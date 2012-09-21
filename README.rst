@@ -25,6 +25,7 @@ Credits
 * Stephan Gerhard (unidesigner)
 * Christophe Chênes (Cwis)
 * Alessandra Griffa (agriffa)
+* Oscar Esteban (oesteban) 
 * Adrien Birbaumer
 
 ------------
