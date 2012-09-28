@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/DTB_dtk2dir.dir/main.cxx.o  -o DTB_dtk2dir -rdynamic -Wl,-Bstatic -lblitz -Wl,-Bdynamic -lniftiio -lboost_program_options-mt 
