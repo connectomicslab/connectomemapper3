@@ -1,7 +1,10 @@
 
 import os
 from common import *
-from enthought.traits.api import *
+try: 
+	from traits.api import *
+except ImportError: 
+	from enthought.traits.api import *
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
 

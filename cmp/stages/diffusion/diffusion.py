@@ -1,17 +1,25 @@
 
+# General imports
 import re
 import os
+try: 
+	from traits.api import *
+	from traitsui.api import *
+except ImportError: 
+	from enthought.traits.api import *
+	from enthought.traits.ui.api import *
 
-from enthought.traits.api import *
-from enthought.traits.ui.api import *
-from cmp.stages.common import CMP_Stage
-import cmp.DTB_nipype
+# Nipype imports
 
 import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
 import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
+
+# Own imports
+from cmp.stages.common import CMP_Stage
+import cmp.DTB_nipype
 
 class Diffusion_Config(HasTraits):
 	imaging_model_choices = List(['No diffusion input'])
@@ -87,8 +95,8 @@ class Diffusion(CMP_Stage):
 		# inputnode
 		inputnode = pe.Node(interface=util.IdentityInterface(fields=["DSI","DTI","HARDI"]),name="inputnode")
 		
-		# resampling to 2x2x2m3 and setting output type to short
-		fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_datatype='short',vox_size=(2,2,2),out_file='diffusion_resampled.nii'),name="fs_mriconvert")
+		# resampling to 2x2x2m3 and setting output type to shortll
+		fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_datatype='short',vox_size=(2,2,2),out_file='diffusion_resampled_2x2x2.nii'),name="fs_mriconvert")
 		
 		if True:#self.config.imaging_model == 'DSI':
 			prefix = 'dsi'

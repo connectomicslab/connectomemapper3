@@ -1,6 +1,10 @@
 
-from enthought.traits.api import *
-from enthought.traits.ui.api import *
+try: 
+	from traits.api import *
+	from traitsui.api import *
+except ImportError: 
+	from enthought.traits.api import *
+	from enthought.traits.ui.api import *
 from cmp.stages.common import CMP_Stage
 
 class Preprocessing_Config(HasTraits):
