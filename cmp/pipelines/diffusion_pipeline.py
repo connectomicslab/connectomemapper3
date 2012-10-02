@@ -50,8 +50,12 @@ def preprocess(project):
 			
 	if diffusion_available:
 		project.stages['Diffusion'].config.imaging_model_choices = diffusion_model
+		if t2_available:
+		    swap_and_reorient(project.base_directory,os.path.join(project.base_directory,'NIFTI','T2.nii.gz'),
+		        os.path.join(project.base_directory,'NIFTI',diffusion_model[0]+'.nii.gz'))
 		if t1_available:
-			# TODO swap and reorient
+			swap_and_reorient(project.base_directory,os.path.join(project.base_directory,'NIFTI','T1.nii.gz'),
+			    os.path.join(project.base_directory,'NIFTI',diffusion_model[0]+'.nii.gz'))
 			return True, 'Preprocessing finished successfully.\nDiffusion and morphological data available.'
 		else:
 			project.stages['Segmentation'].enabled = False
