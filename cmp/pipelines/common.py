@@ -1,5 +1,6 @@
 
 import os
+import shutil
 from nipype.utils.filemanip import copyfile
 import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.fsl as fsl
@@ -24,6 +25,9 @@ def convert_rawdata(base_directory, input_dir):
 	return True
 	
 def swap_and_reorient(base_directory,src_file, ref_file):
+    print 'Swap and reorient: bd='+base_directory+' src='+src_file+' ref='+ref_file
+ 
+
     mem = Memory(base_dir=os.path.join(base_directory,'NIPYPE'))
     
     fs_imageinfo = mem.cache(fs.utils.ImageInfo)
@@ -47,27 +51,27 @@ def swap_and_reorient(base_directory,src_file, ref_file):
             tmpsrc = os.path.join(os.path.dirname(src_file), 'temp-' + os.path.basename(src_file))
             shutil.move(src_file, csrc)
         
-            fsl_swapdim(in_file=csrc, new_dims='-x y z', out_file=tmpsrc)
+            fsl_swapdim(in_file=csrc, new_dims=('-x','y','z'), out_file=tmpsrc)
         
             fsl_orient(in_file=tmpsrc, swap_orient=True)
         else:
             # If conventions match, just use the original source
             tmpsrc = src_file
     
-    tmp2 = os.path.join(os.path.dirname(src), 'tmp.nii.gz')
+    tmp2 = os.path.join(os.path.dirname(src_file), 'tmp.nii.gz')
     
     if ref_orient == 'LPS':
-        fsl_swapdim(in_file=tmpsrc, new_dims='RL AP IS', out_file=tmp2)
+        fsl_swapdim(in_file=tmpsrc, new_dims=('RL','AP','IS'), out_file=tmp2)
     elif ref_orient == 'LPI':
-        fsl_swapdim(in_file=tmpsrc, new_dims='RL AP SI', out_file=tmp2)
+        fsl_swapdim(in_file=tmpsrc, new_dims=('RL','AP','SI'), out_file=tmp2)
     else:
         return False
     
-    shutil.move(tmp2, src)
+    shutil.move(tmp2, src_file)
     
     # Only remove the temporary file if the conventions did not match.  Otherwise,
     # we end up removing the output.
-    if tmpsrc != src:
+    if tmpsrc != src_file:
         os.remove(tmpsrc)
     return True 
 	
