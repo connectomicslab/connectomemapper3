@@ -4,9 +4,11 @@ import re
 import os
 try: 
 	from traits.api import *
-	from traitsui.api import *
 except ImportError: 
 	from enthought.traits.api import *
+try: 
+	from traitsui.api import *
+except ImportError: 
 	from enthought.traits.ui.api import *
 
 # Nipype imports

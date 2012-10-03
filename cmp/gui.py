@@ -4,14 +4,18 @@
 # Libraries imports
 try: 
 	from traits.api import *
-	from traitsui.api import *
 except ImportError: 
 	from enthought.traits.api import *
+try: 
+	from traitsui.api import *
+except ImportError: 
 	from enthought.traits.ui.api import *
-import subprocess
 from enable.api import Canvas
 from enable.label import Label as EnableLabel
-from enthought.enable.component_editor import ComponentEditor
+try:
+	from enthought.enable.component_editor import ComponentEditor
+except ImportError: 
+	from enable.component_editor import ComponentEditor
 
 # CMP imports
 from stages.common import CMP_Stage

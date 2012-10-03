@@ -1,9 +1,11 @@
 # Libraries imports
 try: 
 	from traits.api import *
-	from traitsui.api import *
 except ImportError: 
 	from enthought.traits.api import *
+try: 
+	from traitsui.api import *
+except ImportError: 
 	from enthought.traits.ui.api import *
 
 ##	Stage master class, will be inherited by the various stage subclasses. Inherits from HasTraits.
