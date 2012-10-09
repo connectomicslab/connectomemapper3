@@ -12,7 +12,6 @@ except ImportError:
 	from enthought.traits.ui.api import *
 
 # Nipype imports
-
 import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
 import nipype.interfaces.diffusion_toolkit as dtk
