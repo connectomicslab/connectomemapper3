@@ -7,6 +7,7 @@ except ImportError:
 	from enthought.traits.api import *
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
+from nipype.caching import Memory
 
 from cmp.stages.preprocessing.preprocessing import Preprocessing
 from cmp.stages.segmentation.segmentation import Segmentation
@@ -27,35 +28,40 @@ def preprocess(project):
 	t1_available = False
 	t2_available = False
 	
+	mem = Memory(base_dir=os.path.join(project.base_directory,'NIPYPE'))
+	swap_and_reorient = mem.cache(SwapAndReorient)
+	
 	# Check for (and if existing, convert) diffusion data
 	diffusion_model = []
 	for model in ['DSI','DTI','HARDI']:
 		input_dir = os.path.join(project.base_directory,'RAWDATA',model)
 		if len(os.listdir(input_dir)) > 0:
-			if convert_rawdata(project.base_directory, input_dir):
+			if convert_rawdata(project.base_directory, input_dir, model):
 				diffusion_available = True
 				diffusion_model.append(model)
 	
 	# Check for (and if existing, convert)  T1
 	input_dir = os.path.join(project.base_directory,'RAWDATA','T1')
 	if len(os.listdir(input_dir)) > 0:
-		if convert_rawdata(project.base_directory, input_dir):
+		if convert_rawdata(project.base_directory, input_dir, 'T1_orig'):
 			t1_available = True
 			
 	# Check for (and if existing, convert)  T2
 	input_dir = os.path.join(project.base_directory,'RAWDATA','T2')
 	if len(os.listdir(input_dir)) > 0:
-		if convert_rawdata(project.base_directory, input_dir):
+		if convert_rawdata(project.base_directory, input_dir, 'T2_orig'):
 			t2_available = True	
 			
 	if diffusion_available:
 		project.stages['Diffusion'].config.imaging_model_choices = diffusion_model
 		if t2_available:
-		    swap_and_reorient(project.base_directory,os.path.join(project.base_directory,'NIFTI','T2.nii.gz'),
-		        os.path.join(project.base_directory,'NIFTI',diffusion_model[0]+'.nii.gz'))
+		    swap_and_reorient(src_file=os.path.join(project.base_directory,'NIFTI','T2_orig.nii.gz'),
+		                      ref_file=os.path.join(project.base_directory,'NIFTI',diffusion_model[0]+'.nii.gz'),
+		                      out_file=os.path.join(project.base_directory,'NIFTI','T2.nii.gz'))
 		if t1_available:
-			swap_and_reorient(project.base_directory,os.path.join(project.base_directory,'NIFTI','T1.nii.gz'),
-			    os.path.join(project.base_directory,'NIFTI',diffusion_model[0]+'.nii.gz'))
+			swap_and_reorient(src_file=os.path.join(project.base_directory,'NIFTI','T1_orig.nii.gz'),
+		                      ref_file=os.path.join(project.base_directory,'NIFTI',diffusion_model[0]+'.nii.gz'),
+		                      out_file=os.path.join(project.base_directory,'NIFTI','T1.nii.gz'))
 			return True, 'Preprocessing finished successfully.\nDiffusion and morphological data available.'
 		else:
 			project.stages['Segmentation'].enabled = False
@@ -75,7 +81,6 @@ def process(project):
 	# Data import
 	datasource = pe.Node(interface=nio.DataGrabber(outfields = ['DSI','DTI','HARDI','T1','T2']), name='datasource')
 	datasource.inputs.base_directory = os.path.join(project.base_directory,'NIFTI')
-	#datasource.inputs.outfields = ['DSI','DTI','HARDI','T1','T2']
 	datasource.inputs.template = '*'
 	datasource.inputs.raise_on_empty = False
 	datasource.inputs.field_template = dict(DSI='DSI.nii.gz',DTI='DTI.nii.gz',HARDI='HARDI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
@@ -85,7 +90,17 @@ def process(project):
 	#reg_flow = project.stages['Registration'].create_worfklow()
 	#con_flow = project.stages['Connectome'].create_worfklow()
 	
-	if project.stages['Diffusion'].enabled:
+	if project.stages['Segmentation'].enabled:
+	    project.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(project.base_directory,'FREESURFER')
+	    seg_flow = project.stages['Segmentation'].create_workflow()
+	    flow.connect([(datasource,seg_flow, [('T1','inputnode.T1')])])
+	
+	if project.stages['Parcellation'].enabled:
+	    parc_flow = project.stages['Parcellation'].create_workflow()
+	    flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
+	                                        ('outputnode.subject_id','inputnode.subject_id')])])
+	
+	if not project.stages['Diffusion'].enabled:
 		diff_flow = project.stages['Diffusion'].create_workflow()
 		flow.connect([(datasource,diff_flow, [('DSI','inputnode.DSI'),('DTI','inputnode.DTI'),('HARDI','inputnode.HARDI')])])
 		
