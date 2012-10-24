@@ -1,1 +1,0 @@
-/usr/bin/c++      CMakeFiles/DTB_streamline.dir/main.cxx.o  -o DTB_streamline -rdynamic -Wl,-Bstatic -lblitz -Wl,-Bdynamic -lniftiio -lboost_program_options-mt 

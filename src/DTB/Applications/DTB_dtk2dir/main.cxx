@@ -183,7 +183,7 @@ int main(int argc, char** argv)
 	/*----------------------------*/
 	else if ( DATA_type.compare("dsi")==0 )
 	{
-		string 	ODF_filename, MAX_filename;
+		string 	ODF_filename, MAX_filename, B0_filename;
 
 		cout <<"-> Converting 'dsi' dataset\n   ------------------------\n\n";
 
@@ -231,6 +231,8 @@ int main(int argc, char** argv)
 		float c = niiODF.hdr->quatern_c;
 		float b = niiODF.hdr->quatern_b;
 		float a = sqrt(1.0-(b*b+c*c+d*d));
+		cout <<"-> Compute QFORM matrix...\n";
+		printf("      quatern_b, quatern_c, quatern_d,    : %.4f , %.4f , %.4f\n", b,c,d);
 
 		Array<float,2> QFORM(3,3);
 		QFORM = a*a+b*b-c*c-d*d, 2*b*c-2*a*d, 2*b*d+2*a*c,
@@ -241,7 +243,7 @@ int main(int argc, char** argv)
 			 QFORM(0,1)!=0  || QFORM(1,1)!=-1 || QFORM(2,1)!=0 ||
 			 QFORM(0,2)!=0  || QFORM(1,2)!=0  || QFORM(2,2)!=1 )
 		{
-			cerr <<"The 'qform' information is not handled properly by this software! Be careful.\n";
+			cerr <<"\nThe 'qform' information is not handled properly by this software! Be careful.\n";
 			cerr << "   qform = "<< QFORM << "\n";
 		}
 
@@ -291,8 +293,13 @@ int main(int argc, char** argv)
 		/*  Perform conversion  */
 		cout <<"-> Performing CONVERSION...\n";
 
-		int 	dim[4] 		= {niiMAX.hdr->dim[2], niiMAX.hdr->dim[3], niiMAX.hdr->dim[4], 12};
-		float 	pixdim[4] 	= {niiMAX.hdr->pixdim[2], niiMAX.hdr->pixdim[3], niiMAX.hdr->pixdim[4], 1};
+		B0_filename = DATA_prefix + "b0.nii";
+		NIFTI<INT16> niiB0( B0_filename, false );
+		int     dim[4]         = {niiMAX.hdr->dim[2], niiMAX.hdr->dim[3], niiMAX.hdr->dim[4], 12};
+		float   pixdim[4]      = {niiB0.hdr->pixdim[1], niiB0.hdr->pixdim[2], niiB0.hdr->pixdim[3], 1}; 
+		printf("-> Creating 'DIR' file...\n");
+		printf("      dim   : %d x %d x %d x %d\n", dim[0],dim[1],dim[2],dim[3]);
+		printf("      pixdim: %.4f x %.4f x %.4f x %.4f\n", pixdim[0],pixdim[1],pixdim[2],pixdim[3]);
 
 		NIFTI<FLOAT32> niiDIR;
 		niiDIR.make( 4, dim, pixdim );
