@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+import cmp.gui
+import traitsui.wx
+import wx
+
+if __name__ == "__main__":
+    #TODO handle CLI args
+
+    traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
+    mw = cmp.gui.CMP_MainWindow()
+    mw_res = mw.configure_traits()
