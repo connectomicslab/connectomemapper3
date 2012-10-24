@@ -1,123 +1,151 @@
+# Copyright (C) 2009-2012, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+# All rights reserved.
+#
+#  This software is distributed under the open-source license Modified BSD.
+
+""" Connectome Mapper Controler for handling GUI and non GUI general events
+""" 
 
 try: 
-	from traits.api import *
+    from traits.api import *
 except ImportError: 
-	from enthought.traits.api import *
+    from enthought.traits.api import *
 try: 
-	from traitsui.api import *
+    from traitsui.api import *
 except ImportError: 
-	from enthought.traits.ui.api import *
+    from enthought.traits.ui.api import *
 
 import os
 import gui
 import ConfigParser
-import pipelines.diffusion_pipeline as diffusion_pipeline
+import pipelines.diffusion.diffusion as diffusion_pipeline
 
 def get_process_type(project_info):
-	config = ConfigParser.ConfigParser()
-	config.read(os.path.join(project_info.base_directory, 'config.ini'))
-	return config.get('Preprocessing','process_type')
+    config = ConfigParser.ConfigParser()
+    config.read(os.path.join(project_info.base_directory, 'config.ini'))
+    return config.get('Global','process_type')
 
-def save_config(project):
-	config = ConfigParser.RawConfigParser()
-	for stage in project.stages.values():
-		config.add_section(stage.name)
-		stage_keys = [prop for prop in stage.config.traits().keys() if not 'trait' in prop] # possibly dangerous..?
-		for key in stage_keys:
-			config.set(stage.name, key, getattr(stage.config, key))
-			
-	with open(os.path.join(project.base_directory, 'config.ini'), 'wb') as configfile:
-		config.write(configfile)
-		
-	
-def load_config(project):
-	config = ConfigParser.ConfigParser()
-	config.read(os.path.join(project.base_directory, 'config.ini'))
-	for stage in project.stages.values():
-		stage_keys = [prop for prop in stage.config.traits().keys() if not 'trait' in prop] # possibly dangerous..?
-		for key in stage_keys:
-			conf_value = config.get(stage.name, key)
-			#if '[' in conf_value: # has to transform into list again... mmmm better way?
-			#	conf_value = map(str, conf_value[1:-1].split(','))
-			#if conf_value == 'True':
-			#	conf_value = True
-			#if conf_value == 'False':
-			#	conf_value = False
-			try:
-				conf_value = eval(conf_value)
-			except:
-				pass
-			
-			setattr(stage.config, key, conf_value)
-			
-	return True
-	
+def save_config(pipeline, config_path):
+    config = ConfigParser.RawConfigParser()
+    config.add_section('Global')
+    global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+    for key in global_keys:
+        config.set('Global', key, getattr(pipeline.global_conf, key))
+    for stage in pipeline.stages.values():
+        config.add_section(stage.name)
+        stage_keys = [prop for prop in stage.config.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+        for key in stage_keys:
+            keyval = getattr(stage.config, key)
+            if 'config' in key: # subconfig
+                stage_sub_keys = [prop for prop in keyval.traits().keys() if not 'trait' in prop]
+                for sub_key in stage_sub_keys:
+                    config.set(stage.name, key+'.'+sub_key, getattr(keyval, sub_key))
+            else:
+                config.set(stage.name, key, keyval)
+
+    with open(config_path, 'wb') as configfile:
+        config.write(configfile)
+
+def load_config(pipeline, config_path):
+    config = ConfigParser.ConfigParser()
+    config.read(config_path)
+    global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+    for key in global_keys:
+        conf_value = config.get('Global', key)
+        setattr(pipeline.global_conf, key, conf_value)
+    for stage in pipeline.stages.values():
+        stage_keys = [prop for prop in stage.config.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+        for key in stage_keys:
+            if 'config' in key: #subconfig
+                sub_config = getattr(stage.config, key)
+                stage_sub_keys = [prop for prop in sub_config.traits().keys() if not 'trait' in prop]
+                for sub_key in stage_sub_keys:
+                    conf_value = config.get(stage.name, key+'.'+sub_key)
+                    try:
+                        conf_value = eval(conf_value)
+                    except:
+                        pass
+                    setattr(sub_config, sub_key, conf_value)
+            else:
+                conf_value = config.get(stage.name, key)
+                try:
+                    conf_value = eval(conf_value)
+                except:
+                    pass
+                setattr(stage.config, key, conf_value)
+
+    return True
+
 ## Creates (if needed) the folder hierarchy
 #
 def refresh_folder(base_directory, input_folders):
-	paths = ['CMP','FREESURFER','LOG','NIFTI','RAWDATA','STATS','NIPYPE']
-	
-	for in_f in input_folders:
-		paths.append(os.path.join('RAWDATA',in_f))
-		
-	for p in paths:
-		full_p = os.path.join(base_directory,p)
-		if not os.path.exists(full_p):
-			try:
-				os.makedirs(full_p)
-			except os.error:
-				print "%s was already existing" % full_p
-			finally:
-				print "Created directory %s" % full_p
-		
-def init_project(project, canvas, is_new_project):
-	if project.process_type == 'Diffusion':
-		project.process_callback = diffusion_pipeline.process
-		project.input_folders = ['DSI','DTI','HARDI','T1','T2']
-		project.stages = diffusion_pipeline.get_stages()
-		canvas.init_stage_labels(project.stages)
-		
-	if is_new_project:
-		save_config(project)
-	else:
-		conf_loaded = load_config(project)
-		if not conf_loaded:
-			return False
-		
-	refresh_folder(project.base_directory, project.input_folders)
-	return True
-						
+    paths = ['RESULTS','FREESURFER','LOG','NIFTI','RAWDATA','STATS','NIPYPE']
+
+    for in_f in input_folders:
+        paths.append(os.path.join('RAWDATA',in_f))
+
+    for p in paths:
+        full_p = os.path.join(base_directory,p)
+        if not os.path.exists(full_p):
+            try:
+                os.makedirs(full_p)
+            except os.error:
+                print "%s was already existing" % full_p
+            finally:
+                print "Created directory %s" % full_p
+
+def init_project(project_info, is_new_project):
+    pipeline = None
+    
+    if project_info.process_type == 'Diffusion':
+        pipeline = diffusion_pipeline.Pipeline(base_directory=project_info.base_directory)
+
+    if is_new_project and pipeline!= None:
+        project_info.config_file = os.path.join(project_info.base_directory,'config.ini')
+        save_config(pipeline, project_info.config_file)
+    else:
+        conf_loaded = load_config(pipeline, project_info.config_file)
+        if not conf_loaded:
+            return None
+
+    refresh_folder(project_info.base_directory, pipeline.input_folders)
+    return pipeline
+
 class ProjectHandler(Handler):
-	project_loaded = Bool(False)
-	inputs_checked = Bool(False)
-	
-	def new_project(self, ui_info ):
-		new_project = gui.CMP_Project_Info()
-		np_res = new_project.configure_traits(view='create_view')
-		if np_res and os.path.exists(new_project.base_directory):
-			self.project_loaded = init_project(new_project, ui_info.ui.context["object"].canvas, True)
-			if self.project_loaded:
-				ui_info.ui.context["object"].project_info = new_project
-				
-	def load_project(self, ui_info ):
-		loaded_project = gui.CMP_Project_Info()
-		np_res = loaded_project.configure_traits(view='open_view')
-		if np_res and os.path.exists(loaded_project.base_directory):
-			loaded_project.process_type = get_process_type(loaded_project)
-			self.project_loaded = init_project(loaded_project, ui_info.ui.context["object"].canvas, False)
-			if self.project_loaded:
-				ui_info.ui.context["object"].project_info = loaded_project
-				
-	def preprocessing(self, ui_info):
-		if ui_info.ui.context["object"].project_info.process_type == 'Diffusion':
-			[pre_ok, pre_message] = diffusion_pipeline.preprocess(ui_info.ui.context["object"].project_info)
-		
-		self.inputs_checked = True
-		print pre_message
-		#preprocessing = ui_info.ui.context["object"].project_info
-		#if project.process_type == 'Diffusion'
-	
-	def map_connectome(self, ui_info):
-		if ui_info.ui.context["object"].project_info.process_type == 'Diffusion':
-			[proc_ok, proc_message] = diffusion_pipeline.process(ui_info.ui.context["object"].project_info)
-		
+    pipeline = Instance(HasTraits)
+    project_loaded = Bool(False)
+    inputs_checked = Bool(False)
+
+    def new_project(self, ui_info ):
+        new_project = gui.CMP_Project_Info()
+        np_res = new_project.configure_traits(view='create_view')
+        if np_res and os.path.exists(new_project.base_directory):
+            self.pipeline = init_project(new_project, True)
+            if self.pipeline != None:
+                ui_info.ui.context["object"].project_info = new_project
+                ui_info.ui.context["object"].pipeline = self.pipeline
+                self.project_loaded = True
+
+    def load_project(self, ui_info ):
+        loaded_project = gui.CMP_Project_Info()
+        np_res = loaded_project.configure_traits(view='open_view')
+        if np_res and os.path.exists(loaded_project.base_directory):
+            loaded_project.process_type = get_process_type(loaded_project)
+            loaded_project.config_file = os.path.join(loaded_project.base_directory,'config.ini')
+#           self.project_loaded = init_project(loaded_project, ui_info.ui.context["object"].canvas, False)
+            self.pipeline = init_project(loaded_project, False)
+            if self.pipeline != None:
+                ui_info.ui.context["object"].project_info = loaded_project
+                ui_info.ui.context["object"].pipeline = self.pipeline
+                self.project_loaded = True
+
+    def check_input(self, ui_info):
+        self.inputs_checked = self.pipeline.check_input()
+        if self.inputs_checked:
+            save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
+
+    def map_connectome(self, ui_info):
+        save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
+        self.pipeline.process()
+
