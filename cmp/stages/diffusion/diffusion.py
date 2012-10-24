@@ -1,135 +1,154 @@
+# Copyright (C) 2009-2012, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+# All rights reserved.
+#
+#  This software is distributed under the open-source license Modified BSD.
+
+""" CMP Stage for Diffusion reconstruction and tractography
+""" 
 
 # General imports
-import re
-import os
 try: 
-	from traits.api import *
+    from traits.api import *
 except ImportError: 
-	from enthought.traits.api import *
+    from enthought.traits.api import *
 try: 
-	from traitsui.api import *
+    from traitsui.api import *
 except ImportError: 
-	from enthought.traits.ui.api import *
+    from enthought.traits.ui.api import *
 
 # Nipype imports
 import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
-import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.fsl as fsl
+import nipype.interfaces.diffusion_toolkit as dtk
+from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec,\
+    traits, File, TraitedSpec, isdefined
+from nipype.utils.filemanip import split_filename
 
 # Own imports
 from cmp.stages.common import CMP_Stage
-import cmp.DTB_nipype
+from cmp_dtk import *
+from cmp_dtb import *
+from cmtklib.diffusion import filter_fibers
+
 
 class Diffusion_Config(HasTraits):
-	imaging_model_choices = List(['No diffusion input'])
-	imaging_model = List(editor = CheckListEditor(name='imaging_model_choices'))
-	maximum_b_value = Int(1000)
-	gradient_table = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
-								'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256'])
-	#dsi_number_of_directions = Enum('514',['514','257','124'])
-	dsi_number_of_directions = Int(514)
-	#number_of_directions = Property(Int,depends_on=['imaging_model','dsi_number_of_directions','gradient_table'])
-	number_of_directions = Int()
-	number_of_output_directions = Int(181)
-	multiple_high_b_values = Bool(False)
-	number_of_b0_volumes = Int(1)
-	#recon_matrix_file = Property(Str('DSI_matrix_515dx181.dat'),depends_on='dsi_number_of_directions')
-	recon_matrix_file = Str('DSI_matrix_515x181.dat')
-	apply_gradient_orientation_correction = Bool(True)
-	
-	angle_threshold = Int(60)	
-	
-	apply_spline_filter = Bool(True)
-	
-	number_of_averages = Int(3)
-	mask1_threshold_auto = Bool(True)
-	mask1_threshold = List([0.0,1.0])
-	mask1_input = Enum('DWI',['B0','DWI'])
-	#oblique_correction = Bool(False)
+    imaging_model = Str
+    resampling = Tuple(2,2,2)
+    reconstruction = Enum('DTK',['DTK','Camino'])
+    tracking = Enum('DTB',['DTK','DTB'])
+    dtk_recon_config = Instance(HasTraits)
+    dtk_tracking_config = Instance(HasTraits)
+    dtb_tracking_config = Instance(HasTraits)
+    
+    traits_view = View(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+                       Group('reconstruction',
+                             Item('dtk_recon_config',style='custom',visible_when='reconstruction=="DTK"'),
+                             label='Reconstruction', show_border=True, show_labels=False),
+                       Group('tracking',
+                             Item('dtb_tracking_config',style='custom',visible_when='tracking=="DTB"'),
+                             Item('dtk_tracking_config',style='custom',visible_when='tracking=="DTK"'),
+                             label='Tracking', show_border=True, show_labels=False),
+                       )
 
-	traits_view = View('imaging_model',
-						Group(
-							Item('maximum_b_value',visible_when='imaging_model=="DTI"'),Item('gradient_table',visible_when='imaging_model!="DSI"'),
-							Item('dsi_number_of_directions',visible_when='imaging_model=="DSI"'),
-							Item('number_of_directions',visible_when='imaging_model!="DSI"',style='readonly'),
-							Item('number_of_averages',visible_when='imaging_model=="DTI"'),
-							Item('multiple_high_b_values',visible_when='imaging_model=="DTI"'),
-							'number_of_b0_volumes',Item('apply_gradient_orientation_correction',visible_when='imaging_model!="DSI"'),
-							label='Reconstruction',show_border=True, visible_when='imaging_model!="No diffusion input"'),
-						Group(
-							'mask1_input',
-							'angle_threshold','mask1_threshold_auto',Item('mask1_threshold',enabled_when='mask1_threshold_auto==False'),
-							label='Tracking',show_border=True),
-						'apply_spline_filter',
-						)
-	def _get_recon_matrix_file(self):
-		mat_file =  'DSI_matrix_%(n_directions)dx181.dat' % {'n_directions':int(self.dsi_number_of_directions)+1}
-		return mat_file
+    def __init__(self):
+        self.dtk_recon_config = DTK_recon_config(imaging_model=self.imaging_model)
+        self.dtk_tracking_config = DTK_tracking_config()
+        self.dtb_tracking_config = DTB_tracking_config(imaging_model=self.imaging_model)
+        
+    def _imaging_model_changed(self, new):
+        self.dtk_recon_config.imaging_model = new
+        self.dtk_tracking_config.imaging_model = new
+        self.dtb_tracking_config.imaging_model = new
+        
+class CMTK_filterfibersInputSpec(BaseInterfaceInputSpec):
+    track_file = File(desc='Input trk file', mandatory=True, exists=True)
+    fiber_cutoff_lower = traits.Int(20, desc='Lower length threshold of the fibers', usedefault=True)
+    fiber_cutoff_upper = traits.Int(500, desc='Upper length threshold of the fibers', usedefault=True)
+    filtered_track_file = File(desc='Filtered trk file')
+    
+class CMTK_filterfibersOutputSpec(TraitedSpec):
+    filtered_track_file= File(desc='Filtered trk file', exists=True)
+    lengths_file= File(desc='Streamline lengths file', exists=True)
+    
+class CMTK_filterfibers(BaseInterface):
+    input_spec = CMTK_filterfibersInputSpec
+    output_spec = CMTK_filterfibersOutputSpec
+    
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.filtered_track_file):
+            filter_fibers(intrk=self.inputs.track_file, outtrk=self.filtered_track_file,
+                          fiber_cutoff_lower=self.inputs.fiber_cutoff_lower,
+                          fiber_cutoff_upper=self.inputs.fiber_cutoff_upper)
+        else:
+            filter_fibers(intrk=self.inputs.track_file,
+                          fiber_cutoff_lower=self.inputs.fiber_cutoff_lower,
+                          fiber_cutoff_upper=self.inputs.fiber_cutoff_upper)
+        return runtime
+        
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if not isdefined(self.inputs.filtered_track_file):
+            _, base, ext = split_filename(self.inputs.track_file)
+            outputs["filtered_track_file"] = os.path.abspath(base + '_cutfiltered' + ext)
+        else:
+            outputs["filtered_track_file"] = os.path.abspath(self.inputs.filtered_track_file)
+        outputs["lengths_file"] = os.path.abspath("lengths.npy")
+        return outputs
 
-	def _get_number_of_directions(self):
-		if self.imaging_model == 'DSI':
-			return self.dsi_number_of_directions
-		else:
-			return int(re.search('\d+',self.gradient_table).group(0))
-			
-			
+
 def strip_suffix(file_input, prefix):
-	import os
-	from nipype.utils.filemanip import split_filename
-	path, _, _ = split_filename(file_input)
-	return os.path.join(path, prefix+'_')
-	
-class Diffusion(CMP_Stage):
-	name = 'Diffusion'
-	display_color = 'pink'
-	position_x = 295
-	position_y = 320
-	config = Diffusion_Config()
-	
-	
-		
-	def create_workflow(self):
-		flow = pe.Workflow(name="Diffusion_stage")
-		
-		# inputnode
-		inputnode = pe.Node(interface=util.IdentityInterface(fields=["DSI","DTI","HARDI"]),name="inputnode")
-		
-		# resampling to 2x2x2m3 and setting output type to shortll
-		fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_datatype='short',vox_size=(2,2,2),out_file='diffusion_resampled_2x2x2.nii'),name="fs_mriconvert")
-		
-		if True:#self.config.imaging_model == 'DSI':
-			prefix = 'dsi'
-		
-			dtk_recon = pe.Node(interface=dtk.ODFRecon(dsi=True, out_prefix=prefix),name='dtk_recon')
-			dtk_recon.inputs.matrix = os.path.join(os.environ['DSI_PATH'],self.config.recon_matrix_file)
-			dtk_recon.inputs.n_b0 = self.config.number_of_b0_volumes
-			dtk_recon.inputs.n_directions = int(self.config.dsi_number_of_directions)+1
-			dtk_recon.inputs.n_output_directions = self.config.number_of_output_directions
-			
-			dtb_gfa = pe.Node(interface=cmp.DTB_nipype.DTB_gfa(moment=2),name='dtb_gfa')
-			dtb_skewness = pe.Node(interface=cmp.DTB_nipype.DTB_gfa(moment=3),name='dtb_skewness')
-			dtb_curtosis = pe.Node(interface=cmp.DTB_nipype.DTB_gfa(moment=4),name='dtb_curtosis')
-			dtb_p0 = pe.Node(interface=cmp.DTB_nipype.DTB_P0(),name='dtb_p0')
-			
-			
-			flow.connect([
-						(inputnode,fs_mriconvert,[('DSI','in_file')]),
-						(fs_mriconvert,dtk_recon,[('out_file','DWI')]),
-						(dtk_recon,dtb_gfa,[(('ODF',strip_suffix,prefix),'dsi_basepath')]),
-						(dtk_recon,dtb_skewness,[(('ODF',strip_suffix,prefix),'dsi_basepath')]),
-						(dtk_recon,dtb_curtosis,[(('ODF',strip_suffix,prefix),'dsi_basepath')]),
-						(inputnode,dtb_p0,[('DSI','dwi_file')]),
-						(dtk_recon,dtb_p0,[(('ODF',strip_suffix,prefix),'dsi_basepath')]),
-						])
+    import os
+    from nipype.utils.filemanip import split_filename
+    path, _, _ = split_filename(file_input)
+    return os.path.join(path, prefix+'_')
 
-		#if self.config.parcellation_scheme == 'NativeFreesurfer':
-		#	...
-			
-		#output_node = pe.Node(interface=util.IdentityInterface(fields=["WM_mask_1mm","GM_masks_1mm"]),name="outputnode")
-		
-		#flow.connect([(inputnode,...[(...,...),...]),...])
-		
-		return flow
-	
+class Diffusion(CMP_Stage):
+    name = 'Diffusion'
+    display_color = 'pink'
+    position_x = 70
+    position_y = 145
+    config = Diffusion_Config()
+
+    def create_workflow(self):
+        flow = pe.Workflow(name="Diffusion_stage")
+
+        # inputs and outputs
+        inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","wm_mask","T1-TO-B0_mat"]),name="inputnode")
+        outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file","lengths_file","gFA","skewness","kurtosis","P0"]),name="outputnode")
+
+        # resampling diffusion image and setting output type to short
+        fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_datatype='short',out_file='diffusion_resampled.nii'),name="fs_mriconvert")
+        fs_mriconvert.inputs.vox_size = self.config.resampling
+        flow.connect([(inputnode,fs_mriconvert,[('diffusion','in_file')])])
+        
+        # Reconstruction
+        if self.config.reconstruction == 'DTK':
+            recon_flow = create_dtk_recon_flow(self.config.dtk_recon_config)
+            flow.connect([
+                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
+                        (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
+                        ])
+        
+        # Tracking
+        if self.config.tracking == 'DTB':
+            track_flow = create_dtb_tracking_flow(self.config.dtb_tracking_config)
+            flow.connect([
+                        (inputnode, track_flow,[('wm_mask','inputnode.wm_mask'),('T1-TO-B0_mat','inputnode.T1-TO-B0_mat')]),
+                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
+                        ])
+                        
+        # Fibers spline and length filtering
+        dtk_splinefilter = pe.Node(interface=dtk.SplineFilter(step_length=1), name="dtk_splinefilter")
+        cmtk_filterfibers = pe.Node(interface=CMTK_filterfibers(), name="cmtk_filterfibers")
+        flow.connect([
+                    (track_flow,dtk_splinefilter, [('outputnode.track_file','track_file')]),
+                    (dtk_splinefilter,cmtk_filterfibers, [('smoothed_track_file','track_file')]),
+                    (recon_flow,outputnode, [("outputnode.gFA","gFA"),("outputnode.skewness","skewness"),
+                                             ("outputnode.kurtosis","kurtosis"),("outputnode.P0","P0")]),
+                    (cmtk_filterfibers,outputnode, [('filtered_track_file','track_file'),('lengths_file','lengths_file')])
+                    ])
+        
+        return flow
+

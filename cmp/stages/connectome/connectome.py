@@ -1,44 +1,119 @@
+# Copyright (C) 2009-2012, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+# All rights reserved.
+#
+#  This software is distributed under the open-source license Modified BSD.
+
+""" CMP Stage for building connectivity matrices and resulting CFF file
+""" 
 
 try: 
-	from traits.api import *
+    from traits.api import *
 except ImportError: 
-	from enthought.traits.api import *
+    from enthought.traits.api import *
 try: 
-	from traitsui.api import *
+    from traitsui.api import *
 except ImportError: 
-	from enthought.traits.ui.api import *
+    from enthought.traits.ui.api import *
+
+import glob
+import os
+
+# Nipype imports
+import nipype.interfaces.utility as util
+import nipype.pipeline.engine as pe
+import nipype.interfaces.fsl as fsl
+from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec,\
+    traits, File, TraitedSpec, InputMultiPath, OutputMultiPath
+
+from cmtklib.connectome import cmat
+
 from cmp.stages.common import CMP_Stage
+from nipype.utils.filemanip import split_filename
 
 class Connectome_Config(HasTraits):
-	cff_creator = Str
-	cff_email = Str
-	cff_publisher = Str
-	cff_license = Str
-	
-	traits_view = View(Group('cff_creator','cff_email','cff_publisher','cff_license',
-						label='CFF creation metadata'
-						),
-						)
-	
-class Connectome(CMP_Stage):
-	name = 'Connectome'
-	display_color = 'mediumpurple'
-	position_x = 170
-	position_y = 50
-	config = Connectome_Config()
-	
-		
-	#def create_workflow(self):
-		#flow = pe.Workflow(name="CMP_Parcellation")
-		
-		#input_node = pe.Node(interface=util.IdentityInterface(fields=["aparc+aseg"]),name="inputnode")
+    compute_curvature = Bool(True)
+    cff_creator = Str
+    cff_email = Str
+    cff_publisher = Str
+    cff_license = Str
 
-		#if self.config.parcellation_scheme == 'NativeFreesurfer':
-		#	...
-			
-		#output_node = pe.Node(interface=util.IdentityInterface(fields=["WM_mask_1mm","GM_masks_1mm"]),name="outputnode")
-		
-		#flow.connect([(inputnode,...[(...,...),...]),...])
-		
-		#return flow
-	
+    traits_view = View(Group('compute_curvature',label='Connectivity matrix'),
+                        Group('cff_creator','cff_email','cff_publisher','cff_license',
+                        label='CFF creation metadata'
+                        ),
+                        )
+                        
+class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
+    track_file = File(desc='Tractography result', exists=True, mandatory=True)
+    roi_volumes = InputMultiPath(File(exists=True), desc='ROI volumes registered to diffusion space')
+    parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','Nativefreesurfer'], usedefault=True)
+    compute_curvature = traits.Bool(True, desc='Compute curvature', usedefault=True)
+    additional_maps = traits.List(File,desc='Additional calculated maps (ADC, gFA, ...)')
+    
+class CMTK_cmatOutputSpec(TraitedSpec):
+    endpoints_file = File()
+    endpoints_mm_file = File()
+    final_fiberslength_files = OutputMultiPath(File())
+    filtered_fiberslabel_files = OutputMultiPath(File())
+    final_fiberlabels_files = OutputMultiPath(File())
+    streamline_final_files = OutputMultiPath(File())
+    connectivity_matrices = OutputMultiPath(File())
+    
+class CMTK_cmat(BaseInterface):
+    input_spec = CMTK_cmatInputSpec
+    output_spec = CMTK_cmatOutputSpec
+    
+    def _run_interface(self, runtime):
+        additional_maps = dict( (split_filename(add_map)[1],add_map) for add_map in self.inputs.additional_maps if add_map != '')
+
+        cmat(intrk=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
+             parcellation_scheme=self.inputs.parcellation_scheme,
+             compute_curvature=self.inputs.compute_curvature,
+             additional_maps=additional_maps)
+             
+        return runtime
+        
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['endpoints_file'] = os.path.abspath('endpoints.npy')
+        outputs['endpoints_mm_file'] = os.path.abspath('endpointsmm.npy')
+        outputs['final_fiberslength_files'] = glob.glob(os.path.abspath('final_fiberslength*'))
+        outputs['filtered_fiberslabel_files'] = glob.glob(os.path.abspath('filtered_fiberslabel*'))
+        outputs['final_fiberlabels_files'] = glob.glob(os.path.abspath('final_fiberlabels*'))
+        outputs['streamline_final_files'] = glob.glob(os.path.abspath('streamline_final*'))
+        outputs['connectivity_matrices'] = glob.glob(os.path.abspath('connectome*gpickle'))
+        
+        return outputs
+    
+
+class Connectome(CMP_Stage):
+    name = 'Connectome'
+    config = Connectome_Config()
+    
+    def create_workflow(self):
+        flow = pe.Workflow(name="Connectome_stage")
+        
+        # define inputs and outputs
+        inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","roi_volumes","track_file","parcellation_scheme","gFA","skewness","kurtosis","P0","T1-TO-B0_mat"]),name="inputnode")
+        outputnode = pe.Node(interface=util.IdentityInterface(fields=["endpoints_file","final_track_file","connectivity_matrices_file"]),name="inputnode")
+        
+        cmtk_cmat = pe.Node(interface=CMTK_cmat(),name="cmtk_cmat")
+        cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
+
+        # Additional maps
+        map_merge = pe.Node(interface=util.Merge(4),name="map_merge")
+        
+        # Register ROI Volumes to B0 space
+        fsl_applyxfm = pe.MapNode(interface=fsl.ApplyXfm(apply_xfm=True),name="fsl_applyxfm",iterfield=["in_file"])
+        
+        flow.connect([
+                     (inputnode,map_merge, [('gFA','in1'),('skewness','in2'),('kurtosis','in3'),('P0','in4')]),
+                     (inputnode,fsl_applyxfm, [('roi_volumes','in_file'),('diffusion','reference'),('T1-TO-B0_mat','in_matrix_file')]),
+                     (inputnode,cmtk_cmat, [('track_file','track_file'),('parcellation_scheme','parcellation_scheme')]),
+                     (fsl_applyxfm,cmtk_cmat, [('out_file','roi_volumes')]),
+                     (map_merge,cmtk_cmat, [('out','additional_maps')]),
+                     ])
+        return flow
+
+
