@@ -96,7 +96,8 @@ class Connectome(CMP_Stage):
         
         # define inputs and outputs
         inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","roi_volumes","track_file","parcellation_scheme","gFA","skewness","kurtosis","P0","T1-TO-B0_mat"]),name="inputnode")
-        outputnode = pe.Node(interface=util.IdentityInterface(fields=["endpoints_file","final_track_file","connectivity_matrices_file"]),name="inputnode")
+        outputnode = pe.Node(interface=util.IdentityInterface(fields=["endpoints_file","endpoints_mm_file","final_fiberslength_files",
+                             "filtered_fiberslabel_files","final_fiberlabels_files","streamline_final_files","connectivity_matrices"]),name="outputnode")
         
         cmtk_cmat = pe.Node(interface=CMTK_cmat(),name="cmtk_cmat")
         cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
@@ -113,6 +114,10 @@ class Connectome(CMP_Stage):
                      (inputnode,cmtk_cmat, [('track_file','track_file'),('parcellation_scheme','parcellation_scheme')]),
                      (fsl_applyxfm,cmtk_cmat, [('out_file','roi_volumes')]),
                      (map_merge,cmtk_cmat, [('out','additional_maps')]),
+                     (cmtk_cmat,outputnode, [('endpoints_file','endpoints_file'),('endpoints_mm_file','endpoints_mm_file'),
+                             ('final_fiberslength_files','final_fiberslength_files'),('filtered_fiberslabel_files','filtered_fiberslabel_files'),
+                             ('final_fiberlabels_files','final_fiberlabels_files'),('streamline_final_files','streamline_final_files'),
+                             ('connectivity_matrices','connectivity_matrices')])
                      ])
         return flow
 
