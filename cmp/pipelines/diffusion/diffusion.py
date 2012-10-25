@@ -68,10 +68,10 @@ class Pipeline(HasTraits):
     
     traits_view = View(VGroup(
                         HGroup(spring,Item('preprocessing',editor=ThemedButtonEditor(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('segmentation',editor=ThemedButtonEditor(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('diffusion',editor=ThemedButtonEditor(image=ImageResource('diffusion'),theme='@G')),spring,show_labels=False),
+                        HGroup(Item('segmentation',editor=ThemedButtonEditor(image=ImageResource('segmentation'),theme='@G')),spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
+#                        HGroup(spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('registration',editor=ThemedButtonEditor(image=ImageResource('registration'),theme='@G')),spring,show_labels=False),
+                        HGroup(spring,Item('diffusion',editor=ThemedButtonEditor(image=ImageResource('diffusion'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('connectome',editor=ThemedButtonEditor(image=ImageResource('connectome'),theme='@G')),spring,show_labels=False),
                         )
                         )
@@ -234,8 +234,12 @@ class Pipeline(HasTraits):
         flow.connect([
                     (diff_flow,sinker, [('outputnode.gFA','scalars.@gfa'),('outputnode.skewness','scalars.@skewness'),
                                        ('outputnode.kurtosis','scalars.@kurtosis'),('outputnode.P0','scalars.@P0')]),
-                    (parc_flow,sinker, [('outputnode.aseg_file','fs_ouptut.HR.@aseg'),('outputnode.wm_mask_file','fs_ouptut.HR.@wm'),
+                    (parc_flow,sinker, [('outputnode.aseg_file','fs_output.HR.@aseg'),('outputnode.wm_mask_file','fs_output.HR.@wm'),
                                        ('outputnode.cc_unknown_file','fs_output.HR.@unknown'),('outputnode.ribbon_file','fs_output.HR.@ribbon')]),
+                    (con_flow,sinker, [('outputnode.endpoints_file','fibers.@endpoints_file'),('outputnode.endpoints_mm_file','fibers.@endpoints_mm_file'),
+                             ('outputnode.final_fiberslength_files','fibers.@final_fiberslength_files'),('outputnode.filtered_fiberslabel_files','fibers.@filtered_fiberslabel_files'),
+                             ('outputnode.final_fiberlabels_files','fibers.@final_fiberlabels_files'),('outputnode.streamline_final_files','fibers.@streamline_final_files'),
+                             ('outputnode.connectivity_matrices','fibers.connectivity_matrices')])
                     ])
         
         flow.run()
