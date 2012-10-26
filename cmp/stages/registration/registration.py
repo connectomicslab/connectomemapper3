@@ -48,6 +48,33 @@ class Registration_Config(HasTraits):
                               show_border=True,visible_when='registration_mode=="BBregister (FS)"'),
                        kind='live',
                        )
+                       
+
+class Tkregsiter2InputSpec(CommandLineInputSpec):
+    subjects_dir = Directory(desc='Use dir as SUBJECTS_DIR',exists=True,argstr="--sd %s")
+    subject_id = traits.Str(desc='Set subject id',argstr="--s %s")
+    regheader = traits.Bool(desc='Compute registration from headers',argstr="--regheader")
+    in_file = File(desc='Movable volume',mandatory=True,exists=True,argstr="--mov %s")
+    target_file = File(desc='Target volume',mandatory=True,exists=True,argstr="--targ %s")
+    reg_out = traits.Str(desc='Input/output registration file',mandatory=True,argstr="--reg %s")
+    fslreg_out = traits.Str(desc='FSL-Style registration output matrix',mandatory=True,argstr="--fslregout %s")
+    noedit = traits.Bool(desc='Do not open edit window (exit) - for conversions',argstr="--noedit")
+
+
+class Tkregsiter2OutputSpec(TraitedSpec):
+    regout_file = File(desc='Resulting registration file')
+    fslregout_file = File(desc='Resulting FSL-Style registration matrix')
+
+class Tkregsiter2(CommandLine):
+    _cmd = 'tkregister2'
+    input_spec = Tkregsiter2InputSpec
+    output_spec = Tkregsiter2OutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["regout_file"]  = os.path.abspath(self.inputs.reg_out)
+        outputs["fslregout_file"]  = os.path.abspath(self.inputs.fslregout_out)
+        return outputs
 
 
 class Registration(CMP_Stage):
@@ -81,18 +108,34 @@ class Registration(CMP_Stage):
                         (fsl_flirt, outputnode, [('out_file','T1-TO-B0'),('out_matrix_file','T1-TO-B0_mat')]),
                         ])
         if self.config.registration_mode == 'BBregister (FS)':
-            fs_bbregister = pe.Node(interface=fs.BBRegister(out_fsl_file=True),name="fs_bbregister")
+            fs_bbregister = pe.Node(interface=fs.BBRegister(out_fsl_file="b0-TO-orig.mat"),name="fs_bbregister")
             fs_bbregister.inputs.init = self.config.init
             fs_bbregister.inputs.contrast_type = self.config.contrast_type
             
-            fsl_convertxfm = pe.Node(interface=fsl.ConvertXFM(invert_xfm=True),name="fsl_convertxfm")
+            fsl_invertxfm = pe.Node(interface=fsl.ConvertXFM(invert_xfm=True),name="fsl_invertxfm")
             
-            # TODO tkregister2 (+node), convertxfm, applyxfm
+            fs_tkregister2 = pe.Node(interface=Tkregister2(regheader=True,noedit=True),name="fs_tkregister2")
+            fs_tkregister2.inputs.reg_out = 'T1-TO-orig.dat'
+            fs_tkregister2.inputs.fslreg_out = 'T1-TO-orig.mat'
+            fs_tkregister2.inputs.in_file = 'rawavg.mgz'
+            fs_tkregister2.inputs.target_file = 'orig.mgz'
+            
+            fsl_concatxfm = pe.Node(interface=fsl.ConvertXFM(concat_xfm=True),name="fsl_concatxfm")
+            
+            fsl_applyxfm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True),name="fsl_applyxfm")
             
             flow.connect([
                         (inputnode, fs_bbregister, [('subjects_dir','subjects_dir'),('subject_id','subject_id')]),
                         (fs_mriconvert, fs_bbregister, [('out_file','source_file')]),
-                        (fsl_flirt, outputnode, [('out_file','T1_TO_B0'),('out_matrix_file','T1_TO_B0_mat')]),
+                        (fs_bbregister, fsl_invertxfm, [('out_fsl_file','in_file')]),
+                        (fsl_invertxfm, fsl_concatxfm, [('out_file','in_file')]),
+                        (inputnode, fs_tkregister2, [(('subjects_dir','subjects_dir'),('subject_id','subject_id'))]),
+                        (fs_tkregister2, fsl_concatxfm, [('fslregout_file','in_file2')]),
+                        (fsl_concatxfm, fsl_applyxfm, [('out_file','in_matrix_file')]),
+                        (inputnode, fsl_applyxfm, [('T1','in_file')]),
+                        (fs_mriconvert, fsl_applyxfm, [('out_file','reference')]),
+                        (fsl_applyxfm, outputnode [('out_file','T1-TO-B0')]),
+                        (fsl_concatxfm, outputnode, [('out_file','T1-TO-B0_mat')]),
                         ])
        
        
