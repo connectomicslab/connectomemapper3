@@ -47,14 +47,15 @@ class Parcellation(CMP_Stage):
         
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
         
-        if self.config.parcellation_scheme == 'Lausanne2008':
-            parc_node = pe.Node(interface=cmtk.Parcellate(parcellation_scheme='Lausanne2008'),name="cmtk_parcellation")
-            flow.connect([
-                            (inputnode,parc_node,[("subjects_dir","subjects_dir"),("subject_id","subject_id")]),
-                            (parc_node,outputnode,[("aseg_file","aseg_file"),("cc_unknown_file","cc_unknown_file"),
-                                                   ("ribbon_file","ribbon_file"),("white_matter_mask_file","wm_mask_file"),
-                                                   ("roi_files","roi_files"),("roi_files_in_structural_space","roi_volumes")])
-                        ])
+        parc_node = pe.Node(interface=cmtk.Parcellate(),name="cmtk_parcellation")
+        parc_node.inputs.parcellation_scheme = self.config.parcellation_scheme
+        
+        flow.connect([
+                     (inputnode,parc_node,[("subjects_dir","subjects_dir"),("subject_id","subject_id")]),
+                     (parc_node,outputnode,[("aseg_file","aseg_file"),("cc_unknown_file","cc_unknown_file"),
+                                            ("ribbon_file","ribbon_file"),("white_matter_mask_file","wm_mask_file"),
+                                            ("roi_files","roi_files"),("roi_files_in_structural_space","roi_volumes")])
+                    ])
 
         return flow
 
