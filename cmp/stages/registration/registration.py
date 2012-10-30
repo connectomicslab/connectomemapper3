@@ -22,6 +22,8 @@ import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
+from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
+    traits, File, TraitedSpec
 
 # Own imports
 from cmp.stages.common import CMP_Stage
