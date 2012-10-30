@@ -25,6 +25,8 @@ class CMP_Project_Info(HasTraits):
     process_type = Enum('Diffusion',['Diffusion'])
     last_date_processed = Str('Not yet processed')
     last_stage_processed = Str('Not yet processed')
+    stage_names = List
+    custom_map_stop = Str
 
     create_view = View( Item('process_type',style='custom'),
                         'base_directory',
@@ -35,6 +37,12 @@ class CMP_Project_Info(HasTraits):
 
     open_view = View('base_directory',
                         title='Select directory of existing Connectome Data',
+                        kind='modal',
+                        width=400,
+                        buttons=['OK','Cancel'])
+                        
+    custom_map_view = View(Item('custom_map_stop',editor=EnumEditor(name='stage_names')),
+                        title='Select until which stage of the pipeline to process.',
                         kind='modal',
                         width=400,
                         buttons=['OK','Cancel'])
@@ -66,6 +74,7 @@ class CMP_MainWindow(HasTraits):
     load_project = Action(name='Load Connectome data...',action='load_project')
     preprocessing = Action(name='Check input data',action='check_input',enabled_when='handler.project_loaded==True')
     map_connectome = Action(name='Map Connectome!',action='map_connectome',enabled_when='handler.inputs_checked==True')
+    map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
 
     traits_view = View(HGroup(
                             Item('pipeline',style='custom',enabled_when='handler.inputs_checked==True',show_label=False,width=400,height=600),
@@ -88,7 +97,7 @@ class CMP_MainWindow(HasTraits):
                                 name='Configuration'),
                           ),
                        handler = project.ProjectHandler(),
-                       buttons = [preprocessing, map_connectome],
+                       buttons = [preprocessing, map_connectome, map_custom],
                    )
 
 
