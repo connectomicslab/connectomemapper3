@@ -56,6 +56,8 @@ class Pipeline(HasTraits):
     stages = {'Preprocessing':Preprocessing(), 'Segmentation':Segmentation(), 
             'Parcellation':Parcellation(), 'Diffusion':Diffusion(),
             'Registration':Registration(), 'Connectome':Connectome()}
+            
+    ordered_stage_list = ['Preprocessing','Segmentation','Parcellation','Registration','Diffusion','Connectome']
     
     global_conf = Global_Configuration()
     
@@ -93,6 +95,14 @@ class Pipeline(HasTraits):
 
     def _connectome_fired(self, info):
         self.stages['Connectome'].configure_traits()
+        
+    def define_custom_mapping(self, stage_stop):
+        stage_stop_seen = False
+        for stage in self.ordered_stage_list:
+            if stage_stop_seen:
+                self.stages[stage].enabled = False
+            if stage == stage_stop:
+                stage_stop_seen = True
 
     
     def check_input(self):
@@ -184,10 +194,9 @@ class Pipeline(HasTraits):
         datasource.inputs.raise_on_empty = False
         datasource.inputs.field_template = dict(diffusion=self.global_conf.imaging_model+'.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
         
-        
-        # create sub workflows that will exist anyway
-        #reg_flow = project.stages['Registration'].create_worfklow()
-        #con_flow = project.stages['Connectome'].create_worfklow()
+        # Prepare output directory
+        sinker = pe.Node(nio.DataSink(), name="sinker")
+        sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS", "CMP")
         
         if self.stages['Segmentation'].enabled:
             if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
@@ -198,7 +207,10 @@ class Pipeline(HasTraits):
         if self.stages['Parcellation'].enabled:
             parc_flow = self.stages['Parcellation'].create_workflow()
             flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
-                                                ('outputnode.subject_id','inputnode.subject_id')])])
+                                                ('outputnode.subject_id','inputnode.subject_id')]),
+                          (parc_flow,sinker, [('outputnode.aseg_file','fs_output.HR.@aseg'),('outputnode.wm_mask_file','fs_output.HR.@wm'),
+                                       ('outputnode.cc_unknown_file','fs_output.HR.@unknown'),('outputnode.ribbon_file','fs_output.HR.@ribbon')])
+                        ])
                                                 
         if self.stages['Registration'].enabled:
             reg_flow = self.stages['Registration'].create_workflow()
@@ -215,6 +227,8 @@ class Pipeline(HasTraits):
                         (datasource,diff_flow, [('diffusion','inputnode.diffusion')]),
                         (parc_flow,diff_flow, [('outputnode.wm_mask_file','inputnode.wm_mask')]),
                         (reg_flow,diff_flow, [('outputnode.T1-TO-B0_mat','inputnode.T1-TO-B0_mat')]),
+                        (diff_flow,sinker, [('outputnode.gFA','scalars.@gfa'),('outputnode.skewness','scalars.@skewness'),
+                                       ('outputnode.kurtosis','scalars.@kurtosis'),('outputnode.P0','scalars.@P0')])
                         ])
                         
         if self.stages['Connectome'].enabled:
@@ -226,21 +240,11 @@ class Pipeline(HasTraits):
                         (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
                                               ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
                                               ('outputnode.P0','inputnode.P0')]),
-                        ])
-        
-        sinker = pe.Node(nio.DataSink(), name="sinker")
-        sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS", "CMP")
-        
-        flow.connect([
-                    (diff_flow,sinker, [('outputnode.gFA','scalars.@gfa'),('outputnode.skewness','scalars.@skewness'),
-                                       ('outputnode.kurtosis','scalars.@kurtosis'),('outputnode.P0','scalars.@P0')]),
-                    (parc_flow,sinker, [('outputnode.aseg_file','fs_output.HR.@aseg'),('outputnode.wm_mask_file','fs_output.HR.@wm'),
-                                       ('outputnode.cc_unknown_file','fs_output.HR.@unknown'),('outputnode.ribbon_file','fs_output.HR.@ribbon')]),
-                    (con_flow,sinker, [('outputnode.endpoints_file','fibers.@endpoints_file'),('outputnode.endpoints_mm_file','fibers.@endpoints_mm_file'),
+                        (con_flow,sinker, [('outputnode.endpoints_file','fibers.@endpoints_file'),('outputnode.endpoints_mm_file','fibers.@endpoints_mm_file'),
                              ('outputnode.final_fiberslength_files','fibers.@final_fiberslength_files'),('outputnode.filtered_fiberslabel_files','fibers.@filtered_fiberslabel_files'),
                              ('outputnode.final_fiberlabels_files','fibers.@final_fiberlabels_files'),('outputnode.streamline_final_files','fibers.@streamline_final_files'),
                              ('outputnode.connectivity_matrices','fibers.connectivity_matrices')])
-                    ])
+                        ])
         
         flow.run()
         
