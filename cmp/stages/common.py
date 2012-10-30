@@ -44,7 +44,7 @@ class CMP_Stage(HasTraits):
                                 label = 'View outputs', show_border=True
                                 )
                             ),
-                            spring, scrollable=True, kind='livemodal', buttons=['OK','Cancel']
+                            spring, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     def _view_output_fired(self,info):
