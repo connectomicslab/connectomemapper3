@@ -246,6 +246,7 @@ class Pipeline(HasTraits):
                              ('outputnode.connectivity_matrices','fibers.connectivity_matrices')])
                         ])
         
+        #flow.run(plugin='MultiProc', plugin_args={'n_procs' : 4}) // for multicore processing
         flow.run()
         
         self.prepare_outputs()
