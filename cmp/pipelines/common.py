@@ -71,6 +71,7 @@ class SwapAndReorient(BaseInterface):
         if src_orient == ref_orient:
             # no reorientation needed
             copyfile(src_file,out_file,False, False, 'content')
+            return runtime
         else:
             if src_conv != ref_conv:
                 # if needed, match convention (radiological/neurological) to reference
