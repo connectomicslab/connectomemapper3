@@ -147,8 +147,8 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
 
     r = 0
     for parkey, parval in resolutions.items():
-        if parval['number_of_regions'] != 83:
-            continue
+        #if parval['number_of_regions'] != 83:
+        #    continue
             
         print("Resolution = "+parkey)
         
