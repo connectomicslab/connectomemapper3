@@ -23,7 +23,7 @@ import pipelines.diffusion.diffusion as diffusion_pipeline
 
 def get_process_type(project_info):
     config = ConfigParser.ConfigParser()
-    config.read(os.path.join(project_info.base_directory, 'config.ini'))
+    config.read(project_info.config_file)
     return config.get('Global','process_type')
 
 def save_config(pipeline, config_path):
@@ -110,6 +110,7 @@ def init_project(project_info, is_new_project):
             return None
 
     refresh_folder(project_info.base_directory, pipeline.input_folders)
+    pipeline.config_file = project_info.config_file
     return pipeline
 
 class ProjectHandler(Handler):
@@ -131,8 +132,8 @@ class ProjectHandler(Handler):
         loaded_project = gui.CMP_Project_Info()
         np_res = loaded_project.configure_traits(view='open_view')
         if np_res and os.path.exists(loaded_project.base_directory):
-            loaded_project.process_type = get_process_type(loaded_project)
             loaded_project.config_file = os.path.join(loaded_project.base_directory,'config.ini')
+            loaded_project.process_type = get_process_type(loaded_project)  
 #           self.project_loaded = init_project(loaded_project, ui_info.ui.context["object"].canvas, False)
             self.pipeline = init_project(loaded_project, False)
             if self.pipeline != None:
