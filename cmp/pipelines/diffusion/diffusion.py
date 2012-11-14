@@ -68,6 +68,8 @@ class Pipeline(HasTraits):
     registration = Button('Registration')
     connectome = Button('Connectome')
     
+    config_file = Str
+    
     traits_view = View(VGroup(
                         HGroup(spring,Item('preprocessing',editor=ThemedButtonEditor(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
                         HGroup(Item('segmentation',editor=ThemedButtonEditor(image=ImageResource('segmentation'),theme='@G')),spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
@@ -105,7 +107,7 @@ class Pipeline(HasTraits):
                 stage_stop_seen = True
 
     
-    def check_input(self):
+    def check_input(self, gui=True):
         print '**** Check Inputs ****'
         diffusion_available = False
         t1_available = False
@@ -158,13 +160,18 @@ class Pipeline(HasTraits):
         imaging_model = ''
         if len(diffusion_model) > 0:
             imaging_model = diffusion_model[0]
-            
-        input_notification = Check_Input_Notification(message=input_message, imaging_model_options=diffusion_model,imaging_model=imaging_model)
-        input_notification.configure_traits()
-        
-        self.global_conf.imaging_model = input_notification.imaging_model
-        self.stages['Registration'].config.imaging_model = input_notification.imaging_model
-        self.stages['Diffusion'].config.imaging_model = input_notification.imaging_model
+          
+        if gui:  
+            input_notification = Check_Input_Notification(message=input_message, imaging_model_options=diffusion_model,imaging_model=imaging_model)
+            input_notification.configure_traits()    
+            self.global_conf.imaging_model = input_notification.imaging_model
+            self.stages['Registration'].config.imaging_model = input_notification.imaging_model
+            self.stages['Diffusion'].config.imaging_model = input_notification.imaging_model
+        else:
+            print input_message
+            self.global_conf.imaging_model = imaging_model
+            self.stages['Registration'].config.imaging_model = imaging_model
+            self.stages['Diffusion'].config.imaging_model = imaging_model
         
         return valid_inputs
         
@@ -174,7 +181,7 @@ class Pipeline(HasTraits):
         os.makedirs(outdir)
         
         # copy .ini and log file
-        shutil.copy(os.path.join(self.base_directory,'config.ini'),outdir)
+        shutil.copy(config_file,outdir)
         shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
 
     def process(self):
