@@ -1,13 +1,46 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
-import cmp.gui
-import traitsui.wx
+import sys
+import os
 import wx
 
-if __name__ == "__main__":
-    #TODO handle CLI args
+try: 
+    from traitsui.wx import *
+except ImportError: 
+    from enthought.traits.ui.wx import *
 
-    traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
-    mw = cmp.gui.CMP_MainWindow()
-    mw_res = mw.configure_traits()
+import cmp.gui
+import cmp.project
+from cmp.info import __version__
+
+def info():
+    print "\nconnectomemapper " + __version__
+    print """Copyright (C) 2009-2012, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
+             Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+             All rights reserved.\n"""
+          
+def usage():
+    print "Usage: connectomemapper input_folder ini_file"
+
+if __name__ == "__main__":
+    
+    info()
+    argc = len(sys.argv)
+    
+    if argc==1: # no args, launch the GUI
+        traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
+        mw = cmp.gui.CMP_MainWindow()
+        mw_res = mw.configure_traits()
+    elif argc==3: # connectomemapper input_folder ini_file
+        project = cmp.gui.CMP_Project_Info()
+        project.base_directory = os.path.abspath(sys.argv[1])
+        project.config_file = os.path.abspath(sys.argv[2])
+        pipeline = cmp.project.init_project(project, False)
+        if pipeline != None:
+            valid_inputs = pipeline.check_input(gui=False)
+            if valid_inputs:
+                pipeline.process()
+    else:
+        usage()
+        sys.exit(2)
