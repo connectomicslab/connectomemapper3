@@ -6,9 +6,9 @@ import os
 import wx
 
 try: 
-    from traitsui.wx import *
+    import traitsui.wx
 except ImportError: 
-    from enthought.traits.ui.wx import *
+    import enthought.traits.ui.wx
 
 import cmp.gui
 import cmp.project
