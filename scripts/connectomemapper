@@ -13,6 +13,7 @@ except ImportError:
 import cmp.gui
 import cmp.project
 from cmp.info import __version__
+from cmp.stages.diffusion.cmp_dtb import DTB_gfa
 
 def info():
     print "\nconnectomemapper " + __version__
@@ -24,10 +25,14 @@ def usage():
     print "Usage: connectomemapper input_folder ini_file"
 
 if __name__ == "__main__":
+
+    # add current directory to the path, useful if DTB_ bins not installed
+    os.environ["PATH"] += os.pathsep + os.path.dirname(sys.argv[0])
     
+    # version and copyright message
     info()
-    argc = len(sys.argv)
     
+    argc = len(sys.argv)
     if argc==1: # no args, launch the GUI
         traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
         mw = cmp.gui.CMP_MainWindow()
@@ -41,6 +46,8 @@ if __name__ == "__main__":
             valid_inputs = pipeline.check_input(gui=False)
             if valid_inputs:
                 pipeline.process()
+            else:
+                sys.exit(1)
     else:
         usage()
         sys.exit(2)
