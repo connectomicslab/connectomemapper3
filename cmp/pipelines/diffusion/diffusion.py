@@ -181,7 +181,7 @@ class Pipeline(HasTraits):
         os.makedirs(outdir)
         
         # copy .ini and log file
-        shutil.copy(config_file,outdir)
+        shutil.copy(self.config_file,outdir)
         shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
 
     def process(self):
