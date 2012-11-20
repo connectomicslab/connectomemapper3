@@ -31,7 +31,8 @@ class Segmentation_Config(HasTraits):
     freesurfer_subjects_dir = Directory
     freesurfer_subject_id_trait = List
     freesurfer_subject_id = Str
-    traits_view = View('use_existing_freesurfer_data',
+    freesurfer_args = Str
+    traits_view = View('freesurfer_args','use_existing_freesurfer_data',
                         Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
                         Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True')
                         )
@@ -63,6 +64,7 @@ class Segmentation(CMP_Stage):
             # ReconAll => named outputnode as we don't want to select a specific output....
             fs_reconall = pe.Node(interface=fs.ReconAll(),name="outputnode")
             fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
+            fs_reconall.inputs.args = self.config.freesurfer_args
             if self.config.use_existing_freesurfer_data == True:
                 fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id
             
