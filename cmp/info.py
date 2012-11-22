@@ -1,6 +1,6 @@
-""" This file contains cmtk package information """
+""" This file contains cmp package information """
 
-_version_major = 1
+_version_major = 2
 _version_minor = 0
 _version_micro = 0
 _version_extra = ''
