@@ -33,16 +33,27 @@ from nipype.utils.filemanip import split_filename
 
 class Connectome_Config(HasTraits):
     compute_curvature = Bool(True)
+    cff_enabled_trait = Bool(False)
     cff_creator = Str
     cff_email = Str
     cff_publisher = Str
     cff_license = Str
+    
+    output_type = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff'],cols=3))
 
-    traits_view = View(Group('compute_curvature',label='Connectivity matrix'),
+    traits_view = View(Item('output_type',style='custom'),
+                        Group('compute_curvature',label='Connectivity matrix', show_border=True),
                         Group('cff_creator','cff_email','cff_publisher','cff_license',
-                        label='CFF creation metadata'
+                        label='CFF creation metadata', show_border=True, visible_when='cff_enabled_trait==True'
                         ),
+                        kind='live',
                         )
+                        
+    def _output_type_changed(self, new):
+        if 'cff' in new:
+            self.cff_enabled_trait = True
+        else:
+            self.cff_enabled_trait = False
                         
 class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     track_file = File(desc='Tractography result', exists=True, mandatory=True)
