@@ -71,9 +71,9 @@ class Pipeline(HasTraits):
     config_file = Str
     
     traits_view = View(VGroup(
-                        HGroup(spring,Item('preprocessing',editor=ThemedButtonEditor(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
-                        HGroup(Item('segmentation',editor=ThemedButtonEditor(image=ImageResource('segmentation'),theme='@G')),spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
-#                        HGroup(spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
+                        #HGroup(spring,Item('preprocessing',editor=ThemedButtonEditor(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
+                        HGroup(spring,Item('segmentation',editor=ThemedButtonEditor(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
+                        HGroup(spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('registration',editor=ThemedButtonEditor(image=ImageResource('registration'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('diffusion',editor=ThemedButtonEditor(image=ImageResource('diffusion'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('connectome',editor=ThemedButtonEditor(image=ImageResource('connectome'),theme='@G')),spring,show_labels=False),
@@ -183,6 +183,12 @@ class Pipeline(HasTraits):
         # copy .ini and log file
         shutil.copy(self.config_file,outdir)
         shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
+        
+        # copy connectivity matrices
+        mat_folder = os.path.join(self.base_directory,"RESULTS","CMP",'fibers','connectivity_matrices')
+        matrices = os.listdir(mat_folder)
+        for mat in matrices:
+            shutil.copy(os.path.join(mat_folder, mat),outdir)
 
     def process(self):
         # Prepare
@@ -216,7 +222,8 @@ class Pipeline(HasTraits):
             flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
                                                 ('outputnode.subject_id','inputnode.subject_id')]),
                           (parc_flow,sinker, [('outputnode.aseg_file','fs_output.HR.@aseg'),('outputnode.wm_mask_file','fs_output.HR.@wm'),
-                                       ('outputnode.cc_unknown_file','fs_output.HR.@unknown'),('outputnode.ribbon_file','fs_output.HR.@ribbon')])
+                                       ('outputnode.cc_unknown_file','fs_output.HR.@unknown'),('outputnode.ribbon_file','fs_output.HR.@ribbon'),
+                                       ('outputnode.roi_files','fs_output.HR.scales.@files'),('outputnode.roi_volumes','fs_output.HR.scales.@volumes')])
                         ])
                                                 
         if self.stages['Registration'].enabled:
