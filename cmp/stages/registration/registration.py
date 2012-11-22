@@ -34,6 +34,7 @@ class Registration_Config(HasTraits):
     imaging_model = Str
     
     # FLIRT
+    flirt_args = Str
     uses_qform = Bool(True)
     dof = Int(6)
     cost = Enum('mutualinfo',['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'])
@@ -44,7 +45,7 @@ class Registration_Config(HasTraits):
     contrast_type = Enum('t2',['t1','t2'])
                 
     traits_view = View('registration_mode',
-                        Group('uses_qform','dof','cost','no_search',label='FLIRT',
+                        Group('uses_qform','dof','cost','no_search','flirt_args',label='FLIRT',
                               show_border=True,visible_when='registration_mode=="Linear (FSL)"'),
                         Group('init','contrast_type',
                               show_border=True,visible_when='registration_mode=="BBregister (FS)"'),
@@ -81,9 +82,6 @@ class Tkregsiter2(CommandLine):
 
 class Registration(CMP_Stage):
     name = 'Registration'
-    display_color = 'lightgreen'
-    position_x = 70
-    position_y = 240
     config = Registration_Config()
 
     def create_workflow(self):
@@ -103,6 +101,7 @@ class Registration(CMP_Stage):
             fsl_flirt.inputs.dof = self.config.dof
             fsl_flirt.inputs.cost = self.config.cost
             fsl_flirt.inputs.no_search = self.config.no_search
+            fsl_flirt.inputs.args = self.config.flirt_args
             
             flow.connect([
                         (inputnode, fsl_flirt, [('T1','in_file')]),
