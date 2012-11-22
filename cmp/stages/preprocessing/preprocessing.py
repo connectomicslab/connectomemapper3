@@ -23,9 +23,5 @@ class Preprocessing_Config(HasTraits):
 class Preprocessing(CMP_Stage):
     # General and UI members
     name = 'Preprocessing'
-    description = 'Preprocessing stage.'
-    display_color = 'lightgray'
-    position_x = 70
-    position_y = 510
     config = Preprocessing_Config()
 

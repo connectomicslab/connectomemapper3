@@ -46,9 +46,6 @@ class Segmentation_Config(HasTraits):
 class Segmentation(CMP_Stage):
     # General and UI members
     name = 'Segmentation'
-    display_color = 'lightyellow'
-    position_x = 70
-    position_y = 420
     config = Segmentation_Config()
 
     

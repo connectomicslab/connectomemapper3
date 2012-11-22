@@ -106,9 +106,6 @@ def strip_suffix(file_input, prefix):
 
 class Diffusion(CMP_Stage):
     name = 'Diffusion'
-    display_color = 'pink'
-    position_x = 70
-    position_y = 145
     config = Diffusion_Config()
 
     def create_workflow(self):

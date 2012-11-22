@@ -32,9 +32,6 @@ class CMP_Parcellation_Config(HasTraits):
 
 class Parcellation(CMP_Stage):
     name = 'Parcellation'
-    display_color = 'lightyellow'
-    position_x = 70
-    position_y = 330
     config = CMP_Parcellation_Config()
     
     def create_workflow(self):
