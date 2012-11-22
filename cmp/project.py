@@ -61,19 +61,25 @@ def load_config(pipeline, config_path):
                 sub_config = getattr(stage.config, key)
                 stage_sub_keys = [prop for prop in sub_config.traits().keys() if not 'trait' in prop]
                 for sub_key in stage_sub_keys:
-                    conf_value = config.get(stage.name, key+'.'+sub_key)
+                    try:
+                        conf_value = config.get(stage.name, key+'.'+sub_key)
+                        try:
+                            conf_value = eval(conf_value)
+                        except:
+                            pass
+                        setattr(sub_config, sub_key, conf_value)
+                    except:
+                        pass
+            else:
+                try:
+                    conf_value = config.get(stage.name, key)
                     try:
                         conf_value = eval(conf_value)
                     except:
                         pass
-                    setattr(sub_config, sub_key, conf_value)
-            else:
-                conf_value = config.get(stage.name, key)
-                try:
-                    conf_value = eval(conf_value)
+                    setattr(stage.config, key, conf_value)
                 except:
                     pass
-                setattr(stage.config, key, conf_value)
 
     return True
 
