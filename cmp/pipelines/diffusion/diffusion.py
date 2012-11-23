@@ -233,6 +233,7 @@ class Pipeline(HasTraits):
                           (seg_flow,reg_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
                                                 ('outputnode.subject_id','inputnode.subject_id')]),
                           (datasource,reg_flow, [('T1','inputnode.T1'),('T2','inputnode.T2')]),
+                          (reg_flow,sinker, [('outputnode.diffusion_b0_resampled','diffusion')]),
                           ])
         
         if self.stages['Diffusion'].enabled:
@@ -240,7 +241,7 @@ class Pipeline(HasTraits):
             flow.connect([
                         (datasource,diff_flow, [('diffusion','inputnode.diffusion')]),
                         (parc_flow,diff_flow, [('outputnode.wm_mask_file','inputnode.wm_mask')]),
-                        (reg_flow,diff_flow, [('outputnode.T1-TO-B0_mat','inputnode.T1-TO-B0_mat')]),
+                        (reg_flow,diff_flow, [('outputnode.T1-TO-B0_mat','inputnode.T1-TO-B0_mat'),('outputnode.diffusion_b0_resampled','inputnode.diffusion_b0_resampled')]),
                         (diff_flow,sinker, [('outputnode.gFA','scalars.@gfa'),('outputnode.skewness','scalars.@skewness'),
                                        ('outputnode.kurtosis','scalars.@kurtosis'),('outputnode.P0','scalars.@P0')])
                         ])

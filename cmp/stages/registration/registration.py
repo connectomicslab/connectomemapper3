@@ -88,12 +88,13 @@ class Registration(CMP_Stage):
         flow = pe.Workflow(name="Registration_Stage")
 
         inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1","diffusion","T2","subjects_dir","subject_id"]),name="inputnode")
-        outputnode = pe.Node(interface=util.IdentityInterface(fields=["T1-TO-B0","T1-TO-B0_mat"]),name="outputnode")
+        outputnode = pe.Node(interface=util.IdentityInterface(fields=["T1-TO-B0","T1-TO-B0_mat","diffusion_b0_resampled"]),name="outputnode")
 
         # Extract B0 and resample it to 1x1x1mm3
         fs_mriconvert = pe.Node(interface=fs.MRIConvert(frame=0,out_file="diffusion_first.nii.gz",vox_size=(1,1,1)),name="fs_mriconvert")
         
-        flow.connect([(inputnode, fs_mriconvert,[('diffusion','in_file')])])
+        flow.connect([(inputnode, fs_mriconvert,[('diffusion','in_file')]),
+                      (fs_mriconvert, outputnode, [('out_file','diffusion_b0_resampled')])])
         
         if self.config.registration_mode == 'Linear (FSL)':
             fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-B0.nii.gz',out_matrix_file='T1-TO-B0.mat'),name="fsl_flirt")

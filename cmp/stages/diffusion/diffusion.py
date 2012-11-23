@@ -112,7 +112,7 @@ class Diffusion(CMP_Stage):
         flow = pe.Workflow(name="Diffusion_stage")
 
         # inputs and outputs
-        inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","wm_mask","T1-TO-B0_mat"]),name="inputnode")
+        inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","wm_mask","T1-TO-B0_mat","diffusion_b0_resampled"]),name="inputnode")
         outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file","lengths_file","gFA","skewness","kurtosis","P0"]),name="outputnode")
 
         # resampling diffusion image and setting output type to short
@@ -132,7 +132,7 @@ class Diffusion(CMP_Stage):
         if self.config.tracking == 'DTB':
             track_flow = create_dtb_tracking_flow(self.config.dtb_tracking_config)
             flow.connect([
-                        (inputnode, track_flow,[('wm_mask','inputnode.wm_mask'),('T1-TO-B0_mat','inputnode.T1-TO-B0_mat')]),
+                        (inputnode, track_flow,[('wm_mask','inputnode.wm_mask'),('T1-TO-B0_mat','inputnode.T1-TO-B0_mat'),('diffusion_b0_resampled','inputnode.diffusion_b0_resampled')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
                         ])
                         
