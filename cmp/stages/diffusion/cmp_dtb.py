@@ -149,13 +149,13 @@ def create_dtb_tracking_flow(config):
         prefix = 'dsi'
     else:
         dtb_dtk2dir.inputs.diffusion_type = 'dti'
+        prefix = 'dti'
     if 'x' in config.flip_input:
         dtb_dtk2dir.inputs.invert_x = True
     if 'y' in config.flip_input:
         dtb_dtk2dir.inputs.invert_y = True
     if 'z' in config.flip_input:
         dtb_dtk2dir.inputs.invert_z = True
-        prefix = 'dti'
         
         
     # Apply transformation to WM-mask
