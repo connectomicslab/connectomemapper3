@@ -12,5 +12,5 @@ Architecture: all
 Homepage: http://www.cmtk.org
 XB-Python-Version: ${python:Versions}
 Depends: ${misc:Depends}, ${python:Depends}, python-traits, python-traitsui, libboost-program-options-dev (>=1.40), libnifti-dev, libblitz0-dev
-Description: Connectome Mapper implements a full diffusion MRI processing pipeline.
+Description: Connectome Mapper
  Connectome Mapper implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 data to multi-resolution connection matrices. It also offers support for resting state fMRI data processing and multi-resolution functional connection matrices creation. The Connectome Mapper is part of the Connectome Mapping Toolkit.
