@@ -26,7 +26,8 @@ package_data = {'cmp':
                 'data/parcellation/freesurferaparc/*/*.*',
                 'data/colortable_and_gcs/*.*',
                 'data/colortable_and_gcs/my_atlas_gcs/*.*',
-                'data/diffusion/odf_directions/*.*'
+                'data/diffusion/odf_directions/*.*',
+                'data/diffusion/gradient_tables/*.*',
                  ]}
 
 ################################################################################
@@ -55,7 +56,7 @@ def main(**extra_args):
           author= 'CHUV',
           author_email='info@connectomics.org',
           url='http://www.connectomics.org/',
-          scripts = glob('scripts/connectomemapper'),
+          scripts = glob('scripts/*'),
           license='Modified BSD License',
           packages = packages,
         classifiers = [c.strip() for c in """\
