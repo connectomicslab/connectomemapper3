@@ -117,7 +117,7 @@ class Connectome(CMP_Stage):
         map_merge = pe.Node(interface=util.Merge(4),name="map_merge")
         
         # Register ROI Volumes to B0 space
-        fsl_applyxfm = pe.MapNode(interface=fsl.ApplyXfm(apply_xfm=True),name="fsl_applyxfm",iterfield=["in_file"])
+        fsl_applyxfm = pe.MapNode(interface=fsl.ApplyXfm(apply_xfm=True, interp="nearestneighbour"),name="fsl_applyxfm",iterfield=["in_file"])
         
         flow.connect([
                      (inputnode,map_merge, [('gFA','in1'),('skewness','in2'),('kurtosis','in3'),('P0','in4')]),
