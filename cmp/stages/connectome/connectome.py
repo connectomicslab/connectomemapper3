@@ -106,7 +106,7 @@ class Connectome(CMP_Stage):
         flow = pe.Workflow(name="Connectome_stage")
         
         # define inputs and outputs
-        inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","roi_volumes","track_file","parcellation_scheme","gFA","skewness","kurtosis","P0","T1-TO-B0_mat"]),name="inputnode")
+        inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_b0_resampled","roi_volumes","track_file","parcellation_scheme","gFA","skewness","kurtosis","P0","T1-TO-B0_mat"]),name="inputnode")
         outputnode = pe.Node(interface=util.IdentityInterface(fields=["endpoints_file","endpoints_mm_file","final_fiberslength_files",
                              "filtered_fiberslabel_files","final_fiberlabels_files","streamline_final_files","connectivity_matrices"]),name="outputnode")
         
@@ -121,7 +121,7 @@ class Connectome(CMP_Stage):
         
         flow.connect([
                      (inputnode,map_merge, [('gFA','in1'),('skewness','in2'),('kurtosis','in3'),('P0','in4')]),
-                     (inputnode,fsl_applyxfm, [('roi_volumes','in_file'),('diffusion','reference'),('T1-TO-B0_mat','in_matrix_file')]),
+                     (inputnode,fsl_applyxfm, [('roi_volumes','in_file'),('diffusion_b0_resampled','reference'),('T1-TO-B0_mat','in_matrix_file')]),
                      (inputnode,cmtk_cmat, [('track_file','track_file'),('parcellation_scheme','parcellation_scheme')]),
                      (fsl_applyxfm,cmtk_cmat, [('out_file','roi_volumes')]),
                      (map_merge,cmtk_cmat, [('out','additional_maps')]),

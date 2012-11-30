@@ -249,9 +249,8 @@ class Pipeline(HasTraits):
         if self.stages['Connectome'].enabled:
             con_flow = self.stages['Connectome'].create_workflow()
             flow.connect([
-                        (datasource,con_flow, [('diffusion','inputnode.diffusion')]),
                         (parc_flow,con_flow, [('outputnode.roi_volumes','inputnode.roi_volumes'),('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
-                        (reg_flow,con_flow, [('outputnode.T1-TO-B0_mat','inputnode.T1-TO-B0_mat')]),
+                        (reg_flow,con_flow, [('outputnode.T1-TO-B0_mat','inputnode.T1-TO-B0_mat'),('outputnode.diffusion_b0_resampled','inputnode.diffusion_b0_resampled')]),
                         (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
                                               ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
                                               ('outputnode.P0','inputnode.P0')]),
