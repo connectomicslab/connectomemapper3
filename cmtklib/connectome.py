@@ -304,26 +304,26 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
             edge_keys = G.edges(data=True)[0][2].keys()
             
             edge_struct = {}
-            for key in edge_keys:
-                arr = np.zeros(size_edges,dtype=np.float)
-                for x,y,data in G.edges(data=True):
-                    arr[x-1,y-1] = data[key]
-                    arr[y-1,x-1] = data[key]
-                edge_struct[key] = arr
+            for edge_key in edge_keys:
+                edge_arr = np.zeros(size_edges,dtype=np.float)
+                for edge_x,edge_y,edge_data in G.edges(data=True):
+                    edge_arr[edge_x-1,edge_y-1] = edge_data[edge_key]
+                    edge_arr[edge_y-1,edge_x-1] = edge_data[edge_key]
+                edge_struct[edge_key] = edge_arr
                 
             # nodes
             size_nodes = parval['number_of_regions']
             node_keys = G.nodes(data=True)[0][1].keys()
 
             node_struct = {}
-            for key in node_keys:
-                if key == 'dn_position':
-                    arr = np.zeros([size_nodes,3],dtype=np.float)
+            for node_key in node_keys:
+                if node_key == 'dn_position':
+                    node_arr = np.zeros([size_nodes,3],dtype=np.float)
                 else:
-                    arr = np.zeros(size_nodes,dtype=np.object_)
-                for n,data in G.nodes(data=True):
-                    arr[n-1] = data[key]
-                node_struct[key] = arr
+                    node_arr = np.zeros(size_nodes,dtype=np.object_)
+                for node_n,node_data in G.nodes(data=True):
+                    node_arr[node_n-1] = node_data[node_key]
+                node_struct[node_key] = node_arr
                 
             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
 
