@@ -57,7 +57,7 @@ class Pipeline(HasTraits):
             'Parcellation':Parcellation(), 'Diffusion':Diffusion(),
             'Registration':Registration(), 'Connectome':Connectome()}
             
-    ordered_stage_list = ['Preprocessing','Segmentation','Parcellation','Registration','Diffusion','Connectome']
+    ordered_stage_list = ['Segmentation','Parcellation','Registration','Diffusion','Connectome']
     
     global_conf = Global_Configuration()
     
@@ -174,32 +174,20 @@ class Pipeline(HasTraits):
             self.stages['Diffusion'].config.imaging_model = imaging_model
         
         return valid_inputs
-        
-    def prepare_outputs(self):
-        now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-        outdir = os.path.join(self.base_directory,"RESULTS",now)
-        os.makedirs(outdir)
-        
-        # copy .ini and log file
-        shutil.copy(self.config_file,outdir)
-        shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
-        
-        # copy connectivity matrices
-        mat_folder = os.path.join(self.base_directory,"RESULTS","CMP",'fibers','connectivity_matrices')
-        matrices = os.listdir(mat_folder)
-        for mat in matrices:
-            shutil.copy(os.path.join(mat_folder, mat),outdir)
 
     def process(self):
-        # Prepare
+        # Process time
+        now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        
+        # Initialization
         config.update_config({'logging': {'log_directory': os.path.join(self.base_directory,"LOG"),
                                   'log_to_file': True},
                               'exectution': {'use_relative_paths': True}
                               })
         logging.update_logging(config)
-        print '**** Processing ****'
         flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(self.base_directory,'NIPYPE'))
-
+        iflogger = logging.getLogger('interface')
+        
         # Data import
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','T1','T2']), name='datasource')
         datasource.inputs.base_directory = os.path.join(self.base_directory,'NIFTI')
@@ -207,9 +195,9 @@ class Pipeline(HasTraits):
         datasource.inputs.raise_on_empty = False
         datasource.inputs.field_template = dict(diffusion=self.global_conf.imaging_model+'.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
         
-        # Prepare output directory
+        # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="sinker")
-        sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS", "CMP")
+        sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS")
         
         if self.stages['Segmentation'].enabled:
             if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
@@ -221,19 +209,17 @@ class Pipeline(HasTraits):
             parc_flow = self.stages['Parcellation'].create_workflow()
             flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
                                                 ('outputnode.subject_id','inputnode.subject_id')]),
-                          (parc_flow,sinker, [('outputnode.aseg_file','fs_output.HR.@aseg'),('outputnode.wm_mask_file','fs_output.HR.@wm'),
-                                       ('outputnode.cc_unknown_file','fs_output.HR.@unknown'),('outputnode.ribbon_file','fs_output.HR.@ribbon'),
-                                       ('outputnode.roi_files','fs_output.HR.scales.@files'),('outputnode.roi_volumes','fs_output.HR.scales.@volumes')])
+                          (parc_flow,sinker, [('outputnode.aseg_file','CMP.fs_output.HR.@aseg'),('outputnode.wm_mask_file','CMP.fs_output.HR.@wm'),
+                                       ('outputnode.cc_unknown_file','CMP.fs_output.HR.@unknown'),('outputnode.ribbon_file','CMP.fs_output.HR.@ribbon'),
+                                       ('outputnode.roi_files','CMP.fs_output.HR.scales.@files'),('outputnode.roi_volumes','CMP.fs_output.HR.scales.@volumes')])
                         ])
                                                 
         if self.stages['Registration'].enabled:
             reg_flow = self.stages['Registration'].create_workflow()
             flow.connect([
-                          (datasource,reg_flow, [('diffusion','inputnode.diffusion')]),
+                          (datasource,reg_flow, [('diffusion','inputnode.diffusion'),('T1','inputnode.T1'),('T2','inputnode.T2')]),
                           (seg_flow,reg_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
                                                 ('outputnode.subject_id','inputnode.subject_id')]),
-                          (datasource,reg_flow, [('T1','inputnode.T1'),('T2','inputnode.T2')]),
-                          (reg_flow,sinker, [('outputnode.diffusion_b0_resampled','diffusion')]),
                           ])
         
         if self.stages['Diffusion'].enabled:
@@ -242,8 +228,8 @@ class Pipeline(HasTraits):
                         (datasource,diff_flow, [('diffusion','inputnode.diffusion')]),
                         (parc_flow,diff_flow, [('outputnode.wm_mask_file','inputnode.wm_mask')]),
                         (reg_flow,diff_flow, [('outputnode.T1-TO-B0_mat','inputnode.T1-TO-B0_mat'),('outputnode.diffusion_b0_resampled','inputnode.diffusion_b0_resampled')]),
-                        (diff_flow,sinker, [('outputnode.gFA','scalars.@gfa'),('outputnode.skewness','scalars.@skewness'),
-                                       ('outputnode.kurtosis','scalars.@kurtosis'),('outputnode.P0','scalars.@P0')])
+                        (diff_flow,sinker, [('outputnode.gFA','CMP.scalars.@gfa'),('outputnode.skewness','CMP.scalars.@skewness'),
+                                       ('outputnode.kurtosis','CMP.scalars.@kurtosis'),('outputnode.P0','CMP.scalars.@P0')])
                         ])
                         
         if self.stages['Connectome'].enabled:
@@ -254,16 +240,24 @@ class Pipeline(HasTraits):
                         (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
                                               ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
                                               ('outputnode.P0','inputnode.P0')]),
-                        (con_flow,sinker, [('outputnode.endpoints_file','fibers.@endpoints_file'),('outputnode.endpoints_mm_file','fibers.@endpoints_mm_file'),
-                             ('outputnode.final_fiberslength_files','fibers.@final_fiberslength_files'),('outputnode.filtered_fiberslabel_files','fibers.@filtered_fiberslabel_files'),
-                             ('outputnode.final_fiberlabels_files','fibers.@final_fiberlabels_files'),('outputnode.streamline_final_files','fibers.@streamline_final_files'),
-                             ('outputnode.connectivity_matrices','fibers.connectivity_matrices')])
+                        (con_flow,sinker, [('outputnode.endpoints_file','CMP.fibers.@endpoints_file'),('outputnode.endpoints_mm_file','CMP.fibers.@endpoints_mm_file'),
+                             ('outputnode.final_fiberslength_files','CMP.fibers.@final_fiberslength_files'),('outputnode.filtered_fiberslabel_files','CMP.fibers.@filtered_fiberslabel_files'),
+                             ('outputnode.final_fiberlabels_files','CMP.fibers.@final_fiberlabels_files'),('outputnode.streamline_final_files','CMP.fibers.@streamline_final_files'),
+                             ('outputnode.connectivity_matrices',now+'.connectivity_matrices')])
                         ])
         
+        iflogger.info("**** Processing ****")
         #flow.run(plugin='MultiProc', plugin_args={'n_procs' : 4}) // for multicore processing
         flow.run()
         
-        self.prepare_outputs()
+        # copy .ini and log file
+        outdir = os.path.join(self.base_directory,"RESULTS",now)
+        if not os.path.exists(outdir):
+            os.makedirs(outdir)
+        shutil.copy(self.config_file,outdir)
+        shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
+        
+        iflogger.info("**** Processing finished ****")
         
         return True,'Processing sucessful'
 
