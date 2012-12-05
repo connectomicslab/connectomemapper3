@@ -39,9 +39,9 @@ class Connectome_Config(HasTraits):
     cff_publisher = Str
     cff_license = Str
     
-    output_type = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff'],cols=3))
+    output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff'],cols=3))
 
-    traits_view = View(Item('output_type',style='custom'),
+    traits_view = View(Item('output_types',style='custom'),
                         Group('compute_curvature',label='Connectivity matrix', show_border=True),
                         Group('cff_creator','cff_email','cff_publisher','cff_license',
                         label='CFF creation metadata', show_border=True, visible_when='cff_enabled_trait==True'
@@ -61,6 +61,7 @@ class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','Nativefreesurfer'], usedefault=True)
     compute_curvature = traits.Bool(True, desc='Compute curvature', usedefault=True)
     additional_maps = traits.List(File,desc='Additional calculated maps (ADC, gFA, ...)')
+    output_types = traits.List(Str, desc='Output types of the connectivity matrices')
     
 class CMTK_cmatOutputSpec(TraitedSpec):
     endpoints_file = File()
@@ -81,7 +82,7 @@ class CMTK_cmat(BaseInterface):
         cmat(intrk=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
              parcellation_scheme=self.inputs.parcellation_scheme,
              compute_curvature=self.inputs.compute_curvature,
-             additional_maps=additional_maps)
+             additional_maps=additional_maps,output_types=self.inputs.output_types)
              
         return runtime
         
@@ -93,7 +94,7 @@ class CMTK_cmat(BaseInterface):
         outputs['filtered_fiberslabel_files'] = glob.glob(os.path.abspath('filtered_fiberslabel*'))
         outputs['final_fiberlabels_files'] = glob.glob(os.path.abspath('final_fiberlabels*'))
         outputs['streamline_final_files'] = glob.glob(os.path.abspath('streamline_final*'))
-        outputs['connectivity_matrices'] = glob.glob(os.path.abspath('connectome*gpickle'))
+        outputs['connectivity_matrices'] = glob.glob(os.path.abspath('connectome*'))
         
         return outputs
     
@@ -112,6 +113,7 @@ class Connectome(CMP_Stage):
         
         cmtk_cmat = pe.Node(interface=CMTK_cmat(),name="cmtk_cmat")
         cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
+        cmtk_cmat.inputs.output_types = self.config.output_types
 
         # Additional maps
         map_merge = pe.Node(interface=util.Merge(4),name="map_merge")
