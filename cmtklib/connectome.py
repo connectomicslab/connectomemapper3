@@ -10,6 +10,7 @@
 import nibabel
 import numpy as np
 import networkx as nx
+import scipy.io
 
 from util import mean_curvature, length
 from parcellation import get_parcellation
@@ -106,7 +107,7 @@ def save_fibers(oldhdr, oldfib, fname, indices):
     print("Writing final no orphan fibers: %s" % fname)
     nibabel.trackvis.write(fname, outstreams, hdrnew)
 
-def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additional_maps={}): 
+def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additional_maps={}, output_types=['gPickle']): 
     """ Create the connection matrix for each resolution using fibers and ROIs. """
               
     # create the endpoints for each fibers
@@ -145,7 +146,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
     
     #resolution = gconf.parcellation.keys()
 
-    r = 0
+    #r = 0
     for parkey, parval in resolutions.items():
         #if parval['number_of_regions'] != 83:
         #    continue
@@ -159,8 +160,12 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
         
         # Open the corresponding ROI
         print("Open the corresponding ROI")
-        roi_fname = roi_volumes[r]
-        r += 1
+        for vol in roi_volumes:
+            if parkey in vol:
+                roi_fname = vol
+                print roi_fname
+        #roi_fname = roi_volumes[r]
+        #r += 1
         roi       = nibabel.load(roi_fname)
         roiData   = roi.get_data()
       
@@ -291,7 +296,36 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
             G.add_edge(u,v, di)
 
         # storing network
-        nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
+        if 'gPickle' in output_types:
+            nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
+        if 'mat' in output_types:
+            # edges
+            size_edges = (parval['number_of_regions'],parval['number_of_regions'])
+            edge_keys = G.edges(data=True)[0][2].keys()
+            
+            edge_struct = {}
+            for key in edge_keys:
+                arr = np.zeros(size_edges,dtype=np.float)
+                for x,y,data in G.edges(data=True):
+                    arr[x-1,y-1] = data[key]
+                    arr[y-1,x-1] = data[key]
+                edge_struct[key] = arr
+                
+            # nodes
+            size_nodes = parval['number_of_regions']
+            node_keys = G.nodes(data=True)[0][1].keys()
+
+            node_struct = {}
+            for key in node_keys:
+                if key == 'dn_position':
+                    arr = np.zeros([size_nodes,3],dtype=np.float)
+                else:
+                    arr = np.zeros(size_nodes,dtype=np.object_)
+                for n,data in G.nodes(data=True):
+                    arr[n-1] = data[key]
+                node_struct[key] = arr
+                
+            scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
 
         print("Storing final fiber length array")
         fiberlabels_fname  = 'final_fiberslength_%s.npy' % str(parkey)
