@@ -118,6 +118,23 @@ def init_project(project_info, is_new_project):
     refresh_folder(project_info.base_directory, pipeline.input_folders)
     pipeline.config_file = project_info.config_file
     return pipeline
+    
+def update_last_processed(project_info, ordered_stage_list):
+    # last date
+    out_dirs = os.listdir(project_info.base_directory+'/'+'RESULTS')
+    for out in out_dirs:
+        if out != 'CMP':
+            if (project_info.last_date_processed == "Not yet processed" or 
+                out > project_info.last_date_processed):
+                project_info.last_date_processed = out
+                
+    # last stage
+    if os.path.exists(project_info.base_directory+'/'+project_info.process_type+'_pipeline'):
+        stage_dirs = os.listdir(project_info.base_directory+'/'+project_info.process_type+'_pipeline')
+        for stage in ordered_stage_list:
+            if stage+'_Stage' in stage_dirs:
+                project_info.last_stage_processsed = stage
+                
 
 class ProjectHandler(Handler):
     pipeline = Instance(HasTraits)
@@ -130,6 +147,7 @@ class ProjectHandler(Handler):
         if np_res and os.path.exists(new_project.base_directory):
             self.pipeline = init_project(new_project, True)
             if self.pipeline != None:
+                update_last_processed(new_project, self.pipeline.ordered_stage_list)
                 ui_info.ui.context["object"].project_info = new_project
                 ui_info.ui.context["object"].pipeline = self.pipeline
                 self.project_loaded = True
@@ -143,6 +161,7 @@ class ProjectHandler(Handler):
 #           self.project_loaded = init_project(loaded_project, ui_info.ui.context["object"].canvas, False)
             self.pipeline = init_project(loaded_project, False)
             if self.pipeline != None:
+                update_last_processed(loaded_project, self.pipeline.ordered_stage_list)
                 ui_info.ui.context["object"].project_info = loaded_project
                 ui_info.ui.context["object"].pipeline = self.pipeline
                 self.project_loaded = True
@@ -155,6 +174,7 @@ class ProjectHandler(Handler):
     def map_connectome(self, ui_info):
         save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
         self.pipeline.process()
+        update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline.ordered_stage_list)
         
     def map_custom(self, ui_info):
         cus_res = ui_info.ui.context["object"].project_info.stage_names = self.pipeline.ordered_stage_list
