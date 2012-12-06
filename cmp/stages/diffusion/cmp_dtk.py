@@ -95,13 +95,44 @@ def create_dtk_recon_flow(config):
         dtk_odfrecon.inputs.n_b0 = config.number_of_b0_volumes
         dtk_odfrecon.inputs.n_directions = int(config.dsi_number_of_directions)+1
         dtk_odfrecon.inputs.n_output_directions = config.number_of_output_directions
-        if config.imaging_model == 'DSI':
-            dtk_odfrecon.inputs.dsi = True
+        dtk_odfrecon.inputs.dsi = True
+        
         flow.connect([
                     (inputnode,dtk_odfrecon,[('diffusion_resampled','DWI')]),
                     (dtk_odfrecon,outputnode,[('DWI','DWI'),('B0','B0'),('ODF','ODF'),('max','max')])])
                     
+    if config.imaging_model == "HARDI":
+        prefix = "hardi"
+        dtk_hardimat = pe.Node(interface=dtk.HARDIMat(),name='dtk_hardimat')
+        dtk_hardimat.inputs.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),config.gradient_table+'.txt')
+        dtk_hardimat.inputs.oblique_correction = config.apply_gradient_orientation_correction
         
+        dtk_odfrecon = pe.Node(interface=dtk.ODFRecon(out_prefix=prefix),name='dtk_odfrecon')
+        dtk_odfrecon.inputs.n_b0 = config.number_of_b0_volumes
+        dtk_odfrecon.inputs.n_directions = int(config.number_of_directions)+1
+        dtk_odfrecon.inputs.n_output_directions = config.number_of_output_directions
+
+        flow.connect([
+                    (inputnode,dtk_hardimat,[('diffusion_resampled','reference_file')]),
+                    (dtk_hardimat,dtk_odfrecon,[('out_file','matrix')]),
+                    (inputnode,dtk_odfrecon,[('diffusion_resampled','DWI')]),
+                    (dtk_odfrecon,outputnode,[('DWI','DWI'),('B0','B0'),('ODF','ODF'),('max','max')])])
+                    
+                        
+    if config.imaging_model == "DTI":
+        prefix = "dti"
+        dtk_dtirecon = pe.Node(interface=dtk.DTIRecon(out_prefix=prefix),name='dtk_dtirecon')
+        dtk_dtirecon.inputs.b_value = config.maximum_b_value
+        dtk_dtirecon.inputs.gradient_matrix = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),config.gradient_table+'.txt')
+        dtk_dtirecon.inputs.multiple_b_values = config.multiple_high_b_values
+        dtk_dtirecon.inputs.n_averages = config.number_of_averages
+        dtk_dtirecon.inputs.number_of_b0 = config.number_of_b0_volumes
+        dtk_dtirecon.inputs.oblique_correction = config.apply_gradient_orientation_correction
+        
+        flow.connect([
+                    (inputnode,dtk_dtirecon,[('diffusion','DWI')]),
+                    (dtk_dtirecon,outputnode,[('DWI','DWI'),('B0','B0'),('V1','V1')])])
+    else:
         if 'gFA' in config.compute_additional_maps:
             dtb_gfa = pe.Node(interface=DTB_gfa(moment=2),name='dtb_gfa')
             flow.connect([
@@ -123,22 +154,5 @@ def create_dtk_recon_flow(config):
                         (inputnode,dtb_p0,[('diffusion','dwi_file')]),
                         (dtk_odfrecon,dtb_p0,[(('ODF',strip_suffix,prefix),'dsi_basepath')]),
                         (dtb_p0,outputnode,[('out_file','P0')])])
-                        
-    if config.imaging_model == "DTI":
-        prefix = "dti"
-        dtk_dtirecon = pe.Node(interface=dtk.DTIRecon(out_prefix=prefix),name='dtk_dtirecon')
-        dtk_dtirecon.inputs.b_value = config.maximum_b_value
-        dtk_dtirecon.inputs.gradient_matrix = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),config.gradient_table+'.txt')
-        dtk_dtirecon.inputs.multiple_b_values = config.multiple_high_b_values
-        dtk_dtirecon.inputs.n_averages = config.number_of_averages
-        dtk_dtirecon.inputs.number_of_b0 = config.number_of_b0_volumes
-        dtk_dtirecon.inputs.oblique_correction = config.apply_gradient_orientation_correction
-        
-        flow.connect([
-                    (inputnode,dtk_dtirecon,[('diffusion_resampled','DWI')]),
-                    (dtk_dtirecon,outputnode,[('DWI','DWI'),('B0','B0'),('V1','V1')])])
                     
-        
-
-
     return flow

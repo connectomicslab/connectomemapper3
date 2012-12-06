@@ -147,9 +147,13 @@ def create_dtb_tracking_flow(config):
         dtb_dtk2dir.inputs.diffusion_type = 'dsi'
         dtb_dtk2dir.inputs.dirlist = pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','odf_directions','181_vecs.dat'))
         prefix = 'dsi'
-    else:
+    if config.imaging_model == 'DTI':
         dtb_dtk2dir.inputs.diffusion_type = 'dti'
         prefix = 'dti'
+    if config.imaging_model == 'HARDI':
+        dtb_dtk2dir.inputs.diffusion_type = 'dsi'
+        dtb_dtk2dir.inputs.dirlist = pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','odf_directions','181_vecs.dat'))
+        prefix = 'hardi'
     if 'x' in config.flip_input:
         dtb_dtk2dir.inputs.invert_x = True
     if 'y' in config.flip_input:
