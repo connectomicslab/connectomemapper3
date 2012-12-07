@@ -24,7 +24,7 @@ import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec,\
-    traits, File, TraitedSpec, InputMultiPath, OutputMultiPath
+    traits, File, TraitedSpec, InputMultiPath, OutputMultiPath, isdefined
 
 from cmtklib.connectome import cmat
 
@@ -77,7 +77,10 @@ class CMTK_cmat(BaseInterface):
     output_spec = CMTK_cmatOutputSpec
     
     def _run_interface(self, runtime):
-        additional_maps = dict( (split_filename(add_map)[1],add_map) for add_map in self.inputs.additional_maps if add_map != '')
+        if isdefined(self.inputs.additional_maps):
+            additional_maps = dict( (split_filename(add_map)[1],add_map) for add_map in self.inputs.additional_maps if add_map != '')
+        else:
+            additional_maps = {}
 
         cmat(intrk=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
              parcellation_scheme=self.inputs.parcellation_scheme,
