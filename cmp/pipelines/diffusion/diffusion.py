@@ -10,15 +10,9 @@
 import os
 import datetime
 from cmp.pipelines.common import *
-try: 
-    from traits.api import *
-except ImportError: 
-    from enthought.traits.api import *
-try: 
-    from traitsui.api import *
-except ImportError: 
-    from enthought.traits.ui.api import *
-    
+from traits.api import *
+from traitsui.api import *
+
 from traitsui.wx.themed_button_editor import ThemedButtonEditor
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
@@ -27,12 +21,12 @@ from nipype.caching import Memory
 from pyface.api import ImageResource
 import shutil
 
-from cmp.stages.preprocessing.preprocessing import Preprocessing
-from cmp.stages.segmentation.segmentation import Segmentation
-from cmp.stages.parcellation.parcellation import Parcellation
-from cmp.stages.diffusion.diffusion import Diffusion
-from cmp.stages.registration.registration import Registration
-from cmp.stages.connectome.connectome import Connectome
+from cmp.stages.preprocessing.preprocessing import PreprocessingStage
+from cmp.stages.segmentation.segmentation import SegmentationStage
+from cmp.stages.parcellation.parcellation import ParcellationStage
+from cmp.stages.diffusion.diffusion import DiffusionStage
+from cmp.stages.registration.registration import RegistrationStage
+from cmp.stages.connectome.connectome import ConnectomeStage
 
 class Global_Configuration(HasTraits):
     process_type = Str('Diffusion')
@@ -50,12 +44,14 @@ class Check_Input_Notification(HasTraits):
                        kind='modal',
                        buttons=['OK'])
 
-class Pipeline(HasTraits):
-    base_directory = Str('')
+class DiffusionPipeline(Pipeline):
+    pipeline_name = Str("diffusion_pipeline")
     input_folders = ['DSI','DTI','HARDI','T1','T2']
-    stages = {'Preprocessing':Preprocessing(), 'Segmentation':Segmentation(), 
-            'Parcellation':Parcellation(), 'Diffusion':Diffusion(),
-            'Registration':Registration(), 'Connectome':Connectome()}
+    stages = {'Segmentation':SegmentationStage(), 
+            'Parcellation':ParcellationStage(),
+            'Registration':RegistrationStage(),
+            'Diffusion':DiffusionStage(),
+            'Connectome':ConnectomeStage()}
             
     ordered_stage_list = ['Segmentation','Parcellation','Registration','Diffusion','Connectome']
     
@@ -70,14 +66,14 @@ class Pipeline(HasTraits):
     
     config_file = Str
     
-    traits_view = View(VGroup(
+    pipeline_group = VGroup(
                         #HGroup(spring,Item('preprocessing',editor=ThemedButtonEditor(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('segmentation',editor=ThemedButtonEditor(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
                         HGroup(spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('registration',editor=ThemedButtonEditor(image=ImageResource('registration'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('diffusion',editor=ThemedButtonEditor(image=ImageResource('diffusion'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('connectome',editor=ThemedButtonEditor(image=ImageResource('connectome'),theme='@G')),spring,show_labels=False),
-                        )
+                        springy=True
                         )
                         
     def _preprocessing_fired(self, info):
@@ -98,15 +94,15 @@ class Pipeline(HasTraits):
     def _connectome_fired(self, info):
         self.stages['Connectome'].configure_traits()
         
-    def define_custom_mapping(self, stage_stop):
-        stage_stop_seen = False
+    def define_custom_mapping(self, custom_stages):
+        # start by disabling all stages
         for stage in self.ordered_stage_list:
-            if stage_stop_seen:
-                self.stages[stage].enabled = False
-            if stage == stage_stop:
-                stage_stop_seen = True
+            self.stages[stage].enabled = False
+        # enable only selected ones
+        for stage in custom_stages:
+            print 'Enable stage : %s' % stage
+            self.stages[stage].enabled = True
 
-    
     def check_input(self, gui=True):
         print '**** Check Inputs ****'
         diffusion_available = False
@@ -173,6 +169,8 @@ class Pipeline(HasTraits):
             self.stages['Registration'].config.imaging_model = imaging_model
             self.stages['Diffusion'].config.imaging_model = imaging_model
         
+        self.fill_stages_outputs()
+        
         return valid_inputs
 
     def process(self):
@@ -180,9 +178,11 @@ class Pipeline(HasTraits):
         now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
         
         # Initialization
+        if os.path.exists(os.path.join(self.base_directory,"LOG","pypeline.log")):
+            os.unlink(os.path.join(self.base_directory,"LOG","pypeline.log"))
         config.update_config({'logging': {'log_directory': os.path.join(self.base_directory,"LOG"),
                                   'log_to_file': True},
-                              'exectution': {'use_relative_paths': True}
+                              'execution': {}
                               })
         logging.update_logging(config)
         flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(self.base_directory,'NIPYPE'))
@@ -202,53 +202,53 @@ class Pipeline(HasTraits):
         if self.stages['Segmentation'].enabled:
             if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
                 self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory,'FREESURFER')
-            seg_flow = self.stages['Segmentation'].create_workflow()
+            seg_flow = self.create_stage_flow("Segmentation")
             flow.connect([(datasource,seg_flow, [('T1','inputnode.T1')])])
         
         if self.stages['Parcellation'].enabled:
-            parc_flow = self.stages['Parcellation'].create_workflow()
+            parc_flow = self.create_stage_flow("Parcellation")
             flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
                                                 ('outputnode.subject_id','inputnode.subject_id')]),
-                          (parc_flow,sinker, [('outputnode.aseg_file','CMP.fs_output.HR.@aseg'),('outputnode.wm_mask_file','CMP.fs_output.HR.@wm'),
-                                       ('outputnode.cc_unknown_file','CMP.fs_output.HR.@unknown'),('outputnode.ribbon_file','CMP.fs_output.HR.@ribbon'),
-                                       ('outputnode.roi_files','CMP.fs_output.HR.scales.@files'),('outputnode.roi_volumes','CMP.fs_output.HR.scales.@volumes')])
                         ])
                                                 
         if self.stages['Registration'].enabled:
-            reg_flow = self.stages['Registration'].create_workflow()
+            reg_flow = self.create_stage_flow("Registration")
             flow.connect([
-                          (datasource,reg_flow, [('diffusion','inputnode.diffusion'),('T1','inputnode.T1'),('T2','inputnode.T2')]),
+                          (datasource,reg_flow, [('diffusion','inputnode.diffusion'),('T1','inputnode.T1'),('T2','inputnode.T2')])
+                          ])
+            if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
+                flow.connect([
                           (seg_flow,reg_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
                                                 ('outputnode.subject_id','inputnode.subject_id')]),
                           ])
         
         if self.stages['Diffusion'].enabled:
-            diff_flow = self.stages['Diffusion'].create_workflow()
+            diff_flow = self.create_stage_flow("Diffusion")
             flow.connect([
                         (datasource,diff_flow, [('diffusion','inputnode.diffusion')]),
                         (parc_flow,diff_flow, [('outputnode.wm_mask_file','inputnode.wm_mask')]),
                         (reg_flow,diff_flow, [('outputnode.T1-TO-B0_mat','inputnode.T1-TO-B0_mat'),('outputnode.diffusion_b0_resampled','inputnode.diffusion_b0_resampled')]),
-                        (diff_flow,sinker, [('outputnode.gFA','CMP.scalars.@gfa'),('outputnode.skewness','CMP.scalars.@skewness'),
-                                       ('outputnode.kurtosis','CMP.scalars.@kurtosis'),('outputnode.P0','CMP.scalars.@P0')])
                         ])
                         
         if self.stages['Connectome'].enabled:
-            con_flow = self.stages['Connectome'].create_workflow()
+            con_flow = self.create_stage_flow("Connectome")
             flow.connect([
                         (parc_flow,con_flow, [('outputnode.roi_volumes','inputnode.roi_volumes'),('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
                         (reg_flow,con_flow, [('outputnode.T1-TO-B0_mat','inputnode.T1-TO-B0_mat'),('outputnode.diffusion_b0_resampled','inputnode.diffusion_b0_resampled')]),
                         (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
                                               ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
                                               ('outputnode.P0','inputnode.P0')]),
-                        (con_flow,sinker, [('outputnode.endpoints_file','CMP.fibers.@endpoints_file'),('outputnode.endpoints_mm_file','CMP.fibers.@endpoints_mm_file'),
-                             ('outputnode.final_fiberslength_files','CMP.fibers.@final_fiberslength_files'),('outputnode.filtered_fiberslabel_files','CMP.fibers.@filtered_fiberslabel_files'),
-                             ('outputnode.final_fiberlabels_files','CMP.fibers.@final_fiberlabels_files'),('outputnode.streamline_final_files','CMP.fibers.@streamline_final_files'),
-                             ('outputnode.connectivity_matrices',now+'.connectivity_matrices')])
+                        (con_flow,sinker, [('outputnode.connectivity_matrices',now+'.connectivity_matrices')])
                         ])
         
         iflogger.info("**** Processing ****")
-        #flow.run(plugin='MultiProc', plugin_args={'n_procs' : 4}) // for multicore processing
-        flow.run()
+        
+        if(self.number_of_cores != 1):
+            flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
+        else:
+            flow.run()
+        
+        self.fill_stages_outputs()
         
         # copy .ini and log file
         outdir = os.path.join(self.base_directory,"RESULTS",now)
