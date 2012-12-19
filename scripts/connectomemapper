@@ -14,7 +14,7 @@ except ImportError:
 import cmp.gui
 import cmp.project
 from cmp.info import __version__
-from cmp.stages.diffusion.cmp_dtb import DTB_gfa
+from cmp.stages.diffusion.reconstruction import DTB_gfa
 
 def info():
     print "\nconnectomemapper " + __version__
