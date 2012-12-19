@@ -1,0 +1,14 @@
+Release 2.0.1 (Dec 19, 2012)
+============================
+* ENH: Added outputs inspectors
+* ENH: Removed CMP folder of RESULTS to avoid file duplication
+* ENH: Merged streamlining and filtering to reduce temp files
+* ENH: Removed unnecessary final_scale*.trks (only one needed)
+* ENH: Added multicore setting
+* ENH: Added processing status window and thread
+* FIX: Reformat of the class names
+* FIX: Removed dependence testing to enthoughts.traits (not working)
+
+Release 2.0.0 (Dec 07, 2012)
+============================
+* Initial release of the new Connectome Mapper
