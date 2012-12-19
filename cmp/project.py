@@ -105,7 +105,7 @@ def init_project(project_info, is_new_project):
     pipeline = None
     
     if project_info.process_type == 'Diffusion':
-        pipeline = diffusion_pipeline.Pipeline(base_directory=project_info.base_directory)
+        pipeline = diffusion_pipeline.DiffusionPipeline(project_info)
 
     if is_new_project and pipeline!= None:
         project_info.config_file = os.path.join(project_info.base_directory,'config.ini')
@@ -173,13 +173,14 @@ class ProjectHandler(Handler):
 
     def map_connectome(self, ui_info):
         save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
-        self.pipeline.process()
+        self.pipeline.launch_process()
+        self.pipeline.launch_progress_window()
         update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline.ordered_stage_list)
         
     def map_custom(self, ui_info):
         cus_res = ui_info.ui.context["object"].project_info.stage_names = self.pipeline.ordered_stage_list
         cus_res = ui_info.ui.context["object"].project_info.configure_traits(view='custom_map_view')
         if cus_res:
-            self.pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.custom_map_stop)
+            self.pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.custom_map_stages)
 
 
