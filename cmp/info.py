@@ -2,7 +2,7 @@
 
 _version_major = 2
 _version_minor = 0
-_version_micro = 0
+_version_micro = 1
 _version_extra = ''
 
 __version__ = "%s.%s.%s%s" % (_version_major,
