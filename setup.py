@@ -23,7 +23,7 @@ package_data = {'cmp':
                 ],
                 'cmtklib':
                 ['data/parcellation/lausanne2008/*/*.*',
-                'data/parcellation/freesurferaparc/*/*.*',
+                'data/parcellation/nativefreesurfer/*/*.*',
                 'data/colortable_and_gcs/*.*',
                 'data/colortable_and_gcs/my_atlas_gcs/*.*',
                 'data/diffusion/odf_directions/*.*',
