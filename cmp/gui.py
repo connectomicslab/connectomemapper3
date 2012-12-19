@@ -26,7 +26,7 @@ class CMP_Project_Info(HasTraits):
     last_date_processed = Str('Not yet processed')
     last_stage_processed = Str('Not yet processed')
     stage_names = List
-    custom_map_stop = Str
+    custom_map_stages = List
 
     create_view = View( Item('process_type',style='custom'),
                         'base_directory',
@@ -41,27 +41,31 @@ class CMP_Project_Info(HasTraits):
                         width=400,
                         buttons=['OK','Cancel'])
                         
-    custom_map_view = View(Item('custom_map_stop',editor=EnumEditor(name='stage_names')),
-                        title='Select until which stage of the pipeline to process.',
+    custom_map_view = View(Item('custom_map_stages',editor=CheckListEditor(name='stage_names'),style='custom',show_label=False),
+                        title='Select which stages to process.',
                         kind='modal',
                         width=400,
                         buttons=['OK','Cancel'])
                         
 
-    traits_view = View(Group(
-                            Group(
-                                Item('base_directory',enabled_when='1>2',show_label=False),
-                                label='Base directory',
-                            ),
-                            Group(
-                                Item('process_type',style='readonly'),
-                                Item('last_date_processed',style='readonly'),
-                                Item('last_stage_processed',style='readonly'),
-                                label='Last processing'
-                            ),
-                        ),
-                        #width=200,
-                        )
+#    traits_view = View(Group(
+#                            Group(
+#                                Item('base_directory',enabled_when='1>2',show_label=False),
+#                                label='Base directory',
+#                            ),
+#                            Group(
+#                                Item('process_type',style='readonly'),
+#                                Item('last_date_processed',style='readonly'),
+#                                Item('last_stage_processed',style='readonly'),
+#                                label='Last processing'
+#                            ),
+#                            Group(
+#                                Item('processing_status',show_label=False),
+#                                label='Processing status'
+#                            ),
+#                        ),
+#                        #width=200,
+#                        )
 
 
 ## Main window class of the ConnectomeMapper_Pipeline
@@ -77,8 +81,8 @@ class CMP_MainWindow(HasTraits):
     map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
 
     traits_view = View(HGroup(
-                            Item('pipeline',style='custom',enabled_when='handler.inputs_checked==True',show_label=False,width=400,height=600),
-                            Item('project_info',style='custom',show_label=False,width=400),
+                            Item('pipeline',style='custom',enabled_when='handler.inputs_checked==True',show_label=False,width=800,height=600),
+#                            Item('project_info',style='custom',show_label=False,width=400),
                             ),
                        title='Connectome Mapper',
                        menubar=MenuBar(
