@@ -146,7 +146,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
     
     #resolution = gconf.parcellation.keys()
 
-    #r = 0
+    streamline_wrote = False
     for parkey, parval in resolutions.items():
         #if parval['number_of_regions'] != 83:
         #    continue
@@ -326,6 +326,20 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
                 node_struct[node_key] = node_arr
                 
             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
+        if 'graphml' in output_types:
+            g2 = nx.Graph()
+            for u_gml,v_gml,d_gml in G.edges_iter(data=True):
+                g2.add_edge(u_gml,v_gml,d_gml)
+            for u_gml,d_gml in G.nodes(data=True):
+                g2.add_node(u_gml,{'dn_correspondence_id':d_gml['dn_correspondence_id'],
+                               'dn_fsname':d_gml['dn_fsname'],
+                               'dn_hemisphere':d_gml['dn_hemisphere'],
+                               'dn_name':d_gml['dn_name'],
+                               'dn_position_x':float(d_gml['dn_position'][0]),
+                               'dn_position_y':float(d_gml['dn_position'][1]),
+                               'dn_position_z':float(d_gml['dn_position'][2]),
+                               'dn_region':d_gml['dn_region']})
+            nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
         print("Storing final fiber length array")
         fiberlabels_fname  = 'final_fiberslength_%s.npy' % str(parkey)
@@ -339,9 +353,10 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
         fiberlabels_noorphans_fname  = 'final_fiberlabels_%s.npy' % str(parkey)
         np.save(fiberlabels_noorphans_fname, final_fiberlabels_array)
 
-        print("Filtering tractography - keeping only no orphan fibers")
-        finalfibers_fname = 'streamline_final_%s.trk' % str(parkey)
-        save_fibers(hdr, fib, finalfibers_fname, final_fibers_idx)
+        if not streamline_wrote:
+            print("Filtering tractography - keeping only no orphan fibers")
+            finalfibers_fname = 'streamline_final.trk'
+            save_fibers(hdr, fib, finalfibers_fname, final_fibers_idx)
 
     print("Done.")
     print("========================")
