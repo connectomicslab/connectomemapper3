@@ -8,69 +8,36 @@
 """ 
 
 # Libraries imports
-try: 
-    from traits.api import *
-except ImportError: 
-    from enthought.traits.api import *
-try: 
-    from traitsui.api import *
-except ImportError: 
-    from enthought.traits.ui.api import *
+from traits.api import *
+from traitsui.api import *
+import subprocess
 
 ##  Stage master class, will be inherited by the various stage subclasses. Inherits from HasTraits.
 #
-class CMP_Stage(HasTraits):
-    output_options = ['Stage not yet run']
-    view_output_choice = Enum(values='output_options')
-    view_output = Button('View')
-    outputs = Dict
-    config = Instance(HasTraits)
-    description = Str('No description')
+class Stage(HasTraits):
+    inspect_outputs = ['Outputs not available']
+    inspect_outputs_enum = Enum(values='inspect_outputs')
+    inspect_outputs_dict = Dict
+    inspect_output_button = Button('View')
     enabled = True
-    name = ''
+    config = Instance(HasTraits)
 
     traits_view = View(Group(
                             Item('name',editor=TitleEditor(),show_label=False),
-#                           Group(
-#                               Item('description',style='custom',enabled_when='1>2',show_label=False),
-#                               label = 'Description', show_border=True
-#                               ),
                             Group(
                                 Item('config',style='custom',show_label=False,visible_when='enabled=True'),
                                 label = 'Configuration', show_border=True
                                 ),
                             Group(
-                                Item('view_output_choice'),Item('view_output',enabled_when='len(outputs)>0'),
+                                Item('inspect_outputs_enum',show_label=False),Item('inspect_output_button',enabled_when='inspect_outputs_enum!="Outputs not available"',show_label=False),
                                 label = 'View outputs', show_border=True
                                 )
                             ),
                             spring, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
-    def _view_output_fired(self,info):
-        choice = self.outputs[self.view_output_choice]
-        if isinstance(choice,list):
-            for c in choice:
-                _,_,ext = split_filename(c)
-                if ext == '.nii' or ext == '.nii.gz':
-                    viewer_args = ['fslview',c]
-                if ext == '.trk':
-                    viewer_args = ['trackvis',c]
-                if ext == '.bmp' or ext == '.png' or ext == '.jpg':
-                    viewer_args = ['eog',c]
-                if ext == '.mgz':
-                    viewer_args = ['tkmedit -f',c]
-                subprocess.Popen(viewer_args)
-        else:
-            _,_,ext = split_filename(choice)
-            if ext == '.nii' or ext == '.nii.gz':
-                viewer_args = ['fslview',choice]
-            if ext == '.trk':
-                viewer_args = ['trackvis',choice]
-            if ext == '.bmp' or ext == '.png' or ext == '.jpg':
-                viewer_args = ['eog',choice]
-            if ext == '.mgz':
-                viewer_args = ['tkmedit -f',choice]
-            subprocess.Popen(viewer_args)
+    def _inspect_output_button_fired(self,info):
+        subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])
+
 
 
