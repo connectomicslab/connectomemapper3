@@ -8,17 +8,13 @@
 """ 
 
 # General imports
-try: 
-    from traits.api import *
-except ImportError: 
-    from enthought.traits.api import *
-try: 
-    from traitsui.api import *
-except ImportError: 
-    from enthought.traits.ui.api import *
+from traits.api import *
+from traitsui.api import *
+import os
+import pickle
+import gzip
 
 # Nipype imports
-import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
@@ -26,9 +22,9 @@ from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
     traits, File, TraitedSpec
 
 # Own imports
-from cmp.stages.common import CMP_Stage
+from cmp.stages.common import Stage
 
-class Registration_Config(HasTraits):
+class RegistrationConfig(HasTraits):
     # Registration selection
     registration_mode = Enum('Linear (FSL)','Nonlinear (FSL)','BBregister (FS)')
     imaging_model = Str
@@ -79,25 +75,21 @@ class Tkregsiter2(CommandLine):
         outputs["fslregout_file"]  = os.path.abspath(self.inputs.fslregout_out)
         return outputs
 
+class RegistrationStage(Stage):
+    name = 'registration_stage'
+    config = RegistrationConfig()
+    inputs = ["T1","diffusion","T2","subjects_dir","subject_id"]
+    outputs = ["T1-TO-B0","T1-TO-B0_mat","diffusion_b0_resampled"]
 
-class Registration(CMP_Stage):
-    name = 'Registration'
-    config = Registration_Config()
-
-    def create_workflow(self):
-        flow = pe.Workflow(name="Registration_Stage")
-
-        inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1","diffusion","T2","subjects_dir","subject_id"]),name="inputnode")
-        outputnode = pe.Node(interface=util.IdentityInterface(fields=["T1-TO-B0","T1-TO-B0_mat","diffusion_b0_resampled"]),name="outputnode")
-
+    def create_workflow(self, flow, inputnode, outputnode):
         # Extract B0 and resample it to 1x1x1mm3
-        fs_mriconvert = pe.Node(interface=fs.MRIConvert(frame=0,out_file="diffusion_first.nii.gz",vox_size=(1,1,1)),name="fs_mriconvert")
+        fs_mriconvert = pe.Node(interface=fs.MRIConvert(frame=0,out_file="diffusion_first.nii.gz",vox_size=(1,1,1)),name="diffusion_resample")
         
         flow.connect([(inputnode, fs_mriconvert,[('diffusion','in_file')]),
                       (fs_mriconvert, outputnode, [('out_file','diffusion_b0_resampled')])])
         
         if self.config.registration_mode == 'Linear (FSL)':
-            fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-B0.nii.gz',out_matrix_file='T1-TO-B0.mat'),name="fsl_flirt")
+            fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-B0.nii.gz',out_matrix_file='T1-TO-B0.mat'),name="registration")
             fsl_flirt.inputs.uses_qform = self.config.uses_qform
             fsl_flirt.inputs.dof = self.config.dof
             fsl_flirt.inputs.cost = self.config.cost
@@ -110,7 +102,7 @@ class Registration(CMP_Stage):
                         (fsl_flirt, outputnode, [('out_file','T1-TO-B0'),('out_matrix_file','T1-TO-B0_mat')]),
                         ])
         if self.config.registration_mode == 'BBregister (FS)':
-            fs_bbregister = pe.Node(interface=fs.BBRegister(out_fsl_file="b0-TO-orig.mat"),name="fs_bbregister")
+            fs_bbregister = pe.Node(interface=fs.BBRegister(out_fsl_file="b0-TO-orig.mat"),name="registration")
             fs_bbregister.inputs.init = self.config.init
             fs_bbregister.inputs.contrast_type = self.config.contrast_type
             
@@ -139,7 +131,17 @@ class Registration(CMP_Stage):
                         (fsl_applyxfm, outputnode [('out_file','T1-TO-B0')]),
                         (fsl_concatxfm, outputnode, [('out_file','T1-TO-B0_mat')]),
                         ])
-       
-       
-        return flow
+
+    def define_inspect_outputs(self):
+        resamp_results_path = os.path.join(self.stage_dir,"diffusion_resample","result_diffusion_resample.pklz")
+        reg_results_path = os.path.join(self.stage_dir,"registration","result_registration.pklz")
+        if(os.path.exists(resamp_results_path) and os.path.exists(reg_results_path)):
+            resamp_results = pickle.load(gzip.open(resamp_results_path))
+            reg_results = pickle.load(gzip.open(reg_results_path))
+            self.inspect_outputs_dict['B0/T1-to-B0'] = ['fslview',resamp_results.outputs.out_file,reg_results.outputs.out_file]
+            self.inspect_outputs = self.inspect_outputs_dict.keys()
+
+    def has_run(self):
+        return os.path.exists(os.path.join(self.stage_dir,"registration","result_registration.pklz"))
+
 

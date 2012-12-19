@@ -9,24 +9,21 @@
 
 # General imports
 import os
-try: 
-    from traits.api import *
-except ImportError: 
-    from enthought.traits.api import *
-try: 
-    from traitsui.api import *
-except ImportError: 
-    from enthought.traits.ui.api import *
+from traits.api import *
+from traitsui.api import *
+import pickle
+import gzip
 
 # Nipype imports
 import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
 import nipype.interfaces.freesurfer as fs
+from nipype.interfaces.io import FreeSurferSource
+import nipype.interfaces.utility as util
 
 # Own imports
-from cmp.stages.common import CMP_Stage
+from cmp.stages.common import Stage
 
-class Segmentation_Config(HasTraits):
+class SegmentationConfig(HasTraits):
     use_existing_freesurfer_data = Bool(False)
     freesurfer_subjects_dir = Directory
     freesurfer_subject_id_trait = List
@@ -41,25 +38,21 @@ class Segmentation_Config(HasTraits):
         dirnames = [name for name in os.listdir(self.freesurfer_subjects_dir) if
              os.path.isdir(os.path.join(self.freesurfer_subjects_dir, name))]
         self.freesurfer_subject_id_trait = dirnames
-        
 
-class Segmentation(CMP_Stage):
+class SegmentationStage(Stage):
     # General and UI members
-    name = 'Segmentation'
-    config = Segmentation_Config()
+    name = 'segmentation_stage'
+    config = SegmentationConfig()
+    inputs = ["T1"]
+    outputs = ["subjects_dir","subject_id"]
 
-    
-    def create_workflow(self):
-        flow = pe.Workflow(name="Segmentation_stage")
-        
+    def create_workflow(self, flow, inputnode, outputnode):
         if self.config.use_existing_freesurfer_data == False:
-            inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
-            
             # Converting to .mgz format
-            fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="T1.mgz"),name="fs_mriconvert")
+            fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="T1.mgz"),name="mgz_convert")
             
             # ReconAll => named outputnode as we don't want to select a specific output....
-            fs_reconall = pe.Node(interface=fs.ReconAll(),name="outputnode")
+            fs_reconall = pe.Node(interface=fs.ReconAll(),name="reconall")
             fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
             fs_reconall.inputs.args = self.config.freesurfer_args
             if self.config.use_existing_freesurfer_data == True:
@@ -68,15 +61,24 @@ class Segmentation(CMP_Stage):
             flow.connect([
                         (inputnode,fs_mriconvert,[('T1','in_file')]),
                         (fs_mriconvert,fs_reconall,[('out_file','T1_files')]),
+                        (fs_reconall,outputnode,[('subjects_dir','subjects_dir'),('subject_id','subject_id')]),
                         ])
             
         else:
-            inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
-            outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id"]),name="outputnode")
             outputnode.inputs.subjects_dir = self.config.freesurfer_subjects_dir
             outputnode.inputs.subject_id = self.config.freesurfer_subject_id
-            flow.add_nodes([inputnode,outputnode])
-        
-        return flow
 
-	
+    def define_inspect_outputs(self):
+        reconall_results_path = os.path.join(self.stage_dir,"reconall","result_reconall.pklz")
+        if(os.path.exists(reconall_results_path)):
+            reconall_results = pickle.load(gzip.open(reconall_results_path))
+            fs = FreeSurferSource(subjects_dir=reconall_results.outputs.subjects_dir,
+                                  subject_id=reconall_results.outputs.subject_id)
+            res = fs.run()
+            self.inspect_outputs_dict['brainmask/T1'] = ['tkmedit','-f',res.outputs.brainmask,'-aux',res.outputs.T1,'-surfs']
+            self.inspect_outputs_dict['norm/aseg'] = ['tkmedit','-f',res.outputs.norm,'-segmentation',res.outputs.aseg,os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
+            self.inspect_outputs = self.inspect_outputs_dict.keys()
+            
+    def has_run(self):
+        return os.path.exists(os.path.join(self.stage_dir,"reconall","result_reconall.pklz"))
+

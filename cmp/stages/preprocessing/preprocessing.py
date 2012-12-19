@@ -7,21 +7,18 @@
 """ CMP preprocessing Stage (not used yet!)
 """ 
 
-try: 
-    from traits.api import *
-except ImportError: 
-    from enthought.traits.api import *
-try: 
-    from traitsui.api import *
-except ImportError: 
-    from enthought.traits.ui.api import *
-from cmp.stages.common import CMP_Stage
+from traits.api import *
+from traitsui.api import *
 
-class Preprocessing_Config(HasTraits):
+from cmp.stages.common import Stage
+
+class PreprocessingConfig(HasTraits):
     description = Str('description')
 
-class Preprocessing(CMP_Stage):
+class PreprocessingStage(Stage):
     # General and UI members
-    name = 'Preprocessing'
-    config = Preprocessing_Config()
+    name = 'preprocessing_stage'
+    config = PreprocessingConfig()
+    inputs = []
+    outputs = []
 

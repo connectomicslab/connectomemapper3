@@ -8,32 +8,20 @@
 """ 
 
 # General imports
-try: 
-    from traits.api import *
-except ImportError: 
-    from enthought.traits.api import *
-try: 
-    from traitsui.api import *
-except ImportError: 
-    from enthought.traits.ui.api import *
+from traits.api import *
+from traitsui.api import *
+import gzip
 
 # Nipype imports
-import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.diffusion_toolkit as dtk
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec,\
-    traits, File, TraitedSpec, isdefined
-from nipype.utils.filemanip import split_filename
 
 # Own imports
-from cmp.stages.common import CMP_Stage
-from cmp_dtk import *
-from cmp_dtb import *
-from cmtklib.diffusion import filter_fibers
+from cmp.stages.common import Stage
+from reconstruction import *
+from tracking import *
 
-
-class Diffusion_Config(HasTraits):
+class DiffusionConfig(HasTraits):
     imaging_model = Str
     resampling = Tuple(2,2,2)
     reconstruction = Enum('DTK',['DTK','Camino'])
@@ -62,61 +50,22 @@ class Diffusion_Config(HasTraits):
         self.dtk_tracking_config.imaging_model = new
         self.dtb_tracking_config.imaging_model = new
         
-class CMTK_filterfibersInputSpec(BaseInterfaceInputSpec):
-    track_file = File(desc='Input trk file', mandatory=True, exists=True)
-    fiber_cutoff_lower = traits.Int(20, desc='Lower length threshold of the fibers', usedefault=True)
-    fiber_cutoff_upper = traits.Int(500, desc='Upper length threshold of the fibers', usedefault=True)
-    filtered_track_file = File(desc='Filtered trk file')
-    
-class CMTK_filterfibersOutputSpec(TraitedSpec):
-    filtered_track_file= File(desc='Filtered trk file', exists=True)
-    lengths_file= File(desc='Streamline lengths file', exists=True)
-    
-class CMTK_filterfibers(BaseInterface):
-    input_spec = CMTK_filterfibersInputSpec
-    output_spec = CMTK_filterfibersOutputSpec
-    
-    def _run_interface(self, runtime):
-        if isdefined(self.inputs.filtered_track_file):
-            filter_fibers(intrk=self.inputs.track_file, outtrk=self.filtered_track_file,
-                          fiber_cutoff_lower=self.inputs.fiber_cutoff_lower,
-                          fiber_cutoff_upper=self.inputs.fiber_cutoff_upper)
-        else:
-            filter_fibers(intrk=self.inputs.track_file,
-                          fiber_cutoff_lower=self.inputs.fiber_cutoff_lower,
-                          fiber_cutoff_upper=self.inputs.fiber_cutoff_upper)
-        return runtime
-        
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        if not isdefined(self.inputs.filtered_track_file):
-            _, base, ext = split_filename(self.inputs.track_file)
-            outputs["filtered_track_file"] = os.path.abspath(base + '_cutfiltered' + ext)
-        else:
-            outputs["filtered_track_file"] = os.path.abspath(self.inputs.filtered_track_file)
-        outputs["lengths_file"] = os.path.abspath("lengths.npy")
-        return outputs
-
-
 def strip_suffix(file_input, prefix):
     import os
     from nipype.utils.filemanip import split_filename
     path, _, _ = split_filename(file_input)
     return os.path.join(path, prefix+'_')
 
-class Diffusion(CMP_Stage):
-    name = 'Diffusion'
-    config = Diffusion_Config()
+class DiffusionStage(Stage):
+    name = 'diffusion_stage'
+    config = DiffusionConfig()
+    inputs = ["diffusion","wm_mask","T1-TO-B0_mat","diffusion_b0_resampled"]
+    outputs = ["track_file","gFA","skewness","kurtosis","P0"]
 
-    def create_workflow(self):
-        flow = pe.Workflow(name="Diffusion_stage")
 
-        # inputs and outputs
-        inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","wm_mask","T1-TO-B0_mat","diffusion_b0_resampled"]),name="inputnode")
-        outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file","lengths_file","gFA","skewness","kurtosis","P0"]),name="outputnode")
-
+    def create_workflow(self, flow, inputnode, outputnode):
         # resampling diffusion image and setting output type to short
-        fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_datatype='short',out_file='diffusion_resampled.nii'),name="fs_mriconvert")
+        fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_datatype='short',out_file='diffusion_resampled.nii'),name="diffusion_resample")
         fs_mriconvert.inputs.vox_size = self.config.resampling
         flow.connect([(inputnode,fs_mriconvert,[('diffusion','in_file')])])
         
@@ -136,16 +85,20 @@ class Diffusion(CMP_Stage):
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
                         ])
                         
-        # Fibers spline and length filtering
-        dtk_splinefilter = pe.Node(interface=dtk.SplineFilter(step_length=1), name="dtk_splinefilter")
-        cmtk_filterfibers = pe.Node(interface=CMTK_filterfibers(), name="cmtk_filterfibers")
+
         flow.connect([
-                    (track_flow,dtk_splinefilter, [('outputnode.track_file','track_file')]),
-                    (dtk_splinefilter,cmtk_filterfibers, [('smoothed_track_file','track_file')]),
                     (recon_flow,outputnode, [("outputnode.gFA","gFA"),("outputnode.skewness","skewness"),
                                              ("outputnode.kurtosis","kurtosis"),("outputnode.P0","P0")]),
-                    (cmtk_filterfibers,outputnode, [('filtered_track_file','track_file'),('lengths_file','lengths_file')])
+                    (track_flow,outputnode, [('outputnode.track_file','track_file')])
                     ])
-        
-        return flow
+
+    def define_inspect_outputs(self):
+        diff_results_path = os.path.join(self.stage_dir,"tracking","dtb_streamline","result_fiber_tracking.pklz")
+        if(os.path.exists(diff_results_path)):
+            diff_results = pickle.load(gzip.open(diff_results_path))
+            self.inspect_outputs_dict['streamline'] = ['trackvis',diff_results.outputs.track_file]
+            self.inspect_outputs = self.inspect_outputs_dict.keys()
+            
+    def has_run(self):
+        return os.path.exists(os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz"))
 
