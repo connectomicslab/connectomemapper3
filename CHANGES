@@ -6,6 +6,7 @@ Release 2.0.1 (Dec 19, 2012)
 * ENH: Removed unnecessary final_scale*.trks (only one needed)
 * ENH: Added multicore setting
 * ENH: Added processing status window and thread
+* ENH: New output options: graphml and cff
 * FIX: Reformat of the class names
 * FIX: Removed dependence testing to enthoughts.traits (not working)
 
