@@ -195,7 +195,7 @@ def create_dtb_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask","T1-TO-B0_mat","diffusion_b0_resampled"]),name="inputnode")
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_registered"]),name="inputnode")
     
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
@@ -219,10 +219,6 @@ def create_dtb_tracking_flow(config):
         dtb_dtk2dir.inputs.invert_y = True
     if 'z' in config.flip_input:
         dtb_dtk2dir.inputs.invert_z = True
-        
-        
-    # Apply transformation to WM-mask
-    fsl_applyxfm = pe.Node(interface=fsl.ApplyXfm(apply_xfm=True,interp="nearestneighbour"), name="fsl_applyxfm")
    
     fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii', vox_size=(1,1,1), 
                             out_datatype='uchar', out_file='fsmask_1mm.nii'), name="fs_mriconvert")
@@ -235,8 +231,7 @@ def create_dtb_tracking_flow(config):
     # Workflow connections
     flow.connect([
                  (inputnode,dtb_dtk2dir, [(('DWI',strip_suffix,prefix),'prefix')]),
-                 (inputnode,fsl_applyxfm, [('wm_mask','in_file'),('diffusion_b0_resampled','reference'),('T1-TO-B0_mat','in_matrix_file')]),
-                 (fsl_applyxfm,fs_mriconvert, [('out_file','in_file')]),
+                 (inputnode,fs_mriconvert, [('wm_mask_registered','in_file')]),
                  (dtb_dtk2dir,streamline_filter, [('out_file','dir_file')]),
                  (fs_mriconvert,streamline_filter, [('out_file','wm_mask')]),
                  (streamline_filter,outputnode, [('out_file','track_file')]),

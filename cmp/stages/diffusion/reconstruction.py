@@ -12,6 +12,7 @@ import re
 import os
 from traits.api import *
 from traitsui.api import *
+import pkg_resources
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
@@ -19,13 +20,16 @@ import nipype.interfaces.diffusion_toolkit as dtk
 from nipype.utils.filemanip import split_filename
 
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
-    traits, File, TraitedSpec, BaseInterface, BaseInterfaceInputSpec
-
+    traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec
+import nipype.interfaces.base as nibase
+    
 class DTK_recon_config(HasTraits):
     imaging_model = Str
     maximum_b_value = Int(1000)
-    gradient_table = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
-                          'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256'])
+    gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
+                          'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
+    gradient_table = Str
+    custom_gradient_table = File
     dsi_number_of_directions = Enum(514,[514,257,124])
     number_of_directions = Int(514)
     number_of_output_directions = Int(181)
@@ -39,9 +43,10 @@ class DTK_recon_config(HasTraits):
                                   editor=CheckListEditor(values=['gFA','skewness','kurtosis','P0'],cols=4))
     
     traits_view = View(Item('maximum_b_value',visible_when='imaging_model=="DTI"'),
-                       Item('gradient_table',visible_when='imaging_model!="DSI"'),
+                       Item('gradient_table_file',visible_when='imaging_model!="DSI"'),
                        Item('dsi_number_of_directions',visible_when='imaging_model=="DSI"'),
-                       Item('number_of_directions',visible_when='imaging_model!="DSI"',style='readonly'),
+                       Item('number_of_directions',visible_when='imaging_model!="DSI"',enabled_when='gradient_table_file=="Custom..."'),
+                       Item('custom_gradient_table',visible_when='imaging_model!="DSI"',enabled_when='gradient_table_file=="Custom..."'),
                        Item('number_of_averages',visible_when='imaging_model=="DTI"'),
                        Item('multiple_high_b_values',visible_when='imaging_model=="DTI"'),
                        'number_of_b0_volumes',
@@ -53,12 +58,17 @@ class DTK_recon_config(HasTraits):
         self.number_of_directions = int(new)
         self.recon_matrix_file = 'DSI_matrix_%(n_directions)dx181.dat' % {'n_directions':int(new)+1}
         
-    def _gradient_table_changed(self, new):
-        self.number_of_directions = int(re.search('\d+',self.gradient_table).group(0))
+    def _gradient_table_file_changed(self, new):
+        if new != 'Custom...':
+            self.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'.txt')
+            self.number_of_directions = int(re.search('\d+',new).group(0))
+            
+    def _custom_gradient_table_changed(self, new):
+        self.gradient_table = new
         
     def _imaging_model_changed(self, new):
         if new == 'DTI' or new == 'HARDI':
-            self._gradient_table_changed(self.gradient_table)
+            self._gradient_table_file_changed(self.gradient_table_file)
         if new == 'DSI':
             self._dsi_number_of_directions_changed(self.number_of_directions)
             
@@ -66,10 +76,10 @@ class DTK_recon_config(HasTraits):
 
 class DTB_P0InputSpec(CommandLineInputSpec):
     dsi_basepath = traits.Str(desc='DSI path/basename (e.g. \"data/dsi_\")',position=1,mandatory=True,argstr = "--dsi %s")
-    dwi_file = File(desc='DWI file',position=2,mandatory=True,exists=True,argstr = "--dwi %s")
+    dwi_file = nibase.File(desc='DWI file',position=2,mandatory=True,exists=True,argstr = "--dwi %s")
 
 class DTB_P0OutputSpec(TraitedSpec):
-    out_file = File(desc='Resulting P0 file')
+    out_file = nibase.File(desc='Resulting P0 file')
 
 class DTB_P0(CommandLine):
     _cmd = 'DTB_P0'
@@ -87,7 +97,7 @@ class DTB_gfaInputSpec(CommandLineInputSpec):
     moment = traits.Enum((2, 3, 4),desc='Moment to calculate (2 = gfa, 3 = skewness, 4 = curtosis)',position=2,mandatory=True,argstr = "--m %s")
 
 class DTB_gfaOutputSpec(TraitedSpec):
-    out_file = File(desc='Resulting file')
+    out_file = nibase.File(desc='Resulting file')
 
 class DTB_gfa(CommandLine):
     _cmd = 'DTB_gfa'
@@ -137,7 +147,7 @@ def create_dtk_recon_flow(config):
     if config.imaging_model == "HARDI":
         prefix = "hardi"
         dtk_hardimat = pe.Node(interface=dtk.HARDIMat(),name='dtk_hardimat')
-        dtk_hardimat.inputs.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),config.gradient_table+'.txt')
+        dtk_hardimat.inputs.gradient_table = config.gradient_table
         dtk_hardimat.inputs.oblique_correction = config.apply_gradient_orientation_correction
         
         dtk_odfrecon = pe.Node(interface=dtk.ODFRecon(out_prefix=prefix),name='dtk_odfrecon')
@@ -156,7 +166,7 @@ def create_dtk_recon_flow(config):
         prefix = "dti"
         dtk_dtirecon = pe.Node(interface=dtk.DTIRecon(out_prefix=prefix),name='dtk_dtirecon')
         dtk_dtirecon.inputs.b_value = config.maximum_b_value
-        dtk_dtirecon.inputs.gradient_matrix = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),config.gradient_table+'.txt')
+        dtk_dtirecon.inputs.gradient_matrix = config.gradient_table
         dtk_dtirecon.inputs.multiple_b_values = config.multiple_high_b_values
         dtk_dtirecon.inputs.n_averages = config.number_of_averages
         dtk_dtirecon.inputs.number_of_b0 = config.number_of_b0_volumes

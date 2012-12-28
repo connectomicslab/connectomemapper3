@@ -24,8 +24,8 @@ from tracking import *
 class DiffusionConfig(HasTraits):
     imaging_model = Str
     resampling = Tuple(2,2,2)
-    reconstruction = Enum('DTK',['DTK','Camino'])
-    tracking = Enum('DTB',['DTK','DTB'])
+    reconstruction = Enum('DTK',['DTK'])
+    tracking = Enum('DTB',['DTB'])
     dtk_recon_config = Instance(HasTraits)
     dtk_tracking_config = Instance(HasTraits)
     dtb_tracking_config = Instance(HasTraits)
@@ -36,7 +36,6 @@ class DiffusionConfig(HasTraits):
                              label='Reconstruction', show_border=True, show_labels=False),
                        Group('tracking',
                              Item('dtb_tracking_config',style='custom',visible_when='tracking=="DTB"'),
-                             Item('dtk_tracking_config',style='custom',visible_when='tracking=="DTK"'),
                              label='Tracking', show_border=True, show_labels=False),
                        )
 
@@ -59,7 +58,7 @@ def strip_suffix(file_input, prefix):
 class DiffusionStage(Stage):
     name = 'diffusion_stage'
     config = DiffusionConfig()
-    inputs = ["diffusion","wm_mask","T1-TO-B0_mat","diffusion_b0_resampled"]
+    inputs = ["diffusion","wm_mask_registered"]
     outputs = ["track_file","gFA","skewness","kurtosis","P0"]
 
 
@@ -81,7 +80,7 @@ class DiffusionStage(Stage):
         if self.config.tracking == 'DTB':
             track_flow = create_dtb_tracking_flow(self.config.dtb_tracking_config)
             flow.connect([
-                        (inputnode, track_flow,[('wm_mask','inputnode.wm_mask'),('T1-TO-B0_mat','inputnode.T1-TO-B0_mat'),('diffusion_b0_resampled','inputnode.diffusion_b0_resampled')]),
+                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_registered')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
                         ])
                         
