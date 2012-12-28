@@ -56,7 +56,7 @@ def main(**extra_args):
           author= 'CHUV',
           author_email='info@connectomics.org',
           url='http://www.connectomics.org/',
-          scripts = glob('scripts/connectomemapper'),
+          scripts = ['scripts/connectomemapper','scripts/showmatrix_gpickle'],
           license='Modified BSD License',
           packages = packages,
         classifiers = [c.strip() for c in """\
