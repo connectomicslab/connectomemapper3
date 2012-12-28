@@ -7,18 +7,16 @@
 """ Connectome Mapper Controler for handling GUI and non GUI general events
 """ 
 
-try: 
-    from traits.api import *
-except ImportError: 
-    from enthought.traits.api import *
-try: 
-    from traitsui.api import *
-except ImportError: 
-    from enthought.traits.ui.api import *
-
+# Global imports
+from traits.api import *
+from traitsui.api import *
+import shutil
 import os
 import gui
 import ConfigParser
+from pyface.api import FileDialog, OK
+
+# Own imports
 import pipelines.diffusion.diffusion as diffusion_pipeline
 
 def get_process_type(project_info):
@@ -182,5 +180,18 @@ class ProjectHandler(Handler):
         cus_res = ui_info.ui.context["object"].project_info.configure_traits(view='custom_map_view')
         if cus_res:
             self.pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.custom_map_stages)
-
+            
+    def save_config_file(self, ui_info):
+        save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
+        dialog = FileDialog(action="save as", default_filename="config.ini")
+        dialog.open()
+        if dialog.return_code == OK:
+            shutil.copyfile(ui_info.ui.context["object"].project_info.config_file, dialog.path)
+    
+    def load_config_file(self, ui_info):
+        dialog = FileDialog(action="open", wildcard="*.ini")
+        dialog.open()
+        if dialog.return_code == OK:
+            shutil.copyfile(dialog.path, ui_info.ui.context["object"].project_info.config_file)
+            load_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
 
