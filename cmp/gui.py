@@ -8,14 +8,8 @@
 """ 
 
 # Libraries imports
-try: 
-    from traits.api import *
-except ImportError: 
-    from enthought.traits.api import *
-try: 
-    from traitsui.api import *
-except ImportError: 
-    from enthought.traits.ui.api import *
+from traits.api import *
+from traitsui.api import *
 
 # CMP imports
 import project
@@ -46,27 +40,6 @@ class CMP_Project_Info(HasTraits):
                         kind='modal',
                         width=400,
                         buttons=['OK','Cancel'])
-                        
-
-#    traits_view = View(Group(
-#                            Group(
-#                                Item('base_directory',enabled_when='1>2',show_label=False),
-#                                label='Base directory',
-#                            ),
-#                            Group(
-#                                Item('process_type',style='readonly'),
-#                                Item('last_date_processed',style='readonly'),
-#                                Item('last_stage_processed',style='readonly'),
-#                                label='Last processing'
-#                            ),
-#                            Group(
-#                                Item('processing_status',show_label=False),
-#                                label='Processing status'
-#                            ),
-#                        ),
-#                        #width=200,
-#                        )
-
 
 ## Main window class of the ConnectomeMapper_Pipeline
 #
@@ -79,10 +52,11 @@ class CMP_MainWindow(HasTraits):
     preprocessing = Action(name='Check input data',action='check_input',enabled_when='handler.project_loaded==True')
     map_connectome = Action(name='Map Connectome!',action='map_connectome',enabled_when='handler.inputs_checked==True')
     map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
+    save_config = Action(name='Save configuration as...',action='save_config_file',enabled_when='handler.project_loaded==True')
+    load_config = Action(name='Load configuration...',action='load_config_file',enabled_when='handler.project_loaded==True')
 
     traits_view = View(HGroup(
                             Item('pipeline',style='custom',enabled_when='handler.inputs_checked==True',show_label=False,width=800,height=600),
-#                            Item('project_info',style='custom',show_label=False,width=400),
                             ),
                        title='Connectome Mapper',
                        menubar=MenuBar(
@@ -96,8 +70,8 @@ class CMP_MainWindow(HasTraits):
                                    ),
                                    name='File'),
                                Menu(
-                                   Action(name='Save configuration as...',action='_save_config'),
-                                   Action(name='Load configuration...',action='_load_config'),
+                                   save_config,
+                                   load_config,
                                 name='Configuration'),
                           ),
                        handler = project.ProjectHandler(),
