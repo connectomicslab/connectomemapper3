@@ -49,21 +49,25 @@ class ProgressThread(threading.Thread):
     pw = Instance(ProgressWindow)
     
     def run(self):
-        c=1
+        c=0
+        
         while(c < len(self.stage_names)):
-            print "******* checking progress *****"
-            
-            c = 1
+            time.sleep(5)
+            c = 0
             statuses = []
             for stage in self.stage_names:
-                if self.stages[stage].has_run():
-                    statuses.append(stage+" stage finished!")
-                    c = c+1
+                if self.stages[stage].enabled:
+                    if self.stages[stage].has_run():
+                        statuses.append(stage+" stage finished!")
+                        c = c+1
+                    else:
+                        statuses.append(stage+" stage running...")
                 else:
-                    statuses.append(stage+" stage running...")
+                    c = c+1
+                    statuses.append(stage+" stage not selected for running!")
             self.pw.stages_status = statuses
-            time.sleep(5)
         self.pw.main_status = "Processing finished!"
+        self.pw.stages_status = ['All stages finished!']
                     
 class ProcessThread(threading.Thread):
     pipeline = Instance(Any)
