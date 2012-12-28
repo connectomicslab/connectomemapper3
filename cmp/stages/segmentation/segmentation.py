@@ -80,5 +80,8 @@ class SegmentationStage(Stage):
             self.inspect_outputs = self.inspect_outputs_dict.keys()
             
     def has_run(self):
-        return os.path.exists(os.path.join(self.stage_dir,"reconall","result_reconall.pklz"))
+        if self.config.use_existing_freesurfer_data:
+            return True
+        else:
+            return os.path.exists(os.path.join(self.stage_dir,"reconall","result_reconall.pklz"))
 
