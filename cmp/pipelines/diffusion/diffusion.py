@@ -169,6 +169,9 @@ class DiffusionPipeline(Pipeline):
             self.stages['Registration'].config.imaging_model = imaging_model
             self.stages['Diffusion'].config.imaging_model = imaging_model
         
+        if t2_available:
+            self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)','Nonlinear (FSL)']
+        
         self.fill_stages_outputs()
         
         return valid_inputs
@@ -214,7 +217,8 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Registration'].enabled:
             reg_flow = self.create_stage_flow("Registration")
             flow.connect([
-                          (datasource,reg_flow, [('diffusion','inputnode.diffusion'),('T1','inputnode.T1'),('T2','inputnode.T2')])
+                          (datasource,reg_flow, [('diffusion','inputnode.diffusion'),('T1','inputnode.T1'),('T2','inputnode.T2')]),
+                          (parc_flow,reg_flow, [('outputnode.wm_mask_file','inputnode.wm_mask'),('outputnode.roi_volumes','inputnode.roi_volumes')]),
                           ])
             if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
                 flow.connect([
@@ -226,15 +230,14 @@ class DiffusionPipeline(Pipeline):
             diff_flow = self.create_stage_flow("Diffusion")
             flow.connect([
                         (datasource,diff_flow, [('diffusion','inputnode.diffusion')]),
-                        (parc_flow,diff_flow, [('outputnode.wm_mask_file','inputnode.wm_mask')]),
-                        (reg_flow,diff_flow, [('outputnode.T1-TO-B0_mat','inputnode.T1-TO-B0_mat'),('outputnode.diffusion_b0_resampled','inputnode.diffusion_b0_resampled')]),
+                        (reg_flow,diff_flow, [('outputnode.wm_mask_registered','inputnode.wm_mask_registered')]),
                         ])
                         
         if self.stages['Connectome'].enabled:
             con_flow = self.create_stage_flow("Connectome")
             flow.connect([
-                        (parc_flow,con_flow, [('outputnode.roi_volumes','inputnode.roi_volumes'),('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
-                        (reg_flow,con_flow, [('outputnode.T1-TO-B0_mat','inputnode.T1-TO-B0_mat'),('outputnode.diffusion_b0_resampled','inputnode.diffusion_b0_resampled')]),
+                        (parc_flow,con_flow, [('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
+                        (reg_flow,con_flow, [('outputnode.roi_volumes_registered','inputnode.roi_volumes_registered')]),
                         (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
                                               ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
                                               ('outputnode.P0','inputnode.P0')]),
