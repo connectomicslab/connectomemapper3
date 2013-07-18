@@ -1,3 +1,7 @@
+Release 2.0.3 ()
+================
+* ENH: Addition of Mrtrix commands to diffusion options
+
 Release 2.0.2 (Dec 28, 2012)
 ============================
 * ENH: Implemented Non-linear registration option in registration stage

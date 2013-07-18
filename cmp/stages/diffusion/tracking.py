@@ -23,6 +23,8 @@ import nipype.interfaces.utility as util
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.diffusion_toolkit as dtk
+import nipype.interfaces.mrtrix as mrtrix
+import nipype.interfaces.camino as camino
 
 from cmtklib.diffusion import filter_fibers
 
@@ -33,6 +35,35 @@ class DTB_tracking_config(HasTraits):
     seeds = Int(32)
     
     traits_view = View(Item('flip_input',style='custom'),'angle','seeds')
+
+class MRtrix_tracking_config(HasTraits):
+    #imaging_model = Str
+    #flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
+    #angle = Int(60)
+    #seeds = Int(32)
+    tracking_model = Enum('Steamline',['Streamline','Probabilistic'])
+    desired_number_of_tracks = Int(1000)
+    max_number_of_tracks = Int(1000)
+    step_size = Float(0.2)
+    min_length = Float(10)
+    max_length = Float(200)
+    
+    traits_view = View( 'tracking_model',
+			HGroup('desired_number_of_tracks','max_number_of_tracks'),
+			'step_size',
+			HGroup('min_length','max_length')
+		      )
+
+class Camino_tracking_config(HasTraits):
+    imaging_model = Str
+    #flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
+    angle = Int(60)
+    #seeds = Int(32)
+    tracking_model = Enum(['dt','multitensor','pds','pico','bootstrap','ballstick','bayesdirac'])
+    
+    traits_view = View( 'tracking_model',
+			'angle',
+		      )
     
 class DTB_dtk2dirInputSpec(CommandLineInputSpec):
     diffusion_type = traits.Enum(['dti','dsi'], desc='type of diffusion data [dti|dsi]', position=1,
@@ -239,3 +270,89 @@ def create_dtb_tracking_flow(config):
         
     return flow
 
+class MRtrix_trackingInputSpec(CommandLineInputSpec):
+    type = Str(desc='Streamline tracking method', position=3,
+                    mandatory=True, exists=False, argstr="%s")
+    source = File(desc='source diffusion file',position=4,
+                   mandatory=True, exists=True, argstr="%s")
+    tracks = File(desc='tracks filename',position=5,
+                   mandatory=True, argstr="%s")
+    mask = File(desc='Mask filename', position=1,
+                    mandatory=False, exists=True, argstr="-mask %s")
+    grad = File(desc='Gradient scheme filename', position=2,
+                    mandatory=False, exists=True, argstr="-grad %s")
+
+class MRtrix_trackingOutputSpec(TraitedSpec):
+    out_file = File(desc='Resulting trk file', exists = True)
+
+class MRtrix_tracking(CommandLine):
+    input_spec = MRtrix_trackingInputSpec
+    output_spec = MRtrix_trackingOutputSpec
+    _cmd = 'streamtrack'
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.tracks)
+        return outputs
+
+def create_mrtrix_tracking_flow(config,grad_table,SD):
+    flow = pe.Workflow(name="tracking")
+    
+    # inputnode
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_resampled","SD","grad"]),name="inputnode")
+    
+    # outputnode
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
+
+    mrtrix_tracking = pe.Node(interface=mrtrix.StreamlineTrack(),name="mrtrix_tracking")
+    mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
+    mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
+    mrtrix_tracking.inputs.maximum_tract_length = config.max_length
+    mrtrix_tracking.inputs.minimum_tract_length = config.min_length
+    mrtrix_tracking.inputs.step_size = config.step_size
+    if config.tracking_model == 'Streamline':
+	if SD:
+		mrtrix_tracking.inputs.inputmodel = 'SD_STREAM'
+	else:
+		mrtrix_tracking.inputs.inputmodel = 'DT_STREAM'
+		mrtrix_tracking.inputs.gradient_encoding_file = grad_table
+		#flow.connect([
+		#	    (inputnode,mrtrix_tracking,[('grad','gradient_encoding_file')])
+		#	    ])
+    elif config.tracking_model == 'Probabilistic':
+	if SD:
+		mrtrix_tracking.inputs.inputmodel = 'SD_PROB'
+	else:
+		mrtrix_tracking.inputs.inputmodel = 'DT_PROB'
+
+
+    flow.connect([
+		(inputnode,mrtrix_tracking,[('DWI','in_file')]),
+		(inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
+		(inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
+		(mrtrix_tracking,outputnode,[('tracked','track_file')])
+		])
+
+    return flow
+
+def create_camino_tracking_flow(config):
+    flow = pe.Workflow(name="tracking")
+
+    # inputnode
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_resampled"]),name="inputnode")
+    
+    # outputnode
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
+
+    # Camino tracking
+    camino_tracking = pe.Node(interface=camino.Track(),name='camino_tracking')
+    camino_tracking.inputs.curvethresh = config.angle
+    camino_tracking.inputs.inputmodel = config.tracking_model
+
+    flow.connect([
+		(inputnode,camino_tracking,[('DWI','in_file')]),
+		(inputnode,camino_tracking,[('wm_mask_resampled','seed_file')]),
+		(camino_tracking,outputnode,[('tracked','track_file')]),
+		])
+
+    return flow

@@ -39,7 +39,7 @@ class ConnectomeConfig(HasTraits):
 class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     track_file = File(desc='Tractography result', exists=True, mandatory=True)
     roi_volumes = InputMultiPath(File(exists=True), desc='ROI volumes registered to diffusion space')
-    parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','Nativefreesurfer'], usedefault=True)
+    parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','NativeFreesurfer'], usedefault=True)
     compute_curvature = traits.Bool(True, desc='Compute curvature', usedefault=True)
     additional_maps = traits.List(File,desc='Additional calculated maps (ADC, gFA, ...)')
     output_types = traits.List(Str, desc='Output types of the connectivity matrices')

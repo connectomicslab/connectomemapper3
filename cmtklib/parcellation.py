@@ -650,7 +650,9 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
           ]
 
     for p in get_parcellation('NativeFreesurfer').keys():
-        ds.append( (op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % p), op.join(p, 'ROIv_HR_th.nii.gz')))
+	if not op.exists(op.join(fs_dir, 'mri',p)):
+		os.makedirs(op.join(fs_dir, 'mri',p))
+        ds.append( (op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % p), op.join(fs_dir, 'mri',p, 'ROIv_HR_th.nii.gz')))
 
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
 
