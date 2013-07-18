@@ -24,7 +24,7 @@ class CMP_Project_Info(HasTraits):
 
     create_view = View( Item('process_type',style='custom'),
                         'base_directory',
-                        title='Select type of pipeline and base directory for new Connectome Data',
+                        title='Select CIAO type of pipeline and base directory for new Connectome Data',
                         kind='modal',
                         width=400,
                         buttons=['OK','Cancel'])
