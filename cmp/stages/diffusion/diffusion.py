@@ -25,9 +25,9 @@ class DiffusionConfig(HasTraits):
     imaging_model = Str
     resampling = Tuple(2,2,2)
     recon_editor = List(['DTK','MRtrix','Camino']) # list of available reconstruction methods. Update _imaging_model_changed when adding new
-    reconstruction = Str ('DTK') # default recon method
+    reconstruction_software = Str ('DTK') # default recon method
     tracking_editor = List(['DTB','MRtrix','Camino']) # list of available tracking methods
-    tracking = Str('DTB') # default tracking method
+    tracking_software = Str('DTB') # default tracking method
     dtk_recon_config = Instance(HasTraits)
     mrtrix_recon_config = Instance(HasTraits)
     camino_recon_config = Instance(HasTraits)
@@ -35,28 +35,31 @@ class DiffusionConfig(HasTraits):
     dtb_tracking_config = Instance(HasTraits)
     mrtrix_tracking_config = Instance(HasTraits)
     camino_tracking_config = Instance(HasTraits)
+    diffusion_model_editor = List(['Streamline','Probabilistic'])
+    diffusion_model = Str('Streamline')
     
     traits_view = View(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-                       Group(Item('reconstruction',editor=EnumEditor(name='recon_editor')),
-                             Item('dtk_recon_config',style='custom',visible_when='reconstruction=="DTK"'),
-			     Item('mrtrix_recon_config',style='custom',visible_when='reconstruction=="MRtrix"'),
-			     Item('camino_recon_config',style='custom',visible_when='reconstruction=="Camino"'),
+		       Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+                       Group(Item('reconstruction_software',editor=EnumEditor(name='recon_editor')),
+                             Item('dtk_recon_config',style='custom',visible_when='reconstruction_software=="DTK"'),
+			     Item('mrtrix_recon_config',style='custom',visible_when='reconstruction_software=="MRtrix"'),
+			     Item('camino_recon_config',style='custom',visible_when='reconstruction_software=="Camino"'),
                              label='Reconstruction', show_border=True, show_labels=False),
-                       Group(Item('tracking',editor=EnumEditor(name='tracking_editor')),
-                             Item('dtb_tracking_config',style='custom',visible_when='tracking=="DTB"'),
-			     Item('mrtrix_tracking_config',style='custom',visible_when='tracking=="MRtrix"'),
-			     Item('camino_tracking_config',style='custom',visible_when='tracking=="Camino"'),
+                       Group(Item('tracking_software',editor=EnumEditor(name='tracking_editor')),
+                             Item('dtb_tracking_config',style='custom',visible_when='tracking_software=="DTB"'),
+			     Item('mrtrix_tracking_config',style='custom',visible_when='tracking_software=="MRtrix"'),
+			     Item('camino_tracking_config',style='custom',visible_when='tracking_software=="Camino"'),
                              label='Tracking', show_border=True, show_labels=False),
                        )
 
     def __init__(self):
         self.dtk_recon_config = DTK_recon_config(imaging_model=self.imaging_model)
-        self.mrtrix_recon_config = MRtrix_recon_config(imaging_model=self.imaging_model)
+        self.mrtrix_recon_config = MRtrix_recon_config(imaging_model=self.imaging_model,recon_mode=self.diffusion_model)
 	self.camino_recon_config = Camino_recon_config(imaging_model=self.imaging_model)
         self.dtk_tracking_config = DTK_tracking_config()
         self.dtb_tracking_config = DTB_tracking_config(imaging_model=self.imaging_model)
-        self.mrtrix_tracking_config = MRtrix_tracking_config(imaging_model=self.imaging_model)
-	self.camino_tracking_config = Camino_tracking_config(imaging_model=self.imaging_model)
+        self.mrtrix_tracking_config = MRtrix_tracking_config(imaging_model=self.imaging_model,tracking_model=self.diffusion_model)
+	self.camino_tracking_config = Camino_tracking_config(imaging_model=self.imaging_model,tracking_mode=self.diffusion_model)
         
     def _imaging_model_changed(self, new):
         self.dtk_recon_config.imaging_model = new
@@ -64,31 +67,47 @@ class DiffusionConfig(HasTraits):
 	self.camino_recon_config.imaging_model = new
         self.dtk_tracking_config.imaging_model = new
         self.dtb_tracking_config.imaging_model = new
-	# Remove MRtrix from recon and tracking methods if imaging_model is DSI
+	# Remove MRtrix from recon and tracking methods and Probabilistic from diffusion model if imaging_model is DSI
 	if new == 'DSI':
+		self.diffusion_model_editor = ['Streamline']
+		self.diffusion_model = 'Streamline'
 		self.recon_editor = ['DTK']
-		self.reconstruction = 'DTK'
+		self.reconstruction_software = 'DTK'
 		self.tracking_editor = ['DTB']
-		self.tracking = 'DTB'
+		self.tracking_software = 'DTB'
 	else:
+		self.diffusion_model_editor = ['Streamline','Probabilistic']
 		self.recon_editor = ['DTK','MRtrix','Camino']
 		self.tracking_editor = ['DTB','MRtrix','Camino']
 
-    def _reconstruction_changed(self, new):
-	if new == 'DTK':
-		self.tracking = 'DTB'
-	elif new == 'MRtrix':
-		self.tracking = 'MRtrix'
-	elif new == 'Camino':
-		self.tracking = 'Camino'
 
-    def _tracking_changed(self,new):
+    def _reconstruction_software_changed(self, new):
+	if new == 'DTK':
+		self.tracking_software = 'DTB'
+	else:
+		self.tracking_software = new
+
+    def _tracking_software_changed(self,new):
 	if new == 'DTB':
-		self.reconstruction = 'DTK'
-	if new == 'MRtrix':
-		self.reconstruction = 'MRtrix'
-	if new == 'Camino':
-		self.reconstruction = 'Camino'
+		self.reconstruction_software = 'DTK'
+	else:
+		self.reconstruction_software = new
+
+    def _diffusion_model_changed(self,new):
+	if new == 'Probabilistic':
+		self.recon_editor = ['MRtrix','Camino']
+		if self.recon_editor == 'DTK':
+			self.recon_editor = 'MRtrix'
+		self.tracking_editor = ['MRtrix','Camino']
+		if self.tracking_software == 'DTB':
+			self.tracking_software = 'MRtrix'
+	else:
+		self.recon_editor = ['DTK','MRtrix','Camino']
+		self.tracking_editor = ['DTB','MRtrix','Camino']
+	self.mrtrix_recon_config.recon_mode = new
+	self.mrtrix_tracking_config.tracking_mode = new
+	self.mrtrix_tracking_config.tracking_mode = new
+		
         
 def strip_suffix(file_input, prefix):
     import os
@@ -99,7 +118,7 @@ def strip_suffix(file_input, prefix):
 class DiffusionStage(Stage):
     name = 'diffusion_stage'
     config = DiffusionConfig()
-    inputs = ["diffusion","wm_mask_registered"]
+    inputs = ["diffusion","wm_mask_registered","roi_volumes"]
     outputs = ["track_file","gFA","skewness","kurtosis","P0"]
 
 
@@ -114,13 +133,13 @@ class DiffusionStage(Stage):
         flow.connect([(inputnode,fs_mriconvert_wm_mask,[('wm_mask_registered','in_file')])])
         
         # Reconstruction
-        if self.config.reconstruction == 'DTK':
+        if self.config.reconstruction_software == 'DTK':
             recon_flow = create_dtk_recon_flow(self.config.dtk_recon_config)
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
                         ])
- 	elif self.config.reconstruction == 'MRtrix':
+ 	elif self.config.reconstruction_software == 'MRtrix':
             recon_flow = create_mrtrix_recon_flow(self.config.mrtrix_recon_config)
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
@@ -128,7 +147,7 @@ class DiffusionStage(Stage):
 			(fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         ])
 
-	elif self.config.reconstruction == 'Camino':
+	elif self.config.reconstruction_software == 'Camino':
             recon_flow = create_camino_recon_flow(self.config.camino_recon_config)
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
@@ -137,13 +156,13 @@ class DiffusionStage(Stage):
                         ])
         
         # Tracking
-        if self.config.tracking == 'DTB':
+        if self.config.tracking_software == 'DTB':
             track_flow = create_dtb_tracking_flow(self.config.dtb_tracking_config)
             flow.connect([
                         (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_registered')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
                         ])
-	elif self.config.tracking == 'MRtrix':
+	elif self.config.tracking_software == 'MRtrix':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config,self.config.mrtrix_recon_config.gradient_table,self.config.mrtrix_recon_config.compute_CSD)
             flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
@@ -152,14 +171,14 @@ class DiffusionStage(Stage):
 			(recon_flow, track_flow,[('outputnode.grad','inputnode.grad')]),
                         ])
 
-	elif self.config.tracking == 'Camino':
+	elif self.config.tracking_software == 'Camino':
             track_flow = create_camino_tracking_flow(self.config.camino_tracking_config)
             flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
                         ])
                         
-	if self.config.reconstruction == 'DTK':
+	if self.config.reconstruction_software == 'DTK':
 		flow.connect([
 			    (recon_flow,outputnode, [("outputnode.gFA","gFA"),("outputnode.skewness","skewness"),
 			                             ("outputnode.kurtosis","kurtosis"),("outputnode.P0","P0")]),

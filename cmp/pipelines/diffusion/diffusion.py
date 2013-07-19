@@ -231,6 +231,7 @@ class DiffusionPipeline(Pipeline):
             flow.connect([
                         (datasource,diff_flow, [('diffusion','inputnode.diffusion')]),
                         (reg_flow,diff_flow, [('outputnode.wm_mask_registered','inputnode.wm_mask_registered')]),
+			(parc_flow,diff_flow,[('outputnode.roi_volumes','inputnode.roi_volumes')])
                         ])
                         
         if self.stages['Connectome'].enabled:

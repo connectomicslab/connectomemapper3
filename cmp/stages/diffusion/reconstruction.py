@@ -82,14 +82,16 @@ class MRtrix_recon_config(HasTraits):
                           'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
     gradient_table = Str
     custom_gradient_table = File
-    compute_CSD = Enum([False, True])
+    compute_CSD_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
+    compute_CSD = Bool(False)
     lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
     normalize_to_B0 = Bool(False)
     single_fib_thr = Float(0.7,min=0,max=1)
+    recon_mode = Str    
     
     traits_view = View(Item('gradient_table_file',label='Gradient table (x,y,z,b):'),
                        Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
-                       Item('compute_CSD',editor=EnumEditor(values={False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})),
+                       Item('compute_CSD',editor=EnumEditor(name='compute_CSD_editor')),
 		       Group(Item('lmax_order',editor=EnumEditor(values={'Auto':'1:Auto','2':'2:2','4':'3:4','6':'4:6','8':'5:8','10':'6:10','12':'7:12','14':'8:14','16':'9:16'})),
 		       Item('normalize_to_B0'),
 		       Item('single_fib_thr',label = 'FA threshold'),visible_when='compute_CSD'),
@@ -107,6 +109,13 @@ class MRtrix_recon_config(HasTraits):
         if new == 'DTI' or new == 'HARDI':
             self._gradient_table_file_changed(self.gradient_table_file)
 
+    def _recon_mode_changed(self,new):
+	if new == 'Probabilistic':
+		self.compute_CSD_editor = {True:'Constrained Spherical Deconvolution'}
+		self.compute_CSD = True
+	else:
+		self.compute_CSD_editor = {False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'}
+
 class Camino_recon_config(HasTraits):
     imaging_model = Str
     #build_scheme_file = Bool(False)
@@ -115,17 +124,17 @@ class Camino_recon_config(HasTraits):
     max_components = Int(1)
     diffusion_model = Str('dt')
     diffusion_model_editor = Dict({'dt':'Diffusion tensor','nldt_pos':'Non linear positive','nldt':'unconstrained non linear','ldt_wtd':'Diffusion weighted'})
+    #recon_mode = Str
     
     gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
                           'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
     gradient_table = Str
     custom_gradient_table = File
     
-    traits_view = View(#VGroup('build_scheme_file',Item('b_value',visible_when='build_scheme_file')),
-                       Item('gradient_table_file',label='Gradient table (x,y,z,b):'),
+    traits_view = View(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+		       Item('gradient_table_file',label='Gradient table (x,y,z,b):'),
                        Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
 		       VGroup('number_of_tensors',Item('max_components',enabled_when="number_of_tensors !=\'1\'")),
-		       Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
                        )
 
     def _number_of_tensors_changed(self,new):
@@ -141,6 +150,7 @@ class Camino_recon_config(HasTraits):
 		self.diffusion_model = 'cylcylcyl'
 	elif new == 'Multitensor':
 		self.diffusion_model_editor = {'adc':'ADC','ball_stick':'Ball stick'}
+		self.diffusion_model = 'adc'
         
     def _gradient_table_file_changed(self, new):
         if new != 'Custom...':

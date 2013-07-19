@@ -41,21 +41,21 @@ class MRtrix_tracking_config(HasTraits):
     #flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     #angle = Int(60)
     #seeds = Int(32)
-    tracking_model = Enum('Steamline',['Streamline','Probabilistic'])
+    tracking_model = Str
     desired_number_of_tracks = Int(1000)
     max_number_of_tracks = Int(1000)
     step_size = Float(0.2)
     min_length = Float(10)
     max_length = Float(200)
     
-    traits_view = View( 'tracking_model',
-			HGroup('desired_number_of_tracks','max_number_of_tracks'),
+    traits_view = View( HGroup('desired_number_of_tracks','max_number_of_tracks'),
 			'step_size',
 			HGroup('min_length','max_length')
 		      )
 
 class Camino_tracking_config(HasTraits):
     imaging_model = Str
+    tracking_mode = Str
     #flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     angle = Int(60)
     #seeds = Int(32)
