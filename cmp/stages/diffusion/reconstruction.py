@@ -306,10 +306,19 @@ class MRtrix_mul(CommandLine):
     output_spec = MRtrix_mul_OutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        path, base, _ = split_filename(self.inputs.input1)
-        outputs["out_file"]  = os.path.join(path,base+'_masked.mif')
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
         return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_filename':
+            return self._gen_outfilename()
+        else:
+            return None
+
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.input1)
+        return name + '_masked.mif'
 
 def create_mrtrix_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
@@ -353,7 +362,7 @@ def create_mrtrix_recon_flow(config):
 	mrtrix_erode.inputs.number_of_passes = 3
 	#mrtrix_mul_eroded_FA = pe.Node(interface=mrtrix.MRMultiply(),name='mrtrix_mul_eroded_FA')
 	mrtrix_mul_eroded_FA = pe.Node(interface=MRtrix_mul(),name='mrtrix_mul_eroded_FA')
-	mrtrix_mul_eroded_FA.inputs.out_filename = "/home/cmt/Documents/test_dataset/sub06/QBI64_b3000/NIPYPE/diffusion_pipeline/diffusion_stage/reconstruction/mrtrix_FA/diffusion_resampled_tensor_FA_masked.mif"
+	mrtrix_mul_eroded_FA.inputs.out_filename = "diffusion_resampled_tensor_FA_masked.mif"
 	mrtrix_thr_FA = pe.Node(interface=mrtrix.Threshold(),name='mrtrix_thr')
 	mrtrix_thr_FA.inputs.absolute_threshold_value = config.single_fib_thr
 	#mrtrix_thr_FA.inputs.out_filename = 'sf.mif'

@@ -31,8 +31,10 @@ class ParcellationStage(Stage):
     name = 'parcellation_stage'
     config = ParcellationConfig()
     inputs = ["subjects_dir","subject_id"]
-    outputs = ["aseg_file","wm_mask_file","cc_unknown_file",
-               "ribbon_file","roi_files","roi_volumes","parcellation_scheme"]
+    outputs = [#"aseg_file",
+		"wm_mask_file",
+	       #"cc_unknown_file","ribbon_file",
+		"roi_files","roi_volumes","parcellation_scheme"]
     
     def create_workflow(self, flow, inputnode, outputnode):
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
@@ -42,9 +44,10 @@ class ParcellationStage(Stage):
         
         flow.connect([
                      (inputnode,parc_node,[("subjects_dir","subjects_dir"),("subject_id","subject_id")]),
-                     (parc_node,outputnode,[("aseg_file","aseg_file"),("cc_unknown_file","cc_unknown_file"),
-                                            ("ribbon_file","ribbon_file"),("white_matter_mask_file","wm_mask_file"),
-                                            ("roi_files","roi_files"),("roi_files_in_structural_space","roi_volumes")])
+                     (parc_node,outputnode,[#("aseg_file","aseg_file"),("cc_unknown_file","cc_unknown_file"),
+                                            #("ribbon_file","ribbon_file"),
+					     ("white_matter_mask_file","wm_mask_file"),
+                                             ("roi_files","roi_files"),("roi_files_in_structural_space","roi_volumes")])
                     ])
 
     def define_inspect_outputs(self):

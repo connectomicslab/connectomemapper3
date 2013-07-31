@@ -204,7 +204,8 @@ class DiffusionPipeline(Pipeline):
         
         if self.stages['Segmentation'].enabled:
             if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
-                self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory,'FREESURFER')
+                self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
+		self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
             seg_flow = self.create_stage_flow("Segmentation")
             flow.connect([(datasource,seg_flow, [('T1','inputnode.T1')])])
         
@@ -231,7 +232,7 @@ class DiffusionPipeline(Pipeline):
             flow.connect([
                         (datasource,diff_flow, [('diffusion','inputnode.diffusion')]),
                         (reg_flow,diff_flow, [('outputnode.wm_mask_registered','inputnode.wm_mask_registered')]),
-			(parc_flow,diff_flow,[('outputnode.roi_volumes','inputnode.roi_volumes')])
+			(reg_flow,diff_flow,[('outputnode.roi_volumes_registered','inputnode.roi_volumes')])
                         ])
                         
         if self.stages['Connectome'].enabled:

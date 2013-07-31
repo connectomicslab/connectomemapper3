@@ -104,9 +104,8 @@ class DiffusionConfig(HasTraits):
 	else:
 		self.recon_editor = ['DTK','MRtrix','Camino']
 		self.tracking_editor = ['DTB','MRtrix','Camino']
-	self.mrtrix_recon_config.recon_mode = new
-	self.mrtrix_tracking_config.tracking_mode = new
-	self.mrtrix_tracking_config.tracking_mode = new
+	self.mrtrix_tracking_config.tracking_model = new
+	self.camino_tracking_config.tracking_mode = new
 		
         
 def strip_suffix(file_input, prefix):
@@ -124,13 +123,17 @@ class DiffusionStage(Stage):
 
     def create_workflow(self, flow, inputnode, outputnode):
         # resampling diffusion image and setting output type to short
-        fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_datatype='short',out_file='diffusion_resampled.nii'),name="diffusion_resample")
+	fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_datatype='short',out_file='diffusion_resampled.nii'),name="diffusion_resample")
         fs_mriconvert.inputs.vox_size = self.config.resampling
         flow.connect([(inputnode,fs_mriconvert,[('diffusion','in_file')])])
 
-	fs_mriconvert_wm_mask = pe.Node(interface=fs.MRIConvert(out_type='nii',out_datatype='short',out_file='wm_mask_resampled.nii'),name="mask_resample")
+	fs_mriconvert_wm_mask = pe.Node(interface=fs.MRIConvert(out_type='nii',resample_type='nearest',out_file='wm_mask_resampled.nii'),name="mask_resample")
         fs_mriconvert_wm_mask.inputs.vox_size = self.config.resampling
         flow.connect([(inputnode,fs_mriconvert_wm_mask,[('wm_mask_registered','in_file')])])
+
+	fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='nii',resample_type='nearest',out_file='ROIs_resampled.nii'),name="ROIs_resample",iterfield=['in_file'])
+        fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
+        flow.connect([(inputnode,fs_mriconvert_ROIs,[('roi_volumes','in_file')])])
         
         # Reconstruction
         if self.config.reconstruction_software == 'DTK':
@@ -170,6 +173,10 @@ class DiffusionStage(Stage):
 			(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
 			(recon_flow, track_flow,[('outputnode.grad','inputnode.grad')]),
                         ])
+	    if self.config.diffusion_model == 'Probabilistic':
+	    	flow.connect([
+			    (fs_mriconvert_ROIs,track_flow,[('out_file','inputnode.gm_registered')]),
+			    ])
 
 	elif self.config.tracking_software == 'Camino':
             track_flow = create_camino_tracking_flow(self.config.camino_tracking_config)
