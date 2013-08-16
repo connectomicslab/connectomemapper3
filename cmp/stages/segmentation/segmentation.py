@@ -76,8 +76,9 @@ class SegmentationStage(Stage):
             fs = FreeSurferSource(subjects_dir=reconall_results.outputs.subjects_dir,
                                   subject_id=reconall_results.outputs.subject_id)
             res = fs.run()
-            self.inspect_outputs_dict['brainmask/T1'] = ['tkmedit','-f',res.outputs.brainmask,'-aux',res.outputs.T1,'-surfs']
+            self.inspect_outputs_dict['brainmask/T1'] = ['tkmedit','-f',res.outputs.brainmask,'-surface',res.outputs.white[1],'-aux',res.outputs.T1,'-aux-surface',res.outputs.white[2]]
             self.inspect_outputs_dict['norm/aseg'] = ['tkmedit','-f',res.outputs.norm,'-segmentation',res.outputs.aseg,os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
+	    self.inspect_outputs_dict['norm/aseg/surf'] = ['tkmedit','-f',res.outputs.norm,'-surface',res.outputs.white[1],'-aux-surface',res.outputs.white[2],'-segmentation',res.outputs.aseg,os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
             self.inspect_outputs = self.inspect_outputs_dict.keys()
             
     def has_run(self):

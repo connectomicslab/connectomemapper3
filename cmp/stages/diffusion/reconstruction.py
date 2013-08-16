@@ -25,6 +25,9 @@ from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
     traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec
 import nipype.interfaces.base as nibase
 
+from nipype import logging
+iflogger = logging.getLogger('interface')
+
 # Reconstruction configuration
     
 class DTK_recon_config(HasTraits):
@@ -65,6 +68,8 @@ class DTK_recon_config(HasTraits):
     def _gradient_table_file_changed(self, new):
         if new != 'Custom...':
             self.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'.txt')
+	    if os.path.exists('cmtklib'):
+		self.gradient_table = os.path.abspath(self.gradient_table)
             self.number_of_directions = int(re.search('\d+',new).group(0))
             
     def _custom_gradient_table_changed(self, new):
@@ -77,13 +82,15 @@ class DTK_recon_config(HasTraits):
             self._dsi_number_of_directions_changed(self.number_of_directions)
 
 class MRtrix_recon_config(HasTraits):
-    imaging_model = Str
+    #imaging_model = Str
     gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
                           'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
     gradient_table = Str
     custom_gradient_table = File
-    compute_CSD_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
-    compute_CSD = Bool(False)
+    b_value = Int (1000)
+    b0_volumes = Str()
+    local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
+    local_model = Bool(False)
     lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
     normalize_to_B0 = Bool(False)
     single_fib_thr = Float(0.7,min=0,max=1)
@@ -91,39 +98,79 @@ class MRtrix_recon_config(HasTraits):
     
     traits_view = View(Item('gradient_table_file',label='Gradient table (x,y,z,b):'),
                        Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
-                       Item('compute_CSD',editor=EnumEditor(name='compute_CSD_editor')),
+		       Item('b_value'),
+		       Item('b0_volumes'),
+                       Item('local_model',editor=EnumEditor(name='local_model_editor')),
 		       Group(Item('lmax_order',editor=EnumEditor(values={'Auto':'1:Auto','2':'2:2','4':'3:4','6':'4:6','8':'5:8','10':'6:10','12':'7:12','14':'8:14','16':'9:16'})),
 		       Item('normalize_to_B0'),
-		       Item('single_fib_thr',label = 'FA threshold'),visible_when='compute_CSD'),
+		       Item('single_fib_thr',label = 'FA threshold'),visible_when='local_model'),
                        )
+
+    """def _check_gradient_table(self,f):
+	import csv
+	print(f + '\n' + self.gradient_table_file)
+	with open(f,'rb') as csv_file:
+		dialect = csv.Sniffer().sniff(csvfile.read(1024))
+    		csvfile.seek(0)
+    		reader = csv.reader(csvfile, dialect)
+		row1 = next(reader)
+		if len(row1) < 4:
+			new_f_path = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),self.gradient_table_file+'_mrtrix_b' + str(self.b_value) + '.txt')
+			new_f = open( new_f_path,'wb')
+			writer = csv.writer(new_f, dialect)
+			b0_volumes = [int(s) for s in self.b0_volumes.split() if s.isdigit()]
+			csvfile.seek(0)
+			row_counter = 0
+			for row in reader:
+				if row_counter in b0_volumes:
+					writer.writerow(row + dialect.delimiter + '0')
+				else:
+					writer.writerow(row + dialect.delimiter + str(self.b_value))
+				row_counter = row_counter + 1
+			new_f.close
+			self.gradient_table = new_f_path
         
     def _gradient_table_file_changed(self, new):
         if new != 'Custom...':
+		f = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'_mrtrix_b' + str(self.b_value) + '.txt')
+		if os.path.exists(f):
+			self.gradient_table = f
+			self.number_of_directions = int(re.search('\d+',new).group(0))
+		else:
+			self._check_gradient_table(f)"""
+
+    def _gradient_table_file_changed(self, new):
+        if new != 'Custom...':
             self.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'.txt')
+	    if os.path.exists('cmtklib'):
+		self.gradient_table = os.path.abspath(self.gradient_table)
             self.number_of_directions = int(re.search('\d+',new).group(0))
             
     def _custom_gradient_table_changed(self, new):
         self.gradient_table = new
-        
-    def _imaging_model_changed(self, new):
-        if new == 'DTI' or new == 'HARDI':
-            self._gradient_table_file_changed(self.gradient_table_file)
+        #self._check_gradient_table()
+
+    #def _imaging_model_changed(self, new):
+    #    if new == 'DTI' or new == 'HARDI':
+    #        self._gradient_table_file_changed(self.gradient_table_file)
 
     def _recon_mode_changed(self,new):
 	if new == 'Probabilistic':
-		self.compute_CSD_editor = {True:'Constrained Spherical Deconvolution'}
-		self.compute_CSD = True
+		self.local_model_editor = {True:'Constrained Spherical Deconvolution'}
+		self.local_model = True
 	else:
-		self.compute_CSD_editor = {False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'}
+		self.local_model_editor = {False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'}
 
 class Camino_recon_config(HasTraits):
-    imaging_model = Str
+    #imaging_model = Str
     #build_scheme_file = Bool(False)
     #b_value = Int(1000)
+    b_value = Int (1000)
+    b0_volumes = Str()
     number_of_tensors = Enum('1',['1','2','3','Multitensor'])
     max_components = Int(1)
-    diffusion_model = Str('dt')
-    diffusion_model_editor = Dict({'dt':'Diffusion tensor','nldt_pos':'Non linear positive','nldt':'unconstrained non linear','ldt_wtd':'Diffusion weighted'})
+    local_model = Str('dt')
+    local_model_editor = Dict({'dt':'Diffusion tensor','nldt_pos':'Non linear positive','nldt':'unconstrained non linear','ldt_wtd':'Diffusion weighted'})
     #recon_mode = Str
     
     gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
@@ -131,27 +178,59 @@ class Camino_recon_config(HasTraits):
     gradient_table = Str
     custom_gradient_table = File
     
-    traits_view = View(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
-		       Item('gradient_table_file',label='Gradient table (x,y,z,b):'),
+    traits_view = View(Item('gradient_table_file',label='Gradient table (x,y,z,b):'),
                        Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
+		       Item('local_model',editor=EnumEditor(name='local_model_editor')),
 		       VGroup('number_of_tensors',Item('max_components',enabled_when="number_of_tensors !=\'1\'")),
                        )
 
     def _number_of_tensors_changed(self,new):
 	if new == '1':
-		self.diffusion_model_editor = {'dt':'Linear fit','nldt_pos':'Non linear positive definite','nldt':'Unconstrained non linear','ldt_wtd':'Weighted linear fit'}
-		self.diffusion_model = 'dt'
+		self.local_model_editor = {'dt':'Linear fit','nldt_pos':'Non linear positive definite','nldt':'Unconstrained non linear','ldt_wtd':'Weighted linear fit'}
+		self.local_model = 'dt'
 		self.max_components = 1
 	elif new == '2':
-		self.diffusion_model_editor = {'cylcyl':'bla1','cylcyl_eq':'bla2','pospos':'bla3','pospos_eq':'bla4','poscyl':'bla5','poscyl_eq':'bla6'}
-		self.diffusion_model = 'cylcyl'
+		self.local_model_editor = {'cylcyl':'bla1','cylcyl_eq':'bla2','pospos':'bla3','pospos_eq':'bla4','poscyl':'bla5','poscyl_eq':'bla6'}
+		self.local_model = 'cylcyl'
 	elif new == '3':
-		self.diffusion_model_editor = {'cylcylcyl':'bla7','cylcylcyl_eq':'bla8','pospospos':'bla9','pospospos_eq':'bla10','posposcyl':'bla11','posposcyl_eq':'bla12','poscylcyl':'bla13','poscylcyl_eq':'bla14'}
-		self.diffusion_model = 'cylcylcyl'
+		self.local_model_editor = {'cylcylcyl':'bla7','cylcylcyl_eq':'bla8','pospospos':'bla9','pospospos_eq':'bla10','posposcyl':'bla11','posposcyl_eq':'bla12','poscylcyl':'bla13','poscylcyl_eq':'bla14'}
+		self.local_model = 'cylcylcyl'
 	elif new == 'Multitensor':
-		self.diffusion_model_editor = {'adc':'ADC','ball_stick':'Ball stick'}
-		self.diffusion_model = 'adc'
+		self.local_model_editor = {'adc':'ADC','ball_stick':'Ball stick'}
+		self.local_model = 'adc'
         
+    """def _check_gradient_table(self, f):
+	import csv
+	with open(f,'rb') as csv_file:
+		dialect = csv.Sniffer().sniff(csvfile.read(1024))
+    		csvfile.seek(0)
+    		reader = csv.reader(csvfile, dialect)
+		row1 = next(reader)
+		if len(row1) < 4:
+			new_f_path = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),self.gradient_table_file+'_camino_b' + str(self.b_value) + '.txt')
+			new_f = open( new_f_path,'wb')
+			writer = csv.writer(new_f, dialect)
+			b0_volumes = [int(s) for s in self.b0_volumes.split() if s.isdigit()]
+			csvfile.seek(0)
+			row_counter = 0
+			for row in reader:
+				if row_counter in b0_volumes:
+					writer.writerow(row + dialect.delimiter + '0')
+				else:
+					writer.writerow(row + dialect.delimiter + str(self.b_value))
+				row_counter = row_counter + 1
+			new_f.close
+			self.gradient_table = new_f_path
+        
+    def _gradient_table_file_changed(self, new):
+        if new != 'Custom...':
+		f = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'_mrtrix_b' + str(self.b_value) + '.txt')
+		if os.path.exists(f):
+			self.gradient_table = f
+			self.number_of_directions = int(re.search('\d+',new).group(0))
+		else:
+			self._check_gradient_table()"""
+
     def _gradient_table_file_changed(self, new):
         if new != 'Custom...':
             self.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'.txt')
@@ -160,9 +239,22 @@ class Camino_recon_config(HasTraits):
     def _custom_gradient_table_changed(self, new):
         self.gradient_table = new
         
-    def _imaging_model_changed(self, new):
-        if new == 'DTI' or new == 'HARDI':
-            self._gradient_table_file_changed(self.gradient_table_file)
+    #def _imaging_model_changed(self, new):
+    #    if new == 'DTI' or new == 'HARDI':
+    #        self._gradient_table_file_changed(self.gradient_table_file)
+
+class Gibbs_recon_config(HasTraits):
+    iterations = Int(100000000)
+    particle_length=Float(1.5)
+    particle_width=Float(0.5)
+    particle_weigth=Float(0.0003)
+    temp_start=Float(0.1)
+    temp_end=Float(0.001)
+    inexbalance=Int(-2)
+    fiber_length=Float(20)
+    curvature_threshold=Float(90)
+    sh_coefficient_convention = Enum(['FSL','MRtrix'])
+    traits_view = View('iterations','particle_length','particle_width','particle_weigth','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold','sh_coefficient_convention')
             
 # Nipype interfaces for DTB commands
 
@@ -324,7 +416,7 @@ def create_mrtrix_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled"]),name="inputnode")
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","eigVec","RF","SD","grad"],mandatory_inputs=True),name="outputnode")
-    if config.compute_CSD:
+    if config.local_model:
 	outputnode.inputs.SD = True
     else:
 	outputnode.inputs.SD = False
@@ -356,7 +448,7 @@ def create_mrtrix_recon_flow(config):
 		])
 
     # Constrained Spherical Deconvolution
-    if config.compute_CSD:
+    if config.local_model:
 	# Compute single fiber voxel mask
 	mrtrix_erode = pe.Node(interface=mrtrix.Erode(),name="mrtrix_erode")
 	mrtrix_erode.inputs.number_of_passes = 3
@@ -413,7 +505,7 @@ def create_camino_recon_flow(config):
 
     # Fit model
     camino_ModelFit = pe.Node(interface=camino.ModelFit(),name='camino_ModelFit')
-    camino_ModelFit.inputs.model = config.diffusion_model
+    camino_ModelFit.inputs.model = config.local_model
     camino_ModelFit.inputs.scheme_file = config.gradient_table
 
     flow.connect([
@@ -466,4 +558,87 @@ def create_camino_recon_flow(config):
 		(camino_ModelFit,camino_eigenvectors,[('fitted_data','in_file')]),
 		(camino_eigenvectors,outputnode,[('eigen','eigVec')])
 		])
+    return flow
+
+class gibbs_commandInputSpec(CommandLineInputSpec):
+    in_file = File(argstr="-i %s",position = 1,mandatory=True,exists=True,desc="input image (tensor, Q-ball or FSL/MRTrix SH-coefficient image)")
+    parameter_file = File(argstr="-p %s", position = 2, mandatory = True, exists=True, desc="gibbs parameter file (.gtp)")
+    mask = File(argstr="-m %s",position=3,mandatory=False,desc="mask, binary mask image (optional)")
+    sh_coefficients = Enum(['FSL','MRtrix'],argstr="-s %s",position=4,mandatory=False,desc="sh coefficient convention (FSL, MRtrix) (optional), (default: FSL)")
+    out_file_name = File(argstr="-o %s",position=5,desc='output fiber bundle (.fib)')
+
+class gibbs_commandOutputSpec(TraitedSpec):
+    out_file = File(desc='output fiber bundle')
+
+class gibbs_command(CommandLine):
+    _cmd = 'mitkFiberTrackingMiniApps.sh GibbsTracking'
+    input_spec = gibbs_commandInputSpec
+    output_spec = gibbs_commandOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = self.inputs.out_file_name
+        return outputs
+
+class gibbs_reconInputSpec(BaseInterfaceInputSpec):
+    # Inputs for XML file
+    iterations = Int
+    particle_length=Float
+    particle_width=Float
+    particle_weigth=Float
+    temp_start=Float
+    temp_end=Float
+    inexbalance=Int
+    fiber_length=Float
+    curvature_threshold=Float
+    # Command line parameters
+    in_file = File(argstr="-i %s",position = 1,mandatory=True,exists=True,desc="input image (tensor, Q-ball or FSL/MRTrix SH-coefficient image)")
+    mask = File(argstr="-m %s",position=3,mandatory=False,desc="mask, binary mask image (optional)")
+    sh_coefficients = Enum(['FSL','MRtrix'],argstr="-s %s",position=4,mandatory=False,desc="sh coefficient convention (FSL, MRtrix) (optional), (default: FSL)")
+    out_file_name = File(argstr="-o %s",position=5,desc='output fiber bundle (.fib)')
+
+class gibbs_reconOutputSpec(TraitedSpec):
+    out_file = File(desc='output fiber bundle')
+
+class gibbs_recon(BaseInterface):
+    input_spec = gibbs_reconInputSpec
+    output_spec = gibbs_reconOutputSpec
+
+    def _run_interface(self,runtime):
+
+	# Create XML file
+	f = open(os.path.abspath('gibbs_parameters.gtp'),'w')
+	xml_text = '<?xml version="1.0" ?>\n<global_tracking_parameter_file file_version="0.1">\n    <parameter_set iterations="%s" particle_length="%s" particle_width="%s" particle_weight="%s" temp_start="%s" temp_end="%s" inexbalance="%s" fiber_length="%s" curvature_threshold="90" />\n</global_tracking_parameter_file>' % (self.inputs.iterations,self.inputs.particle_length,self.inputs.particle_width,self.inputs.particle_weigth,self.inputs.temp_start,self.inputs.temp_end,self.inputs.inexbalance,self.inputs.fiber_length)
+	f.write(xml_text)
+	f.close()
+
+	# Call gibbs software
+	gibbs = gibbs_command(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'))
+	gibbs.inputs.mask = self.inputs.mask
+	gibbs.inputs.sh_coefficients = self.inputs.sh_coefficients
+	print(os.path.abspath('test'))
+	gibbs.inputs.out_file_name = os.path.abspath(self.inputs.out_file_name)
+	res = gibbs.run()
+
+	return runtime
+
+    def _list_outputs(self):
+	outputs = self._outputs().get()
+	outputs["out_file"] = os.path.abspath(self.inputs.out_file_name)
+
+def create_gibbs_recon_flow(config):
+    flow = pe.Workflow(name="reconstruction")
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_resampled","wm_mask_resampled"]),name="inputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI"],mandatory_inputs=True),name="outputnode")
+
+    gibbs = pe.Node(interface=gibbs_recon(iterations = config.iterations,particle_length=config.particle_length,particle_width=config.particle_width,particle_weigth=config.particle_weigth,temp_start=config.temp_start,temp_end=config.temp_end,inexbalance=config.inexbalance,fiber_length=config.fiber_length,curvature_threshold=config.curvature_threshold,sh_coefficients=config.sh_coefficient_convention,out_file_name='global_tractography.fib'),name="gibbs_recon")
+
+    flow.connect([
+		(inputnode,gibbs,[("diffusion_resampled","in_file")]),
+		(inputnode,gibbs,[("wm_mask_resampled","mask")]),
+		(gibbs,outputnode,[("out_file","DWI")]),
+		])
+
+    
+
     return flow

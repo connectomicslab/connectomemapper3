@@ -143,6 +143,7 @@ class Pipeline(HasTraits):
                
 
 def convert_rawdata(base_directory, input_dir, out_prefix):
+    os.environ['UNPACK_MGH_DTI'] = '0'
     file_list = os.listdir(input_dir)
 
     # If RAWDATA folder contains one (and only one) nifti file -> copy it
@@ -151,8 +152,12 @@ def convert_rawdata(base_directory, input_dir, out_prefix):
         copyfile(first_file, os.path.join(base_directory, 'NIFTI', out_prefix+'.nii.gz'), False, False, 'content') # intelligent copy looking at input's content
     else:
         mem = Memory(base_dir=os.path.join(base_directory,'NIPYPE'))
-        dtk_diffunpack = mem.cache(dtk.DiffUnpack)
-        res = dtk_diffunpack(input_dicom=first_file, out_prefix=os.path.join(base_directory, 'NIFTI', out_prefix), output_type='nii.gz')
+        mri_convert = mem.cache(fs.MRIConvert)
+        res = mri_convert(in_file=first_file, out_file=os.path.join(base_directory, 'NIFTI', out_prefix + '.nii.gz'))
+	#cmd = 'mri_convert -nc %s %s.nii.gz' % (first_file, os.path.join(base_directory,'NIFTI',out_prefix))
+	#os.system(cmd)
+	#if not os.path.exists(os.path.join(base_directory,'NIFTI',out_prefix+'.nii.gz')):
+	#	return False
         if len(res.outputs.get()) == 0:
             return False
 

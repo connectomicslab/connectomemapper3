@@ -62,10 +62,9 @@ class Camino_tracking_config(HasTraits):
     #flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     angle = Int(60)
     #seeds = Int(32)
-    tracking_model = Enum(['dt','multitensor','pds','pico','bootstrap','ballstick','bayesdirac'])
+    tracking_model = Str#Enum(['dt','multitensor','pds','pico','bootstrap','ballstick','bayesdirac'])
     
-    traits_view = View( 'tracking_model',
-			'angle',
+    traits_view = View( 'angle',
 		      )
     
 class DTB_dtk2dirInputSpec(CommandLineInputSpec):
@@ -388,14 +387,11 @@ class make_seeds(BaseInterface):
 
 def create_mrtrix_tracking_flow(config,grad_table,SD):
     flow = pe.Workflow(name="tracking")
-    
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_resampled","gm_registered","SD","grad"]),name="inputnode")
-    
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','wm_mask_resampled','gm_registered']),name='inputnode')
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
-
-    if config.tracking_model == 'Streamline':
+    if config.tracking_model == 'Deterministic':
 	mrtrix_tracking = pe.Node(interface=mrtrix.StreamlineTrack(),name="mrtrix_deterministic_tracking")
 	mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
 	mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks

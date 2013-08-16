@@ -54,10 +54,18 @@ class ParcellationStage(Stage):
         parc_results_path = os.path.join(self.stage_dir,"parcellation","result_parcellation.pklz")
         if(os.path.exists(parc_results_path)):
             parc_results = pickle.load(gzip.open(parc_results_path))
-            for roi_v in parc_results.outputs.roi_files_in_structural_space:
-                self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview','-v',
-                 parc_results.outputs.white_matter_mask_file+':colormap=GEColor',
-                    roi_v+":colormap=lut:lut="+pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))]
+	    white_matter_file = parc_results.outputs.white_matter_mask_file
+	    lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))
+	    if type(parc_results.outputs.roi_files_in_structural_space) == str:
+		roi_v = parc_results.outputs.roi_files_in_structural_space
+		self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview','-v',
+                 white_matter_file+':colormap=GEColor',
+                    roi_v+":colormap=lut:lut="+lut_file]
+            elif type(parc_results.outputs.roi_files_in_structural_space) == list:
+		for roi_v in parc_results.outputs.roi_files_in_structural_space:
+                	self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview','-v',
+                 	 white_matter_file+':colormap=GEColor',
+                          roi_v+":colormap=lut:lut="+lut_file]
             self.inspect_outputs = self.inspect_outputs_dict.keys()
             
     def has_run(self):
