@@ -154,10 +154,6 @@ def convert_rawdata(base_directory, input_dir, out_prefix):
         mem = Memory(base_dir=os.path.join(base_directory,'NIPYPE'))
         mri_convert = mem.cache(fs.MRIConvert)
         res = mri_convert(in_file=first_file, out_file=os.path.join(base_directory, 'NIFTI', out_prefix + '.nii.gz'))
-	#cmd = 'mri_convert -nc %s %s.nii.gz' % (first_file, os.path.join(base_directory,'NIFTI',out_prefix))
-	#os.system(cmd)
-	#if not os.path.exists(os.path.join(base_directory,'NIFTI',out_prefix+'.nii.gz')):
-	#	return False
         if len(res.outputs.get()) == 0:
             return False
 

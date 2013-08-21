@@ -47,13 +47,14 @@ class Check_Input_Notification(HasTraits):
 class DiffusionPipeline(Pipeline):
     pipeline_name = Str("diffusion_pipeline")
     input_folders = ['DSI','DTI','HARDI','T1','T2']
-    stages = {'Segmentation':SegmentationStage(), 
+    stages = {'Preprocessing':PreprocessingStage(),
+	    'Segmentation':SegmentationStage(), 
             'Parcellation':ParcellationStage(),
             'Registration':RegistrationStage(),
             'Diffusion':DiffusionStage(),
             'Connectome':ConnectomeStage()}
             
-    ordered_stage_list = ['Segmentation','Parcellation','Registration','Diffusion','Connectome']
+    ordered_stage_list = ['Preprocessing','Segmentation','Parcellation','Registration','Diffusion','Connectome']
     
     global_conf = Global_Configuration()
     
@@ -67,7 +68,7 @@ class DiffusionPipeline(Pipeline):
     config_file = Str
     
     pipeline_group = VGroup(
-                        #HGroup(spring,Item('preprocessing',editor=ThemedButtonEditor(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
+                        HGroup(spring,Item('preprocessing',editor=ThemedButtonEditor(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('segmentation',editor=ThemedButtonEditor(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
                         HGroup(spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('registration',editor=ThemedButtonEditor(image=ImageResource('registration'),theme='@G')),spring,show_labels=False),
@@ -201,6 +202,12 @@ class DiffusionPipeline(Pipeline):
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="sinker")
         sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS")
+
+	if self.stages['Preprocessing'].enabled:
+	    preproc_flow = self.create_stage_flow("Preprocessing")
+	    flow.connect([
+			(datasource,preproc_flow,[("diffusion","inputnode.diffusion")]),
+			])
         
         if self.stages['Segmentation'].enabled:
             if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
@@ -218,7 +225,8 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Registration'].enabled:
             reg_flow = self.create_stage_flow("Registration")
             flow.connect([
-                          (datasource,reg_flow, [('diffusion','inputnode.diffusion'),('T1','inputnode.T1'),('T2','inputnode.T2')]),
+			  (datasource,reg_flow,[('T1','inputnode.T1'),('T2','inputnode.T2')]),
+                          (preproc_flow,reg_flow, [('outputnode.diffusion_preproc','inputnode.diffusion')]),
                           (parc_flow,reg_flow, [('outputnode.wm_mask_file','inputnode.wm_mask'),('outputnode.roi_volumes','inputnode.roi_volumes')]),
                           ])
             if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
@@ -230,13 +238,14 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Diffusion'].enabled:
             diff_flow = self.create_stage_flow("Diffusion")
             flow.connect([
-                        (datasource,diff_flow, [('diffusion','inputnode.diffusion')]),
+                        (preproc_flow,diff_flow, [('outputnode.diffusion_preproc','inputnode.diffusion')]),
                         (reg_flow,diff_flow, [('outputnode.wm_mask_registered','inputnode.wm_mask_registered')]),
 			(reg_flow,diff_flow,[('outputnode.roi_volumes_registered','inputnode.roi_volumes')])
                         ])
                         
         if self.stages['Connectome'].enabled:
             con_flow = self.create_stage_flow("Connectome")
+	    print("\n\n" + self.stages['Diffusion'].config.processing_tool + "\n\n")
             flow.connect([
                         (parc_flow,con_flow, [('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
                         (reg_flow,con_flow, [('outputnode.roi_volumes_registered','inputnode.roi_volumes_registered')]),
