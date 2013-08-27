@@ -35,6 +35,7 @@ class DiffusionConfig(HasTraits):
     mrtrix_recon_config = Instance(HasTraits)
     camino_recon_config = Instance(HasTraits)
     gibbs_recon_config = Instance(HasTraits)
+    gibbs_model_config = Instance(HasTraits)
     dtk_tracking_config = Instance(HasTraits)
     dtb_tracking_config = Instance(HasTraits)
     mrtrix_tracking_config = Instance(HasTraits)
@@ -45,10 +46,11 @@ class DiffusionConfig(HasTraits):
     traits_view = View(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
 		       Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
                        Group(#Item('reconstruction_software',editor=EnumEditor(name='recon_editor')),
+			     Item('gibbs_recon_config',style='custom',visible_when='processing_tool=="Gibbs"'),
+			     Item('gibbs_model_config',style='custom',visible_when='processing_tool=="Gibbs"'),
                              Item('dtk_recon_config',style='custom',visible_when='processing_tool=="DTK"'),
 			     Item('mrtrix_recon_config',style='custom',visible_when='processing_tool=="MRtrix"'),
 			     Item('camino_recon_config',style='custom',visible_when='processing_tool=="Camino"'),
-			     Item('gibbs_recon_config',style='custom',visible_when='processing_tool=="Gibbs"'),
                              label='Reconstruction', show_border=True, show_labels=False),
                        Group(#Item('tracking_software',editor=EnumEditor(name='tracking_editor')),
 			     Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
@@ -63,6 +65,7 @@ class DiffusionConfig(HasTraits):
         self.mrtrix_recon_config = MRtrix_recon_config(imaging_model=self.imaging_model,recon_mode=self.diffusion_model)
 	self.camino_recon_config = Camino_recon_config(imaging_model=self.imaging_model)
 	self.gibbs_recon_config = Gibbs_recon_config()
+	self.gibbs_model_config = Gibbs_model_config()
         self.dtk_tracking_config = DTK_tracking_config()
         self.dtb_tracking_config = DTB_tracking_config(imaging_model=self.imaging_model)
         self.mrtrix_tracking_config = MRtrix_tracking_config(imaging_model=self.imaging_model,tracking_model=self.diffusion_model)
@@ -79,7 +82,7 @@ class DiffusionConfig(HasTraits):
 		if (not self.processing_tool == 'DTK') or (not self.processing_tool == 'Gibbs'):
 			self._processing_tool_changed('DTK')
 			self.processing_tool = 'DTK'
-		self.processing_tool_editor = ['DTK','Gibbs']
+		self.processing_tool_editor = ['DTK']
 	else:
 		self.diffusion_model_editor = ['Deterministic','Probabilistic']
 		self.processing_tool_editor = ['DTK','MRtrix','Camino','Gibbs']
@@ -112,7 +115,7 @@ class DiffusionStage(Stage):
 
     def create_workflow(self, flow, inputnode, outputnode):
         # resampling diffusion image and setting output type to short
-	fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_datatype='short',out_file='diffusion_resampled.nii'),name="diffusion_resample")
+	fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_file='diffusion_resampled.nii'),name="diffusion_resample")
         fs_mriconvert.inputs.vox_size = self.config.resampling
         flow.connect([(inputnode,fs_mriconvert,[('diffusion','in_file')])])
 
@@ -148,7 +151,7 @@ class DiffusionStage(Stage):
                         ])
 
 	elif self.config.processing_tool == 'Gibbs':
-	    recon_flow = create_gibbs_recon_flow(self.config.gibbs_recon_config)
+	    recon_flow = create_gibbs_recon_flow(self.config.gibbs_recon_config,self.config.gibbs_model_config)
 	    flow.connect([
 			(fs_mriconvert,recon_flow,[("out_file","inputnode.diffusion_resampled")]),
 			(fs_mriconvert_wm_mask,recon_flow,[("out_file","inputnode.wm_mask_resampled")]),

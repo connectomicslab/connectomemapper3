@@ -10,6 +10,7 @@
 # General imports
 import re
 import os
+import shutil
 from traits.api import *
 from traitsui.api import *
 import pkg_resources
@@ -17,6 +18,7 @@ import pkg_resources
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import nipype.interfaces.diffusion_toolkit as dtk
+import nipype.interfaces.fsl as fsl
 import nipype.interfaces.mrtrix as mrtrix # DR: Might be used directly in the nipype
 import nipype.interfaces.camino as camino
 from nipype.utils.filemanip import split_filename
@@ -243,6 +245,29 @@ class Camino_recon_config(HasTraits):
     #    if new == 'DTI' or new == 'HARDI':
     #        self._gradient_table_file_changed(self.gradient_table_file)
 
+class Gibbs_model_config(HasTraits):
+    local_model_editor = Dict({False:'1:Tensor',True:'2:CSD'})
+    local_model = Bool(False)
+    # CSD parameters
+    #gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
+    #                      'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
+    gradient_table = File()
+    #custom_gradient_table = File
+    lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
+    normalize_to_B0 = Bool(False)
+    single_fib_thr = Float(0.7,min=0,max=1)
+    #recon_mode = Str
+
+    # FSL parameters
+    b_values = File()
+    b_vectors = File()
+
+    traits_view = View(Item('local_model',editor=EnumEditor(name='local_model_editor')),Group(Item('gradient_table'),
+		       Item('lmax_order',editor=EnumEditor(values={'Auto':'1:Auto','2':'2:2','4':'3:4','6':'4:6','8':'5:8','10':'6:10','12':'7:12','14':'8:14','16':'9:16'})),
+		       Item('normalize_to_B0'),
+		       Item('single_fib_thr',label = 'FA threshold'),show_border=True,label='CSD parameters', visible_when='local_model'),
+	     Group('b_vectors','b_values',show_border = True, label='FSL tensor fitting', visible_when='not local_model'))
+
 class Gibbs_recon_config(HasTraits):
     iterations = Int(100000000)
     particle_length=Float(1.5)
@@ -253,8 +278,9 @@ class Gibbs_recon_config(HasTraits):
     inexbalance=Int(-2)
     fiber_length=Float(20)
     curvature_threshold=Float(90)
-    sh_coefficient_convention = Enum(['FSL','MRtrix'])
-    traits_view = View('iterations','particle_length','particle_width','particle_weigth','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold','sh_coefficient_convention')
+    #sh_coefficient_convention = Enum(['FSL','MRtrix'])
+    
+    traits_view = View(Group('iterations','particle_length','particle_width','particle_weigth','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold',show_border=True,label='Gibbs parameters'))
             
 # Nipype interfaces for DTB commands
 
@@ -565,7 +591,7 @@ class gibbs_commandInputSpec(CommandLineInputSpec):
     parameter_file = File(argstr="-p %s", position = 2, mandatory = True, exists=True, desc="gibbs parameter file (.gtp)")
     mask = File(argstr="-m %s",position=3,mandatory=False,desc="mask, binary mask image (optional)")
     sh_coefficients = Enum(['FSL','MRtrix'],argstr="-s %s",position=4,mandatory=False,desc="sh coefficient convention (FSL, MRtrix) (optional), (default: FSL)")
-    out_file_name = File(argstr="-o %s",position=5,desc='output fiber bundle (.fib)')
+    out_file_name = File(argstr="-o %s",position=5,desc='output fiber bundle (.trk)')
 
 class gibbs_commandOutputSpec(TraitedSpec):
     out_file = File(desc='output fiber bundle')
@@ -577,10 +603,11 @@ class gibbs_command(CommandLine):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.out_file_name
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file_name)
         return outputs
 
 class gibbs_reconInputSpec(BaseInterfaceInputSpec):
+
     # Inputs for XML file
     iterations = Int
     particle_length=Float
@@ -591,11 +618,12 @@ class gibbs_reconInputSpec(BaseInterfaceInputSpec):
     inexbalance=Int
     fiber_length=Float
     curvature_threshold=Float
+
     # Command line parameters
     in_file = File(argstr="-i %s",position = 1,mandatory=True,exists=True,desc="input image (tensor, Q-ball or FSL/MRTrix SH-coefficient image)")
     mask = File(argstr="-m %s",position=3,mandatory=False,desc="mask, binary mask image (optional)")
     sh_coefficients = Enum(['FSL','MRtrix'],argstr="-s %s",position=4,mandatory=False,desc="sh coefficient convention (FSL, MRtrix) (optional), (default: FSL)")
-    out_file_name = File(argstr="-o %s",position=5,desc='output fiber bundle (.fib)')
+    out_file_name = File(argstr="-o %s",position=5,desc='output fiber bundle (.trk)')
 
 class gibbs_reconOutputSpec(TraitedSpec):
     out_file = File(desc='output fiber bundle')
@@ -612,11 +640,20 @@ class gibbs_recon(BaseInterface):
 	f.write(xml_text)
 	f.close()
 
+	# Change input to nifti format and rename to .dti for loading in MITK
+	if self.inputs.sh_coefficients == 'MRtrix':
+		mif_convert = pe.Node(interface=mrtrix.MRConvert(in_file = self.inputs.in_file, out_filename = os.path.abspath('input.nii')),name='convert_to_dti')
+		res = mif_convert.run()
+		#shutil.copyfile(res.outputs.converted,os.path.abspath('input.dwi'))
+		self.inputs.in_file = res.outputs.converted
+	else:
+		shutil.copyfile(self.inputs.in_file,os.path.abspath('input.dti'))
+		self.inputs.in_file = os.path.abspath('input.dti')
+
 	# Call gibbs software
 	gibbs = gibbs_command(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'))
 	gibbs.inputs.mask = self.inputs.mask
 	gibbs.inputs.sh_coefficients = self.inputs.sh_coefficients
-	print(os.path.abspath('test'))
 	gibbs.inputs.out_file_name = os.path.abspath(self.inputs.out_file_name)
 	res = gibbs.run()
 
@@ -625,20 +662,39 @@ class gibbs_recon(BaseInterface):
     def _list_outputs(self):
 	outputs = self._outputs().get()
 	outputs["out_file"] = os.path.abspath(self.inputs.out_file_name)
+	return outputs
 
-def create_gibbs_recon_flow(config):
+def create_gibbs_recon_flow(config_gibbs,config_model):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_resampled","wm_mask_resampled"]),name="inputnode")
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI"],mandatory_inputs=True),name="outputnode")
 
-    gibbs = pe.Node(interface=gibbs_recon(iterations = config.iterations,particle_length=config.particle_length,particle_width=config.particle_width,particle_weigth=config.particle_weigth,temp_start=config.temp_start,temp_end=config.temp_end,inexbalance=config.inexbalance,fiber_length=config.fiber_length,curvature_threshold=config.curvature_threshold,sh_coefficients=config.sh_coefficient_convention,out_file_name='global_tractography.fib'),name="gibbs_recon")
+    gibbs = pe.Node(interface=gibbs_recon(iterations = config_gibbs.iterations, particle_length=config_gibbs.particle_length, particle_width=config_gibbs.particle_width, particle_weigth=config_gibbs.particle_weigth, temp_start=config_gibbs.temp_start, temp_end=config_gibbs.temp_end, inexbalance=config_gibbs.inexbalance, fiber_length=config_gibbs.fiber_length, curvature_threshold=config_gibbs.curvature_threshold, out_file_name='global_tractography.trk'),name="gibbs_recon")
+
+    if config_model.local_model :
+	gibbs.inputs.sh_coefficients = 'MRtrix'
+	CSD_flow = create_mrtrix_recon_flow(config_model)
+	flow.connect([
+		    (inputnode,CSD_flow,[('diffusion_resampled','inputnode.diffusion_resampled'),('wm_mask_resampled','inputnode.wm_mask_resampled')]),
+		    (CSD_flow,gibbs,[('outputnode.DWI','in_file')]),
+		    ])
+
+    else:
+	dtifit = pe.Node(interface=fsl.DTIFit(),name="dtifit")
+	dtifit.inputs.bvals = config_model.b_values
+	dtifit.inputs.bvecs = config_model.b_vectors
+	dtifit.inputs.save_tensor = True
+	dtifit.inputs.output_type = 'NIFTI'
+	gibbs.inputs.sh_coefficients = 'FSL'
+
+	flow.connect([
+		    (inputnode,dtifit,[('diffusion_resampled','dwi'),('wm_mask_resampled','mask')]),
+		    (dtifit,gibbs,[('tensor','in_file')])
+		    ])
 
     flow.connect([
-		(inputnode,gibbs,[("diffusion_resampled","in_file")]),
 		(inputnode,gibbs,[("wm_mask_resampled","mask")]),
 		(gibbs,outputnode,[("out_file","DWI")]),
 		])
-
-    
 
     return flow
