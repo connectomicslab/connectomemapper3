@@ -236,6 +236,8 @@ class Camino_recon_config(HasTraits):
     def _gradient_table_file_changed(self, new):
         if new != 'Custom...':
             self.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'.txt')
+	    if os.path.exists('cmtklib'):
+		self.gradient_table = os.path.abspath(self.gradient_table)
             self.number_of_directions = int(re.search('\d+',new).group(0))
             
     def _custom_gradient_table_changed(self, new):
