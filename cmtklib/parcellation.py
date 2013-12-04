@@ -64,7 +64,7 @@ def get_parcellation(parcel = "NativeFreesurfer"):
     else:
         return {'freesurferaparc' : {'number_of_regions' : 83,
                                     # contains name, url, color, freesurfer_label, etc. used for connection matrix
-                                    'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','freesurferaparc','resolution83','resolution83.graphml')),
+                                    'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','nativefreesurfer','freesurferaparc','resolution83.graphml')),
                                     # scalar node values on fsaverage? or atlas? 
                                     'surface_parcellation' : None,
                                     # scalar node values in fsaverage volume?

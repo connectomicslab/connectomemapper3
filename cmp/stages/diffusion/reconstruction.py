@@ -70,8 +70,8 @@ class DTK_recon_config(HasTraits):
     def _gradient_table_file_changed(self, new):
         if new != 'Custom...':
             self.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'.txt')
-	    if os.path.exists('cmtklib'):
-		self.gradient_table = os.path.abspath(self.gradient_table)
+            if os.path.exists('cmtklib'):
+                self.gradient_table = os.path.abspath(self.gradient_table)
             self.number_of_directions = int(re.search('\d+',new).group(0))
             
     def _custom_gradient_table_changed(self, new):
@@ -85,12 +85,13 @@ class DTK_recon_config(HasTraits):
 
 class MRtrix_recon_config(HasTraits):
     #imaging_model = Str
-    gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
-                          'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
-    gradient_table = Str
-    custom_gradient_table = File
-    b_value = Int (1000)
-    b0_volumes = Str()
+    #gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
+    #'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
+    gradient_table = File
+    #custom_gradient_table = File
+    #gradient_table_file = File
+    #b_value = Int (1000)
+    #b0_volumes = Str()
     local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
     local_model = Bool(False)
     lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
@@ -98,10 +99,10 @@ class MRtrix_recon_config(HasTraits):
     single_fib_thr = Float(0.7,min=0,max=1)
     recon_mode = Str    
     
-    traits_view = View(Item('gradient_table_file',label='Gradient table (x,y,z,b):'),
-                       Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
-		       Item('b_value'),
-		       Item('b0_volumes'),
+    traits_view = View(Item('gradient_table',label='Gradient table (x,y,z,b):'),
+                       #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
+		       #Item('b_value'),
+		       #Item('b0_volumes'),
                        Item('local_model',editor=EnumEditor(name='local_model_editor')),
 		       Group(Item('lmax_order',editor=EnumEditor(values={'Auto':'1:Auto','2':'2:2','4':'3:4','6':'4:6','8':'5:8','10':'6:10','12':'7:12','14':'8:14','16':'9:16'})),
 		       Item('normalize_to_B0'),
@@ -141,15 +142,15 @@ class MRtrix_recon_config(HasTraits):
 		else:
 			self._check_gradient_table(f)"""
 
-    def _gradient_table_file_changed(self, new):
+    """def _gradient_table_file_changed(self, new):
         if new != 'Custom...':
             self.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'.txt')
-	    if os.path.exists('cmtklib'):
-		self.gradient_table = os.path.abspath(self.gradient_table)
-            self.number_of_directions = int(re.search('\d+',new).group(0))
+            if os.path.exists('cmtklib'):
+                self.gradient_table = os.path.abspath(self.gradient_table)
+            self.number_of_directions = int(re.search('\d+',new).group(0))"""
             
-    def _custom_gradient_table_changed(self, new):
-        self.gradient_table = new
+    #def _gradient_table_file_changed(self, new):
+    #    self.gradient_table = new
         #self._check_gradient_table()
 
     #def _imaging_model_changed(self, new):
@@ -157,22 +158,25 @@ class MRtrix_recon_config(HasTraits):
     #        self._gradient_table_file_changed(self.gradient_table_file)
 
     def _recon_mode_changed(self,new):
-	if new == 'Probabilistic':
-		self.local_model_editor = {True:'Constrained Spherical Deconvolution'}
-		self.local_model = True
-	else:
-		self.local_model_editor = {False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'}
+        if new == 'Probabilistic':
+            self.local_model_editor = {True:'Constrained Spherical Deconvolution'}
+            self.local_model = True
+        else:
+            self.local_model_editor = {False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'}
 
 class Camino_recon_config(HasTraits):
     #imaging_model = Str
     #build_scheme_file = Bool(False)
     #b_value = Int(1000)
     b_value = Int (1000)
-    b0_volumes = Str()
-    number_of_tensors = Enum('1',['1','2','3','Multitensor'])
-    max_components = Int(1)
-    local_model = Str('dt')
-    local_model_editor = Dict({'dt':'Diffusion tensor','nldt_pos':'Non linear positive','nldt':'unconstrained non linear','ldt_wtd':'Diffusion weighted'})
+    #b0_volumes = Str()
+    model_type = Enum('Single-Tensor',['Single-Tensor','Two-Tensor','Three-Tensor','Other models'])
+    local_model = Str()
+    local_model_editor = Dict()
+    mixing_eq = Bool()
+    singleTensor_models = {'dt':'Linear fit','nldt_pos':'Non linear positive semi-definite','nldt':'Unconstrained non linear','ldt_wtd':'Weighted linear','restore':'Restore'}
+    fallback_model = Str('dt')
+    fallback_editor = Dict(singleTensor_models)
     #recon_mode = Str
     
     gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
@@ -182,24 +186,27 @@ class Camino_recon_config(HasTraits):
     
     traits_view = View(Item('gradient_table_file',label='Gradient table (x,y,z,b):'),
                        Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
-		       Item('local_model',editor=EnumEditor(name='local_model_editor')),
-		       VGroup('number_of_tensors',Item('max_components',enabled_when="number_of_tensors !=\'1\'")),
+		               VGroup('model_type',Item('local_model',editor=EnumEditor(name='local_model_editor')),
+                              Item('mixing_eq',label='Enforce compartment mixing parameter to 0.5',visible_when='model_type == "Two-Tensor" or model_type == "Three-Tensor"'),
+                              Item('fallback_model',editor=EnumEditor(name='fallback_editor'),visible_when='model_type == "Two-Tensor" or model_type == "Three-Tensor"')
+                       )
                        )
 
-    def _number_of_tensors_changed(self,new):
-	if new == '1':
-		self.local_model_editor = {'dt':'Linear fit','nldt_pos':'Non linear positive definite','nldt':'Unconstrained non linear','ldt_wtd':'Weighted linear fit'}
-		self.local_model = 'dt'
-		self.max_components = 1
-	elif new == '2':
-		self.local_model_editor = {'cylcyl':'bla1','cylcyl_eq':'bla2','pospos':'bla3','pospos_eq':'bla4','poscyl':'bla5','poscyl_eq':'bla6'}
-		self.local_model = 'cylcyl'
-	elif new == '3':
-		self.local_model_editor = {'cylcylcyl':'bla7','cylcylcyl_eq':'bla8','pospospos':'bla9','pospospos_eq':'bla10','posposcyl':'bla11','posposcyl_eq':'bla12','poscylcyl':'bla13','poscylcyl_eq':'bla14'}
-		self.local_model = 'cylcylcyl'
-	elif new == 'Multitensor':
-		self.local_model_editor = {'adc':'ADC','ball_stick':'Ball stick'}
-		self.local_model = 'adc'
+    def _model_type_changed(self,new):
+        if new == 'Single-Tensor':
+            self.local_model_editor = self.singleTensor_models
+            self.local_model = 'dt'
+            self.mixing_eq = False
+        elif new == 'Two-Tensor':
+            self.local_model_editor = {'cylcyl':'Both Cylindrically symmetric','pospos':'Both positive','poscyl':'One positive, one cylindrically symmetric'}
+            self.local_model = 'cylcyl'
+        elif new == 'Three-Tensor':
+            self.local_model_editor = {'cylcylcyl':'All cylindrically symmetric','pospospos':'All positive','posposcyl':'Two positive, one cylindrically symmetric','poscylcyl':'Two cylindrically symmetric, one positive'}
+            self.local_model = 'cylcylcyl'
+        elif new == 'Other models':
+            self.local_model_editor = {'adc':'ADC','ball_stick':'Ball stick'}
+            self.local_model = 'adc'
+            self.mixing_eq = False
         
     """def _check_gradient_table(self, f):
 	import csv
@@ -236,8 +243,8 @@ class Camino_recon_config(HasTraits):
     def _gradient_table_file_changed(self, new):
         if new != 'Custom...':
             self.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'.txt')
-	    if os.path.exists('cmtklib'):
-		self.gradient_table = os.path.abspath(self.gradient_table)
+            if os.path.exists('cmtklib'):
+                self.gradient_table = os.path.abspath(self.gradient_table)
             self.number_of_directions = int(re.search('\d+',new).group(0))
             
     def _custom_gradient_table_changed(self, new):
@@ -445,9 +452,9 @@ def create_mrtrix_recon_flow(config):
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled"]),name="inputnode")
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","eigVec","RF","SD","grad"],mandatory_inputs=True),name="outputnode")
     if config.local_model:
-	outputnode.inputs.SD = True
+        outputnode.inputs.SD = True
     else:
-	outputnode.inputs.SD = False
+        outputnode.inputs.SD = False
     #outputnode.inputs.grad = config.gradient_table
 
     # Tensor
@@ -477,37 +484,37 @@ def create_mrtrix_recon_flow(config):
 
     # Constrained Spherical Deconvolution
     if config.local_model:
-	# Compute single fiber voxel mask
-	mrtrix_erode = pe.Node(interface=mrtrix.Erode(),name="mrtrix_erode")
-	mrtrix_erode.inputs.number_of_passes = 3
-	#mrtrix_mul_eroded_FA = pe.Node(interface=mrtrix.MRMultiply(),name='mrtrix_mul_eroded_FA')
-	mrtrix_mul_eroded_FA = pe.Node(interface=MRtrix_mul(),name='mrtrix_mul_eroded_FA')
-	mrtrix_mul_eroded_FA.inputs.out_filename = "diffusion_resampled_tensor_FA_masked.mif"
-	mrtrix_thr_FA = pe.Node(interface=mrtrix.Threshold(),name='mrtrix_thr')
-	mrtrix_thr_FA.inputs.absolute_threshold_value = config.single_fib_thr
-	#mrtrix_thr_FA.inputs.out_filename = 'sf.mif'
-	flow.connect([
+        # Compute single fiber voxel mask
+        mrtrix_erode = pe.Node(interface=mrtrix.Erode(),name="mrtrix_erode")
+        mrtrix_erode.inputs.number_of_passes = 3
+        #mrtrix_mul_eroded_FA = pe.Node(interface=mrtrix.MRMultiply(),name='mrtrix_mul_eroded_FA')
+        mrtrix_mul_eroded_FA = pe.Node(interface=MRtrix_mul(),name='mrtrix_mul_eroded_FA')
+        mrtrix_mul_eroded_FA.inputs.out_filename = "diffusion_resampled_tensor_FA_masked.mif"
+        mrtrix_thr_FA = pe.Node(interface=mrtrix.Threshold(),name='mrtrix_thr')
+        mrtrix_thr_FA.inputs.absolute_threshold_value = config.single_fib_thr
+        #mrtrix_thr_FA.inputs.out_filename = 'sf.mif'
+        flow.connect([
 		    (inputnode,mrtrix_erode,[("wm_mask_resampled",'in_file')]),
 		    (mrtrix_erode,mrtrix_mul_eroded_FA,[('out_file','input2')]),
 		    (mrtrix_FA,mrtrix_mul_eroded_FA,[('FA','input1')]),
 		    (mrtrix_mul_eroded_FA,mrtrix_thr_FA,[('out_file','in_file')])
 		    ])
-	# Compute single fiber response function
-	mrtrix_rf = pe.Node(interface=mrtrix.EstimateResponseForSH(),name="mrtrix_rf")
-	mrtrix_rf.inputs.encoding_file = config.gradient_table
-	if config.lmax_order != 'Auto':
-		mrtrix_rf.inputs.maximum_harmonic_order = config.lmax_order
-	#mrtrix_rf.inputs.out_filename = 'rf.mif'
-	mrtrix_rf.inputs.normalise = config.normalize_to_B0
-	flow.connect([
+        # Compute single fiber response function
+        mrtrix_rf = pe.Node(interface=mrtrix.EstimateResponseForSH(),name="mrtrix_rf")
+        mrtrix_rf.inputs.encoding_file = config.gradient_table
+        if config.lmax_order != 'Auto':
+            mrtrix_rf.inputs.maximum_harmonic_order = config.lmax_order
+        #mrtrix_rf.inputs.out_filename = 'rf.mif'
+        mrtrix_rf.inputs.normalise = config.normalize_to_B0
+        flow.connect([
 		    (inputnode,mrtrix_rf,[("diffusion_resampled","in_file")]),
 		    (mrtrix_thr_FA,mrtrix_rf,[("out_file","mask_image")])
 		    ])
-	# Perform spherical deconvolution
-	mrtrix_CSD = pe.Node(interface=mrtrix.ConstrainedSphericalDeconvolution(),name="mrtrix_CSD")
-	mrtrix_CSD.inputs.normalise = config.normalize_to_B0
-	mrtrix_CSD.inputs.encoding_file = config.gradient_table
-	flow.connect([
+        # Perform spherical deconvolution
+        mrtrix_CSD = pe.Node(interface=mrtrix.ConstrainedSphericalDeconvolution(),name="mrtrix_CSD")
+        mrtrix_CSD.inputs.normalise = config.normalize_to_B0
+        mrtrix_CSD.inputs.encoding_file = config.gradient_table
+        flow.connect([
 		    (inputnode,mrtrix_CSD,[('diffusion_resampled','in_file')]),
 		    (mrtrix_rf,mrtrix_CSD,[('response','response_file')]),
 		    (mrtrix_rf,outputnode,[('response','RF')]),
@@ -515,7 +522,7 @@ def create_mrtrix_recon_flow(config):
 		    (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
 		    ])
     else:
-	flow.connect([
+        flow.connect([
 		    (inputnode,outputnode,[('diffusion_resampled','DWI')])
 		    ])
     return flow
@@ -533,7 +540,13 @@ def create_camino_recon_flow(config):
 
     # Fit model
     camino_ModelFit = pe.Node(interface=camino.ModelFit(),name='camino_ModelFit')
-    camino_ModelFit.inputs.model = config.local_model
+    if config.model_type == "Two-Tensor" or config.model_type == "Three-Tensor":
+        if config.mixing_eq:
+            camino_ModelFit.inputs.model = config.local_model + '_eq ' + config.fallback_model
+        else:
+            camino_ModelFit.inputs.model = config.local_model + ' ' + config.fallback_model
+    else:
+        camino_ModelFit.inputs.model = config.local_model
     camino_ModelFit.inputs.scheme_file = config.gradient_table
 
     flow.connect([
@@ -544,14 +557,14 @@ def create_camino_recon_flow(config):
 
     # Compute FA map
     camino_FA = pe.Node(interface=camino.ComputeFractionalAnisotropy(),name='camino_FA')
-    if config.number_of_tensors == '1':
-	camino_FA.inputs.inputmodel = 'dt'
-    elif config.number_of_tensors == '2':
-	camino_FA.inputs.inputmodel = 'twotensor'
-    elif config.number_of_tensors == '3':
-	camino_FA.inputs.inputmodel = 'threetensor'
-    elif config.number_of_tensors == 'Multitensor':
-	camino_FA.inputs.inputmodel = 'multitensor'
+    if config.model_type == 'Single-Tensor' or config.model_type == 'Other models':
+        camino_FA.inputs.inputmodel = 'dt'
+    elif config.model_type == 'Two-Tensor':
+        camino_FA.inputs.inputmodel = 'twotensor'
+    elif config.model_type == 'Three-Tensor':
+        camino_FA.inputs.inputmodel = 'threetensor'
+    elif config.model_type == 'Multitensor':
+        camino_FA.inputs.inputmodel = 'multitensor'
 
     flow.connect([
 		(camino_ModelFit,camino_FA,[('fitted_data','in_file')]),
@@ -560,14 +573,14 @@ def create_camino_recon_flow(config):
 
     # Compute MD map
     camino_MD = pe.Node(interface=camino.ComputeMeanDiffusivity(),name='camino_MD')
-    if config.number_of_tensors == '1':
-	camino_MD.inputs.inputmodel = 'dt'
-    elif config.number_of_tensors == '2':
-	camino_MD.inputs.inputmodel = 'twotensor'
-    elif config.number_of_tensors == '3':
-	camino_MD.inputs.inputmodel = 'threetensor'
-    elif config.number_of_tensors == 'Multitensor':
-	camino_MD.inputs.inputmodel = 'multitensor'
+    if config.model_type == 'Single-Tensor' or config.model_type == 'Other models':
+        camino_MD.inputs.inputmodel = 'dt'
+    elif config.model_type == 'Two-Tensor':
+        camino_MD.inputs.inputmodel = 'twotensor'
+    elif config.model_type == 'Three-Tensor':
+        camino_MD.inputs.inputmodel = 'threetensor'
+    elif config.model_type == 'Multitensor':
+        camino_MD.inputs.inputmodel = 'multitensor'
 
     flow.connect([
 		(camino_ModelFit,camino_MD,[('fitted_data','in_file')]),
@@ -576,11 +589,14 @@ def create_camino_recon_flow(config):
 
     # Compute Eigenvalues
     camino_eigenvectors = pe.Node(interface=camino.ComputeEigensystem(),name='camino_eigenvectors')
-    if config.number_of_tensors == '1':
-	camino_eigenvectors.inputs.inputmodel = 'dt'
+    if config.model_type == 'Single-Tensor' or config.model_type == 'Other models':
+        camino_eigenvectors.inputs.inputmodel = 'dt'
     else:
-	camino_eigenvectors.inputs.inputmodel = 'multitensor'
-    camino_eigenvectors.inputs.maxcomponents = config.max_components 
+        camino_eigenvectors.inputs.inputmodel = 'multitensor'
+        if config.model_type == 'Three-Tensor':
+            camino_eigenvectors.inputs.maxcomponents = 3
+        elif config.model_type == 'Two-Tensor':
+            camino_eigenvectors.inputs.maxcomponents = 2
 
     flow.connect([
 		(camino_ModelFit,camino_eigenvectors,[('fitted_data','in_file')]),
@@ -635,36 +651,33 @@ class gibbs_recon(BaseInterface):
     output_spec = gibbs_reconOutputSpec
 
     def _run_interface(self,runtime):
+        # Create XML file
+        f = open(os.path.abspath('gibbs_parameters.gtp'),'w')
+        xml_text = '<?xml version="1.0" ?>\n<global_tracking_parameter_file file_version="0.1">\n    <parameter_set iterations="%s" particle_length="%s" particle_width="%s" particle_weight="%s" temp_start="%s" temp_end="%s" inexbalance="%s" fiber_length="%s" curvature_threshold="90" />\n</global_tracking_parameter_file>' % (self.inputs.iterations,self.inputs.particle_length,self.inputs.particle_width,self.inputs.particle_weigth,self.inputs.temp_start,self.inputs.temp_end,self.inputs.inexbalance,self.inputs.fiber_length)
+        f.write(xml_text)
+        f.close()
+        # Change input to nifti format and rename to .dti for loading in MITK
+        if self.inputs.sh_coefficients == 'MRtrix':
+            mif_convert = pe.Node(interface=mrtrix.MRConvert(in_file = self.inputs.in_file, out_filename = os.path.abspath('input.nii')),name='convert_to_dti')
+            res = mif_convert.run()
+            #shutil.copyfile(res.outputs.converted,os.path.abspath('input.dwi'))
+            self.inputs.in_file = res.outputs.converted
+        else:
+            shutil.copyfile(self.inputs.in_file,os.path.abspath('input.dti'))
+            self.inputs.in_file = os.path.abspath('input.dti')
+        # Call gibbs software
+        gibbs = gibbs_command(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'))
+        gibbs.inputs.mask = self.inputs.mask
+        gibbs.inputs.sh_coefficients = self.inputs.sh_coefficients
+        gibbs.inputs.out_file_name = os.path.abspath(self.inputs.out_file_name)
+        res = gibbs.run()
 
-	# Create XML file
-	f = open(os.path.abspath('gibbs_parameters.gtp'),'w')
-	xml_text = '<?xml version="1.0" ?>\n<global_tracking_parameter_file file_version="0.1">\n    <parameter_set iterations="%s" particle_length="%s" particle_width="%s" particle_weight="%s" temp_start="%s" temp_end="%s" inexbalance="%s" fiber_length="%s" curvature_threshold="90" />\n</global_tracking_parameter_file>' % (self.inputs.iterations,self.inputs.particle_length,self.inputs.particle_width,self.inputs.particle_weigth,self.inputs.temp_start,self.inputs.temp_end,self.inputs.inexbalance,self.inputs.fiber_length)
-	f.write(xml_text)
-	f.close()
-
-	# Change input to nifti format and rename to .dti for loading in MITK
-	if self.inputs.sh_coefficients == 'MRtrix':
-		mif_convert = pe.Node(interface=mrtrix.MRConvert(in_file = self.inputs.in_file, out_filename = os.path.abspath('input.nii')),name='convert_to_dti')
-		res = mif_convert.run()
-		#shutil.copyfile(res.outputs.converted,os.path.abspath('input.dwi'))
-		self.inputs.in_file = res.outputs.converted
-	else:
-		shutil.copyfile(self.inputs.in_file,os.path.abspath('input.dti'))
-		self.inputs.in_file = os.path.abspath('input.dti')
-
-	# Call gibbs software
-	gibbs = gibbs_command(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'))
-	gibbs.inputs.mask = self.inputs.mask
-	gibbs.inputs.sh_coefficients = self.inputs.sh_coefficients
-	gibbs.inputs.out_file_name = os.path.abspath(self.inputs.out_file_name)
-	res = gibbs.run()
-
-	return runtime
+        return runtime
 
     def _list_outputs(self):
-	outputs = self._outputs().get()
-	outputs["out_file"] = os.path.abspath(self.inputs.out_file_name)
-	return outputs
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file_name)
+        return outputs
 
 def create_gibbs_recon_flow(config_gibbs,config_model):
     flow = pe.Workflow(name="reconstruction")
@@ -674,22 +687,22 @@ def create_gibbs_recon_flow(config_gibbs,config_model):
     gibbs = pe.Node(interface=gibbs_recon(iterations = config_gibbs.iterations, particle_length=config_gibbs.particle_length, particle_width=config_gibbs.particle_width, particle_weigth=config_gibbs.particle_weigth, temp_start=config_gibbs.temp_start, temp_end=config_gibbs.temp_end, inexbalance=config_gibbs.inexbalance, fiber_length=config_gibbs.fiber_length, curvature_threshold=config_gibbs.curvature_threshold, out_file_name='global_tractography.trk'),name="gibbs_recon")
 
     if config_model.local_model :
-	gibbs.inputs.sh_coefficients = 'MRtrix'
-	CSD_flow = create_mrtrix_recon_flow(config_model)
-	flow.connect([
+        gibbs.inputs.sh_coefficients = 'MRtrix'
+        CSD_flow = create_mrtrix_recon_flow(config_model)
+        flow.connect([
 		    (inputnode,CSD_flow,[('diffusion_resampled','inputnode.diffusion_resampled'),('wm_mask_resampled','inputnode.wm_mask_resampled')]),
 		    (CSD_flow,gibbs,[('outputnode.DWI','in_file')]),
 		    ])
 
     else:
-	dtifit = pe.Node(interface=fsl.DTIFit(),name="dtifit")
-	dtifit.inputs.bvals = config_model.b_values
-	dtifit.inputs.bvecs = config_model.b_vectors
-	dtifit.inputs.save_tensor = True
-	dtifit.inputs.output_type = 'NIFTI'
-	gibbs.inputs.sh_coefficients = 'FSL'
+        dtifit = pe.Node(interface=fsl.DTIFit(),name="dtifit")
+        dtifit.inputs.bvals = config_model.b_values
+        dtifit.inputs.bvecs = config_model.b_vectors
+        dtifit.inputs.save_tensor = True
+        dtifit.inputs.output_type = 'NIFTI'
+        gibbs.inputs.sh_coefficients = 'FSL'
 
-	flow.connect([
+        flow.connect([
 		    (inputnode,dtifit,[('diffusion_resampled','dwi'),('wm_mask_resampled','mask')]),
 		    (dtifit,gibbs,[('tensor','in_file')])
 		    ])

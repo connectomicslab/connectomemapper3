@@ -21,7 +21,7 @@ class PreprocessingConfig(HasTraits):
     description = Str('description')
     eddy_current_correction = Bool(False)
     motion_correction = Bool(False)
-
+    
     traits_view = View('motion_correction','eddy_current_correction')
 
 class PreprocessingStage(Stage):
@@ -30,43 +30,43 @@ class PreprocessingStage(Stage):
     config = PreprocessingConfig()
     inputs = ["diffusion"]
     outputs = ["diffusion_preproc"]
-
+    
     def create_workflow(self, flow, inputnode, outputnode):
-	if self.config.motion_correction:
-		mc_flirt = pe.Node(interface=fsl.MCFLIRT(out_file='motion_corrected.nii.gz'),name='motion_correction')
-		flow.connect([
+        if self.config.motion_correction:
+            mc_flirt = pe.Node(interface=fsl.MCFLIRT(out_file='motion_corrected.nii.gz'),name='motion_correction')
+            flow.connect([
 			    (inputnode,mc_flirt,[("diffusion","in_file")]),
 			    ])
-		if self.config.eddy_current_correction:
-			eddy_correct = pe.Node(interface=fsl.EddyCorrect(ref_num=0,out_file='eddy_corrected.nii.gz'),name='eddy_correct')
-			flow.connect([
+            if self.config.eddy_current_correction:
+                eddy_correct = pe.Node(interface=fsl.EddyCorrect(ref_num=0,out_file='eddy_corrected.nii.gz'),name='eddy_correct')
+                flow.connect([
 				    (mc_flirt,eddy_correct,[("out_file","in_file")]),
 				    (eddy_correct,outputnode,[("eddy_corrected","diffusion_preproc")]),
 				    ])
-		else:
-			flow.connect([
+            else:
+                flow.connect([
 				    (mc_flirt,outputnode,[("out_file","diffusion_preproc")]),
 				    ])
-	else:
-		if self.config.eddy_current_correction:
-			eddy_correct = pe.Node(interface=fsl.EddyCorrect(ref_num=0,out_file="eddy_corrected.nii.gz"),name='eddy_correct')
-			flow.connect([
+        else:
+            if self.config.eddy_current_correction:
+                eddy_correct = pe.Node(interface=fsl.EddyCorrect(ref_num=0,out_file="eddy_corrected.nii.gz"),name='eddy_correct')
+                flow.connect([
 				    (inputnode,eddy_correct,[("diffusion","in_file")]),
 				    (eddy_correct,outputnode,[("eddy_corrected","diffusion_preproc")]),
 				    ])
-		else:
-			flow.connect([
+            else:
+                flow.connect([
 				    (inputnode,outputnode,[("diffusion","diffusion_preproc")]),
 				    ])
 
     def define_inspect_outputs(self):
 
-	if self.config.motion_correction:
-		preproc_results_path = os.path.join(self.stage_dir,"result_preprocessing_stage.pklz")
-		if(os.path.exists(preproc_results_path)):
-		    preproc_results = pickle.load(gzip.open(preproc_results_path))
-		    self.inspect_outputs_dict['Preprocessed image'] = ['fslview',preproc_results.outputs.diffusion_preproc]
-		    self.inspect_outputs = self.inspect_outputs_dict.keys()
+        if self.config.motion_correction:
+            preproc_results_path = os.path.join(self.stage_dir,"result_preprocessing_stage.pklz")
+            if(os.path.exists(preproc_results_path)):
+                preproc_results = pickle.load(gzip.open(preproc_results_path))
+                self.inspect_outputs_dict['Preprocessed image'] = ['fslview',preproc_results.outputs.diffusion_preproc]
+                self.inspect_outputs = self.inspect_outputs_dict.keys()
 
             
     def has_run(self):

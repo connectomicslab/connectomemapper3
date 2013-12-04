@@ -316,74 +316,73 @@ class make_seeds(BaseInterface):
     base_name = Str
 
     def _run_interface(self,runtime):
-	import nibabel as nib
-	import numpy as np
-	from scipy.ndimage.morphology import binary_dilation as dil
-	iflogger.info("Computing seed files for probabilistic tractography\n===================================================")
-	# Load ROI file
-	for ROI_file in self.inputs.ROI_files:
-		ROI_vol = nib.load(ROI_file)
-		ROI_data = ROI_vol.get_data()
-		ROI_affine = ROI_vol.get_affine()
-		space_size = ROI_data.shape
-		# Load WM mask
-		WM_vol = nib.load(self.inputs.WM_file)
-		WM_data = WM_vol.get_data()
-		# Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
-		iflogger.info("ROI dilation...")
-		self.ROI_idx = np.unique(ROI_data[ROI_data!=0]).astype(int)
-		#self.n_ROIs = ROI_idx.size
-		overlap_value = 10*self.ROI_idx.max().astype(int)
-		temp = ROI_data.copy()
-		dil_ROIs = ROI_data.copy()
-		dil_ROIs = dil_ROIs * 0
-		for i in self.ROI_idx:
-			temp[ROI_data==i]=1
-			temp[ROI_data!=i]=0
-			temp = dil(temp).astype(temp.dtype)
-			overlap = temp * dil_ROIs # -> volume with ones on voxels overlapping dilated current ROI with previous dilations
-			dil_ROIs[temp > 0] = i
-			dil_ROIs[overlap > 0] = overlap_value
-		# Reassign overlapping voxels to ROI with most values in neighbourhood, iterating until 10 voxels then puts to 0
-		iflogger.info("Reassigning overlapping voxels...")
-		count = 0
-		while ((dil_ROIs.max().astype(int) == overlap_value) and (count <= 10)):
-			count = count + 1
-			xx,yy,zz = np.where(dil_ROIs==overlap_value)
-			for i in range(0,xx.size):
-				neigh = dil_ROIs[max(xx[i]-1,0):min(xx[i]+2,space_size[0]),max(yy[i]-1,0):min(yy[i]+2,space_size[1]),max(zz[i]-1,0):min(zz[i]+2,space_size[2])].astype(int)
-				neigh = neigh[neigh!=overlap_value]
-				neigh = neigh[neigh!=0]
-				dil_ROIs[xx[i],yy[i],zz[i]] = np.argmax(np.bincount(neigh))
-		idx = np.where(dil_ROIs==overlap_value)
-		iflogger.info("Non resolved overlapping voxels: "+str(idx[0].size))
-		dil_ROIs[idx] = 0
-		# Take overlap between dilated ROIs and WM to define seeding regions
-		border = dil_ROIs * WM_data 
-		# Save one nifti file per seeding ROI
-		temp = border.copy()
-		for i in self.ROI_idx:
-			temp[border == i] = 1
-			temp[border != i] = 0
-			new_image = nib.Nifti1Image(temp,ROI_affine)
-			_,self.base_name,_ = split_filename(ROI_file)
-			save_as = os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz')
-			#iflogger.info("Saving file to: " + save_as)
-			nib.save(new_image,save_as)
-	
-	return runtime
+        import nibabel as nib
+        import numpy as np
+        from scipy.ndimage.morphology import binary_dilation as dil
+        iflogger.info("Computing seed files for probabilistic tractography\n===================================================")
+        # Load ROI file
+        for ROI_file in self.inputs.ROI_files:
+            ROI_vol = nib.load(ROI_file)
+            ROI_data = ROI_vol.get_data()
+            ROI_affine = ROI_vol.get_affine()
+            space_size = ROI_data.shape
+            # Load WM mask
+            WM_vol = nib.load(self.inputs.WM_file)
+            WM_data = WM_vol.get_data()
+            # Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
+            iflogger.info("ROI dilation...")
+            self.ROI_idx = np.unique(ROI_data[ROI_data!=0]).astype(int)
+            #self.n_ROIs = ROI_idx.size
+            #overlap_value = 10*self.ROI_idx.max().astype(int)
+            #temp = ROI_data.copy()
+            #dil_ROIs = ROI_data.copy()
+            #dil_ROIs = dil_ROIs * 0
+            #for i in self.ROI_idx:
+            #    temp[ROI_data==i]=1
+            #    temp[ROI_data!=i]=0
+            #    temp = dil(temp).astype(temp.dtype)
+            #    overlap = temp * dil_ROIs # -> volume with ones on voxels overlapping dilated current ROI with previous dilations
+            #    dil_ROIs[temp > 0] = i
+            #    dil_ROIs[overlap > 0] = overlap_value
+            # Reassign overlapping voxels to ROI with most values in neighbourhood, iterating until 10 voxels then puts to 0
+            #iflogger.info("Reassigning overlapping voxels...")
+            #count = 0
+            #while ((dil_ROIs.max().astype(int) == overlap_value) and (count <= 10)):
+            #    count = count + 1
+            #    xx,yy,zz = np.where(dil_ROIs==overlap_value)
+            #    for i in range(0,xx.size):
+            #        neigh = dil_ROIs[max(xx[i]-1,0):min(xx[i]+2,space_size[0]),max(yy[i]-1,0):min(yy[i]+2,space_size[1]),max(zz[i]-1,0):min(zz[i]+2,space_size[2])].astype(int)
+            #        neigh = neigh[neigh!=overlap_value]
+            #        neigh = neigh[neigh!=0]
+            #        dil_ROIs[xx[i],yy[i],zz[i]] = np.argmax(np.bincount(neigh))
+            #idx = np.where(dil_ROIs==overlap_value)
+            #iflogger.info("Non resolved overlapping voxels: "+str(idx[0].size))
+            #dil_ROIs[idx] = 0
+            # Take overlap between dilated ROIs and WM to define seeding regions
+            border = ROI_data * WM_data 
+            # Save one nifti file per seeding ROI
+            temp = border.copy()
+            for i in self.ROI_idx:
+                temp[border == i] = 1
+                temp[border != i] = 0
+                new_image = nib.Nifti1Image(temp,ROI_affine)
+                _,self.base_name,_ = split_filename(ROI_file)
+                save_as = os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz')
+                #iflogger.info("Saving file to: " + save_as)
+                nib.save(new_image,save_as)
+        return runtime
 
     def _list_outputs(self):
-	outputs = self._outputs().get()
-	outputs["seed_files"] = self.gen_outputfilelist()
-	return outputs
+        outputs = self._outputs().get()
+        outputs["seed_files"] = self.gen_outputfilelist()
+        return outputs
 
     def gen_outputfilelist(self):
-	output_list = []
-	for i in self.ROI_idx:
-		output_list.append(os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz'))
-	return output_list
-	
+        output_list = []
+        for i in self.ROI_idx:
+            output_list.append(os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz'))
+        return output_list
+
 
 def create_mrtrix_tracking_flow(config,grad_table,SD):
     flow = pe.Workflow(name="tracking")
@@ -392,47 +391,52 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
     if config.tracking_model == 'Deterministic':
-	mrtrix_tracking = pe.Node(interface=mrtrix.StreamlineTrack(),name="mrtrix_deterministic_tracking")
-	mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
-	mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
-	mrtrix_tracking.inputs.maximum_tract_length = config.max_length
-	mrtrix_tracking.inputs.minimum_tract_length = config.min_length
-	mrtrix_tracking.inputs.step_size = config.step_size
-	if SD:
-		mrtrix_tracking.inputs.inputmodel = 'SD_STREAM'
-	else:
-		mrtrix_tracking.inputs.inputmodel = 'DT_STREAM'
-		mrtrix_tracking.inputs.gradient_encoding_file = grad_table
-		#flow.connect([
-		#	    (inputnode,mrtrix_tracking,[('grad','gradient_encoding_file')])
-		#	    ])
-	flow.connect([
-	(inputnode,mrtrix_tracking,[('DWI','in_file')]),
-	(inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
-	(inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
-	(mrtrix_tracking,outputnode,[('tracked','track_file')])
-	])
+        mrtrix_tracking = pe.Node(interface=mrtrix.StreamlineTrack(),name="mrtrix_deterministic_tracking")
+        mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
+        mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
+        mrtrix_tracking.inputs.maximum_tract_length = config.max_length
+        mrtrix_tracking.inputs.minimum_tract_length = config.min_length
+        mrtrix_tracking.inputs.step_size = config.step_size
+        if SD:
+            mrtrix_tracking.inputs.inputmodel = 'SD_STREAM'
+        else:
+            mrtrix_tracking.inputs.inputmodel = 'DT_STREAM'
+            mrtrix_tracking.inputs.gradient_encoding_file = grad_table
+            #flow.connect([
+            #	    (inputnode,mrtrix_tracking,[('grad','gradient_encoding_file')])
+            #	    ])
+        converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
+        flow.connect([
+                      (inputnode,mrtrix_tracking,[('DWI','in_file')]),
+                      (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
+                      (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
+                      (mrtrix_tracking,converter,[('tracked','in_file')]),
+                      (inputnode,converter,[('wm_mask_resampled','image_file')]),
+                      (converter,outputnode,[('out_file','track_file')])
+                      ])
 
     elif config.tracking_model == 'Probabilistic':
-	mrtrix_seeds = pe.Node(interface=make_seeds(),name="mrtrix_seeds")
-	mrtrix_tracking = pe.MapNode(interface=mrtrix.StreamlineTrack(desired_number_of_tracks = config.desired_number_of_tracks,maximum_number_of_tracks = config.max_number_of_tracks, maximum_tract_length = config.max_length,minimum_tract_length = config.min_length,step_size = config.step_size,inputmodel='SD_PROB'),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
-	flow.connect([
+        mrtrix_seeds = pe.Node(interface=make_seeds(),name="mrtrix_seeds")
+        mrtrix_tracking = pe.MapNode(interface=mrtrix.StreamlineTrack(desired_number_of_tracks = config.desired_number_of_tracks,maximum_number_of_tracks = config.max_number_of_tracks, maximum_tract_length = config.max_length,minimum_tract_length = config.min_length,step_size = config.step_size,inputmodel='SD_PROB'),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
+        converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name='trackvis')
+        flow.connect([
 		    #(inputnode,mrtrix_seeds,[('DWI','DWI')]),
 		    (inputnode,mrtrix_seeds,[('wm_mask_resampled','WM_file')]),
 		    (inputnode,mrtrix_seeds,[('gm_registered','ROI_files')]),
 		    ])
-	flow.connect([
+        flow.connect([
 		    (mrtrix_seeds,mrtrix_tracking,[('seed_files','seed_file')]),
 		    (inputnode,mrtrix_tracking,[('DWI','in_file')]),
 		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
-		    (mrtrix_tracking,outputnode,[('tracked','track_file')])
+            (mrtrix_tracking,converter,[('tracked','in_file')]),
+		    (converter,outputnode,[('out_file','track_file')])
 		    ])
-	#mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
-	#mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
-	#mrtrix_tracking.inputs.maximum_tract_length = config.max_length
-	#mrtrix_tracking.inputs.minimum_tract_length = config.min_length
-	#mrtrix_tracking.inputs.step_size = config.step_size
-	#mrtrix_tracking.inputs.inputmodel = 'DT_PROB'
+        #mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
+        #mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
+        #mrtrix_tracking.inputs.maximum_tract_length = config.max_length
+        #mrtrix_tracking.inputs.minimum_tract_length = config.min_length
+        #mrtrix_tracking.inputs.step_size = config.step_size
+        #mrtrix_tracking.inputs.inputmodel = 'DT_PROB'
 
     return flow
 

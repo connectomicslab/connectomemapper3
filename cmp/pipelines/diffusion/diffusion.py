@@ -212,7 +212,7 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Segmentation'].enabled:
             if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
                 self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
-        	self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
+                self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
             seg_flow = self.create_stage_flow("Segmentation")
             flow.connect([(datasource,seg_flow, [('T1','inputnode.T1')])])
        
@@ -246,13 +246,13 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Connectome'].enabled:
             con_flow = self.create_stage_flow("Connectome")
             flow.connect([
-                        (parc_flow,con_flow, [('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
-                        (reg_flow,con_flow, [('outputnode.roi_volumes_registered','inputnode.roi_volumes_registered')]),
-                        (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
-                                              ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
-                                              ('outputnode.P0','inputnode.P0')]),
-                        (con_flow,sinker, [('outputnode.connectivity_matrices',now+'.connectivity_matrices')])
-                        ])
+		                (parc_flow,con_flow, [('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
+		                (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
+                                              ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
+		                                      ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
+		                                      ('outputnode.P0','inputnode.P0')]),
+		                (con_flow,sinker, [('outputnode.connectivity_matrices',now+'.connectivity_matrices')])
+		                ])
        
         iflogger.info("**** Processing ****")
        

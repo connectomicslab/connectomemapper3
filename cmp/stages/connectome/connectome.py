@@ -28,6 +28,7 @@ from cmtklib.connectome import cmat
 from cmp.stages.common import Stage
 
 class ConnectomeConfig(HasTraits):
+    #modality = List(['Deterministic','Probabilistic'])
     compute_curvature = Bool(True)
     output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
 

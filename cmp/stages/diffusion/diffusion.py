@@ -16,6 +16,7 @@ import pickle
 # Nipype imports
 import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
+import nipype.interfaces.fsl as fsl
 
 # Own imports
 from cmp.stages.common import Stage
@@ -63,42 +64,42 @@ class DiffusionConfig(HasTraits):
     def __init__(self):
         self.dtk_recon_config = DTK_recon_config(imaging_model=self.imaging_model)
         self.mrtrix_recon_config = MRtrix_recon_config(imaging_model=self.imaging_model,recon_mode=self.diffusion_model)
-	self.camino_recon_config = Camino_recon_config(imaging_model=self.imaging_model)
-	self.gibbs_recon_config = Gibbs_recon_config()
-	self.gibbs_model_config = Gibbs_model_config()
+        self.camino_recon_config = Camino_recon_config(imaging_model=self.imaging_model)
+        self.gibbs_recon_config = Gibbs_recon_config()
+        self.gibbs_model_config = Gibbs_model_config()
         self.dtk_tracking_config = DTK_tracking_config()
         self.dtb_tracking_config = DTB_tracking_config(imaging_model=self.imaging_model)
         self.mrtrix_tracking_config = MRtrix_tracking_config(imaging_model=self.imaging_model,tracking_model=self.diffusion_model)
-	self.camino_tracking_config = Camino_tracking_config(imaging_model=self.imaging_model,tracking_mode=self.diffusion_model)
+        self.camino_tracking_config = Camino_tracking_config(imaging_model=self.imaging_model,tracking_mode=self.diffusion_model)
         
     def _imaging_model_changed(self, new):
         self.dtk_recon_config.imaging_model = new
         #self.mrtrix_recon_config.imaging_model = new
-	#self.camino_recon_config.imaging_model = new
+        #self.camino_recon_config.imaging_model = new
         self.dtk_tracking_config.imaging_model = new
         self.dtb_tracking_config.imaging_model = new
-	# Remove MRtrix from recon and tracking methods and Probabilistic from diffusion model if imaging_model is DSI
-	if new == 'DSI':
-		if (not self.processing_tool == 'DTK') or (not self.processing_tool == 'Gibbs'):
-			self._processing_tool_changed('DTK')
-			self.processing_tool = 'DTK'
-		self.processing_tool_editor = ['DTK']
-	else:
-		self.diffusion_model_editor = ['Deterministic','Probabilistic']
-		self.processing_tool_editor = ['DTK','MRtrix','Camino','Gibbs']
+        # Remove MRtrix from recon and tracking methods and Probabilistic from diffusion model if imaging_model is DSI
+        if new == 'DSI':
+            if (not self.processing_tool == 'DTK'):
+                self._processing_tool_changed('DTK')
+                self.processing_tool = 'DTK'
+            self.processing_tool_editor = ['DTK']
+        else:
+            self.diffusion_model_editor = ['Deterministic','Probabilistic']
+            self.processing_tool_editor = ['DTK','MRtrix','Camino','Gibbs']
 
     def _processing_tool_changed(self, new):
-	if new == 'DTK':
-		self.diffusion_model_editor = ['Deterministic']
-		self.diffusion_model = 'Deterministic'
-		self._diffusion_model_changed('Deterministic')
-	else:
-		self.diffusion_model_editor = ['Deterministic','Probabilistic']
+        if new == 'DTK':
+            self.diffusion_model_editor = ['Deterministic']
+            self.diffusion_model = 'Deterministic'
+            self._diffusion_model_changed('Deterministic')
+        else:
+            self.diffusion_model_editor = ['Deterministic','Probabilistic']
 
     def _diffusion_model_changed(self,new):
-	self.mrtrix_tracking_config.tracking_model = new
-	self.camino_tracking_config.tracking_model = new
-		
+        self.mrtrix_tracking_config.tracking_model = new
+        self.camino_tracking_config.tracking_model = new
+
         
 def strip_suffix(file_input, prefix):
     import os
@@ -110,22 +111,33 @@ class DiffusionStage(Stage):
     name = 'diffusion_stage'
     config = DiffusionConfig()
     inputs = ["diffusion","wm_mask_registered","roi_volumes"]
-    outputs = ["track_file","gFA","skewness","kurtosis","P0"]
+    outputs = ["track_file","gFA","skewness","kurtosis","P0","roi_volumes"]
 
 
     def create_workflow(self, flow, inputnode, outputnode):
         # resampling diffusion image and setting output type to short
-	fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_file='diffusion_resampled.nii'),name="diffusion_resample")
+        fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_file='diffusion_resampled.nii'),name="diffusion_resample")
         fs_mriconvert.inputs.vox_size = self.config.resampling
         flow.connect([(inputnode,fs_mriconvert,[('diffusion','in_file')])])
 
-	fs_mriconvert_wm_mask = pe.Node(interface=fs.MRIConvert(out_type='nii',resample_type='nearest',out_file='wm_mask_resampled.nii'),name="mask_resample")
+        fs_mriconvert_wm_mask = pe.Node(interface=fs.MRIConvert(out_type='nii',resample_type='nearest',out_file='wm_mask_resampled.nii'),name="mask_resample")
         fs_mriconvert_wm_mask.inputs.vox_size = self.config.resampling
         flow.connect([(inputnode,fs_mriconvert_wm_mask,[('wm_mask_registered','in_file')])])
 
-	fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='nii',resample_type='nearest',out_file='ROIs_resampled.nii'),name="ROIs_resample",iterfield=['in_file'])
+        fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='nii',resample_type='nearest'),name="ROIs_resample",iterfield=['in_file'])
         fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
         flow.connect([(inputnode,fs_mriconvert_ROIs,[('roi_volumes','in_file')])])
+        if self.config.processing_tool != 'DTK':
+            dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
+            dilate_rois.inputs.operation = 'mean'
+            flow.connect([
+                          (fs_mriconvert_ROIs,dilate_rois,[("out_file","in_file")]),
+                          (dilate_rois,outputnode,[("out_file","roi_volumes")])
+                        ])
+        else:
+            flow.connect([
+                          (fs_mriconvert,outputnode,[("out_file","roi_volumes")])
+                        ])
         
         # Reconstruction
         if self.config.processing_tool == 'DTK':
@@ -134,7 +146,7 @@ class DiffusionStage(Stage):
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
                         ])
- 	elif self.config.processing_tool == 'MRtrix':
+        elif self.config.processing_tool == 'MRtrix':
             recon_flow = create_mrtrix_recon_flow(self.config.mrtrix_recon_config)
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
@@ -142,7 +154,7 @@ class DiffusionStage(Stage):
 			(fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         ])
 
-	elif self.config.processing_tool == 'Camino':
+        elif self.config.processing_tool == 'Camino':
             recon_flow = create_camino_recon_flow(self.config.camino_recon_config)
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
@@ -150,9 +162,9 @@ class DiffusionStage(Stage):
 			(fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         ])
 
-	elif self.config.processing_tool == 'Gibbs':
-	    recon_flow = create_gibbs_recon_flow(self.config.gibbs_recon_config,self.config.gibbs_model_config)
-	    flow.connect([
+        elif self.config.processing_tool == 'Gibbs':
+            recon_flow = create_gibbs_recon_flow(self.config.gibbs_recon_config,self.config.gibbs_model_config)
+            flow.connect([
 			(fs_mriconvert,recon_flow,[("out_file","inputnode.diffusion_resampled")]),
 			(fs_mriconvert_wm_mask,recon_flow,[("out_file","inputnode.wm_mask_resampled")]),
 			])
@@ -162,31 +174,34 @@ class DiffusionStage(Stage):
             track_flow = create_dtb_tracking_flow(self.config.dtb_tracking_config)
             flow.connect([
                         (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_registered')]),
-                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
+                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')])
                         ])
 
-	elif self.config.processing_tool == 'MRtrix':
+        elif self.config.processing_tool == 'MRtrix':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config,self.config.mrtrix_recon_config.gradient_table,self.config.mrtrix_recon_config.local_model)
-	    flow.connect([
+            flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
-			#(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
-			#(recon_flow, track_flow,[('outputnode.grad','inputnode.grad')]),
+			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
+			             #(recon_flow, track_flow,[('outputnode.grad','inputnode.grad')]),
                         ])
-	    if self.config.diffusion_model == 'Probabilistic':
-	    	flow.connect([
-			    (fs_mriconvert_ROIs,track_flow,[('out_file','inputnode.gm_registered')]),
-			    ])
+            if self.config.diffusion_model == 'Probabilistic':
+                flow.connect([
+    			    (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')]),
+    			    ])
+            flow.connect([
+                        (track_flow,outputnode,[('outputnode.track_file','track_file')])
+                        ])
 
-	elif self.config.processing_tool == 'Camino':
+        elif self.config.processing_tool == 'Camino':
             track_flow = create_camino_tracking_flow(self.config.camino_tracking_config)
             flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
                         ])
                         
-	if self.config.processing_tool == 'DTK':
-		flow.connect([
+        if self.config.processing_tool == 'DTK':
+            flow.connect([
 			    (recon_flow,outputnode, [("outputnode.gFA","gFA"),("outputnode.skewness","skewness"),
 			                             ("outputnode.kurtosis","kurtosis"),("outputnode.P0","P0")]),
 			    (track_flow,outputnode, [('outputnode.track_file','track_file')])
@@ -194,33 +209,38 @@ class DiffusionStage(Stage):
 
     def define_inspect_outputs(self):
 
-	if self.config.processing_tool == 'DTK':
-		diff_results_path = os.path.join(self.stage_dir,"tracking","dtb_streamline","result_fiber_tracking.pklz")
-		if(os.path.exists(diff_results_path)):
-		    diff_results = pickle.load(gzip.open(diff_results_path))
-		    self.inspect_outputs_dict['DTK streamline'] = ['trackvis',diff_results.outputs.track_file]
-		    self.inspect_outputs = self.inspect_outputs_dict.keys()
+        if self.config.processing_tool == 'DTK':
+            diff_results_path = os.path.join(self.stage_dir,"tracking","dtb_streamline","result_fiber_tracking.pklz")
+            if(os.path.exists(diff_results_path)):
+                diff_results = pickle.load(gzip.open(diff_results_path))
+                self.inspect_outputs_dict['DTK streamline'] = ['trackvis',diff_results.outputs.track_file]
+                self.inspect_outputs = self.inspect_outputs_dict.keys()
 
-	if self.config.processing_tool == 'MRtrix':
+        elif self.config.processing_tool == 'MRtrix':
 
-		if self.config.mrtrix_recon_config.local_model:
-		    RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
-		    if(os.path.exists(RF_path)):
-		    	RF_results = pickle.load(gzip.open(RF_path))
-		    	self.inspect_outputs_dict['MRTRIX Response function'] = ['disp_profile','-response',RF_results.outputs.response]
-		    	self.inspect_outputs = self.inspect_outputs_dict.keys()
+            if self.config.mrtrix_recon_config.local_model:
+                RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
+                if(os.path.exists(RF_path)):
+                    RF_results = pickle.load(gzip.open(RF_path))
+                    self.inspect_outputs_dict['MRTRIX Response function'] = ['disp_profile','-response',RF_results.outputs.response]
+                    self.inspect_outputs = self.inspect_outputs_dict.keys()
 
-		FA_map_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_FA","result_mrtrix_FA.pklz")
-		if os.path.exists(FA_map_path):
-			FA_map_res = pickle.load(gzip.open(FA_map_path))
-			self.inspect_outputs_dict['MRtrix FA map'] = ['mrview', FA_map_res.outputs.FA]
-			self.inspect_outputs = self.inspect_outputs_dict.keys()
-	
-		FA_thr_map_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_thr","result_mrtrix_thr.pklz")
-		if os.path.exists(FA_thr_map_path):
-			FA_thr_map_res = pickle.load(gzip.open(FA_thr_map_path))
-			self.inspect_outputs_dict['MRtrix thresholded FA'] = ['mrview', FA_map_res.outputs.FA, FA_thr_map_res.outputs.out_file]
-			self.inspect_outputs = self.inspect_outputs_dict.keys()
+            FA_map_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_FA","result_mrtrix_FA.pklz")
+            if os.path.exists(FA_map_path):
+                FA_map_res = pickle.load(gzip.open(FA_map_path))
+                self.inspect_outputs_dict['MRtrix FA map'] = ['mrview', FA_map_res.outputs.FA]
+                self.inspect_outputs = self.inspect_outputs_dict.keys()
+
+            FA_thr_map_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_thr","result_mrtrix_thr.pklz")
+            if os.path.exists(FA_thr_map_path):
+                FA_thr_map_res = pickle.load(gzip.open(FA_thr_map_path))
+                self.inspect_outputs_dict['MRtrix thresholded FA'] = ['mrview', FA_map_res.outputs.FA, FA_thr_map_res.outputs.out_file]
+                self.inspect_outputs = self.inspect_outputs_dict.keys()
+                
+            diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
+            if(os.path.exists(diff_results_path)):
+                diff_results = pickle.load(gzip.open(diff_results_path))
+                self.inspect_outputs_dict['MRTrix streamline'] = ['trackvis',diff_results.outputs.out_file]
 
             
     def has_run(self):
