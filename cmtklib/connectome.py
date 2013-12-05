@@ -106,6 +106,158 @@ def save_fibers(oldhdr, oldfib, fname, indices):
 
     print("Writing final no orphan fibers: %s" % fname)
     nibabel.trackvis.write(fname, outstreams, hdrnew)
+    
+def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle']): 
+
+    resolutions = get_parcellation(parcellation_scheme)
+    firstROIFile = roi_volumes[0]
+    firstROI = nibabel.load(firstROIFile)
+    roiVoxelSize = firstROI.get_header().get_zooms()
+    
+    for parkey, parval in resolutions.items():            
+        print("Resolution = "+parkey)
+        
+        # Open the corresponding ROI
+        print("Open the corresponding ROI")
+        for vol in roi_volumes:
+            if parkey in vol:
+                roi_fname = vol
+                print roi_fname
+        #roi_fname = roi_volumes[r]
+        #r += 1
+        roi       = nibabel.load(roi_fname)
+        roiData   = roi.get_data()
+      
+        # Create the matrix
+        nROIs = parval['number_of_regions']
+        print("Create the connection matrix (%s rois)" % nROIs)
+        G     = nx.Graph()
+
+        # add node information from parcellation
+        gp = nx.read_graphml(parval['node_information_graphml'])
+        for u,d in gp.nodes_iter(data=True):
+            G.add_node(int(u), d)
+            # compute a position for the node based on the mean position of the
+            # ROI in voxel coordinates (segmentation volume )
+            G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
+
+        graph_matrix = np.zeros((nROIs,nROIs),dtype = int)
+    
+        for intrk_i in range(0,len(intrk)):
+            fib, hdr    = nibabel.trackvis.read(intrk[intrk_i], False)
+            (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize)
+            n = len(fib)
+                
+            # create empty fiber label array
+            #fiberlabels = np.zeros( (n, 2) )
+            #final_fiberlabels = []
+            #final_fibers_idx = []
+                
+            dis = 0
+    
+            pc = -1
+            for i in range(n):  # n: number of fibers
+    
+                # Percent counter
+                pcN = int(round( float(100*i)/n ))
+                if pcN > pc and pcN%1 == 0:
+                    pc = pcN
+                    print('%4.0f%%' % (pc))
+        
+                # ROI start => ROI end
+                try:
+                    startROI = int(roiData[endpoints[i, 0, 0], endpoints[i, 0, 1], endpoints[i, 0, 2]]) # endpoints from create_endpoints_array
+                    endROI   = int(roiData[endpoints[i, 1, 0], endpoints[i, 1, 1], endpoints[i, 1, 2]])
+                except IndexError:
+                    print("An index error occured for fiber %s. This means that the fiber start or endpoint is outside the volume. Continue." % i)
+                    continue
+                
+                # Filter
+                if startROI == 0 or endROI == 0:
+                    dis += 1
+                    #fiberlabels[i,0] = -1
+                    continue
+                
+                if startROI > nROIs or endROI > nROIs:
+    #                print("Start or endpoint of fiber terminate in a voxel which is labeled higher")
+    #                print("than is expected by the parcellation node information.")
+    #                print("Start ROI: %i, End ROI: %i" % (startROI, endROI))
+    #                print("This needs bugfixing!")
+                    continue
+                
+                # Update fiber label
+                # switch the rois in order to enforce startROI < endROI
+                if endROI < startROI:
+                    tmp = startROI
+                    startROI = endROI
+                    endROI = tmp
+    
+                #fiberlabels[i,0] = startROI
+                #fiberlabels[i,1] = endROI
+    
+                #final_fiberlabels.append( [ startROI, endROI ] )
+                #final_fibers_idx.append(i)
+    
+                # Add edge to graph
+                if G.has_edge(startROI, endROI):
+                    G.edge[startROI][endROI]['n_tracks'] += 1
+                else:
+                    G.add_edge(startROI, endROI, n_tracks  = 1)
+                
+                graph_matrix[startROI-1][endROI-1] +=1
+                
+        tot_tracks_from_ROI = graph_matrix.sum(1)
+                    
+        for u,v,d in G.edges_iter(data=True):
+            G.remove_edge(u,v)
+            di = { 'connection_prob' : d['n_tracks']/ tot_tracks_from_ROI[u-1]}
+            G.add_edge(u,v, di)
+                
+        # storing network
+        if 'gPickle' in output_types:
+            nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
+        if 'mat' in output_types:
+            # edges
+            size_edges = (parval['number_of_regions'],parval['number_of_regions'])
+            edge_keys = G.edges(data=True)[0][2].keys()
+            
+            edge_struct = {}
+            for edge_key in edge_keys:
+                edge_arr = np.zeros(size_edges,dtype=np.float)
+                for edge_x,edge_y,edge_data in G.edges(data=True):
+                    edge_arr[edge_x-1,edge_y-1] = edge_data[edge_key]
+                    edge_arr[edge_y-1,edge_x-1] = edge_data[edge_key]
+                edge_struct[edge_key] = edge_arr
+                
+            # nodes
+            size_nodes = parval['number_of_regions']
+            node_keys = G.nodes(data=True)[0][1].keys()
+
+            node_struct = {}
+            for node_key in node_keys:
+                if node_key == 'dn_position':
+                    node_arr = np.zeros([size_nodes,3],dtype=np.float)
+                else:
+                    node_arr = np.zeros(size_nodes,dtype=np.object_)
+                for node_n,node_data in G.nodes(data=True):
+                    node_arr[node_n-1] = node_data[node_key]
+                node_struct[node_key] = node_arr
+                
+            scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
+        if 'graphml' in output_types:
+            g2 = nx.Graph()
+            for u_gml,v_gml,d_gml in G.edges_iter(data=True):
+                g2.add_edge(u_gml,v_gml,d_gml)
+            for u_gml,d_gml in G.nodes(data=True):
+                g2.add_node(u_gml,{'dn_correspondence_id':d_gml['dn_correspondence_id'],
+                               'dn_fsname':d_gml['dn_fsname'],
+                               'dn_hemisphere':d_gml['dn_hemisphere'],
+                               'dn_name':d_gml['dn_name'],
+                               'dn_position_x':float(d_gml['dn_position'][0]),
+                               'dn_position_y':float(d_gml['dn_position'][1]),
+                               'dn_position_z':float(d_gml['dn_position'][2]),
+                               'dn_region':d_gml['dn_region']})
+            nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
 def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additional_maps={}, output_types=['gPickle']): 
     """ Create the connection matrix for each resolution using fibers and ROIs. """

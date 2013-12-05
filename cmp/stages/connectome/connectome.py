@@ -24,7 +24,7 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec,\
 from nipype.utils.filemanip import split_filename
 
 # Own imports
-from cmtklib.connectome import cmat
+from cmtklib.connectome import cmat, prob_cmat
 from cmp.stages.common import Stage
 
 class ConnectomeConfig(HasTraits):
@@ -38,7 +38,7 @@ class ConnectomeConfig(HasTraits):
 
 
 class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
-    track_file = File(desc='Tractography result', exists=True, mandatory=True)
+    track_file = InputMultiPath(File(exists=True),desc='Tractography result', mandatory=True)
     roi_volumes = InputMultiPath(File(exists=True), desc='ROI volumes registered to diffusion space')
     parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','NativeFreesurfer'], usedefault=True)
     compute_curvature = traits.Bool(True, desc='Compute curvature', usedefault=True)
@@ -53,6 +53,7 @@ class CMTK_cmatOutputSpec(TraitedSpec):
     final_fiberlabels_files = OutputMultiPath(File())
     streamline_final_file = File()
     connectivity_matrices = OutputMultiPath(File())
+        
     
 class CMTK_cmat(BaseInterface):
     input_spec = CMTK_cmatInputSpec
@@ -63,19 +64,24 @@ class CMTK_cmat(BaseInterface):
             additional_maps = dict( (split_filename(add_map)[1],add_map) for add_map in self.inputs.additional_maps if add_map != '')
         else:
             additional_maps = {}
-
-        cmat(intrk=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
+            
+        if len(self.inputs.track_file) > 1:
+            prob_cmat(intrk=self.inputs.track_file[1], roi_volumes=self.inputs.roi_volumes,
+             parcellation_scheme=self.inputs.parcellation_scheme,
+             output_types=self.inputs.output_types)
+        else:
+            cmat(intrk=self.inputs.track_file[1], roi_volumes=self.inputs.roi_volumes,
              parcellation_scheme=self.inputs.parcellation_scheme,
              compute_curvature=self.inputs.compute_curvature,
              additional_maps=additional_maps,output_types=self.inputs.output_types)
              
-        if 'cff' in self.inputs.output_types:
-            cvt = cmtk.CFFConverter()
-            cvt.inputs.title = 'Connectome mapper'
-            cvt.inputs.nifti_volumes = self.inputs.roi_volumes
-            cvt.inputs.tract_files = ['streamline_final.trk']
-            cvt.inputs.gpickled_networks = glob.glob(os.path.abspath("connectome_*.gpickle"))
-            cvt.run()
+            if 'cff' in self.inputs.output_types:
+                cvt = cmtk.CFFConverter()
+                cvt.inputs.title = 'Connectome mapper'
+                cvt.inputs.nifti_volumes = self.inputs.roi_volumes
+                cvt.inputs.tract_files = ['streamline_final.trk']
+                cvt.inputs.gpickled_networks = glob.glob(os.path.abspath("connectome_*.gpickle"))
+                cvt.run()
              
         return runtime
         
