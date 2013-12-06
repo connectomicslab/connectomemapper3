@@ -129,7 +129,7 @@ class DiffusionStage(Stage):
         flow.connect([(inputnode,fs_mriconvert_ROIs,[('roi_volumes','in_file')])])
         if self.config.processing_tool != 'DTK':
             dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
-            dilate_rois.inputs.operation = 'mean'
+            dilate_rois.inputs.operation = 'modal'
             flow.connect([
                           (fs_mriconvert_ROIs,dilate_rois,[("out_file","in_file")]),
                           (dilate_rois,outputnode,[("out_file","roi_volumes")])

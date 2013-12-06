@@ -26,6 +26,9 @@ import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
 
+import nibabel as nib
+import numpy as np
+
 from cmtklib.diffusion import filter_fibers
 
 from nipype import logging
@@ -312,20 +315,17 @@ class make_seeds(BaseInterface):
     """
     input_spec = make_seedsInputSpec
     output_spec = make_seedsOutputSpec
-    ROI_idx = List
-    base_name = Str
-
+    ROI_idx = []
+    base_name = ''
     def _run_interface(self,runtime):
-        import nibabel as nib
-        import numpy as np
-        from scipy.ndimage.morphology import binary_dilation as dil
+        #from scipy.ndimage.morphology import binary_dilation as dil
         iflogger.info("Computing seed files for probabilistic tractography\n===================================================")
         # Load ROI file
         for ROI_file in self.inputs.ROI_files:
             ROI_vol = nib.load(ROI_file)
             ROI_data = ROI_vol.get_data()
             ROI_affine = ROI_vol.get_affine()
-            space_size = ROI_data.shape
+            #space_size = ROI_data.shape
             # Load WM mask
             WM_vol = nib.load(self.inputs.WM_file)
             WM_data = WM_vol.get_data()
@@ -362,21 +362,22 @@ class make_seeds(BaseInterface):
             border = ROI_data * WM_data 
             # Save one nifti file per seeding ROI
             temp = border.copy()
+            _,self.base_name,_ = split_filename(ROI_file)
             for i in self.ROI_idx:
                 temp[border == i] = 1
                 temp[border != i] = 0
                 new_image = nib.Nifti1Image(temp,ROI_affine)
-                _,self.base_name,_ = split_filename(ROI_file)
                 save_as = os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz')
                 #iflogger.info("Saving file to: " + save_as)
                 nib.save(new_image,save_as)
         return runtime
-
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["seed_files"] = self.gen_outputfilelist()
+        print(outputs)
         return outputs
-
+    
     def gen_outputfilelist(self):
         output_list = []
         for i in self.ROI_idx:
@@ -429,6 +430,7 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
 		    (inputnode,mrtrix_tracking,[('DWI','in_file')]),
 		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
             (mrtrix_tracking,converter,[('tracked','in_file')]),
+            (inputnode,converter,[('wm_mask_resampled','image_file')]),
 		    (converter,outputnode,[('out_file','track_file')])
 		    ])
         #mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks

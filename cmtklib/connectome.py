@@ -109,6 +109,8 @@ def save_fibers(oldhdr, oldfib, fname, indices):
     
 def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle']): 
 
+    print("Filling probabilistic connectivity matrices:")
+
     resolutions = get_parcellation(parcellation_scheme)
     firstROIFile = roi_volumes[0]
     firstROI = nibabel.load(firstROIFile)
@@ -142,8 +144,9 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'])
             G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
 
         graph_matrix = np.zeros((nROIs,nROIs),dtype = int)
-    
+
         for intrk_i in range(0,len(intrk)):
+            print(intrk[intrk_i])
             fib, hdr    = nibabel.trackvis.read(intrk[intrk_i], False)
             (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize)
             n = len(fib)

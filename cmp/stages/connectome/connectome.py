@@ -66,11 +66,11 @@ class CMTK_cmat(BaseInterface):
             additional_maps = {}
             
         if len(self.inputs.track_file) > 1:
-            prob_cmat(intrk=self.inputs.track_file[1], roi_volumes=self.inputs.roi_volumes,
+            prob_cmat(intrk=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
              parcellation_scheme=self.inputs.parcellation_scheme,
              output_types=self.inputs.output_types)
         else:
-            cmat(intrk=self.inputs.track_file[1], roi_volumes=self.inputs.roi_volumes,
+            cmat(intrk=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
              parcellation_scheme=self.inputs.parcellation_scheme,
              compute_curvature=self.inputs.compute_curvature,
              additional_maps=additional_maps,output_types=self.inputs.output_types)
