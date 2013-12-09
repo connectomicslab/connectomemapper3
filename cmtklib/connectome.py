@@ -32,7 +32,7 @@ def compute_curvature_array(fib):
 
     return meancurv
 
-def create_endpoints_array(fib, voxelSize):
+def create_endpoints_array(fib, voxelSize, show_counter):
     """ Create the endpoints arrays for each fiber
         
     Parameters
@@ -61,10 +61,11 @@ def create_endpoints_array(fib, voxelSize):
     for i, fi in enumerate(fib):
     
         # Percent counter
-        pcN = int(round( float(100*i)/n ))
-        if pcN > pc and pcN%1 == 0:    
-            pc = pcN
-            print('%4.0f%%' % (pc))
+        if show_counter:
+            pcN = int(round( float(100*i)/n ))
+            if pcN > pc and pcN%20 == 0:    
+                pc = pcN
+                print('%4.0f%%' % (pc))
 
         f = fi[0]
     
@@ -144,11 +145,17 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'])
             G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
 
         graph_matrix = np.zeros((nROIs,nROIs),dtype = int)
-
+        
+        pc = -1
+        
         for intrk_i in range(0,len(intrk)):
-            print(intrk[intrk_i])
+            # Percent counter
+            pcN = int(round( float(100*intrk)/len(intrk) ))
+            if pcN > pc and pcN%20 == 0:
+                pc = pcN
+                print('%4.0f%%' % (pc))
             fib, hdr    = nibabel.trackvis.read(intrk[intrk_i], False)
-            (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize)
+            (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
             n = len(fib)
                 
             # create empty fiber label array
@@ -157,15 +164,9 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'])
             #final_fibers_idx = []
                 
             dis = 0
-    
+        
             pc = -1
             for i in range(n):  # n: number of fibers
-    
-                # Percent counter
-                pcN = int(round( float(100*i)/n ))
-                if pcN > pc and pcN%1 == 0:
-                    pc = pcN
-                    print('%4.0f%%' % (pc))
         
                 # ROI start => ROI end
                 try:
@@ -182,10 +183,10 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'])
                     continue
                 
                 if startROI > nROIs or endROI > nROIs:
-    #                print("Start or endpoint of fiber terminate in a voxel which is labeled higher")
-    #                print("than is expected by the parcellation node information.")
-    #                print("Start ROI: %i, End ROI: %i" % (startROI, endROI))
-    #                print("This needs bugfixing!")
+        #                print("Start or endpoint of fiber terminate in a voxel which is labeled higher")
+        #                print("than is expected by the parcellation node information.")
+        #                print("Start ROI: %i, End ROI: %i" % (startROI, endROI))
+        #                print("This needs bugfixing!")
                     continue
                 
                 # Update fiber label
@@ -194,13 +195,13 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'])
                     tmp = startROI
                     startROI = endROI
                     endROI = tmp
-    
+        
                 #fiberlabels[i,0] = startROI
                 #fiberlabels[i,1] = endROI
-    
+        
                 #final_fiberlabels.append( [ startROI, endROI ] )
                 #final_fibers_idx.append(i)
-    
+        
                 # Add edge to graph
                 if G.has_edge(startROI, endROI):
                     G.edge[startROI][endROI]['n_tracks'] += 1
@@ -208,12 +209,13 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'])
                     G.add_edge(startROI, endROI, n_tracks  = 1)
                 
                 graph_matrix[startROI-1][endROI-1] +=1
+                graph_matrix[endROI-1][startROI-1] +=1
                 
         tot_tracks_from_ROI = graph_matrix.sum(1)
                     
         for u,v,d in G.edges_iter(data=True):
             G.remove_edge(u,v)
-            di = { 'connection_prob' : d['n_tracks']/ tot_tracks_from_ROI[u-1]}
+            di = { 'connection_prob' : d['n_tracks'].astype(float) / (tot_tracks_from_ROI[u-1]+tot_tracks_from_ROI[v-1]).astype(float)}
             G.add_edge(u,v, di)
                 
         # storing network
@@ -286,7 +288,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
     firstROIFile = roi_volumes[0]
     firstROI = nibabel.load(firstROIFile)
     roiVoxelSize = firstROI.get_header().get_zooms()
-    (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize)
+    (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize, True)
     np.save(en_fname, endpoints)
     np.save(en_fnamemm, endpointsmm)
 
