@@ -32,7 +32,7 @@ def compute_curvature_array(fib):
 
     return meancurv
 
-def create_endpoints_array(fib, voxelSize, show_counter):
+def create_endpoints_array(fib, voxelSize, print_info):
     """ Create the endpoints arrays for each fiber
         
     Parameters
@@ -47,9 +47,9 @@ def create_endpoints_array(fib, voxelSize, show_counter):
     endpointsmm) : endpoints in milimeter coordinates
     
     """
-
-    print("========================")
-    print("create_endpoints_array")
+    if print_info:
+        print("========================")
+        print("create_endpoints_array")
     
     # Init
     n         = len(fib)
@@ -61,7 +61,7 @@ def create_endpoints_array(fib, voxelSize, show_counter):
     for i, fi in enumerate(fib):
     
         # Percent counter
-        if show_counter:
+        if print_info:
             pcN = int(round( float(100*i)/n ))
             if pcN > pc and pcN%20 == 0:    
                 pc = pcN
@@ -88,10 +88,8 @@ def create_endpoints_array(fib, voxelSize, show_counter):
         endpoints[i,1,2] = int( endpoints[i,1,2] / float(voxelSize[2]))
         
     # Return the matrices  
-    return (endpoints, endpointsmm)  
-    
-    print("done")
-    print("========================")
+    return (endpoints, endpointsmm)
+
 
 def save_fibers(oldhdr, oldfib, fname, indices):
     """ Stores a new trackvis file fname using only given indices """
@@ -150,7 +148,7 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'])
         
         for intrk_i in range(0,len(intrk)):
             # Percent counter
-            pcN = int(round( float(100*intrk)/len(intrk) ))
+            pcN = int(round( float(100*intrk_i)/len(intrk) ))
             if pcN > pc and pcN%20 == 0:
                 pc = pcN
                 print('%4.0f%%' % (pc))
@@ -215,7 +213,7 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'])
                     
         for u,v,d in G.edges_iter(data=True):
             G.remove_edge(u,v)
-            di = { 'connection_prob' : d['n_tracks'].astype(float) / (tot_tracks_from_ROI[u-1]+tot_tracks_from_ROI[v-1]).astype(float)}
+            di = { 'connection_prob' : (float(d['n_tracks']) / (tot_tracks_from_ROI[u-1].astype(float)+tot_tracks_from_ROI[v-1].astype(float)))}
             G.add_edge(u,v, di)
                 
         # storing network
