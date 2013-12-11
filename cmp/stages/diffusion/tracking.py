@@ -25,6 +25,7 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
+import nipype.interfaces.camino2trackvis as camino2trackvis
 
 import nibabel as nib
 import numpy as np
@@ -47,7 +48,7 @@ class MRtrix_tracking_config(HasTraits):
     #flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     #angle = Int(60)
     #seeds = Int(32)
-    tracking_model = Str
+    tracking_mode = Str
     desired_number_of_tracks = Int(1000)
     max_number_of_tracks = Int(1000)
     step_size = Float(0.2)
@@ -65,10 +66,17 @@ class Camino_tracking_config(HasTraits):
     #flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     angle = Int(60)
     #seeds = Int(32)
-    tracking_model = Str#Enum(['dt','multitensor','pds','pico','bootstrap','ballstick','bayesdirac'])
+    tracking_model_editor = List(['dt','multitensor','pds','bootstrap','ballstick'])
+    tracking_model = Str('dt')
+    traits_view = View( Item('tracking_model',editor = EnumEditor(name='tracking_model_editor')),'angle',)
     
-    traits_view = View( 'angle',
-		      )
+    def _tracking_mode_changed(self,new):
+        if new == "Deterministic":
+            self.tracking_model_editor = ['dt','multitensor','pds','bootstrap','ballstick']
+            self.tracking_model = 'dt'
+        elif new == "Probabilistic":
+            self.tracking_model_editor = ['pico','bayesdirac']
+            self.tracking_model = 'pico'
     
 class DTB_dtk2dirInputSpec(CommandLineInputSpec):
     diffusion_type = traits.Enum(['dti','dsi'], desc='type of diffusion data [dti|dsi]', position=1,
@@ -391,8 +399,8 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
     inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','wm_mask_resampled','gm_registered']),name='inputnode')
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
-    if config.tracking_model == 'Deterministic':
-        mrtrix_tracking = pe.Node(interface=mrtrix.StreamlineTrack(),name="mrtrix_deterministic_tracking")
+    if config.tracking_mode == 'Deterministic':
+        mrtrix_tracking = pe.MapNode(interface=mrtrix.StreamlineTrack(),iterfield=['in_file'],name="mrtrix_deterministic_tracking")
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
         mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
@@ -406,7 +414,7 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
             #flow.connect([
             #	    (inputnode,mrtrix_tracking,[('grad','gradient_encoding_file')])
             #	    ])
-        converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
+        converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name="trackvis")
         flow.connect([
                       (inputnode,mrtrix_tracking,[('DWI','in_file')]),
                       (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
@@ -416,9 +424,13 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
                       (converter,outputnode,[('out_file','track_file')])
                       ])
 
-    elif config.tracking_model == 'Probabilistic':
+    elif config.tracking_mode == 'Probabilistic':
         mrtrix_seeds = pe.Node(interface=make_seeds(),name="mrtrix_seeds")
-        mrtrix_tracking = pe.MapNode(interface=mrtrix.StreamlineTrack(desired_number_of_tracks = config.desired_number_of_tracks,maximum_number_of_tracks = config.max_number_of_tracks, maximum_tract_length = config.max_length,minimum_tract_length = config.min_length,step_size = config.step_size,inputmodel='SD_PROB'),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
+        mrtrix_tracking = pe.MapNode(interface=mrtrix.StreamlineTrack(desired_number_of_tracks = config.desired_number_of_tracks,maximum_number_of_tracks = config.max_number_of_tracks, maximum_tract_length = config.max_length,minimum_tract_length = config.min_length,step_size = config.step_size),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
+        if SD:
+            mrtrix_tracking.inputmodel='SD_PROB'
+        else:
+            mrtrix_tracking.inputmodel='DT_PROB'
         converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name='trackvis')
         flow.connect([
 		    #(inputnode,mrtrix_seeds,[('DWI','DWI')]),
@@ -451,15 +463,28 @@ def create_camino_tracking_flow(config):
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
 
-    # Camino tracking
-    camino_tracking = pe.Node(interface=camino.Track(),name='camino_tracking')
-    camino_tracking.inputs.curvethresh = config.angle
-    camino_tracking.inputs.inputmodel = config.tracking_model
+    if config.tracking_mode == 'Deterministic':
 
-    flow.connect([
-		(inputnode,camino_tracking,[('DWI','in_file')]),
-		(inputnode,camino_tracking,[('wm_mask_resampled','seed_file')]),
-		(camino_tracking,outputnode,[('tracked','track_file')]),
-		])
+        # Camino tracking
+        camino_tracking = pe.Node(interface=camino.Track(),name='camino_tracking')
+        camino_tracking.inputs.curvethresh = config.angle
+        camino_tracking.inputs.inputmodel = config.tracking_model
+        
+        converter = pe.Node(interface=camino2trackvis.Camino2Trackvis(),name='trackvis')
+        converter.inputs.phys_coords = True
+    
+        flow.connect([
+    		(inputnode,camino_tracking,[('DWI','in_file')]),
+    		(inputnode,camino_tracking,[('wm_mask_resampled','seed_file')]),
+    		(camino_tracking,converter,[('tracked','in_file')]),
+            (inputnode,converter,[('wm_mask_resampled','nifti_file')]),
+            (converter,outputnode,[('trackvis','track_file')]),
+    		])
+        
+    elif config.tracking_mode == 'Probabilistic':
+        
+        print('In development')
+        
+        
 
     return flow

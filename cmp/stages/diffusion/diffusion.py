@@ -69,7 +69,7 @@ class DiffusionConfig(HasTraits):
         self.gibbs_model_config = Gibbs_model_config()
         self.dtk_tracking_config = DTK_tracking_config()
         self.dtb_tracking_config = DTB_tracking_config(imaging_model=self.imaging_model)
-        self.mrtrix_tracking_config = MRtrix_tracking_config(imaging_model=self.imaging_model,tracking_model=self.diffusion_model)
+        self.mrtrix_tracking_config = MRtrix_tracking_config(imaging_model=self.imaging_model,tracking_mode=self.diffusion_model)
         self.camino_tracking_config = Camino_tracking_config(imaging_model=self.imaging_model,tracking_mode=self.diffusion_model)
         
     def _imaging_model_changed(self, new):
@@ -97,8 +97,9 @@ class DiffusionConfig(HasTraits):
             self.diffusion_model_editor = ['Deterministic','Probabilistic']
 
     def _diffusion_model_changed(self,new):
+        self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
         self.mrtrix_tracking_config.tracking_model = new
-        self.camino_tracking_config.tracking_model = new
+        self.camino_tracking_config.tracking_mode = new
 
         
 def strip_suffix(file_input, prefix):
@@ -167,6 +168,7 @@ class DiffusionStage(Stage):
             flow.connect([
 			(fs_mriconvert,recon_flow,[("out_file","inputnode.diffusion_resampled")]),
 			(fs_mriconvert_wm_mask,recon_flow,[("out_file","inputnode.wm_mask_resampled")]),
+            (recon_flow,outputnode,[('outputnode.track_file','track_file')])
 			])
         
         # Tracking
@@ -198,6 +200,7 @@ class DiffusionStage(Stage):
             flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
+                        (track_flow,outputnode,[('outputnode.track_file','track_file')])
                         ])
                         
         if self.config.processing_tool == 'DTK':

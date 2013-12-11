@@ -171,24 +171,25 @@ class Camino_recon_config(HasTraits):
     b_value = Int (1000)
     #b0_volumes = Str()
     model_type = Enum('Single-Tensor',['Single-Tensor','Two-Tensor','Three-Tensor','Other models'])
-    local_model = Str()
-    local_model_editor = Dict()
-    mixing_eq = Bool()
     singleTensor_models = {'dt':'Linear fit','nldt_pos':'Non linear positive semi-definite','nldt':'Unconstrained non linear','ldt_wtd':'Weighted linear','restore':'Restore'}
+    local_model = Str('dt')
+    local_model_editor = Dict(singleTensor_models)
+    mixing_eq = Bool()
     fallback_model = Str('dt')
     fallback_editor = Dict(singleTensor_models)
     #recon_mode = Str
     
-    gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
-                          'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
-    gradient_table = Str
-    custom_gradient_table = File
+    gradient_table = File
     
-    traits_view = View(Item('gradient_table_file',label='Gradient table (x,y,z,b):'),
-                       Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
-		               VGroup('model_type',Item('local_model',editor=EnumEditor(name='local_model_editor')),
-                              Item('mixing_eq',label='Enforce compartment mixing parameter to 0.5',visible_when='model_type == "Two-Tensor" or model_type == "Three-Tensor"'),
-                              Item('fallback_model',editor=EnumEditor(name='fallback_editor'),visible_when='model_type == "Two-Tensor" or model_type == "Three-Tensor"')
+    #gradient_table = Str
+    #custom_gradient_table = File
+    
+    traits_view = View(Item('gradient_table',label='Gradient table (x,y,z,b):'),
+                       #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
+                       'model_type',
+		               VGroup(Item('local_model',editor=EnumEditor(name='local_model_editor')),
+                              Item('mixing_eq',label='Compartment mixing parameter = 0.5',visible_when='model_type == "Two-Tensor" or model_type == "Three-Tensor"'),
+                              Item('fallback_model',label='Initialisation and fallback model',editor=EnumEditor(name='fallback_editor'),visible_when='model_type == "Two-Tensor" or model_type == "Three-Tensor"')
                        )
                        )
 
@@ -547,6 +548,7 @@ def create_camino_recon_flow(config):
             camino_ModelFit.inputs.model = config.local_model + ' ' + config.fallback_model
     else:
         camino_ModelFit.inputs.model = config.local_model
+        
     camino_ModelFit.inputs.scheme_file = config.gradient_table
 
     flow.connect([
@@ -682,7 +684,7 @@ class gibbs_recon(BaseInterface):
 def create_gibbs_recon_flow(config_gibbs,config_model):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_resampled","wm_mask_resampled"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"],mandatory_inputs=True),name="outputnode")
 
     gibbs = pe.Node(interface=gibbs_recon(iterations = config_gibbs.iterations, particle_length=config_gibbs.particle_length, particle_width=config_gibbs.particle_width, particle_weigth=config_gibbs.particle_weigth, temp_start=config_gibbs.temp_start, temp_end=config_gibbs.temp_end, inexbalance=config_gibbs.inexbalance, fiber_length=config_gibbs.fiber_length, curvature_threshold=config_gibbs.curvature_threshold, out_file_name='global_tractography.trk'),name="gibbs_recon")
 
@@ -709,7 +711,7 @@ def create_gibbs_recon_flow(config_gibbs,config_model):
 
     flow.connect([
 		(inputnode,gibbs,[("wm_mask_resampled","mask")]),
-		(gibbs,outputnode,[("out_file","DWI")]),
+		(gibbs,outputnode,[("out_file","track_file")]),
 		])
 
     return flow
