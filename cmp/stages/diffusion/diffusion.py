@@ -196,10 +196,16 @@ class DiffusionStage(Stage):
                         ])
 
         elif self.config.processing_tool == 'Camino':
-            track_flow = create_camino_tracking_flow(self.config.camino_tracking_config)
+            track_flow = create_camino_tracking_flow(self.config.camino_tracking_config,self.config.camino_recon_config.gradient_table,self.config.camino_recon_config.local_model)
             flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
-                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
+                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')])
+                        ])
+            if self.config.diffusion_model == 'Probabilistic':
+                flow.connect([
+                    (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')]),
+                    ])
+            flow.connect([
                         (track_flow,outputnode,[('outputnode.track_file','track_file')])
                         ])
                         

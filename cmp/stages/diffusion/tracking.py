@@ -68,14 +68,23 @@ class Camino_tracking_config(HasTraits):
     #seeds = Int(32)
     tracking_model_editor = List(['dt','multitensor','pds','bootstrap','ballstick'])
     tracking_model = Str('dt')
-    traits_view = View( Item('tracking_model',editor = EnumEditor(name='tracking_model_editor')),'angle',)
+    snr = Float(20)
+    iterations = Int(50)
+    pdf = Enum(['bingham', 'watson', 'acg'])
+    traits_view = View( Item('tracking_model',editor = EnumEditor(name='tracking_model_editor')),
+                        'angle',
+                        Item('snr',visible_when="tracking_mode=='Probabilistic"),
+                        Item('iterations',visible_when="tracking_mode=='Probabilistic"),
+                        Item('pdf',visible_when="tracking_mode=='Probabilistic"),
+                        )
+
     
     def _tracking_mode_changed(self,new):
         if new == "Deterministic":
             self.tracking_model_editor = ['dt','multitensor','pds','bootstrap','ballstick']
             self.tracking_model = 'dt'
         elif new == "Probabilistic":
-            self.tracking_model_editor = ['pico','bayesdirac']
+            self.tracking_model_editor = ['pico'] # bayesdirac to be implemented as it should desactivate reconstruction step
             self.tracking_model = 'pico'
     
 class DTB_dtk2dirInputSpec(CommandLineInputSpec):
@@ -433,7 +442,6 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
             mrtrix_tracking.inputmodel='DT_PROB'
         converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name='trackvis')
         flow.connect([
-		    #(inputnode,mrtrix_seeds,[('DWI','DWI')]),
 		    (inputnode,mrtrix_seeds,[('wm_mask_resampled','WM_file')]),
 		    (inputnode,mrtrix_seeds,[('gm_registered','ROI_files')]),
 		    ])
@@ -454,37 +462,76 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
 
     return flow
 
-def create_camino_tracking_flow(config):
+def create_camino_tracking_flow(config,grad_table,local_model):
     flow = pe.Workflow(name="tracking")
 
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_resampled"]),name="inputnode")
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_resampled","gm_registered"]),name="inputnode")
     
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
-
+    
     if config.tracking_mode == 'Deterministic':
-
+        
         # Camino tracking
         camino_tracking = pe.Node(interface=camino.Track(),name='camino_tracking')
         camino_tracking.inputs.curvethresh = config.angle
         camino_tracking.inputs.inputmodel = config.tracking_model
-        
+        camino_tracking.inputs.anisthresh = 0.5
+        # Converter
         converter = pe.Node(interface=camino2trackvis.Camino2Trackvis(),name='trackvis')
         converter.inputs.phys_coords = True
     
         flow.connect([
     		(inputnode,camino_tracking,[('DWI','in_file')]),
     		(inputnode,camino_tracking,[('wm_mask_resampled','seed_file')]),
+            (inputnode,camino_tracking,[('wm_mask_resampled','anisfile')]),
     		(camino_tracking,converter,[('tracked','in_file')]),
             (inputnode,converter,[('wm_mask_resampled','nifti_file')]),
             (converter,outputnode,[('trackvis','track_file')]),
     		])
         
     elif config.tracking_mode == 'Probabilistic':
+        # Make seeds
+        camino_seeds = pe.Node(interface=make_seeds(),name="camino_seeds")
+        # Generate Lookup table
+        inversion_dict = {'restore':-2,'ltd':1,'nldt_pos':2,'nldt':4,'ldt_wtd':7,'cylcyl':10}
+        dtlutgen = pe.Node(interface=camino.DTLUTGen(),name='dtlutgen')
+        dtlutgen.inputs.scheme_file = grad_table
+        dtlutgen.inputs.snr = config.snr
+        dtlutgen.inputs.inversion = inversion_dict[local_model]
+        if config.pdf == 'bingham':
+            dtlutgen.inputs.bingham = True
+        if config.pdf == 'watson':
+            dtlutgen.inputs.watson = True
+        if config.pdf == 'acg':
+            dtlutgen.inputs.acg = True
+        # Pico PDF generation
+        picopdf = pe.Node(interface=camino.PicoPDFs(),name='picopdf')
+        picopdf.inputs.pdf = config.pdf
+        # Camino tracking
+        camino_tracking = pe.MapNode(interface=camino.TrackPICo(),iterfield=['seed_file'],name='camino_tracking')
+        camino_tracking.inputs.curvethresh = config.angle
+        camino_tracking.inputs.inputmodel = config.tracking_model
+        camino_tracking.inputs.anisthresh = 0.5
+        camino_tracking.inputs.iterations = config.iterations
+        camino_tracking.inputs.pdf = config.pdf
+        # Convert to trk format
+        converter = pe.MapNode(interface=camino2trackvis.Camino2Trackvis(),iterfield=['in_file'],name='trackvis')
+        converter.inputs.phys_coords = True
         
-        print('In development')
-        
+        flow.connect([
+            (inputnode,camino_seeds,[('wm_mask_resampled','WM_file')]),
+            (inputnode,camino_seeds,[('gm_registered','ROI_files')]),
+            (inputnode,picopdf,[("DWI","in_file")]),
+            (dtlutgen,picopdf,[("dtLUT","luts")]),
+            (picopdf,camino_tracking,[('pdfs','in_file')]),
+            (camino_seeds,camino_tracking,[('seed_files','seed_file')]),
+            (inputnode,camino_tracking,[('wm_mask_resampled','anisfile')]),
+            (camino_tracking,converter,[('tracked','in_file')]),
+            (inputnode,converter,[('wm_mask_resampled','nifti_file')]),
+            (converter,outputnode,[('trackvis','track_file')]),
+            ])
         
 
     return flow

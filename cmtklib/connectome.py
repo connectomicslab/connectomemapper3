@@ -207,13 +207,12 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'])
                     G.add_edge(startROI, endROI, n_tracks  = 1)
                 
                 graph_matrix[startROI-1][endROI-1] +=1
-                graph_matrix[endROI-1][startROI-1] +=1
                 
-        tot_tracks_from_ROI = graph_matrix.sum(1)
+        tot_tracks = graph_matrix.sum()
                     
         for u,v,d in G.edges_iter(data=True):
             G.remove_edge(u,v)
-            di = { 'connection_prob' : (float(d['n_tracks']) / (tot_tracks_from_ROI[u-1].astype(float)+tot_tracks_from_ROI[v-1].astype(float)))}
+            di = { 'number_of_fibers' : (float(d['n_tracks']) / tot_tracks.astype(float))}
             G.add_edge(u,v, di)
                 
         # storing network
