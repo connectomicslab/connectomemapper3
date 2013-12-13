@@ -646,7 +646,9 @@ class gibbs_reconInputSpec(BaseInterfaceInputSpec):
     out_file_name = File(argstr="-o %s",position=5,desc='output fiber bundle (.trk)')
 
 class gibbs_reconOutputSpec(TraitedSpec):
-    out_file = File(desc='output fiber bundle')
+    out_file = File(desc='output fiber bundle', exists = True)
+    param_file = File(desc='gibbs parameters',exists = True)
+    input_file = File(desc='gibbs input file', exists = True)
 
 class gibbs_recon(BaseInterface):
     input_spec = gibbs_reconInputSpec
@@ -679,12 +681,14 @@ class gibbs_recon(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file_name)
+        outputs["param_file"] = os.path.abspath('gibbs_parameters.gtp')
+        outputs["input_file"] = os.path.abspath(self.inputs.in_file)
         return outputs
 
 def create_gibbs_recon_flow(config_gibbs,config_model):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_resampled","wm_mask_resampled"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file","param_file",'input_file'],mandatory_inputs=True),name="outputnode")
 
     gibbs = pe.Node(interface=gibbs_recon(iterations = config_gibbs.iterations, particle_length=config_gibbs.particle_length, particle_width=config_gibbs.particle_width, particle_weigth=config_gibbs.particle_weigth, temp_start=config_gibbs.temp_start, temp_end=config_gibbs.temp_end, inexbalance=config_gibbs.inexbalance, fiber_length=config_gibbs.fiber_length, curvature_threshold=config_gibbs.curvature_threshold, out_file_name='global_tractography.trk'),name="gibbs_recon")
 
@@ -712,6 +716,8 @@ def create_gibbs_recon_flow(config_gibbs,config_model):
     flow.connect([
 		(inputnode,gibbs,[("wm_mask_resampled","mask")]),
 		(gibbs,outputnode,[("out_file","track_file")]),
+        (gibbs,outputnode,[("param_file","param_file")]),
+        (gibbs,outputnode,[("input_file","input_file")]),
 		])
 
     return flow
