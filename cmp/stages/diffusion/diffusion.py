@@ -30,7 +30,7 @@ class DiffusionConfig(HasTraits):
     #reconstruction_software = Str ('DTK') # default recon method
     #tracking_editor = List(['DTB','MRtrix','Camino']) # list of available tracking methods
     #tracking_software = Str('DTB') # default tracking method
-    processing_tool_editor = List(['DTK','MRtrix','Camino','Gibbs'])
+    processing_tool_editor = List(['DTK','MRtrix','Camino','FSL','Gibbs'])
     processing_tool = Str('DTK')
     dtk_recon_config = Instance(HasTraits)
     mrtrix_recon_config = Instance(HasTraits)
@@ -52,12 +52,14 @@ class DiffusionConfig(HasTraits):
                              Item('dtk_recon_config',style='custom',visible_when='processing_tool=="DTK"'),
 			     Item('mrtrix_recon_config',style='custom',visible_when='processing_tool=="MRtrix"'),
 			     Item('camino_recon_config',style='custom',visible_when='processing_tool=="Camino"'),
+                 Item('fsl_recon_config',stlye='custom',visible_when='processing_tool==FSL'),
                              label='Reconstruction', show_border=True, show_labels=False),
                        Group(#Item('tracking_software',editor=EnumEditor(name='tracking_editor')),
 			     Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
                              Item('dtb_tracking_config',style='custom',visible_when='processing_tool=="DTK"'),
 			     Item('mrtrix_tracking_config',style='custom',visible_when='processing_tool=="MRtrix"'),
 			     Item('camino_tracking_config',style='custom',visible_when='processing_tool=="Camino"'),
+                 Item('fsl_tracking_config',stlye='custom',visible_when='processing_tool==FSL'),
                              label='Tracking', show_border=True, show_labels=False,visible_when='processing_tool!="Gibbs"'),
                        )
 
@@ -65,12 +67,14 @@ class DiffusionConfig(HasTraits):
         self.dtk_recon_config = DTK_recon_config(imaging_model=self.imaging_model)
         self.mrtrix_recon_config = MRtrix_recon_config(imaging_model=self.imaging_model,recon_mode=self.diffusion_model)
         self.camino_recon_config = Camino_recon_config(imaging_model=self.imaging_model)
+        self.fsl_recon_config = FSL_recon_config()
         self.gibbs_recon_config = Gibbs_recon_config()
         self.gibbs_model_config = Gibbs_model_config()
         self.dtk_tracking_config = DTK_tracking_config()
         self.dtb_tracking_config = DTB_tracking_config(imaging_model=self.imaging_model)
         self.mrtrix_tracking_config = MRtrix_tracking_config(imaging_model=self.imaging_model,tracking_mode=self.diffusion_model)
         self.camino_tracking_config = Camino_tracking_config(imaging_model=self.imaging_model,tracking_mode=self.diffusion_model)
+        self.fsl_tracking_config = FSL_tracking_config()
         
     def _imaging_model_changed(self, new):
         self.dtk_recon_config.imaging_model = new
@@ -86,10 +90,10 @@ class DiffusionConfig(HasTraits):
             self.processing_tool_editor = ['DTK']
         else:
             self.diffusion_model_editor = ['Deterministic','Probabilistic']
-            self.processing_tool_editor = ['DTK','MRtrix','Camino','Gibbs']
+            self.processing_tool_editor = ['DTK','MRtrix','Camino','FSL','Gibbs']
 
     def _processing_tool_changed(self, new):
-        if new == 'DTK':
+        if new == 'DTK' or new == 'Gibbs':
             self.diffusion_model_editor = ['Deterministic']
             self.diffusion_model = 'Deterministic'
             self._diffusion_model_changed('Deterministic')
@@ -162,6 +166,13 @@ class DiffusionStage(Stage):
                         (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
 			(fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         ])
+        
+        elif self.config.processing_tool == 'FSL':
+            recon_flow = create_fsl_recon_flow(self.config.fsl_recon_config)
+            flow.connect([
+                        (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
+                        (fs_mriconvert_wm_mask,recon_flow,[('out_file','inputnode.wm_mask_resampled')])
+                        ])
 
         elif self.config.processing_tool == 'Gibbs':
             recon_flow = create_gibbs_recon_flow(self.config.gibbs_recon_config,self.config.gibbs_model_config)
@@ -207,6 +218,16 @@ class DiffusionStage(Stage):
                     ])
             flow.connect([
                         (track_flow,outputnode,[('outputnode.track_file','track_file')])
+                        ])
+        
+        elif self.config.processing_tool == 'FSL':
+            track_flow = create_fsl_tracking_flow(self.config.fsl_tracking_config)
+            flow.connect([
+                        (fs_mriconvert_wm_mask,track_flow,[('out_file','intputnode.wm_mask_resampled')]),
+                        (recon_flow,track_flow,[('outputnode.DWI','inputnode.DWI')]),
+                        ])
+            flow.connect([
+                        (track_flow,outputnode,["outputnode.track_file","track_file"]),
                         ])
                         
         if self.config.processing_tool == 'DTK':

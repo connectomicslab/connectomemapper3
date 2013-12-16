@@ -87,6 +87,12 @@ class Camino_tracking_config(HasTraits):
             self.tracking_model_editor = ['pico'] # bayesdirac to be implemented as it should desactivate reconstruction step
             self.tracking_model = 'pico'
     
+class FSL_tracking_config(HasTraits):
+    number_of_samples = Int(5000)
+    number_of_steps = Int(2000)
+    distance_threshold = Float(0)
+    curvature_threshold = Float(0.2)
+
 class DTB_dtk2dirInputSpec(CommandLineInputSpec):
     diffusion_type = traits.Enum(['dti','dsi'], desc='type of diffusion data [dti|dsi]', position=1,
                                  mandatory=True, argstr="--type %s")
@@ -534,4 +540,24 @@ def create_camino_tracking_flow(config,grad_table,local_model):
             ])
         
 
+    return flow
+
+def create_fsl_tracking_flow(config):
+    flow = pe.Workflow(name="tracking")
+    
+    # inputnode
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_resampled","gm_registered"]),name="inputnode")
+    
+    # outputnode
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
+    
+    fsl_seeds = pe.Node(interface=make_seeds(),name="fsl_seeds")
+    
+    probtrackx = pe.MapNode(interface=fsl.ProbTrackX(),iterfield=['seed'])
+    
+    flow.connect([
+            (inputnode,fsl_seeds,[('wm_mask_resampled','WM_file')]),
+            (inputnode,fsl_seeds,[('gm_registered','ROI_files')]),
+            ])
+    
     return flow

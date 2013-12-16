@@ -208,38 +208,6 @@ class Camino_recon_config(HasTraits):
             self.local_model_editor = {'adc':'ADC','ball_stick':'Ball stick'}
             self.local_model = 'adc'
             self.mixing_eq = False
-        
-    """def _check_gradient_table(self, f):
-	import csv
-	with open(f,'rb') as csv_file:
-		dialect = csv.Sniffer().sniff(csvfile.read(1024))
-    		csvfile.seek(0)
-    		reader = csv.reader(csvfile, dialect)
-		row1 = next(reader)
-		if len(row1) < 4:
-			new_f_path = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),self.gradient_table_file+'_camino_b' + str(self.b_value) + '.txt')
-			new_f = open( new_f_path,'wb')
-			writer = csv.writer(new_f, dialect)
-			b0_volumes = [int(s) for s in self.b0_volumes.split() if s.isdigit()]
-			csvfile.seek(0)
-			row_counter = 0
-			for row in reader:
-				if row_counter in b0_volumes:
-					writer.writerow(row + dialect.delimiter + '0')
-				else:
-					writer.writerow(row + dialect.delimiter + str(self.b_value))
-				row_counter = row_counter + 1
-			new_f.close
-			self.gradient_table = new_f_path
-        
-    def _gradient_table_file_changed(self, new):
-        if new != 'Custom...':
-		f = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'_mrtrix_b' + str(self.b_value) + '.txt')
-		if os.path.exists(f):
-			self.gradient_table = f
-			self.number_of_directions = int(re.search('\d+',new).group(0))
-		else:
-			self._check_gradient_table()"""
 
     def _gradient_table_file_changed(self, new):
         if new != 'Custom...':
@@ -250,10 +218,30 @@ class Camino_recon_config(HasTraits):
             
     def _custom_gradient_table_changed(self, new):
         self.gradient_table = new
-        
-    #def _imaging_model_changed(self, new):
-    #    if new == 'DTI' or new == 'HARDI':
-    #        self._gradient_table_file_changed(self.gradient_table_file)
+
+class FSL_recon_config(HasTraits):
+    local_model = Enum("dtfit","BEDPOSTX")
+    b_values = File()
+    b_vectors = File()
+    
+    # BEDPOSTX parameters
+    burn_period = Int(0)
+    fibres_per_voxel = Int(1)
+    jumps = Int(1250)
+    sampling = Int(25)
+    weigth = Float(1.00)
+    
+    # DTIFit parameters
+    save_tensor_data = Bool(False)
+    counfound_regressors = File()
+    
+    traits_view = View(
+                       'b_values',
+                       'b_vectors',
+                       VGroup('fibres_per_voxel','jumps','sampling','weigth',border=False,visible_when='local_model=="BEDPOSTX"'),
+                       VGroup('save_tensor_data','counfound_regressors',border=False,visible_when='local_model=="dtfit"')
+                      )
+    
 
 class Gibbs_model_config(HasTraits):
     local_model_editor = Dict({False:'1:Tensor',True:'2:CSD'})
@@ -604,6 +592,44 @@ def create_camino_recon_flow(config):
 		(camino_ModelFit,camino_eigenvectors,[('fitted_data','in_file')]),
 		(camino_eigenvectors,outputnode,[('eigen','eigVec')])
 		])
+    return flow
+
+def create_fsl_recon_flow(config):
+    flow = pe.Workflow(name="reconstruction")
+    
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_resampled","wm_mask_resampled"]),name="inputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","MD","eigVec"],mandatory_inputs=True),name="outputnode")
+    
+    if config.local_model == 'dtifit':
+        fsl_node = pe.Node(interface=fsl.DTIFit(),name='dtifit')
+        fsl_node.inputs.save_tensor = config.save_tensor_data
+        fsl_node.inputs.cni = config.counfound_regressors
+        flow.connect([
+                    (fsl_node,outputnode,[("tensor","DWI")]),
+                    (fsl_node,outputnode,[("FA","FA")]),
+                    (fsl_node,outputnode,[("MD","MD")]),
+                    (fsl_node,outputnode,[("V1","eigVec")]),
+                    ])
+    elif config.local_model == 'BEDPOSTX':
+        fsl_node = pe.Node(interface=fsl.BEDPOSTX(),name='BEDPOSTX')
+        fsl_node.inputs.burn_period = config.burn_period
+        fsl_node.inputs.fibres = config.fibres_per_voxel
+        fsl_node.inputs.jumps = config.jumps
+        fsl_node.inputs.sampling = config.sampling
+        fsl_node.inputs.weigth = config.weigth
+        flow.connect([
+                    (fsl_node,outputnode,[("bpx_out_directory","DWI")]),
+                    ])
+        
+        
+    fsl_node.inputs.bvals = config.b_values
+    fsl_node.inputs.bvecs = config.b_vectors
+    
+    flow.connect([
+                (inputnode,fsl_node,[("diffusion_resampled","dwi")]),
+                (inputnode,fsl_node,[("wm_mask_resampled","mask")]),
+                ])
+    
     return flow
 
 class gibbs_commandInputSpec(CommandLineInputSpec):
