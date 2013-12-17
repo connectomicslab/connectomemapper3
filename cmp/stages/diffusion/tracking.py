@@ -92,6 +92,8 @@ class FSL_tracking_config(HasTraits):
     number_of_steps = Int(2000)
     distance_threshold = Float(0)
     curvature_threshold = Float(0.2)
+    
+    traits_view = View('number_of_samples','number_of_steps','distance_threshold','curvature_threshold')
 
 class DTB_dtk2dirInputSpec(CommandLineInputSpec):
     diffusion_type = traits.Enum(['dti','dsi'], desc='type of diffusion data [dti|dsi]', position=1,
@@ -398,7 +400,6 @@ class make_seeds(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["seed_files"] = self.gen_outputfilelist()
-        print(outputs)
         return outputs
     
     def gen_outputfilelist(self):
@@ -468,7 +469,7 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
 
     return flow
 
-def create_camino_tracking_flow(config,grad_table,local_model):
+def create_camino_tracking_flow(config,grad_table,inversion_index):
     flow = pe.Workflow(name="tracking")
 
     # inputnode
@@ -501,11 +502,10 @@ def create_camino_tracking_flow(config,grad_table,local_model):
         # Make seeds
         camino_seeds = pe.Node(interface=make_seeds(),name="camino_seeds")
         # Generate Lookup table
-        inversion_dict = {'restore':-2,'ltd':1,'nldt_pos':2,'nldt':4,'ldt_wtd':7,'cylcyl':10}
         dtlutgen = pe.Node(interface=camino.DTLUTGen(),name='dtlutgen')
         dtlutgen.inputs.scheme_file = grad_table
         dtlutgen.inputs.snr = config.snr
-        dtlutgen.inputs.inversion = inversion_dict[local_model]
+        dtlutgen.inputs.inversion = inversion_index
         if config.pdf == 'bingham':
             dtlutgen.inputs.bingham = True
         if config.pdf == 'watson':
@@ -515,6 +515,10 @@ def create_camino_tracking_flow(config,grad_table,local_model):
         # Pico PDF generation
         picopdf = pe.Node(interface=camino.PicoPDFs(),name='picopdf')
         picopdf.inputs.pdf = config.pdf
+        if inversion_index >= 10:
+            picopdf.inputs.inputmodel = 'multitensor'
+        else:
+            picopdf.inputs.inputmodel = 'dt'
         # Camino tracking
         camino_tracking = pe.MapNode(interface=camino.TrackPICo(),iterfield=['seed_file'],name='camino_tracking')
         camino_tracking.inputs.curvethresh = config.angle
@@ -546,18 +550,36 @@ def create_fsl_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_resampled","gm_registered"]),name="inputnode")
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["phsamples","fsamples","thsamples","wm_mask_resampled","gm_registered"]),name="inputnode")
     
     # outputnode
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["fdt_paths","log","way_total"]),name="outputnode")
     
     fsl_seeds = pe.Node(interface=make_seeds(),name="fsl_seeds")
     
-    probtrackx = pe.MapNode(interface=fsl.ProbTrackX(),iterfield=['seed'])
+    probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx') #
+    
+    probtrackx.inputs.n_samples = config.number_of_samples
+    probtrackx.inputs.n_steps = config.number_of_steps
+    probtrackx.inputs.dist_thresh = config.distance_threshold
+    probtrackx.inputs.c_thresh = config.curvature_threshold
+    #probtrackx.inputs.mode = 'seedmask'
+    #probtrackx.inputs.seed = ['/home/cmt/Documents/test_dataset/S01_XavierG/NIPYPE/diffusion_pipeline/diffusion_stage/tracking/fsl_seeds/ROIv_HR_th_freesurferaparc_flirt_out_dil_seed_1.nii.gz']
+    
+    probtrackx.inputs.network = True
     
     flow.connect([
             (inputnode,fsl_seeds,[('wm_mask_resampled','WM_file')]),
             (inputnode,fsl_seeds,[('gm_registered','ROI_files')]),
+            (fsl_seeds,probtrackx,[("seed_files","seed")]),
+            #(inputnode,probtrackx,[("wm_mask_resampled","seed")]),
+            (inputnode,probtrackx,[("wm_mask_resampled","mask")]),
+            (inputnode,probtrackx,[("fsamples","fsamples")]),
+            (inputnode,probtrackx,[("phsamples","phsamples")]),
+            (inputnode,probtrackx,[("thsamples","thsamples")]),
+            (probtrackx,outputnode,[("fdt_paths","fdt_paths")]),
+            (probtrackx,outputnode,[("log","log")]),
+            (probtrackx,outputnode,[("way_total","way_total")]),
             ])
     
     return flow

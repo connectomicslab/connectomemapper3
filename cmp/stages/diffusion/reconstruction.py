@@ -171,13 +171,14 @@ class Camino_recon_config(HasTraits):
     b_value = Int (1000)
     #b0_volumes = Str()
     model_type = Enum('Single-Tensor',['Single-Tensor','Two-Tensor','Three-Tensor','Other models'])
-    singleTensor_models = {'dt':'Linear fit','nldt_pos':'Non linear positive semi-definite','nldt':'Unconstrained non linear','ldt_wtd':'Weighted linear','restore':'Restore'}
+    singleTensor_models = {'dt':'Linear fit','nldt_pos':'Non linear positive semi-definite','nldt':'Unconstrained non linear','ldt_wtd':'Weighted linear'}
     local_model = Str('dt')
     local_model_editor = Dict(singleTensor_models)
     mixing_eq = Bool()
     fallback_model = Str('dt')
     fallback_editor = Dict(singleTensor_models)
     #recon_mode = Str
+    inversion = Int()
     
     gradient_table = File
     
@@ -205,7 +206,7 @@ class Camino_recon_config(HasTraits):
             self.local_model_editor = {'cylcylcyl':'All cylindrically symmetric','pospospos':'All positive','posposcyl':'Two positive, one cylindrically symmetric','poscylcyl':'Two cylindrically symmetric, one positive'}
             self.local_model = 'cylcylcyl'
         elif new == 'Other models':
-            self.local_model_editor = {'adc':'ADC','ball_stick':'Ball stick'}
+            self.local_model_editor = {'adc':'ADC','ball_stick':'Ball stick', 'restore':'Restore'}
             self.local_model = 'adc'
             self.mixing_eq = False
 
@@ -218,9 +219,27 @@ class Camino_recon_config(HasTraits):
             
     def _custom_gradient_table_changed(self, new):
         self.gradient_table = new
+        
+    def update_inversion(self):
+        inversion_dict = {'ball_stick':-3, 'restore':-2, 'adc':-1, 'ltd':1, 'dt':1, 'nldt_pos':2,'nldt':4,'ldt_wtd':7,'cylcyl':10, 'pospos':30, 'poscyl':50, 'cylcylcyl':210, 'pospospos':230, 'posposcyl':250, 'poscylcyl':270}
+        if self.model_type == 'Single-Tensor' or self.model_type == 'Other models':
+            self.inversion = inversion_dict[self.local_model]
+        else:
+            self.inversion = inversion_dict[self.local_model] + inversion_dict[self.fallback_model]
+            if self.mixing_eq:
+                self.inversion = self.inversion + 10
+            
+    def _local_model_changed(self,new):
+        self.update_inversion()
+        
+    def _mixing_eq_changed(self,new):
+        self.update_inversion()
+    
+    def _fallback_model_changed(self,new):
+        self.update_inversion()
 
 class FSL_recon_config(HasTraits):
-    local_model = Enum("dtfit","BEDPOSTX")
+
     b_values = File()
     b_vectors = File()
     
@@ -229,17 +248,11 @@ class FSL_recon_config(HasTraits):
     fibres_per_voxel = Int(1)
     jumps = Int(1250)
     sampling = Int(25)
-    weigth = Float(1.00)
+    weight = Float(1.00)
     
-    # DTIFit parameters
-    save_tensor_data = Bool(False)
-    counfound_regressors = File()
-    
-    traits_view = View(
-                       'b_values',
+    traits_view = View('b_values',
                        'b_vectors',
-                       VGroup('fibres_per_voxel','jumps','sampling','weigth',border=False,visible_when='local_model=="BEDPOSTX"'),
-                       VGroup('save_tensor_data','counfound_regressors',border=False,visible_when='local_model=="dtfit"')
+                       VGroup('burn_period','fibres_per_voxel','jumps','sampling','weight',show_border=True,label = 'BEDPOSTX parameters'),
                       )
     
 
@@ -598,36 +611,24 @@ def create_fsl_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_resampled","wm_mask_resampled"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","MD","eigVec"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["phsamples","fsamples","thsamples"],mandatory_inputs=True),name="outputnode")
     
-    if config.local_model == 'dtifit':
-        fsl_node = pe.Node(interface=fsl.DTIFit(),name='dtifit')
-        fsl_node.inputs.save_tensor = config.save_tensor_data
-        fsl_node.inputs.cni = config.counfound_regressors
-        flow.connect([
-                    (fsl_node,outputnode,[("tensor","DWI")]),
-                    (fsl_node,outputnode,[("FA","FA")]),
-                    (fsl_node,outputnode,[("MD","MD")]),
-                    (fsl_node,outputnode,[("V1","eigVec")]),
-                    ])
-    elif config.local_model == 'BEDPOSTX':
-        fsl_node = pe.Node(interface=fsl.BEDPOSTX(),name='BEDPOSTX')
-        fsl_node.inputs.burn_period = config.burn_period
-        fsl_node.inputs.fibres = config.fibres_per_voxel
-        fsl_node.inputs.jumps = config.jumps
-        fsl_node.inputs.sampling = config.sampling
-        fsl_node.inputs.weigth = config.weigth
-        flow.connect([
-                    (fsl_node,outputnode,[("bpx_out_directory","DWI")]),
-                    ])
-        
-        
+    fsl_node = pe.Node(interface=fsl.BEDPOSTX(),name='BEDPOSTX')
+    
     fsl_node.inputs.bvals = config.b_values
     fsl_node.inputs.bvecs = config.b_vectors
+    fsl_node.inputs.burn_period = config.burn_period
+    fsl_node.inputs.fibres = config.fibres_per_voxel
+    fsl_node.inputs.jumps = config.jumps
+    fsl_node.inputs.sampling = config.sampling
+    fsl_node.inputs.weight = config.weight
     
     flow.connect([
                 (inputnode,fsl_node,[("diffusion_resampled","dwi")]),
                 (inputnode,fsl_node,[("wm_mask_resampled","mask")]),
+                (fsl_node,outputnode,[("merged_fsamples","fsamples")]),
+                (fsl_node,outputnode,[("merged_phsamples","phsamples")]),
+                (fsl_node,outputnode,[("merged_thsamples","thsamples")]),
                 ])
     
     return flow

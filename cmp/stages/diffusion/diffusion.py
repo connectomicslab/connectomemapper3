@@ -35,12 +35,14 @@ class DiffusionConfig(HasTraits):
     dtk_recon_config = Instance(HasTraits)
     mrtrix_recon_config = Instance(HasTraits)
     camino_recon_config = Instance(HasTraits)
+    fsl_recon_config = Instance(HasTraits)
     gibbs_recon_config = Instance(HasTraits)
     gibbs_model_config = Instance(HasTraits)
     dtk_tracking_config = Instance(HasTraits)
     dtb_tracking_config = Instance(HasTraits)
     mrtrix_tracking_config = Instance(HasTraits)
     camino_tracking_config = Instance(HasTraits)
+    fsl_tracking_config = Instance(HasTraits)
     diffusion_model_editor = List(['Deterministic','Probabilistic'])
     diffusion_model = Str('Deterministic')
     
@@ -52,14 +54,14 @@ class DiffusionConfig(HasTraits):
                              Item('dtk_recon_config',style='custom',visible_when='processing_tool=="DTK"'),
 			     Item('mrtrix_recon_config',style='custom',visible_when='processing_tool=="MRtrix"'),
 			     Item('camino_recon_config',style='custom',visible_when='processing_tool=="Camino"'),
-                 Item('fsl_recon_config',stlye='custom',visible_when='processing_tool==FSL'),
+                 Item('fsl_recon_config',style='custom',visible_when='processing_tool=="FSL"'),
                              label='Reconstruction', show_border=True, show_labels=False),
                        Group(#Item('tracking_software',editor=EnumEditor(name='tracking_editor')),
 			     Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
                              Item('dtb_tracking_config',style='custom',visible_when='processing_tool=="DTK"'),
 			     Item('mrtrix_tracking_config',style='custom',visible_when='processing_tool=="MRtrix"'),
 			     Item('camino_tracking_config',style='custom',visible_when='processing_tool=="Camino"'),
-                 Item('fsl_tracking_config',stlye='custom',visible_when='processing_tool==FSL'),
+                 Item('fsl_tracking_config',style='custom',visible_when='processing_tool=="FSL"'),
                              label='Tracking', show_border=True, show_labels=False,visible_when='processing_tool!="Gibbs"'),
                        )
 
@@ -97,6 +99,9 @@ class DiffusionConfig(HasTraits):
             self.diffusion_model_editor = ['Deterministic']
             self.diffusion_model = 'Deterministic'
             self._diffusion_model_changed('Deterministic')
+        elif new == "FSL":
+            self.diffusion_model_editor = ['Probabilistic']
+            self.diffusion_model = 'Probabilistic'       
         else:
             self.diffusion_model_editor = ['Deterministic','Probabilistic']
 
@@ -207,7 +212,7 @@ class DiffusionStage(Stage):
                         ])
 
         elif self.config.processing_tool == 'Camino':
-            track_flow = create_camino_tracking_flow(self.config.camino_tracking_config,self.config.camino_recon_config.gradient_table,self.config.camino_recon_config.local_model)
+            track_flow = create_camino_tracking_flow(self.config.camino_tracking_config,self.config.camino_recon_config.gradient_table,self.config.camino_recon_config.inversion)
             flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')])
@@ -223,11 +228,14 @@ class DiffusionStage(Stage):
         elif self.config.processing_tool == 'FSL':
             track_flow = create_fsl_tracking_flow(self.config.fsl_tracking_config)
             flow.connect([
-                        (fs_mriconvert_wm_mask,track_flow,[('out_file','intputnode.wm_mask_resampled')]),
-                        (recon_flow,track_flow,[('outputnode.DWI','inputnode.DWI')]),
+                        (fs_mriconvert_wm_mask,track_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')]),
+                        (recon_flow,track_flow,[('outputnode.fsamples','inputnode.fsamples')]),
+                        (recon_flow,track_flow,[('outputnode.phsamples','inputnode.phsamples')]),
+                        (recon_flow,track_flow,[('outputnode.thsamples','inputnode.thsamples')]),
                         ])
             flow.connect([
-                        (track_flow,outputnode,["outputnode.track_file","track_file"]),
+                        (track_flow,outputnode,[("outputnode.fdt_paths","track_file")]),
                         ])
                         
         if self.config.processing_tool == 'DTK':
