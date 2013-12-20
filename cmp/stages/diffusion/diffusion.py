@@ -78,6 +78,11 @@ class DiffusionConfig(HasTraits):
         self.camino_tracking_config = Camino_tracking_config(imaging_model=self.imaging_model,tracking_mode=self.diffusion_model)
         self.fsl_tracking_config = FSL_tracking_config()
         
+        self.camino_recon_config.on_trait_change(self.update_camino_tracking_model,'model_type')
+        self.camino_recon_config.on_trait_change(self.update_camino_tracking_model,'local_model')
+        self.camino_recon_config.on_trait_change(self.update_camino_tracking_inversion,'inversion')
+        self.camino_recon_config.on_trait_change(self.update_camino_tracking_inversion,'fallback_index')
+        
     def _imaging_model_changed(self, new):
         self.dtk_recon_config.imaging_model = new
         #self.mrtrix_recon_config.imaging_model = new
@@ -109,6 +114,21 @@ class DiffusionConfig(HasTraits):
         self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
         self.mrtrix_tracking_config.tracking_model = new
         self.camino_tracking_config.tracking_mode = new
+        self.update_camino_tracking_model()
+        
+    def update_camino_tracking_model(self):
+        if self.diffusion_model == 'Probabilistic':
+            self.camino_tracking_config.tracking_model = 'pico'
+        elif self.camino_recon_config.model_type == 'Single-Tensor' or self.camino_recon_config.local_model == 'restore' or self.camino_recon_config.local_model == 'adc':
+            self.camino_tracking_config.tracking_model = 'dt'
+        elif self.camino_recon_config.local_model == 'ball_stick':
+            self.camino_tracking_config.tracking_model = 'ballstick'
+        else:
+            self.camino_tracking_config.tracking_model = 'multitensor'
+            
+    def update_camino_tracking_inversion(self):
+        self.camino_tracking_config.inversion_index = self.camino_recon_config.inversion
+        self.camino_tracking_config.fallback_index = self.camino_recon_config.fallback_index
 
         
 def strip_suffix(file_input, prefix):
@@ -212,7 +232,7 @@ class DiffusionStage(Stage):
                         ])
 
         elif self.config.processing_tool == 'Camino':
-            track_flow = create_camino_tracking_flow(self.config.camino_tracking_config,self.config.camino_recon_config.gradient_table,self.config.camino_recon_config.inversion)
+            track_flow = create_camino_tracking_flow(self.config.camino_tracking_config,self.config.camino_recon_config.gradient_table)
             flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')])

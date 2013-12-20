@@ -19,7 +19,7 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.fsl as fsl
-import nipype.interfaces.mrtrix as mrtrix # DR: Might be used directly in the nipype
+import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
 from nipype.utils.filemanip import split_filename
 
@@ -174,9 +174,11 @@ class Camino_recon_config(HasTraits):
     singleTensor_models = {'dt':'Linear fit','nldt_pos':'Non linear positive semi-definite','nldt':'Unconstrained non linear','ldt_wtd':'Weighted linear'}
     local_model = Str('dt')
     local_model_editor = Dict(singleTensor_models)
+    snr = Float(10.0)
     mixing_eq = Bool()
     fallback_model = Str('dt')
     fallback_editor = Dict(singleTensor_models)
+    fallback_index = Int()
     #recon_mode = Str
     inversion = Int()
     
@@ -188,7 +190,8 @@ class Camino_recon_config(HasTraits):
     traits_view = View(Item('gradient_table',label='Gradient table (x,y,z,b):'),
                        #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
                        'model_type',
-		               VGroup(Item('local_model',editor=EnumEditor(name='local_model_editor')),
+		               VGroup(Item('local_model',label="Camino model",editor=EnumEditor(name='local_model_editor')),
+                              Item('snr',visible_when='local_model=="restore"'),
                               Item('mixing_eq',label='Compartment mixing parameter = 0.5',visible_when='model_type == "Two-Tensor" or model_type == "Three-Tensor"'),
                               Item('fallback_model',label='Initialisation and fallback model',editor=EnumEditor(name='fallback_editor'),visible_when='model_type == "Two-Tensor" or model_type == "Three-Tensor"')
                        )
@@ -209,6 +212,8 @@ class Camino_recon_config(HasTraits):
             self.local_model_editor = {'adc':'ADC','ball_stick':'Ball stick', 'restore':'Restore'}
             self.local_model = 'adc'
             self.mixing_eq = False
+            
+        self.update_inversion()
 
     def _gradient_table_file_changed(self, new):
         if new != 'Custom...':
@@ -226,6 +231,7 @@ class Camino_recon_config(HasTraits):
             self.inversion = inversion_dict[self.local_model]
         else:
             self.inversion = inversion_dict[self.local_model] + inversion_dict[self.fallback_model]
+            self.fallback_index = inversion_dict[self.fallback_model]
             if self.mixing_eq:
                 self.inversion = self.inversion + 10
             
@@ -551,6 +557,9 @@ def create_camino_recon_flow(config):
         camino_ModelFit.inputs.model = config.local_model
         
     camino_ModelFit.inputs.scheme_file = config.gradient_table
+    
+    if config.local_model == 'restore':
+        camino_ModelFit.inputs.sigma = config.snr
 
     flow.connect([
 		(camino_convert,camino_ModelFit,[('voxel_order','in_file')]),

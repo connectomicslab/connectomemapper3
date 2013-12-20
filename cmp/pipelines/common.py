@@ -73,7 +73,7 @@ class ProcessThread(threading.Thread):
     pipeline = Instance(Any)
     
     def run(self):
-       self.pipeline.process()
+        self.pipeline.process()
                       
 
 class Pipeline(HasTraits):

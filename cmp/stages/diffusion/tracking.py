@@ -64,28 +64,37 @@ class Camino_tracking_config(HasTraits):
     imaging_model = Str
     tracking_mode = Str
     #flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
-    angle = Int(60)
+    inversion_index = Int()
+    fallback_index = Int()
+    angle = Float(60)
+    cross_angle = Float(20)
+    trace_editor = Dict({0.0000000021:'2100E-12 m^2/s', 0.0021:'2.1E-3 s/mm^2'})
+    trace = Float(0.0000000021)
     #seeds = Int(32)
-    tracking_model_editor = List(['dt','multitensor','pds','bootstrap','ballstick'])
+    #tracking_model_editor = List(['dt','multitensor','pds','bootstrap','ballstick'])
     tracking_model = Str('dt')
     snr = Float(20)
     iterations = Int(50)
     pdf = Enum(['bingham', 'watson', 'acg'])
-    traits_view = View( Item('tracking_model',editor = EnumEditor(name='tracking_model_editor')),
+    traits_view = View( #Item('tracking_model',editor = EnumEditor(name='tracking_model_editor')),
+                        'inversion_index',
+                        'tracking_model',
                         'angle',
-                        Item('snr',visible_when="tracking_mode=='Probabilistic"),
-                        Item('iterations',visible_when="tracking_mode=='Probabilistic"),
-                        Item('pdf',visible_when="tracking_mode=='Probabilistic"),
+                        Item('snr',visible_when="tracking_mode=='Probabilistic'"),
+                        Item('iterations',visible_when="tracking_mode=='Probabilistic'"),
+                        Item('pdf',visible_when="tracking_mode=='Probabilistic'"),
+                        Item('cross_angle', visible_when='(tracking_mode=="Probabilistic") and (inversion_index > 9)'),
+                        Item('trace',editor=EnumEditor(name='trace_editor')),
+                        'trace'
                         )
-
     
-    def _tracking_mode_changed(self,new):
-        if new == "Deterministic":
-            self.tracking_model_editor = ['dt','multitensor','pds','bootstrap','ballstick']
-            self.tracking_model = 'dt'
-        elif new == "Probabilistic":
-            self.tracking_model_editor = ['pico'] # bayesdirac to be implemented as it should desactivate reconstruction step
-            self.tracking_model = 'pico'
+    #def _tracking_mode_changed(self,new):
+    #    if new == "Deterministic":
+    #        self.tracking_model_editor = ['dt','multitensor','pds','bootstrap','ballstick']
+    #        self.tracking_model = 'dt'
+    #    elif new == "Probabilistic":
+    #        self.tracking_model_editor = ['pico'] # bayesdirac to be implemented as it should desactivate reconstruction step
+    #        self.tracking_model = 'pico'
     
 class FSL_tracking_config(HasTraits):
     number_of_samples = Int(5000)
@@ -408,7 +417,6 @@ class make_seeds(BaseInterface):
             output_list.append(os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz'))
         return output_list
 
-
 def create_mrtrix_tracking_flow(config,grad_table,SD):
     flow = pe.Workflow(name="tracking")
     # inputnode
@@ -469,7 +477,7 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
 
     return flow
 
-def create_camino_tracking_flow(config,grad_table,inversion_index):
+def create_camino_tracking_flow(config,grad_table):
     flow = pe.Workflow(name="tracking")
 
     # inputnode
@@ -485,6 +493,10 @@ def create_camino_tracking_flow(config,grad_table,inversion_index):
         camino_tracking.inputs.curvethresh = config.angle
         camino_tracking.inputs.inputmodel = config.tracking_model
         camino_tracking.inputs.anisthresh = 0.5
+        if config.inversion_index >= 10:
+            camino_tracking.inputs.inputmodel = 'multitensor'
+        if config.inversion_index > 100:
+            camino_tracking.inputs.maxcomponents = 3
         # Converter
         converter = pe.Node(interface=camino2trackvis.Camino2Trackvis(),name='trackvis')
         converter.inputs.phys_coords = True
@@ -505,20 +517,54 @@ def create_camino_tracking_flow(config,grad_table,inversion_index):
         dtlutgen = pe.Node(interface=camino.DTLUTGen(),name='dtlutgen')
         dtlutgen.inputs.scheme_file = grad_table
         dtlutgen.inputs.snr = config.snr
-        dtlutgen.inputs.inversion = inversion_index
+        dtlutgen.inputs.inversion = config.inversion_index
+        dtlutgen.inputs.trace = config.trace
         if config.pdf == 'bingham':
             dtlutgen.inputs.bingham = True
         if config.pdf == 'watson':
             dtlutgen.inputs.watson = True
         if config.pdf == 'acg':
             dtlutgen.inputs.acg = True
+            
+        if config.inversion_index >= 10:
+            dtlutgen.inputs.cross = config.cross_angle
+            dtlutgen2 = pe.Node(interface=camino.DTLUTGen(),name='dtlutgen2')
+            dtlutgen2.inputs.scheme_file = grad_table
+            dtlutgen2.inputs.snr = config.snr
+            dtlutgen2.inputs.inversion = config.fallback_index
+            dtlutgen2.inputs.trace = config.trace
+            if config.pdf == 'bingham':
+                dtlutgen2.inputs.bingham = True
+            if config.pdf == 'watson':
+                dtlutgen2.inputs.watson = True
+            if config.pdf == 'acg':
+                dtlutgen2.inputs.acg = True
+                
         # Pico PDF generation
         picopdf = pe.Node(interface=camino.PicoPDFs(),name='picopdf')
         picopdf.inputs.pdf = config.pdf
-        if inversion_index >= 10:
+        if config.inversion_index >= 10:
             picopdf.inputs.inputmodel = 'multitensor'
+            #picopdf.inputs.lut_str = '/home/cmt/Documents/test_dataset/S01_XavierG/NIPYPE/diffusion_pipeline/diffusion_stage/tracking/dtlutgen2/siemens_20_b=1000_for_Camino_invertedY.dat /home/cmt/Documents/test_dataset/S01_XavierG/NIPYPE/diffusion_pipeline/diffusion_stage/tracking/dtlutgen/siemens_20_b=1000_for_Camino_invertedY.dat'
+            merge = pe.Node(interface=util.Merge(2),name='merge_LUTs')
+            flow.connect([
+                        (dtlutgen2,merge,[("dtLUT","in1")]),
+                        (dtlutgen,merge,[("dtLUT","in2")]),
+                        (merge,picopdf,[("out","luts")]),
+                        ])
+            #merge_func = 'def func(arg1,arg2): return arg1 + ' ' + arg2'
+            #merge = pe.Node(interface=util.Function(input_names=['arg1', 'arg2'], output_names = ['out'], function_str = merge_func), name='merge_LUTs')
+            #flow.connect([
+            #            (dtlutgen,merge,[("dtLUT","arg1")]),
+            #            (dtlutgen2,merge,[("dtLUT","arg2")]),
+            #            (merge,picopdf,[("out","luts")]),
+            #            ])
         else:
             picopdf.inputs.inputmodel = 'dt'
+            flow.connect([
+                        (dtlutgen,picopdf,[("dtLUT","luts")]),
+                        ])         
+            
         # Camino tracking
         camino_tracking = pe.MapNode(interface=camino.TrackPICo(),iterfield=['seed_file'],name='camino_tracking')
         camino_tracking.inputs.curvethresh = config.angle
@@ -526,6 +572,11 @@ def create_camino_tracking_flow(config,grad_table,inversion_index):
         camino_tracking.inputs.anisthresh = 0.5
         camino_tracking.inputs.iterations = config.iterations
         camino_tracking.inputs.pdf = config.pdf
+        if config.inversion_index >= 10 and config.inversion_index < 100:
+            camino_tracking.inputs.numpds = 2
+        else:
+            camino_tracking.inputs.numpds = 3
+        
         # Convert to trk format
         converter = pe.MapNode(interface=camino2trackvis.Camino2Trackvis(),iterfield=['in_file'],name='trackvis')
         converter.inputs.phys_coords = True
@@ -534,7 +585,8 @@ def create_camino_tracking_flow(config,grad_table,inversion_index):
             (inputnode,camino_seeds,[('wm_mask_resampled','WM_file')]),
             (inputnode,camino_seeds,[('gm_registered','ROI_files')]),
             (inputnode,picopdf,[("DWI","in_file")]),
-            (dtlutgen,picopdf,[("dtLUT","luts")]),
+            #(dtlutgen,picopdf,[("dtLUT","luts")]),
+            #(dtlutgen2,picopdf,[("dtLUT","luts")]),
             (picopdf,camino_tracking,[('pdfs','in_file')]),
             (camino_seeds,camino_tracking,[('seed_files','seed_file')]),
             (inputnode,camino_tracking,[('wm_mask_resampled','anisfile')]),
