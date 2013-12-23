@@ -296,9 +296,10 @@ class DiffusionStage(Stage):
                 self.inspect_outputs = self.inspect_outputs_dict.keys()
                 
             diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
-            if(os.path.exists(diff_results_path)):
+            if os.path.exists(diff_results_path):
                 diff_results = pickle.load(gzip.open(diff_results_path))
                 self.inspect_outputs_dict['MRTrix streamline'] = ['trackvis',diff_results.outputs.out_file]
+                self.inspect_outputs = self.inspect_outputs_dict.keys()
 
             
     def has_run(self):

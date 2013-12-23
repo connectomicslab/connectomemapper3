@@ -39,6 +39,7 @@ class DTK_recon_config(HasTraits):
                           'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
     gradient_table = Str
     custom_gradient_table = File
+    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     dsi_number_of_directions = Enum(514,[514,257,124])
     number_of_directions = Int(514)
     number_of_output_directions = Int(181)
@@ -56,6 +57,7 @@ class DTK_recon_config(HasTraits):
                        Item('dsi_number_of_directions',visible_when='imaging_model=="DSI"'),
                        Item('number_of_directions',visible_when='imaging_model!="DSI"',enabled_when='gradient_table_file=="Custom..."'),
                        Item('custom_gradient_table',visible_when='imaging_model!="DSI"',enabled_when='gradient_table_file=="Custom..."'),
+                       Item('flip_table_axis',style='custom',label='Flip table:'),
                        Item('number_of_averages',visible_when='imaging_model=="DTI"'),
                        Item('multiple_high_b_values',visible_when='imaging_model=="DTI"'),
                        'number_of_b0_volumes',
@@ -88,6 +90,7 @@ class MRtrix_recon_config(HasTraits):
     #gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
     #'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
     gradient_table = File
+    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     #custom_gradient_table = File
     #gradient_table_file = File
     #b_value = Int (1000)
@@ -100,6 +103,7 @@ class MRtrix_recon_config(HasTraits):
     recon_mode = Str    
     
     traits_view = View(Item('gradient_table',label='Gradient table (x,y,z,b):'),
+                       Item('flip_table_axis',style='custom',label='Flip table:'),
                        #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
 		       #Item('b_value'),
 		       #Item('b0_volumes'),
@@ -183,11 +187,13 @@ class Camino_recon_config(HasTraits):
     inversion = Int()
     
     gradient_table = File
+    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     
     #gradient_table = Str
     #custom_gradient_table = File
     
     traits_view = View(Item('gradient_table',label='Gradient table (x,y,z,b):'),
+                       Item('flip_table_axis',style='custom',label='Flip table:'),
                        #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
                        'model_type',
 		               VGroup(Item('local_model',label="Camino model",editor=EnumEditor(name='local_model_editor')),
@@ -248,6 +254,7 @@ class FSL_recon_config(HasTraits):
 
     b_values = File()
     b_vectors = File()
+    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     
     # BEDPOSTX parameters
     burn_period = Int(0)
@@ -258,9 +265,9 @@ class FSL_recon_config(HasTraits):
     
     traits_view = View('b_values',
                        'b_vectors',
+                       Item('flip_table_axis',style='custom',label='Flip table:'),
                        VGroup('burn_period','fibres_per_voxel','jumps','sampling','weight',show_border=True,label = 'BEDPOSTX parameters'),
-                      )
-    
+                      ) 
 
 class Gibbs_model_config(HasTraits):
     local_model_editor = Dict({False:'1:Tensor',True:'2:CSD'})
@@ -269,6 +276,7 @@ class Gibbs_model_config(HasTraits):
     #gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
     #                      'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
     gradient_table = File()
+    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     #custom_gradient_table = File
     lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
     normalize_to_B0 = Bool(False)
@@ -279,11 +287,11 @@ class Gibbs_model_config(HasTraits):
     b_values = File()
     b_vectors = File()
 
-    traits_view = View(Item('local_model',editor=EnumEditor(name='local_model_editor')),Group(Item('gradient_table'),
+    traits_view = View(Item('local_model',editor=EnumEditor(name='local_model_editor')),Group(Item('gradient_table'),Item('flip_table_axis',style='custom',label='Flip table:'),
 		       Item('lmax_order',editor=EnumEditor(values={'Auto':'1:Auto','2':'2:2','4':'3:4','6':'4:6','8':'5:8','10':'6:10','12':'7:12','14':'8:14','16':'9:16'})),
 		       Item('normalize_to_B0'),
 		       Item('single_fib_thr',label = 'FA threshold'),show_border=True,label='CSD parameters', visible_when='local_model'),
-	     Group('b_vectors','b_values',show_border = True, label='FSL tensor fitting', visible_when='not local_model'))
+	     Group('b_vectors','b_values',Item('flip_table_axis',style='custom',label='Flip table:'),show_border = True, label='FSL tensor fitting', visible_when='not local_model'))
 
 class Gibbs_recon_config(HasTraits):
     iterations = Int(100000000)
@@ -349,6 +357,49 @@ def strip_suffix(file_input, prefix):
     from nipype.utils.filemanip import split_filename
     path, _, _ = split_filename(file_input)
     return os.path.join(path, prefix+'_')
+
+class flipTableInputSpec(BaseInterfaceInputSpec):
+    table = File(exists=True)
+    flipping_axis = List()
+    delimiter = Str()
+    header = Bool()
+    orientation = Enum(['v','h'])
+    
+class flipTableOutputSpec(TraitedSpec):
+    table = File(exists=True)
+
+class flipTable(BaseInterface):
+    input_spec = flipTableInputSpec
+    output_spec = flipTableOutputSpec
+    
+    def _run_interface(self,runtime):
+        axis_dict = {'x':0, 'y':1, 'z':2}
+        import numpy as np
+        f = open(self.inputs.table,'r')
+        if self.inputs.header:
+            header = f.readline()
+        if self.inputs.delimiter == ' ':
+            table = np.loadtxt(f)
+        else:
+            table = np.loadtxt(f, delimiter=self.inputs.delimiter)
+        f.close()
+        if self.inputs.orientation == 'v':
+            for i in self.inputs.flipping_axis:
+                table[:,axis_dict[i]] = -table[:,axis_dict[i]]
+        elif self.inputs.orientation == 'h':
+            for i in self.inputs.flipping_axis:
+                table[axis_dict[i],:] = -table[axis_dict[i],:]
+        out_f = file(os.path.abspath('flipped_table.txt'),'a')
+        if self.inputs.header:
+            out_f.write(header)
+        np.savetxt(out_f,table,delimiter=self.inputs.delimiter)
+        out_f.close()
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["table"] = os.path.abspath('flipped_table.txt')
+        return outputs
                         
 def create_dtk_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
@@ -356,7 +407,7 @@ def create_dtk_recon_flow(config):
     # inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled"]),name="inputnode")
     
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","B0","ODF","gFA","skewness","kurtosis","P0","max","V1"]),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","B0","ODF","gFA","skewness","kurtosis","P0","max","V1"]),name="outputnode") 
     
     if config.imaging_model == "DSI":
         prefix = "dsi"
@@ -459,18 +510,30 @@ def create_mrtrix_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled"]),name="inputnode")
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","eigVec","RF","SD","grad"],mandatory_inputs=True),name="outputnode")
+    
     if config.local_model:
         outputnode.inputs.SD = True
     else:
         outputnode.inputs.SD = False
     #outputnode.inputs.grad = config.gradient_table
+    
+    # Flip gradient table
+    flip_table = pe.Node(interface=flipTable(),name='flip_table')
+    flip_table.inputs.table = config.gradient_table
+    flip_table.inputs.flipping_axis = config.flip_table_axis
+    flip_table.inputs.delimiter = ' '
+    flip_table.inputs.header = False
+    flip_table.inputs.orientation = 'v'
+    flow.connect([
+                (flip_table,outputnode,[("table","grad")]),
+                ])
 
     # Tensor
     mrtrix_tensor = pe.Node(interface=mrtrix.DWI2Tensor(),name='mrtrix_make_tensor')
-    mrtrix_tensor.inputs.encoding_file = config.gradient_table
     #mrtrix_tensor.inputs.out_filename = 'dt.mif'
     flow.connect([
-		(inputnode, mrtrix_tensor,[('diffusion_resampled','in_file')])
+		(inputnode, mrtrix_tensor,[('diffusion_resampled','in_file')]),
+        (flip_table,mrtrix_tensor,[("table","encoding_file")]),
 		])
     #mrtrix_mul.inputs.in_files = [
 
@@ -509,36 +572,48 @@ def create_mrtrix_recon_flow(config):
 		    ])
         # Compute single fiber response function
         mrtrix_rf = pe.Node(interface=mrtrix.EstimateResponseForSH(),name="mrtrix_rf")
-        mrtrix_rf.inputs.encoding_file = config.gradient_table
         if config.lmax_order != 'Auto':
             mrtrix_rf.inputs.maximum_harmonic_order = config.lmax_order
         #mrtrix_rf.inputs.out_filename = 'rf.mif'
         mrtrix_rf.inputs.normalise = config.normalize_to_B0
         flow.connect([
 		    (inputnode,mrtrix_rf,[("diffusion_resampled","in_file")]),
-		    (mrtrix_thr_FA,mrtrix_rf,[("out_file","mask_image")])
+		    (mrtrix_thr_FA,mrtrix_rf,[("out_file","mask_image")]),
+            (flip_table,mrtrix_rf,[("table","encoding_file")]),
 		    ])
         # Perform spherical deconvolution
         mrtrix_CSD = pe.Node(interface=mrtrix.ConstrainedSphericalDeconvolution(),name="mrtrix_CSD")
         mrtrix_CSD.inputs.normalise = config.normalize_to_B0
-        mrtrix_CSD.inputs.encoding_file = config.gradient_table
         flow.connect([
 		    (inputnode,mrtrix_CSD,[('diffusion_resampled','in_file')]),
 		    (mrtrix_rf,mrtrix_CSD,[('response','response_file')]),
 		    (mrtrix_rf,outputnode,[('response','RF')]),
 		    (inputnode,mrtrix_CSD,[("wm_mask_resampled",'mask_image')]),
+            (flip_table,mrtrix_CSD,[("table","encoding_file")]),
 		    (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
 		    ])
     else:
         flow.connect([
 		    (inputnode,outputnode,[('diffusion_resampled','DWI')])
 		    ])
+        
     return flow
 
 def create_camino_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled"]),name="inputnode")
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","MD","eigVec","RF","SD","grad"],mandatory_inputs=True),name="outputnode")
+    
+    # Flip gradient table
+    flip_table = pe.Node(interface=flipTable(),name='flip_table')
+    flip_table.inputs.table = config.gradient_table
+    flip_table.inputs.flipping_axis = config.flip_table_axis
+    flip_table.inputs.delimiter = ' '
+    flip_table.inputs.header = True
+    flip_table.inputs.orientation = 'v'
+    flow.connect([
+                (flip_table,outputnode,[("table","grad")]),
+                ])
     
     # Convert diffusion data to camino format
     camino_convert = pe.Node(interface=camino.Image2Voxel(),name='camino_convert')
@@ -555,8 +630,6 @@ def create_camino_recon_flow(config):
             camino_ModelFit.inputs.model = config.local_model + ' ' + config.fallback_model
     else:
         camino_ModelFit.inputs.model = config.local_model
-        
-    camino_ModelFit.inputs.scheme_file = config.gradient_table
     
     if config.local_model == 'restore':
         camino_ModelFit.inputs.sigma = config.snr
@@ -564,6 +637,7 @@ def create_camino_recon_flow(config):
     flow.connect([
 		(camino_convert,camino_ModelFit,[('voxel_order','in_file')]),
 		(inputnode,camino_ModelFit,[('wm_mask_resampled','bgmask')]),
+        (flip_table,camino_ModelFit,[("table","scheme_file")]),
 		(camino_ModelFit,outputnode,[('fitted_data','DWI')])
 		])
 
@@ -622,10 +696,17 @@ def create_fsl_recon_flow(config):
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_resampled","wm_mask_resampled"]),name="inputnode")
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["phsamples","fsamples","thsamples"],mandatory_inputs=True),name="outputnode")
     
+    # Flip gradient table
+    flip_table = pe.Node(interface=flipTable(),name='flip_table')
+    flip_table.inputs.table = config.b_vectors
+    flip_table.inputs.flipping_axis = config.flip_table_axis
+    flip_table.inputs.delimiter = ' '
+    flip_table.inputs.header = False
+    flip_table.inputs.orientation = 'h'
+    
     fsl_node = pe.Node(interface=fsl.BEDPOSTX(),name='BEDPOSTX')
     
     fsl_node.inputs.bvals = config.b_values
-    fsl_node.inputs.bvecs = config.b_vectors
     fsl_node.inputs.burn_period = config.burn_period
     fsl_node.inputs.fibres = config.fibres_per_voxel
     fsl_node.inputs.jumps = config.jumps
@@ -635,6 +716,7 @@ def create_fsl_recon_flow(config):
     flow.connect([
                 (inputnode,fsl_node,[("diffusion_resampled","dwi")]),
                 (inputnode,fsl_node,[("wm_mask_resampled","mask")]),
+                (flip_table,fsl_node,[("table","bvecs")]),
                 (fsl_node,outputnode,[("merged_fsamples","fsamples")]),
                 (fsl_node,outputnode,[("merged_phsamples","phsamples")]),
                 (fsl_node,outputnode,[("merged_thsamples","thsamples")]),
@@ -737,15 +819,25 @@ def create_gibbs_recon_flow(config_gibbs,config_model):
 		    ])
 
     else:
+        
+        # Flip gradient table
+        flip_table = pe.Node(interface=flipTable(),name='flip_table')
+        flip_table.inputs.table = config_model.b_vectors
+        flip_table.inputs.flipping_axis = config_model.flip_table_axis
+        flip_table.inputs.delimiter = ' '
+        flip_table.inputs.header = False
+        flip_table.inputs.orientation = 'h'
+        
+        # Fit linear tensor
         dtifit = pe.Node(interface=fsl.DTIFit(),name="dtifit")
         dtifit.inputs.bvals = config_model.b_values
-        dtifit.inputs.bvecs = config_model.b_vectors
         dtifit.inputs.save_tensor = True
         dtifit.inputs.output_type = 'NIFTI'
         gibbs.inputs.sh_coefficients = 'FSL'
 
         flow.connect([
 		    (inputnode,dtifit,[('diffusion_resampled','dwi'),('wm_mask_resampled','mask')]),
+            (flip_table,dtifit,[("table","bvecs")]),
 		    (dtifit,gibbs,[('tensor','in_file')])
 		    ])
 
