@@ -1,0 +1,403 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Connectome Mapper Stages &mdash; The Connectome Mapper</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.2alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="The Connectome Mapper" href="index.html" />
+    <link rel="next" title="Example Results" href="exampleresults.html" />
+    <link rel="prev" title="Download Instruction" href="download.html" /> 
+
+ <script type="text/javascript" src="_static/jquery.js"></script>
+ <script type="text/javascript">
+       // intelligent scrolling of the sidebar content
+      $(window).scroll(function() {
+        var sb = $('.sphinxsidebarwrapper');
+        var win = $(window);
+        var sbh = sb.height();
+        var offset = $('.sphinxsidebar').position()['top'];
+        var wintop = win.scrollTop();
+        var winbot = wintop + win.innerHeight();
+        var curtop = sb.position()['top'];
+        var curbot = curtop + sbh;
+        // does sidebar fit in window?
+        if (sbh < win.innerHeight()) {
+          // yes: easy case -- always keep at the top
+          sb.css('top', $u.min([$u.max([0, wintop - offset - 10]),
+                                $(document).height() - sbh - 200]));
+        } else {
+          // no: only scroll if top/bottom edge of sidebar is at
+          // top/bottom edge of window
+          if (curtop > wintop && curbot > winbot) {
+            sb.css('top', $u.max([wintop - offset - 10, 0]));
+          } else if (curtop < wintop && curbot < winbot) {
+            sb.css('top', $u.min([winbot - sbh - offset - 20,
+                                  $(document).height() - sbh - 200]));
+          }
+        }
+      });
+  </script>      
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="exampleresults.html" title="Example Results"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="download.html" title="Download Instruction"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">The Connectome Mapper</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><i>Latest release: 2.0.2alpha <br> (January 1st 2014)</i>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="download.html"
+                        title="previous chapter">Download Instruction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="exampleresults.html"
+                        title="next chapter">Example Results</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mappingsteps.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="connectome-mapper-stages">
+<h1>Connectome Mapper Stages<a class="headerlink" href="#connectome-mapper-stages" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="project-settings-main-tab">
+<h2>Project settings / Main Tab<a class="headerlink" href="#project-settings-main-tab" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/maintab_120.png" src="_images/maintab_120.png" />
+<dl class="docutils">
+<dt>Project directory</dt>
+<dd>Select the root folder of your project which contains the subfolders for all the subjects of this project.</dd>
+<dt>Imaging Modality</dt>
+<dd>What type of data to process. Currently supports DSI, QBALL and DTI data.</dd>
+<dt>Stages</dt>
+<dd>Select the stages you want to run. A good practice is to incrementally select the stages to be processed. So you keep good control of what is going on.</dd>
+<dt>Inspector</dt>
+<dd>Let you inspect the result of different processing stages, using external packages such as FSL, Freesurfer, Diffusion Toolkit or matplotlib.</dd>
+</dl>
+<p>Buttons</p>
+<ul class="simple">
+<li>About: Information about the pipeline, copyright, contributors etc.</li>
+<li>Help: Show help information for each processing stage</li>
+<li>Save state: Save the entered information, parameters etc in order not to enter them again.</li>
+<li>Load state: You can load a saved state.</li>
+<li>Map Connectome! : Start the processing of the selected stages. Information and error messages are written to the console.</li>
+</ul>
+</div>
+<div class="section" id="project-related-information-metadata-tab">
+<h2>Project-related information / Metadata Tab<a class="headerlink" href="#project-related-information-metadata-tab" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/metadata_120.png" src="_images/metadata_120.png" />
+<p>Enter relevant project-wide metadata. Keep in mind that good metadata eases the reuse of the data a lot later on. The
+metadata fields are derived from the <a class="reference external" href="http://dublincore.org/documents/dcmi-terms/">Dublin Core Metadata Standards</a></p>
+<ul class="simple">
+<li>Creator: The dataset creator.</li>
+<li>Email: Email address of the contact person of the dataset.</li>
+<li>Publisher: Institution that published the dataset.</li>
+<li>Created: Dataset creation date</li>
+<li>Modified: Dataset modification date</li>
+<li>License: The license of the data</li>
+<li>References: E.g. Reference to a journal paper which used this dataset</li>
+<li>Species: Binomal species name</li>
+<li>Project description: A short general project description.</li>
+</ul>
+</div>
+<div class="section" id="subject-timepoint-related-information">
+<h2>Subject/Timepoint related information<a class="headerlink" href="#subject-timepoint-related-information" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/subject_120.png" src="_images/subject_120.png" />
+<dl class="docutils">
+<dt>Name</dt>
+<dd>Specify a name/ID/own code for the subject. The name is reused as folder name in the project structure.</dd>
+<dt>Timepoint</dt>
+<dd>Enter the timepoint name. Should correspond to the folder name.</dd>
+<dt>Working Directory</dt>
+<dd>Automatically generated using the project directory and name and timepoint informatino. You can change it by selecting
+the folder that contains the RAWDATA folder. Usually, this should be project/subject/timepoint</dd>
+<dt>Metadata</dt>
+<dd>Add key-value metadata fields  for this subject and timepoint. This metadata can be reused for processing later.
+Examples are age, handedness etc.</dd>
+</dl>
+</div>
+<div class="section" id="create-folder">
+<h2>Create Folder<a class="headerlink" href="#create-folder" title="Permalink to this headline">¶</a></h2>
+<p>This stage creates the folder structure for your subject and timepoint. You can run this stage before you added
+the DICOM files in the corresponding RAWDATA folders. By modifying subject name and timepoint, you can quickly create
+the set of folders for your study.</p>
+</div>
+<div class="section" id="dicom-converter">
+<h2>DICOM Converter<a class="headerlink" href="#dicom-converter" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/dicomconverter_120.png" src="_images/dicomconverter_120.png" />
+<p>Converts the raw DICOM data files in the RAWDATA subfolders into the Nifti format. It is possible to convert independently
+the structural data (T1 and T2), the diffusion (DSI, DTI, QBALL) and the functional data (rs-fMRI). Performs required flipping if needed.
+If the DICOM files have no file name ending, just enter * as the file pattern.</p>
+<p>If you have not acquired any structural T2 image or rs-fMRI image, you can deselect the corresponding checkboxes. However, diffusion data and T1 data are required.</p>
+<p>For the conversion, packages such as Diffusion Toolkit and Nibabel are used.</p>
+</div>
+<div class="section" id="registration">
+<h2>Registration<a class="headerlink" href="#registration" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/registration_120.png" src="_images/registration_120.png" />
+<p>This stage allows to register the structural T1 image (where the parcellation of the cortical surface is extracted) onto the diffusion space.</p>
+<p>Choose <em>Linear</em> or <em>BBregister</em> if you only acquired the structural T1 image and you miss the additional T2. In this way, the stage will
+try to align the T1 directly onto the b0 image.</p>
+<p>If additional T2 images have been acquired, <em>Nonlinear</em> registration can be performed. A two steps procedure is performed:</p>
+<ol class="arabic simple">
+<li>First, a linear registration if performed between the T1 and the T2; these images don&#8217;t share the same contrast but
+there are no distortions between them, so a linear registration will suffice.</li>
+<li>Then, a nonlinear registration will try to align the T2 image and the b0 one, and then the two transformations are concatenated.
+To preserve edges, a intermediate skull-stripping step is performed on both images by using <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/bet2/index.html">BET</a>.</li>
+</ol>
+<p>We use the nonlinear registration approach in order to mitigate the nonlinear distortions which are present in diffusion images.
+Future versions of the pipeline will account for other methods to achieve this (e.g. fieldmaps).</p>
+<div class="section" id="linear-registration">
+<h3>Linear Registration<a class="headerlink" href="#linear-registration" title="Permalink to this headline">¶</a></h3>
+<p>The FSL linear registration tool <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/flirt/index.html">FLIRT</a> is used.
+Default parameters (which can be modified) generally give good results in most cases.</p>
+</div>
+<div class="section" id="nonlinear-registration">
+<h3>Nonlinear Registration<a class="headerlink" href="#nonlinear-registration" title="Permalink to this headline">¶</a></h3>
+<p>The FSL nonlinear registration tool <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/fnirt/index.html">FNIRT</a> is used to perform this step.
+Default parameters (which can be modified) generally give good results in most cases.</p>
+</div>
+<div class="section" id="bbregister-registration">
+<h3>BBregister Registration<a class="headerlink" href="#bbregister-registration" title="Permalink to this headline">¶</a></h3>
+<p>The FREESURFER cross-modal registration tool <a class="reference external" href="http://surfer.nmr.mgh.harvard.edu/fswiki/bbregister">BBREGISTER</a> is used.
+Differently from FSL FLIRT, BBREGISTER registration algorithm exploits the FREESURFER segmentation results and can therefore be more robust in the context of this pipeline.
+Default parameters (which can be modified) generally give good results in most cases.</p>
+</div>
+</div>
+<div class="section" id="segmentation">
+<h2>Segmentation<a class="headerlink" href="#segmentation" title="Permalink to this headline">¶</a></h2>
+<p>We use Freesurfer&#8217;s recon_all for the segmentation. You can provide custom parameters for <a class="reference external" href="http://surfer.nmr.mgh.harvard.edu/fswiki/recon-all">recon_all</a>.</p>
+</div>
+<div class="section" id="parcellation">
+<h2>Parcellation<a class="headerlink" href="#parcellation" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/parcellation_120.png" src="_images/parcellation_120.png" />
+<p>We provide two parcellation schemes.</p>
+<dl class="docutils">
+<dt>NativeFreesurfer</dt>
+<dd>The native Freesurfer parcellation using the <a class="reference external" href="http://surfer.nmr.mgh.harvard.edu/fswiki/CorticalParcellation">Desikan-Killiany Atlas</a>
+extended to include subcortical regions.</dd>
+<dt>Lausanne2008</dt>
+<dd>The multi-resolution parcellation that was used in Hagmann et al. 2008. It is updated to incorporate
+the new atlases provided by Freesurfer 5.0 (including insula).</dd>
+</dl>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The Lausanne2008 parcellation is in experimental stage. Use it with caution. More information <a class="reference external" href="http://github.com/LTS5/cmp/blob/master/cmp/data/parcellation/lausanne2008/ParcellationLausanne2008.xls">about the parcellation</a>.</p>
+</div>
+</div>
+<div class="section" id="apply-registration">
+<h2>Apply registration<a class="headerlink" href="#apply-registration" title="Permalink to this headline">¶</a></h2>
+<p>The registration transformations are applied to the white matter mask and the parcellation to map them into the diffusion space.</p>
+</div>
+<div class="section" id="reconstruction">
+<h2>Reconstruction<a class="headerlink" href="#reconstruction" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/reconstruction_120.png" src="_images/reconstruction_120.png" />
+<p>Use <a class="reference external" href="http://www.trackvis.org/dtk/">DiffusionToolkit</a> for extracting the orientation distribution function (ODF), the default parameters are the same as DTKs.</p>
+<p>Please refer to <a class="reference external" href="http://www.trackvis.org/dtk/?subsect=script#odf_recon">odf_recon</a> or
+<a class="reference external" href="http://www.trackvis.org/dtk/?subsect=script#dti_recon">dti_recon</a> documentationfor the meaning of each parameter.</p>
+<p>You can also set parameters for the DTB_dtk2dir conversion. This can be helpful if you have to flip axes before tractography.</p>
+<dl class="docutils">
+<dt>DTB_dtk2dir parameters</dt>
+<dd><table class="first last docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">--ix</span></kbd></td>
+<td>invert x axis</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--iy</span></kbd></td>
+<td>invert y axis</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--iz</span></kbd></td>
+<td>invert z axis</td></tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="tractography">
+<h2>Tractography<a class="headerlink" href="#tractography" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/tractography_120.png" src="_images/tractography_120.png" />
+<p>This module runs a classical streamline fiber-tracking algorithm (Weeden et al. (2003), Diffusion spectrum magnetic resonance imaging (DSI))
+tractography adapted to deal with possible multiple directions inside each voxel.</p>
+<p>The following parameters are automatically set by the mapper:
+Tracking is performed inside the white matter mask computed by FreeSurfer (&#8211;wm parameter) and is started in each non-zero
+voxel of the seed mask (&#8211;seed parameter); if no such a mask is give, then all voxels will be considered.
+Trajectories are iteratively propagated following coherent diffusion directions inside each voxel (&#8211;dir parameter) by using a fixed step size
+(&#8211;stepSize parameter) and the Euler integration method, and are stopped when a stopping criteria is met.</p>
+<p>The following parameters are recommended to be explored:
+Stopping criteria are: trajectories are outside the white matter mask or no compatible direction are found below a specific crossing angle, &#8211;angle parameter).
+Only diffusion directions with a volume fraction greater than a threshold are considered (&#8211;vf parameter).
+For some imaging modalities, this parameter has no sense (e.g. DTI) and it is ignored.
+Multiple seed points can be created inside each voxel (&#8211;seeds parameter); this way, multiple trajectories
+will be started for every direction inside each voxel.</p>
+</div>
+<div class="section" id="fiber-filtering">
+<h2>Fiber Filtering<a class="headerlink" href="#fiber-filtering" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/fiberfiltering_120.png" src="_images/fiberfiltering_120.png" />
+<dl class="docutils">
+<dt>Apply spline filter</dt>
+<dd>Fibers are spline-filtered using diffusion toolkit. Please refer to <a class="reference external" href="http://www.trackvis.org/dtk/?subsect=script#spline_filter">spline_filter</a> documentation.</dd>
+</dl>
+<p>Apply cutoff filter: Fibers can be filtered depending on their length:</p>
+<ul class="simple">
+<li>Lower cutoff: Fibers smaller than this cutoff length are filtered.</li>
+<li>Upper cutoff: Fibers longer than this cutoff length are filtered.</li>
+</ul>
+</div>
+<div class="section" id="connection-matrix-creation">
+<h2>Connection Matrix Creation<a class="headerlink" href="#connection-matrix-creation" title="Permalink to this headline">¶</a></h2>
+<p>This stage merges the grey matter labeling and the tractography to create a connection matrix or brain graph for each
+resolution. A final tractography file is stored for each parcellation containing only fibers that start and end
+in grey matter regions.</p>
+<p>Very general edge measures are used to construct the network, namely the number of fibers between two regions and their
+average length. Further measures can be computed using the Connectome Viewer using appropriate scalar volumes, tractography
+and label arrays.</p>
+<dl class="docutils">
+<dt>Compute curvature</dt>
+<dd>Compute the curvature value for each of the filtered fibers</dd>
+</dl>
+</div>
+<div class="section" id="resting-state-fmri-processing">
+<h2>Resting-State fMRI Processing<a class="headerlink" href="#resting-state-fmri-processing" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/rsfMRI_120.png" src="_images/rsfMRI_120.png" />
+<p>This stage produces average time-courses for each cortical ROI, from resting-state fMRI (rsfMRI) data.
+FSL <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/mcflirt/index.html">MCFLIRT</a> is used to realign the rsfMRI time points and compute the mean rsfMRI volume.
+The T1 volume is then registered to the mean rsfMRI volume. It is possible to choose between two different linear registration tools: FLIRT or BBREGISTER (see &#8216;Registration&#8217; step).
+The linear transformation T1-to-mean_rsfMRI is then applied to the cortical ROIs&#8217; volumes corresponding to the selected parcellation scheme,
+and the averaged rsfMRI time-course is computed for each ROI.</p>
+<p>The averaged time-courses are saved as Numpy matrices of dimensions number_of_ROIs X number_of_timepoints. Check the &#8216;Save .mat format?&#8217; case if you wish to save the average time-courses in mat format too.</p>
+<p>The output average time-series matrix can be suitably analysed through the <a class="reference external" href="http://miplab.epfl.ch/richiardi/software.php">Connectivity Decoding Toolkit</a> (Richiardi J, Eryilmaz H, Schwartz S, Vuilleumier P,
+Van De Ville D. 2011. Decoding brain states from fMRI connectivity graphs. Neuroimage 56: 616-626). In this case, check the &#8216;Save .mat format?&#8217; option, then import the matrices directly into Matlab
+Fand use them to feed the Brain Decoding Toolkit&#8217; function &#8216;connectivityDecoding_filtering&#8217;.</p>
+</div>
+<div class="section" id="connectome-file-format-converter">
+<h2>Connectome File Format Converter<a class="headerlink" href="#connectome-file-format-converter" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/cffconverter_120.png" src="_images/cffconverter_120.png" />
+<p>Raw and processed data are stored in the connectome file for further analysis in the Connectome Viewer or elsewhere.</p>
+<dl class="docutils">
+<dt>All connectomes</dt>
+<dd>All the connectivity information for the different resolutions.</dd>
+<dt>Original Tractography</dt>
+<dd>The unfiltered tractography result as produced by DTB_streamline.</dd>
+<dt>Filtered Tractography</dt>
+<dd>The tractography result after potential spline and length cutoff filtering.</dd>
+<dt>Filtered fiber arrays</dt>
+<dd>The filtered tractography contains also so-called orphan fibers, which are
+fibers that do not start or end in grey matter voxels. The filtered fiber arrays
+contain are NumPy arrays labeling the individual fibers as orphans (-1) or connection
+two regions.</dd>
+<dt>Final Tractography and Labels</dt>
+<dd>For each parcellation/resolution, a tractography files and a corresponding fiber
+label array is produced. The tractography contains much less fibers, because orphan
+fibers are filtered out, and only fibers to contribute to the final connection matrix
+are shown.</dd>
+<dt>Scalar Maps</dt>
+<dd>For DSI datasets, we provide the computation of a few scalar maps based on the reconstructed
+Orientation Density Functions (ODF) that might be relevant in comparing subjects.
+We provide GFA, skewness, kurtosis and P0 maps.</dd>
+<dt>Raw Diffusion data</dt>
+<dd>Store the raw diffusion data in Nifti format. Beware that Nifti files do not contain
+all the information from the DICOM series.</dd>
+<dt>Raw T1 data</dt>
+<dd>Store the raw T1 data in Nifti format.</dd>
+<dt>Raw T2 data</dt>
+<dd>Store the raw T2 data in Nifti format if available.</dd>
+<dt>Parcellation Volumes</dt>
+<dd>Store the segmentation and parcellation results (Freesurfer aseg, white matter, ROI parcellation in
+T1 and diffusion space.</dd>
+<dt>Surfaces</dt>
+<dd>Store the surfaces extracted by Freesurfer in Gifti format.</dd>
+</dl>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/configuration_120.png" src="_images/configuration_120.png" />
+<dl class="docutils">
+<dt>E-Mail notification</dt>
+<dd>If you have installed an SMTP server, you can enter a list of email addresses to which an email is sent after the completion of a stage.
+On Ubuntu, you can for instance use <a class="reference external" href="https://help.ubuntu.com/community/Postfix">Postfix</a>.</dd>
+<dt>Environment variables</dt>
+<dd>They are recognized by your current .bashrc settings. These fields should not be empty, otherwise you have to add the
+missing environment variables in your environment. Changing the paths only in this option is not sufficient.</dd>
+</dl>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If you want to explore the pipeline parameters, beware that the output of the stages will be overwritten.
+Alternatively, you can duplicate the data folders.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="exampleresults.html" title="Example Results"
+             >next</a></li>
+        <li class="right" >
+          <a href="download.html" title="Download Instruction"
+             >previous</a> |</li>
+        <li><a href="index.html">The Connectome Mapper</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, EPFL &amp; UNIL-CHUV.
+      Last updated on Dec 24, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

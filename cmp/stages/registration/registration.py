@@ -51,7 +51,7 @@ class RegistrationConfig(HasTraits):
                        )
                        
 
-class Tkregsiter2InputSpec(CommandLineInputSpec):
+class Tkregister2InputSpec(CommandLineInputSpec):
     subjects_dir = Directory(desc='Use dir as SUBJECTS_DIR',exists=True,argstr="--sd %s")
     subject_id = traits.Str(desc='Set subject id',argstr="--s %s")
     regheader = traits.Bool(desc='Compute registration from headers',argstr="--regheader")
@@ -62,14 +62,14 @@ class Tkregsiter2InputSpec(CommandLineInputSpec):
     noedit = traits.Bool(desc='Do not open edit window (exit) - for conversions',argstr="--noedit")
 
 
-class Tkregsiter2OutputSpec(TraitedSpec):
+class Tkregister2OutputSpec(TraitedSpec):
     regout_file = File(desc='Resulting registration file')
     fslregout_file = File(desc='Resulting FSL-Style registration matrix')
 
-class Tkregsiter2(CommandLine):
+class Tkregister2(CommandLine):
     _cmd = 'tkregister2'
-    input_spec = Tkregsiter2InputSpec
-    output_spec = Tkregsiter2OutputSpec
+    input_spec = Tkregister2InputSpec
+    output_spec = Tkregister2OutputSpec
 
     def _list_outputs(self):
         outputs = self._outputs().get()

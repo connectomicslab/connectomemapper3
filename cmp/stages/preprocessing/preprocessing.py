@@ -13,6 +13,8 @@ from traitsui.api import *
 from cmp.stages.common import Stage
 
 import os
+import pickle
+import gzip
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.fsl as fsl
@@ -61,7 +63,7 @@ class PreprocessingStage(Stage):
 
     def define_inspect_outputs(self):
 
-        if self.config.motion_correction:
+        if self.config.motion_correction or self.config.eddy_current_correction:
             preproc_results_path = os.path.join(self.stage_dir,"result_preprocessing_stage.pklz")
             if(os.path.exists(preproc_results_path)):
                 preproc_results = pickle.load(gzip.open(preproc_results_path))

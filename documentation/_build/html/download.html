@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Download Instruction &mdash; The Connectome Mapper</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.2alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="The Connectome Mapper" href="index.html" />
+    <link rel="next" title="Connectome Mapper Stages" href="mappingsteps.html" />
+    <link rel="prev" title="Installation Instruction" href="installation.html" /> 
+
+ <script type="text/javascript" src="_static/jquery.js"></script>
+ <script type="text/javascript">
+       // intelligent scrolling of the sidebar content
+      $(window).scroll(function() {
+        var sb = $('.sphinxsidebarwrapper');
+        var win = $(window);
+        var sbh = sb.height();
+        var offset = $('.sphinxsidebar').position()['top'];
+        var wintop = win.scrollTop();
+        var winbot = wintop + win.innerHeight();
+        var curtop = sb.position()['top'];
+        var curbot = curtop + sbh;
+        // does sidebar fit in window?
+        if (sbh < win.innerHeight()) {
+          // yes: easy case -- always keep at the top
+          sb.css('top', $u.min([$u.max([0, wintop - offset - 10]),
+                                $(document).height() - sbh - 200]));
+        } else {
+          // no: only scroll if top/bottom edge of sidebar is at
+          // top/bottom edge of window
+          if (curtop > wintop && curbot > winbot) {
+            sb.css('top', $u.max([wintop - offset - 10, 0]));
+          } else if (curtop < wintop && curbot < winbot) {
+            sb.css('top', $u.min([winbot - sbh - offset - 20,
+                                  $(document).height() - sbh - 200]));
+          }
+        }
+      });
+  </script>      
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="mappingsteps.html" title="Connectome Mapper Stages"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="installation.html" title="Installation Instruction"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">The Connectome Mapper</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><i>Latest release: 2.0.2alpha <br> (January 1st 2014)</i>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="previous chapter">Installation Instruction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mappingsteps.html"
+                        title="next chapter">Connectome Mapper Stages</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/download.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="download-instruction">
+<h1>Download Instruction<a class="headerlink" href="#download-instruction" title="Permalink to this headline">¶</a></h1>
+<p>By downloading Connectome Mapper, you agree to the terms and conditions of the Modified BSD license.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Copyright (C) 2009-2014, Ecole Polytechnique Fédérale de Lausanne (EPFL) and Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland. All rights reserved.</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</dt>
+<dd><ul class="first last simple">
+<li>Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.</li>
+<li>Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.</li>
+<li>Neither the name of the Ecole Polytechnique Fédérale de Lausanne (EPFL)
+and Hospital Center and University of Lausanne (UNIL-CHUV) nor the
+names of its contributors may be used to endorse or promote products
+derived from this software without specific prior written permission.</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &#8220;AS IS&#8221; AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL &#8220;Ecole Polytechnique Fédérale de Lausanne (EPFL) and
+Hospital Center and University of Lausanne (UNIL-CHUV)&#8221; BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+<p class="last">THIS SOFTWARE IS FOR RESEARCH PURPOSES ONLY AND SHALL NOT BE USED FOR
+ANY CLINICAL USE. THIS SOFTWARE HAS NOT BEEN REVIEWED OR APPROVED BY
+THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR
+NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA
+OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE
+PROVISION OR PATIENT CARE.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Please <a class="reference external" href="http://www.cmtk.org/users/register">REGISTER</a>  before you start to use Connectome Mapper or the Connectome Mapping Toolkit. This will help us improving the software.</p>
+</div>
+<a href="https://github.com/LTS5/cmp/tarball/release-1.2.0" onclick="_gaq.push(['_trackEvent', 'release-1.1.0', 'download']);">I agree on the terms and conditions of the connectome mapper license and want to download the source code, current release 1.2.0</a><br/><br/>
+<a href="https://github.com/LTS5/cmp/tarball/release-1.1.0" onclick="_gaq.push(['_trackEvent', 'release-1.1.0', 'download']);">I agree on the terms and conditions of the connectome mapper license and want to download the source code, previous release 1.1.0</a></div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="mappingsteps.html" title="Connectome Mapper Stages"
+             >next</a></li>
+        <li class="right" >
+          <a href="installation.html" title="Installation Instruction"
+             >previous</a> |</li>
+        <li><a href="index.html">The Connectome Mapper</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, EPFL &amp; UNIL-CHUV.
+      Last updated on Dec 24, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
