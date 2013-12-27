@@ -315,6 +315,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
         # Open the corresponding ROI
         print("Open the corresponding ROI")
         for vol in roi_volumes:
+            print(vol)
             if parkey in vol:
                 roi_fname = vol
                 print roi_fname

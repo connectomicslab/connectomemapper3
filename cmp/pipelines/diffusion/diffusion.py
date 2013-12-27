@@ -42,7 +42,8 @@ class Check_Input_Notification(HasTraits):
                        Item('imaging_model_message',visible_when='len(imaging_model_options)>1',style='readonly',show_label=False),
                        Item('imaging_model',editor=EnumEditor(name='imaging_model_options'),visible_when='len(imaging_model_options)>1'),
                        kind='modal',
-                       buttons=['OK'])
+                       buttons=['OK'],
+                       title="Check inputs")
 
 class DiffusionPipeline(Pipeline):
     pipeline_name = Str("diffusion_pipeline")

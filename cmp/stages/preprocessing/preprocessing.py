@@ -63,12 +63,20 @@ class PreprocessingStage(Stage):
 
     def define_inspect_outputs(self):
 
-        if self.config.motion_correction or self.config.eddy_current_correction:
-            preproc_results_path = os.path.join(self.stage_dir,"result_preprocessing_stage.pklz")
-            if(os.path.exists(preproc_results_path)):
-                preproc_results = pickle.load(gzip.open(preproc_results_path))
-                self.inspect_outputs_dict['Preprocessed image'] = ['fslview',preproc_results.outputs.diffusion_preproc]
-                self.inspect_outputs = self.inspect_outputs_dict.keys()
+        if self.config.motion_correction:
+            motion_results_path = os.path.join(self.stage_dir,"motion_correction","result_motion_correction.pklz")
+            if(os.path.exists(motion_results_path)):
+                motion_results = pickle.load(gzip.open(motion_results_path))
+                self.inspect_outputs_dict['Motion corrected image'] = ['fslview',motion_results.outputs.out_file]
+                
+        if self.config.eddy_current_correction:
+            eddy_results_path = os.path.join(self.stage_dir,"eddy_correct","result_eddy_correct.pklz")
+            if(os.path.exists(eddy_results_path)):
+                eddy_results = pickle.load(gzip.open(eddy_results_path))
+                self.inspect_outputs_dict['Eddy current corrected image'] = ['fslview',eddy_results.outputs.eddy_corrected]
+        
+        self.inspect_outputs = self.inspect_outputs_dict.keys()
+            
 
             
     def has_run(self):

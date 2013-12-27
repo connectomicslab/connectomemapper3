@@ -425,7 +425,19 @@ def create_dtk_recon_flow(config):
     if config.imaging_model == "HARDI":
         prefix = "hardi"
         dtk_hardimat = pe.Node(interface=dtk.HARDIMat(),name='dtk_hardimat')
-        dtk_hardimat.inputs.gradient_table = config.gradient_table
+        
+        #dtk_hardimat.inputs.gradient_table = config.gradient_table
+        # Flip gradient table
+        flip_table = pe.Node(interface=flipTable(),name='flip_table')
+        flip_table.inputs.table = config.gradient_table
+        flip_table.inputs.flipping_axis = config.flip_table_axis
+        flip_table.inputs.delimiter = ','
+        flip_table.inputs.header = False
+        flip_table.inputs.orientation = 'v'
+        flow.connect([
+                (flip_table,dtk_hardimat,[("table","gradient_table")]),
+                ])
+        
         dtk_hardimat.inputs.oblique_correction = config.apply_gradient_orientation_correction
         
         dtk_odfrecon = pe.Node(interface=dtk.ODFRecon(out_prefix=prefix),name='dtk_odfrecon')

@@ -82,11 +82,11 @@ Manual installation (all distributions)
 ---------------------------------------
 
 Manual installation is divided between the Python libraries needed by the Connectome Mapper and the CMTKlib and the libraries needed by the DTB binaries. Files for manual installation is the zipped archive of the Connectome Mapper.
+
 * As we will use `easy_install` in order to have access to the latest libraries even on older systems the python-setuptools package is needed. Ipython is strongly recommended for debugging purposes. Debian/Ubuntu command: `sudo apt-get install python-setuptools ipython`
 * Python libraries needed: traits, traitsui, pyface, nibabel, numpy, networkx, scipy. Easy_install command: `sudo easy_install traits traitsui pyface nibabel numpy networkx scipy nose`
 * Install our forked version of Nipype (http://nipy.sourceforge.net/nipype/). For now, we require a modified vesion Nipype interfaces that is available on our Github repository (https://github.com/LTS5/nipype). To install it clone to your machine the nipype fork by typing `git clone git://github.com/LTS5/nipype.git`, and run the install script with `sudo python setup.py install`. You will have to remove already installed versions of nipype if they were installed through apt-get (installation location: `/usr/lib/pyshared`) as it will take precedence over versions installed through the setup.py script.
-* Libraries needed by the DTB binaries: boost (module program-options), nifti, blitz. Debian/Ubuntu 
-
+* Libraries needed by the DTB binaries: boost (module program-options), nifti, blitz. Debian/Ubuntu
 
 Now, you are ready to start the Connectome Mapper from the Bash Shell::
 
@@ -99,11 +99,11 @@ Sample dataset
 To get you started, we provide two Diffusion Spectrum Imaging sample datasets. They already contain the correct
 folder structure described below. You can find the two `raw datasets online <http://cmtk.org/datasets/rawdata/>`_::
 
-project01_dsi
-    *connectome_0001* with timepoint *tp1* and DSI, T1 and T2 raw data
+	project01_dsi
+    	*connectome_0001* with timepoint *tp1* and DSI, T1 and T2 raw data
 
-project02_dsi
-    *connectome_0002* with timepoint *tp1* and DSI, T1 raw data
+	project02_dsi
+    	*connectome_0002* with timepoint *tp1* and DSI, T1 raw data
 
 If you produce any connectome dataset that you want to share with the community, we provide a curated
 `cffdata repository on GitHub <http://github.com/LTS5/cffdata>`_ .
@@ -112,64 +112,39 @@ If you produce any connectome dataset that you want to share with the community,
 Project configuration and setup
 ===============================
 
-Steps to do before executing the pipeline
+Running the Connectome Mapper opens the main window as well as a menu toolbar on the top of the screen. The only enabled buttons are the "New Connectome Data..." and "Load Connectome Data..." in the File menu of the toolbar.
 
-#. Create the folder structure for your project for DSI data. For DTI data, rename the folder DSI to DTI. For QBALL data, rename the folder DSI to QBALL. 
-If you have resting state fMRI data, create a new folder 'fMRI' in RAWDATA.::
+#. If you have already configured a processing pipeline before, you can load the configuration by selecting the base directory using the "Load Connectome Data..." button.
 
-	├── myproject
-	│   ├── control001
-	│   │   └── tp1
-	│   │       ├── RAWDATA
-	│   │       │   ├── DSI
-	│   │       │   ├── T1
-	│   │       │   ├── T2
-	│   │       │   └── fMRI
+	Otherwise, click "New Connectome Data..." and select the base directory for the project (i.e. the project that will contain all the processing steps and results for one subject). Selecting a folder will create the following folder structure::
 
-#. Copy the Diffusion / MPRAGE (DSI, DTI, QBALL, T1, T2, fMRI) images (DICOM series) in the corresponding folders.
-   The T2 images are optional but they improve the registration of the data. The fMRI images are optional.
+		├── myproject
+		│   ├── control001
+		│   │   └── tp1 <- Selected folder (base directory)
+		│   │       ├── LOG
+		│   │       ├── NIFTI
+		│   │       ├── NIPYPE
+		│   │       ├── RAWDATA
+		│   │       │   ├── DSI
+		│   │       │   ├── DTI
+		│   │       │   ├── HARDI
+		│   │       │   ├── T1
+		│   │       │   └── T2
+		│   │       ├── RESULTS
+		│   │       └── STATS
+		
+	You can also create the folder structure manually (existing folders won't be overwritten).
 
-#. Run the Connectome Mapper and configure it for your project::
+#. Copy the Diffusion / MPRAGE (DSI, DTI, QBALL/HARDI, T1, T2) images (DICOM series or single .nii.gz files) in the corresponding folders.
+	The T2 images are optional but they improve the registration of the data. 
 
-    connectomemapper
+#. Click on "Check input data". DICOM sequences will be converted to nifti format and nifti files copied into the NIFTI folder. A dialog box will appear to confirm the successful conversion. If several diffusion modalities are available, you will have to choose one.
 
-#. After the first run of the e.g. the first module DICOM Converter, the folder structure should look like this::
+#. In the GUI, you should be able now to setup all the parameters for the different stages and hit the *Map connectome!* button. If you want to process only a part of the pipeline, you can select
+	You select the stages you want to run.
 
-	├── myproject
-	│   ├── control001
-	│   │   └── tp1
-	│   │       ├── CMP
-	│   │       │   ├── cff
-	│   │       │   ├── fibers
-	│   │       │   ├── fMRI
-	│   │       │   ├── fs_output
-	│   │       │   ├── raw_diffusion
-	│   │       │   └── scalars
-	│   │       ├── FREESURFER
-	│   │       │   └── mri
-	│   │       ├── LOG
-	│   │       ├── NIFTI
-	│   │       │   ├── diffusion_metadata
-	│   │       │   ├── transformations
-	│   │       │   └── wm_correction
-	│   │       ├── RAWDATA
-	│   │       │   ├── DSI
-	│   │       │   ├── T1
-	│   │       │   ├── T2
-	│   │       │   └── fMRI
-	│   │       └── STATS
+#. When the processing is finished, connectome tables will be saved in the RESULTS folder, in a folder named to the corresponding date and time the data was processed.
 
-All the files for your subject will be stored in this folder structure.
-
-In the GUI, now you should setup all the parameters for your your single subject and hit the *Map connectome!* button.
-You select the stages you want to run. To produce a connectome, all the stages have to be run in sequential order.
-
-If you have to restart the GUI later and do not want to enter everything again, you can open the LOG folder,
-there are so-called pickle files with ending .pkl and you can load them with the *Load* button in the GUI to restore your configuration state.
-
-Alternatively, you can also open a pickle file directly from the Bash shell when starting the Connectome Mapper::
-
-    connectomemapper mypickle.pkl
 
 If you run into any problems or have any questions, post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_.
 

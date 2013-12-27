@@ -149,15 +149,16 @@ class DiffusionStage(Stage):
         fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_file='diffusion_resampled.nii'),name="diffusion_resample")
         fs_mriconvert.inputs.vox_size = self.config.resampling
         flow.connect([(inputnode,fs_mriconvert,[('diffusion','in_file')])])
-
-        fs_mriconvert_wm_mask = pe.Node(interface=fs.MRIConvert(out_type='nii',resample_type='nearest',out_file='wm_mask_resampled.nii'),name="mask_resample")
-        fs_mriconvert_wm_mask.inputs.vox_size = self.config.resampling
-        flow.connect([(inputnode,fs_mriconvert_wm_mask,[('wm_mask_registered','in_file')])])
-
-        fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='nii',resample_type='nearest'),name="ROIs_resample",iterfield=['in_file'])
-        fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
-        flow.connect([(inputnode,fs_mriconvert_ROIs,[('roi_volumes','in_file')])])
+        
         if self.config.processing_tool != 'DTK':
+            fs_mriconvert_wm_mask = pe.Node(interface=fs.MRIConvert(out_type='nii',resample_type='nearest',out_file='wm_mask_resampled.nii'),name="mask_resample")
+            fs_mriconvert_wm_mask.inputs.vox_size = self.config.resampling
+            flow.connect([(inputnode,fs_mriconvert_wm_mask,[('wm_mask_registered','in_file')])])
+    
+            fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='nii',resample_type='nearest'),name="ROIs_resample",iterfield=['in_file'])
+            fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
+            flow.connect([(inputnode,fs_mriconvert_ROIs,[('roi_volumes','in_file')])])
+            
             dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
             dilate_rois.inputs.operation = 'modal'
             flow.connect([
@@ -166,7 +167,7 @@ class DiffusionStage(Stage):
                         ])
         else:
             flow.connect([
-                          (fs_mriconvert,outputnode,[("out_file","roi_volumes")])
+                          (inputnode,outputnode,[("roi_volumes","roi_volumes")])
                         ])
         
         # Reconstruction
