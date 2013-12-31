@@ -29,5 +29,6 @@ Contents:
 
    installation
    download
-   mappingsteps
+   conf
+   stages
    exampleresults

@@ -305,7 +305,7 @@ class Gibbs_recon_config(HasTraits):
     curvature_threshold=Float(90)
     #sh_coefficient_convention = Enum(['FSL','MRtrix'])
     
-    traits_view = View(Group('iterations','particle_length','particle_width','particle_weigth','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold',show_border=True,label='Gibbs parameters'))
+    traits_view = View('iterations','particle_length','particle_width','particle_weigth','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold')
             
 # Nipype interfaces for DTB commands
 

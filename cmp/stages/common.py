@@ -25,7 +25,7 @@ class Stage(HasTraits):
     traits_view = View(Group(
                             Item('name',editor=TitleEditor(),show_label=False),
                             Group(
-                                Item('config',style='custom',show_label=False,visible_when='enabled=True'),
+                                Item('config',style='custom',show_label=False),
                                 label = 'Configuration', show_border=True
                                 ),
                             Group(
@@ -33,7 +33,7 @@ class Stage(HasTraits):
                                 label = 'View outputs', show_border=True
                                 )
                             ),
-                            scrollable = True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            resizable = True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     def _inspect_output_button_fired(self,info):

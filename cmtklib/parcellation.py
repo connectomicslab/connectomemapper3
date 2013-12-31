@@ -596,7 +596,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     niiWM = np.zeros( niiAPARCdata.shape, dtype = np.uint8 )
 
     for i in WM:
-         niiWM[niiAPARCdata == i] = 1
+        niiWM[niiAPARCdata == i] = 1
 
     # we do not add subcortical regions
 #    for i in SUBCORTICAL[1]:
@@ -650,10 +650,10 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
           ]
 
     for p in get_parcellation('NativeFreesurfer').keys():
-	if not op.exists(op.join(fs_dir, 'mri',p)):
-		os.makedirs(op.join(fs_dir, 'mri',p))
+        if not op.exists(op.join(fs_dir, 'mri',p)):
+            os.makedirs(op.join(fs_dir, 'mri',p))
         ds.append( (op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % p), op.join(fs_dir, 'mri',p, 'ROIv_HR_th.nii.gz')))
-	ds.append( (op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p))
+        ds.append( (op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p))
 
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
 

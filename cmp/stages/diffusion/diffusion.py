@@ -23,6 +23,51 @@ from cmp.stages.common import Stage
 from reconstruction import *
 from tracking import *
 
+class diffusion_handler(Handler):
+    
+    def object_processing_tool_changed(self, ui_info):
+        if ui_info.initialized:
+            ui_info.ui.updated = True
+            ui_info.ui.context["object"].trait_view('traits_view').updated = True
+            print(ui_info.ui.context["object"].trait_view_elements())
+            
+
+        """view_header = Group(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+               Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')))
+        if ui_info.ui.context["object"].processing_tool == 'DTK':
+            ui_info.ui.context["object"].view = View(view_header,
+                    Group(Item('dtk_recon_config',style='custom'),
+                          label='Reconstruction', show_border=True, show_labels=False),
+                    Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+                          Item('dtb_tracking_config',style='custom'),
+                          label='Tracking', show_border=True, show_labels=False))
+        elif ui_info.ui.context["object"].processing_tool == 'MRtrix':
+            ui_info.ui.context["object"].view = View(view_header,
+                    Group(Item('mrtrix_recon_config',style='custom'),
+                          label='Reconstruction', show_border=True, show_labels=False),
+                    Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+                          Item('mrtrix_tracking_config',style='custom'),
+                          label='Tracking', show_border=True, show_labels=False))
+        elif ui_info.ui.context["object"].processing_tool == 'Camino':
+            ui_info.ui.context["object"].view = View(view_header,
+                    Group(Item('camino_recon_config',style='custom'),
+                          label='Reconstruction', show_border=True, show_labels=False),
+                    Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+                          Item('camino_tracking_config',style='custom'),
+                          label='Tracking', show_border=True, show_labels=False))
+        elif ui_info.ui.context["object"].processing_tool == 'FSL':
+            ui_info.ui.context["object"].view = View(view_header,
+                    Group(Item('fsl_recon_config',style='custom'),
+                          label='Reconstruction', show_border=True, show_labels=False),
+                    Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+                          Item('fsl_tracking_config',style='custom'),
+                          label='Tracking', show_border=True, show_labels=False))
+        elif ui_info.ui.context["object"].processing_tool == 'Gibbs':
+            ui_info.ui.context["object"].view = View(view_header,
+                      Group(Item('gibbs_recon_config',style='custom'),
+                       Item('gibbs_model_config',style='custom'),
+                       label='Reconstruction', show_border=True, show_labels=False))"""
+
 class DiffusionConfig(HasTraits):
     imaging_model = Str
     resampling = Tuple(2,2,2)
@@ -46,23 +91,33 @@ class DiffusionConfig(HasTraits):
     diffusion_model_editor = List(['Deterministic','Probabilistic'])
     diffusion_model = Str('Deterministic')
     
+    """tool = Group(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+               Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
+                    Group(Item('dtk_recon_config',style='custom'),
+                          label='Reconstruction', show_border=True, show_labels=False),
+                    Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+                          Item('dtb_tracking_config',style='custom'),
+                          label='Tracking', show_border=True, show_labels=False))
+    
+    traits_view = View(tool, handler = diffusion_handler())"""
+    
+    
     traits_view = View(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-		       Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
-                       Group(#Item('reconstruction_software',editor=EnumEditor(name='recon_editor')),
-			     Item('gibbs_recon_config',style='custom',visible_when='processing_tool=="Gibbs"'),
-			     Item('gibbs_model_config',style='custom',visible_when='processing_tool=="Gibbs"'),
-                             Item('dtk_recon_config',style='custom',visible_when='processing_tool=="DTK"'),
-			     Item('mrtrix_recon_config',style='custom',visible_when='processing_tool=="MRtrix"'),
-			     Item('camino_recon_config',style='custom',visible_when='processing_tool=="Camino"'),
-                 Item('fsl_recon_config',style='custom',visible_when='processing_tool=="FSL"'),
+		               Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
+                       Group(Item('dtk_recon_config',style='custom',defined_when='processing_tool=="DTK"'),
+			                 Item('mrtrix_recon_config',style='custom',defined_when='processing_tool=="MRtrix"'),
+			                 Item('camino_recon_config',style='custom',defined_when='processing_tool=="Camino"'),
+                             Item('fsl_recon_config',style='custom',defined_when='processing_tool=="FSL"'),
+                             Item('gibbs_model_config',style='custom',defined_when='processing_tool=="Gibbs"'),
                              label='Reconstruction', show_border=True, show_labels=False),
-                       Group(#Item('tracking_software',editor=EnumEditor(name='tracking_editor')),
-			     Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
-                             Item('dtb_tracking_config',style='custom',visible_when='processing_tool=="DTK"'),
-			     Item('mrtrix_tracking_config',style='custom',visible_when='processing_tool=="MRtrix"'),
-			     Item('camino_tracking_config',style='custom',visible_when='processing_tool=="Camino"'),
-                 Item('fsl_tracking_config',style='custom',visible_when='processing_tool=="FSL"'),
-                             label='Tracking', show_border=True, show_labels=False,visible_when='processing_tool!="Gibbs"'),
+                       Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+                             Item('dtb_tracking_config',style='custom',defined_when='processing_tool=="DTK"'),
+			                 Item('mrtrix_tracking_config',style='custom',defined_when='processing_tool=="MRtrix"'),
+			                 Item('camino_tracking_config',style='custom',defined_when='processing_tool=="Camino"'),
+                             Item('fsl_tracking_config',style='custom',defined_when='processing_tool=="FSL"'),
+                             Item('gibbs_recon_config',style='custom',defined_when='processing_tool=="Gibbs"'),
+                             label='Tracking', show_border=True, show_labels=False),
+                       scrollable = True,
                        )
 
     def __init__(self):
@@ -100,6 +155,7 @@ class DiffusionConfig(HasTraits):
             self.processing_tool_editor = ['DTK','MRtrix','Camino','FSL','Gibbs']
 
     def _processing_tool_changed(self, new):
+        self.trait_view('traits_view').updated = True 
         if new == 'DTK' or new == 'Gibbs':
             self.diffusion_model_editor = ['Deterministic']
             self.diffusion_model = 'Deterministic'
@@ -269,10 +325,10 @@ class DiffusionStage(Stage):
     def define_inspect_outputs(self):
 
         if self.config.processing_tool == 'DTK':
-            diff_results_path = os.path.join(self.stage_dir,"tracking","dtb_streamline","result_fiber_tracking.pklz")
+            diff_results_path = os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz")
             if(os.path.exists(diff_results_path)):
                 diff_results = pickle.load(gzip.open(diff_results_path))
-                self.inspect_outputs_dict['DTK streamline'] = ['trackvis',diff_results.outputs.track_file]
+                self.inspect_outputs_dict['DTK streamline'] = ['trackvis',diff_results.outputs.out_file]
                 self.inspect_outputs = self.inspect_outputs_dict.keys()
 
         elif self.config.processing_tool == 'MRtrix':
@@ -283,23 +339,11 @@ class DiffusionStage(Stage):
                     RF_results = pickle.load(gzip.open(RF_path))
                     self.inspect_outputs_dict['MRTRIX Response function'] = ['disp_profile','-response',RF_results.outputs.response]
                     self.inspect_outputs = self.inspect_outputs_dict.keys()
-
-            FA_map_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_FA","result_mrtrix_FA.pklz")
-            if os.path.exists(FA_map_path):
-                FA_map_res = pickle.load(gzip.open(FA_map_path))
-                self.inspect_outputs_dict['MRtrix FA map'] = ['mrview', FA_map_res.outputs.FA]
-                self.inspect_outputs = self.inspect_outputs_dict.keys()
-
-            FA_thr_map_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_thr","result_mrtrix_thr.pklz")
-            if os.path.exists(FA_thr_map_path):
-                FA_thr_map_res = pickle.load(gzip.open(FA_thr_map_path))
-                self.inspect_outputs_dict['MRtrix thresholded FA'] = ['mrview', FA_map_res.outputs.FA, FA_thr_map_res.outputs.out_file]
-                self.inspect_outputs = self.inspect_outputs_dict.keys()
                 
             diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
             if os.path.exists(diff_results_path):
                 diff_results = pickle.load(gzip.open(diff_results_path))
-                self.inspect_outputs_dict['MRTrix streamline'] = ['trackvis',diff_results.outputs.out_file]
+                self.inspect_outputs_dict['MRTrix streamline'] = ['trackvis',diff_results.outputs.out_file[0]]
                 self.inspect_outputs = self.inspect_outputs_dict.keys()
 
             

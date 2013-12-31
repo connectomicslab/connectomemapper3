@@ -105,7 +105,7 @@ class RegistrationStage(Stage):
     name = 'registration_stage'
     config = RegistrationConfig()
     inputs = ["T1","diffusion","T2","subjects_dir","subject_id","wm_mask","roi_volumes"]
-    outputs = ["wm_mask_registered","roi_volumes_registered"]
+    outputs = ["T1_registered", "wm_mask_registered","roi_volumes_registered"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         # Extract B0 and resample it to 1x1x1mm3
@@ -129,6 +129,7 @@ class RegistrationStage(Stage):
                         (fs_mriconvert, fsl_flirt, [('out_file','reference')]),
                         (inputnode, fsl_applyxfm_wm, [('wm_mask','in_file')]),
                         (fs_mriconvert, fsl_applyxfm_wm, [('out_file','reference')]),
+                        (fsl_flirt,outputnode,[("out_file","T1_registered")]),
                         (fsl_flirt, fsl_applyxfm_wm, [('out_matrix_file','in_matrix_file')]),
                         (fsl_applyxfm_wm, outputnode, [('out_file','wm_mask_registered')]),
                         (inputnode, fsl_applyxfm_rois, [('roi_volumes','in_file')]),
@@ -245,12 +246,17 @@ class RegistrationStage(Stage):
 
     def define_inspect_outputs(self):
         resamp_results_path = os.path.join(self.stage_dir,"diffusion_resample","result_diffusion_resample.pklz")
-        reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
+        
+        if self.config.registration_mode != 'Nonlinear (FSL)':
+            reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
+        elif self.config.registration_mode == 'Nonlinear (FSL)':
+            reg_results_path = os.path.join(self.stage_dir,"nonlinear_registration","result_nonlinear_registration.pklz")
+        
         if(os.path.exists(resamp_results_path) and os.path.exists(reg_results_path)):
-            resamp_results = pickle.load(gzip.open(resamp_results_path))
-            reg_results = pickle.load(gzip.open(reg_results_path))
-            self.inspect_outputs_dict['B0/T1-to-B0'] = ['fslview',resamp_results.outputs.out_file,reg_results.outputs.out_file]
-        self.inspect_outputs = self.inspect_outputs_dict.keys()
+                resamp_results = pickle.load(gzip.open(resamp_results_path))
+                reg_results = pickle.load(gzip.open(reg_results_path))
+                self.inspect_outputs_dict['B0/T1-to-B0'] = ['fslview',resamp_results.outputs.out_file,reg_results.outputs.out_file]
+                self.inspect_outputs = self.inspect_outputs_dict.keys()
 
     def has_run(self):
         return os.path.exists(os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz"))
