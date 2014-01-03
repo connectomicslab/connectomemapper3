@@ -9,10 +9,8 @@ Installation Instruction
              or images generated through the use of the Software be used in the
              provision of patient care.
 
-Step-by-Step Guide for Installation on Ubuntu/Debian
-====================================================
 
-Installation of the new Connectome Mapper through :ref:`debian-install`. For older versions of Ubuntu / different distributions, please look at the :ref:`manual-install`.
+You can install the new Connectome Mapper through :ref:`debian-install`. For older versions of Ubuntu / different distributions, please look at the :ref:`manual-install`.
 
 The steps to add the NeuroDebian repository are explained here::
 
@@ -27,7 +25,7 @@ Prerequisites
 
 	firefox http://trackvis.org/dtk/
 	
-Diffusion toolkit executables ('dtk', 'odf_recon', ...) should be in the `$PATH`, and `$DSI_PATH` needs to be set to the folder containing the diffusion matrices.
+Diffusion toolkit executables ('dtk', 'odf_recon', ...) should be in the `$PATH` environmental variable, and `$DSI_PATH` needs to be set to the folder containing the diffusion matrices.
 
 * Installed and configured version of Freesurfer (http://surfer.nmr.mgh.harvard.edu/)::
 
@@ -47,7 +45,7 @@ Diffusion toolkit executables ('dtk', 'odf_recon', ...) should be in the `$PATH`
     echo $FSLDIR
     echo $DTDIR
 
-In case, you can update your bash configuration::
+In case, you can update your bash configuration to automatically declare the variables::
 
     gedit /home/username/.bashrc
 
@@ -87,6 +85,9 @@ Manual installation is divided between the Python libraries needed by the Connec
 * Python libraries needed: traits, traitsui, pyface, nibabel, numpy, networkx, scipy. Easy_install command: `sudo easy_install traits traitsui pyface nibabel numpy networkx scipy nose`
 * Install our forked version of Nipype (http://nipy.sourceforge.net/nipype/). For now, we require a modified vesion Nipype interfaces that is available on our Github repository (https://github.com/LTS5/nipype). To install it clone to your machine the nipype fork by typing `git clone git://github.com/LTS5/nipype.git`, and run the install script with `sudo python setup.py install`. You will have to remove already installed versions of nipype if they were installed through apt-get (installation location: `/usr/lib/pyshared`) as it will take precedence over versions installed through the setup.py script.
 * Libraries needed by the DTB binaries: boost (module program-options), nifti, blitz. Debian/Ubuntu
+
+Run the Connectome Mapper
+-------------------------
 
 Now, you are ready to start the Connectome Mapper from the Bash Shell::
 

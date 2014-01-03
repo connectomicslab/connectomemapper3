@@ -54,10 +54,15 @@ Running the Connectome Mapper opens the main window as well as a menu toolbar on
   DICOM sequences will be converted to nifti format and nifti files copied into the NIFTI folder. A dialog box will appear to confirm the successful conversion. If several diffusion modalities are available, you'll be asked to choose which modality to process.
 
   .. image:: images/checkInputs.png
+  
+* Once the diffusion modality is set, configuration of the pipeline is enabled. You can :doc:`configure the processing stages <stages>` by clicking on the respective buttons on the left. Pipeline information as base directory and last processing information are displayed on the right. You can also set the number of cores for multithreading the pipeline processing.
 
-* Now you can configure the different :doc:`stages <stages>` and hit the *Map connectome!* button. If you don't want to process the whole pipeline at once, you can select which stage to stop at using the "Custom mapping..." button.
+  .. image:: images/mainWindow_inputsChecked.png
+  	  :width: 600
 
-* When the processing is finished, connectome tables will be saved in the RESULTS folder, in a folder named after the date and time the data was processed.
+* When the pipeline is configured, you can run the *Map connectome!* button. If you don't want to process the whole pipeline at once, you can select which stage to stop at using the "Custom mapping..." button.
+
+* When the processing is finished, connectome tables will be saved in the RESULTS folder, in a subfolder named after the date and time the data was processed.
 
 If you run into any problems or have any questions, post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_.
 

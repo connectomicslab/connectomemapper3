@@ -25,26 +25,39 @@ from cmp.stages.common import Stage
 
 class SegmentationConfig(HasTraits):
     use_existing_freesurfer_data = Bool(False)
+    last_state = False
     freesurfer_subjects_dir = Directory
     freesurfer_subject_id_trait = List
     freesurfer_subject_id = Str
     freesurfer_args = Str
+    custom_segmentation = Bool(False)
+    white_matter_mask = File(exist=True)
     traits_view = View('freesurfer_args','use_existing_freesurfer_data',
-                        Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
-                        Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True')
+                        Item('freesurfer_subjects_dir', visible_when='use_existing_freesurfer_data == True'),
+                        Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), visible_when='use_existing_freesurfer_data == True'),
+                        Item('custom_segmentation'),
+                        Item('white_matter_mask',visible_when="custom_segmentation==True")
                         )
     
     def _freesurfer_subjects_dir_changed(self, old, new):
         dirnames = [name for name in os.listdir(self.freesurfer_subjects_dir) if
              os.path.isdir(os.path.join(self.freesurfer_subjects_dir, name))]
         self.freesurfer_subject_id_trait = dirnames
+        
+    def _use_existing_freesurfer_data_changed(self,new):
+        if new == True:
+            self.custom_segmentation = False
+        
+    def _custom_segmentation_changed(self,new):
+        if new == True:
+            self.use_existing_freesurfer_data = False
 
 class SegmentationStage(Stage):
     # General and UI members
     name = 'segmentation_stage'
     config = SegmentationConfig()
     inputs = ["T1"]
-    outputs = ["subjects_dir","subject_id"]
+    outputs = ["subjects_dir","subject_id","custom_wm_mask"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         if self.config.use_existing_freesurfer_data == False:
@@ -65,6 +78,8 @@ class SegmentationStage(Stage):
                         (fs_reconall,outputnode,[('subjects_dir','subjects_dir'),('subject_id','subject_id')]),
                         ])
             
+        elif self.config.custom_segmentation:
+            outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
         else:
             outputnode.inputs.subjects_dir = self.config.freesurfer_subjects_dir
             outputnode.inputs.subject_id = self.config.freesurfer_subject_id

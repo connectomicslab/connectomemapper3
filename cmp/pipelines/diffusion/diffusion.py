@@ -77,6 +77,26 @@ class DiffusionPipeline(Pipeline):
                         HGroup(spring,Item('connectome',editor=ThemedButtonEditor(image=ImageResource('connectome'),theme='@G')),spring,show_labels=False),
                         springy=True
                         )
+    
+    def __init__(self,project_info):
+        Pipeline.__init__(self, project_info)
+        self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'custom_segmentation')
+        self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
+        
+    def update_parcellation(self):
+        if self.stages['Segmentation'].config.custom_segmentation :
+            self.stages['Parcellation'].config.last_state = self.stages['Parcellation'].config.parcellation_scheme
+            self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
+        else:
+            self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.last_state
+    
+    def update_segmentation(self):
+        if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
+            self.stages['Segmentation'].config.last_state = self.stages['Segmentation'].config.use_existing_freesurfer_data
+            self.stages['Segmentation'].config.custom_segmentation = True
+        else:
+            self.stages['Segmentation'].config.custom_segmentation = False
+            self.stages['Segmentation'].config.use_existing_freesurfer_data = self.stages['Segmentation'].config.last_state
                        
     def _preprocessing_fired(self, info):
         self.stages['Preprocessing'].configure_traits()
@@ -211,17 +231,20 @@ class DiffusionPipeline(Pipeline):
                 ])
        
         if self.stages['Segmentation'].enabled:
-            if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
-                self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
-                self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
+            if self.stages['Segmentation'].config.custom_segmentation == False:
+                if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
+                    self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
+                    self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
             seg_flow = self.create_stage_flow("Segmentation")
-            flow.connect([(datasource,seg_flow, [('T1','inputnode.T1')])])
+            if self.stages['Segmentation'].config.custom_segmentation == False:
+                flow.connect([(datasource,seg_flow, [('T1','inputnode.T1')])])
        
         if self.stages['Parcellation'].enabled:
             parc_flow = self.create_stage_flow("Parcellation")
-            flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
-                                                ('outputnode.subject_id','inputnode.subject_id')]),
-                        ])
+            if self.stages['Segmentation'].config.custom_segmentation == False:
+                flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
+                                                    ('outputnode.subject_id','inputnode.subject_id')]),
+                            ])
                                                
         if self.stages['Registration'].enabled:
             reg_flow = self.create_stage_flow("Registration")

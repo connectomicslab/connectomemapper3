@@ -10,6 +10,10 @@ The Connectome Mapper is part of the Connectome Mapping Toolkit.
 .. image:: images/flowchart.jpg
 	:height: 300
 	:align: center
+	
+*******
+License
+*******
 
 Copyright (C) 2009-2014, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
 Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
@@ -22,7 +26,9 @@ Citations
 
 Please cite `[Alessandro et al., 2012] <http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0048121>`_ when using the Connectome Mapper.
 
-Contents:
+********
+Contents
+********
 
 .. toctree::
    :maxdepth: 2
