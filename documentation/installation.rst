@@ -65,6 +65,8 @@ It should contain something similar as (adapted to your installation paths)::
 
 .. _debian-install:
 
+
+
 Debian package installation (Ubuntu >=11.10)
 --------------------------------------------
 

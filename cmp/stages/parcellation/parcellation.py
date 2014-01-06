@@ -19,6 +19,7 @@ from traits.trait_handlers import TraitListObject
 # Nipype imports
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.cmtk as cmtk
+import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
@@ -26,22 +27,33 @@ from cmp.stages.common import Stage
 class ParcellationConfig(HasTraits):
     parcellation_scheme = Str('Lausanne2008')
     parcellation_scheme_editor = List(['NativeFreesurfer','Lausanne2008','Custom'])
-    last_state = 'Lausanne2008'
-    custom_atlas = File(exists=True)
-    custom_LUT = File(exists=True)
-    traits_view = View(Item('parcellation_scheme',editor=EnumEditor(name='parcellation_scheme_editor')), Group('custom_atlas','custom_LUT',visible_when='parcellation_scheme=="Custom"'))
-
-    def _parcellation_scheme_changed(self, new):
-        last_state = new
+    atlas_name = Str()
+    number_of_regions = Int()
+    nifti_file = File(exists=True)
+    graphml_file = File(exists=True)
+    atlas_info = Dict()
+    traits_view = View(Item('parcellation_scheme',editor=EnumEditor(name='parcellation_scheme_editor')), Group('atlas_name','number_of_regions','nifti_file','graphml_file',visible_when='parcellation_scheme=="Custom"'))
+    
+    def update_atlas_info(self):
+        self.atlas_info = {self.atlas_name:{'number_of_regions':self.number_of_regions,'node_information_graphml':self.graphml_file}}
+    
+    def _atlas_name_changed(self,new):
+        self.update_atlas_info()
         
+    def _number_of_regions_changed(self,new):
+        self.update_atlas_info()
+        
+    def _graphml_file_changed(self,new):
+        self.update_atlas_info()
+          
 class ParcellationStage(Stage):
     name = 'parcellation_stage'
     config = ParcellationConfig()
-    inputs = ["subjects_dir","subject_id","custom_wm_segmentation"]
+    inputs = ["subjects_dir","subject_id","custom_wm_mask"]
     outputs = [#"aseg_file",
 		"wm_mask_file",
 	       #"cc_unknown_file","ribbon_file","roi_files",
-        "roi_volumes","parcellation_scheme"]
+        "roi_volumes","parcellation_scheme","atlas_info"]
     
     def create_workflow(self, flow, inputnode, outputnode):
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
@@ -58,9 +70,13 @@ class ParcellationStage(Stage):
                                                  ("roi_files_in_structural_space","roi_volumes")])
                         ])
         else:
-            outputnode.inputs.roi_volumes = self.config.custom_atlas
+            temp_node = pe.Node(interface=util.IdentityInterface(fields=["roi_volumes","atlas_info"]),name="parcellation")
+            temp_node.inputs.roi_volumes = self.config.nifti_file
+            temp_node.inputs.atlas_info = self.config.atlas_info
             flow.connect([
-                        (inputnode,outputnode,[("custom_wm_segmentation","wm_mask_file")]),
+                        (temp_node,outputnode,[("roi_volumes","roi_volumes")]),
+                        (temp_node,outputnode,[("atlas_info","atlas_info")]),
+                        (inputnode,outputnode,[("custom_wm_mask","wm_mask_file")]),
                         ])
 
     def define_inspect_outputs(self):

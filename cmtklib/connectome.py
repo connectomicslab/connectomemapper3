@@ -106,11 +106,15 @@ def save_fibers(oldhdr, oldfib, fname, indices):
     print("Writing final no orphan fibers: %s" % fname)
     nibabel.trackvis.write(fname, outstreams, hdrnew)
     
-def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle']): 
+def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'], atlas_info = {}): 
 
     print("Filling probabilistic connectivity matrices:")
 
-    resolutions = get_parcellation(parcellation_scheme)
+    if parcellation_scheme != "Custom":
+        resolutions = get_parcellation(parcellation_scheme)
+    else:
+        resolutions = atlas_info
+        
     firstROIFile = roi_volumes[0]
     firstROI = nibabel.load(firstROIFile)
     roiVoxelSize = firstROI.get_header().get_zooms()
@@ -261,7 +265,7 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'])
                                'dn_region':d_gml['dn_region']})
             nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
-def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additional_maps={}, output_types=['gPickle']): 
+def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additional_maps={}, output_types=['gPickle'], atlas_info = {}): 
     """ Create the connection matrix for each resolution using fibers and ROIs. """
               
     # create the endpoints for each fibers
@@ -273,7 +277,10 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
     print('Opening file :' + intrk)
     fib, hdr    = nibabel.trackvis.read(intrk, False)
     
-    resolutions = get_parcellation(parcellation_scheme)
+    if parcellation_scheme != "Custom":
+        resolutions = get_parcellation(parcellation_scheme)
+    else:
+        resolutions = atlas_info
     
     # Previously, load_endpoints_from_trk() used the voxel size stored
     # in the track hdr to transform the endpoints to ROI voxel space.

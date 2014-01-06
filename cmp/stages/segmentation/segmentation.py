@@ -24,19 +24,22 @@ import nipype.interfaces.utility as util
 from cmp.stages.common import Stage
 
 class SegmentationConfig(HasTraits):
+    seg_tool = Enum(["Freesurfer","Custom segmentation"])
     use_existing_freesurfer_data = Bool(False)
-    last_state = False
     freesurfer_subjects_dir = Directory
     freesurfer_subject_id_trait = List
     freesurfer_subject_id = Str
     freesurfer_args = Str
-    custom_segmentation = Bool(False)
+    #custom_segmentation = Bool(False)
     white_matter_mask = File(exist=True)
-    traits_view = View('freesurfer_args','use_existing_freesurfer_data',
-                        Item('freesurfer_subjects_dir', visible_when='use_existing_freesurfer_data == True'),
-                        Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), visible_when='use_existing_freesurfer_data == True'),
-                        Item('custom_segmentation'),
-                        Item('white_matter_mask',visible_when="custom_segmentation==True")
+    traits_view = View(Item('seg_tool',label="Segmentation tool"),
+                       Group('freesurfer_args','use_existing_freesurfer_data',
+                        Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
+                        Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True'),
+                        visible_when="seg_tool=='Freesurfer'"),
+                       Group(
+                        'white_matter_mask',
+                        visible_when='seg_tool=="Custom segmentation"')
                         )
     
     def _freesurfer_subjects_dir_changed(self, old, new):
@@ -47,10 +50,6 @@ class SegmentationConfig(HasTraits):
     def _use_existing_freesurfer_data_changed(self,new):
         if new == True:
             self.custom_segmentation = False
-        
-    def _custom_segmentation_changed(self,new):
-        if new == True:
-            self.use_existing_freesurfer_data = False
 
 class SegmentationStage(Stage):
     # General and UI members
@@ -60,29 +59,31 @@ class SegmentationStage(Stage):
     outputs = ["subjects_dir","subject_id","custom_wm_mask"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        if self.config.use_existing_freesurfer_data == False:
-            # Converting to .mgz format
-            fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="T1.mgz"),name="mgz_convert")
+        if self.config.seg_tool == "Freesurfer":
+            if self.config.use_existing_freesurfer_data == False:
+                # Converting to .mgz format
+                fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="T1.mgz"),name="mgz_convert")
+                
+                # ReconAll => named outputnode as we don't want to select a specific output....
+                fs_reconall = pe.Node(interface=fs.ReconAll(),name="reconall")
+                fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
+                fs_reconall.inputs.args = self.config.freesurfer_args
+                #if self.config.use_existing_freesurfer_data == True:
+                #    fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id
+                fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id # DR: inputs seemed to lack from previous version
+                
+                flow.connect([
+                            (inputnode,fs_mriconvert,[('T1','in_file')]),
+                            (fs_mriconvert,fs_reconall,[('out_file','T1_files')]),
+                            (fs_reconall,outputnode,[('subjects_dir','subjects_dir'),('subject_id','subject_id')]),
+                            ])
+                
+            else:
+                outputnode.inputs.subjects_dir = self.config.freesurfer_subjects_dir
+                outputnode.inputs.subject_id = self.config.freesurfer_subject_id
             
-            # ReconAll => named outputnode as we don't want to select a specific output....
-            fs_reconall = pe.Node(interface=fs.ReconAll(),name="reconall")
-            fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
-            fs_reconall.inputs.args = self.config.freesurfer_args
-            #if self.config.use_existing_freesurfer_data == True:
-            #    fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id
-            fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id # DR: inputs seemed to lack from previous version
-            
-            flow.connect([
-                        (inputnode,fs_mriconvert,[('T1','in_file')]),
-                        (fs_mriconvert,fs_reconall,[('out_file','T1_files')]),
-                        (fs_reconall,outputnode,[('subjects_dir','subjects_dir'),('subject_id','subject_id')]),
-                        ])
-            
-        elif self.config.custom_segmentation:
+        elif self.config.seg_tool == "Custom segmentation":
             outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
-        else:
-            outputnode.inputs.subjects_dir = self.config.freesurfer_subjects_dir
-            outputnode.inputs.subject_id = self.config.freesurfer_subject_id
 
     def define_inspect_outputs(self):
         if self.config.use_existing_freesurfer_data == False:

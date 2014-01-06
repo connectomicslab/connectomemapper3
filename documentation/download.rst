@@ -34,13 +34,12 @@ By downloading Connectome Mapper, you agree to the terms and conditions of the M
 	THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR
 	NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA
 	OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE
-	PROVISION OR PATIENT CARE.
-
-.. note:: Please `REGISTER <http://www.cmtk.org/users/register>`_  before you start to use Connectome Mapper or the Connectome Mapping Toolkit. This will help us improving the software.
+	PROVISION OF PATIENT CARE.
 
 .. raw:: html
 
-   <a href="https://github.com/LTS5/cmp/tarball/release-1.2.0" onclick="_gaq.push(['_trackEvent', 'release-1.1.0', 'download']);">I agree on the terms and conditions of the connectome mapper license and want to download the source code, current release 1.2.0</a><br/><br/>
+   <a href="https://github.com/LTS5/cmp/tarball/release-2.1.0" onclick="_gaq.push(['_trackEvent', 'release-2.1.0', 'download']);">I agree on the terms and conditions of the connectome mapper license and want to download the source code, current release 2.1.0</a><br/><br/>
+   <a href="https://github.com/LTS5/cmp/tarball/release-1.2.0" onclick="_gaq.push(['_trackEvent', 'release-1.1.0', 'download']);">I agree on the terms and conditions of the connectome mapper license and want to download the source code, previous release 1.2.0</a><br/><br/>
    <a href="https://github.com/LTS5/cmp/tarball/release-1.1.0" onclick="_gaq.push(['_trackEvent', 'release-1.1.0', 'download']);">I agree on the terms and conditions of the connectome mapper license and want to download the source code, previous release 1.1.0</a>
 
 

@@ -80,23 +80,16 @@ class DiffusionPipeline(Pipeline):
     
     def __init__(self,project_info):
         Pipeline.__init__(self, project_info)
-        self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'custom_segmentation')
+        self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
         
     def update_parcellation(self):
-        if self.stages['Segmentation'].config.custom_segmentation :
-            self.stages['Parcellation'].config.last_state = self.stages['Parcellation'].config.parcellation_scheme
+        if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
             self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
-        else:
-            self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.last_state
     
     def update_segmentation(self):
         if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
-            self.stages['Segmentation'].config.last_state = self.stages['Segmentation'].config.use_existing_freesurfer_data
-            self.stages['Segmentation'].config.custom_segmentation = True
-        else:
-            self.stages['Segmentation'].config.custom_segmentation = False
-            self.stages['Segmentation'].config.use_existing_freesurfer_data = self.stages['Segmentation'].config.last_state
+            self.stages['Segmentation'].config.seg_tool = "Custom segmentation"
                        
     def _preprocessing_fired(self, info):
         self.stages['Preprocessing'].configure_traits()
@@ -231,19 +224,23 @@ class DiffusionPipeline(Pipeline):
                 ])
        
         if self.stages['Segmentation'].enabled:
-            if self.stages['Segmentation'].config.custom_segmentation == False:
+            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
                 if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
                     self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
                     self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
             seg_flow = self.create_stage_flow("Segmentation")
-            if self.stages['Segmentation'].config.custom_segmentation == False:
+            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
                 flow.connect([(datasource,seg_flow, [('T1','inputnode.T1')])])
        
         if self.stages['Parcellation'].enabled:
             parc_flow = self.create_stage_flow("Parcellation")
-            if self.stages['Segmentation'].config.custom_segmentation == False:
+            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
                 flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
                                                     ('outputnode.subject_id','inputnode.subject_id')]),
+                            ])
+            else:
+                flow.connect([
+                            (seg_flow,parc_flow,[("outputnode.custom_wm_mask","inputnode.custom_wm_mask")])
                             ])
                                                
         if self.stages['Registration'].enabled:
@@ -277,6 +274,9 @@ class DiffusionPipeline(Pipeline):
 		                                      ('outputnode.P0','inputnode.P0')]),
 		                (con_flow,sinker, [('outputnode.connectivity_matrices',now+'.connectivity_matrices')])
 		                ])
+            
+            if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
+                flow.connect([(parc_flow,con_flow, [('outputnode.atlas_info','inputnode.atlas_info')])])
        
         iflogger.info("**** Processing ****")
        
