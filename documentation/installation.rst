@@ -39,6 +39,22 @@ Diffusion toolkit executables ('dtk', 'odf_recon', ...) should be in the `$PATH`
 
 `$FSLDIR` should have been declared and the FSL setup script should have been sourced as described under "Installation" here: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSL%20FAQ
 
+* Installed version of MRTrix::
+
+	firefox http://www.brain.org.au/software/mrtrix/install/index.html
+	
+* Installed version of Camino::
+
+	firefox http://cmic.cs.ucl.ac.uk/camino//index.php?n=Main.Installation
+	
+  and Camino-Trackvis converter::
+  
+	firefox http://sourceforge.net/projects/camino-trackvis/
+	
+* Installed version of the gibbs tracker::
+
+	firefox http://mitk.org/Download
+
 * At this point, make sure that you have setup the environment variables correctly for the external packages such as Freesurfer and Diffusion Toolkit (The FSL environment variables should be set automatically when installing FSL as described above). You should have the environment variables: FREESURFER_HOME, DTDIR, DSI_DIR and FSLDIR. You can check this if you enter in the bash shell (terminal), they should give you the correct path to your packages::
 
     echo $FREESURFER_HOME
@@ -62,9 +78,11 @@ It should contain something similar as (adapted to your installation paths)::
 
 	# FSL configuration
 	source /etc/fsl/4.1/fsl.sh
+	
+	# Camino to trackvis
+	export PATH=/usr/share/camino-trackvis-0.2.8.1/bin/:$PATH
 
 .. _debian-install:
-
 
 
 Debian package installation (Ubuntu >=11.10)

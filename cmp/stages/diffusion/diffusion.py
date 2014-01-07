@@ -23,59 +23,11 @@ from cmp.stages.common import Stage
 from reconstruction import *
 from tracking import *
 
-class diffusion_handler(Handler):
-    
-    def object_processing_tool_changed(self, ui_info):
-        if ui_info.initialized:
-            ui_info.ui.updated = True
-            ui_info.ui.context["object"].trait_view('traits_view').updated = True
-            print(ui_info.ui.context["object"].trait_view_elements())
-            
-
-        """view_header = Group(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-               Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')))
-        if ui_info.ui.context["object"].processing_tool == 'DTK':
-            ui_info.ui.context["object"].view = View(view_header,
-                    Group(Item('dtk_recon_config',style='custom'),
-                          label='Reconstruction', show_border=True, show_labels=False),
-                    Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
-                          Item('dtb_tracking_config',style='custom'),
-                          label='Tracking', show_border=True, show_labels=False))
-        elif ui_info.ui.context["object"].processing_tool == 'MRtrix':
-            ui_info.ui.context["object"].view = View(view_header,
-                    Group(Item('mrtrix_recon_config',style='custom'),
-                          label='Reconstruction', show_border=True, show_labels=False),
-                    Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
-                          Item('mrtrix_tracking_config',style='custom'),
-                          label='Tracking', show_border=True, show_labels=False))
-        elif ui_info.ui.context["object"].processing_tool == 'Camino':
-            ui_info.ui.context["object"].view = View(view_header,
-                    Group(Item('camino_recon_config',style='custom'),
-                          label='Reconstruction', show_border=True, show_labels=False),
-                    Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
-                          Item('camino_tracking_config',style='custom'),
-                          label='Tracking', show_border=True, show_labels=False))
-        elif ui_info.ui.context["object"].processing_tool == 'FSL':
-            ui_info.ui.context["object"].view = View(view_header,
-                    Group(Item('fsl_recon_config',style='custom'),
-                          label='Reconstruction', show_border=True, show_labels=False),
-                    Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
-                          Item('fsl_tracking_config',style='custom'),
-                          label='Tracking', show_border=True, show_labels=False))
-        elif ui_info.ui.context["object"].processing_tool == 'Gibbs':
-            ui_info.ui.context["object"].view = View(view_header,
-                      Group(Item('gibbs_recon_config',style='custom'),
-                       Item('gibbs_model_config',style='custom'),
-                       label='Reconstruction', show_border=True, show_labels=False))"""
-
 class DiffusionConfig(HasTraits):
     imaging_model = Str
     resampling = Tuple(2,2,2)
-    #recon_editor = List(['DTK','MRtrix','Camino']) # list of available reconstruction methods. Update _imaging_model_changed when adding new
-    #reconstruction_software = Str ('DTK') # default recon method
-    #tracking_editor = List(['DTB','MRtrix','Camino']) # list of available tracking methods
-    #tracking_software = Str('DTB') # default tracking method
     processing_tool_editor = List(['DTK','MRtrix','Camino','FSL','Gibbs'])
+    dilate_rois = Bool(True)
     processing_tool = Str('DTK')
     dtk_recon_config = Instance(HasTraits)
     mrtrix_recon_config = Instance(HasTraits)
@@ -88,22 +40,13 @@ class DiffusionConfig(HasTraits):
     mrtrix_tracking_config = Instance(HasTraits)
     camino_tracking_config = Instance(HasTraits)
     fsl_tracking_config = Instance(HasTraits)
-    diffusion_model_editor = List(['Deterministic','Probabilistic'])
+    diffusion_model_editor = List(['Deterministic'])
     diffusion_model = Str('Deterministic')
-    
-    """tool = Group(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-               Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
-                    Group(Item('dtk_recon_config',style='custom'),
-                          label='Reconstruction', show_border=True, show_labels=False),
-                    Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
-                          Item('dtb_tracking_config',style='custom'),
-                          label='Tracking', show_border=True, show_labels=False))
-    
-    traits_view = View(tool, handler = diffusion_handler())"""
     
     
     traits_view = View(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
 		               Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
+                       Item('dilate_rois',visible_when='processing_tool!="DTK"'),
                        Group(Item('dtk_recon_config',style='custom',defined_when='processing_tool=="DTK"'),
 			                 Item('mrtrix_recon_config',style='custom',defined_when='processing_tool=="MRtrix"'),
 			                 Item('camino_recon_config',style='custom',defined_when='processing_tool=="Camino"'),
@@ -117,7 +60,6 @@ class DiffusionConfig(HasTraits):
                              Item('fsl_tracking_config',style='custom',defined_when='processing_tool=="FSL"'),
                              Item('gibbs_recon_config',style='custom',defined_when='processing_tool=="Gibbs"'),
                              label='Tracking', show_border=True, show_labels=False),
-                       scrollable = True,
                        )
 
     def __init__(self):
@@ -146,13 +88,14 @@ class DiffusionConfig(HasTraits):
         self.dtb_tracking_config.imaging_model = new
         # Remove MRtrix from recon and tracking methods and Probabilistic from diffusion model if imaging_model is DSI
         if new == 'DSI':
-            if (not self.processing_tool == 'DTK'):
-                self._processing_tool_changed('DTK')
-                self.processing_tool = 'DTK'
+            self.processing_tool = 'DTK'
             self.processing_tool_editor = ['DTK']
         else:
-            self.diffusion_model_editor = ['Deterministic','Probabilistic']
             self.processing_tool_editor = ['DTK','MRtrix','Camino','FSL','Gibbs']
+            if self.processing_tool == 'DTK':
+                self.diffusion_model_editor = ['Deterministic']
+            else:
+                self.diffusion_model_editor = ['Deterministic','Probabilistic']
 
     def _processing_tool_changed(self, new):
         self.trait_view('traits_view').updated = True 
@@ -168,7 +111,7 @@ class DiffusionConfig(HasTraits):
 
     def _diffusion_model_changed(self,new):
         self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
-        self.mrtrix_tracking_config.tracking_model = new
+        self.mrtrix_tracking_config.tracking_mode = new
         self.camino_tracking_config.tracking_mode = new
         self.update_camino_tracking_model()
         
@@ -215,12 +158,17 @@ class DiffusionStage(Stage):
             fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
             flow.connect([(inputnode,fs_mriconvert_ROIs,[('roi_volumes','in_file')])])
             
-            dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
-            dilate_rois.inputs.operation = 'modal'
-            flow.connect([
-                          (fs_mriconvert_ROIs,dilate_rois,[("out_file","in_file")]),
-                          (dilate_rois,outputnode,[("out_file","roi_volumes")])
-                        ])
+            if self.config.dilate_rois:
+                dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
+                dilate_rois.inputs.operation = 'modal'
+                flow.connect([
+                              (fs_mriconvert_ROIs,dilate_rois,[("out_file","in_file")]),
+                              (dilate_rois,outputnode,[("out_file","roi_volumes")])
+                            ])
+            else:
+                flow.connect([
+                            (fs_mriconvert_ROIs,outputnode,[("out_file","roi_volumes")])
+                            ])
         else:
             flow.connect([
                           (inputnode,outputnode,[("roi_volumes","roi_volumes")])
@@ -330,23 +278,31 @@ class DiffusionStage(Stage):
                 diff_results = pickle.load(gzip.open(diff_results_path))
                 self.inspect_outputs_dict['DTK streamline'] = ['trackvis',diff_results.outputs.out_file]
                 self.inspect_outputs = self.inspect_outputs_dict.keys()
-
-        elif self.config.processing_tool == 'MRtrix':
-
-            if self.config.mrtrix_recon_config.local_model:
-                RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
-                if(os.path.exists(RF_path)):
-                    RF_results = pickle.load(gzip.open(RF_path))
-                    self.inspect_outputs_dict['MRTRIX Response function'] = ['disp_profile','-response',RF_results.outputs.response]
+        else:
+            if self.config.diffusion_model == 'Deterministic':
+                diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
+                if os.path.exists(diff_results_path):
+                    diff_results = pickle.load(gzip.open(diff_results_path))
+                    self.inspect_outputs_dict[self.config.processing_tool + ' streamline'] = ['trackvis',diff_results.outputs.out_file[0]]
                     self.inspect_outputs = self.inspect_outputs_dict.keys()
-                
-            diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
-            if os.path.exists(diff_results_path):
-                diff_results = pickle.load(gzip.open(diff_results_path))
-                self.inspect_outputs_dict['MRTrix streamline'] = ['trackvis',diff_results.outputs.out_file[0]]
-                self.inspect_outputs = self.inspect_outputs_dict.keys()
+
+            if self.config.processing_tool == 'MRtrix' :
+                if self.config.mrtrix_recon_config.local_model:
+                    RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
+                    if(os.path.exists(RF_path)):
+                        RF_results = pickle.load(gzip.open(RF_path))
+                        self.inspect_outputs_dict['MRTRIX Response function'] = ['disp_profile','-response',RF_results.outputs.response]
+                    
+                tensor_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_make_tensor","result_mrtrix_make_tensor.pklz")
+                if(os.path.exists(tensor_path)):
+                    Tensor_results = pickle.load(gzip.open(tensor_path))
+                    self.inspect_outputs_dict['MRTrix tensor'] = ['mrview',Tensor_results.outputs.tensor]
+                    self.inspect_outputs = self.inspect_outputs_dict.keys()
 
             
     def has_run(self):
-        return os.path.exists(os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz"))
+        if self.config.processing_tool == 'DTK':
+            return os.path.exists(os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz"))
+        elif self.config.diffusion_model == 'Deterministic':
+            return os.path.exists(os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz"))
 

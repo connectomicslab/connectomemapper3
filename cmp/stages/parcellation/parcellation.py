@@ -80,21 +80,29 @@ class ParcellationStage(Stage):
                         ])
 
     def define_inspect_outputs(self):
-        parc_results_path = os.path.join(self.stage_dir,"parcellation","result_parcellation.pklz")
-        if(os.path.exists(parc_results_path)):
-            parc_results = pickle.load(gzip.open(parc_results_path))
-            white_matter_file = parc_results.outputs.white_matter_mask_file
-            lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))
-            if type(parc_results.outputs.roi_files_in_structural_space) == str:
-                roi_v = parc_results.outputs.roi_files_in_structural_space
-                self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview','-v',
-                                                                       white_matter_file+':colormap=GEColor',
-                                                                       roi_v+":colormap=lut:lut="+lut_file]
-            elif type(parc_results.outputs.roi_files_in_structural_space) == TraitListObject:
-                for roi_v in parc_results.outputs.roi_files_in_structural_space:
+        if self.config.parcellation_scheme != "Custom":
+            parc_results_path = os.path.join(self.stage_dir,"parcellation","result_parcellation.pklz")
+            if(os.path.exists(parc_results_path)):
+                parc_results = pickle.load(gzip.open(parc_results_path))
+                white_matter_file = parc_results.outputs.white_matter_mask_file
+                if type(parc_results.outputs.roi_files_in_structural_space) == str:
+                    lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))
+                    roi_v = parc_results.outputs.roi_files_in_structural_space
                     self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview','-v',
-                                                                       white_matter_file+':colormap=GEColor',
-                                                                       roi_v+":colormap=lut:lut="+lut_file]
+                                                                           white_matter_file+':colormap=GEColor',
+                                                                           roi_v+":colormap=lut:lut="+lut_file]
+                elif type(parc_results.outputs.roi_files_in_structural_space) == TraitListObject:
+                    resolution = {'33':'resolution83','60':'resolution150','125':'resolution258','250':'resolution500','500':'resolution1015'}
+                    for roi_v in parc_results.outputs.roi_files_in_structural_space:
+                        roi_basename = os.path.basename(roi_v)
+                        scale = roi_basename[16:-7]
+                        lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008',resolution[scale],resolution[scale] + '_LUT.txt'))
+                        self.inspect_outputs_dict[roi_basename] = ['freeview','-v',
+                                                                           white_matter_file+':colormap=GEColor',
+                                                                           roi_v+":colormap=lut:lut="+lut_file]
+                self.inspect_outputs = self.inspect_outputs_dict.keys()
+        else:
+            self.inspect_outputs_dict["Custom atlas"] = ['fslview',self.config.nifti_file,"-l","Random-Rainbow"]
             self.inspect_outputs = self.inspect_outputs_dict.keys()
             
     def has_run(self):

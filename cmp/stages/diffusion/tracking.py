@@ -63,38 +63,30 @@ class MRtrix_tracking_config(HasTraits):
 class Camino_tracking_config(HasTraits):
     imaging_model = Str
     tracking_mode = Str
-    #flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     inversion_index = Int()
     fallback_index = Int()
     angle = Float(60)
     cross_angle = Float(20)
-    trace_editor = Dict({0.0000000021:'2100E-12 m^2/s', 0.0021:'2.1E-3 s/mm^2'})
     trace = Float(0.0000000021)
-    #seeds = Int(32)
-    #tracking_model_editor = List(['dt','multitensor','pds','bootstrap','ballstick'])
+    units = Enum(["m^2/s","s/mm^2"])
     tracking_model = Str('dt')
     snr = Float(20)
     iterations = Int(50)
     pdf = Enum(['bingham', 'watson', 'acg'])
-    traits_view = View( #Item('tracking_model',editor = EnumEditor(name='tracking_model_editor')),
-                        'inversion_index',
-                        'tracking_model',
-                        'angle',
+    traits_view = View( 'angle',
                         Item('snr',visible_when="tracking_mode=='Probabilistic'"),
                         Item('iterations',visible_when="tracking_mode=='Probabilistic'"),
                         Item('pdf',visible_when="tracking_mode=='Probabilistic'"),
-                        Item('cross_angle', visible_when='(tracking_mode=="Probabilistic") and (inversion_index > 9)'),
-                        Item('trace',editor=EnumEditor(name='trace_editor')),
-                        'trace'
+                        Item('cross_angle', label="Crossing angle", visible_when='(tracking_mode=="Probabilistic") and (inversion_index > 9)'),
+                        HGroup('trace','units')
                         )
     
-    #def _tracking_mode_changed(self,new):
-    #    if new == "Deterministic":
-    #        self.tracking_model_editor = ['dt','multitensor','pds','bootstrap','ballstick']
-    #        self.tracking_model = 'dt'
-    #    elif new == "Probabilistic":
-    #        self.tracking_model_editor = ['pico'] # bayesdirac to be implemented as it should desactivate reconstruction step
-    #        self.tracking_model = 'pico'
+    def _units_changed(self,new):
+        if new == "s/mm^2":
+            self.trace = self.trace * 1000000
+        elif new == "m^2/s":
+            self.trace = self.trace / 1000000
+
     
 class FSL_tracking_config(HasTraits):
     number_of_samples = Int(5000)
@@ -309,32 +301,6 @@ def create_dtb_tracking_flow(config):
         
     return flow
 
-"""class MRtrix_trackingInputSpec(CommandLineInputSpec):
-    type = Str(desc='Streamline tracking method', position=3,
-                    mandatory=True, exists=False, argstr="%s")
-    source = File(desc='source diffusion file',position=4,
-                   mandatory=True, exists=True, argstr="%s")
-    tracks = File(desc='tracks filename',position=5,
-                   mandatory=True, argstr="%s")
-    mask = File(desc='Mask filename', position=1,
-                    mandatory=False, exists=True, argstr="-mask %s")
-    grad = File(desc='Gradient scheme filename', position=2,
-                    mandatory=False, exists=True, argstr="-grad %s")
-
-class MRtrix_trackingOutputSpec(TraitedSpec):
-    out_file = File(desc='Resulting trk file', exists = True)
-
-class MRtrix_tracking(CommandLine):
-    input_spec = MRtrix_trackingInputSpec
-    output_spec = MRtrix_trackingOutputSpec
-    _cmd = 'streamtrack'
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.tracks)
-        return outputs
-"""
-
 class make_seedsInputSpec(BaseInterfaceInputSpec):
     ROI_files = InputMultiPath(File(exists=True),desc='ROI files registered to diffusion space')
     WM_file = File(mandatory=True,desc='WM mask file registered to diffusion space')
@@ -452,9 +418,9 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
         mrtrix_seeds = pe.Node(interface=make_seeds(),name="mrtrix_seeds")
         mrtrix_tracking = pe.MapNode(interface=mrtrix.StreamlineTrack(desired_number_of_tracks = config.desired_number_of_tracks,maximum_number_of_tracks = config.max_number_of_tracks, maximum_tract_length = config.max_length,minimum_tract_length = config.min_length,step_size = config.step_size),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
         if SD:
-            mrtrix_tracking.inputmodel='SD_PROB'
+            mrtrix_tracking.inputs.inputmodel='SD_PROB'
         else:
-            mrtrix_tracking.inputmodel='DT_PROB'
+            mrtrix_tracking.inputs.inputmodel='DT_PROB'
         converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name='trackvis')
         flow.connect([
 		    (inputnode,mrtrix_seeds,[('wm_mask_resampled','WM_file')]),
@@ -468,12 +434,6 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
             (inputnode,converter,[('wm_mask_resampled','image_file')]),
 		    (converter,outputnode,[('out_file','track_file')])
 		    ])
-        #mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
-        #mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
-        #mrtrix_tracking.inputs.maximum_tract_length = config.max_length
-        #mrtrix_tracking.inputs.minimum_tract_length = config.min_length
-        #mrtrix_tracking.inputs.step_size = config.step_size
-        #mrtrix_tracking.inputs.inputmodel = 'DT_PROB'
 
     return flow
 

@@ -127,6 +127,11 @@ class Pipeline(HasTraits):
             if stage.enabled:
                 stage.define_inspect_outputs()
                 
+    def clear_stages_outputs(self):
+        for stage in self.stages.values():
+            if stage.enabled:
+                stage.inspect_outputs = ['Outputs not available']
+                
     def launch_progress_window(self):
         pw = ProgressWindow()
         pt = ProgressThread()

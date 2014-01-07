@@ -216,6 +216,9 @@ class DiffusionPipeline(Pipeline):
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="sinker")
         sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS")
+        
+        # Clear previous outputs
+        self.clear_stages_outputs()
 
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")

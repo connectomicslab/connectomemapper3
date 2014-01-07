@@ -255,10 +255,13 @@ class RegistrationStage(Stage):
         if(os.path.exists(resamp_results_path) and os.path.exists(reg_results_path)):
                 resamp_results = pickle.load(gzip.open(resamp_results_path))
                 reg_results = pickle.load(gzip.open(reg_results_path))
-                self.inspect_outputs_dict['B0/T1-to-B0'] = ['fslview',resamp_results.outputs.out_file,reg_results.outputs.out_file]
+                self.inspect_outputs_dict['B0/T1-to-B0'] = ['fslview',resamp_results.outputs.out_file,reg_results.outputs.out_file,'-l "Copper" -t 0.5']
                 self.inspect_outputs = self.inspect_outputs_dict.keys()
 
     def has_run(self):
-        return os.path.exists(os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz"))
+        if self.config.registration_mode != 'Nonlinear (FSL)':
+            return os.path.exists(os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz"))
+        elif self.config.registration_mode == 'Nonlinear (FSL)':
+            return os.path.exists(os.path.join(self.stage_dir,"nonlinear_registration","result_linear_registration.pklz"))
 
 
