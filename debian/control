@@ -7,7 +7,7 @@ XS-Python-Version: >=2.6
 Standards-Version: 3.9.3.1
 
 Package: cmp
-Version: 2.0.0
+Version: 2.1.0
 Architecture: all
 Homepage: http://www.cmtk.org
 XB-Python-Version: ${python:Versions}

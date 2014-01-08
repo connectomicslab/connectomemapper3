@@ -5,7 +5,7 @@ PYTHON=`which python`
 DESTDIR=/
 BUILDIR=$(CURDIR)/debian/cmp
 PROJECT=cmp
-VERSION=2.0.0
+VERSION=2.1.0
 
 all:
 		@echo "make source - Create source package"

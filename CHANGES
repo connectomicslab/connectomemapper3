@@ -1,6 +1,12 @@
-Release 2.0.3 ()
-================
-* ENH: Addition of Mrtrix commands to diffusion options
+Release 2.1.0 (Jan 08, 2014)
+============================
+* ENH: Added Mrtrix diffusion processing (deterministic and probabilistic tractography)
+* ENH: Added Camino diffusion processing (deterministic and probabilistic tractography)
+* ENH: Added FSL diffusion processing (probabilistic tractography)
+* ENH: Added Gibbs diffusion processing (global tractography)
+* ENH: Added custom segmentation and atlas options
+* ENH: Added preprocessing options (eddy current and motion correction)
+* FIX: Fixed output inspection for parcellation stage
 
 Release 2.0.2 (Dec 28, 2012)
 ============================

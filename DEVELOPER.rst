@@ -4,7 +4,7 @@ Connectome Mapper Developer Notes
 
 :Authors: Adrien Birbaumer
 :Version: $Revision: 1 $
-:Copyright: Copyright (C) 2009-2011, Ecole Polytechnique Fédérale de Lausanne 
+:Copyright: Copyright (C) 2009-2014, Ecole Polytechnique Fédérale de Lausanne 
             (EPFL) and Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland. 
             This software is distributed under the open-source license Modified BSD.
 

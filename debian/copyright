@@ -6,13 +6,13 @@ Upstream Author:
 
 Files: *
 Copyright:
-	2009-2012, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
+	2009-2014, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
 	Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 License: GPL
 
 Files: debian/*
 Copyright:
-	2009-2012, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
+	2009-2014, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
 	Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 License: BSD
 
@@ -46,4 +46,4 @@ License: BSD
 	THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR
 	NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA
 	OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE
-	PROVISION OR PATIENT CARE.
+	PROVISION OF PATIENT CARE.
