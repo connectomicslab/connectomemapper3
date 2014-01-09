@@ -40,7 +40,7 @@ class DTK_recon_config(HasTraits):
     gradient_table = Str
     custom_gradient_table = File
     flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
-    dsi_number_of_directions = Enum(514,[514,257,124])
+    dsi_number_of_directions = Enum([514,257,124])
     number_of_directions = Int(514)
     number_of_output_directions = Int(181)
     recon_matrix_file = Str('DSI_matrix_515x181.dat')
@@ -66,7 +66,7 @@ class DTK_recon_config(HasTraits):
                        )
     
     def _dsi_number_of_directions_changed(self, new):
-        self.number_of_directions = int(new)
+        print("Number of directions changed to %d" % new )
         self.recon_matrix_file = 'DSI_matrix_%(n_directions)dx181.dat' % {'n_directions':int(new)+1}
         
     def _gradient_table_file_changed(self, new):
@@ -82,19 +82,10 @@ class DTK_recon_config(HasTraits):
     def _imaging_model_changed(self, new):
         if new == 'DTI' or new == 'HARDI':
             self._gradient_table_file_changed(self.gradient_table_file)
-        if new == 'DSI':
-            self._dsi_number_of_directions_changed(self.number_of_directions)
 
 class MRtrix_recon_config(HasTraits):
-    #imaging_model = Str
-    #gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
-    #'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
     gradient_table = File
     flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
-    #custom_gradient_table = File
-    #gradient_table_file = File
-    #b_value = Int (1000)
-    #b0_volumes = Str()
     local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
     local_model = Bool(False)
     lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
@@ -113,54 +104,6 @@ class MRtrix_recon_config(HasTraits):
 		       Item('single_fib_thr',label = 'FA threshold'),visible_when='local_model'),
                        )
 
-    """def _check_gradient_table(self,f):
-	import csv
-	print(f + '\n' + self.gradient_table_file)
-	with open(f,'rb') as csv_file:
-		dialect = csv.Sniffer().sniff(csvfile.read(1024))
-    		csvfile.seek(0)
-    		reader = csv.reader(csvfile, dialect)
-		row1 = next(reader)
-		if len(row1) < 4:
-			new_f_path = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),self.gradient_table_file+'_mrtrix_b' + str(self.b_value) + '.txt')
-			new_f = open( new_f_path,'wb')
-			writer = csv.writer(new_f, dialect)
-			b0_volumes = [int(s) for s in self.b0_volumes.split() if s.isdigit()]
-			csvfile.seek(0)
-			row_counter = 0
-			for row in reader:
-				if row_counter in b0_volumes:
-					writer.writerow(row + dialect.delimiter + '0')
-				else:
-					writer.writerow(row + dialect.delimiter + str(self.b_value))
-				row_counter = row_counter + 1
-			new_f.close
-			self.gradient_table = new_f_path
-        
-    def _gradient_table_file_changed(self, new):
-        if new != 'Custom...':
-		f = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'_mrtrix_b' + str(self.b_value) + '.txt')
-		if os.path.exists(f):
-			self.gradient_table = f
-			self.number_of_directions = int(re.search('\d+',new).group(0))
-		else:
-			self._check_gradient_table(f)"""
-
-    """def _gradient_table_file_changed(self, new):
-        if new != 'Custom...':
-            self.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'.txt')
-            if os.path.exists('cmtklib'):
-                self.gradient_table = os.path.abspath(self.gradient_table)
-            self.number_of_directions = int(re.search('\d+',new).group(0))"""
-            
-    #def _gradient_table_file_changed(self, new):
-    #    self.gradient_table = new
-        #self._check_gradient_table()
-
-    #def _imaging_model_changed(self, new):
-    #    if new == 'DTI' or new == 'HARDI':
-    #        self._gradient_table_file_changed(self.gradient_table_file)
-
     def _recon_mode_changed(self,new):
         if new == 'Probabilistic':
             self.local_model_editor = {True:'Constrained Spherical Deconvolution'}
@@ -169,11 +112,7 @@ class MRtrix_recon_config(HasTraits):
             self.local_model_editor = {False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'}
 
 class Camino_recon_config(HasTraits):
-    #imaging_model = Str
-    #build_scheme_file = Bool(False)
-    #b_value = Int(1000)
     b_value = Int (1000)
-    #b0_volumes = Str()
     model_type = Enum('Single-Tensor',['Single-Tensor','Two-Tensor','Three-Tensor','Other models'])
     singleTensor_models = {'dt':'Linear fit','nldt_pos':'Non linear positive semi-definite','nldt':'Unconstrained non linear','ldt_wtd':'Weighted linear'}
     local_model = Str('dt')
@@ -183,18 +122,13 @@ class Camino_recon_config(HasTraits):
     fallback_model = Str('dt')
     fallback_editor = Dict(singleTensor_models)
     fallback_index = Int()
-    #recon_mode = Str
     inversion = Int()
     
     gradient_table = File
     flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     
-    #gradient_table = Str
-    #custom_gradient_table = File
-    
     traits_view = View(Item('gradient_table',label='Gradient table (x,y,z,b):'),
                        Item('flip_table_axis',style='custom',label='Flip table:'),
-                       #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
                        'model_type',
 		               VGroup(Item('local_model',label="Camino model",editor=EnumEditor(name='local_model_editor')),
                               Item('snr',visible_when='local_model=="restore"'),
@@ -220,16 +154,6 @@ class Camino_recon_config(HasTraits):
             self.mixing_eq = False
             
         self.update_inversion()
-
-    def _gradient_table_file_changed(self, new):
-        if new != 'Custom...':
-            self.gradient_table = os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','diffusion','gradient_tables')),new+'.txt')
-            if os.path.exists('cmtklib'):
-                self.gradient_table = os.path.abspath(self.gradient_table)
-            self.number_of_directions = int(re.search('\d+',new).group(0))
-            
-    def _custom_gradient_table_changed(self, new):
-        self.gradient_table = new
         
     def update_inversion(self):
         inversion_dict = {'ball_stick':-3, 'restore':-2, 'adc':-1, 'ltd':1, 'dt':1, 'nldt_pos':2,'nldt':4,'ldt_wtd':7,'cylcyl':10, 'pospos':30, 'poscyl':50, 'cylcylcyl':210, 'pospospos':230, 'posposcyl':250, 'poscylcyl':270}
@@ -272,18 +196,12 @@ class FSL_recon_config(HasTraits):
 class Gibbs_model_config(HasTraits):
     local_model_editor = Dict({False:'1:Tensor',True:'2:CSD'})
     local_model = Bool(False)
-    # CSD parameters
-    #gradient_table_file = Enum('siemens_06',['mgh_dti_006','mgh_dti_018','mgh_dti_030','mgh_dti_042','mgh_dti_060','mgh_dti_072','mgh_dti_090','mgh_dti_120','mgh_dti_144',
-    #                      'siemens_06','siemens_12','siemens_20','siemens_30','siemens_64','siemens_256','Custom...'])
     gradient_table = File()
     flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
-    #custom_gradient_table = File
     lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
     normalize_to_B0 = Bool(False)
     single_fib_thr = Float(0.7,min=0,max=1)
-    #recon_mode = Str
-
-    # FSL parameters
+    
     b_values = File()
     b_vectors = File()
 
@@ -303,7 +221,6 @@ class Gibbs_recon_config(HasTraits):
     inexbalance=Int(-2)
     fiber_length=Float(20)
     curvature_threshold=Float(90)
-    #sh_coefficient_convention = Enum(['FSL','MRtrix'])
     
     traits_view = View('iterations','particle_length','particle_width','particle_weigth','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold')
             
@@ -413,6 +330,8 @@ def create_dtk_recon_flow(config):
         prefix = "dsi"
         dtk_odfrecon = pe.Node(interface=dtk.ODFRecon(out_prefix=prefix),name='dtk_odfrecon')
         dtk_odfrecon.inputs.matrix = os.path.join(os.environ['DSI_PATH'],config.recon_matrix_file)
+        config.dsi_number_of_directions
+        config.number_of_output_directions
         dtk_odfrecon.inputs.n_b0 = config.number_of_b0_volumes
         dtk_odfrecon.inputs.n_directions = int(config.dsi_number_of_directions)+1
         dtk_odfrecon.inputs.n_output_directions = config.number_of_output_directions
@@ -527,7 +446,6 @@ def create_mrtrix_recon_flow(config):
         outputnode.inputs.SD = True
     else:
         outputnode.inputs.SD = False
-    #outputnode.inputs.grad = config.gradient_table
     
     # Flip gradient table
     flip_table = pe.Node(interface=flipTable(),name='flip_table')
@@ -542,24 +460,25 @@ def create_mrtrix_recon_flow(config):
 
     # Tensor
     mrtrix_tensor = pe.Node(interface=mrtrix.DWI2Tensor(),name='mrtrix_make_tensor')
-    #mrtrix_tensor.inputs.out_filename = 'dt.mif'
+    
     flow.connect([
 		(inputnode, mrtrix_tensor,[('diffusion_resampled','in_file')]),
         (flip_table,mrtrix_tensor,[("table","encoding_file")]),
 		])
-    #mrtrix_mul.inputs.in_files = [
 
     # Tensor -> FA map
     mrtrix_FA = pe.Node(interface=mrtrix.Tensor2FractionalAnisotropy(),name='mrtrix_FA')
-    #mrtrix_FA.inputs.out_filename = 'FA.mif'
+    convert_FA = pe.Node(interface=mrtrix.MRConvert(out_filename="FA.nii"),name='convert_FA')
+
     flow.connect([
 		(mrtrix_tensor,mrtrix_FA,[('tensor','in_file')]),
-		(mrtrix_FA,outputnode,[('FA','FA')])
+		(mrtrix_FA,convert_FA,[('FA','in_file')]),
+        (convert_FA,outputnode,[("converted","FA")])
 		])
 
     # Tensor -> Eigenvectors
     mrtrix_eigVectors = pe.Node(interface=mrtrix.Tensor2Vector(),name="mrtrix_eigenvectors")
-    #mrtrix_eigVectors.inputs.out_filename = 'ev.mif'
+
     flow.connect([
 		(mrtrix_tensor,mrtrix_eigVectors,[('tensor','in_file')]),
 		(mrtrix_eigVectors,outputnode,[('vector','eigVec')])
@@ -570,12 +489,11 @@ def create_mrtrix_recon_flow(config):
         # Compute single fiber voxel mask
         mrtrix_erode = pe.Node(interface=mrtrix.Erode(),name="mrtrix_erode")
         mrtrix_erode.inputs.number_of_passes = 3
-        #mrtrix_mul_eroded_FA = pe.Node(interface=mrtrix.MRMultiply(),name='mrtrix_mul_eroded_FA')
         mrtrix_mul_eroded_FA = pe.Node(interface=MRtrix_mul(),name='mrtrix_mul_eroded_FA')
         mrtrix_mul_eroded_FA.inputs.out_filename = "diffusion_resampled_tensor_FA_masked.mif"
         mrtrix_thr_FA = pe.Node(interface=mrtrix.Threshold(),name='mrtrix_thr')
         mrtrix_thr_FA.inputs.absolute_threshold_value = config.single_fib_thr
-        #mrtrix_thr_FA.inputs.out_filename = 'sf.mif'
+
         flow.connect([
 		    (inputnode,mrtrix_erode,[("wm_mask_resampled",'in_file')]),
 		    (mrtrix_erode,mrtrix_mul_eroded_FA,[('out_file','input2')]),
@@ -586,13 +504,14 @@ def create_mrtrix_recon_flow(config):
         mrtrix_rf = pe.Node(interface=mrtrix.EstimateResponseForSH(),name="mrtrix_rf")
         if config.lmax_order != 'Auto':
             mrtrix_rf.inputs.maximum_harmonic_order = config.lmax_order
-        #mrtrix_rf.inputs.out_filename = 'rf.mif'
+
         mrtrix_rf.inputs.normalise = config.normalize_to_B0
         flow.connect([
 		    (inputnode,mrtrix_rf,[("diffusion_resampled","in_file")]),
 		    (mrtrix_thr_FA,mrtrix_rf,[("out_file","mask_image")]),
             (flip_table,mrtrix_rf,[("table","encoding_file")]),
 		    ])
+        
         # Perform spherical deconvolution
         mrtrix_CSD = pe.Node(interface=mrtrix.ConstrainedSphericalDeconvolution(),name="mrtrix_CSD")
         mrtrix_CSD.inputs.normalise = config.normalize_to_B0
@@ -663,10 +582,14 @@ def create_camino_recon_flow(config):
         camino_FA.inputs.inputmodel = 'threetensor'
     elif config.model_type == 'Multitensor':
         camino_FA.inputs.inputmodel = 'multitensor'
+        
+    convert_FA = pe.Node(interface=camino.Voxel2Image(output_root="FA"),name="convert_FA")
 
     flow.connect([
 		(camino_ModelFit,camino_FA,[('fitted_data','in_file')]),
-		(camino_FA,outputnode,[('fa','FA')]),
+		(camino_FA,convert_FA,[("fa","in_file")]),
+        (inputnode,convert_FA,[("wm_mask_resampled","header_file")]),
+        (convert_FA,outputnode,[('image_file','FA')]),
 		])
 
     # Compute MD map

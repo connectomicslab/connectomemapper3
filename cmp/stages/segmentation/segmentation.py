@@ -30,7 +30,6 @@ class SegmentationConfig(HasTraits):
     freesurfer_subject_id_trait = List
     freesurfer_subject_id = Str
     freesurfer_args = Str
-    #custom_segmentation = Bool(False)
     white_matter_mask = File(exist=True)
     traits_view = View(Item('seg_tool',label="Segmentation tool"),
                        Group('freesurfer_args','use_existing_freesurfer_data',
@@ -68,8 +67,7 @@ class SegmentationStage(Stage):
                 fs_reconall = pe.Node(interface=fs.ReconAll(),name="reconall")
                 fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
                 fs_reconall.inputs.args = self.config.freesurfer_args
-                #if self.config.use_existing_freesurfer_data == True:
-                #    fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id
+                
                 fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id # DR: inputs seemed to lack from previous version
                 
                 flow.connect([

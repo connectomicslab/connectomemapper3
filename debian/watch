@@ -1,0 +1,3 @@
+version=3
+
+https://github.com/LTS5/cmp/releases /LTS5/cmp/archive/release-(.+)\.tar\.gz

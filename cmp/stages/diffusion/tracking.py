@@ -44,10 +44,6 @@ class DTB_tracking_config(HasTraits):
     traits_view = View(Item('flip_input',style='custom'),'angle','seeds')
 
 class MRtrix_tracking_config(HasTraits):
-    #imaging_model = Str
-    #flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
-    #angle = Int(60)
-    #seeds = Int(32)
     tracking_mode = Str
     desired_number_of_tracks = Int(1000)
     max_number_of_tracks = Int(1000)
@@ -318,46 +314,18 @@ class make_seeds(BaseInterface):
     ROI_idx = []
     base_name = ''
     def _run_interface(self,runtime):
-        #from scipy.ndimage.morphology import binary_dilation as dil
         iflogger.info("Computing seed files for probabilistic tractography\n===================================================")
         # Load ROI file
         for ROI_file in self.inputs.ROI_files:
             ROI_vol = nib.load(ROI_file)
             ROI_data = ROI_vol.get_data()
             ROI_affine = ROI_vol.get_affine()
-            #space_size = ROI_data.shape
             # Load WM mask
             WM_vol = nib.load(self.inputs.WM_file)
             WM_data = WM_vol.get_data()
             # Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
             iflogger.info("ROI dilation...")
             self.ROI_idx = np.unique(ROI_data[ROI_data!=0]).astype(int)
-            #self.n_ROIs = ROI_idx.size
-            #overlap_value = 10*self.ROI_idx.max().astype(int)
-            #temp = ROI_data.copy()
-            #dil_ROIs = ROI_data.copy()
-            #dil_ROIs = dil_ROIs * 0
-            #for i in self.ROI_idx:
-            #    temp[ROI_data==i]=1
-            #    temp[ROI_data!=i]=0
-            #    temp = dil(temp).astype(temp.dtype)
-            #    overlap = temp * dil_ROIs # -> volume with ones on voxels overlapping dilated current ROI with previous dilations
-            #    dil_ROIs[temp > 0] = i
-            #    dil_ROIs[overlap > 0] = overlap_value
-            # Reassign overlapping voxels to ROI with most values in neighbourhood, iterating until 10 voxels then puts to 0
-            #iflogger.info("Reassigning overlapping voxels...")
-            #count = 0
-            #while ((dil_ROIs.max().astype(int) == overlap_value) and (count <= 10)):
-            #    count = count + 1
-            #    xx,yy,zz = np.where(dil_ROIs==overlap_value)
-            #    for i in range(0,xx.size):
-            #        neigh = dil_ROIs[max(xx[i]-1,0):min(xx[i]+2,space_size[0]),max(yy[i]-1,0):min(yy[i]+2,space_size[1]),max(zz[i]-1,0):min(zz[i]+2,space_size[2])].astype(int)
-            #        neigh = neigh[neigh!=overlap_value]
-            #        neigh = neigh[neigh!=0]
-            #        dil_ROIs[xx[i],yy[i],zz[i]] = np.argmax(np.bincount(neigh))
-            #idx = np.where(dil_ROIs==overlap_value)
-            #iflogger.info("Non resolved overlapping voxels: "+str(idx[0].size))
-            #dil_ROIs[idx] = 0
             # Take overlap between dilated ROIs and WM to define seeding regions
             border = ROI_data * WM_data 
             # Save one nifti file per seeding ROI
@@ -368,7 +336,6 @@ class make_seeds(BaseInterface):
                 temp[border != i] = 0
                 new_image = nib.Nifti1Image(temp,ROI_affine)
                 save_as = os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz')
-                #iflogger.info("Saving file to: " + save_as)
                 nib.save(new_image,save_as)
         return runtime
     
@@ -390,7 +357,7 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
     if config.tracking_mode == 'Deterministic':
-        mrtrix_tracking = pe.MapNode(interface=mrtrix.StreamlineTrack(),iterfield=['in_file'],name="mrtrix_deterministic_tracking")
+        mrtrix_tracking = pe.Node(interface=mrtrix.StreamlineTrack(),name="mrtrix_deterministic_tracking")
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
         mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
@@ -404,7 +371,7 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
             #flow.connect([
             #	    (inputnode,mrtrix_tracking,[('grad','gradient_encoding_file')])
             #	    ])
-        converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name="trackvis")
+        converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
         flow.connect([
                       (inputnode,mrtrix_tracking,[('DWI','in_file')]),
                       (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
@@ -505,20 +472,13 @@ def create_camino_tracking_flow(config,grad_table):
         picopdf.inputs.pdf = config.pdf
         if config.inversion_index >= 10:
             picopdf.inputs.inputmodel = 'multitensor'
-            #picopdf.inputs.lut_str = '/home/cmt/Documents/test_dataset/S01_XavierG/NIPYPE/diffusion_pipeline/diffusion_stage/tracking/dtlutgen2/siemens_20_b=1000_for_Camino_invertedY.dat /home/cmt/Documents/test_dataset/S01_XavierG/NIPYPE/diffusion_pipeline/diffusion_stage/tracking/dtlutgen/siemens_20_b=1000_for_Camino_invertedY.dat'
             merge = pe.Node(interface=util.Merge(2),name='merge_LUTs')
             flow.connect([
                         (dtlutgen2,merge,[("dtLUT","in1")]),
                         (dtlutgen,merge,[("dtLUT","in2")]),
                         (merge,picopdf,[("out","luts")]),
                         ])
-            #merge_func = 'def func(arg1,arg2): return arg1 + ' ' + arg2'
-            #merge = pe.Node(interface=util.Function(input_names=['arg1', 'arg2'], output_names = ['out'], function_str = merge_func), name='merge_LUTs')
-            #flow.connect([
-            #            (dtlutgen,merge,[("dtLUT","arg1")]),
-            #            (dtlutgen2,merge,[("dtLUT","arg2")]),
-            #            (merge,picopdf,[("out","luts")]),
-            #            ])
+            
         else:
             picopdf.inputs.inputmodel = 'dt'
             flow.connect([
@@ -545,8 +505,6 @@ def create_camino_tracking_flow(config,grad_table):
             (inputnode,camino_seeds,[('wm_mask_resampled','WM_file')]),
             (inputnode,camino_seeds,[('gm_registered','ROI_files')]),
             (inputnode,picopdf,[("DWI","in_file")]),
-            #(dtlutgen,picopdf,[("dtLUT","luts")]),
-            #(dtlutgen2,picopdf,[("dtLUT","luts")]),
             (picopdf,camino_tracking,[('pdfs','in_file')]),
             (camino_seeds,camino_tracking,[('seed_files','seed_file')]),
             (inputnode,camino_tracking,[('wm_mask_resampled','anisfile')]),
@@ -575,9 +533,6 @@ def create_fsl_tracking_flow(config):
     probtrackx.inputs.n_steps = config.number_of_steps
     probtrackx.inputs.dist_thresh = config.distance_threshold
     probtrackx.inputs.c_thresh = config.curvature_threshold
-    #probtrackx.inputs.mode = 'seedmask'
-    #probtrackx.inputs.seed = ['/home/cmt/Documents/test_dataset/S01_XavierG/NIPYPE/diffusion_pipeline/diffusion_stage/tracking/fsl_seeds/ROIv_HR_th_freesurferaparc_flirt_out_dil_seed_1.nii.gz']
-    
     probtrackx.inputs.network = True
     
     flow.connect([

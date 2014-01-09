@@ -186,7 +186,8 @@ class DiffusionStage(Stage):
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
-			(fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
+			            (fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (recon_flow,outputnode,[("outputnode.FA","gFA")]),
                         ])
 
         elif self.config.processing_tool == 'Camino':
@@ -194,7 +195,8 @@ class DiffusionStage(Stage):
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
-			(fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (recon_flow,outputnode,[("outputnode.FA","gFA")])
                         ])
         
         elif self.config.processing_tool == 'FSL':
@@ -283,7 +285,11 @@ class DiffusionStage(Stage):
                 diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
                 if os.path.exists(diff_results_path):
                     diff_results = pickle.load(gzip.open(diff_results_path))
-                    self.inspect_outputs_dict[self.config.processing_tool + ' streamline'] = ['trackvis',diff_results.outputs.out_file[0]]
+                    if self.config.processing_tool == "MRtrix":
+                        streamline_res = diff_results.outputs.out_file
+                    else:
+                        streamline_res = diff_results.outputs.trackvis
+                    self.inspect_outputs_dict[self.config.processing_tool + ' streamline'] = ['trackvis',streamline_res]
                     self.inspect_outputs = self.inspect_outputs_dict.keys()
 
             if self.config.processing_tool == 'MRtrix' :

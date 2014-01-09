@@ -1,22 +1,21 @@
-This package was debianized by CHUV
-
-Upstream Author:
-
-	CHUV
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: CMP
+Upstream-Contact: CHUV-EPFL <info@connectomics.org>
+Source: https://github.com/LTS5/cmp_nipype
 
 Files: *
 Copyright:
 	2009-2014, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
 	Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
-License: GPL
+License: BSD-3-clause
 
 Files: debian/*
 Copyright:
 	2009-2014, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
 	Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
-License: BSD
+License: BSD-3-clause
 
-License: BSD
+License: BSD-3-clause
 	Redistribution and use in source and binary forms, with or without
 	modification, are permitted provided that the following conditions are met:
 		* Redistributions of source code must retain the above copyright

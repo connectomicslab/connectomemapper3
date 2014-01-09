@@ -128,8 +128,6 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
             if parkey in vol:
                 roi_fname = vol
                 print roi_fname
-        #roi_fname = roi_volumes[r]
-        #r += 1
         roi       = nibabel.load(roi_fname)
         roiData   = roi.get_data()
       
@@ -151,7 +149,6 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
         pc = -1
         
         for intrk_i in range(0,len(intrk)):
-            # Percent counter
             pcN = int(round( float(100*intrk_i)/len(intrk) ))
             if pcN > pc and pcN%20 == 0:
                 pc = pcN
@@ -159,11 +156,6 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
             fib, hdr    = nibabel.trackvis.read(intrk[intrk_i], False)
             (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
             n = len(fib)
-                
-            # create empty fiber label array
-            #fiberlabels = np.zeros( (n, 2) )
-            #final_fiberlabels = []
-            #final_fibers_idx = []
                 
             dis = 0
         
@@ -197,12 +189,6 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
                     tmp = startROI
                     startROI = endROI
                     endROI = tmp
-        
-                #fiberlabels[i,0] = startROI
-                #fiberlabels[i,1] = endROI
-        
-                #final_fiberlabels.append( [ startROI, endROI ] )
-                #final_fibers_idx.append(i)
         
                 # Add edge to graph
                 if G.has_edge(startROI, endROI):

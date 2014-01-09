@@ -1,12 +1,13 @@
-Release 2.1.0 (Jan 08, 2014)
-============================
-* ENH: Added Mrtrix diffusion processing (deterministic and probabilistic tractography)
-* ENH: Added Camino diffusion processing (deterministic and probabilistic tractography)
-* ENH: Added FSL diffusion processing (probabilistic tractography)
-* ENH: Added Gibbs diffusion processing (global tractography)
-* ENH: Added custom segmentation and atlas options
+Release 2.1.0-beta (Jan 09, 2014)
+=================================
 * ENH: Added preprocessing options (eddy current and motion correction)
-* FIX: Fixed output inspection for parcellation stage
+* ENH: Added custom segmentation and atlas options
+* ENH: Added Mrtrix reconstruction (CSD and tensor) and tractography (deterministic and probabilistic)
+* ENH: Added Camino reconstruction (single tensor, multi-tensor, ballstick, ADC and restore) and tractography (deterministic and probabilistic)
+* ENH: Added FSL probabilistic tractography (ProbTrackX)
+* ENH: Added Gibbs diffusion processing (global tractography)
+* ENH: Added source files for sphinx documentation
+* FIX: Fixed output inspection bugs
 
 Release 2.0.2 (Dec 28, 2012)
 ============================

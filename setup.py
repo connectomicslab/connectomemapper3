@@ -53,14 +53,14 @@ def main(**extra_args):
           long_description="""Connectome Mapper implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 """ + \
           """data to multi-resolution connection matrices. It also offers support for resting state fMRI data processing and multi-resolution functional connection matrices creation. """ + \
           """The Connectome Mapper is part of the Connectome Mapping Toolkit.""",
-          author= 'CHUV',
+          author= 'CHUV-EPFL',
           author_email='info@connectomics.org',
           url='http://www.connectomics.org/',
           scripts = glob('scripts/*'),
           license='Modified BSD License',
           packages = packages,
         classifiers = [c.strip() for c in """\
-            Development Status :: 3 - Alpha
+            Development Status :: 4 - Beta
             Intended Audience :: Developers
             Intended Audience :: Science/Research
             Operating System :: OS Independent

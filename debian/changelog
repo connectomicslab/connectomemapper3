@@ -1,5 +1,5 @@
-cmp (2.0.0) UNRELEASED; urgency=low
+cmp (2.1.0-beta) unstable; urgency=low
 
   * Initial release. (Closes: #XXXXXX)
 
- -- CHUV <info@connectomics.org>  Thu, 22 Nov 2012 14:31:32 +0100
+ -- CHUV-EPFL <info@connectomics.org>  Wed, 09 Jan 2014 13:10:00 +0100

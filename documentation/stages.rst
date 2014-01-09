@@ -15,6 +15,8 @@ Preprocessing includes motion and eddy current correction for diffusion data.
 *Motion correction*
 
 	Aligns diffusion volumes to the b0 volume using FSL's MCFLIRT.
+	
+	.. note:: For hemi-sphere DSI aquisitions, warning outputs will be displayed in the console when processing empty volumes.
 
 *Eddy current correction*
 
@@ -107,6 +109,8 @@ Diffusion and tractography
 --------------------------
 
 Performs deterministic, probabilistic or global tractography based on several tools.
+
+.. note:: There is currently an issue with window resizing when changing processing tools. Close the window and reopen it when you change the processing tool.
 	
 *Resampling*
 
@@ -170,6 +174,8 @@ Performs deterministic, probabilistic or global tractography based on several to
 Connectome
 ----------
 
+Computes fiber length connectivity matrices. If DTI or HARDI data is processed, FA additional map is computed. In case of DSI, additional maps include GFA, Skewness, Kurtosis and P0.
+
 .. image:: images/connectome.png
 	:align: center
 
@@ -179,7 +185,7 @@ Connectome
 	
 *View outputs*
 
-	Connectivity matrices
+	Connectivity matrices in gpickle format: extracts and displays mean fiber length matrices
 
 ******
 Nipype 

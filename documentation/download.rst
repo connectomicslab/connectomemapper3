@@ -2,7 +2,7 @@
 Download Instruction
 ====================
 
-By downloading Connectome Mapper, you agree to the terms and conditions of the Modified BSD license.
+By downloading Connectome Mapper, you agree to the terms and conditions of the following Modified BSD license.
 
 .. note:: Copyright (C) 2009-2014, Ecole Polytechnique Fédérale de Lausanne (EPFL) and Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland. All rights reserved.
 
@@ -36,12 +36,29 @@ By downloading Connectome Mapper, you agree to the terms and conditions of the M
 	OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE
 	PROVISION OF PATIENT CARE.
 
+	
+Souce code (`git repository <http://www.github.com/LTS5/cmp_nipype>`_)
+----------------------------------------------------------------------
+
 .. raw:: html
 
-   <a href="https://github.com/LTS5/cmp_nipype/archive/release_candidate.zip" onclick="_gaq.push(['_trackEvent', 'release-2.1.0', 'download']);">I agree on the terms and conditions of the connectome mapper license and want to download the source code, current release 2.1.0-beta</a><br/><br/>
-   <a href="https://github.com/LTS5/cmp/tarball/release-1.2.0" onclick="_gaq.push(['_trackEvent', 'release-1.2.0', 'download']);">I agree on the terms and conditions of the connectome mapper license and want to download the source code, previous release 1.2.0</a><br/><br/>
-   <a href="https://github.com/LTS5/cmp/tarball/release-1.1.0" onclick="_gaq.push(['_trackEvent', 'release-1.1.0', 'download']);">I agree on the terms and conditions of the connectome mapper license and want to download the source code, previous release 1.1.0</a>
+	<blockquote>
+	<div><ul class="simple">
+	<li><tt class="xref download docutils literal"><a href="https://github.com/LTS5/cmp_nipype/releases" onmousedown="_gaq.push(['_trackEvent', 'source_release-2.1.0-beta', 'download']);">2.x branch (beta)</a></tt></li>
+	<li><tt class="xref download docutils literal"><a href="https://github.com/LTS5/cmp/releases" onmousedown="_gaq.push(['_trackEvent', 'source_release-1.2.0', 'download']);">1.x branch</a></tt></li>
+	</ul>
+	</div></blockquote>
 
-
+..
+	Deb package
+	-----------
+		
+	.. raw:: html
+	
+		<blockquote>
+		<div><ul class="simple">
+		<li><tt class="xref download docutils literal"><a class="reference download internal" href="_downloads/cmp_2.1.0-beta_all.deb" onmousedown="_gaq.push(['_trackEvent', 'debian_release-2.1.0-beta', 'download']);">Debian package, current release 2.1.0-beta</a></tt></li>
+		</ul>
+		</div></blockquote>
 
 
