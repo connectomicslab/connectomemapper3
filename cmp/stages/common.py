@@ -33,7 +33,7 @@ class Stage(HasTraits):
                                 label = 'View outputs', show_border=True
                                 )
                             ),
-                            kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     def _inspect_output_button_fired(self,info):
