@@ -56,7 +56,7 @@ class CMP_MainWindow(HasTraits):
     load_config = Action(name='Load configuration...',action='load_config_file',enabled_when='handler.project_loaded==True')
 
     traits_view = View(HGroup(
-                            Item('pipeline',style='custom',enabled_when='handler.inputs_checked==True',show_label=False,width=800,height=710),
+                            Item('pipeline',style='custom',enabled_when='handler.inputs_checked==True',show_label=False,width=800,height=700),
                             ),
                        title='Connectome Mapper',
                        menubar=MenuBar(
@@ -76,6 +76,7 @@ class CMP_MainWindow(HasTraits):
                           ),
                        handler = project.ProjectHandler(),
                        buttons = [preprocessing, map_connectome, map_custom],
+                       height= 0.75, scrollable=True
                    )
 
 
