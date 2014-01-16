@@ -440,12 +440,7 @@ class MRtrix_mul(CommandLine):
 def create_mrtrix_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","eigVec","RF","SD","grad"],mandatory_inputs=True),name="outputnode")
-    
-    if config.local_model:
-        outputnode.inputs.SD = True
-    else:
-        outputnode.inputs.SD = False
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
     
     # Flip gradient table
     flip_table = pe.Node(interface=flipTable(),name='flip_table')

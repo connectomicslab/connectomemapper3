@@ -71,9 +71,11 @@ class DiffusionConfig(HasTraits):
         self.gibbs_model_config = Gibbs_model_config()
         self.dtk_tracking_config = DTK_tracking_config()
         self.dtb_tracking_config = DTB_tracking_config(imaging_model=self.imaging_model)
-        self.mrtrix_tracking_config = MRtrix_tracking_config(imaging_model=self.imaging_model,tracking_mode=self.diffusion_model)
+        self.mrtrix_tracking_config = MRtrix_tracking_config(tracking_mode=self.diffusion_model,SD=self.mrtrix_recon_config.local_model)
         self.camino_tracking_config = Camino_tracking_config(imaging_model=self.imaging_model,tracking_mode=self.diffusion_model)
         self.fsl_tracking_config = FSL_tracking_config()
+        
+        self.mrtrix_recon_config.on_trait_change(self.update_mrtrix_tracking_SD,'local_model')
         
         self.camino_recon_config.on_trait_change(self.update_camino_tracking_model,'model_type')
         self.camino_recon_config.on_trait_change(self.update_camino_tracking_model,'local_model')
@@ -114,6 +116,9 @@ class DiffusionConfig(HasTraits):
         self.mrtrix_tracking_config.tracking_mode = new
         self.camino_tracking_config.tracking_mode = new
         self.update_camino_tracking_model()
+        
+    def update_mrtrix_tracking_SD(self):
+        self.mrtrix_tracking_config.SD = self.mrtrix_recon_config.local_model
         
     def update_camino_tracking_model(self):
         if self.diffusion_model == 'Probabilistic':
@@ -223,7 +228,7 @@ class DiffusionStage(Stage):
                         ])
 
         elif self.config.processing_tool == 'MRtrix':
-            track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config,self.config.mrtrix_recon_config.gradient_table,self.config.mrtrix_recon_config.local_model)
+            track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config,self.config.mrtrix_recon_config.gradient_table)
             flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),

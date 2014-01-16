@@ -46,16 +46,38 @@ class DTB_tracking_config(HasTraits):
 
 class MRtrix_tracking_config(HasTraits):
     tracking_mode = Str
+    SD = Bool
     desired_number_of_tracks = Int(1000)
     max_number_of_tracks = Int(1000)
+    curvature = Float(2.0)
     step_size = Float(0.2)
     min_length = Float(10)
     max_length = Float(200)
     
     traits_view = View( HGroup('desired_number_of_tracks','max_number_of_tracks'),
-			'step_size',
+			Item('curvature',label="Curvature radius"),'step_size',
 			HGroup('min_length','max_length')
 		      )
+    
+    def _SD_changed(self,new):
+        if self.tracking_mode == "Deterministic" and not new:
+            self.curvature = 2.0
+        elif self.tracking_mode == "Deterministic" and new:
+            self.curvature = 0.0
+        elif self.tracking_mode == "Probabilistic":
+            self.curvature = 1.0
+            
+    def _tracking_mode_changed(self,new):
+        if new == "Deterministic" and not self.SD:
+            self.curvature = 2.0
+        elif new == "Deterministic" and self.SD:
+            self.curvature = 0.0
+        elif new == "Probabilistic":
+            self.curvature = 1.0
+            
+    def _curvature_changed(self,new):
+        if new <= 0.000001:
+            self.curvature = 0.0                
 
 class Camino_tracking_config(HasTraits):
     imaging_model = Str
@@ -355,7 +377,7 @@ class make_seeds(BaseInterface):
             output_list.append(os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz'))
         return output_list
 
-def create_mrtrix_tracking_flow(config,grad_table,SD):
+def create_mrtrix_tracking_flow(config,grad_table):
     flow = pe.Workflow(name="tracking")
     # inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','wm_mask_resampled','gm_registered']),name='inputnode')
@@ -368,10 +390,13 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
         mrtrix_tracking.inputs.minimum_tract_length = config.min_length
         mrtrix_tracking.inputs.step_size = config.step_size
-        if SD:
-            mrtrix_tracking.inputs.inputmodel = 'SD_STREAM'
+        if config.curvature >= 0.000001:
+            mrtrix_tracking.inputs.minimum_radius_of_curvature = config.curvature
+        if config.SD:
+            mrtrix_tracking.inputs.inputmodel = 'SD_STREAM'  
         else:
             mrtrix_tracking.inputs.inputmodel = 'DT_STREAM'
+            mrtrix_tracking.inputs.minimum_radius_of_curvature = config.curvature
             mrtrix_tracking.inputs.gradient_encoding_file = grad_table
             #flow.connect([
             #	    (inputnode,mrtrix_tracking,[('grad','gradient_encoding_file')])
@@ -388,8 +413,10 @@ def create_mrtrix_tracking_flow(config,grad_table,SD):
 
     elif config.tracking_mode == 'Probabilistic':
         mrtrix_seeds = pe.Node(interface=make_seeds(),name="mrtrix_seeds")
-        mrtrix_tracking = pe.MapNode(interface=mrtrix.StreamlineTrack(desired_number_of_tracks = config.desired_number_of_tracks,maximum_number_of_tracks = config.max_number_of_tracks, maximum_tract_length = config.max_length,minimum_tract_length = config.min_length,step_size = config.step_size),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
-        if SD:
+        mrtrix_tracking = pe.MapNode(interface=mrtrix.StreamlineTrack(desired_number_of_tracks = config.desired_number_of_tracks,maximum_number_of_tracks = config.max_number_of_tracks, maximum_tract_length = config.max_length,minimum_tract_length = config.min_length, step_size = config.step_size),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
+        if config.curvature >= 0.000001:
+            mrtrix_tracking.inputs.minimum_radius_of_curvature = config.curvature
+        if config.SD:
             mrtrix_tracking.inputs.inputmodel='SD_PROB'
         else:
             mrtrix_tracking.inputs.inputmodel='DT_PROB'
