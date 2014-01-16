@@ -39,9 +39,10 @@ class DTB_tracking_config(HasTraits):
     imaging_model = Str
     flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     angle = Int(60)
+    step_size = traits.Float(1.0)
     seeds = Int(32)
     
-    traits_view = View(Item('flip_input',style='custom'),'angle','seeds')
+    traits_view = View(Item('flip_input',style='custom'),'angle','step_size','seeds')
 
 class MRtrix_tracking_config(HasTraits):
     tracking_mode = Str
@@ -121,6 +122,7 @@ class DTB_streamlineInputSpec(CommandLineInputSpec):
     wm_mask = File(desc='WM MASK path/filename (e.g. "data/mask.nii")")',position=2,
                    mandatory=True, exists=True, argstr="--wm %s")
     angle = traits.Int(desc='ANGLE threshold [degree]', argstr="--angle %d")
+    step_size = traits.Float(desc='Step-size [mm]',  argstr="--stepSize %f")
     seeds = traits.Int(desc='number of random seed points per voxel', argstr='--seeds %d')
     out_file = File(desc='OUTPUT path/filename (e.g. "data/fibers.trk")', mandatory=True, argstr='--out %s')
 
@@ -179,6 +181,7 @@ class StreamlineAndFilterInputSpect(BaseInterfaceInputSpec):
     wm_mask = File(desc='WM MASK path/filename (e.g. "data/mask.nii")")',position=2,
                    mandatory=True, exists=True, argstr="--wm %s")
     angle = traits.Int(desc='ANGLE threshold [degree]', argstr="--angle %d")
+    step_size = traits.Float(desc='Step-size [mm]',  argstr="--stepSize %f")
     seeds = traits.Int(desc='number of random seed points per voxel', argstr='--seeds %d')
     out_file = File(desc='OUTPUT path/filename (e.g. "data/fibers.trk")', mandatory=True, argstr='--out %s')
     # spline filter specs
@@ -200,6 +203,7 @@ class StreamlineAndFilter(BaseInterface):
         dtb_streamline.inputs.dir_file = self.inputs.dir_file
         dtb_streamline.inputs.wm_mask = self.inputs.wm_mask
         dtb_streamline.inputs.angle = self.inputs.angle
+        dtb_streamline.inputs.step_size = self.inputs.step_size
         dtb_streamline.inputs.seeds = self.inputs.seeds
         dtb_streamline.inputs.out_file = self.inputs.out_file
         res_stream = dtb_streamline.run()
@@ -284,6 +288,7 @@ def create_dtb_tracking_flow(config):
     # Streamline AND filtering (to avoid temp files)
     streamline_filter = pe.Node(interface=StreamlineAndFilter(out_file='streamline.trk'), name="dtb_streamline")
     streamline_filter.inputs.angle = config.angle
+    streamline_filter.inputs.step_size = config.step_size
     streamline_filter.inputs.seeds = config.seeds
     
     # Workflow connections
