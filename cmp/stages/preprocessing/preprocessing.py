@@ -60,12 +60,12 @@ class splitDiffusion(BaseInterface):
         if self.inputs.start > 0:
             temp = diffusion[:,:,:,0:self.inputs.start]
             nib.save(nib.nifti1.Nifti1Image(temp,affine),os.path.abspath('padding.nii.gz'))
-            temp = diffusion[:,:,:,self.inputs.start:dim[3]-1]
+            temp = diffusion[:,:,:,self.inputs.start:dim[3]]
             nib.save(nib.nifti1.Nifti1Image(temp,affine),os.path.abspath('data.nii.gz'))
         elif self.inputs.start == 0 and self.inputs.end < dim[3]-1:
             temp = diffusion[:,:,:,0:self.inputs.end+1]
             nib.save(nib.nifti1.Nifti1Image(temp,affine),os.path.abspath('data.nii.gz'))
-            temp = diffusion[:,:,:,self.inputs.end+1:dim[3]-1]
+            temp = diffusion[:,:,:,self.inputs.end+1:dim[3]]
             nib.save(nib.nifti1.Nifti1Image(temp,affine),os.path.abspath('padding.nii.gz'))
             
         return runtime
