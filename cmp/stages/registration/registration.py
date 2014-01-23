@@ -109,9 +109,13 @@ class RegistrationStage(Stage):
 
     def create_workflow(self, flow, inputnode, outputnode):
         # Extract B0 and resample it to 1x1x1mm3
-        fs_mriconvert = pe.Node(interface=fs.MRIConvert(frame=0,out_file="diffusion_first.nii.gz",vox_size=(1,1,1)),name="diffusion_resample")
+        extract_b0 = pe.Node(interface=fsl.ExtractROI(t_min=0,t_size=1,roi_file='b0.nii.gz'),name='extract_b0')
+        flow.connect([
+                    (inputnode,extract_b0,[("diffusion","in_file")])
+                    ])
+        fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_file="diffusion_first.nii.gz",vox_size=(1,1,1)),name="diffusion_resample")
         
-        flow.connect([(inputnode, fs_mriconvert,[('diffusion','in_file')])])
+        flow.connect([(extract_b0, fs_mriconvert,[('roi_file','in_file')])])
         
         if self.config.registration_mode == 'Linear (FSL)':
             fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-B0.nii.gz',out_matrix_file='T1-TO-B0.mat'),name="linear_registration")
