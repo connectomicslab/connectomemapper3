@@ -21,6 +21,8 @@ from nipype.caching import Memory
 from pyface.api import ImageResource
 import shutil
 
+import nibabel as nib
+
 from cmp.stages.preprocessing.preprocessing import PreprocessingStage
 from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
@@ -174,13 +176,23 @@ class DiffusionPipeline(Pipeline):
          
         if gui: 
             input_notification = Check_Input_Notification(message=input_message, imaging_model_options=diffusion_model,imaging_model=imaging_model)
-            input_notification.configure_traits()   
+            input_notification.configure_traits()
             self.global_conf.imaging_model = input_notification.imaging_model
+            diffusion_file = os.path.join(self.base_directory,'NIFTI',input_notification.imaging_model+'.nii.gz')
+            n_vol = nib.load(diffusion_file).shape[3]
+            if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
+                self.stages['Preprocessing'].config.end_vol = n_vol-1
+            self.stages['Preprocessing'].config.max_vol = n_vol-1
             self.stages['Registration'].config.imaging_model = input_notification.imaging_model
             self.stages['Diffusion'].config.imaging_model = input_notification.imaging_model
         else:
             print input_message
             self.global_conf.imaging_model = imaging_model
+            diffusion_file = os.path.join(self.base_directory,'NIFTI',imaging_model+'.nii.gz')
+            n_vol = nib.load(diffusion_file).shape[3]
+            if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
+                self.stages['Preprocessing'].config.end_vol = n_vol-1
+            self.stages['Preprocessing'].config.max_vol = n_vol-1
             self.stages['Registration'].config.imaging_model = imaging_model
             self.stages['Diffusion'].config.imaging_model = imaging_model
        
