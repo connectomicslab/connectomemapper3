@@ -257,15 +257,24 @@ class DTB_gfa(CommandLine):
     output_spec = DTB_gfaOutputSpec
 
     def _list_outputs(self):
+        import shutil
         outputs = self._outputs().get()
         path, base, _ = split_filename(self.inputs.dsi_basepath)
-
         if self.inputs.moment == 2:
-            outputs["out_file"]  = os.path.join(path,base+'gfa.nii')
-        if self.inputs.moment == 3:
-            outputs["out_file"]  = os.path.join(path,base+'skewness.nii')
-        if self.inputs.moment == 4:
-            outputs["out_file"]  = os.path.join(path,base+'kurtosis.nii')
+            shutil.move(os.path.join(path,base+'gfa.nii'),os.path.abspath(base+'gfa.nii'))
+            outputs["out_file"]  = os.path.abspath(base+'gfa.nii')
+        elif self.inputs.moment == 3:
+            shutil.move(os.path.join(path,base+'skewness.nii'),os.path.abspath(base+'skewness.nii'))
+            outputs["out_file"]  = os.path.abspath(base+'skewness.nii')
+        elif self.inputs.moment == 4:
+            shutil.move(os.path.join(path,base+'kurtosis.nii'),os.path.abspath(base+'kurtosis.nii'))
+            outputs["out_file"]  = os.path.abspath(base+'kurtosis.nii')
+        #if self.inputs.moment == 2:
+        #    outputs["out_file"]  = os.path.join(path,base+'gfa.nii')
+        #if self.inputs.moment == 3:
+        #    outputs["out_file"]  = os.path.join(path,base+'skewness.nii')
+        #if self.inputs.moment == 4:
+        #    outputs["out_file"]  = os.path.join(path,base+'kurtosis.nii')
 
         return outputs
             

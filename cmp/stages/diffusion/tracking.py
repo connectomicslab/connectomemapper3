@@ -134,8 +134,11 @@ class DTB_dtk2dir(CommandLine):
     output_spec = DTB_dtk2dirOutputSpec
 
     def _list_outputs(self):
+        import shutil
         outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.prefix+'dir.nii'
+        _, base, _ = split_filename(self.inputs.prefix)
+        shutil.move(self.inputs.prefix+'dir.nii',os.path.abspath(base+'dir.nii'))
+        outputs["out_file"] = os.path.abspath(base+'dir.nii')
         return outputs
         
 class DTB_streamlineInputSpec(CommandLineInputSpec):
