@@ -68,7 +68,7 @@ class SegmentationStage(Stage):
                 fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
                 fs_reconall.inputs.args = self.config.freesurfer_args
                 
-                fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id # DR: inputs seemed to lack from previous version
+                #fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id
                 
                 flow.connect([
                             (inputnode,fs_mriconvert,[('T1','in_file')]),
