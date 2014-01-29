@@ -20,7 +20,7 @@ class CMP_Project_Info(HasTraits):
     last_date_processed = Str('Not yet processed')
     last_stage_processed = Str('Not yet processed')
     stage_names = List
-    custom_map_stages = List
+    custom_last_stage = Str
 
     create_view = View( Item('process_type',style='custom'),
                         'base_directory',
@@ -35,8 +35,8 @@ class CMP_Project_Info(HasTraits):
                         width=400,
                         buttons=['OK','Cancel'])
                         
-    custom_map_view = View(Item('custom_map_stages',editor=CheckListEditor(name='stage_names'),style='custom',show_label=False),
-                        title='Select which stages to process.',
+    custom_map_view = View(Item('custom_last_stage',editor=EnumEditor(name='stage_names'),style='custom',show_label=False),
+                        title='Select until which stage to process.',
                         kind='modal',
                         width=400,
                         buttons=['OK','Cancel'])

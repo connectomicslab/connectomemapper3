@@ -111,14 +111,16 @@ class DiffusionPipeline(Pipeline):
     def _connectome_fired(self, info):
         self.stages['Connectome'].configure_traits()
        
-    def define_custom_mapping(self, custom_stages):
+    def define_custom_mapping(self, custom_last_stage):
         # start by disabling all stages
         for stage in self.ordered_stage_list:
             self.stages[stage].enabled = False
-        # enable only selected ones
-        for stage in custom_stages:
+        # enable until selected one
+        for stage in self.ordered_stage_list:
             print 'Enable stage : %s' % stage
             self.stages[stage].enabled = True
+            if stage == custom_last_stage:
+                break
 
     def check_input(self, gui=True):
         print '**** Check Inputs ****'

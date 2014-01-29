@@ -179,7 +179,7 @@ class ProjectHandler(Handler):
         cus_res = ui_info.ui.context["object"].project_info.stage_names = self.pipeline.ordered_stage_list
         cus_res = ui_info.ui.context["object"].project_info.configure_traits(view='custom_map_view')
         if cus_res:
-            self.pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.custom_map_stages)
+            self.pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.custom_last_stage)
             
     def save_config_file(self, ui_info):
         save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
