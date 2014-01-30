@@ -65,10 +65,11 @@ class SegmentationStage(Stage):
                 
                 # ReconAll => named outputnode as we don't want to select a specific output....
                 fs_reconall = pe.Node(interface=fs.ReconAll(),name="reconall")
-                fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
                 fs_reconall.inputs.args = self.config.freesurfer_args
                 
-                #fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id
+                #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
+                fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
+                fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id
                 
                 flow.connect([
                             (inputnode,fs_mriconvert,[('T1','in_file')]),

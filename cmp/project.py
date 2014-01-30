@@ -84,7 +84,7 @@ def load_config(pipeline, config_path):
 ## Creates (if needed) the folder hierarchy
 #
 def refresh_folder(base_directory, input_folders):
-    paths = ['RESULTS','FREESURFER','LOG','NIFTI','RAWDATA','STATS','NIPYPE']
+    paths = ['RESULTS','LOG','NIFTI','RAWDATA','STATS','NIPYPE'] # 'FREESURFER' removed to allow creation on runtime (FS crashes if directory exists)
 
     for in_f in input_folders:
         paths.append(os.path.join('RAWDATA',in_f))
