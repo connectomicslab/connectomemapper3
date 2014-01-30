@@ -41,6 +41,9 @@ def save_config(pipeline, config_path):
                     config.set(stage.name, key+'.'+sub_key, getattr(keyval, sub_key))
             else:
                 config.set(stage.name, key, keyval)
+                
+    config.add_section('Multi-processing')
+    config.set('Multi-processing','number_of_cores',pipeline.number_of_cores)
 
     with open(config_path, 'wb') as configfile:
         config.write(configfile)
@@ -78,6 +81,7 @@ def load_config(pipeline, config_path):
                     setattr(stage.config, key, conf_value)
                 except:
                     pass
+    setattr(pipeline,'number_of_cores',int(config.get('Multi-processing','number_of_cores')))
 
     return True
 
@@ -182,16 +186,18 @@ class ProjectHandler(Handler):
             self.pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.custom_last_stage)
             
     def save_config_file(self, ui_info):
-        save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
         dialog = FileDialog(action="save as", default_filename="config.ini")
         dialog.open()
         if dialog.return_code == OK:
-            shutil.copyfile(ui_info.ui.context["object"].project_info.config_file, dialog.path)
+            save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
+            if dialog.path != ui_info.ui.context["object"].project_info.config_file:
+                shutil.copy(ui_info.ui.context["object"].project_info.config_file, dialog.path)
     
     def load_config_file(self, ui_info):
         dialog = FileDialog(action="open", wildcard="*.ini")
         dialog.open()
         if dialog.return_code == OK:
-            shutil.copyfile(dialog.path, ui_info.ui.context["object"].project_info.config_file)
+            if dialog.path != ui_info.ui.context["object"].project_info.config_file:
+                shutil.copy(dialog.path, ui_info.ui.context["object"].project_info.config_file)
             load_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
 
