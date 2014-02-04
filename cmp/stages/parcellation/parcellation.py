@@ -63,7 +63,7 @@ class ParcellationStage(Stage):
             parc_node.inputs.parcellation_scheme = self.config.parcellation_scheme
             
             flow.connect([
-                         (inputnode,parc_node,[("subjects_dir","subjects_dir"),("subject_id","subject_id")]),
+                         (inputnode,parc_node,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
                          (parc_node,outputnode,[#("aseg_file","aseg_file"),("cc_unknown_file","cc_unknown_file"),
                                                 #("ribbon_file","ribbon_file"),("roi_files","roi_files"),
     					     ("white_matter_mask_file","wm_mask_file"),
