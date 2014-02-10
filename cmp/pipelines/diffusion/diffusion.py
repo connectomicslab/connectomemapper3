@@ -245,6 +245,8 @@ class DiffusionPipeline(Pipeline):
                 if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
                     self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
                     self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
+                    if (not os.path.exists(os.path.join(self.base_directory,'NIPYPE/diffusion_pipeline/segmentation_stage/reconall/result_reconall.pklz'))) and os.path.exists(os.path.join(self.base_directory,'FREESURFER')):
+                        shutil.rmtree(os.path.join(self.base_directory,'FREESURFER'))
             seg_flow = self.create_stage_flow("Segmentation")
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
                 flow.connect([(datasource,seg_flow, [('T1','inputnode.T1')])])
@@ -303,6 +305,12 @@ class DiffusionPipeline(Pipeline):
             flow.run()
        
         self.fill_stages_outputs()
+        
+        # Clean undesired folders/files
+        rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
+        for file_to_rm in rm_file_list:
+            if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
+                os.remove(os.path.join(self.base_directory,file_to_rm))
        
         # copy .ini and log file
         outdir = os.path.join(self.base_directory,"RESULTS",now)
