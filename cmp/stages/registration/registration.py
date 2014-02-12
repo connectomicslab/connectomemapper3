@@ -139,7 +139,7 @@ class RegistrationStage(Stage):
                         (inputnode, fsl_applyxfm_rois, [('roi_volumes','in_file')]),
                         (fs_mriconvert, fsl_applyxfm_rois, [('out_file','reference')]),
                         (fsl_flirt, fsl_applyxfm_rois, [('out_matrix_file','in_matrix_file')]),
-                        (fsl_applyxfm_rois, outputnode, [('out_file','roi_volumes_registered')]),
+                        (fsl_applyxfm_rois, outputnode, [('out_file','roi_volumes_registered')])
                         ])
         if self.config.registration_mode == 'BBregister (FS)':
             fs_bbregister = pe.Node(interface=fs.BBRegister(out_fsl_file="b0-TO-orig.mat"),name="bbregister")

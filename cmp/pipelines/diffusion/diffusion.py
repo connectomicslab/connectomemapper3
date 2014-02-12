@@ -88,10 +88,14 @@ class DiffusionPipeline(Pipeline):
     def update_parcellation(self):
         if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
             self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
+        else:
+            self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.pre_custom
     
     def update_segmentation(self):
         if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
             self.stages['Segmentation'].config.seg_tool = "Custom segmentation"
+        else:
+            self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
                        
     def _preprocessing_fired(self, info):
         self.stages['Preprocessing'].configure_traits()

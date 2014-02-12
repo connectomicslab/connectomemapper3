@@ -27,6 +27,7 @@ from cmp.stages.common import Stage
 class ParcellationConfig(HasTraits):
     parcellation_scheme = Str('Lausanne2008')
     parcellation_scheme_editor = List(['NativeFreesurfer','Lausanne2008','Custom'])
+    pre_custom = Str('Lausanne2008')
     atlas_name = Str()
     number_of_regions = Int()
     nifti_file = File(exists=True)
@@ -45,6 +46,10 @@ class ParcellationConfig(HasTraits):
         
     def _graphml_file_changed(self,new):
         self.update_atlas_info()
+        
+    def _parcellation_scheme_changed(self,old,new):
+        if new == 'Custom':
+            self.pre_custom = old
           
 class ParcellationStage(Stage):
     name = 'parcellation_stage'
