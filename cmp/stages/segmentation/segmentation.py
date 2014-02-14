@@ -87,25 +87,19 @@ class SegmentationStage(Stage):
 
     def define_inspect_outputs(self):
         if self.config.seg_tool == "Freesurfer":
+            fs_path = ''
             if self.config.use_existing_freesurfer_data == False:
                 reconall_results_path = os.path.join(self.stage_dir,"reconall","result_reconall.pklz")
                 if(os.path.exists(reconall_results_path)):
                     reconall_results = pickle.load(gzip.open(reconall_results_path))
-                    fs = FreeSurferSource(subjects_dir=reconall_results.outputs.subjects_dir,
-                                          subject_id=reconall_results.outputs.subject_id)
-                    res = fs.run()
-                    self.inspect_outputs_dict['brainmask/T1'] = ['tkmedit','-f',res.outputs.brainmask,'-surface',res.outputs.white[1],'-aux',res.outputs.T1,'-aux-surface',res.outputs.white[2]]
-                    self.inspect_outputs_dict['norm/aseg'] = ['tkmedit','-f',res.outputs.norm,'-segmentation',res.outputs.aseg,os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
-                    self.inspect_outputs_dict['norm/aseg/surf'] = ['tkmedit','-f',res.outputs.norm,'-surface',res.outputs.white[1],'-aux-surface',res.outputs.white[2],'-segmentation',res.outputs.aseg,os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
-                    self.inspect_outputs = self.inspect_outputs_dict.keys()
+                    fs_path = reconall_results.outputs.subject_id
             else:
-                fs = FreeSurferSource(subjects_dir=self.config.freesurfer_subjects_dir,
-                                          subject_id=self.config.freesurfer_subject_id)
-                res = fs.run()
-                self.inspect_outputs_dict['brainmask/T1'] = ['tkmedit','-f',res.outputs.brainmask,'-surface',res.outputs.white[1],'-aux',res.outputs.T1,'-aux-surface',res.outputs.white[2]]
-                self.inspect_outputs_dict['norm/aseg'] = ['tkmedit','-f',res.outputs.norm,'-segmentation',res.outputs.aseg,os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
-                self.inspect_outputs_dict['norm/aseg/surf'] = ['tkmedit','-f',res.outputs.norm,'-surface',res.outputs.white[1],'-aux-surface',res.outputs.white[2],'-segmentation',res.outputs.aseg,os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
-                self.inspect_outputs = self.inspect_outputs_dict.keys()
+                fs_path = os.path.join(self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
+            self.inspect_outputs_dict['brainmask/T1'] = ['tkmedit','-f',os.path.join(fs_path,'mri','brainmask.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux',os.path.join(fs_path,'mri','T1.mgz'),'-aux-surface',os.path.join(fs_path,'surf','rh.white')]
+            self.inspect_outputs_dict['norm/aseg'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
+            self.inspect_outputs_dict['norm/aseg/surf'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux-surface',os.path.join(fs_path,'surf','rh.white'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
+            self.inspect_outputs = self.inspect_outputs_dict.keys()
+            
         elif self.config.seg_tool == "Custom segmentation":
             self.inspect_outputs_dict['brainmask'] = ['fslview',self.config.white_matter_mask]
             self.inspect_outputs = self.inspect_outputs_dict.keys()
