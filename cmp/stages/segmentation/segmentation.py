@@ -52,10 +52,11 @@ class SegmentationConfig(HasTraits):
 
 class SegmentationStage(Stage):
     # General and UI members
-    name = 'segmentation_stage'
-    config = SegmentationConfig()
-    inputs = ["T1"]
-    outputs = ["subjects_dir","subject_id","custom_wm_mask"]
+    def __init__(self):
+        self.name = 'segmentation_stage'
+        self.config = SegmentationConfig()
+        self.inputs = ["T1"]
+        self.outputs = ["subjects_dir","subject_id","custom_wm_mask"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         if self.config.seg_tool == "Freesurfer":

@@ -142,10 +142,12 @@ def strip_suffix(file_input, prefix):
     return os.path.join(path, prefix+'_')
 
 class DiffusionStage(Stage):
-    name = 'diffusion_stage'
-    config = DiffusionConfig()
-    inputs = ["diffusion","wm_mask_registered","roi_volumes"]
-    outputs = ["track_file","gFA","skewness","kurtosis","P0","roi_volumes"]
+    
+    def __init__(self):
+        self.name = 'diffusion_stage'
+        self.config = DiffusionConfig()
+        self.inputs = ["diffusion","wm_mask_registered","roi_volumes"]
+        self.outputs = ["track_file","gFA","skewness","kurtosis","P0","roi_volumes"]
 
 
     def create_workflow(self, flow, inputnode, outputnode):

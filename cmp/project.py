@@ -111,7 +111,14 @@ def init_project(project_info, is_new_project):
 
     if is_new_project and pipeline!= None:
         project_info.config_file = os.path.join(project_info.base_directory,'config.ini')
-        save_config(pipeline, project_info.config_file)
+        if os.path.exists(project_info.config_file):
+            warn_res = project_info.configure_traits(view='warning_view')
+            if warn_res:
+                save_config(pipeline, project_info.config_file)
+            else:
+                return None
+        else:
+            save_config(pipeline, project_info.config_file)
     else:
         conf_loaded = load_config(pipeline, project_info.config_file)
         if not conf_loaded:

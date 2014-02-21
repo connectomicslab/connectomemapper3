@@ -16,6 +16,7 @@ import project
 
 class CMP_Project_Info(HasTraits):
     base_directory = Directory
+    warning_msg = Str('\nWarning: selected directory is already configured.\n\nDo you want to reset the configuration to default parameters ?\n')
     process_type = Enum('Diffusion',['Diffusion'])
     last_date_processed = Str('Not yet processed')
     last_stage_processed = Str('Not yet processed')
@@ -24,7 +25,13 @@ class CMP_Project_Info(HasTraits):
 
     create_view = View( Item('process_type',style='custom'),
                         'base_directory',
-                        title='Select type of pipeline and base directory for new Connectome Data',
+                        title='Select type of pipeline and base directory',
+                        kind='modal',
+                        width=400,
+                        buttons=['OK','Cancel'])
+    
+    warning_view = View( Item('warning_msg',style='readonly',show_label=False),
+                        title='Warning',
                         kind='modal',
                         width=400,
                         buttons=['OK','Cancel'])

@@ -102,10 +102,12 @@ class Applynlinmultiplewarps(BaseInterface):
         return outputs
 
 class RegistrationStage(Stage):
-    name = 'registration_stage'
-    config = RegistrationConfig()
-    inputs = ["T1","diffusion","T2","subjects_dir","subject_id","wm_mask","roi_volumes"]
-    outputs = ["T1_registered", "wm_mask_registered","roi_volumes_registered"]
+    
+    def __init__(self):
+        self.name = 'registration_stage'
+        self.config = RegistrationConfig()
+        self.inputs = ["T1","diffusion","T2","subjects_dir","subject_id","wm_mask","roi_volumes"]
+        self.outputs = ["T1_registered", "wm_mask_registered","roi_volumes_registered"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         # Extract B0 and resample it to 1x1x1mm3

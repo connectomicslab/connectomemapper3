@@ -110,8 +110,8 @@ class Pipeline(HasTraits):
     def __init__(self, project_info):
         self.base_directory = project_info.base_directory
         self.last_date_processed = project_info.last_date_processed
-        for stage in self.stages.values():
-            stage.stage_dir = os.path.join(self.base_directory,"NIPYPE",self.pipeline_name,stage.name)
+        for stage in self.stages.keys():
+            self.stages[stage].stage_dir = os.path.join(self.base_directory,"NIPYPE",self.pipeline_name,self.stages[stage].name)
         
     def create_stage_flow(self, stage_name):
         stage = self.stages[stage_name]

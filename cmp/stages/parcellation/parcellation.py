@@ -52,13 +52,15 @@ class ParcellationConfig(HasTraits):
             self.pre_custom = old
           
 class ParcellationStage(Stage):
-    name = 'parcellation_stage'
-    config = ParcellationConfig()
-    inputs = ["subjects_dir","subject_id","custom_wm_mask"]
-    outputs = [#"aseg_file",
-		"wm_mask_file",
-	       #"cc_unknown_file","ribbon_file","roi_files",
-        "roi_volumes","parcellation_scheme","atlas_info"]
+    
+    def __init__(self):
+        self.name = 'parcellation_stage'
+        self.config = ParcellationConfig()
+        self.inputs = ["subjects_dir","subject_id","custom_wm_mask"]
+        self.outputs = [#"aseg_file",
+    		"wm_mask_file",
+    	       #"cc_unknown_file","ribbon_file","roi_files",
+            "roi_volumes","parcellation_scheme","atlas_info"]
     
     def create_workflow(self, flow, inputnode, outputnode):
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme

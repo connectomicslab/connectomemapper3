@@ -50,12 +50,6 @@ class Check_Input_Notification(HasTraits):
 class DiffusionPipeline(Pipeline):
     pipeline_name = Str("diffusion_pipeline")
     input_folders = ['DSI','DTI','HARDI','T1','T2']
-    stages = {'Preprocessing':PreprocessingStage(),
-        'Segmentation':SegmentationStage(),
-            'Parcellation':ParcellationStage(),
-            'Registration':RegistrationStage(),
-            'Diffusion':DiffusionStage(),
-            'Connectome':ConnectomeStage()}
            
     ordered_stage_list = ['Preprocessing','Segmentation','Parcellation','Registration','Diffusion','Connectome']
    
@@ -81,6 +75,12 @@ class DiffusionPipeline(Pipeline):
                         )
     
     def __init__(self,project_info):
+        self.stages = {'Preprocessing':PreprocessingStage(),
+        'Segmentation':SegmentationStage(),
+            'Parcellation':ParcellationStage(),
+            'Registration':RegistrationStage(),
+            'Diffusion':DiffusionStage(),
+            'Connectome':ConnectomeStage()}
         Pipeline.__init__(self, project_info)
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')

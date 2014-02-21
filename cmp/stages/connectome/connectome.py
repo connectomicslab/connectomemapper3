@@ -99,13 +99,15 @@ class CMTK_cmat(BaseInterface):
         return outputs
 
 class ConnectomeStage(Stage):
-    name = 'connectome_stage'
-    config = ConnectomeConfig()
-    inputs = ["roi_volumes_registered","track_file",
-              "parcellation_scheme","atlas_info","gFA","skewness","kurtosis","P0"]
-    outputs = ["endpoints_file","endpoints_mm_file","final_fiberslength_files",
-               "filtered_fiberslabel_files","final_fiberlabels_files",
-               "streamline_final_file","connectivity_matrices"]
+    
+    def __init__(self):
+        self.name = 'connectome_stage'
+        self.config = ConnectomeConfig()
+        self.inputs = ["roi_volumes_registered","track_file",
+                  "parcellation_scheme","atlas_info","gFA","skewness","kurtosis","P0"]
+        self.outputs = ["endpoints_file","endpoints_mm_file","final_fiberslength_files",
+                   "filtered_fiberslabel_files","final_fiberlabels_files",
+                   "streamline_final_file","connectivity_matrices"]
         
     
     def create_workflow(self, flow, inputnode, outputnode):

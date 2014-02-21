@@ -78,10 +78,11 @@ class splitDiffusion(BaseInterface):
 
 class PreprocessingStage(Stage):
     # General and UI members
-    name = 'preprocessing_stage'
-    config = PreprocessingConfig()
-    inputs = ["diffusion"]
-    outputs = ["diffusion_preproc"]
+    def __init__(self):
+        self.name = 'preprocessing_stage'
+        self.config = PreprocessingConfig()
+        self.inputs = ["diffusion"]
+        self.outputs = ["diffusion_preproc"]
     
     def create_workflow(self, flow, inputnode, outputnode):
         processing_input = pe.Node(interface=util.IdentityInterface(fields=['diffusion']),name='processing_input')
