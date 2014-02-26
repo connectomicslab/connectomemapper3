@@ -216,7 +216,8 @@ class RegistrationStage(Stage):
             #[3.2] -> apply the warp found for "T2" also onto "T1"
             fsl_applywarp = pe.Node(interface=fsl.ApplyWarp(out_file='T1_warped.nii.gz'),name="nonlinear_registration")
             fsl_applywarp_wm = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
-            fsl_applywarp_rois = pe.Node(interface=Applynlinmultiplewarps(),name="apply_registration_roivs")
+            fsl_applywarp_rois = pe.Node(interface=Applynlinmultiplewarps(),name="apply_registration_roivs") # TO FIX: Applynlinmultiplewarps() done because applying MapNode to fsl.ApplyWarp crashes
+            #fsl_applywarp_rois = pe.MapNode(interface=fsl.ApplyWarp(interp="nn"),name="apply_registration_roivs",iterfield=["in_file"])
             
             flow.connect([
                     (inputnode,fsl_flirt_1,[('T1','in_file'),('T2','reference')]),
@@ -252,22 +253,32 @@ class RegistrationStage(Stage):
 
     def define_inspect_outputs(self):
         resamp_results_path = os.path.join(self.stage_dir,"diffusion_resample","result_diffusion_resample.pklz")
+        warpedROIs_results_path = os.path.join(self.stage_dir,"apply_registration_roivs","result_apply_registration_roivs.pklz")
         
         if self.config.registration_mode != 'Nonlinear (FSL)':
             reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
         elif self.config.registration_mode == 'Nonlinear (FSL)':
             reg_results_path = os.path.join(self.stage_dir,"nonlinear_registration","result_nonlinear_registration.pklz")
         
-        if(os.path.exists(resamp_results_path) and os.path.exists(reg_results_path)):
+        if(os.path.exists(resamp_results_path) and os.path.exists(reg_results_path) and os.path.exists(warpedROIs_results_path)):
                 resamp_results = pickle.load(gzip.open(resamp_results_path))
                 reg_results = pickle.load(gzip.open(reg_results_path))
-                self.inspect_outputs_dict['B0/T1-to-B0'] = ['fslview',resamp_results.outputs.out_file,reg_results.outputs.out_file,'-l "Copper" -t 0.5']
+                rois_results = pickle.load(gzip.open(warpedROIs_results_path))
+                self.inspect_outputs_dict['B0/T1-to-B0'] = ['fslview',resamp_results.outputs.out_file,reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
+                if self.config.registration_mode != 'Nonlinear (FSL)':
+                    for roi_output in rois_results.outputs.out_file:
+                        self.inspect_outputs_dict['B0/%s' % os.path.basename(roi_output)] = ['fslview',resamp_results.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+                elif self.config.registration_mode == 'Nonlinear (FSL)':
+                    if type(rois_results.outputs.warped_files) == str:
+                        self.inspect_outputs_dict['B0/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fslview',resamp_results.outputs.out_file,rois_results.outputs.warped_files,'-l','Random-Rainbow','-t','0.5']
+                    elif type(rois_results.outputs.warped_files) == TraitListObject:
+                        for roi_output in rois_results.outputs.warped_files:
+                            self.inspect_outputs_dict['B0/%s' % os.path.basename(roi_output)] = ['fslview',resamp_results.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
                 self.inspect_outputs = self.inspect_outputs_dict.keys()
 
     def has_run(self):
         if self.config.registration_mode != 'Nonlinear (FSL)':
             return os.path.exists(os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz"))
         elif self.config.registration_mode == 'Nonlinear (FSL)':
-            return os.path.exists(os.path.join(self.stage_dir,"nonlinear_registration","result_linear_registration.pklz"))
-
+            return os.path.exists(os.path.join(self.stage_dir,"nonlinear_registration","result_nonlinear_registration.pklz"))
 

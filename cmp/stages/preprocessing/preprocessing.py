@@ -190,4 +190,7 @@ class PreprocessingStage(Stage):
 
             
     def has_run(self):
-        return os.path.exists(os.path.join(self.stage_dir,"result_preprocessing_stage.pklz"))
+        if not self.config.eddy_current_correction and not self.config.motion_correction:
+            return True
+        else:
+            return os.path.exists(os.path.join(self.stage_dir,"result_preprocessing_stage.pklz"))

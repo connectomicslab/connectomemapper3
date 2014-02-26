@@ -142,5 +142,3 @@ class ConnectomeStage(Stage):
 
     def has_run(self):
         return os.path.exists(os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz"))
-
-

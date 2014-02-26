@@ -318,4 +318,3 @@ class DiffusionStage(Stage):
             return os.path.exists(os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz"))
         elif self.config.diffusion_model == 'Deterministic':
             return os.path.exists(os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz"))
-

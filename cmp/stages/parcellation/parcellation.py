@@ -113,5 +113,8 @@ class ParcellationStage(Stage):
             self.inspect_outputs = self.inspect_outputs_dict.keys()
             
     def has_run(self):
-        return os.path.exists(os.path.join(self.stage_dir,"parcellation","result_parcellation.pklz"))
+        if self.config.parcellation_scheme != "Custom":
+            return os.path.exists(os.path.join(self.stage_dir,"parcellation","result_parcellation.pklz"))
+        else:
+            return os.path.exists(self.config.nifti_file)
 
