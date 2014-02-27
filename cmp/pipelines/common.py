@@ -224,12 +224,8 @@ class SwapAndReorient(BaseInterface):
                 tmpsrc = src_file
                 
         tmp2 = os.path.join(os.path.dirname(src_file), 'tmp.nii.gz')
-        if ref_orient == 'LPS':
-            fsl.SwapDimensions(in_file=tmpsrc, new_dims=('RL','AP','IS'), out_file=tmp2).run()
-        elif ref_orient == 'LPI':
-            fsl.SwapDimensions(in_file=tmpsrc, new_dims=('RL','AP','SI'), out_file=tmp2).run()
-        else:
-            self.raise_exception(runtime)
+        map_orient = {'L':'RL','R':'LR','A':'PA','P':'AP','S':'IS','I':'SI'}
+        fsl.SwapDimensions(in_file=tmpsrc, new_dims=(map_orient[ref_orient[0]],map_orient[ref_orient[1]],map_orient[ref_orient[2]]), out_file=tmp2).run()
             
         shutil.move(tmp2, out_file)
     
