@@ -99,7 +99,7 @@ class MRtrix_recon_config(HasTraits):
 		       #Item('b_value'),
 		       #Item('b0_volumes'),
                        Item('local_model',editor=EnumEditor(name='local_model_editor')),
-		       Group(Item('lmax_order',editor=EnumEditor(values={'Auto':'1:Auto','2':'2:2','4':'3:4','6':'4:6','8':'5:8','10':'6:10','12':'7:12','14':'8:14','16':'9:16'})),
+		       Group(Item('lmax_order'),
 		       Item('normalize_to_B0'),
 		       Item('single_fib_thr',label = 'FA threshold'),visible_when='local_model'),
                        )
