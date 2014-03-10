@@ -135,11 +135,12 @@ class Pipeline(HasTraits):
             if stage.enabled:
                 stage.inspect_outputs_dict = {}
                 stage.inspect_outputs = ['Outputs not available']
-                stage_results = [os.path.join(dirpath, f)
-                                 for dirpath, dirnames, files in os.walk(stage.stage_dir)
-                                 for f in fnmatch.filter(files, 'result_*.pklz')]
-                for stage_res in stage_results:
-                    os.remove(stage_res)
+                # Remove result_*.pklz files to clear them from visualisation drop down list
+                #stage_results = [os.path.join(dirpath, f)
+                #                 for dirpath, dirnames, files in os.walk(stage.stage_dir)
+                #                 for f in fnmatch.filter(files, 'result_*.pklz')]
+                #for stage_res in stage_results:
+                #    os.remove(stage_res)
                 
     def launch_progress_window(self):
         pw = ProgressWindow()
