@@ -40,7 +40,7 @@ class RegistrationConfig(HasTraits):
     
     # BBRegister
     init = Enum('header',['spm','fsl','header'])
-    contrast_type = Enum('t2',['t1','t2'])
+    contrast_type = Enum('dti',['t1','t2','dti'])
                 
     traits_view = View(Item('registration_mode',editor=EnumEditor(name='registration_mode_trait')),
                         Group('uses_qform','dof','cost','no_search','flirt_args',label='FLIRT',
@@ -161,7 +161,7 @@ class RegistrationStage(Stage):
             
             fsl_concatxfm = pe.Node(interface=fsl.ConvertXFM(concat_xfm=True),name="fsl_concatxfm")
             
-            fsl_applyxfm = pe.Node(interface=fsl.ApplyXfm(apply_xfm=True),name="linear_registration")
+            fsl_applyxfm = pe.Node(interface=fsl.ApplyXfm(apply_xfm=True,out_file="T1-TO-B0.nii.gz"),name="linear_registration")
             fsl_applyxfm_wm = pe.Node(interface=fsl.ApplyXfm(apply_xfm=True,interp="nearestneighbour",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
             fsl_applyxfm_rois = pe.MapNode(interface=fsl.ApplyXfm(apply_xfm=True,interp="nearestneighbour"),name="apply_registration_roivs",iterfield=["in_file"])
             
@@ -170,13 +170,16 @@ class RegistrationStage(Stage):
                         (inputnode, fs_bbregister, [(('subjects_dir',unicode2str),'subjects_dir'),(('subject_id',os.path.basename),'subject_id')]),
                         (fs_mriconvert, fs_bbregister, [('out_file','source_file')]),
                         (fs_bbregister, fsl_invertxfm, [('out_fsl_file','in_file')]),
-                        (fsl_invertxfm, fsl_concatxfm, [('out_file','in_file')]),
+                        (fsl_invertxfm, fsl_concatxfm, [('out_file','in_file2')]),
                         (inputnode,fs_source,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
                         (inputnode, fs_tkregister2, [('subjects_dir','subjects_dir'),(('subject_id',os.path.basename),'subject_id')]),
                         (fs_source,fs_tkregister2,[("orig","target_file"),("rawavg","in_file")]),
-                        (fs_tkregister2, fsl_concatxfm, [('fslregout_file','in_file2')]),
+                        (fs_tkregister2, fsl_concatxfm, [('fslregout_file','in_file')]),
+                        (inputnode, fsl_applyxfm, [('T1','in_file')]),
                         (fsl_concatxfm, fsl_applyxfm, [('out_file','in_matrix_file')]),
-                        (inputnode, fsl_applyxfm_wm, [('T1','in_file')]),
+                        (fs_mriconvert, fsl_applyxfm, [('out_file','reference')]),
+                        (fsl_applyxfm,outputnode,[("out_file","T1_registered")]),
+                        (inputnode, fsl_applyxfm_wm, [('wm_mask','in_file')]),
                         (fs_mriconvert, fsl_applyxfm_wm, [('out_file','reference')]),
                         (fsl_concatxfm, fsl_applyxfm_wm, [('out_file','in_matrix_file')]),
                         (fsl_applyxfm_wm, outputnode, [('out_file','wm_mask_registered')]),
