@@ -19,9 +19,11 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.fsl as fsl
+import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
 from nipype.utils.filemanip import split_filename
+import nibabel as nib
 
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
     traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec
@@ -741,6 +743,34 @@ class gibbs_recon(BaseInterface):
         outputs["param_file"] = os.path.abspath('gibbs_parameters.gtp')
         outputs["input_file"] = os.path.abspath(self.inputs.in_file)
         return outputs
+    
+class match_orientationInputSpec(BaseInterfaceInputSpec):
+    gibbs_output = File(exists=True, mandatory=True,desc="Trackvis file outputed by gibbs miniapp, with the LPS orientation set as default")
+    gibbs_input = File(exists=True, mandatory=True, desc="File used as input for the gibbs tracking (wm mask)")
+
+class match_orientationOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Trackvis file with orientation matching gibbs input')
+
+class match_orientations(BaseInterface):
+    
+    input_spec = match_orientationInputSpec
+    output_spec = match_orientationOutputSpec
+    
+    def _run_interface(self, runtime):
+        filename = os.path.basename(self.inputs.gibbs_output)
+        
+        input_orientation = fs.utils.ImageInfo(in_file=self.inputs.gibbs_input).run().outputs.orientation
+        fib, h = nib.trackvis.read(self.inputs.gibbs_output)
+        new_h = h.copy()
+        new_h['voxel_order'] = input_orientation
+        nib.trackvis.write(os.path.abspath(filename),fib,new_h)
+        return runtime
+    
+    def _list_outputs(self):
+        filename = os.path.basename(self.inputs.gibbs_output)
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(filename)
+        return outputs
 
 def create_gibbs_recon_flow(config_gibbs,config_model):
     flow = pe.Workflow(name="reconstruction")
@@ -779,10 +809,14 @@ def create_gibbs_recon_flow(config_gibbs,config_model):
             (flip_table,dtifit,[("table","bvecs")]),
 		    (dtifit,gibbs,[('tensor','in_file')])
 		    ])
+        
+    match_orient = pe.Node(interface=match_orientations(),name='match_orientations')
 
     flow.connect([
 		(inputnode,gibbs,[("wm_mask_resampled","mask")]),
-		(gibbs,outputnode,[("out_file","track_file")]),
+		(gibbs,match_orient,[("out_file","gibbs_output")]),
+        (inputnode,match_orient,[("wm_mask_resampled","gibbs_input")]),
+        (match_orient,outputnode,[("out_file","track_file")]),
         (gibbs,outputnode,[("param_file","param_file")]),
         (gibbs,outputnode,[("input_file","input_file")]),
 		])
