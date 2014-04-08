@@ -12,6 +12,8 @@ from traitsui.api import *
 
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
     traits, File, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, isdefined, OutputMultiPath, InputMultiPath
+    
+from nipype.utils.filemanip import copyfile
 
 import glob
 import os
@@ -551,6 +553,135 @@ def create_camino_tracking_flow(config,grad_table):
 
     return flow
 
+class mapped_ProbTrackXInputSpec(CommandLineInputSpec):
+    thsamples = InputMultiPath(File(exists=True), mandatory=True)
+    phsamples = InputMultiPath(File(exists=True), mandatory=True)
+    fsamples = InputMultiPath(File(exists=True), mandatory=True)
+    samples_base_name = traits.Str("merged", desc='the rootname/base_name for samples files',
+                                   argstr='--samples=%s', usedefault=True)
+    mask = File(exists=True, desc='bet binary mask file in diffusion space',
+                    argstr='-m %s', mandatory=True)
+    seed = traits.File(exists=True,
+                         desc='seed volume(s)',
+                         argstr='--seed=%s', mandatory=True)
+    mode = traits.Enum("simple", "two_mask_symm", "seedmask",
+                       desc='options: simple (single seed voxel), seedmask (mask of seed voxels), '
+                            + 'twomask_symm (two bet binary masks) ',
+                       argstr='--mode=%s', genfile=True)
+    target_masks = InputMultiPath(File(exits=True), desc='list of target masks - ' +
+                       'required for seeds_to_targets classification', argstr='--targetmasks=%s')
+    network = traits.Bool(desc='activate network mode - only keep paths going through ' +
+                          'at least one seed mask (required if multiple seed masks)',
+                          argstr='--network')
+    opd = traits.Bool(True, desc='outputs path distributions', argstr='--opd', usedefault=True)
+    os2t = traits.Bool(desc='Outputs seeds to targets', argstr='--os2t')
+    n_samples = traits.Int(5000, argstr='--nsamples=%d',
+                           desc='number of samples - default=5000', usedefault=True)
+    n_steps = traits.Int(argstr='--nsteps=%d', desc='number of steps per sample - default=2000')
+    dist_thresh = traits.Float(argstr='--distthresh=%.3f', desc='discards samples shorter than ' +
+                              'this threshold (in mm - default=0)')
+    c_thresh = traits.Float(argstr='--cthr=%.3f', desc='curvature threshold - default=0.2')
+    step_length = traits.Float(argstr='--steplength=%.3f', desc='step_length in mm - default=0.5')
+    loop_check = traits.Bool(argstr='--loopcheck', desc='perform loop_checks on paths -' +
+                            ' slower, but allows lower curvature threshold')
+    fibst = traits.Int(argstr='--fibst=%d', desc='force a starting fibre for tracking - ' +
+                       'default=1, i.e. first fibre orientation. Only works if randfib==0')
+    s2tastext = traits.Bool(argstr='--s2tastext', desc='output seed-to-target counts as a' +
+                            ' text file (useful when seeding from a mesh)')
+    
+class mapped_ProbTrackXOutputSpec(TraitedSpec):
+    log = File(exists=True, desc='path/name of a text record of the command that was run')
+    fdt_paths = OutputMultiPath(File(exists=True), desc='path/name of a 3D image file containing the output ' +
+                     'connectivity distribution to the seed mask')
+    way_total = File(exists=True, desc='path/name of a text file containing a single number ' +
+                    'corresponding to the total number of generated tracts that ' +
+                    'have not been rejected by inclusion/exclusion mask criteria')
+    targets = traits.List(File, exists=True, desc='a list with all generated seeds_to_target files')
+    particle_files = traits.List(File, exists=True, desc='Files describing ' +
+                                 'all of the tract samples. Generated only if ' +
+                                 'verbose is set to 2')
+
+class mapped_ProbTrackX(CommandLine):
+    input_spec = mapped_ProbTrackXInputSpec
+    output_spec = mapped_ProbTrackXOutputSpec
+    
+    _cmd = "probtrackx"
+    
+    def _run_interface(self, runtime):
+        for i in range(1, len(self.inputs.thsamples) + 1):
+            _, _, ext = split_filename(self.inputs.thsamples[i - 1])
+            copyfile(self.inputs.thsamples[i - 1],
+                     self.inputs.samples_base_name + "_th%dsamples" % i + ext,
+                     copy=True)
+            _, _, ext = split_filename(self.inputs.thsamples[i - 1])
+            copyfile(self.inputs.phsamples[i - 1],
+                     self.inputs.samples_base_name + "_ph%dsamples" % i + ext,
+                     copy=True)
+            _, _, ext = split_filename(self.inputs.thsamples[i - 1])
+            copyfile(self.inputs.fsamples[i - 1],
+                     self.inputs.samples_base_name + "_f%dsamples" % i + ext,
+                     copy=True)
+
+        if isdefined(self.inputs.target_masks):
+            f = open("targets.txt", "w")
+            for target in self.inputs.target_masks:
+                f.write("%s\n" % target)
+            f.close()
+
+        runtime = super(mapped_ProbTrackX, self)._run_interface(runtime)
+        if runtime.stderr:
+            self.raise_exception(runtime)
+        return runtime
+    
+    def _format_arg(self, name, spec, value):
+        if name == 'target_masks' and isdefined(value):
+            fname = "targets.txt"
+            return super(mapped_ProbTrackX, self)._format_arg(name, spec, [fname])
+        elif name == 'seed' and isinstance(value, list):
+            fname = "seeds.txt"
+            return super(mapped_ProbTrackX, self)._format_arg(name, spec, fname)
+        else:
+            return super(mapped_ProbTrackX, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if not isdefined(self.inputs.out_dir):
+            out_dir = self._gen_filename("out_dir")
+        else:
+            out_dir = self.inputs.out_dir
+
+        outputs['log'] = os.path.abspath(os.path.join(out_dir, 'probtrackx.log'))
+        #utputs['way_total'] = os.path.abspath(os.path.join(out_dir, 'waytotal'))
+        if isdefined(self.inputs.opd == True):
+            if isinstance(self.inputs.seed, list) and isinstance(self.inputs.seed[0], list):
+                outputs['fdt_paths'] = []
+                for seed in self.inputs.seed:
+                    outputs['fdt_paths'].append(
+                            os.path.abspath(
+                                self._gen_fname("fdt_paths_%s" % ("_".join([str(s) for s in seed])),
+                                                cwd=out_dir, suffix='')))
+            else:
+                outputs['fdt_paths'] = os.path.abspath(self._gen_fname("fdt_paths",
+                                               cwd=out_dir, suffix=''))
+
+        # handle seeds-to-target output files
+        if isdefined(self.inputs.target_masks):
+            outputs['targets'] = []
+            for target in self.inputs.target_masks:
+                outputs['targets'].append(os.path.abspath(
+                                                self._gen_fname('seeds_to_' + os.path.split(target)[1],
+                                                cwd=out_dir,
+                                                suffix='')))
+        if isdefined(self.inputs.verbose) and self.inputs.verbose == 2:
+            outputs['particle_files'] = [os.path.abspath(
+                                            os.path.join(out_dir, 'particle%d' % i))
+                                            for i in range(self.inputs.n_samples)]
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_dir":
+            return os.getcwd()
+
 def create_fsl_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     
@@ -558,30 +689,33 @@ def create_fsl_tracking_flow(config):
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["phsamples","fsamples","thsamples","wm_mask_resampled","gm_registered"]),name="inputnode")
     
     # outputnode
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["fdt_paths","log","way_total"]),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["targets"]),name="outputnode")
     
     fsl_seeds = pe.Node(interface=make_seeds(),name="fsl_seeds")
     
-    probtrackx = pe.Node(interface=fsl.ProbTrackX(),name='probtrackx') #
+    probtrackx = pe.MapNode(interface=mapped_ProbTrackX(),iterfield=['seed'],name='probtrackx') #
     
     probtrackx.inputs.n_samples = config.number_of_samples
     probtrackx.inputs.n_steps = config.number_of_steps
     probtrackx.inputs.dist_thresh = config.distance_threshold
     probtrackx.inputs.c_thresh = config.curvature_threshold
-    probtrackx.inputs.network = True
+    probtrackx.inputs.loop_check = True
+    probtrackx.inputs.opd = False
+    probtrackx.inputs.os2t = True
+    probtrackx.inputs.s2tastext = True
+    probtrackx.inputs.network = False
+    probtrackx.inputs.mode = "seedmask"
     
     flow.connect([
             (inputnode,fsl_seeds,[('wm_mask_resampled','WM_file')]),
             (inputnode,fsl_seeds,[('gm_registered','ROI_files')]),
             (fsl_seeds,probtrackx,[("seed_files","seed")]),
-            #(inputnode,probtrackx,[("wm_mask_resampled","seed")]),
+            (fsl_seeds,probtrackx,[("seed_files","target_masks")]),
             (inputnode,probtrackx,[("wm_mask_resampled","mask")]),
             (inputnode,probtrackx,[("fsamples","fsamples")]),
             (inputnode,probtrackx,[("phsamples","phsamples")]),
             (inputnode,probtrackx,[("thsamples","thsamples")]),
-            (probtrackx,outputnode,[("fdt_paths","fdt_paths")]),
-            (probtrackx,outputnode,[("log","log")]),
-            (probtrackx,outputnode,[("way_total","way_total")]),
+            (probtrackx,outputnode,[("targets","targets")])
             ])
     
     return flow

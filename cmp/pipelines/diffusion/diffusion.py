@@ -288,6 +288,8 @@ class DiffusionPipeline(Pipeline):
                         ])
                        
         if self.stages['Connectome'].enabled:
+            if self.stages['Diffusion'].config.processing_tool == 'FSL':
+                self.stages['Connectome'].config.probtrackx = True
             con_flow = self.create_stage_flow("Connectome")
             flow.connect([
 		                (parc_flow,con_flow, [('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
@@ -300,6 +302,7 @@ class DiffusionPipeline(Pipeline):
             
             if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
                 flow.connect([(parc_flow,con_flow, [('outputnode.atlas_info','inputnode.atlas_info')])])
+                
        
         iflogger.info("**** Processing ****")
        

@@ -24,11 +24,12 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec,\
 from nipype.utils.filemanip import split_filename
 
 # Own imports
-from cmtklib.connectome import cmat, prob_cmat
+from cmtklib.connectome import cmat, prob_cmat, probtrackx_cmat
 from cmp.stages.common import Stage
 
 class ConnectomeConfig(HasTraits):
     #modality = List(['Deterministic','Probabilistic'])
+    probtrackx = Bool(False)
     compute_curvature = Bool(True)
     output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
 
@@ -45,6 +46,8 @@ class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     compute_curvature = traits.Bool(True, desc='Compute curvature', usedefault=True)
     additional_maps = traits.List(File,desc='Additional calculated maps (ADC, gFA, ...)')
     output_types = traits.List(Str, desc='Output types of the connectivity matrices')
+    probtrackx = traits.Bool(False)
+    voxel_connectivity = InputMultiPath(File(exists=True),desc = "ProbtrackX connectivity matrices (# seed voxels x # target ROIs)")
     
 class CMTK_cmatOutputSpec(TraitedSpec):
     endpoints_file = File()
@@ -65,8 +68,12 @@ class CMTK_cmat(BaseInterface):
             additional_maps = dict( (split_filename(add_map)[1],add_map) for add_map in self.inputs.additional_maps if add_map != '')
         else:
             additional_maps = {}
-            
-        if len(self.inputs.track_file) > 1:
+        
+        if self.inputs.probtrackx:
+            probtrackx_cmat(voxel_connectivity = self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
+                parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
+                output_types = self.inputs.output_types)
+        elif len(self.inputs.track_file) > 1:
             prob_cmat(intrk=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
              parcellation_scheme=self.inputs.parcellation_scheme,atlas_info = self.inputs.atlas_info,
              output_types=self.inputs.output_types)
@@ -114,6 +121,7 @@ class ConnectomeStage(Stage):
         cmtk_cmat = pe.Node(interface=CMTK_cmat(),name="compute_matrice")
         cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
         cmtk_cmat.inputs.output_types = self.config.output_types
+        cmtk_cmat.inputs.probtrackx = self.config.probtrackx
 
         # Additional maps
         map_merge = pe.Node(interface=util.Merge(4),name="merge_additional_maps")

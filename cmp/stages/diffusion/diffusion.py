@@ -269,7 +269,7 @@ class DiffusionStage(Stage):
                         (recon_flow,track_flow,[('outputnode.thsamples','inputnode.thsamples')]),
                         ])
             flow.connect([
-                        (track_flow,outputnode,[("outputnode.fdt_paths","track_file")]),
+                        (track_flow,outputnode,[("outputnode.targets","track_file")]),
                         ])
                         
         if self.config.processing_tool == 'DTK':
