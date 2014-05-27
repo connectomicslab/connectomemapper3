@@ -92,7 +92,7 @@ class Pipeline(HasTraits):
                         Include('pipeline_group'),
                         Group(
                             Group(
-                                Item('base_directory',enabled_when='1>2',show_label=False,width=300),
+                                Item('base_directory',editor=TextEditor(),style='readonly',show_label=False,height=100),
                                 label='Base directory',
                             ),
                             Group(
@@ -161,7 +161,7 @@ def convert_rawdata(base_directory, input_dir, out_prefix):
     os.environ['UNPACK_MGH_DTI'] = '0'
     file_list = os.listdir(input_dir)
 
-    # If RAWDATA folder contains one (and only one) nifti file -> copy it
+    # If RAWDATA folder contains one (and only one) gunzipped nifti file -> copy it
     first_file = os.path.join(input_dir, file_list[0])
     if len(file_list) == 1 and first_file.endswith('nii.gz'):
         copyfile(first_file, os.path.join(base_directory, 'NIFTI', out_prefix+'.nii.gz'), False, False, 'content') # intelligent copy looking at input's content

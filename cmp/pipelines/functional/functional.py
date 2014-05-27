@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Diffusion pipeline Class definition
+""" Functional pipeline Class definition
 """
 
 import os
@@ -23,42 +23,40 @@ import shutil
 
 import nibabel as nib
 
-from cmp.stages.preprocessing.preprocessing import PreprocessingStage
+from cmp.stages.preprocessing.fmri_preprocessing import PreprocessingStage
 from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
-from cmp.stages.diffusion.diffusion import DiffusionStage
 from cmp.stages.registration.registration import RegistrationStage
-from cmp.stages.connectome.connectome import ConnectomeStage
+from cmp.stages.functional.functional import FunctionalStage
+from cmp.stages.connectome.fmri_connectome import ConnectomeStage
 
 class Global_Configuration(HasTraits):
-    process_type = Str('Diffusion')
+    process_type = Str('fMRI')
     imaging_model = Str
    
 class Check_Input_Notification(HasTraits):
     message = Str
-    imaging_model_options = List(['DSI','DTI','HARDI'])
+    imaging_model_options = List(['fMRI'])
     imaging_model = Str
-    imaging_model_message = Str('\nMultiple diffusion inputs available. Please select desired diffusion modality.')
-   
+
     traits_view = View(Item('message',style='readonly',show_label=False),
-                       Item('imaging_model_message',visible_when='len(imaging_model_options)>1',style='readonly',show_label=False),
                        Item('imaging_model',editor=EnumEditor(name='imaging_model_options'),visible_when='len(imaging_model_options)>1'),
                        kind='modal',
                        buttons=['OK'],
                        title="Check inputs")
 
-class DiffusionPipeline(Pipeline):
-    pipeline_name = Str("diffusion_pipeline")
-    input_folders = ['DSI','DTI','HARDI','T1','T2']
+class fMRIPipeline(Pipeline):
+    pipeline_name = Str("fMRI_pipeline")
+    input_folders = ['fMRI','T1','T2']
            
-    ordered_stage_list = ['Preprocessing','Segmentation','Parcellation','Registration','Diffusion','Connectome']
+    ordered_stage_list = ['Preprocessing','Segmentation','Parcellation','Registration','Functional','Connectome']
    
     global_conf = Global_Configuration()
    
     preprocessing = Button('Preprocessing')
     segmentation = Button('Segmentation')
     parcellation = Button('Parcellation')
-    diffusion = Button('Diffusion')
+    functional = Button('Functional')
     registration = Button('Registration')
     connectome = Button('Connectome')
    
@@ -69,7 +67,7 @@ class DiffusionPipeline(Pipeline):
                         HGroup(spring,Item('segmentation',editor=ThemedButtonEditor(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
                         HGroup(spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('registration',editor=ThemedButtonEditor(image=ImageResource('registration'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('diffusion',editor=ThemedButtonEditor(image=ImageResource('diffusion'),theme='@G')),spring,show_labels=False),
+                        HGroup(spring,Item('functional',editor=ThemedButtonEditor(image=ImageResource('functional'),theme='@G')),spring,show_labels=False),
                         HGroup(spring,Item('connectome',editor=ThemedButtonEditor(image=ImageResource('connectome'),theme='@G')),spring,show_labels=False),
                         springy=True
                         )
@@ -78,8 +76,8 @@ class DiffusionPipeline(Pipeline):
         self.stages = {'Preprocessing':PreprocessingStage(),
         'Segmentation':SegmentationStage(),
             'Parcellation':ParcellationStage(),
-            'Registration':RegistrationStage(pipeline_mode = "Diffusion"),
-            'Diffusion':DiffusionStage(),
+            'Registration':RegistrationStage(pipeline_mode = "fMRI"),
+            'Functional':FunctionalStage(),
             'Connectome':ConnectomeStage()}
         Pipeline.__init__(self, project_info)
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
@@ -106,8 +104,8 @@ class DiffusionPipeline(Pipeline):
     def _parcellation_fired(self, info):
         self.stages['Parcellation'].configure_traits()
        
-    def _diffusion_fired(self, info):
-        self.stages['Diffusion'].configure_traits()
+    def _functional_fired(self, info):
+        self.stages['Functional'].configure_traits()
        
     def _registration_fired(self, info):
         self.stages['Registration'].configure_traits()
@@ -128,7 +126,7 @@ class DiffusionPipeline(Pipeline):
 
     def check_input(self, gui=True):
         print '**** Check Inputs ****'
-        diffusion_available = False
+        fMRI_available = False
         t1_available = False
         t2_available = False
         valid_inputs = False
@@ -136,14 +134,11 @@ class DiffusionPipeline(Pipeline):
         mem = Memory(base_dir=os.path.join(self.base_directory,'NIPYPE'))
         swap_and_reorient = mem.cache(SwapAndReorient)
 
-        # Check for (and if existing, convert) diffusion data
-        diffusion_model = []
-        for model in ['DSI','DTI','HARDI']:
-            input_dir = os.path.join(self.base_directory,'RAWDATA',model)
-            if len(os.listdir(input_dir)) > 0:
-                if convert_rawdata(self.base_directory, input_dir, model):
-                    diffusion_available = True
-                    diffusion_model.append(model)
+        # Check for (and if existing, convert) functional data
+        input_dir = os.path.join(self.base_directory,'RAWDATA','fMRI')
+        if len(os.listdir(input_dir)) > 0:
+            if convert_rawdata(self.base_directory, input_dir, 'fMRI'):
+                fMRI_available = True
 
         # Check for (and if existing, convert)  T1
         input_dir = os.path.join(self.base_directory,'RAWDATA','T1')
@@ -157,50 +152,33 @@ class DiffusionPipeline(Pipeline):
             if convert_rawdata(self.base_directory, input_dir, 'T2_orig'):
                 t2_available = True   
 
-        if diffusion_available:
-            #project.stages['Diffusion'].config.imaging_model_choices = diffusion_model
+        if fMRI_available:
             if t2_available:
                 swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T2_orig.nii.gz'),
-                                  ref_file=os.path.join(self.base_directory,'NIFTI',diffusion_model[0]+'.nii.gz'),
+                                  ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
                                   out_file=os.path.join(self.base_directory,'NIFTI','T2.nii.gz'))
             if t1_available:
                 swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T1_orig.nii.gz'),
-                                  ref_file=os.path.join(self.base_directory,'NIFTI',diffusion_model[0]+'.nii.gz'),
+                                  ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
                                   out_file=os.path.join(self.base_directory,'NIFTI','T1.nii.gz'))
                 valid_inputs = True
-                input_message = 'Inputs check finished successfully.\nDiffusion and morphological data available.'
+                input_message = 'Inputs check finished successfully.\nfMRI and morphological data available.'
             else:
                 input_message = 'Error during inputs check.\nMorphological data (T1) not available.'
         elif t1_available:
-            input_message = 'Error during inputs check. \nDiffusion data not available (DSI/DTI/HARDI).'
+            input_message = 'Error during inputs check. \nfMRI data not available (fMRI).'
         else:
-            input_message = 'Error during inputs check. No diffusion or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
+            input_message = 'Error during inputs check. No fMRI or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
 
-        imaging_model = ''
-        if len(diffusion_model) > 0:
-            imaging_model = diffusion_model[0]
-         
         if gui: 
-            input_notification = Check_Input_Notification(message=input_message, imaging_model_options=diffusion_model,imaging_model=imaging_model)
+            input_notification = Check_Input_Notification(message=input_message, imaging_model='fMRI')
             input_notification.configure_traits()
             self.global_conf.imaging_model = input_notification.imaging_model
-            diffusion_file = os.path.join(self.base_directory,'NIFTI',input_notification.imaging_model+'.nii.gz')
-            n_vol = nib.load(diffusion_file).shape[3]
-            if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
-                self.stages['Preprocessing'].config.end_vol = n_vol-1
-            self.stages['Preprocessing'].config.max_vol = n_vol-1
             self.stages['Registration'].config.imaging_model = input_notification.imaging_model
-            self.stages['Diffusion'].config.imaging_model = input_notification.imaging_model
         else:
             print input_message
-            self.global_conf.imaging_model = imaging_model
-            diffusion_file = os.path.join(self.base_directory,'NIFTI',imaging_model+'.nii.gz')
-            n_vol = nib.load(diffusion_file).shape[3]
-            if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
-                self.stages['Preprocessing'].config.end_vol = n_vol-1
-            self.stages['Preprocessing'].config.max_vol = n_vol-1
-            self.stages['Registration'].config.imaging_model = imaging_model
-            self.stages['Diffusion'].config.imaging_model = imaging_model
+            self.global_conf.imaging_model = 'fMRI'
+            self.stages['Registration'].config.imaging_model = 'fMRI'
        
         if t2_available:
             self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)','Nonlinear (FSL)']
@@ -218,18 +196,18 @@ class DiffusionPipeline(Pipeline):
             os.unlink(os.path.join(self.base_directory,"LOG","pypeline.log"))
         config.update_config({'logging': {'log_directory': os.path.join(self.base_directory,"LOG"),
                                   'log_to_file': True},
-                              'execution': {}
+                              'execution': {'remove_unnecessary_outputs': False}
                               })
         logging.update_logging(config)
-        flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(self.base_directory,'NIPYPE'))
+        flow = pe.Workflow(name='fMRI_pipeline', base_dir=os.path.join(self.base_directory,'NIPYPE'))
         iflogger = logging.getLogger('interface')
        
         # Data import
-        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','T1','T2']), name='datasource')
+        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['fMRI','T1','T2']), name='datasource')
         datasource.inputs.base_directory = os.path.join(self.base_directory,'NIFTI')
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
-        datasource.inputs.field_template = dict(diffusion=self.global_conf.imaging_model+'.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
+        datasource.inputs.field_template = dict(fMRI=self.global_conf.imaging_model+'.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
        
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="sinker")
@@ -241,7 +219,7 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
             flow.connect([
-                (datasource,preproc_flow,[("diffusion","inputnode.diffusion")]),
+                (datasource,preproc_flow,[("fMRI","inputnode.functional")]),
                 ])
        
         if self.stages['Segmentation'].enabled:
@@ -249,7 +227,7 @@ class DiffusionPipeline(Pipeline):
                 if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
                     self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
                     self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
-                    if (not os.path.exists(os.path.join(self.base_directory,'NIPYPE/diffusion_pipeline/segmentation_stage/reconall/result_reconall.pklz'))) and os.path.exists(os.path.join(self.base_directory,'FREESURFER')):
+                    if (not os.path.exists(os.path.join(self.base_directory,'NIPYPE/fMRI_pipeline/segmentation_stage/reconall/result_reconall.pklz'))) and os.path.exists(os.path.join(self.base_directory,'FREESURFER')):
                         shutil.rmtree(os.path.join(self.base_directory,'FREESURFER'))
             seg_flow = self.create_stage_flow("Segmentation")
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
@@ -269,9 +247,11 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Registration'].enabled:
             reg_flow = self.create_stage_flow("Registration")
             flow.connect([
-              (datasource,reg_flow,[('T1','inputnode.T1'),('T2','inputnode.T2')]),
-                          (preproc_flow,reg_flow, [('outputnode.diffusion_preproc','inputnode.target')]),
-                          (parc_flow,reg_flow, [('outputnode.wm_mask_file','inputnode.wm_mask'),('outputnode.roi_volumes','inputnode.roi_volumes')]),
+                          (datasource,reg_flow,[('T1','inputnode.T1')]),(datasource,reg_flow,[('T2','inputnode.T2')]),
+                          (preproc_flow,reg_flow, [('outputnode.mean_vol','inputnode.target')]),
+                          (parc_flow,reg_flow, [('outputnode.wm_mask_file','inputnode.wm_mask'),('outputnode.roi_volumes','inputnode.roi_volumes'),
+                                                ('outputnode.wm_eroded','inputnode.eroded_wm'),('outputnode.csf_eroded','inputnode.eroded_csf'),
+                        ('outputnode.brain_eroded','inputnode.eroded_brain')]),
                           ])
             if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
                 flow.connect([
@@ -279,31 +259,29 @@ class DiffusionPipeline(Pipeline):
                                                 ('outputnode.subject_id','inputnode.subject_id')]),
                           ])
        
-        if self.stages['Diffusion'].enabled:
-            diff_flow = self.create_stage_flow("Diffusion")
+        if self.stages['Functional'].enabled:
+            func_flow = self.create_stage_flow("Functional")
             flow.connect([
-                        (preproc_flow,diff_flow, [('outputnode.diffusion_preproc','inputnode.diffusion')]),
-                        (reg_flow,diff_flow, [('outputnode.wm_mask_registered','inputnode.wm_mask_registered')]),
-            (reg_flow,diff_flow,[('outputnode.roi_volumes_registered','inputnode.roi_volumes')])
+                        (preproc_flow,func_flow, [('outputnode.functional_preproc','inputnode.preproc_file')]),
+                        (reg_flow,func_flow, [('outputnode.wm_mask_registered','inputnode.registered_wm'),('outputnode.roi_volumes_registered','inputnode.registered_roi_volumes'),
+                        ('outputnode.eroded_wm_registered','inputnode.eroded_wm'),('outputnode.eroded_csf_registered','inputnode.eroded_csf'),
+                        ('outputnode.eroded_brain_registered','inputnode.eroded_brain')]),
+                        (preproc_flow,func_flow,[("outputnode.par_file","inputnode.motion_par_file")])
                         ])
                        
         if self.stages['Connectome'].enabled:
-            if self.stages['Diffusion'].config.processing_tool == 'FSL':
-                self.stages['Connectome'].config.probtrackx = True
             con_flow = self.create_stage_flow("Connectome")
             flow.connect([
 		                (parc_flow,con_flow, [('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
-		                (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
-                                              ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
-		                                      ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
-		                                      ('outputnode.P0','inputnode.P0')]),
+		                (func_flow,con_flow, [('outputnode.func_file','inputnode.func_file'),("outputnode.FD","inputnode.FD"),
+                                              ("outputnode.DVARS","inputnode.DVARS")]),
+                        (reg_flow,con_flow,[("outputnode.roi_volumes_registered","inputnode.roi_volumes_registered")]),
 		                (con_flow,sinker, [('outputnode.connectivity_matrices',now+'.connectivity_matrices')])
 		                ])
             
             if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
                 flow.connect([(parc_flow,con_flow, [('outputnode.atlas_info','inputnode.atlas_info')])])
-                
-       
+        
         iflogger.info("**** Processing ****")
        
         if(self.number_of_cores != 1):

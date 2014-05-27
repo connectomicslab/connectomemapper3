@@ -17,7 +17,10 @@ import project
 class CMP_Project_Info(HasTraits):
     base_directory = Directory
     warning_msg = Str('\nWarning: selected directory is already configured.\n\nDo you want to reset the configuration to default parameters ?\n')
-    process_type = Enum('Diffusion',['Diffusion'])
+    process_type = Enum('Diffusion',['Diffusion','fMRI'])
+    config_to_load = Str()
+    available_config = List()
+    config_to_load_msg = Str('Several configuration files available.Select which one to load:\n')
     last_date_processed = Str('Not yet processed')
     last_stage_processed = Str('Not yet processed')
     stage_names = List
@@ -41,6 +44,13 @@ class CMP_Project_Info(HasTraits):
                         kind='modal',
                         width=400,
                         buttons=['OK','Cancel'])
+    
+    select_config_to_load = View(Item('config_to_load_msg',style='readonly',show_label=False),
+                                  Item('config_to_load',style='custom',editor=EnumEditor(name='available_config'),show_label=False),
+                                  title='Select configuration',
+                                  kind='modal',
+                                  width=400,
+                                  buttons=['OK','Cancel'])
                         
     custom_map_view = View(Item('custom_last_stage',editor=EnumEditor(name='stage_names'),style='custom',show_label=False),
                         title='Select until which stage to process.',

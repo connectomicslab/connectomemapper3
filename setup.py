@@ -13,13 +13,16 @@ packages=["cmp","cmp.stages",
           "cmp.stages.parcellation",
           "cmp.stages.registration",
           "cmp.stages.diffusion",
+          "cmp.stages.functional",
           "cmp.stages.connectome",
           "cmp.pipelines",
           "cmp.pipelines.diffusion",
+          "cmp.pipelines.functional",
           "cmtklib"]
 
 package_data = {'cmp':
-                ['pipelines/diffusion/*.png'
+                ['pipelines/diffusion/*.png',
+                'pipelines/functional/*.png'
                 ],
                 'cmtklib':
                 ['data/parcellation/lausanne2008/*/*.*',

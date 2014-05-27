@@ -24,6 +24,7 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
+from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
@@ -395,6 +396,7 @@ def create_mrtrix_tracking_flow(config,grad_table):
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
         mrtrix_tracking.inputs.minimum_tract_length = config.min_length
         mrtrix_tracking.inputs.step_size = config.step_size
+        mrtrix_tracking.inputs.args = '2>/dev/null'
         if config.curvature >= 0.000001:
             mrtrix_tracking.inputs.minimum_radius_of_curvature = config.curvature
         if config.SD:
@@ -419,6 +421,7 @@ def create_mrtrix_tracking_flow(config,grad_table):
     elif config.tracking_mode == 'Probabilistic':
         mrtrix_seeds = pe.Node(interface=make_seeds(),name="mrtrix_seeds")
         mrtrix_tracking = pe.MapNode(interface=mrtrix.StreamlineTrack(desired_number_of_tracks = config.desired_number_of_tracks,maximum_number_of_tracks = config.max_number_of_tracks, maximum_tract_length = config.max_length,minimum_tract_length = config.min_length, step_size = config.step_size),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
+        mrtrix_tracking.inputs.args = '2>/dev/null'
         if config.curvature >= 0.000001:
             mrtrix_tracking.inputs.minimum_radius_of_curvature = config.curvature
         if config.SD:
@@ -553,7 +556,7 @@ def create_camino_tracking_flow(config,grad_table):
 
     return flow
 
-class mapped_ProbTrackXInputSpec(CommandLineInputSpec):
+class mapped_ProbTrackXInputSpec(FSLCommandInputSpec):
     thsamples = InputMultiPath(File(exists=True), mandatory=True)
     phsamples = InputMultiPath(File(exists=True), mandatory=True)
     fsamples = InputMultiPath(File(exists=True), mandatory=True)
@@ -588,20 +591,16 @@ class mapped_ProbTrackXInputSpec(CommandLineInputSpec):
                        'default=1, i.e. first fibre orientation. Only works if randfib==0')
     s2tastext = traits.Bool(argstr='--s2tastext', desc='output seed-to-target counts as a' +
                             ' text file (useful when seeding from a mesh)')
+    out_dir = Directory(exists=True, argstr='--dir=%s',
+                       desc='directory to put the final volumes in', genfile=True)
+    force_dir = traits.Bool(True, desc='use the actual directory name given - i.e. ' +
+                            'do not add + to make a new directory', argstr='--forcedir',
+                            usedefault=True)
     
 class mapped_ProbTrackXOutputSpec(TraitedSpec):
-    log = File(exists=True, desc='path/name of a text record of the command that was run')
-    fdt_paths = OutputMultiPath(File(exists=True), desc='path/name of a 3D image file containing the output ' +
-                     'connectivity distribution to the seed mask')
-    way_total = File(exists=True, desc='path/name of a text file containing a single number ' +
-                    'corresponding to the total number of generated tracts that ' +
-                    'have not been rejected by inclusion/exclusion mask criteria')
-    targets = traits.List(File, exists=True, desc='a list with all generated seeds_to_target files')
-    particle_files = traits.List(File, exists=True, desc='Files describing ' +
-                                 'all of the tract samples. Generated only if ' +
-                                 'verbose is set to 2')
+    matrix = File(exists=True, desc='matrix_seeds_to_all_targets file')
 
-class mapped_ProbTrackX(CommandLine):
+class mapped_ProbTrackX(FSLCommand):
     input_spec = mapped_ProbTrackXInputSpec
     output_spec = mapped_ProbTrackXOutputSpec
     
@@ -650,32 +649,9 @@ class mapped_ProbTrackX(CommandLine):
         else:
             out_dir = self.inputs.out_dir
 
-        outputs['log'] = os.path.abspath(os.path.join(out_dir, 'probtrackx.log'))
-        #utputs['way_total'] = os.path.abspath(os.path.join(out_dir, 'waytotal'))
-        if isdefined(self.inputs.opd == True):
-            if isinstance(self.inputs.seed, list) and isinstance(self.inputs.seed[0], list):
-                outputs['fdt_paths'] = []
-                for seed in self.inputs.seed:
-                    outputs['fdt_paths'].append(
-                            os.path.abspath(
-                                self._gen_fname("fdt_paths_%s" % ("_".join([str(s) for s in seed])),
-                                                cwd=out_dir, suffix='')))
-            else:
-                outputs['fdt_paths'] = os.path.abspath(self._gen_fname("fdt_paths",
-                                               cwd=out_dir, suffix=''))
-
         # handle seeds-to-target output files
         if isdefined(self.inputs.target_masks):
-            outputs['targets'] = []
-            for target in self.inputs.target_masks:
-                outputs['targets'].append(os.path.abspath(
-                                                self._gen_fname('seeds_to_' + os.path.split(target)[1],
-                                                cwd=out_dir,
-                                                suffix='')))
-        if isdefined(self.inputs.verbose) and self.inputs.verbose == 2:
-            outputs['particle_files'] = [os.path.abspath(
-                                            os.path.join(out_dir, 'particle%d' % i))
-                                            for i in range(self.inputs.n_samples)]
+            outputs['matrix'] = os.path.abspath('matrix_seeds_to_all_targets')
         return outputs
 
     def _gen_filename(self, name):
@@ -705,6 +681,7 @@ def create_fsl_tracking_flow(config):
     probtrackx.inputs.s2tastext = True
     probtrackx.inputs.network = False
     probtrackx.inputs.mode = "seedmask"
+    probtrackx.inputs.force_dir = True
     
     flow.connect([
             (inputnode,fsl_seeds,[('wm_mask_resampled','WM_file')]),
@@ -715,7 +692,7 @@ def create_fsl_tracking_flow(config):
             (inputnode,probtrackx,[("fsamples","fsamples")]),
             (inputnode,probtrackx,[("phsamples","phsamples")]),
             (inputnode,probtrackx,[("thsamples","thsamples")]),
-            (probtrackx,outputnode,[("targets","targets")])
+            (probtrackx,outputnode,[("matrix","targets")])
             ])
     
     return flow

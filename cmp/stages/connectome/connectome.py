@@ -70,7 +70,7 @@ class CMTK_cmat(BaseInterface):
             additional_maps = {}
         
         if self.inputs.probtrackx:
-            probtrackx_cmat(voxel_connectivity = self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
+            probtrackx_cmat(voxel_connectivity_files = self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
                 parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
                 output_types = self.inputs.output_types)
         elif len(self.inputs.track_file) > 1:

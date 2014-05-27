@@ -12,15 +12,18 @@ from traits.api import *
 from traitsui.api import *
 import shutil
 import os
+import glob
 import gui
 import ConfigParser
 from pyface.api import FileDialog, OK
 
 # Own imports
 import pipelines.diffusion.diffusion as diffusion_pipeline
+import pipelines.functional.functional as fMRI_pipeline
 
 def get_process_type(project_info):
     config = ConfigParser.ConfigParser()
+    #print('Loading config from file: %s' % project_info.config_file)
     config.read(project_info.config_file)
     return config.get('Global','process_type')
 
@@ -108,9 +111,11 @@ def init_project(project_info, is_new_project):
     
     if project_info.process_type == 'Diffusion':
         pipeline = diffusion_pipeline.DiffusionPipeline(project_info)
+    elif project_info.process_type == 'fMRI':
+        pipeline = fMRI_pipeline.fMRIPipeline(project_info)
 
     if is_new_project and pipeline!= None:
-        project_info.config_file = os.path.join(project_info.base_directory,'config.ini')
+        project_info.config_file = os.path.join(project_info.base_directory,'%s_config.ini' % pipeline.global_conf.process_type)
         if os.path.exists(project_info.config_file):
             warn_res = project_info.configure_traits(view='warning_view')
             if warn_res:
@@ -142,8 +147,8 @@ def update_last_processed(project_info, ordered_stage_list):
         stage_dirs = os.listdir(project_info.base_directory+'/'+project_info.process_type+'_pipeline')
         for stage in ordered_stage_list:
             if stage+'_Stage' in stage_dirs:
-                project_info.last_stage_processsed = stage
-                
+                project_info.last_stage_processed = stage
+    
 
 class ProjectHandler(Handler):
     pipeline = Instance(HasTraits)
@@ -165,15 +170,29 @@ class ProjectHandler(Handler):
         loaded_project = gui.CMP_Project_Info()
         np_res = loaded_project.configure_traits(view='open_view')
         if np_res and os.path.exists(loaded_project.base_directory):
-            loaded_project.config_file = os.path.join(loaded_project.base_directory,'config.ini')
-            loaded_project.process_type = get_process_type(loaded_project)  
-#           self.project_loaded = init_project(loaded_project, ui_info.ui.context["object"].canvas, False)
+            # Retrocompatibility with v2.1.0 where only one config.ini file was created
+            if os.path.exists(os.path.join(loaded_project.base_directory,'config.ini')):
+                loaded_project.config_file = os.path.join(loaded_project.base_directory,'config.ini')
+            # Load new format: <process_type>_config.ini
+            else:
+                loaded_project.available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.base_directory,'*_config.ini'))]
+                loaded_project.config_to_load = loaded_project.available_config[0]
+                if loaded_project.available_config > 1:
+                    loaded_project.configure_traits(view='select_config_to_load')
+                loaded_project.config_file = os.path.join(loaded_project.base_directory,'%s_config.ini' % loaded_project.config_to_load)
+            
+            loaded_project.process_type = get_process_type(loaded_project)
             self.pipeline = init_project(loaded_project, False)
             if self.pipeline != None:
                 update_last_processed(loaded_project, self.pipeline.ordered_stage_list)
                 ui_info.ui.context["object"].project_info = loaded_project
                 ui_info.ui.context["object"].pipeline = self.pipeline
                 self.project_loaded = True
+                # Move old to new config filename format
+                if os.path.exists(os.path.join(loaded_project.base_directory,'config.ini')):
+                    loaded_project.config_file = '%s_config.ini' % get_process_type(loaded_project)
+                    os.remove(os.path.join(loaded_project.base_directory,'config.ini'))
+                    save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
 
     def check_input(self, ui_info):
         self.inputs_checked = self.pipeline.check_input()
@@ -187,7 +206,9 @@ class ProjectHandler(Handler):
         update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline.ordered_stage_list)
         
     def map_custom(self, ui_info):
-        cus_res = ui_info.ui.context["object"].project_info.stage_names = self.pipeline.ordered_stage_list
+        if ui_info.ui.context["object"].project_info.custom_last_stage == '':
+            ui_info.ui.context["object"].project_info.custom_last_stage = self.pipeline.ordered_stage_list[0]
+        ui_info.ui.context["object"].project_info.stage_names = self.pipeline.ordered_stage_list
         cus_res = ui_info.ui.context["object"].project_info.configure_traits(view='custom_map_view')
         if cus_res:
             self.pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.custom_last_stage)

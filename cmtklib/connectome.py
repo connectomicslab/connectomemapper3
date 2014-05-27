@@ -106,7 +106,7 @@ def save_fibers(oldhdr, oldfib, fname, indices):
     print("Writing final no orphan fibers: %s" % fname)
     nibabel.trackvis.write(fname, outstreams, hdrnew)
     
-def probtrackx_cmat(voxel_connectivity, roi_volumes, parcellation_scheme, output_types=['gPickle'], atlas_info = {}): 
+def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, output_types=['gPickle'], atlas_info = {}): 
 
     print("Filling probabilistic connectivity matrices:")
 
@@ -137,7 +137,7 @@ def probtrackx_cmat(voxel_connectivity, roi_volumes, parcellation_scheme, output
         G     = nx.Graph()
         
         # Match ROI indexes to matrix indexes
-        ROI_idx = np.unique(roiData[roiData != 0])
+        ROI_idx = np.unique(roiData[roiData != 0]).astype('int32')
 
         # add node information from parcellation
         gp = nx.read_graphml(parval['node_information_graphml'])
@@ -147,12 +147,12 @@ def probtrackx_cmat(voxel_connectivity, roi_volumes, parcellation_scheme, output
             # ROI in voxel coordinates (segmentation volume )
             G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
 
-        graph_matrix = np.zeros((nROIs,nROIs),dtype = int)
+        tot_tracks = 0
         
         pc = -1
         
-        for voxmat_i in range(0,len(voxel_connectivity)):
-            pcN = int(round( float(100*voxmat_i)/len(voxel_connectivity) ))
+        for voxmat_i in range(0,len(voxel_connectivity_files)):
+            pcN = int(round( float(100*voxmat_i)/len(voxel_connectivity_files) ))
             if pcN > pc and pcN%20 == 0:
                 pc = pcN
                 print('%4.0f%%' % (pc))
@@ -160,24 +160,26 @@ def probtrackx_cmat(voxel_connectivity, roi_volumes, parcellation_scheme, output
             #(endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
             #n = len(fib)
             
-            startROI = ROI_idx[voxmat_i]
+            startROI = int(ROI_idx[voxmat_i])
                 
-            voxmat = np.loadtxt(voxel_connectivity[voxmat_i])
-            ROImat = np.sum(voxmat,0)
+            voxmat = np.loadtxt(voxel_connectivity_files[voxmat_i]).astype('int32')
+            if len(voxmat.shape) > 1:
+                ROImat = np.sum(voxmat,0)
+            else:
+                ROImat = voxmat
             
-            for target in range(1,len(ROI_idx)): # start from 1 to exclude connections of start ROI with itself
+            for target in range(0,len(ROI_idx)):
                 
-                endROI = ROI_idx[target]
-        
-                # Add edge to graph
-                if G.has_edge(startROI, endROI):
-                    G.edge[startROI][endROI]['n_tracks'] += ROImat[target]
-                else:
-                    G.add_edge(startROI, endROI, n_tracks  = ROImat[target])
-                
-                graph_matrix[startROI-1][endROI-1] += ROImat[target]
-                
-        tot_tracks = graph_matrix.sum()
+                endROI = int(ROI_idx[target])
+
+                if startROI != endROI: # Excludes loops (connections within the same ROI)
+                    # Add edge to graph
+                    if G.has_edge(startROI, endROI):
+                        G.edge[startROI][endROI]['n_tracks'] += ROImat[target]
+                    else:
+                        G.add_edge(startROI, endROI, n_tracks  = ROImat[target])
+                    
+                    tot_tracks += ROImat[target]
                     
         for u,v,d in G.edges_iter(data=True):
             G.remove_edge(u,v)
