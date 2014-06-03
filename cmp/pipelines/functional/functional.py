@@ -75,7 +75,7 @@ class fMRIPipeline(Pipeline):
     def __init__(self,project_info):
         self.stages = {'Preprocessing':PreprocessingStage(),
         'Segmentation':SegmentationStage(),
-            'Parcellation':ParcellationStage(),
+            'Parcellation':ParcellationStage(pipeline_mode = "fMRI"),
             'Registration':RegistrationStage(pipeline_mode = "fMRI"),
             'Functional':FunctionalStage(),
             'Connectome':ConnectomeStage()}

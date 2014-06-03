@@ -196,11 +196,7 @@ def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, 
             
             edge_struct = {}
             for edge_key in edge_keys:
-                edge_arr = np.zeros(size_edges,dtype=np.float)
-                for edge_x,edge_y,edge_data in G.edges(data=True):
-                    edge_arr[edge_x-1,edge_y-1] = edge_data[edge_key]
-                    edge_arr[edge_y-1,edge_x-1] = edge_data[edge_key]
-                edge_struct[edge_key] = edge_arr
+                edge_struct[edge_key] = nx.to_numpy_matrix(G,weight=edge_key)
                 
             # nodes
             size_nodes = parval['number_of_regions']
@@ -212,8 +208,10 @@ def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, 
                     node_arr = np.zeros([size_nodes,3],dtype=np.float)
                 else:
                     node_arr = np.zeros(size_nodes,dtype=np.object_)
-                for node_n,node_data in G.nodes(data=True):
-                    node_arr[node_n-1] = node_data[node_key]
+                node_n = 0
+                for _,node_data in G.nodes(data=True):
+                    node_arr[node_n] = node_data[node_key]
+                    node_n += 1
                 node_struct[node_key] = node_arr
                 
             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
@@ -341,11 +339,7 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
             
             edge_struct = {}
             for edge_key in edge_keys:
-                edge_arr = np.zeros(size_edges,dtype=np.float)
-                for edge_x,edge_y,edge_data in G.edges(data=True):
-                    edge_arr[edge_x-1,edge_y-1] = edge_data[edge_key]
-                    edge_arr[edge_y-1,edge_x-1] = edge_data[edge_key]
-                edge_struct[edge_key] = edge_arr
+                edge_struct[edge_key] = nx.to_numpy_matrix(G,weight=edge_key)
                 
             # nodes
             size_nodes = parval['number_of_regions']
@@ -357,8 +351,10 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
                     node_arr = np.zeros([size_nodes,3],dtype=np.float)
                 else:
                     node_arr = np.zeros(size_nodes,dtype=np.object_)
-                for node_n,node_data in G.nodes(data=True):
-                    node_arr[node_n-1] = node_data[node_key]
+                node_n = 0
+                for _,node_data in G.nodes(data=True):
+                    node_arr[node_n] = node_data[node_key]
+                    node_n += 1
                 node_struct[node_key] = node_arr
                 
             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
@@ -579,11 +575,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
             
             edge_struct = {}
             for edge_key in edge_keys:
-                edge_arr = np.zeros(size_edges,dtype=np.float)
-                for edge_x,edge_y,edge_data in G.edges(data=True):
-                    edge_arr[edge_x-1,edge_y-1] = edge_data[edge_key]
-                    edge_arr[edge_y-1,edge_x-1] = edge_data[edge_key]
-                edge_struct[edge_key] = edge_arr
+                edge_struct[edge_key] = nx.to_numpy_matrix(G,weight=edge_key)
                 
             # nodes
             size_nodes = parval['number_of_regions']
@@ -595,8 +587,10 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
                     node_arr = np.zeros([size_nodes,3],dtype=np.float)
                 else:
                     node_arr = np.zeros(size_nodes,dtype=np.object_)
-                for node_n,node_data in G.nodes(data=True):
-                    node_arr[node_n-1] = node_data[node_key]
+                node_n = 0
+                for _,node_data in G.nodes(data=True):
+                    node_arr[node_n] = node_data[node_key]
+                    node_n += 1
                 node_struct[node_key] = node_arr
                 
             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})

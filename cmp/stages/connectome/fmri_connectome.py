@@ -72,7 +72,7 @@ class rsfmri_conmat(BaseInterface):
         if self.inputs.parcellation_scheme != "Custom":
             resolutions = get_parcellation(self.inputs.parcellation_scheme)
         else:
-            resolutions = self.atlas_info
+            resolutions = self.inputs.atlas_info
         
         if self.inputs.apply_scrubbing:
             # load scrubbing FD and DVARS series
@@ -93,7 +93,7 @@ class rsfmri_conmat(BaseInterface):
             index = np.linspace(0,tp-1,tp).astype('int')
     
         # loop throughout all the resolutions ('scale33', ..., 'scale500')
-        for parkey, parval in resolutions.items():            
+        for parkey, parval in resolutions.items():
             print("Resolution = "+parkey)
             
             # Open the corresponding ROI
@@ -150,11 +150,7 @@ class rsfmri_conmat(BaseInterface):
                 
                 edge_struct = {}
                 for edge_key in edge_keys:
-                    edge_arr = np.zeros(size_edges,dtype=np.float)
-                    for edge_x,edge_y,edge_data in G.edges(data=True):
-                        edge_arr[edge_x-1,edge_y-1] = edge_data[edge_key]
-                        edge_arr[edge_y-1,edge_x-1] = edge_data[edge_key]
-                    edge_struct[edge_key] = edge_arr
+                    edge_struct[edge_key] = nx.to_numpy_matrix(G,weight=edge_key)
                     
                 # nodes
                 size_nodes = parval['number_of_regions']
@@ -166,8 +162,10 @@ class rsfmri_conmat(BaseInterface):
                         node_arr = np.zeros([size_nodes,3],dtype=np.float)
                     else:
                         node_arr = np.zeros(size_nodes,dtype=np.object_)
-                    for node_n,node_data in G.nodes(data=True):
-                        node_arr[node_n-1] = node_data[node_key]
+                    node_n = 0
+                    for _,node_data in G.nodes(data=True):
+                        node_arr[node_n] = node_data[node_key]
+                        node_n += 1
                     node_struct[node_key] = node_arr
                     
                 sio.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})

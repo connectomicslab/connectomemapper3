@@ -156,6 +156,7 @@ class RegistrationStage(Stage):
                         (fsl_flirt, fsl_applyxfm_rois, [('out_matrix_file','in_matrix_file')]),
                         (fsl_applyxfm_rois, outputnode, [('out_file','roi_volumes_registered')])
                         ])
+            
             if self.config.pipeline == "fMRI":
                 flow.connect([
                             (T1_bet, fsl_flirt, [('out_file','in_file')]),

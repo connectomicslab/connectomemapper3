@@ -16,10 +16,6 @@ import nibabel as ni
 import networkx as nx
 import numpy as np
 import math
-try:
-    import scipy.ndimage.morphology as nd
-except ImportError:
-    raise Exception('Need scipy for binary erosion of white matter and CSF masks')
 
 def get_parcellation(parcel = "NativeFreesurfer"):
     if parcel == "Lausanne2008":
@@ -524,9 +520,9 @@ def crop_and_move_datasets(subject_id, subjects_dir):
           (op.join(fs_dir, 'mri', 'ribbon.nii.gz'), 'ribbon.nii.gz'),
           (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
           (op.join(fs_dir, 'label', 'cc_unknown.nii.gz'), 'cc_unknown.nii.gz'),
-          (op.join(fs_dir, 'mri', 'fsmask_eroded.nii.gz'), 'fsmask_eroded.nii.gz'),
-          (op.join(fs_dir, 'mri', 'csf_eroded.nii.gz'), 'csf_eroded.nii.gz'),
-          (op.join(fs_dir, 'mri', 'brain_eroded.nii.gz'), 'brain_eroded.nii.gz'),
+          (op.join(fs_dir, 'mri', 'fsmask_1mm_eroded.nii.gz'), 'wm_eroded.nii.gz'),
+          (op.join(fs_dir, 'mri', 'csf_mask_eroded.nii.gz'), 'csf_eroded.nii.gz'),
+          (op.join(fs_dir, 'mri', 'brainmask_eroded.nii.gz'), 'brain_eroded.nii.gz'),
           ]
 
     for p in get_parcellation('Lausanne2008').keys():
@@ -641,29 +637,8 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
         print("Save to: " + GMout)        
         img = ni.Nifti1Image(niiGM, niiAPARCimg.get_affine(), niiAPARCimg.get_header())
         ni.save(img, GMout)
-
-    print("[DONE]")
-
-def generate_csf_wm_and_brain_eroded_masks(subject_id,subjects_dir):
-    fs_dir = op.join(subjects_dir,subject_id)
     
-    # Define erosion mask
-    imerode = nd.binary_erosion
-    se = np.zeros( (3,3,3) )
-    se[1,:,1] = 1; se[:,1,1] = 1; se[1,1,:] = 1
-    
-    # Erode white matter mask
-    WMfile = op.join(fs_dir,'mri', 'fsmask_1mm.nii.gz')
-    WM = ni.load( WMfile ).get_data().astype( np.uint32 )
-    er_mask = np.zeros( WM.shape )
-    idx = np.where( (WM == 1) )
-    er_mask[idx] = 1
-    er_mask = imerode(er_mask,se)
-    er_mask = imerode(er_mask,se)
-    img = ni.Nifti1Image(er_mask, ni.load( WMfile ).get_affine(), ni.load( WMfile ).get_header())
-    ni.save(img, op.join(fs_dir,'mri', 'fsmask_eroded.nii.gz')) 
-
-    # Convert, create and erode the CSF mask
+    # Create CSF mask
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','aseg.mgz'),'-o',op.join(fs_dir,'mri','aseg.nii.gz')]
     subprocess.check_call(mri_cmd)
 
@@ -679,19 +654,12 @@ def generate_csf_wm_and_brain_eroded_masks(subject_id,subjects_dir):
                     (aseg == 49) )
     er_mask = np.zeros( aseg.shape )
     er_mask[idx] = 1
-    er_mask = imerode(er_mask,se)
-    er_mask = imerode(er_mask,se)
     img = ni.Nifti1Image(er_mask, ni.load( asegfile ).get_affine(), ni.load( asegfile ).get_header())
-    ni.save(img, op.join(fs_dir, 'mri', 'csf_eroded.nii.gz'))
+    ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
     
-    # Create the whole brain eroded mask
-    idx = np.where( aseg > 0)
-    er_mask = np.zeros( aseg.shape )
-    er_mask[idx] = 1
-    er_mask = imerode(er_mask,se)
-    er_mask = imerode(er_mask,se)
-    img = ni.Nifti1Image(er_mask, ni.load( asegfile ).get_affine(), ni.load( asegfile ).get_header())
-    ni.save(img, op.join(fs_dir,'mri', 'brain_eroded.nii.gz')) 
+    # Convert whole brain mask
+    mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
+    subprocess.check_call(mri_cmd)
 
     print("[DONE]")
 
@@ -704,9 +672,9 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
     # datasets to crop and move: (from, to)
     ds = [
           (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
-          (op.join(fs_dir, 'mri', 'fsmask_eroded.nii.gz'), 'fsmask_eroded.nii.gz'),
-          (op.join(fs_dir, 'mri', 'csf_eroded.nii.gz'), 'csf_eroded.nii.gz'),
-          (op.join(fs_dir, 'mri', 'brain_eroded.nii.gz'), 'brain_eroded.nii.gz'),
+          (op.abspath('fsmask_1mm_eroded.nii.gz'), 'wm_eroded.nii.gz'),
+          (op.abspath('csf_mask_eroded.nii.gz'), 'csf_eroded.nii.gz'),
+          (op.abspath('brainmask_eroded.nii.gz'), 'brain_eroded.nii.gz'),
           ]
 
     for p in get_parcellation('NativeFreesurfer').keys():

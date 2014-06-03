@@ -77,7 +77,7 @@ class DiffusionPipeline(Pipeline):
     def __init__(self,project_info):
         self.stages = {'Preprocessing':PreprocessingStage(),
         'Segmentation':SegmentationStage(),
-            'Parcellation':ParcellationStage(),
+            'Parcellation':ParcellationStage(pipeline_mode = "Diffusion"),
             'Registration':RegistrationStage(pipeline_mode = "Diffusion"),
             'Diffusion':DiffusionStage(),
             'Connectome':ConnectomeStage()}
@@ -218,7 +218,7 @@ class DiffusionPipeline(Pipeline):
             os.unlink(os.path.join(self.base_directory,"LOG","pypeline.log"))
         config.update_config({'logging': {'log_directory': os.path.join(self.base_directory,"LOG"),
                                   'log_to_file': True},
-                              'execution': {}
+                              'execution': {'remove_unnecessary_outputs': False}
                               })
         logging.update_logging(config)
         flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(self.base_directory,'NIPYPE'))
@@ -290,6 +290,8 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Connectome'].enabled:
             if self.stages['Diffusion'].config.processing_tool == 'FSL':
                 self.stages['Connectome'].config.probtrackx = True
+            else:
+                self.stages['Connectome'].config.probtrackx = False
             con_flow = self.create_stage_flow("Connectome")
             flow.connect([
 		                (parc_flow,con_flow, [('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
