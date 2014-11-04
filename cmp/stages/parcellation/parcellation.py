@@ -95,6 +95,8 @@ class ParcellationStage(Stage):
         if self.config.parcellation_scheme != "Custom":
             parc_node = pe.Node(interface=cmtk.Parcellate(),name="parcellation")
             parc_node.inputs.parcellation_scheme = self.config.parcellation_scheme
+            if self.config.pipeline_mode == "fMRI":
+                parc_node.inputs.erode_masks = True
             
             flow.connect([
                          (inputnode,parc_node,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),

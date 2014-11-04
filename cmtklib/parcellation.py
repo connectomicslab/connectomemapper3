@@ -519,10 +519,7 @@ def crop_and_move_datasets(subject_id, subjects_dir):
           (op.join(fs_dir, 'mri', 'aseg.nii.gz'), 'aseg.nii.gz'),
           (op.join(fs_dir, 'mri', 'ribbon.nii.gz'), 'ribbon.nii.gz'),
           (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
-          (op.join(fs_dir, 'label', 'cc_unknown.nii.gz'), 'cc_unknown.nii.gz'),
-          (op.join(fs_dir, 'mri', 'fsmask_1mm_eroded.nii.gz'), 'wm_eroded.nii.gz'),
-          (op.join(fs_dir, 'mri', 'csf_mask_eroded.nii.gz'), 'csf_eroded.nii.gz'),
-          (op.join(fs_dir, 'mri', 'brainmask_eroded.nii.gz'), 'brain_eroded.nii.gz'),
+          (op.join(fs_dir, 'label', 'cc_unknown.nii.gz'), 'cc_unknown.nii.gz')
           ]
 
     for p in get_parcellation('Lausanne2008').keys():
@@ -547,6 +544,17 @@ def crop_and_move_datasets(subject_id, subjects_dir):
         #runCmd( mri_cmd,log )
         mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', d[0], '-nc', d[1]]
         subprocess.check_call(mri_cmd)
+        
+    ds =  [(op.join(fs_dir, 'mri', 'fsmask_1mm_eroded.nii.gz'), 'wm_eroded.nii.gz'),
+          (op.join(fs_dir, 'mri', 'csf_mask_eroded.nii.gz'), 'csf_eroded.nii.gz'),
+          (op.join(fs_dir, 'mri', 'brainmask_eroded.nii.gz'), 'brain_eroded.nii.gz')]
+    
+    for d in ds:
+        if op.exists(d[0]):
+            print("Processing %s:" % d[0])
+            mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', d[0], '-nc', d[1]]
+            subprocess.check_call(mri_cmd)
+        
         
 def generate_WM_and_GM_mask(subject_id, subjects_dir):
     fs_dir = op.join(subjects_dir,subject_id)
@@ -671,10 +679,7 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
 
     # datasets to crop and move: (from, to)
     ds = [
-          (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
-          (op.abspath('fsmask_1mm_eroded.nii.gz'), 'wm_eroded.nii.gz'),
-          (op.abspath('csf_mask_eroded.nii.gz'), 'csf_eroded.nii.gz'),
-          (op.abspath('brainmask_eroded.nii.gz'), 'brain_eroded.nii.gz'),
+          (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz')
           ]
 
     for p in get_parcellation('NativeFreesurfer').keys():
@@ -697,3 +702,13 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
 #        runCmd( mri_cmd,log )
         mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', d[0], '-nc', d[1]]
         subprocess.check_call(mri_cmd)
+        
+    ds = [(op.abspath('fsmask_1mm_eroded.nii.gz'), 'wm_eroded.nii.gz'),
+          (op.abspath('csf_mask_eroded.nii.gz'), 'csf_eroded.nii.gz'),
+          (op.abspath('brainmask_eroded.nii.gz'), 'brain_eroded.nii.gz')]
+    
+    for d in ds:
+        if op.exists(d[0]):
+            print("Processing %s:" % d[0])
+            mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', d[0], '-nc', d[1]]
+            subprocess.check_call(mri_cmd)

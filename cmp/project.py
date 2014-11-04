@@ -176,9 +176,13 @@ class ProjectHandler(Handler):
             # Load new format: <process_type>_config.ini
             else:
                 loaded_project.available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.base_directory,'*_config.ini'))]
-                loaded_project.config_to_load = loaded_project.available_config[0]
-                if loaded_project.available_config > 1:
-                    loaded_project.configure_traits(view='select_config_to_load')
+                if len(loaded_project.available_config) > 1:
+                    loaded_project.config_to_load = loaded_project.available_config[0]
+                    config_selected = loaded_project.configure_traits(view='select_config_to_load')
+                    if not config_selected:
+                        return 0
+                else:
+                    loaded_project.config_to_load = loaded_project.available_config[0]
                 loaded_project.config_file = os.path.join(loaded_project.base_directory,'%s_config.ini' % loaded_project.config_to_load)
             
             loaded_project.process_type = get_process_type(loaded_project)
