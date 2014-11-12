@@ -227,7 +227,7 @@ class fMRIPipeline(Pipeline):
                 if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
                     self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
                     self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
-                    if (os.path.exists(os.path.join(self.base_directory,'NIPYPE/diffusion_pipeline/segmentation_stage/reconall/result_reconall.pklz'))):
+                    if (os.path.exists(os.path.join(self.base_directory,'NIPYPE/diffusion_pipeline/segmentation_stage/reconall/result_reconall.pklz')) and (not os.path.exists(os.path.join(self.base_directory,'NIPYPE/fMRI_pipeline/segmentation_stage/')))):
                         shutil.copytree(os.path.join(self.base_directory,'NIPYPE/diffusion_pipeline/segmentation_stage'),os.path.join(self.base_directory,'NIPYPE/fMRI_pipeline/segmentation_stage'))
                     if (not os.path.exists(os.path.join(self.base_directory,'NIPYPE/fMRI_pipeline/segmentation_stage/reconall/result_reconall.pklz'))) and os.path.exists(os.path.join(self.base_directory,'FREESURFER')):
                         shutil.rmtree(os.path.join(self.base_directory,'FREESURFER'))
