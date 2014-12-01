@@ -670,13 +670,14 @@ class gibbs_commandInputSpec(CommandLineInputSpec):
     parameter_file = File(argstr="-p %s", position = 2, mandatory = True, exists=True, desc="gibbs parameter file (.gtp)")
     mask = File(argstr="-m %s",position=3,mandatory=False,desc="mask, binary mask image (optional)")
     sh_coefficients = Enum(['FSL','MRtrix'],argstr="-s %s",position=4,mandatory=False,desc="sh coefficient convention (FSL, MRtrix) (optional), (default: FSL)")
+    noflip = Bool(argstr = "-f", desc = "do not flip input image to match MITK coordinate convention (optional)")
     out_file_name = File(argstr="-o %s",position=5,desc='output fiber bundle (.trk)')
 
 class gibbs_commandOutputSpec(TraitedSpec):
     out_file = File(desc='output fiber bundle')
 
 class gibbs_command(CommandLine):
-    _cmd = 'mitkFiberTrackingMiniApps.sh GibbsTracking'
+    _cmd = 'MitkDiffusionMiniApps.sh GibbsTracking'
     input_spec = gibbs_commandInputSpec
     output_spec = gibbs_commandOutputSpec
 
@@ -729,7 +730,7 @@ class gibbs_recon(BaseInterface):
             shutil.copyfile(self.inputs.in_file,os.path.abspath('input.dti'))
             self.inputs.in_file = os.path.abspath('input.dti')
         # Call gibbs software
-        gibbs = gibbs_command(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'))
+        gibbs = gibbs_command(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'), noflip = True)
         gibbs.inputs.mask = self.inputs.mask
         gibbs.inputs.sh_coefficients = self.inputs.sh_coefficients
         gibbs.inputs.out_file_name = os.path.abspath(self.inputs.out_file_name)

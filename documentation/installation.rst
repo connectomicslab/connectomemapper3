@@ -53,9 +53,11 @@ Prerequisites
 	sudo apt-get install python-dipy
 	firefox http://sourceforge.net/projects/camino-trackvis/
 	
-* Installed version of the gibbs tracker::
+* Installed version of the MITK Diffusion Imaging tools::
 
-	firefox http://mitk.org/Download
+	firefox http://mitk.org/wiki/DiffusionImaging#Downloads
+	
+  The path to the folder containing the file "MitkDiffusionMiniApps.sh" should be added to the `$PATH` environment variable.
 
 * At this point, make sure that you have setup the environment variables correctly for the external packages such as Freesurfer and Diffusion Toolkit (The FSL environment variables should be set automatically when installing FSL as described above). You should have the environment variables: FREESURFER_HOME, DTDIR, DSI_DIR and FSLDIR. You can check this if you enter in the bash shell (terminal), they should give you the correct path to your packages::
 
@@ -76,7 +78,6 @@ Prerequisites
 	# DIFFUSION TOOLKIT configuration
 	export DTDIR="/usr/share/dtk"
 	export DSI_PATH="/usr/share/dtk/matrices"
-	export PATH="${DTDIR}:${PATH}"
 
 	# FSL configuration
 	source /etc/fsl/4.1/fsl.sh
@@ -84,8 +85,11 @@ Prerequisites
 	# Camino to trackvis
 	export CAMINO2TRK=/usr/share/camino-trackvis-0.2.8.1/bin/
 	
+	# MITK DiffusionMiniApp
+	export MITK=usr/share/MITK-Diffusion-2014.03.00-linux64
+	
 	# Update PATH
-	export PATH="${DTDIR}:${CAMINO2TRK}:${PATH}"
+	export PATH="${DTDIR}:${CAMINO2TRK}:${MITK}:${PATH}"
 
 ..
 	.. _debian-install:
