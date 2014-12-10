@@ -123,8 +123,8 @@ class Camino_recon_config(HasTraits):
     mixing_eq = Bool()
     fallback_model = Str('dt')
     fallback_editor = Dict(singleTensor_models)
-    fallback_index = Int()
-    inversion = Int()
+    fallback_index = Int(1) # index for 'dt' which is the default fallback_model
+    inversion = Int(1)
     
     gradient_table = File
     flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))

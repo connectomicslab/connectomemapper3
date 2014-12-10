@@ -85,8 +85,8 @@ class MRtrix_tracking_config(HasTraits):
 class Camino_tracking_config(HasTraits):
     imaging_model = Str
     tracking_mode = Str
-    inversion_index = Int()
-    fallback_index = Int()
+    inversion_index = Int(1) # 1=='dt' which is the default local_model in reconstruction.py
+    fallback_index = Int(1) # 1=='dt' which is the default fallback_index in reconstruction.py
     angle = Float(60)
     cross_angle = Float(20)
     trace = Float(0.0000000021)
