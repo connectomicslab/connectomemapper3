@@ -24,6 +24,8 @@ import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
 from nipype.utils.filemanip import split_filename
 import nibabel as nib
+from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
+from nipype.interfaces.mrtrix.convert import transform_to_affine
 
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
     traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec
@@ -730,7 +732,7 @@ class gibbs_recon(BaseInterface):
             shutil.copyfile(self.inputs.in_file,os.path.abspath('input.dti'))
             self.inputs.in_file = os.path.abspath('input.dti')
         # Call gibbs software
-        gibbs = gibbs_command(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'), noflip = True)
+        gibbs = gibbs_command(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'), noflip = False)
         gibbs.inputs.mask = self.inputs.mask
         gibbs.inputs.sh_coefficients = self.inputs.sh_coefficients
         gibbs.inputs.out_file_name = os.path.abspath(self.inputs.out_file_name)
@@ -757,14 +759,29 @@ class match_orientations(BaseInterface):
     input_spec = match_orientationInputSpec
     output_spec = match_orientationOutputSpec
     
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime):    
         filename = os.path.basename(self.inputs.gibbs_output)
+    
+        dx, dy, dz = get_data_dims(self.inputs.gibbs_input)
+        vx, vy, vz = get_vox_dims(self.inputs.gibbs_input)
+        image_file = nib.load(self.inputs.gibbs_input)
+        affine = image_file.get_affine()
+        import numpy as np
+        #Reads MITK tracks
+        fib, hdr = nib.trackvis.read(self.inputs.gibbs_output)
+        trk_header = nib.trackvis.empty_header()
+        trk_header['dim'] = [dx,dy,dz]
+        trk_header['voxel_size'] = [vx,vy,vz]
+        trk_header['n_count'] = hdr['n_count']
         
-        input_orientation = fs.utils.ImageInfo(in_file=self.inputs.gibbs_input).run().outputs.orientation
-        fib, h = nib.trackvis.read(self.inputs.gibbs_output)
-        new_h = h.copy()
-        new_h['voxel_order'] = input_orientation
-        nib.trackvis.write(os.path.abspath(filename),fib,new_h)
+        axcode = nib.orientations.aff2axcodes(affine)
+        trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
+        trk_header['vox_to_ras'] = affine
+        new_fib = []
+        for i in range(len(fib)):
+            new_fib.append((fib[i][0]*[1,-1,1],None,None))
+        nib.trackvis.write(os.path.abspath(filename), new_fib, trk_header)
+        iflogger.info('file written to %s' % os.path.abspath(filename))
         return runtime
     
     def _list_outputs(self):
