@@ -82,18 +82,42 @@ class fMRIPipeline(Pipeline):
         Pipeline.__init__(self, project_info)
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
+        self.stages['Preprocessing'].config.on_trait_change(self.update_motion_regression,'motion_correction')
+        self.stages['Functional'].config.on_trait_change(self.update_motion_correction,'motion_nuisance')
         
     def update_parcellation(self):
         if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
             self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
         else:
             self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.pre_custom
+        self.update_registration()
     
     def update_segmentation(self):
         if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
             self.stages['Segmentation'].config.seg_tool = "Custom segmentation"
         else:
             self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
+        self.update_registration()
+            
+    def update_registration(self):
+        if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
+            if self.stages['Registration'].config.registration_mode == 'BBregister (FS)':
+                self.stages['Registration'].config.registration_mode = 'Linear (FSL)'
+            if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
+                self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','Nonlinear (FSL)']
+            else:
+                self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)']
+        else:
+            if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
+                self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)','Nonlinear (FSL)']
+            else:
+                self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)']
+            
+    def update_motion_regression(self):
+        self.stages['Functional'].config.motion_nuisance = self.stages['Preprocessing'].config.motion_correction
+        
+    def update_motion_correction(self):
+        self.stages['Preprocessing'].config.motion_correction = self.stages['Functional'].config.motion_nuisance
                        
     def _preprocessing_fired(self, info):
         self.stages['Preprocessing'].configure_traits()
@@ -186,6 +210,14 @@ class fMRIPipeline(Pipeline):
         self.fill_stages_outputs()
        
         return valid_inputs
+    
+    def check_config(self):
+        common_check = Pipeline.check_config(self)
+        if common_check == '':
+            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['Functional'].config.global_nuisance and not os.path.exists(self.stages['Parcellation'].config.brain_file):
+                return('\nGlobal signal regression selected but no existing brain mask provided.\nPlease provide a brain mask in the parcellation configuration window.\n')
+            return ''
+        return common_check
 
     def process(self):
         # Process time
@@ -199,7 +231,6 @@ class fMRIPipeline(Pipeline):
                               'execution': {'remove_unnecessary_outputs': False}
                               })
         logging.update_logging(config)
-        flow = pe.Workflow(name='fMRI_pipeline', base_dir=os.path.join(self.base_directory,'NIPYPE'))
         iflogger = logging.getLogger('interface')
        
         # Data import
@@ -207,82 +238,96 @@ class fMRIPipeline(Pipeline):
         datasource.inputs.base_directory = os.path.join(self.base_directory,'NIFTI')
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
-        datasource.inputs.field_template = dict(fMRI=self.global_conf.imaging_model+'.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
+        datasource.inputs.field_template = dict(fMRI='fMRI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
        
         # Data sinker for output
-        sinker = pe.Node(nio.DataSink(), name="sinker")
+        sinker = pe.Node(nio.DataSink(), name="fMRI_sinker")
         sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS")
         
         # Clear previous outputs
         self.clear_stages_outputs()
+        
+        # Create common_flow
+        common_flow = self.create_common_flow()
+        
+        # Create fMRI flow
+        
+        fMRI_flow = pe.Workflow(name='fMRI_pipeline')
+        fMRI_inputnode = pe.Node(interface=util.IdentityInterface(fields=["fMRI","T1","T2","subjects_dir","subject_id","wm_mask_file","roi_volumes","wm_eroded","brain_eroded","csf_eroded","parcellation_scheme","atlas_info"]),name="inputnode")
+        fMRI_outputnode = pe.Node(interface=util.IdentityInterface(fields=["connectivity_matrices"]),name="outputnode")
+        fMRI_flow.add_nodes([fMRI_inputnode,fMRI_outputnode])
 
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
-            flow.connect([
-                (datasource,preproc_flow,[("fMRI","inputnode.functional")]),
+            fMRI_flow.connect([
+                (fMRI_inputnode,preproc_flow,[("fMRI","inputnode.functional")]),
                 ])
-       
-        if self.stages['Segmentation'].enabled:
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
-                    self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
-                    self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
-                    if (os.path.exists(os.path.join(self.base_directory,'NIPYPE/diffusion_pipeline/segmentation_stage/reconall/result_reconall.pklz')) and (not os.path.exists(os.path.join(self.base_directory,'NIPYPE/fMRI_pipeline/segmentation_stage/')))):
-                        shutil.copytree(os.path.join(self.base_directory,'NIPYPE/diffusion_pipeline/segmentation_stage'),os.path.join(self.base_directory,'NIPYPE/fMRI_pipeline/segmentation_stage'))
-                    if (not os.path.exists(os.path.join(self.base_directory,'NIPYPE/fMRI_pipeline/segmentation_stage/reconall/result_reconall.pklz'))) and os.path.exists(os.path.join(self.base_directory,'FREESURFER')):
-                        shutil.rmtree(os.path.join(self.base_directory,'FREESURFER'))
-            seg_flow = self.create_stage_flow("Segmentation")
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                flow.connect([(datasource,seg_flow, [('T1','inputnode.T1')])])
-       
-        if self.stages['Parcellation'].enabled:
-            parc_flow = self.create_stage_flow("Parcellation")
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
-                                                    ('outputnode.subject_id','inputnode.subject_id')]),
-                            ])
-            else:
-                flow.connect([
-                            (seg_flow,parc_flow,[("outputnode.custom_wm_mask","inputnode.custom_wm_mask")])
-                            ])
                                                
         if self.stages['Registration'].enabled:
             reg_flow = self.create_stage_flow("Registration")
-            flow.connect([
-                          (datasource,reg_flow,[('T1','inputnode.T1')]),(datasource,reg_flow,[('T2','inputnode.T2')]),
+            fMRI_flow.connect([
+                          (fMRI_inputnode,reg_flow,[('T1','inputnode.T1')]),(fMRI_inputnode,reg_flow,[('T2','inputnode.T2')]),
                           (preproc_flow,reg_flow, [('outputnode.mean_vol','inputnode.target')]),
-                          (parc_flow,reg_flow, [('outputnode.wm_mask_file','inputnode.wm_mask'),('outputnode.roi_volumes','inputnode.roi_volumes'),
-                                                ('outputnode.wm_eroded','inputnode.eroded_wm'),('outputnode.csf_eroded','inputnode.eroded_csf'),
-                        ('outputnode.brain_eroded','inputnode.eroded_brain')]),
+                          (fMRI_inputnode,reg_flow, [('wm_mask_file','inputnode.wm_mask'),('roi_volumes','inputnode.roi_volumes'),
+                                                ('wm_eroded','inputnode.eroded_wm')])
                           ])
+            if self.stages['Registration'].config.apply_to_eroded_brain:
+                fMRI_flow.connect([
+                              (fMRI_inputnode,reg_flow,[('brain_eroded','inputnode.eroded_brain')])
+                            ])
+            if self.stages['Registration'].config.apply_to_eroded_csf:
+                fMRI_flow.connect([
+                              (fMRI_inputnode,reg_flow,[('csf_eroded','inputnode.eroded_csf')])
+                            ])
             if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
-                flow.connect([
-                          (seg_flow,reg_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
-                                                ('outputnode.subject_id','inputnode.subject_id')]),
+                fMRI_flow.connect([
+                          (fMRI_inputnode,reg_flow, [('subjects_dir','inputnode.subjects_dir'),
+                                                ('subject_id','inputnode.subject_id')]),
                           ])
        
         if self.stages['Functional'].enabled:
             func_flow = self.create_stage_flow("Functional")
-            flow.connect([
+            fMRI_flow.connect([
                         (preproc_flow,func_flow, [('outputnode.functional_preproc','inputnode.preproc_file')]),
                         (reg_flow,func_flow, [('outputnode.wm_mask_registered','inputnode.registered_wm'),('outputnode.roi_volumes_registered','inputnode.registered_roi_volumes'),
-                        ('outputnode.eroded_wm_registered','inputnode.eroded_wm'),('outputnode.eroded_csf_registered','inputnode.eroded_csf'),
-                        ('outputnode.eroded_brain_registered','inputnode.eroded_brain')]),
+                                              ('outputnode.eroded_wm_registered','inputnode.eroded_wm'),('outputnode.eroded_csf_registered','inputnode.eroded_csf'),
+                                              ('outputnode.eroded_brain_registered','inputnode.eroded_brain')]),
                         (preproc_flow,func_flow,[("outputnode.par_file","inputnode.motion_par_file")])
                         ])
                        
         if self.stages['Connectome'].enabled:
             con_flow = self.create_stage_flow("Connectome")
-            flow.connect([
-		                (parc_flow,con_flow, [('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
+            fMRI_flow.connect([
+		                (fMRI_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
 		                (func_flow,con_flow, [('outputnode.func_file','inputnode.func_file'),("outputnode.FD","inputnode.FD"),
                                               ("outputnode.DVARS","inputnode.DVARS")]),
                         (reg_flow,con_flow,[("outputnode.roi_volumes_registered","inputnode.roi_volumes_registered")]),
-		                (con_flow,sinker, [('outputnode.connectivity_matrices',now+'.connectivity_matrices')])
+                        (con_flow,fMRI_outputnode,[("outputnode.connectivity_matrices","connectivity_matrices")])
 		                ])
             
             if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
-                flow.connect([(parc_flow,con_flow, [('outputnode.atlas_info','inputnode.atlas_info')])])
+                fMRI_flow.connect([(fMRI_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
+                
+        # Create NIPYPE flow
+        
+        flow = pe.Workflow(name='NIPYPE', base_dir=os.path.join(self.base_directory))
+        
+        flow.connect([
+                      (datasource,common_flow,[("T1","inputnode.T1")]),
+                      (datasource,fMRI_flow,[("fMRI","inputnode.fMRI"),("T1","inputnode.T1"),("T2","inputnode.T2")]),
+                      (common_flow,fMRI_flow,[("outputnode.subjects_dir","inputnode.subjects_dir"),
+                                              ("outputnode.subject_id","inputnode.subject_id"),
+                                              ("outputnode.wm_mask_file","inputnode.wm_mask_file"),
+                                              ("outputnode.roi_volumes","inputnode.roi_volumes"),
+                                              ("outputnode.wm_eroded","inputnode.wm_eroded"),
+                                              ("outputnode.brain_eroded","inputnode.brain_eroded"),
+                                              ("outputnode.csf_eroded","inputnode.csf_eroded"),
+                                              ("outputnode.parcellation_scheme","inputnode.parcellation_scheme"),
+                                              ("outputnode.atlas_info","inputnode.atlas_info")]),
+                      (fMRI_flow,sinker,[("outputnode.connectivity_matrices","fMRI.%s.connectivity_matrices"%now)])
+                    ])
+        
+        # Process pipeline
         
         iflogger.info("**** Processing ****")
        
@@ -300,7 +345,7 @@ class fMRIPipeline(Pipeline):
                 os.remove(os.path.join(self.base_directory,file_to_rm))
        
         # copy .ini and log file
-        outdir = os.path.join(self.base_directory,"RESULTS",now)
+        outdir = os.path.join(self.base_directory,"RESULTS",'fMRI',now)
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         shutil.copy(self.config_file,outdir)

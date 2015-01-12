@@ -32,7 +32,7 @@ from cmp.stages.common import Stage
 class ConnectomeConfig(HasTraits):
     apply_scrubbing = Bool(False)
     FD_thr = Float(0.5)
-    DVARS_thr = float(5.0)
+    DVARS_thr = Float(5.0)
     output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
 
     traits_view = View(VGroup('apply_scrubbing',VGroup(Item('FD_thr',label='FD threshold'),Item('DVARS_thr',label='DVARS threshold'),visible_when="apply_scrubbing==True")),
@@ -220,10 +220,15 @@ class ConnectomeStage(Stage):
     def define_inspect_outputs(self):
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
         if(os.path.exists(con_results_path)):
-            con_results = pickle.load(gzip.open(con_results_path))            
-            for mat in con_results.outputs.connectivity_matrices:
+            con_results = pickle.load(gzip.open(con_results_path))
+            if type(con_results.outputs.connectivity_matrices) == str:
+                mat = con_results.outputs.connectivity_matrices
                 if 'gpickle' in mat:
                     self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "corr", "False"]
+            else:
+                for mat in con_results.outputs.connectivity_matrices:
+                    if 'gpickle' in mat:
+                        self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "corr", "False"]
                 
             self.inspect_outputs = self.inspect_outputs_dict.keys()
 

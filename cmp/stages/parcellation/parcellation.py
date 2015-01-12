@@ -32,9 +32,7 @@ class ParcellationConfig(HasTraits):
     #atlas_name = Str()
     number_of_regions = Int()
     atlas_nifti_file = File(exists=True)
-    compute_eroded_csf_mask = Bool(False)
     csf_file = File(exists=True)
-    compute_eroded_brain_mask = Bool(False)
     brain_file = File(exists=True)
     graphml_file = File(exists=True)
     atlas_info = Dict()
@@ -44,10 +42,7 @@ class ParcellationConfig(HasTraits):
                              'atlas_nifti_file',
                              'graphml_file',
                              Group(
-                                   "compute_eroded_csf_mask",
-                                   Item("csf_file",visible_when="compute_eroded_csf_mask==True"),
-                                   "compute_eroded_brain_mask",
-                                   Item("brain_file",visible_when="compute_eroded_brain_mask==True"),
+                                   "csf_file","brain_file",
                                    show_border=True,
                                    label="Files for nuisance regression (optional)",
                                    visible_when="pipeline_mode=='fMRI'"
@@ -93,24 +88,19 @@ class ParcellationStage(Stage):
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
         
         if self.config.parcellation_scheme != "Custom":
-            parc_node = pe.Node(interface=cmtk.Parcellate(),name="parcellation")
+            parc_node = pe.Node(interface=cmtk.Parcellate(),name="%s_parcellation" % self.config.parcellation_scheme)
             parc_node.inputs.parcellation_scheme = self.config.parcellation_scheme
-            if self.config.pipeline_mode == "fMRI":
-                parc_node.inputs.erode_masks = True
             
             flow.connect([
                          (inputnode,parc_node,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
                          (parc_node,outputnode,[#("aseg_file","aseg_file"),("cc_unknown_file","cc_unknown_file"),
                                                 #("ribbon_file","ribbon_file"),("roi_files","roi_files"),
     					     ("white_matter_mask_file","wm_mask_file"),
-                             ("roi_files_in_structural_space","roi_volumes")])
+                             ("roi_files_in_structural_space","roi_volumes"),
+                             ("wm_eroded","wm_eroded"),("csf_eroded","csf_eroded"),("brain_eroded","brain_eroded")])
                         ])
-            if self.config.pipeline_mode == "fMRI":
-                flow.connect([
-                            (parc_node,outputnode,[("wm_eroded","wm_eroded"),("csf_eroded","csf_eroded"),("brain_eroded","brain_eroded")])
-                            ])
         else:
-            temp_node = pe.Node(interface=util.IdentityInterface(fields=["roi_volumes","atlas_info","wm_eroded","csf_eroded","brain_eroded"]),name="parcellation")
+            temp_node = pe.Node(interface=util.IdentityInterface(fields=["roi_volumes","atlas_info"]),name="custom_parcellation")
             temp_node.inputs.roi_volumes = self.config.atlas_nifti_file
             temp_node.inputs.atlas_info = self.config.atlas_info
             flow.connect([
@@ -124,12 +114,12 @@ class ParcellationStage(Stage):
                             (inputnode,erode_wm,[("custom_wm_mask","in_file")]),
                             (erode_wm,outputnode,[("out_file","wm_eroded")]),
                             ])
-                if self.config.compute_eroded_csf_mask:
+                if os.path.exists(self.config.csf_file):
                     erode_csf = pe.Node(interface=cmtk.Erode(in_file = self.config.csf_file),name="erode_csf")
                     flow.connect([
                                 (erode_csf,outputnode,[("out_file","csf_eroded")])
                                 ])
-                if self.config.compute_eroded_brain_mask:
+                if os.path.exists(self.config.brain_file):
                     erode_brain = pe.Node(interface=cmtk.Erode(in_file = self.config.brain_file),name="erode_brain")
                     flow.connect([
                                 (erode_brain,outputnode,[("out_file","brain_eroded")])
@@ -137,7 +127,7 @@ class ParcellationStage(Stage):
 
     def define_inspect_outputs(self):
         if self.config.parcellation_scheme != "Custom":
-            parc_results_path = os.path.join(self.stage_dir,"parcellation","result_parcellation.pklz")
+            parc_results_path = os.path.join(self.stage_dir,"%s_parcellation" % self.config.parcellation_scheme,"result_%s_parcellation.pklz" % self.config.parcellation_scheme)
             if(os.path.exists(parc_results_path)):
                 parc_results = pickle.load(gzip.open(parc_results_path))
                 white_matter_file = parc_results.outputs.white_matter_mask_file
@@ -163,7 +153,7 @@ class ParcellationStage(Stage):
             
     def has_run(self):
         if self.config.parcellation_scheme != "Custom":
-            return os.path.exists(os.path.join(self.stage_dir,"parcellation","result_parcellation.pklz"))
+            return os.path.exists(os.path.join(self.stage_dir,"%s_parcellation" % self.config.parcellation_scheme,"result_%s_parcellation.pklz" % self.config.parcellation_scheme))
         else:
             return os.path.exists(self.config.atlas_nifti_file)
 

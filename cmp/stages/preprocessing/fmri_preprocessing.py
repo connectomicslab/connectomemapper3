@@ -24,7 +24,7 @@ import nipype.interfaces.fsl as fsl
 class PreprocessingConfig(HasTraits):
     slice_timing = Enum("none", ["none", "bottom-top interleaved", "top-bottom interleaved", "bottom-top", "top-bottom"])
     repetition_time = Float(3.0)
-    motion_correction = Bool()
+    motion_correction = Bool(True)
     
     traits_view = View('slice_timing',Item('repetition_time',visible_when='slice_timing!="none"'),'motion_correction')
 
@@ -116,8 +116,10 @@ class PreprocessingStage(Stage):
 
             
     def has_run(self):
-        if not self.config.slice_timing and not self.config.motion_correction:
-            return True
+        if self.config.motion_correction:
+            return os.path.exists(os.path.join(self.stage_dir,"motion_correction","result_motion_correction.pklz"))
+        elif self.config.slice_timing:
+            return os.path.exists(os.path.join(self.stage_dir,"slice_timing","result_slice_timing.pklz"))
         else:
-            return os.path.exists(os.path.join(self.stage_dir,"result_preprocessing_stage.pklz"))
+            return True
 

@@ -49,6 +49,9 @@ class SegmentationConfig(HasTraits):
     def _use_existing_freesurfer_data_changed(self,new):
         if new == True:
             self.custom_segmentation = False
+            
+def extract_base_directory(file):
+    return file[:-17]
 
 class SegmentationStage(Stage):
     # General and UI members
@@ -64,17 +67,23 @@ class SegmentationStage(Stage):
                 # Converting to .mgz format
                 fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="T1.mgz"),name="mgz_convert")
                 
+                rename = pe.Node(util.Rename(), name="copy_orig")
+                orig_dir = os.path.join(self.config.freesurfer_subject_id,"mri","orig")
+                if not os.path.exists(orig_dir):
+                    os.makedirs(orig_dir)
+                rename.inputs.format_string = os.path.join(orig_dir,"001.mgz")
+                
                 # ReconAll => named outputnode as we don't want to select a specific output....
                 fs_reconall = pe.Node(interface=fs.ReconAll(),name="reconall")
                 fs_reconall.inputs.args = self.config.freesurfer_args
                 
                 #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
                 fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
-                fs_reconall.inputs.subject_id = self.config.freesurfer_subject_id
                 
                 flow.connect([
                             (inputnode,fs_mriconvert,[('T1','in_file')]),
-                            (fs_mriconvert,fs_reconall,[('out_file','T1_files')]),
+                            (fs_mriconvert,rename,[('out_file','in_file')]),
+                            (rename,fs_reconall,[(("out_file",extract_base_directory),"subject_id")]),
                             (fs_reconall,outputnode,[('subjects_dir','subjects_dir'),('subject_id','subject_id')]),
                             ])
                 

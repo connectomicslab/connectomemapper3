@@ -141,10 +141,14 @@ class ConnectomeStage(Stage):
         if(os.path.exists(con_results_path)):
             con_results = pickle.load(gzip.open(con_results_path))
             self.inspect_outputs_dict['streamline_final'] = ['trackvis',con_results.outputs.streamline_final_file]
-            
-            for mat in con_results.outputs.connectivity_matrices:
+            if type(con_results.outputs.connectivity_matrices) == str:
+                mat = con_results.outputs.connectivity_matrices
                 if 'gpickle' in mat:
-                    self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "True"]
+                    self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
+            else:
+                for mat in con_results.outputs.connectivity_matrices:
+                    if 'gpickle' in mat:
+                        self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
                 
             self.inspect_outputs = self.inspect_outputs_dict.keys()
 

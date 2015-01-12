@@ -508,6 +508,12 @@ def create_wm_mask(subject_id, subjects_dir):
     img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
     print("Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
+    
+    # Convert whole brain mask
+    mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
+    subprocess.check_call(mri_cmd)
+    mri_cmd = ['fslmaths',op.join(fs_dir,'mri','brainmask.nii.gz'),'-bin',op.join(fs_dir,'mri','brainmask.nii.gz')]
+    subprocess.check_call(mri_cmd)
 
 def crop_and_move_datasets(subject_id, subjects_dir):
     fs_dir = op.join(subjects_dir,subject_id)
@@ -668,6 +674,8 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     # Convert whole brain mask
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
     subprocess.check_call(mri_cmd)
+    mri_cmd = ['fslmaths',op.join(fs_dir,'mri','brainmask.nii.gz'),'-bin',op.join(fs_dir,'mri','brainmask.nii.gz')]
+    subprocess.check_call(mri_cmd)
 
     print("[DONE]")
 
@@ -703,9 +711,9 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
         mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', d[0], '-nc', d[1]]
         subprocess.check_call(mri_cmd)
         
-    ds = [(op.abspath('fsmask_1mm_eroded.nii.gz'), 'wm_eroded.nii.gz'),
-          (op.abspath('csf_mask_eroded.nii.gz'), 'csf_eroded.nii.gz'),
-          (op.abspath('brainmask_eroded.nii.gz'), 'brain_eroded.nii.gz')]
+    ds = [(op.join(fs_dir, 'mri', 'fsmask_1mm_eroded.nii.gz'), 'wm_eroded.nii.gz'),
+          (op.join(fs_dir, 'mri', 'csf_mask_eroded.nii.gz'), 'csf_eroded.nii.gz'),
+          (op.join(fs_dir, 'mri', 'brainmask_eroded.nii.gz'), 'brain_eroded.nii.gz')]
     
     for d in ds:
         if op.exists(d[0]):

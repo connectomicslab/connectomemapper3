@@ -285,7 +285,7 @@ def create_dtb_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_registered","roi_volumes"]),name="inputnode")
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_registered"]),name="inputnode")
     
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")

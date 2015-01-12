@@ -13,6 +13,7 @@ from traitsui.api import *
 import shutil
 import os
 import glob
+import fnmatch
 import gui
 import ConfigParser
 from pyface.api import FileDialog, OK
@@ -21,11 +22,11 @@ from pyface.api import FileDialog, OK
 import pipelines.diffusion.diffusion as diffusion_pipeline
 import pipelines.functional.functional as fMRI_pipeline
 
-def get_process_type(project_info):
+def get_process_detail(project_info, section, detail):
     config = ConfigParser.ConfigParser()
     #print('Loading config from file: %s' % project_info.config_file)
     config.read(project_info.config_file)
-    return config.get('Global','process_type')
+    return config.get(section, detail)
 
 def save_config(pipeline, config_path):
     config = ConfigParser.RawConfigParser()
@@ -109,7 +110,7 @@ def refresh_folder(base_directory, input_folders):
 def init_project(project_info, is_new_project):
     pipeline = None
     
-    if project_info.process_type == 'Diffusion':
+    if project_info.process_type == 'diffusion':
         pipeline = diffusion_pipeline.DiffusionPipeline(project_info)
     elif project_info.process_type == 'fMRI':
         pipeline = fMRI_pipeline.fMRIPipeline(project_info)
@@ -133,20 +134,25 @@ def init_project(project_info, is_new_project):
     pipeline.config_file = project_info.config_file
     return pipeline
     
-def update_last_processed(project_info, ordered_stage_list):
+def update_last_processed(project_info, pipeline):
     # last date
-    out_dirs = os.listdir(project_info.base_directory+'/'+'RESULTS')
-    for out in out_dirs:
-        if out != 'CMP':
+    if os.path.exists(os.path.join(project_info.base_directory,'RESULTS',pipeline.global_conf.imaging_model)):
+        out_dirs = os.listdir(os.path.join(project_info.base_directory,'RESULTS',pipeline.global_conf.imaging_model))
+        for out in out_dirs:
             if (project_info.last_date_processed == "Not yet processed" or 
                 out > project_info.last_date_processed):
+                pipeline.last_date_processed = out
                 project_info.last_date_processed = out
                 
     # last stage
-    if os.path.exists(project_info.base_directory+'/'+project_info.process_type+'_pipeline'):
-        stage_dirs = os.listdir(project_info.base_directory+'/'+project_info.process_type+'_pipeline')
-        for stage in ordered_stage_list:
-            if stage+'_Stage' in stage_dirs:
+    if os.path.exists(os.path.join(project_info.base_directory,'NIPYPE',project_info.process_type+'_pipeline')):
+        stage_dirs = []
+        for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'NIPYPE')):
+            for dirname in fnmatch.filter(dirnames, '*_stage'):
+                stage_dirs.append(dirname)
+        for stage in pipeline.ordered_stage_list:
+            if stage.lower()+'_stage' in stage_dirs:
+                pipeline.last_stage_processed = stage
                 project_info.last_stage_processed = stage
     
 
@@ -161,7 +167,7 @@ class ProjectHandler(Handler):
         if np_res and os.path.exists(new_project.base_directory):
             self.pipeline = init_project(new_project, True)
             if self.pipeline != None:
-                update_last_processed(new_project, self.pipeline.ordered_stage_list)
+                # update_last_processed(new_project, self.pipeline) # Not required as the project is new, so no update should be done on processing status
                 ui_info.ui.context["object"].project_info = new_project
                 ui_info.ui.context["object"].pipeline = self.pipeline
                 self.project_loaded = True
@@ -185,16 +191,17 @@ class ProjectHandler(Handler):
                     loaded_project.config_to_load = loaded_project.available_config[0]
                 loaded_project.config_file = os.path.join(loaded_project.base_directory,'%s_config.ini' % loaded_project.config_to_load)
             
-            loaded_project.process_type = get_process_type(loaded_project)
+            loaded_project.process_type = get_process_detail(loaded_project,'Global','process_type')
+            loaded_project.imaging_model = get_process_detail(loaded_project,'Global','imaging_model')
             self.pipeline = init_project(loaded_project, False)
             if self.pipeline != None:
-                update_last_processed(loaded_project, self.pipeline.ordered_stage_list)
+                update_last_processed(loaded_project, self.pipeline)
                 ui_info.ui.context["object"].project_info = loaded_project
                 ui_info.ui.context["object"].pipeline = self.pipeline
                 self.project_loaded = True
                 # Move old to new config filename format
                 if os.path.exists(os.path.join(loaded_project.base_directory,'config.ini')):
-                    loaded_project.config_file = '%s_config.ini' % get_process_type(loaded_project)
+                    loaded_project.config_file = '%s_config.ini' % get_process_detail(loaded_project,'Global','process_type')
                     os.remove(os.path.join(loaded_project.base_directory,'config.ini'))
                     save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
 
@@ -204,10 +211,14 @@ class ProjectHandler(Handler):
             save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
 
     def map_connectome(self, ui_info):
-        save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
-        self.pipeline.launch_process()
-        self.pipeline.launch_progress_window()
-        update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline.ordered_stage_list)
+        ui_info.ui.context["object"].project_info.config_error_msg = self.pipeline.check_config()
+        if ui_info.ui.context["object"].project_info.config_error_msg != '':
+            ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
+        else:
+            save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
+            self.pipeline.launch_process()
+            self.pipeline.launch_progress_window()
+            update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline)
         
     def map_custom(self, ui_info):
         if ui_info.ui.context["object"].project_info.custom_last_stage == '':

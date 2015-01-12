@@ -17,7 +17,8 @@ import project
 class CMP_Project_Info(HasTraits):
     base_directory = Directory
     warning_msg = Str('\nWarning: selected directory is already configured.\n\nDo you want to reset the configuration to default parameters ?\n')
-    process_type = Enum('Diffusion',['Diffusion','fMRI'])
+    config_error_msg = Str('')
+    process_type = Enum('diffusion',['diffusion','fMRI'])
     config_to_load = Str()
     available_config = List()
     config_to_load_msg = Str('Several configuration files available.Select which one to load:\n')
@@ -38,6 +39,12 @@ class CMP_Project_Info(HasTraits):
                         kind='modal',
                         width=400,
                         buttons=['OK','Cancel'])
+    
+    config_error_view = View( Item('config_error_msg', style='readonly',show_label=False),
+                              title='Error',
+                              kind = 'modal',
+                              width=400,
+                              buttons=['OK','Cancel'])
 
     open_view = View('base_directory',
                         title='Select directory of existing Connectome Data',

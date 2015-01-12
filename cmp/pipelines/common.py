@@ -11,6 +11,7 @@ import os
 import fnmatch
 import shutil
 import threading
+import multiprocessing
 import time
 from nipype.utils.filemanip import copyfile
 import nipype.pipeline.engine as pe
@@ -86,7 +87,7 @@ class Pipeline(HasTraits):
     last_stage_processed = Str
     
     # num core settings
-    number_of_cores = Enum(1,[1,2,3,4])
+    number_of_cores = Enum(1,range(1,multiprocessing.cpu_count()+1))
     
     traits_view = View(HGroup(
                         Include('pipeline_group'),
@@ -114,7 +115,20 @@ class Pipeline(HasTraits):
         self.base_directory = project_info.base_directory
         self.last_date_processed = project_info.last_date_processed
         for stage in self.stages.keys():
-            self.stages[stage].stage_dir = os.path.join(self.base_directory,"NIPYPE",self.pipeline_name,self.stages[stage].name)
+            if self.stages[stage].name == 'segmentation_stage' or self.stages[stage].name == 'parcellation_stage':
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"NIPYPE",'common_stages',self.stages[stage].name)
+            else:
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"NIPYPE",self.pipeline_name,self.stages[stage].name)
+                
+    def check_config(self):
+        if self.stages['Segmentation'].config.seg_tool ==  'Custom segmentation':
+            if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
+                return('\nCustom segmentation selected but no WM mask provided.\nPlease provide an existing WM mask file in the Segmentation configuration window.\n')
+            if not os.path.exists(self.stages['Parcellation'].config.atlas_nifti_file):
+                return('\n\tCustom segmentation selected but no atlas provided.\nPlease specify an existing atlas file in the Parcellation configuration window.\t\n')
+            if not os.path.exists(self.stages['Parcellation'].config.graphml_file):
+                return('\n\tCustom segmentation selected but no graphml info provided.\nPlease specify an existing graphml file in the Parcellation configuration window.\t\n')
+        return ''
         
     def create_stage_flow(self, stage_name):
         stage = self.stages[stage_name]
@@ -124,6 +138,52 @@ class Pipeline(HasTraits):
         flow.add_nodes([inputnode,outputnode])
         stage.create_workflow(flow,inputnode,outputnode)
         return flow
+    
+    def create_common_flow(self):
+        common_flow = pe.Workflow(name='common_stages')
+        common_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
+        common_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","wm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
+            "roi_volumes","parcellation_scheme","atlas_info"]),name="outputnode")
+        common_flow.add_nodes([common_inputnode,common_outputnode])
+        
+        if self.stages['Segmentation'].enabled:
+            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
+                
+                if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
+                    self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
+                    self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
+                    
+            seg_flow = self.create_stage_flow("Segmentation")
+            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
+                common_flow.connect([(common_inputnode,seg_flow, [('T1','inputnode.T1')])])
+            
+            common_flow.connect([
+                                 (seg_flow,common_outputnode,[("outputnode.subjects_dir","subjects_dir"),
+                                                              ("outputnode.subject_id","subject_id")])
+                                ])
+       
+        if self.stages['Parcellation'].enabled:
+            parc_flow = self.create_stage_flow("Parcellation")
+            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
+                common_flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
+                                                           ('outputnode.subject_id','inputnode.subject_id')]),
+                                     ])
+            else:
+                common_flow.connect([
+                                     (seg_flow,parc_flow,[("outputnode.custom_wm_mask","inputnode.custom_wm_mask")])
+                                     ])
+            common_flow.connect([
+                                 (parc_flow,common_outputnode,[("outputnode.wm_mask_file","wm_mask_file"),
+                                                               ("outputnode.parcellation_scheme","parcellation_scheme"),
+                                                               ("outputnode.atlas_info","atlas_info"),
+                                                               ("outputnode.roi_volumes","roi_volumes"),
+                                                               ("outputnode.wm_eroded","wm_eroded"),
+                                                               ("outputnode.csf_eroded","csf_eroded"),
+                                                               ("outputnode.brain_eroded","brain_eroded"),
+                                                               ])
+                                 ])
+            
+        return common_flow
         
     def fill_stages_outputs(self):
         for stage in self.stages.values():

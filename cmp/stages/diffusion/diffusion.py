@@ -316,5 +316,13 @@ class DiffusionStage(Stage):
     def has_run(self):
         if self.config.processing_tool == 'DTK':
             return os.path.exists(os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz"))
-        elif self.config.diffusion_model == 'Deterministic':
+        elif self.config.processing_tool == 'MRtrix':
             return os.path.exists(os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz"))
+        elif self.config.processing_tool == 'Camino':
+            return os.path.exists(os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz"))
+        elif self.config.processing_tool == 'FSL':
+            return os.path.exists(os.path.join(self.stage_dir,"tracking","probtrackx","result_probtrackx.pklz"))
+        elif self.config.processing_tool == 'Gibbs':
+            return os.path.exists(os.path.join(self.stage_dir,"reconstruction","match_orientations","result_match_orientations.pklz"))
+            
+        

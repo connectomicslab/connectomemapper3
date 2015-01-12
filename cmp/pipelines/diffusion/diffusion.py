@@ -31,7 +31,7 @@ from cmp.stages.registration.registration import RegistrationStage
 from cmp.stages.connectome.connectome import ConnectomeStage
 
 class Global_Configuration(HasTraits):
-    process_type = Str('Diffusion')
+    process_type = Str('diffusion')
     imaging_model = Str
    
 class Check_Input_Notification(HasTraits):
@@ -81,7 +81,9 @@ class DiffusionPipeline(Pipeline):
             'Registration':RegistrationStage(pipeline_mode = "Diffusion"),
             'Diffusion':DiffusionStage(),
             'Connectome':ConnectomeStage()}
+        
         Pipeline.__init__(self, project_info)
+        
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
         
@@ -176,9 +178,7 @@ class DiffusionPipeline(Pipeline):
         else:
             input_message = 'Error during inputs check. No diffusion or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
 
-        imaging_model = ''
-        if len(diffusion_model) > 0:
-            imaging_model = diffusion_model[0]
+        imaging_model = diffusion_model[0]
          
         if gui: 
             input_notification = Check_Input_Notification(message=input_message, imaging_model_options=diffusion_model,imaging_model=imaging_model)
@@ -221,7 +221,6 @@ class DiffusionPipeline(Pipeline):
                               'execution': {'remove_unnecessary_outputs': False}
                               })
         logging.update_logging(config)
-        flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(self.base_directory,'NIPYPE'))
         iflogger = logging.getLogger('interface')
        
         # Data import
@@ -232,62 +231,49 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.field_template = dict(diffusion=self.global_conf.imaging_model+'.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
        
         # Data sinker for output
-        sinker = pe.Node(nio.DataSink(), name="sinker")
+        sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
         sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS")
         
         # Clear previous outputs
         self.clear_stages_outputs()
-
+        
+        # Create common_flow
+        common_flow = self.create_common_flow()
+        
+        # Create diffusion flow
+        
+        diffusion_flow = pe.Workflow(name='diffusion_pipeline')
+        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","T1","T2","wm_mask_file","roi_volumes","subjects_dir","subject_id",
+                                                                               "atlas_info","parcellation_scheme"]),name="inputnode")
+        diffusion_outputnode = pe.Node(interface=util.IdentityInterface(fields=["connectivity_matrices"]),name="outputnode")
+        diffusion_flow.add_nodes([diffusion_inputnode,diffusion_outputnode])
+        
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
-            flow.connect([
-                (datasource,preproc_flow,[("diffusion","inputnode.diffusion")]),
-                ])
-       
-        if self.stages['Segmentation'].enabled:
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
-                    self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory)
-                    self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,'FREESURFER')
-                    if (os.path.exists(os.path.join(self.base_directory,'NIPYPE/fMRI_pipeline/segmentation_stage/reconall/result_reconall.pklz')) and (not os.path.exists(os.path.join(self.base_directory,'NIPYPE/diffusion_pipeline/segmentation_stage/')))):
-                        shutil.copytree(os.path.join(self.base_directory,'NIPYPE/fMRI_pipeline/segmentation_stage'),os.path.join(self.base_directory,'NIPYPE/diffusion_pipeline/segmentation_stage'))
-                    if (not os.path.exists(os.path.join(self.base_directory,'NIPYPE/diffusion_pipeline/segmentation_stage/reconall/result_reconall.pklz'))) and os.path.exists(os.path.join(self.base_directory,'FREESURFER')):
-                        shutil.rmtree(os.path.join(self.base_directory,'FREESURFER'))
-            seg_flow = self.create_stage_flow("Segmentation")
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                flow.connect([(datasource,seg_flow, [('T1','inputnode.T1')])])
-       
-        if self.stages['Parcellation'].enabled:
-            parc_flow = self.create_stage_flow("Parcellation")
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
-                                                    ('outputnode.subject_id','inputnode.subject_id')]),
-                            ])
-            else:
-                flow.connect([
-                            (seg_flow,parc_flow,[("outputnode.custom_wm_mask","inputnode.custom_wm_mask")])
-                            ])
+            diffusion_flow.connect([
+                                    (diffusion_inputnode,preproc_flow,[("diffusion","inputnode.diffusion")]),
+                                    ])
                                                
         if self.stages['Registration'].enabled:
             reg_flow = self.create_stage_flow("Registration")
-            flow.connect([
-              (datasource,reg_flow,[('T1','inputnode.T1'),('T2','inputnode.T2')]),
-                          (preproc_flow,reg_flow, [('outputnode.diffusion_preproc','inputnode.target')]),
-                          (parc_flow,reg_flow, [('outputnode.wm_mask_file','inputnode.wm_mask'),('outputnode.roi_volumes','inputnode.roi_volumes')]),
-                          ])
+            diffusion_flow.connect([
+                                    (diffusion_inputnode,reg_flow,[('T1','inputnode.T1'),('T2','inputnode.T2'),('wm_mask_file','inputnode.wm_mask'),
+                                                                   ('roi_volumes','inputnode.roi_volumes')]),
+                                    (preproc_flow,reg_flow, [('outputnode.diffusion_preproc','inputnode.target')])
+                                    ])
             if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
-                flow.connect([
-                          (seg_flow,reg_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
-                                                ('outputnode.subject_id','inputnode.subject_id')]),
-                          ])
+                diffusion_flow.connect([
+                                        (diffusion_inputnode,reg_flow, [('subjects_dir','inputnode.subjects_dir'),
+                                                                        ('subject_id','inputnode.subject_id')]),
+                                        ])
        
         if self.stages['Diffusion'].enabled:
             diff_flow = self.create_stage_flow("Diffusion")
-            flow.connect([
-                        (preproc_flow,diff_flow, [('outputnode.diffusion_preproc','inputnode.diffusion')]),
-                        (reg_flow,diff_flow, [('outputnode.wm_mask_registered','inputnode.wm_mask_registered')]),
-            (reg_flow,diff_flow,[('outputnode.roi_volumes_registered','inputnode.roi_volumes')])
-                        ])
+            diffusion_flow.connect([
+                                    (preproc_flow,diff_flow, [('outputnode.diffusion_preproc','inputnode.diffusion')]),
+                                    (reg_flow,diff_flow, [('outputnode.wm_mask_registered','inputnode.wm_mask_registered')]),
+                                    (reg_flow,diff_flow,[('outputnode.roi_volumes_registered','inputnode.roi_volumes')])
+                                    ])
                        
         if self.stages['Connectome'].enabled:
             if self.stages['Diffusion'].config.processing_tool == 'FSL':
@@ -295,18 +281,34 @@ class DiffusionPipeline(Pipeline):
             else:
                 self.stages['Connectome'].config.probtrackx = False
             con_flow = self.create_stage_flow("Connectome")
-            flow.connect([
-		                (parc_flow,con_flow, [('outputnode.parcellation_scheme','inputnode.parcellation_scheme')]),
+            diffusion_flow.connect([
+		                (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
 		                (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
                                               ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
 		                                      ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
 		                                      ('outputnode.P0','inputnode.P0')]),
-		                (con_flow,sinker, [('outputnode.connectivity_matrices',now+'.connectivity_matrices')])
+		                (con_flow,diffusion_outputnode, [('outputnode.connectivity_matrices','connectivity_matrices')])
 		                ])
             
             if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
-                flow.connect([(parc_flow,con_flow, [('outputnode.atlas_info','inputnode.atlas_info')])])
+                diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
                 
+        # Create NIPYPE flow
+        
+        flow = pe.Workflow(name='NIPYPE', base_dir=os.path.join(self.base_directory))
+        
+        flow.connect([
+                      (datasource,common_flow,[("T1","inputnode.T1")]),
+                      (datasource,diffusion_flow,[("diffusion","inputnode.diffusion"),("T1","inputnode.T1"),("T2","inputnode.T2")]),
+                      (common_flow,diffusion_flow,[("outputnode.subjects_dir","inputnode.subjects_dir"),("outputnode.subject_id","inputnode.subject_id"),
+                                                   ("outputnode.wm_mask_file","inputnode.wm_mask_file"),
+                                                   ( "outputnode.roi_volumes","inputnode.roi_volumes"),
+                                                   ("outputnode.parcellation_scheme","inputnode.parcellation_scheme"),
+                                                   ("outputnode.atlas_info","inputnode.atlas_info")]),
+                      (diffusion_flow,sinker,[("outputnode.connectivity_matrices","%s.%s.connectivity_matrices"%(self.global_conf.imaging_model,now))])
+                    ])
+        
+        # Process pipeline 
        
         iflogger.info("**** Processing ****")
        
@@ -324,7 +326,7 @@ class DiffusionPipeline(Pipeline):
                 os.remove(os.path.join(self.base_directory,file_to_rm))
        
         # copy .ini and log file
-        outdir = os.path.join(self.base_directory,"RESULTS",now)
+        outdir = os.path.join(self.base_directory,"RESULTS",self.global_conf.imaging_model,now)
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         shutil.copy(self.config_file,outdir)
