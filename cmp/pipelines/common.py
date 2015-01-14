@@ -128,6 +128,8 @@ class Pipeline(HasTraits):
                 return('\n\tCustom segmentation selected but no atlas provided.\nPlease specify an existing atlas file in the Parcellation configuration window.\t\n')
             if not os.path.exists(self.stages['Parcellation'].config.graphml_file):
                 return('\n\tCustom segmentation selected but no graphml info provided.\nPlease specify an existing graphml file in the Parcellation configuration window.\t\n')
+        if self.stages['Connectome'].config.output_types == []:
+            return('\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
         return ''
         
     def create_stage_flow(self, stage_name):

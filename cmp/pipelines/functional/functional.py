@@ -82,8 +82,10 @@ class fMRIPipeline(Pipeline):
         Pipeline.__init__(self, project_info)
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
-        self.stages['Preprocessing'].config.on_trait_change(self.update_motion_regression,'motion_correction')
-        self.stages['Functional'].config.on_trait_change(self.update_motion_correction,'motion_nuisance')
+        self.stages['Functional'].config.on_trait_change(self.update_nuisance_requirements,'global_nuisance')
+        self.stages['Functional'].config.on_trait_change(self.update_nuisance_requirements,'csf')
+        self.stages['Functional'].config.on_trait_change(self.update_nuisance_requirements,'wm')
+        self.stages['Connectome'].config.on_trait_change(self.update_scrubbing,'apply_scrubbing')
         
     def update_parcellation(self):
         if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
@@ -112,12 +114,14 @@ class fMRIPipeline(Pipeline):
                 self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)','Nonlinear (FSL)']
             else:
                 self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)']
+                
+    def update_nuisance_requirements(self):
+        self.stages['Registration'].config.apply_to_eroded_brain = self.stages['Functional'].config.global_nuisance
+        self.stages['Registration'].config.apply_to_eroded_csf = self.stages['Functional'].config.csf
+        self.stages['Registration'].config.apply_to_eroded_wm = self.stages['Functional'].config.wm
             
-    def update_motion_regression(self):
-        self.stages['Functional'].config.motion_nuisance = self.stages['Preprocessing'].config.motion_correction
-        
-    def update_motion_correction(self):
-        self.stages['Preprocessing'].config.motion_correction = self.stages['Functional'].config.motion_nuisance
+    def update_scrubbing(self):
+        self.stages['Functional'].config.scrubbing = self.stages['Connectome'].config.apply_scrubbing
                        
     def _preprocessing_fired(self, info):
         self.stages['Preprocessing'].configure_traits()
@@ -215,7 +219,15 @@ class fMRIPipeline(Pipeline):
         common_check = Pipeline.check_config(self)
         if common_check == '':
             if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['Functional'].config.global_nuisance and not os.path.exists(self.stages['Parcellation'].config.brain_file):
-                return('\nGlobal signal regression selected but no existing brain mask provided.\nPlease provide a brain mask in the parcellation configuration window.\n')
+                return('\n\tGlobal signal regression selected but no existing brain mask provided.\t\n\tPlease provide a brain mask in the parcellation configuration window,\n\tor disable the global signal regression in the functional configuration window.\t\n')
+            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['Functional'].config.csf and not os.path.exists(self.stages['Parcellation'].config.csf_file):
+                return('\n\tCSF signal regression selected but no existing csf mask provided.\t\n\tPlease provide a csf mask in the parcellation configuration window,\n\tor disable the csf signal regression in the functional configuration window.\t\n')
+            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['Functional'].config.wm and not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
+                return('\n\tWM signal regression selected but no existing wm mask provided.\t\n\tPlease provide a wm mask in the segmentation configuration window,\n\tor disable the wm signal regression in the functional configuration window.\t\n')
+            if self.stages['Functional'].config.motion == True and self.stages['Preprocessing'].config.motion_correction == False:
+                return('\n\tMotion signal regression selected but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configuration window,\n\tor disable the motion signal regression in the functional configuration window.\t\n')
+            if self.stages['Connectome'].config.apply_scrubbing == True and self.stages['Preprocessing'].config.motion_correction == False:
+                return('\n\tScrubbing applied but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configutation window,\n\tor disable scrubbing in the connectome configuration window.\t\n')
             return ''
         return common_check
 
@@ -271,11 +283,11 @@ class fMRIPipeline(Pipeline):
                           (fMRI_inputnode,reg_flow, [('wm_mask_file','inputnode.wm_mask'),('roi_volumes','inputnode.roi_volumes'),
                                                 ('wm_eroded','inputnode.eroded_wm')])
                           ])
-            if self.stages['Registration'].config.apply_to_eroded_brain:
+            if self.stages['Functional'].config.global_nuisance:
                 fMRI_flow.connect([
                               (fMRI_inputnode,reg_flow,[('brain_eroded','inputnode.eroded_brain')])
                             ])
-            if self.stages['Registration'].config.apply_to_eroded_csf:
+            if self.stages['Functional'].config.csf:
                 fMRI_flow.connect([
                               (fMRI_inputnode,reg_flow,[('csf_eroded','inputnode.eroded_csf')])
                             ])
@@ -291,9 +303,12 @@ class fMRIPipeline(Pipeline):
                         (preproc_flow,func_flow, [('outputnode.functional_preproc','inputnode.preproc_file')]),
                         (reg_flow,func_flow, [('outputnode.wm_mask_registered','inputnode.registered_wm'),('outputnode.roi_volumes_registered','inputnode.registered_roi_volumes'),
                                               ('outputnode.eroded_wm_registered','inputnode.eroded_wm'),('outputnode.eroded_csf_registered','inputnode.eroded_csf'),
-                                              ('outputnode.eroded_brain_registered','inputnode.eroded_brain')]),
-                        (preproc_flow,func_flow,[("outputnode.par_file","inputnode.motion_par_file")])
+                                              ('outputnode.eroded_brain_registered','inputnode.eroded_brain')])
                         ])
+            if self.stages['Functional'].config.scrubbing or self.stages['Functional'].config.motion:
+                fMRI_flow.connect([
+                                   (preproc_flow,func_flow,[("outputnode.par_file","inputnode.motion_par_file")])
+                                ])
                        
         if self.stages['Connectome'].enabled:
             con_flow = self.create_stage_flow("Connectome")

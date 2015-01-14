@@ -48,28 +48,21 @@ class FunctionalConfig(HasTraits):
     
     scrubbing = Bool(True)
     
-    traits_view = View(Item('scrubbing',label="Compute scrubbing parameters"),
-                       Group(
-                             Item('smoothing'),
-                             label="Spatial processing",show_border=True
-                             ),
-                       Group(
-                             Item('discard_n_volumes'),
-                             HGroup(
-                                    Item('global_nuisance',label="Global"),
-                                    Item('csf'),
-                                    Item('wm'),
-                                    Item('motion'),
-                                    label='Nuisance factors',show_border=True
-                                    ),
-                             Item('detrending'),
-                             HGroup(
-                                    Item('lowpass_filter',label='Low cutoff (volumes)'),
-                                    Item('highpass_filter',label='High cutoff (volumes)'),
-                                    label="Bandpass filtering",show_border=True
-                                    ),
-                             label="Temporal processing",show_border=True
-                             )
+    traits_view = View(Item('smoothing'),
+                       Item('discard_n_volumes'),
+                       HGroup(
+                            Item('global_nuisance',label="Global"),
+                            Item('csf'),
+                            Item('wm'),
+                            Item('motion'),
+                            label='Nuisance factors',show_border=True
+                            ),
+                        Item('detrending'),
+                        HGroup(
+                            Item('lowpass_filter',label='Low cutoff (volumes)'),
+                            Item('highpass_filter',label='High cutoff (volumes)'),
+                            label="Bandpass filtering",show_border=True
+                            )
                        )
     
 class discard_tp_InputSpec(BaseInterfaceInputSpec):
