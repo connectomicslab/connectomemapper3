@@ -27,6 +27,7 @@ from nipype.utils.filemanip import split_filename
 
 # Own imports
 from cmtklib.parcellation import get_parcellation
+import nipype.interfaces.cmtk as cmtk
 from cmp.stages.common import Stage
 
 class ConnectomeConfig(HasTraits):
@@ -171,8 +172,6 @@ class rsfmri_conmat(BaseInterface):
                 sio.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
             if 'graphml' in self.inputs.output_types:
                 g2 = nx.Graph()
-                for u_gml,v_gml,d_gml in G.edges_iter(data=True):
-                    g2.add_edge(u_gml,v_gml,d_gml)
                 for u_gml,d_gml in G.nodes(data=True):
                     g2.add_node(u_gml,{'dn_correspondence_id':d_gml['dn_correspondence_id'],
                                    'dn_fsname':d_gml['dn_fsname'],
@@ -182,7 +181,16 @@ class rsfmri_conmat(BaseInterface):
                                    'dn_position_y':float(d_gml['dn_position'][1]),
                                    'dn_position_z':float(d_gml['dn_position'][2]),
                                    'dn_region':d_gml['dn_region']})
+                for u_gml,v_gml,d_gml in G.edges_iter(data=True):
+                    g2.add_edge(u_gml,v_gml,{'corr' : float(d_gml['corr'])})
                 nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
+                
+            if 'cff' in self.inputs.output_types:
+                cvt = cmtk.CFFConverter()
+                cvt.inputs.title = 'Connectome mapper'
+                cvt.inputs.nifti_volumes = self.inputs.roi_volumes
+                cvt.inputs.gpickled_networks = glob.glob(os.path.abspath("connectome_*.gpickle"))
+                cvt.run()
     
         print("[ DONE ]")
         return runtime
