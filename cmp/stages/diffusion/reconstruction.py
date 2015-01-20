@@ -219,14 +219,14 @@ class Gibbs_recon_config(HasTraits):
     iterations = Int(100000000)
     particle_length=Float(1.5)
     particle_width=Float(0.5)
-    particle_weigth=Float(0.0003)
+    particle_weight=Float(0.0003)
     temp_start=Float(0.1)
     temp_end=Float(0.001)
     inexbalance=Int(-2)
     fiber_length=Float(20)
     curvature_threshold=Float(90)
     
-    traits_view = View('iterations','particle_length','particle_width','particle_weigth','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold')
+    traits_view = View('iterations','particle_length','particle_width','particle_weight','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold')
             
 # Nipype interfaces for DTB commands
 
@@ -694,7 +694,7 @@ class gibbs_reconInputSpec(BaseInterfaceInputSpec):
     iterations = Int
     particle_length=Float
     particle_width=Float
-    particle_weigth=Float
+    particle_weight=Float
     temp_start=Float
     temp_end=Float
     inexbalance=Int
@@ -719,7 +719,7 @@ class gibbs_recon(BaseInterface):
     def _run_interface(self,runtime):
         # Create XML file
         f = open(os.path.abspath('gibbs_parameters.gtp'),'w')
-        xml_text = '<?xml version="1.0" ?>\n<global_tracking_parameter_file file_version="0.1">\n    <parameter_set iterations="%s" particle_length="%s" particle_width="%s" particle_weight="%s" temp_start="%s" temp_end="%s" inexbalance="%s" fiber_length="%s" curvature_threshold="90" />\n</global_tracking_parameter_file>' % (self.inputs.iterations,self.inputs.particle_length,self.inputs.particle_width,self.inputs.particle_weigth,self.inputs.temp_start,self.inputs.temp_end,self.inputs.inexbalance,self.inputs.fiber_length)
+        xml_text = '<?xml version="1.0" ?>\n<global_tracking_parameter_file file_version="0.1">\n    <parameter_set iterations="%s" particle_length="%s" particle_width="%s" particle_weight="%s" temp_start="%s" temp_end="%s" inexbalance="%s" fiber_length="%s" curvature_threshold="%s" />\n</global_tracking_parameter_file>' % (self.inputs.iterations,self.inputs.particle_length,self.inputs.particle_width,self.inputs.particle_weight,self.inputs.temp_start,self.inputs.temp_end,self.inputs.inexbalance,self.inputs.fiber_length, self.inputs.curvature_threshold)
         f.write(xml_text)
         f.close()
         # Change input to nifti format and rename to .dti for loading in MITK
@@ -795,7 +795,7 @@ def create_gibbs_recon_flow(config_gibbs,config_model):
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_resampled","wm_mask_resampled"]),name="inputnode")
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file","param_file",'input_file'],mandatory_inputs=True),name="outputnode")
 
-    gibbs = pe.Node(interface=gibbs_recon(iterations = config_gibbs.iterations, particle_length=config_gibbs.particle_length, particle_width=config_gibbs.particle_width, particle_weigth=config_gibbs.particle_weigth, temp_start=config_gibbs.temp_start, temp_end=config_gibbs.temp_end, inexbalance=config_gibbs.inexbalance, fiber_length=config_gibbs.fiber_length, curvature_threshold=config_gibbs.curvature_threshold, out_file_name='global_tractography.trk'),name="gibbs_recon")
+    gibbs = pe.Node(interface=gibbs_recon(iterations = config_gibbs.iterations, particle_length=config_gibbs.particle_length, particle_width=config_gibbs.particle_width, particle_weight=config_gibbs.particle_weight, temp_start=config_gibbs.temp_start, temp_end=config_gibbs.temp_end, inexbalance=config_gibbs.inexbalance, fiber_length=config_gibbs.fiber_length, curvature_threshold=config_gibbs.curvature_threshold, out_file_name='global_tractography.trk'),name="gibbs_recon")
 
     if config_model.local_model :
         gibbs.inputs.sh_coefficients = 'MRtrix'
