@@ -230,10 +230,10 @@ class DiffusionStage(Stage):
                         ])
 
         elif self.config.processing_tool == 'MRtrix':
-            track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config,self.config.mrtrix_recon_config.gradient_table)
+            track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
             flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
-                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
+                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'), ('outputnode.grad','inputnode.grad')]),
 			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
 			             #(recon_flow, track_flow,[('outputnode.grad','inputnode.grad')]),
                         ])
@@ -246,10 +246,10 @@ class DiffusionStage(Stage):
                         ])
 
         elif self.config.processing_tool == 'Camino':
-            track_flow = create_camino_tracking_flow(self.config.camino_tracking_config,self.config.camino_recon_config.gradient_table)
+            track_flow = create_camino_tracking_flow(self.config.camino_tracking_config)
             flow.connect([
                         (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
-                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')])
+                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'), ('outputnode.grad','inputnode.grad')])
                         ])
             if self.config.diffusion_model == 'Probabilistic':
                 flow.connect([

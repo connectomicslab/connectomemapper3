@@ -383,10 +383,10 @@ class make_seeds(BaseInterface):
             output_list.append(os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz'))
         return output_list
 
-def create_mrtrix_tracking_flow(config,grad_table):
+def create_mrtrix_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','wm_mask_resampled','gm_registered']),name='inputnode')
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','wm_mask_resampled','gm_registered','grad']),name='inputnode')
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
     if config.tracking_mode == 'Deterministic':
@@ -404,15 +404,12 @@ def create_mrtrix_tracking_flow(config,grad_table):
         else:
             mrtrix_tracking.inputs.inputmodel = 'DT_STREAM'
             mrtrix_tracking.inputs.minimum_radius_of_curvature = config.curvature
-            mrtrix_tracking.inputs.gradient_encoding_file = grad_table
-            #flow.connect([
-            #	    (inputnode,mrtrix_tracking,[('grad','gradient_encoding_file')])
-            #	    ])
+            flow.connect([
+                        (inputnode,mrtrix_tracking,[("grad","gradient_encoding_file")])
+                        ])
         converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
         flow.connect([
-                      (inputnode,mrtrix_tracking,[('DWI','in_file')]),
-                      (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
-                      (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
+                      (inputnode,mrtrix_tracking,[('DWI','in_file'),('wm_mask_resampled','seed_file'),('wm_mask_resampled','mask_file')]),
                       (mrtrix_tracking,converter,[('tracked','in_file')]),
                       (inputnode,converter,[('wm_mask_resampled','image_file')]),
                       (converter,outputnode,[('out_file','track_file')])
@@ -444,11 +441,11 @@ def create_mrtrix_tracking_flow(config,grad_table):
 
     return flow
 
-def create_camino_tracking_flow(config,grad_table):
+def create_camino_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
 
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_resampled","gm_registered"]),name="inputnode")
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_resampled","gm_registered", "grad"]),name="inputnode")
     
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
@@ -482,7 +479,9 @@ def create_camino_tracking_flow(config,grad_table):
         camino_seeds = pe.Node(interface=make_seeds(),name="camino_seeds")
         # Generate Lookup table
         dtlutgen = pe.Node(interface=camino.DTLUTGen(),name='dtlutgen')
-        dtlutgen.inputs.scheme_file = grad_table
+        flow.connect([
+                      (inputnode,dtlutgen,[('grad','scheme_file')])
+                    ])
         dtlutgen.inputs.snr = config.snr
         dtlutgen.inputs.inversion = config.inversion_index
         dtlutgen.inputs.trace = config.trace
@@ -496,7 +495,9 @@ def create_camino_tracking_flow(config,grad_table):
         if config.inversion_index >= 10:
             dtlutgen.inputs.cross = config.cross_angle
             dtlutgen2 = pe.Node(interface=camino.DTLUTGen(),name='dtlutgen2')
-            dtlutgen2.inputs.scheme_file = grad_table
+            flow.connect([
+                        (inputnode,dtlutgen2,[("grad","scheme_file")])
+                        ])
             dtlutgen2.inputs.snr = config.snr
             dtlutgen2.inputs.inversion = config.fallback_index
             dtlutgen2.inputs.trace = config.trace

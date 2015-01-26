@@ -292,7 +292,7 @@ class flipTableInputSpec(BaseInterfaceInputSpec):
     table = File(exists=True)
     flipping_axis = List()
     delimiter = Str()
-    header = Bool()
+    header_lines = Int(0)
     orientation = Enum(['v','h'])
     
 class flipTableOutputSpec(TraitedSpec):
@@ -306,8 +306,9 @@ class flipTable(BaseInterface):
         axis_dict = {'x':0, 'y':1, 'z':2}
         import numpy as np
         f = open(self.inputs.table,'r')
-        if self.inputs.header:
-            header = f.readline()
+        header = ''
+        for h in range(self.inputs.header_lines):
+            header += f.readline()
         if self.inputs.delimiter == ' ':
             table = np.loadtxt(f)
         else:
@@ -320,7 +321,7 @@ class flipTable(BaseInterface):
             for i in self.inputs.flipping_axis:
                 table[axis_dict[i],:] = -table[axis_dict[i],:]
         out_f = file(os.path.abspath('flipped_table.txt'),'a')
-        if self.inputs.header:
+        if self.inputs.header_lines > 0:
             out_f.write(header)
         np.savetxt(out_f,table,delimiter=self.inputs.delimiter)
         out_f.close()
@@ -364,7 +365,7 @@ def create_dtk_recon_flow(config):
         flip_table.inputs.table = config.gradient_table
         flip_table.inputs.flipping_axis = config.flip_table_axis
         flip_table.inputs.delimiter = ','
-        flip_table.inputs.header = False
+        flip_table.inputs.header_lines = 0
         flip_table.inputs.orientation = 'v'
         flow.connect([
                 (flip_table,dtk_hardimat,[("table","gradient_table")]),
@@ -386,9 +387,16 @@ def create_dtk_recon_flow(config):
                         
     if config.imaging_model == "DTI":
         prefix = "dti"
+        
+        flip_table = pe.Node(interface=flipTable(),name='flip_table')
+        flip_table.inputs.table = config.gradient_table
+        flip_table.inputs.flipping_axis = config.flip_table_axis
+        flip_table.inputs.delimiter = ','
+        flip_table.inputs.header_lines = 0
+        flip_table.inputs.orientation = 'v'
+        
         dtk_dtirecon = pe.Node(interface=dtk.DTIRecon(out_prefix=prefix),name='dtk_dtirecon')
         dtk_dtirecon.inputs.b_value = config.maximum_b_value
-        dtk_dtirecon.inputs.gradient_matrix = config.gradient_table
         dtk_dtirecon.inputs.multiple_b_values = config.multiple_high_b_values
         dtk_dtirecon.inputs.n_averages = config.number_of_averages
         dtk_dtirecon.inputs.number_of_b0 = config.number_of_b0_volumes
@@ -396,6 +404,7 @@ def create_dtk_recon_flow(config):
         
         flow.connect([
                     (inputnode,dtk_dtirecon,[('diffusion','DWI')]),
+                    (flip_table, dtk_dtirecon,[('table', 'gradient_matrix')]),
                     (dtk_dtirecon,outputnode,[('DWI','DWI'),('B0','B0'),('V1','V1')])])
     else:
         if 'gFA' in config.compute_additional_maps:
@@ -460,7 +469,7 @@ def create_mrtrix_recon_flow(config):
     flip_table.inputs.table = config.gradient_table
     flip_table.inputs.flipping_axis = config.flip_table_axis
     flip_table.inputs.delimiter = ' '
-    flip_table.inputs.header = False
+    flip_table.inputs.header_lines = 0
     flip_table.inputs.orientation = 'v'
     flow.connect([
                 (flip_table,outputnode,[("table","grad")]),
@@ -548,7 +557,7 @@ def create_camino_recon_flow(config):
     flip_table.inputs.table = config.gradient_table
     flip_table.inputs.flipping_axis = config.flip_table_axis
     flip_table.inputs.delimiter = ' '
-    flip_table.inputs.header = True
+    flip_table.inputs.header_lines = 2
     flip_table.inputs.orientation = 'v'
     flow.connect([
                 (flip_table,outputnode,[("table","grad")]),
@@ -644,7 +653,7 @@ def create_fsl_recon_flow(config):
     flip_table.inputs.table = config.b_vectors
     flip_table.inputs.flipping_axis = config.flip_table_axis
     flip_table.inputs.delimiter = ' '
-    flip_table.inputs.header = False
+    flip_table.inputs.header_lines = 0
     flip_table.inputs.orientation = 'h'
     
     fsl_node = pe.Node(interface=fsl.BEDPOSTX(),name='BEDPOSTX')
@@ -812,7 +821,7 @@ def create_gibbs_recon_flow(config_gibbs,config_model):
         flip_table.inputs.table = config_model.b_vectors
         flip_table.inputs.flipping_axis = config_model.flip_table_axis
         flip_table.inputs.delimiter = ' '
-        flip_table.inputs.header = False
+        flip_table.inputs.header_lines = 0
         flip_table.inputs.orientation = 'h'
         
         # Fit linear tensor
