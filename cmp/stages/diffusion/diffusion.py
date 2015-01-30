@@ -26,6 +26,7 @@ from tracking import *
 class DiffusionConfig(HasTraits):
     imaging_model = Str
     resampling = Tuple(2,2,2)
+    interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
     processing_tool_editor = List(['DTK','MRtrix','Camino','FSL','Gibbs'])
     dilate_rois = Bool(True)
     processing_tool = Str('DTK')
@@ -44,7 +45,8 @@ class DiffusionConfig(HasTraits):
     diffusion_model = Str('Deterministic')
     
     
-    traits_view = View(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+    traits_view = View(HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+                       'interpolation'),
 		               Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
                        Item('dilate_rois',visible_when='processing_tool!="DTK"'),
                        Group(Item('dtk_recon_config',style='custom',defined_when='processing_tool=="DTK"'),
@@ -154,6 +156,7 @@ class DiffusionStage(Stage):
         # resampling diffusion image and setting output type to short
         fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_file='diffusion_resampled.nii'),name="diffusion_resample")
         fs_mriconvert.inputs.vox_size = self.config.resampling
+        fs_mriconvert.input.resample_type = self.config.interpolation
         flow.connect([(inputnode,fs_mriconvert,[('diffusion','in_file')])])
         
         if self.config.processing_tool != 'DTK':
