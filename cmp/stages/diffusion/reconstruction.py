@@ -23,9 +23,6 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
 from nipype.utils.filemanip import split_filename
-import nibabel as nib
-from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
-from nipype.interfaces.mrtrix.convert import transform_to_affine
 
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
     traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec
@@ -197,36 +194,25 @@ class FSL_recon_config(HasTraits):
                        VGroup('burn_period','fibres_per_voxel','jumps','sampling','weight',show_border=True,label = 'BEDPOSTX parameters'),
                       ) 
 
-class Gibbs_model_config(HasTraits):
-    local_model_editor = Dict({False:'1:Tensor',True:'2:CSD'})
-    local_model = Bool(False)
-    gradient_table = File()
-    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
-    lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
-    normalize_to_B0 = Bool(False)
-    single_fib_thr = Float(0.7,min=0,max=1)
-    
+class Gibbs_recon_config(HasTraits):
+    recon_model = Enum(['Tensor','CSD'])
     b_values = File()
     b_vectors = File()
+    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
+    sh_order = Enum(4,[2,4,6,8,10,12,14,16])
+    reg_lambda = Float(0.006)
+    csa = Bool(True)
 
-    traits_view = View(Item('local_model',editor=EnumEditor(name='local_model_editor')),Group(Item('gradient_table'),Item('flip_table_axis',style='custom',label='Flip table:'),
-		       Item('lmax_order',editor=EnumEditor(values={'Auto':'1:Auto','2':'2:2','4':'3:4','6':'4:6','8':'5:8','10':'6:10','12':'7:12','14':'8:14','16':'9:16'})),
-		       Item('normalize_to_B0'),
-		       Item('single_fib_thr',label = 'FA threshold'),show_border=True,label='CSD parameters', visible_when='local_model'),
-	     Group('b_vectors','b_values',Item('flip_table_axis',style='custom',label='Flip table:'),show_border = True, label='FSL tensor fitting', visible_when='not local_model'))
+    traits_view = View(Item('recon_model',label='Reconstruction  model:'),
+                       'b_values',
+                       'b_vectors',
+                       Item('flip_table_axis',style='custom',label='Flip table:'),
+                       Group(Item('sh_order',label="Spherical Harmonics order"),
+                             Item('reg_lambda', label="Regularisation lambda factor"),
+                             Item('csa',label="Use constant solid angle"),
+                             show_border=True,label='CSD parameters', visible_when='recon_model == "CSD"'),
+	           )
 
-class Gibbs_recon_config(HasTraits):
-    iterations = Int(100000000)
-    particle_length=Float(1.5)
-    particle_width=Float(0.5)
-    particle_weight=Float(0.0003)
-    temp_start=Float(0.1)
-    temp_end=Float(0.001)
-    inexbalance=Int(-2)
-    fiber_length=Float(20)
-    curvature_threshold=Float(90)
-    
-    traits_view = View('iterations','particle_length','particle_width','particle_weight','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold')
             
 # Nipype interfaces for DTB commands
 
@@ -676,176 +662,114 @@ def create_fsl_recon_flow(config):
     
     return flow
 
-class gibbs_commandInputSpec(CommandLineInputSpec):
-    in_file = File(argstr="-i %s",position = 1,mandatory=True,exists=True,desc="input image (tensor, Q-ball or FSL/MRTrix SH-coefficient image)")
-    parameter_file = File(argstr="-p %s", position = 2, mandatory = True, exists=True, desc="gibbs parameter file (.gtp)")
-    mask = File(argstr="-m %s",position=3,mandatory=False,desc="mask, binary mask image (optional)")
-    sh_coefficients = Enum(['FSL','MRtrix'],argstr="-s %s",position=4,mandatory=False,desc="sh coefficient convention (FSL, MRtrix) (optional), (default: FSL)")
-    noflip = Bool(argstr = "-f", desc = "do not flip input image to match MITK coordinate convention (optional)")
-    out_file_name = File(argstr="-o %s",position=5,desc='output fiber bundle (.trk)')
+class MITKqball_commandInputSpec(CommandLineInputSpec):
+    in_file = File(argstr="-i %s",position = 1,mandatory=True,exists=True,desc="input raw dwi (.dwi or .fsl/.fslgz)")
+    out_file_name = String(argstr="-o %s",position=2,desc='output fiber name (.dti)')
+    sh_order = Int(argstr="-sh %d", position=3,des='spherical harmonics order (optional), (default: 4)')
+    reg_lambda = Float(argstr="-r %0.4f", position=4, desc='ragularization factor lambda (optional), (default: 0.006)')
+    csa = Bool(argstr="-csa", position=5, desc='use constant solid angle consideration (optional)')
 
-class gibbs_commandOutputSpec(TraitedSpec):
-    out_file = File(desc='output fiber bundle')
+class MITKqball_commandOutputSpec(TraitedSpec):
+    out_file = File(exists=True,desc='output tensor file')
 
-class gibbs_command(CommandLine):
-    _cmd = 'MitkDiffusionMiniApps.sh GibbsTracking'
-    input_spec = gibbs_commandInputSpec
-    output_spec = gibbs_commandOutputSpec
+class MITKqball(CommandLine):
+    _cmd = 'MitkQballReconstruction.sh'
+    input_spec = MITKqball_commandInputSpec
+    output_spec = MITKqball_commandOutputSpec
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file_name)
+        outputs["out_file"] = self.inputs.out_file_name
         return outputs
+    
+class MITKtensor_commandInputSpec(CommandLineInputSpec):
+    in_file = File(argstr="-i %s",position = 1,mandatory=True,exists=True,desc="input raw dwi (.dwi or .fsl/.fslgz)")
+    out_file_name = String(argstr="-o %s",position=2,desc='output fiber name (.dti)')
 
+class MITKtensor_commandOutputSpec(TraitedSpec):
+    out_file = File(exists=True,desc='output tensor file')
+
+class MITKtensor(CommandLine):
+    _cmd = 'MitkTensorReconstruction.sh'
+    input_spec = MITKtensor_commandInputSpec
+    output_spec = MITKtensor_commandOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = self.inputs.out_file_name
+        return outputs
+    
 class gibbs_reconInputSpec(BaseInterfaceInputSpec):
 
-    # Inputs for XML file
-    iterations = Int
-    particle_length=Float
-    particle_width=Float
-    particle_weight=Float
-    temp_start=Float
-    temp_end=Float
-    inexbalance=Int
-    fiber_length=Float
-    curvature_threshold=Float
-
-    # Command line parameters
-    in_file = File(argstr="-i %s",position = 1,mandatory=True,exists=True,desc="input image (tensor, Q-ball or FSL/MRTrix SH-coefficient image)")
-    mask = File(argstr="-m %s",position=3,mandatory=False,desc="mask, binary mask image (optional)")
-    sh_coefficients = Enum(['FSL','MRtrix'],argstr="-s %s",position=4,mandatory=False,desc="sh coefficient convention (FSL, MRtrix) (optional), (default: FSL)")
-    out_file_name = File(argstr="-o %s",position=5,desc='output fiber bundle (.trk)')
+    dwi = File(exists=True)
+    bvals = File(exists=True)
+    bvecs = File(exists=True)
+    recon_model = Enum(['Tensor','CSD'])
+    sh_order = Int(argstr="-sh %d", position=3,des='spherical harmonics order (optional), (default: 4)')
+    reg_lambda = Float(argstr="-t %0.4f", position=4, desc='ragularization factor lambda (optional), (default: 0.006)')
+    csa = Bool(argstr="-csa", position=5, desc='use constant solid angle consideration (optional)')
 
 class gibbs_reconOutputSpec(TraitedSpec):
-    out_file = File(desc='output fiber bundle', exists = True)
-    param_file = File(desc='gibbs parameters',exists = True)
-    input_file = File(desc='gibbs input file', exists = True)
+    recon_file = File(exists=True)
 
 class gibbs_recon(BaseInterface):
     input_spec = gibbs_reconInputSpec
     output_spec = gibbs_reconOutputSpec
 
     def _run_interface(self,runtime):
-        # Create XML file
-        f = open(os.path.abspath('gibbs_parameters.gtp'),'w')
-        xml_text = '<?xml version="1.0" ?>\n<global_tracking_parameter_file file_version="0.1">\n    <parameter_set iterations="%s" particle_length="%s" particle_width="%s" particle_weight="%s" temp_start="%s" temp_end="%s" inexbalance="%s" fiber_length="%s" curvature_threshold="%s" />\n</global_tracking_parameter_file>' % (self.inputs.iterations,self.inputs.particle_length,self.inputs.particle_width,self.inputs.particle_weight,self.inputs.temp_start,self.inputs.temp_end,self.inputs.inexbalance,self.inputs.fiber_length, self.inputs.curvature_threshold)
-        f.write(xml_text)
-        f.close()
-        # Change input to nifti format and rename to .dti for loading in MITK
-        if self.inputs.sh_coefficients == 'MRtrix':
-            mif_convert = pe.Node(interface=mrtrix.MRConvert(in_file = self.inputs.in_file, out_filename = os.path.abspath('input.nii')),name='convert_to_dti')
-            res = mif_convert.run()
-            #shutil.copyfile(res.outputs.converted,os.path.abspath('input.dwi'))
-            self.inputs.in_file = res.outputs.converted
-        else:
-            shutil.copyfile(self.inputs.in_file,os.path.abspath('input.dti'))
-            self.inputs.in_file = os.path.abspath('input.dti')
-        # Call gibbs software
-        gibbs = gibbs_command(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'), noflip = False)
-        gibbs.inputs.mask = self.inputs.mask
-        gibbs.inputs.sh_coefficients = self.inputs.sh_coefficients
-        gibbs.inputs.out_file_name = os.path.abspath(self.inputs.out_file_name)
-        res = gibbs.run()
-
+        # change DWI and gradient table names
+        mitk_dwi = os.path.abspath(os.path.basename(self.inputs.dwi)+'.fsl')
+        shutil.copyfile(self.inputs.dwi,mitk_dwi)
+        mitk_bvec = os.path.abspath(os.path.basename(self.inputs.dwi)+'.fsl.bvecs')
+        shutil.copyfile(self.inputs.bvecs,mitk_bvec)
+        mitk_bval = os.path.abspath(os.path.basename(self.inputs.dwi)+'.fsl.bvals')
+        shutil.copyfile(self.inputs.bvals,mitk_bval)
+        if self.inputs.recon_model == 'Tensor':
+            tensor = pe.Node(interface=MITKtensor(in_file = mitk_dwi, out_file_name = os.path.abspath('mitk_tensor.dti')),name="mitk_tensor")
+            res = tensor.run()
+        elif self.inputs.recon_model == 'CSD':
+            csd = pe.Node(interface=MITKqball(),name='mitk_CSD')
+            csd.inputs.in_file = mitk_dwi
+            csd.inputs.out_file_name = os.path.abspath('mitk_qball.qbi')
+            csd.inputs.sh_order = self.inputs.sh_order
+            csd.inputs.reg_lambda = self.inputs.reg_lambda
+            csd.inputs.csa = self.inputs.csa
+            res = csd.run()
+            
         return runtime
-
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file_name)
-        outputs["param_file"] = os.path.abspath('gibbs_parameters.gtp')
-        outputs["input_file"] = os.path.abspath(self.inputs.in_file)
+        if self.inputs.recon_model == 'Tensor':
+            outputs["recon_file"] = os.path.abspath('mitk_tensor.dti')
+        elif self.inputs.recon_model == 'CSD':
+            outputs["recon_file"] = os.path.abspath('mitk_qball.qbi')
         return outputs
     
-class match_orientationInputSpec(BaseInterfaceInputSpec):
-    gibbs_output = File(exists=True, mandatory=True,desc="Trackvis file outputed by gibbs miniapp, with the LPS orientation set as default")
-    gibbs_input = File(exists=True, mandatory=True, desc="File used as input for the gibbs tracking (wm mask)")
-
-class match_orientationOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='Trackvis file with orientation matching gibbs input')
-
-class match_orientations(BaseInterface):
-    
-    input_spec = match_orientationInputSpec
-    output_spec = match_orientationOutputSpec
-    
-    def _run_interface(self, runtime):    
-        filename = os.path.basename(self.inputs.gibbs_output)
-    
-        dx, dy, dz = get_data_dims(self.inputs.gibbs_input)
-        vx, vy, vz = get_vox_dims(self.inputs.gibbs_input)
-        image_file = nib.load(self.inputs.gibbs_input)
-        affine = image_file.get_affine()
-        import numpy as np
-        #Reads MITK tracks
-        fib, hdr = nib.trackvis.read(self.inputs.gibbs_output)
-        trk_header = nib.trackvis.empty_header()
-        trk_header['dim'] = [dx,dy,dz]
-        trk_header['voxel_size'] = [vx,vy,vz]
-        trk_header['n_count'] = hdr['n_count']
-        
-        axcode = nib.orientations.aff2axcodes(affine)
-        trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
-        trk_header['vox_to_ras'] = affine
-        new_fib = []
-        for i in range(len(fib)):
-            new_fib.append((fib[i][0]*[1,-1,1],None,None))
-        nib.trackvis.write(os.path.abspath(filename), new_fib, trk_header)
-        iflogger.info('file written to %s' % os.path.abspath(filename))
-        return runtime
-    
-    def _list_outputs(self):
-        filename = os.path.basename(self.inputs.gibbs_output)
-        outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(filename)
-        return outputs
-
-def create_gibbs_recon_flow(config_gibbs,config_model):
+def create_gibbs_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_resampled","wm_mask_resampled"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file","param_file",'input_file'],mandatory_inputs=True),name="outputnode")
-
-    gibbs = pe.Node(interface=gibbs_recon(iterations = config_gibbs.iterations, particle_length=config_gibbs.particle_length, particle_width=config_gibbs.particle_width, particle_weight=config_gibbs.particle_weight, temp_start=config_gibbs.temp_start, temp_end=config_gibbs.temp_end, inexbalance=config_gibbs.inexbalance, fiber_length=config_gibbs.fiber_length, curvature_threshold=config_gibbs.curvature_threshold, out_file_name='global_tractography.trk'),name="gibbs_recon")
-
-    if config_model.local_model :
-        gibbs.inputs.sh_coefficients = 'MRtrix'
-        CSD_flow = create_mrtrix_recon_flow(config_model)
-        flow.connect([
-		    (inputnode,CSD_flow,[('diffusion_resampled','inputnode.diffusion_resampled'),('wm_mask_resampled','inputnode.wm_mask_resampled')]),
-		    (CSD_flow,gibbs,[('outputnode.DWI','in_file')]),
-		    ])
-
-    else:
-        
-        # Flip gradient table
-        flip_table = pe.Node(interface=flipTable(),name='flip_table')
-        flip_table.inputs.table = config_model.b_vectors
-        flip_table.inputs.flipping_axis = config_model.flip_table_axis
-        flip_table.inputs.delimiter = ' '
-        flip_table.inputs.header_lines = 0
-        flip_table.inputs.orientation = 'h'
-        
-        # Fit linear tensor
-        dtifit = pe.Node(interface=fsl.DTIFit(),name="dtifit")
-        dtifit.inputs.bvals = config_model.b_values
-        dtifit.inputs.save_tensor = True
-        dtifit.inputs.output_type = 'NIFTI'
-        gibbs.inputs.sh_coefficients = 'FSL'
-
-        flow.connect([
-		    (inputnode,dtifit,[('diffusion_resampled','dwi'),('wm_mask_resampled','mask')]),
-            (flip_table,dtifit,[("table","bvecs")]),
-		    (dtifit,gibbs,[('tensor','in_file')])
-		    ])
-        
-    match_orient = pe.Node(interface=match_orientations(),name='match_orientations')
-
+    
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion_resampled"]),name="inputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["recon_file"],mandatory_inputs=True),name="outputnode")
+    
+    # Flip gradient table
+    flip_table = pe.Node(interface=flipTable(),name='flip_table')
+    flip_table.inputs.table = config.b_vectors
+    flip_table.inputs.flipping_axis = config.flip_table_axis
+    flip_table.inputs.delimiter = ' '
+    flip_table.inputs.header_lines = 0
+    flip_table.inputs.orientation = 'h'
+    
+    gibbs_node = pe.Node(interface=gibbs_recon(),name='gibbs_reconstruction')
+    gibbs_node.inputs.bvals = config.b_values
+    gibbs_node.inputs.recon_model = config.recon_model
+    gibbs_node.inputs.sh_order = config.sh_order
+    gibbs_node.inputs.reg_lambda = config.reg_lambda
+    gibbs_node.inputs.csa = config.csa
+    
     flow.connect([
-		(inputnode,gibbs,[("wm_mask_resampled","mask")]),
-		(gibbs,match_orient,[("out_file","gibbs_output")]),
-        (inputnode,match_orient,[("wm_mask_resampled","gibbs_input")]),
-        (match_orient,outputnode,[("out_file","track_file")]),
-        (gibbs,outputnode,[("param_file","param_file")]),
-        (gibbs,outputnode,[("input_file","input_file")]),
-		])
-
+                  (flip_table,gibbs_node,[("table","bvecs")]),
+                  (inputnode,gibbs_node,[("diffusion_resampled","dwi")]),
+                  (gibbs_node,outputnode,[("recon_file","recon_file")])
+                ])
     return flow

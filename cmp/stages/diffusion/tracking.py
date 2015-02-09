@@ -29,6 +29,7 @@ import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
 import nipype.interfaces.camino2trackvis as camino2trackvis
+from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
 
 import nibabel as nib
 import numpy as np
@@ -117,6 +118,20 @@ class FSL_tracking_config(HasTraits):
     curvature_threshold = Float(0.2)
     
     traits_view = View('number_of_samples','number_of_steps','distance_threshold','curvature_threshold')
+
+class Gibbs_tracking_config(HasTraits):
+    iterations = Int(100000000)
+    particle_length=Float(1.5)
+    particle_width=Float(0.5)
+    particle_weight=Float(0.0003)
+    temp_start=Float(0.1)
+    temp_end=Float(0.001)
+    inexbalance=Int(-2)
+    fiber_length=Float(20)
+    curvature_threshold=Float(90)
+    
+    traits_view = View('iterations','particle_length','particle_width','particle_weight','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold')
+
 
 class DTB_dtk2dirInputSpec(CommandLineInputSpec):
     diffusion_type = traits.Enum(['dti','dsi'], desc='type of diffusion data [dti|dsi]', position=1,
@@ -696,4 +711,132 @@ def create_fsl_tracking_flow(config):
             (probtrackx,outputnode,[("matrix","targets")])
             ])
     
+    return flow
+
+class gibbs_tracking_CMDInputSpec(CommandLineInputSpec):
+    in_file = File(argstr="-i %s",position = 1,mandatory=True,exists=True,desc="input image (tensor, Q-ball or FSL/MRTrix SH-coefficient image)")
+    parameter_file = File(argstr="-p %s", position = 2, mandatory = True, exists=True, desc="gibbs parameter file (.gtp)")
+    mask = File(argstr="-m %s",position=3,mandatory=False,desc="mask, binary mask image (optional)")
+    out_file_name = File(argstr="-o ./%s",position=5,desc='output fiber bundle (.trk)')
+
+class gibbs_tracking_CMDOutputSpec(TraitedSpec):
+    out_file = File(desc='output fiber bundle')
+
+class gibbs_tracking_CMD(CommandLine):
+    _cmd = 'MitkGibbsTracking.sh'
+    input_spec = gibbs_tracking_CMDInputSpec
+    output_spec = gibbs_tracking_CMDOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file_name)
+        return outputs
+    
+class gibbs_trackingInputSpec(BaseInterfaceInputSpec):
+
+    # Inputs for XML file
+    iterations = Int
+    particle_length=Float
+    particle_width=Float
+    particle_weight=Float
+    temp_start=Float
+    temp_end=Float
+    inexbalance=Int
+    fiber_length=Float
+    curvature_threshold=Float
+
+    # Command line parameters
+    in_file = File(mandatory=True,exists=True,desc="input image (tensor, Q-ball or FSL/MRTrix SH-coefficient image)")
+    mask = File(mandatory=False,desc="mask, binary mask image (optional)")
+
+class gibbs_trackingOutputSpec(TraitedSpec):
+    out_file = File(desc='output fiber bundle', exists = True)
+    param_file = File(desc='gibbs parameters',exists = True)
+
+class gibbs_tracking(BaseInterface):
+    input_spec = gibbs_trackingInputSpec
+    output_spec = gibbs_trackingOutputSpec
+
+    def _run_interface(self,runtime):
+        # Create XML file
+        f = open(os.path.abspath('gibbs_parameters.gtp'),'w')
+        xml_text = '<?xml version="1.0" ?>\n<global_tracking_parameter_file file_version="0.1">\n    <parameter_set iterations="%s" particle_length="%s" particle_width="%s" particle_weight="%s" temp_start="%s" temp_end="%s" inexbalance="%s" fiber_length="%s" curvature_threshold="%s" />\n</global_tracking_parameter_file>' % (self.inputs.iterations,self.inputs.particle_length,self.inputs.particle_width,self.inputs.particle_weight,self.inputs.temp_start,self.inputs.temp_end,self.inputs.inexbalance,self.inputs.fiber_length, self.inputs.curvature_threshold)
+        f.write(xml_text)
+        f.close()
+        
+        # Call gibbs software
+        gibbs = gibbs_tracking_CMD(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'))
+        gibbs.inputs.mask = self.inputs.mask
+        gibbs.inputs.out_file_name = 'global_tractography.trk'
+        res = gibbs.run()
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath('global_tractography.trk')
+        outputs["param_file"] = os.path.abspath('gibbs_parameters.gtp')
+        return outputs
+    
+class match_orientationInputSpec(BaseInterfaceInputSpec):
+    gibbs_output = File(exists=True, mandatory=True,desc="Trackvis file outputed by gibbs miniapp, with the LPS orientation set as default")
+    gibbs_input = File(exists=True, mandatory=True, desc="File used as input for the gibbs tracking (wm mask)")
+
+class match_orientationOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Trackvis file with orientation matching gibbs input')
+
+class match_orientations(BaseInterface):
+    
+    input_spec = match_orientationInputSpec
+    output_spec = match_orientationOutputSpec
+    
+    def _run_interface(self, runtime):    
+        filename = os.path.basename(self.inputs.gibbs_output)
+    
+        dx, dy, dz = get_data_dims(self.inputs.gibbs_input)
+        vx, vy, vz = get_vox_dims(self.inputs.gibbs_input)
+        image_file = nib.load(self.inputs.gibbs_input)
+        affine = image_file.get_affine()
+        import numpy as np
+        #Reads MITK tracks
+        fib, hdr = nib.trackvis.read(self.inputs.gibbs_output)
+        trk_header = nib.trackvis.empty_header()
+        trk_header['dim'] = [dx,dy,dz]
+        trk_header['voxel_size'] = [vx,vy,vz]
+        trk_header['n_count'] = hdr['n_count']
+        
+        axcode = nib.orientations.aff2axcodes(affine)
+        trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
+        trk_header['vox_to_ras'] = affine
+        new_fib = []
+        for i in range(len(fib)):
+            new_fib.append((fib[i][0]*[-1,-1,1],None,None))
+        nib.trackvis.write(os.path.abspath(filename), new_fib, trk_header, points_space = 'rasmm')
+        iflogger.info('file written to %s' % os.path.abspath(filename))
+        return runtime
+    
+    def _list_outputs(self):
+        filename = os.path.basename(self.inputs.gibbs_output)
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(filename)
+        return outputs
+
+def create_gibbs_tracking_flow(config):
+    flow = pe.Workflow(name="tracking")
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["recon_file","wm_mask_resampled"]),name="inputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file","param_file"],mandatory_inputs=True),name="outputnode")
+
+    gibbs = pe.Node(interface=gibbs_tracking(iterations = config.iterations, particle_length=config.particle_length, particle_width=config.particle_width, particle_weight=config.particle_weight, temp_start=config.temp_start, temp_end=config.temp_end, inexbalance=config.inexbalance, fiber_length=config.fiber_length, curvature_threshold=config.curvature_threshold),name="gibbs_tracking")
+        
+    match_orient = pe.Node(interface=match_orientations(),name='match_orientations')
+
+    flow.connect([
+                  (inputnode,gibbs,[("recon_file","in_file")]),
+                  (inputnode,gibbs,[("wm_mask_resampled","mask")]),
+                  (gibbs,match_orient,[("out_file","gibbs_output")]),
+                  (inputnode,match_orient,[("wm_mask_resampled","gibbs_input")]),
+                  (match_orient,outputnode,[("out_file","track_file")]),
+                  (gibbs,outputnode,[("param_file","param_file")]),
+                ])
+
     return flow
