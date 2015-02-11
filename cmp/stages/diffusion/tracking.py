@@ -803,15 +803,28 @@ class match_orientations(BaseInterface):
         trk_header = nib.trackvis.empty_header()
         trk_header['dim'] = [dx,dy,dz]
         trk_header['voxel_size'] = [vx,vy,vz]
-        trk_header['n_count'] = hdr['n_count']
-        
+        trk_header['origin'] = [0 ,0 ,0]
         axcode = nib.orientations.aff2axcodes(affine)
-        trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
-        trk_header['vox_to_ras'] = affine
+        if axcode[0] != str(hdr['voxel_order'])[0]:
+            flip_x = -1
+        else:
+            flip_x = 1
+        if axcode[1] != str(hdr['voxel_order'])[1]:
+            flip_y = -1
+        else:
+            flip_y = 1
+        if axcode[2] != str(hdr['voxel_order'])[2]:
+            flip_z = -1
+        else:
+            flip_z = 1
+        trk_header['voxel_order'] = 'LPS'
         new_fib = []
         for i in range(len(fib)):
-            new_fib.append((fib[i][0]*[-1,-1,1],None,None))
-        nib.trackvis.write(os.path.abspath(filename), new_fib, trk_header, points_space = 'rasmm')
+            temp_fib = fib[i][0].copy()
+            for j in range(len(fib[i][0])):
+                temp_fib[j] = [flip_x*(fib[i][0][j][0]-hdr['origin'][0])+vx/2,flip_y*(fib[i][0][j][1]-hdr['origin'][1])+vy/2, flip_z*(fib[i][0][j][2]-hdr['origin'][2])+vz/2]
+            new_fib.append((temp_fib,None,None))
+        nib.trackvis.write(os.path.abspath(filename), new_fib, trk_header, points_space = 'voxmm')
         iflogger.info('file written to %s' % os.path.abspath(filename))
         return runtime
     
