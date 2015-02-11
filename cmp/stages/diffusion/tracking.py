@@ -817,7 +817,7 @@ class match_orientations(BaseInterface):
             flip_z = -1
         else:
             flip_z = 1
-        trk_header['voxel_order'] = 'LPS'
+        trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
         new_fib = []
         for i in range(len(fib)):
             temp_fib = fib[i][0].copy()
