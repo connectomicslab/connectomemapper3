@@ -229,6 +229,7 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         datasource.inputs.field_template = dict(diffusion=self.global_conf.imaging_model+'.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
+        datasource.inputs.sort_filelist=False
        
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
