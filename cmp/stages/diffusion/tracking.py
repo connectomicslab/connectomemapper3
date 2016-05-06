@@ -418,10 +418,9 @@ def create_mrtrix_tracking_flow(config):
             mrtrix_tracking.inputs.inputmodel = 'SD_STREAM'  
         else:
             mrtrix_tracking.inputs.inputmodel = 'DT_STREAM'
-            mrtrix_tracking.inputs.minimum_radius_of_curvature = config.curvature
-            flow.connect([
-                        (inputnode,mrtrix_tracking,[("grad","gradient_encoding_file")])
-                        ])
+        flow.connect([
+                      (inputnode,mrtrix_tracking,[("grad","gradient_encoding_file")])
+                    ])
         converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
         flow.connect([
                       (inputnode,mrtrix_tracking,[('DWI','in_file'),('wm_mask_resampled','seed_file'),('wm_mask_resampled','mask_file')]),
