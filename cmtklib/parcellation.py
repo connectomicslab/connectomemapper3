@@ -403,6 +403,8 @@ def create_wm_mask(subject_id, subjects_dir):
                     (asegd == 10) |
                     (asegd == 49) )
     csfA[idx] = 1
+    img = ni.Nifti1Image(csfA, aseg.get_affine(), aseg.get_header())
+    ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
     csfA = imerode(imerode(csfA, se1),se)
 
     # thalmus proper and cuadate are put back because they are not lateral ventricles
