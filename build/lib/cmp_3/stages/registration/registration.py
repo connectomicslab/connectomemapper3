@@ -27,8 +27,8 @@ from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineIn
 import nibabel as nib
 
 # Own imports
-from cmp_3.stages.common import Stage
-from cmp_3.pipelines.common import MRThreshold, MRCrop, ExtractMRTrixGrad, FSLCreateHD
+from cmp3.stages.common import Stage
+from cmp3.pipelines.common import MRThreshold, MRCrop, ExtractMRTrixGrad, FSLCreateHD
 
 
 class RegistrationConfig(HasTraits):

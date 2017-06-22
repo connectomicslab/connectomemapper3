@@ -595,7 +595,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
     en_fnamemm  = 'endpointsmm.npy'
     #ep_fname  = 'lengths.npy'
     curv_fname  = 'meancurvature.npy'
-    #intrk = op.join(gconf.get_cmp_3_fibers(), 'streamline_filtered.trk')
+    #intrk = op.join(gconf.get_cmp3_fibers(), 'streamline_filtered.trk')
     print('Opening file :' + intrk)
     fib, hdr    = nibabel.trackvis.read(intrk, False)
     

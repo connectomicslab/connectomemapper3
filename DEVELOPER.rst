@@ -32,11 +32,11 @@ The adding of newer configuration options to existing stages should be self-
 understandable. If the addition is large enough to be considered a "sub-module"
 of an existing stage, see the Diffusion stage example.
 
-Adding a new stage implies the addition of the stage folder to the cmp_3/stages
+Adding a new stage implies the addition of the stage folder to the cmp3/stages
 directory and according modification of the parent pipeline along with insertion
 of a new image. Copy-paste of existing stage (such as segmentation stage) is
 recommended.
 
 Adding a new pipeline implies the creation of a new pipeline script and folder
-in the cmp_3/pipelines directory. Again copy-pasting an existing pipeline is the
-better idea here. Modification of the cmp_3/project.py file is also needed.
+in the cmp3/pipelines directory. Again copy-pasting an existing pipeline is the
+better idea here. Modification of the cmp3/project.py file is also needed.

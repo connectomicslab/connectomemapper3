@@ -9,7 +9,7 @@
 
 import os
 import datetime
-from cmp_3.pipelines.common import *
+from cmp3.pipelines.common import *
 from traits.api import *
 from traitsui.api import *
 
@@ -23,12 +23,12 @@ import shutil
 
 import nibabel as nib
 
-from cmp_3.stages.preprocessing.preprocessing import PreprocessingStage
-from cmp_3.stages.segmentation.segmentation import SegmentationStage
-from cmp_3.stages.parcellation.parcellation import ParcellationStage
-from cmp_3.stages.diffusion.diffusion import DiffusionStage
-from cmp_3.stages.registration.registration import RegistrationStage
-from cmp_3.stages.connectome.connectome import MRTrixConnectomeStage
+from cmp3.stages.preprocessing.preprocessing import PreprocessingStage
+from cmp3.stages.segmentation.segmentation import SegmentationStage
+from cmp3.stages.parcellation.parcellation import ParcellationStage
+from cmp3.stages.diffusion.diffusion import DiffusionStage
+from cmp3.stages.registration.registration import RegistrationStage
+from cmp3.stages.connectome.connectome import MRTrixConnectomeStage
 
 from bids.grabbids import BIDSLayout
 

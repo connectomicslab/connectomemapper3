@@ -19,7 +19,7 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 
 # Own imports
-from cmp_3.stages.common import Stage
+from cmp3.stages.common import Stage
 from reconstruction import *
 from tracking import *
 

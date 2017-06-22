@@ -13,8 +13,8 @@ from traitsui.api import *
 from nipype.interfaces.base import traits, BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, CommandLine, OutputMultiPath, TraitedSpec, Interface, InterfaceResult, isdefined
 import nipype.interfaces.utility as util
 
-from cmp_3.stages.common import Stage
-from cmp_3.pipelines.common import MRThreshold, ExtractMRTrixGrad
+from cmp3.stages.common import Stage
+from cmp3.pipelines.common import MRThreshold, ExtractMRTrixGrad
 
 import os
 import pickle

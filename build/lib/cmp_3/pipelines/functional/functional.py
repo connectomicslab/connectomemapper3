@@ -9,7 +9,7 @@
 
 import os
 import datetime
-from cmp_3.pipelines.common import *
+from cmp3.pipelines.common import *
 from traits.api import *
 from traitsui.api import *
 
@@ -23,12 +23,12 @@ import shutil
 
 import nibabel as nib
 
-from cmp_3.stages.preprocessing.fmri_preprocessing import PreprocessingStage
-from cmp_3.stages.segmentation.segmentation import SegmentationStage
-from cmp_3.stages.parcellation.parcellation import ParcellationStage
-from cmp_3.stages.registration.registration import RegistrationStage
-from cmp_3.stages.functional.functional import FunctionalStage
-from cmp_3.stages.connectome.fmri_connectome import ConnectomeStage
+from cmp3.stages.preprocessing.fmri_preprocessing import PreprocessingStage
+from cmp3.stages.segmentation.segmentation import SegmentationStage
+from cmp3.stages.parcellation.parcellation import ParcellationStage
+from cmp3.stages.registration.registration import RegistrationStage
+from cmp3.stages.functional.functional import FunctionalStage
+from cmp3.stages.connectome.fmri_connectome import ConnectomeStage
 
 class Global_Configuration(HasTraits):
     process_type = Str('fMRI')

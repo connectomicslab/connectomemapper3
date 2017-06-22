@@ -11,10 +11,10 @@ try:
 except ImportError: 
     import enthought.traits.ui.wx
 
-import cmp_3.gui
-import cmp_3.project
-from cmp_3.info import __version__
-from cmp_3.stages.diffusion.reconstruction import DTB_gfa
+import cmp3.gui
+import cmp3.project
+from cmp3.info import __version__
+from cmp3.stages.diffusion.reconstruction import DTB_gfa
 
 def info():
     print "\nconnectomemapper " + __version__
@@ -74,13 +74,13 @@ if __name__ == "__main__":
     argc = len(sys.argv)
     if argc==1: # no args, launch the GUI
         traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
-        mw = cmp_3.gui.CMP_MainWindow()
+        mw = cmp3.gui.CMP_MainWindow()
         mw_res = mw.configure_traits()
     elif argc==3: # connectomemapper input_folder ini_file
-        project = cmp_3.gui.CMP_Project_Info()
+        project = cmp3.gui.CMP_Project_Info()
         project.base_directory = os.path.abspath(sys.argv[1])
         project.config_file = os.path.abspath(sys.argv[2])
-        pipeline = cmp_3.project.init_project(project, False)
+        pipeline = cmp3.project.init_project(project, False)
         if pipeline != None:
             valid_inputs = pipeline.check_input(gui=False)
             if valid_inputs:

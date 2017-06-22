@@ -22,7 +22,7 @@ import nipype.interfaces.cmtk as cmtk
 import nipype.interfaces.utility as util
 
 # Own imports
-from cmp_3.stages.common import Stage
+from cmp3.stages.common import Stage
 
 class ParcellationConfig(HasTraits):
     pipeline_mode = Enum(["Diffusion","fMRI"])

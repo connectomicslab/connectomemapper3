@@ -10,7 +10,7 @@
 from traits.api import *
 from traitsui.api import *
 
-from cmp_3.stages.common import Stage
+from cmp3.stages.common import Stage
 
 import os
 import pickle

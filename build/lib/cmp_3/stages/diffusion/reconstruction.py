@@ -28,7 +28,7 @@ from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
     traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec
 import nipype.interfaces.base as nibase
 
-from cmp_3.pipelines.common import MRThreshold
+from cmp3.pipelines.common import MRThreshold
 
 from nipype import logging
 iflogger = logging.getLogger('interface')

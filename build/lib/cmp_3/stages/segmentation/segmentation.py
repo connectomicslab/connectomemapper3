@@ -21,7 +21,7 @@ from nipype.interfaces.io import FreeSurferSource
 import nipype.interfaces.utility as util
 
 # Own imports
-from cmp_3.stages.common import Stage
+from cmp3.stages.common import Stage
 
 class SegmentationConfig(HasTraits):
     seg_tool = Enum(["Freesurfer","Custom segmentation"])
@@ -79,7 +79,7 @@ class SegmentationStage(Stage):
                 fs_reconall = pe.Node(interface=fs.ReconAll(flags='-no-isrunning'),name="reconall")
                 fs_reconall.inputs.args = self.config.freesurfer_args
                 
-                #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp_3/pipelines/diffusion/diffusion.py
+                #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp3/pipelines/diffusion/diffusion.py
                 fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
 
                 def isavailable(file):

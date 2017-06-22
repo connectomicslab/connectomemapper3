@@ -23,7 +23,7 @@ import nipype.interfaces.utility as util
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
 
 # Own imports
-from cmp_3.stages.common import Stage
+from cmp3.stages.common import Stage
 
 # Imports for processing
 import nibabel as nib

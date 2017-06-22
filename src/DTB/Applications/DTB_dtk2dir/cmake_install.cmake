@@ -1,8 +1,8 @@
-# Install script for directory: /home/localadmin/Softwares/cmp_3/src/DTB/Applications/DTB_dtk2dir
+# Install script for directory: /home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_dtk2dir
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/localadmin/Softwares/cmp_3/src/DTB/../../scripts")
+  set(CMAKE_INSTALL_PREFIX "/home/localadmin/Softwares/cmp3/src/DTB/../../scripts")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -39,7 +39,7 @@ if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspeci
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/./DTB_dtk2dir"
          RPATH "")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/." TYPE EXECUTABLE PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE FILES "/home/localadmin/Softwares/cmp_3/src/DTB/Applications/DTB_dtk2dir/DTB_dtk2dir")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/." TYPE EXECUTABLE PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE FILES "/home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_dtk2dir/DTB_dtk2dir")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/./DTB_dtk2dir" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/./DTB_dtk2dir")
     if(CMAKE_INSTALL_DO_STRIP)

@@ -7,18 +7,18 @@ import sys
 from glob import glob
 if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 
-packages=["cmp_3","cmp_3.stages",
-          "cmp_3.stages.preprocessing",
-          "cmp_3.stages.segmentation",
-          "cmp_3.stages.parcellation",
-          "cmp_3.stages.registration",
-          "cmp_3.stages.diffusion",
-          "cmp_3.stages.connectome",
-          "cmp_3.pipelines",
-          "cmp_3.pipelines.diffusion",
+packages=["cmp3","cmp3.stages",
+          "cmp3.stages.preprocessing",
+          "cmp3.stages.segmentation",
+          "cmp3.stages.parcellation",
+          "cmp3.stages.registration",
+          "cmp3.stages.diffusion",
+          "cmp3.stages.connectome",
+          "cmp3.pipelines",
+          "cmp3.pipelines.diffusion",
           "cmtklib"]
 
-package_data = {'cmp_3':
+package_data = {'cmp3':
                 ['pipelines/diffusion/*.png'
                 ],
                 'cmtklib':
@@ -46,8 +46,8 @@ if not 'extra_setuptools_args' in globals():
 
 def main(**extra_args):
     from distutils.core import setup
-    from cmp_3.info import __version__
-    setup(name='cmp_3',
+    from cmp3.info import __version__
+    setup(name='cmp3',
           version=__version__,
           description='Connectome Mapper',
           long_description="""Connectome Mapper implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 """ + \

@@ -25,7 +25,7 @@ from nipype.utils.filemanip import split_filename
 
 # Own imports
 from cmtklib.connectome import BuildConnectome, FilterTractogram, mrtrixcmat, cmat, prob_cmat, probtrackx_cmat
-from cmp_3.stages.common import Stage
+from cmp3.stages.common import Stage
 
 class ConnectomeConfig(HasTraits):
     #modality = List(['Deterministic','Probabilistic'])
