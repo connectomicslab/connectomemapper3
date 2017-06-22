@@ -1,12 +1,12 @@
-=================
-Connectome Mapper
-=================
+===================
+Connectome Mapper 3
+===================
 
-Connectome Mapper implements a full diffusion MRI processing pipeline,
+Connectome Mapper 3 implements a full diffusion MRI processing pipeline,
 from raw Diffusion/T1/T2 data to multi-resolution connection matrices.
-The Connectome Mapper is part of the Connectome Mapping Toolkit.
+The Connectome Mapper 3 is part of the Connectome Mapping Toolkit.
 
-Copyright (C) 2009-2015, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
+Copyright (C) 2009-2017, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
 Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 
 This software is distributed under the open-source license Modified BSD.
@@ -28,6 +28,7 @@ Credits
 * Oscar Esteban (oesteban) 
 * Adrien Birbaumer
 * David Romascano
+* Sebastien Tourbier (sebastientourbier)
 
 ------------
 Contributors

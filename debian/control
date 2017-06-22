@@ -1,4 +1,4 @@
-Source: cmp
+Source: cmp_3
 Section: python
 Priority: optional
 Maintainer: CHUV-EPFL <info@connectomics.org>
@@ -6,7 +6,7 @@ Build-Depends: debhelper (>=7.0.50~), python-support (>= 0.6), cdbs (>= 0.4.90),
 X-Python-Version: >=2.6
 Standards-Version: 3.9.3.1
 
-Package: cmp
+Package: cmp_3
 Architecture: all
 Homepage: http://www.cmtk.org
 Depends: ${misc:Depends}, ${python:Depends}, python-traits, python-traitsui, libboost-program-options-dev (>=1.40), libnifti-dev, libblitz0-dev

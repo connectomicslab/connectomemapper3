@@ -7,18 +7,18 @@ import sys
 from glob import glob
 if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 
-packages=["cmp","cmp.stages",
-          "cmp.stages.preprocessing",
-          "cmp.stages.segmentation",
-          "cmp.stages.parcellation",
-          "cmp.stages.registration",
-          "cmp.stages.diffusion",
-          "cmp.stages.connectome",
-          "cmp.pipelines",
-          "cmp.pipelines.diffusion",
+packages=["cmp_3","cmp_3.stages",
+          "cmp_3.stages.preprocessing",
+          "cmp_3.stages.segmentation",
+          "cmp_3.stages.parcellation",
+          "cmp_3.stages.registration",
+          "cmp_3.stages.diffusion",
+          "cmp_3.stages.connectome",
+          "cmp_3.pipelines",
+          "cmp_3.pipelines.diffusion",
           "cmtklib"]
 
-package_data = {'cmp':
+package_data = {'cmp_3':
                 ['pipelines/diffusion/*.png'
                 ],
                 'cmtklib':
@@ -46,8 +46,8 @@ if not 'extra_setuptools_args' in globals():
 
 def main(**extra_args):
     from distutils.core import setup
-    from cmp.info import __version__
-    setup(name='cmp',
+    from cmp_3.info import __version__
+    setup(name='cmp_3',
           version=__version__,
           description='Connectome Mapper',
           long_description="""Connectome Mapper implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 """ + \
@@ -68,7 +68,7 @@ def main(**extra_args):
             Topic :: Scientific/Engineering
             Topic :: Software Development
             """.splitlines() if len(c.split()) > 0],    
-          maintainer = 'EPFL LTS5 Diffusion Group',
+          maintainer = 'CIBM-CHUV Diffusion Group',
           maintainer_email = 'info@connectomics.org',
           package_data = package_data,
           requires=["numpy (>=1.2)", "nibabel (>=1.1.0)"],

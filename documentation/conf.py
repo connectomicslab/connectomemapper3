@@ -12,7 +12,7 @@
 # serve to show the default.
 
 import sys
-sys.path.append('../cmp/')
+sys.path.append('../cmp_3/')
 from info import __minor_version__
 from info import __version__
 from info import __release_date__
@@ -219,7 +219,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'cmp', u'CMP Documentation',
+    ('index', 'cmp_3', u'CMP Documentation',
      [u'EPFL & UNIL-CHUV'], 1)
 ]
 

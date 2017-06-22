@@ -1,7 +1,7 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: CMP
 Upstream-Contact: CHUV-EPFL <info@connectomics.org>
-Source: https://github.com/LTS5/cmp_nipype
+Source: https://github.com/LTS5/cmp_3
 
 Files: *
 Copyright:

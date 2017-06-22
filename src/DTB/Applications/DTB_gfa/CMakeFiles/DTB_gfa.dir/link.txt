@@ -1,0 +1,1 @@
+/usr/bin/g++-5      CMakeFiles/DTB_gfa.dir/main.cxx.o  -o DTB_gfa -rdynamic -Wl,-Bstatic -lblitz -Wl,-Bdynamic -lniftiio -lboost_program_options 

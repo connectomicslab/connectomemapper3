@@ -106,18 +106,18 @@ Save the file as `batch.sh` and run it from the terminal::
 	
 	You can start to modify this script to loop over subjects and/or load the "pickle" file automatically, add::
 	
-		from cmp.gui import CMPGUI
-		cmpgui = CMPGUI()
-		cmpgui.load_state('/path/to/your/pickle/state/LOG/cmp.pkl')
+		from cmp_3.gui import CMPGUI
+		cmp_3gui = CMPGUI()
+		cmp_3gui.load_state('/path/to/your/pickle/state/LOG/cmp_3.pkl')
 	
-	You can set the attributes of the cmpgui configuration object in the script and directly call the pipeline execution engine::
+	You can set the attributes of the cmp_3gui configuration object in the script and directly call the pipeline execution engine::
 	
-		cmpgui.active_dicomconverter = True
-		cmpgui.project_name = '...'
-		cmpgui.project_dir = '.../'
-		cmpgui.subject_name = '...'
-		cmpgui.subject_timepoint = '...'
-		cmpgui.subject_workingdir = '.../'
-		cmp.connectome.mapit(cmpgui)
+		cmp_3gui.active_dicomconverter = True
+		cmp_3gui.project_name = '...'
+		cmp_3gui.project_dir = '.../'
+		cmp_3gui.subject_name = '...'
+		cmp_3gui.subject_timepoint = '...'
+		cmp_3gui.subject_workingdir = '.../'
+		cmp_3.connectome.mapit(cmp_3gui)
 	
-	For a full list of field names, refer to the `source code <http://github.com/LTS5/cmp/blob/master/cmp/configuration.py>`_.
+	For a full list of field names, refer to the `source code <http://github.com/LTS5/cmp_3/blob/master/cmp_3/configuration.py>`_.

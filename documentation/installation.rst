@@ -98,13 +98,13 @@ Prerequisites
 	Debian package installation (Ubuntu >=11.10)
 	--------------------------------------------
 	
-	Installation is composed of a :doc:`debian package file <download>` (cmp_2.x.x_all.deb, containing the python cmp and cmtklib packages) and compiled binaries (32/64 bit versions available).
+	Installation is composed of a :doc:`debian package file <download>` (cmp_3_2.x.x_all.deb, containing the python cmp_3 and cmtklib packages) and compiled binaries (32/64 bit versions available).
 	
 	.. |dtb_download| raw:: html
 	
 		<tt class="xref download docutils literal"><a class="reference download internal" href="_downloads/DTB.tar.gz" onmousedown="_gaq.push(['_trackEvent', 'DTB', 'download']);">Download</a></tt>
 	
-	* :doc:`Download <download>` the .deb package and install it with the Ubuntu Software Center (default if you double click on the package on Ubuntu) or using the dpkg command (sudo dpkg -i cmp_2.x.x_all.deb). This will install all the needed dependencies.
+	* :doc:`Download <download>` the .deb package and install it with the Ubuntu Software Center (default if you double click on the package on Ubuntu) or using the dpkg command (sudo dpkg -i cmp_3_2.x.x_all.deb). This will install all the needed dependencies.
 	* |dtb_download| the compiled binaries needed by the Connectome Mapper and install them by putting them somewhere in the PATH (e.g. copy all the executable of the archive to /usr/local/bin). If you run into any trouble when running the connectome mapper, try recompiling the executables from the "src" folder.
 	* Install our forked version of Nipype (http://nipy.sourceforge.net/nipype/). For now, we require a modified version of Nipype interfaces that is available on our Github repository (https://github.com/LTS5/nipype). To install it clone to your machine the nipype fork by typing `git clone git://github.com/LTS5/nipype.git`, and run the install script with `sudo python setup.py install`. You will have to remove already installed versions of nipype if they were installed through apt-get (installation location: `/usr/lib/pyshared`) as it will take precedence over versions installed through the setup.py script.
     	
@@ -128,12 +128,12 @@ Manual installation is divided between the Python libraries needed by the Connec
 * Libraries needed by the DTB binaries: boost (module program-options), nifti, blitz: `sudo apt-get install libboost-program-options-dev libnifti-dev libblitz0-dev`
 * Extract the source code and install the Connectome Mapper from the Bash Shell using following commands::
 
-	tar xzf <cmp-release>.tar.gz
-	cd <cmp-release>/
+	tar xzf <cmp_3-release>.tar.gz
+	cd <cmp_3-release>/
 	sudo python setup.py install
 
 Help/Questions
 --------------
 
-If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_. Code bugs can be reported by creating a "New Issue" on the `github repository <https://github.com/LTS5/cmp_nipype/issues>`_.
+If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_. Code bugs can be reported by creating a "New Issue" on the `github repository <https://github.com/LTS5/cmp_3/issues>`_.
 

@@ -3,9 +3,9 @@
 
 PYTHON=`which python`
 DESTDIR=/
-BUILDIR=$(CURDIR)/debian/cmp
-PROJECT=cmp
-VERSION=2.1.0-beta
+BUILDIR=$(CURDIR)/debian/cmp_3
+PROJECT=cmp_3
+VERSION=3.0.0-beta
 
 all:
 		@echo "make source - Create source package"

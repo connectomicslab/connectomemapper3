@@ -37,15 +37,15 @@ By downloading Connectome Mapper, you agree to the terms and conditions of the f
 	PROVISION OF PATIENT CARE.
 
 	
-Souce code (`git repository <http://www.github.com/LTS5/cmp_nipype>`_)
+Souce code (`git repository <http://www.github.com/LTS5/cmp_3>`_)
 ----------------------------------------------------------------------
 
 .. raw:: html
 
 	<blockquote>
 	<div><ul class="simple">
-	<li><tt class="xref download docutils literal"><a href="https://github.com/LTS5/cmp_nipype/releases" onmousedown="_gaq.push(['_trackEvent', 'source_release-2.1.0-beta', 'download']);">2.x branch (beta)</a></tt></li>
-	<li><tt class="xref download docutils literal"><a href="https://github.com/LTS5/cmp/releases" onmousedown="_gaq.push(['_trackEvent', 'source_release-1.2.0', 'download']);">1.x branch</a></tt></li>
+	<li><tt class="xref download docutils literal"><a href="https://github.com/LTS5/cmp_3/releases" onmousedown="_gaq.push(['_trackEvent', 'source_release-2.1.0-beta', 'download']);">2.x branch (beta)</a></tt></li>
+	<li><tt class="xref download docutils literal"><a href="https://github.com/LTS5/cmp_3/releases" onmousedown="_gaq.push(['_trackEvent', 'source_release-1.2.0', 'download']);">1.x branch</a></tt></li>
 	</ul>
 	</div></blockquote>
 
@@ -57,7 +57,7 @@ Souce code (`git repository <http://www.github.com/LTS5/cmp_nipype>`_)
 	
 		<blockquote>
 		<div><ul class="simple">
-		<li><tt class="xref download docutils literal"><a class="reference download internal" href="_downloads/cmp_2.1.0-beta_all.deb" onmousedown="_gaq.push(['_trackEvent', 'debian_release-2.1.0-beta', 'download']);">Debian package, current release 2.1.0-beta</a></tt></li>
+		<li><tt class="xref download docutils literal"><a class="reference download internal" href="_downloads/cmp_3_2.1.0-beta_all.deb" onmousedown="_gaq.push(['_trackEvent', 'debian_release-2.1.0-beta', 'download']);">Debian package, current release 2.1.0-beta</a></tt></li>
 		</ul>
 		</div></blockquote>
 
