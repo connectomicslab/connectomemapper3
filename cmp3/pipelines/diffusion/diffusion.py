@@ -310,9 +310,9 @@ class DiffusionPipeline(Pipeline):
                 self.stages['Diffusion'].config.diffusion_imaging_model_choices = self.diffusion_imaging_model
                 
                 #Copy diffusion data to derivatives / cmp3  / subject / dwi 
-                out_dwi_file = os.path.join(self.derivatives_directory,'cmp3',self.subject,'dwi','dwi.nii.gz')
-                out_bval_file = os.path.join(self.derivatives_directory,'cmp3',self.subject,'dwi','dwi.bval')
-                out_bvec_file = os.path.join(self.derivatives_directory,'cmp3',self.subject,'dwi','dwi.bvec')
+                out_dwi_file = os.path.join(self.derivatives_directory,'cmp3',self.subject,'dwi',self.subject+'_dwi.nii.gz')
+                out_bval_file = os.path.join(self.derivatives_directory,'cmp3',self.subject,'dwi',self.subject+'_dwi.bval')
+                out_bvec_file = os.path.join(self.derivatives_directory,'cmp3',self.subject,'dwi',self.subject+'_dwi.bvec')
                 
                 shutil.copy(src=dwi_file,dst=out_dwi_file)
                 shutil.copy(src=bvec_file,dst=out_bvec_file)
@@ -322,11 +322,11 @@ class DiffusionPipeline(Pipeline):
                     print "Swap and reorient T2"
                     swap_and_reorient(src_file=os.path.join(self.subject_directory,'anat',self.subject+'_T2w.nii.gz'),
                                       ref_file=os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz'),
-                                      out_file=os.path.join(self.derivatives_directory,'cmp3',self.subject,'anat','T2.nii.gz'))
+                                      out_file=os.path.join(self.derivatives_directory,'cmp3',self.subject,'anat',self.subject+'_T2w.nii.gz'))
                 if t1_available:
                     swap_and_reorient(src_file=os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz'),
                                       ref_file=os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz'),
-                                      out_file=os.path.join(self.derivatives_directory,'cmp3',self.subject,'anat','T1.nii.gz'))
+                                      out_file=os.path.join(self.derivatives_directory,'cmp3',self.subject,'anat',self.subject+'_T1w.nii.gz'))
                     valid_inputs = True
                     input_message = 'Inputs check finished successfully.\nDiffusion and morphological data available.'
                 else:
@@ -405,7 +405,7 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
-        datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
+        datasource.inputs.field_template = dict(T1='anat/'+self.subject+'_T1w.nii.gz', diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval')
         #datasource.inputs.field_template_args = dict(T1=[['subject']], T2=[['subject']], diffusion=[['subject', ['subject']]], bvecs=[['subject', ['subject']]], bvals=[['subject', ['subject']]])
         datasource.inputs.sort_filelist=False
         #datasource.inputs.subject = self.subject
@@ -433,6 +433,26 @@ class DiffusionPipeline(Pipeline):
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
         sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
+
+        #Dataname substitutions in order to comply with BIDS derivatives specifications
+        sinker.inputs.substitutions = [ ('T1_registered_crop', self.subject+'_T1w_space-T1w-crop_preproc'),
+                                        ('roi_volumes_flirt_crop',self.subject+'_T1w_space-T1w-crop_labels'),
+                                        ('brain_registered_crop',self.subject+'_T1w_space-T1w-crop_brain'),
+                                        ('brain_mask_registered_crop',self.subject+'_T1w_space-T1w-crop_brainmask'),
+                                        ('wm_registered_crop',self.subject+'_T1w_space-T1w-crop_class-GM'),
+                                        ('connectome',self.subject+'_dwi_connectome'),
+                                        ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
+                                        ('dwi.bval',self.subject+'_dwi.bval'),
+                                        ('dwi.bvec',self.subject+'_dwi.bvec'),
+                                        ('diffusion_resampled_CSD.mif',self.subject+'_dwi_space-T1w-crop_CSD.mif'),
+                                        ('diffusion_resampled_CSD_tracked',self.subject+'_dwi_space-T1w-crop_tract'),
+                                        ('eddy_corrected.nii.gz.eddy_rotated_bvecs',self.subject+'_dwi_preproc.eddy_rotated_bvec'),
+                                        ('eddy_corrected.nii.gz',self.subject+'_dwi_preproc.nii.gz'),
+                                        ('dwi_brain_mask',self.subject+'_dwi_brainmask'),
+                                        ('FA',self.subject+'_dwi_FA'),
+                                        ('grad.txt',self.subject+'_dwi_grad.txt'),
+                                        ('target_epicorrected',self.subject+'_dwi_space-T1w-crop_preproc')
+                                      ]
         
         # Clear previous outputs
         self.clear_stages_outputs()
