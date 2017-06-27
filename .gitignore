@@ -1,2 +1,4 @@
 *.pyc
 *.npz
+
+build/lib
