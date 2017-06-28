@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_dtk2dir/main.cxx
+/home/localadmin/Softwares/cmp/src/DTB/Applications/DTB_dtk2dir/main.cxx
 iostream
 -
 fstream
@@ -14,7 +14,7 @@ fstream
 string
 -
 NIFTI.h
-/home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_dtk2dir/NIFTI.h
+/home/localadmin/Softwares/cmp/src/DTB/Applications/DTB_dtk2dir/NIFTI.h
 boost/program_options.hpp
 -
 

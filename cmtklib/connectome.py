@@ -384,179 +384,156 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
                                'dn_region':d_gml['dn_region']})
             nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
-class MRTrix3BaseInputSpec(CommandLineInputSpec):
-    nthreads = traits.Int(
-        argstr='-nthreads %d', desc='number of threads. if zero, the number'
-        ' of available cpus will be used', nohash=True)
-    # DW gradient table import options
-    grad_file = File(exists=True, argstr='-grad %s',
-                     desc='dw gradient scheme (MRTrix format')
-    grad_fsl = traits.Tuple(
-        File(exists=True), File(exists=True), argstr='-fslgrad %s %s',
-        desc='(bvecs, bvals) dw gradient scheme (FSL format')
-    bval_scale = traits.Enum(
-        'yes', 'no', argstr='-bvalue_scaling %s',
-        desc='specifies whether the b - values should be scaled by the square'
-        ' of the corresponding DW gradient norm, as often required for '
-        'multishell or DSI DW acquisition schemes. The default action '
-        'can also be set in the MRtrix config file, under the '
-        'BValueScaling entry. Valid choices are yes / no, true / '
-        'false, 0 / 1 (default: true).')
+# class MRTrix3BaseInputSpec(CommandLineInputSpec):
+#     nthreads = traits.Int(
+#         argstr='-nthreads %d', desc='number of threads. if zero, the number'
+#         ' of available cpus will be used', nohash=True)
+#     # DW gradient table import options
+#     grad_file = File(exists=True, argstr='-grad %s',
+#                      desc='dw gradient scheme (MRTrix format')
+#     grad_fsl = traits.Tuple(
+#         File(exists=True), File(exists=True), argstr='-fslgrad %s %s',
+#         desc='(bvecs, bvals) dw gradient scheme (FSL format')
+#     bval_scale = traits.Enum(
+#         'yes', 'no', argstr='-bvalue_scaling %s',
+#         desc='specifies whether the b - values should be scaled by the square'
+#         ' of the corresponding DW gradient norm, as often required for '
+#         'multishell or DSI DW acquisition schemes. The default action '
+#         'can also be set in the MRtrix config file, under the '
+#         'BValueScaling entry. Valid choices are yes / no, true / '
+#         'false, 0 / 1 (default: true).')
 
-    in_bvec = File(exists=True, argstr='-fslgrad %s %s',
-                   desc='bvecs file in FSL format')
-    in_bval = File(exists=True, desc='bvals file in FSL format')
-
-
-class MRTrix3Base(CommandLine):
-
-    def _format_arg(self, name, trait_spec, value):
-        if name == 'nthreads' and value == 0:
-            value = 1
-            try:
-                from multiprocessing import cpu_count
-                value = cpu_count()
-            except:
-                logger.warn('Number of threads could not be computed')
-                pass
-            return trait_spec.argstr % value
-
-        if name == 'in_bvec':
-            return trait_spec.argstr % (value, self.inputs.in_bval)
-
-        return super(MRTrix3Base, self)._format_arg(name, trait_spec, value)
-
-    def _parse_inputs(self, skip=None):
-        if skip is None:
-            skip = []
-
-        try:
-            if (isdefined(self.inputs.grad_file) or
-                    isdefined(self.inputs.grad_fsl)):
-                skip += ['in_bvec', 'in_bval']
-
-            is_bvec = isdefined(self.inputs.in_bvec)
-            is_bval = isdefined(self.inputs.in_bval)
-            if is_bvec or is_bval:
-                if not is_bvec or not is_bval:
-                    raise RuntimeError('If using bvecs and bvals inputs, both'
-                                       'should be defined')
-                skip += ['in_bval']
-        except AttributeError:
-            pass
-
-        return super(MRTrix3Base, self)._parse_inputs(skip=skip)
-
-class BuildConnectomeInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
-                   desc='input tractography')
-    in_parc = File(exists=True, argstr='%s', position=-2,
-                   desc='parcellation file')
-    out_file = File(
-        'connectome.csv', argstr='%s', mandatory=True, position=-1,
-        usedefault=True, desc='output file after processing')
-
-    nthreads = traits.Int(
-        argstr='-nthreads %d', desc='number of threads. if zero, the number'
-        ' of available cpus will be used', nohash=True)
-
-    vox_lookup = traits.Bool(
-        argstr='-assignment_voxel_lookup',
-        desc='use a simple voxel lookup value at each streamline endpoint')
-    search_radius = traits.Float(
-        argstr='-assignment_radial_search %f',
-        desc='perform a radial search from each streamline endpoint to locate '
-        'the nearest node. Argument is the maximum radius in mm; if no node is'
-        ' found within this radius, the streamline endpoint is not assigned to'
-        ' any node.')
-    search_reverse = traits.Float(
-        argstr='-assignment_reverse_search %f',
-        desc='traverse from each streamline endpoint inwards along the '
-        'streamline, in search of the last node traversed by the streamline. '
-        'Argument is the maximum traversal length in mm (set to 0 to allow '
-        'search to continue to the streamline midpoint).')
-    search_forward = traits.Float(
-        argstr='-assignment_forward_search %f',
-        desc='project the streamline forwards from the endpoint in search of a'
-        'parcellation node voxel. Argument is the maximum traversal length in '
-        'mm.')
-
-    metric = traits.Enum(
-        'count', 'meanlength', 'invlength', 'invnodevolume', 'mean_scalar',
-        'invlength_invnodevolume', argstr='-metric %s', desc='specify the edge'
-        ' weight metric')
-
-    in_scalar = File(
-        exists=True, argstr='-image %s', desc='provide the associated image '
-        'for the mean_scalar metric')
-
-    in_weights = File(
-        exists=True, argstr='-tck_weights_in %s', desc='specify a text scalar '
-        'file containing the streamline weights')
-
-    keep_unassigned = traits.Bool(
-        argstr='-keep_unassigned', desc='By default, the program discards the'
-        ' information regarding those streamlines that are not successfully '
-        'assigned to a node pair. Set this option to keep these values (will '
-        'be the first row/column in the output matrix)')
-    zero_diagonal = traits.Bool(
-        argstr='-zero_diagonal', desc='set all diagonal entries in the matrix '
-        'to zero (these represent streamlines that connect to the same node at'
-        ' both ends)')
+#     in_bvec = File(exists=True, argstr='-fslgrad %s %s',
+#                    desc='bvecs file in FSL format')
+#     in_bval = File(exists=True, desc='bvals file in FSL format')
 
 
-class BuildConnectomeOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='the output response file')
+# class MRTrix3Base(CommandLine):
+
+#     def _format_arg(self, name, trait_spec, value):
+#         if name == 'nthreads' and value == 0:
+#             value = 1
+#             try:
+#                 from multiprocessing import cpu_count
+#                 value = cpu_count()
+#             except:
+#                 logger.warn('Number of threads could not be computed')
+#                 pass
+#             return trait_spec.argstr % value
+
+#         if name == 'in_bvec':
+#             return trait_spec.argstr % (value, self.inputs.in_bval)
+
+#         return super(MRTrix3Base, self)._format_arg(name, trait_spec, value)
+
+#     def _parse_inputs(self, skip=None):
+#         if skip is None:
+#             skip = []
+
+#         try:
+#             if (isdefined(self.inputs.grad_file) or
+#                     isdefined(self.inputs.grad_fsl)):
+#                 skip += ['in_bvec', 'in_bval']
+
+#             is_bvec = isdefined(self.inputs.in_bvec)
+#             is_bval = isdefined(self.inputs.in_bval)
+#             if is_bvec or is_bval:
+#                 if not is_bvec or not is_bval:
+#                     raise RuntimeError('If using bvecs and bvals inputs, both'
+#                                        'should be defined')
+#                 skip += ['in_bval']
+#         except AttributeError:
+#             pass
+
+#         return super(MRTrix3Base, self)._parse_inputs(skip=skip)
+
+# class BuildConnectomeInputSpec(CommandLineInputSpec):
+#     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
+#                    desc='input tractography')
+#     in_parc = File(exists=True, argstr='%s', position=-2,
+#                    desc='parcellation file')
+#     out_file = File(
+#         'connectome.csv', argstr='%s', mandatory=True, position=-1,
+#         usedefault=True, desc='output file after processing')
+
+#     nthreads = traits.Int(
+#         argstr='-nthreads %d', desc='number of threads. if zero, the number'
+#         ' of available cpus will be used', nohash=True)
+
+#     vox_lookup = traits.Bool(
+#         argstr='-assignment_voxel_lookup',
+#         desc='use a simple voxel lookup value at each streamline endpoint')
+#     search_radius = traits.Float(
+#         argstr='-assignment_radial_search %f',
+#         desc='perform a radial search from each streamline endpoint to locate '
+#         'the nearest node. Argument is the maximum radius in mm; if no node is'
+#         ' found within this radius, the streamline endpoint is not assigned to'
+#         ' any node.')
+#     search_reverse = traits.Float(
+#         argstr='-assignment_reverse_search %f',
+#         desc='traverse from each streamline endpoint inwards along the '
+#         'streamline, in search of the last node traversed by the streamline. '
+#         'Argument is the maximum traversal length in mm (set to 0 to allow '
+#         'search to continue to the streamline midpoint).')
+#     search_forward = traits.Float(
+#         argstr='-assignment_forward_search %f',
+#         desc='project the streamline forwards from the endpoint in search of a'
+#         'parcellation node voxel. Argument is the maximum traversal length in '
+#         'mm.')
+
+#     metric = traits.Enum(
+#         'count', 'meanlength', 'invlength', 'invnodevolume', 'mean_scalar',
+#         'invlength_invnodevolume', argstr='-metric %s', desc='specify the edge'
+#         ' weight metric')
+
+#     in_scalar = File(
+#         exists=True, argstr='-image %s', desc='provide the associated image '
+#         'for the mean_scalar metric')
+
+#     in_weights = File(
+#         exists=True, argstr='-tck_weights_in %s', desc='specify a text scalar '
+#         'file containing the streamline weights')
+
+#     keep_unassigned = traits.Bool(
+#         argstr='-keep_unassigned', desc='By default, the program discards the'
+#         ' information regarding those streamlines that are not successfully '
+#         'assigned to a node pair. Set this option to keep these values (will '
+#         'be the first row/column in the output matrix)')
+#     zero_diagonal = traits.Bool(
+#         argstr='-zero_diagonal', desc='set all diagonal entries in the matrix '
+#         'to zero (these represent streamlines that connect to the same node at'
+#         ' both ends)')
 
 
-class BuildConnectome(MRTrix3Base):
+# class BuildConnectomeOutputSpec(TraitedSpec):
+#     out_file = File(exists=True, desc='the output response file')
 
-    """
-    Generate a connectome matrix from a streamlines file and a node
-    parcellation image
-    Example
-    -------
-    >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> mat = mrt.BuildConnectome()
-    >>> mat.inputs.in_file = 'tracks.tck'
-    >>> mat.inputs.in_parc = 'aparc+aseg.nii'
-    >>> mat.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
-    'tck2connectome tracks.tck aparc+aseg.nii connectome.csv'
-    >>> mat.run()                                 # doctest: +SKIP
-    """
 
-    _cmd = 'tck2connectome'
-    input_spec = BuildConnectomeInputSpec
-    output_spec = BuildConnectomeOutputSpec
+# class BuildConnectome(MRTrix3Base):
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+#     """
+#     Generate a connectome matrix from a streamlines file and a node
+#     parcellation image
+#     Example
+#     -------
+#     >>> import nipype.interfaces.mrtrix3 as mrt
+#     >>> mat = mrt.BuildConnectome()
+#     >>> mat.inputs.in_file = 'tracks.tck'
+#     >>> mat.inputs.in_parc = 'aparc+aseg.nii'
+#     >>> mat.cmdline                               # doctest: +ELLIPSIS +ALLOW_UNICODE
+#     'tck2connectome tracks.tck aparc+aseg.nii connectome.csv'
+#     >>> mat.run()                                 # doctest: +SKIP
+#     """
 
-class FilterTractogramInputSpec(CommandLineInputSpec):
-    in_tracks = File(exists=True,mandatory=True,argstr='%s',position=-3,desc='Input track file')
-    in_fod = File(exists=True,mandatory=True,argstr='%s',position=-2,desc='Input image containing the spherical harmonics of the fibre orientation distributions')
-    out_file = File(argstr='%s',position=-1,desc='Output text file containing the weighting factor for each streamline')
+#     _cmd = 'tck2connectome'
+#     input_spec = BuildConnectomeInputSpec
+#     output_spec = BuildConnectomeOutputSpec
 
-class FilterTractogramOutputSpec(TraitedSpec):
-    out_weights = File(exists=True,desc='Output text file containing the weighting factor for each streamline')
+#     def _list_outputs(self):
+#         outputs = self.output_spec().get()
+#         outputs['out_file'] = op.abspath(self.inputs.out_file)
+#         return outputs
 
-class FilterTractogram(MRTrix3Base):
-
-    _cmd = 'tcksift2'
-    input_spec = FilterTractogramInputSpec
-    output_spec = FilterTractogramOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        if not isdefined(self.inputs.out_file):
-            outputs['out_weights'] = op.abspath('streamlines_weights.txt')
-        else:
-            outputs['out_weights'] = op.abspath(self.inputs.out_file)
-
-        return outputs
 
 
 def mrtrixcmat(intck, fod_file, roi_volumes, parcellation_scheme, compute_curvature=True, additional_maps={}, output_types=['gPickle'], atlas_info= {}):
@@ -595,7 +572,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
     en_fnamemm  = 'endpointsmm.npy'
     #ep_fname  = 'lengths.npy'
     curv_fname  = 'meancurvature.npy'
-    #intrk = op.join(gconf.get_cmp3_fibers(), 'streamline_filtered.trk')
+    #intrk = op.join(gconf.get_cmp_fibers(), 'streamline_filtered.trk')
     print('Opening file :' + intrk)
     fib, hdr    = nibabel.trackvis.read(intrk, False)
     

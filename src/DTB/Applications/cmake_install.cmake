@@ -1,8 +1,8 @@
-# Install script for directory: /home/localadmin/Softwares/cmp3/src/DTB/Applications
+# Install script for directory: /home/localadmin/Softwares/cmp/src/DTB/Applications
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/localadmin/Softwares/cmp3/src/DTB/../../scripts")
+  set(CMAKE_INSTALL_PREFIX "/home/localadmin/Softwares/cmp/src/DTB/../../scripts")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -33,15 +33,15 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/." TYPE FILE FILES "/home/localadmin/Softwares/cmp3/src/DTB/Common/181_vecs.dat")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/." TYPE FILE FILES "/home/localadmin/Softwares/cmp/src/DTB/Common/181_vecs.dat")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_gfa/cmake_install.cmake")
-  include("/home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_P0/cmake_install.cmake")
-  include("/home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_dtk2dir/cmake_install.cmake")
-  include("/home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_streamline/cmake_install.cmake")
+  include("/home/localadmin/Softwares/cmp/src/DTB/Applications/DTB_gfa/cmake_install.cmake")
+  include("/home/localadmin/Softwares/cmp/src/DTB/Applications/DTB_P0/cmake_install.cmake")
+  include("/home/localadmin/Softwares/cmp/src/DTB/Applications/DTB_dtk2dir/cmake_install.cmake")
+  include("/home/localadmin/Softwares/cmp/src/DTB/Applications/DTB_streamline/cmake_install.cmake")
 
 endif()
 

@@ -3,8 +3,8 @@
 
 PYTHON=`which python`
 DESTDIR=/
-BUILDIR=$(CURDIR)/debian/cmp3
-PROJECT=cmp3
+BUILDIR=$(CURDIR)/debian/cmp
+PROJECT=cmp
 VERSION=3.0.0-beta
 
 all:

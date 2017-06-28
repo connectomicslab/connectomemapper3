@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_streamline/main.cxx
+/home/localadmin/Softwares/cmp/src/DTB/Applications/DTB_streamline/main.cxx
 iostream
 -
 fstream
@@ -14,11 +14,11 @@ fstream
 string
 -
 NIFTI.h
-/home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_streamline/NIFTI.h
+/home/localadmin/Softwares/cmp/src/DTB/Applications/DTB_streamline/NIFTI.h
 boost/program_options.hpp
 -
 streamline.h
-/home/localadmin/Softwares/cmp3/src/DTB/Applications/DTB_streamline/streamline.h
+/home/localadmin/Softwares/cmp/src/DTB/Applications/DTB_streamline/streamline.h
 
 /usr/include/nifti/nifti1.h
 

@@ -6,5 +6,5 @@ CXX_FLAGS =
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/localadmin/Softwares/cmp3/src/DTB/Common -I/usr/include/nifti 
+CXX_INCLUDES = -I/home/localadmin/Softwares/cmp/src/DTB/Common -I/usr/include/nifti 
 
