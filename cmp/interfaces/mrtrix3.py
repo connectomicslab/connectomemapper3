@@ -29,7 +29,7 @@ class MRtrix_mul(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        outputs['out_file'] = os.path.abspath(self.inputs.out_filename)
         return outputs
 
     def _gen_filename(self, name):
@@ -466,7 +466,7 @@ class MRTransform(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = util.split_filename(self.inputs.in_files[0])
+        _, name , _ = split_filename(self.inputs.in_files[0])
         return name + '_crop.nii.gz'
 
 
