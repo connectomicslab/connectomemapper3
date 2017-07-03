@@ -128,9 +128,9 @@ class Pipeline(HasTraits):
         for stage in self.stages.keys():
             if self.stages[stage].name == 'segmentation_stage' or self.stages[stage].name == 'parcellation_stage':
                 #self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject,self.stages[stage].name)
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,self.pipeline_name,self.stages[stage].name)
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype','common_stages',self.stages[stage].name)
             else:
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,self.pipeline_name,self.stages[stage].name)
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype',self.pipeline_name,self.stages[stage].name)
                 
     def check_config(self):
         if self.stages['Segmentation'].config.seg_tool ==  'Custom segmentation':

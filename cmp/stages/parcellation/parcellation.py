@@ -130,6 +130,7 @@ class ParcellationStage(Stage):
                                 ])
 
     def define_inspect_outputs(self):
+        print "stage_dir : %s" % self.stage_dir
         if self.config.parcellation_scheme != "Custom":
             parc_results_path = os.path.join(self.stage_dir,"%s_parcellation" % self.config.parcellation_scheme,"result_%s_parcellation.pklz" % self.config.parcellation_scheme)
             if(os.path.exists(parc_results_path)):

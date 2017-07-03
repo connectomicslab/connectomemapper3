@@ -300,7 +300,7 @@ class DiffusionStage(Stage):
                     ])
 
     def define_inspect_outputs(self):
-
+        print "stage_dir : %s" % self.stage_dir
         if self.config.processing_tool == 'DTK':
             diff_results_path = os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz")
             if(os.path.exists(diff_results_path)):

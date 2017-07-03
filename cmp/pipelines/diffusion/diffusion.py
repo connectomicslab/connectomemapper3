@@ -375,6 +375,7 @@ class DiffusionPipeline(Pipeline):
         for stage in self.stages.values():
             if stage.enabled:
                 print stage.name
+                print stage.stage_dir
 
         self.fill_stages_outputs()
        

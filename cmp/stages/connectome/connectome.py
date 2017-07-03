@@ -303,20 +303,38 @@ class MRTrixConnectomeStage(Stage):
 
     
     def define_inspect_outputs(self):
-        con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
+        # print "stage_dir : %s" % self.stage_dir
+        # con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
+        # if(os.path.exists(con_results_path)):
+        #     con_results = pickle.load(gzip.open(con_results_path))
+        #     self.inspect_outputs_dict['streamline_final'] = ['mrview',con_results.outputs.streamline_final_file]
+        #     if type(con_results.outputs.connectivity_matrices) == str:
+        #         mat = con_results.outputs.connectivity_matrices
+        #         if 'gpickle' in mat:
+        #             self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
+        #     else:
+        #         for mat in con_results.outputs.connectivity_matrices:
+        #             if 'gpickle' in mat:
+        #                 self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
+                
+        #     self.inspect_outputs = self.inspect_outputs_dict.keys()
+
+        print "stage_dir : %s" % self.stage_dir
+        con_results_path = os.path.join(self.stage_dir,"connectome_builder","result_connectome_builder.pklz")
         if(os.path.exists(con_results_path)):
             con_results = pickle.load(gzip.open(con_results_path))
-            self.inspect_outputs_dict['streamline_final'] = ['mrview',con_results.outputs.streamline_final_file]
-            if type(con_results.outputs.connectivity_matrices) == str:
-                mat = con_results.outputs.connectivity_matrices
+            self.inspect_outputs_dict['streamline_final'] = ['mrview',con_results.inputs['in_file']]
+            if type(con_results.outputs.out_file) == str:
+                mat = con_results.outputs.out_file
                 if 'gpickle' in mat:
                     self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
             else:
-                for mat in con_results.outputs.connectivity_matrices:
+                for mat in con_results.outputs.out_file:
                     if 'gpickle' in mat:
                         self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
                 
             self.inspect_outputs = self.inspect_outputs_dict.keys()
 
     def has_run(self):
-        return os.path.exists(os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz"))
+        # return os.path.exists(os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz"))
+        return os.path.exists(os.path.join(self.stage_dir,"connectome_builder","result_connectome_builder.pklz"))

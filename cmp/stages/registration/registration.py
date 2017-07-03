@@ -719,6 +719,7 @@ class RegistrationStage(Stage):
         #                     ])
 
     def define_inspect_outputs(self):
+        print "stage_dir : %s" % self.stage_dir
         if self.config.pipeline == "Diffusion":
             target_path = os.path.join(self.stage_dir,"target_resample","result_target_resample.pklz")
             fnirt_results_path = os.path.join(self.stage_dir,"fsl_fnirt_crop","result_fsl_fnirt_crop.pklz")

@@ -102,15 +102,17 @@ class SegmentationStage(Stage):
             outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
 
     def define_inspect_outputs(self):
+        print "stage_dit : %s" % self.stage_dir
         if self.config.seg_tool == "Freesurfer":
             fs_path = ''
             if self.config.use_existing_freesurfer_data == False:
                 reconall_results_path = os.path.join(self.stage_dir,"reconall","result_reconall.pklz")
+                fs_path = self.config.freesurfer_subject_id
                 if(os.path.exists(reconall_results_path)):
-                    reconall_results = pickle.load(gzip.open(reconall_results_path))
-                    fs_path = reconall_results.outputs.subject_id
+                    reconall_results = pickle.load(gzip.open(reconall_results_path))                  
             else:
                 fs_path = os.path.join(self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
+            print "fs_path : %s" % fs_path
             self.inspect_outputs_dict['brainmask/T1'] = ['tkmedit','-f',os.path.join(fs_path,'mri','brainmask.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux',os.path.join(fs_path,'mri','T1.mgz'),'-aux-surface',os.path.join(fs_path,'surf','rh.white')]
             self.inspect_outputs_dict['norm/aseg'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
             self.inspect_outputs_dict['norm/aseg/surf'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux-surface',os.path.join(fs_path,'surf','rh.white'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
