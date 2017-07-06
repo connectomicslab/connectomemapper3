@@ -428,6 +428,12 @@ class PreprocessingStage(Stage):
 
         #Extract b0 and create DWI mask
         flirt_dwimask_pre = pe.Node(interface=fsl.FLIRT(out_file='brain2b0.nii.gz',out_matrix_file='brain2b0aff'), name='flirt_dwimask_pre')
+        costs=['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff','bbr']
+        flirt_dwimask_pre.inputs.cost=costs[3]
+        flirt_dwimask_pre.inputs.cost_func=costs[3]
+        flirt_dwimask_pre.inputs.dof=6
+        flirt_dwimask_pre.inputs.no_search=False
+
         flirt_dwimask = pe.Node(interface=fsl.FLIRT(out_file='dwi_brain_mask.nii.gz', apply_xfm = True, interp='nearestneighbour'), name='flirt_dwimask')
 
         mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[-1,-2,+3]), name='mr_convert_b0')

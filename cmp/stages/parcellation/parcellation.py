@@ -131,18 +131,25 @@ class ParcellationStage(Stage):
 
     def define_inspect_outputs(self):
         print "stage_dir : %s" % self.stage_dir
+        print "parcellation scheme : %s" % self.config.parcellation_scheme
         if self.config.parcellation_scheme != "Custom":
             parc_results_path = os.path.join(self.stage_dir,"%s_parcellation" % self.config.parcellation_scheme,"result_%s_parcellation.pklz" % self.config.parcellation_scheme)
+            print "parc_results_path : %s" % parc_results_path
             if(os.path.exists(parc_results_path)):
                 parc_results = pickle.load(gzip.open(parc_results_path))
+                print parc_results
+                #print parc_results.outputs.roi_files_in_structural_space
                 white_matter_file = parc_results.outputs.white_matter_mask_file
-                if type(parc_results.outputs.roi_files_in_structural_space) == str:
+                if isinstance(parc_results.outputs.roi_files_in_structural_space, (str,unicode)):
+                    print "str: %s" % parc_results.outputs.roi_files_in_structural_space
                     lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))
                     roi_v = parc_results.outputs.roi_files_in_structural_space
+                    print "roi_v : %s" % os.path.basename(roi_v)
                     self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview','-v',
                                                                            white_matter_file+':colormap=GEColor',
                                                                            roi_v+":colormap=lut:lut="+lut_file]
-                elif type(parc_results.outputs.roi_files_in_structural_space) == TraitListObject:
+                elif isinstance(parc_results.outputs.roi_files_in_structural_space, TraitListObject):
+                    print parc_results.outputs.roi_files_in_structural_space
                     resolution = {'33':'resolution83','60':'resolution150','125':'resolution258','250':'resolution500','500':'resolution1015'}
                     for roi_v in parc_results.outputs.roi_files_in_structural_space:
                         roi_basename = os.path.basename(roi_v)
@@ -151,10 +158,11 @@ class ParcellationStage(Stage):
                         self.inspect_outputs_dict[roi_basename] = ['freeview','-v',
                                                                            white_matter_file+':colormap=GEColor',
                                                                            roi_v+":colormap=lut:lut="+lut_file]
-                self.inspect_outputs = self.inspect_outputs_dict.keys()
+                #self.inspect_outputs = self.inspect_outputs_dict.keys()
         else:
             self.inspect_outputs_dict["Custom atlas"] = ['fslview',self.config.atlas_nifti_file,"-l","Random-Rainbow"]
-            self.inspect_outputs = self.inspect_outputs_dict.keys()
+        
+        self.inspect_outputs = self.inspect_outputs_dict.keys()
             
     def has_run(self):
         if self.config.parcellation_scheme != "Custom":
