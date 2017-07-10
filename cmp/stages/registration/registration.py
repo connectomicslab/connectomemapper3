@@ -289,9 +289,9 @@ class RegistrationStage(Stage):
 
             # [1.2] Linear registration of the DW data to the T1 data
             fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='FA-TO-T1.nii.gz',out_matrix_file='FA2T1aff.mat'),name="linear_registration")
-            fsl_flirt.inputs.dof = self.config.dof
-            fsl_flirt.inputs.cost = self.config.cost
-            fsl_flirt.inputs.no_search = self.config.no_search
+            #fsl_flirt.inputs.dof = self.config.dof
+            #fsl_flirt.inputs.cost = self.config.cost
+            #fsl_flirt.inputs.no_search = self.config.no_search
             fsl_flirt.inputs.verbose = True
 
             flow.connect([
@@ -304,6 +304,17 @@ class RegistrationStage(Stage):
             flow.connect([
                         (fsl_flirt, FA2T1aff, [('out_matrix_file','in_file')])
                         ])
+
+            # flow.connect([
+            #             (FA_noNaN, fsl_flirt, [('out_file','reference')]),
+            #             (inputnode, fsl_flirt, [('brain','in_file')])
+            #             ])
+
+            # # [1.3] Transforming T1-space images using reverse affine transform to avoid rotation of bvecs
+            # FA2T1aff = pe.Node(interface=fsl.ConvertXFM(invert_xfm=True),name='FA2T1aff')
+            # flow.connect([
+            #             (fsl_flirt, FA2T1aff, [('out_matrix_file','in_file')])
+            #             ])
             
             fsl_applyxfm_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
             fsl_applyxfm_rois = pe.Node(interface=ApplymultipleXfm(),name="apply_registration_roivs")           
