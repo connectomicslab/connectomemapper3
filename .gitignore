@@ -1,5 +1,6 @@
 *.pklz
 *.pyc
 *.npz
+*.xdebug_tkmedit
 
 build/lib
