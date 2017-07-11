@@ -211,7 +211,7 @@ def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, 
                 
             # nodes
             size_nodes = parval['number_of_regions']
-            node_keys = G.nodes(data=True)[0][1].keys()
+            node_keys = G.nodes(data=True)[0][1].keys() 
 
             node_struct = {}
             for node_key in node_keys:
@@ -577,6 +577,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
     fib, hdr    = nibabel.trackvis.read(intrk, False)
     
     print "Header trackvis : ",hdr
+    print "Header trackvis id_string : ",hdr['id_string']
     #print "Fibers trackvis : ",fib
 
     if parcellation_scheme != "Custom":

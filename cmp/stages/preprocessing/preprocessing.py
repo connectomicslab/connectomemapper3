@@ -10,7 +10,7 @@
 from traits.api import *
 from traitsui.api import *
 
-from nipype.interfaces.base import traits, BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, CommandLine, OutputMultiPath, TraitedSpec, Interface, InterfaceResult, isdefined
+from nipype.interfaces.base import traits, BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, CommandLine, InputMultiPath, OutputMultiPath, TraitedSpec, Interface, InterfaceResult, isdefined
 import nipype.interfaces.utility as util
 
 from cmp.stages.common import Stage
@@ -18,6 +18,7 @@ from cmp.stages.common import Stage
 import os
 import pickle
 import gzip
+import glob
 
 import nipype.pipeline.engine as pe
 import nipype.pipeline as pip
@@ -272,6 +273,36 @@ class flipTable(BaseInterface):
         outputs["table"] = os.path.abspath('flipped_table.txt')
         return outputs
 
+class ApplymultipleMRConvertInputSpec(BaseInterfaceInputSpec):
+    in_files = InputMultiPath(File(desc='files to be registered', mandatory = True, exists = True))
+    stride = traits.List(traits.Int, argstr='-stride %s', sep=',',
+        position=3, minlen=3, maxlen=4,
+        desc='Three to four comma-separated numbers specifying the strides of the output data in memory. The actual strides produced will depend on whether the output image format can support it..')
+    output_datatype = traits.Enum("float32", "float32le","float32be", "float64", "float64le", "float64be", "int64", "uint64", "int64le","uint64le", "int64be", "uint64be", "int32", "uint32", "int32le", "uint32le", "int32be","uint32be", "int16", "uint16", "int16le", "uint16le", "int16be", "uint16be", "cfloat32","cfloat32le", "cfloat32be", "cfloat64", "cfloat64le", "cfloat64be", "int8", "uint8","bit", argstr='-datatype %s', position=2,
+                           desc='"specify output image data type. Valid choices are: float32, float32le, float32be, float64, float64le, float64be, int64, uint64, int64le, uint64le, int64be, uint64be, int32, uint32, int32le, uint32le, int32be, uint32be, int16, uint16, int16le, uint16le, int16be, uint16be, cfloat32, cfloat32le, cfloat32be, cfloat64, cfloat64le, cfloat64be, int8, uint8, bit."') #, usedefault=True)  
+    extension = traits.Enum("mif","nii", "float", "char", "short", "int", "long", "double", position=4,
+                           desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
+    
+class ApplymultipleMRConvertOutputSpec(TraitedSpec):
+    converted_files = OutputMultiPath(File())
+    
+class ApplymultipleMRConvert(BaseInterface):
+    input_spec = ApplymultipleMRConvertInputSpec
+    output_spec = ApplymultipleMRConvertOutputSpec
+    
+    def _run_interface(self, runtime):
+        for in_file in self.inputs.in_files:
+            # Extract image filename (only) and create output image filename (no renaming)
+            out_filename = in_file.split('/')[-1]
+            ax = MRConvert(in_file = in_file, stride=self.inputs.stride, out_filename=out_filename, output_datatype=self.inputs.output_datatype, extension=self.inputs.extension)
+            ax.run()
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['converted_files'] = glob.glob(os.path.abspath("*.nii.gz"))
+        return outputs
+
 class PreprocessingConfig(HasTraits):
     total_readout = Float(0.0)
     description = Str('description')
@@ -388,14 +419,14 @@ class PreprocessingStage(Stage):
         mr_convert_brainmask = pe.Node(interface=MRConvert(out_filename='brainmaskfull.nii.gz',stride=[-1,2,3],output_datatype='float32'),name='mr_convert_brain_mask')
         mr_convert_brain = pe.Node(interface=MRConvert(out_filename='anat_masked.nii.gz',stride=[-1,2,3],output_datatype='float32'),name='mr_convert_brain')
         mr_convert_T1 = pe.Node(interface=MRConvert(out_filename='anat.nii.gz',stride=[-1,2,3],output_datatype='float32'),name='mr_convert_T1')
-        mr_convert_roi_volumes = pe.Node(interface=MRConvert(out_filename='roi_volumes.nii.gz',stride=[-1,2,3],output_datatype='float32'),name='mr_convert_roi_volumes')
+        mr_convert_roi_volumes = pe.Node(interface=ApplymultipleMRConvert(stride=[-1,2,3],output_datatype='float32',extension='nii'),name='mr_convert_roi_volumes')
         mr_convert_wm_mask_file = pe.Node(interface=MRConvert(out_filename='wm_mask_file.nii.gz',stride=[-1,2,3],output_datatype='float32'),name='mr_convert_wm_mask_file')
 
         flow.connect([
                     (processing_input,mr_convert_brainmask,[('brain_mask','in_file')]),
                     (processing_input,mr_convert_brain,[('brain','in_file')]),
                     (processing_input,mr_convert_T1,[('T1','in_file')]),
-                    (processing_input,mr_convert_roi_volumes,[('roi_volumes','in_file')]),
+                    (processing_input,mr_convert_roi_volumes,[('roi_volumes','in_files')]),
                     (processing_input,mr_convert_wm_mask_file,[('wm_mask_file','in_file')])
                     ])
 
@@ -403,7 +434,7 @@ class PreprocessingStage(Stage):
                     (mr_convert_brainmask,outputnode,[('converted','brain_mask_full')]),
                     (mr_convert_brain,outputnode,[('converted','brain')]),
                     (mr_convert_T1,outputnode,[('converted','T1')]),
-                    (mr_convert_roi_volumes,outputnode,[('converted','roi_volumes')]),
+                    (mr_convert_roi_volumes,outputnode,[('converted_files','roi_volumes')]),
                     (mr_convert_wm_mask_file,outputnode,[('converted','wm_mask_file')])
                     ])
 

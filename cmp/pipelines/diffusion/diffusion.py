@@ -28,7 +28,7 @@ from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
 from cmp.stages.diffusion.diffusion import DiffusionStage
 from cmp.stages.registration.registration import RegistrationStage
-from cmp.stages.connectome.connectome import MRTrixConnectomeStage
+from cmp.stages.connectome.connectome import ConnectomeStage, MRTrixConnectomeStage
 
 from bids.grabbids import BIDSLayout
 
@@ -63,7 +63,7 @@ class DiffusionPipeline(Pipeline):
     subject = Str
     subject_directory = Directory
     derivatives_directory = Directory
-    ordered_stage_list = ['Segmentation','Parcellation','Preprocessing','Registration','Diffusion','MRTrixConnectome']
+    ordered_stage_list = ['Segmentation','Parcellation','Preprocessing','Registration','Diffusion','Connectome']# ,'MRTrixConnectome']
    
     global_conf = Global_Configuration()
   
@@ -92,8 +92,8 @@ class DiffusionPipeline(Pipeline):
             'Preprocessing':PreprocessingStage(),
             'Registration':RegistrationStage(pipeline_mode = "Diffusion"),
             'Diffusion':DiffusionStage(),
-            'MRTrixConnectome':MRTrixConnectomeStage()}
-        
+            'Connectome':ConnectomeStage()}
+        # 'MRTrixConnectome':MRTrixConnectomeStage()
         Pipeline.__init__(self, project_info)
 
         self.diffusion_imaging_model = project_info.diffusion_imaging_model
@@ -136,7 +136,8 @@ class DiffusionPipeline(Pipeline):
         self.stages['Registration'].configure_traits()
 
     def _connectome_fired(self, info):
-        self.stages['MRTrixConnectome'].configure_traits()
+        # self.stages['MRTrixConnectome'].configure_traits()
+        self.stages['Connectome'].configure_traits()
        
     def define_custom_mapping(self, custom_last_stage):
         # start by disabling all stages
@@ -535,26 +536,54 @@ class DiffusionPipeline(Pipeline):
                                     (reg_flow,sinker,[("outputnode.roi_volumes_registered_crop","anat.@vrois_reg_crop")])
                                     ])
                        
-        if self.stages['MRTrixConnectome'].enabled:
+        # if self.stages['MRTrixConnectome'].enabled:
+        #     if self.stages['Diffusion'].config.processing_tool == 'FSL':
+        #         self.stages['MRTrixConnectome'].config.probtrackx = True
+        #     else:
+        #         self.stages['MRTrixConnectome'].config.probtrackx = False
+        #     con_flow = self.create_stage_flow("MRTrixConnectome")
+        #     diffusion_flow.connect([
+		      #           (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
+		      #           (diff_flow,con_flow, [('outputnode.diffusion_model','inputnode.diffusion_model'),('outputnode.track_file','inputnode.track_file'),('outputnode.fod_file','inputnode.fod_file'),('outputnode.gFA','inputnode.gFA'),
+        #                                       ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
+		      #                                 ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
+		      #                                 ('outputnode.P0','inputnode.P0')]),
+		      #           (con_flow,diffusion_outputnode, [('outputnode.connectivity_matrices','connectivity_matrices')]),
+        #                 (diff_flow,sinker,[('outputnode.track_file','dwi.@track_file'),('outputnode.fod_file','dwi.@fod_file'),('outputnode.gFA','dwi.@gFA'),
+        #                                       ('outputnode.skewness','dwi.@skewness'),('outputnode.kurtosis','dwi.@kurtosis'),
+        #                                       ('outputnode.P0','dwi.@P0')])
+		      #           ])
+            
+        #     if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
+        #         diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
+
+        if self.stages['Connectome'].enabled:
             if self.stages['Diffusion'].config.processing_tool == 'FSL':
-                self.stages['MRTrixConnectome'].config.probtrackx = True
+                self.stages['Connectome'].config.probtrackx = True
             else:
-                self.stages['MRTrixConnectome'].config.probtrackx = False
-            con_flow = self.create_stage_flow("MRTrixConnectome")
+                self.stages['Connectome'].config.probtrackx = False
+            con_flow = self.create_stage_flow("Connectome")
             diffusion_flow.connect([
-		                (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
-		                (diff_flow,con_flow, [('outputnode.diffusion_model','inputnode.diffusion_model'),('outputnode.track_file','inputnode.track_file'),('outputnode.fod_file','inputnode.fod_file'),('outputnode.gFA','inputnode.gFA'),
+                        (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
+                        (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
                                               ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
-		                                      ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
-		                                      ('outputnode.P0','inputnode.P0')]),
-		                (con_flow,diffusion_outputnode, [('outputnode.connectivity_matrices','connectivity_matrices')]),
+                                              ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
+                                              ('outputnode.P0','inputnode.P0')]),
+                        (con_flow,diffusion_outputnode, [('outputnode.connectivity_matrices','connectivity_matrices')]),
                         (diff_flow,sinker,[('outputnode.track_file','dwi.@track_file'),('outputnode.fod_file','dwi.@fod_file'),('outputnode.gFA','dwi.@gFA'),
                                               ('outputnode.skewness','dwi.@skewness'),('outputnode.kurtosis','dwi.@kurtosis'),
-                                              ('outputnode.P0','dwi.@P0')])
-		                ])
+                                              ('outputnode.P0','dwi.@P0')]),
+                        (con_flow,sinker,[('outputnode.endpoints_file','dwi.@endpoints_file'),('outputnode.endpoints_mm_file','dwi.@endpoints_mm_file'),
+                                              ('outputnode.final_fiberslength_files','dwi.@sfinal_fiberslength_files'),
+                                              ('outputnode.filtered_fiberslabel_files','dwi.@filtered_fiberslabel_files'),
+                                              ('outputnode.final_fiberlabels_files','dwi.@final_fiberlabels_files'),
+                                              ('outputnode.streamline_final_file','dwi.@streamline_final_file')
+                                              ])
+                        ])
             
             if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
                 diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
+
 
         iflogger.info("**** Processing ****")
        
@@ -695,6 +724,8 @@ class DiffusionPipeline(Pipeline):
             
             if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
                 diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
+
+
                 
                 
         # Create NIPYPE flow

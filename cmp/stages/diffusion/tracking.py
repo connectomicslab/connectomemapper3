@@ -686,10 +686,10 @@ def create_mrtrix_tracking_flow(config):
             (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
             (inputnode,mrtrix_tracking,[('DWI','in_file')]),
             (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
-            (mrtrix_tracking,outputnode,[('tracked','track_file')]),
+            #(mrtrix_tracking,outputnode,[('tracked','track_file')]),
             (mrtrix_tracking,converter,[('tracked','in_file')]),
-            (inputnode,converter,[('wm_mask_resampled','image_file')])
-            #(converter,outputnode,[('out_file','track_file')])
+            (inputnode,converter,[('wm_mask_resampled','image_file')]),
+            (converter,outputnode,[('out_file','track_file')])
             ])
 
         # flow.connect([
