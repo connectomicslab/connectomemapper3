@@ -395,7 +395,9 @@ class DiffusionPipeline(Pipeline):
             os.unlink(os.path.join(deriv_subject_directory,"pypeline.log"))
         config.update_config({'logging': {'log_directory': deriv_subject_directory,
                                   'log_to_file': True},
-                              'execution': {'remove_unnecessary_outputs': False}
+                              'execution': {'remove_unnecessary_outputs': False,
+                              'stop_on_first_crash': True,'stop_on_first_rerun': False,
+                              'crashfile_format': "txt"}
                               })
         logging.update_logging(config)
         iflogger = logging.getLogger('interface')
@@ -412,11 +414,11 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.sort_filelist=False
         #datasource.inputs.subject = self.subject
 
-        print datasource.inputs
+        #print datasource.inputs
 
-        datasource.run()
+        #datasource.run()
 
-        print datasource.outputs
+        #print datasource.outputs
 
         # try:
         #     datasource.run()

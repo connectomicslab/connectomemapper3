@@ -585,6 +585,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
     else:
         resolutions = atlas_info
     
+    print "resolutions : %s" % resolutions 
     # Previously, load_endpoints_from_trk() used the voxel size stored
     # in the track hdr to transform the endpoints to ROI voxel space.
     # This only works if the ROI voxel size is the same as the DSI/DTI
@@ -637,6 +638,10 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
         roi       = nibabel.load(roi_fname)
         roiData   = roi.get_data()
         affine_vox_to_world = np.matrix(roi.affine[:3,:3])
+
+
+        #print "roiData shape : %s " % roiData.shape
+
         print "Affine Voxel 2 World transformation : ",affine_vox_to_world
 
         affine_world_to_vox = np.linalg.inv(affine_vox_to_world)
@@ -703,17 +708,17 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
                 print "origin: ",origin[0],",",origin[1],",",origin[2]
                 
                 startvox = np.zeros((3,1))
-                startvox[0]=np.int(endpointsmm[i, 0, 0])
-                startvox[1]=np.int(endpointsmm[i, 0, 1])
-                startvox[2]=np.int(endpointsmm[i, 0, 2])
+                startvox[0]=np.int(endpoints[i, 0, 0])
+                startvox[1]=np.int(endpoints[i, 0, 1])
+                startvox[2]=np.int(endpoints[i, 0, 2])
                 # startvox[0]=np.int(-(endpoints[i, 0, 0]+origin[0]))
                 # startvox[1]=np.int(-(endpoints[i, 0, 1]+origin[1]))
                 # startvox[2]=np.int(-endpoints[i, 0, 2]+origin[2])
 
                 endvox = np.zeros((3,1))
-                endvox[0]=np.int(endpointsmm[i, 1, 0])
-                endvox[1]=np.int(endpointsmm[i, 1, 1])
-                endvox[2]=np.int(endpointsmm[i, 1, 2])
+                endvox[0]=np.int(endpoints[i, 1, 0])
+                endvox[1]=np.int(endpoints[i, 1, 1])
+                endvox[2]=np.int(endpoints[i, 1, 2])
                 # endvox[0]=np.int(-(endpoints[i, 1, 0]+origin[0]))
                 # endvox[1]=np.int(-(endpoints[i, 1, 1]+origin[1]))
                 # endvox[2]=np.int(-endpoints[i, 1, 2]+origin[2])
@@ -766,8 +771,8 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
         print("Valid fibers: %i (%f percent)" % (n-dis, 100 - dis*100.0/n) )
 
         print "roi : ",roi
-        print "roiData size : ",roiData.size
-        print "roiData shape : ",roiData.shape
+        #print "roiData size : ",roiData.size
+        #print "roiData shape : ",roiData.shape
 
         # create a final fiber length array
         finalfiberlength = []
