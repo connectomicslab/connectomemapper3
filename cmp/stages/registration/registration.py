@@ -42,6 +42,10 @@ from nipype.interfaces.mrtrix3.utils import TensorMetrics
 class RegistrationConfig(HasTraits):
     # Pipeline mode
     pipeline = Enum(["Diffusion","fMRI"])
+
+    # DWI resampling selection
+    resampling = Tuple(1,1,1)
+    interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
     
     # Registration selection
     registration_mode = Str('Linear + Non-linear (FSL)')
@@ -64,7 +68,9 @@ class RegistrationConfig(HasTraits):
     apply_to_eroded_csf = Bool(True)
     apply_to_eroded_brain = Bool(False)
                 
-    traits_view = View(Item('registration_mode',editor=EnumEditor(name='registration_mode_trait')),
+    traits_view = View(HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+                       'interpolation'),
+                        Item('registration_mode',editor=EnumEditor(name='registration_mode_trait')),
                         Group('uses_qform','dof','cost','no_search','flirt_args',label='FLIRT',
                               show_border=True,visible_when='registration_mode=="Linear + Non-linear (FSL)"'),
                         # Group('init','contrast_type',
@@ -392,10 +398,14 @@ class RegistrationStage(Stage):
 
             # [1.5] Non linear registration of the DW data to the rotated T1 data
             fsl_flirt_crop = pe.Node(interface=fsl.FLIRT(out_file='B0-TO-T1_masked_crop.nii.gz',out_matrix_file='T12DWIaffcrop.mat'),name='fsl_flirt_crop')
+            fsl_flirt_crop.inputs.dof = self.config.dof
+            fsl_flirt_crop.inputs.cost = self.config.cost
+            fsl_flirt_crop.inputs.no_search = self.config.no_search
+            fsl_flirt_crop.inputs.verbose = True
 
             flow.connect([
-                        (mr_convert_b0, fsl_flirt_crop, [('converted','in_file')]),
-                        (mr_crop_T1, fsl_flirt_crop, [('cropped','reference')]),           
+                        (mr_convert_b0, fsl_flirt_crop, [('converted','reference')]),
+                        (mr_crop_T1, fsl_flirt_crop, [('cropped','in_file')]),           
                         ])
 
             fsl_fnirt_crop = pe.Node(interface=fsl.FNIRT(fieldcoeff_file=True),name='fsl_fnirt_crop')

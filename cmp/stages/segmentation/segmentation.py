@@ -13,18 +13,22 @@ from traits.api import *
 from traitsui.api import *
 import pickle
 import gzip
+import shutil
 
 # Nipype imports
 import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
+import nipype.interfaces.fsl as fsl
 from nipype.interfaces.io import FreeSurferSource
 import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
+from cmp.interfaces.freesurfer import copyFileToFreesurfer
 
 class SegmentationConfig(HasTraits):
     seg_tool = Enum(["Freesurfer","Custom segmentation"])
+    use_fsl_brain_mask = Bool(True)
     use_existing_freesurfer_data = Bool(False)
     freesurfer_subjects_dir = Directory
     freesurfer_subject_id_trait = List
@@ -32,7 +36,7 @@ class SegmentationConfig(HasTraits):
     freesurfer_args = Str
     white_matter_mask = File(exist=True)
     traits_view = View(Item('seg_tool',label="Segmentation tool"),
-                       Group('freesurfer_args','use_existing_freesurfer_data',
+                       Group('use_fsl_brain_mask','freesurfer_args','use_existing_freesurfer_data',
                         Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
                         Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True'),
                         visible_when="seg_tool=='Freesurfer'"),
@@ -53,6 +57,7 @@ class SegmentationConfig(HasTraits):
 def extract_base_directory(file):
     print "Extract reconall base dir : %s" % file[:-17]
     return file[:-17]
+
 
 class SegmentationStage(Stage):
     # General and UI members
@@ -75,23 +80,99 @@ class SegmentationStage(Stage):
                     print "Folder not existing; %s created!" % orig_dir
                 rename.inputs.format_string = os.path.join(orig_dir,"001.mgz")
                 
-                # ReconAll => named outputnode as we don't want to select a specific output....
-                fs_reconall = pe.Node(interface=fs.ReconAll(flags='-no-isrunning'),name="reconall")
-                fs_reconall.inputs.args = self.config.freesurfer_args
-                
-                #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
-                fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
+                if self.config.use_fsl_brain_mask == False:
+                    # ReconAll => named outputnode as we don't want to select a specific output....
+                    fs_reconall = pe.Node(interface=fs.ReconAll(flags='-no-isrunning'),name="reconall")
+                    fs_reconall.inputs.directive = 'all'
+                    fs_reconall.inputs.args = self.config.freesurfer_args
+                    
+                    #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
+                    fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
 
-                def isavailable(file):
-                    print "T1 is available"
-                    return file
-                
-                flow.connect([
-                            (inputnode,fs_mriconvert,[(('T1',isavailable),'in_file')]),
-                            (fs_mriconvert,rename,[('out_file','in_file')]),
-                            (rename,fs_reconall,[(("out_file",extract_base_directory),"subject_id")]),
-                            (fs_reconall,outputnode,[('subjects_dir','subjects_dir'),('subject_id','subject_id')]),
-                            ])
+                    def isavailable(file):
+                        print "T1 is available"
+                        return file
+                    
+                    flow.connect([
+                                (inputnode,fs_mriconvert,[(('T1',isavailable),'in_file')]),
+                                (fs_mriconvert,rename,[('out_file','in_file')]),
+                                (rename,fs_reconall,[(("out_file",extract_base_directory),"subject_id")]),
+                                (fs_reconall,outputnode,[('subjects_dir','subjects_dir'),('subject_id','subject_id')]),
+                                ])
+                else:
+                    # ReconAll => named outputnode as we don't want to select a specific output....
+                    fs_autorecon1 = pe.Node(interface=fs.ReconAll(flags='-no-isrunning'),name="autorecon1")
+                    fs_autorecon1.inputs.directive = 'autorecon1'
+                    fs_autorecon1.inputs.flags = '-noskullstrip'
+                    fs_autorecon1.inputs.args = self.config.freesurfer_args
+                    
+                    #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
+                    fs_autorecon1.inputs.subjects_dir = self.config.freesurfer_subjects_dir
+
+                    def isavailable(file):
+                        print "Is available"
+                        return file
+                    
+                    flow.connect([
+                                (inputnode,fs_mriconvert,[(('T1',isavailable),'in_file')]),
+                                (fs_mriconvert,rename,[('out_file','in_file')]),
+                                (rename,fs_autorecon1,[(("out_file",extract_base_directory),"subject_id")])
+                                ])
+
+                    fs_source = pe.Node(interface=FreeSurferSource(),name='fs_source')
+
+                    fs_mriconvert_nu = pe.Node(interface=fs.MRIConvert(out_type="niigz",out_file="nu.nii.gz"),name="niigz_convert")
+
+                    flow.connect([
+                                (fs_autorecon1,fs_source,[('subjects_dir','subjects_dir'),('subject_id','subject_id')]),
+                                (fs_source,fs_mriconvert_nu,[('nu','in_file')])
+                                ])
+
+                    fsl_bet = pe.Node(interface=fsl.BET(out_file='brain.nii.gz',mask=True,skull=True,robust=True),name='fsl_bet')
+
+                    flow.connect([
+                                (fs_mriconvert_nu,fsl_bet,[('out_file','in_file')])
+                                ])
+
+                    fs_mriconvert_brain = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="brain.mgz"),name='fs_mriconvert_bet_brain')
+                    fs_mriconvert_brainmask = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="brainmask.mgz"),name='fs_mriconvert_bet_brainmask')
+
+                    flow.connect([
+                                (fsl_bet,fs_mriconvert_brain,[('out_file','in_file')]),
+                                (fsl_bet,fs_mriconvert_brainmask,[('mask_file','in_file')])
+                                ])
+
+                    copy_brain_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brain_to_fs')
+                    copy_brain_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brain.mgz")
+
+                    copy_brainmask_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmask_to_fs')
+                    copy_brainmask_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.mgz")
+
+                    copy_brainmaskauto_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmaskauto_to_fs')
+                    copy_brainmaskauto_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.auto.mgz")
+
+                    flow.connect([
+                                (fs_mriconvert_brainmask,copy_brainmask_to_fs,[('out_file','in_file')]),
+                                (fs_mriconvert_brainmask,copy_brainmaskauto_to_fs,[('out_file','in_file')])
+                                ])
+
+                    def get_freesurfer_subject_id(file):
+                        print "Extract reconall base dir : %s" % file[:-18]
+                        return file[:-18]
+
+                    fs_reconall23 = pe.Node(interface=fs.ReconAll(flags='-no-isrunning'),name="reconall23")
+                    fs_reconall23.inputs.directive = 'autorecon2'
+                    fs_reconall23.inputs.args = self.config.freesurfer_args
+                    fs_reconall23.inputs.flags = '-autorecon3'
+                    
+                    #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
+                    fs_reconall23.inputs.subjects_dir = self.config.freesurfer_subjects_dir
+
+
+                    flow.connect([
+                                (copy_brainmask_to_fs,fs_reconall23,[(("out_file",get_freesurfer_subject_id),"subject_id")]),
+                                (fs_reconall23,outputnode,[('subjects_dir','subjects_dir'),('subject_id','subject_id')])
+                                ])
                 
             else:
                 outputnode.inputs.subjects_dir = self.config.freesurfer_subjects_dir

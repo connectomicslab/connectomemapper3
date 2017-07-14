@@ -14,14 +14,35 @@ from glob import glob
 import numpy as np
 
 from nibabel import load
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.io import FreeSurferSource
+from nipype.utils.filemanip import fname_presuffix, copyfile
+from nipype.interfaces.io import FreeSurferSource, IOBase
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
                                     OutputMultiPath, CommandLine,
-                                    CommandLineInputSpec, isdefined)
+                                    CommandLineInputSpec, isdefined, BaseInterface, BaseInterfaceInputSpec)
+
+class copyFileToFreesurfer_InputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True)
+    out_file = File(exists=False)
+    
+class copyFileToFreesurfer_OutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+    
+class copyFileToFreesurfer(IOBase):
+    input_spec = copyFileToFreesurfer_InputSpec
+    output_spec = copyFileToFreesurfer_OutputSpec
+    
+    # def _run_interface(self,runtime):
+    #     copyfile(self.inputs.in_file,self.inputs.out_file, copy=True)
+    #     return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        copyfile(self.inputs.in_file,self.inputs.out_file, copy=True)
+        outputs["out_file"] = self.inputs.out_file
+        return outputs
 
 
 class BBRegisterInputSpec(FSTraitedSpec):
