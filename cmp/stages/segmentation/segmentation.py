@@ -24,7 +24,7 @@ import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
-from cmp.interfaces.freesurfer import copyFileToFreesurfer
+from cmp.interfaces.freesurfer import copyBrainMaskToFreesurfer, copyFileToFreesurfer
 
 class SegmentationConfig(HasTraits):
     seg_tool = Enum(["Freesurfer","Custom segmentation"])
@@ -103,7 +103,7 @@ class SegmentationStage(Stage):
                     # ReconAll => named outputnode as we don't want to select a specific output....
                     fs_autorecon1 = pe.Node(interface=fs.ReconAll(flags='-no-isrunning'),name="autorecon1")
                     fs_autorecon1.inputs.directive = 'autorecon1'
-                    fs_autorecon1.inputs.flags = '-noskullstrip'
+                    #fs_autorecon1.inputs.flags = '-noskullstrip'
                     fs_autorecon1.inputs.args = self.config.freesurfer_args
                     
                     #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
@@ -134,28 +134,34 @@ class SegmentationStage(Stage):
                                 (fs_mriconvert_nu,fsl_bet,[('out_file','in_file')])
                                 ])
 
-                    fs_mriconvert_brain = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="brain.mgz"),name='fs_mriconvert_bet_brain')
                     fs_mriconvert_brainmask = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="brainmask.mgz"),name='fs_mriconvert_bet_brainmask')
 
                     flow.connect([
-                                (fsl_bet,fs_mriconvert_brain,[('out_file','in_file')]),
-                                (fsl_bet,fs_mriconvert_brainmask,[('mask_file','in_file')])
+                                (fsl_bet,fs_mriconvert_brainmask,[('out_file','in_file')])
                                 ])
 
-                    copy_brain_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brain_to_fs')
-                    copy_brain_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brain.mgz")
+                    # copy_brainmask_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmask_to_fs')
+                    # copy_brainmask_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.mgz")
 
-                    copy_brainmask_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmask_to_fs')
-                    copy_brainmask_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.mgz")
+                    # copy_brainmaskauto_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmaskauto_to_fs')
+                    # copy_brainmaskauto_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.auto.mgz")
 
-                    copy_brainmaskauto_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmaskauto_to_fs')
-                    copy_brainmaskauto_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.auto.mgz")
+                    # flow.connect([
+                    #             (fs_mriconvert_brainmask,copy_brainmask_to_fs,[('out_file','in_file')]),
+                    #             (fs_mriconvert_brainmask,copy_brainmaskauto_to_fs,[('out_file','in_file')])
+                    #             ])
+
+                    copy_brainmask_to_fs = pe.Node(interface=copyBrainMaskToFreesurfer(),name='copy_brainmask_to_fs')
 
                     flow.connect([
-                                (fs_mriconvert_brainmask,copy_brainmask_to_fs,[('out_file','in_file')]),
-                                (fs_mriconvert_brainmask,copy_brainmaskauto_to_fs,[('out_file','in_file')])
+                                (rename,copy_brainmask_to_fs,[(("out_file",extract_base_directory),"subject_dir")]),
+                                (fs_mriconvert_brainmask,copy_brainmask_to_fs,[('out_file','in_file')])
                                 ])
 
+                    # flow.connect([
+                    #             (fs_source,fs_mriconvert_nu,[('nu','in_file')])
+                    #             ])
+                    
                     def get_freesurfer_subject_id(file):
                         print "Extract reconall base dir : %s" % file[:-18]
                         return file[:-18]
@@ -170,7 +176,7 @@ class SegmentationStage(Stage):
 
 
                     flow.connect([
-                                (copy_brainmask_to_fs,fs_reconall23,[(("out_file",get_freesurfer_subject_id),"subject_id")]),
+                                (copy_brainmask_to_fs,fs_reconall23,[(("out_brainmask_file",get_freesurfer_subject_id),"subject_id")]),
                                 (fs_reconall23,outputnode,[('subjects_dir','subjects_dir'),('subject_id','subject_id')])
                                 ])
                 
@@ -183,7 +189,7 @@ class SegmentationStage(Stage):
             outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
 
     def define_inspect_outputs(self):
-        print "stage_dit : %s" % self.stage_dir
+        print "stage_dir : %s" % self.stage_dir
         if self.config.seg_tool == "Freesurfer":
             fs_path = ''
             if self.config.use_existing_freesurfer_data == False:

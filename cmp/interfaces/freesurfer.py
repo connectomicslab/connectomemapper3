@@ -45,6 +45,39 @@ class copyFileToFreesurfer(IOBase):
         return outputs
 
 
+class copyBrainMaskToFreesurfer_InputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True)
+    subject_dir = Directory(exists=True)
+    
+class copyBrainMaskToFreesurfer_OutputSpec(TraitedSpec):
+    out_brainmask_file = File(exists=True)
+    out_brainmaskauto_file = File(exists=True)
+    
+class copyBrainMaskToFreesurfer(IOBase):
+    input_spec = copyBrainMaskToFreesurfer_InputSpec
+    output_spec = copyBrainMaskToFreesurfer_OutputSpec
+    
+    # def _run_interface(self,runtime):
+    #     copyfile(self.inputs.in_file,self.inputs.out_file, copy=True)
+    #     return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        
+        brainmask_file = op.join(self.inputs.subject_dir,'mri','brainmask.mgz')
+        copyfile(brainmask_file, op.join(self.inputs.subject_dir,'mri','brainmask.old.mgz'), copy=True)
+        copyfile(self.inputs.in_file, brainmask_file, copy=True)
+
+        brainmaskauto_file = op.join(self.inputs.subject_dir,'mri','brainmask.auto.mgz')
+        copyfile(brainmaskauto_file, op.join(self.inputs.subject_dir,'mri','brainmask.auto.old.mgz'), copy=True)
+        copyfile(self.inputs.in_file, brainmaskauto_file, copy=True)
+        
+        outputs["out_brainmask_file"] = brainmask_file
+        outputs["out_brainmaskauto_file"] = brainmaskauto_file
+
+        return outputs
+
+
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s',
                             desc='freesurfer subject id',
