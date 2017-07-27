@@ -78,13 +78,18 @@ class Erode(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name is 'out_file':
             return self._gen_outfilename()
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
-        return name + '_erode.mif'
+        if isdefined(self.inputs.out_filename):
+            outfilename = self.inputs.out_filename
+        else:
+            _, name , _ = split_filename(self.inputs.in_file)
+            outfilename = name + '_erode.mif'
+        
+        return outfilename
 
 
 class DWIDenoiseInputSpec(CommandLineInputSpec):

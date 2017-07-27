@@ -29,6 +29,7 @@ from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
+import nipype.interfaces.dipy as dipy
 
 #  import nipype.interfaces.camino2trackvis as camino2trackvis
 import cmp.interfaces.camino2trackvis as camino2trackvis
@@ -55,6 +56,40 @@ class DTB_tracking_config(HasTraits):
     seeds = Int(32)
     
     traits_view = View(Item('flip_input',style='custom'),'angle','step_size','seeds')
+
+class Dipy_tracking_config(HasTraits):
+    imaging_model = Str
+    tracking_mode = Str
+    SD = Bool
+    number_of_tracks = Int(1000)
+    gfa_thresh = Float(0.2)
+    peak_thresh = Float(0.5)
+    min_angle = Float(25.0)
+
+    traits_view = View( Item('number_of_tracks',label="Number of tracks (seeds)"),
+                        Item('min_angle',label="Min angle (degree)"),
+                        Item('gfa_thresh',label="GFA threshold (tracking mask)"), 
+                        Item('peak_thresh',label="Peak threshold"))
+    
+    def _SD_changed(self,new):
+        if self.tracking_mode == "Deterministic" and not new:
+            self.curvature = 2.0
+        elif self.tracking_mode == "Deterministic" and new:
+            self.curvature = 0.0
+        elif self.tracking_mode == "Probabilistic":
+            self.curvature = 1.0
+            
+    def _tracking_mode_changed(self,new):
+        if new == "Deterministic" and not self.SD:
+            self.curvature = 2.0
+        elif new == "Deterministic" and self.SD:
+            self.curvature = 0.0
+        elif new == "Probabilistic":
+            self.curvature = 1.0
+            
+    def _curvature_changed(self,new):
+        if new <= 0.000001:
+            self.curvature = 0.0                
 
 class MRtrix_tracking_config(HasTraits):
     tracking_mode = Str
@@ -635,6 +670,52 @@ class extractHeaderVoxel2WorldMatrix(BaseInterface):
         outputs = self._outputs().get()
         outputs["out_matrix"] = os.path.abspath('voxel2world.txt')
         return outputs
+
+
+def create_dipy_tracking_flow(config):
+    flow = pe.Workflow(name="tracking")
+    # inputnode
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','wm_mask_resampled','gm_registered','bvals','bvecs','model']),name='inputnode')
+    # outputnode
+
+    #CRS2XYZtkReg = subprocess.check_output
+
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
+
+
+    if config.tracking_mode == 'Deterministic':
+        dipy_seeds = pe.Node(interface=make_seeds(),name="dipy_seeds")
+        dipy_tracking = pe.Node(interface=dipy.StreamlineTractography(),name="dipy_deterministic_tracking")
+
+        dipy_tracking.inputs.num_seeds = config.number_of_tracks
+        dipy_tracking.inputs.gfa_thresh = config.gfa_thresh
+        dipy_tracking.inputs.peak_threshold = config.peak_thresh
+        dipy_tracking.inputs.min_angle = config.min_angle
+
+        # flow.connect([
+        #               (inputnode,dipy_tracking,[("bvals","bvals")]),
+        #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
+        #             ])
+
+        flow.connect([
+            (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
+            (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
+            ])
+
+        flow.connect([
+            #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
+            (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+            (inputnode,dipy_tracking,[('DWI','in_file')]),
+            (inputnode,dipy_tracking,[('model','in_model')]),
+            (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
+            (dipy_tracking,outputnode,[('tracks','track_file')])
+            ])
+
+    elif config.tracking_mode == 'Probabilistic':
+        print "Not implemented yet"
+
+    return flow
+
 
 def create_mrtrix_tracking_flow(config):
     flow = pe.Workflow(name="tracking")

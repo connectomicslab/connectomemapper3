@@ -33,6 +33,9 @@ from nipype.interfaces.mrtrix3.reconst import FitTensor, EstimateFOD
 from nipype.interfaces.mrtrix3.utils import TensorMetrics
 # from nipype.interfaces.mrtrix3.preprocess import ResponseSD
 
+from cmp.interfaces.dipy import DTIEstimateResponseSH, CSD
+# from nipype.interfaces.dipy import CSD
+
 import cmp.interfaces.diffusion_toolkit as cmp_dtk
 
 from nipype import logging
@@ -90,6 +93,35 @@ class DTK_recon_config(HasTraits):
     def _imaging_model_changed(self, new):
         if new == 'DTI' or new == 'HARDI':
             self._gradient_table_file_changed(self.gradient_table_file)
+
+class Dipy_recon_config(HasTraits):
+    imaging_model = Str
+    # gradient_table = File
+    # flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
+    local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
+    local_model = Bool(True)
+    lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
+    # normalize_to_B0 = Bool(False)
+    single_fib_thr = Float(0.7,min=0,max=1)
+    recon_mode = Str    
+    
+    traits_view = View(#Item('gradient_table',label='Gradient table (x,y,z,b):'),
+                       #Item('flip_table_axis',style='custom',label='Flip table:'),
+                       #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
+               #Item('b_value'),
+               #Item('b0_volumes'),
+                       Item('local_model',editor=EnumEditor(name='local_model_editor')),
+               Group(Item('lmax_order'),
+               #Item('normalize_to_B0'),
+               Item('single_fib_thr',label = 'FA threshold'),visible_when='local_model'),
+                       )
+
+    def _recon_mode_changed(self,new):
+        if new == 'Probabilistic':
+            self.local_model_editor = {True:'Constrained Spherical Deconvolution'}
+            self.local_model = True
+        else:
+            self.local_model_editor = {False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'}
 
 class MRtrix_recon_config(HasTraits):
     gradient_table = File
@@ -422,6 +454,78 @@ def create_dtk_recon_flow(config):
                         (dtk_odfrecon,dtb_p0,[(('ODF',strip_suffix,prefix),'dsi_basepath')]),
                         (dtb_p0,outputnode,[('out_file','P0')])])
                     
+    return flow
+
+def create_dipy_recon_flow(config):
+    flow = pe.Workflow(name="reconstruction")
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled","bvals","bvecs"]),name="inputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","model","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
+    
+    # Flip gradient table
+    # flip_table = pe.Node(interface=flipTable(),name='flip_table')
+
+    # flip_table.inputs.flipping_axis = config.flip_table_axis
+    # flip_table.inputs.delimiter = ' '
+    # flip_table.inputs.header_lines = 0
+    # flip_table.inputs.orientation = 'v'
+    # flow.connect([
+    #             (inputnode,flip_table,[("grad","table")]),
+    #             (flip_table,outputnode,[("table","grad")])
+    #             ])
+
+    # Tensor -> EigenVectors / FA, AD, MD, RD maps
+    dipy_tensor = pe.Node(interface=DTIEstimateResponseSH(),name='dipy_CSD_preproc')
+    dipy_tensor.inputs.fa_thresh = config.single_fib_thr
+
+    # Compute single fiber voxel mask
+    dipy_erode = pe.Node(interface=Erode(out_filename="wm_mask_resampled.nii.gz"),name="dipy_erode")
+    dipy_erode.inputs.number_of_passes = 3
+    dipy_erode.inputs.filtertype = 'erode'
+
+    flow.connect([
+        (inputnode,dipy_erode,[("wm_mask_resampled",'in_file')]),
+        (inputnode, dipy_tensor,[('diffusion_resampled','in_file')]),
+        (inputnode, dipy_tensor,[('bvals','in_bval')]),
+        (inputnode, dipy_tensor,[('bvecs','in_bvec')]),
+        (dipy_erode, dipy_tensor,[('out_file','in_mask')])
+        ])
+
+    flow.connect([
+        (dipy_tensor,outputnode,[("response","RF")]),
+        (dipy_tensor,outputnode,[("fa_file","FA")])
+        ])
+
+    # Tensor -> Eigenvectors
+    # mrtrix_eigVectors = pe.Node(interface=Tensor2Vector(),name="mrtrix_eigenvectors")
+
+    # flow.connect([
+    #     (mrtrix_tensor,mrtrix_eigVectors,[('tensor','in_file')]),
+    #     (mrtrix_eigVectors,outputnode,[('vector','eigVec')])
+    #     ])
+
+    # Constrained Spherical Deconvolution
+    if config.local_model:
+
+        # Perform spherical deconvolution
+        dipy_CSD = pe.Node(interface=CSD(),name="dipy_CSD")
+
+        if config.lmax_order != 'Auto':
+            dipy_CSD.inputs.sh_order = config.lmax_order
+
+        flow.connect([
+                (inputnode, dipy_CSD,[('diffusion_resampled','in_file')]),
+                (inputnode, dipy_CSD,[('bvals','in_bval')]),
+                (inputnode, dipy_CSD,[('bvecs','in_bvec')]),
+                (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
+                (dipy_tensor, dipy_CSD,[('response','response')]),
+                (dipy_CSD,outputnode,[('out_fods','DWI')]),
+                (dipy_CSD,outputnode,[('model','model')])
+                ])
+    else:
+        flow.connect([
+            (inputnode,outputnode,[('diffusion_resampled','DWI')])
+            ])
+        
     return flow
 
 

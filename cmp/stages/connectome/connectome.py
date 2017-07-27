@@ -203,7 +203,7 @@ class ConnectomeStage(Stage):
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
         if(os.path.exists(con_results_path)):
             con_results = pickle.load(gzip.open(con_results_path))
-            self.inspect_outputs_dict['streamline_final'] = ['mrview',con_results.outputs.streamline_final_file]
+            self.inspect_outputs_dict['streamline_final'] = ['trackvis',con_results.outputs.streamline_final_file]
             if type(con_results.outputs.connectivity_matrices) == str:
                 mat = con_results.outputs.connectivity_matrices
                 if 'gpickle' in mat:

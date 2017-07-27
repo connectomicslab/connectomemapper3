@@ -128,6 +128,34 @@ class ApplymultipleXfm(BaseInterface):
         outputs['out_files'] = glob.glob(os.path.abspath("*.nii.gz"))
         return outputs
 
+
+class ApplymultipleWarpInputSpec(BaseInterfaceInputSpec):
+    in_files = InputMultiPath(File(desc='files to be registered', mandatory = True, exists = True))
+    field_file = File(mandatory=True, exists=True)
+    ref_file = File(mandatory = True, exists = True)
+    interp = traits.Enum(
+        'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s', position=-2,
+        desc='interpolation method')
+    
+class ApplymultipleWarpOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File())
+    
+class ApplymultipleWarp(BaseInterface):
+    input_spec = ApplymultipleWarpInputSpec
+    output_spec = ApplymultipleWarpOutputSpec
+    
+    def _run_interface(self, runtime):
+        for in_file in self.inputs.in_files:
+            ax = fsl.ApplyWarp(in_file = in_file, interp=self.inputs.interp, field_file = self.inputs.field_file, ref_file = self.inputs.ref_file)
+            ax.run()
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_files'] = glob.glob(os.path.abspath("*.nii.gz"))
+        return outputs
+
+
 class ApplymultipleMRCropInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(desc='files to be cropped', mandatory = True, exists = True))
     template_image = File(mandatory=True, exists=True)
@@ -206,7 +234,7 @@ class RegistrationStage(Stage):
         self.config = RegistrationConfig()
         self.config.pipeline = pipeline_mode
         self.inputs = ["T1","target","T2","subjects_dir","subject_id","wm_mask","roi_volumes","brain","brain_mask","brain_mask_full","target_mask","bvecs","bvals"]
-        self.outputs = ["T1_registered_crop", "brain_registered_crop", "brain_mask_registered_crop", "wm_mask_registered_crop","roi_volumes_registered_crop","target_epicorrected","grad"]
+        self.outputs = ["T1_registered_crop", "brain_registered_crop", "brain_mask_registered_crop", "wm_mask_registered_crop","roi_volumes_registered_crop","target_epicorrected","grad","bvecs","bvals"]
         if self.config.pipeline == "fMRI":
             self.inputs = self.inputs + ["eroded_csf","eroded_wm","eroded_brain"]
             self.outputs = self.outputs + ["eroded_wm_registered","eroded_csf_registered","eroded_brain_registered"]
@@ -251,6 +279,11 @@ class RegistrationStage(Stage):
             flow.connect([
                         (mr_convert,grad_mrtrix,[("converted","in_file")]),
                         (grad_mrtrix,outputnode,[("out_grad_mrtrix","grad")])
+                        ])
+
+            flow.connect([
+                        (inputnode,outputnode,[("bvals","bvals")]),
+                        (inputnode,outputnode,[("bvecs","bvecs")])
                         ])
 
             mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[-1,-2,+3]), name='mr_convert_b0')
@@ -305,8 +338,9 @@ class RegistrationStage(Stage):
             fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-B0.nii.gz',out_matrix_file='T12DWIaff.mat'),name="linear_registration")
             fsl_flirt.inputs.dof = self.config.dof
             fsl_flirt.inputs.cost = self.config.cost
+            fsl_flirt.inputs.cost_func = self.config.cost
             fsl_flirt.inputs.no_search = self.config.no_search
-            fsl_flirt.inputs.verbose = True
+            fsl_flirt.inputs.verbose = False
 
             flow.connect([
                         (inputnode, fsl_flirt, [('T1','in_file')]),
@@ -389,19 +423,20 @@ class RegistrationStage(Stage):
                         ])
 
             flow.connect([
-                        (mr_crop_wm, outputnode, [('out_file','wm_mask_registered_crop')]),
-                        (mr_crop_rois, outputnode, [('out_files','roi_volumes_registered_crop')]),
+                        #(mr_crop_wm, outputnode, [('out_file','wm_mask_registered_crop')]),
+                        #(mr_crop_rois, outputnode, [('out_files','roi_volumes_registered_crop')]),
                         (mr_crop_brain_mask_full, outputnode, [('out_file','brain_mask_registered_crop')]),
-                        (mr_crop_brain, outputnode, [('out_file','brain_registered_crop')]),
-                        (mr_crop_T1, outputnode, [('cropped','T1_registered_crop')]),
+                        #(mr_crop_brain, outputnode, [('out_file','brain_registered_crop')]),
+                        #(mr_crop_T1, outputnode, [('cropped','T1_registered_crop')]),
                         ])
 
             # [1.5] Non linear registration of the DW data to the rotated T1 data
-            fsl_flirt_crop = pe.Node(interface=fsl.FLIRT(out_file='B0-TO-T1_masked_crop.nii.gz',out_matrix_file='T12DWIaffcrop.mat'),name='fsl_flirt_crop')
+            fsl_flirt_crop = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-B0_masked_crop.nii.gz',out_matrix_file='T12DWIaffcrop.mat'),name='fsl_flirt_crop')
             fsl_flirt_crop.inputs.dof = self.config.dof
             fsl_flirt_crop.inputs.cost = self.config.cost
+            fsl_flirt_crop.inputs.cost_func = self.config.cost
             fsl_flirt_crop.inputs.no_search = self.config.no_search
-            fsl_flirt_crop.inputs.verbose = True
+            fsl_flirt_crop.inputs.verbose = False
 
             flow.connect([
                         (mr_convert_b0, fsl_flirt_crop, [('converted','reference')]),
@@ -411,28 +446,66 @@ class RegistrationStage(Stage):
             fsl_fnirt_crop = pe.Node(interface=fsl.FNIRT(fieldcoeff_file=True),name='fsl_fnirt_crop')
 
             flow.connect([
-                        (mr_convert_b0, fsl_fnirt_crop, [('converted','in_file')]),
-                        (mr_crop_T1, fsl_fnirt_crop, [('cropped','ref_file')]),
+                        (mr_convert_b0, fsl_fnirt_crop, [('converted','ref_file')]),
+                        (mr_crop_T1, fsl_fnirt_crop, [('cropped','in_file')]),
                         (fsl_flirt_crop, fsl_fnirt_crop, [('out_matrix_file','affine_file')]),
-                        (mr_crop_brain_mask_full, fsl_fnirt_crop, [('out_file','refmask_file')])
+                        (inputnode, fsl_fnirt_crop, [('target_mask','refmask_file')])
                         ])
 
-            fsl_applywarp = pe.Node(interface=fsl.ApplyWarp(out_file='target_epicorrected.nii.gz'),name='fsl_apply_warp')
+
+            fsl_applywarp_T1 = pe.Node(interface=fsl.ApplyWarp(interp="spline",out_file="T1_warped.nii.gz"),name="apply_warp_T1")
+            fsl_applywarp_brain = pe.Node(interface=fsl.ApplyWarp(interp="spline",out_file="brain_warped.nii.gz"),name="apply_warp_brain")
+            fsl_applywarp_wm = pe.Node(interface=fsl.ApplyWarp(interp='nn',out_file="wm_mask_warped.nii.gz"),name="apply_warp_wm")
+            fsl_applywarp_rois = pe.Node(interface=ApplymultipleWarp(interp='nn'),name="apply_warp_roivs")         
 
             flow.connect([
-                        (inputnode, fsl_applywarp, [('target','in_file')]),
-                        (mr_crop_T1, fsl_applywarp, [('cropped','ref_file')]),
-                        (fsl_fnirt_crop, fsl_applywarp, [('fieldcoeff_file','field_file')]), 
-                        (fsl_applywarp, outputnode, [('out_file','target_epicorrected')]),  
+                        (mr_crop_T1, fsl_applywarp_T1, [('cropped','in_file')]),
+                        (inputnode, fsl_applywarp_T1, [('target','ref_file')]),
+                        (fsl_fnirt_crop, fsl_applywarp_T1, [('fieldcoeff_file','field_file')]), 
+                        (fsl_applywarp_T1, outputnode, [('out_file','T1_registered_crop')]),  
                         ])
-
-            fsl_applywarp_FA_noNaN = pe.Node(interface=fsl.ApplyWarp(out_file='FA_epicorrected.nii.gz'),name='fsl_applywarp_FA_noNaN')
 
             flow.connect([
-                        (mr_convert_FA, fsl_applywarp_FA_noNaN, [('converted','in_file')]),
-                        (mr_crop_T1, fsl_applywarp_FA_noNaN, [('cropped','ref_file')]),
-                        (fsl_fnirt_crop, fsl_applywarp_FA_noNaN, [('fieldcoeff_file','field_file')])
+                        (mr_crop_brain, fsl_applywarp_brain, [('out_file','in_file')]),
+                        (inputnode, fsl_applywarp_brain, [('target','ref_file')]),
+                        (fsl_fnirt_crop, fsl_applywarp_brain, [('fieldcoeff_file','field_file')]), 
+                        (fsl_applywarp_brain, outputnode, [('out_file','brain_registered_crop')]),  
                         ])
+
+            flow.connect([
+                        (mr_crop_wm, fsl_applywarp_wm, [('out_file','in_file')]),
+                        (inputnode, fsl_applywarp_wm, [('target','ref_file')]),
+                        (fsl_fnirt_crop, fsl_applywarp_wm, [('fieldcoeff_file','field_file')]), 
+                        (fsl_applywarp_wm, outputnode, [('out_file','wm_mask_registered_crop')]),  
+                        ])
+
+            flow.connect([
+                        (mr_crop_rois, fsl_applywarp_rois, [('out_files','in_files')]),
+                        (inputnode, fsl_applywarp_rois, [('target','ref_file')]),
+                        (fsl_fnirt_crop, fsl_applywarp_rois, [('fieldcoeff_file','field_file')]), 
+                        (fsl_applywarp_rois, outputnode, [('out_files','roi_volumes_registered_crop')]),  
+                        ])
+
+            flow.connect([
+                        (inputnode, outputnode, [('target','target_epicorrected')]),  
+                        ])
+
+            # fsl_applywarp = pe.Node(interface=fsl.ApplyWarp(out_file='target_epicorrected.nii.gz'),name='fsl_apply_warp')
+
+            # flow.connect([
+            #             (inputnode, fsl_applywarp, [('target','in_file')]),
+            #             (mr_crop_T1, fsl_applywarp, [('cropped','ref_file')]),
+            #             (fsl_fnirt_crop, fsl_applywarp, [('fieldcoeff_file','field_file')]), 
+            #             (fsl_applywarp, outputnode, [('out_file','target_epicorrected')]),  
+            #             ])
+
+            # fsl_applywarp_FA_noNaN = pe.Node(interface=fsl.ApplyWarp(out_file='FA_epicorrected.nii.gz'),name='fsl_applywarp_FA_noNaN')
+
+            # flow.connect([
+            #             (mr_convert_FA, fsl_applywarp_FA_noNaN, [('converted','in_file')]),
+            #             (mr_crop_T1, fsl_applywarp_FA_noNaN, [('cropped','ref_file')]),
+            #             (fsl_fnirt_crop, fsl_applywarp_FA_noNaN, [('fieldcoeff_file','field_file')])
+            #             ])
 
                    
     def old_create_workflow(self, flow, inputnode, outputnode):        

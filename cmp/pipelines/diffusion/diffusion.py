@@ -529,6 +529,8 @@ class DiffusionPipeline(Pipeline):
                                     (reg_flow,diff_flow, [('outputnode.wm_mask_registered_crop','inputnode.wm_mask_registered')]),
                                     (reg_flow,diff_flow,[('outputnode.roi_volumes_registered_crop','inputnode.roi_volumes')]),
                                     (reg_flow,diff_flow,[('outputnode.grad','inputnode.grad')]),
+                                    (reg_flow,diff_flow,[('outputnode.bvals','inputnode.bvals')]),
+                                    (reg_flow,diff_flow,[('outputnode.bvecs','inputnode.bvecs')]),
                                     (reg_flow,sinker,[("outputnode.target_epicorrected","dwi.@bdiffusion_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.grad","dwi.@diffusion_grad")]),
                                     (reg_flow,sinker,[("outputnode.T1_registered_crop","anat.@T1_reg_crop")]),
@@ -704,6 +706,8 @@ class DiffusionPipeline(Pipeline):
             diff_flow = self.create_stage_flow("Diffusion")
             diffusion_flow.connect([
                                     (reg_flow,diff_flow, [('outputnode.target_epicorrected','inputnode.diffusion')]),
+                                    (diffusion_inputnode,diff_flow,[('T2','inputnode.T2'),("bvals","inputnode.bvals")]),
+                                    (preproc_flow,diff_flow, [('outputnode.bvecs_rot','inputnode.bvecs')]),
                                     (reg_flow,diff_flow, [('outputnode.wm_mask_registered_crop','inputnode.wm_mask_registered')]),
                                     (reg_flow,diff_flow,[('outputnode.roi_volumes_registered_crop','inputnode.roi_volumes')]),
                                     (reg_flow,diff_flow,[('outputnode.grad','inputnode.grad')])
