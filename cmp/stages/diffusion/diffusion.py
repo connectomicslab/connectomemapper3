@@ -265,6 +265,10 @@ class DiffusionStage(Stage):
                          #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                         ])
 
+            flow.connect([
+                        (track_flow,outputnode,[('outputnode.track_file','track_file')])
+                        ])
+
         elif self.config.processing_tool == 'MRtrix':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
             flow.connect([
