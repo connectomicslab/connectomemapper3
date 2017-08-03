@@ -260,9 +260,11 @@ class DiffusionStage(Stage):
                         (recon_flow, track_flow,[('outputnode.model','inputnode.model')]),
                         (inputnode,track_flow,[('bvals','inputnode.bvals')]),
                         (inputnode,track_flow,[('bvecs','inputnode.bvecs')]),
-                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
+                        (fs_mriconvert,track_flow,[('out_file','inputnode.DWI')]), # Diffusion resampled
+                        # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
+                        (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
                         (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
-                         #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
+                        # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                         ])
 
             flow.connect([

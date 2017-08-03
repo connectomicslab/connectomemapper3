@@ -26,6 +26,7 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.utility as util
 import nipype.interfaces.mrtrix as mrt
 import nipype.interfaces.ants as ants
+import nipype.interfaces.dipy as dipy
 
 import nibabel as nib
 
@@ -307,6 +308,8 @@ class PreprocessingConfig(HasTraits):
     total_readout = Float(0.0)
     description = Str('description')
     denoising = Bool(False)
+    denoising_algo =  Enum('MRtrix (MP-PCA)',['MRtrix (MP-PCA)','Dipy (NLM)'])
+    dipy_noise_model = Enum('Rician',['Rician','Gaussian'])
     bias_field_correction = Bool(False)
     bias_field_algo = Enum('ANTS N4',['ANTS N4','FSL FAST'])
     eddy_current_and_motion_correction = Bool(False)
@@ -314,7 +317,13 @@ class PreprocessingConfig(HasTraits):
     end_vol = Int()
     max_vol = Int()
     max_str = Str
-    traits_view = View( Item('denoising'),
+    traits_view = View( 
+                    VGroup(
+                        HGroup(
+                            Item('denoising'),
+                            Item('denoising_algo',label='Tool:',visible_when='denoising==True'),
+                            Item('dipy_noise_model',label='Noise model (Dipy):',visible_when='denoising_algo=="Dipy (NLM)"')
+                            ),
                         HGroup(
                             Item('bias_field_correction'),
                             Item('bias_field_algo',label='Tool:',visible_when='bias_field_correction==True')
@@ -329,6 +338,7 @@ class PreprocessingConfig(HasTraits):
                             Item('max_str',style='readonly',show_label=False)
                             )
                         )
+                    )
     
     def _max_vol_changed(self,new):
         self.max_str = '(max: %d)' % new
@@ -411,8 +421,7 @@ class PreprocessingStage(Stage):
             # (processing_input,concatnode,[('bvecs','in1'),('bvals','in2')]),
             (processing_input,concatnode,[('bvecs','in1')]),
             (processing_input,concatnode,[('bvals','in2')]),
-            (concatnode,mr_convert,[(('out',convertList2Tuple),'grad_fsl')]),
-            (processing_input,mr_convert,[('diffusion','in_file')])
+            (concatnode,mr_convert,[(('out',convertList2Tuple),'grad_fsl')])
             ])
 
         #Convert Freesurfer data
@@ -446,17 +455,6 @@ class PreprocessingStage(Stage):
                     (mr_threshold_brainmask,outputnode,[('thresholded','brain_mask')])
                     ])
 
-        #Diffusion data denoising        
-        if self.config.denoising:
-            dwi_denoise = pe.Node(interface=DWIDenoise(out_file='diffusion_denoised.mif',out_noisemap='diffusion_noisemap.mif') , name='dwi_denoise')
-            dwi_denoise.inputs.force_writing = True
-            dwi_denoise.inputs.debug = True
-            dwi_denoise.ignore_exception = True
-
-            flow.connect([
-                (mr_convert,dwi_denoise,[('converted','in_file')])
-                ])
-
         #Extract b0 and create DWI mask
         flirt_dwimask_pre = pe.Node(interface=fsl.FLIRT(out_file='brain2b0.nii.gz',out_matrix_file='brain2b0aff'), name='flirt_dwimask_pre')
         costs=['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff','bbr']
@@ -467,17 +465,11 @@ class PreprocessingStage(Stage):
 
         flirt_dwimask = pe.Node(interface=fsl.FLIRT(out_file='dwi_brain_mask.nii.gz', apply_xfm = True, interp='nearestneighbour'), name='flirt_dwimask')
 
-        mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[-1,-2,+3]), name='mr_convert_b0')
+        mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[+1,+2,+3]), name='mr_convert_b0')
         mr_convert_b0.inputs.extract_at_axis = 3
         mr_convert_b0.inputs.extract_at_coordinate = [0.0]
-
-        if self.config.denoising:
-            flow.connect([
-            (dwi_denoise,mr_convert_b0,[('out_file','in_file')])
-            ])
-
-        else:
-            flow.connect([
+        
+        flow.connect([
             (processing_input,mr_convert_b0,[('diffusion','in_file')])
             ])
 
@@ -490,10 +482,41 @@ class PreprocessingStage(Stage):
             ])
 
         flow.connect([
-                    (flirt_dwimask,outputnode,[('out_file','dwi_brain_mask')])
+            (flirt_dwimask,outputnode,[('out_file','dwi_brain_mask')])
+            ])
+
+        #Diffusion data denoising        
+        if self.config.denoising:
+            if self.config.denoising_algo == "MRtrix (MP-PCA)":
+                dwi_denoise = pe.Node(interface=DWIDenoise(out_file='diffusion_denoised.mif',out_noisemap='diffusion_noisemap.mif') , name='dwi_denoise')
+                dwi_denoise.inputs.force_writing = True
+                dwi_denoise.inputs.debug = True
+                dwi_denoise.ignore_exception = True
+
+                flow.connect([
+                    (processing_input,mr_convert,[('diffusion','in_file')]),
+                    (mr_convert,dwi_denoise,[('converted','in_file')]),
+                    (flirt_dwimask,dwi_denoise,[('out_file','mask')]),
                     ])
 
+            elif self.config.denoising_algo == "Dipy (NLM)":
+                dwi_denoise = pe.Node(interface=dipy.Denoise() , name='dwi_denoise')
+                if self.config.dipy_noise_model == "Gaussian":
+                    dwi_denoise.inputs.noise_model = "gaussian"
+                elif self.config.dipy_noise_model == "Rician":
+                    dwi_denoise.inputs.noise_model = "rician"
 
+                flow.connect([
+                    (processing_input,dwi_denoise,[('diffusion','in_file')]),
+                    (flirt_dwimask,dwi_denoise,[('out_file','in_mask')]),
+                    (dwi_denoise,mr_convert,[('out_file','in_file')])
+                    ])
+        else:
+            flow.connect([
+                    (processing_input,mr_convert,[('diffusion','in_file')])
+                    ])
+
+        
         mr_convert_b = pe.Node(interface=MRConvert(out_filename='diffusion_corrected.nii.gz',stride=[-1,-2,+3,+4]),name='mr_convert_b')
        
         if self.config.bias_field_correction:
@@ -505,11 +528,18 @@ class PreprocessingStage(Stage):
             dwi_biascorrect.inputs.verbose = True
 
             if self.config.denoising:
-                flow.connect([
-                    (dwi_denoise,dwi_biascorrect,[('out_file','in_file')]),
-                    (flirt_dwimask,dwi_biascorrect,[('out_file','mask')]),
-                    (dwi_biascorrect,mr_convert_b,[('out_file','in_file')])
-                    ])
+                if self.config.denoising_algo == "MRtrix (MP-PCA)":
+                    flow.connect([
+                        (dwi_denoise,dwi_biascorrect,[('out_file','in_file')]),
+                        (flirt_dwimask,dwi_biascorrect,[('out_file','mask')]),
+                        (dwi_biascorrect,mr_convert_b,[('out_file','in_file')])
+                        ])
+                elif self.config.denoising_algo == "Dipy (NLM)":
+                    flow.connect([
+                        (mr_convert,dwi_biascorrect,[('converted','in_file')]),
+                        (flirt_dwimask,dwi_biascorrect,[('out_file','mask')]),
+                        (dwi_biascorrect,mr_convert_b,[('out_file','in_file')])
+                        ])
             else:
                 flow.connect([
                     (mr_convert,dwi_biascorrect,[('converted','in_file')]),
@@ -517,9 +547,14 @@ class PreprocessingStage(Stage):
                     ])
         else:
             if self.config.denoising:
-                flow.connect([
-                    (dwi_denoise,mr_convert_b,[('out_file','in_file')])
-                    ])
+                if self.config.denoising_algo == "MRtrix (MP-PCA)":
+                    flow.connect([
+                        (dwi_denoise,mr_convert_b,[('out_file','in_file')])
+                        ])
+                elif self.config.denoising_algo == "Dipy (NLM)":
+                    flow.connect([
+                        (mr_convert,mr_convert_b,[('converted','in_file')])
+                        ])        
             else:
                 flow.connect([
                     (mr_convert,mr_convert_b,[('converted','in_file')])

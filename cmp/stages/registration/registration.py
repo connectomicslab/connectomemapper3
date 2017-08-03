@@ -286,7 +286,7 @@ class RegistrationStage(Stage):
                         (inputnode,outputnode,[("bvecs","bvecs")])
                         ])
 
-            mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[-1,-2,+3]), name='mr_convert_b0')
+            mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[+1,+2,+3]), name='mr_convert_b0')
             mr_convert_b0.inputs.extract_at_axis = 3
             mr_convert_b0.inputs.extract_at_coordinate = [0.0]
 

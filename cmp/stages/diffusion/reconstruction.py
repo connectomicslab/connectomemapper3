@@ -475,6 +475,8 @@ def create_dipy_recon_flow(config):
 
     # Tensor -> EigenVectors / FA, AD, MD, RD maps
     dipy_tensor = pe.Node(interface=DTIEstimateResponseSH(),name='dipy_CSD_preproc')
+    dipy_tensor.inputs.auto = True
+    dipy_tensor.inputs.roi_radius = 10
     dipy_tensor.inputs.fa_thresh = config.single_fib_thr
 
     # Compute single fiber voxel mask
@@ -508,6 +510,7 @@ def create_dipy_recon_flow(config):
 
         # Perform spherical deconvolution
         dipy_CSD = pe.Node(interface=CSD(),name="dipy_CSD")
+        dipy_CSD.inputs.save_fods=False
 
         if config.lmax_order != 'Auto':
             dipy_CSD.inputs.sh_order = config.lmax_order
@@ -518,7 +521,7 @@ def create_dipy_recon_flow(config):
                 (inputnode, dipy_CSD,[('bvecs','in_bvec')]),
                 (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
                 (dipy_tensor, dipy_CSD,[('response','response')]),
-                (dipy_CSD,outputnode,[('out_fods','DWI')]),
+                (inputnode,outputnode,[('diffusion_resampled','DWI')]),
                 (dipy_CSD,outputnode,[('model','model')])
                 ])
     else:
