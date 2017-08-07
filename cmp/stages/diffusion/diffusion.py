@@ -340,12 +340,27 @@ class DiffusionStage(Stage):
 
     def define_inspect_outputs(self):
         print "stage_dir : %s" % self.stage_dir
+
         if self.config.processing_tool == 'DTK':
             diff_results_path = os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz")
             if(os.path.exists(diff_results_path)):
                 diff_results = pickle.load(gzip.open(diff_results_path))
                 self.inspect_outputs_dict['DTK streamline'] = ['trackvis',diff_results.outputs.out_file]
-                self.inspect_outputs = self.inspect_outputs_dict.keys()
+       
+        elif self.config.processing_tool == 'Dipy':
+            if self.config.diffusion_model == 'Deterministic':               
+                diff_results_path = os.path.join(self.stage_dir,"tracking","dipy_deterministic_tracking","result_dipy_deterministic_tracking.pklz")
+                if os.path.exists(diff_results_path):
+                    diff_results = pickle.load(gzip.open(diff_results_path))
+                    streamline_res = diff_results.outputs.tracks
+                    self.inspect_outputs_dict[self.config.processing_tool + ' streamline'] = ['trackvis',streamline_res]
+            if self.config.diffusion_model == 'Probabilistic':               
+                diff_results_path = os.path.join(self.stage_dir,"tracking","dipy_probabilistic_tracking","result_dipy_probabilistic_tracking.pklz")
+                if os.path.exists(diff_results_path):
+                    diff_results = pickle.load(gzip.open(diff_results_path))
+                    streamline_res = diff_results.outputs.tracks
+                    self.inspect_outputs_dict[self.config.processing_tool + ' streamline'] = ['trackvis',streamline_res]
+
         else:
             if self.config.diffusion_model == 'Deterministic':
                 diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
@@ -357,7 +372,6 @@ class DiffusionStage(Stage):
                     else:
                         streamline_res = diff_results.outputs.trackvis
                     self.inspect_outputs_dict[self.config.processing_tool + ' streamline'] = ['trackvis',streamline_res]
-                    self.inspect_outputs = self.inspect_outputs_dict.keys()
 
             if self.config.processing_tool == 'MRtrix' :
                 if self.config.mrtrix_recon_config.local_model:
@@ -379,7 +393,8 @@ class DiffusionStage(Stage):
                 if(os.path.exists(FA_path)):
                     FA_results = pickle.load(gzip.open(FA_path))
                     self.inspect_outputs_dict['MRTrix FA'] = ['mrview',FA_results.outputs.converted]
-                    self.inspect_outputs = self.inspect_outputs_dict.keys()
+                    
+        self.inspect_outputs = self.inspect_outputs_dict.keys()
 
                 
 

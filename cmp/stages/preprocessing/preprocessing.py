@@ -407,7 +407,7 @@ class PreprocessingStage(Stage):
         #flipbrain2mrtrix
 
         #Conversion to MRTrix image format ".mif", grad_fsl=(inputnode.inputs.bvecs,inputnode.inputs.bvals)
-        mr_convert = pe.Node(interface=MRConvert(out_filename='diffusion.mif',stride=[-1,-2,+3,+4]), name='mr_convert')
+        mr_convert = pe.Node(interface=MRConvert(out_filename='diffusion.mif',stride=[1,2,+3,+4]), name='mr_convert')
         mr_convert.inputs.quiet = True
         mr_convert.inputs.force_writing = True
 
@@ -425,11 +425,11 @@ class PreprocessingStage(Stage):
             ])
 
         #Convert Freesurfer data
-        mr_convert_brainmask = pe.Node(interface=MRConvert(out_filename='brainmaskfull.nii.gz',stride=[-1,2,3],output_datatype='float32'),name='mr_convert_brain_mask')
-        mr_convert_brain = pe.Node(interface=MRConvert(out_filename='anat_masked.nii.gz',stride=[-1,2,3],output_datatype='float32'),name='mr_convert_brain')
-        mr_convert_T1 = pe.Node(interface=MRConvert(out_filename='anat.nii.gz',stride=[-1,2,3],output_datatype='float32'),name='mr_convert_T1')
-        mr_convert_roi_volumes = pe.Node(interface=ApplymultipleMRConvert(stride=[-1,2,3],output_datatype='float32',extension='nii'),name='mr_convert_roi_volumes')
-        mr_convert_wm_mask_file = pe.Node(interface=MRConvert(out_filename='wm_mask_file.nii.gz',stride=[-1,2,3],output_datatype='float32'),name='mr_convert_wm_mask_file')
+        mr_convert_brainmask = pe.Node(interface=MRConvert(out_filename='brainmaskfull.nii.gz',stride=[1,2,3],output_datatype='float32'),name='mr_convert_brain_mask')
+        mr_convert_brain = pe.Node(interface=MRConvert(out_filename='anat_masked.nii.gz',stride=[1,2,3],output_datatype='float32'),name='mr_convert_brain')
+        mr_convert_T1 = pe.Node(interface=MRConvert(out_filename='anat.nii.gz',stride=[1,2,3],output_datatype='float32'),name='mr_convert_T1')
+        mr_convert_roi_volumes = pe.Node(interface=ApplymultipleMRConvert(stride=[1,2,3],output_datatype='float32',extension='nii'),name='mr_convert_roi_volumes')
+        mr_convert_wm_mask_file = pe.Node(interface=MRConvert(out_filename='wm_mask_file.nii.gz',stride=[1,2,3],output_datatype='float32'),name='mr_convert_wm_mask_file')
 
         flow.connect([
                     (processing_input,mr_convert_brainmask,[('brain_mask','in_file')]),
@@ -517,7 +517,7 @@ class PreprocessingStage(Stage):
                     ])
 
         
-        mr_convert_b = pe.Node(interface=MRConvert(out_filename='diffusion_corrected.nii.gz',stride=[-1,-2,+3,+4]),name='mr_convert_b')
+        mr_convert_b = pe.Node(interface=MRConvert(out_filename='diffusion_corrected.nii.gz',stride=[+1,+2,+3,+4]),name='mr_convert_b')
        
         if self.config.bias_field_correction:
             if self.config.bias_field_algo == "ANTS N4":

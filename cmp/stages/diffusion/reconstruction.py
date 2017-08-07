@@ -519,7 +519,8 @@ def create_dipy_recon_flow(config):
                 (inputnode, dipy_CSD,[('diffusion_resampled','in_file')]),
                 (inputnode, dipy_CSD,[('bvals','in_bval')]),
                 (inputnode, dipy_CSD,[('bvecs','in_bvec')]),
-                (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
+                # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
+                (dipy_erode, dipy_CSD,[('out_file','in_mask')]),
                 (dipy_tensor, dipy_CSD,[('response','response')]),
                 (inputnode,outputnode,[('diffusion_resampled','DWI')]),
                 (dipy_CSD,outputnode,[('model','model')])
@@ -578,7 +579,7 @@ def create_mrtrix_recon_flow(config):
     # Constrained Spherical Deconvolution
     if config.local_model:
         # Compute single fiber voxel mask
-        mrtrix_erode = pe.Node(interface=Erode(),name="mrtrix_erode")
+        mrtrix_erode = pe.Node(interface=Erode(out_filename='wm_mask_res_eroded.nii.gz'),name="mrtrix_erode")
         mrtrix_erode.inputs.number_of_passes = 3
         mrtrix_erode.inputs.filtertype = 'erode'
         mrtrix_mul_eroded_FA = pe.Node(interface=MRtrix_mul(),name='mrtrix_mul_eroded_FA')
