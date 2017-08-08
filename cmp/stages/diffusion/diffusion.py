@@ -124,6 +124,7 @@ class DiffusionConfig(HasTraits):
     def _diffusion_model_changed(self,new):
         self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
         self.mrtrix_tracking_config.tracking_mode = new
+        self.dipy_tracking_config.tracking_mode = new
         self.camino_tracking_config.tracking_mode = new
         self.update_camino_tracking_model()
         
@@ -403,7 +404,10 @@ class DiffusionStage(Stage):
         if self.config.processing_tool == 'DTK':
             return os.path.exists(os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz"))
         elif self.config.processing_tool == 'Dipy':
-            return os.path.exists(os.path.join(self.stage_dir,"tracking","dipy_deterministic_tracking","result_dipy_deterministic_tracking.pklz"))
+            if self.config.diffusion_model == 'Deterministic': 
+                return os.path.exists(os.path.join(self.stage_dir,"tracking","dipy_deterministic_tracking","result_dipy_deterministic_tracking.pklz"))
+            elif self.config.diffusion_model == 'Probabilistic':
+                return os.path.exists(os.path.join(self.stage_dir,"tracking","dipy_probabilistic_tracking","result_dipy_probabilistic_tracking.pklz")) 
         elif self.config.processing_tool == 'MRtrix':
             return os.path.exists(os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz"))
         elif self.config.processing_tool == 'Camino':
