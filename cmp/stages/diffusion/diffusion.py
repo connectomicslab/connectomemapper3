@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2015, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
 #
@@ -25,8 +25,8 @@ from tracking import *
 
 class DiffusionConfig(HasTraits):
     diffusion_imaging_model = Str
-    resampling = Tuple(2,2,2)
-    interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
+    #resampling = Tuple(2,2,2)
+    #interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
     # processing_tool_editor = List(['DTK','MRtrix','Camino','FSL','Gibbs'])
     processing_tool_editor = List(['Dipy','MRtrix'])
     dilate_rois = Bool(True)
@@ -46,10 +46,10 @@ class DiffusionConfig(HasTraits):
     gibbs_tracking_config = Instance(HasTraits)
     diffusion_model_editor = List(['Deterministic'])
     diffusion_model = Str('Deterministic')
+    ## TODO import custom DWI and tractogram (need to register anatomical data to DWI to project parcellated ROIs onto the tractogram)    
     
-    
-    traits_view = View(HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-                       'interpolation'),
+    traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+                       #'interpolation'),
 		               Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
                        Item('dilate_rois',visible_when='processing_tool!="DTK"'),
                        Group(Item('dtk_recon_config',style='custom',defined_when='processing_tool=="DTK"'),
@@ -120,11 +120,12 @@ class DiffusionConfig(HasTraits):
             self.diffusion_model = 'Probabilistic'       
         else:
             self.diffusion_model_editor = ['Deterministic','Probabilistic']
+            self.diffusion_model = 'Deterministic'
 
     def _diffusion_model_changed(self,new):
-        self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
-        self.mrtrix_tracking_config.tracking_mode = new
-        self.dipy_tracking_config.tracking_mode = new
+        # self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
+        # self.mrtrix_tracking_config.tracking_mode = new
+        # self.dipy_tracking_config.tracking_mode = new
         self.camino_tracking_config.tracking_mode = new
         self.update_camino_tracking_model()
         
@@ -162,32 +163,50 @@ class DiffusionStage(Stage):
 
 
     def create_workflow(self, flow, inputnode, outputnode):
-        # resampling diffusion image and setting output type to short
-        fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_file='diffusion_resampled.nii'),name="diffusion_resample")
-        fs_mriconvert.inputs.vox_size = self.config.resampling
-        fs_mriconvert.inputs.resample_type = self.config.interpolation
-        flow.connect([(inputnode,fs_mriconvert,[('diffusion','in_file')])])
+        # # resampling diffusion image and setting output type to short
+        # fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_file='diffusion_resampled.nii'),name="diffusion_resample")
+        # fs_mriconvert.inputs.vox_size = self.config.resampling
+        # fs_mriconvert.inputs.resample_type = self.config.interpolation
+        # flow.connect([(inputnode,fs_mriconvert,[('diffusion','in_file')])])
 
-        fs_mriconvert_wm_mask = pe.Node(interface=fs.MRIConvert(out_type='nii',resample_type='nearest',out_file='wm_mask_resampled.nii'),name="mask_resample")
-        fs_mriconvert_wm_mask.inputs.vox_size = self.config.resampling
-        flow.connect([(inputnode,fs_mriconvert_wm_mask,[('wm_mask_registered','in_file')])])
+        # fs_mriconvert_wm_mask = pe.Node(interface=fs.MRIConvert(out_type='nii',resample_type='nearest',out_file='wm_mask_resampled.nii'),name="mask_resample")
+        # fs_mriconvert_wm_mask.inputs.vox_size = self.config.resampling
+        # flow.connect([(inputnode,fs_mriconvert_wm_mask,[('wm_mask_registered','in_file')])])
         
-        if self.config.processing_tool != 'DTK':
+        # if self.config.processing_tool != 'DTK':
     
-            fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='nii',resample_type='nearest'),name="ROIs_resample",iterfield=['in_file'])
-            fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
-            flow.connect([(inputnode,fs_mriconvert_ROIs,[('roi_volumes','in_file')])])
+        #     fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='nii',resample_type='nearest'),name="ROIs_resample",iterfield=['in_file'])
+        #     fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
+        #     flow.connect([(inputnode,fs_mriconvert_ROIs,[('roi_volumes','in_file')])])
             
+        #     if self.config.dilate_rois:
+        #         dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
+        #         dilate_rois.inputs.operation = 'modal'
+        #         flow.connect([
+        #                       (fs_mriconvert_ROIs,dilate_rois,[("out_file","in_file")]),
+        #                       (dilate_rois,outputnode,[("out_file","roi_volumes")])
+        #                     ])
+        #     else:
+        #         flow.connect([
+        #                     (fs_mriconvert_ROIs,outputnode,[("out_file","roi_volumes")])
+        #                     ])
+        # else:
+        #     flow.connect([
+        #                   (inputnode,outputnode,[("roi_volumes","roi_volumes")])
+        #                 ])
+
+        if self.config.processing_tool != 'DTK':
+      
             if self.config.dilate_rois:
                 dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
                 dilate_rois.inputs.operation = 'modal'
                 flow.connect([
-                              (fs_mriconvert_ROIs,dilate_rois,[("out_file","in_file")]),
-                              (dilate_rois,outputnode,[("out_file","roi_volumes")])
+                            (inputnode,dilate_rois,[("roi_volumes","in_file")]),
+                            (dilate_rois,outputnode,[("out_file","roi_volumes")])
                             ])
             else:
                 flow.connect([
-                            (fs_mriconvert_ROIs,outputnode,[("out_file","roi_volumes")])
+                            (inputnode,outputnode,[("roi_volumes","roi_volumes")])
                             ])
         else:
             flow.connect([
@@ -199,7 +218,7 @@ class DiffusionStage(Stage):
             recon_flow = create_dtk_recon_flow(self.config.dtk_recon_config)
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
-                        (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
+                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
                         ])
 
         elif self.config.processing_tool == 'Dipy':
@@ -208,8 +227,8 @@ class DiffusionStage(Stage):
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (inputnode,recon_flow,[('bvals','inputnode.bvals')]),
                         (inputnode,recon_flow,[('bvecs','inputnode.bvecs')]),
-                        (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
-                        (fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
+                        (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (recon_flow,outputnode,[("outputnode.FA","gFA")]),
                         ])
 
@@ -218,8 +237,8 @@ class DiffusionStage(Stage):
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (inputnode,recon_flow,[('grad','inputnode.grad')]),
-                        (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
-			            (fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
+			            (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (recon_flow,outputnode,[("outputnode.FA","gFA")]),
                         ])
 
@@ -227,22 +246,22 @@ class DiffusionStage(Stage):
             recon_flow = create_camino_recon_flow(self.config.camino_recon_config)
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
-                        (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
-                        (fs_mriconvert_wm_mask, recon_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
+                        (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (recon_flow,outputnode,[("outputnode.FA","gFA")])
                         ])
         
         elif self.config.processing_tool == 'FSL':
             recon_flow = create_fsl_recon_flow(self.config.fsl_recon_config)
             flow.connect([
-                        (fs_mriconvert,recon_flow,[('out_file','inputnode.diffusion_resampled')]),
-                        (fs_mriconvert_wm_mask,recon_flow,[('out_file','inputnode.wm_mask_resampled')])
+                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
+                        (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')])
                         ])
 
         elif self.config.processing_tool == 'Gibbs':
             recon_flow = create_gibbs_recon_flow(self.config.gibbs_recon_config)
             flow.connect([
-                          (fs_mriconvert,recon_flow,[("out_file","inputnode.diffusion_resampled")])
+                          (inputnode,recon_flow,[("diffusion","inputnode.diffusion_resampled")])
                         ])
         
         # Tracking
@@ -256,12 +275,12 @@ class DiffusionStage(Stage):
         elif self.config.processing_tool == 'Dipy':
             track_flow = create_dipy_tracking_flow(self.config.dipy_tracking_config)
             flow.connect([
-                        (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
                         (recon_flow, track_flow,[('outputnode.model','inputnode.model')]),
                         (inputnode,track_flow,[('bvals','inputnode.bvals')]),
                         (inputnode,track_flow,[('bvecs','inputnode.bvecs')]),
-                        (fs_mriconvert,track_flow,[('out_file','inputnode.DWI')]), # Diffusion resampled
+                        (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
                         # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
                         (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
                         (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
@@ -275,7 +294,7 @@ class DiffusionStage(Stage):
         elif self.config.processing_tool == 'MRtrix':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
             flow.connect([
-                        (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'),('outputnode.grad','inputnode.grad')]),
                         (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
@@ -294,7 +313,7 @@ class DiffusionStage(Stage):
         elif self.config.processing_tool == 'Camino':
             track_flow = create_camino_tracking_flow(self.config.camino_tracking_config)
             flow.connect([
-                        (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'), ('outputnode.grad','inputnode.grad')])
                         ])
             if self.config.diffusion_model == 'Probabilistic':
@@ -308,7 +327,7 @@ class DiffusionStage(Stage):
         elif self.config.processing_tool == 'FSL':
             track_flow = create_fsl_tracking_flow(self.config.fsl_tracking_config)
             flow.connect([
-                        (fs_mriconvert_wm_mask,track_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')]),
                         (recon_flow,track_flow,[('outputnode.fsamples','inputnode.fsamples')]),
                         (recon_flow,track_flow,[('outputnode.phsamples','inputnode.phsamples')]),
@@ -320,7 +339,7 @@ class DiffusionStage(Stage):
         elif self.config.processing_tool == 'Gibbs':
             track_flow = create_gibbs_tracking_flow(self.config.gibbs_tracking_config)
             flow.connect([
-                          (fs_mriconvert_wm_mask, track_flow,[('out_file','inputnode.wm_mask_resampled')]),
+                          (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                           (recon_flow,track_flow,[("outputnode.recon_file","inputnode.recon_file")]),
                           (track_flow,outputnode,[('outputnode.track_file','track_file')])
                         ])

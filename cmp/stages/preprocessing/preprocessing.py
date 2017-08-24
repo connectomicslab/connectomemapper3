@@ -95,10 +95,6 @@ class PreprocessingConfig(HasTraits):
     traits_view = View( 
                     VGroup(
                         HGroup(
-                            Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-                            'interpolation'
-                            ),
-                        HGroup(
                             Item('denoising'),
                             Item('denoising_algo',label='Tool:',visible_when='denoising==True'),
                             Item('dipy_noise_model',label='Noise model (Dipy):',visible_when='denoising_algo=="Dipy (NLM)"')
@@ -115,6 +111,10 @@ class PreprocessingConfig(HasTraits):
                             Item('start_vol',label='Vol'),
                             Item('end_vol',label='to'),
                             Item('max_str',style='readonly',show_label=False)
+                            ),
+                        HGroup(
+                            Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+                            'interpolation'
                             )
                         )
                     )
@@ -624,9 +624,10 @@ class PreprocessingStage(Stage):
             if(os.path.exists(denoising_results_path)):
                 dwi_denoise_results = pickle.load(gzip.open(denoising_results_path))
                 print dwi_denoise_results.outputs.out_file
-                print dwi_denoise_results.outputs.out_noisemap
                 self.inspect_outputs_dict['DWI denoised image'] = ['mrview',dwi_denoise_results.outputs.out_file]
-                self.inspect_outputs_dict['Noise map'] = ['mrview',dwi_denoise_results.outputs.out_noisemap]
+                if self.config.denoising_algo == "MRtrix (MP-PCA)":
+                    print dwi_denoise_results.outputs.out_noisemap
+                    self.inspect_outputs_dict['Noise map'] = ['mrview',dwi_denoise_results.outputs.out_noisemap]
 
         if self.config.bias_field_correction:
             bias_field_correction_results_path = os.path.join(self.stage_dir,"dwi_biascorrect","result_dwi_biascorrect.pklz")

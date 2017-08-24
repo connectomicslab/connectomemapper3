@@ -764,7 +764,7 @@ def create_dipy_tracking_flow(config):
 
         flow.connect([
             #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
-            (inputnode,dipy_tracking,[('gm_registered','seed_mask')]),
+            (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
             (inputnode,dipy_tracking,[('DWI','in_file')]),
             (inputnode,dipy_tracking,[('model','in_model')]),
             (inputnode,dipy_tracking,[('FA','in_fa')]),

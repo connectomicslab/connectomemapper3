@@ -521,7 +521,7 @@ def create_dipy_recon_flow(config):
                 (inputnode, dipy_CSD,[('bvecs','in_bvec')]),
                 # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
                 (dipy_erode, dipy_CSD,[('out_file','in_mask')]),
-                (dipy_tensor, dipy_CSD,[('response','response')]),
+                #(dipy_tensor, dipy_CSD,[('response','response')]),
                 (inputnode,outputnode,[('diffusion_resampled','DWI')]),
                 (dipy_CSD,outputnode,[('model','model')])
                 ])

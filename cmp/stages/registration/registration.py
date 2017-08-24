@@ -44,8 +44,8 @@ class RegistrationConfig(HasTraits):
     pipeline = Enum(["Diffusion","fMRI"])
 
     # DWI resampling selection
-    resampling = Tuple(1,1,1)
-    interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
+    # resampling = Tuple(1,1,1)
+    # interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
     
     # Registration selection
     registration_mode = Str('Linear + Non-linear (FSL)')
@@ -68,8 +68,8 @@ class RegistrationConfig(HasTraits):
     apply_to_eroded_csf = Bool(True)
     apply_to_eroded_brain = Bool(False)
                 
-    traits_view = View(HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-                       'interpolation'),
+    traits_view = View(# HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+                       # 'interpolation'),
                         Item('registration_mode',editor=EnumEditor(name='registration_mode_trait')),
                         Group('uses_qform','dof','cost','no_search','flirt_args',label='FLIRT',
                               show_border=True,visible_when='registration_mode=="Linear + Non-linear (FSL)"'),
