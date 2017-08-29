@@ -44,17 +44,17 @@ class DiffusionConfig(HasTraits):
     camino_tracking_config = Instance(HasTraits)
     fsl_tracking_config = Instance(HasTraits)
     gibbs_tracking_config = Instance(HasTraits)
-    diffusion_model_editor = List(['Deterministic'])
+    diffusion_model_editor = List(['Deterministic','Probabilistic'])
     diffusion_model = Str('Deterministic')
     ## TODO import custom DWI and tractogram (need to register anatomical data to DWI to project parcellated ROIs onto the tractogram)    
     
     traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
                        #'interpolation'),
-		               Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
+		              Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
                        Item('dilate_rois',visible_when='processing_tool!="DTK"'),
                        Group(Item('dtk_recon_config',style='custom',defined_when='processing_tool=="DTK"'),
                              Item('dipy_recon_config',style='custom',defined_when='processing_tool=="Dipy"'),
-			                 Item('mrtrix_recon_config',style='custom',defined_when='processing_tool=="MRtrix"'),
+			                Item('mrtrix_recon_config',style='custom',defined_when='processing_tool=="MRtrix"'),
 			                 Item('camino_recon_config',style='custom',defined_when='processing_tool=="Camino"'),
                              Item('fsl_recon_config',style='custom',defined_when='processing_tool=="FSL"'),
                              Item('gibbs_recon_config',style='custom',defined_when='processing_tool=="Gibbs"'),
@@ -68,6 +68,32 @@ class DiffusionConfig(HasTraits):
                              Item('gibbs_tracking_config',style='custom',defined_when='processing_tool=="Gibbs"'),
                              label='Tracking', show_border=True, show_labels=False),
                        )
+
+    # dipy_traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+    #                    #'interpolation'),
+    #                     Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
+    #                     Item('dilate_rois'),
+    #                     Group(
+    #                         Item('dipy_recon_config',style='custom'),
+    #                         label='Reconstruction', show_border=True, show_labels=False),
+    #                     Group(
+    #                         Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+    #                         Item('dipy_tracking_config',style='custom'),
+    #                         label='Tracking', show_border=True, show_labels=False),
+    #                     )
+
+    # mrtrix_traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
+    #                    #'interpolation'),
+    #                    Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
+    #                    Item('dilate_rois'),
+    #                    Group(
+    #                         Item('mrtrix_recon_config',style='custom'),
+    #                         label='Reconstruction', show_border=True, show_labels=False),
+    #                    Group(
+    #                         Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+    #                         Item('mrtrix_tracking_config',style='custom'),
+    #                         label='Tracking', show_border=True, show_labels=False),
+    #                    )
 
     def __init__(self):
         self.dtk_recon_config = DTK_recon_config(imaging_model=self.diffusion_imaging_model)
@@ -84,7 +110,11 @@ class DiffusionConfig(HasTraits):
         self.fsl_tracking_config = FSL_tracking_config()
         self.gibbs_tracking_config = Gibbs_tracking_config()
         
+        #self.mrtrix_recon_config.on_trait_change(self.update_mrtrix_tracking_SD,'local_model')
+        #self.on_trait_change(self._processing_tool_changed,'processing_tool')
+
         self.mrtrix_recon_config.on_trait_change(self.update_mrtrix_tracking_SD,'local_model')
+        self.dipy_recon_config.on_trait_change(self.update_dipy_tracking_SD,'local_model')
         
         self.camino_recon_config.on_trait_change(self.update_camino_tracking_model,'model_type')
         self.camino_recon_config.on_trait_change(self.update_camino_tracking_model,'local_model')
@@ -110,7 +140,7 @@ class DiffusionConfig(HasTraits):
                 self.diffusion_model_editor = ['Deterministic','Probabilistic']
 
     def _processing_tool_changed(self, new):
-        self.trait_view('traits_view').updated = True 
+        print "processing_tool_changed"
         if new == 'DTK' or new == 'Gibbs':
             self.diffusion_model_editor = ['Deterministic']
             self.diffusion_model = 'Deterministic'
@@ -118,19 +148,29 @@ class DiffusionConfig(HasTraits):
         elif new == "FSL":
             self.diffusion_model_editor = ['Probabilistic']
             self.diffusion_model = 'Probabilistic'       
-        else:
+        elif new == "Dipy":
             self.diffusion_model_editor = ['Deterministic','Probabilistic']
             self.diffusion_model = 'Deterministic'
+            # self.configure_traits(view='dipy_traits_view')
+        elif new == "MRtrix":
+            self.diffusion_model_editor = ['Deterministic','Probabilistic']
+            self.diffusion_model = 'Deterministic'
+            # self.configure_traits(view='mrtrix_traits_view')
+        #self.edit_traits()
+        #self.trait_view('traits_view').updated = True 
 
     def _diffusion_model_changed(self,new):
         # self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
-        # self.mrtrix_tracking_config.tracking_mode = new
-        # self.dipy_tracking_config.tracking_mode = new
+        self.mrtrix_tracking_config.tracking_mode = new
+        self.dipy_tracking_config.tracking_mode = new
         self.camino_tracking_config.tracking_mode = new
         self.update_camino_tracking_model()
         
-    def update_mrtrix_tracking_SD(self):
-        self.mrtrix_tracking_config.SD = self.mrtrix_recon_config.local_model
+    def update_mrtrix_tracking_SD(self,new):
+        self.mrtrix_tracking_config.SD = new
+
+    def update_dipy_tracking_SD(self,new):
+        self.dipy_tracking_config.SD = new
         
     def update_camino_tracking_model(self):
         if self.diffusion_model == 'Probabilistic':

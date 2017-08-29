@@ -10,10 +10,16 @@
 import os
 import datetime
 from cmp.pipelines.common import *
-from traits.api import *
-from traitsui.api import *
 
-from traitsui.wx.themed_button_editor import ThemedButtonEditor
+try: 
+    from traitsui.api import *
+    from traits.api import *
+    from traitsui.wx.themed_button_editor import ThemedButtonEditor
+except ImportError: 
+    from enthought.traits.api import *
+    from enthought.traits.ui.api import *
+    from  enthought.traits.ui.wx.themed_button_editor import ThemedButtonEditor
+
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
 from nipype import config, logging

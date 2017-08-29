@@ -6,10 +6,17 @@
 
 """ CMP registration stage
 """ 
+try: 
+    from traitsui.api import *
+    from traits.api import *
+
+except ImportError: 
+    from enthought.traits.api import *
+    from enthought.traits.ui.api import *
 
 # General imports
-from traits.api import *
-from traitsui.api import *
+# from traits.api import *
+# from traitsui.api import *
 import os
 import pickle
 import gzip

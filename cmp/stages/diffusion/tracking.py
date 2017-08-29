@@ -35,7 +35,7 @@ import nipype.interfaces.dipy as dipy
 import cmp.interfaces.camino2trackvis as camino2trackvis
 from cmp.interfaces.mrtrix3 import StreamlineTrack
 from cmp.interfaces.fsl import mapped_ProbTrackX
-from cmp.interfaces.dipy import DirectionGetterTractography
+from cmp.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
 
 from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
 
@@ -684,93 +684,110 @@ def create_dipy_tracking_flow(config):
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
 
-
-    if config.tracking_mode == 'Deterministic':
-        # dipy_seeds = pe.Node(interface=make_seeds(),name="dipy_seeds")
-        # dipy_tracking = pe.Node(interface=dipy.StreamlineTractography(),name="dipy_deterministic_tracking")
-
-        # dipy_tracking.inputs.num_seeds = config.number_of_tracks
-        # dipy_tracking.inputs.gfa_thresh = config.gfa_thresh
-        # dipy_tracking.inputs.peak_threshold = config.peak_thresh
-        # dipy_tracking.inputs.min_angle = config.min_angle
-
-        # # flow.connect([
-        # #               (inputnode,dipy_tracking,[("bvals","bvals")]),
-        # #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
-        # #             ])
-
-        # flow.connect([
-        #     (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
-        #     (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
-        #     ])
-
-        # flow.connect([
-        #     #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
-        #     (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
-        #     (inputnode,dipy_tracking,[('DWI','in_file')]),
-        #     (inputnode,dipy_tracking,[('model','in_model')]),
-        #     (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
-        #     (dipy_tracking,outputnode,[('tracks','track_file')])
-        #     ])
-
-        dipy_seeds = pe.Node(interface=make_seeds(),name="dipy_seeds")
-        dipy_tracking = pe.Node(interface=DirectionGetterTractography(),name="dipy_deterministic_tracking")
-        dipy_tracking.inputs.algo = 'deterministic'
+    if not config.SD: # If tensor fitting was used
+        dipy_tracking = pe.Node(interface=TensorInformedEudXTractography(),name='dipy_dtieudx_tracking')
         dipy_tracking.inputs.num_seeds = config.number_of_seeds
         dipy_tracking.inputs.fa_thresh = config.fa_thresh
         dipy_tracking.inputs.max_angle = config.max_angle
         dipy_tracking.inputs.step_size = config.step_size
 
-        # flow.connect([
-        #               (inputnode,dipy_tracking,[("bvals","bvals")]),
-        #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
-        #             ])
-
         flow.connect([
-            (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
-            (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
-            ])
+                #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+                (inputnode,dipy_tracking,[('DWI','in_file')]),
+                (inputnode,dipy_tracking,[('model','in_model')]),
+                (inputnode,dipy_tracking,[('FA','in_fa')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
+                (dipy_tracking,outputnode,[('tracks','track_file')])
+                ])
 
-        flow.connect([
-            #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
-            (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
-            (inputnode,dipy_tracking,[('DWI','in_file')]),
-            (inputnode,dipy_tracking,[('model','in_model')]),
-            (inputnode,dipy_tracking,[('FA','in_fa')]),
-            (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
-            (dipy_tracking,outputnode,[('tracks','track_file')])
-            ])
+    else: # If CSD was used                     
+        if config.tracking_mode == 'Deterministic':
+            # dipy_seeds = pe.Node(interface=make_seeds(),name="dipy_seeds")
+            # dipy_tracking = pe.Node(interface=dipy.StreamlineTractography(),name="dipy_deterministic_tracking")
 
-    elif config.tracking_mode == 'Probabilistic':
-        
-        dipy_seeds = pe.Node(interface=make_seeds(),name="dipy_seeds")
+            # dipy_tracking.inputs.num_seeds = config.number_of_tracks
+            # dipy_tracking.inputs.gfa_thresh = config.gfa_thresh
+            # dipy_tracking.inputs.peak_threshold = config.peak_thresh
+            # dipy_tracking.inputs.min_angle = config.min_angle
 
-        flow.connect([
-            (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
-            (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
-            ])
-        
-        dipy_tracking = pe.Node(interface=DirectionGetterTractography(),name="dipy_probabilistic_tracking")
-        dipy_tracking.inputs.algo = 'probabilistic'
-        dipy_tracking.inputs.num_seeds = config.number_of_seeds
-        dipy_tracking.inputs.fa_thresh = config.fa_thresh
-        dipy_tracking.inputs.max_angle = config.max_angle
-        dipy_tracking.inputs.step_size = config.step_size
+            # # flow.connect([
+            # #               (inputnode,dipy_tracking,[("bvals","bvals")]),
+            # #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
+            # #             ])
 
-        # flow.connect([
-        #               (inputnode,dipy_tracking,[("bvals","bvals")]),
-        #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
-        #             ])
+            # flow.connect([
+            #     (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
+            #     (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
+            #     ])
 
-        flow.connect([
-            #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
-            (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
-            (inputnode,dipy_tracking,[('DWI','in_file')]),
-            (inputnode,dipy_tracking,[('model','in_model')]),
-            (inputnode,dipy_tracking,[('FA','in_fa')]),
-            (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
-            (dipy_tracking,outputnode,[('tracks','track_file')])
-            ])
+            # flow.connect([
+            #     #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
+            #     (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+            #     (inputnode,dipy_tracking,[('DWI','in_file')]),
+            #     (inputnode,dipy_tracking,[('model','in_model')]),
+            #     (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
+            #     (dipy_tracking,outputnode,[('tracks','track_file')])
+            #     ])
+
+            dipy_seeds = pe.Node(interface=make_seeds(),name="dipy_seeds")
+            dipy_tracking = pe.Node(interface=DirectionGetterTractography(),name="dipy_deterministic_tracking")
+            dipy_tracking.inputs.algo = 'deterministic'
+            dipy_tracking.inputs.num_seeds = config.number_of_seeds
+            dipy_tracking.inputs.fa_thresh = config.fa_thresh
+            dipy_tracking.inputs.max_angle = config.max_angle
+            dipy_tracking.inputs.step_size = config.step_size
+
+            # flow.connect([
+            #               (inputnode,dipy_tracking,[("bvals","bvals")]),
+            #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
+            #             ])
+
+            flow.connect([
+                (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
+                (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
+                ])
+
+            flow.connect([
+                #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+                (inputnode,dipy_tracking,[('DWI','in_file')]),
+                (inputnode,dipy_tracking,[('model','in_model')]),
+                (inputnode,dipy_tracking,[('FA','in_fa')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
+                (dipy_tracking,outputnode,[('tracks','track_file')])
+                ])
+
+        elif config.tracking_mode == 'Probabilistic':
+            
+            dipy_seeds = pe.Node(interface=make_seeds(),name="dipy_seeds")
+
+            flow.connect([
+                (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
+                (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
+                ])
+            
+            dipy_tracking = pe.Node(interface=DirectionGetterTractography(),name="dipy_probabilistic_tracking")
+            dipy_tracking.inputs.algo = 'probabilistic'
+            dipy_tracking.inputs.num_seeds = config.number_of_seeds
+            dipy_tracking.inputs.fa_thresh = config.fa_thresh
+            dipy_tracking.inputs.max_angle = config.max_angle
+            dipy_tracking.inputs.step_size = config.step_size
+
+            # flow.connect([
+            #               (inputnode,dipy_tracking,[("bvals","bvals")]),
+            #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
+            #             ])
+
+            flow.connect([
+                #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+                (inputnode,dipy_tracking,[('DWI','in_file')]),
+                (inputnode,dipy_tracking,[('model','in_model')]),
+                (inputnode,dipy_tracking,[('FA','in_fa')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
+                (dipy_tracking,outputnode,[('tracks','track_file')])
+                ])
 
     return flow
 
