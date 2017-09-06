@@ -707,7 +707,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
                 # endROI   = int(roiData[endvox[0], endvox[1], endvox[2]])
                 print "origin: ",origin[0],",",origin[1],",",origin[2]
                 
-                startvox = np.zeros((3,1))
+                startvox = np.zeros((3,1)).astype(int)
                 startvox[0]=np.int(endpoints[i, 0, 0])
                 startvox[1]=np.int(endpoints[i, 0, 1])
                 startvox[2]=np.int(endpoints[i, 0, 2])
@@ -715,7 +715,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
                 # startvox[1]=np.int(-(endpoints[i, 0, 1]+origin[1]))
                 # startvox[2]=np.int(-endpoints[i, 0, 2]+origin[2])
 
-                endvox = np.zeros((3,1))
+                endvox = np.zeros((3,1)).astype(int)
                 endvox[0]=np.int(endpoints[i, 1, 0])
                 endvox[1]=np.int(endpoints[i, 1, 1])
                 endvox[2]=np.int(endpoints[i, 1, 2])
@@ -723,11 +723,12 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
                 # endvox[1]=np.int(-(endpoints[i, 1, 1]+origin[1]))
                 # endvox[2]=np.int(-endpoints[i, 1, 2]+origin[2])
 
-                print "start point : ",startvox[0,0]," , ",startvox[1,0]," , ",startvox[2,0]
-                print "end point : ",endvox[0,0]," , ",endvox[1,0]," , ",endvox[2,0]
+                print "start point : ",startvox
+                print "end point : ",endvox
+                print "roi data shape : ",roiData.shape
 
-                startROI = int(roiData[startvox[0,0],startvox[1,0],startvox[2,0]]) # endpoints from create_endpoints_array
-                endROI   = int(roiData[endvox[0,0],endvox[1,0],endvox[2,0]])
+                startROI = int(roiData[startvox[0],startvox[1],startvox[2]]) # endpoints from create_endpoints_array
+                endROI   = int(roiData[endvox[0],endvox[1],endvox[2]])
 
                 
                 

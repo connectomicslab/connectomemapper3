@@ -473,34 +473,38 @@ def create_dipy_recon_flow(config):
     #             (flip_table,outputnode,[("table","grad")])
     #             ])
 
+    # Compute single fiber voxel mask
+    dipy_erode = pe.Node(interface=Erode(out_filename="wm_mask_resampled.nii.gz"),name="dipy_erode")
+    dipy_erode.inputs.number_of_passes = 3
+    dipy_erode.inputs.filtertype = 'erode'
+
+    flow.connect([
+        (inputnode,dipy_erode,[("wm_mask_resampled",'in_file')])
+        ])
+
+    
+    # Tensor -> EigenVectors / FA, AD, MD, RD maps
+    dipy_tensor = pe.Node(interface=DTIEstimateResponseSH(),name='dipy_tensor')
+    dipy_tensor.inputs.auto = True
+    dipy_tensor.inputs.roi_radius = 10
+    dipy_tensor.inputs.fa_thresh = config.single_fib_thr
+
+    flow.connect([
+        (inputnode, dipy_tensor,[('diffusion_resampled','in_file')]),
+        (inputnode, dipy_tensor,[('bvals','in_bval')]),
+        (inputnode, dipy_tensor,[('bvecs','in_bvec')]),
+        (dipy_erode, dipy_tensor,[('out_file','in_mask')])
+        ])
+
+    flow.connect([
+        (dipy_tensor,outputnode,[("response","RF")]),
+        (dipy_tensor,outputnode,[("fa_file","FA")])
+        ])
+
     if not config.local_model:
-        # Tensor -> EigenVectors / FA, AD, MD, RD maps
-        dipy_tensor = pe.Node(interface=DTIEstimateResponseSH(),name='dipy_tensor')
-        dipy_tensor.inputs.auto = True
-        dipy_tensor.inputs.roi_radius = 10
-        dipy_tensor.inputs.fa_thresh = config.single_fib_thr
-
-        # Compute single fiber voxel mask
-        dipy_erode = pe.Node(interface=Erode(out_filename="wm_mask_resampled.nii.gz"),name="dipy_erode")
-        dipy_erode.inputs.number_of_passes = 3
-        dipy_erode.inputs.filtertype = 'erode'
-
         flow.connect([
-            (inputnode,dipy_erode,[("wm_mask_resampled",'in_file')]),
-            (inputnode, dipy_tensor,[('diffusion_resampled','in_file')]),
-            (inputnode, dipy_tensor,[('bvals','in_bval')]),
-            (inputnode, dipy_tensor,[('bvecs','in_bvec')]),
-            (dipy_erode, dipy_tensor,[('out_file','in_mask')])
-            ])
-
-        flow.connect([
-            (dipy_tensor,outputnode,[("response","RF")]),
-            (dipy_tensor,outputnode,[("fa_file","FA")]),
+            (inputnode,outputnode,[('diffusion_resampled','DWI')]),
             (dipy_tensor,outputnode,[("dti_model","model")])
-            ])
-
-        flow.connect([
-            (inputnode,outputnode,[('diffusion_resampled','DWI')])
             ])
 
         # Tensor -> Eigenvectors
@@ -540,15 +544,18 @@ def create_mrtrix_recon_flow(config):
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
     
     # Flip gradient table
-    flip_table = pe.Node(interface=flipTable(),name='flip_table')
+    # flip_table = pe.Node(interface=flipTable(),name='flip_table')
 
-    flip_table.inputs.flipping_axis = config.flip_table_axis
-    flip_table.inputs.delimiter = ' '
-    flip_table.inputs.header_lines = 0
-    flip_table.inputs.orientation = 'v'
+    # flip_table.inputs.flipping_axis = config.flip_table_axis
+    # flip_table.inputs.delimiter = ' '
+    # flip_table.inputs.header_lines = 0
+    # flip_table.inputs.orientation = 'v'
+    # flow.connect([
+    #             (inputnode,flip_table,[("grad","table")]),
+    #             (flip_table,outputnode,[("table","grad")])
+    #             ])
     flow.connect([
-                (inputnode,flip_table,[("grad","table")]),
-                (flip_table,outputnode,[("table","grad")])
+                (inputnode,outputnode,[("grad","grad")])
                 ])
 
     # Tensor
@@ -556,7 +563,7 @@ def create_mrtrix_recon_flow(config):
     
     flow.connect([
 		(inputnode, mrtrix_tensor,[('diffusion_resampled','in_file')]),
-        (flip_table,mrtrix_tensor,[("table","encoding_file")]),
+        (inputnode,mrtrix_tensor,[("grad","encoding_file")]),
 		])
 
     # Tensor -> FA map
@@ -604,7 +611,7 @@ def create_mrtrix_recon_flow(config):
         flow.connect([
 		    (inputnode,mrtrix_rf,[("diffusion_resampled","in_file")]),
 		    (mrtrix_thr_FA,mrtrix_rf,[("thresholded","mask_image")]),
-            (flip_table,mrtrix_rf,[("table","encoding_file")]),
+            (inputnode,mrtrix_rf,[("grad","encoding_file")]),
 		    ])
         
         # Perform spherical deconvolution
@@ -616,7 +623,7 @@ def create_mrtrix_recon_flow(config):
 		    (mrtrix_rf,mrtrix_CSD,[('response','response_file')]),
 		    (mrtrix_rf,outputnode,[('response','RF')]),
 		    (inputnode,mrtrix_CSD,[("wm_mask_resampled",'mask_image')]),
-            (flip_table,mrtrix_CSD,[("table","encoding_file")]),
+            (inputnode,mrtrix_CSD,[("grad","encoding_file")]),
 		    (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
 		    ])
     else:

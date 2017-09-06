@@ -799,7 +799,7 @@ def create_mrtrix_tracking_flow(config):
     # outputnode
 
     #CRS2XYZtkReg = subprocess.check_output
-
+    
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
     if config.tracking_mode == 'Deterministic':
         mrtrix_seeds = pe.Node(interface=make_mrtrix_seeds(),name="mrtrix_seeds")
@@ -818,7 +818,7 @@ def create_mrtrix_tracking_flow(config):
         flow.connect([
                       (inputnode,mrtrix_tracking,[("grad","gradient_encoding_file")])
                     ])
-        converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
+        
 
         voxel2WorldMatrixExtracter = pe.Node(interface=extractHeaderVoxel2WorldMatrix(),name='voxel2WorldMatrixExtracter')
         
@@ -837,6 +837,9 @@ def create_mrtrix_tracking_flow(config):
             (inputnode,mrtrix_seeds,[('wm_mask_resampled','WM_file')]),
             (inputnode,mrtrix_seeds,[('gm_registered','ROI_files')]),
             ])
+
+        converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
+
         flow.connect([
             #(mrtrix_seeds,mrtrix_tracking,[('seed_files','seed_file')]),
             (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
@@ -884,10 +887,13 @@ def create_mrtrix_tracking_flow(config):
 		    (inputnode,mrtrix_seeds,[('gm_registered','ROI_files')]),
 		    ])
         flow.connect([
-		    (mrtrix_seeds,mrtrix_tracking,[('seed_files','seed_file')]),
+		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
 		    (inputnode,mrtrix_tracking,[('DWI','in_file')]),
 		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
-            (mrtrix_tracking,outputnode,[('tracked','track_file')])
+            #(mrtrix_tracking,outputnode,[('tracked','track_file')]),
+            (mrtrix_tracking,converter,[('tracked','in_file')]),
+            (inputnode,converter,[('wm_mask_resampled','image_file')]),
+            (converter,outputnode,[('out_file','track_file')])
             #(mrtrix_tracking,converter,[('tracked','in_file')]),
             #(inputnode,converter,[('wm_mask_resampled','image_file')]),
 		    #(converter,outputnode,[('out_file','track_file')])

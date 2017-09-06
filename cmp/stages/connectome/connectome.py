@@ -201,15 +201,21 @@ class ConnectomeStage(Stage):
     
     def define_inspect_outputs(self):
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
+        print "Stage dir: %s" % self.stage_dir
         if(os.path.exists(con_results_path)):
+            print "con_results_path : %s" % con_results_path
             con_results = pickle.load(gzip.open(con_results_path))
             self.inspect_outputs_dict['streamline_final'] = ['trackvis',con_results.outputs.streamline_final_file]
-            if type(con_results.outputs.connectivity_matrices) == str:
-                mat = con_results.outputs.connectivity_matrices
+            mat = con_results.outputs.connectivity_matrices
+            print "Conn. matrix : %s" % mat
+            if isinstance(mat, basestring):
+                print "is str"
                 if 'gpickle' in mat:
                     self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
             else:
+                print "is list"
                 for mat in con_results.outputs.connectivity_matrices:
+                    print "mat : %s" % mat
                     if 'gpickle' in mat:
                         self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
                 
