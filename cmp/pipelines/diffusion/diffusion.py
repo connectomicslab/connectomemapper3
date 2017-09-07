@@ -11,14 +11,26 @@ import os
 import datetime
 from cmp.pipelines.common import *
 
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+
+# try: 
+#     from traitsui.api import *
+#     from traits.api import *
+#     from traitsui.wx.themed_button_editor import ThemedButtonEditor
+# except ImportError: 
+#     from enthought.traits.api import *
+#     from enthought.traits.ui.api import *
+#     from  enthought.traits.ui.wx.themed_button_editor import ThemedButtonEditor
+   
 try: 
     from traitsui.api import *
     from traits.api import *
-    from traitsui.wx.themed_button_editor import ThemedButtonEditor
+    from traitsui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
 except ImportError: 
     from enthought.traits.api import *
     from enthought.traits.ui.api import *
-    from  enthought.traits.ui.wx.themed_button_editor import ThemedButtonEditor
+    from  enthought.traits.ui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
@@ -74,23 +86,45 @@ class DiffusionPipeline(Pipeline):
     global_conf = Global_Configuration()
   
     segmentation = Button('Segmentation')
+    #segmentation.setIcon(QIcon(QPixmap("segmentation.png")))
+
     parcellation = Button('Parcellation') 
+    #parcellation.setIcon(QIcon(QPixmap("parcellation.png")))
+
     preprocessing = Button('Preprocessing')
+    #preprocessing.setIcon(QIcon(QPixmap("preprocessing.png")))
+
     diffusion = Button('Diffusion')
+    #diffusion.setIcon(QIcon(QPixmap("diffusion.png")))
+
     registration = Button('Registration')
+    #registration.setIcon(QIcon(QPixmap("registration.png")))
+
     connectome = Button('Connectome')
-   
+    #connectome.setIcon(QIcon(QPixmap("connectome.png")))
+
     config_file = Str
    
+    # pipeline_group = VGroup(
+    #                     HGroup(spring,Item('segmentation',editor=ToolkitEditorFactory(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
+    #                     HGroup(spring,Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
+    #                     HGroup(spring,Item('preprocessing',editor=ToolkitEditorFactory(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
+    #                     HGroup(spring,Item('registration',editor=ToolkitEditorFactory(image=ImageResource('registration'),theme='@G')),spring,show_labels=False),
+    #                     HGroup(spring,Item('diffusion',editor=ToolkitEditorFactory(image=ImageResource('diffusion'),theme='@G')),spring,show_labels=False),
+    #                     HGroup(spring,Item('connectome',editor=ToolkitEditorFactory(image=ImageResource('connectome'),theme='@G')),spring,show_labels=False),
+    #                     springy=True
+    #       
+    #              )
+
     pipeline_group = VGroup(
-                        HGroup(spring,Item('segmentation',editor=ThemedButtonEditor(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
-                        HGroup(spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('preprocessing',editor=ThemedButtonEditor(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('registration',editor=ThemedButtonEditor(image=ImageResource('registration'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('diffusion',editor=ThemedButtonEditor(image=ImageResource('diffusion'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('connectome',editor=ThemedButtonEditor(image=ImageResource('connectome'),theme='@G')),spring,show_labels=False),
+                        HGroup(spring,Item('segmentation',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
+                        HGroup(spring,Item('parcellation',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),
+                        HGroup(spring,Item('preprocessing',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),
+                        HGroup(spring,Item('registration',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),
+                        HGroup(spring,Item('diffusion',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),
+                        HGroup(spring,Item('connectome',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),
                         springy=True
-                        )
+                    )
     
     def __init__(self,project_info):
         self.stages = {'Segmentation':SegmentationStage(),

@@ -10,10 +10,25 @@
 import os
 import datetime
 from cmp.pipelines.common import *
-from traits.api import *
-from traitsui.api import *
 
-from traitsui.wx.themed_button_editor import ThemedButtonEditor
+# try: 
+#     from traitsui.api import *
+#     from traits.api import *
+#     from traitsui.wx.themed_button_editor import ThemedButtonEditor
+# except ImportError: 
+#     from enthought.traits.api import *
+#     from enthought.traits.ui.api import *
+#     from  enthought.traits.ui.wx.themed_button_editor import ThemedButtonEditor
+   
+try: 
+    from traitsui.api import *
+    from traits.api import *
+    from traitsui.qt4.button_editor import ToolkitEditorFactory
+except ImportError: 
+    from enthought.traits.api import *
+    from enthought.traits.ui.api import *
+    from  enthought.traits.ui.qt4.button_editor import ToolkitEditorFactory
+
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
 from nipype import config, logging
@@ -63,12 +78,12 @@ class fMRIPipeline(Pipeline):
     config_file = Str
    
     pipeline_group = VGroup(
-                        HGroup(spring,Item('preprocessing',editor=ThemedButtonEditor(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('segmentation',editor=ThemedButtonEditor(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
-                        HGroup(spring,Item('parcellation',editor=ThemedButtonEditor(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('registration',editor=ThemedButtonEditor(image=ImageResource('registration'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('functional',editor=ThemedButtonEditor(image=ImageResource('functional'),theme='@G')),spring,show_labels=False),
-                        HGroup(spring,Item('connectome',editor=ThemedButtonEditor(image=ImageResource('connectome'),theme='@G')),spring,show_labels=False),
+                        HGroup(spring,Item('preprocessing',editor=ToolkitEditorFactory(image=ImageResource('preprocessing'))),spring,show_labels=False),
+                        HGroup(spring,Item('segmentation',editor=ToolkitEditorFactory(image=ImageResource('segmentation'))),spring,show_labels=False),#Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
+                        HGroup(spring,Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'))),spring,show_labels=False),
+                        HGroup(spring,Item('registration',editor=ToolkitEditorFactory(image=ImageResource('registration'))),spring,show_labels=False),
+                        HGroup(spring,Item('functional',editor=ToolkitEditorFactory(image=ImageResource('functional'))),spring,show_labels=False),
+                        HGroup(spring,Item('connectome',editor=ToolkitEditorFactory(image=ImageResource('connectome'))),spring,show_labels=False),
                         springy=True
                         )
     

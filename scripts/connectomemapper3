@@ -3,14 +3,21 @@
 
 import sys
 import os
-import wx
+
+#import wx
+from pyface.qt import QtCore, QtGui
+
 import subprocess
 
+# try: 
+#     import traitsui.wx
+# except ImportError: 
+#     import enthought.traits.ui.wx
 
 try: 
-    import traitsui.wx
+    import traitsui.qt4
 except ImportError: 
-    import enthought.traits.ui.wx
+    import enthought.traits.ui.qt4
 
 import cmp.gui
 import cmp.project
@@ -74,7 +81,7 @@ if __name__ == "__main__":
     
     argc = len(sys.argv)
     if argc==1: # no args, launch the GUI
-        traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
+        #traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
         mw = cmp.gui.CMP_MainWindow()
         mw_res = mw.configure_traits()
     elif argc==3: # connectomemapper input_folder ini_file

@@ -225,11 +225,14 @@ class ProjectHandler(Handler):
 
         is_bids = False
 
+        print "Base dir: %s" % loaded_project.base_directory
         try:
             bids_layout = BIDSLayout(loaded_project.base_directory)
             is_bids = True
             loaded_project.subjects = []
+
             for subj in bids_layout.get_subjects():
+                print "sub: %s" % subj
                 loaded_project.subjects.append('sub-'+str(subj))
             # loaded_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
         except:

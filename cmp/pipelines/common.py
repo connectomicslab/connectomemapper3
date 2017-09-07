@@ -32,6 +32,9 @@ import cmp.interfaces.fsl as cmp_fsl
 from traits.api import *
 from traitsui.api import *
 
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+
 class ProgressWindow(HasTraits):
     main_status = Str("Processing launched...")
     stages_status = List([''])
@@ -99,11 +102,11 @@ class Pipeline(HasTraits):
                         Include('pipeline_group'),
                         Group(
                             Group(
-                                Item('base_directory',editor=TextEditor(),style='readonly',show_label=False,height=100),
+                                Item('base_directory',editor=TextEditor(),style='readonly',show_label=False),
                                 label='BIDS base directory',
                             ),
                              Group(
-                                Item('subject',style='readonly',show_label=False,height=100),
+                                Item('subject',style='readonly',show_label=False),
                                 label='Subject',
                             ),
                             Group(
@@ -115,11 +118,11 @@ class Pipeline(HasTraits):
                             Group(
                                 'number_of_cores',
                                 label='Processing configuration'
-                            ),
+                            ),spring,
                             
                         ),
                         
-                        ),kind = 'livemodal')
+                        springy=True),kind = 'livemodal')
     
     def __init__(self, project_info):
         self.base_directory = project_info.base_directory

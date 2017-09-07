@@ -10,9 +10,47 @@
 # Libraries imports
 from traits.api import *
 from traitsui.api import *
+from traitsui.qt4.extra.qt_view import QtView
 
 # CMP imports
 import project
+
+global style_sheet
+style_sheet = '''
+            QLabel {
+                font: 12pt "Verdana";
+                margin-left: 12px;
+            }
+            QPushButton {
+                border: 2px solid #8f8f91;
+                border-radius: 6px;
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                      stop: 0 #f6f7fa, stop: 1 #dadbde);
+                min-width: 80px;
+                font: 12pt "Verdana";
+                margin: 16px;
+                padding: 1px 4px;
+            }
+            QPushButton:pressed {
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                                  stop: 0 #dadbde, stop: 1 #f6f7fa);
+            }
+            QMenuBar {
+                background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 lightgray, stop:1 darkgray);
+            }
+            QMenuBar::item {
+                spacing: 3px; /* spacing between menu bar items */
+                padding: 1px 4px;
+                background: transparent;
+                border-radius: 4px;
+            }
+            QMenuBar::item:selected { /* when selected using mouse or keyboard */
+                background: #a8a8a8;
+            }
+            QMenuBar::item:pressed {
+                background: #888888;
+            }
+            '''
 
 class CMP_Project_Info(HasTraits):
     base_directory = Directory
@@ -31,47 +69,47 @@ class CMP_Project_Info(HasTraits):
     stage_names = List
     custom_last_stage = Str
 
-    create_view = View( Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
+    create_view = QtView( Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
                         Item('base_directory',label='BIDS dataset directory'),
                         title='Select type of pipeline, diffusion model (if diffusion) and BIDS base directory ',
                         kind='livemodal',
-                        width=500,
+                        #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    subject_view = View(Item('subject',label='Subject to be processed'),
+    subject_view = QtView(Item('subject',label='Subject to be processed'),
                         kind='modal',
-                        width=500,
+                        #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
     
-    warning_view = View( Item('warning_msg',style='readonly',show_label=False),
+    warning_view = QtView( Item('warning_msg',style='readonly',show_label=False),
                         title='Warning',
                         kind='modal',
-                        width=500,
+                        #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
     
-    config_error_view = View( Item('config_error_msg', style='readonly',show_label=False),
+    config_error_view = QtView( Item('config_error_msg', style='readonly',show_label=False),
                               title='Error',
                               kind = 'modal',
-                              width=500,
+                              style_sheet=style_sheet,
                               buttons=['OK','Cancel'])
 
-    open_view = View(Item('base_directory',label='BIDS dataset directory'),
+    open_view = QtView(Item('base_directory',label='BIDS dataset directory'),
                         title='Select BIDS directory with existing Connectome Data',
                         kind='modal',
-                        width=500,
+                        #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
     
-    select_config_to_load = View(Item('config_to_load_msg',style='readonly',show_label=False),
+    select_config_to_load = QtView(Item('config_to_load_msg',style='readonly',show_label=False),
                                   Item('config_to_load',style='custom',editor=EnumEditor(name='available_config'),show_label=False),
                                   title='Select configuration',
                                   kind='modal',
-                                  width=500,
+                                  #style_sheet=style_sheet,
                                   buttons=['OK','Cancel'])
                         
-    custom_map_view = View(Item('custom_last_stage',editor=EnumEditor(name='stage_names'),style='custom',show_label=False),
+    custom_map_view = QtView(Item('custom_last_stage',editor=EnumEditor(name='stage_names'),style='custom',show_label=False),
                         title='Select until which stage to process.',
                         kind='modal',
-                        width=500,
+                        #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
 ## Main window class of the ConnectomeMapper_Pipeline
@@ -89,8 +127,10 @@ class CMP_MainWindow(HasTraits):
     save_config = Action(name='Save configuration as...',action='save_config_file',enabled_when='handler.project_loaded==True')
     load_config = Action(name='Load configuration...',action='load_config_file',enabled_when='handler.project_loaded==True')
 
-    traits_view = View(HGroup(
-                            Item('pipeline',style='custom',enabled_when='handler.inputs_checked==True',show_label=False,width=800,height=700),
+    project_info.style_sheet = style_sheet
+
+    traits_view = QtView(HGroup(
+                            Item('pipeline',style='custom',enabled_when='handler.inputs_checked==True',show_label=False),
                             ),
                        title='Connectome Mapper 3',
                        menubar=MenuBar(
@@ -112,8 +152,9 @@ class CMP_MainWindow(HasTraits):
                                 name='Subjects'),
                           ),
                        handler = project.ProjectHandler(),
+                       style_sheet=style_sheet,
                        buttons = [preprocessing, map_connectome, map_custom],
-                       height= 0.75, scrollable=True
+                       width=0.45, height=0.75, scrollable=True, resizable=True
                    )
 
 
