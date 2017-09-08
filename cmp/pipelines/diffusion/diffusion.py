@@ -117,12 +117,14 @@ class DiffusionPipeline(Pipeline):
     #              )
 
     pipeline_group = VGroup(
-                        HGroup(spring,Item('segmentation',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
-                        HGroup(spring,Item('parcellation',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),
-                        HGroup(spring,Item('preprocessing',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),
-                        HGroup(spring,Item('registration',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),
-                        HGroup(spring,Item('diffusion',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),
-                        HGroup(spring,Item('connectome',editor=CustomEditor(factory=ToolkitEditorFactory(image=ImageResource('segmentation')))),spring,show_labels=False),
+                        spring,
+                        HGroup(spring,Item('segmentation',style='custom',width=450,height=110,resizable=False,editor_args={'image':ImageResource('segmentation'),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
+                        HGroup(spring,Item('parcellation',style='custom',width=450,height=130,resizable=False,editor_args={'image':ImageResource('parcellation'),'label':""}),spring,show_labels=False),
+                        HGroup(spring,Item('preprocessing',style='custom',width=450,height=130,resizable=False,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False),
+                        HGroup(spring,Item('registration',style='custom',width=500,height=110,resizable=False,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False),
+                        HGroup(spring,Item('diffusion',style='custom',width=450,height=240,resizable=False,editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False),
+                        HGroup(spring,Item('connectome',style='custom',width=450,height=130,resizable=False,editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False),
+                        spring,
                         springy=True
                     )
     

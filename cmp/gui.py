@@ -18,14 +18,13 @@ import project
 global style_sheet
 style_sheet = '''
             QLabel {
-                font: 12pt "Verdana";
-                margin-left: 12px;
+                font: 10pt "Verdana";
+                margin-left: 10px;
             }
             QPushButton {
-                border: 2px solid #8f8f91;
+                border: 0px solid #8f8f91;
                 border-radius: 6px;
-                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                      stop: 0 #f6f7fa, stop: 1 #dadbde);
+                background-color: transparent
                 min-width: 80px;
                 font: 12pt "Verdana";
                 margin: 16px;
@@ -37,6 +36,7 @@ style_sheet = '''
             }
             QMenuBar {
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 lightgray, stop:1 darkgray);
+                font: 12pt "Verdana";
             }
             QMenuBar::item {
                 spacing: 3px; /* spacing between menu bar items */
@@ -154,7 +154,7 @@ class CMP_MainWindow(HasTraits):
                        handler = project.ProjectHandler(),
                        style_sheet=style_sheet,
                        buttons = [preprocessing, map_connectome, map_custom],
-                       width=0.45, height=0.75, scrollable=True, resizable=True
+                       width=0.5, height=0.75, scrollable=True, resizable=True
                    )
 
 

@@ -98,11 +98,12 @@ class Pipeline(HasTraits):
     # num core settings
     number_of_cores = Enum(1,range(1,multiprocessing.cpu_count()+1))
     
-    traits_view = View(HGroup(
+    traits_view = View(
+                        HGroup(
                         Include('pipeline_group'),
                         Group(
                             Group(
-                                Item('base_directory',editor=TextEditor(),style='readonly',show_label=False),
+                                Item('base_directory',editor=TextEditor(),style='readonly',width=0.2,show_label=False),
                                 label='BIDS base directory',
                             ),
                              Group(
