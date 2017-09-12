@@ -14,6 +14,8 @@ from cmp.pipelines.common import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+from cmp.interfaces.traitsuiQt4 import QPushButtonCustomEditor
+
 # try: 
 #     from traitsui.api import *
 #     from traits.api import *
@@ -28,6 +30,7 @@ try:
     from traits.api import *
     from traitsui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
 except ImportError: 
+    print "Enthought used"
     from enthought.traits.api import *
     from enthought.traits.ui.api import *
     from  enthought.traits.ui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
