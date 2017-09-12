@@ -39,8 +39,8 @@ class ConnectomeConfig(HasTraits):
 
     traits_view = View(Item('output_types',style='custom'),
                         Group(
-                            Item('compute_curvature'),
                             Item('connectivity_metrics',label='Metrics',style='custom'),
+                            Item('compute_curvature'),
                             label='Connectivity matrix', show_border=True),
                         )
 
@@ -220,8 +220,8 @@ class ConnectomeStage(Stage):
                     if any('Fiber number' in m for m in self.config.connectivity_metrics):
                         self.inspect_outputs_dict[os.path.basename(mat)+' - number of fibers'] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
                     if any('Fiber length' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[os.path.basename(mat)+' - fibers length mean'] = ["showmatrix_gpickle",mat, "fibers_length_mean", "False"]
-                        self.inspect_outputs_dict[os.path.basename(mat)+' - fibers length std'] = ["showmatrix_gpickle",mat, "fibers_length_std", "False"]
+                        self.inspect_outputs_dict[os.path.basename(mat)+' - fiber length mean'] = ["showmatrix_gpickle",mat, "fiber_length_mean", "False"]
+                        self.inspect_outputs_dict[os.path.basename(mat)+' - fiber length std'] = ["showmatrix_gpickle",mat, "fiber_length_std", "False"]
             else:
                 print "is list"
                 for mat in con_results.outputs.connectivity_matrices:
@@ -230,8 +230,8 @@ class ConnectomeStage(Stage):
                         if any('Fiber number' in m for m in self.config.connectivity_metrics):
                             self.inspect_outputs_dict[os.path.basename(mat)+' - number of fibers'] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
                         if any('Fiber length' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[os.path.basename(mat)+' - fibers length mean'] = ["showmatrix_gpickle",mat, "fibers_length_mean", "False"]
-                            self.inspect_outputs_dict[os.path.basename(mat)+' - fibers length std'] = ["showmatrix_gpickle",mat, "fibers_length_std", "False"]
+                            self.inspect_outputs_dict[os.path.basename(mat)+' - fiber length mean'] = ["showmatrix_gpickle",mat, "fiber_length_mean", "False"]
+                            self.inspect_outputs_dict[os.path.basename(mat)+' - fiber length std'] = ["showmatrix_gpickle",mat, "fiber_length_std", "False"]
                 
             self.inspect_outputs = self.inspect_outputs_dict.keys()
 
