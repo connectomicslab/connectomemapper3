@@ -6,7 +6,7 @@ import os
 import networkx as nx
 import numpy as np
 try:
-    from pylab import imshow, show, cm, figure
+    from pylab import title, imshow, show, cm, figure
 except ImportError:
     print("matplotlib not available. Can not plot matrix")
 
@@ -16,15 +16,36 @@ if __name__ == "__main__":
         a=nx.read_gpickle(sys.argv[1])
 
         figure()
-        for u,v,d in a.edges_iter(data=True):
-            a.edge[u][v]['weight'] = a.edge[u][v][sys.argv[2]]
-        bb=nx.to_numpy_matrix(a)
-        if sys.argv[3]:
+        #for u,v,d in a.edges_iter(data=True):
+        #    a.edge[u][v]['weight'] = a.edge[u][v][sys.argv[2]]
+        bb=nx.to_numpy_matrix(a,weight=sys.argv[2],dtype=np.float64)
+
+        if sys.argv[3]=='True':
+            print "set to 1"
             c=np.zeros(bb.shape)
             c[bb>0] = 1
             b = c
         else:
             b = bb
+        imshow(b, interpolation='nearest', cmap=cm.jet, vmin = b.min(), vmax=b.max())
+        show()
+    elif len(sys.argv) == 5 and os.path.exists(sys.argv[1]):
+        print "read %s" % sys.argv[1]
+        a=nx.read_gpickle(sys.argv[1])
+
+        figure()
+        #for u,v,d in a.edges_iter(data=True):
+        #    a.edge[u][v]['weight'] = a.edge[u][v][sys.argv[2]]
+        bb=nx.to_numpy_matrix(a,weight=sys.argv[2],dtype=np.float64)
+
+        if sys.argv[3]=='True':
+            print "set to 1"
+            c=np.zeros(bb.shape)
+            c[bb>0] = 1
+            b = c
+        else:
+            b = bb
+        title(sys.argv[4])
         imshow(b, interpolation='nearest', cmap=cm.jet, vmin = b.min(), vmax=b.max())
         show()
 

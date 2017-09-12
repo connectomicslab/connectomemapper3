@@ -199,7 +199,7 @@ class DiffusionStage(Stage):
         self.name = 'diffusion_stage'
         self.config = DiffusionConfig()
         self.inputs = ["diffusion","wm_mask_registered","roi_volumes","grad","bvals","bvecs"]
-        self.outputs = ["diffusion_model","track_file","fod_file","gFA","skewness","kurtosis","P0","roi_volumes"]
+        self.outputs = ["diffusion_model","track_file","fod_file","gFA","ADC","skewness","kurtosis","P0","roi_volumes"]
 
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -280,6 +280,7 @@ class DiffusionStage(Stage):
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
 			            (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (recon_flow,outputnode,[("outputnode.FA","gFA")]),
+                        (recon_flow,outputnode,[("outputnode.ADC","ADC")]),
                         ])
 
         elif self.config.processing_tool == 'Camino':
@@ -477,7 +478,7 @@ class DiffusionStage(Stage):
         #             streamline_res = diff_results.outputs.trackvis
         #             self.inspect_outputs_dict[self.config.processing_tool + ' streamline'] = ['trackvis',streamline_res]
                     
-        self.inspect_outputs = self.inspect_outputs_dict.keys()
+        self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
 
                 
 

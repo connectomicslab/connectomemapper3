@@ -541,7 +541,7 @@ def create_dipy_recon_flow(config):
 def create_mrtrix_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled","grad"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","ADC","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
     
     # Flip gradient table
     # flip_table = pe.Node(interface=flipTable(),name='flip_table')
@@ -567,13 +567,16 @@ def create_mrtrix_recon_flow(config):
 		])
 
     # Tensor -> FA map
-    mrtrix_FA = pe.Node(interface=TensorMetrics(out_fa='FA.mif'),name='mrtrix_FA')
+    mrtrix_tensor_metrics = pe.Node(interface=TensorMetrics(out_fa='FA.mif',out_adc='ADC.mif'),name='mrtrix_tensor_metrics')
     convert_FA = pe.Node(interface=MRConvert(out_filename="FA.nii.gz"),name='convert_FA')
+    convert_ADC = pe.Node(interface=MRConvert(out_filename="ADC.nii.gz"),name='convert_ADC')
 
     flow.connect([
-		(mrtrix_tensor,mrtrix_FA,[('tensor','in_file')]),
-		(mrtrix_FA,convert_FA,[('out_fa','in_file')]),
-        (convert_FA,outputnode,[("converted","FA")])
+		(mrtrix_tensor,mrtrix_tensor_metrics,[('tensor','in_file')]),
+		(mrtrix_tensor_metrics,convert_FA,[('out_fa','in_file')]),
+        (mrtrix_tensor_metrics,convert_ADC,[('out_adc','in_file')]),
+        (convert_FA,outputnode,[("converted","FA")]),
+        (convert_ADC,outputnode,[("converted","ADC")])
 		])
 
     # Tensor -> Eigenvectors
@@ -598,7 +601,7 @@ def create_mrtrix_recon_flow(config):
         flow.connect([
 		    (inputnode,mrtrix_erode,[("wm_mask_resampled",'in_file')]),
 		    (mrtrix_erode,mrtrix_mul_eroded_FA,[('out_file','input2')]),
-		    (mrtrix_FA,mrtrix_mul_eroded_FA,[('out_fa','input1')]),
+		    (mrtrix_tensor_metrics,mrtrix_mul_eroded_FA,[('out_fa','input1')]),
 		    (mrtrix_mul_eroded_FA,mrtrix_thr_FA,[('out_file','in_file')])
 		    ])
         # Compute single fiber response function

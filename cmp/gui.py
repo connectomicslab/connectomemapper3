@@ -29,6 +29,7 @@ style_sheet = '''
                 font: 12pt "Verdana";
                 margin: 16px;
                 padding: 1px 4px;
+                margin-bottom: 10px;
             }
             QPushButton:pressed {
                 background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,

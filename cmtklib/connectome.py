@@ -663,6 +663,8 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
+            G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_correspondence_id"]) )
+            print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_correspondence_id"]) ))
 
         dis = 0
 
@@ -674,7 +676,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
         mmapdata = {}
         for k,v in mmap.items():
             da = nibabel.load(v)
-            mmapdata[k] = (da.get_data(), da.get_header().get_zooms() )
+            mmapdata[k] = (np.nan_to_num(da.get_data()), da.get_header().get_zooms() )
 
         def voxmm2vox(x,y,z,affine_vox_to_world,origin):
             return np.rint( np.linalg.solve(affine_vox_to_world, (np.matrix([x,y,z]).T-origin) ) )
@@ -773,7 +775,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
         print("Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis*100.0/n, n) )
         print("Valid fibers: %i (%f percent)" % (n-dis, 100 - dis*100.0/n) )
 
-        print "roi : ",roi
+        #print "roi : ",roi
         #print "roiData size : ",roiData.size
         #print "roiData shape : ",roiData.shape
 
@@ -795,29 +797,36 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
             G.remove_edge(u,v)
             di = { 'number_of_fibers' : len(d['fiblist']), }
 
-            print di
+            #print di
             
             # additional measures
             # compute mean/std of fiber measure
             idx = np.where( (final_fiberlabels_array[:,0] == int(u)) & (final_fiberlabels_array[:,1] == int(v)) )[0]
 
-            print "idx : ",idx
+            #print "idx : ",idx
 
             di['fiber_length_mean'] = float( np.mean(final_fiberlength_array[idx]) )
+            di['fiber_length_median'] = float( np.median(final_fiberlength_array[idx]) )
             di['fiber_length_std'] = float( np.std(final_fiberlength_array[idx]) )
+
+            # Compute density
+            # density = (#fibers / mean_fibers_length) * (2 / (area_roi_u + area_roi_v))
+            di['fiber_density'] = float( (di['number_of_fibers'] / di['fiber_length_mean']) * (2 / G.node[int(u)]['roi_volume']+G.node[int(v)]['roi_volume']) )
 
             # this is indexed into the fibers that are valid in the sense of touching start
             # and end roi and not going out of the volume
             idx_valid = np.where( (fiberlabels[:,0] == int(u)) & (fiberlabels[:,1] == int(v)) )[0]
+
+            print "mmapdata size : %g " % len(mmapdata.items())
             for k,vv in mmapdata.items():
                 val = []
 
-                print "k, vv : ",k,", ",vv
+                print "Processing %s map..." % k
                 for i in idx_valid:
                     # retrieve indices
                     try:
                         idx2 = (h[i]/ vv[1] ).astype( np.uint32 )
-                        print "idx2 : ",idx2
+                        #print "idx2 : ",idx2
                         val.append( vv[0][idx2[:,0],idx2[:,1],idx2[:,2]] )
                     except IndexError, e:
                         print "Index error occured when trying extract scalar values for measure", k
@@ -827,6 +836,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
                 da = np.concatenate( val )
                 di[k + '_mean'] = float(da.mean())
                 di[k + '_std'] = float(da.std())
+                di[k + '_median'] = float(np.median(da))
                 del da
                 del val
 

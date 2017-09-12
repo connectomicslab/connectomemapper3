@@ -203,11 +203,11 @@ class SegmentationStage(Stage):
             self.inspect_outputs_dict['brainmask/T1'] = ['tkmedit','-f',os.path.join(fs_path,'mri','brainmask.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux',os.path.join(fs_path,'mri','T1.mgz'),'-aux-surface',os.path.join(fs_path,'surf','rh.white')]
             self.inspect_outputs_dict['norm/aseg'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
             self.inspect_outputs_dict['norm/aseg/surf'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux-surface',os.path.join(fs_path,'surf','rh.white'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
-            self.inspect_outputs = self.inspect_outputs_dict.keys()
             
         elif self.config.seg_tool == "Custom segmentation":
             self.inspect_outputs_dict['brainmask'] = ['fslview',self.config.white_matter_mask]
-            self.inspect_outputs = self.inspect_outputs_dict.keys()
+        
+        self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
             
     def has_run(self):
         if self.config.use_existing_freesurfer_data or self.config.seg_tool == "Custom segmentation":

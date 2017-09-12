@@ -162,7 +162,7 @@ class ParcellationStage(Stage):
         else:
             self.inspect_outputs_dict["Custom atlas"] = ['fslview',self.config.atlas_nifti_file,"-l","Random-Rainbow"]
         
-        self.inspect_outputs = self.inspect_outputs_dict.keys()
+        self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
             
     def has_run(self):
         if self.config.parcellation_scheme != "Custom":

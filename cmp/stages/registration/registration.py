@@ -1059,13 +1059,12 @@ class RegistrationStage(Stage):
         if self.config.pipeline == "Diffusion":
             target_path = os.path.join(self.stage_dir,"target_resample","result_target_resample.pklz")
             fnirt_results_path = os.path.join(self.stage_dir,"fsl_fnirt_crop","result_fsl_fnirt_crop.pklz")
-            warpedDWI_results_path = os.path.join(self.stage_dir,"fsl_apply_warp","result_fsl_apply_warp.pklz")
-            warpedFA_results_path = os.path.join(self.stage_dir,"fsl_applywarp_FA_noNaN","result_fsl_applywarp_FA_noNaN.pklz")
+            warpedROIVs_results_path = os.path.join(self.stage_dir,"apply_warp_roivs","result_apply_warp_roivs.pklz")
+            warpedWM_results_path = os.path.join(self.stage_dir,"apply_warp_wm","result_apply_warp_wm.pklz")
+            warpedT1_results_path = os.path.join(self.stage_dir,"apply_warp_T1","result_apply_warp_T1.pklz")
         else:
             target_path = os.path.join(self.stage_dir,"fMRI_skullstrip","result_fMRI_skullstrip.pklz")
             
-        warpedROIs_results_path = os.path.join(self.stage_dir,"mr_crop_rois","result_mr_crop_rois.pklz")
-
         reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
 
         # print "target:",target_path
@@ -1082,17 +1081,17 @@ class RegistrationStage(Stage):
         # elif self.config.registration_mode == 'Nonlinear (FSL)':
         #     reg_results_path = os.path.join(self.stage_dir,"nonlinear_registration","result_nonlinear_registration.pklz")        
         
-        if(os.path.exists(target_path) and os.path.exists(reg_results_path) and os.path.exists(fnirt_results_path) and os.path.exists(warpedROIs_results_path) and os.path.exists(warpedDWI_results_path) and os.path.exists(warpedFA_results_path)):
+        if(os.path.exists(target_path) and os.path.exists(reg_results_path) and os.path.exists(fnirt_results_path) and os.path.exists(warpedROIVs_results_path) and os.path.exists(warpedWM_results_path) and os.path.exists(warpedT1_results_path)):
                 target = pickle.load(gzip.open(target_path))
                 reg_results = pickle.load(gzip.open(reg_results_path))
-                rois_results = pickle.load(gzip.open(warpedROIs_results_path))
+                rois_results = pickle.load(gzip.open(warpedROIVs_results_path))
                 fnirt_results = pickle.load(gzip.open(fnirt_results_path))
-                dwi_results = pickle.load(gzip.open(warpedDWI_results_path))
-                fa_results = pickle.load(gzip.open(warpedFA_results_path))
+                wm_results = pickle.load(gzip.open(warpedWM_results_path))
+                T1_results = pickle.load(gzip.open(warpedT1_results_path))
+                
                 if self.config.pipeline == "Diffusion":
-                    self.inspect_outputs_dict['Linear FA-to-T1'] = ['fslview',reg_results.inputs['reference'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
-                    self.inspect_outputs_dict['Wrapped DWI-to-T1crop'] = ['fslview',dwi_results.inputs['ref_file'],dwi_results.outputs.out_file,'-l',"Copper",'-t','0.5']
-                    self.inspect_outputs_dict['Wrapped FA-to-T1crop'] = ['fslview',fa_results.inputs['ref_file'],fa_results.outputs.out_file,'-l',"Copper",'-t','0.5']
+                    self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['reference'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
+                    self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',fnirt_results.inputs['ref_file'],T1_results.outputs.out_file,'-l',"Copper",'-t','0.5']
                     self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
                 else:
                     self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fslview',target.inputs['in_file'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
@@ -1100,13 +1099,13 @@ class RegistrationStage(Stage):
                 if self.config.registration_mode == 'Linear + Non-linear (FSL)':
                     if type(rois_results.outputs.out_files) == str:
                         if self.config.pipeline == "Diffusion":
-                            self.inspect_outputs_dict['FA-to-%s' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',fa_results.outputs.out_file,rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
+                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',fnirt_results.inputs['ref_file'],rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
                         else:
                             self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
                     else:
                         for roi_output in rois_results.outputs.out_files:
                             if self.config.pipeline == "Diffusion":
-                                self.inspect_outputs_dict['FA-to-%s' % os.path.basename(roi_output)] = ['fslview',fa_results.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+                                self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',fnirt_results.inputs['ref_file'],roi_output,'-l','Random-Rainbow','-t','0.5']
                             else:
                                 self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
                 # elif self.config.registration_mode == 'Nonlinear (FSL)':
@@ -1122,7 +1121,7 @@ class RegistrationStage(Stage):
                 #             else:
                 #                 self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
                 
-                self.inspect_outputs = self.inspect_outputs_dict.keys()
+                self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
 
     def has_run(self):
         if self.config.registration_mode != 'Nonlinear (FSL)':

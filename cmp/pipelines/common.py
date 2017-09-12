@@ -101,26 +101,30 @@ class Pipeline(HasTraits):
     traits_view = View(
                         HGroup(
                         Include('pipeline_group'),
-                        Group(
+                        VGroup(
                             Group(
-                                Item('base_directory',editor=TextEditor(),style='readonly',width=0.2,show_label=False),
+                                Item('base_directory',editor=TextEditor(),style='readonly',width=0.2,show_label=False,resizable=True),
                                 label='BIDS base directory',
                             ),
-                             Group(
-                                Item('subject',style='readonly',show_label=False),
+                            spring,
+                            Group(
+                                Item('subject',style='readonly',show_label=False,resizable=True),
                                 label='Subject',
                             ),
+                            spring,
                             Group(
-                                Item('pipeline_name',style='readonly'),
-                                Item('last_date_processed',style='readonly'),
-                                Item('last_stage_processed',style='readonly'),
+                                Item('pipeline_name',style='readonly',resizable=True),
+                                Item('last_date_processed',style='readonly',resizable=True),
+                                Item('last_stage_processed',style='readonly',resizable=True),
                                 label='Last processing'
                             ),
+                            spring,
                             Group(
-                                'number_of_cores',
+                                Item('number_of_cores',resizable=True),
                                 label='Processing configuration'
-                            ),spring,
-                            
+                            ),
+                            '700',
+                            spring,
                         ),
                         
                         springy=True),kind = 'livemodal')

@@ -628,7 +628,7 @@ class PreprocessingStage(Stage):
                 eddy_results = pickle.load(gzip.open(eddy_results_path))
                 self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview',eddy_results.outputs.eddy_corrected]
         
-        self.inspect_outputs = self.inspect_outputs_dict.keys()           
+        self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)           
 
             
     def has_run(self):

@@ -121,12 +121,12 @@ class DiffusionPipeline(Pipeline):
 
     pipeline_group = VGroup(
                         spring,
-                        HGroup(spring,Item('segmentation',style='custom',width=450,height=110,resizable=False,editor_args={'image':ImageResource('segmentation'),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
-                        HGroup(spring,Item('parcellation',style='custom',width=450,height=130,resizable=False,editor_args={'image':ImageResource('parcellation'),'label':""}),spring,show_labels=False),
-                        HGroup(spring,Item('preprocessing',style='custom',width=450,height=130,resizable=False,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False),
-                        HGroup(spring,Item('registration',style='custom',width=500,height=110,resizable=False,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False),
-                        HGroup(spring,Item('diffusion',style='custom',width=450,height=240,resizable=False,editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False),
-                        HGroup(spring,Item('connectome',style='custom',width=450,height=130,resizable=False,editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False),
+                        HGroup(spring,Item('segmentation',style='custom',width=450,height=110,resizable=True,editor_args={'image':ImageResource('segmentation'),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
+                        HGroup(spring,Item('parcellation',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('parcellation'),'label':""}),spring,show_labels=False),
+                        HGroup(spring,Item('preprocessing',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False),
+                        HGroup(spring,Item('registration',style='custom',width=500,height=110,resizable=True,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False),
+                        HGroup(spring,Item('diffusion',style='custom',width=450,height=240,resizable=True,editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False),
+                        HGroup(spring,Item('connectome',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False),
                         spring,
                         springy=True
                     )
@@ -614,7 +614,7 @@ class DiffusionPipeline(Pipeline):
             con_flow = self.create_stage_flow("Connectome")
             diffusion_flow.connect([
                         (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
-                        (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),
+                        (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),('outputnode.ADC','inputnode.ADC'),
                                               ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
                                               ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
                                               ('outputnode.P0','inputnode.P0')]),
