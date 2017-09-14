@@ -9,14 +9,14 @@ from pyface.qt import QtCore, QtGui
 
 import subprocess
 
-# try: 
+# try:
 #     import traitsui.wx
-# except ImportError: 
+# except ImportError:
 #     import enthought.traits.ui.wx
 
-try: 
+try:
     import traitsui.qt4
-except ImportError: 
+except ImportError:
     import enthought.traits.ui.qt4
 
 import cmp.gui
@@ -29,41 +29,41 @@ def info():
     print """Copyright (C) 2009-2017, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
              Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
              All rights reserved.\n"""
-          
+
 def usage():
     print "Usage: connectomemapper3 input_folder ini_file"
-    
+
 # Checks the needed dependencies. We call directly the functions instead
 # of just checking existence in $PATH in order to handl missing libraries.
 # Note that not all the commands give the awaited 1 exit code...
 def dep_check():
 
     nul = open(os.devnull, 'w')
-    
+
     error = ""
-    
+
     # Check for FSL
     if subprocess.call("fslorient",stdout=nul,stderr=nul,shell=True) != 255:
-        error = """FSL not installed or not working correctly. Check that the 
+        error = """FSL not installed or not working correctly. Check that the
 FSL_DIR variable is exported and the fsl.sh setup script is sourced."""
-        
+
     # Check for Freesurfer
     if subprocess.call("mri_info",stdout=nul,stderr=nul,shell=True) != 1:
-        error = """FREESURFER not installed or not working correctly. Check that the 
-FREESURFER_HOME variable is exported and the SetUpFreeSurfer.sh setup 
+        error = """FREESURFER not installed or not working correctly. Check that the
+FREESURFER_HOME variable is exported and the SetUpFreeSurfer.sh setup
 script is sourced."""
-        
+
     # Check for DTK
     if subprocess.call("dti_recon",stdout=nul,stderr=nul,shell=True) != 0 or "DSI_PATH" not in os.environ:
-        error = """Diffusion Toolkit not installed or not working correctly. Check that 
-the DSI_PATH variable is exported and that the dtk binaries (e.g. dti_recon) are in 
+        error = """Diffusion Toolkit not installed or not working correctly. Check that
+the DSI_PATH variable is exported and that the dtk binaries (e.g. dti_recon) are in
 your path."""
-        
+
     # Check for DTB
     if subprocess.call("DTB_dtk2dir",stdout=nul,stderr=nul,shell=True) != 1:
-        error = """DTB binaries not installed or not working correctly. Check that the 
+        error = """DTB binaries not installed or not working correctly. Check that the
 DTB binaries (e.g. DTB_dtk2dir) are in your path and don't give any error."""
-        
+
     if error != "":
         print error
         sys.exit(2)
@@ -72,13 +72,13 @@ DTB binaries (e.g. DTB_dtk2dir) are in your path and don't give any error."""
 if __name__ == "__main__":
     # check dependencies
     dep_check()
-    
+
     # add current directory to the path, useful if DTB_ bins not installed
     os.environ["PATH"] += os.pathsep + os.path.dirname(sys.argv[0])
-    
+
     # version and copyright message
     info()
-    
+
     argc = len(sys.argv)
     if argc==1: # no args, launch the GUI
         #traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)

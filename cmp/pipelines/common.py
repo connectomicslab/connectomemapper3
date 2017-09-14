@@ -5,7 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 """ Common functions for CMP pipelines
-""" 
+"""
 
 import os
 import fnmatch
@@ -38,7 +38,7 @@ from PyQt4.QtGui import *
 class ProgressWindow(HasTraits):
     main_status = Str("Processing launched...")
     stages_status = List([''])
-    
+
     traits_view = View(Group(
                             Group(
                                 Item('main_status',show_label=False,style='readonly'),
@@ -52,15 +52,15 @@ class ProgressWindow(HasTraits):
                        buttons=['OK','Cancel'],
                        title='Processing status',
                        kind='livemodal')
-    
+
 class ProgressThread(threading.Thread):
     stages = {}
     stage_names = []
     pw = Instance(ProgressWindow)
-    
+
     def run(self):
         c=0
-        
+
         while(c < len(self.stage_names)):
             time.sleep(5)
             c = 0
@@ -80,13 +80,13 @@ class ProgressThread(threading.Thread):
             self.pw.stages_status = statuses
         self.pw.main_status = "Processing finished!"
         self.pw.stages_status = ['All stages finished!']
-                    
+
 class ProcessThread(threading.Thread):
     pipeline = Instance(Any)
-    
+
     def run(self):
         self.pipeline.process()
-                      
+
 
 class Pipeline(HasTraits):
     # informations common to project_info
@@ -94,41 +94,46 @@ class Pipeline(HasTraits):
     subject = 'sub-01'
     last_date_processed = Str
     last_stage_processed = Str
-    
+
     # num core settings
     number_of_cores = Enum(1,range(1,multiprocessing.cpu_count()+1))
-    
+
     traits_view = View(
-                        HGroup(
-                        Include('pipeline_group'),
-                        VGroup(
-                            Group(
-                                Item('base_directory',editor=TextEditor(),style='readonly',width=0.2,show_label=False,resizable=True),
-                                label='BIDS base directory',
+                        Group(
+                            VGroup(
+                                Group(
+                                    Item('base_directory',editor=TextEditor(),style='readonly',width=0.2,show_label=False,resizable=True),
+                                    label='BIDS base directory',
+                                ),
+                                spring,
+                                Group(
+                                    Item('subject',style='readonly',show_label=False,resizable=True),
+                                    label='Subject',
+                                ),
+                                spring,
+                                Group(
+                                    Item('pipeline_name',style='readonly',resizable=True),
+                                    Item('last_date_processed',style='readonly',resizable=True),
+                                    Item('last_stage_processed',style='readonly',resizable=True),
+                                    label='Last processing'
+                                ),
+                                spring,
+                                Group(
+                                    Item('number_of_cores',resizable=True),
+                                    label='Processing configuration'
+                                ),
+                                '700',
+                                spring,
+                            label='Data',
+                            springy=True),
+                            HGroup(
+                                Include('pipeline_group'),
+                                label='Diffusion pipeline',
+                                springy=True
                             ),
-                            spring,
-                            Group(
-                                Item('subject',style='readonly',show_label=False,resizable=True),
-                                label='Subject',
-                            ),
-                            spring,
-                            Group(
-                                Item('pipeline_name',style='readonly',resizable=True),
-                                Item('last_date_processed',style='readonly',resizable=True),
-                                Item('last_stage_processed',style='readonly',resizable=True),
-                                label='Last processing'
-                            ),
-                            spring,
-                            Group(
-                                Item('number_of_cores',resizable=True),
-                                label='Processing configuration'
-                            ),
-                            '700',
-                            spring,
-                        ),
-                        
-                        springy=True),kind = 'livemodal')
-    
+                        orientation='horizontal', layout='tabbed', springy=True)
+                    ,kind = 'livemodal')
+
     def __init__(self, project_info):
         self.base_directory = project_info.base_directory
         self.subject = project_info.subject
@@ -139,7 +144,7 @@ class Pipeline(HasTraits):
                 self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype','common_stages',self.stages[stage].name)
             else:
                 self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype',self.pipeline_name,self.stages[stage].name)
-                
+
     def check_config(self):
         if self.stages['Segmentation'].config.seg_tool ==  'Custom segmentation':
             if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
@@ -153,7 +158,7 @@ class Pipeline(HasTraits):
         if self.stages['Connectome'].config.output_types == []:
             return('\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
         return ''
-        
+
     def create_stage_flow(self, stage_name):
         stage = self.stages[stage_name]
         flow = pe.Workflow(name=stage.name)
@@ -162,17 +167,17 @@ class Pipeline(HasTraits):
         flow.add_nodes([inputnode,outputnode])
         stage.create_workflow(flow,inputnode,outputnode)
         return flow
-    
+
     def create_common_flow(self):
         common_flow = pe.Workflow(name='common_stages')
         common_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
         common_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","brain","brain_mask","wm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
             "roi_volumes","parcellation_scheme","atlas_info"]),name="outputnode")
         common_flow.add_nodes([common_inputnode,common_outputnode])
-        
+
         if self.stages['Segmentation'].enabled:
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                
+
                 if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
                     self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory,"derivatives",'freesurfer')
                     print "Freesurfer_subjects_dir: %s" % self.stages['Segmentation'].config.freesurfer_subjects_dir
@@ -182,12 +187,12 @@ class Pipeline(HasTraits):
             seg_flow = self.create_stage_flow("Segmentation")
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
                 common_flow.connect([(common_inputnode,seg_flow, [('T1','inputnode.T1')])])
-            
+
             common_flow.connect([
                                  (seg_flow,common_outputnode,[("outputnode.subjects_dir","subjects_dir"),
                                                               ("outputnode.subject_id","subject_id")])
                                 ])
-       
+
         if self.stages['Parcellation'].enabled:
             parc_flow = self.create_stage_flow("Parcellation")
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
@@ -211,14 +216,14 @@ class Pipeline(HasTraits):
                                                                ("outputnode.brain","brain"),
                                                                ])
                                  ])
-            
+
         return common_flow
-        
+
     def fill_stages_outputs(self):
         for stage in self.stages.values():
             if stage.enabled:
                 stage.define_inspect_outputs()
-                
+
     def clear_stages_outputs(self):
         for stage in self.stages.values():
             if stage.enabled:
@@ -230,7 +235,7 @@ class Pipeline(HasTraits):
                 #                 for f in fnmatch.filter(files, 'result_*.pklz')]
                 #for stage_res in stage_results:
                 #    os.remove(stage_res)
-                
+
     def launch_progress_window(self):
         pw = ProgressWindow()
         pt = ProgressThread()
@@ -239,12 +244,12 @@ class Pipeline(HasTraits):
         pt.stage_names = self.ordered_stage_list
         pt.start()
         pw.configure_traits()
-        
+
     def launch_process(self):
         pt = ProcessThread()
         pt.pipeline = self
         pt.start()
-               
+
 
 def convert_rawdata(base_directory, input_dir, out_prefix):
     os.environ['UNPACK_MGH_DTI'] = '0'
@@ -269,19 +274,19 @@ def convert_rawdata(base_directory, input_dir, out_prefix):
             return False
 
     return True
-    
+
 class SwapAndReorientInputSpec(BaseInterfaceInputSpec):
     src_file = File(desc='Source file to be reoriented.',exists=True,mandatory=True)
     ref_file = File(desc='Reference file, which orientation will be applied to src_file.',exists=True,mandatory=True)
     out_file = File(genfile=True, desc='Name of the reoriented file.')
-    
+
 class SwapAndReorientOutputSpec(TraitedSpec):
     out_file = File(desc='Reoriented file.')
 
 class SwapAndReorient(BaseInterface):
     input_spec = SwapAndReorientInputSpec
     output_spec = SwapAndReorientOutputSpec
-    
+
     def _gen_outfilename(self):
         out_file = self.inputs.out_file
         path,base,ext = split_filename(self.inputs.src_file)
@@ -295,21 +300,21 @@ class SwapAndReorient(BaseInterface):
             shutil.copy(json_file,out_json_file)
 
         return os.path.abspath(out_file)
-    
+
     def _run_interface(self, runtime):
         out_file = self._gen_outfilename()
         src_file = self.inputs.src_file
         ref_file = self.inputs.ref_file
-    
+
         # Collect orientation infos
-        
+
         # "orientation" => 3 letter acronym defining orientation
         src_orient = fs.utils.ImageInfo(in_file=src_file).run().outputs.orientation
         ref_orient = fs.utils.ImageInfo(in_file=ref_file).run().outputs.orientation
         # "convention" => RADIOLOGICAL/NEUROLOGICAL
         src_conv = cmp_fsl.Orient(in_file=src_file, get_orient=True).run().outputs.orient
         ref_conv = cmp_fsl.Orient(in_file=ref_file, get_orient=True).run().outputs.orient
-        
+
         if src_orient == ref_orient:
             # no reorientation needed
             print "No reorientation needed for anatomical image; Copy only!"
@@ -319,29 +324,27 @@ class SwapAndReorient(BaseInterface):
             if src_conv != ref_conv:
                 # if needed, match convention (radiological/neurological) to reference
                 tmpsrc = os.path.join(os.path.dirname(src_file), 'tmp_' + os.path.basename(src_file))
-        
+
                 fsl.SwapDimensions(in_file=src_file, new_dims=('-x','y','z'), out_file=tmpsrc).run()
-        
+
                 cmp_fsl.Orient(in_file=tmpsrc, swap_orient=True).run()
             else:
                 # If conventions match, just use the original source
                 tmpsrc = src_file
-                
+
         tmp2 = os.path.join(os.path.dirname(src_file), 'tmp.nii.gz')
         map_orient = {'L':'RL','R':'LR','A':'PA','P':'AP','S':'IS','I':'SI'}
         fsl.SwapDimensions(in_file=tmpsrc, new_dims=(map_orient[ref_orient[0]],map_orient[ref_orient[1]],map_orient[ref_orient[2]]), out_file=tmp2).run()
-            
+
         shutil.move(tmp2, out_file)
-    
+
         # Only remove the temporary file if the conventions did not match.  Otherwise,
         # we end up removing the output.
         if tmpsrc != src_file:
             os.remove(tmpsrc)
         return runtime
-        
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self._gen_outfilename()
         return outputs
-
-

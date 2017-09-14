@@ -5,7 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 """ Connectome Mapper GUI
-""" 
+"""
 
 # Libraries imports
 from traits.api import *
@@ -18,30 +18,30 @@ import project
 global style_sheet
 style_sheet = '''
             QLabel {
-                font: 10pt "Verdana";
-                margin-left: 10px;
+                font: 12pt "Verdana";
+                margin-left: 25px;
             }
             QPushButton {
-                border: 0px solid #8f8f91;
+                border: 0px solid lightgray;
                 border-radius: 6px;
-                background-color: transparent
+                background-color: transparent;
                 min-width: 80px;
                 font: 12pt "Verdana";
-                margin: 16px;
-                padding: 1px 4px;
-                margin-bottom: 10px;
+                margin: 3px 3px 3px 3px;
+                padding: 3px 3px;
             }
             QPushButton:pressed {
                 background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                                   stop: 0 #dadbde, stop: 1 #f6f7fa);
             }
             QMenuBar {
-                background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 lightgray, stop:1 darkgray);
-                font: 12pt "Verdana";
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                                  stop: 0 #dadbde, stop: 1 #f6f7fa)
+                font: 14pt "Verdana";
             }
             QMenuBar::item {
-                spacing: 3px; /* spacing between menu bar items */
-                padding: 1px 4px;
+                spacing: 5px; /* spacing between menu bar items */
+                padding: 5px 5px;
                 background: transparent;
                 border-radius: 4px;
             }
@@ -50,6 +50,69 @@ style_sheet = '''
             }
             QMenuBar::item:pressed {
                 background: #888888;
+            }
+            QMainWindow {
+                background-color: yellow;
+            }
+            QMainWindow::separator {
+                background: yellow;
+                width: 10px; /* when vertical */
+                height: 10px; /* when horizontal */
+            }
+            QMainWindow::separator:hover {
+                background: red;
+            }
+            QDockWidget {
+                border: 1px solid lightgray;
+                titlebar-close-icon: url(close.png);
+                titlebar-normal-icon: url(undock.png);
+            }
+
+            QDockWidget::title {
+                text-align: left; /* align the text to the left */
+                background: lightgray;
+                padding-left: 5px;
+            }
+
+            QDockWidget::close-button, QDockWidget::float-button {
+                border: 1px solid transparent;
+                background: darkgray;
+                padding: 0px;
+            }
+
+            QDockWidget::close-button:hover, QDockWidget::float-button:hover {
+                background: gray;
+            }
+
+            QDockWidget::close-button:pressed, QDockWidget::float-button:pressed {
+                padding: 1px -1px -1px 1px;
+            }
+            QListView::item:selected {
+                border: 1px solid #6a6ea9;
+            }
+
+            QListView::item:selected:!active {
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                            stop: 0 #ABAFE5, stop: 1 #8588B2);
+            }
+
+            QListView::item:selected:active {
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                            stop: 0 #6a6ea9, stop: 1 #888dd9);
+            }
+
+            QListView::item:hover {
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                            stop: 0 #FAFBFE, stop: 1 #DCDEF1);
+            }
+            QProgressBar {
+                border: 2px solid grey;
+                border-radius: 5px;
+            }
+
+            QProgressBar::chunk {
+                background-color: #05B8CC;
+                width: 20px;
             }
             '''
 
@@ -81,13 +144,13 @@ class CMP_Project_Info(HasTraits):
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
-    
+
     warning_view = QtView( Item('warning_msg',style='readonly',show_label=False),
                         title='Warning',
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
-    
+
     config_error_view = QtView( Item('config_error_msg', style='readonly',show_label=False),
                               title='Error',
                               kind = 'modal',
@@ -99,14 +162,14 @@ class CMP_Project_Info(HasTraits):
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
-    
+
     select_config_to_load = QtView(Item('config_to_load_msg',style='readonly',show_label=False),
                                   Item('config_to_load',style='custom',editor=EnumEditor(name='available_config'),show_label=False),
                                   title='Select configuration',
                                   kind='modal',
                                   #style_sheet=style_sheet,
                                   buttons=['OK','Cancel'])
-                        
+
     custom_map_view = QtView(Item('custom_last_stage',editor=EnumEditor(name='stage_names'),style='custom',show_label=False),
                         title='Select until which stage to process.',
                         kind='modal',
@@ -118,7 +181,7 @@ class CMP_Project_Info(HasTraits):
 class CMP_MainWindow(HasTraits):
     pipeline = Instance(HasTraits)
     project_info = Instance(CMP_Project_Info)
-    
+
     new_project = Action(name='New Connectome data...',action='new_project')
     load_project = Action(name='Load Connectome data...',action='load_project')
     preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
@@ -155,9 +218,5 @@ class CMP_MainWindow(HasTraits):
                        handler = project.ProjectHandler(),
                        style_sheet=style_sheet,
                        buttons = [preprocessing, map_connectome, map_custom],
-                       width=0.5, height=0.75, scrollable=True, resizable=True
+                       width=0.5, height=0.8, scrollable=True, resizable=True
                    )
-
-
-
-

@@ -5,7 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 """ Connectome Mapper Controler for handling GUI and non GUI general events
-""" 
+"""
 
 # Global imports
 from traits.api import *
@@ -48,7 +48,7 @@ def save_config(pipeline, config_path):
                     config.set(stage.name, key+'.'+sub_key, getattr(keyval, sub_key))
             else:
                 config.set(stage.name, key, keyval)
-                
+
     config.add_section('Multi-processing')
     config.set('Multi-processing','number_of_cores',pipeline.number_of_cores)
 
@@ -117,7 +117,7 @@ def refresh_folder(derivatives_directory, subject, input_folders):
 
 def init_project(project_info, is_new_project):
     pipeline = None
-    
+
     if project_info.process_type == 'diffusion':
         pipeline = diffusion_pipeline.DiffusionPipeline(project_info)
     elif project_info.process_type == 'fMRI':
@@ -156,22 +156,22 @@ def init_project(project_info, is_new_project):
     refresh_folder(derivatives_directory, project_info.subject, pipeline.input_folders)
     pipeline.config_file = project_info.config_file
     return pipeline
-    
+
 def update_last_processed(project_info, pipeline):
     # last date
     if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject)):
         out_dirs = os.listdir(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject))
         # for out in out_dirs:
-        #     if (project_info.last_date_processed == "Not yet processed" or 
+        #     if (project_info.last_date_processed == "Not yet processed" or
         #         out > project_info.last_date_processed):
         #         pipeline.last_date_processed = out
         #         project_info.last_date_processed = out
 
-        if (project_info.last_date_processed == "Not yet processed" or 
+        if (project_info.last_date_processed == "Not yet processed" or
             pipeline.now > project_info.last_date_processed):
             pipeline.last_date_processed = pipeline.now
             project_info.last_date_processed = pipeline.now
-                
+
     # last stage
     if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','nipype',project_info.process_type+'_pipeline')):
         stage_dirs = []
@@ -182,7 +182,7 @@ def update_last_processed(project_info, pipeline):
             if stage.lower()+'_stage' in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.last_stage_processed = stage
-    
+
 
 class ProjectHandler(Handler):
     pipeline = Instance(HasTraits)
@@ -201,8 +201,8 @@ class ProjectHandler(Handler):
                 # new_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
 
                 # new_project.configure_traits(subject=Enum(*subjects))
-                # print new_project.subjects 
-                
+                # print new_project.subjects
+
                 print "Default subject : "+new_project.subject
                 np_res = new_project.configure_traits(view='subject_view')
                 print "Selected subject : "+new_project.subject
@@ -230,16 +230,16 @@ class ProjectHandler(Handler):
             bids_layout = BIDSLayout(loaded_project.base_directory)
             is_bids = True
             loaded_project.subjects = []
-
             for subj in bids_layout.get_subjects():
                 print "sub: %s" % subj
                 loaded_project.subjects.append('sub-'+str(subj))
             # loaded_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
+            loaded_project.subjects.sort()
         except:
             error(message="Invalid BIDS dataset. Please see documentation for more details.",title="BIDS error")
-    
+
         self.inputs_checked = False
-        
+
         print loaded_project.subjects
 
         if np_res and os.path.exists(loaded_project.base_directory) and is_bids:
@@ -250,6 +250,7 @@ class ProjectHandler(Handler):
             else:
                 loaded_project.available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_config.ini'))]
                 if len(loaded_project.available_config) > 1:
+                    loaded_project.available_config.sort()
                     loaded_project.config_to_load = loaded_project.available_config[0]
                     config_selected = loaded_project.configure_traits(view='select_config_to_load')
                     if not config_selected:
@@ -262,7 +263,7 @@ class ProjectHandler(Handler):
                 print "Config to load: %s"%loaded_project.config_to_load
                 loaded_project.config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_config.ini' % loaded_project.config_to_load)
                 print "Config file: %s"%loaded_project.config_file
-            
+
             loaded_project.process_type = get_process_detail(loaded_project,'Global','process_type')
             loaded_project.diffusion_imaging_model = get_process_detail(loaded_project,'Global','diffusion_imaging_model')
             self.pipeline = init_project(loaded_project, False)
@@ -290,7 +291,7 @@ class ProjectHandler(Handler):
                 changed_project.subjects.append('sub-'+str(subj))
             # changed_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
             print "Subjects : %s" % changed_project.subjects
-            
+
             print "Previous selected subject : %s" % changed_project.subject
             changed_project.configure_traits(view='subject_view')
             print "New selected subject : %s" % changed_project.subject
@@ -302,7 +303,7 @@ class ProjectHandler(Handler):
         changed_project.config_file = os.path.join(changed_project.base_directory,'derivatives','%s_%s_config.ini' % (changed_project.subject,changed_project.process_type))
 
         if os.path.isfile(changed_project.config_file): # If existing config file / connectome data, load subject project
-            
+
             print "Existing config file for subject %s: %s" % (changed_project.config_file, changed_project.subject)
 
             changed_project.process_type = get_process_detail(changed_project,'Global','process_type')
@@ -339,7 +340,7 @@ class ProjectHandler(Handler):
             self.pipeline.launch_process()
             self.pipeline.launch_progress_window()
             update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline)
-        
+
     def map_custom(self, ui_info):
         if ui_info.ui.context["object"].project_info.custom_last_stage == '':
             ui_info.ui.context["object"].project_info.custom_last_stage = self.pipeline.ordered_stage_list[0]
@@ -347,7 +348,7 @@ class ProjectHandler(Handler):
         cus_res = ui_info.ui.context["object"].project_info.configure_traits(view='custom_map_view')
         if cus_res:
             self.pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.custom_last_stage)
-            
+
     def save_config_file(self, ui_info):
         dialog = FileDialog(action="save as", default_filename="config.ini")
         dialog.open()
@@ -355,7 +356,7 @@ class ProjectHandler(Handler):
             save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
             if dialog.path != ui_info.ui.context["object"].project_info.config_file:
                 shutil.copy(ui_info.ui.context["object"].project_info.config_file, dialog.path)
-    
+
     def load_config_file(self, ui_info):
         dialog = FileDialog(action="open", wildcard="*.ini")
         dialog.open()
@@ -363,4 +364,3 @@ class ProjectHandler(Handler):
             if dialog.path != ui_info.ui.context["object"].project_info.config_file:
                 shutil.copy(dialog.path, ui_info.ui.context["object"].project_info.config_file)
             load_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
-
