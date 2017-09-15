@@ -8,7 +8,7 @@ import numpy as np
 import copy
 try:
     import matplotlib.colors as colors
-    from pylab import title, imshow, show, cm, figure, pcolor
+    from pylab import title, imshow, show, cm, figure, pcolor, colorbar
 except ImportError:
     print("matplotlib not available. Can not plot matrix")
 
@@ -73,6 +73,7 @@ if __name__ == "__main__":
             my_cmap = copy.copy(cm.get_cmap('jet')) # copy the default cmap
             my_cmap.set_bad((0,0,0))
             imshow(b, interpolation='nearest',norm=colors.LogNorm(),cmap=my_cmap)
+            colorbar()
         else:
             print "normal scaling"
             imshow(b, interpolation='nearest',norm=None,cmap=cm.jet, vmin = b.min(), vmax=b.max())

@@ -32,6 +32,8 @@ import cmp.interfaces.fsl as cmp_fsl
 from traits.api import *
 from traitsui.api import *
 
+import apptools.io.api as io
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -87,10 +89,63 @@ class ProcessThread(threading.Thread):
     def run(self):
         self.pipeline.process()
 
+#-- FileAdapter Class ----------------------------------------------------
+
+
+# class FileAdapter(ITreeNodeAdapter):
+#
+#     adapts(File, ITreeNode)
+#
+#     #-- ITreeNodeAdapter Method Overrides ------------------------------------
+#
+#     def allows_children(self):
+#         """ Returns whether this object can have children.
+#         """
+#         return self.adaptee.is_folder
+#
+#     def has_children(self):
+#         """ Returns whether the object has children.
+#         """
+#         children = self.adaptee.children
+#         return ((children is not None) and (len(children) > 0))
+#
+#     def get_children(self):
+#         """ Gets the object's children.
+#         """
+#         return self.adaptee.children
+# 
+#     def get_label(self):
+#         """ Gets the label to display for a specified object.
+#         """
+#         return self.adaptee.name + self.adaptee.ext
+#
+#     def get_tooltip(self):
+#         """ Gets the tooltip to display for a specified object.
+#         """
+#         return self.adaptee.absolute_path
+#
+#     def get_icon(self, is_expanded):
+#         """ Returns the icon for a specified object.
+#         """
+#         if self.adaptee.is_file:
+#             return '<item>'
+#
+#         if is_expanded:
+#             return '<open>'
+#
+#         return '<open>'
+#
+#     def can_auto_close(self):
+#         """ Returns whether the object's children should be automatically
+#             closed.
+#         """
+#         return True
+
 
 class Pipeline(HasTraits):
     # informations common to project_info
     base_directory = Directory
+    root = Property
     subject = 'sub-01'
     last_date_processed = Str
     last_stage_processed = Str
@@ -101,9 +156,15 @@ class Pipeline(HasTraits):
     traits_view = View(
                         Group(
                             VGroup(
-                                Group(
-                                    Item('base_directory',editor=TextEditor(),style='readonly',width=0.2,show_label=False,resizable=True),
-                                    label='BIDS base directory',
+                                VGroup(
+                                    HGroup(
+                                        # '20',Item('base_directory',width=-0.3,height=-0.2, style='custom',show_label=False,resizable=True),
+                                        '20',Item('base_directory',width=-0.3,style='readonly',show_label=False,resizable=True),
+                                        ),
+                                    # HGroup(
+                                    #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)
+                                    #     ),
+                                label='BIDS base directory',
                                 ),
                                 spring,
                                 Group(
@@ -133,6 +194,16 @@ class Pipeline(HasTraits):
                             ),
                         orientation='horizontal', layout='tabbed', springy=True)
                     ,kind = 'livemodal')
+     #-- Traits Default Value Methods -----------------------------------------
+
+    # def _base_directory_default(self):
+    #     return getcwd()
+
+    #-- Property Implementations ---------------------------------------------
+
+    @property_depends_on('base_directory')
+    def _get_root(self):
+        return File(path=self.base_directory)
 
     def __init__(self, project_info):
         self.base_directory = project_info.base_directory
