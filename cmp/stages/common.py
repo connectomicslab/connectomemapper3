@@ -1,11 +1,11 @@
-# Copyright (C) 2009-2015, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
 
 """ Common class for CMP Stages
-""" 
+"""
 
 # Libraries imports
 from traits.api import *
@@ -30,7 +30,8 @@ class Stage(HasTraits):
                                 label = 'Configuration', show_border=True
                                 ),
                             Group(
-                                Item('inspect_outputs_enum',show_label=False),Item('inspect_output_button',enabled_when='inspect_outputs_enum!="Outputs not available"',show_label=False),
+                                Item('inspect_outputs_enum',show_label=False),
+                                Item('inspect_output_button',enabled_when='inspect_outputs_enum!="Outputs not available"',show_label=False),
                                 label = 'View outputs', show_border=True
                                 )
                             ),
@@ -39,12 +40,9 @@ class Stage(HasTraits):
 
     def _inspect_output_button_fired(self,info):
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])
-        
+
     def is_running(self):
         unfinished_files = [os.path.join(dirpath, f)
                                           for dirpath, dirnames, files in os.walk(self.stage_dir)
                                           for f in files if f.endswith('_unfinished.json')]
         return len(unfinished_files)
-
-
-

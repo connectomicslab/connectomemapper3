@@ -1,11 +1,11 @@
-# Copyright (C) 2009-2015, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
 
 """ CMP Stage for building connectivity matrices and resulting CFF file
-""" 
+"""
 
 # Global imports
 from traits.api import *
@@ -36,13 +36,20 @@ class ConnectomeConfig(HasTraits):
     compute_curvature = Bool(True)
     output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
     connectivity_metrics = List(['Fiber number'], editor=CheckListEditor(values=['Fiber number','Fiber length','Fiber density','ADC','gFA'],cols=4))
+    log_visualization = Bool(True)
 
     traits_view = View(Item('output_types',style='custom'),
                         Group(
                             Item('connectivity_metrics',label='Metrics',style='custom'),
                             Item('compute_curvature'),
-                            label='Connectivity matrix', show_border=True),
+                            label='Connectivity matrix', show_border=True
+                            ),
+                        Group(
+                            Item('log_visualization',label='Log scale'),
+                            label='Visualization'
+                            ),
                         )
+
 
 class MRTrixConnectomeConfig(HasTraits):
     #modality = List(['Deterministic','Probabilistic'])
@@ -65,7 +72,7 @@ class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     output_types = traits.List(Str, desc='Output types of the connectivity matrices')
     probtrackx = traits.Bool(False)
     voxel_connectivity = InputMultiPath(File(exists=True),desc = "ProbtrackX connectivity matrices (# seed voxels x # target ROIs)")
-    
+
 class CMTK_cmatOutputSpec(TraitedSpec):
     endpoints_file = File()
     endpoints_mm_file = File()
@@ -74,18 +81,18 @@ class CMTK_cmatOutputSpec(TraitedSpec):
     final_fiberlabels_files = OutputMultiPath(File())
     streamline_final_file = File()
     connectivity_matrices = OutputMultiPath(File())
-        
-    
+
+
 class CMTK_cmat(BaseInterface):
     input_spec = CMTK_cmatInputSpec
     output_spec = CMTK_cmatOutputSpec
-    
+
     def _run_interface(self, runtime):
         if isdefined(self.inputs.additional_maps):
             additional_maps = dict( (split_filename(add_map)[1],add_map) for add_map in self.inputs.additional_maps if add_map != '')
         else:
             additional_maps = {}
-        
+
         if self.inputs.probtrackx:
             probtrackx_cmat(voxel_connectivity_files = self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
                 parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
@@ -99,7 +106,7 @@ class CMTK_cmat(BaseInterface):
              parcellation_scheme=self.inputs.parcellation_scheme,atlas_info = self.inputs.atlas_info,
              compute_curvature=self.inputs.compute_curvature,
              additional_maps=additional_maps,output_types=self.inputs.output_types)
-             
+
             if 'cff' in self.inputs.output_types:
                 cvt = cmtk.CFFConverter()
                 cvt.inputs.title = 'Connectome mapper'
@@ -107,9 +114,9 @@ class CMTK_cmat(BaseInterface):
                 cvt.inputs.tract_files = ['streamline_final.trk']
                 cvt.inputs.gpickled_networks = glob.glob(os.path.abspath("connectome_*.gpickle"))
                 cvt.run()
-             
+
         return runtime
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['endpoints_file'] = os.path.abspath('endpoints.npy')
@@ -119,7 +126,7 @@ class CMTK_cmat(BaseInterface):
         outputs['final_fiberlabels_files'] = glob.glob(os.path.abspath('final_fiberlabels*'))
         outputs['streamline_final_file'] = os.path.abspath('streamline_final.trk')
         outputs['connectivity_matrices'] = glob.glob(os.path.abspath('connectome*'))
-        
+
         return outputs
 
 class CMTK_mrtrixcmatInputSpec(BaseInterfaceInputSpec):
@@ -133,7 +140,7 @@ class CMTK_mrtrixcmatInputSpec(BaseInterfaceInputSpec):
     output_types = traits.List(Str, desc='Output types of the connectivity matrices')
     #probtrackx = traits.Bool(False)
     #voxel_connectivity = InputMultiPath(File(exists=True),desc = "ProbtrackX connectivity matrices (# seed voxels x # target ROIs)")
-    
+
 class CMTK_mrtrixcmatOutputSpec(TraitedSpec):
     # endpoints_file = File()
     # endpoints_mm_file = File()
@@ -142,24 +149,24 @@ class CMTK_mrtrixcmatOutputSpec(TraitedSpec):
     # final_fiberlabels_files = OutputMultiPath(File())
     streamline_final_file = File()
     connectivity_matrices = OutputMultiPath(File())
-        
-    
+
+
 class CMTK_mrtrixcmat(BaseInterface):
     input_spec = CMTK_mrtrixcmatInputSpec
     output_spec = CMTK_mrtrixcmatOutputSpec
-    
+
     def _run_interface(self, runtime):
         if isdefined(self.inputs.additional_maps):
             additional_maps = dict( (split_filename(add_map)[1],add_map) for add_map in self.inputs.additional_maps if add_map != '')
         else:
             additional_maps = {}
-        
+
         mrtrixcmat(intck=self.inputs.track_file[0], fod_file=self.inputs.fod_file, roi_volumes=self.inputs.roi_volumes,
              parcellation_scheme=self.inputs.parcellation_scheme,atlas_info = self.inputs.atlas_info,
              compute_curvature=self.inputs.compute_curvature, additional_maps=additional_maps,output_types=self.inputs.output_types)
-             
+
         return runtime
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         # outputs['endpoints_file'] = os.path.abspath('endpoints.npy')
@@ -169,11 +176,11 @@ class CMTK_mrtrixcmat(BaseInterface):
         # outputs['final_fiberlabels_files'] = glob.glob(os.path.abspath('final_fiberlabels*'))
         outputs['streamline_final_file'] = os.path.abspath('streamline_final.tck')
         outputs['connectivity_matrices'] = glob.glob(os.path.abspath('connectome*'))
-        
+
         return outputs
 
 class ConnectomeStage(Stage):
-    
+
     def __init__(self):
         self.name = 'connectome_stage'
         self.config = ConnectomeConfig()
@@ -182,8 +189,8 @@ class ConnectomeStage(Stage):
         self.outputs = ["endpoints_file","endpoints_mm_file","final_fiberslength_files",
                    "filtered_fiberslabel_files","final_fiberlabels_files",
                    "streamline_final_file","connectivity_matrices"]
-        
-    
+
+
     def create_workflow(self, flow, inputnode, outputnode):
         cmtk_cmat = pe.Node(interface=CMTK_cmat(),name="compute_matrice")
         cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
@@ -202,7 +209,7 @@ class ConnectomeStage(Stage):
                              ('final_fiberlabels_files','final_fiberlabels_files'),('streamline_final_file','streamline_final_file'),
                              ('connectivity_matrices','connectivity_matrices')])
                      ])
-    
+
     def define_inspect_outputs(self):
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
         print "Stage dir: %s" % self.stage_dir
@@ -212,27 +219,32 @@ class ConnectomeStage(Stage):
             self.inspect_outputs_dict['streamline_final'] = ['trackvis',con_results.outputs.streamline_final_file]
             mat = con_results.outputs.connectivity_matrices
             print "Conn. matrix : %s" % mat
+
+            map_scale = "default"
+            if self.config.log_visualization:
+                map_scale = "log"
+
             if isinstance(mat, basestring):
                 print "is str"
                 if 'gpickle' in mat:
                     # 'Fiber number','Fiber length','Fiber density','ADC','gFA'
                     con_name = os.path.basename(mat).split(".")[0].split("_")
                     if any('Fiber number' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - number of fibers'] = ["showmatrix_gpickle",mat, "number_of_fibers", "False", con_name+' - number of fibers']
+                        self.inspect_outputs_dict[con_name+' - number of fibers'] = ["showmatrix_gpickle",mat, "number_of_fibers", "False", con_name+' - number of fibers', map_scale]
                     if any('Fiber length' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - fiber length mean'] = ["showmatrix_gpickle",mat, "fiber_length_mean", "False", con_name+' - fiber length mean']
-                        self.inspect_outputs_dict[con_name+' - fiber length median'] = ["showmatrix_gpickle",mat, "fiber_length_median", "False", con_name+' - fiber length median']
-                        self.inspect_outputs_dict[con_name+' - fiber length std'] = ["showmatrix_gpickle",mat, "fiber_length_std", "False", con_name+' - fiber length std']
+                        self.inspect_outputs_dict[con_name+' - fiber length mean'] = ["showmatrix_gpickle",mat, "fiber_length_mean", "False", con_name+' - fiber length mean', map_scale]
+                        self.inspect_outputs_dict[con_name+' - fiber length median'] = ["showmatrix_gpickle",mat, "fiber_length_median", "False", con_name+' - fiber length median', map_scale]
+                        self.inspect_outputs_dict[con_name+' - fiber length std'] = ["showmatrix_gpickle",mat, "fiber_length_std", "False", con_name+' - fiber length std', map_scale]
                     if any('Fiber density' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - fiber density'] = ["showmatrix_gpickle",mat, "fiber_density", "False", con_name+' - fiber density']
+                        self.inspect_outputs_dict[con_name+' - fiber density'] = ["showmatrix_gpickle",mat, "fiber_density", "False", con_name+' - fiber density', map_scale]
                     if any('gFA' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",mat, "FA_mean", "False", con_name+' - gFA mean']
-                        self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",mat, "FA_median", "False", con_name+' - gFA median']
-                        self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",mat, "FA_std", "False", con_name+' - gFA std']
+                        self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",mat, "FA_mean", "False", con_name+' - gFA mean', map_scale]
+                        self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",mat, "FA_median", "False", con_name+' - gFA median', map_scale]
+                        self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",mat, "FA_std", "False", con_name+' - gFA std', map_scale]
                     if any('ADC' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - ADC mean'] = ["showmatrix_gpickle",mat, "ADC_mean", "False", con_name+' - ADC mean']
-                        self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",mat, "ADC_median", "False", con_name+' - ADC median']
-                        self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",mat, "ADC_std", "False", con_name+' - ADC std']
+                        self.inspect_outputs_dict[con_name+' - ADC mean'] = ["showmatrix_gpickle",mat, "ADC_mean", "False", con_name+' - ADC mean', map_scale]
+                        self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",mat, "ADC_median", "False", con_name+' - ADC median', map_scale]
+                        self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",mat, "ADC_std", "False", con_name+' - ADC std', map_scale]
             else:
                 print "is list"
                 for mat in con_results.outputs.connectivity_matrices:
@@ -240,21 +252,21 @@ class ConnectomeStage(Stage):
                     if 'gpickle' in mat:
                         con_name = " ".join(os.path.basename(mat).split(".")[0].split("_"))
                         if any('Fiber number' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - number of fibers'] = ["showmatrix_gpickle",mat, "number_of_fibers", "False", con_name+' - number of fibers']
+                            self.inspect_outputs_dict[con_name+' - number of fibers'] = ["showmatrix_gpickle",mat, "number_of_fibers", "False", con_name+' - number of fibers', map_scale]
                         if any('Fiber length' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - fiber length mean'] = ["showmatrix_gpickle",mat, "fiber_length_mean", "False", con_name+' - fiber length mean']
-                            self.inspect_outputs_dict[con_name+' - fiber length std'] = ["showmatrix_gpickle",mat, "fiber_length_std", "False", con_name+' - fiber length std']
-                            self.inspect_outputs_dict[con_name+' - fiber length median'] = ["showmatrix_gpickle",mat, "fiber_length_median", "False", con_name+' - fiber length median']
+                            self.inspect_outputs_dict[con_name+' - fiber length mean'] = ["showmatrix_gpickle",mat, "fiber_length_mean", "False", con_name+' - fiber length mean', map_scale]
+                            self.inspect_outputs_dict[con_name+' - fiber length std'] = ["showmatrix_gpickle",mat, "fiber_length_std", "False", con_name+' - fiber length std', map_scale]
+                            self.inspect_outputs_dict[con_name+' - fiber length median'] = ["showmatrix_gpickle",mat, "fiber_length_median", "False", con_name+' - fiber length median', map_scale]
                         if any('Fiber density' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - fiber density'] = ["showmatrix_gpickle",mat, "fiber_density", "False", con_name+' - fiber density']
+                            self.inspect_outputs_dict[con_name+' - fiber density'] = ["showmatrix_gpickle",mat, "fiber_density", "False", con_name+' - fiber density', map_scale]
                         if any('gFA' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",mat, "FA_mean", "False", con_name+' - gFA mean']
-                            self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",mat, "FA_std", "False", con_name+' - gFA std']
-                            self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",mat, "FA_mean", "False", con_name+' - gFA median']
+                            self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",mat, "FA_mean", "False", con_name+' - gFA mean', map_scale]
+                            self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",mat, "FA_std", "False", con_name+' - gFA std', map_scale]
+                            self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",mat, "FA_mean", "False", con_name+' - gFA median', map_scale]
                         if any('ADC' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - ADC mean'] = ["showmatrix_gpickle",mat, "ADC_mean", "False", con_name+' - ADC mean']
-                            self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",mat, "ADC_std", "False", con_name+' - ADC std']
-                            self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",mat, "ADC_median", "False", con_name+' - ADC median']
+                            self.inspect_outputs_dict[con_name+' - ADC mean'] = ["showmatrix_gpickle",mat, "ADC_mean", "False", con_name+' - ADC mean', map_scale]
+                            self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",mat, "ADC_std", "False", con_name+' - ADC std', map_scale]
+                            self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",mat, "ADC_median", "False", con_name+' - ADC median', map_scale]
 
             self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
             #print self.inspect_outputs
@@ -264,7 +276,7 @@ class ConnectomeStage(Stage):
 
 
 class MRTrixConnectomeStage(Stage):
-    
+
     def __init__(self):
         self.name = 'connectome_stage'
         self.config = MRTrixConnectomeConfig()
@@ -273,7 +285,7 @@ class MRTrixConnectomeStage(Stage):
         self.outputs = ["streamline_final_file","connectivity_matrices"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        
+
         #conflow = pe.Workflow(name='MRTRix_connectome_pipeline')
         #connectome_inputnode = pe.Node(interface=util.IdentityInterface(fields=['intck','fod_file','roi_volumes']),name='inputnode')
         #connectome_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectome']),name='outputnode')
@@ -288,15 +300,15 @@ class MRTrixConnectomeStage(Stage):
                      (inputnode,map_merge, [('gFA','in1'),('skewness','in2'),('kurtosis','in3'),('P0','in4')])
                      #(map_merge,cmtk_mrtrixcmat, [('out','additional_maps')]),
                     ])
-        
-        #print "INTCK : ",intck 
+
+        #print "INTCK : ",intck
         if self.config.fiber_filter:
             fibers_filter = pe.Node(interface=FilterTractogram(out_file='streamlines_weights.txt'),name='fibers_filter')
 
             flow.connect([
                             (inputnode,fibers_filter,[('track_file','in_tracks')])
                             ])
-            
+
             # if inputnode.inputs.diffusion_model == 'Deterministic':
             #     flow.connect([
             #                 (inputnode,fibers_filter,[('track_file','in_tracks')])
@@ -338,14 +350,14 @@ class MRTrixConnectomeStage(Stage):
             flow.connect([
                         (fibers_filter,connectome_builder,[('out_weights','in_weights')])
                         ])
-        
+
 
         flow.connect([
                     (inputnode,outputnode, [('track_file','streamline_final_file')]),
                     (connectome_builder,outputnode, [('out_file','connectivity_matrices')])
                     ])
 
-    
+
     def define_inspect_outputs(self):
         # print "stage_dir : %s" % self.stage_dir
         # con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
@@ -360,7 +372,7 @@ class MRTrixConnectomeStage(Stage):
         #         for mat in con_results.outputs.connectivity_matrices:
         #             if 'gpickle' in mat:
         #                 self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
-                
+
         #     self.inspect_outputs = self.inspect_outputs_dict.keys()
 
         print "stage_dir : %s" % self.stage_dir
@@ -376,7 +388,7 @@ class MRTrixConnectomeStage(Stage):
                 for mat in con_results.outputs.out_file:
                     if 'gpickle' in mat:
                         self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "number_of_fibers", "False"]
-                
+
             self.inspect_outputs = self.inspect_outputs_dict.keys()
 
     def has_run(self):

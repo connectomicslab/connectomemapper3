@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2015, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
 #
@@ -11,20 +11,20 @@ import os
 import datetime
 from cmp.pipelines.common import *
 
-# try: 
+# try:
 #     from traitsui.api import *
 #     from traits.api import *
 #     from traitsui.wx.themed_button_editor import ThemedButtonEditor
-# except ImportError: 
+# except ImportError:
 #     from enthought.traits.api import *
 #     from enthought.traits.ui.api import *
 #     from  enthought.traits.ui.wx.themed_button_editor import ThemedButtonEditor
-   
-try: 
+
+try:
     from traitsui.api import *
     from traits.api import *
     from traitsui.qt4.button_editor import ToolkitEditorFactory
-except ImportError: 
+except ImportError:
     from enthought.traits.api import *
     from enthought.traits.ui.api import *
     from  enthought.traits.ui.qt4.button_editor import ToolkitEditorFactory
@@ -48,7 +48,7 @@ from cmp.stages.connectome.fmri_connectome import ConnectomeStage
 class Global_Configuration(HasTraits):
     process_type = Str('fMRI')
     imaging_model = Str
-   
+
 class Check_Input_Notification(HasTraits):
     message = Str
     imaging_model_options = List(['fMRI'])
@@ -63,20 +63,20 @@ class Check_Input_Notification(HasTraits):
 class fMRIPipeline(Pipeline):
     pipeline_name = Str("fMRI_pipeline")
     input_folders = ['fMRI','T1','T2']
-           
+
     ordered_stage_list = ['Preprocessing','Segmentation','Parcellation','Registration','Functional','Connectome']
-   
+
     global_conf = Global_Configuration()
-   
+
     preprocessing = Button('Preprocessing')
     segmentation = Button('Segmentation')
     parcellation = Button('Parcellation')
     functional = Button('Functional')
     registration = Button('Registration')
     connectome = Button('Connectome')
-   
+
     config_file = Str
-   
+
     pipeline_group = VGroup(
                         HGroup(spring,Item('preprocessing',editor=ToolkitEditorFactory(image=ImageResource('preprocessing'))),spring,show_labels=False),
                         HGroup(spring,Item('segmentation',editor=ToolkitEditorFactory(image=ImageResource('segmentation'))),spring,show_labels=False),#Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
@@ -86,7 +86,7 @@ class fMRIPipeline(Pipeline):
                         HGroup(spring,Item('connectome',editor=ToolkitEditorFactory(image=ImageResource('connectome'))),spring,show_labels=False),
                         springy=True
                         )
-    
+
     def __init__(self,project_info):
         self.stages = {'Preprocessing':PreprocessingStage(),
         'Segmentation':SegmentationStage(),
@@ -101,21 +101,21 @@ class fMRIPipeline(Pipeline):
         self.stages['Functional'].config.on_trait_change(self.update_nuisance_requirements,'csf')
         self.stages['Functional'].config.on_trait_change(self.update_nuisance_requirements,'wm')
         self.stages['Connectome'].config.on_trait_change(self.update_scrubbing,'apply_scrubbing')
-        
+
     def update_parcellation(self):
         if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
             self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
         else:
             self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.pre_custom
         self.update_registration()
-    
+
     def update_segmentation(self):
         if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
             self.stages['Segmentation'].config.seg_tool = "Custom segmentation"
         else:
             self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
         self.update_registration()
-            
+
     def update_registration(self):
         if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
             if self.stages['Registration'].config.registration_mode == 'BBregister (FS)':
@@ -129,33 +129,33 @@ class fMRIPipeline(Pipeline):
                 self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)','Nonlinear (FSL)']
             else:
                 self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)']
-                
+
     def update_nuisance_requirements(self):
         self.stages['Registration'].config.apply_to_eroded_brain = self.stages['Functional'].config.global_nuisance
         self.stages['Registration'].config.apply_to_eroded_csf = self.stages['Functional'].config.csf
         self.stages['Registration'].config.apply_to_eroded_wm = self.stages['Functional'].config.wm
-            
+
     def update_scrubbing(self):
         self.stages['Functional'].config.scrubbing = self.stages['Connectome'].config.apply_scrubbing
-                       
+
     def _preprocessing_fired(self, info):
         self.stages['Preprocessing'].configure_traits()
-       
+
     def _segmentation_fired(self, info):
         self.stages['Segmentation'].configure_traits()
-       
+
     def _parcellation_fired(self, info):
         self.stages['Parcellation'].configure_traits()
-       
+
     def _functional_fired(self, info):
         self.stages['Functional'].configure_traits()
-       
+
     def _registration_fired(self, info):
         self.stages['Registration'].configure_traits()
 
     def _connectome_fired(self, info):
         self.stages['Connectome'].configure_traits()
-       
+
     def define_custom_mapping(self, custom_last_stage):
         # start by disabling all stages
         for stage in self.ordered_stage_list:
@@ -193,7 +193,7 @@ class fMRIPipeline(Pipeline):
         input_dir = os.path.join(self.base_directory,'RAWDATA','T2')
         if len(os.listdir(input_dir)) > 0:
             if convert_rawdata(self.base_directory, input_dir, 'T2_orig'):
-                t2_available = True   
+                t2_available = True
 
         if fMRI_available:
             if t2_available:
@@ -213,7 +213,7 @@ class fMRIPipeline(Pipeline):
         else:
             input_message = 'Error during inputs check. No fMRI or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
 
-        if gui: 
+        if gui:
             input_notification = Check_Input_Notification(message=input_message, imaging_model='fMRI')
             input_notification.configure_traits()
             self.global_conf.imaging_model = input_notification.imaging_model
@@ -222,14 +222,14 @@ class fMRIPipeline(Pipeline):
             print input_message
             self.global_conf.imaging_model = 'fMRI'
             self.stages['Registration'].config.imaging_model = 'fMRI'
-       
+
         if t2_available:
             self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)','Nonlinear (FSL)']
-       
+
         self.fill_stages_outputs()
-       
+
         return valid_inputs
-    
+
     def check_config(self):
         common_check = Pipeline.check_config(self)
         if common_check == '':
@@ -249,7 +249,7 @@ class fMRIPipeline(Pipeline):
     def process(self):
         # Process time
         now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-       
+
         # Initialization
         if os.path.exists(os.path.join(self.base_directory,"LOG","pypeline.log")):
             os.unlink(os.path.join(self.base_directory,"LOG","pypeline.log"))
@@ -259,7 +259,7 @@ class fMRIPipeline(Pipeline):
                               })
         logging.update_logging(config)
         iflogger = logging.getLogger('interface')
-       
+
         # Data import
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['fMRI','T1','T2']), name='datasource')
         datasource.inputs.base_directory = os.path.join(self.base_directory,'NIFTI')
@@ -267,19 +267,19 @@ class fMRIPipeline(Pipeline):
         datasource.inputs.raise_on_empty = False
         datasource.inputs.field_template = dict(fMRI='fMRI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
         datasource.inputs.sort_filelist=False
-       
+
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="fMRI_sinker")
         sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS")
-        
+
         # Clear previous outputs
         self.clear_stages_outputs()
-        
+
         # Create common_flow
         common_flow = self.create_common_flow()
-        
+
         # Create fMRI flow
-        
+
         fMRI_flow = pe.Workflow(name='fMRI_pipeline')
         fMRI_inputnode = pe.Node(interface=util.IdentityInterface(fields=["fMRI","T1","T2","subjects_dir","subject_id","wm_mask_file","roi_volumes","wm_eroded","brain_eroded","csf_eroded","parcellation_scheme","atlas_info"]),name="inputnode")
         fMRI_outputnode = pe.Node(interface=util.IdentityInterface(fields=["connectivity_matrices"]),name="outputnode")
@@ -290,7 +290,7 @@ class fMRIPipeline(Pipeline):
             fMRI_flow.connect([
                 (fMRI_inputnode,preproc_flow,[("fMRI","inputnode.functional")]),
                 ])
-                                               
+
         if self.stages['Registration'].enabled:
             reg_flow = self.create_stage_flow("Registration")
             fMRI_flow.connect([
@@ -312,7 +312,7 @@ class fMRIPipeline(Pipeline):
                           (fMRI_inputnode,reg_flow, [('subjects_dir','inputnode.subjects_dir'),
                                                 ('subject_id','inputnode.subject_id')]),
                           ])
-       
+
         if self.stages['Functional'].enabled:
             func_flow = self.create_stage_flow("Functional")
             fMRI_flow.connect([
@@ -325,7 +325,7 @@ class fMRIPipeline(Pipeline):
                 fMRI_flow.connect([
                                    (preproc_flow,func_flow,[("outputnode.par_file","inputnode.motion_par_file")])
                                 ])
-                       
+
         if self.stages['Connectome'].enabled:
             con_flow = self.create_stage_flow("Connectome")
             fMRI_flow.connect([
@@ -335,14 +335,14 @@ class fMRIPipeline(Pipeline):
                         (reg_flow,con_flow,[("outputnode.roi_volumes_registered","inputnode.roi_volumes_registered")]),
                         (con_flow,fMRI_outputnode,[("outputnode.connectivity_matrices","connectivity_matrices")])
 		                ])
-            
+
             if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
                 fMRI_flow.connect([(fMRI_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
-                
+
         # Create NIPYPE flow
-        
+
         flow = pe.Workflow(name='NIPYPE', base_dir=os.path.join(self.base_directory))
-        
+
         flow.connect([
                       (datasource,common_flow,[("T1","inputnode.T1")]),
                       (datasource,fMRI_flow,[("fMRI","inputnode.fMRI"),("T1","inputnode.T1"),("T2","inputnode.T2")]),
@@ -357,31 +357,31 @@ class fMRIPipeline(Pipeline):
                                               ("outputnode.atlas_info","inputnode.atlas_info")]),
                       (fMRI_flow,sinker,[("outputnode.connectivity_matrices","fMRI.%s.connectivity_matrices"%now)])
                     ])
-        
+
         # Process pipeline
-        
+
         iflogger.info("**** Processing ****")
-       
+
         if(self.number_of_cores != 1):
             flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
         else:
             flow.run()
-       
+
         self.fill_stages_outputs()
-        
+
         # Clean undesired folders/files
         rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
         for file_to_rm in rm_file_list:
             if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
                 os.remove(os.path.join(self.base_directory,file_to_rm))
-       
+
         # copy .ini and log file
         outdir = os.path.join(self.base_directory,"RESULTS",'fMRI',now)
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         shutil.copy(self.config_file,outdir)
         shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
-       
+
         iflogger.info("**** Processing finished ****")
-       
+
         return True,'Processing sucessful'

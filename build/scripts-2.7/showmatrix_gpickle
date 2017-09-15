@@ -5,8 +5,10 @@ import sys
 import os
 import networkx as nx
 import numpy as np
+import copy
 try:
-    from pylab import title, imshow, show, cm, figure
+    import matplotlib.colors as colors
+    from pylab import title, imshow, show, cm, figure, pcolor
 except ImportError:
     print("matplotlib not available. Can not plot matrix")
 
@@ -46,6 +48,32 @@ if __name__ == "__main__":
         else:
             b = bb
         title(sys.argv[4])
-        imshow(b, interpolation='nearest', cmap=cm.jet, vmin = b.min(), vmax=b.max())
+        imshow(b, interpolation='nearest',cmap=cm.jet, vmin = b.min(), vmax=b.max())
         show()
+    elif len(sys.argv) == 6 and os.path.exists(sys.argv[1]):
+        print "read %s" % sys.argv[1]
+        a=nx.read_gpickle(sys.argv[1])
 
+        figure()
+        #for u,v,d in a.edges_iter(data=True):
+        #    a.edge[u][v]['weight'] = a.edge[u][v][sys.argv[2]]
+        bb=nx.to_numpy_matrix(a,weight=sys.argv[2],dtype=np.float64)
+
+        if sys.argv[3]=='True':
+            print "set to 1"
+            c=np.zeros(bb.shape)
+            c[bb>0] = 1
+            b = c
+        else:
+            b = bb
+        title(sys.argv[4])
+        print "sys.argv[5]==%s" % sys.argv[5]
+        if sys.argv[5]=="log":
+            print "log scaling..."
+            my_cmap = copy.copy(cm.get_cmap('jet')) # copy the default cmap
+            my_cmap.set_bad((0,0,0))
+            imshow(b, interpolation='nearest',norm=colors.LogNorm(),cmap=my_cmap)
+        else:
+            print "normal scaling"
+            imshow(b, interpolation='nearest',norm=None,cmap=cm.jet, vmin = b.min(), vmax=b.max())
+        show()

@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2015, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
 #
