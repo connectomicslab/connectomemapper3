@@ -5,7 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 """ CMP Stage for Parcellation
-""" 
+"""
 
 # General imports
 from traits.api import *
@@ -27,7 +27,7 @@ from cmp.stages.common import Stage
 
 class ParcellationConfig(HasTraits):
     pipeline_mode = Enum(["Diffusion","fMRI"])
-    parcellation_scheme = Str('NativeFreesurfer')
+    parcellation_scheme = Str('Lausanne2008')
     parcellation_scheme_editor = List(['NativeFreesurfer','Lausanne2008','Custom'])
     pre_custom = Str('Lausanne2008')
     #atlas_name = Str()
@@ -51,27 +51,27 @@ class ParcellationConfig(HasTraits):
                              visible_when='parcellation_scheme=="Custom"'
                              )
                        )
-    
+
     def update_atlas_info(self):
         atlas_name = os.path.basename(self.atlas_nifti_file)
         atlas_name = os.path.splitext(os.path.splitext(atlas_name)[0])[0].encode('ascii')
         self.atlas_info = {atlas_name : {'number_of_regions':self.number_of_regions,'node_information_graphml':self.graphml_file}}
-    
+
     def _atlas_nifti_file_changed(self,new):
         self.update_atlas_info()
-        
+
     def _number_of_regions_changed(self,new):
         self.update_atlas_info()
-        
+
     def _graphml_file_changed(self,new):
         self.update_atlas_info()
-        
+
     def _parcellation_scheme_changed(self,old,new):
         if new == 'Custom':
             self.pre_custom = old
-          
+
 class ParcellationStage(Stage):
-    
+
     def __init__(self,pipeline_mode):
         self.name = 'parcellation_stage'
         self.config = ParcellationConfig()
@@ -85,15 +85,15 @@ class ParcellationStage(Stage):
             "brain_eroded",
     	       #"cc_unknown_file","ribbon_file","roi_files",
             "roi_volumes","parcellation_scheme","atlas_info"]
-    
+
     def create_workflow(self, flow, inputnode, outputnode):
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
-        
+
         if self.config.parcellation_scheme != "Custom":
             parc_node = pe.Node(interface=cmtk.parcellation.Parcellate(),name="%s_parcellation" % self.config.parcellation_scheme)
             parc_node.inputs.parcellation_scheme = self.config.parcellation_scheme
             parc_node.inputs.erode_masks = True
-            
+
             flow.connect([
                          (inputnode,parc_node,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
                          (parc_node,outputnode,[#("aseg_file","aseg_file"),("cc_unknown_file","cc_unknown_file"),
@@ -161,12 +161,11 @@ class ParcellationStage(Stage):
                 #self.inspect_outputs = self.inspect_outputs_dict.keys()
         else:
             self.inspect_outputs_dict["Custom atlas"] = ['fslview',self.config.atlas_nifti_file,"-l","Random-Rainbow"]
-        
+
         self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
-            
+
     def has_run(self):
         if self.config.parcellation_scheme != "Custom":
             return os.path.exists(os.path.join(self.stage_dir,"%s_parcellation" % self.config.parcellation_scheme,"result_%s_parcellation.pklz" % self.config.parcellation_scheme))
         else:
             return os.path.exists(self.config.atlas_nifti_file)
-

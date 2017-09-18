@@ -82,7 +82,7 @@ class PreprocessingConfig(HasTraits):
     dipy_noise_model = Enum('Rician',['Rician','Gaussian'])
     bias_field_correction = Bool(False)
     bias_field_algo = Enum('ANTS N4',['ANTS N4','FSL FAST'])
-    eddy_current_and_motion_correction = Bool(False)
+    eddy_current_and_motion_correction = Bool(True)
     eddy_correction_algo = Enum('FSL eddy_correct','FSL eddy')
     eddy_correct_motion_correction = Bool(True)
     start_vol = Int(0)

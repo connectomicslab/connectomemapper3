@@ -63,7 +63,7 @@ class RegistrationConfig(HasTraits):
     flirt_args = Str
     uses_qform = Bool(True)
     dof = Int(6)
-    cost = Enum('mutualinfo',['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'])
+    cost = Enum('normmi',['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'])
     no_search = Bool(True)
 
     # BBRegister
