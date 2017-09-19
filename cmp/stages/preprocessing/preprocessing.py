@@ -123,13 +123,13 @@ class PreprocessingConfig(HasTraits):
                         ),
                         label='Preprocessing steps'),
                         VGroup(
-                        HGroup(
+                        VGroup(
                             Item('resampling',label='Voxel size (x,y,z)',editor=TupleEditor(cols=3)),
                             'interpolation'
                             ),
                         label='Final resampling')
-                        )
-                    )
+                        ),
+                    width=0.5,height=0.5)
 
     def _max_vol_changed(self,new):
         self.max_str = '(max: %d)' % new

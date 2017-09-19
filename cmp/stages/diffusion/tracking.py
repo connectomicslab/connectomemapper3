@@ -103,9 +103,9 @@ class MRtrix_tracking_config(HasTraits):
     min_length = Float(10)
     max_length = Float(200)
 
-    traits_view = View( HGroup('desired_number_of_tracks','max_number_of_tracks'),
+    traits_view = View( VGroup('desired_number_of_tracks','max_number_of_tracks'),
 			Item('curvature',label="Curvature radius"),'step_size',
-			HGroup('min_length','max_length')
+			VGroup('min_length','max_length')
 		      )
 
     def _SD_changed(self,new):
