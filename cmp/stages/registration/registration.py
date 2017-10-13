@@ -31,6 +31,10 @@ import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec,\
     TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 
+import nipype.interfaces.ants as ants
+# from nipype.interfaces.ants.registration import ANTS
+# from nipype.interfaces.ants.resampling import ApplyTransforms, WarpImageMultiTransform
+
 import nibabel as nib
 
 # Own imports
@@ -55,9 +59,14 @@ class RegistrationConfig(HasTraits):
     # interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
 
     # Registration selection
-    registration_mode = Str('Linear + Non-linear (FSL)')
-    registration_mode_trait = List(['Linear + Non-linear (FSL)']) #,'BBregister (FS)'])
+    registration_mode = Str('ANTs')#Str('Linear + Non-linear (FSL)')
+    registration_mode_trait = List(['Linear + Non-linear (FSL)','ANTs']) #,'BBregister (FS)'])
     diffusion_imaging_model = Str
+
+    # ANTS
+    linear_cost = Enum('normmi',['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'])
+    nonlinear_cost = Enum('normmi',['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'])
+
 
     # FLIRT
     flirt_args = Str
@@ -523,6 +532,202 @@ class RegistrationStage(Stage):
             #             (mr_crop_T1, fsl_applywarp_FA_noNaN, [('cropped','ref_file')]),
             #             (fsl_fnirt_crop, fsl_applywarp_FA_noNaN, [('fieldcoeff_file','field_file')])
             #             ])
+
+        elif self.config.registration_mode == 'ANTs':
+            # [SUB-STEP 1] Linear register "T1" onto"Target_FA_resampled"
+            # [1.1] Convert diffusion data to mrtrix format using rotated bvecs
+            mr_convert = pe.Node(interface=MRConvert(out_filename='diffusion.mif',stride=[+1,+2,+3,+4]), name='mr_convert')
+            mr_convert.inputs.quiet = True
+            mr_convert.inputs.force_writing = True
+
+            concatnode = pe.Node(interface=util.Merge(2),name='concatnode')
+
+            def convertList2Tuple(lists):
+                print "******************************************",tuple(lists)
+                return tuple(lists)
+
+            flow.connect([
+                (inputnode,concatnode,[('bvecs','in1')]),
+                (inputnode,concatnode,[('bvals','in2')]),
+                (concatnode,mr_convert,[(('out',convertList2Tuple),'grad_fsl')]),
+                (inputnode,mr_convert,[('target','in_file')])
+                ])
+            grad_mrtrix = pe.Node(ExtractMRTrixGrad(out_grad_mrtrix='grad.txt'),name='extract_grad')
+            flow.connect([
+                        (mr_convert,grad_mrtrix,[("converted","in_file")]),
+                        (grad_mrtrix,outputnode,[("out_grad_mrtrix","grad")])
+                        ])
+
+            flow.connect([
+                        (inputnode,outputnode,[("bvals","bvals")]),
+                        (inputnode,outputnode,[("bvecs","bvecs")])
+                        ])
+
+            mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[+1,+2,+3]), name='mr_convert_b0')
+            mr_convert_b0.inputs.extract_at_axis = 3
+            mr_convert_b0.inputs.extract_at_coordinate = [0.0]
+
+            flow.connect([
+                (inputnode,mr_convert_b0,[('target','in_file')])
+            ])
+
+            # dwi2tensor = pe.Node(interface=mrt.DWI2Tensor(out_filename='dt_corrected.mif'),name='dwi2tensor')
+            # dwi2tensor_unmasked = pe.Node(interface=mrt.DWI2Tensor(out_filename='dt_corrected_unmasked.mif'),name='dwi2tensor_unmasked')
+
+            # tensor2FA = pe.Node(interface=mrt.Tensor2FractionalAnisotropy(out_filename='fa_corrected.mif'),name='tensor2FA')
+            # tensor2FA_unmasked = pe.Node(interface=mrt.Tensor2FractionalAnisotropy(out_filename='fa_corrected_unmasked.mif'),name='tensor2FA_unmasked')
+
+            # mr_convert_FA = pe.Node(interface=MRConvert(out_filename='fa_corrected.nii.gz',stride=[-1,-2,+3]), name='mr_convert_FA')
+            # mr_convert_FA_unmasked = pe.Node(interface=MRConvert(out_filename='fa_corrected_unmasked.nii.gz',stride=[-1,-2,+3]), name='mr_convert_FA_unmasked')
+
+            # FA_noNaN = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_nonan.nii.gz',nan2zeros=True),name='FA_noNaN')
+            # FA_noNaN_unmasked = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_unmasked_nonan.nii.gz',nan2zeros=True),name='FA_noNaN_unmasked')
+
+            dwi2tensor = pe.Node(interface=DWI2Tensor(out_filename='dt_corrected.mif'),name='dwi2tensor')
+            dwi2tensor_unmasked = pe.Node(interface=DWI2Tensor(out_filename='dt_corrected_unmasked.mif'),name='dwi2tensor_unmasked')
+
+            tensor2FA = pe.Node(interface=TensorMetrics(out_fa='fa_corrected.mif'),name='tensor2FA')
+            tensor2FA_unmasked = pe.Node(interface=TensorMetrics(out_fa='fa_corrected_unmasked.mif'),name='tensor2FA_unmasked')
+
+            mr_convert_FA = pe.Node(interface=MRConvert(out_filename='fa_corrected.nii.gz',stride=[+1,+2,+3]), name='mr_convert_FA')
+            mr_convert_FA_unmasked = pe.Node(interface=MRConvert(out_filename='fa_corrected_unmasked.nii.gz',stride=[+1,+2,+3]), name='mr_convert_FA_unmasked')
+
+            FA_noNaN = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_nonan.nii.gz',nan2zeros=True),name='FA_noNaN')
+            FA_noNaN_unmasked = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_unmasked_nonan.nii.gz',nan2zeros=True),name='FA_noNaN_unmasked')
+
+            flow.connect([
+                (mr_convert,dwi2tensor,[('converted','in_file')]),
+                (inputnode,dwi2tensor,[('target_mask','in_mask_file')]),
+                (dwi2tensor,tensor2FA,[('tensor','in_file')]),
+                (inputnode,tensor2FA,[('target_mask','in_mask')]),
+                (tensor2FA,mr_convert_FA,[('out_fa','in_file')]),
+                (mr_convert_FA,FA_noNaN,[('converted','in_file')])
+                ])
+
+            flow.connect([
+                (mr_convert,dwi2tensor_unmasked,[('converted','in_file')]),
+                (dwi2tensor_unmasked,tensor2FA_unmasked,[('tensor','in_file')]),
+                (tensor2FA_unmasked,mr_convert_FA_unmasked,[('out_fa','in_file')]),
+                (mr_convert_FA_unmasked,FA_noNaN_unmasked,[('converted','in_file')])
+                ])
+
+            # [1.2] Linear registration of the DW data to the T1 data
+            # ants_registration = pe.Node(interface=ants.ANTS(),name="ants_registration")
+            # ants_registration.inputs.dimension = 3
+            # ants_registration.inputs.output_transform_prefix = 'T1-TO-B0'
+            # ants_registration.inputs.metric = ['MI']
+            # ants_registration.inputs.metric_weight = [1.0]
+            # ants_registration.inputs.radius = [5]
+            # ants_registration.inputs.transformation_model = 'SyN'
+            # ants_registration.inputs.gradient_step_length = 0.25
+            # ants_registration.inputs.number_of_iterations = [50, 35, 15]
+            # ants_registration.inputs.use_histogram_matching = False
+            # ants_registration.inputs.mi_option = [32, 16000]
+            # ants_registration.inputs.regularization = 'Gauss'
+            # ants_registration.inputs.regularization_gradient_field_sigma = 3
+            # ants_registration.inputs.regularization_deformation_field_sigma = 0
+            # ants_registration.inputs.number_of_affine_iterations = [10000,10000,1000]
+            #
+            # # fsl_flirt.inputs.dof = self.config.dof
+            # # fsl_flirt.inputs.cost = self.config.cost
+            # # fsl_flirt.inputs.cost_func = self.config.cost
+            # # fsl_flirt.inputs.no_search = self.config.no_search
+            # # fsl_flirt.inputs.verbose = False
+            #
+            # flow.connect([
+            #             (inputnode, ants_registration, [('T1','moving_image')]),
+            #             (mr_convert_b0, ants_registration, [('converted','fixed_image')])
+            #             ])
+
+            ants_registration = pe.Node(interface=ants.Registration(),name='ants_registration')
+            ants_registration.inputs.collapse_output_transforms=True
+            ants_registration.inputs.initial_moving_transform_com=True
+            ants_registration.inputs.num_threads=8
+            ants_registration.inputs.output_inverse_warped_image=True
+            ants_registration.inputs.output_warped_image=True
+            ants_registration.inputs.sigma_units=['vox']*3
+            ants_registration.inputs.transforms=['Rigid', 'Affine', 'SyN']
+            ants_registration.inputs.terminal_output='file'
+            ants_registration.inputs.winsorize_lower_quantile=0.005
+            ants_registration.inputs.winsorize_upper_quantile=0.995
+            ants_registration.inputs.convergence_threshold=[1e-06]
+            ants_registration.inputs.convergence_window_size=[10]
+            ants_registration.inputs.metric=['MI', 'MI', 'CC']
+            ants_registration.inputs.metric_weight=[1.0]*3
+            ants_registration.inputs.number_of_iterations=[[1000, 500, 250, 100],
+                                                            [1000, 500, 250, 100],
+                                                            [100, 70, 50, 20]]
+            ants_registration.inputs.radius_or_number_of_bins=[32, 32, 4]
+            ants_registration.inputs.sampling_percentage=[0.25, 0.25, 1]
+            ants_registration.inputs.sampling_strategy=['Regular',
+                                                        'Regular',
+                                                        'None']
+            ants_registration.inputs.shrink_factors=[[8, 4, 2, 1]]*3
+            ants_registration.inputs.smoothing_sigmas=[[3, 2, 1, 0]]*3
+            ants_registration.inputs.transform_parameters=[(0.1,),
+                                                            (0.1,),
+                                                            (0.1, 3.0, 0.0)]
+            ants_registration.inputs.use_histogram_matching=True
+            ants_registration.inputs.write_composite_transform=True
+
+            flow.connect([
+                        (inputnode, ants_registration, [('T1','moving_image')]),
+                        (mr_convert_b0, ants_registration, [('converted','fixed_image')])
+                        ])
+
+            # multitransforms = pe.Node(interface=util.Merge(2),name='multitransforms')
+            #
+            # def convertList2Tuple(lists):
+            #     print "******************************************",tuple(lists)
+            #     return tuple(lists)
+            #
+            # flow.connect([
+            #     (ants_registration,multitransforms,[('warp_transform','in1')]),
+            #     (ants_registration,multitransforms,[('affine_transform','in2')])
+            #     #(concatnode,mr_convert,[(('out',convertList2Tuple),'grad_fsl')])
+            #     ])
+
+            ants_applywarp_T1 = pe.Node(interface=ants.ApplyTransforms(default_value=100,out_postfix="_warped",interpolation="BSpline"),name="apply_warp_T1")
+            ants_applywarp_brain = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="BSpline",out_postfix="_warped"),name="apply_warp_brain")
+            ants_applywarp_wm = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="NearestNeighbor",out_postfix="_warped"),name="apply_warp_wm")
+            #ants_applywarp_rois = pe.Node(interface=ApplymultipleANTsWarp(use_bspline=True),name="apply_warp_roivs")
+
+            flow.connect([
+                        (inputnode, ants_applywarp_T1, [('T1','input_image')]),
+                        (inputnode, ants_applywarp_T1, [('target','reference_image')]),
+                        #(multitransforms, ants_applywarp_T1, [('out','transforms')]),
+                        (ants_registration, ants_applywarp_T1, [('composite_transform','transforms')]),
+                        (ants_applywarp_T1, outputnode, [('output_image','T1_registered_crop')]),
+                        ])
+
+            flow.connect([
+                        (inputnode, ants_applywarp_brain, [('brain','input_image')]),
+                        (inputnode, ants_applywarp_brain, [('target','reference_image')]),
+                        #(multitransforms, ants_applywarp_brain, [('out','transforms')]),
+                        (ants_registration, ants_applywarp_brain, [('composite_transform','transforms')]),
+                        (ants_applywarp_brain, outputnode, [('output_image','brain_registered_crop')]),
+                        ])
+
+            flow.connect([
+                        (inputnode, ants_applywarp_wm, [('wm_mask','input_image')]),
+                        (inputnode, ants_applywarp_wm, [('target','reference_image')]),
+                        #(multitransforms, ants_applywarp_wm, [('out','transforms')]),
+                        (ants_registration, ants_applywarp_wm, [('composite_transform','transforms')]),
+                        (ants_applywarp_wm, outputnode, [('output_image','wm_mask_registered_crop')]),
+                        ])
+
+            #flow.connect([
+            #            (inputnode, ants_applywarp_rois, [('roi_volumes','input_images')]),
+            #            (inputnode, ants_applywarp_rois, [('target','reference_image')]),
+            #            (fsl_fnirt_crop, ants_applywarp_rois, [('fieldcoeff_file','field_file')]),
+            #            (ants_applywarp_rois, outputnode, [('out_files','roi_volumes_registered_crop')]),
+            #            ])
+
+            flow.connect([
+                        (inputnode, outputnode, [('roi_volumes','roi_volumes_registered_crop')]),
+                        (inputnode, outputnode, [('target','target_epicorrected')]),
+                        ])
+
 
 
     def old_create_workflow(self, flow, inputnode, outputnode):

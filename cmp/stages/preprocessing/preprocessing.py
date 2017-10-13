@@ -371,55 +371,55 @@ class PreprocessingStage(Stage):
 
         # resampling Freesurfer data and setting output type to short
         fs_mriconvert_T1 = pe.Node(interface=fs.MRIConvert(out_type='niigz',out_file='anat_resampled.nii.gz'),name="anat_resample")
-        #fs_mriconvert_T1.inputs.vox_size = self.config.resampling
+        fs_mriconvert_T1.inputs.vox_size = self.config.resampling
         fs_mriconvert_T1.inputs.resample_type = self.config.interpolation
 
         flow.connect([
                     (mr_convert_T1,fs_mriconvert_T1,[('converted','in_file')]),
-                    (mr_convert_b0_resample,fs_mriconvert_T1,[('converted','reslice_like')]),
+                    #(mr_convert_b0_resample,fs_mriconvert_T1,[('converted','reslice_like')]),
                     (fs_mriconvert_T1,outputnode,[('out_file','T1')])
                     ])
 
         fs_mriconvert_brain = pe.Node(interface=fs.MRIConvert(out_type='niigz',out_file='anat_masked_resampled.nii.gz'),name="anat_masked_resample")
-        #fs_mriconvert_brain.inputs.vox_size = self.config.resampling
+        fs_mriconvert_brain.inputs.vox_size = self.config.resampling
         fs_mriconvert_brain.inputs.resample_type = self.config.interpolation
 
         flow.connect([
                     (mr_convert_brain,fs_mriconvert_brain,[('converted','in_file')]),
-                    (mr_convert_b0_resample,fs_mriconvert_brain,[('converted','reslice_like')]),
+                    #(mr_convert_b0_resample,fs_mriconvert_brain,[('converted','reslice_like')]),
                     (fs_mriconvert_brain,outputnode,[('out_file','brain')])
                     ])
 
         fs_mriconvert_brainmask = pe.Node(interface=fs.MRIConvert(out_type='niigz',resample_type='nearest',out_file='brain_mask_resampled.nii.gz'),name="brain_mask_resample")
-        #fs_mriconvert_brainmask.inputs.vox_size = self.config.resampling
+        fs_mriconvert_brainmask.inputs.vox_size = self.config.resampling
         flow.connect([
                     (mr_threshold_brainmask,fs_mriconvert_brainmask,[('thresholded','in_file')]),
-                    (mr_convert_b0_resample,fs_mriconvert_brainmask,[('converted','reslice_like')]),
+                    #(mr_convert_b0_resample,fs_mriconvert_brainmask,[('converted','reslice_like')]),
                     (fs_mriconvert_brainmask,outputnode,[('out_file','brain_mask')])
                     ])
 
         fs_mriconvert_brainmaskfull = pe.Node(interface=fs.MRIConvert(out_type='niigz',out_file='brain_mask_full_resampled.nii.gz'),name="brain_mask_full_resample")
-        #fs_mriconvert_brainmaskfull.inputs.vox_size = self.config.resampling
+        fs_mriconvert_brainmaskfull.inputs.vox_size = self.config.resampling
         fs_mriconvert_brainmaskfull.inputs.resample_type = self.config.interpolation
         flow.connect([
                     (mr_convert_brainmask,fs_mriconvert_brainmaskfull,[('converted','in_file')]),
-                    (mr_convert_b0_resample,fs_mriconvert_brainmaskfull,[('converted','reslice_like')]),
+                    #(mr_convert_b0_resample,fs_mriconvert_brainmaskfull,[('converted','reslice_like')]),
                     (fs_mriconvert_brainmaskfull,outputnode,[('out_file','brain_mask_full')])
                     ])
 
         fs_mriconvert_wm_mask = pe.Node(interface=fs.MRIConvert(out_type='niigz',resample_type='nearest',out_file='wm_mask_resampled.nii.gz'),name="wm_mask_resample")
-        #fs_mriconvert_wm_mask.inputs.vox_size = self.config.resampling
+        fs_mriconvert_wm_mask.inputs.vox_size = self.config.resampling
         flow.connect([
                     (mr_convert_wm_mask_file,fs_mriconvert_wm_mask,[('converted','in_file')]),
-                    (mr_convert_b0_resample,fs_mriconvert_wm_mask,[('converted','reslice_like')]),
+                    #(mr_convert_b0_resample,fs_mriconvert_wm_mask,[('converted','reslice_like')]),
                     (fs_mriconvert_wm_mask,outputnode,[('out_file','wm_mask_file')])
                     ])
 
         fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='niigz',resample_type='nearest'),name="ROIs_resample",iterfield=['in_file'])
-        #fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
+        fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
         flow.connect([
                     (mr_convert_roi_volumes,fs_mriconvert_ROIs,[('converted_files','in_file')]),
-                    (mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
+                    #(mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
                     (fs_mriconvert_ROIs,outputnode,[("out_file","roi_volumes")])
                     ])
 

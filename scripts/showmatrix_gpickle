@@ -71,7 +71,7 @@ if __name__ == "__main__":
         if sys.argv[5]=="log":
             print "log scaling..."
             my_cmap = copy.copy(cm.get_cmap('jet')) # copy the default cmap
-            my_cmap.set_bad((0,0,0))
+            my_cmap.set_bad((0,0,0.5156))
             imshow(b, interpolation='nearest',norm=colors.LogNorm(),cmap=my_cmap)
             colorbar()
         else:
