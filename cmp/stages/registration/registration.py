@@ -622,10 +622,10 @@ class RegistrationStage(Stage):
             # ants_registration.inputs.gradient_step_length = 0.25
             # ants_registration.inputs.number_of_iterations = [50, 35, 15]
             # ants_registration.inputs.use_histogram_matching = False
-            # ants_registration.inputs.mi_option = [32, 16000]
             # ants_registration.inputs.regularization = 'Gauss'
             # ants_registration.inputs.regularization_gradient_field_sigma = 3
             # ants_registration.inputs.regularization_deformation_field_sigma = 0
+            # ants_registration.inputs.mi_option = [32, 16000]
             # ants_registration.inputs.number_of_affine_iterations = [10000,10000,1000]
             #
             # # fsl_flirt.inputs.dof = self.config.dof
@@ -639,40 +639,68 @@ class RegistrationStage(Stage):
             #             (mr_convert_b0, ants_registration, [('converted','fixed_image')])
             #             ])
 
-            ants_registration = pe.Node(interface=ants.Registration(),name='ants_registration')
-            ants_registration.inputs.collapse_output_transforms=True
-            ants_registration.inputs.initial_moving_transform_com=True
-            ants_registration.inputs.num_threads=8
-            ants_registration.inputs.output_inverse_warped_image=True
-            ants_registration.inputs.output_warped_image=True
-            ants_registration.inputs.sigma_units=['vox']*3
-            ants_registration.inputs.transforms=['Rigid', 'Affine', 'SyN']
-            ants_registration.inputs.terminal_output='file'
-            ants_registration.inputs.winsorize_lower_quantile=0.005
-            ants_registration.inputs.winsorize_upper_quantile=0.995
-            ants_registration.inputs.convergence_threshold=[1e-06]
-            ants_registration.inputs.convergence_window_size=[10]
-            ants_registration.inputs.metric=['MI', 'MI', 'CC']
-            ants_registration.inputs.metric_weight=[1.0]*3
-            ants_registration.inputs.number_of_iterations=[[1000, 500, 250, 100],
-                                                            [1000, 500, 250, 100],
-                                                            [100, 70, 50, 20]]
-            ants_registration.inputs.radius_or_number_of_bins=[32, 32, 4]
-            ants_registration.inputs.sampling_percentage=[0.25, 0.25, 1]
-            ants_registration.inputs.sampling_strategy=['Regular',
-                                                        'Regular',
-                                                        'None']
-            ants_registration.inputs.shrink_factors=[[8, 4, 2, 1]]*3
-            ants_registration.inputs.smoothing_sigmas=[[3, 2, 1, 0]]*3
-            ants_registration.inputs.transform_parameters=[(0.1,),
-                                                            (0.1,),
-                                                            (0.1, 3.0, 0.0)]
-            ants_registration.inputs.use_histogram_matching=True
-            ants_registration.inputs.write_composite_transform=True
+            affine_registration = pe.Node(interface=ants.Registration(), name='affine_registration')
+            affine_registration.inputs.collapse_output_transforms=True
+            affine_registration.inputs.initialize_transforms_per_stage=True
+            affine_registration.inputs.initial_moving_transform_com=True
+            affine_registration.inputs.output_transform_prefix = 'initial'
+            affine_registration.inputs.num_threads=8
+            affine_registration.inputs.output_inverse_warped_image=True
+            affine_registration.inputs.output_warped_image=True
+            affine_registration.inputs.sigma_units=['vox']*2
+            affine_registration.inputs.transforms=['Rigid','Affine']
+            affine_registration.inputs.terminal_output='file'
+            affine_registration.inputs.winsorize_lower_quantile=0.005
+            affine_registration.inputs.winsorize_upper_quantile=0.995
+            affine_registration.inputs.convergence_threshold=[1e-06]
+            affine_registration.inputs.convergence_window_size=[10]
+            affine_registration.inputs.metric=['MI','MI']
+            affine_registration.inputs.metric_weight=[1.0]*1
+            affine_registration.inputs.number_of_iterations=[[1000, 500, 250, 100],
+                                                            [1000, 500, 250, 100]]
+            affine_registration.inputs.radius_or_number_of_bins=[32, 32]
+            affine_registration.inputs.sampling_percentage=[0.25, 0.25]
+            affine_registration.inputs.sampling_strategy=['Regular',
+                                                        'Regular']
+            affine_registration.inputs.shrink_factors=[[8, 4, 2, 1]]*2
+            affine_registration.inputs.smoothing_sigmas=[[3, 2, 1, 0]]*2
+            affine_registration.inputs.transform_parameters=[(0.1,),
+                                                            (0.1,)]
+            affine_registration.inputs.use_histogram_matching=True
+            affine_registration.inputs.write_composite_transform=True
+
+            SyN_registration = pe.Node(interface=ants.Registration(),name='SyN_registration')
+            SyN_registration.inputs.collapse_output_transforms=True
+            SyN_registration.inputs.write_composite_transform=True
+            SyN_registration.inputs.output_transform_prefix = 'final'
+            #SyN_registration.inputs.initial_moving_transform_com=True
+            SyN_registration.inputs.num_threads=8
+            SyN_registration.inputs.output_inverse_warped_image=True
+            SyN_registration.inputs.output_warped_image=True
+            SyN_registration.inputs.sigma_units=['vox']*1
+            SyN_registration.inputs.transforms=['SyN']
+            SyN_registration.inputs.terminal_output='file'
+            SyN_registration.inputs.winsorize_lower_quantile=0.005
+            SyN_registration.inputs.winsorize_upper_quantile=0.995
+            SyN_registration.inputs.convergence_threshold=[1e-06]
+            SyN_registration.inputs.convergence_window_size=[10]
+            SyN_registration.inputs.metric=['CC']
+            SyN_registration.inputs.metric_weight=[1.0]*1
+            SyN_registration.inputs.number_of_iterations=[[100, 70, 50, 20]]
+            SyN_registration.inputs.radius_or_number_of_bins=[4]
+            SyN_registration.inputs.sampling_percentage=[1]
+            SyN_registration.inputs.sampling_strategy=['None']
+            SyN_registration.inputs.shrink_factors=[[8, 4, 2, 1]]*1
+            SyN_registration.inputs.smoothing_sigmas=[[3, 2, 1, 0]]*1
+            SyN_registration.inputs.transform_parameters=[(0.1, 3.0, 0.0)]
+            SyN_registration.inputs.use_histogram_matching=True
 
             flow.connect([
-                        (inputnode, ants_registration, [('T1','moving_image')]),
-                        (mr_convert_b0, ants_registration, [('converted','fixed_image')])
+                        (inputnode, affine_registration, [('T1','moving_image')]),
+                        (mr_convert_b0, affine_registration, [('converted','fixed_image')]),
+                        (inputnode, SyN_registration, [('T1','moving_image')]),
+                        (mr_convert_b0, SyN_registration, [('converted','fixed_image')]),
+                        (affine_registration, SyN_registration, [('composite_transform','initial_moving_transform')])
                         ])
 
             # multitransforms = pe.Node(interface=util.Merge(2),name='multitransforms')
@@ -687,7 +715,7 @@ class RegistrationStage(Stage):
             #     #(concatnode,mr_convert,[(('out',convertList2Tuple),'grad_fsl')])
             #     ])
 
-            ants_applywarp_T1 = pe.Node(interface=ants.ApplyTransforms(default_value=100,out_postfix="_warped",interpolation="BSpline"),name="apply_warp_T1")
+            ants_applywarp_T1 = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="BSpline",out_postfix="_warped"),name="apply_warp_T1")
             ants_applywarp_brain = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="BSpline",out_postfix="_warped"),name="apply_warp_brain")
             ants_applywarp_wm = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="NearestNeighbor",out_postfix="_warped"),name="apply_warp_wm")
             #ants_applywarp_rois = pe.Node(interface=ApplymultipleANTsWarp(use_bspline=True),name="apply_warp_roivs")
@@ -696,7 +724,7 @@ class RegistrationStage(Stage):
                         (inputnode, ants_applywarp_T1, [('T1','input_image')]),
                         (inputnode, ants_applywarp_T1, [('target','reference_image')]),
                         #(multitransforms, ants_applywarp_T1, [('out','transforms')]),
-                        (ants_registration, ants_applywarp_T1, [('composite_transform','transforms')]),
+                        (SyN_registration, ants_applywarp_T1, [('composite_transform','transforms')]),
                         (ants_applywarp_T1, outputnode, [('output_image','T1_registered_crop')]),
                         ])
 
@@ -704,7 +732,7 @@ class RegistrationStage(Stage):
                         (inputnode, ants_applywarp_brain, [('brain','input_image')]),
                         (inputnode, ants_applywarp_brain, [('target','reference_image')]),
                         #(multitransforms, ants_applywarp_brain, [('out','transforms')]),
-                        (ants_registration, ants_applywarp_brain, [('composite_transform','transforms')]),
+                        (SyN_registration, ants_applywarp_brain, [('composite_transform','transforms')]),
                         (ants_applywarp_brain, outputnode, [('output_image','brain_registered_crop')]),
                         ])
 
@@ -712,7 +740,7 @@ class RegistrationStage(Stage):
                         (inputnode, ants_applywarp_wm, [('wm_mask','input_image')]),
                         (inputnode, ants_applywarp_wm, [('target','reference_image')]),
                         #(multitransforms, ants_applywarp_wm, [('out','transforms')]),
-                        (ants_registration, ants_applywarp_wm, [('composite_transform','transforms')]),
+                        (SyN_registration, ants_applywarp_wm, [('composite_transform','transforms')]),
                         (ants_applywarp_wm, outputnode, [('output_image','wm_mask_registered_crop')]),
                         ])
 
