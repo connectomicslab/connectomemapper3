@@ -16,20 +16,20 @@ from PyQt4.QtGui import *
 
 from cmp.interfaces.traitsuiQt4 import QPushButtonCustomEditor
 
-# try: 
+# try:
 #     from traitsui.api import *
 #     from traits.api import *
 #     from traitsui.wx.themed_button_editor import ThemedButtonEditor
-# except ImportError: 
+# except ImportError:
 #     from enthought.traits.api import *
 #     from enthought.traits.ui.api import *
 #     from  enthought.traits.ui.wx.themed_button_editor import ThemedButtonEditor
-   
-try: 
+
+try:
     from traitsui.api import *
     from traits.api import *
     from traitsui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
-except ImportError: 
+except ImportError:
     print "Enthought used"
     from enthought.traits.api import *
     from enthought.traits.ui.api import *
@@ -60,13 +60,13 @@ class Global_Configuration(HasTraits):
     subject = Str
     modalities = []
 
-   
+
 class Check_Input_Notification(HasTraits):
     message = Str
     diffusion_imaging_model_options = List(['DSI','DTI','HARDI'])
     diffusion_imaging_model = Str
     diffusion_imaging_model_message = Str('\nMultiple diffusion inputs available. Please select desired diffusion modality.')
-   
+
     traits_view = View(Item('message',style='readonly',show_label=False),
                        Item('diffusion_imaging_model_message',visible_when='len(diffusion_imaging_model_options)>1',style='readonly',show_label=False),
                        Item('diffusion_imaging_model',editor=EnumEditor(name='diffusion_imaging_model_options'),visible_when='len(diffusion_imaging_model_options)>1'),
@@ -75,7 +75,7 @@ class Check_Input_Notification(HasTraits):
                        title="Check inputs")
 
 class DiffusionPipeline(Pipeline):
-    now = datetime.datetime.now().strftime("%Y%m%d_%H%M") 
+    now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("diffusion_pipeline")
     #input_folders = ['DSI','DTI','HARDI','T1','T2']
     input_folders = ['anat','dwi']
@@ -85,13 +85,13 @@ class DiffusionPipeline(Pipeline):
     subject_directory = Directory
     derivatives_directory = Directory
     ordered_stage_list = ['Segmentation','Parcellation','Preprocessing','Registration','Diffusion','Connectome']# ,'MRTrixConnectome']
-   
+
     global_conf = Global_Configuration()
-  
+
     segmentation = Button('Segmentation')
     #segmentation.setIcon(QIcon(QPixmap("segmentation.png")))
 
-    parcellation = Button('Parcellation') 
+    parcellation = Button('Parcellation')
     #parcellation.setIcon(QIcon(QPixmap("parcellation.png")))
 
     preprocessing = Button('Preprocessing')
@@ -107,7 +107,7 @@ class DiffusionPipeline(Pipeline):
     #connectome.setIcon(QIcon(QPixmap("connectome.png")))
 
     config_file = Str
-   
+
     # pipeline_group = VGroup(
     #                     HGroup(spring,Item('segmentation',editor=ToolkitEditorFactory(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
     #                     HGroup(spring,Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
@@ -116,7 +116,7 @@ class DiffusionPipeline(Pipeline):
     #                     HGroup(spring,Item('diffusion',editor=ToolkitEditorFactory(image=ImageResource('diffusion'),theme='@G')),spring,show_labels=False),
     #                     HGroup(spring,Item('connectome',editor=ToolkitEditorFactory(image=ImageResource('connectome'),theme='@G')),spring,show_labels=False),
     #                     springy=True
-    #       
+    #
     #              )
 
     pipeline_group = VGroup(
@@ -130,7 +130,7 @@ class DiffusionPipeline(Pipeline):
                         spring,
                         springy=True
                     )
-    
+
     def __init__(self,project_info):
         self.stages = {'Segmentation':SegmentationStage(),
             'Parcellation':ParcellationStage(pipeline_mode = "Diffusion"),
@@ -149,41 +149,41 @@ class DiffusionPipeline(Pipeline):
 
         self.subject_directory =  os.path.join(self.base_directory,self.subject)
         self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
-        
+
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
-        
+
     def update_parcellation(self):
         if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
             self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
         else:
             self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.pre_custom
-    
+
     def update_segmentation(self):
         if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
             self.stages['Segmentation'].config.seg_tool = "Custom segmentation"
         else:
             self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
-                       
+
     def _preprocessing_fired(self, info):
         self.stages['Preprocessing'].configure_traits()
-       
+
     def _segmentation_fired(self, info):
         self.stages['Segmentation'].configure_traits()
-       
+
     def _parcellation_fired(self, info):
         self.stages['Parcellation'].configure_traits()
-       
+
     def _diffusion_fired(self, info):
         self.stages['Diffusion'].configure_traits()
-       
+
     def _registration_fired(self, info):
         self.stages['Registration'].configure_traits()
 
     def _connectome_fired(self, info):
         # self.stages['MRTrixConnectome'].configure_traits()
         self.stages['Connectome'].configure_traits()
-       
+
     def define_custom_mapping(self, custom_last_stage):
         # start by disabling all stages
         for stage in self.ordered_stage_list:
@@ -236,7 +236,7 @@ class DiffusionPipeline(Pipeline):
         rawdata_dir = os.path.join(self.base_directory,'RAWDATA','T2')
         if len(os.listdir(rawdata_dir)) > 0:
             if convert_rawdata(self.base_directory, rawdata_dir, 'T2_orig'):
-                t2_available = True   
+                t2_available = True
         elif len(os.listdir(nifti_dir)) > 0:
             print os.path.join(nifti_dir,'T2_orig.nii.gz')
             if os.path.isfile(os.path.join(nifti_dir,'T2_orig.nii.gz')):
@@ -263,8 +263,8 @@ class DiffusionPipeline(Pipeline):
             input_message = 'Error during inputs check. No diffusion or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
 
         diffusion_imaging_model = diffusion_imaging_model[0]
-         
-        if gui: 
+
+        if gui:
             input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
             input_notification.configure_traits()
             self.global_conf.diffusion_imaging_model = input_notification.diffusion_imaging_model
@@ -285,12 +285,12 @@ class DiffusionPipeline(Pipeline):
             self.stages['Preprocessing'].config.max_vol = n_vol-1
             self.stages['Registration'].config.diffusion_imaging_model = diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = diffusion_imaging_model
-       
+
         if t2_available:
             self.stages['Registration'].config.registration_mode_trait = ['Linear + Non-linear (FSL)']#,'BBregister (FS)','Nonlinear (FSL)']
-       
+
         self.fill_stages_outputs()
-       
+
         return valid_inputs
 
     def check_input(self, gui=True):
@@ -349,17 +349,17 @@ class DiffusionPipeline(Pipeline):
         if os.path.isfile(bvec_file): bvecs_available = True
 
         mem = Memory(base_dir=os.path.join(self.derivatives_directory,'cmp',self.subject,'tmp','nipype'))
-        swap_and_reorient = mem.cache(SwapAndReorient)            
+        swap_and_reorient = mem.cache(SwapAndReorient)
 
         if diffusion_available:
             if bvals_available and bvecs_available:
                 self.stages['Diffusion'].config.diffusion_imaging_model_choices = self.diffusion_imaging_model
-                
-                #Copy diffusion data to derivatives / cmp  / subject / dwi 
+
+                #Copy diffusion data to derivatives / cmp  / subject / dwi
                 out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.nii.gz')
                 out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bval')
                 out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bvec')
-                
+
                 shutil.copy(src=dwi_file,dst=out_dwi_file)
                 shutil.copy(src=bvec_file,dst=out_bvec_file)
                 shutil.copy(src=bval_file,dst=out_bval_file)
@@ -385,8 +385,8 @@ class DiffusionPipeline(Pipeline):
             input_message = 'Error during inputs check. No diffusion or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
 
         #diffusion_imaging_model = diffusion_imaging_model[0]
-         
-        if gui: 
+
+        if gui:
             #input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
             #input_notification.configure_traits()
             print input_message
@@ -408,7 +408,7 @@ class DiffusionPipeline(Pipeline):
             self.stages['Preprocessing'].config.max_vol = n_vol-1
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
-       
+
         if t2_available:
             self.stages['Registration'].config.registration_mode_trait = ['Linear + Non-linear (FSL)']#,'BBregister (FS)','Nonlinear (FSL)']
 
@@ -424,17 +424,17 @@ class DiffusionPipeline(Pipeline):
                 print stage.stage_dir
 
         self.fill_stages_outputs()
-       
+
         return valid_inputs
 
-   
+
     def process(self):
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
         subject_directory = os.path.join(self.base_directory,self.subject)
         deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
-       
+
         # Initialization
         if os.path.isfile(os.path.join(deriv_subject_directory,"pypeline.log")):
             os.unlink(os.path.join(deriv_subject_directory,"pypeline.log"))
@@ -446,7 +446,7 @@ class DiffusionPipeline(Pipeline):
                               })
         logging.update_logging(config)
         iflogger = logging.getLogger('interface')
-       
+
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','diffusion','bvecs','bvals']), name='datasource')
@@ -478,7 +478,7 @@ class DiffusionPipeline(Pipeline):
         #datasource = pe.Node(interface=nio.SelectFiles(templates, base_directory=base_dir, subject=self.subject), name='datasource')
         #res = datasource.run()
 
-       
+
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
         sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
@@ -502,13 +502,13 @@ class DiffusionPipeline(Pipeline):
                                         ('grad.txt',self.subject+'_dwi_grad.txt'),
                                         ('target_epicorrected',self.subject+'_dwi_space-T1w-crop_preproc')
                                       ]
-        
+
         # Clear previous outputs
         self.clear_stages_outputs()
 
         flow = pe.Workflow(name='nipype', base_dir=os.path.join(deriv_subject_directory,'tmp'))
-        
-        
+
+
         # Create common_flow
         common_flow = self.create_common_flow()
 
@@ -516,9 +516,9 @@ class DiffusionPipeline(Pipeline):
                       (datasource,common_flow,[("T1","inputnode.T1")])
                       ])
 
-        
+
         # Create diffusion flow
-        
+
         diffusion_flow = pe.Workflow(name='diffusion_pipeline')
         diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','atlas_info','parcellation_scheme']),name='inputnode')
         diffusion_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectivity_matrices']),name='outputnode')
@@ -539,7 +539,7 @@ class DiffusionPipeline(Pipeline):
                     ])
 
         print diffusion_inputnode.outputs
-        
+
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
             diffusion_flow.connect([
@@ -547,7 +547,7 @@ class DiffusionPipeline(Pipeline):
                                                                         ('wm_mask_file','inputnode.wm_mask_file'),('roi_volumes','inputnode.roi_volumes'),
                                                                         ('bvecs','inputnode.bvecs'),('bvals','inputnode.bvals'),('T1','inputnode.T1')]),
                                     ])
-                                               
+
         if self.stages['Registration'].enabled:
             reg_flow = self.create_stage_flow("Registration")
             diffusion_flow.connect([
@@ -566,7 +566,7 @@ class DiffusionPipeline(Pipeline):
                                         (diffusion_inputnode,reg_flow, [('subjects_dir','inputnode.subjects_dir'),
                                                                         ('subject_id','inputnode.subject_id')]),
                                         ])
-       
+
         if self.stages['Diffusion'].enabled:
             diff_flow = self.create_stage_flow("Diffusion")
             diffusion_flow.connect([
@@ -584,7 +584,7 @@ class DiffusionPipeline(Pipeline):
                                     (reg_flow,sinker,[("outputnode.wm_mask_registered_crop","anat.@wm_mask_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.roi_volumes_registered_crop","anat.@vrois_reg_crop")])
                                     ])
-                       
+
         # if self.stages['MRTrixConnectome'].enabled:
         #     if self.stages['Diffusion'].config.processing_tool == 'FSL':
         #         self.stages['MRTrixConnectome'].config.probtrackx = True
@@ -602,7 +602,7 @@ class DiffusionPipeline(Pipeline):
         #                                       ('outputnode.skewness','dwi.@skewness'),('outputnode.kurtosis','dwi.@kurtosis'),
         #                                       ('outputnode.P0','dwi.@P0')])
 		      #           ])
-            
+
         #     if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
         #         diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
 
@@ -629,35 +629,35 @@ class DiffusionPipeline(Pipeline):
                                               ('outputnode.streamline_final_file','dwi.@streamline_final_file')
                                               ])
                         ])
-            
+
             if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
                 diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
 
 
         iflogger.info("**** Processing ****")
-       
+        flow.write_graph(graph2use='colored', format='svg', simple_form=True)
         if(self.number_of_cores != 1):
             flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
         else:
             flow.run()
-       
+
         self.fill_stages_outputs()
-        
+
         # Clean undesired folders/files
         # rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
         # for file_to_rm in rm_file_list:
         #     if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
         #         os.remove(os.path.join(self.base_directory,file_to_rm))
-       
+
         # copy .ini and log file
         outdir = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         shutil.copy(self.config_file,outdir)
         #shutil.copy(os.path.join(self.base_directory,"derivatives","cmp",self.subject,'pypeline.log'),outdir)
-       
+
         iflogger.info("**** Processing finished ****")
-       
+
         return True,'Processing sucessful'
 
 
@@ -665,7 +665,7 @@ class DiffusionPipeline(Pipeline):
     def old_process(self):
         # Process time
         now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-       
+
         # Initialization
         if os.path.exists(os.path.join(self.base_directory,"LOG","pypeline.log")):
             os.unlink(os.path.join(self.base_directory,"LOG","pypeline.log"))
@@ -675,7 +675,7 @@ class DiffusionPipeline(Pipeline):
                               })
         logging.update_logging(config)
         iflogger = logging.getLogger('interface')
-       
+
         # Data import
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals','T1','T2']), name='datasource')
         datasource.inputs.base_directory = os.path.join(self.base_directory,'NIFTI')
@@ -683,17 +683,17 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.raise_on_empty = False
         datasource.inputs.field_template = dict(diffusion=self.global_conf.diffusion_imaging_model+'.nii.gz',bvecs=self.global_conf.diffusion_imaging_model+'.bvec',bvals=self.global_conf.diffusion_imaging_model+'.bval',T1='T1.nii.gz',T2='T2.nii.gz')
         datasource.inputs.sort_filelist=False
-       
+
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
         sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS")
-        
+
         # Clear previous outputs
         self.clear_stages_outputs()
 
         flow = pe.Workflow(name='NIPYPE', base_dir=os.path.join(self.base_directory))
-        
-        
+
+
         # Create common_flow
         common_flow = self.create_common_flow()
 
@@ -701,9 +701,9 @@ class DiffusionPipeline(Pipeline):
                       (datasource,common_flow,[("T1","inputnode.T1")])
                       ])
 
-        
+
         # Create diffusion flow
-        
+
         diffusion_flow = pe.Workflow(name='diffusion_pipeline')
         diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','atlas_info','parcellation_scheme']),name='inputnode')
         diffusion_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectivity_matrices']),name='outputnode')
@@ -723,7 +723,7 @@ class DiffusionPipeline(Pipeline):
                     ])
 
         print diffusion_inputnode.outputs
-        
+
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
             diffusion_flow.connect([
@@ -731,7 +731,7 @@ class DiffusionPipeline(Pipeline):
                                                                         ('wm_mask_file','inputnode.wm_mask_file'),('roi_volumes','inputnode.roi_volumes'),
                                                                         ('bvecs','inputnode.bvecs'),('bvals','inputnode.bvals'),('T1','inputnode.T1')]),
                                     ])
-                                               
+
         if self.stages['Registration'].enabled:
             reg_flow = self.create_stage_flow("Registration")
             diffusion_flow.connect([
@@ -746,7 +746,7 @@ class DiffusionPipeline(Pipeline):
                                         (diffusion_inputnode,reg_flow, [('subjects_dir','inputnode.subjects_dir'),
                                                                         ('subject_id','inputnode.subject_id')]),
                                         ])
-       
+
         if self.stages['Diffusion'].enabled:
             diff_flow = self.create_stage_flow("Diffusion")
             diffusion_flow.connect([
@@ -757,7 +757,7 @@ class DiffusionPipeline(Pipeline):
                                     (reg_flow,diff_flow,[('outputnode.roi_volumes_registered_crop','inputnode.roi_volumes')]),
                                     (reg_flow,diff_flow,[('outputnode.grad','inputnode.grad')])
                                     ])
-                       
+
         if self.stages['MRTrixConnectome'].enabled:
             if self.stages['Diffusion'].config.processing_tool == 'FSL':
                 self.stages['MRTrixConnectome'].config.probtrackx = True
@@ -772,17 +772,17 @@ class DiffusionPipeline(Pipeline):
                                               ('outputnode.P0','inputnode.P0')]),
                         (con_flow,diffusion_outputnode, [('outputnode.connectivity_matrices','connectivity_matrices')])
                         ])
-            
+
             if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
                 diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
 
 
-                
-                
+
+
         # Create NIPYPE flow
-        
+
         # flow = pe.Workflow(name='NIPYPE', base_dir=os.path.join(self.base_directory))
-        
+
         # flow.connect([
         #               (datasource,common_flow,[("T1","inputnode.T1")]),
         #               (datasource,diffusion_flow,[("diffusion","inputnode.diffusion"),("T1","inputnode.T1"),("bvecs","inputnode.bvecs"),("bvals","inputnode.bvals"),("T2","inputnode.T2")]),
@@ -794,31 +794,31 @@ class DiffusionPipeline(Pipeline):
         #                                            ("outputnode.atlas_info","inputnode.atlas_info")]),
         #               (diffusion_flow,sinker,[("outputnode.connectivity_matrices","%s.%s.connectivity_matrices"%(self.global_conf.diffusion_imaging_model,now))])
         #             ])
-        
-        # Process pipeline 
-       
+
+        # Process pipeline
+
         iflogger.info("**** Processing ****")
-       
+
         if(self.number_of_cores != 1):
             flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
         else:
             flow.run()
-       
+
         self.fill_stages_outputs()
-        
+
         # Clean undesired folders/files
         # rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
         # for file_to_rm in rm_file_list:
         #     if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
         #         os.remove(os.path.join(self.base_directory,file_to_rm))
-       
+
         # copy .ini and log file
         outdir = os.path.join(self.base_directory,"derivatives","cmp",self.subject,"connectome",now)
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         shutil.copy(self.config_file,outdir)
         shutil.copy(os.path.join(self.base_directory,"derivatives","cmp",self.subject,'pypeline.log'),outdir)
-       
+
         iflogger.info("**** Processing finished ****")
-       
+
         return True,'Processing sucessful'
