@@ -45,6 +45,7 @@ from cmp.interfaces.mrtrix3 import DWI2Tensor, MRConvert, MRTransform, MRThresho
 from cmp.interfaces.fsl import FSLCreateHD
 import cmp.interfaces.freesurfer as cmp_fs
 import cmp.interfaces.fsl as cmp_fsl
+from cmp.interfaces.ants import MultipleANTsApplyTransforms
 
 from nipype.interfaces.mrtrix3.reconst import FitTensor
 from nipype.interfaces.mrtrix3.utils import TensorMetrics
@@ -692,15 +693,45 @@ class RegistrationStage(Stage):
             SyN_registration.inputs.convergence_window_size=[10]*1
             SyN_registration.inputs.metric=['CC']
             SyN_registration.inputs.metric_weight=[1.0]*1
-            SyN_registration.inputs.number_of_iterations=[[100, 70, 50, 20]]
+            SyN_registration.inputs.number_of_iterations=[[20]]
             SyN_registration.inputs.radius_or_number_of_bins=[4]
             SyN_registration.inputs.sampling_percentage=[1]
             SyN_registration.inputs.sampling_strategy=['None']
-            SyN_registration.inputs.shrink_factors=[[8, 4, 2, 1]]*1
-            SyN_registration.inputs.smoothing_sigmas=[[3, 2, 1, 0]]*1
+            SyN_registration.inputs.shrink_factors=[[1]]*1
+            SyN_registration.inputs.smoothing_sigmas=[[0]]*1
             SyN_registration.inputs.transform_parameters=[(0.1, 3.0, 0.0)]
             SyN_registration.inputs.use_histogram_matching=True
             SyN_registration.inputs.verbose = True
+
+            # SyN_registration = pe.Node(interface=ants.Registration(),name='SyN_registration')
+            # SyN_registration.inputs.collapse_output_transforms=True
+            # SyN_registration.inputs.write_composite_transform=False
+            # SyN_registration.inputs.output_transform_prefix = 'final'
+            # #SyN_registration.inputs.initial_moving_transform_com=True
+            # SyN_registration.inputs.num_threads=8
+            # SyN_registration.inputs.output_inverse_warped_image=True
+            # SyN_registration.inputs.output_warped_image='Syn_warped_image.nii.gz'
+            # SyN_registration.inputs.sigma_units=['vox']*1
+            # SyN_registration.inputs.transforms=['SyN']
+            # SyN_registration.inputs.restrict_deformation=[[1,1,0]]
+            # SyN_registration.inputs.interpolation='BSpline'
+            # SyN_registration.inputs.interpolation_parameters=(3,)
+            # SyN_registration.inputs.terminal_output='file'
+            # SyN_registration.inputs.winsorize_lower_quantile=0.005
+            # SyN_registration.inputs.winsorize_upper_quantile=0.995
+            # SyN_registration.inputs.convergence_threshold=[1e-06]*1
+            # SyN_registration.inputs.convergence_window_size=[10]*1
+            # SyN_registration.inputs.metric=['CC']
+            # SyN_registration.inputs.metric_weight=[1.0]*1
+            # SyN_registration.inputs.number_of_iterations=[[100, 70, 50, 20]]
+            # SyN_registration.inputs.radius_or_number_of_bins=[4]
+            # SyN_registration.inputs.sampling_percentage=[1]
+            # SyN_registration.inputs.sampling_strategy=['None']
+            # SyN_registration.inputs.shrink_factors=[[8, 4, 2, 1]]*1
+            # SyN_registration.inputs.smoothing_sigmas=[[3, 2, 1, 0]]*1
+            # SyN_registration.inputs.transform_parameters=[(0.1, 3.0, 0.0)]
+            # SyN_registration.inputs.use_histogram_matching=True
+            # SyN_registration.inputs.verbose = True
 
             # BSplineSyN_registration = pe.Node(interface=ants.Registration(),name='BSplineSyN_registration')
             # BSplineSyN_registration.inputs.collapse_output_transforms=True
@@ -734,9 +765,9 @@ class RegistrationStage(Stage):
             flow.connect([
                         (inputnode, affine_registration, [('T1','moving_image')]),
                         (mr_convert_b0, affine_registration, [('converted','fixed_image')]),
+                        (affine_registration, SyN_registration, [('composite_transform','initial_moving_transform')]),
                         (inputnode, SyN_registration, [('T1','moving_image')]),
-                        (mr_convert_b0, SyN_registration, [('converted','fixed_image')]),
-                        (affine_registration, SyN_registration, [('composite_transform','initial_moving_transform')])
+                        (mr_convert_b0, SyN_registration, [('converted','fixed_image')])
                         ])
 
             # multitransforms = pe.Node(interface=util.Merge(2),name='multitransforms')
@@ -754,7 +785,7 @@ class RegistrationStage(Stage):
             ants_applywarp_T1 = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="BSpline",out_postfix="_warped"),name="apply_warp_T1")
             ants_applywarp_brain = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="BSpline",out_postfix="_warped"),name="apply_warp_brain")
             ants_applywarp_wm = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="NearestNeighbor",out_postfix="_warped"),name="apply_warp_wm")
-            #ants_applywarp_rois = pe.Node(interface=ApplymultipleANTsWarp(use_bspline=True),name="apply_warp_roivs")
+            ants_applywarp_rois = pe.Node(interface=MultipleANTsApplyTransforms(interpolation="NearestNeighbor",default_value=0,out_postfix="_warped"),name="apply_warp_roivs")
 
             def reverse_order_transforms(transforms):
                 return transforms[::-1]
@@ -783,15 +814,15 @@ class RegistrationStage(Stage):
                         (ants_applywarp_wm, outputnode, [('output_image','wm_mask_registered_crop')]),
                         ])
 
-            #flow.connect([
-            #            (inputnode, ants_applywarp_rois, [('roi_volumes','input_images')]),
-            #            (inputnode, ants_applywarp_rois, [('target','reference_image')]),
-            #            (fsl_fnirt_crop, ants_applywarp_rois, [('fieldcoeff_file','field_file')]),
-            #            (ants_applywarp_rois, outputnode, [('out_files','roi_volumes_registered_crop')]),
-            #            ])
+            flow.connect([
+                        (inputnode, ants_applywarp_rois, [('roi_volumes','input_images')]),
+                        (mr_convert_b0, ants_applywarp_rois, [('converted','reference_image')]),
+                        (SyN_registration, ants_applywarp_rois, [(('forward_transforms',reverse_order_transforms),'transforms')]),
+                        (ants_applywarp_rois, outputnode, [('output_images','roi_volumes_registered_crop')]),
+                        ])
 
             flow.connect([
-                        (inputnode, outputnode, [('roi_volumes','roi_volumes_registered_crop')]),
+                        # (inputnode, outputnode, [('roi_volumes','roi_volumes_registered_crop')]),
                         (inputnode, outputnode, [('target','target_epicorrected')]),
                         ])
 
