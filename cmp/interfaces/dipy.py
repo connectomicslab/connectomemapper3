@@ -742,13 +742,13 @@ class MAPMRIInputSpec(DipyBaseInterfaceInputSpec):
 class MAPMRIOutputSpec(TraitedSpec):
     model = File(desc='Python pickled object of the MAP-MRI model fitted.')
     rtop_file = File(desc=('rtop output file name'))
-    rtap_file = File(desc=('rtop output file name'))
-    rtpp_file = File(desc=('rtop output file name'))
-    msd_file = File(desc=('rtop output file name'))
-    qiv_file = File(desc=('rtop output file name'))
-    ng_file = File(desc=('rtop output file name'))
-    ng_perp_file = File(desc=('rtop output file name'))
-    ng_para_file = File(desc=('rtop output file name'))
+    rtap_file = File(desc=('rtap output file name'))
+    rtpp_file = File(desc=('rtpp output file name'))
+    msd_file = File(desc=('msd output file name'))
+    qiv_file = File(desc=('qiv output file name'))
+    ng_file = File(desc=('ng output file name'))
+    ng_perp_file = File(desc=('ng perpendicular output file name'))
+    ng_para_file = File(desc=('ng parallel output file name'))
 
 
 class MAPMRI(DipyDiffusionInterface):
