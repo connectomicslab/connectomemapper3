@@ -734,10 +734,10 @@ class MAPMRIInputSpec(DipyBaseInterfaceInputSpec):
                           desc=('maximal shperical harmonics order'))
 
     small_delta = traits.Int(0.02, mandatory=True,
-                          desc=('Small data for gradient table))
+                          desc=('Small data for gradient table'))
 
     big_delta = traits.Int(0.5, mandatory=True,
-                          desc=('Small data for gradient table))
+                          desc=('Small data for gradient table'))
 
 class MAPMRIOutputSpec(TraitedSpec):
     model = File(desc='Python pickled object of the MAP-MRI model fitted.')
@@ -795,25 +795,26 @@ class MAPMRI(DipyDiffusionInterface):
                               big_delta=self.inputs.big_delta)
 
         map_model_both_aniso = mapmri.MapmriModel(gtab,
-                                                  radial_order=self.inputs.radial_order,
-                                                  anisotropic_scaling=True,
-                                                  laplacian_regularization=self.inputs.laplacian_regularization
-                                                  laplacian_weighting=self.inputs.laplacian_weighting,
-                                                  positivity_constraint=self.inputs.positivity_constraint)
+                                                  radial_order = self.inputs.radial_order,
+                                                  anisotropic_scaling = True,
+                                                  laplacian_regularization = self.inputs.laplacian_regularization,
+                                                  laplacian_weighting = self.inputs.laplacian_weighting,
+                                                  positivity_constraint = self.inputs.positivity_constraint
+                                                  )
 
         IFLOGGER.info('Fitting MAP-MRI model')
         mapfit_both_aniso = map_model_both_aniso.fit(data)
 
         '''maps'''
         maps = {}
-        maps["rtop"] = mapfit_both_aniso.rtop() '''1/Volume of pore'''
-        maps["rtap"] = mapfit_both_aniso.rtap()  '''1/AREA ...'''
-        maps["rtpp"] = mapfit_both_aniso.rtpp()  '''1/length ...'''
-        maps["msd"] = mapfit_both_aniso.msd()  '''similar to mean diffusivity'''
-        maps["qiv"] = mapfit_both_aniso.qiv()  '''almost reciprocal of rtop'''
-        maps["ng"] = mapfit_both_aniso.ng()  '''general non Gaussianity'''
-        maps["ng_perp"] = mapfit_both_aniso.ng_perpendicular()  '''perpendicular to main direction (likely to be non gaussian in white matter)'''
-        maps["ng_para"] = mapfit_both_aniso.ng_parallel()  '''along main direction (likely to be gaussian)'''
+        maps["rtop"] = mapfit_both_aniso.rtop() #'''1/Volume of pore'''
+        maps["rtap"] = mapfit_both_aniso.rtap()  #'''1/AREA ...'''
+        maps["rtpp"] = mapfit_both_aniso.rtpp()  #'''1/length ...'''
+        maps["msd"] = mapfit_both_aniso.msd()  #'''similar to mean diffusivity'''
+        maps["qiv"] = mapfit_both_aniso.qiv() #'''almost reciprocal of rtop'''
+        maps["ng"] = mapfit_both_aniso.ng()  #'''general non Gaussianity'''
+        maps["ng_perp"] = mapfit_both_aniso.ng_perpendicular()  #'''perpendicular to main direction (likely to be non gaussian in white matter)'''
+        maps["ng_para"] = mapfit_both_aniso.ng_parallel()  #'''along main direction (likely to be gaussian)'''
 
         ''' The most related to white matter anisotropy are:
             rtpp, for anisotropy
