@@ -617,7 +617,7 @@ class DiffusionPipeline(Pipeline):
                         (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),('outputnode.ADC','inputnode.ADC'),
                                               ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
                                               ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
-                                              ('outputnode.P0','inputnode.P0')]),
+                                              ('outputnode.P0','inputnode.P0'),('outputnode.mapmri_maps','inputnode.mapmri_maps')]),
                         (con_flow,diffusion_outputnode, [('outputnode.connectivity_matrices','connectivity_matrices')]),
                         (diff_flow,sinker,[('outputnode.track_file','dwi.@track_file'),('outputnode.fod_file','dwi.@fod_file'),('outputnode.gFA','dwi.@gFA'),
                                               ('outputnode.skewness','dwi.@skewness'),('outputnode.kurtosis','dwi.@kurtosis'),

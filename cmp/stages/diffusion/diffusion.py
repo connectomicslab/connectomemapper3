@@ -52,7 +52,7 @@ class DiffusionConfig(HasTraits):
                        #'interpolation'),
 		              Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
                        Item('dilate_rois',visible_when='processing_tool!="DTK"'),
-                       Group(Item('dtk_recon_config',style='custom',defined_when='processing_tool=="DTK"'),
+                       Group(Item('dtk_recon_config',style='custom',defined_when='processing_hallenging because each DWI section can only acquire one b-value for a stool=="DTK"'),
                              Item('dipy_recon_config',style='custom',defined_when='processing_tool=="Dipy"'),
 			                Item('mrtrix_recon_config',style='custom',defined_when='processing_tool=="MRtrix"'),
 			                 Item('camino_recon_config',style='custom',defined_when='processing_tool=="Camino"'),
@@ -199,7 +199,7 @@ class DiffusionStage(Stage):
         self.name = 'diffusion_stage'
         self.config = DiffusionConfig()
         self.inputs = ["diffusion","wm_mask_registered","roi_volumes","grad","bvals","bvecs"]
-        self.outputs = ["diffusion_model","track_file","fod_file","gFA","ADC","skewness","kurtosis","P0","roi_volumes"]
+        self.outputs = ["diffusion_model","track_file","fod_file","gFA","ADC","skewness","kurtosis","P0","roi_volumes","mapmri_maps"]
 
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -270,6 +270,7 @@ class DiffusionStage(Stage):
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
                         (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (recon_flow,outputnode,[("outputnode.FA","gFA")]),
+                        (recon_flow,outputnode,[("outputnode.mapmri_maps","mapmri_maps")]),
                         ])
 
         elif self.config.processing_tool == 'MRtrix':

@@ -185,7 +185,7 @@ class ConnectomeStage(Stage):
         self.name = 'connectome_stage'
         self.config = ConnectomeConfig()
         self.inputs = ["roi_volumes_registered","track_file",
-                  "parcellation_scheme","atlas_info","gFA","ADC","skewness","kurtosis","P0"]
+                  "parcellation_scheme","atlas_info","gFA","ADC","skewness","kurtosis","P0","mapmri_maps"]
         self.outputs = ["endpoints_file","endpoints_mm_file","final_fiberslength_files",
                    "filtered_fiberslabel_files","final_fiberlabels_files",
                    "streamline_final_file","connectivity_matrices"]
@@ -198,10 +198,10 @@ class ConnectomeStage(Stage):
         cmtk_cmat.inputs.probtrackx = self.config.probtrackx
 
         # Additional maps
-        map_merge = pe.Node(interface=util.Merge(5),name="merge_additional_maps")
+        map_merge = pe.Node(interface=util.Merge(6),name="merge_additional_maps")
 
         flow.connect([
-                     (inputnode,map_merge, [('gFA','in1'),('ADC','in2'),('skewness','in3'),('kurtosis','in4'),('P0','in5')]),
+                     (inputnode,map_merge, [('gFA','in1'),('ADC','in2'),('skewness','in3'),('kurtosis','in4'),('P0','in5'),('mapmri_maps','in6')]),
                      (inputnode,cmtk_cmat, [('track_file','track_file'),('parcellation_scheme','parcellation_scheme'),('atlas_info','atlas_info'),('roi_volumes_registered','roi_volumes')]),
                      (map_merge,cmtk_cmat, [('out','additional_maps')]),
                      (cmtk_cmat,outputnode, [('endpoints_file','endpoints_file'),('endpoints_mm_file','endpoints_mm_file'),

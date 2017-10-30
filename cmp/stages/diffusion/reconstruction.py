@@ -96,8 +96,8 @@ class DTK_recon_config(HasTraits):
 
 class Dipy_recon_config(HasTraits):
     imaging_model = Str
-    # gradient_table = File
     # flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
+    # gradient_table = File
     local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
     local_model = Bool(True)
     lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
@@ -116,11 +116,11 @@ class Dipy_recon_config(HasTraits):
     radial_order = traits.Int(8, usedefault=True,
                           desc=('radial order'))
 
-    small_delta = traits.Int(0.02, mandatory=True,
-                          desc=('Small data for gradient table'))
+    small_delta = traits.Float(0.02, mandatory=True,
+                          desc=('Small data for gradient table (pulse duration)'))
 
-    big_delta = traits.Int(0.5, mandatory=True,
-                          desc=('Small data for gradient table'))
+    big_delta = traits.Float(0.5, mandatory=True,
+                          desc=('Small data for gradient table (time interval)'))
 
     traits_view = View(#Item('gradient_table',label='Gradient table (x,y,z,b):'),
                        #Item('flip_table_axis',style='custom',label='Flip table:'),
@@ -493,7 +493,7 @@ def create_dtk_recon_flow(config):
 def create_dipy_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled","bvals","bvecs"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","model","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","model","eigVec","RF","grad","mapmri_maps"],mandatory_inputs=True),name="outputnode")
 
     # Flip gradient table
     # flip_table = pe.Node(interface=flipTable(),name='flip_table')
@@ -567,6 +567,26 @@ def create_dipy_recon_flow(config):
                 #(dipy_tensor, dipy_CSD,[('response','response')]),
                 (inputnode,outputnode,[('diffusion_resampled','DWI')]),
                 (dipy_CSD,outputnode,[('model','model')])
+                ])
+
+    if config.mapmri:
+        from cmp.interfaces.dipy import MAPMRI
+        dipy_MAPMRI = pe.Node(interface=MAPMRI(),name='dipy_mapmri')
+
+        dipy_MAPMRI.inputs.laplacian_regularization = config.laplacian_regularization
+        dipy_MAPMRI.inputs.laplacian_weighting= config.laplacian_weighting
+        dipy_MAPMRI.inputs.positivity_constraint = config.positivity_constraint
+        dipy_MAPMRI.inputs.radial_order = config.radial_order
+        dipy_MAPMRI.inputs.small_delta = config.small_delta
+        dipy_MAPMRI.inputs.big_delta = config.big_delta
+
+        maps_merge = pe.Node(interface=util.Merge(8),name="merge_additional_maps")
+
+        flow.connect([
+                (inputnode, dipy_MAPMRI,[('diffusion_resampled','in_file')]),
+                (inputnode, dipy_MAPMRI,[('bvals','in_bval')]),
+                (inputnode, dipy_MAPMRI,[('bvecs','in_bvec')]),
+                (dipy_MAPMRI, maps_merge, [('rtop_file','in1'),('rtap_file','in2'),('rtpp_file','in3'),('msd_file','in4'),('qiv_file','in5'),('ng_file','in6'),('ng_perp_file','in7'),('ng_para_file','in8')])
                 ])
 
     return flow

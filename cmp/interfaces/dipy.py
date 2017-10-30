@@ -733,10 +733,10 @@ class MAPMRIInputSpec(DipyBaseInterfaceInputSpec):
     radial_order = traits.Int(8, usedefault=True,
                           desc=('maximal shperical harmonics order'))
 
-    small_delta = traits.Int(0.02, mandatory=True,
+    small_delta = traits.Float(0.02, mandatory=True,
                           desc=('Small data for gradient table'))
 
-    big_delta = traits.Int(0.5, mandatory=True,
+    big_delta = traits.Float(0.5, mandatory=True,
                           desc=('Small data for gradient table'))
 
 class MAPMRIOutputSpec(TraitedSpec):
