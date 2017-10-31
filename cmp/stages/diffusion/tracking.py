@@ -67,6 +67,8 @@ class Dipy_tracking_config(HasTraits):
     step_size = traits.Float(0.5)
     max_angle = Float(25.0)
 
+    fast_number_of_classes = Int(3)
+
     traits_view = View( Item('number_of_seeds',label="Number of seeds"),
                         Item('step_size',label="Step size)"),
                         Item('max_angle',label="Max angle (degree)"),
