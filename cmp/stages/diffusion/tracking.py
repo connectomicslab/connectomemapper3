@@ -67,6 +67,7 @@ class Dipy_tracking_config(HasTraits):
     step_size = traits.Float(0.5)
     max_angle = Float(25.0)
 
+    use_act = traits.Bool(False, desc='Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier')
     fast_number_of_classes = Int(3)
 
     traits_view = View( Item('number_of_seeds',label="Number of seeds"),
@@ -739,6 +740,8 @@ def create_dipy_tracking_flow(config):
             dipy_tracking.inputs.fa_thresh = config.fa_thresh
             dipy_tracking.inputs.max_angle = config.max_angle
             dipy_tracking.inputs.step_size = config.step_size
+            dipy_tracking.inputs.use_act = config.use_act
+            dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
 
             # flow.connect([
             #               (inputnode,dipy_tracking,[("bvals","bvals")]),
@@ -775,6 +778,8 @@ def create_dipy_tracking_flow(config):
             dipy_tracking.inputs.fa_thresh = config.fa_thresh
             dipy_tracking.inputs.max_angle = config.max_angle
             dipy_tracking.inputs.step_size = config.step_size
+            dipy_tracking.inputs.use_act = config.use_act
+            dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
 
             # flow.connect([
             #               (inputnode,dipy_tracking,[("bvals","bvals")]),

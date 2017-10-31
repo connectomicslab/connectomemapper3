@@ -509,7 +509,8 @@ class TensorInformedEudXTractography(DipyBaseInterface):
 class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
     algo = traits.Enum(["deterministic","probabilistic"], usedefault=True,
                               desc=('Use either deterministic maximum (default) or probabilistic direction getter tractography'))
-
+    use_act = traits.Bool(False, desc=('Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier'))
+    fast_number_of_classes = traits.Int(3, desc=('Number of tissue classes used by FAST for Anatomically-Constrained Tractography (ACT)'))
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     in_fa = File(exists=True, mandatory=True, desc=('input FA'))
     in_model = File(exists=True, mandatory=True, desc=('input f/d-ODF model extracted from.'))
@@ -558,7 +559,7 @@ class DirectionGetterTractography(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.tracking import utils
         from dipy.direction import DeterministicMaximumDirectionGetter, ProbabilisticDirectionGetter
-        from dipy.tracking.local import ThresholdTissueClassifier, BinaryTissueClassifier, LocalTracking
+        from dipy.tracking.local import ThresholdTissueClassifier, BinaryTissueClassifier, ActTissueClassifier, LocalTracking
         from dipy.reconst.peaks import peaks_from_model
         from dipy.data import get_sphere, default_sphere
         from dipy.io.trackvis import save_trk
@@ -643,9 +644,46 @@ class DirectionGetterTractography(DipyBaseInterface):
         hdr.set_data_shape(fa.shape)
         nb.Nifti1Image(fa.astype(np.float32), affine, hdr).to_filename(self._gen_filename('fa_masked'))
 
-        IFLOGGER.info('Building Tissue Classifier')
-        # classifier = ThresholdTissueClassifier(fa,self.inputs.fa_thresh)
-        classifier = BinaryTissueClassifier(tmsk)
+        if config.use_act:
+            from nipype.interfaces import fsl
+            # Run FAST for partial volume estimation (WM;GM;CSF)
+            fastr = fsl.FAST()
+            fastr.inputs.in_files = self.inputs.in_file
+            fastr.inputs.out_basename = 'fast_'
+            IFLOGGER.info("Running FAST :%s"%fastr.cmdline)
+            out = fastr.run()  # doctest: +SKIP
+
+            # Create the include_map and exclude_map for the partial volume files (FAST outputs)
+            fastr.outputs.partial_volume_files
+            IFLOGGER.info("partial_volume_files :")
+            IFLOGGER.info(fastr.outputs.partial_volume_files)
+
+            background = np.ones(imref.shape)
+            pve_sum = np.zeros(imref.shape)
+            for pve_file in fastr.outputs.partial_volume_files:
+                pve_img = nb.load(self.inputs.in_file)
+                pve_data = pve_img.get_data().astype(np.float32)
+                pve_sum = pve_sum + pve_data
+
+            background[pve_sum>0] = 0
+
+            include_map = np.zeros(imref.shape)
+            exclude_map = np.zeros(imref.shape)
+            for pve_file in fastr.outputs.partial_volume_files:
+                pve_img = nb.load(self.inputs.in_file)
+                pve_data = pve_img.get_data().astype(np.float32)
+                if "pve_0" in pve_file:# CSF
+                    exclude_map = pve_data
+                elif "pve_1" in pve_file:# GM
+                    include_map = pve_data
+
+            include_map[background>0] = 1
+
+            classifier = ActTissueClassifier(include_map,exclude_map)
+        else:
+            IFLOGGER.info('Building Tissue Classifier')
+            # classifier = ThresholdTissueClassifier(fa,self.inputs.fa_thresh)
+            classifier = BinaryTissueClassifier(tmsk)
 
         IFLOGGER.info('Loading CSD model')
         f = gzip.open(self.inputs.in_model, 'rb')
