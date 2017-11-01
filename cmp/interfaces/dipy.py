@@ -14,6 +14,8 @@ import numpy as np
 import nibabel as nb
 import gzip
 
+# Nipype imports
+import nipype.pipeline.engine as pe
 from nipype import logging
 from nipype.interfaces.base import TraitedSpec, File, traits, isdefined, BaseInterfaceInputSpec, InputMultiPath
 from nipype.interfaces.dipy.base import DipyDiffusionInterface, DipyBaseInterface, DipyBaseInterfaceInputSpec
@@ -644,17 +646,16 @@ class DirectionGetterTractography(DipyBaseInterface):
         hdr.set_data_shape(fa.shape)
         nb.Nifti1Image(fa.astype(np.float32), affine, hdr).to_filename(self._gen_filename('fa_masked'))
 
-        if config.use_act:
+        if self.inputs.use_act:
             from nipype.interfaces import fsl
             # Run FAST for partial volume estimation (WM;GM;CSF)
-            fastr = fsl.FAST()
+            fastr = pe.Node(interface=fsl.FAST(),name='fastr')
             fastr.inputs.in_files = self.inputs.in_file
             fastr.inputs.out_basename = 'fast_'
-            IFLOGGER.info("Running FAST :%s"%fastr.cmdline)
+            IFLOGGER.info("Running FAST...")
             out = fastr.run()  # doctest: +SKIP
 
             # Create the include_map and exclude_map for the partial volume files (FAST outputs)
-            fastr.outputs.partial_volume_files
             IFLOGGER.info("partial_volume_files :")
             IFLOGGER.info(fastr.outputs.partial_volume_files)
 

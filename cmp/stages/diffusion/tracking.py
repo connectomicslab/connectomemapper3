@@ -73,7 +73,11 @@ class Dipy_tracking_config(HasTraits):
     traits_view = View( Item('number_of_seeds',label="Number of seeds"),
                         Item('step_size',label="Step size)"),
                         Item('max_angle',label="Max angle (degree)"),
-                        Item('fa_thresh',label="FA threshold (classifier)")
+                        HGroup(
+                            Item('use_act',label="Anatomically-Constrained Tractography using FAST"),
+                            Item('fast_number_of_classes', label='Number of tissue classes (FAST)')
+                            ),
+                        Item('fa_thresh',label="FA threshold (classifier)",visible_when='use_act == False')
                         )
 
     def _SD_changed(self,new):
