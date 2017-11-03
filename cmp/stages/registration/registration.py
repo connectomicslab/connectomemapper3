@@ -250,8 +250,8 @@ class RegistrationStage(Stage):
         self.name = 'registration_stage'
         self.config = RegistrationConfig()
         self.config.pipeline = pipeline_mode
-        self.inputs = ["T1","target","T2","subjects_dir","subject_id","wm_mask","roi_volumes","brain","brain_mask","brain_mask_full","target_mask","bvecs","bvals"]
-        self.outputs = ["T1_registered_crop", "brain_registered_crop", "brain_mask_registered_crop", "wm_mask_registered_crop","roi_volumes_registered_crop","target_epicorrected","grad","bvecs","bvals"]
+        self.inputs = ["T1","target","T2","subjects_dir","subject_id","wm_mask","partial_volume_files","roi_volumes","brain","brain_mask","brain_mask_full","target_mask","bvecs","bvals"]
+        self.outputs = ["T1_registered_crop", "brain_registered_crop", "brain_mask_registered_crop", "wm_mask_registered_crop","partial_volumes_registered_crop","roi_volumes_registered_crop","target_epicorrected","grad","bvecs","bvals"]
         if self.config.pipeline == "fMRI":
             self.inputs = self.inputs + ["eroded_csf","eroded_wm","eroded_brain"]
             self.outputs = self.outputs + ["eroded_wm_registered","eroded_csf_registered","eroded_brain_registered"]
@@ -786,6 +786,7 @@ class RegistrationStage(Stage):
             ants_applywarp_brain = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="BSpline",out_postfix="_warped"),name="apply_warp_brain")
             ants_applywarp_wm = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="NearestNeighbor",out_postfix="_warped"),name="apply_warp_wm")
             ants_applywarp_rois = pe.Node(interface=MultipleANTsApplyTransforms(interpolation="NearestNeighbor",default_value=0,out_postfix="_warped"),name="apply_warp_roivs")
+            ants_applywarp_pves = pe.Node(interface=MultipleANTsApplyTransforms(interpolation="BSpline",default_value=0,out_postfix="_warped"),name="apply_warp_pves")
 
             def reverse_order_transforms(transforms):
                 return transforms[::-1]
@@ -819,6 +820,13 @@ class RegistrationStage(Stage):
                         (mr_convert_b0, ants_applywarp_rois, [('converted','reference_image')]),
                         (SyN_registration, ants_applywarp_rois, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                         (ants_applywarp_rois, outputnode, [('output_images','roi_volumes_registered_crop')]),
+                        ])
+
+            flow.connect([
+                        (inputnode, ants_applywarp_pves, [('partial_volume_files','input_images')]),
+                        (mr_convert_b0, ants_applywarp_pves, [('converted','reference_image')]),
+                        (SyN_registration, ants_applywarp_pves, [(('forward_transforms',reverse_order_transforms),'transforms')]),
+                        (ants_applywarp_pves, outputnode, [('output_images','partial_volumes_registered_crop')]),
                         ])
 
             flow.connect([

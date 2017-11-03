@@ -554,7 +554,7 @@ class DiffusionPipeline(Pipeline):
                                     #(diffusion_inputnode,reg_flow,[('T2','inputnode.T2')]),
                                     (diffusion_inputnode,reg_flow,[("bvals","inputnode.bvals")]),
                                     (preproc_flow,reg_flow, [('outputnode.T1','inputnode.T1'),('outputnode.bvecs_rot','inputnode.bvecs'),('outputnode.wm_mask_file','inputnode.wm_mask'),
-                                                            ('outputnode.roi_volumes','inputnode.roi_volumes'),
+                                                            ('outputnode.partial_volume_files','inputnode.partial_volume_files'),('outputnode.roi_volumes','inputnode.roi_volumes'),
                                                             ("outputnode.brain","inputnode.brain"),("outputnode.brain_mask","inputnode.brain_mask"),("outputnode.brain_mask_full","inputnode.brain_mask_full"),
                                                             ('outputnode.diffusion_preproc','inputnode.target'),('outputnode.dwi_brain_mask','inputnode.target_mask')]),
                                     (preproc_flow,sinker,[("outputnode.bvecs_rot","dwi.@bvecs_rot")]),
@@ -571,7 +571,9 @@ class DiffusionPipeline(Pipeline):
             diff_flow = self.create_stage_flow("Diffusion")
             diffusion_flow.connect([
                                     (reg_flow,diff_flow, [('outputnode.target_epicorrected','inputnode.diffusion')]),
+                                    # (reg_flow,diff_flow, [('outputnode.T1_registered_crop','inputnode.T1')]),
                                     (reg_flow,diff_flow, [('outputnode.wm_mask_registered_crop','inputnode.wm_mask_registered')]),
+                                    (reg_flow,diff_flow,[('outputnode.partial_volumes_registered_crop','inputnode.partial_volumes')]),
                                     (reg_flow,diff_flow,[('outputnode.roi_volumes_registered_crop','inputnode.roi_volumes')]),
                                     (reg_flow,diff_flow,[('outputnode.grad','inputnode.grad')]),
                                     (reg_flow,diff_flow,[('outputnode.bvals','inputnode.bvals')]),

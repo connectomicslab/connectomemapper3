@@ -684,7 +684,7 @@ class extractHeaderVoxel2WorldMatrix(BaseInterface):
 def create_dipy_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','FA','wm_mask_resampled','gm_registered','bvals','bvecs','model']),name='inputnode')
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','FA','T1','partial_volumes','wm_mask_resampled','gm_registered','bvals','bvecs','model']),name='inputnode')
     # outputnode
 
     #CRS2XYZtkReg = subprocess.check_output
@@ -761,6 +761,7 @@ def create_dipy_tracking_flow(config):
                 #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
                 (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
                 (inputnode,dipy_tracking,[('DWI','in_file')]),
+                (inputnode,dipy_tracking,[('partial_volumes','in_partial_volume_files')]),
                 (inputnode,dipy_tracking,[('model','in_model')]),
                 (inputnode,dipy_tracking,[('FA','in_fa')]),
                 (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
@@ -794,6 +795,7 @@ def create_dipy_tracking_flow(config):
                 #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
                 (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
                 (inputnode,dipy_tracking,[('DWI','in_file')]),
+                (inputnode,dipy_tracking,[('partial_volumes','in_partial_volume_files')]),
                 (inputnode,dipy_tracking,[('model','in_model')]),
                 (inputnode,dipy_tracking,[('FA','in_fa')]),
                 (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),

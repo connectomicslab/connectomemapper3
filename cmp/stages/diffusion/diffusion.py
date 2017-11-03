@@ -198,7 +198,7 @@ class DiffusionStage(Stage):
     def __init__(self):
         self.name = 'diffusion_stage'
         self.config = DiffusionConfig()
-        self.inputs = ["diffusion","wm_mask_registered","roi_volumes","grad","bvals","bvecs"]
+        self.inputs = ["diffusion","partial_volumes","wm_mask_registered","roi_volumes","grad","bvals","bvecs"]
         self.outputs = ["diffusion_model","track_file","fod_file","gFA","ADC","skewness","kurtosis","P0","roi_volumes","mapmri_maps"]
 
 
@@ -323,6 +323,7 @@ class DiffusionStage(Stage):
                         (inputnode,track_flow,[('bvals','inputnode.bvals')]),
                         (inputnode,track_flow,[('bvecs','inputnode.bvecs')]),
                         (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
+                        (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
                         # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
                         (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
                         (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])

@@ -89,6 +89,7 @@ class PreprocessingConfig(HasTraits):
     end_vol = Int()
     max_vol = Int()
     max_str = Str
+    partial_volume_estimation = Bool(True)
 
     # DWI resampling selection
     resampling = Tuple(1,1,1)
@@ -149,7 +150,7 @@ class PreprocessingStage(Stage):
         self.name = 'preprocessing_stage'
         self.config = PreprocessingConfig()
         self.inputs = ["diffusion","bvecs","bvals","T1","brain","brain_mask","wm_mask_file","roi_volumes"]
-        self.outputs = ["diffusion_preproc","bvecs_rot","dwi_brain_mask","T1","brain","brain_mask","brain_mask_full","wm_mask_file","roi_volumes"]
+        self.outputs = ["diffusion_preproc","bvecs_rot","dwi_brain_mask","T1","brain","brain_mask","brain_mask_full","wm_mask_file","partial_volume_files","roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         print inputnode
@@ -230,6 +231,18 @@ class PreprocessingStage(Stage):
                     (processing_input,mr_convert_roi_volumes,[('roi_volumes','in_files')]),
                     (processing_input,mr_convert_wm_mask_file,[('wm_mask_file','in_file')])
                     ])
+
+        if self.config.partial_volume_estimation:
+            from nipype.interfaces import fsl
+            # Run FAST for partial volume estimation (WM;GM;CSF)
+            fastr = pe.Node(interface=fsl.FAST(),name='fastr')
+            fastr.inputs.out_basename = 'fast_'
+            fastr.inputs.number_classes = 3
+
+            flow.connect([
+                        (mr_convert_brain,fastr,[('converted','in_files')]),
+                        # (fastr,outputnode,[('partial_volume_files','partial_volume_files')])
+                        ])
 
         #Threshold converted Freesurfer brainmask into a binary mask
         mr_threshold_brainmask = pe.Node(interface=MRThreshold(abs_value=1,out_file='brain_mask.nii.gz'),name='mr_threshold_brainmask')
@@ -421,6 +434,15 @@ class PreprocessingStage(Stage):
                     (mr_convert_roi_volumes,fs_mriconvert_ROIs,[('converted_files','in_file')]),
                     #(mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
                     (fs_mriconvert_ROIs,outputnode,[("out_file","roi_volumes")])
+                    ])
+
+        fs_mriconvert_PVEs = pe.MapNode(interface=fs.MRIConvert(out_type='niigz'),name="PVEs_resample",iterfield=['in_file'])
+        fs_mriconvert_PVEs.inputs.vox_size = self.config.resampling
+        fs_mriconvert_PVEs.inputs.resample_type = self.config.interpolation
+        flow.connect([
+                    (fastr,fs_mriconvert_PVEs,[('partial_volume_files','in_file')]),
+                    #(mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
+                    (fs_mriconvert_PVEs,outputnode,[("out_file","partial_volume_files")])
                     ])
 
         fs_mriconvert_dwimask = pe.Node(interface=fs.MRIConvert(out_type='niigz',resample_type='nearest',out_file='dwi_brain_mask_resampled.nii.gz'),name="dwi_brainmask_resample")

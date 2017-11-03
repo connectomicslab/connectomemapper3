@@ -515,6 +515,8 @@ class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
     fast_number_of_classes = traits.Int(3, desc=('Number of tissue classes used by FAST for Anatomically-Constrained Tractography (ACT)'))
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     in_fa = File(exists=True, mandatory=True, desc=('input FA'))
+    in_partial_volume_files = InputMultiPath(File(exists=True), desc='FAST partial volume estimation result files (required if performing ACT)')
+    # in_t1 = File(exists=True, desc=('input T1w (required if performing ACT)'))
     in_model = File(exists=True, mandatory=True, desc=('input f/d-ODF model extracted from.'))
     tracking_mask = File(exists=True, mandatory=True,
                          desc=('input mask within which perform tracking'))
@@ -647,22 +649,23 @@ class DirectionGetterTractography(DipyBaseInterface):
         nb.Nifti1Image(fa.astype(np.float32), affine, hdr).to_filename(self._gen_filename('fa_masked'))
 
         if self.inputs.use_act:
-            from nipype.interfaces import fsl
-            # Run FAST for partial volume estimation (WM;GM;CSF)
-            fastr = pe.Node(interface=fsl.FAST(),name='fastr')
-            fastr.inputs.in_files = self.inputs.in_file
-            fastr.inputs.out_basename = 'fast_'
-            IFLOGGER.info("Running FAST...")
-            out = fastr.run()  # doctest: +SKIP
-
-            # Create the include_map and exclude_map for the partial volume files (FAST outputs)
-            IFLOGGER.info("partial_volume_files :")
-            IFLOGGER.info(fastr.outputs.partial_volume_files)
+            # from nipype.interfaces import fsl
+            # # Run FAST for partial volume estimation (WM;GM;CSF)
+            # fastr = pe.Node(interface=fsl.FAST(),name='fastr')
+            # fastr.inputs.in_files = self.inputs.in_t1 # TODO: input T1w image to interface, diffusion and tracking stages
+            # fastr.inputs.out_basename = 'fast_'
+            # fastr.inputs.number_classes = self.inputs.fast_number_of_classes
+            # IFLOGGER.info("Running FAST...")
+            # out = fastr.run()  # doctest: +SKIP
+            #
+            # # Create the include_map and exclude_map for the partial volume files (FAST outputs)
+            # IFLOGGER.info("partial_volume_files :")
+            # IFLOGGER.info(fastr.outputs.partial_volume_files)
 
             background = np.ones(imref.shape)
             pve_sum = np.zeros(imref.shape)
-            for pve_file in fastr.outputs.partial_volume_files:
-                pve_img = nb.load(self.inputs.in_file)
+            for pve_file in self.inputs.in_partial_volume_files:
+                pve_img = nb.load(pve_file)
                 pve_data = pve_img.get_data().astype(np.float32)
                 pve_sum = pve_sum + pve_data
 
@@ -670,8 +673,8 @@ class DirectionGetterTractography(DipyBaseInterface):
 
             include_map = np.zeros(imref.shape)
             exclude_map = np.zeros(imref.shape)
-            for pve_file in fastr.outputs.partial_volume_files:
-                pve_img = nb.load(self.inputs.in_file)
+            for pve_file in self.inputs.in_partial_volume_files:
+                pve_img = nb.load(pve_file)
                 pve_data = pve_img.get_data().astype(np.float32)
                 if "pve_0" in pve_file:# CSF
                     exclude_map = pve_data
