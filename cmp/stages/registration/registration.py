@@ -782,11 +782,11 @@ class RegistrationStage(Stage):
             #     #(concatnode,mr_convert,[(('out',convertList2Tuple),'grad_fsl')])
             #     ])
 
-            ants_applywarp_T1 = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="BSpline",out_postfix="_warped"),name="apply_warp_T1")
-            ants_applywarp_brain = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="BSpline",out_postfix="_warped"),name="apply_warp_brain")
-            ants_applywarp_wm = pe.Node(interface=ants.ApplyTransforms(default_value=100,interpolation="NearestNeighbor",out_postfix="_warped"),name="apply_warp_wm")
+            ants_applywarp_T1 = pe.Node(interface=ants.ApplyTransforms(default_value=0,interpolation="Gaussian",out_postfix="_warped"),name="apply_warp_T1")
+            ants_applywarp_brain = pe.Node(interface=ants.ApplyTransforms(default_value=0,interpolation="Gaussian",out_postfix="_warped"),name="apply_warp_brain")
+            ants_applywarp_wm = pe.Node(interface=ants.ApplyTransforms(default_value=0,interpolation="NearestNeighbor",out_postfix="_warped"),name="apply_warp_wm")
             ants_applywarp_rois = pe.Node(interface=MultipleANTsApplyTransforms(interpolation="NearestNeighbor",default_value=0,out_postfix="_warped"),name="apply_warp_roivs")
-            ants_applywarp_pves = pe.Node(interface=MultipleANTsApplyTransforms(interpolation="BSpline",default_value=0,out_postfix="_warped"),name="apply_warp_pves")
+            ants_applywarp_pves = pe.Node(interface=MultipleANTsApplyTransforms(interpolation="Gaussian",default_value=0,out_postfix="_warped"),name="apply_warp_pves")
 
             def reverse_order_transforms(transforms):
                 return transforms[::-1]

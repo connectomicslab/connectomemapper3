@@ -682,10 +682,10 @@ class DirectionGetterTractography(DipyBaseInterface):
                     include_map = pve_data
 
             include_map[background>0] = 1
-
+            IFLOGGER.info('Building ACT Tissue Classifier')
             classifier = ActTissueClassifier(include_map,exclude_map)
         else:
-            IFLOGGER.info('Building Tissue Classifier')
+            IFLOGGER.info('Building Binary Tissue Classifier')
             # classifier = ThresholdTissueClassifier(fa,self.inputs.fa_thresh)
             classifier = BinaryTissueClassifier(tmsk)
 
