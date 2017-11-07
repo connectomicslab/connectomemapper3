@@ -484,23 +484,46 @@ class DiffusionPipeline(Pipeline):
         sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
 
         #Dataname substitutions in order to comply with BIDS derivatives specifications
-        sinker.inputs.substitutions = [ ('T1_registered_crop', self.subject+'_T1w_space-T1w-crop_preproc'),
-                                        ('roi_volumes_flirt_crop',self.subject+'_T1w_space-T1w-crop_labels'),
-                                        ('brain_registered_crop',self.subject+'_T1w_space-T1w-crop_brain'),
-                                        ('brain_mask_registered_crop',self.subject+'_T1w_space-T1w-crop_brainmask'),
-                                        ('wm_registered_crop',self.subject+'_T1w_space-T1w-crop_class-GM'),
+        sinker.inputs.substitutions = [ ('T1', self.subject+'_T1w_space-T1w_head'),
+                                        ('brain', self.subject+'_T1w_space-T1w_brain'),
+                                        ('brain_mask', self.subject+'_T1w_space-T1w_brainmask'),
+                                        #('roivs', self.subject+'_T1w_space-T1w_parc'),#TODO substitute for list of files
+                                        ('T1_warped', self.subject+'_T1w_space-DWI_head'),
+                                        ('ROIv_HR_th_scale33_out.nii.gz',self.subject+'_T1w_space-T1w_parc_scale33.nii.gz'),
+                                        ('ROIv_HR_th_scale60_out.nii.gz',self.subject+'_T1w_space-T1w_parc_scale60.nii.gz'),
+                                        ('ROIv_HR_th_scale125_out.nii.gz',self.subject+'_T1w_space-T1w_parc_scale125.nii.gz'),
+                                        ('ROIv_HR_th_scale250_out.nii.gz',self.subject+'_T1w_space-T1w_parc_scale250.nii.gz'),
+                                        ('ROIv_HR_th_scale500_out.nii.gz',self.subject+'_T1w_space-T1w_parc_scale500.nii.gz'),
+                                        ('ROIv_HR_th_scale33_out_warp.nii.gz',self.subject+'_T1w_space-DWI_parc_scale33.nii.gz'),
+                                        ('ROIv_HR_th_scale60_out_warp.nii.gz',self.subject+'_T1w_space-DWI_parc_scale60.nii.gz'),
+                                        ('ROIv_HR_th_scale125_out_warp.nii.gz',self.subject+'_T1w_space-DWI_parc_scale125.nii.gz'),
+                                        ('ROIv_HR_th_scale250_out_warp.nii.gz',self.subject+'_T1w_space-DWI_parc_scale250.nii.gz'),
+                                        ('ROIv_HR_th_scale500_out_warp.nii.gz',self.subject+'_T1w_space-DWI_parc_scale500.nii.gz'),
+                                        ('brain_warped',self.subject+'_T1w_space-DWI_brain'),
+                                        ('brain_mask_registered_temp_crop',self.subject+'_T1w_space-DWI_brainmask'),
+                                        ('wm_mask_wraped',self.subject+'_T1w_space-DWI_class-WM'),
                                         ('connectome',self.subject+'_dwi_connectome'),
                                         ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
                                         ('dwi.bval',self.subject+'_dwi.bval'),
                                         ('dwi.bvec',self.subject+'_dwi.bvec'),
-                                        ('diffusion_resampled_CSD.mif',self.subject+'_dwi_space-T1w-crop_CSD.mif'),
-                                        ('diffusion_resampled_CSD_tracked',self.subject+'_dwi_space-T1w-crop_tract'),
+                                        ('diffusion_resampled_CSD.mif',self.subject+'_dwi_CSD.mif'),
+                                        ('diffusion_resampled_CSD_tracked',self.subject+'_dwi_tract'),
                                         ('eddy_corrected.nii.gz.eddy_rotated_bvecs',self.subject+'_dwi_preproc.eddy_rotated_bvec'),
-                                        ('eddy_corrected.nii.gz',self.subject+'_dwi_preproc.nii.gz'),
+                                        ('eddy_corrected.nii.gz',self.subject+'_dwi_eddycor.nii.gz'),
                                         ('dwi_brain_mask',self.subject+'_dwi_brainmask'),
+                                        ('ADC',self.subject+'_dwi_ADC'),
                                         ('FA',self.subject+'_dwi_FA'),
+                                        ('diffusion_preproc_resampled_fa',self.subject+'_dwi_FA'),
                                         ('grad.txt',self.subject+'_dwi_grad.txt'),
-                                        ('target_epicorrected',self.subject+'_dwi_space-T1w-crop_preproc')
+                                        ('target_epicorrected',self.subject+'_dwi_preproc'),
+                                        ('diffusion_preproc_resampled.nii.gz',self.subject+'_dwi_preproc'),
+                                        ('endpoints',self.subject+'_endpoints'),
+                                        ('filtered_fiberslabel',self.subject+'_dwi_tract_fiberslabel_filt'),
+                                        ('final_fiberlabels',self.subject+'_dwi_tract_fiberlabels_filt'),
+                                        ('final_fiberslength',self.subject+'_dwi_tract_fiberslength_filt'),
+                                        ('streamline_final',self.subject+'_dwi_tract_filt'),
+                                        ('_trackvis0/converted',self.subject+'_dwi_tract'),#MRtrix tracts
+                                        ('diffusion_preproc_resampled_tracked',self.subject+'_dwi_tract') #Dipy tracts
                                       ]
 
         # Clear previous outputs
@@ -513,7 +536,11 @@ class DiffusionPipeline(Pipeline):
         common_flow = self.create_common_flow()
 
         flow.connect([
-                      (datasource,common_flow,[("T1","inputnode.T1")])
+                      (datasource,common_flow,[("T1","inputnode.T1")]),
+                      (diffusion_flow,sinker,[("outputnode.T1","anat.@T1")]),
+                      (diffusion_flow,sinker,[("outputnode.brain","anat.@brain")]),
+                      (diffusion_flow,sinker,[("outputnode.brain_mask","anat.@brain_mask")]),
+                      (diffusion_flow,sinker,[("outputnode.roi_volumes","anat.@roivs")])
                       ])
 
 
@@ -558,8 +585,10 @@ class DiffusionPipeline(Pipeline):
                                                             ("outputnode.brain","inputnode.brain"),("outputnode.brain_mask","inputnode.brain_mask"),("outputnode.brain_mask_full","inputnode.brain_mask_full"),
                                                             ('outputnode.diffusion_preproc','inputnode.target'),('outputnode.dwi_brain_mask','inputnode.target_mask')]),
                                     (preproc_flow,sinker,[("outputnode.bvecs_rot","dwi.@bvecs_rot")]),
-                                    (preproc_flow,sinker,[("outputnode.diffusion_preproc","dwi.@cdiffusion_preproc")]),
-                                    (preproc_flow,sinker,[("outputnode.dwi_brain_mask","dwi.@diffusion_brainmask")])
+                                    (preproc_flow,sinker,[("outputnode.diffusion_preproc","dwi.@diffusion_preproc")]),
+                                    (preproc_flow,sinker,[("outputnode.dwi_brain_mask","dwi.@diffusion_brainmask")]),
+                                    (preproc_flow,sinker,[("outputnode.roi_volumes","dwi.@roi_volumes")]),
+                                    (preproc_flow,sinker,[("outputnode.partial_volume_files","dwi.@partial_volume_files")])
                                     ])
             if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
                 diffusion_flow.connect([
@@ -584,7 +613,8 @@ class DiffusionPipeline(Pipeline):
                                     (reg_flow,sinker,[("outputnode.brain_registered_crop","anat.@brain_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.brain_mask_registered_crop","anat.@brain_mask_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.wm_mask_registered_crop","anat.@wm_mask_reg_crop")]),
-                                    (reg_flow,sinker,[("outputnode.roi_volumes_registered_crop","anat.@vrois_reg_crop")])
+                                    (reg_flow,sinker,[("outputnode.roi_volumes_registered_crop","anat.@roivs_reg_crop")]),
+                                    (reg_flow,sinker,[("outputnode.partial_volumes_registered_crop","anat.@pves_reg_crop")])
                                     ])
 
         # if self.stages['MRTrixConnectome'].enabled:
@@ -622,8 +652,9 @@ class DiffusionPipeline(Pipeline):
                                               ('outputnode.P0','inputnode.P0'),('outputnode.mapmri_maps','inputnode.mapmri_maps')]),
                         (con_flow,diffusion_outputnode, [('outputnode.connectivity_matrices','connectivity_matrices')]),
                         (diff_flow,sinker,[('outputnode.track_file','dwi.@track_file'),('outputnode.fod_file','dwi.@fod_file'),('outputnode.gFA','dwi.@gFA'),
-                                              ('outputnode.skewness','dwi.@skewness'),('outputnode.kurtosis','dwi.@kurtosis'),
-                                              ('outputnode.P0','dwi.@P0')]),
+                                            ('outputnode.ADC','dwi.@ADC'),
+                                            ('outputnode.skewness','dwi.@skewness'),('outputnode.kurtosis','dwi.@kurtosis'),
+                                            ('outputnode.P0','dwi.@P0')]),
                         (con_flow,sinker,[('outputnode.endpoints_file','dwi.@endpoints_file'),('outputnode.endpoints_mm_file','dwi.@endpoints_mm_file'),
                                               ('outputnode.final_fiberslength_files','dwi.@sfinal_fiberslength_files'),
                                               ('outputnode.filtered_fiberslabel_files','dwi.@filtered_fiberslabel_files'),

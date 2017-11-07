@@ -5,7 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 """ The MRTrix3 module provides functions for interfacing with MRTrix3 functions missing in nipype or modified
-""" 
+"""
 
 import nipype.interfaces.base as nibase
 import nipype.interfaces.utility as util
@@ -88,14 +88,14 @@ class Erode(CommandLine):
         else:
             _, name , _ = split_filename(self.inputs.in_file)
             outfilename = name + '_erode.mif'
-        
+
         return outfilename
 
 
 class DWIDenoiseInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='Input diffusion-weighted image filename')
     out_file = File(genfile=True, argstr='%s', position=-1, desc='Output denoised DWI image filename.')
-    
+
     mask = File(argstr="-mask %s",position=1,mandatory=False,desc="Only perform computation within the specified binary brain mask image. (optional)")
     extent_window = traits.List(traits.Float, argstr='-extent %s', sep=',',position=2, minlen=3, maxlen=3,desc='Three comma-separated numbers giving the window size of the denoising filter.')
     out_noisemap = File(argstr='-noise %s', position=3, desc='Output noise map filename.')
@@ -187,7 +187,7 @@ class DWIDenoise(CommandLine):
 class DWIBiasCorrectInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='The input image series to be corrected')
     out_file = File(genfile=True, argstr='%s', position=-1, desc='The output corrected image series')
-    
+
     mask = File(argstr="-mask %s",position=2,mandatory=False,desc="Manually provide a mask image for bias field estimation (optional)")
     out_bias = File(genfile=True, argstr='-bias %s', position=3, desc='Output the estimated bias field')
 
@@ -371,7 +371,7 @@ class MRCrop(CommandLine):
     Example
     -------
 
-    >>> 
+    >>>
     """
 
     _cmd = 'mrcrop'
@@ -479,10 +479,10 @@ class ExtractFSLGradInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Input images to be read')
     out_grad_fsl =  traits.Tuple(File(),File(), argstr='-export_grad_fsl %s %s', desc='export the DWI gradient table to files in FSL (bvecs / bvals) format')
-    
+
 class ExtractFSLGradOutputSpec(TraitedSpec):
     out_grad_fsl = traits.Tuple(File(exists=True),File(exists=True), desc='Outputs [bvecs, bvals] DW gradient scheme (FSL format) if set')
-    
+
 class ExtractFSLGrad(CommandLine):
     """
     Prints out relevant header information found in the image specified.
@@ -512,10 +512,10 @@ class ExtractMRTrixGradInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Input images to be read')
     out_grad_mrtrix = File(argstr='-export_grad_mrtrix %s',desc='export the DWI gradient table to file in MRtrix format')
-    
+
 class ExtractMRTrixGradOutputSpec(TraitedSpec):
     out_grad_mrtrix = File(exits=True,desc='Output MRtrix gradient text file if set')
-    
+
 class ExtractMRTrixGrad(CommandLine):
     """
     Prints out relevant header information found in the image specified.
@@ -643,7 +643,7 @@ class EstimateResponseForSHInputSpec(CommandLineInputSpec):
     encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2, desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     maximum_harmonic_order = traits.Float(argstr='-lmax %s', position=-3, desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     # normalise = traits.Bool(argstr='-normalise', desc='normalise the DW signal to the b=0 image')
-    
+
     quiet = traits.Bool(argstr='-quiet', desc='Do not display information messages or progress status.')
     debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
 
@@ -781,7 +781,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     gradient_encoding_file = File(exists=True, argstr='-grad %s', mandatory=False,
     desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
 
-    inputmodel = traits.Enum('FACT', 'iFOD1', 'iFOD2', 'Nulldist1', 'Nulldist2', 'SD_Stream', 'Seedtest', 'Tensor_Det', 'Tensor_Prob', 
+    inputmodel = traits.Enum('FACT', 'iFOD1', 'iFOD2', 'Nulldist1', 'Nulldist2', 'SD_Stream', 'Seedtest', 'Tensor_Det', 'Tensor_Prob',
         argstr='-algorithm %s', desc='specify the tractography algorithm to use. Valid choices are: FACT, iFOD1, iFOD2, Nulldist1, Nulldist2, SD_Stream, Seedtest, Tensor_Det, Tensor_Prob (default: iFOD2).', usedefault=True, position=-3)
 
     stop = traits.Bool(argstr='-stop', desc="stop track as soon as it enters any of the include regions.")
