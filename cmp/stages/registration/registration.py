@@ -60,20 +60,36 @@ class RegistrationConfig(HasTraits):
     # interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
 
     # Registration selection
-    registration_mode = Str('ANTs')#Str('Linear + Non-linear (FSL)')
-    registration_mode_trait = List(['Linear + Non-linear (FSL)','ANTs']) #,'BBregister (FS)'])
+    registration_mode = Str('Rigid + Affine + SyN (ANTs)')#Str('Linear + Non-linear (FSL)')
+    registration_mode_trait = List(['Linear + Non-linear (FSL)','Rigid + Affine + SyN (ANTs)']) #,'BBregister (FS)'])
     diffusion_imaging_model = Str
 
     # ANTS
-    linear_cost = Enum('normmi',['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'])
-    nonlinear_cost = Enum('normmi',['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'])
+    ants_interpolation = traits.Enum('Linear',['Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc','HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline', 'MultiLabel', 'Gaussian'])
+    ants_interpolation_parameters = traits.Either(traits.Tuple(traits.Int()),  # BSpline (order)
+                                             traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
+                                                          traits.Float())
+                                             )
+    ants_lower_quantile = Float('0.005')
+    ants_upper_quantile = Float('0.995')
+    ants_convergence_thresh = Float('1e-06')
+    ants_convergence_winsize = Int('10')
 
+    ants_linear_gradient_step = Float('0.1')
+    ants_linear_cost = Enum('MI',['CC', 'MeanSquares', 'Demons', 'GC', 'MI', 'Mattes'])
+    ants_linear_sampling_perc = Float('0.25')
+    ants_linear_sampling_strategy = Enum("None", "Regular", "Random", None)
+
+    ants_nonlinear_gradient_step = Float('0.1')
+    ants_nonlinear_cost = Enum('CC',['CC', 'MeanSquares', 'Demons', 'GC', 'MI', 'Mattes'])
+    ants_nonlinear_update_field_variance = Float('3.0')
+    ants_nonlinear_total_field_variance = Float('0.0')
 
     # FLIRT
     flirt_args = Str
     uses_qform = Bool(True)
     dof = Int(6)
-    cost = Enum('normmi',['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'])
+    fsl_cost = Enum('normmi',['mutualinfo','corratio','normcorr','normmi','leastsq','labeldiff'])
     no_search = Bool(True)
 
     # BBRegister
@@ -87,9 +103,48 @@ class RegistrationConfig(HasTraits):
 
     traits_view = View(# HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
                        # 'interpolation'),
+
                         Item('registration_mode',editor=EnumEditor(name='registration_mode_trait')),
-                        Group('uses_qform','dof','cost','no_search','flirt_args',label='FLIRT',
-                              show_border=True,visible_when='registration_mode=="Linear + Non-linear (FSL)"'),
+                        Group(Item('uses_qform'),
+                              Item('dof'),
+                              Item('fsl_cost',label="FLIRT metric"),
+                              Item('no_search'),
+                              Item('flirt_args'),
+                            label='FLS registration settings', show_border=True,visible_when='registration_mode=="Linear + Non-linear (FSL)"'),
+                        Group(
+                            Group(
+                                HGroup(
+                                    Item('ants_interpolation',label="Interpolation"),
+                                    Item('ants_interpolation_parameters', label="Parameters")
+                                ),
+                                HGroup(
+                                    Item('ants_lower_quantile',label='winsorize lower quantile'),
+                                    Item('ants_upper_quantile',label='winsorize upper quantile'),
+                                ),
+                                HGroup(
+                                    Item('ants_convergence_thresh',label='Convergence threshold'),
+                                    Item('ants_convergence_winsize',label='Convergence window size'),
+                                ),
+                                label="General",show_border=False
+                                ),
+                            Group(
+                                Item('ants_linear_cost', label="Metric"),
+                                Item('ants_linear_gradient_step', label="Gradient step size"),
+                                HGroup(
+                                    Item('ants_linear_sampling_strategy', label="Sampling strategy"),
+                                    Item('ants_linear_sampling_perc', label="Sampling percentage")
+                                    ),
+                                Item('ants_linear_gradient_step', label="Gradient step size"),
+                                label="Rigid + Affine",show_border=False
+                                ),
+                            Group(
+                                Item('ants_nonlinear_cost', label="Metric"),
+                                Item('ants_nonlinear_gradient_step', label="Gradient step size"),
+                                Item('ants_nonlinear_update_field_variance', label="Update field variance in voxel space"),
+                                Item('ants_nonlinear_total_field_variance', label="Total field variance in voxel space"),
+                                label="SyN (symmetric diffeomorphic registration)",show_border=False
+                                ),
+                            label='ANTs registration settings',show_border=True,visible_when='registration_mode=="Linear + Non-linear (FSL)"'),
                         # Group('init','contrast_type',
                         #       show_border=True,visible_when='registration_mode=="BBregister (FS)"'),
                        kind='live',
@@ -354,8 +409,8 @@ class RegistrationStage(Stage):
             # [1.2] Linear registration of the DW data to the T1 data
             fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-B0.nii.gz',out_matrix_file='T12DWIaff.mat'),name="linear_registration")
             fsl_flirt.inputs.dof = self.config.dof
-            fsl_flirt.inputs.cost = self.config.cost
-            fsl_flirt.inputs.cost_func = self.config.cost
+            fsl_flirt.inputs.cost = self.config.fsl_cost
+            fsl_flirt.inputs.cost_func = self.config.fsl_cost
             fsl_flirt.inputs.no_search = self.config.no_search
             fsl_flirt.inputs.verbose = False
 
@@ -460,7 +515,7 @@ class RegistrationStage(Stage):
             # [1.5] Non linear registration of the DW data to the rotated T1 data
             # fsl_flirt_crop = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-B0_masked_crop.nii.gz',out_matrix_file='T12DWIaffcrop.mat'),name='fsl_flirt_crop')
             # fsl_flirt_crop.inputs.dof = self.config.dof
-            # fsl_flirt_crop.inputs.cost = self.config.cost
+            # fsl_flirt_crop.inputs.cost = self.config.fsl_cost
             # fsl_flirt_crop.inputs.cost_func = self.config.cost
             # fsl_flirt_crop.inputs.no_search = self.config.no_search
             # fsl_flirt_crop.inputs.verbose = False
@@ -534,7 +589,7 @@ class RegistrationStage(Stage):
             #             (fsl_fnirt_crop, fsl_applywarp_FA_noNaN, [('fieldcoeff_file','field_file')])
             #             ])
 
-        elif self.config.registration_mode == 'ANTs':
+        elif self.config.registration_mode == 'Rigid + Affine + SyN (ANTs)':
             # [SUB-STEP 1] Linear register "T1" onto"Target_FA_resampled"
             # [1.1] Convert diffusion data to mrtrix format using rotated bvecs
             mr_convert = pe.Node(interface=MRConvert(out_filename='diffusion.mif',stride=[+1,+2,+3,+4]), name='mr_convert')
@@ -630,8 +685,8 @@ class RegistrationStage(Stage):
             # ants_registration.inputs.number_of_affine_iterations = [10000,10000,1000]
             #
             # # fsl_flirt.inputs.dof = self.config.dof
-            # # fsl_flirt.inputs.cost = self.config.cost
-            # # fsl_flirt.inputs.cost_func = self.config.cost
+            # # fsl_flirt.inputs.cost = self.config.fsl_cost
+            # # fsl_flirt.inputs.cost_func = self.config.fsl_cost
             # # fsl_flirt.inputs.no_search = self.config.no_search
             # # fsl_flirt.inputs.verbose = False
             #
@@ -650,25 +705,23 @@ class RegistrationStage(Stage):
             affine_registration.inputs.output_warped_image='linear_warped_image.nii.gz'
             affine_registration.inputs.sigma_units=['vox']*2
             affine_registration.inputs.transforms=['Rigid','Affine']
-            affine_registration.inputs.interpolation='BSpline'
-            affine_registration.inputs.interpolation_parameters=(3,)
+            affine_registration.inputs.interpolation=self.config.ants_interpolation
+            affine_registration.inputs.interpolation_parameters=self.config.ants_interpolation_parameters#(3,)
             affine_registration.inputs.terminal_output='file'
-            affine_registration.inputs.winsorize_lower_quantile=0.005
-            affine_registration.inputs.winsorize_upper_quantile=0.995
-            affine_registration.inputs.convergence_threshold=[1e-06]*2
-            affine_registration.inputs.convergence_window_size=[10]*2
-            affine_registration.inputs.metric=['MI','MI']
+            affine_registration.inputs.winsorize_lower_quantile=self.config.ants_lower_quantile#0.005
+            affine_registration.inputs.winsorize_upper_quantile=self.config.ants_upper_quantile#0.995
+            affine_registration.inputs.convergence_threshold=[self.config.ants_convergence_thresh]*2#[1e-06]*2
+            affine_registration.inputs.convergence_window_size=[self.config.ants_convergence_winsize]*2#[10]*2
+            affine_registration.inputs.metric=[self.config.ants_linear_cost,self.config.ants_linear_cost]#['MI','MI']
             affine_registration.inputs.metric_weight=[1.0]*2
             affine_registration.inputs.number_of_iterations=[[1000, 500, 250, 100],
                                                             [1000, 500, 250, 100]]
             affine_registration.inputs.radius_or_number_of_bins=[32, 32]
-            affine_registration.inputs.sampling_percentage=[0.25, 0.25]
-            affine_registration.inputs.sampling_strategy=['Regular',
-                                                        'Regular']
+            affine_registration.inputs.sampling_percentage=[self.config.ants_linear_sampling_perc,self.config.ants_linear_sampling_perc]#[0.25, 0.25]
+            affine_registration.inputs.sampling_strategy=[self.config.ants_linear_sampling_strategy,self.config.ants_linear_sampling_strategy]#['Regular','Regular']
             affine_registration.inputs.shrink_factors=[[8, 4, 2, 1]]*2
             affine_registration.inputs.smoothing_sigmas=[[3, 2, 1, 0]]*2
-            affine_registration.inputs.transform_parameters=[(0.1,),
-                                                            (0.1,)]
+            affine_registration.inputs.transform_parameters=[(self.config.ants_linear_gradient_step,),(self.config.ants_linear_gradient_step,)]#[(0.1,),(0.1,)]
             affine_registration.inputs.use_histogram_matching=True
             affine_registration.inputs.write_composite_transform=True
             affine_registration.inputs.verbose = True
@@ -684,14 +737,14 @@ class RegistrationStage(Stage):
             SyN_registration.inputs.sigma_units=['vox']*1
             SyN_registration.inputs.transforms=['SyN']
             SyN_registration.inputs.restrict_deformation=[[1,1,0]]
-            SyN_registration.inputs.interpolation='BSpline'
-            SyN_registration.inputs.interpolation_parameters=(3,)
+            SyN_registration.inputs.interpolation=self.config.ants_interpolation#'BSpline'
+            SyN_registration.inputs.interpolation_parameters=self.config.ants_interpolation_parameters#(3,)
             SyN_registration.inputs.terminal_output='file'
-            SyN_registration.inputs.winsorize_lower_quantile=0.005
-            SyN_registration.inputs.winsorize_upper_quantile=0.995
-            SyN_registration.inputs.convergence_threshold=[1e-06]*1
-            SyN_registration.inputs.convergence_window_size=[10]*1
-            SyN_registration.inputs.metric=['CC']
+            SyN_registration.inputs.winsorize_lower_quantile=self.config.ants_lower_quantile#0.005
+            SyN_registration.inputs.winsorize_upper_quantile=self.config.ants_upper_quantile#0.995
+            SyN_registration.inputs.convergence_threshold=[self.config.ants_convergence_thresh]*1#[1e-06]*1
+            SyN_registration.inputs.convergence_window_size=[self.config.ants_converants_convergence_winsize]*1#[10]*1
+            SyN_registration.inputs.metric=[self.config.ants_nonlinear_cost]#['CC']
             SyN_registration.inputs.metric_weight=[1.0]*1
             SyN_registration.inputs.number_of_iterations=[[20]]
             SyN_registration.inputs.radius_or_number_of_bins=[4]
@@ -699,7 +752,7 @@ class RegistrationStage(Stage):
             SyN_registration.inputs.sampling_strategy=['None']
             SyN_registration.inputs.shrink_factors=[[1]]*1
             SyN_registration.inputs.smoothing_sigmas=[[0]]*1
-            SyN_registration.inputs.transform_parameters=[(0.1, 3.0, 0.0)]
+            SyN_registration.inputs.transform_parameters=[(self.config.ants_nonlinear_gradient_step, self.config.ants_nonlinear_update_field_variance, self.config.ants_nonlinear_total_field_variance)]#[(0.1, 3.0, 0.0)]
             SyN_registration.inputs.use_histogram_matching=True
             SyN_registration.inputs.verbose = True
 
@@ -925,7 +978,7 @@ class RegistrationStage(Stage):
             # [1.2] Linear registration of the DW data to the T1 data
             fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='FA-TO-T1.nii.gz',out_matrix_file='FA2T1aff.mat'),name="linear_registration")
             #fsl_flirt.inputs.dof = self.config.dof
-            #fsl_flirt.inputs.cost = self.config.cost
+            #fsl_flirt.inputs.cost = self.config.fsl_cost
             #fsl_flirt.inputs.no_search = self.config.no_search
             fsl_flirt.inputs.verbose = True
 
@@ -1059,7 +1112,7 @@ class RegistrationStage(Stage):
         #     fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-TARGET.nii.gz',out_matrix_file='T1-TO-TARGET.mat'),name="linear_registration")
         #     fsl_flirt.inputs.uses_qform = self.config.uses_qform
         #     fsl_flirt.inputs.dof = self.config.dof
-        #     fsl_flirt.inputs.cost = self.config.cost
+        #     fsl_flirt.inputs.cost = self.config.fsl_cost
         #     fsl_flirt.inputs.no_search = self.config.no_search
         #     fsl_flirt.inputs.args = self.config.flirt_args
 
@@ -1419,6 +1472,21 @@ class RegistrationStage(Stage):
                                 self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',fnirt_results.inputs['ref_file'],roi_output,'-l','Random-Rainbow','-t','0.5']
                             else:
                                 self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+
+                if self.config.registration_mode == 'Rigid + Affine + SyN (ANTs)':
+                    if type(rois_results.outputs.out_files) == str:
+                        if self.config.pipeline == "Diffusion":
+                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',fnirt_results.inputs['ref_file'],rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
+                        else:
+                            self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
+                    else:
+                        for roi_output in rois_results.outputs.out_files:
+                            if self.config.pipeline == "Diffusion":
+                                self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',fnirt_results.inputs['ref_file'],roi_output,'-l','Random-Rainbow','-t','0.5']
+                            else:
+                                self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+
+
                 # elif self.config.registration_mode == 'Nonlinear (FSL)':
                 #     if type(rois_results.outputs.warped_files) == str:
                 #         if self.config.pipeline == "Diffusion":

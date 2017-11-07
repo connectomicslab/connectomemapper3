@@ -537,10 +537,10 @@ class DiffusionPipeline(Pipeline):
 
         flow.connect([
                       (datasource,common_flow,[("T1","inputnode.T1")]),
-                      (diffusion_flow,sinker,[("outputnode.T1","anat.@T1")]),
-                      (diffusion_flow,sinker,[("outputnode.brain","anat.@brain")]),
-                      (diffusion_flow,sinker,[("outputnode.brain_mask","anat.@brain_mask")]),
-                      (diffusion_flow,sinker,[("outputnode.roi_volumes","anat.@roivs")])
+                      (common_flow,sinker,[("outputnode.T1","anat.@T1")]),
+                      (common_flow,sinker,[("outputnode.brain","anat.@brain")]),
+                      (common_flow,sinker,[("outputnode.brain_mask","anat.@brain_mask")]),
+                      (common_flow,sinker,[("outputnode.roi_volumes","anat.@roivs")])
                       ])
 
 
