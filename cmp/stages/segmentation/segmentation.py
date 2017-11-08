@@ -22,6 +22,7 @@ import nipype.interfaces.fsl as fsl
 from nipype.interfaces.io import FreeSurferSource
 import nipype.interfaces.utility as util
 
+
 # Own imports
 from cmp.stages.common import Stage
 from cmp.interfaces.freesurfer import copyBrainMaskToFreesurfer, copyFileToFreesurfer
