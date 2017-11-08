@@ -28,6 +28,10 @@ from cmp.interfaces.freesurfer import copyBrainMaskToFreesurfer, copyFileToFrees
 
 class SegmentationConfig(HasTraits):
     seg_tool = Enum(["Freesurfer","Custom segmentation"])
+    make_isotropic = Bool(False)
+    isotropic_vox_size = Float(1.2, desc='specify the size (mm)')
+    isotropic_interpolation = Enum('cubic', 'weighted', 'nearest', 'sinc', 'interpolate',
+                                desc='<interpolate|weighted|nearest|sinc|cubic> (default is cubic)')
     use_fsl_brain_mask = Bool(False)
     use_existing_freesurfer_data = Bool(False)
     freesurfer_subjects_dir = Directory
@@ -36,7 +40,10 @@ class SegmentationConfig(HasTraits):
     freesurfer_args = Str
     white_matter_mask = File(exist=True)
     traits_view = View(Item('seg_tool',label="Segmentation tool"),
-                       Group('use_fsl_brain_mask','freesurfer_args','use_existing_freesurfer_data',
+                       Group(
+                        HGroup('make_isotropic',Item('isotropic_vox_size',label="Voxel size (mm)",visible_when='make_isotropic')),
+                        Item('isotropic_interpolation',label='Interpolation',visible_when='make_isotropic'),
+                        'use_fsl_brain_mask','freesurfer_args','use_existing_freesurfer_data',
                         Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
                         Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True'),
                         visible_when="seg_tool=='Freesurfer'"),
@@ -72,6 +79,10 @@ class SegmentationStage(Stage):
             if self.config.use_existing_freesurfer_data == False:
                 # Converting to .mgz format
                 fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="T1.mgz"),name="mgz_convert")
+
+                if self.config.make_isotropic:
+                    fs_mriconvert.inputs.vox_size = (self.config.isotropic_vox_size,self.config.isotropic_vox_size,self.config.isotropic_vox_size)
+                    fs_mriconvert.inputs.resample_type = self.config.isotropic_interpolation
 
                 rename = pe.Node(util.Rename(), name="copy_orig")
                 orig_dir = os.path.join(self.config.freesurfer_subject_id,"mri","orig")

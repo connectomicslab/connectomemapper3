@@ -65,25 +65,24 @@ class RegistrationConfig(HasTraits):
     diffusion_imaging_model = Str
 
     # ANTS
-    ants_interpolation = traits.Enum('Linear',['Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc','HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline', 'MultiLabel', 'Gaussian'])
-    ants_interpolation_parameters = traits.Either(traits.Tuple(traits.Int()),  # BSpline (order)
-                                             traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
-                                                          traits.Float())
-                                             )
-    ants_lower_quantile = Float('0.005')
-    ants_upper_quantile = Float('0.995')
-    ants_convergence_thresh = Float('1e-06')
-    ants_convergence_winsize = Int('10')
+    ants_interpolation = Enum('Linear',['Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc','HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline', 'MultiLabel', 'Gaussian'])
+    ants_bspline_interpolation_parameters = Tuple(Int(3))
+    ants_gauss_interpolation_parameters = Tuple(Float(5),Float(5))
+    ants_multilab_interpolation_parameters = Tuple(Float(5),Float(5))
+    ants_lower_quantile = Float(0.005)
+    ants_upper_quantile = Float(0.995)
+    ants_convergence_thresh = Float(1e-06)
+    ants_convergence_winsize = Int(10)
 
-    ants_linear_gradient_step = Float('0.1')
+    ants_linear_gradient_step = Float(0.1)
     ants_linear_cost = Enum('MI',['CC', 'MeanSquares', 'Demons', 'GC', 'MI', 'Mattes'])
-    ants_linear_sampling_perc = Float('0.25')
-    ants_linear_sampling_strategy = Enum("None", "Regular", "Random", None)
+    ants_linear_sampling_perc = Float(0.25)
+    ants_linear_sampling_strategy = Enum('Regular',['None', 'Regular', 'Random'])
 
-    ants_nonlinear_gradient_step = Float('0.1')
+    ants_nonlinear_gradient_step = Float(0.1)
     ants_nonlinear_cost = Enum('CC',['CC', 'MeanSquares', 'Demons', 'GC', 'MI', 'Mattes'])
-    ants_nonlinear_update_field_variance = Float('3.0')
-    ants_nonlinear_total_field_variance = Float('0.0')
+    ants_nonlinear_update_field_variance = Float(3.0)
+    ants_nonlinear_total_field_variance = Float(0.0)
 
     # FLIRT
     flirt_args = Str
@@ -115,15 +114,17 @@ class RegistrationConfig(HasTraits):
                             Group(
                                 HGroup(
                                     Item('ants_interpolation',label="Interpolation"),
-                                    Item('ants_interpolation_parameters', label="Parameters")
+                                    Item('ants_bspline_interpolation_parameters', label="Parameters", visible_when='ants_interpolation=="BSpline"'),
+                                    Item('ants_gauss_interpolation_parameters', label="Parameters", visible_when='ants_interpolation=="Gaussian"'),
+                                    Item('ants_multilab_interpolation_parameters', label="Parameters", visible_when='ants_interpolation=="MultiLabel"')
                                 ),
                                 HGroup(
                                     Item('ants_lower_quantile',label='winsorize lower quantile'),
-                                    Item('ants_upper_quantile',label='winsorize upper quantile'),
+                                    Item('ants_upper_quantile',label='winsorize upper quantile')
                                 ),
                                 HGroup(
                                     Item('ants_convergence_thresh',label='Convergence threshold'),
-                                    Item('ants_convergence_winsize',label='Convergence window size'),
+                                    Item('ants_convergence_winsize',label='Convergence window size')
                                 ),
                                 label="General",show_border=False
                                 ),
@@ -132,7 +133,7 @@ class RegistrationConfig(HasTraits):
                                 Item('ants_linear_gradient_step', label="Gradient step size"),
                                 HGroup(
                                     Item('ants_linear_sampling_strategy', label="Sampling strategy"),
-                                    Item('ants_linear_sampling_perc', label="Sampling percentage")
+                                    Item('ants_linear_sampling_perc', label="Sampling percentage", visible_when='ants_linear_sampling_strategy!="None"' )
                                     ),
                                 Item('ants_linear_gradient_step', label="Gradient step size"),
                                 label="Rigid + Affine",show_border=False
@@ -144,7 +145,8 @@ class RegistrationConfig(HasTraits):
                                 Item('ants_nonlinear_total_field_variance', label="Total field variance in voxel space"),
                                 label="SyN (symmetric diffeomorphic registration)",show_border=False
                                 ),
-                            label='ANTs registration settings',show_border=True,visible_when='registration_mode=="Linear + Non-linear (FSL)"'),
+                            label='ANTs registration settings',show_border=True,visible_when='registration_mode=="Rigid + Affine + SyN (ANTs)"'
+                            ),
                         # Group('init','contrast_type',
                         #       show_border=True,visible_when='registration_mode=="BBregister (FS)"'),
                        kind='live',
@@ -705,8 +707,15 @@ class RegistrationStage(Stage):
             affine_registration.inputs.output_warped_image='linear_warped_image.nii.gz'
             affine_registration.inputs.sigma_units=['vox']*2
             affine_registration.inputs.transforms=['Rigid','Affine']
+
             affine_registration.inputs.interpolation=self.config.ants_interpolation
-            affine_registration.inputs.interpolation_parameters=self.config.ants_interpolation_parameters#(3,)
+            if self.config.ants_interpolation=="BSpline":
+                affine_registration.inputs.interpolation_parameters=self.config.ants_bspline_interpolation_parameters#(3,)
+            elif self.config.ants_interpolation=="Gaussian":
+                affine_registration.inputs.interpolation_parameters=self.config.ants_gauss_interpolation_parameters#(5,5,)
+            elif self.config.ants_interpolation=="MultiLabel":
+                affine_registration.inputs.interpolation_parameters=self.config.ants_multilab_interpolation_parameters#(5,5,)
+
             affine_registration.inputs.terminal_output='file'
             affine_registration.inputs.winsorize_lower_quantile=self.config.ants_lower_quantile#0.005
             affine_registration.inputs.winsorize_upper_quantile=self.config.ants_upper_quantile#0.995
@@ -737,13 +746,20 @@ class RegistrationStage(Stage):
             SyN_registration.inputs.sigma_units=['vox']*1
             SyN_registration.inputs.transforms=['SyN']
             SyN_registration.inputs.restrict_deformation=[[1,1,0]]
+
             SyN_registration.inputs.interpolation=self.config.ants_interpolation#'BSpline'
-            SyN_registration.inputs.interpolation_parameters=self.config.ants_interpolation_parameters#(3,)
+            if self.config.ants_interpolation=="BSpline":
+                SyN_registration.inputs.interpolation_parameters=self.config.ants_bspline_interpolation_parameters#(3,)
+            elif self.config.ants_interpolation=="Gaussian":
+                SyN_registration.inputs.interpolation_parameters=self.config.ants_gauss_interpolation_parameters#(5,5,)
+            elif self.config.ants_interpolation=="MultiLabel":
+                SyN_registration.inputs.interpolation_parameters=self.config.ants_multilab_interpolation_parameters#(5,5,)
+
             SyN_registration.inputs.terminal_output='file'
             SyN_registration.inputs.winsorize_lower_quantile=self.config.ants_lower_quantile#0.005
             SyN_registration.inputs.winsorize_upper_quantile=self.config.ants_upper_quantile#0.995
             SyN_registration.inputs.convergence_threshold=[self.config.ants_convergence_thresh]*1#[1e-06]*1
-            SyN_registration.inputs.convergence_window_size=[self.config.ants_converants_convergence_winsize]*1#[10]*1
+            SyN_registration.inputs.convergence_window_size=[self.config.ants_convergence_winsize]*1#[10]*1
             SyN_registration.inputs.metric=[self.config.ants_nonlinear_cost]#['CC']
             SyN_registration.inputs.metric_weight=[1.0]*1
             SyN_registration.inputs.number_of_iterations=[[20]]
