@@ -155,8 +155,8 @@ class SegmentationStage(Stage):
                                     ])
 
                     elif self.config.brain_mask_extraction_tool == "ANTs":
-                        templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_templateIXI', 'T_template2.nii.gz'))
-                        probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_templateIXI', 'T_templateProbabilityMask.nii.gz'))
+                        templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2.nii.gz'))
+                        probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_templateProbabilityMask.nii.gz'))
 
                         ants_bet = pe.Node(interface=ants.BrainExtraction(out_prefix='ants_bet_'),name='ants_bet')
                         ants_bet.inputs.brain_template = templatefile

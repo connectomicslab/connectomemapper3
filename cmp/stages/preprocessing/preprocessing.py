@@ -19,6 +19,7 @@ import os
 import pickle
 import gzip
 import glob
+import pkg_resources
 
 import nipype.pipeline.engine as pe
 import nipype.pipeline as pip
@@ -238,11 +239,13 @@ class PreprocessingStage(Stage):
             # Run FAST for partial volume estimation (WM;GM;CSF)
             fastr = pe.Node(interface=fsl.FAST(),name='fastr')
             fastr.inputs.out_basename = 'fast_'
-            fastr.inputs.number_classes = 5
+            fastr.inputs.number_classes = 3
 
             if self.config.fast_use_priors:
                 fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='Template2Input.nii.gz',out_matrix_file='template2input.mat'),name="linear_registration")
-                fsl_flirt.inputs.in_file = os.environ['FSLDIR']+'/data/standard/MNI152_T1_1mm.nii.gz'
+                #fsl_flirt.inputs.in_file = os.environ['FSLDIR']+'/data/standard/MNI152_T1_1mm.nii.gz'
+                template_path = os.path.join('data', 'segmentation', 'ants_template_IXI')
+                fsl_flirt.inputs.in_file = pkg_resources.resource_filename('cmtklib', os.path.join(template_path, 'T_template2.nii.gz'))
                 #fsl_flirt.inputs.dof = self.config.dof
                 #fsl_flirt.inputs.cost = self.config.fsl_cost
                 #fsl_flirt.inputs.no_search = self.config.no_search
@@ -253,6 +256,10 @@ class PreprocessingStage(Stage):
                             ])
 
                 fastr.inputs.use_priors = True
+                fastr.inputs.other_priors = [pkg_resources.resource_filename('cmtklib', os.path.join(template_path,'3Class-Priors','priors1.nii.gz')),
+                                             pkg_resources.resource_filename('cmtklib', os.path.join(template_path,'3Class-Priors','priors2.nii.gz')),
+                                             pkg_resources.resource_filename('cmtklib', os.path.join(template_path,'3Class-Priors','priors3.nii.gz'))
+                                            ]
                 flow.connect([
                             (fsl_flirt, fastr, [('out_matrix_file','init_transform')]),
                             ])

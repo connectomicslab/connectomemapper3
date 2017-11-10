@@ -26,6 +26,8 @@ package_data = {'cmp':
                 ],
                 'cmtklib':
                 ['data/parcellation/lausanne2008/*/*.*',
+		'data/segmentation/ants_template_IXI/*/*.*',
+		'data/segmentation/ants_template_IXI/*.*',
                 'data/parcellation/nativefreesurfer/*/*.*',
                 'data/colortable_and_gcs/*.*',
                 'data/colortable_and_gcs/my_atlas_gcs/*.*',
