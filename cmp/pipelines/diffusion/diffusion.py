@@ -487,6 +487,8 @@ class DiffusionPipeline(Pipeline):
         sinker.inputs.substitutions = [ ('T1', self.subject+'_T1w_head'),
                                         ('brain_mask.nii.gz', self.subject+'_T1w_brainmask'),
                                         ('brain.nii.gz', self.subject+'_T1w_brain'),
+                                        #('wm_mask',self.subject+'_T1w_class-WM'),
+                                        #('gm_mask',self.subject+'_T1w_class-GM'),
                                         #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
                                         ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale33.nii.gz'),
                                         ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale60.nii.gz'),
@@ -495,13 +497,14 @@ class DiffusionPipeline(Pipeline):
                                         ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale500.nii.gz'),
 
                                         #('*/_ROIs_resample*/fast__pve_0_out.nii.gz',self.subject+'_dwi_connectome'),
-                                        
+
                                         ('T1_warped', self.subject+'_T1w_space-DWI_head'),
                                         ('anat_resampled_warped', self.subject+'_T1w_space-DWI_head'),
                                         ('brain_warped',self.subject+'_T1w_space-DWI_brain'),
                                         ('anat_masked_resampled_warped', self.subject+'_T1w_space-DWI_brain'),
                                         ('brain_mask_registered_temp_crop',self.subject+'_T1w_space-DWI_brainmask'),
                                         ('wm_mask_warped',self.subject+'_T1w_space-DWI_class-WM'),
+                                        ('wm_mask_resampled_warped',self.subject+'_T1w_space-DWI_class-WM'),
                                         ('ROIv_HR_th_scale33_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale33.nii.gz'),
                                         ('ROIv_HR_th_scale60_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale60.nii.gz'),
                                         ('ROIv_HR_th_scale125_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale125.nii.gz'),
@@ -525,8 +528,8 @@ class DiffusionPipeline(Pipeline):
                                         ('diffusion_preproc_resampled_fa',self.subject+'_dwi_FA'),
                                         ('grad.txt',self.subject+'_dwi_grad.txt'),
                                         ('target_epicorrected',self.subject+'_dwi_preproc'),
-                                        ('diffusion_preproc_resampled.nii.gz',self.subject+'_dwi_preproc'),
-                                        ('endpoints',self.subject+'_endpoints'),
+                                        ('diffusion_preproc_resampled.nii.gz',self.subject+'_dwi_preproc.nii.gz'),
+                                        ('endpoints',self.subject+'_tract_endpoints'),
                                         ('filtered_fiberslabel',self.subject+'_dwi_tract_fiberslabel_filt'),
                                         ('final_fiberlabels',self.subject+'_dwi_tract_fiberlabels_filt'),
                                         ('final_fiberslength',self.subject+'_dwi_tract_fiberslength_filt'),
@@ -596,8 +599,8 @@ class DiffusionPipeline(Pipeline):
                                     (preproc_flow,sinker,[("outputnode.bvecs_rot","dwi.@bvecs_rot")]),
                                     (preproc_flow,sinker,[("outputnode.diffusion_preproc","dwi.@diffusion_preproc")]),
                                     (preproc_flow,sinker,[("outputnode.dwi_brain_mask","dwi.@diffusion_brainmask")]),
-                                    (preproc_flow,sinker,[("outputnode.roi_volumes","anat.@roi_volumes")]),
-                                    (preproc_flow,sinker,[("outputnode.partial_volume_files","anat.@partial_volume_files")])
+                                    #(preproc_flow,sinker,[("outputnode.roi_volumes","anat.@roi_volumes")]),
+                                    #(preproc_flow,sinker,[("outputnode.partial_volume_files","anat.@partial_volume_files")])
                                     ])
             if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
                 diffusion_flow.connect([

@@ -90,6 +90,7 @@ class PreprocessingConfig(HasTraits):
     max_vol = Int()
     max_str = Str
     partial_volume_estimation = Bool(True)
+    fast_use_priors = Bool(True)
 
     # DWI resampling selection
     resampling = Tuple(1,1,1)
@@ -237,7 +238,24 @@ class PreprocessingStage(Stage):
             # Run FAST for partial volume estimation (WM;GM;CSF)
             fastr = pe.Node(interface=fsl.FAST(),name='fastr')
             fastr.inputs.out_basename = 'fast_'
-            fastr.inputs.number_classes = 3
+            fastr.inputs.number_classes = 5
+
+            if self.config.fast_use_priors:
+                fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='Template2Input.nii.gz',out_matrix_file='template2input.mat'),name="linear_registration")
+                fsl_flirt.inputs.in_file = os.environ['FSLDIR']+'/data/standard/MNI152_T1_1mm.nii.gz'
+                #fsl_flirt.inputs.dof = self.config.dof
+                #fsl_flirt.inputs.cost = self.config.fsl_cost
+                #fsl_flirt.inputs.no_search = self.config.no_search
+                fsl_flirt.inputs.verbose = True
+
+                flow.connect([
+                            (mr_convert_T1, fsl_flirt, [('converted','reference')]),
+                            ])
+
+                fastr.inputs.use_priors = True
+                flow.connect([
+                            (fsl_flirt, fastr, [('out_matrix_file','init_transform')]),
+                            ])
 
             flow.connect([
                         (mr_convert_brain,fastr,[('converted','in_files')]),

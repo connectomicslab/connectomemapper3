@@ -697,7 +697,7 @@ class RegistrationStage(Stage):
             #             (mr_convert_b0, ants_registration, [('converted','fixed_image')])
             #             ])
 
-            affine_registration = pe.Node(interface=ants.Registration(), name='affine_registration')
+            affine_registration = pe.Node(interface=ants.Registration(), name='linear_registration')
             affine_registration.inputs.collapse_output_transforms=True
             #affine_registration.inputs.initialize_transforms_per_stage=True
             affine_registration.inputs.initial_moving_transform_com=True
@@ -1438,14 +1438,18 @@ class RegistrationStage(Stage):
         print "stage_dir : %s" % self.stage_dir
         if self.config.pipeline == "Diffusion":
             target_path = os.path.join(self.stage_dir,"target_resample","result_target_resample.pklz")
-            fnirt_results_path = os.path.join(self.stage_dir,"fsl_fnirt_crop","result_fsl_fnirt_crop.pklz")
+            reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
             warpedROIVs_results_path = os.path.join(self.stage_dir,"apply_warp_roivs","result_apply_warp_roivs.pklz")
+            warpedPVEs_results_path = os.path.join(self.stage_dir,"apply_warp_pves","result_apply_warp_pves.pklz")
             warpedWM_results_path = os.path.join(self.stage_dir,"apply_warp_wm","result_apply_warp_wm.pklz")
             warpedT1_results_path = os.path.join(self.stage_dir,"apply_warp_T1","result_apply_warp_T1.pklz")
+            if self.config.registration_mode == 'Linear + Non-linear (FSL)':
+                fnirt_results_path = os.path.join(self.stage_dir,"fsl_fnirt_crop","result_fsl_fnirt_crop.pklz")
+            elif self.config.registration_mode == 'Rigid + Affine + SyN (ANTs)':
+                syn_results_path = os.path.join(self.stage_dir,"SyN_registration","result_SyN_registration.pklz")
         else:
             target_path = os.path.join(self.stage_dir,"fMRI_skullstrip","result_fMRI_skullstrip.pklz")
-
-        reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
+            reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
 
         # print "target:",target_path
         # print "fnirt_results_path:",fnirt_results_path
@@ -1454,54 +1458,77 @@ class RegistrationStage(Stage):
         # print "warpedROIs_results_path:",warpedROIs_results_path
         # print "reg_results_path:",reg_results_path
 
-
-
         # if self.config.registration_mode != 'Nonlinear (FSL)':
         #     reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
         # elif self.config.registration_mode == 'Nonlinear (FSL)':
         #     reg_results_path = os.path.join(self.stage_dir,"nonlinear_registration","result_nonlinear_registration.pklz")
 
-        if(os.path.exists(target_path) and os.path.exists(reg_results_path) and os.path.exists(fnirt_results_path) and os.path.exists(warpedROIVs_results_path) and os.path.exists(warpedWM_results_path) and os.path.exists(warpedT1_results_path)):
-                target = pickle.load(gzip.open(target_path))
-                reg_results = pickle.load(gzip.open(reg_results_path))
-                rois_results = pickle.load(gzip.open(warpedROIVs_results_path))
-                fnirt_results = pickle.load(gzip.open(fnirt_results_path))
-                wm_results = pickle.load(gzip.open(warpedWM_results_path))
-                T1_results = pickle.load(gzip.open(warpedT1_results_path))
+        if self.config.pipeline == "Diffusion":
+                if(os.path.exists(target_path) and os.path.exists(reg_results_path) and os.path.exists(warpedROIVs_results_path) and os.path.exists(warpedPVEs_results_path) and os.path.exists(warpedWM_results_path) and os.path.exists(warpedT1_results_path)):
 
-                if self.config.pipeline == "Diffusion":
-                    self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['reference'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
-                    self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',fnirt_results.inputs['ref_file'],T1_results.outputs.out_file,'-l',"Copper",'-t','0.5']
-                    self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
-                else:
-                    self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fslview',target.inputs['in_file'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
+                    target = pickle.load(gzip.open(target_path))
+                    reg_results = pickle.load(gzip.open(reg_results_path))
+                    rois_results = pickle.load(gzip.open(warpedROIVs_results_path))
+                    pves_results = pickle.load(gzip.open(warpedPVEs_results_path))
+                    wm_results = pickle.load(gzip.open(warpedWM_results_path))
+                    T1_results = pickle.load(gzip.open(warpedT1_results_path))
 
-                if self.config.registration_mode == 'Linear + Non-linear (FSL)':
-                    if type(rois_results.outputs.out_files) == str:
-                        if self.config.pipeline == "Diffusion":
-                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',fnirt_results.inputs['ref_file'],rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
-                        else:
-                            self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
-                    else:
-                        for roi_output in rois_results.outputs.out_files:
-                            if self.config.pipeline == "Diffusion":
-                                self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',fnirt_results.inputs['ref_file'],roi_output,'-l','Random-Rainbow','-t','0.5']
+                    if self.config.registration_mode == 'Linear + Non-linear (FSL)':
+                        if(os.path.exists(fnirt_results_path)):
+                                fnirt_results = pickle.load(gzip.open(fnirt_results_path))
+                                self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['reference'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
+                                self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',fnirt_results.inputs['ref_file'],T1_results.outputs.out_file,'-l',"Copper",'-t','0.5']
+                                self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
+
+                                if type(rois_results.outputs.out_files) == str:
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',fnirt_results.inputs['ref_file'],rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
+                                else:
+                                    for roi_output in rois_results.outputs.out_files:
+                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',fnirt_results.inputs['ref_file'],roi_output,'-l','Random-Rainbow','-t','0.5']
+
+                                if type(pves_results.outputs.out_files) == str:
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.out_files)] = ['fslview',fnirt_results.inputs['ref_file'],pves_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
+                                else:
+                                    for pve_output in pves_results.outputs.out_files:
+                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',fnirt_results.inputs['ref_file'],pve_output,'-l','Random-Rainbow','-t','0.5']
+
+                    elif self.config.registration_mode == 'Rigid + Affine + SyN (ANTs)':
+                        if(os.path.exists(syn_results_path)):
+                            syn_results = pickle.load(gzip.open(syn_results_path))
+                            print("reg_results.inputs['fixed_image']: %s"%reg_results.inputs['fixed_image'][0])
+                            print("reg_results.outputs.warped_image: %s"%reg_results.outputs.warped_image)
+                            print("syn_results.inputs['fixed_image']: %s"%syn_results.inputs['fixed_image'][0])
+                            print("T1_results.outputs.output_image: %s"%T1_results.outputs.output_image)
+                            self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['fixed_image'][0],reg_results.outputs.warped_image,'-l',"Copper",'-t','0.5']
+                            self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',syn_results.inputs['fixed_image'][0],T1_results.outputs.output_image,'-l',"Copper",'-t','0.5']
+                            #self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
+
+                            print("rois_results.outputs.output_images: %s"%rois_results.outputs.output_images)
+                            print("pves_results.outputs.output_images: %s"%pves_results.outputs.output_images)
+
+                            if type(rois_results.outputs.output_images) == str:
+                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fslview',syn_results.inputs['fixed_image'][0],rois_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
                             else:
-                                self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+                                for roi_output in rois_results.outputs.output_images:
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',syn_results.inputs['fixed_image'][0],roi_output,'-l','Random-Rainbow','-t','0.5']
 
-                if self.config.registration_mode == 'Rigid + Affine + SyN (ANTs)':
-                    if type(rois_results.outputs.out_files) == str:
-                        if self.config.pipeline == "Diffusion":
-                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',fnirt_results.inputs['ref_file'],rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
-                        else:
-                            self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
-                    else:
-                        for roi_output in rois_results.outputs.out_files:
-                            if self.config.pipeline == "Diffusion":
-                                self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',fnirt_results.inputs['ref_file'],roi_output,'-l','Random-Rainbow','-t','0.5']
+                            if type(pves_results.outputs.output_images) == str:
+                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fslview',syn_results.inputs['fixed_image'][0],pves_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
                             else:
-                                self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+                                for pve_output in pves_results.outputs.output_images:
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',syn_results.inputs['fixed_image'][0],pve_output,'-l','Random-Rainbow','-t','0.5']
 
+        else:
+            target = pickle.load(gzip.open(target_path))
+            reg_results = pickle.load(gzip.open(reg_results_path))
+
+            self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fslview',target.inputs['in_file'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
+
+            if type(rois_results.outputs.out_files) == str:
+                    self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
+            else:
+                for roi_output in rois_results.outputs.out_files:
+                        self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
 
                 # elif self.config.registration_mode == 'Nonlinear (FSL)':
                 #     if type(rois_results.outputs.warped_files) == str:
@@ -1516,7 +1543,8 @@ class RegistrationStage(Stage):
                 #             else:
                 #                 self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
 
-                self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
+
+        self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
 
     def has_run(self):
         if self.config.registration_mode != 'Nonlinear (FSL)':
