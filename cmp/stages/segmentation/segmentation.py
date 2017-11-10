@@ -14,11 +14,13 @@ from traitsui.api import *
 import pickle
 import gzip
 import shutil
+import pkg_resources
 
 # Nipype imports
 import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
+import nipype.interfaces.ants as ants
 from nipype.interfaces.io import FreeSurferSource
 import nipype.interfaces.utility as util
 
@@ -33,6 +35,7 @@ class SegmentationConfig(HasTraits):
     isotropic_vox_size = Float(1.2, desc='specify the size (mm)')
     isotropic_interpolation = Enum('cubic', 'weighted', 'nearest', 'sinc', 'interpolate',
                                 desc='<interpolate|weighted|nearest|sinc|cubic> (default is cubic)')
+    brain_mask_extraction_tool = Enum("Freesurfer",["Freesurfer","BET","ANTs"])
     use_fsl_brain_mask = Bool(False)
     use_existing_freesurfer_data = Bool(False)
     freesurfer_subjects_dir = Directory
@@ -44,7 +47,8 @@ class SegmentationConfig(HasTraits):
                        Group(
                         HGroup('make_isotropic',Item('isotropic_vox_size',label="Voxel size (mm)",visible_when='make_isotropic')),
                         Item('isotropic_interpolation',label='Interpolation',visible_when='make_isotropic'),
-                        'use_fsl_brain_mask','freesurfer_args','use_existing_freesurfer_data',
+                        'brain_mask_extraction_tool',
+                        'freesurfer_args','use_existing_freesurfer_data',
                         Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
                         Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True'),
                         visible_when="seg_tool=='Freesurfer'"),
@@ -92,7 +96,7 @@ class SegmentationStage(Stage):
                     print "Folder not existing; %s created!" % orig_dir
                 rename.inputs.format_string = os.path.join(orig_dir,"001.mgz")
 
-                if self.config.use_fsl_brain_mask == False:
+                if self.config.brain_mask_extraction_tool == "Freesurfer":
                     # ReconAll => named outputnode as we don't want to select a specific output....
                     fs_reconall = pe.Node(interface=fs.ReconAll(flags='-no-isrunning'),name="reconall")
                     fs_reconall.inputs.directive = 'all'
@@ -140,17 +144,28 @@ class SegmentationStage(Stage):
                                 (fs_source,fs_mriconvert_nu,[('nu','in_file')])
                                 ])
 
-                    fsl_bet = pe.Node(interface=fsl.BET(out_file='brain.nii.gz',mask=True,skull=True,robust=True),name='fsl_bet')
-
-                    flow.connect([
-                                (fs_mriconvert_nu,fsl_bet,[('out_file','in_file')])
-                                ])
-
                     fs_mriconvert_brainmask = pe.Node(interface=fs.MRIConvert(out_type="mgz",out_file="brainmask.mgz"),name='fs_mriconvert_bet_brainmask')
 
-                    flow.connect([
-                                (fsl_bet,fs_mriconvert_brainmask,[('out_file','in_file')])
-                                ])
+                    if self.config.brain_mask_extraction_tool == "BET":
+                        fsl_bet = pe.Node(interface=fsl.BET(out_file='brain.nii.gz',mask=True,skull=True,robust=True),name='fsl_bet')
+
+                        flow.connect([
+                                    (fs_mriconvert_nu,fsl_bet,[('out_file','in_file')]),
+                                    (fsl_bet,fs_mriconvert_brainmask,[('out_file','in_file')])
+                                    ])
+
+                    elif self.config.brain_mask_extraction_tool == "ANTs":
+                        templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_templateIXI', 'T_template2.nii.gz'))
+                        probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_templateIXI', 'T_templateProbabilityMask.nii.gz'))
+
+                        ants_bet = pe.Node(interface=ants.BrainExtraction(out_prefix='ants_bet_'),name='ants_bet')
+                        ants_bet.inputs.brain_template = templatefile
+                        ants_bet.inputs.brain_probability_mask = probmaskfile
+
+                        flow.connect([
+                                    (fs_mriconvert_nu,ants_bet,[('out_file','anatomical_image')]),
+                                    (ants_bet,fs_mriconvert_brainmask,[('BrainExtractionMask','in_file')])
+                                    ])
 
                     # copy_brainmask_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmask_to_fs')
                     # copy_brainmask_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.mgz")
