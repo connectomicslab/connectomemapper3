@@ -277,6 +277,8 @@ class CSD(DipyDiffusionInterface):
 
         if self.inputs.save_fods:
             # isphere = get_sphere('symmetric724')
+            IFLOGGER.info('Fitting CSD model')
+            csd_fit = csd_model.fit(data, msk)
             fods = csd_fit.odf(sphere)
             IFLOGGER.info(fods)
             IFLOGGER.info(fods.shape)
