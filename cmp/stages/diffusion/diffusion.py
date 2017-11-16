@@ -22,6 +22,7 @@ import nipype.interfaces.fsl as fsl
 from cmp.stages.common import Stage
 from reconstruction import *
 from tracking import *
+from cmp.interfaces.misc import ExtractImageVoxelSizes
 
 class DiffusionConfig(HasTraits):
     diffusion_imaging_model = Str
@@ -30,6 +31,8 @@ class DiffusionConfig(HasTraits):
     # processing_tool_editor = List(['DTK','MRtrix','Camino','FSL','Gibbs'])
     processing_tool_editor = List(['Dipy','MRtrix'])
     dilate_rois = Bool(True)
+    dilation_kernel = Enum(['Box','Gauss','Sphere'])
+    dilation_radius = Enum([1,2,3,4])
     processing_tool = Str('MRtrix')
     dtk_recon_config = Instance(HasTraits)
     dipy_recon_config = Instance(HasTraits)
@@ -51,7 +54,10 @@ class DiffusionConfig(HasTraits):
     traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
                        #'interpolation'),
 		              Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
-                       Item('dilate_rois',visible_when='processing_tool!="DTK"'),
+                       HGroup(
+                           Item('dilate_rois',visible_when='processing_tool!="DTK"'),
+                           Item('dilation_radius',visible_when='dilate_rois',label="radius")
+                           ),
                        Group(Item('dtk_recon_config',style='custom',defined_when='processing_hallenging because each DWI section can only acquire one b-value for a stool=="DTK"'),
                              Item('dipy_recon_config',style='custom',defined_when='processing_tool=="Dipy"'),
 			                Item('mrtrix_recon_config',style='custom',defined_when='processing_tool=="MRtrix"'),
@@ -238,8 +244,38 @@ class DiffusionStage(Stage):
         if self.config.processing_tool != 'DTK':
 
             if self.config.dilate_rois:
+
                 dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
                 dilate_rois.inputs.operation = 'modal'
+
+                if self.config.dilation_kernel == 'Box':
+                    kernel_size = 2*self.config.dilation_radius + 1
+                    dilate_rois.inputs.kernel_shape = 'boxv'
+                    dilate_rois.inputs.kernel_size = kernel_size
+                else:
+                    extract_sizes = pe.Node(interface=ExtractImageVoxelSizes(),name='extract_sizes')
+                    flow.connect([
+                                (inputnode,extract_sizes,[("diffusion","in_file")])
+                                ])
+                    extract_sizes.run()
+                    print "Voxel sizes : ",extract_sizes.outputs.voxel_sizes
+
+                    min_size = 100
+                    for voxel_size in extract_sizes.outputs.voxel_sizes:
+                        if voxel_size < min_size:
+                            min_size = voxel_size
+
+                    print("voxel size (min): %g"%min_size)
+                    if self.confi.dilation_kernel == 'Gauss':
+                        kernel_size = 2*extract_sizes.outputs.voxel_sizes + 1
+                        sigma = kernel_size / 2.355 # FWHM criteria, i.e. sigma = FWHM / 2(sqrt(2ln(2)))
+                        dilate_rois.inputs.kernel_shape = 'gauss'
+                        dilate_rois.inputs.kernel_size = sigma
+                    elif self.config.dilation_kernel == 'Sphere':
+                        radius =  0.5*min_size + self.config.dilation_radius * min_size
+                        dilate_rois.inputs.kernel_shape = 'sphere'
+                        dilate_rois.inputs.kernel_size = radius
+
                 flow.connect([
                             (inputnode,dilate_rois,[("roi_volumes","in_file")]),
                             (dilate_rois,outputnode,[("out_file","roi_volumes")])

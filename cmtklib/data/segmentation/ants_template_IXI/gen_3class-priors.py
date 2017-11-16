@@ -26,7 +26,8 @@ deep_gm = img_prior4.get_data()
 img_csf = nib.Nifti1Image(csf,affine)
 nib.save(img_csf,'/home/localadmin/Softwares/cmp3/cmtklib/data/segmentation/ants_template_IXI/3Class-Priors/priors1.nii.gz')
 
-gm = deep_gm + cort_gm
+#gm = deep_gm + cort_gm
+gm = cort_gm
 gm[gm>1.0]=1.0
 img_gm = nib.Nifti1Image(gm,affine)
 nib.save(img_gm,'/home/localadmin/Softwares/cmp3/cmtklib/data/segmentation/ants_template_IXI/3Class-Priors/priors2.nii.gz')

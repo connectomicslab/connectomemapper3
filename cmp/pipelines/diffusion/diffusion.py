@@ -485,8 +485,8 @@ class DiffusionPipeline(Pipeline):
 
         #Dataname substitutions in order to comply with BIDS derivatives specifications
         sinker.inputs.substitutions = [ ('T1', self.subject+'_T1w_head'),
-                                        ('brain_mask.nii.gz', self.subject+'_T1w_brainmask'),
-                                        ('brain.nii.gz', self.subject+'_T1w_brain'),
+                                        ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
+                                        ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
                                         #('wm_mask',self.subject+'_T1w_class-WM'),
                                         #('gm_mask',self.subject+'_T1w_class-GM'),
                                         #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files

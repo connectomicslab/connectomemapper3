@@ -113,7 +113,7 @@ class ProcessThread(threading.Thread):
 #         """ Gets the object's children.
 #         """
 #         return self.adaptee.children
-# 
+#
 #     def get_label(self):
 #         """ Gets the label to display for a specified object.
 #         """

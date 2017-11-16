@@ -553,7 +553,8 @@ def create_dipy_recon_flow(config):
     else:
         # Perform spherical deconvolution
         dipy_CSD = pe.Node(interface=CSD(),name="dipy_CSD")
-        dipy_CSD.inputs.save_fods=False
+        dipy_CSD.inputs.save_fods=True
+        dipy_CSD.inputs.out_fods='diffusion_fODFs.nii.gz'
 
         if config.lmax_order != 'Auto':
             dipy_CSD.inputs.sh_order = config.lmax_order
