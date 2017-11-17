@@ -63,15 +63,14 @@ class Check_Input_Notification(HasTraits):
 class fMRIPipeline(Pipeline):
     pipeline_name = Str("fMRI_pipeline")
     input_folders = ['fMRI','T1','T2']
+    seg_tool = Str
 
-    ordered_stage_list = ['Preprocessing','Segmentation','Parcellation','Registration','Functional','Connectome']
+    ordered_stage_list = ['Preprocessing','Registration','FunctionalMRI','Connectome']
 
     global_conf = Global_Configuration()
 
     preprocessing = Button('Preprocessing')
-    segmentation = Button('Segmentation')
-    parcellation = Button('Parcellation')
-    functional = Button('Functional')
+    functionalMRI = Button('FunctionalMRI')
     registration = Button('Registration')
     connectome = Button('Connectome')
 
@@ -79,45 +78,25 @@ class fMRIPipeline(Pipeline):
 
     pipeline_group = VGroup(
                         HGroup(spring,Item('preprocessing',editor=ToolkitEditorFactory(image=ImageResource('preprocessing'))),spring,show_labels=False),
-                        HGroup(spring,Item('segmentation',editor=ToolkitEditorFactory(image=ImageResource('segmentation'))),spring,show_labels=False),#Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
-                        HGroup(spring,Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'))),spring,show_labels=False),
                         HGroup(spring,Item('registration',editor=ToolkitEditorFactory(image=ImageResource('registration'))),spring,show_labels=False),
-                        HGroup(spring,Item('functional',editor=ToolkitEditorFactory(image=ImageResource('functional'))),spring,show_labels=False),
+                        HGroup(spring,Item('functionalMRI',editor=ToolkitEditorFactory(image=ImageResource('functionalMRI'))),spring,show_labels=False),
                         HGroup(spring,Item('connectome',editor=ToolkitEditorFactory(image=ImageResource('connectome'))),spring,show_labels=False),
                         springy=True
                         )
 
     def __init__(self,project_info):
         self.stages = {'Preprocessing':PreprocessingStage(),
-        'Segmentation':SegmentationStage(),
-            'Parcellation':ParcellationStage(pipeline_mode = "fMRI"),
             'Registration':RegistrationStage(pipeline_mode = "fMRI"),
-            'Functional':FunctionalStage(),
+            'FunctionalMRI':FMRIStage(),
             'Connectome':ConnectomeStage()}
         Pipeline.__init__(self, project_info)
-        self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
-        self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
-        self.stages['Functional'].config.on_trait_change(self.update_nuisance_requirements,'global_nuisance')
-        self.stages['Functional'].config.on_trait_change(self.update_nuisance_requirements,'csf')
-        self.stages['Functional'].config.on_trait_change(self.update_nuisance_requirements,'wm')
+        self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements,'global_nuisance')
+        self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements,'csf')
+        self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements,'wm')
         self.stages['Connectome'].config.on_trait_change(self.update_scrubbing,'apply_scrubbing')
 
-    def update_parcellation(self):
-        if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
-            self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
-        else:
-            self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.pre_custom
-        self.update_registration()
-
-    def update_segmentation(self):
-        if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
-            self.stages['Segmentation'].config.seg_tool = "Custom segmentation"
-        else:
-            self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
-        self.update_registration()
-
     def update_registration(self):
-        if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
+        if self.seg_tool == "Custom segmentation" :
             if self.stages['Registration'].config.registration_mode == 'BBregister (FS)':
                 self.stages['Registration'].config.registration_mode = 'Linear (FSL)'
             if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
@@ -131,24 +110,18 @@ class fMRIPipeline(Pipeline):
                 self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)']
 
     def update_nuisance_requirements(self):
-        self.stages['Registration'].config.apply_to_eroded_brain = self.stages['Functional'].config.global_nuisance
-        self.stages['Registration'].config.apply_to_eroded_csf = self.stages['Functional'].config.csf
-        self.stages['Registration'].config.apply_to_eroded_wm = self.stages['Functional'].config.wm
+        self.stages['Registration'].config.apply_to_eroded_brain = self.stages['FunctionalMRI'].config.global_nuisance
+        self.stages['Registration'].config.apply_to_eroded_csf = self.stages['FunctionalMRI'].config.csf
+        self.stages['Registration'].config.apply_to_eroded_wm = self.stages['FunctionalMRI'].config.wm
 
     def update_scrubbing(self):
-        self.stages['Functional'].config.scrubbing = self.stages['Connectome'].config.apply_scrubbing
+        self.stages['FunctionalMRI'].config.scrubbing = self.stages['Connectome'].config.apply_scrubbing
 
     def _preprocessing_fired(self, info):
         self.stages['Preprocessing'].configure_traits()
 
-    def _segmentation_fired(self, info):
-        self.stages['Segmentation'].configure_traits()
-
-    def _parcellation_fired(self, info):
-        self.stages['Parcellation'].configure_traits()
-
     def _functional_fired(self, info):
-        self.stages['Functional'].configure_traits()
+        self.stages['FunctionalMRI'].configure_traits()
 
     def _registration_fired(self, info):
         self.stages['Registration'].configure_traits()
@@ -233,13 +206,13 @@ class fMRIPipeline(Pipeline):
     def check_config(self):
         common_check = Pipeline.check_config(self)
         if common_check == '':
-            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['Functional'].config.global_nuisance and not os.path.exists(self.stages['Parcellation'].config.brain_file):
+            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['FunctionalMRI'].config.global_nuisance and not os.path.exists(self.stages['Parcellation'].config.brain_file):
                 return('\n\tGlobal signal regression selected but no existing brain mask provided.\t\n\tPlease provide a brain mask in the parcellation configuration window,\n\tor disable the global signal regression in the functional configuration window.\t\n')
-            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['Functional'].config.csf and not os.path.exists(self.stages['Parcellation'].config.csf_file):
+            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['FunctionalMRI'].config.csf and not os.path.exists(self.stages['Parcellation'].config.csf_file):
                 return('\n\tCSF signal regression selected but no existing csf mask provided.\t\n\tPlease provide a csf mask in the parcellation configuration window,\n\tor disable the csf signal regression in the functional configuration window.\t\n')
-            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['Functional'].config.wm and not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
+            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['FunctionalMRI'].config.wm and not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
                 return('\n\tWM signal regression selected but no existing wm mask provided.\t\n\tPlease provide a wm mask in the segmentation configuration window,\n\tor disable the wm signal regression in the functional configuration window.\t\n')
-            if self.stages['Functional'].config.motion == True and self.stages['Preprocessing'].config.motion_correction == False:
+            if self.stages['FunctionalMRI'].config.motion == True and self.stages['Preprocessing'].config.motion_correction == False:
                 return('\n\tMotion signal regression selected but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configuration window,\n\tor disable the motion signal regression in the functional configuration window.\t\n')
             if self.stages['Connectome'].config.apply_scrubbing == True and self.stages['Preprocessing'].config.motion_correction == False:
                 return('\n\tScrubbing applied but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configutation window,\n\tor disable scrubbing in the connectome configuration window.\t\n')
@@ -299,11 +272,11 @@ class fMRIPipeline(Pipeline):
                           (fMRI_inputnode,reg_flow, [('wm_mask_file','inputnode.wm_mask'),('roi_volumes','inputnode.roi_volumes'),
                                                 ('wm_eroded','inputnode.eroded_wm')])
                           ])
-            if self.stages['Functional'].config.global_nuisance:
+            if self.stages['FunctionalMRI'].config.global_nuisance:
                 fMRI_flow.connect([
                               (fMRI_inputnode,reg_flow,[('brain_eroded','inputnode.eroded_brain')])
                             ])
-            if self.stages['Functional'].config.csf:
+            if self.stages['FunctionalMRI'].config.csf:
                 fMRI_flow.connect([
                               (fMRI_inputnode,reg_flow,[('csf_eroded','inputnode.eroded_csf')])
                             ])
@@ -313,15 +286,15 @@ class fMRIPipeline(Pipeline):
                                                 ('subject_id','inputnode.subject_id')]),
                           ])
 
-        if self.stages['Functional'].enabled:
-            func_flow = self.create_stage_flow("Functional")
+        if self.stages['FunctionalMRI'].enabled:
+            func_flow = self.create_stage_flow("FunctionalMRI")
             fMRI_flow.connect([
                         (preproc_flow,func_flow, [('outputnode.functional_preproc','inputnode.preproc_file')]),
                         (reg_flow,func_flow, [('outputnode.wm_mask_registered','inputnode.registered_wm'),('outputnode.roi_volumes_registered','inputnode.registered_roi_volumes'),
                                               ('outputnode.eroded_wm_registered','inputnode.eroded_wm'),('outputnode.eroded_csf_registered','inputnode.eroded_csf'),
                                               ('outputnode.eroded_brain_registered','inputnode.eroded_brain')])
                         ])
-            if self.stages['Functional'].config.scrubbing or self.stages['Functional'].config.motion:
+            if self.stages['FunctionalMRI'].config.scrubbing or self.stages['FunctionalMRI'].config.motion:
                 fMRI_flow.connect([
                                    (preproc_flow,func_flow,[("outputnode.par_file","inputnode.motion_par_file")])
                                 ])
@@ -336,12 +309,12 @@ class fMRIPipeline(Pipeline):
                         (con_flow,fMRI_outputnode,[("outputnode.connectivity_matrices","connectivity_matrices")])
 		                ])
 
-            if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
+            if self.parcellation_scheme == "Custom":
                 fMRI_flow.connect([(fMRI_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
 
         # Create NIPYPE flow
 
-        flow = pe.Workflow(name='NIPYPE', base_dir=os.path.join(self.base_directory))
+        flow = pe.Workflow(name='nipype', base_dir=os.path.join(self.base_directory))
 
         flow.connect([
                       (datasource,common_flow,[("T1","inputnode.T1")]),

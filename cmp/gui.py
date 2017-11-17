@@ -123,19 +123,30 @@ class CMP_Project_Info(HasTraits):
     #current_subj = Str()
     warning_msg = Str('\nWarning: selected directory is already configured.\n\nDo you want to reset the configuration to default parameters ?\n')
     config_error_msg = Str('')
-    process_type = Enum('diffusion',['diffusion','fMRI'])
+    #process_type = Enum('diffusion',['diffusion','fMRI'])
     diffusion_imaging_model = Enum('DSI',['DSI','DTI','HARDI'])
-    config_to_load = Str()
-    available_config = List()
-    config_to_load_msg = Str('Several configuration files available.Select which one to load:\n')
-    last_date_processed = Str('Not yet processed')
-    last_stage_processed = Str('Not yet processed')
-    stage_names = List
-    custom_last_stage = Str
 
-    create_view = QtView( Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
+    anat_config_to_load = Str()
+    anat_available_config = List()
+    anat_config_to_load_msg = Str('Several configuration files available.Select which one to load:\n')
+    anat_last_date_processed = Str('Not yet processed')
+    anat_last_stage_processed = Str('Not yet processed')
+
+    anat_stage_names = List
+    anat_custom_last_stage = Str
+
+    dmri_config_to_load = Str()
+    dmri_available_config = List()
+    dmri_config_to_load_msg = Str('Several configuration files available.Select which one to load:\n')
+    dmri_last_date_processed = Str('Not yet processed')
+    dmri_last_stage_processed = Str('Not yet processed')
+
+    dmri_stage_names = List
+    dmri_custom_last_stage = Str
+
+    create_view = QtView( #Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
                         Item('base_directory',label='BIDS dataset directory'),
-                        title='Select type of pipeline, diffusion model (if diffusion) and BIDS base directory ',
+                        title='Select BIDS base directory ',
                         kind='livemodal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
@@ -163,15 +174,28 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    select_config_to_load = QtView(Item('config_to_load_msg',style='readonly',show_label=False),
-                                  Item('config_to_load',style='custom',editor=EnumEditor(name='available_config'),show_label=False),
-                                  title='Select configuration',
+    anat_select_config_to_load = QtView(Item('anat_config_to_load_msg',style='readonly',show_label=False),
+                                  Item('anat_config_to_load',style='custom',editor=EnumEditor(name='anat_available_config'),show_label=False),
+                                  title='Select configuration for anatomical pipeline',
                                   kind='modal',
                                   #style_sheet=style_sheet,
                                   buttons=['OK','Cancel'])
 
-    custom_map_view = QtView(Item('custom_last_stage',editor=EnumEditor(name='stage_names'),style='custom',show_label=False),
-                        title='Select until which stage to process.',
+    anat_custom_map_view = QtView(Item('anat_custom_last_stage',editor=EnumEditor(name='anat_stage_names'),style='custom',show_label=False),
+                        title='Select until which stage to process the anatomical pipeline.',
+                        kind='modal',
+                        #style_sheet=style_sheet,
+                        buttons=['OK','Cancel'])
+
+    dmri_select_config_to_load = QtView(Item('dmri_config_to_load_msg',style='readonly',show_label=False),
+                                  Item('dmri_config_to_load',style='custom',editor=EnumEditor(name='dmri_available_config'),show_label=False),
+                                  title='Select configuration for diffusion pipeline',
+                                  kind='modal',
+                                  #style_sheet=style_sheet,
+                                  buttons=['OK','Cancel'])
+
+    dmri_custom_map_view = QtView(Item('dmri_custom_last_stage',editor=EnumEditor(name='dmri_stage_names'),style='custom',show_label=False),
+                        title='Select until which stage to process the diffusion pipeline.',
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
@@ -179,44 +203,98 @@ class CMP_Project_Info(HasTraits):
 ## Main window class of the ConnectomeMapper_Pipeline
 #
 class CMP_MainWindow(HasTraits):
-    pipeline = Instance(HasTraits)
+    anat_pipeline = Instance(HasTraits)
+    dmri_pipeline = Instance(HasTraits)
+
     project_info = Instance(CMP_Project_Info)
 
     new_project = Action(name='New Connectome data...',action='new_project')
     load_project = Action(name='Load Connectome data...',action='load_project')
-    preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
-    map_connectome = Action(name='Map Connectome!',action='map_connectome',enabled_when='handler.inputs_checked==True')
-    map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
+    #preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
+    #map_connectome = Action(name='Map Connectome!',action='map_connectome',enabled_when='handler.inputs_checked==True')
+    #map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
     change_subject = Action(name='Change subject',action='change_subject',enabled_when='handler.project_loaded==True')
-    save_config = Action(name='Save configuration as...',action='save_config_file',enabled_when='handler.project_loaded==True')
-    load_config = Action(name='Load configuration...',action='load_config_file',enabled_when='handler.project_loaded==True')
+
+    anat_save_config = Action(name='Save anatomical pipeline configuration as...',action='anat_save_config_file',enabled_when='handler.project_loaded==True')
+    anat_load_config = Action(name='Load anatomical pipeline configuration...',action='anat_load_config_file',enabled_when='handler.project_loaded==True')
+
+    dmri_save_config = Action(name='Save diffusion pipeline configuration as...',action='dmri_save_config_file',enabled_when='handler.project_loaded==True')
+    dmri_load_config = Action(name='Load diffusion pipeline configuration...',action='dmri_load_config_file',enabled_when='handler.project_loaded==True')
 
     project_info.style_sheet = style_sheet
 
-    traits_view = QtView(HGroup(
-                            Item('pipeline',style='custom',enabled_when='handler.inputs_checked==True',show_label=False),
+    data_manager = VGroup(
+                        VGroup(
+                            HGroup(
+                                # '20',Item('base_directory',width=-0.3,height=-0.2, style='custom',show_label=False,resizable=True),
+                                '20',Item('base_directory',width=-0.3,style='readonly',show_label=False,resizable=True),
+                                ),
+                            # HGroup(
+                            #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)
+                            #     ),
+                        label='BIDS base directory',
+                        ),
+                        spring,
+                        Group(
+                            Item('subject',style='readonly',show_label=False,resizable=True),
+                            label='Subject',
+                        ),
+                        spring,
+                        Group(
+                            Group(
+                                Item('dmri_last_date_processed',style='readonly',resizable=True),
+                                Item('dmri_last_stage_processed',style='readonly',resizable=True),
+                                label="Diffusion pipeline"
                             ),
-                       title='Connectome Mapper 3',
-                       menubar=MenuBar(
-                               Menu(
-                                   ActionGroup(
-                                       new_project,
-                                       load_project,
-                                   ),
-                                   ActionGroup(
-                                       Action(name='Quit',action='_on_close'),
-                                   ),
-                                   name='File'),
-                               Menu(
-                                   save_config,
-                                   load_config,
-                                name='Configuration'),
-                               Menu(
-                                   change_subject,
-                                name='Subjects'),
-                          ),
+                            Group(
+                                Item('anat_last_date_processed',style='readonly',resizable=True),
+                                Item('anat_last_stage_processed',style='readonly',resizable=True),
+                                label="Anatomical pipeline"
+                            )
+                        ),
+                        spring,
+                        Group(
+                            Item('number_of_cores',resizable=True),
+                            label='Processing configuration'
+                        ),
+                        '700',
+                        spring,
+                        label='Data',springy=True)
+
+    traits_view = QtView(Group(
+                            HGroup(
+                                Include('data_manager'),label='Data manager',springy=True
+                            ),
+                            HGroup(
+                                Item('anat_pipeline',style='custom',enabled_when='handler.anat_inputs_checked==True',show_label=False),
+                            ),
+                            HGroup(
+                                Item('dmri_pipeline',style='custom',enabled_when='handler.dmri_inputs_checked==True',show_label=False),
+                            ),
+                            orientation='horizontal', layout='tabbed', springy=True),
+                        title='Connectome Mapper 3',
+                        menubar=MenuBar(
+                                    Menu(
+                                        ActionGroup(
+                                            new_project,
+                                            load_project,
+                                        ),
+                                        ActionGroup(
+                                            Action(name='Quit',action='_on_close'),
+                                        ),
+                                        name='File'),
+                                    Menu(
+                                        anat_save_config,
+                                        anat_load_config,
+                                        dmri_save_config,
+                                        dmri_load_config,
+                                    name='Configuration'),
+                                    # Menu(
+                                    #     change_subject,
+                                    # name='Subjects'),
+                                ),
                        handler = project.ProjectHandler(),
                        style_sheet=style_sheet,
-                       buttons = [preprocessing, map_connectome, map_custom],
+                       #buttons = [preprocessing, map_connectome, map_custom],
                        width=0.5, height=0.8, scrollable=True, resizable=True
                    )
