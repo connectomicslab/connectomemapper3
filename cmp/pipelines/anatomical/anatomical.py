@@ -308,7 +308,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         # Create common_flow
 
-        anat_flow = pe.Workflow(name='anatomical_pipeline')
+        anat_flow = pe.Workflow(name='anatomical_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
         anat_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
         anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","brain","brain_mask","wm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
             "roi_volumes","parcellation_scheme","atlas_info"]),name="outputnode")
@@ -328,7 +328,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     print "Freesurfer_subject_id: %s" % self.stages['Segmentation'].config.freesurfer_subject_id
 
             seg_flow = self.create_stage_flow("Segmentation")
-            
+
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
                 anat_flow.connect([(anat_inputnode,seg_flow, [('T1','inputnode.T1')])])
 
