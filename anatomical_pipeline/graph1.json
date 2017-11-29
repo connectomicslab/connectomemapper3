@@ -1,0 +1,82 @@
+{
+    "groups": [
+        {
+            "name": "Group_00001",
+            "procs": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "total": 6
+        }
+    ],
+    "links": [
+        {
+            "source": 2,
+            "target": 3,
+            "value": 1
+        },
+        {
+            "source": 3,
+            "target": 4,
+            "value": 1
+        },
+        {
+            "source": 1,
+            "target": 2,
+            "value": 1
+        },
+        {
+            "source": 4,
+            "target": 5,
+            "value": 1
+        },
+        {
+            "source": 0,
+            "target": 1,
+            "value": 1
+        }
+    ],
+    "maxN": 6,
+    "nodes": [
+        {
+            "group": 1,
+            "name": "0_datasource",
+            "report": "/tmp/tmp9lUxEh/anatomical_pipeline/datasource/_report/report.rst",
+            "result": "/tmp/tmp9lUxEh/anatomical_pipeline/datasource/result_datasource.pklz"
+        },
+        {
+            "group": 1,
+            "name": "1_mgz_convert",
+            "report": "/tmp/tmp66DPF1/anatomical_pipeline/segmentation_stage/mgz_convert/_report/report.rst",
+            "result": "/tmp/tmp66DPF1/anatomical_pipeline/segmentation_stage/mgz_convert/result_mgz_convert.pklz"
+        },
+        {
+            "group": 1,
+            "name": "2_copy_orig",
+            "report": "/tmp/tmpu2KeNT/anatomical_pipeline/segmentation_stage/copy_orig/_report/report.rst",
+            "result": "/tmp/tmpu2KeNT/anatomical_pipeline/segmentation_stage/copy_orig/result_copy_orig.pklz"
+        },
+        {
+            "group": 1,
+            "name": "3_reconall",
+            "report": "/tmp/tmp8Jcgev/anatomical_pipeline/segmentation_stage/reconall/_report/report.rst",
+            "result": "/tmp/tmp8Jcgev/anatomical_pipeline/segmentation_stage/reconall/result_reconall.pklz"
+        },
+        {
+            "group": 1,
+            "name": "4_Lausanne2008_parcellation",
+            "report": "/tmp/tmpQwIxRj/anatomical_pipeline/parcellation_stage/Lausanne2008_parcellation/_report/report.rst",
+            "result": "/tmp/tmpQwIxRj/anatomical_pipeline/parcellation_stage/Lausanne2008_parcellation/result_Lausanne2008_parcellation.pklz"
+        },
+        {
+            "group": 1,
+            "name": "5_anatomical_sinker",
+            "report": "/tmp/tmpPmQTCY/anatomical_pipeline/anatomical_sinker/_report/report.rst",
+            "result": "/tmp/tmpPmQTCY/anatomical_pipeline/anatomical_sinker/result_anatomical_sinker.pklz"
+        }
+    ]
+}

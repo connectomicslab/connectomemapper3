@@ -4,38 +4,52 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Diffusion pipeline Class definition
+""" Anatomical pipeline Class definition
 """
 
+import datetime
 import os
 import fnmatch
 import shutil
 import threading
 import multiprocessing
 import time
+
 from nipype.utils.filemanip import copyfile
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 from nipype.interfaces.dcm2nii import Dcm2niix
-import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.mrtrix as mrt
+
+
+# from pyface.api import ImageResource
+import nipype.interfaces.io as nio
+from nipype import config, logging
+
 from nipype.caching import Memory
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, BaseInterface, \
     BaseInterfaceInputSpec, File, TraitedSpec, isdefined, Directory, InputMultiPath
 from nipype.utils.filemanip import split_filename
 
-# Own import
-import cmp.interfaces.fsl as cmp_fsl
-
 from traits.api import *
 from traitsui.api import *
+from traitsui.qt4.extra.qt_view import QtView
+from pyface.ui.qt4.image_resource import ImageResource
 
 import apptools.io.api as io
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+
+from bids.grabbids import BIDSLayout
+
+# Own import
+import cmp.interfaces.fsl as cmp_fsl
+
+import cmp.pipelines.common as cmp_common
+from cmp.stages.segmentation.segmentation import SegmentationStage
+from cmp.stages.parcellation.parcellation import ParcellationStage
 
 class Global_Configuration(HasTraits):
     process_type = Str('anatomical')
@@ -55,17 +69,19 @@ class Check_Input_Notification(HasTraits):
                        buttons=['OK'],
                        title="Check inputs")
 
-class AnatomicalPipeline(Pipeline):
+class AnatomicalPipeline(cmp_common.Pipeline):
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("anatomical_pipeline")
     #input_folders = ['DSI','DTI','HARDI','T1','T2']
     input_folders = ['anat']
     process_type = Str
     diffusion_imaging_model = Str
-    subject = Str
+
+    #subject = Str
     subject_directory = Directory
     derivatives_directory = Directory
     ordered_stage_list = ['Segmentation','Parcellation']# ,'MRTrixConnectome']
+    custom_last_stage = Enum('Parcellation',['Segmentation','Parcellation'])
 
     global_conf = Global_Configuration()
 
@@ -75,22 +91,33 @@ class AnatomicalPipeline(Pipeline):
     parcellation = Button('Parcellation')
     #parcellation.setIcon(QIcon(QPixmap("parcellation.png")))
 
+    #custom_run = Button('Custom...')
+    #run = Button('Run...')
+
     config_file = Str
 
     pipeline_group = VGroup(
+                        HGroup(spring,Item('segmentation',style='custom',width=550,height=170,resizable=True,editor_args={'image':ImageResource('segmentation',search_path=['./']),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
+                        HGroup(spring,Item('parcellation',style='custom',width=550,height=200,resizable=True,editor_args={'image':ImageResource('parcellation',search_path=['./']),'label':""}),spring,show_labels=False),
                         spring,
-                        HGroup(spring,Item('segmentation',style='custom',width=450,height=110,resizable=True,editor_args={'image':ImageResource('segmentation'),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
-                        HGroup(spring,Item('parcellation',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('parcellation'),'label':""}),spring,show_labels=False),
-                        spring,
+    #                    HGroup(spring,Item('run',width=50,show_label=False),spring,Item('custom_run',width=50,show_label=False),spring),
                         springy=True
-                    )
+                        )
 
     def __init__(self,project_info):
         self.stages = {'Segmentation':SegmentationStage(),
             'Parcellation':ParcellationStage(pipeline_mode = "Diffusion")}
-        Pipeline.__init__(self, project_info)
+        #import inspect
+        #print inspect.getmro(self)
+        print isinstance(self, AnatomicalPipeline)
+        print isinstance(self, Pipeline)
+        print issubclass(AnatomicalPipeline,Pipeline)
+
+        cmp_common.Pipeline.__init__(self, project_info)
+        #super(Pipeline, self).__init__(project_info)
 
         self.subject = project_info.subject
+        self.last_date_processed = project_info.anat_last_date_processed
 
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = self.subject
@@ -100,6 +127,16 @@ class AnatomicalPipeline(Pipeline):
 
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
+
+    def check_config(self):
+        if self.stages['Segmentation'].config.seg_tool ==  'Custom segmentation':
+            if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
+                return('\nCustom segmentation selected but no WM mask provided.\nPlease provide an existing WM mask file in the Segmentation configuration window.\n')
+            if not os.path.exists(self.stages['Parcellation'].config.atlas_nifti_file):
+                return('\n\tCustom segmentation selected but no atlas provided.\nPlease specify an existing atlas file in the Parcellation configuration window.\t\n')
+            if not os.path.exists(self.stages['Parcellation'].config.graphml_file):
+                return('\n\tCustom segmentation selected but no graphml info provided.\nPlease specify an existing graphml file in the Parcellation configuration window.\t\n')
+        return ''
 
     def update_parcellation(self):
         if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
@@ -130,6 +167,24 @@ class AnatomicalPipeline(Pipeline):
             if stage == custom_last_stage:
                 break
 
+    # def _custom_run_fired(self, ui_info):
+    #     if self.custom_last_stage == '':
+    #         ui_info.ui.context["object"].project_info.anat_custom_last_stage = self.ordered_stage_list[0]
+    #     ui_info.ui.context["object"].project_info.anat_stage_names = self.ordered_stage_list
+    #     cus_res = ui_info.ui.context["object"].project_info.configure_traits(view='anat_custom_map_view')
+    #     if cus_res:
+    #         self.define_custom_mapping(ui_info.ui.context["object"].project_info.anat_custom_last_stage)
+    #
+    # def _run_fired(self, ui_info):
+    #     ui_info.ui.context["object"].project_info.config_error_msg = self.check_config()
+    #     if ui_info.ui.context["object"].project_info.config_error_msg != '':
+    #         ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
+    #     else:
+    #         # save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
+    #         self.launch_process()
+    #         self.launch_progress_window()
+    #         # update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline)
+
     def check_input(self, gui=True):
         print '**** Check Inputs  ****'
         t1_available = False
@@ -137,12 +192,8 @@ class AnatomicalPipeline(Pipeline):
 
         T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
 
-        print "Looking for...."
-        print "dwi_file : %s" % dwi_file
-        print "bvecs_file : %s" % bvec_file
-        print "bvals_file : %s" % bval_file
+        print "Looking in %s for...." % self.base_directory
         print "T1_file : %s" % T1_file
-        print "T2_file : %s" % T2_file
 
         try:
             layout = BIDSLayout(self.base_directory)
@@ -158,61 +209,23 @@ class AnatomicalPipeline(Pipeline):
             #     print "-%s" % mod
 
             for typ in types:
-                if typ == 'dwi' and os.path.isfile(dwi_file):
-                    print "%s available" % typ
-                    diffusion_available = True
-
                 if typ == 'T1w' and os.path.isfile(T1_file):
                     print "%s available" % typ
                     t1_available = True
 
-                if typ == 'T2w' and os.path.isfile(T2_file):
-                    print "%s available" % typ
-                    t2_available = True
         except:
             error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+            return
 
+        if t1_available:
+            #Copy diffusion data to derivatives / cmp  / subject / dwi
+            out_T1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
+            shutil.copy(src=T1_file,dst=out_T1_file)
 
-        if os.path.isfile(bval_file): bvals_available = True
-
-        if os.path.isfile(bvec_file): bvecs_available = True
-
-        mem = Memory(base_dir=os.path.join(self.derivatives_directory,'cmp',self.subject,'tmp','nipype'))
-        swap_and_reorient = mem.cache(SwapAndReorient)
-
-        if diffusion_available:
-            if bvals_available and bvecs_available:
-                self.stages['Diffusion'].config.diffusion_imaging_model_choices = self.diffusion_imaging_model
-
-                #Copy diffusion data to derivatives / cmp  / subject / dwi
-                out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.nii.gz')
-                out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bval')
-                out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bvec')
-
-                shutil.copy(src=dwi_file,dst=out_dwi_file)
-                shutil.copy(src=bvec_file,dst=out_bvec_file)
-                shutil.copy(src=bval_file,dst=out_bval_file)
-
-                if t2_available:
-                    print "Swap and reorient T2"
-                    swap_and_reorient(src_file=os.path.join(self.subject_directory,'anat',self.subject+'_T2w.nii.gz'),
-                                      ref_file=os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz'),
-                                      out_file=os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T2w.nii.gz'))
-                if t1_available:
-                    swap_and_reorient(src_file=os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz'),
-                                      ref_file=os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz'),
-                                      out_file=os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz'))
-                    valid_inputs = True
-                    input_message = 'Inputs check finished successfully.\nDiffusion and anatomical data available.'
-                else:
-                    input_message = 'Error during inputs check.\nAnatomical data (T1) not available.'
-            else:
-                input_message = 'Error during inputs check.\nDiffusion bvec or bval files not available.'
-        elif t1_available:
             valid_inputs = True
             input_message = 'Inputs check finished successfully. \nOnly anatomical data (T1) available.'
         else:
-            input_message = 'Error during inputs check. No diffusion or anatomical data available in folder '+os.path.join(self.base_directory,self.subject)+'!'
+            input_message = 'Error during inputs check. No anatomical data available in folder '+os.path.join(self.base_directory,self.subject)+'/anat/!'
 
         #diffusion_imaging_model = diffusion_imaging_model[0]
 
@@ -220,15 +233,9 @@ class AnatomicalPipeline(Pipeline):
             #input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
             #input_notification.configure_traits()
             print input_message
-            diffusion_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
 
         else:
             print input_message
-            self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
-            diffusion_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
-
-        if t2_available:
-            self.stages['Registration'].config.registration_mode_trait = ['Linear + Non-linear (FSL)']#,'BBregister (FS)','Nonlinear (FSL)']
 
         if(t1_available):
             valid_inputs = True
@@ -307,6 +314,10 @@ class AnatomicalPipeline(Pipeline):
             "roi_volumes","parcellation_scheme","atlas_info"]),name="outputnode")
         anat_flow.add_nodes([anat_inputnode,anat_outputnode])
 
+        anat_flow.connect([
+                        (datasource,anat_inputnode,[("T1","T1")])
+                        ])
+
         if self.stages['Segmentation'].enabled:
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
 
@@ -317,7 +328,7 @@ class AnatomicalPipeline(Pipeline):
                     print "Freesurfer_subject_id: %s" % self.stages['Segmentation'].config.freesurfer_subject_id
 
             seg_flow = self.create_stage_flow("Segmentation")
-
+            
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
                 anat_flow.connect([(anat_inputnode,seg_flow, [('T1','inputnode.T1')])])
 
@@ -352,9 +363,9 @@ class AnatomicalPipeline(Pipeline):
 
         anat_flow.connect([
                         (anat_outputnode,sinker,[("T1","anat.@T1")]),
-                        (common_flow,sinker,[("brain","anat.@brain")]),
-                        (common_flow,sinker,[("brain_mask","anat.@brain_mask")]),
-                        (common_flow,sinker,[("roi_volumes","anat.@roivs")])
+                        (anat_outputnode,sinker,[("brain","anat.@brain")]),
+                        (anat_outputnode,sinker,[("brain_mask","anat.@brain_mask")]),
+                        (anat_outputnode,sinker,[("roi_volumes","anat.@roivs")])
                         ])
 
         iflogger.info("**** Processing ****")

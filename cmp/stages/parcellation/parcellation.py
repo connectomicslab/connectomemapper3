@@ -22,6 +22,7 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import cmtklib as cmtk
 import nipype.interfaces.utility as util
 
+from cmtklib.parcellation import Parcellate
 # Own imports
 from cmp.stages.common import Stage
 
@@ -90,7 +91,7 @@ class ParcellationStage(Stage):
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
 
         if self.config.parcellation_scheme != "Custom":
-            parc_node = pe.Node(interface=cmtk.parcellation.Parcellate(),name="%s_parcellation" % self.config.parcellation_scheme)
+            parc_node = pe.Node(interface=Parcellate(),name="%s_parcellation" % self.config.parcellation_scheme)
             parc_node.inputs.parcellation_scheme = self.config.parcellation_scheme
             parc_node.inputs.erode_masks = True
 

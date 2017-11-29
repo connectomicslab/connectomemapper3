@@ -36,6 +36,7 @@ import apptools.io.api as io
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from traitsui.qt4.extra.qt_view import QtView
 
 class ProgressWindow(HasTraits):
     main_status = Str("Processing launched...")
@@ -151,49 +152,51 @@ class Pipeline(HasTraits):
     last_stage_processed = Str
 
     # num core settings
-    number_of_cores = Enum(1,range(1,multiprocessing.cpu_count()+1))
+    number_of_cores = 1
 
-    traits_view = View(
-                        Group(
-                            VGroup(
-                                VGroup(
-                                    HGroup(
-                                        # '20',Item('base_directory',width=-0.3,height=-0.2, style='custom',show_label=False,resizable=True),
-                                        '20',Item('base_directory',width=-0.3,style='readonly',show_label=False,resizable=True),
-                                        ),
-                                    # HGroup(
-                                    #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)
-                                    #     ),
-                                label='BIDS base directory',
-                                ),
-                                spring,
-                                Group(
-                                    Item('subject',style='readonly',show_label=False,resizable=True),
-                                    label='Subject',
-                                ),
-                                spring,
-                                Group(
-                                    Item('pipeline_name',style='readonly',resizable=True),
-                                    Item('last_date_processed',style='readonly',resizable=True),
-                                    Item('last_stage_processed',style='readonly',resizable=True),
-                                    label='Last processing'
-                                ),
-                                spring,
-                                Group(
-                                    Item('number_of_cores',resizable=True),
-                                    label='Processing configuration'
-                                ),
-                                '700',
-                                spring,
-                            label='Data',
-                            springy=True),
-                            HGroup(
-                                Include('pipeline_group'),
-                                label='Diffusion pipeline',
-                                springy=True
-                            ),
-                        orientation='horizontal', layout='tabbed', springy=True)
-                    ,kind = 'livemodal')
+    traits_view = QtView(Include('pipeline_group'))
+
+    # traits_view = View(
+    #                     Group(
+    #                         VGroup(
+    #                             VGroup(
+    #                                 HGroup(
+    #                                     # '20',Item('base_directory',width=-0.3,height=-0.2, style='custom',show_label=False,resizable=True),
+    #                                     '20',Item('base_directory',width=-0.3,style='readonly',show_label=False,resizable=True),
+    #                                     ),
+    #                                 # HGroup(
+    #                                 #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)
+    #                                 #     ),
+    #                             label='BIDS base directory',
+    #                             ),
+    #                             spring,
+    #                             Group(
+    #                                 Item('subject',style='readonly',show_label=False,resizable=True),
+    #                                 label='Subject',
+    #                             ),
+    #                             spring,
+    #                             Group(
+    #                                 Item('pipeline_name',style='readonly',resizable=True),
+    #                                 Item('last_date_processed',style='readonly',resizable=True),
+    #                                 Item('last_stage_processed',style='readonly',resizable=True),
+    #                                 label='Last processing'
+    #                             ),
+    #                             spring,
+    #                             Group(
+    #                                 Item('number_of_cores',resizable=True),
+    #                                 label='Processing configuration'
+    #                             ),
+    #                             '700',
+    #                             spring,
+    #                         label='Data',
+    #                         springy=True),
+    #                         HGroup(
+    #                             Include('pipeline_group'),
+    #                             label='Diffusion pipeline',
+    #                             springy=True
+    #                         ),
+    #                     orientation='horizontal', layout='tabbed', springy=True)
+    #                 ,kind = 'livemodal')
      #-- Traits Default Value Methods -----------------------------------------
 
     # def _base_directory_default(self):
@@ -208,13 +211,15 @@ class Pipeline(HasTraits):
     def __init__(self, project_info):
         self.base_directory = project_info.base_directory
         self.subject = project_info.subject
-        self.last_date_processed = project_info.last_date_processed
+        self.number_of_cores = project_info.number_of_cores
+
         for stage in self.stages.keys():
-            if self.stages[stage].name == 'segmentation_stage' or self.stages[stage].name == 'parcellation_stage':
-                #self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject,self.stages[stage].name)
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype','common_stages',self.stages[stage].name)
-            else:
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype',self.pipeline_name,self.stages[stage].name)
+            self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype',self.pipeline_name,self.stages[stage].name)
+            # if self.stages[stage].name == 'segmentation_stage' or self.stages[stage].name == 'parcellation_stage':
+            #     #self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject,self.stages[stage].name)
+            #     self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype','common_stages',self.stages[stage].name)
+            # else:
+            #     self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype',self.pipeline_name,self.stages[stage].name)
 
     def check_config(self):
         if self.stages['Segmentation'].config.seg_tool ==  'Custom segmentation':
@@ -239,56 +244,56 @@ class Pipeline(HasTraits):
         stage.create_workflow(flow,inputnode,outputnode)
         return flow
 
-    def create_common_flow(self):
-        common_flow = pe.Workflow(name='common_stages')
-        common_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
-        common_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","brain","brain_mask","wm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
-            "roi_volumes","parcellation_scheme","atlas_info"]),name="outputnode")
-        common_flow.add_nodes([common_inputnode,common_outputnode])
-
-        if self.stages['Segmentation'].enabled:
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-
-                if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
-                    self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory,"derivatives",'freesurfer')
-                    print "Freesurfer_subjects_dir: %s" % self.stages['Segmentation'].config.freesurfer_subjects_dir
-                    self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject)
-                    print "Freesurfer_subject_id: %s" % self.stages['Segmentation'].config.freesurfer_subject_id
-
-            seg_flow = self.create_stage_flow("Segmentation")
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                common_flow.connect([(common_inputnode,seg_flow, [('T1','inputnode.T1')])])
-
-            common_flow.connect([
-                                 (seg_flow,common_outputnode,[("outputnode.subjects_dir","subjects_dir"),
-                                                              ("outputnode.subject_id","subject_id")])
-                                ])
-
-        if self.stages['Parcellation'].enabled:
-            parc_flow = self.create_stage_flow("Parcellation")
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                common_flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
-                                                           ('outputnode.subject_id','inputnode.subject_id')]),
-                                     ])
-            else:
-                common_flow.connect([
-                                     (seg_flow,parc_flow,[("outputnode.custom_wm_mask","inputnode.custom_wm_mask")])
-                                     ])
-            common_flow.connect([
-                                 (parc_flow,common_outputnode,[("outputnode.wm_mask_file","wm_mask_file"),
-                                                               ("outputnode.parcellation_scheme","parcellation_scheme"),
-                                                               ("outputnode.atlas_info","atlas_info"),
-                                                               ("outputnode.roi_volumes","roi_volumes"),
-                                                               ("outputnode.wm_eroded","wm_eroded"),
-                                                               ("outputnode.csf_eroded","csf_eroded"),
-                                                               ("outputnode.brain_eroded","brain_eroded"),
-                                                               ("outputnode.T1","T1"),
-                                                               ("outputnode.brain_mask","brain_mask"),
-                                                               ("outputnode.brain","brain"),
-                                                               ])
-                                 ])
-
-        return common_flow
+    # def create_common_flow(self):
+    #     common_flow = pe.Workflow(name='common_stages')
+    #     common_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
+    #     common_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","brain","brain_mask","wm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
+    #         "roi_volumes","parcellation_scheme","atlas_info"]),name="outputnode")
+    #     common_flow.add_nodes([common_inputnode,common_outputnode])
+    #
+    #     if self.stages['Segmentation'].enabled:
+    #         if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
+    #
+    #             if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
+    #                 self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory,"derivatives",'freesurfer')
+    #                 print "Freesurfer_subjects_dir: %s" % self.stages['Segmentation'].config.freesurfer_subjects_dir
+    #                 self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject)
+    #                 print "Freesurfer_subject_id: %s" % self.stages['Segmentation'].config.freesurfer_subject_id
+    #
+    #         seg_flow = self.create_stage_flow("Segmentation")
+    #         if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
+    #             common_flow.connect([(common_inputnode,seg_flow, [('T1','inputnode.T1')])])
+    #
+    #         common_flow.connect([
+    #                              (seg_flow,common_outputnode,[("outputnode.subjects_dir","subjects_dir"),
+    #                                                           ("outputnode.subject_id","subject_id")])
+    #                             ])
+    #
+    #     if self.stages['Parcellation'].enabled:
+    #         parc_flow = self.create_stage_flow("Parcellation")
+    #         if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
+    #             common_flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
+    #                                                        ('outputnode.subject_id','inputnode.subject_id')]),
+    #                                  ])
+    #         else:
+    #             common_flow.connect([
+    #                                  (seg_flow,parc_flow,[("outputnode.custom_wm_mask","inputnode.custom_wm_mask")])
+    #                                  ])
+    #         common_flow.connect([
+    #                              (parc_flow,common_outputnode,[("outputnode.wm_mask_file","wm_mask_file"),
+    #                                                            ("outputnode.parcellation_scheme","parcellation_scheme"),
+    #                                                            ("outputnode.atlas_info","atlas_info"),
+    #                                                            ("outputnode.roi_volumes","roi_volumes"),
+    #                                                            ("outputnode.wm_eroded","wm_eroded"),
+    #                                                            ("outputnode.csf_eroded","csf_eroded"),
+    #                                                            ("outputnode.brain_eroded","brain_eroded"),
+    #                                                            ("outputnode.T1","T1"),
+    #                                                            ("outputnode.brain_mask","brain_mask"),
+    #                                                            ("outputnode.brain","brain"),
+    #                                                            ])
+    #                              ])
+    #
+    #     return common_flow
 
     def fill_stages_outputs(self):
         for stage in self.stages.values():

@@ -45,8 +45,6 @@ import shutil
 import nibabel as nib
 
 from cmp.stages.preprocessing.preprocessing import PreprocessingStage
-from cmp.stages.segmentation.segmentation import SegmentationStage
-from cmp.stages.parcellation.parcellation import ParcellationStage
 from cmp.stages.diffusion.diffusion import DiffusionStage
 from cmp.stages.registration.registration import RegistrationStage
 from cmp.stages.connectome.connectome import ConnectomeStage, MRTrixConnectomeStage
@@ -342,6 +340,7 @@ class DiffusionPipeline(Pipeline):
                     t2_available = True
         except:
             error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+            return
 
 
         if os.path.isfile(bval_file): bvals_available = True

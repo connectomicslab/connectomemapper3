@@ -17,17 +17,19 @@ packages=["cmp","cmp.interfaces","cmp.stages",
           "cmp.stages.connectome",
           "cmp.pipelines",
           "cmp.pipelines.diffusion",
+          "cmp.pipelines.anatomical",
           "cmp.pipelines.functional",
           "cmtklib"]
 
 package_data = {'cmp':
-                ['pipelines/diffusion/*.png',
+                ['pipelines/anatomical/*.png',
+                'pipelines/diffusion/*.png',
                 'pipelines/functional/*.png'
                 ],
                 'cmtklib':
                 ['data/parcellation/lausanne2008/*/*.*',
-		'data/segmentation/ants_template_IXI/*/*.*',
-		'data/segmentation/ants_template_IXI/*.*',
+		        'data/segmentation/ants_template_IXI/*/*.*',
+		        'data/segmentation/ants_template_IXI/*.*',
                 'data/parcellation/nativefreesurfer/*/*.*',
                 'data/colortable_and_gcs/*.*',
                 'data/colortable_and_gcs/my_atlas_gcs/*.*',
@@ -38,7 +40,7 @@ package_data = {'cmp':
 ################################################################################
 # For some commands, use setuptools
 
-if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb', 
+if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb',
             'bdist_wininst', 'install_egg_info', 'egg_info', 'easy_install',
             )).intersection(sys.argv)) > 0:
     from setup_egg import extra_setuptools_args
@@ -72,7 +74,7 @@ def main(**extra_args):
             Programming Language :: Python
             Topic :: Scientific/Engineering
             Topic :: Software Development
-            """.splitlines() if len(c.split()) > 0],    
+            """.splitlines() if len(c.split()) > 0],
           maintainer = 'CIBM-CHUV Diffusion Group',
           maintainer_email = 'info@connectomics.org',
           package_data = package_data,
@@ -82,4 +84,3 @@ def main(**extra_args):
 
 if __name__ == "__main__":
     main(**extra_setuptools_args)
-

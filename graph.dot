@@ -1,0 +1,62 @@
+digraph anatomical_pipeline{
+  label="anatomical_pipeline";
+  anatomical_pipeline_datasource[label="datasource (io)", style=filled, fillcolor="#FFFFC8"];
+  anatomical_pipeline_inputnode[label="inputnode (utility)", style=filled, fillcolor="#FFFFC8"];
+  anatomical_pipeline_outputnode[label="outputnode (utility)", style=filled, fillcolor="#FFFFC8"];
+  anatomical_pipeline_anatomical_sinker[label="anatomical_sinker (io)", style=filled, fillcolor="#FFFFC8"];
+  anatomical_pipeline_datasource -> anatomical_pipeline_inputnode;
+  subgraph cluster_anatomical_pipeline_segmentation_stage {
+      edge [color="#0000FF"];
+      style=filled;
+      fillcolor="#B4B4FF";
+      label="segmentation_stage";
+    anatomical_pipeline_segmentation_stage_inputnode[label="inputnode (utility)", style=filled, fillcolor="#E6E6FF"];
+    anatomical_pipeline_segmentation_stage_mgz_convert[label="mgz_convert (freesurfer)", style=filled, fillcolor="#E6E6FF"];
+    anatomical_pipeline_segmentation_stage_copy_orig[label="copy_orig (utility)", style=filled, fillcolor="#E6E6FF"];
+    anatomical_pipeline_segmentation_stage_reconall[label="reconall (freesurfer)", style=filled, fillcolor="#E6E6FF"];
+    anatomical_pipeline_segmentation_stage_outputnode[label="outputnode (utility)", style=filled, fillcolor="#E6E6FF"];
+    anatomical_pipeline_segmentation_stage_inputnode -> anatomical_pipeline_segmentation_stage_mgz_convert;
+    anatomical_pipeline_segmentation_stage_mgz_convert -> anatomical_pipeline_segmentation_stage_copy_orig;
+    anatomical_pipeline_segmentation_stage_copy_orig -> anatomical_pipeline_segmentation_stage_reconall;
+    anatomical_pipeline_segmentation_stage_reconall -> anatomical_pipeline_segmentation_stage_outputnode;
+    anatomical_pipeline_segmentation_stage_reconall -> anatomical_pipeline_segmentation_stage_outputnode;
+  }
+  subgraph cluster_anatomical_pipeline_parcellation_stage {
+      edge [color="#0000FF"];
+      style=filled;
+      fillcolor="#B4B4FF";
+      label="parcellation_stage";
+    anatomical_pipeline_parcellation_stage_inputnode[label="inputnode (utility)", style=filled, fillcolor="#E6E6FF"];
+    anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation[label="Lausanne2008_parcellation", style=filled, fillcolor="#E6E6FF"];
+    anatomical_pipeline_parcellation_stage_outputnode[label="outputnode (utility)", style=filled, fillcolor="#E6E6FF"];
+    anatomical_pipeline_parcellation_stage_inputnode -> anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation;
+    anatomical_pipeline_parcellation_stage_inputnode -> anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation;
+    anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation -> anatomical_pipeline_parcellation_stage_outputnode;
+    anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation -> anatomical_pipeline_parcellation_stage_outputnode;
+    anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation -> anatomical_pipeline_parcellation_stage_outputnode;
+    anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation -> anatomical_pipeline_parcellation_stage_outputnode;
+    anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation -> anatomical_pipeline_parcellation_stage_outputnode;
+    anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation -> anatomical_pipeline_parcellation_stage_outputnode;
+    anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation -> anatomical_pipeline_parcellation_stage_outputnode;
+    anatomical_pipeline_parcellation_stage_Lausanne2008_parcellation -> anatomical_pipeline_parcellation_stage_outputnode;
+  }
+  anatomical_pipeline_outputnode -> anatomical_pipeline_anatomical_sinker;
+  anatomical_pipeline_outputnode -> anatomical_pipeline_anatomical_sinker;
+  anatomical_pipeline_outputnode -> anatomical_pipeline_anatomical_sinker;
+  anatomical_pipeline_outputnode -> anatomical_pipeline_anatomical_sinker;
+  anatomical_pipeline_segmentation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_segmentation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_segmentation_stage_outputnode -> anatomical_pipeline_parcellation_stage_inputnode;
+  anatomical_pipeline_segmentation_stage_outputnode -> anatomical_pipeline_parcellation_stage_inputnode;
+  anatomical_pipeline_parcellation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_parcellation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_parcellation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_parcellation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_parcellation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_parcellation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_parcellation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_parcellation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_parcellation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_parcellation_stage_outputnode -> anatomical_pipeline_outputnode;
+  anatomical_pipeline_inputnode -> anatomical_pipeline_segmentation_stage_inputnode;
+}

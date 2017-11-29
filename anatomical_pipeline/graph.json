@@ -1,0 +1,48 @@
+[
+    {
+        "group": 1,
+        "imports": [],
+        "name": "0_datasource",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "0_datasource"
+        ],
+        "name": "1_mgz_convert",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "1_mgz_convert"
+        ],
+        "name": "2_copy_orig",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "2_copy_orig"
+        ],
+        "name": "3_reconall",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "3_reconall"
+        ],
+        "name": "4_Lausanne2008_parcellation",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "4_Lausanne2008_parcellation"
+        ],
+        "name": "5_anatomical_sinker",
+        "size": 1
+    }
+]
