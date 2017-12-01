@@ -1,11 +1,11 @@
 # Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
-# 
+#
 #  This software is distributed under the open-source license Modified BSD.
 
 """ CMTK Parcellation functions
-""" 
+"""
 
 import os
 import os.path as op
@@ -32,7 +32,7 @@ def erode_mask(maskFile):
     imerode = nd.binary_erosion
     se = np.zeros( (3,3,3) )
     se[1,:,1] = 1; se[:,1,1] = 1; se[1,1,:] = 1
-    
+
     # Erode mask
     mask = ni.load( maskFile ).get_data().astype( np.uint32 )
     er_mask = np.zeros( mask.shape )
@@ -45,7 +45,7 @@ def erode_mask(maskFile):
 
 class Erode_inputspec(BaseInterfaceInputSpec):
     in_file = File(exists=True)
-    
+
 class Erode_outputspec(TraitedSpec):
     out_file = File(exists=True)
 
@@ -56,7 +56,7 @@ class Erode(BaseInterface):
     def _run_interface(self, runtime):
         erode_mask(self.inputs.in_file)
         return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['out_file'] = op.abspath('%s_eroded.nii.gz' % os.path.splitext(op.splitext(op.basename(self.inputs.in_file))[0])[0])
@@ -113,7 +113,7 @@ class Parcellate(BaseInterface):
         #   os.environ.update({'SUBJECTS_DIR': self.inputs.subjects_dir})
         iflogger.info("ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION")
         iflogger.info("=============================================")
-        
+
         if self.inputs.parcellation_scheme == "Lausanne2008":
             create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
             create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir)
@@ -132,7 +132,7 @@ class Parcellate(BaseInterface):
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','csf_mask.nii.gz'))
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','brainmask.nii.gz'))
             crop_and_move_WM_and_GM(self.inputs.subject_id, self.inputs.subjects_dir)
-            
+
         return runtime
 
     def _list_outputs(self):
@@ -141,15 +141,15 @@ class Parcellate(BaseInterface):
         outputs['T1'] = op.abspath('T1.nii.gz')
         outputs['brain'] = op.abspath('brain.nii.gz')
         outputs['brain_mask'] = op.abspath('brain_mask.nii.gz')
-        
+
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         #outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
         #outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
         #outputs['aseg_file'] = op.abspath('aseg.nii.gz')
-        
+
         #outputs['roi_files'] = self._gen_outfilenames('ROI_HR_th')
         outputs['roi_files_in_structural_space'] = self._gen_outfilenames('ROIv_HR_th')
-        
+
         if self.inputs.erode_masks:
             outputs['wm_eroded'] = op.abspath('wm_eroded.nii.gz')
             outputs['csf_eroded'] = op.abspath('csf_eroded.nii.gz')
@@ -162,7 +162,7 @@ class Parcellate(BaseInterface):
         for scale in get_parcellation(self.inputs.parcellation_scheme).keys():
             filepaths.append(op.abspath(basename+'_'+scale+'.nii.gz'))
         return filepaths
-        
+
 
 
 def get_parcellation(parcel = "NativeFreesurfer"):
@@ -213,13 +213,13 @@ def get_parcellation(parcel = "NativeFreesurfer"):
         return {'roi_volumes_flirt_crop_out_dil' : {'number_of_regions' : 83,
                                     # freesurferaparc; contains name, url, color, freesurfer_label, etc. used for connection matrix
                                     'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','nativefreesurfer','freesurferaparc','resolution83.graphml')),
-                                    # scalar node values on fsaverage? or atlas? 
+                                    # scalar node values on fsaverage? or atlas?
                                     'surface_parcellation' : None,
                                     # scalar node values in fsaverage volume?
                                     'volume_parcellation' : None,
                                     }
         }
-        
+
 def extract(Z, shape, position, fill):
     """ Extract voxel neighbourhood
     Parameters
@@ -231,7 +231,7 @@ def extract(Z, shape, position, fill):
     Returns
     -------
     R: the neighbourhood of the specified point in Z
-    """	
+    """
     R = np.ones(shape, dtype=Z.dtype) * fill # initialize output block to the fill value
     P = np.array(list(position)).astype(int) # position coordinates(numpy array)
     Rs = np.array(list(R.shape)).astype(int) # output block dimensions (numpy array)
@@ -251,7 +251,7 @@ def extract(Z, shape, position, fill):
     return R
 
 def create_T1_and_Brain(subject_id, subjects_dir):
-    
+
     fs_dir = op.join(subjects_dir,subject_id)
 
     # Convert T1 image
@@ -302,7 +302,7 @@ def create_annot_label(subject_id, subjects_dir):
 
     for out in comp:
         gcsfile = pkg_resources.resource_filename('cmtklib', op.join('data', 'colortable_and_gcs', 'my_atlas_gcs', out[1]))
-        
+
         mris_cmd = ['mris_ca_label', '-sdir', subjects_dir, subject_id, out[0],
                     fs_dir+'/surf/'+out[0]+'.sphere.reg', gcsfile,
                     op.join(fs_label_dir, out[2])]
@@ -350,7 +350,7 @@ def create_roi(subject_id, subjects_dir):
 
     print("Create the ROIs:")
     fs_dir = op.join(subjects_dir,subject_id)
-    
+
     # load aseg volume
     aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
     asegd = aseg.get_data()	# numpy.ndarray
@@ -525,7 +525,7 @@ def create_wm_mask(subject_id, subjects_dir):
 
     # these data is stored and could be extracted from fs_dir/stats/aseg.txt
 
-    # extract right and left white matter 
+    # extract right and left white matter
     idx_lh = np.where(fsmaskd == 120)
     idx_rh = np.where(fsmaskd == 20)
 
@@ -544,7 +544,7 @@ def create_wm_mask(subject_id, subjects_dir):
     # need binary erosion function
     imerode = nd.binary_erosion
 
-    # ventricle erosion    
+    # ventricle erosion
     csfA = np.zeros( asegd.shape )
     csfB = np.zeros( asegd.shape )
 
@@ -576,7 +576,7 @@ def create_wm_mask(subject_id, subjects_dir):
                     (asegd == 49) )
     csfA[idx] = 0
 
-    # REST CSF, IE 3RD AND 4TH VENTRICULE AND EXTRACEREBRAL CSF    
+    # REST CSF, IE 3RD AND 4TH VENTRICULE AND EXTRACEREBRAL CSF
     idx = np.where( (asegd == 5) |
                     (asegd == 14) |
                     (asegd == 15) |
@@ -586,7 +586,7 @@ def create_wm_mask(subject_id, subjects_dir):
                     (asegd == 75) |
                     (asegd == 76) |
                     (asegd == 213) |
-                    (asegd == 221))    
+                    (asegd == 221))
     # 43 ??, 4??  213?, 221?
     # more to discuss.
     for i in [5,14,15,24,44,72,75,76,213,221]:
@@ -672,7 +672,7 @@ def create_wm_mask(subject_id, subjects_dir):
     img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
     print("Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
-    
+
     # Convert whole brain mask
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
     subprocess.check_call(mri_cmd)
@@ -714,12 +714,12 @@ def crop_and_move_datasets(subject_id, subjects_dir):
         #runCmd( mri_cmd,log )
         mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', d[0], '-nc', d[1]]
         subprocess.check_call(mri_cmd)
-        
+
     ds =  [(op.join(fs_dir, 'mri', 'fsmask_1mm_eroded.nii.gz'), 'wm_eroded.nii.gz'),
           (op.join(fs_dir, 'mri', 'csf_mask_eroded.nii.gz'), 'csf_eroded.nii.gz'),
           (op.join(fs_dir, 'mri', 'brainmask_eroded.nii.gz'), 'brain_eroded.nii.gz'),
           (op.join(fs_dir, 'mri', 'brainmask.nii.gz'), 'brain_mask.nii.gz')]
-    
+
     for d in ds:
         if op.exists(d[0]):
             print("Processing %s:" % d[0])
@@ -729,14 +729,14 @@ def crop_and_move_datasets(subject_id, subjects_dir):
     ds =  [(op.join(fs_dir, 'mri', 'T1.nii.gz'), 'T1.nii.gz'),
           (op.join(fs_dir, 'mri', 'brain.nii.gz'), 'brain.nii.gz'),
           ]
-    
+
     for d in ds:
         if op.exists(d[0]):
             print("Processing %s:" % d[0])
             mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'cubic', d[0], '-nc', d[1]]
             subprocess.check_call(mri_cmd)
-        
-        
+
+
 def generate_WM_and_GM_mask(subject_id, subjects_dir):
     fs_dir = op.join(subjects_dir,subject_id)
 
@@ -746,7 +746,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','aparc+aseg.mgz'),'-o',op.join(fs_dir,'mri','aparc+aseg.nii.gz')]
     subprocess.check_call(mri_cmd)
 
-    fout = op.join(fs_dir, 'mri', 'aparc+aseg.nii.gz')    
+    fout = op.join(fs_dir, 'mri', 'aparc+aseg.nii.gz')
     niiAPARCimg = ni.load(fout)
     niiAPARCdata = niiAPARCimg.get_data()
 
@@ -784,7 +784,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     # 28  Left-VentralDC
 
     print("WM mask....")
-    #%% create WM mask    
+    #%% create WM mask
     niiWM = np.zeros( niiAPARCdata.shape, dtype = np.uint8 )
 
     for i in WM:
@@ -798,7 +798,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     print("Save to: " + WMout)
     ni.save(img, WMout)
 
-    print("GM mask....")    
+    print("GM mask....")
     #%% create GM mask (CORTICAL+SUBCORTICAL)
     #%  -------------------------------------
     for park in get_parcellation('NativeFreesurfer').keys():
@@ -823,10 +823,10 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
 #        for idx, i in enumerate(OTHER[1]):
 #            niiGM[ niiAPARCdata == i ] = OTHER[2][idx]
 
-        print("Save to: " + GMout)        
+        print("Save to: " + GMout)
         img = ni.Nifti1Image(niiGM, niiAPARCimg.get_affine(), niiAPARCimg.get_header())
         ni.save(img, GMout)
-    
+
     # Create CSF mask
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','aseg.mgz'),'-o',op.join(fs_dir,'mri','aseg.nii.gz')]
     subprocess.check_call(mri_cmd)
@@ -845,7 +845,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     er_mask[idx] = 1
     img = ni.Nifti1Image(er_mask, ni.load( asegfile ).get_affine(), ni.load( asegfile ).get_header())
     ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
-    
+
     # Convert whole brain mask
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
     subprocess.check_call(mri_cmd)
@@ -890,7 +890,7 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
           (op.join(fs_dir, 'mri', 'csf_mask_eroded.nii.gz'), 'csf_eroded.nii.gz'),
           (op.join(fs_dir, 'mri', 'brainmask_eroded.nii.gz'), 'brain_eroded.nii.gz'),
           (op.join(fs_dir, 'mri', 'brainmask.nii.gz'), 'brain_mask.nii.gz')]
-    
+
     for d in ds:
         if op.exists(d[0]):
             print("Processing %s:" % d[0])
@@ -900,7 +900,7 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
     ds =  [(op.join(fs_dir, 'mri', 'T1.nii.gz'), 'T1.nii.gz'),
           (op.join(fs_dir, 'mri', 'brain.nii.gz'), 'brain.nii.gz'),
           ]
-    
+
     for d in ds:
         if op.exists(d[0]):
             print("Processing %s:" % d[0])

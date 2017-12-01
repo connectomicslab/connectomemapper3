@@ -89,12 +89,15 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     #segmentation.setIcon(QIcon(QPixmap("segmentation.png")))
 
     parcellation = Button('Parcellation')
+
     #parcellation.setIcon(QIcon(QPixmap("parcellation.png")))
 
     #custom_run = Button('Custom...')
     #run = Button('Run...')
 
     config_file = Str
+
+    flow = Instance(pe.Workflow)
 
     pipeline_group = VGroup(
                         HGroup(spring,Item('segmentation',style='custom',width=550,height=170,resizable=True,editor_args={'image':ImageResource('segmentation',search_path=['./']),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
@@ -253,24 +256,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return valid_inputs
 
 
-    def process(self):
-        # Process time
-        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-
+    def create_pipeline_flow(self):
         subject_directory = os.path.join(self.base_directory,self.subject)
         deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
-
-        # Initialization
-        if os.path.isfile(os.path.join(deriv_subject_directory,"anatomical_pipeline.log")):
-            os.unlink(os.path.join(deriv_subject_directory,"anatomical_pipeline.log"))
-        config.update_config({'logging': {'log_directory': deriv_subject_directory,
-                                  'log_to_file': True},
-                              'execution': {'remove_unnecessary_outputs': False,
-                              'stop_on_first_crash': True,'stop_on_first_rerun': False,
-                              'crashfile_format': "txt"}
-                              })
-        logging.update_logging(config)
-        iflogger = logging.getLogger('interface')
 
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
@@ -368,8 +356,33 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                         (anat_outputnode,sinker,[("roi_volumes","anat.@roivs")])
                         ])
 
+        self.flow = anat_flow
+        return anat_flow
+
+
+
+    def process(self):
+        # Process time
+        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+
+        deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+
+        # Initialization
+        if os.path.isfile(os.path.join(deriv_subject_directory,"anatomical_pipeline.log")):
+            os.unlink(os.path.join(deriv_subject_directory,"anatomical_pipeline.log"))
+        config.update_config({'logging': {'log_directory': deriv_subject_directory,
+                                  'log_to_file': True},
+                              'execution': {'remove_unnecessary_outputs': False,
+                              'stop_on_first_crash': True,'stop_on_first_rerun': False,
+                              'crashfile_format': "txt"}
+                              })
+        logging.update_logging(config)
+        iflogger = logging.getLogger('interface')
+
         iflogger.info("**** Processing ****")
+        anat_flow = self.create_pipeline_flow()
         anat_flow.write_graph(graph2use='colored', format='svg', simple_form=True)
+
         if(self.number_of_cores != 1):
             anat_flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
         else:

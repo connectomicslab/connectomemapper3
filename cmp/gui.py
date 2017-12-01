@@ -128,6 +128,10 @@ class CMP_Project_Info(HasTraits):
     #process_type = Enum('diffusion',['diffusion','fMRI'])
     diffusion_imaging_model = Enum('DSI',['DSI','DTI','HARDI'])
 
+    t1_available = Bool(False)
+    dmri_available = Bool(False)
+    # fmri_available = Bool(False)
+
     anat_config_to_load = Str()
     anat_available_config = List()
     anat_config_to_load_msg = Str('Several configuration files available.Select which one to load:\n')
@@ -166,16 +170,26 @@ class CMP_Project_Info(HasTraits):
                         ),
                         spring,
                         Group(
+                            Item('t1_available',style='readonly',label='T1',resizable=True),
+                            HGroup(
+                                Item('dmri_available',style='readonly',label='Diffusion',resizable=True),
+                                Item('diffusion_imaging_model',style='readonly',label='Model',resizable=True,enabled_when='dmri_available'),
+                                ),
+                            # Item('t1_available',style='readonly',label='T1',resizable=True),
+                            label='Modalities'
+                        ),
+                        spring,
+                        Group(
                             Group(
                                 Item('anat_last_date_processed',style='readonly',resizable=True),
                                 Item('anat_last_stage_processed',style='readonly',resizable=True),
                                 label="Anatomical pipeline"
                             ),
-                            # Group(
-                            #     Item('dmri_last_date_processed',style='readonly',resizable=True),
-                            #     Item('dmri_last_stage_processed',style='readonly',resizable=True),
-                            #     label="Diffusion pipeline"
-                            # )
+                            Group(
+                                Item('dmri_last_date_processed',style='readonly',resizable=True),
+                                Item('dmri_last_stage_processed',style='readonly',resizable=True),
+                                label="Diffusion pipeline",enabled_when='dmri_available'
+                            )
                         ),
                         spring,
                         Group(
@@ -249,7 +263,7 @@ class CMP_Project_Info(HasTraits):
 #
 class CMP_MainWindow(HasTraits):
     anat_pipeline = Instance(HasTraits)
-    ##dmri_pipeline = Instance(HasTraits)
+    dmri_pipeline = Instance(HasTraits)
 
     project_info = Instance(CMP_Project_Info)
 
@@ -257,15 +271,15 @@ class CMP_MainWindow(HasTraits):
     load_project = Action(name='Load Connectome data...',action='load_project')
     process_anatomical = Action(name='Process anatomical data!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
     #preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
-    #map_connectome = Action(name='Map Connectome!',action='map_connectome',enabled_when='handler.inputs_checked==True')
+    map_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.dmri_inputs_checked==True')
     #map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
     change_subject = Action(name='Change subject',action='change_subject',enabled_when='handler.project_loaded==True')
 
     anat_save_config = Action(name='Save anatomical pipeline configuration as...',action='anat_save_config_file',enabled_when='handler.project_loaded==True')
     anat_load_config = Action(name='Load anatomical pipeline configuration...',action='anat_load_config_file',enabled_when='handler.project_loaded==True')
 
-    ##dmri_save_config = Action(name='Save diffusion pipeline configuration as...',action='dmri_save_config_file',enabled_when='handler.project_loaded==True')
-    ##dmri_load_config = Action(name='Load diffusion pipeline configuration...',action='dmri_load_config_file',enabled_when='handler.project_loaded==True')
+    dmri_save_config = Action(name='Save diffusion pipeline configuration as...',action='dmri_save_config_file',enabled_when='handler.project_loaded==True')
+    dmri_load_config = Action(name='Load diffusion pipeline configuration...',action='dmri_load_config_file',enabled_when='handler.project_loaded==True')
 
     project_info.style_sheet = style_sheet
 
@@ -276,11 +290,12 @@ class CMP_MainWindow(HasTraits):
                             ),
                             HGroup(
                                 Item('anat_pipeline',style='custom',show_label=False),
-                                label='Anatomical pipeline',enabled_when='handler.anat_inputs_checked==True',
+                                label='Anatomical pipeline',enabled_when='handler.anat_inputs_checked==True'
                             ),
-                            # HGroup(
-                            #     Item('dmri_pipeline',style='custom',enabled_when='handler.dmri_inputs_checked==True',show_label=False),
-                            # ),
+                            HGroup(
+                                Item('dmri_pipeline',style='custom',show_label=False),
+                                label='Diffusion pipeline',enabled_when='handler.dmri_inputs_checked==True'
+                            ),
                             orientation='horizontal', layout='tabbed', springy=True, visible_when='handler.anat_inputs_checked==True'),
                         title='Connectome Mapper 3',
                         menubar=MenuBar(
@@ -296,8 +311,8 @@ class CMP_MainWindow(HasTraits):
                                     Menu(
                                         anat_save_config,
                                         anat_load_config,
-                                        # dmri_save_config,
-                                        # dmri_load_config,
+                                        dmri_save_config,
+                                        dmri_load_config,
                                     name='Configuration'),
                                     # Menu(
                                     #     change_subject,
@@ -305,7 +320,7 @@ class CMP_MainWindow(HasTraits):
                                 ),
                        handler = project.ProjectHandler(),
                        style_sheet=style_sheet,
-                       buttons = [process_anatomical],
+                       buttons = [process_anatomical,map_connectome],
                        #buttons = [preprocessing, map_connectome, map_custom],
                        width=0.5, height=0.8, scrollable=True, resizable=True
                    )

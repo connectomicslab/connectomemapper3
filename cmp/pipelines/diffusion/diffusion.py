@@ -44,6 +44,9 @@ import shutil
 
 import nibabel as nib
 
+from cmp.pipelines.common import *
+from cmp.pipelines.anatomical.anatomical import AnatomicalPipeline
+
 from cmp.stages.preprocessing.preprocessing import PreprocessingStage
 from cmp.stages.diffusion.diffusion import DiffusionStage
 from cmp.stages.registration.registration import RegistrationStage
@@ -82,15 +85,9 @@ class DiffusionPipeline(Pipeline):
     subject = Str
     subject_directory = Directory
     derivatives_directory = Directory
-    ordered_stage_list = ['Segmentation','Parcellation','Preprocessing','Registration','Diffusion','Connectome']# ,'MRTrixConnectome']
+    ordered_stage_list = ['Preprocessing','Registration','Diffusion','Connectome']# ,'MRTrixConnectome']
 
     global_conf = Global_Configuration()
-
-    segmentation = Button('Segmentation')
-    #segmentation.setIcon(QIcon(QPixmap("segmentation.png")))
-
-    parcellation = Button('Parcellation')
-    #parcellation.setIcon(QIcon(QPixmap("parcellation.png")))
 
     preprocessing = Button('Preprocessing')
     #preprocessing.setIcon(QIcon(QPixmap("preprocessing.png")))
@@ -106,6 +103,8 @@ class DiffusionPipeline(Pipeline):
 
     config_file = Str
 
+    anat_flow = Instance(pe.Workflow)
+
     # pipeline_group = VGroup(
     #                     HGroup(spring,Item('segmentation',editor=ToolkitEditorFactory(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
     #                     HGroup(spring,Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
@@ -119,8 +118,6 @@ class DiffusionPipeline(Pipeline):
 
     pipeline_group = VGroup(
                         spring,
-                        HGroup(spring,Item('segmentation',style='custom',width=450,height=110,resizable=True,editor_args={'image':ImageResource('segmentation'),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
-                        HGroup(spring,Item('parcellation',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('parcellation'),'label':""}),spring,show_labels=False),
                         HGroup(spring,Item('preprocessing',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False),
                         HGroup(spring,Item('registration',style='custom',width=500,height=110,resizable=True,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False),
                         HGroup(spring,Item('diffusion',style='custom',width=450,height=240,resizable=True,editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False),
@@ -129,9 +126,8 @@ class DiffusionPipeline(Pipeline):
                         springy=True
                     )
 
-    def __init__(self,project_info):
-        self.stages = {'Segmentation':SegmentationStage(),
-            'Parcellation':ParcellationStage(pipeline_mode = "Diffusion"),
+    def __init__(self,project_info,anat_flow):
+        self.stages = {
             'Preprocessing':PreprocessingStage(),
             'Registration':RegistrationStage(pipeline_mode = "Diffusion"),
             'Diffusion':DiffusionStage(),
@@ -148,29 +144,17 @@ class DiffusionPipeline(Pipeline):
         self.subject_directory =  os.path.join(self.base_directory,self.subject)
         self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
 
-        self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
-        self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
+        self.anat_flow = anat_flow
 
-    def update_parcellation(self):
-        if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
-            self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
-        else:
-            self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.pre_custom
-
-    def update_segmentation(self):
-        if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
-            self.stages['Segmentation'].config.seg_tool = "Custom segmentation"
-        else:
-            self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
+    def check_config(self):
+        # if self.stages['MRTrixConnectome'].config.output_types == []:
+        #     return('\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
+        if self.stages['Connectome'].config.output_types == []:
+            return('\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
+        return ''
 
     def _preprocessing_fired(self, info):
         self.stages['Preprocessing'].configure_traits()
-
-    def _segmentation_fired(self, info):
-        self.stages['Segmentation'].configure_traits()
-
-    def _parcellation_fired(self, info):
-        self.stages['Parcellation'].configure_traits()
 
     def _diffusion_fired(self, info):
         self.stages['Diffusion'].configure_traits()
@@ -291,7 +275,7 @@ class DiffusionPipeline(Pipeline):
 
         return valid_inputs
 
-    def check_input(self, gui=True):
+    def check_input1(self, gui=True):
         print '**** Check Inputs  ****'
         diffusion_available = False
         bvecs_available = False
@@ -426,57 +410,126 @@ class DiffusionPipeline(Pipeline):
 
         return valid_inputs
 
+    def check_input(self, gui=True):
+        print '**** Check Inputs  ****'
+        diffusion_available = False
+        bvecs_available = False
+        bvals_available = False
+        valid_inputs = False
 
-    def process(self):
-        # Process time
-        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        dwi_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
+        bval_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.bval')
+        bvec_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.bvec')
+
+        print "Looking for...."
+        print "dwi_file : %s" % dwi_file
+        print "bvecs_file : %s" % bvec_file
+        print "bvals_file : %s" % bval_file
+
+        try:
+            layout = BIDSLayout(self.base_directory)
+            print "Valid BIDS dataset with %s subjects" % len(layout.get_subjects())
+            for subj in layout.get_subjects():
+                self.global_conf.subjects.append('sub-'+str(subj))
+            # self.global_conf.subjects = ['sub-'+str(subj) for subj in layout.get_subjects()]
+            self.global_conf.modalities = [str(mod) for mod in layout.get_modalities()]
+            # mods = layout.get_modalities()
+            types = layout.get_types()
+            # print "Available modalities :"
+            # for mod in mods:
+            #     print "-%s" % mod
+
+            for typ in types:
+                if typ == 'dwi' and os.path.isfile(dwi_file):
+                    print "%s available" % typ
+                    diffusion_available = True
+
+        except:
+            error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+            return
+
+
+        if os.path.isfile(bval_file): bvals_available = True
+
+        if os.path.isfile(bvec_file): bvecs_available = True
+
+        if diffusion_available:
+            if bvals_available and bvecs_available:
+                self.stages['Diffusion'].config.diffusion_imaging_model_choices = self.diffusion_imaging_model
+
+                #Copy diffusion data to derivatives / cmp  / subject / dwi
+                out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.nii.gz')
+                out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bval')
+                out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bvec')
+
+                shutil.copy(src=dwi_file,dst=out_dwi_file)
+                shutil.copy(src=bvec_file,dst=out_bvec_file)
+                shutil.copy(src=bval_file,dst=out_bval_file)
+
+                valid_inputs = True
+                input_message = 'Inputs check finished successfully.\nDiffusion and morphological data available.'
+            else:
+                input_message = 'Error during inputs check.\nDiffusion bvec or bval files not available.'
+        else:
+            input_message = 'Error during inputs check. No diffusion data available in folder '+os.path.join(self.base_directory,self.subject,'dwi')+'!'
+
+        #diffusion_imaging_model = diffusion_imaging_model[0]
+
+        if gui:
+            #input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
+            #input_notification.configure_traits()
+            print input_message
+            self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
+            diffusion_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
+            n_vol = nib.load(diffusion_file).shape[3]
+            if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
+                self.stages['Preprocessing'].config.end_vol = n_vol-1
+            self.stages['Preprocessing'].config.max_vol = n_vol-1
+            self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
+            self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
+        else:
+            print input_message
+            self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
+            diffusion_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
+            n_vol = nib.load(diffusion_file).shape[3]
+            if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
+                self.stages['Preprocessing'].config.end_vol = n_vol-1
+            self.stages['Preprocessing'].config.max_vol = n_vol-1
+            self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
+            self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
+
+
+        if(diffusion_available):
+            valid_inputs = True
+        else:
+            print "Missing required inputs."
+            error(message="Missing required inputs. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+
+        for stage in self.stages.values():
+            if stage.enabled:
+                print stage.name
+                print stage.stage_dir
+
+        self.fill_stages_outputs()
+
+        return valid_inputs
+
+    def create_pipeline_flow(self):
 
         subject_directory = os.path.join(self.base_directory,self.subject)
         deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
 
-        # Initialization
-        if os.path.isfile(os.path.join(deriv_subject_directory,"pypeline.log")):
-            os.unlink(os.path.join(deriv_subject_directory,"pypeline.log"))
-        config.update_config({'logging': {'log_directory': deriv_subject_directory,
-                                  'log_to_file': True},
-                              'execution': {'remove_unnecessary_outputs': False,
-                              'stop_on_first_crash': True,'stop_on_first_rerun': False,
-                              'crashfile_format': "txt"}
-                              })
-        logging.update_logging(config)
-        iflogger = logging.getLogger('interface')
-
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
-        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','diffusion','bvecs','bvals']), name='datasource')
+        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals']), name='datasource')
         datasource.inputs.base_directory = deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
-        datasource.inputs.field_template = dict(T1='anat/'+self.subject+'_T1w.nii.gz', diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval')
+        datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval')
         #datasource.inputs.field_template_args = dict(T1=[['subject']], T2=[['subject']], diffusion=[['subject', ['subject']]], bvecs=[['subject', ['subject']]], bvals=[['subject', ['subject']]])
         datasource.inputs.sort_filelist=False
         #datasource.inputs.subject = self.subject
-
-        #print datasource.inputs
-
-        #datasource.run()
-
-        #print datasource.outputs
-
-        # try:
-        #     datasource.run()
-        # except Exception as e:
-        #     print e
-
-        #templates =    {"T1": "derivatives/cmp/{subject}/anat/{subject}_T1w_reo.nii.gz",
-        #                "T2": "derivatives/cmp/{subject}/anat/{subject}_T2w_reo.nii.gz",
-        #                "diffusion": "{subject}/dwi/{subject}_dwi.nii.gz",
-        #                "bvecs": "{subject}/dwi/{subject}_dwi.bvec",
-        #                "bvals": "{subject}/dwi/{subject}_dwi.bval",}
-        #datasource = pe.Node(interface=nio.SelectFiles(templates, base_directory=base_dir, subject=self.subject), name='datasource')
-        #res = datasource.run()
-
 
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
@@ -540,41 +593,24 @@ class DiffusionPipeline(Pipeline):
         # Clear previous outputs
         self.clear_stages_outputs()
 
-        flow = pe.Workflow(name='nipype', base_dir=os.path.join(deriv_subject_directory,'tmp'))
-
-
-        # Create common_flow
-        common_flow = self.create_common_flow()
-
-        flow.connect([
-                      (datasource,common_flow,[("T1","inputnode.T1")]),
-                      (common_flow,sinker,[("outputnode.T1","anat.@T1")]),
-                      (common_flow,sinker,[("outputnode.brain","anat.@brain")]),
-                      (common_flow,sinker,[("outputnode.brain_mask","anat.@brain_mask")]),
-                      (common_flow,sinker,[("outputnode.roi_volumes","anat.@roivs")])
-                      ])
-
-
         # Create diffusion flow
 
-        diffusion_flow = pe.Workflow(name='diffusion_pipeline')
+        diffusion_flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
         diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','atlas_info','parcellation_scheme']),name='inputnode')
         diffusion_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectivity_matrices']),name='outputnode')
         diffusion_flow.add_nodes([diffusion_inputnode,diffusion_outputnode])
 
-        flow.connect([
-                      #(datasource,diffusion_flow,[("T2","inputnode.T2")]),
-                      (datasource,diffusion_flow,[("diffusion","inputnode.diffusion"),("bvecs","inputnode.bvecs"),("bvals","inputnode.bvals")]),
-                      (common_flow,diffusion_flow,[("outputnode.subjects_dir","inputnode.subjects_dir"),("outputnode.subject_id","inputnode.subject_id"),
-                                                   ("outputnode.T1","inputnode.T1"),
-                                                   ("outputnode.brain","inputnode.brain"),
-                                                   ("outputnode.brain_mask","inputnode.brain_mask"),
-                                                   ("outputnode.wm_mask_file","inputnode.wm_mask_file"),
-                                                   ( "outputnode.roi_volumes","inputnode.roi_volumes"),
-                                                   ("outputnode.parcellation_scheme","inputnode.parcellation_scheme"),
-                                                   ("outputnode.atlas_info","inputnode.atlas_info")]),
-                      (diffusion_flow,sinker,[("outputnode.connectivity_matrices","dwi.@connectivity_matrices")])
-                    ])
+        diffusion_flow.connect([
+                      (datasource,diffusion_inputnode,[("diffusion","diffusion"),("bvecs","bvecs"),("bvals","bvals")]),
+                      (self.anat_flow,diffusion_inputnode,[("outputnode.subjects_dir","subjects_dir"),("outputnode.subject_id","subject_id"),
+                                                   ("outputnode.T1","T1"),
+                                                   ("outputnode.brain","brain"),
+                                                   ("outputnode.brain_mask","brain_mask"),
+                                                   ("outputnode.wm_mask_file","wm_mask_file"),
+                                                   ( "outputnode.roi_volumes","roi_volumes"),
+                                                   ("outputnode.parcellation_scheme","parcellation_scheme"),
+                                                   ("outputnode.atlas_info","atlas_info")]),
+                      ])
 
         print diffusion_inputnode.outputs
 
@@ -670,15 +706,40 @@ class DiffusionPipeline(Pipeline):
                                               ('outputnode.final_fiberslength_files','dwi.@sfinal_fiberslength_files'),
                                               ('outputnode.filtered_fiberslabel_files','dwi.@filtered_fiberslabel_files'),
                                               ('outputnode.final_fiberlabels_files','dwi.@final_fiberlabels_files'),
-                                              ('outputnode.streamline_final_file','dwi.@streamline_final_file')
+                                              ('outputnode.streamline_final_file','dwi.@streamline_final_file'),
+                                              ("outputnode.connectivity_matrices","dwi.@connectivity_matrices")
                                               ])
                         ])
 
-            if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
-                diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
+            # if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
+            #     diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
 
+        return diffusion_flow
+
+
+    def process(self):
+        # Process time
+        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+
+        subject_directory = os.path.join(self.base_directory,self.subject)
+        deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+
+        # Initialization
+        if os.path.isfile(os.path.join(deriv_subject_directory,"pypeline.log")):
+            os.unlink(os.path.join(deriv_subject_directory,"pypeline.log"))
+        config.update_config({'logging': {'log_directory': deriv_subject_directory,
+                                  'log_to_file': True},
+                              'execution': {'remove_unnecessary_outputs': False,
+                              'stop_on_first_crash': True,'stop_on_first_rerun': False,
+                              'crashfile_format': "txt"}
+                              })
+        logging.update_logging(config)
+        iflogger = logging.getLogger('interface')
 
         iflogger.info("**** Processing ****")
+        print self.anat_flow
+
+        flow = self.create_pipeline_flow()
         flow.write_graph(graph2use='colored', format='svg', simple_form=True)
         if(self.number_of_cores != 1):
             flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
@@ -702,7 +763,7 @@ class DiffusionPipeline(Pipeline):
 
         iflogger.info("**** Processing finished ****")
 
-        return True,'Processing sucessful'
+        return True,'Processing successful'
 
 
 

@@ -154,6 +154,8 @@ class Pipeline(HasTraits):
     # num core settings
     number_of_cores = 1
 
+    anat_flow = None
+
     traits_view = QtView(Include('pipeline_group'))
 
     # traits_view = View(

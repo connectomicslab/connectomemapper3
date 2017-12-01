@@ -23,6 +23,7 @@ from bids.grabbids import BIDSLayout
 # Own imports
 #import pipelines.diffusion.diffusion as Diffusion_pipeline
 #import pipelines.functional.functional as FMRI_pipeline
+from pipelines.diffusion import diffusion as Diffusion_pipeline
 from pipelines.anatomical import anatomical as Anatomical_pipeline
 #import pipelines.egg.eeg as EEG_pipeline
 
@@ -107,68 +108,67 @@ def anat_load_config(pipeline, config_path):
 
     return True
 
-# def dmri_save_config(pipeline, config_path):
-#     config = ConfigParser.RawConfigParser()
-#     config.add_section('Global')
-#     global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
-#     for key in global_keys:
-#         #if key != "subject" and key != "subjects":
-#         config.set('Global', key, getattr(pipeline.global_conf, key))
-#     for stage in pipeline.stages.values():
-#         config.add_section(stage.name)
-#         stage_keys = [prop for prop in stage.config.traits().keys() if not 'trait' in prop] # possibly dangerous..?
-#         for key in stage_keys:
-#             keyval = getattr(stage.config, key)
-#             if 'config' in key: # subconfig
-#                 stage_sub_keys = [prop for prop in keyval.traits().keys() if not 'trait' in prop]
-#                 for sub_key in stage_sub_keys:
-#                     config.set(stage.name, key+'.'+sub_key, getattr(keyval, sub_key))
-#             else:
-#                 config.set(stage.name, key, keyval)
-#
-#     config.add_section('Multi-processing')
-#     config.set('Multi-processing','number_of_cores',pipeline.number_of_cores)
-#
-#     with open(config_path, 'wb') as configfile:
-#         config.write(configfile)
-#
-# def dmri_load_config(pipeline, config_path):
-#     config = ConfigParser.ConfigParser()
-#     config.read(config_path)
-#     global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
-#     for key in global_keys:
-#         if key != "subject" and key != "subjects":
-#             conf_value = config.get('Global', key)
-#             setattr(pipeline.global_conf, key, conf_value)
-#     for stage in pipeline.stages.values():
-#         stage_keys = [prop for prop in stage.config.traits().keys() if not 'trait' in prop] # possibly dangerous..?
-#         for key in stage_keys:
-#             if 'config' in key: #subconfig
-#                 sub_config = getattr(stage.config, key)
-#                 stage_sub_keys = [prop for prop in sub_config.traits().keys() if not 'trait' in prop]
-#                 for sub_key in stage_sub_keys:
-#                     try:
-#                         conf_value = config.get(stage.name, key+'.'+sub_key)
-#                         try:
-#                             conf_value = eval(conf_value)
-#                         except:
-#                             pass
-#                         setattr(sub_config, sub_key, conf_value)
-#                     except:
-#                         pass
-#             else:
-#                 try:
-#                     conf_value = config.get(stage.name, key)
-#                     try:
-#                         conf_value = eval(conf_value)
-#                     except:
-#                         pass
-#                     setattr(stage.config, key, conf_value)
-#                 except:
-#                     pass
-#     setattr(pipeline,'number_of_cores',int(config.get('Multi-processing','number_of_cores')))
-#
-#     return True
+def dmri_save_config(pipeline, config_path):
+    config = ConfigParser.RawConfigParser()
+    config.add_section('Global')
+    global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+    for key in global_keys:
+        #if key != "subject" and key != "subjects":
+        config.set('Global', key, getattr(pipeline.global_conf, key))
+    for stage in pipeline.stages.values():
+        config.add_section(stage.name)
+        stage_keys = [prop for prop in stage.config.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+        for key in stage_keys:
+            keyval = getattr(stage.config, key)
+            if 'config' in key: # subconfig
+                stage_sub_keys = [prop for prop in keyval.traits().keys() if not 'trait' in prop]
+                for sub_key in stage_sub_keys:
+                    config.set(stage.name, key+'.'+sub_key, getattr(keyval, sub_key))
+            else:
+                config.set(stage.name, key, keyval)
+
+    config.add_section('Multi-processing')
+    config.set('Multi-processing','number_of_cores',pipeline.number_of_cores)
+
+    with open(config_path, 'wb') as configfile:
+        config.write(configfile)
+
+def dmri_load_config(pipeline, config_path):
+    config = ConfigParser.ConfigParser()
+    config.read(config_path)
+    global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+    for key in global_keys:
+        if key != "subject" and key != "subjects":
+            conf_value = config.get('Global', key)
+            setattr(pipeline.global_conf, key, conf_value)
+    for stage in pipeline.stages.values():
+        stage_keys = [prop for prop in stage.config.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+        for key in stage_keys:
+            if 'config' in key: #subconfig
+                sub_config = getattr(stage.config, key)
+                stage_sub_keys = [prop for prop in sub_config.traits().keys() if not 'trait' in prop]
+                for sub_key in stage_sub_keys:
+                    try:
+                        conf_value = config.get(stage.name, key+'.'+sub_key)
+                        try:
+                            conf_value = eval(conf_value)
+                        except:
+                            pass
+                        setattr(sub_config, sub_key, conf_value)
+                    except:
+                        pass
+            else:
+                try:
+                    conf_value = config.get(stage.name, key)
+                    try:
+                        conf_value = eval(conf_value)
+                    except:
+                        pass
+                    setattr(stage.config, key, conf_value)
+                except:
+                    pass
+    setattr(pipeline,'number_of_cores',int(config.get('Multi-processing','number_of_cores')))
+    return True
 
 ## Creates (if needed) the folder hierarchy
 #
@@ -192,9 +192,47 @@ def refresh_folder(derivatives_directory, subject, input_folders):
             finally:
                 print "Created directory %s" % full_p
 
-def init_project(project_info, is_new_project):
+def init_dmri_project(project_info, anat_pipeline, is_new_project):
+    dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info, anat_pipeline.flow)
+
+    derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
+
+    if is_new_project and dmri_pipeline!= None: #and dmri_pipeline!= None:
+        if not os.path.exists(derivatives_directory):
+            try:
+                os.makedirs(derivatives_directory)
+            except os.error:
+                print "%s was already existing" % derivatives_directory
+            finally:
+                print "Created directory %s" % derivatives_directory
+
+        project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
+
+        if os.path.exists(project_info.dmri_config_file):
+            warn_res = project_info.configure_traits(view='warning_view')
+            if warn_res:
+                dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
+            else:
+                return None
+        else:
+            dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
+    else:
+        print "int_project dmri_pipeline.global_config.subjects : "
+        print dmri_pipeline.global_conf.subjects
+
+        dmri_conf_loaded = load_config(dmri_pipeline, project_info.dmri_config_file)
+
+        if not dmri_conf_loaded:
+            return None
+
+    print dmri_pipeline
+    refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
+    dmri_pipeline.config_file = project_info.dmri_config_file
+    return dmri_pipeline
+
+def init_anat_project(project_info, is_new_project):
     anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
-    #dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
+    #dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info,anat_pipeline.flow)
     #fmri_pipeline = FMRI_pipeline.fMRIPipeline
     #egg_pipeline = None
 
@@ -281,38 +319,40 @@ def update_anat_last_processed(project_info, pipeline):
                 pipeline.last_stage_processed = stage
                 project_info.anat_last_stage_processed = stage
 
-# def update_dmri_last_processed(project_info, pipeline):
-#     # last date
-#     if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject)):
-#         out_dirs = os.listdir(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject))
-#         # for out in out_dirs:
-#         #     if (project_info.last_date_processed == "Not yet processed" or
-#         #         out > project_info.last_date_processed):
-#         #         pipeline.last_date_processed = out
-#         #         project_info.last_date_processed = out
-#
-#         if (project_info.dmri_last_date_processed == "Not yet processed" or
-#             pipeline.now > project_info.dmri_last_date_processed):
-#             pipeline.dmri_last_date_processed = pipeline.now
-#             project_info.dmri_last_date_processed = pipeline.now
-#
-#     # last stage
-#     if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','nipype','diffusion_pipeline')):
-#         stage_dirs = []
-#         for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','nipype','diffusion_pipeline')):
-#             for dirname in fnmatch.filter(dirnames, '*_stage'):
-#                 stage_dirs.append(dirname)
-#         for stage in pipeline.ordered_stage_list:
-#             if stage.lower()+'_stage' in stage_dirs:
-#                 pipeline.last_stage_processed = stage
-#                 project_info.dmri_last_stage_processed = stage
+def update_dmri_last_processed(project_info, pipeline):
+    # last date
+    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject)):
+        out_dirs = os.listdir(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject))
+        # for out in out_dirs:
+        #     if (project_info.last_date_processed == "Not yet processed" or
+        #         out > project_info.last_date_processed):
+        #         pipeline.last_date_processed = out
+        #         project_info.last_date_processed = out
+
+        if (project_info.dmri_last_date_processed == "Not yet processed" or
+            pipeline.now > project_info.dmri_last_date_processed):
+            pipeline.dmri_last_date_processed = pipeline.now
+            project_info.dmri_last_date_processed = pipeline.now
+
+    # last stage
+    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','nipype','diffusion_pipeline')):
+        stage_dirs = []
+        for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','nipype','diffusion_pipeline')):
+            for dirname in fnmatch.filter(dirnames, '*_stage'):
+                stage_dirs.append(dirname)
+        for stage in pipeline.ordered_stage_list:
+            if stage.lower()+'_stage' in stage_dirs:
+                pipeline.last_stage_processed = stage
+                project_info.dmri_last_stage_processed = stage
 
 class ProjectHandler(Handler):
     anat_pipeline = Instance(HasTraits)
-    #dmri_pipeline = Instance(HasTraits)
+    dmri_pipeline = Instance(HasTraits)
     project_loaded = Bool(False)
+    anatomical_processed = Bool(False)
+    dmri_processed = Bool(False)
     anat_inputs_checked = Bool(False)
-    #dmri_inputs_checked = Bool(False)
+    dmri_inputs_checked = Bool(False)
 
     def new_project(self, ui_info ):
         new_project = gui.CMP_Project_Info()
@@ -335,17 +375,32 @@ class ProjectHandler(Handler):
                 error(message="Invalid BIDS dataset. Please see documentation for more details.",title="BIDS error")
 
             #self.anat_pipeline,self.dmri_pipeline = init_project(new_project, True)
-            self.anat_pipeline= init_project(new_project, True)
+            self.anat_pipeline= init_anat_project(new_project, True)
             if self.anat_pipeline != None: #and self.dmri_pipeline != None:
                 # update_last_processed(new_project, self.pipeline) # Not required as the project is new, so no update should be done on processing status
                 ui_info.ui.context["object"].project_info = new_project
                 ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
                 #ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                self.project_loaded = True
 
                 self.anat_inputs_checked = self.anat_pipeline.check_input()
+                ui_info.ui.context["object"].project_info.t1_available = self.anat_inputs_checked
                 if self.anat_inputs_checked:
                     anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
+
+                self.project_loaded = True
+
+            self.dmri_pipeline= init_dmri_project(ui_info.ui.context["object"].project_info, ui_info.ui.context["object"].anat_pipeline, True)
+            if self.dmri_pipeline != None: #and self.dmri_pipeline != None:
+                ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
+                #ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
+                #self.diffusion_ready = True
+                self.dmri_inputs_checked = self.dmri_pipeline.check_input()
+                ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
+                if self.dmri_inputs_checked:
+                    dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
+
+                self.project_loaded = True
+
 
 
     def load_project(self, ui_info ):
@@ -494,6 +549,7 @@ class ProjectHandler(Handler):
                 self.project_loaded = True
 
                 self.anat_inputs_checked = self.anat_pipeline.check_input()
+
                 if self.anat_inputs_checked:
                     anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
 
@@ -517,6 +573,7 @@ class ProjectHandler(Handler):
     #         self.pipeline.launch_progress_window()
     #         update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline)
 
+
     def process_anatomical(self, ui_info):
         ui_info.ui.context["object"].project_info.anat_config_error_msg = self.anat_pipeline.check_config()
         if ui_info.ui.context["object"].project_info.anat_config_error_msg != '':
@@ -526,6 +583,23 @@ class ProjectHandler(Handler):
             self.anat_pipeline.launch_process()
             self.anat_pipeline.launch_progress_window()
             update_anat_last_processed(ui_info.ui.context["object"].project_info, self.anat_pipeline)
+        anatomical_processed = True
+        ui_info.ui.context["object"].dmri_pipeline.anat_flow = self.anat_pipeline.flow
+
+        #self.anat_pipeline,self.dmri_pipeline = init_project(new_project, True)
+
+
+
+    def map_dmri_connectome(self, ui_info):
+        ui_info.ui.context["object"].project_info.dmri_config_error_msg = self.dmri_pipeline.check_config()
+        if ui_info.ui.context["object"].project_info.dmri_config_error_msg != '':
+            ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
+        else:
+            dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
+            self.dmri_pipeline.launch_process()
+            self.dmri_pipeline.launch_progress_window()
+            update_dmri_last_processed(ui_info.ui.context["object"].project_info, self.dmri_pipeline)
+        dmri_processed = True
 
     # def map_dmri_connectome(self, ui_info):
     #     ui_info.ui.context["object"].project_info.dmri_config_error_msg = self.dmri_pipeline.check_config()
