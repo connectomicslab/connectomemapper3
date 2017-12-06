@@ -70,7 +70,7 @@ class Erode(BaseInterface):
 class ParcellateInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(desc='Freesurfer main directory')
     subject_id = traits.String(mandatory=True, desc='Subject ID')
-    parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','NativeFreesurfer'], usedefault = True)
+    parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','Lausanne2018','NativeFreesurfer'], usedefault = True)
     erode_masks = traits.Bool(False)
 
 
@@ -121,8 +121,18 @@ class Parcellate(BaseInterface):
 
         if self.inputs.parcellation_scheme == "Lausanne2008":
             create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
-            #create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir)
+            create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir)
             create_roi(self.inputs.subject_id, self.inputs.subjects_dir)
+            create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir)
+            if self.inputs.erode_masks:
+                erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','fsmask_1mm.nii.gz'))
+                erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','csf_mask.nii.gz'))
+                erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','brainmask.nii.gz'))
+            crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir)
+        if self.inputs.parcellation_scheme == "Lausanne2018":
+            create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
+            #create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir)
+            create_roi_v2(self.inputs.subject_id, self.inputs.subjects_dir)
             create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir)
             if self.inputs.erode_masks:
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','fsmask_1mm.nii.gz'))
@@ -173,36 +183,79 @@ class Parcellate(BaseInterface):
 def get_parcellation(parcel = "NativeFreesurfer"):
     if parcel == "Lausanne2008":
         return {
+            'scale33' : {'number_of_regions' : 83,
+                                    # contains name, url, color, freesurfer_label, etc. used for connection matrix
+                                    'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution83','resolution83.graphml')),
+                                    # scalar node values on fsaverage? or atlas?
+                                    'surface_parcellation' : None,
+                                    # scalar node values in fsaverage volume?
+                                    'volume_parcellation' : None,
+                                    # the subdirectory name from where to copy parcellations, with hemispheric wildcard
+                                    'fs_label_subdir_name' : 'regenerated_%s_36',
+                                    # should we subtract the cortical rois for the white matter mask?
+                                    'subtract_from_wm_mask' : 1,
+                                    },
+                        'scale60' : {'number_of_regions' : 129,
+                                    'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution150','resolution150.graphml')),
+                                    'surface_parcellation' : None,
+                                    'volume_parcellation' : None,
+                                    'fs_label_subdir_name' : 'regenerated_%s_60',
+                                    'subtract_from_wm_mask' : 1,
+                                     },
+                        'scale125' : {'number_of_regions' : 234,
+                                    'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution258','resolution258.graphml')),
+                                    'surface_parcellation' : None,
+                                    'volume_parcellation' : None,
+                                    'fs_label_subdir_name' : 'regenerated_%s_125',
+                                    'subtract_from_wm_mask' : 1,
+                                    },
+                        'scale250' : {'number_of_regions' : 463,
+                                    'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution500','resolution500.graphml')),
+                                    'surface_parcellation' : None,
+                                    'volume_parcellation' : None,
+                                    'fs_label_subdir_name' : 'regenerated_%s_250',
+                                    'subtract_from_wm_mask' : 1,
+                                    },
+                        'scale500' : {'number_of_regions' : 1015,
+                                    'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution1015','resolution1015.graphml')),
+                                    'surface_parcellation' : None,
+                                    'volume_parcellation' : None,
+                                    'fs_label_subdir_name' : 'regenerated_%s_500',
+                                    'subtract_from_wm_mask' : 1,
+                                    },
+                    }
+    elif parcel == "Lausanne2018":
+        return {
             'scale1' : {'number_of_regions' : 95,#83,
-        			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution83','resolution1_new.graphml')), # NOTE that all the node-wise information is stored in a dedicated graphml file
+        			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018','resolution1','resolution1.graphml')), # NOTE that all the node-wise information is stored in a dedicated graphml file
         			      'surface_parcellation' : None,
         			      'volume_parcellation' : None,
         			      'fs_label_subdir_name' : 'regenerated_%s_1',
                           'subtract_from_wm_mask' : 1,
         			      'annotation' : 'myaparc_1'},
         		  'scale2' : {'number_of_regions' : 141,#129,
-        			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution150','resolution2_new.graphml')),
+        			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018','resolution2','resolution2.graphml')),
         			      'surface_parcellation' : None,
         			      'volume_parcellation' : None,
         			      'fs_label_subdir_name' : 'regenerated_%s_2',
                           'subtract_from_wm_mask' : 1,
         			      'annotation' : 'myaparc_2'},
         		  'scale3' : {'number_of_regions' : 246,#234,
-        			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution258','resolution3_new.graphml')),
+        			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018','resolution3','resolution3.graphml')),
         			      'surface_parcellation' : None,
         			      'volume_parcellation' : None,
         			      'fs_label_subdir_name' : 'regenerated_%s_3',
                           'subtract_from_wm_mask' : 1,
         			      'annotation' : 'myaparc_3'},
         		  'scale4' : {'number_of_regions' : 475,#463,
-        			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution500','resolution4_new.graphml')),
+        			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018','resolution4','resolution4.graphml')),
         			      'surface_parcellation' : None,
         			      'volume_parcellation' : None,
         			      'fs_label_subdir_name' : 'regenerated_%s_4',
                           'subtract_from_wm_mask' : 1,
         			      'annotation' : 'myaparc_4'},
         		  'scale5' : {'number_of_regions' : 1027,#1015,
-        			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution1015','resolution5_new.graphml')),
+        			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018','resolution5','resolution5.graphml')),
         			      'surface_parcellation' : None,
         			      'volume_parcellation' : None,
         			      'fs_label_subdir_name' : 'regenerated_%s_5',
@@ -344,6 +397,174 @@ def create_annot_label(subject_id, subjects_dir):
 
     print("[ DONE ]")
 
+def create_roi(subject_id, subjects_dir):
+    """ Creates the ROI_%s.nii.gz files using the given parcellation information
+    from networks. Iteratively create volume. """
+
+    print("Create the ROIs:")
+    fs_dir = op.join(subjects_dir,subject_id)
+
+    # load aseg volume
+    aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
+    asegd = aseg.get_data()	# numpy.ndarray
+
+    # identify cortical voxels, right (3) and left (42) hemispheres
+    idxr = np.where(asegd == 3)
+    idxl = np.where(asegd == 42)
+    xx = np.concatenate((idxr[0],idxl[0]))
+    yy = np.concatenate((idxr[1],idxl[1]))
+    zz = np.concatenate((idxr[2],idxl[2]))
+
+    # initialize variables necessary for cortical ROIs dilation
+    # dimensions of the neighbourhood for rois labels assignment (choose odd dimensions!)
+    shape = (25,25,25)
+    center = np.array(shape) // 2
+    # dist: distances from the center of the neighbourhood
+    dist = np.zeros(shape, dtype='float32')
+    for x in range(shape[0]):
+        for y in range(shape[1]):
+            for z in range(shape[2]):
+                distxyz = center - [x,y,z]
+                dist[x,y,z] = math.sqrt(np.sum(np.multiply(distxyz,distxyz)))
+
+    # LOOP throughout all the SCALES
+    # (from the one with the highest number of region to the one with the lowest number of regions)
+    #parkeys = gconf.parcellation.keys()
+    scales = get_parcellation('Lausanne2008').keys()
+    values = list()
+    for i in range(len(scales)):
+        values.append(get_parcellation('Lausanne2008')[scales[i]]['number_of_regions'])
+    temp = zip(values, scales)
+    temp.sort(reverse=True)
+    values, scales = zip(*temp)
+    roisMax = np.zeros( (256, 256, 256), dtype=np.int16 ) # numpy.ndarray
+    for i,parkey in enumerate(get_parcellation('Lausanne2008').keys()):
+        parval = get_parcellation('Lausanne2008')[parkey]
+
+        print("Working on parcellation: " + parkey)
+        print("========================")
+        pg = nx.read_graphml(parval['node_information_graphml'])
+
+        # each node represents a brain region
+        # create a big 256^3 volume for storage of all ROIs
+        rois = np.zeros( (256, 256, 256), dtype=np.int16 ) # numpy.ndarray
+
+        for brk, brv in pg.nodes_iter(data=True):   # slow loop
+
+            if brv['dn_hemisphere'] == 'left':
+                hemi = 'lh'
+            elif brv['dn_hemisphere'] == 'right':
+                hemi = 'rh'
+
+            if brv['dn_region'] == 'subcortical':
+
+                print("---------------------")
+                print("Work on brain region: %s" % (brv['dn_region']) )
+                print("Freesurfer Name: %s" %  brv['dn_fsname'] )
+                print("---------------------")
+
+                # if it is subcortical, retrieve roi from aseg
+                idx = np.where(asegd == int(brv['dn_fs_aseg_val']))
+                rois[idx] = int(brv['dn_correspondence_id'])
+
+            elif brv['dn_region'] == 'cortical':
+                print("---------------------")
+                print("Work on brain region: %s" % (brv['dn_region']) )
+                print("Freesurfer Name: %s" %  brv['dn_fsname'] )
+                print("---------------------")
+
+                labelpath = op.join(fs_dir, 'label', parval['fs_label_subdir_name'] % hemi)
+
+                # construct .label file name
+                fname = '%s.%s.label' % (hemi, brv['dn_fsname'])
+
+                # execute fs mri_label2vol to generate volume roi from the label file
+                # store it in temporary file to be overwritten for each region (slow!)
+                #mri_cmd = 'mri_label2vol --label "%s" --temp "%s" --o "%s" --identity' % (op.join(labelpath, fname),
+                #        op.join(fs_dir, 'mri', 'orig.mgz'), op.join(labelpath, 'tmp.nii.gz'))
+                #runCmd( mri_cmd, log )
+                mri_cmd = ['mri_label2vol','--label',op.join(labelpath, fname),'--temp',op.join(fs_dir, 'mri', 'orig.mgz'),'--o',op.join(labelpath, 'tmp.nii.gz'),'--identity']
+                subprocess.check_call(mri_cmd)
+
+                tmp = ni.load(op.join(labelpath, 'tmp.nii.gz'))
+                tmpd = tmp.get_data()
+
+                # find voxel and set them to intensity value in rois
+                idx = np.where(tmpd == 1)
+                rois[idx] = int(brv['dn_correspondence_id'])
+
+        newrois = rois.copy()
+        # store scale500 volume for correction on multi-resolution consistency
+        if i == 0:
+            print("Storing ROIs volume maximal resolution...")
+            roisMax = rois.copy()
+            idxMax = np.where(roisMax > 0)
+            xxMax = idxMax[0]
+            yyMax = idxMax[1]
+            zzMax = idxMax[2]
+        # correct cortical surfaces using as reference the roisMax volume (for consistency between resolutions)
+        else:
+            print("Adapt cortical surfaces...")
+            #adaptstart = time()
+            idxRois = np.where(rois > 0)
+            xxRois = idxRois[0]
+            yyRois = idxRois[1]
+            zzRois = idxRois[2]
+            # correct voxels labeled in current resolution, but not labeled in highest resolution
+            for j in range(xxRois.size):
+                if ( roisMax[xxRois[j],yyRois[j],zzRois[j]]==0 ):
+                    newrois[xxRois[j],yyRois[j],zzRois[j]] = 0;
+            # correct voxels not labeled in current resolution, but labeled in highest resolution
+            for j in range(xxMax.size):
+                if ( newrois[xxMax[j],yyMax[j],zzMax[j]]==0 ):
+                    local = extract(rois, shape, position=(xxMax[j],yyMax[j],zzMax[j]), fill=0)
+                    mask = local.copy()
+                    mask[np.nonzero(local>0)] = 1
+                    thisdist = np.multiply(dist,mask)
+                    thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
+                    value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
+                    if value.size > 1:
+                        counts = np.bincount(value)
+                        value = np.argmax(counts)
+                    newrois[xxMax[j],yyMax[j],zzMax[j]] = value
+            #print("Cortical ROIs adaptation took %s seconds to process." % (time()-adaptstart))
+
+        # store volume eg in ROI_scale33.nii.gz
+        out_roi = op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % parkey)
+        # update the header
+        hdr = aseg.get_header()
+        hdr2 = hdr.copy()
+        hdr2.set_data_dtype(np.uint16)
+        print("Save output image to %s" % out_roi)
+        img = ni.Nifti1Image(newrois, aseg.get_affine(), hdr2)
+        ni.save(img, out_roi)
+
+        # dilate cortical regions
+        print("Dilating cortical regions...")
+        #dilatestart = time()
+        # loop throughout all the voxels belonging to the aseg GM volume
+        for j in range(xx.size):
+            if newrois[xx[j],yy[j],zz[j]] == 0:
+                local = extract(rois, shape, position=(xx[j],yy[j],zz[j]), fill=0)
+                mask = local.copy()
+                mask[np.nonzero(local>0)] = 1
+                thisdist = np.multiply(dist,mask)
+                thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
+                value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
+                if value.size > 1:
+                    counts = np.bincount(value)
+                    value = np.argmax(counts)
+                newrois[xx[j],yy[j],zz[j]] = value
+        #print("Cortical ROIs dilation took %s seconds to process." % (time()-dilatestart))
+
+        # store volume eg in ROIv_scale33.nii.gz
+        out_roi = op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % parkey)
+        print("Save output image to %s" % out_roi)
+        img = ni.Nifti1Image(newrois, aseg.get_affine(), hdr2)
+        ni.save(img, out_roi)
+
+    print("[ DONE ]")
+
 def define_atlas_variables():
     print("Define atlas variables")
     print("=================================================")
@@ -366,35 +587,35 @@ def define_atlas_variables():
        ('lh', 'myatlas_4_lh.gcs', 'lh.myaparc_4.annot', 'regenerated_lh_4', 'myaparc_4', pkg_resources.resource_filename('cmtklib', op.join('data', 'colortable_and_gcs', 'my_atlas_gcs', 'myatlas_4_lh.gcs')))]
 
     pardic = {'scale1' : {'number_of_regions' : 95,#83,
-			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution83','resolution1_new.graphml')), # NOTE that all the node-wise information is stored in a dedicated graphml file
+			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018','resolution1','resolution1.graphml')), # NOTE that all the node-wise information is stored in a dedicated graphml file
 			      'surface_parcellation' : None,
 			      'volume_parcellation' : None,
 			      'fs_label_subdir_name' : 'regenerated_%s_1',
                   'subtract_from_wm_mask' : 1,
 			      'annotation' : 'myaparc_1'},
 		  'scale2' : {'number_of_regions' : 141,#129,141
-			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution150','resolution2_new.graphml')),
+			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018','resolution2','resolution2.graphml')),
 			      'surface_parcellation' : None,
 			      'volume_parcellation' : None,
 			      'fs_label_subdir_name' : 'regenerated_%s_2',
                   'subtract_from_wm_mask' : 1,
 			      'annotation' : 'myaparc_2'},
 		  'scale3' : {'number_of_regions' : 246,#234,246
-			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution258','resolution3_new.graphml')),
+			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018','resolution3','resolution3.graphml')),
 			      'surface_parcellation' : None,
 			      'volume_parcellation' : None,
 			      'fs_label_subdir_name' : 'regenerated_%s_3',
                   'subtract_from_wm_mask' : 1,
 			      'annotation' : 'myaparc_3'},
 		  'scale4' : {'number_of_regions' : 475,#463,475
-			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution500','resolution4_new.graphml')),
+			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018','resolution4','resolution4.graphml')),
 			      'surface_parcellation' : None,
 			      'volume_parcellation' : None,
 			      'fs_label_subdir_name' : 'regenerated_%s_4',
                   'subtract_from_wm_mask' : 1,
 			      'annotation' : 'myaparc_4'},
 		  'scale5' : {'number_of_regions' : 1027,#1015,1027
-			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2008','resolution1015','resolution5_new.graphml')),
+			      'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018','resolution5','resolution5.graphml')),
 			      'surface_parcellation' : None,
 			      'volume_parcellation' : None,
 			      'fs_label_subdir_name' : 'regenerated_%s_5',
@@ -405,7 +626,7 @@ def define_atlas_variables():
 
     return paths, comp, pardic, parkeys
 
-def create_roi(subject_id, subjects_dir):
+def create_roi_v2(subject_id, subjects_dir):
     """ Creates the ROI_%s.nii.gz files using the given parcellation information
     from networks. Iteratively create volume. """
 
@@ -494,6 +715,22 @@ def create_roi(subject_id, subjects_dir):
 
     # Path orig volume
     orig = os.path.join(subject_dir, 'mri', 'orig', '001.mgz')
+
+    # extract cc and unknown to add to tractography mask, we do not want this as a region of interest
+    # in FS 5.0, unknown and corpuscallosum are not available for the 35 scale (why?),
+    # but for the other scales only, take the ones from _60
+    rhun = op.join(fs_dir, 'label', 'rh.unknown.label')
+    lhun = op.join(fs_dir, 'label', 'lh.unknown.label')
+    rhco = op.join(fs_dir, 'label', 'rh.corpuscallosum.label')
+    lhco = op.join(fs_dir, 'label', 'lh.corpuscallosum.label')
+    shutil.copy(op.join(fs_dir, 'label', 'regenerated_rh_2', 'rh.unknown.label'), rhun)
+    shutil.copy(op.join(fs_dir, 'label', 'regenerated_lh_2', 'lh.unknown.label'), lhun)
+    shutil.copy(op.join(fs_dir, 'label', 'regenerated_rh_2', 'rh.corpuscallosum.label'), rhco)
+    shutil.copy(op.join(fs_dir, 'label', 'regenerated_lh_2', 'lh.corpuscallosum.label'), lhco)
+
+    mri_cmd = ['mri_label2vol','--label',rhun,'--label',lhun,'--label',rhco,'--label',lhco,'--temp',op.join(fs_dir, 'mri', 'orig.mgz'),'--o',op.join(fs_dir, 'label', 'cc_unknown.nii.gz'),'--identity']
+    subprocess.check_call(mri_cmd)
+
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','ribbon.mgz'),'-o',op.join(fs_dir,'mri','ribbon.nii.gz')]
     subprocess.check_call(mri_cmd)
 

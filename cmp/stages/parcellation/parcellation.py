@@ -29,7 +29,7 @@ from cmp.stages.common import Stage
 class ParcellationConfig(HasTraits):
     pipeline_mode = Enum(["Diffusion","fMRI"])
     parcellation_scheme = Str('Lausanne2008')
-    parcellation_scheme_editor = List(['NativeFreesurfer','Lausanne2008','Custom'])
+    parcellation_scheme_editor = List(['NativeFreesurfer','Lausanne2008','Lausanne2018','Custom'])
     pre_custom = Str('Lausanne2008')
     #atlas_name = Str()
     number_of_regions = Int()
@@ -151,14 +151,25 @@ class ParcellationStage(Stage):
                                                                            roi_v+":colormap=lut:lut="+lut_file]
                 elif isinstance(parc_results.outputs.roi_files_in_structural_space, TraitListObject):
                     print parc_results.outputs.roi_files_in_structural_space
-                    resolution = {'33':'resolution83','60':'resolution150','125':'resolution258','250':'resolution500','500':'resolution1015'}
-                    for roi_v in parc_results.outputs.roi_files_in_structural_space:
-                        roi_basename = os.path.basename(roi_v)
-                        scale = roi_basename[16:-7]
-                        lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008',resolution[scale],resolution[scale] + '_LUT.txt'))
-                        self.inspect_outputs_dict[roi_basename] = ['freeview','-v',
-                                                                           white_matter_file+':colormap=GEColor',
-                                                                           roi_v+":colormap=lut:lut="+lut_file]
+                    if self.config.parcellation_scheme == 'lausanne2008':
+                        resolution = {'33':'resolution83','60':'resolution150','125':'resolution258','250':'resolution500','500':'resolution1015'}
+                        for roi_v in parc_results.outputs.roi_files_in_structural_space:
+                            roi_basename = os.path.basename(roi_v)
+                            scale = roi_basename[16:-7]
+                            lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008',resolution[scale],resolution[scale] + '_LUT.txt'))
+                            self.inspect_outputs_dict[roi_basename] = ['freeview','-v',
+                                                                               white_matter_file+':colormap=GEColor',
+                                                                               roi_v+":colormap=lut:lut="+lut_file]
+                    else:
+                        resolution = {'1':'resolution1','2':'resolution2','3':'resolution3','4':'resolution4','5':'resolution5'}
+                        for roi_v in parc_results.outputs.roi_files_in_structural_space:
+                            roi_basename = os.path.basename(roi_v)
+                            scale = roi_basename[16:-7]
+                            lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2018',resolution[scale],resolution[scale] + '_LUT.txt'))
+                            self.inspect_outputs_dict[roi_basename] = ['freeview','-v',
+                                                                               white_matter_file+':colormap=GEColor',
+                                                                               roi_v+":colormap=lut:lut="+lut_file]
+
                 #self.inspect_outputs = self.inspect_outputs_dict.keys()
         else:
             self.inspect_outputs_dict["Custom atlas"] = ['fslview',self.config.atlas_nifti_file,"-l","Random-Rainbow"]
