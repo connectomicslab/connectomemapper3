@@ -1,0 +1,542 @@
+[
+    {
+        "group": 1,
+        "imports": [],
+        "name": "00_mr_convert_brain",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [],
+        "name": "01_mr_convert_roi_volumes",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "01_mr_convert_roi_volumes"
+        ],
+        "name": "02_ROIs_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [],
+        "name": "03_mr_convert_b0",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [],
+        "name": "04_mr_convert_T1",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "03_mr_convert_b0",
+            "04_mr_convert_T1"
+        ],
+        "name": "05_flirt_dwimask_pre",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [],
+        "name": "06_mr_convert_brain_mask",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "06_mr_convert_brain_mask"
+        ],
+        "name": "07_mr_threshold_brainmask",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "07_mr_threshold_brainmask"
+        ],
+        "name": "08_brain_mask_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "06_mr_convert_brain_mask"
+        ],
+        "name": "09_brain_mask_full_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "00_mr_convert_brain"
+        ],
+        "name": "10_anat_masked_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "04_mr_convert_T1"
+        ],
+        "name": "11_anat_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [],
+        "name": "12_concatnode",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "03_mr_convert_b0",
+            "05_flirt_dwimask_pre",
+            "07_mr_threshold_brainmask"
+        ],
+        "name": "13_flirt_dwimask",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [],
+        "name": "14_concatnode",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "14_concatnode"
+        ],
+        "name": "15_mr_convert",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "15_mr_convert"
+        ],
+        "name": "16_extract_grad_mrtrix",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "16_extract_grad_mrtrix"
+        ],
+        "name": "17_indexnode",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "04_mr_convert_T1"
+        ],
+        "name": "18_linear_registration",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "18_linear_registration",
+            "00_mr_convert_brain"
+        ],
+        "name": "19_fastr",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "19_fastr"
+        ],
+        "name": "20_PVEs_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "15_mr_convert"
+        ],
+        "name": "21_mr_convert_b",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "21_mr_convert_b"
+        ],
+        "name": "22_motion_correction",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "22_motion_correction"
+        ],
+        "name": "23_eddy_correct",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "23_eddy_correct"
+        ],
+        "name": "24_diffusion_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "24_diffusion_resample"
+        ],
+        "name": "25_mr_convert_b0",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "11_anat_resample",
+            "25_mr_convert_b0"
+        ],
+        "name": "26_linear_registration",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "11_anat_resample",
+            "26_linear_registration",
+            "25_mr_convert_b0"
+        ],
+        "name": "27_SyN_registration",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "27_SyN_registration",
+            "20_PVEs_resample",
+            "25_mr_convert_b0"
+        ],
+        "name": "28_apply_warp_pves",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "11_anat_resample",
+            "27_SyN_registration",
+            "25_mr_convert_b0"
+        ],
+        "name": "29_apply_warp_T1",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "02_ROIs_resample",
+            "27_SyN_registration",
+            "25_mr_convert_b0"
+        ],
+        "name": "30_apply_warp_roivs",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "30_apply_warp_roivs"
+        ],
+        "name": "31_dilate_rois",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "10_anat_masked_resample",
+            "27_SyN_registration",
+            "25_mr_convert_b0"
+        ],
+        "name": "32_apply_warp_brain",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "24_diffusion_resample"
+        ],
+        "name": "33_mr_convert_b0_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "13_flirt_dwimask",
+            "33_mr_convert_b0_resample"
+        ],
+        "name": "34_dwi_brainmask_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "12_concatnode",
+            "24_diffusion_resample"
+        ],
+        "name": "35_mr_convert",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "35_mr_convert"
+        ],
+        "name": "36_extract_grad",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "35_mr_convert"
+        ],
+        "name": "37_dwi2tensor_unmasked",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "37_dwi2tensor_unmasked"
+        ],
+        "name": "38_tensor2FA_unmasked",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "38_tensor2FA_unmasked"
+        ],
+        "name": "39_mr_convert_FA_unmasked",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "39_mr_convert_FA_unmasked"
+        ],
+        "name": "40_FA_noNaN_unmasked",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "34_dwi_brainmask_resample",
+            "35_mr_convert"
+        ],
+        "name": "41_dwi2tensor",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "34_dwi_brainmask_resample",
+            "41_dwi2tensor"
+        ],
+        "name": "42_tensor2FA",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "42_tensor2FA"
+        ],
+        "name": "43_mr_convert_FA",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "43_mr_convert_FA"
+        ],
+        "name": "44_FA_noNaN",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "24_diffusion_resample"
+        ],
+        "name": "45_extract_first",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "45_extract_first"
+        ],
+        "name": "46_target_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [],
+        "name": "47_mr_convert_wm_mask_file",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "47_mr_convert_wm_mask_file"
+        ],
+        "name": "48_wm_mask_resample",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "48_wm_mask_resample",
+            "27_SyN_registration",
+            "25_mr_convert_b0"
+        ],
+        "name": "49_apply_warp_wm",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "49_apply_warp_wm"
+        ],
+        "name": "50_dipy_erode",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "50_dipy_erode",
+            "24_diffusion_resample"
+        ],
+        "name": "51_dipy_tensor",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "51_dipy_tensor"
+        ],
+        "name": "52_merge_additional_maps",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "50_dipy_erode",
+            "24_diffusion_resample"
+        ],
+        "name": "53_dipy_CSD",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "53_dipy_CSD",
+            "49_apply_warp_wm",
+            "51_dipy_tensor",
+            "24_diffusion_resample",
+            "28_apply_warp_pves"
+        ],
+        "name": "54_dipy_deterministic_tracking",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "54_dipy_deterministic_tracking",
+            "31_dilate_rois",
+            "52_merge_additional_maps"
+        ],
+        "name": "55_compute_matrice",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "49_apply_warp_wm",
+            "31_dilate_rois"
+        ],
+        "name": "56_dipy_seeds",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "36_extract_grad",
+            "32_apply_warp_brain",
+            "29_apply_warp_T1",
+            "55_compute_matrice",
+            "34_dwi_brainmask_resample",
+            "54_dipy_deterministic_tracking",
+            "49_apply_warp_wm",
+            "51_dipy_tensor",
+            "24_diffusion_resample",
+            "28_apply_warp_pves",
+            "30_apply_warp_roivs"
+        ],
+        "name": "57_diffusion_sinker",
+        "size": 1
+    },
+    {
+        "group": 2,
+        "imports": [],
+        "name": "58_datasource",
+        "size": 1
+    },
+    {
+        "group": 2,
+        "imports": [
+            "58_datasource"
+        ],
+        "name": "59_mgz_convert",
+        "size": 1
+    },
+    {
+        "group": 2,
+        "imports": [
+            "59_mgz_convert"
+        ],
+        "name": "60_copy_orig",
+        "size": 1
+    },
+    {
+        "group": 2,
+        "imports": [
+            "60_copy_orig"
+        ],
+        "name": "61_reconall",
+        "size": 1
+    },
+    {
+        "group": 2,
+        "imports": [
+            "61_reconall"
+        ],
+        "name": "62_Lausanne2008_parcellation",
+        "size": 1
+    },
+    {
+        "group": 2,
+        "imports": [
+            "62_Lausanne2008_parcellation"
+        ],
+        "name": "63_anatomical_sinker",
+        "size": 1
+    },
+    {
+        "group": 3,
+        "imports": [],
+        "name": "64_datasource",
+        "size": 1
+    }
+]

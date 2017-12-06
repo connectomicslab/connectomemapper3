@@ -1,0 +1,1978 @@
+<?xml version="1.0" encoding="utf-8"?><graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key attr.name="dn_region" attr.type="string" for="node" id="d0" />
+  <key attr.name="dn_fsname" attr.type="string" for="node" id="d1" />
+  <key attr.name="dn_hemisphere" attr.type="string" for="node" id="d2" />
+  <key attr.name="dn_multiscaleID" attr.type="int" for="node" id="d3" />
+  <key attr.name="dn_name" attr.type="string" for="node" id="d4" />
+  <key attr.name="dn_fsID" attr.type="int" for="node" id="d5" />
+  <graph edgedefault="undirected" id="">
+    <node id="1">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lateralorbitofrontal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">1</data>
+      <data key="d4">right-lateralorbitofrontal_1</data>
+      <data key="d5">2012</data>
+    </node>
+    <node id="2">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lateralorbitofrontal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">2</data>
+      <data key="d4">right-lateralorbitofrontal_2</data>
+      <data key="d5">2054</data>
+    </node>
+    <node id="3">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lateralorbitofrontal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">3</data>
+      <data key="d4">right-lateralorbitofrontal_3</data>
+      <data key="d5">2055</data>
+    </node>
+    <node id="4">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lateralorbitofrontal_4</data>
+      <data key="d2">right</data>
+      <data key="d3">4</data>
+      <data key="d4">right-lateralorbitofrontal_4</data>
+      <data key="d5">2056</data>
+    </node>
+    <node id="5">
+      <data key="d0">cortical</data>
+      <data key="d1">right-parsorbitalis_1</data>
+      <data key="d2">right</data>
+      <data key="d3">5</data>
+      <data key="d4">right-parsorbitalis_1</data>
+      <data key="d5">2019</data>
+    </node>
+    <node id="6">
+      <data key="d0">cortical</data>
+      <data key="d1">right-frontalpole_1</data>
+      <data key="d2">right</data>
+      <data key="d3">6</data>
+      <data key="d4">right-frontalpole_1</data>
+      <data key="d5">2032</data>
+    </node>
+    <node id="7">
+      <data key="d0">cortical</data>
+      <data key="d1">right-medialorbitofrontal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">7</data>
+      <data key="d4">right-medialorbitofrontal_1</data>
+      <data key="d5">2014</data>
+    </node>
+    <node id="8">
+      <data key="d0">cortical</data>
+      <data key="d1">right-medialorbitofrontal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">8</data>
+      <data key="d4">right-medialorbitofrontal_2</data>
+      <data key="d5">2059</data>
+    </node>
+    <node id="9">
+      <data key="d0">cortical</data>
+      <data key="d1">right-medialorbitofrontal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">9</data>
+      <data key="d4">right-medialorbitofrontal_3</data>
+      <data key="d5">2060</data>
+    </node>
+    <node id="10">
+      <data key="d0">cortical</data>
+      <data key="d1">right-parstriangularis_1</data>
+      <data key="d2">right</data>
+      <data key="d3">10</data>
+      <data key="d4">right-parstriangularis_1</data>
+      <data key="d5">2020</data>
+    </node>
+    <node id="11">
+      <data key="d0">cortical</data>
+      <data key="d1">right-parstriangularis_2</data>
+      <data key="d2">right</data>
+      <data key="d3">11</data>
+      <data key="d4">right-parstriangularis_2</data>
+      <data key="d5">2067</data>
+    </node>
+    <node id="12">
+      <data key="d0">cortical</data>
+      <data key="d1">right-parsopercularis_1</data>
+      <data key="d2">right</data>
+      <data key="d3">12</data>
+      <data key="d4">right-parsopercularis_1</data>
+      <data key="d5">2018</data>
+    </node>
+    <node id="13">
+      <data key="d0">cortical</data>
+      <data key="d1">right-parsopercularis_2</data>
+      <data key="d2">right</data>
+      <data key="d3">13</data>
+      <data key="d4">right-parsopercularis_2</data>
+      <data key="d5">2066</data>
+    </node>
+    <node id="14">
+      <data key="d0">cortical</data>
+      <data key="d1">right-rostralmiddlefrontal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">14</data>
+      <data key="d4">right-rostralmiddlefrontal_1</data>
+      <data key="d5">2027</data>
+    </node>
+    <node id="15">
+      <data key="d0">cortical</data>
+      <data key="d1">right-rostralmiddlefrontal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">15</data>
+      <data key="d4">right-rostralmiddlefrontal_2</data>
+      <data key="d5">2083</data>
+    </node>
+    <node id="16">
+      <data key="d0">cortical</data>
+      <data key="d1">right-rostralmiddlefrontal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">16</data>
+      <data key="d4">right-rostralmiddlefrontal_3</data>
+      <data key="d5">2084</data>
+    </node>
+    <node id="17">
+      <data key="d0">cortical</data>
+      <data key="d1">right-rostralmiddlefrontal_4</data>
+      <data key="d2">right</data>
+      <data key="d3">17</data>
+      <data key="d4">right-rostralmiddlefrontal_4</data>
+      <data key="d5">2085</data>
+    </node>
+    <node id="18">
+      <data key="d0">cortical</data>
+      <data key="d1">right-rostralmiddlefrontal_5</data>
+      <data key="d2">right</data>
+      <data key="d3">18</data>
+      <data key="d4">right-rostralmiddlefrontal_5</data>
+      <data key="d5">2086</data>
+    </node>
+    <node id="19">
+      <data key="d0">cortical</data>
+      <data key="d1">right-rostralmiddlefrontal_6</data>
+      <data key="d2">right</data>
+      <data key="d3">19</data>
+      <data key="d4">right-rostralmiddlefrontal_6</data>
+      <data key="d5">2087</data>
+    </node>
+    <node id="20">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorfrontal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">20</data>
+      <data key="d4">right-superiorfrontal_1</data>
+      <data key="d5">2028</data>
+    </node>
+    <node id="21">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorfrontal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">21</data>
+      <data key="d4">right-superiorfrontal_2</data>
+      <data key="d5">2088</data>
+    </node>
+    <node id="22">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorfrontal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">22</data>
+      <data key="d4">right-superiorfrontal_3</data>
+      <data key="d5">2089</data>
+    </node>
+    <node id="23">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorfrontal_4</data>
+      <data key="d2">right</data>
+      <data key="d3">23</data>
+      <data key="d4">right-superiorfrontal_4</data>
+      <data key="d5">2090</data>
+    </node>
+    <node id="24">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorfrontal_5</data>
+      <data key="d2">right</data>
+      <data key="d3">24</data>
+      <data key="d4">right-superiorfrontal_5</data>
+      <data key="d5">2091</data>
+    </node>
+    <node id="25">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorfrontal_6</data>
+      <data key="d2">right</data>
+      <data key="d3">25</data>
+      <data key="d4">right-superiorfrontal_6</data>
+      <data key="d5">2092</data>
+    </node>
+    <node id="26">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorfrontal_7</data>
+      <data key="d2">right</data>
+      <data key="d3">26</data>
+      <data key="d4">right-superiorfrontal_7</data>
+      <data key="d5">2093</data>
+    </node>
+    <node id="27">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorfrontal_8</data>
+      <data key="d2">right</data>
+      <data key="d3">27</data>
+      <data key="d4">right-superiorfrontal_8</data>
+      <data key="d5">2094</data>
+    </node>
+    <node id="28">
+      <data key="d0">cortical</data>
+      <data key="d1">right-caudalmiddlefrontal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">28</data>
+      <data key="d4">right-caudalmiddlefrontal_1</data>
+      <data key="d5">2003</data>
+    </node>
+    <node id="29">
+      <data key="d0">cortical</data>
+      <data key="d1">right-caudalmiddlefrontal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">29</data>
+      <data key="d4">right-caudalmiddlefrontal_2</data>
+      <data key="d5">2036</data>
+    </node>
+    <node id="30">
+      <data key="d0">cortical</data>
+      <data key="d1">right-caudalmiddlefrontal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">30</data>
+      <data key="d4">right-caudalmiddlefrontal_3</data>
+      <data key="d5">2037</data>
+    </node>
+    <node id="31">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precentral_1</data>
+      <data key="d2">right</data>
+      <data key="d3">31</data>
+      <data key="d4">right-precentral_1</data>
+      <data key="d5">2024</data>
+    </node>
+    <node id="32">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precentral_2</data>
+      <data key="d2">right</data>
+      <data key="d3">32</data>
+      <data key="d4">right-precentral_2</data>
+      <data key="d5">2074</data>
+    </node>
+    <node id="33">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precentral_3</data>
+      <data key="d2">right</data>
+      <data key="d3">33</data>
+      <data key="d4">right-precentral_3</data>
+      <data key="d5">2075</data>
+    </node>
+    <node id="34">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precentral_4</data>
+      <data key="d2">right</data>
+      <data key="d3">34</data>
+      <data key="d4">right-precentral_4</data>
+      <data key="d5">2076</data>
+    </node>
+    <node id="35">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precentral_5</data>
+      <data key="d2">right</data>
+      <data key="d3">35</data>
+      <data key="d4">right-precentral_5</data>
+      <data key="d5">2077</data>
+    </node>
+    <node id="36">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precentral_6</data>
+      <data key="d2">right</data>
+      <data key="d3">36</data>
+      <data key="d4">right-precentral_6</data>
+      <data key="d5">2078</data>
+    </node>
+    <node id="37">
+      <data key="d0">cortical</data>
+      <data key="d1">right-paracentral_1</data>
+      <data key="d2">right</data>
+      <data key="d3">37</data>
+      <data key="d4">right-paracentral_1</data>
+      <data key="d5">2017</data>
+    </node>
+    <node id="38">
+      <data key="d0">cortical</data>
+      <data key="d1">right-paracentral_2</data>
+      <data key="d2">right</data>
+      <data key="d3">38</data>
+      <data key="d4">right-paracentral_2</data>
+      <data key="d5">2064</data>
+    </node>
+    <node id="39">
+      <data key="d0">cortical</data>
+      <data key="d1">right-paracentral_3</data>
+      <data key="d2">right</data>
+      <data key="d3">39</data>
+      <data key="d4">right-paracentral_3</data>
+      <data key="d5">2065</data>
+    </node>
+    <node id="40">
+      <data key="d0">cortical</data>
+      <data key="d1">right-rostralanteriorcingulate_1</data>
+      <data key="d2">right</data>
+      <data key="d3">40</data>
+      <data key="d4">right-rostralanteriorcingulate_1</data>
+      <data key="d5">2026</data>
+    </node>
+    <node id="41">
+      <data key="d0">cortical</data>
+      <data key="d1">right-caudalanteriorcingulate_1</data>
+      <data key="d2">right</data>
+      <data key="d3">41</data>
+      <data key="d4">right-caudalanteriorcingulate_1</data>
+      <data key="d5">2002</data>
+    </node>
+    <node id="42">
+      <data key="d0">cortical</data>
+      <data key="d1">right-posteriorcingulate_1</data>
+      <data key="d2">right</data>
+      <data key="d3">42</data>
+      <data key="d4">right-posteriorcingulate_1</data>
+      <data key="d5">2023</data>
+    </node>
+    <node id="43">
+      <data key="d0">cortical</data>
+      <data key="d1">right-posteriorcingulate_2</data>
+      <data key="d2">right</data>
+      <data key="d3">43</data>
+      <data key="d4">right-posteriorcingulate_2</data>
+      <data key="d5">2073</data>
+    </node>
+    <node id="44">
+      <data key="d0">cortical</data>
+      <data key="d1">right-isthmuscingulate_1</data>
+      <data key="d2">right</data>
+      <data key="d3">44</data>
+      <data key="d4">right-isthmuscingulate_1</data>
+      <data key="d5">2010</data>
+    </node>
+    <node id="45">
+      <data key="d0">cortical</data>
+      <data key="d1">right-postcentral_1</data>
+      <data key="d2">right</data>
+      <data key="d3">45</data>
+      <data key="d4">right-postcentral_1</data>
+      <data key="d5">2022</data>
+    </node>
+    <node id="46">
+      <data key="d0">cortical</data>
+      <data key="d1">right-postcentral_2</data>
+      <data key="d2">right</data>
+      <data key="d3">46</data>
+      <data key="d4">right-postcentral_2</data>
+      <data key="d5">2069</data>
+    </node>
+    <node id="47">
+      <data key="d0">cortical</data>
+      <data key="d1">right-postcentral_3</data>
+      <data key="d2">right</data>
+      <data key="d3">47</data>
+      <data key="d4">right-postcentral_3</data>
+      <data key="d5">2070</data>
+    </node>
+    <node id="48">
+      <data key="d0">cortical</data>
+      <data key="d1">right-postcentral_4</data>
+      <data key="d2">right</data>
+      <data key="d3">48</data>
+      <data key="d4">right-postcentral_4</data>
+      <data key="d5">2071</data>
+    </node>
+    <node id="49">
+      <data key="d0">cortical</data>
+      <data key="d1">right-postcentral_5</data>
+      <data key="d2">right</data>
+      <data key="d3">49</data>
+      <data key="d4">right-postcentral_5</data>
+      <data key="d5">2072</data>
+    </node>
+    <node id="50">
+      <data key="d0">cortical</data>
+      <data key="d1">right-supramarginal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">50</data>
+      <data key="d4">right-supramarginal_1</data>
+      <data key="d5">2031</data>
+    </node>
+    <node id="51">
+      <data key="d0">cortical</data>
+      <data key="d1">right-supramarginal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">51</data>
+      <data key="d4">right-supramarginal_2</data>
+      <data key="d5">2105</data>
+    </node>
+    <node id="52">
+      <data key="d0">cortical</data>
+      <data key="d1">right-supramarginal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">52</data>
+      <data key="d4">right-supramarginal_3</data>
+      <data key="d5">2106</data>
+    </node>
+    <node id="53">
+      <data key="d0">cortical</data>
+      <data key="d1">right-supramarginal_4</data>
+      <data key="d2">right</data>
+      <data key="d3">53</data>
+      <data key="d4">right-supramarginal_4</data>
+      <data key="d5">2107</data>
+    </node>
+    <node id="54">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorparietal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">54</data>
+      <data key="d4">right-superiorparietal_1</data>
+      <data key="d5">2029</data>
+    </node>
+    <node id="55">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorparietal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">55</data>
+      <data key="d4">right-superiorparietal_2</data>
+      <data key="d5">2095</data>
+    </node>
+    <node id="56">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorparietal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">56</data>
+      <data key="d4">right-superiorparietal_3</data>
+      <data key="d5">2096</data>
+    </node>
+    <node id="57">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorparietal_4</data>
+      <data key="d2">right</data>
+      <data key="d3">57</data>
+      <data key="d4">right-superiorparietal_4</data>
+      <data key="d5">2097</data>
+    </node>
+    <node id="58">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorparietal_5</data>
+      <data key="d2">right</data>
+      <data key="d3">58</data>
+      <data key="d4">right-superiorparietal_5</data>
+      <data key="d5">2098</data>
+    </node>
+    <node id="59">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorparietal_6</data>
+      <data key="d2">right</data>
+      <data key="d3">59</data>
+      <data key="d4">right-superiorparietal_6</data>
+      <data key="d5">2099</data>
+    </node>
+    <node id="60">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiorparietal_7</data>
+      <data key="d2">right</data>
+      <data key="d3">60</data>
+      <data key="d4">right-superiorparietal_7</data>
+      <data key="d5">2100</data>
+    </node>
+    <node id="61">
+      <data key="d0">cortical</data>
+      <data key="d1">right-inferiorparietal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">61</data>
+      <data key="d4">right-inferiorparietal_1</data>
+      <data key="d5">2008</data>
+    </node>
+    <node id="62">
+      <data key="d0">cortical</data>
+      <data key="d1">right-inferiorparietal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">62</data>
+      <data key="d4">right-inferiorparietal_2</data>
+      <data key="d5">2042</data>
+    </node>
+    <node id="63">
+      <data key="d0">cortical</data>
+      <data key="d1">right-inferiorparietal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">63</data>
+      <data key="d4">right-inferiorparietal_3</data>
+      <data key="d5">2043</data>
+    </node>
+    <node id="64">
+      <data key="d0">cortical</data>
+      <data key="d1">right-inferiorparietal_4</data>
+      <data key="d2">right</data>
+      <data key="d3">64</data>
+      <data key="d4">right-inferiorparietal_4</data>
+      <data key="d5">2044</data>
+    </node>
+    <node id="65">
+      <data key="d0">cortical</data>
+      <data key="d1">right-inferiorparietal_5</data>
+      <data key="d2">right</data>
+      <data key="d3">65</data>
+      <data key="d4">right-inferiorparietal_5</data>
+      <data key="d5">2045</data>
+    </node>
+    <node id="66">
+      <data key="d0">cortical</data>
+      <data key="d1">right-inferiorparietal_6</data>
+      <data key="d2">right</data>
+      <data key="d3">66</data>
+      <data key="d4">right-inferiorparietal_6</data>
+      <data key="d5">2046</data>
+    </node>
+    <node id="67">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precuneus_1</data>
+      <data key="d2">right</data>
+      <data key="d3">67</data>
+      <data key="d4">right-precuneus_1</data>
+      <data key="d5">2025</data>
+    </node>
+    <node id="68">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precuneus_2</data>
+      <data key="d2">right</data>
+      <data key="d3">68</data>
+      <data key="d4">right-precuneus_2</data>
+      <data key="d5">2079</data>
+    </node>
+    <node id="69">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precuneus_3</data>
+      <data key="d2">right</data>
+      <data key="d3">69</data>
+      <data key="d4">right-precuneus_3</data>
+      <data key="d5">2080</data>
+    </node>
+    <node id="70">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precuneus_4</data>
+      <data key="d2">right</data>
+      <data key="d3">70</data>
+      <data key="d4">right-precuneus_4</data>
+      <data key="d5">2081</data>
+    </node>
+    <node id="71">
+      <data key="d0">cortical</data>
+      <data key="d1">right-precuneus_5</data>
+      <data key="d2">right</data>
+      <data key="d3">71</data>
+      <data key="d4">right-precuneus_5</data>
+      <data key="d5">2082</data>
+    </node>
+    <node id="72">
+      <data key="d0">cortical</data>
+      <data key="d1">right-cuneus_1</data>
+      <data key="d2">right</data>
+      <data key="d3">72</data>
+      <data key="d4">right-cuneus_1</data>
+      <data key="d5">2005</data>
+    </node>
+    <node id="73">
+      <data key="d0">cortical</data>
+      <data key="d1">right-cuneus_2</data>
+      <data key="d2">right</data>
+      <data key="d3">73</data>
+      <data key="d4">right-cuneus_2</data>
+      <data key="d5">2038</data>
+    </node>
+    <node id="74">
+      <data key="d0">cortical</data>
+      <data key="d1">right-pericalcarine_1</data>
+      <data key="d2">right</data>
+      <data key="d3">74</data>
+      <data key="d4">right-pericalcarine_1</data>
+      <data key="d5">2021</data>
+    </node>
+    <node id="75">
+      <data key="d0">cortical</data>
+      <data key="d1">right-pericalcarine_2</data>
+      <data key="d2">right</data>
+      <data key="d3">75</data>
+      <data key="d4">right-pericalcarine_2</data>
+      <data key="d5">2068</data>
+    </node>
+    <node id="76">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lateraloccipital_1</data>
+      <data key="d2">right</data>
+      <data key="d3">76</data>
+      <data key="d4">right-lateraloccipital_1</data>
+      <data key="d5">2011</data>
+    </node>
+    <node id="77">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lateraloccipital_2</data>
+      <data key="d2">right</data>
+      <data key="d3">77</data>
+      <data key="d4">right-lateraloccipital_2</data>
+      <data key="d5">2050</data>
+    </node>
+    <node id="78">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lateraloccipital_3</data>
+      <data key="d2">right</data>
+      <data key="d3">78</data>
+      <data key="d4">right-lateraloccipital_3</data>
+      <data key="d5">2051</data>
+    </node>
+    <node id="79">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lateraloccipital_4</data>
+      <data key="d2">right</data>
+      <data key="d3">79</data>
+      <data key="d4">right-lateraloccipital_4</data>
+      <data key="d5">2052</data>
+    </node>
+    <node id="80">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lateraloccipital_5</data>
+      <data key="d2">right</data>
+      <data key="d3">80</data>
+      <data key="d4">right-lateraloccipital_5</data>
+      <data key="d5">2053</data>
+    </node>
+    <node id="81">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lingual_1</data>
+      <data key="d2">right</data>
+      <data key="d3">81</data>
+      <data key="d4">right-lingual_1</data>
+      <data key="d5">2013</data>
+    </node>
+    <node id="82">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lingual_2</data>
+      <data key="d2">right</data>
+      <data key="d3">82</data>
+      <data key="d4">right-lingual_2</data>
+      <data key="d5">2057</data>
+    </node>
+    <node id="83">
+      <data key="d0">cortical</data>
+      <data key="d1">right-lingual_3</data>
+      <data key="d2">right</data>
+      <data key="d3">83</data>
+      <data key="d4">right-lingual_3</data>
+      <data key="d5">2058</data>
+    </node>
+    <node id="84">
+      <data key="d0">cortical</data>
+      <data key="d1">right-fusiform_1</data>
+      <data key="d2">right</data>
+      <data key="d3">84</data>
+      <data key="d4">right-fusiform_1</data>
+      <data key="d5">2007</data>
+    </node>
+    <node id="85">
+      <data key="d0">cortical</data>
+      <data key="d1">right-fusiform_2</data>
+      <data key="d2">right</data>
+      <data key="d3">85</data>
+      <data key="d4">right-fusiform_2</data>
+      <data key="d5">2039</data>
+    </node>
+    <node id="86">
+      <data key="d0">cortical</data>
+      <data key="d1">right-fusiform_3</data>
+      <data key="d2">right</data>
+      <data key="d3">86</data>
+      <data key="d4">right-fusiform_3</data>
+      <data key="d5">2040</data>
+    </node>
+    <node id="87">
+      <data key="d0">cortical</data>
+      <data key="d1">right-fusiform_4</data>
+      <data key="d2">right</data>
+      <data key="d3">87</data>
+      <data key="d4">right-fusiform_4</data>
+      <data key="d5">2041</data>
+    </node>
+    <node id="88">
+      <data key="d0">cortical</data>
+      <data key="d1">right-parahippocampal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">88</data>
+      <data key="d4">right-parahippocampal_1</data>
+      <data key="d5">2016</data>
+    </node>
+    <node id="89">
+      <data key="d0">cortical</data>
+      <data key="d1">right-entorhinal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">89</data>
+      <data key="d4">right-entorhinal_1</data>
+      <data key="d5">2006</data>
+    </node>
+    <node id="90">
+      <data key="d0">cortical</data>
+      <data key="d1">right-temporalpole_1</data>
+      <data key="d2">right</data>
+      <data key="d3">90</data>
+      <data key="d4">right-temporalpole_1</data>
+      <data key="d5">2033</data>
+    </node>
+    <node id="91">
+      <data key="d0">cortical</data>
+      <data key="d1">right-inferiortemporal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">91</data>
+      <data key="d4">right-inferiortemporal_1</data>
+      <data key="d5">2009</data>
+    </node>
+    <node id="92">
+      <data key="d0">cortical</data>
+      <data key="d1">right-inferiortemporal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">92</data>
+      <data key="d4">right-inferiortemporal_2</data>
+      <data key="d5">2047</data>
+    </node>
+    <node id="93">
+      <data key="d0">cortical</data>
+      <data key="d1">right-inferiortemporal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">93</data>
+      <data key="d4">right-inferiortemporal_3</data>
+      <data key="d5">2048</data>
+    </node>
+    <node id="94">
+      <data key="d0">cortical</data>
+      <data key="d1">right-inferiortemporal_4</data>
+      <data key="d2">right</data>
+      <data key="d3">94</data>
+      <data key="d4">right-inferiortemporal_4</data>
+      <data key="d5">2049</data>
+    </node>
+    <node id="95">
+      <data key="d0">cortical</data>
+      <data key="d1">right-middletemporal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">95</data>
+      <data key="d4">right-middletemporal_1</data>
+      <data key="d5">2015</data>
+    </node>
+    <node id="96">
+      <data key="d0">cortical</data>
+      <data key="d1">right-middletemporal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">96</data>
+      <data key="d4">right-middletemporal_2</data>
+      <data key="d5">2061</data>
+    </node>
+    <node id="97">
+      <data key="d0">cortical</data>
+      <data key="d1">right-middletemporal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">97</data>
+      <data key="d4">right-middletemporal_3</data>
+      <data key="d5">2062</data>
+    </node>
+    <node id="98">
+      <data key="d0">cortical</data>
+      <data key="d1">right-middletemporal_4</data>
+      <data key="d2">right</data>
+      <data key="d3">98</data>
+      <data key="d4">right-middletemporal_4</data>
+      <data key="d5">2063</data>
+    </node>
+    <node id="99">
+      <data key="d0">cortical</data>
+      <data key="d1">right-bankssts_1</data>
+      <data key="d2">right</data>
+      <data key="d3">99</data>
+      <data key="d4">right-bankssts_1</data>
+      <data key="d5">2001</data>
+    </node>
+    <node id="100">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiortemporal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">100</data>
+      <data key="d4">right-superiortemporal_1</data>
+      <data key="d5">2030</data>
+    </node>
+    <node id="101">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiortemporal_2</data>
+      <data key="d2">right</data>
+      <data key="d3">101</data>
+      <data key="d4">right-superiortemporal_2</data>
+      <data key="d5">2101</data>
+    </node>
+    <node id="102">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiortemporal_3</data>
+      <data key="d2">right</data>
+      <data key="d3">102</data>
+      <data key="d4">right-superiortemporal_3</data>
+      <data key="d5">2102</data>
+    </node>
+    <node id="103">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiortemporal_4</data>
+      <data key="d2">right</data>
+      <data key="d3">103</data>
+      <data key="d4">right-superiortemporal_4</data>
+      <data key="d5">2103</data>
+    </node>
+    <node id="104">
+      <data key="d0">cortical</data>
+      <data key="d1">right-superiortemporal_5</data>
+      <data key="d2">right</data>
+      <data key="d3">104</data>
+      <data key="d4">right-superiortemporal_5</data>
+      <data key="d5">2104</data>
+    </node>
+    <node id="105">
+      <data key="d0">cortical</data>
+      <data key="d1">right-transversetemporal_1</data>
+      <data key="d2">right</data>
+      <data key="d3">105</data>
+      <data key="d4">right-transversetemporal_1</data>
+      <data key="d5">2034</data>
+    </node>
+    <node id="106">
+      <data key="d0">cortical</data>
+      <data key="d1">right-insula_1</data>
+      <data key="d2">right</data>
+      <data key="d3">106</data>
+      <data key="d4">right-insula_1</data>
+      <data key="d5">2035</data>
+    </node>
+    <node id="107">
+      <data key="d0">cortical</data>
+      <data key="d1">right-insula_2</data>
+      <data key="d2">right</data>
+      <data key="d3">107</data>
+      <data key="d4">right-insula_2</data>
+      <data key="d5">2108</data>
+    </node>
+    <node id="108">
+      <data key="d0">cortical</data>
+      <data key="d1">right-insula_3</data>
+      <data key="d2">right</data>
+      <data key="d3">108</data>
+      <data key="d4">right-insula_3</data>
+      <data key="d5">2109</data>
+    </node>
+    <node id="109">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">115</data>
+      <data key="d4">right-thalamus_PU</data>
+      <data key="d5">49</data>
+    </node>
+    <node id="110">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">115</data>
+      <data key="d4">right-thalamus_A</data>
+      <data key="d5">49</data>
+    </node>
+    <node id="111">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">115</data>
+      <data key="d4">right-thalamus_MD</data>
+      <data key="d5">49</data>
+    </node>
+    <node id="112">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">115</data>
+      <data key="d4">right-thalamus_VLD</data>
+      <data key="d5">49</data>
+    </node>
+    <node id="113">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">115</data>
+      <data key="d4">right-thalamus_CLPUM</data>
+      <data key="d5">49</data>
+    </node>
+    <node id="114">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">115</data>
+      <data key="d4">right-thalamus_VA</data>
+      <data key="d5">49</data>
+    </node>
+    <node id="115">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">115</data>
+      <data key="d4">right-thalamus_VLV</data>
+      <data key="d5">49</data>
+    </node>
+    <node id="116">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">116</data>
+      <data key="d4">right-caudate</data>
+      <data key="d5">50</data>
+    </node>
+    <node id="117">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">117</data>
+      <data key="d4">right-putamen</data>
+      <data key="d5">51</data>
+    </node>
+    <node id="118">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">118</data>
+      <data key="d4">right-pallidum</data>
+      <data key="d5">52</data>
+    </node>
+    <node id="119">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">119</data>
+      <data key="d4">right-accumbensarea</data>
+      <data key="d5">58</data>
+    </node>
+    <node id="120">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">120</data>
+      <data key="d4">right-hippocampus</data>
+      <data key="d5">53</data>
+    </node>
+    <node id="121">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">right</data>
+      <data key="d3">121</data>
+      <data key="d4">right-amygdala</data>
+      <data key="d5">54</data>
+    </node>
+    <node id="122">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lateralorbitofrontal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">122</data>
+      <data key="d4">left-lateralorbitofrontal_1</data>
+      <data key="d5">1012</data>
+    </node>
+    <node id="123">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lateralorbitofrontal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">123</data>
+      <data key="d4">left-lateralorbitofrontal_2</data>
+      <data key="d5">1053</data>
+    </node>
+    <node id="124">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lateralorbitofrontal_3</data>
+      <data key="d2">left</data>
+      <data key="d3">124</data>
+      <data key="d4">left-lateralorbitofrontal_3</data>
+      <data key="d5">1054</data>
+    </node>
+    <node id="125">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lateralorbitofrontal_4</data>
+      <data key="d2">left</data>
+      <data key="d3">125</data>
+      <data key="d4">left-lateralorbitofrontal_4</data>
+      <data key="d5">1055</data>
+    </node>
+    <node id="126">
+      <data key="d0">cortical</data>
+      <data key="d1">left-parsorbitalis_1</data>
+      <data key="d2">left</data>
+      <data key="d3">126</data>
+      <data key="d4">left-parsorbitalis_1</data>
+      <data key="d5">1019</data>
+    </node>
+    <node id="127">
+      <data key="d0">cortical</data>
+      <data key="d1">left-frontalpole_1</data>
+      <data key="d2">left</data>
+      <data key="d3">127</data>
+      <data key="d4">left-frontalpole_1</data>
+      <data key="d5">1032</data>
+    </node>
+    <node id="128">
+      <data key="d0">cortical</data>
+      <data key="d1">left-medialorbitofrontal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">128</data>
+      <data key="d4">left-medialorbitofrontal_1</data>
+      <data key="d5">1014</data>
+    </node>
+    <node id="129">
+      <data key="d0">cortical</data>
+      <data key="d1">left-medialorbitofrontal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">129</data>
+      <data key="d4">left-medialorbitofrontal_2</data>
+      <data key="d5">1059</data>
+    </node>
+    <node id="130">
+      <data key="d0">cortical</data>
+      <data key="d1">left-parstriangularis_1</data>
+      <data key="d2">left</data>
+      <data key="d3">130</data>
+      <data key="d4">left-parstriangularis_1</data>
+      <data key="d5">1020</data>
+    </node>
+    <node id="131">
+      <data key="d0">cortical</data>
+      <data key="d1">left-parsopercularis_1</data>
+      <data key="d2">left</data>
+      <data key="d3">131</data>
+      <data key="d4">left-parsopercularis_1</data>
+      <data key="d5">1018</data>
+    </node>
+    <node id="132">
+      <data key="d0">cortical</data>
+      <data key="d1">left-parsopercularis_2</data>
+      <data key="d2">left</data>
+      <data key="d3">132</data>
+      <data key="d4">left-parsopercularis_2</data>
+      <data key="d5">1064</data>
+    </node>
+    <node id="133">
+      <data key="d0">cortical</data>
+      <data key="d1">left-rostralmiddlefrontal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">133</data>
+      <data key="d4">left-rostralmiddlefrontal_1</data>
+      <data key="d5">1027</data>
+    </node>
+    <node id="134">
+      <data key="d0">cortical</data>
+      <data key="d1">left-rostralmiddlefrontal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">134</data>
+      <data key="d4">left-rostralmiddlefrontal_2</data>
+      <data key="d5">1083</data>
+    </node>
+    <node id="135">
+      <data key="d0">cortical</data>
+      <data key="d1">left-rostralmiddlefrontal_3</data>
+      <data key="d2">left</data>
+      <data key="d3">135</data>
+      <data key="d4">left-rostralmiddlefrontal_3</data>
+      <data key="d5">1084</data>
+    </node>
+    <node id="136">
+      <data key="d0">cortical</data>
+      <data key="d1">left-rostralmiddlefrontal_4</data>
+      <data key="d2">left</data>
+      <data key="d3">136</data>
+      <data key="d4">left-rostralmiddlefrontal_4</data>
+      <data key="d5">1085</data>
+    </node>
+    <node id="137">
+      <data key="d0">cortical</data>
+      <data key="d1">left-rostralmiddlefrontal_5</data>
+      <data key="d2">left</data>
+      <data key="d3">137</data>
+      <data key="d4">left-rostralmiddlefrontal_5</data>
+      <data key="d5">1086</data>
+    </node>
+    <node id="138">
+      <data key="d0">cortical</data>
+      <data key="d1">left-rostralmiddlefrontal_6</data>
+      <data key="d2">left</data>
+      <data key="d3">138</data>
+      <data key="d4">left-rostralmiddlefrontal_6</data>
+      <data key="d5">1087</data>
+    </node>
+    <node id="139">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorfrontal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">139</data>
+      <data key="d4">left-superiorfrontal_1</data>
+      <data key="d5">1028</data>
+    </node>
+    <node id="140">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorfrontal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">140</data>
+      <data key="d4">left-superiorfrontal_2</data>
+      <data key="d5">1088</data>
+    </node>
+    <node id="141">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorfrontal_3</data>
+      <data key="d2">left</data>
+      <data key="d3">141</data>
+      <data key="d4">left-superiorfrontal_3</data>
+      <data key="d5">1089</data>
+    </node>
+    <node id="142">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorfrontal_4</data>
+      <data key="d2">left</data>
+      <data key="d3">142</data>
+      <data key="d4">left-superiorfrontal_4</data>
+      <data key="d5">1090</data>
+    </node>
+    <node id="143">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorfrontal_5</data>
+      <data key="d2">left</data>
+      <data key="d3">143</data>
+      <data key="d4">left-superiorfrontal_5</data>
+      <data key="d5">1091</data>
+    </node>
+    <node id="144">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorfrontal_6</data>
+      <data key="d2">left</data>
+      <data key="d3">144</data>
+      <data key="d4">left-superiorfrontal_6</data>
+      <data key="d5">1092</data>
+    </node>
+    <node id="145">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorfrontal_7</data>
+      <data key="d2">left</data>
+      <data key="d3">145</data>
+      <data key="d4">left-superiorfrontal_7</data>
+      <data key="d5">1093</data>
+    </node>
+    <node id="146">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorfrontal_8</data>
+      <data key="d2">left</data>
+      <data key="d3">146</data>
+      <data key="d4">left-superiorfrontal_8</data>
+      <data key="d5">1094</data>
+    </node>
+    <node id="147">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorfrontal_9</data>
+      <data key="d2">left</data>
+      <data key="d3">147</data>
+      <data key="d4">left-superiorfrontal_9</data>
+      <data key="d5">1095</data>
+    </node>
+    <node id="148">
+      <data key="d0">cortical</data>
+      <data key="d1">left-caudalmiddlefrontal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">148</data>
+      <data key="d4">left-caudalmiddlefrontal_1</data>
+      <data key="d5">1003</data>
+    </node>
+    <node id="149">
+      <data key="d0">cortical</data>
+      <data key="d1">left-caudalmiddlefrontal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">149</data>
+      <data key="d4">left-caudalmiddlefrontal_2</data>
+      <data key="d5">1037</data>
+    </node>
+    <node id="150">
+      <data key="d0">cortical</data>
+      <data key="d1">left-caudalmiddlefrontal_3</data>
+      <data key="d2">left</data>
+      <data key="d3">150</data>
+      <data key="d4">left-caudalmiddlefrontal_3</data>
+      <data key="d5">1038</data>
+    </node>
+    <node id="151">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precentral_1</data>
+      <data key="d2">left</data>
+      <data key="d3">151</data>
+      <data key="d4">left-precentral_1</data>
+      <data key="d5">1024</data>
+    </node>
+    <node id="152">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precentral_2</data>
+      <data key="d2">left</data>
+      <data key="d3">152</data>
+      <data key="d4">left-precentral_2</data>
+      <data key="d5">1072</data>
+    </node>
+    <node id="153">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precentral_3</data>
+      <data key="d2">left</data>
+      <data key="d3">153</data>
+      <data key="d4">left-precentral_3</data>
+      <data key="d5">1073</data>
+    </node>
+    <node id="154">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precentral_4</data>
+      <data key="d2">left</data>
+      <data key="d3">154</data>
+      <data key="d4">left-precentral_4</data>
+      <data key="d5">1074</data>
+    </node>
+    <node id="155">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precentral_5</data>
+      <data key="d2">left</data>
+      <data key="d3">155</data>
+      <data key="d4">left-precentral_5</data>
+      <data key="d5">1075</data>
+    </node>
+    <node id="156">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precentral_6</data>
+      <data key="d2">left</data>
+      <data key="d3">156</data>
+      <data key="d4">left-precentral_6</data>
+      <data key="d5">1076</data>
+    </node>
+    <node id="157">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precentral_7</data>
+      <data key="d2">left</data>
+      <data key="d3">157</data>
+      <data key="d4">left-precentral_7</data>
+      <data key="d5">1077</data>
+    </node>
+    <node id="158">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precentral_8</data>
+      <data key="d2">left</data>
+      <data key="d3">158</data>
+      <data key="d4">left-precentral_8</data>
+      <data key="d5">1078</data>
+    </node>
+    <node id="159">
+      <data key="d0">cortical</data>
+      <data key="d1">left-paracentral_1</data>
+      <data key="d2">left</data>
+      <data key="d3">159</data>
+      <data key="d4">left-paracentral_1</data>
+      <data key="d5">1017</data>
+    </node>
+    <node id="160">
+      <data key="d0">cortical</data>
+      <data key="d1">left-paracentral_2</data>
+      <data key="d2">left</data>
+      <data key="d3">160</data>
+      <data key="d4">left-paracentral_2</data>
+      <data key="d5">1063</data>
+    </node>
+    <node id="161">
+      <data key="d0">cortical</data>
+      <data key="d1">left-rostralanteriorcingulate_1</data>
+      <data key="d2">left</data>
+      <data key="d3">161</data>
+      <data key="d4">left-rostralanteriorcingulate_1</data>
+      <data key="d5">1026</data>
+    </node>
+    <node id="162">
+      <data key="d0">cortical</data>
+      <data key="d1">left-caudalanteriorcingulate_1</data>
+      <data key="d2">left</data>
+      <data key="d3">162</data>
+      <data key="d4">left-caudalanteriorcingulate_1</data>
+      <data key="d5">1002</data>
+    </node>
+    <node id="163">
+      <data key="d0">cortical</data>
+      <data key="d1">left-posteriorcingulate_1</data>
+      <data key="d2">left</data>
+      <data key="d3">163</data>
+      <data key="d4">left-posteriorcingulate_1</data>
+      <data key="d5">1023</data>
+    </node>
+    <node id="164">
+      <data key="d0">cortical</data>
+      <data key="d1">left-posteriorcingulate_2</data>
+      <data key="d2">left</data>
+      <data key="d3">164</data>
+      <data key="d4">left-posteriorcingulate_2</data>
+      <data key="d5">1071</data>
+    </node>
+    <node id="165">
+      <data key="d0">cortical</data>
+      <data key="d1">left-isthmuscingulate_1</data>
+      <data key="d2">left</data>
+      <data key="d3">165</data>
+      <data key="d4">left-isthmuscingulate_1</data>
+      <data key="d5">1010</data>
+    </node>
+    <node id="166">
+      <data key="d0">cortical</data>
+      <data key="d1">left-postcentral_1</data>
+      <data key="d2">left</data>
+      <data key="d3">166</data>
+      <data key="d4">left-postcentral_1</data>
+      <data key="d5">1022</data>
+    </node>
+    <node id="167">
+      <data key="d0">cortical</data>
+      <data key="d1">left-postcentral_2</data>
+      <data key="d2">left</data>
+      <data key="d3">167</data>
+      <data key="d4">left-postcentral_2</data>
+      <data key="d5">1065</data>
+    </node>
+    <node id="168">
+      <data key="d0">cortical</data>
+      <data key="d1">left-postcentral_3</data>
+      <data key="d2">left</data>
+      <data key="d3">168</data>
+      <data key="d4">left-postcentral_3</data>
+      <data key="d5">1066</data>
+    </node>
+    <node id="169">
+      <data key="d0">cortical</data>
+      <data key="d1">left-postcentral_4</data>
+      <data key="d2">left</data>
+      <data key="d3">169</data>
+      <data key="d4">left-postcentral_4</data>
+      <data key="d5">1067</data>
+    </node>
+    <node id="170">
+      <data key="d0">cortical</data>
+      <data key="d1">left-postcentral_5</data>
+      <data key="d2">left</data>
+      <data key="d3">170</data>
+      <data key="d4">left-postcentral_5</data>
+      <data key="d5">1068</data>
+    </node>
+    <node id="171">
+      <data key="d0">cortical</data>
+      <data key="d1">left-postcentral_6</data>
+      <data key="d2">left</data>
+      <data key="d3">171</data>
+      <data key="d4">left-postcentral_6</data>
+      <data key="d5">1069</data>
+    </node>
+    <node id="172">
+      <data key="d0">cortical</data>
+      <data key="d1">left-postcentral_7</data>
+      <data key="d2">left</data>
+      <data key="d3">172</data>
+      <data key="d4">left-postcentral_7</data>
+      <data key="d5">1070</data>
+    </node>
+    <node id="173">
+      <data key="d0">cortical</data>
+      <data key="d1">left-supramarginal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">173</data>
+      <data key="d4">left-supramarginal_1</data>
+      <data key="d5">1031</data>
+    </node>
+    <node id="174">
+      <data key="d0">cortical</data>
+      <data key="d1">left-supramarginal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">174</data>
+      <data key="d4">left-supramarginal_2</data>
+      <data key="d5">1106</data>
+    </node>
+    <node id="175">
+      <data key="d0">cortical</data>
+      <data key="d1">left-supramarginal_3</data>
+      <data key="d2">left</data>
+      <data key="d3">175</data>
+      <data key="d4">left-supramarginal_3</data>
+      <data key="d5">1107</data>
+    </node>
+    <node id="176">
+      <data key="d0">cortical</data>
+      <data key="d1">left-supramarginal_4</data>
+      <data key="d2">left</data>
+      <data key="d3">176</data>
+      <data key="d4">left-supramarginal_4</data>
+      <data key="d5">1108</data>
+    </node>
+    <node id="177">
+      <data key="d0">cortical</data>
+      <data key="d1">left-supramarginal_5</data>
+      <data key="d2">left</data>
+      <data key="d3">177</data>
+      <data key="d4">left-supramarginal_5</data>
+      <data key="d5">1109</data>
+    </node>
+    <node id="178">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorparietal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">178</data>
+      <data key="d4">left-superiorparietal_1</data>
+      <data key="d5">1029</data>
+    </node>
+    <node id="179">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorparietal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">179</data>
+      <data key="d4">left-superiorparietal_2</data>
+      <data key="d5">1096</data>
+    </node>
+    <node id="180">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorparietal_3</data>
+      <data key="d2">left</data>
+      <data key="d3">180</data>
+      <data key="d4">left-superiorparietal_3</data>
+      <data key="d5">1097</data>
+    </node>
+    <node id="181">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorparietal_4</data>
+      <data key="d2">left</data>
+      <data key="d3">181</data>
+      <data key="d4">left-superiorparietal_4</data>
+      <data key="d5">1098</data>
+    </node>
+    <node id="182">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorparietal_5</data>
+      <data key="d2">left</data>
+      <data key="d3">182</data>
+      <data key="d4">left-superiorparietal_5</data>
+      <data key="d5">1099</data>
+    </node>
+    <node id="183">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorparietal_6</data>
+      <data key="d2">left</data>
+      <data key="d3">183</data>
+      <data key="d4">left-superiorparietal_6</data>
+      <data key="d5">1100</data>
+    </node>
+    <node id="184">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiorparietal_7</data>
+      <data key="d2">left</data>
+      <data key="d3">184</data>
+      <data key="d4">left-superiorparietal_7</data>
+      <data key="d5">1101</data>
+    </node>
+    <node id="185">
+      <data key="d0">cortical</data>
+      <data key="d1">left-inferiorparietal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">185</data>
+      <data key="d4">left-inferiorparietal_1</data>
+      <data key="d5">1008</data>
+    </node>
+    <node id="186">
+      <data key="d0">cortical</data>
+      <data key="d1">left-inferiorparietal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">186</data>
+      <data key="d4">left-inferiorparietal_2</data>
+      <data key="d5">1042</data>
+    </node>
+    <node id="187">
+      <data key="d0">cortical</data>
+      <data key="d1">left-inferiorparietal_3</data>
+      <data key="d2">left</data>
+      <data key="d3">187</data>
+      <data key="d4">left-inferiorparietal_3</data>
+      <data key="d5">1043</data>
+    </node>
+    <node id="188">
+      <data key="d0">cortical</data>
+      <data key="d1">left-inferiorparietal_4</data>
+      <data key="d2">left</data>
+      <data key="d3">188</data>
+      <data key="d4">left-inferiorparietal_4</data>
+      <data key="d5">1044</data>
+    </node>
+    <node id="189">
+      <data key="d0">cortical</data>
+      <data key="d1">left-inferiorparietal_5</data>
+      <data key="d2">left</data>
+      <data key="d3">189</data>
+      <data key="d4">left-inferiorparietal_5</data>
+      <data key="d5">1045</data>
+    </node>
+    <node id="190">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precuneus_1</data>
+      <data key="d2">left</data>
+      <data key="d3">190</data>
+      <data key="d4">left-precuneus_1</data>
+      <data key="d5">1025</data>
+    </node>
+    <node id="191">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precuneus_2</data>
+      <data key="d2">left</data>
+      <data key="d3">191</data>
+      <data key="d4">left-precuneus_2</data>
+      <data key="d5">1079</data>
+    </node>
+    <node id="192">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precuneus_3</data>
+      <data key="d2">left</data>
+      <data key="d3">192</data>
+      <data key="d4">left-precuneus_3</data>
+      <data key="d5">1080</data>
+    </node>
+    <node id="193">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precuneus_4</data>
+      <data key="d2">left</data>
+      <data key="d3">193</data>
+      <data key="d4">left-precuneus_4</data>
+      <data key="d5">1081</data>
+    </node>
+    <node id="194">
+      <data key="d0">cortical</data>
+      <data key="d1">left-precuneus_5</data>
+      <data key="d2">left</data>
+      <data key="d3">194</data>
+      <data key="d4">left-precuneus_5</data>
+      <data key="d5">1082</data>
+    </node>
+    <node id="195">
+      <data key="d0">cortical</data>
+      <data key="d1">left-cuneus_1</data>
+      <data key="d2">left</data>
+      <data key="d3">195</data>
+      <data key="d4">left-cuneus_1</data>
+      <data key="d5">1005</data>
+    </node>
+    <node id="196">
+      <data key="d0">cortical</data>
+      <data key="d1">left-pericalcarine_1</data>
+      <data key="d2">left</data>
+      <data key="d3">196</data>
+      <data key="d4">left-pericalcarine_1</data>
+      <data key="d5">1021</data>
+    </node>
+    <node id="197">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lateraloccipital_1</data>
+      <data key="d2">left</data>
+      <data key="d3">197</data>
+      <data key="d4">left-lateraloccipital_1</data>
+      <data key="d5">1011</data>
+    </node>
+    <node id="198">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lateraloccipital_2</data>
+      <data key="d2">left</data>
+      <data key="d3">198</data>
+      <data key="d4">left-lateraloccipital_2</data>
+      <data key="d5">1049</data>
+    </node>
+    <node id="199">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lateraloccipital_3</data>
+      <data key="d2">left</data>
+      <data key="d3">199</data>
+      <data key="d4">left-lateraloccipital_3</data>
+      <data key="d5">1050</data>
+    </node>
+    <node id="200">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lateraloccipital_4</data>
+      <data key="d2">left</data>
+      <data key="d3">200</data>
+      <data key="d4">left-lateraloccipital_4</data>
+      <data key="d5">1051</data>
+    </node>
+    <node id="201">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lateraloccipital_5</data>
+      <data key="d2">left</data>
+      <data key="d3">201</data>
+      <data key="d4">left-lateraloccipital_5</data>
+      <data key="d5">1052</data>
+    </node>
+    <node id="202">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lingual_1</data>
+      <data key="d2">left</data>
+      <data key="d3">202</data>
+      <data key="d4">left-lingual_1</data>
+      <data key="d5">1013</data>
+    </node>
+    <node id="203">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lingual_2</data>
+      <data key="d2">left</data>
+      <data key="d3">203</data>
+      <data key="d4">left-lingual_2</data>
+      <data key="d5">1056</data>
+    </node>
+    <node id="204">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lingual_3</data>
+      <data key="d2">left</data>
+      <data key="d3">204</data>
+      <data key="d4">left-lingual_3</data>
+      <data key="d5">1057</data>
+    </node>
+    <node id="205">
+      <data key="d0">cortical</data>
+      <data key="d1">left-lingual_4</data>
+      <data key="d2">left</data>
+      <data key="d3">205</data>
+      <data key="d4">left-lingual_4</data>
+      <data key="d5">1058</data>
+    </node>
+    <node id="206">
+      <data key="d0">cortical</data>
+      <data key="d1">left-fusiform_1</data>
+      <data key="d2">left</data>
+      <data key="d3">206</data>
+      <data key="d4">left-fusiform_1</data>
+      <data key="d5">1007</data>
+    </node>
+    <node id="207">
+      <data key="d0">cortical</data>
+      <data key="d1">left-fusiform_2</data>
+      <data key="d2">left</data>
+      <data key="d3">207</data>
+      <data key="d4">left-fusiform_2</data>
+      <data key="d5">1039</data>
+    </node>
+    <node id="208">
+      <data key="d0">cortical</data>
+      <data key="d1">left-fusiform_3</data>
+      <data key="d2">left</data>
+      <data key="d3">208</data>
+      <data key="d4">left-fusiform_3</data>
+      <data key="d5">1040</data>
+    </node>
+    <node id="209">
+      <data key="d0">cortical</data>
+      <data key="d1">left-fusiform_4</data>
+      <data key="d2">left</data>
+      <data key="d3">209</data>
+      <data key="d4">left-fusiform_4</data>
+      <data key="d5">1041</data>
+    </node>
+    <node id="210">
+      <data key="d0">cortical</data>
+      <data key="d1">left-parahippocampal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">210</data>
+      <data key="d4">left-parahippocampal_1</data>
+      <data key="d5">1016</data>
+    </node>
+    <node id="211">
+      <data key="d0">cortical</data>
+      <data key="d1">left-entorhinal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">211</data>
+      <data key="d4">left-entorhinal_1</data>
+      <data key="d5">1006</data>
+    </node>
+    <node id="212">
+      <data key="d0">cortical</data>
+      <data key="d1">left-temporalpole_1</data>
+      <data key="d2">left</data>
+      <data key="d3">212</data>
+      <data key="d4">left-temporalpole_1</data>
+      <data key="d5">1033</data>
+    </node>
+    <node id="213">
+      <data key="d0">cortical</data>
+      <data key="d1">left-inferiortemporal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">213</data>
+      <data key="d4">left-inferiortemporal_1</data>
+      <data key="d5">1009</data>
+    </node>
+    <node id="214">
+      <data key="d0">cortical</data>
+      <data key="d1">left-inferiortemporal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">214</data>
+      <data key="d4">left-inferiortemporal_2</data>
+      <data key="d5">1046</data>
+    </node>
+    <node id="215">
+      <data key="d0">cortical</data>
+      <data key="d1">left-inferiortemporal_3</data>
+      <data key="d2">left</data>
+      <data key="d3">215</data>
+      <data key="d4">left-inferiortemporal_3</data>
+      <data key="d5">1047</data>
+    </node>
+    <node id="216">
+      <data key="d0">cortical</data>
+      <data key="d1">left-inferiortemporal_4</data>
+      <data key="d2">left</data>
+      <data key="d3">216</data>
+      <data key="d4">left-inferiortemporal_4</data>
+      <data key="d5">1048</data>
+    </node>
+    <node id="217">
+      <data key="d0">cortical</data>
+      <data key="d1">left-middletemporal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">217</data>
+      <data key="d4">left-middletemporal_1</data>
+      <data key="d5">1015</data>
+    </node>
+    <node id="218">
+      <data key="d0">cortical</data>
+      <data key="d1">left-middletemporal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">218</data>
+      <data key="d4">left-middletemporal_2</data>
+      <data key="d5">1060</data>
+    </node>
+    <node id="219">
+      <data key="d0">cortical</data>
+      <data key="d1">left-middletemporal_3</data>
+      <data key="d2">left</data>
+      <data key="d3">219</data>
+      <data key="d4">left-middletemporal_3</data>
+      <data key="d5">1061</data>
+    </node>
+    <node id="220">
+      <data key="d0">cortical</data>
+      <data key="d1">left-middletemporal_4</data>
+      <data key="d2">left</data>
+      <data key="d3">220</data>
+      <data key="d4">left-middletemporal_4</data>
+      <data key="d5">1062</data>
+    </node>
+    <node id="221">
+      <data key="d0">cortical</data>
+      <data key="d1">left-bankssts_1</data>
+      <data key="d2">left</data>
+      <data key="d3">221</data>
+      <data key="d4">left-bankssts_1</data>
+      <data key="d5">1001</data>
+    </node>
+    <node id="222">
+      <data key="d0">cortical</data>
+      <data key="d1">left-bankssts_2</data>
+      <data key="d2">left</data>
+      <data key="d3">222</data>
+      <data key="d4">left-bankssts_2</data>
+      <data key="d5">1036</data>
+    </node>
+    <node id="223">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiortemporal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">223</data>
+      <data key="d4">left-superiortemporal_1</data>
+      <data key="d5">1030</data>
+    </node>
+    <node id="224">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiortemporal_2</data>
+      <data key="d2">left</data>
+      <data key="d3">224</data>
+      <data key="d4">left-superiortemporal_2</data>
+      <data key="d5">1102</data>
+    </node>
+    <node id="225">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiortemporal_3</data>
+      <data key="d2">left</data>
+      <data key="d3">225</data>
+      <data key="d4">left-superiortemporal_3</data>
+      <data key="d5">1103</data>
+    </node>
+    <node id="226">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiortemporal_4</data>
+      <data key="d2">left</data>
+      <data key="d3">226</data>
+      <data key="d4">left-superiortemporal_4</data>
+      <data key="d5">1104</data>
+    </node>
+    <node id="227">
+      <data key="d0">cortical</data>
+      <data key="d1">left-superiortemporal_5</data>
+      <data key="d2">left</data>
+      <data key="d3">227</data>
+      <data key="d4">left-superiortemporal_5</data>
+      <data key="d5">1105</data>
+    </node>
+    <node id="228">
+      <data key="d0">cortical</data>
+      <data key="d1">left-transversetemporal_1</data>
+      <data key="d2">left</data>
+      <data key="d3">228</data>
+      <data key="d4">left-transversetemporal_1</data>
+      <data key="d5">1034</data>
+    </node>
+    <node id="229">
+      <data key="d0">cortical</data>
+      <data key="d1">left-insula_1</data>
+      <data key="d2">left</data>
+      <data key="d3">229</data>
+      <data key="d4">left-insula_1</data>
+      <data key="d5">1035</data>
+    </node>
+    <node id="230">
+      <data key="d0">cortical</data>
+      <data key="d1">left-insula_2</data>
+      <data key="d2">left</data>
+      <data key="d3">230</data>
+      <data key="d4">left-insula_2</data>
+      <data key="d5">1110</data>
+    </node>
+    <node id="231">
+      <data key="d0">cortical</data>
+      <data key="d1">left-insula_3</data>
+      <data key="d2">left</data>
+      <data key="d3">231</data>
+      <data key="d4">left-insula_3</data>
+      <data key="d5">1111</data>
+    </node>
+    <node id="232">
+      <data key="d0">cortical</data>
+      <data key="d1">left-insula_4</data>
+      <data key="d2">left</data>
+      <data key="d3">232</data>
+      <data key="d4">left-insula_4</data>
+      <data key="d5">1112</data>
+    </node>
+    <node id="233">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">239</data>
+      <data key="d4">left-thalamus_PU</data>
+      <data key="d5">10</data>
+    </node>
+    <node id="234">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">239</data>
+      <data key="d4">left-thalamus_A</data>
+      <data key="d5">10</data>
+    </node>
+    <node id="235">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">239</data>
+      <data key="d4">left-thalamus_MD</data>
+      <data key="d5">10</data>
+    </node>
+    <node id="236">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">239</data>
+      <data key="d4">left-thalamus_VLD</data>
+      <data key="d5">10</data>
+    </node>
+    <node id="237">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">239</data>
+      <data key="d4">left-thalamus_CLPUM</data>
+      <data key="d5">10</data>
+    </node>
+    <node id="238">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">239</data>
+      <data key="d4">left-thalamus_VA</data>
+      <data key="d5">10</data>
+    </node>
+    <node id="239">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">239</data>
+      <data key="d4">left-thalamus_VLV</data>
+      <data key="d5">10</data>
+    </node>
+    <node id="240">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">240</data>
+      <data key="d4">left-caudate</data>
+      <data key="d5">11</data>
+    </node>
+    <node id="241">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">241</data>
+      <data key="d4">left-putamen</data>
+      <data key="d5">12</data>
+    </node>
+    <node id="242">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">242</data>
+      <data key="d4">left-pallidum</data>
+      <data key="d5">13</data>
+    </node>
+    <node id="243">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">243</data>
+      <data key="d4">left-accumbensarea</data>
+      <data key="d5">26</data>
+    </node>
+    <node id="244">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">244</data>
+      <data key="d4">left-hippocampus</data>
+      <data key="d5">17</data>
+    </node>
+    <node id="245">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">245</data>
+      <data key="d4">left-amygdala</data>
+      <data key="d5">18</data>
+    </node>
+    <node id="246">
+      <data key="d0">subcortical</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">left</data>
+      <data key="d3">246</data>
+      <data key="d4">brainstem</data>
+      <data key="d5">16</data>
+    </node>
+  </graph>
+</graphml>

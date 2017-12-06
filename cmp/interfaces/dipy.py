@@ -275,14 +275,14 @@ class CSD(DipyDiffusionInterface):
         pickle.dump(csd_model, f, -1)
         f.close()
 
-        if self.inputs.save_fods:
-            # isphere = get_sphere('symmetric724')
-            IFLOGGER.info('Fitting CSD model')
-            csd_fit = csd_model.fit(data, msk)
-            fods = csd_fit.odf(sphere)
-            IFLOGGER.info(fods)
-            IFLOGGER.info(fods.shape)
-            nb.Nifti1Image(fods, img.affine,None).to_filename(self._gen_filename('fods'))
+        # if self.inputs.save_fods:
+        #     # isphere = get_sphere('symmetric724')
+        #     IFLOGGER.info('Fitting CSD model')
+        #     csd_fit = csd_model.fit(data, msk)
+        #     fods = csd_fit.odf(sphere)
+        #     IFLOGGER.info(fods)
+        #     IFLOGGER.info(fods.shape)
+        #     nb.Nifti1Image(fods, img.affine,None).to_filename(self._gen_filename('fods'))
 
         return runtime
 

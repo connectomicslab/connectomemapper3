@@ -284,11 +284,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                         #('wm_mask',self.subject+'_T1w_class-WM'),
                                         #('gm_mask',self.subject+'_T1w_class-GM'),
                                         #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
-                                        ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale33.nii.gz'),
-                                        ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale60.nii.gz'),
-                                        ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale125.nii.gz'),
-                                        ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale250.nii.gz'),
-                                        ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale500.nii.gz')
+                                        ('ROIv_HR_th_scale1.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
+                                        ('ROIv_HR_th_scale2.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
+                                        ('ROIv_HR_th_scale3.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
+                                        ('ROIv_HR_th_scale4.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
+                                        ('ROIv_HR_th_scale5.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz')
                                       ]
 
         # Clear previous outputs
@@ -478,9 +478,9 @@ class Pipeline(HasTraits):
         for stage in self.stages.keys():
             if self.stages[stage].name == 'segmentation_stage' or self.stages[stage].name == 'parcellation_stage':
                 #self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject,self.stages[stage].name)
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype','common_stages',self.stages[stage].name)
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp',self.pipeline_name,self.stages[stage].name)
             else:
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype',self.pipeline_name,self.stages[stage].name)
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp',self.pipeline_name,self.stages[stage].name)
 
     def check_config(self):
         if self.stages['Segmentation'].config.seg_tool ==  'Custom segmentation':

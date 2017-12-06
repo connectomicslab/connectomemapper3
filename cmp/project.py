@@ -181,7 +181,7 @@ def refresh_folder(derivatives_directory, subject, input_folders):
     for in_f in input_folders:
         paths.append(os.path.join(derivatives_directory,'cmp',subject,in_f))
 
-    paths.append(os.path.join(derivatives_directory,'cmp',subject,'tmp','nipype'))
+    paths.append(os.path.join(derivatives_directory,'cmp',subject,'tmp'))
 
     for full_p in paths:
         if not os.path.exists(full_p):
@@ -309,9 +309,9 @@ def update_anat_last_processed(project_info, pipeline):
             project_info.anat_last_date_processed = pipeline.now
 
     # last stage
-    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','nipype','anatomical_pipeline')):
+    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','anatomical_pipeline')):
         stage_dirs = []
-        for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','nipype','anatomical_pipeline')):
+        for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','anatomical_pipeline')):
             for dirname in fnmatch.filter(dirnames, '*_stage'):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
@@ -335,9 +335,9 @@ def update_dmri_last_processed(project_info, pipeline):
             project_info.dmri_last_date_processed = pipeline.now
 
     # last stage
-    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','nipype','diffusion_pipeline')):
+    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','diffusion_pipeline')):
         stage_dirs = []
-        for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','nipype','diffusion_pipeline')):
+        for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','diffusion_pipeline')):
             for dirname in fnmatch.filter(dirnames, '*_stage'):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
@@ -389,6 +389,7 @@ class ProjectHandler(Handler):
 
                 self.project_loaded = True
 
+            ui_info.ui.context["object"].anat_pipeline.flow = ui_info.ui.context["object"].anat_pipeline.create_pipeline_flow()
             self.dmri_pipeline= init_dmri_project(ui_info.ui.context["object"].project_info, ui_info.ui.context["object"].anat_pipeline, True)
             if self.dmri_pipeline != None: #and self.dmri_pipeline != None:
                 ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
