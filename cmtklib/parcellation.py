@@ -128,17 +128,17 @@ class Parcellate(BaseInterface):
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','fsmask_1mm.nii.gz'))
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','csf_mask.nii.gz'))
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','brainmask.nii.gz'))
-            crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir)
+            crop_and_move_datasets(self.inputs.parcellation_scheme,self.inputs.subject_id, self.inputs.subjects_dir)
         if self.inputs.parcellation_scheme == "Lausanne2018":
             create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
             #create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir)
             create_roi_v2(self.inputs.subject_id, self.inputs.subjects_dir)
-            create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir)
+            create_wm_mask_v2(self.inputs.subject_id, self.inputs.subjects_dir)
             if self.inputs.erode_masks:
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','fsmask_1mm.nii.gz'))
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','csf_mask.nii.gz'))
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','brainmask.nii.gz'))
-            crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir)
+            crop_and_move_datasets(self.inputs.parcellation_scheme,self.inputs.subject_id, self.inputs.subjects_dir)
         if self.inputs.parcellation_scheme == "NativeFreesurfer":
             create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
             generate_WM_and_GM_mask(self.inputs.subject_id, self.inputs.subjects_dir)
@@ -719,17 +719,17 @@ def create_roi_v2(subject_id, subjects_dir):
     # extract cc and unknown to add to tractography mask, we do not want this as a region of interest
     # in FS 5.0, unknown and corpuscallosum are not available for the 35 scale (why?),
     # but for the other scales only, take the ones from _60
-    rhun = op.join(fs_dir, 'label', 'rh.unknown.label')
-    lhun = op.join(fs_dir, 'label', 'lh.unknown.label')
-    rhco = op.join(fs_dir, 'label', 'rh.corpuscallosum.label')
-    lhco = op.join(fs_dir, 'label', 'lh.corpuscallosum.label')
-    shutil.copy(op.join(fs_dir, 'label', 'regenerated_rh_2', 'rh.unknown.label'), rhun)
-    shutil.copy(op.join(fs_dir, 'label', 'regenerated_lh_2', 'lh.unknown.label'), lhun)
-    shutil.copy(op.join(fs_dir, 'label', 'regenerated_rh_2', 'rh.corpuscallosum.label'), rhco)
-    shutil.copy(op.join(fs_dir, 'label', 'regenerated_lh_2', 'lh.corpuscallosum.label'), lhco)
-
-    mri_cmd = ['mri_label2vol','--label',rhun,'--label',lhun,'--label',rhco,'--label',lhco,'--temp',op.join(fs_dir, 'mri', 'orig.mgz'),'--o',op.join(fs_dir, 'label', 'cc_unknown.nii.gz'),'--identity']
-    subprocess.check_call(mri_cmd)
+    # rhun = op.join(fs_dir, 'label', 'rh.unknown.label')
+    # lhun = op.join(fs_dir, 'label', 'lh.unknown.label')
+    # rhco = op.join(fs_dir, 'label', 'rh.corpuscallosum.label')
+    # lhco = op.join(fs_dir, 'label', 'lh.corpuscallosum.label')
+    # shutil.copy(op.join(fs_dir, 'label', 'regenerated_rh_2', 'rh.unknown.label'), rhun)
+    # shutil.copy(op.join(fs_dir, 'label', 'regenerated_lh_2', 'lh.unknown.label'), lhun)
+    # shutil.copy(op.join(fs_dir, 'label', 'regenerated_rh_2', 'rh.corpuscallosum.label'), rhco)
+    # shutil.copy(op.join(fs_dir, 'label', 'regenerated_lh_2', 'lh.corpuscallosum.label'), lhco)
+    #
+    # mri_cmd = ['mri_label2vol','--label',rhun,'--label',lhun,'--label',rhco,'--label',lhco,'--temp',op.join(fs_dir, 'mri', 'orig.mgz'),'--o',op.join(fs_dir, 'label', 'cc_unknown.nii.gz'),'--identity']
+    # subprocess.check_call(mri_cmd)
 
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','ribbon.mgz'),'-o',op.join(fs_dir,'mri','ribbon.nii.gz')]
     subprocess.check_call(mri_cmd)
@@ -970,185 +970,7 @@ def create_roi_v2(subject_id, subjects_dir):
 
     print("[ DONE ]")
 
-    # # load aseg volume
-    # aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
-    # asegd = aseg.get_data()	# numpy.ndarray
-    #
-    # # identify cortical voxels, right (3) and left (42) hemispheres
-    # idxr = np.where(asegd == 3)
-    # idxl = np.where(asegd == 42)
-    # xx = np.concatenate((idxr[0],idxl[0]))
-    # yy = np.concatenate((idxr[1],idxl[1]))
-    # zz = np.concatenate((idxr[2],idxl[2]))
-    #
-    # # initialize variables necessary for cortical ROIs dilation
-    # # dimensions of the neighbourhood for rois labels assignment (choose odd dimensions!)
-    # shape = (25,25,25)
-    # center = np.array(shape) // 2
-    # # dist: distances from the center of the neighbourhood
-    # dist = np.zeros(shape, dtype='float32')
-    # for x in range(shape[0]):
-    #     for y in range(shape[1]):
-    #         for z in range(shape[2]):
-    #             distxyz = center - [x,y,z]
-    #             dist[x,y,z] = math.sqrt(np.sum(np.multiply(distxyz,distxyz)))
-    #
-    # # LOOP throughout all the SCALES
-    # # (from the one with the highest number of region to the one with the lowest number of regions)
-    # #parkeys = gconf.parcellation.keys()
-    # scales = get_parcellation('Lausanne2008').keys()
-    # values = list()
-    # for i in range(len(scales)):
-    #     values.append(get_parcellation('Lausanne2008')[scales[i]]['number_of_regions'])
-    # temp = zip(values, scales)
-    # temp.sort(reverse=True)
-    # values, scales = zip(*temp)
-    # roisMax = np.zeros( (256, 256, 256), dtype=np.int16 ) # numpy.ndarray
-    # for i,parkey in enumerate(get_parcellation('Lausanne2008').keys()):
-    #     parval = get_parcellation('Lausanne2008')[parkey]
-    #
-    #     print("Working on parcellation: " + parkey)
-    #     print("========================")
-    #     pg = nx.read_graphml(parval['node_information_graphml'])
-    #
-    #     # each node represents a brain region
-    #     # create a big 256^3 volume for storage of all ROIs
-    #     rois = np.zeros( (256, 256, 256), dtype=np.int16 ) # numpy.ndarray
-    #
-    #     if parkey!='scale5':
-    #
-    #
-	# 		# 2. Generate parcellation volume for current scale using mri_aparc2aseg
-	# 		# mri_aparc2aseg: maps the cortical labels from a cortical parcellation (annot) to the automatic segmentation volume (aseg)
-	# 		#                 Requires mri/aseg.mgz, mri/ribbon.mgz, surf/?h.pial, surf/?h.white and annot files generated in previous step
-	# 		# Path temporary file
-	# 		temp = os.path.join(fs_subj_dir, subject, 'mri/tmp.nii.gz')
-	# 		print(' ... generate new Nifti volume for parcellation {}\n'.format(parval['annotation']))
-	# 		mri_cmd = 'mri_aparc2aseg --s "%s" --o "%s" --new-ribbon --annot "%s"' % (
-	# 						subject, temp, parval['annotation'])
-	# 		process = subprocess.Popen(mri_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-	# 		proc_stdout = process.communicate()[0].strip()
-	# 		if v:
-	# 			print proc_stdout
-	# 			print ' '
-    #
-    #     else:
-    #
-    #
-    #
-    #     for brk, brv in pg.nodes_iter(data=True):   # slow loop
-    #
-    #         if brv['dn_hemisphere'] == 'left':
-    #             hemi = 'lh'
-    #         elif brv['dn_hemisphere'] == 'right':
-    #             hemi = 'rh'
-    #
-    #         if brv['dn_region'] == 'subcortical':
-    #
-    #             print("---------------------")
-    #             print("Work on brain region: %s" % (brv['dn_region']) )
-    #             print("Freesurfer Name: %s" %  brv['dn_fsname'] )
-    #             print("---------------------")
-    #
-    #             # if it is subcortical, retrieve roi from aseg
-    #             idx = np.where(asegd == int(brv['dn_fs_aseg_val']))
-    #             rois[idx] = int(brv['dn_correspondence_id'])
-    #
-    #         elif brv['dn_region'] == 'cortical':class
-    #             print("---------------------")
-    #             print("Work on brain region: %s" % (brv['dn_region']) )
-    #             print("Freesurfer Name: %s" %  brv['dn_fsname'] )
-    #             print("---------------------")
-    #
-    #             labelpath = op.join(fs_dir, 'label', parval['fs_label_subdir_name'] % hemi)
-    #
-    #             # construct .label file name
-    #             fname = '%s.%s.label' % (hemi, brv['dn_fsname'])
-    #
-    #             # execute fs mri_label2vol to generate volume roi from the label file
-    #             # store it in temporary file to be overwritten for each region (slow!)
-    #             #mri_cmd = 'mri_label2vol --label "%s" --temp "%s" --o "%s" --identity' % (op.join(labelpath, fname),
-    #             #        op.join(fs_dir, 'mri', 'orig.mgz'), op.join(labelpath, 'tmp.nii.gz'))
-    #             #runCmd( mri_cmd, log )
-    #             mri_cmd = ['mri_label2vol','--label',op.join(labelpath, fname),'--temp',op.join(fs_dir, 'mri', 'orig.mgz'),'--o',op.join(labelpath, 'tmp.nii.gz'),'--identity']
-    #             subprocess.check_call(mri_cmd)
-    #
-    #             tmp = ni.load(op.join(labelpath, 'tmp.nii.gz'))
-    #             tmpd = tmp.get_data()
-    #
-    #             # find voxel and set them to intensity value in rois
-    #             idx = np.where(tmpd == 1)
-    #             rois[idx] = int(brv['dn_correspondence_id'])
-    #
-    #     newrois = rois.copy()
-    #     # store scale500 volume for correction on multi-resolution consistency
-    #     if i == 0:
-    #         print("Storing ROIs volume maximal resolution...")
-    #         roisMax = rois.copy()
-    #         idxMax = np.where(roisMax > 0)
-    #         xxMax = idxMax[0]
-    #         yyMax = idxMax[1]
-    #         zzMax = idxMax[2]
-    #     # correct cortical surfaces using as reference the roisMax volume (for consistency between resolutions)
-    #     else:
-    #         print("Adapt cortical surfaces...")
-    #         #adaptstart = time()
-    #         idxRois = np.where(rois > 0)
-    #         xxRois = idxRois[0]
-    #         yyRois = idxRois[1]
-    #         zzRois = idxRois[2]
-    #         # correct voxels labeled in current resolution, but not labeled in highest resolution
-    #         for j in range(xxRois.size):
-    #             if ( roisMax[xxRois[j],yyRois[j],zzRois[j]]==0 ):
-    #                 newrois[xxRois[j],yyRois[j],zzRois[j]] = 0;
-    #         # correct voxels not labeled in current resolution, but labeled in highest resolution
-    #         for j in range(xxMax.size):
-    #             if ( newrois[xxMax[j],yyMax[j],zzMax[j]]==0 ):
-    #                 local = extract(rois, shape, position=(xxMax[j],yyMax[j],zzMax[j]), fill=0)
-    #                 mask = local.copy()
-    #                 mask[np.nonzero(local>0)] = 1
-    #                 thisdist = np.multiply(dist,mask)
-    #                 thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
-    #                 value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
-    #                 if value.size > 1:
-    #                     counts = np.bincount(value)
-    #                     value = np.argmax(counts)
-    #                 newrois[xxMax[j],yyMax[j],zzMax[j]] = value
-    #         #print("Cortical ROIs adaptation took %s seconds to process." % (time()-adaptstart))
-    #
-    #     # store volume eg in ROI_scale33.nii.gz
-    #     out_roi = op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % parkey)
-    #     # update the header
-    #     hdr = aseg.get_header()
-    #     hdr2 = hdr.copy()
-    #     hdr2.set_data_dtype(np.uint16)
-    #     print("Save output image to %s" % out_roi)
-    #     img = ni.Nifti1Image(newrois, aseg.get_affine(), hdr2)
-    #     ni.save(img, out_roi)
-    #
-    #     # dilate cortical regions
-    #     print("Dilating cortical regions...")
-    #     #dilatestart = time()
-    #     # loop throughout all the voxels belonging to the aseg GM volume
-    #     for j in range(xx.size):
-    #         if newrois[xx[j],yy[j],zz[j]] == 0:
-    #             local = extract(rois, shape, position=(xx[j],yy[j],zz[j]), fill=0)
-    #             mask = local.copy()
-    #             mask[np.nonzero(local>0)] = 1
-    #             thisdist = np.multiply(dist,mask)
-    #             thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
-    #             value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
-    #             if value.size > 1:
-    #                 counts = np.bincount(value)
-    #                 value = np.argmax(counts)
-    #             newrois[xx[j],yy[j],zz[j]] = value
-    #     #print("Cortical ROIs dilation took %s seconds to process." % (time()-dilatestart))
-    #
-    #     # store volume eg in ROIv_scale33.nii.gz
-    #     out_roi = op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % parkey)
-    #     print("Save output image to %s" % out_roi)
-    #     img = ni.Nifti1Image(newrois, aseg.get_affine(), hdr2)
-    #     ni.save(img, out_roi)
+
 
 def create_wm_mask(subject_id, subjects_dir):
     print("Create white matter mask")
@@ -1281,6 +1103,174 @@ def create_wm_mask(subject_id, subjects_dir):
     # XXX: subtracting wmmask from ROI. necessary?
     for parkey, parval in get_parcellation('Lausanne2008').items():
 
+        # check if we should subtract the cortical rois from this parcellation
+        if parval.has_key('subtract_from_wm_mask'):
+            if not bool(int(parval['subtract_from_wm_mask'])):
+                continue
+        else:
+            continue
+
+        print("Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parkey) )
+        roi = ni.load(op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % parkey))
+        roid = roi.get_data()
+
+        assert roid.shape[0] == wmmask.shape[0]
+
+        pg = nx.read_graphml(parval['node_information_graphml'])
+
+        for brk, brv in pg.nodes_iter(data=True):
+
+            if brv['dn_region'] == 'cortical':
+
+                print("Subtracting region %s with intensity value %s" % (brv['dn_region'], brv['dn_correspondence_id']))
+
+                idx = np.where(roid == int(brv['dn_correspondence_id']))
+                wmmask[idx] = 0
+
+    # output white matter mask. crop and move it afterwards
+    wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
+    img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
+    print("Save white matter mask: %s" % wm_out)
+    ni.save(img, wm_out)
+
+    # Convert whole brain mask
+    mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
+    subprocess.check_call(mri_cmd)
+    mri_cmd = ['fslmaths',op.join(fs_dir,'mri','brainmask.nii.gz'),'-bin',op.join(fs_dir,'mri','brainmask.nii.gz')]
+    subprocess.check_call(mri_cmd)
+
+def create_wm_mask_v2(subject_id, subjects_dir):
+    print("Create white matter mask")
+
+    fs_dir = op.join(subjects_dir,subject_id)
+
+    # load ribbon as basis for white matter mask
+    fsmask = ni.load(op.join(fs_dir, 'mri', 'ribbon.nii.gz'))
+    fsmaskd = fsmask.get_data()
+
+    wmmask = np.zeros( fsmask.get_data().shape )
+
+    # these data is stored and could be extracted from fs_dir/stats/aseg.txt
+
+    # extract right and left white matter
+    idx_lh = np.where(fsmaskd == 120)
+    idx_rh = np.where(fsmaskd == 20)
+
+    wmmask[idx_lh] = 1
+    wmmask[idx_rh] = 1
+
+    # remove subcortical nuclei from white matter mask
+    aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
+    asegd = aseg.get_data()
+
+    try:
+        import scipy.ndimage.morphology as nd
+    except ImportError:
+        raise Exception('Need scipy for binary erosion of white matter mask')
+
+    # need binary erosion function
+    imerode = nd.binary_erosion
+
+    # ventricle erosion
+    csfA = np.zeros( asegd.shape )
+    csfB = np.zeros( asegd.shape )
+
+    # structuring elements for erosion
+    se1 = np.zeros( (3,3,5) )
+    se1[1,:,2] = 1; se1[:,1,2] = 1; se1[1,1,:] = 1
+    se = np.zeros( (3,3,3) )
+    se[1,:,1] = 1; se[:,1,1] = 1; se[1,1,:] = 1
+
+    # lateral ventricles, thalamus proper and caudate
+    # the latter two removed for better erosion, but put back afterwards
+    idx = np.where( (asegd == 4) |
+                    (asegd == 43) |
+                    (asegd == 11) |
+                    (asegd == 50) |
+                    (asegd == 31) |
+                    (asegd == 63) |
+                    (asegd == 10) |
+                    (asegd == 49) )
+    csfA[idx] = 1
+    img = ni.Nifti1Image(csfA, aseg.get_affine(), aseg.get_header())
+    ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
+    csfA = imerode(imerode(csfA, se1),se)
+
+    # thalmus proper and cuadate are put back because they are not lateral ventricles
+    idx = np.where( (asegd == 11) |
+                    (asegd == 50) |
+                    (asegd == 10) |
+                    (asegd == 49) )
+    csfA[idx] = 0
+
+    # REST CSF, IE 3RD AND 4TH VENTRICULE AND EXTRACEREBRAL CSF
+    idx = np.where( (asegd == 5) |
+                    (asegd == 14) |
+                    (asegd == 15) |
+                    (asegd == 24) |
+                    (asegd == 44) |
+                    (asegd == 72) |
+                    (asegd == 75) |
+                    (asegd == 76) |
+                    (asegd == 213) |
+                    (asegd == 221))
+    # 43 ??, 4??  213?, 221?
+    # more to discuss.
+    for i in [5,14,15,24,44,72,75,76,213,221]:
+        idx = np.where(asegd == i)
+        csfB[idx] = 1
+
+    # do not remove the subthalamic nucleus for now from the wm mask
+    # 23, 60
+    # would stop the fiber going to the segmented "brainstem"
+
+    # grey nuclei, either with or without erosion
+    gr_ncl = np.zeros( asegd.shape )
+
+    # with erosion
+    for i in [10,11,12,49,50,51]:
+        idx = np.where(asegd == i)
+        # temporary volume
+        tmp = np.zeros( asegd.shape )
+        tmp[idx] = 1
+        tmp = imerode(tmp,se)
+        idx = np.where(tmp == 1)
+        gr_ncl[idx] = 1
+
+    # without erosion
+    for i in [13,17,18,26,52,53,54,58]:
+        idx = np.where(asegd == i)
+        gr_ncl[idx] = 1
+
+    # remove remaining structure, e.g. brainstem
+    remaining = np.zeros( asegd.shape )
+    idx = np.where( asegd == 16 )
+    remaining[idx] = 1
+
+    # now remove all the structures from the white matter
+    idx = np.where( (csfA != 0) | (csfB != 0) | (gr_ncl != 0) | (remaining != 0) )
+    wmmask[idx] = 0
+    print("Removing lateral ventricles and eroded grey nuclei and brainstem from white matter mask")
+
+    # ADD voxels from 'cc_unknown.nii.gz' dataset
+    # ccun = ni.load(op.join(fs_dir, 'label', 'cc_unknown.nii.gz'))
+    # ccund = ccun.get_data()
+    # idx = np.where(ccund != 0)
+    # print("Add corpus callosum and unknown to wm mask")
+    # wmmask[idx] = 1
+
+    # XXX add unknown dilation for connecting corpus callosum?
+#    se2R = zeros(15,3,3); se2R(8:end,2,2)=1;
+#    se2L = zeros(15,3,3); se2L(1:8,2,2)=1;
+#    temp = (cc_unknown.img==1 | cc_unknown.img==2);
+#    fsmask.img(imdilate(temp,se2R))    =  1;
+#    fsmask.img(imdilate(temp,se2L))    =  1;
+#    fsmask.img(cc_unknown.img==3)    =  1;
+#    fsmask.img(cc_unknown.img==4)    =  1;
+
+    # XXX: subtracting wmmask from ROI. necessary?
+    for parkey, parval in get_parcellation('Lausanne2018').items():
+
         print parkey
 
         # check if we should subtract the cortical rois from this parcellation
@@ -1319,7 +1309,7 @@ def create_wm_mask(subject_id, subjects_dir):
     mri_cmd = ['fslmaths',op.join(fs_dir,'mri','brainmask.nii.gz'),'-bin',op.join(fs_dir,'mri','brainmask.nii.gz')]
     subprocess.check_call(mri_cmd)
 
-def crop_and_move_datasets(subject_id, subjects_dir):
+def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
     fs_dir = op.join(subjects_dir,subject_id)
 
     print("Cropping datasets")
@@ -1329,12 +1319,16 @@ def crop_and_move_datasets(subject_id, subjects_dir):
           (op.join(fs_dir, 'mri', 'aseg.nii.gz'), 'aseg.nii.gz'),
           (op.join(fs_dir, 'mri', 'ribbon.nii.gz'), 'ribbon.nii.gz'),
           (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
-          (op.join(fs_dir, 'label', 'cc_unknown.nii.gz'), 'cc_unknown.nii.gz')
           ]
-
-    for p in get_parcellation('Lausanne2008').keys():
-        ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
-        ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
+    if parcellation_scheme == 'Lausanne2008':
+        ds.append( (op.join(fs_dir, 'label', 'cc_unknown.nii.gz'), 'cc_unknown.nii.gz') )
+        for p in get_parcellation('Lausanne2008').keys():
+            ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
+            ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
+    elif parcellation_scheme == 'Lausanne2018':
+        for p in get_parcellation('Lausanne2018').keys():
+            ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
+            ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
 #        try:
 #            os.makedirs(op.join('.', p))
 #        except:

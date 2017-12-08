@@ -117,7 +117,6 @@ class DiffusionPipeline(Pipeline):
     #              )
 
     pipeline_group = VGroup(
-                        spring,
                         HGroup(spring,Item('preprocessing',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False),
                         HGroup(spring,Item('registration',style='custom',width=500,height=110,resizable=True,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False),
                         HGroup(spring,Item('diffusion',style='custom',width=450,height=240,resizable=True,editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False),
@@ -146,6 +145,9 @@ class DiffusionPipeline(Pipeline):
 
         self.anat_flow = anat_flow
 
+    def _diffusion_imaging_model_changed(self,new):
+        print "diffusion model changed"
+        
     def check_config(self):
         # if self.stages['MRTrixConnectome'].config.output_types == []:
         #     return('\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')

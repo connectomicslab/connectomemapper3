@@ -28,6 +28,7 @@ package_data = {'cmp':
                 ],
                 'cmtklib':
                 ['data/parcellation/lausanne2008/*/*.*',
+                 'data/parcellation/lausanne2018/*/*.*',
 		        'data/segmentation/ants_template_IXI/*/*.*',
 		        'data/segmentation/ants_template_IXI/*.*',
                 'data/parcellation/nativefreesurfer/*/*.*',

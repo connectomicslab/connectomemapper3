@@ -173,7 +173,7 @@ class CMP_Project_Info(HasTraits):
                             Item('t1_available',style='readonly',label='T1',resizable=True),
                             HGroup(
                                 Item('dmri_available',style='readonly',label='Diffusion',resizable=True),
-                                Item('diffusion_imaging_model',style='readonly',label='Model',resizable=True,enabled_when='dmri_available'),
+                                Item('diffusion_imaging_model',label='Model',resizable=True,enabled_when='dmri_available'),
                                 ),
                             # Item('t1_available',style='readonly',label='T1',resizable=True),
                             label='Modalities'
@@ -245,6 +245,11 @@ class CMP_Project_Info(HasTraits):
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
+
+    diffusion_imaging_model_select_view = QtView(Item('diffusion_imaging_model',label='Diffusion MRI modality'),
+                                                 title='Please select diffusion MRI modality',
+                                                 kind='modal',
+                                                 buttons=['OK','Cancel'])
 
     dmri_select_config_to_load = QtView(Item('dmri_config_to_load_msg',style='readonly',show_label=False),
                                   Item('dmri_config_to_load',style='custom',editor=EnumEditor(name='dmri_available_config'),show_label=False),

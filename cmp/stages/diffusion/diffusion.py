@@ -25,7 +25,9 @@ from tracking import *
 from cmp.interfaces.misc import ExtractImageVoxelSizes
 
 class DiffusionConfig(HasTraits):
-    diffusion_imaging_model = Str
+
+    diffusion_imaging_model_editor = List(['DSI','DTI','HARDI'])
+    diffusion_imaging_model = Str('DSI')
     #resampling = Tuple(2,2,2)
     #interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
     # processing_tool_editor = List(['DTK','MRtrix','Camino','FSL','Gibbs'])
@@ -53,6 +55,7 @@ class DiffusionConfig(HasTraits):
 
     traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
                        #'interpolation'),
+                      Item('diffusion_imaging_model',editor=EnumEditor(name='diffusion_imaging_model_editor')),
 		              Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
                        HGroup(
                            Item('dilate_rois',visible_when='processing_tool!="DTK"'),
