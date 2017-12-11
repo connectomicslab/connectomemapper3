@@ -124,14 +124,18 @@ class CMP_Project_Info(HasTraits):
     subject = Enum(values='subjects')
     #current_subj = Str()
     warning_msg = Str('\nWarning: selected directory is already configured.\n\nDo you want to reset the configuration to default parameters ?\n')
-    config_error_msg = Str('')
+
     #process_type = Enum('diffusion',['diffusion','fMRI'])
     diffusion_imaging_model = Enum('DSI',['DSI','DTI','HARDI'])
+    parcellation_scheme = Str('Lausanne2008')
+    # atlas_info = Dict()
+
 
     t1_available = Bool(False)
     dmri_available = Bool(False)
     # fmri_available = Bool(False)
 
+    anat_config_error_msg = Str('')
     anat_config_to_load = Str()
     anat_available_config = List()
     anat_config_to_load_msg = Str('Several configuration files available.Select which one to load:\n')
@@ -141,6 +145,7 @@ class CMP_Project_Info(HasTraits):
     anat_stage_names = List
     anat_custom_last_stage = Str
 
+    dmri_config_error_msg = Str('')
     dmri_config_to_load = Str()
     dmri_available_config = List()
     dmri_config_to_load_msg = Str('Several configuration files available.Select which one to load:\n')
@@ -196,7 +201,7 @@ class CMP_Project_Info(HasTraits):
                             Item('number_of_cores',resizable=True),
                             label='Processing configuration'
                         ),
-                        '700',
+                        '550',
                         spring,
                         springy=True)
 
@@ -221,7 +226,13 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    config_error_view = QtView( Item('config_error_msg', style='readonly',show_label=False),
+    anat_config_error_view = QtView( Item('anat_config_error_msg', style='readonly',show_label=False),
+                              title='Error',
+                              kind = 'modal',
+                              style_sheet=style_sheet,
+                              buttons=['OK','Cancel'])
+
+    dmri_config_error_view = QtView( Item('dmri_config_error_msg', style='readonly',show_label=False),
                               title='Error',
                               kind = 'modal',
                               style_sheet=style_sheet,
@@ -276,7 +287,7 @@ class CMP_MainWindow(HasTraits):
     load_project = Action(name='Load Connectome data...',action='load_project')
     process_anatomical = Action(name='Process anatomical data!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
     #preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
-    map_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.dmri_inputs_checked==True')
+    map_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked==True')
     #map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
     change_subject = Action(name='Change subject',action='change_subject',enabled_when='handler.project_loaded==True')
 
@@ -299,7 +310,7 @@ class CMP_MainWindow(HasTraits):
                             ),
                             HGroup(
                                 Item('dmri_pipeline',style='custom',show_label=False),
-                                label='Diffusion pipeline',enabled_when='handler.dmri_inputs_checked==True'
+                                label='Diffusion pipeline',enabled_when='handler.anat_outputs_checked==True'
                             ),
                             orientation='horizontal', layout='tabbed', springy=True, visible_when='handler.anat_inputs_checked==True'),
                         title='Connectome Mapper 3',
@@ -327,5 +338,5 @@ class CMP_MainWindow(HasTraits):
                        style_sheet=style_sheet,
                        buttons = [process_anatomical,map_connectome],
                        #buttons = [preprocessing, map_connectome, map_custom],
-                       width=0.5, height=0.8, scrollable=True, resizable=True
+                       width=0.5, height=0.8, resizable=True#, scrollable=True, resizable=True
                    )

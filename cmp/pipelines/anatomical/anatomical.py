@@ -9,6 +9,7 @@
 
 import datetime
 import os
+import glob
 import fnmatch
 import shutil
 import threading
@@ -76,6 +77,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     input_folders = ['anat']
     process_type = Str
     diffusion_imaging_model = Str
+    parcellation_scheme = Str('Lausanne2008')
+    atlas_info = Dict()
 
     #subject = Str
     subject_directory = Directory
@@ -112,9 +115,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             'Parcellation':ParcellationStage(pipeline_mode = "Diffusion")}
         #import inspect
         #print inspect.getmro(self)
-        print isinstance(self, AnatomicalPipeline)
-        print isinstance(self, Pipeline)
-        print issubclass(AnatomicalPipeline,Pipeline)
+        # print isinstance(self, AnatomicalPipeline)
+        # print isinstance(self, Pipeline)
+        # print issubclass(AnatomicalPipeline,Pipeline)
 
         cmp_common.Pipeline.__init__(self, project_info)
         #super(Pipeline, self).__init__(project_info)
@@ -131,6 +134,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
 
+        self.stages['Parcellation'].config.on_trait_change(self.update_parcellation_scheme,'parcellation_scheme')
+
     def check_config(self):
         if self.stages['Segmentation'].config.seg_tool ==  'Custom segmentation':
             if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
@@ -140,6 +145,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if not os.path.exists(self.stages['Parcellation'].config.graphml_file):
                 return('\n\tCustom segmentation selected but no graphml info provided.\nPlease specify an existing graphml file in the Parcellation configuration window.\t\n')
         return ''
+
+    def update_parcellation_scheme(self):
+        self.parcellation_scheme = self.stages['Parcellation'].config.parcellation_scheme
+        self.atlas_info = self.stages['Parcellation'].config.atlas_info
 
     def update_parcellation(self):
         if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
@@ -255,6 +264,68 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         return valid_inputs
 
+    def check_output(self):
+        t1_available = False
+        brain_available = False
+        brainmask_available = False
+        wm_available = False
+        roivs_available = False
+        valid_output = False
+        anat_deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,'anat')
+
+        T1_file = os.path.join(anat_deriv_subject_directory,self.subject+'_T1w_head.nii.gz')
+        brain_file = os.path.join(anat_deriv_subject_directory,self.subject+'_T1w_brain.nii.gz')
+        brainmask_file = os.path.join(anat_deriv_subject_directory,self.subject+'_T1w_brainmask.nii.gz')
+        wm_mask_file = os.path.join(anat_deriv_subject_directory,self.subject+'_T1w_class-WM.nii.gz')
+        roiv_files = glob.glob(anat_deriv_subject_directory+"/"+self.subject+"_T1w_parc_scale*.nii.gz")
+
+        error_message = ''
+
+        if os.path.isfile(T1_file):
+            t1_available = True
+        else:
+            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % T1_file
+            print error_message
+            error(message=error_message, title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+
+        if os.path.isfile(brain_file):
+            brain_available = True
+        else:
+            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % brain_file
+            print error_message
+            error(message=error_message, title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+
+        if os.path.isfile(brainmask_file):
+            brainmask_available = True
+        else:
+            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % brainmask_file
+            print error_message
+            error(message=error_message, title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+
+        if os.path.isfile(wm_mask_file):
+            wm_available = True
+        else:
+            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % wm_mask_file
+            print error_message
+            error(message=error_message, title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+
+        cnt1=0
+        cnt2=0
+        for roiv_file in roiv_files:
+            cnt1 = cnt1 + 1
+            if os.path.isfile(roiv_file): cnt2 = cnt2 + 1
+        if cnt1 == cnt2:
+            roivs_available = True
+        else:
+            error_message = "Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline" % (cnt1-cnt2,cnt1)
+            print error_message
+            error(message=error_message, title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+
+        if t1_available == True and brain_available == True and brainmask_available == True and wm_available == True and roivs_available == True:
+            print "valid deriv/anat output"
+            valid_output = True
+
+        return valid_output,error_message
 
     def create_pipeline_flow(self):
         subject_directory = os.path.join(self.base_directory,self.subject)
@@ -280,15 +351,23 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         #Dataname substitutions in order to comply with BIDS derivatives specifications
         sinker.inputs.substitutions = [ ('T1', self.subject+'_T1w_head'),
                                         ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
+                                        ('brainmask_eroded.nii.gz', self.subject+'_T1w_brainmask_eroded.nii.gz'),
                                         ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
-                                        #('wm_mask',self.subject+'_T1w_class-WM'),
+                                        ('fsmask_1mm.nii.gz',self.subject+'_T1w_class-WM.nii.gz'),
+                                        ('fsmask_1mm_eroded.nii.gz',self.subject+'_T1w_class-WM_eroded.nii.gz'),
+                                        ('csf_mask_eroded.nii.gz',self.subject+'_T1w_class-CSF_eroded.nii.gz'),
                                         #('gm_mask',self.subject+'_T1w_class-GM'),
                                         #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
                                         ('ROIv_HR_th_scale1.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
                                         ('ROIv_HR_th_scale2.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
                                         ('ROIv_HR_th_scale3.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
                                         ('ROIv_HR_th_scale4.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
-                                        ('ROIv_HR_th_scale5.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz')
+                                        ('ROIv_HR_th_scale5.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
+                                        ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
+                                        ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
+                                        ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
+                                        ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
+                                        ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
                                       ]
 
         # Clear previous outputs
@@ -353,6 +432,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                         (anat_outputnode,sinker,[("T1","anat.@T1")]),
                         (anat_outputnode,sinker,[("brain","anat.@brain")]),
                         (anat_outputnode,sinker,[("brain_mask","anat.@brain_mask")]),
+                        (anat_outputnode,sinker,[("wm_mask_file","anat.@wm_mask")]),
                         (anat_outputnode,sinker,[("roi_volumes","anat.@roivs")])
                         ])
 

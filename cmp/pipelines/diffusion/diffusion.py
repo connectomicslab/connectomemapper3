@@ -87,6 +87,9 @@ class DiffusionPipeline(Pipeline):
     derivatives_directory = Directory
     ordered_stage_list = ['Preprocessing','Registration','Diffusion','Connectome']# ,'MRTrixConnectome']
 
+    parcellation_scheme = Str
+    # atlas_info = Dict()
+
     global_conf = Global_Configuration()
 
     preprocessing = Button('Preprocessing')
@@ -103,7 +106,7 @@ class DiffusionPipeline(Pipeline):
 
     config_file = Str
 
-    anat_flow = Instance(pe.Workflow)
+    # anat_flow = Instance(pe.Workflow)
 
     # pipeline_group = VGroup(
     #                     HGroup(spring,Item('segmentation',editor=ToolkitEditorFactory(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
@@ -125,7 +128,7 @@ class DiffusionPipeline(Pipeline):
                         springy=True
                     )
 
-    def __init__(self,project_info,anat_flow):
+    def __init__(self,project_info):
         self.stages = {
             'Preprocessing':PreprocessingStage(),
             'Registration':RegistrationStage(pipeline_mode = "Diffusion"),
@@ -143,11 +146,11 @@ class DiffusionPipeline(Pipeline):
         self.subject_directory =  os.path.join(self.base_directory,self.subject)
         self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
 
-        self.anat_flow = anat_flow
+        # self.anat_flow = anat_flow
 
     def _diffusion_imaging_model_changed(self,new):
         print "diffusion model changed"
-        
+
     def check_config(self):
         # if self.stages['MRTrixConnectome'].config.output_types == []:
         #     return('\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
@@ -523,14 +526,18 @@ class DiffusionPipeline(Pipeline):
 
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
-        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals']), name='datasource')
+        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals','T1','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volumes']), name='datasource')
         datasource.inputs.base_directory = deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
-        datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval')
+        datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval',
+                                                T1='anat/'+self.subject+'_T1w_head.nii.gz',brain='anat/'+self.subject+'_T1w_brain.nii.gz',brain_mask='anat/'+self.subject+'_T1w_brainmask.nii.gz',
+                                                wm_mask_file='anat/'+self.subject+'_T1w_class-WM_eroded.nii.gz',wm_eroded='anat/'+self.subject+'_T1w_class-WM_eroded.nii.gz',
+                                                brain_eroded='anat/'+self.subject+'_T1w_brainmask_eroded.nii.gz',csf_eroded='anat/'+self.subject+'_T1w_class-CSF_eroded.nii.gz',
+                                                roi_volumes='anat/'+self.subject+'_T1w_parc_scale*.nii.gz')
         #datasource.inputs.field_template_args = dict(T1=[['subject']], T2=[['subject']], diffusion=[['subject', ['subject']]], bvecs=[['subject', ['subject']]], bvals=[['subject', ['subject']]])
-        datasource.inputs.sort_filelist=False
+        datasource.inputs.sort_filelist=True
         #datasource.inputs.subject = self.subject
 
         # Data sinker for output
@@ -544,11 +551,11 @@ class DiffusionPipeline(Pipeline):
                                         #('wm_mask',self.subject+'_T1w_class-WM'),
                                         #('gm_mask',self.subject+'_T1w_class-GM'),
                                         #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
-                                        ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale33.nii.gz'),
-                                        ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale60.nii.gz'),
-                                        ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale125.nii.gz'),
-                                        ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale250.nii.gz'),
-                                        ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale500.nii.gz'),
+                                        # ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale33.nii.gz'),
+                                        # ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale60.nii.gz'),
+                                        # ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale125.nii.gz'),
+                                        # ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale250.nii.gz'),
+                                        # ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale500.nii.gz'),
 
                                         #('*/_ROIs_resample*/fast__pve_0_out.nii.gz',self.subject+'_dwi_connectome'),
 
@@ -559,11 +566,11 @@ class DiffusionPipeline(Pipeline):
                                         ('brain_mask_registered_temp_crop',self.subject+'_T1w_space-DWI_brainmask'),
                                         ('wm_mask_warped',self.subject+'_T1w_space-DWI_class-WM'),
                                         ('wm_mask_resampled_warped',self.subject+'_T1w_space-DWI_class-WM'),
-                                        ('ROIv_HR_th_scale33_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale33.nii.gz'),
-                                        ('ROIv_HR_th_scale60_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale60.nii.gz'),
-                                        ('ROIv_HR_th_scale125_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale125.nii.gz'),
-                                        ('ROIv_HR_th_scale250_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale250.nii.gz'),
-                                        ('ROIv_HR_th_scale500_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale500.nii.gz'),
+                                        ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale1.nii.gz'),
+                                        ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale2.nii.gz'),
+                                        ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale3.nii.gz'),
+                                        ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale4.nii.gz'),
+                                        ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale5.nii.gz'),
                                         ('fast__pve_0_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-CSF_pve.nii.gz'),
                                         ('fast__pve_1_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-GM_pve.nii.gz'),
                                         ('fast__pve_2_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-WM_pve.nii.gz'),
@@ -598,20 +605,34 @@ class DiffusionPipeline(Pipeline):
         # Create diffusion flow
 
         diffusion_flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
-        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','atlas_info','parcellation_scheme']),name='inputnode')
+        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')# ,'atlas_info'
+        # diffusion_inputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
+        # diffusion_inputnode.inputs.atlas_info = self.config.atlas_info
+
         diffusion_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectivity_matrices']),name='outputnode')
         diffusion_flow.add_nodes([diffusion_inputnode,diffusion_outputnode])
 
+        # diffusion_flow.connect([
+        #               (datasource,diffusion_inputnode,[("diffusion","diffusion"),("bvecs","bvecs"),("bvals","bvals")]),
+        #               (self.anat_flow,diffusion_inputnode,[("outputnode.subjects_dir","subjects_dir"),("outputnode.subject_id","subject_id"),
+        #                                            ("outputnode.T1","T1"),
+        #                                            ("outputnode.brain","brain"),
+        #                                            ("outputnode.brain_mask","brain_mask"),
+        #                                            ("outputnode.wm_mask_file","wm_mask_file"),
+        #                                            ( "outputnode.roi_volumes","roi_volumes"),
+        #                                            ("outputnode.parcellation_scheme","parcellation_scheme"),
+        #                                            ("outputnode.atlas_info","atlas_info")]),
+        #               ])
+
         diffusion_flow.connect([
                       (datasource,diffusion_inputnode,[("diffusion","diffusion"),("bvecs","bvecs"),("bvals","bvals")]),
-                      (self.anat_flow,diffusion_inputnode,[("outputnode.subjects_dir","subjects_dir"),("outputnode.subject_id","subject_id"),
-                                                   ("outputnode.T1","T1"),
-                                                   ("outputnode.brain","brain"),
-                                                   ("outputnode.brain_mask","brain_mask"),
-                                                   ("outputnode.wm_mask_file","wm_mask_file"),
-                                                   ( "outputnode.roi_volumes","roi_volumes"),
-                                                   ("outputnode.parcellation_scheme","parcellation_scheme"),
-                                                   ("outputnode.atlas_info","atlas_info")]),
+                      (datasource,diffusion_inputnode,[("T1","T1"),
+                                                   ("brain","brain"),
+                                                   ("brain_mask","brain_mask"),
+                                                   ("wm_mask_file","wm_mask_file"),
+                                                   ( "roi_volumes","roi_volumes")])
+                                                #    ("parcellation_scheme","parcellation_scheme"),
+                                                #    ("atlas_info","atlas_info")]),
                       ])
 
         print diffusion_inputnode.outputs
@@ -812,7 +833,7 @@ class DiffusionPipeline(Pipeline):
         # Create diffusion flow
 
         diffusion_flow = pe.Workflow(name='diffusion_pipeline')
-        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','atlas_info','parcellation_scheme']),name='inputnode')
+        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')#'atlas_info',
         diffusion_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectivity_matrices']),name='outputnode')
         diffusion_flow.add_nodes([diffusion_inputnode,diffusion_outputnode])
 
@@ -824,8 +845,8 @@ class DiffusionPipeline(Pipeline):
                                                    ("outputnode.brain_mask","inputnode.brain_mask"),
                                                    ("outputnode.wm_mask_file","inputnode.wm_mask_file"),
                                                    ( "outputnode.roi_volumes","inputnode.roi_volumes"),
-                                                   ("outputnode.parcellation_scheme","inputnode.parcellation_scheme"),
-                                                   ("outputnode.atlas_info","inputnode.atlas_info")]),
+                                                   ("outputnode.parcellation_scheme","inputnode.parcellation_scheme")]),
+                                                   #("outputnode.atlas_info","inputnode.atlas_info")]),
                       (diffusion_flow,sinker,[("outputnode.connectivity_matrices","%s.%s.connectivity_matrices"%(self.global_conf.diffusion_imaging_model,now))])
                     ])
 
@@ -880,8 +901,8 @@ class DiffusionPipeline(Pipeline):
                         (con_flow,diffusion_outputnode, [('outputnode.connectivity_matrices','connectivity_matrices')])
                         ])
 
-            if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
-                diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
+            # if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
+            #     diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
 
 
 
