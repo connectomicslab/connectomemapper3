@@ -152,7 +152,7 @@ class ParcellationStage(Stage):
                 elif isinstance(parc_results.outputs.roi_files_in_structural_space, TraitListObject):
                     print parc_results.outputs.roi_files_in_structural_space
                     if self.config.parcellation_scheme == 'Lausanne2008':
-                        resolution = {'33':'resolution83','60':'resolution150','125':'resolution258','250':'resolution500','500':'resolution1015'}
+                        resolution = {'1':'resolution83','2':'resolution150','3':'resolution258','4':'resolution500','5':'resolution1015'}
                         for roi_v in parc_results.outputs.roi_files_in_structural_space:
                             roi_basename = os.path.basename(roi_v)
                             scale = roi_basename[16:-7]

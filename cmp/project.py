@@ -209,7 +209,7 @@ def init_dmri_project(project_info, is_new_project):
         project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
 
         if os.path.exists(project_info.dmri_config_file):
-            warn_res = project_info.configure_traits(view='warning_view')
+            warn_res = project_info.configure_traits(view='dmri_warning_view')
             if warn_res:
                 dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
             else:
@@ -256,7 +256,7 @@ def init_anat_project(project_info, is_new_project):
         #project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
 
         if os.path.exists(project_info.anat_config_file):
-            warn_res = project_info.configure_traits(view='warning_view')
+            warn_res = project_info.configure_traits(view='anat_warning_view')
             if warn_res:
                 anat_save_config(anat_pipeline, project_info.anat_config_file)
             else:
@@ -484,7 +484,7 @@ class ProjectHandler(Handler):
                     ui_info.ui.context["object"].project_info.t1_available = self.anat_inputs_checked
                     anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
                     self.project_loaded = True
-                    self.anat_outputs_checked = self.anat_pipeline.check_output()
+                    self.anat_outputs_checked, msg = self.anat_pipeline.check_output()
                     print "anat_outputs_checked : %s" % self.anat_outputs_checked
                     # ui_info.ui.context["object"].anat_pipeline.flow = ui_info.ui.context["object"].anat_pipeline.create_pipeline_flow()
 
@@ -592,7 +592,7 @@ class ProjectHandler(Handler):
                     anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
                     self.project_loaded = True
                     print "Config loaded !"
-                    self.anat_outputs_checked = self.anat_pipeline.check_output()
+                    self.anat_outputs_checked, msg = self.anat_pipeline.check_output()
                     print "anat_outputs_checked : %s" % self.anat_outputs_checked
 
             changed_project.parcellation_scheme = get_anat_process_detail(changed_project,'parcellation_stage','parcellation_scheme')

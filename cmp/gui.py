@@ -123,7 +123,8 @@ class CMP_Project_Info(HasTraits):
     subjects = List(['sub-01','sub-02'])
     subject = Enum(values='subjects')
     #current_subj = Str()
-    warning_msg = Str('\nWarning: selected directory is already configured.\n\nDo you want to reset the configuration to default parameters ?\n')
+    anat_warning_msg = Str('\nWarning: selected directory is already configured for anatomical data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
+    dmri_warning_msg = Str('\nWarning: selected directory is already configured for diffusion data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
 
     #process_type = Enum('diffusion',['diffusion','fMRI'])
     diffusion_imaging_model = Enum('DSI',['DSI','DTI','HARDI'])
@@ -220,8 +221,14 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    warning_view = QtView( Item('warning_msg',style='readonly',show_label=False),
-                        title='Warning',
+    dmri_warning_view = QtView( Item('dmri_warning_msg',style='readonly',show_label=False),
+                        title='Warning : Diffusion data',
+                        kind='modal',
+                        #style_sheet=style_sheet,
+                        buttons=['OK','Cancel'])
+
+    anat_warning_view = QtView( Item('anat_warning_msg',style='readonly',show_label=False),
+                        title='Warning : Anatomical data',
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
