@@ -476,7 +476,7 @@ class DiffusionStage(Stage):
                 diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
                 if os.path.exists(diff_results_path):
                     diff_results = pickle.load(gzip.open(diff_results_path))
-                    streamline_res = diff_results.outputs.out_file
+                    streamline_res = diff_results.outputs.out_tracks
                     print streamline_res
                     self.inspect_outputs_dict[self.config.processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
             elif self.config.diffusion_model == 'Probabilistic':
@@ -484,7 +484,7 @@ class DiffusionStage(Stage):
                 print diff_results_path
                 if os.path.exists(diff_results_path):
                     diff_results = pickle.load(gzip.open(diff_results_path))
-                    streamline_res = diff_results.outputs.out_file
+                    streamline_res = diff_results.outputs.out_tracks
                     print streamline_res
                     self.inspect_outputs_dict[self.config.processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
 

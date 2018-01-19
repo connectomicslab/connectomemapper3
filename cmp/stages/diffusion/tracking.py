@@ -36,6 +36,7 @@ import cmp.interfaces.camino2trackvis as camino2trackvis
 from cmp.interfaces.mrtrix3 import StreamlineTrack
 from cmp.interfaces.fsl import mapped_ProbTrackX
 from cmp.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
+from cmp.interfaces.misc import Tck2Trk
 
 from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
 
@@ -851,7 +852,9 @@ def create_mrtrix_tracking_flow(config):
             (inputnode,mrtrix_seeds,[('gm_registered','ROI_files')]),
             ])
 
-        converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
+        # converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
+        converter = pe.Node(interface=Tck2Trk(),name="trackvis")
+        converter.inputs.out_tracks = 'converted.trk'
 
         flow.connect([
             #(mrtrix_seeds,mrtrix_tracking,[('seed_files','seed_file')]),
@@ -859,9 +862,12 @@ def create_mrtrix_tracking_flow(config):
             (inputnode,mrtrix_tracking,[('DWI','in_file')]),
             (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
             #(mrtrix_tracking,outputnode,[('tracked','track_file')]),
-            (mrtrix_tracking,converter,[('tracked','in_file')]),
-            (inputnode,converter,[('wm_mask_resampled','image_file')]),
-            (converter,outputnode,[('out_file','track_file')])
+            # (mrtrix_tracking,converter,[('tracked','in_file')]),
+            # (inputnode,converter,[('wm_mask_resampled','image_file')]),
+            # (converter,outputnode,[('out_file','track_file')])
+            (mrtrix_tracking,converter,[('tracked','in_tracks')]),
+            (inputnode,converter,[('wm_mask_resampled','in_image')]),
+            (converter,outputnode,[('out_tracks','track_file')])
             ])
 
         # flow.connect([
@@ -892,7 +898,9 @@ def create_mrtrix_tracking_flow(config):
             mrtrix_tracking.inputs.inputmodel='iFOD2'
         else:
             mrtrix_tracking.inputs.inputmodel='Tensor_Prob'
-        converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name='trackvis')
+        #converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name='trackvis')
+        converter = pe.MapNode(interface=Tck2Trk(),iterfield='in_tracks',name='trackvis')
+        converter.inputs.out_tracks = 'converted.trk'
         #orientation_matcher = pe.Node(interface=match_orientation(), name="orient_matcher")
 
         flow.connect([
@@ -904,9 +912,11 @@ def create_mrtrix_tracking_flow(config):
 		    (inputnode,mrtrix_tracking,[('DWI','in_file')]),
 		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
             #(mrtrix_tracking,outputnode,[('tracked','track_file')]),
+            ##(mrtrix_tracking,converter,[('tracked','in_file')]),
             (mrtrix_tracking,converter,[('tracked','in_file')]),
             (inputnode,converter,[('wm_mask_resampled','image_file')]),
-            (converter,outputnode,[('out_file','track_file')])
+            # (converter,outputnode,[('out_file','track_file')])
+            (converter,outputnode,[('out_tracks','track_file')])
             #(mrtrix_tracking,converter,[('tracked','in_file')]),
             #(inputnode,converter,[('wm_mask_resampled','image_file')]),
 		    #(converter,outputnode,[('out_file','track_file')])

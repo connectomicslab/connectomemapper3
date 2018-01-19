@@ -120,6 +120,7 @@ class Parcellate(BaseInterface):
         iflogger.info("=============================================")
 
         if self.inputs.parcellation_scheme == "Lausanne2008":
+            print "Parcellation scheme : Lausanne2008"
             create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
             create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir)
             create_roi(self.inputs.subject_id, self.inputs.subjects_dir)
@@ -130,6 +131,7 @@ class Parcellate(BaseInterface):
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','brainmask.nii.gz'))
             crop_and_move_datasets(self.inputs.parcellation_scheme,self.inputs.subject_id, self.inputs.subjects_dir)
         if self.inputs.parcellation_scheme == "Lausanne2018":
+            print "Parcellation scheme : Lausanne2018"
             create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
             #create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir)
             create_roi_v2(self.inputs.subject_id, self.inputs.subjects_dir)
@@ -140,6 +142,7 @@ class Parcellate(BaseInterface):
                 erode_mask(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','brainmask.nii.gz'))
             crop_and_move_datasets(self.inputs.parcellation_scheme,self.inputs.subject_id, self.inputs.subjects_dir)
         if self.inputs.parcellation_scheme == "NativeFreesurfer":
+            print "Parcellation scheme : NativeFreesurfer"
             create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
             generate_WM_and_GM_mask(self.inputs.subject_id, self.inputs.subjects_dir)
             if self.inputs.erode_masks:

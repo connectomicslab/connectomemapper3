@@ -738,6 +738,7 @@ class ProjectHandler(Handler):
                 ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
             else:
                 self.dmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
+                print "self.dmri_pipeline.parcellation_scheme: %s" % self.dmri_pipeline.parcellation_scheme
                 # self.dmri_pipeline.atlas_info = ui_info.ui.context["object"].project_info.atlas_info
                 dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
                 self.dmri_pipeline.launch_process()

@@ -533,8 +533,8 @@ class DiffusionPipeline(Pipeline):
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
         datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval',
                                                 T1='anat/'+self.subject+'_T1w_head.nii.gz',brain='anat/'+self.subject+'_T1w_brain.nii.gz',brain_mask='anat/'+self.subject+'_T1w_brainmask.nii.gz',
-                                                wm_mask_file='anat/'+self.subject+'_T1w_class-WM_eroded.nii.gz',wm_eroded='anat/'+self.subject+'_T1w_class-WM_eroded.nii.gz',
-                                                brain_eroded='anat/'+self.subject+'_T1w_brainmask_eroded.nii.gz',csf_eroded='anat/'+self.subject+'_T1w_class-CSF_eroded.nii.gz',
+                                                wm_mask_file='anat/'+self.subject+'_T1w_class-WM.nii.gz',wm_eroded='anat/'+self.subject+'_T1w_class-WM.nii.gz',
+                                                brain_eroded='anat/'+self.subject+'_T1w_brainmask.nii.gz',csf_eroded='anat/'+self.subject+'_T1w_class-CSF.nii.gz',
                                                 roi_volumes='anat/'+self.subject+'_T1w_parc_scale*.nii.gz')
         #datasource.inputs.field_template_args = dict(T1=[['subject']], T2=[['subject']], diffusion=[['subject', ['subject']]], bvecs=[['subject', ['subject']]], bvals=[['subject', ['subject']]])
         datasource.inputs.sort_filelist=True
@@ -606,7 +606,7 @@ class DiffusionPipeline(Pipeline):
 
         diffusion_flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
         diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')# ,'atlas_info'
-        # diffusion_inputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
+        diffusion_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         # diffusion_inputnode.inputs.atlas_info = self.config.atlas_info
 
         diffusion_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectivity_matrices']),name='outputnode')
