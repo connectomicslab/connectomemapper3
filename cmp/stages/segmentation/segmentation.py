@@ -35,8 +35,9 @@ class SegmentationConfig(HasTraits):
     isotropic_vox_size = Float(1.2, desc='specify the size (mm)')
     isotropic_interpolation = Enum('cubic', 'weighted', 'nearest', 'sinc', 'interpolate',
                                 desc='<interpolate|weighted|nearest|sinc|cubic> (default is cubic)')
-    brain_mask_extraction_tool = Enum("Freesurfer",["Freesurfer","BET","ANTs"])
+    brain_mask_extraction_tool = Enum("Freesurfer",["Freesurfer","BET","ANTs","Custom"])
     use_fsl_brain_mask = Bool(False)
+    brain_mask_path = File
     use_existing_freesurfer_data = Bool(False)
     freesurfer_subjects_dir = Directory
     freesurfer_subject_id_trait = List
@@ -48,6 +49,7 @@ class SegmentationConfig(HasTraits):
                         HGroup('make_isotropic',Item('isotropic_vox_size',label="Voxel size (mm)",visible_when='make_isotropic')),
                         Item('isotropic_interpolation',label='Interpolation',visible_when='make_isotropic'),
                         'brain_mask_extraction_tool',
+                        Item('brain_mask_path',label='Brain mask path',visible_when='brain_mask_extraction_tool == "Custom"'),
                         'freesurfer_args','use_existing_freesurfer_data',
                         Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
                         Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True'),
@@ -119,7 +121,8 @@ class SegmentationStage(Stage):
                     # ReconAll => named outputnode as we don't want to select a specific output....
                     fs_autorecon1 = pe.Node(interface=fs.ReconAll(flags='-no-isrunning'),name="autorecon1")
                     fs_autorecon1.inputs.directive = 'autorecon1'
-                    #fs_autorecon1.inputs.flags = '-noskullstrip'
+                    if self.config.brain_mask_extraction_tool == "Custom":
+                        fs_autorecon1.inputs.flags = '-noskullstrip'
                     fs_autorecon1.inputs.args = self.config.freesurfer_args
 
                     #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
@@ -166,6 +169,8 @@ class SegmentationStage(Stage):
                                     (fs_mriconvert_nu,ants_bet,[('out_file','anatomical_image')]),
                                     (ants_bet,fs_mriconvert_brainmask,[('BrainExtractionMask','in_file')])
                                     ])
+                    elif self.config.brain_mask_extraction_tool == "Custom":
+                        fs_mriconvert_brainmask.inputs.in_file = os.path.abspath(self.config.brain_mask_path)
 
                     # copy_brainmask_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmask_to_fs')
                     # copy_brainmask_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.mgz")
