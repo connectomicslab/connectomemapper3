@@ -15,6 +15,7 @@ import pickle
 import gzip
 import shutil
 import pkg_resources
+import multiprocessing as mp
 
 # Nipype imports
 import nipype.pipeline.engine as pe
@@ -121,7 +122,7 @@ class SegmentationStage(Stage):
                     # ReconAll => named outputnode as we don't want to select a specific output....
                     fs_autorecon1 = pe.Node(interface=fs.ReconAll(flags='-no-isrunning'),name="autorecon1")
                     fs_autorecon1.inputs.directive = 'autorecon1'
-                    if self.config.brain_mask_extraction_tool == "Custom":
+                    if self.config.brain_mask_extraction_tool == "Custom" or self.config.brain_mask_extraction_tool == "ANTs":
                         fs_autorecon1.inputs.flags = '-noskullstrip'
                     fs_autorecon1.inputs.args = self.config.freesurfer_args
 
@@ -158,16 +159,17 @@ class SegmentationStage(Stage):
                                     ])
 
                     elif self.config.brain_mask_extraction_tool == "ANTs":
-                        templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2.nii.gz'))
-                        probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_templateProbabilityMask.nii.gz'))
+                        templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz'))
+                        probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz'))
 
                         ants_bet = pe.Node(interface=ants.BrainExtraction(out_prefix='ants_bet_'),name='ants_bet')
                         ants_bet.inputs.brain_template = templatefile
                         ants_bet.inputs.brain_probability_mask = probmaskfile
+                        ants_bet.inputs.num_threads = mp.cpu_count()
 
                         flow.connect([
                                     (fs_mriconvert_nu,ants_bet,[('out_file','anatomical_image')]),
-                                    (ants_bet,fs_mriconvert_brainmask,[('BrainExtractionMask','in_file')])
+                                    (ants_bet,fs_mriconvert_brainmask,[('BrainExtractionBrain','in_file')])
                                     ])
                     elif self.config.brain_mask_extraction_tool == "Custom":
                         fs_mriconvert_brainmask.inputs.in_file = os.path.abspath(self.config.brain_mask_path)
