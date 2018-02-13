@@ -37,6 +37,10 @@ class SegmentationConfig(HasTraits):
     isotropic_interpolation = Enum('cubic', 'weighted', 'nearest', 'sinc', 'interpolate',
                                 desc='<interpolate|weighted|nearest|sinc|cubic> (default is cubic)')
     brain_mask_extraction_tool = Enum("Freesurfer",["Freesurfer","BET","ANTs","Custom"])
+    ants_templatefile = File(desc="Anatomical template")
+    ants_probmaskfile = File(desc="Brain probability mask")
+    ants_regmaskfile = File(desc="Mask (defined in the template space) used during registration for brain extraction.To limit the metric computation to a specific region.")
+
     use_fsl_brain_mask = Bool(False)
     brain_mask_path = File
     use_existing_freesurfer_data = Bool(False)
@@ -50,6 +54,9 @@ class SegmentationConfig(HasTraits):
                         HGroup('make_isotropic',Item('isotropic_vox_size',label="Voxel size (mm)",visible_when='make_isotropic')),
                         Item('isotropic_interpolation',label='Interpolation',visible_when='make_isotropic'),
                         'brain_mask_extraction_tool',
+                        Item('ants_templatefile',label='Template',visible_when='brain_mask_extraction_tool == "ANTs"'),
+                        Item('ants_probmaskfile',label='Probability mask',visible_when='brain_mask_extraction_tool == "ANTs"'),
+                        Item('ants_regmaskfile',label='Extraction mask',visible_when='brain_mask_extraction_tool == "ANTs"'),
                         Item('brain_mask_path',label='Brain mask path',visible_when='brain_mask_extraction_tool == "Custom"'),
                         'freesurfer_args','use_existing_freesurfer_data',
                         Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
@@ -79,6 +86,9 @@ class SegmentationStage(Stage):
     def __init__(self):
         self.name = 'segmentation_stage'
         self.config = SegmentationConfig()
+        self.config.ants_templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz'))
+        self.config.ants_probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz'))
+        self.config.ants_regmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumMask.nii.gz'))
         self.inputs = ["T1"]
         self.outputs = ["subjects_dir","subject_id","custom_wm_mask"]
 
@@ -159,12 +169,13 @@ class SegmentationStage(Stage):
                                     ])
 
                     elif self.config.brain_mask_extraction_tool == "ANTs":
-                        templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz'))
-                        probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz'))
+                        # templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz'))
+                        # probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz'))
 
                         ants_bet = pe.Node(interface=ants.BrainExtraction(out_prefix='ants_bet_'),name='ants_bet')
-                        ants_bet.inputs.brain_template = templatefile
-                        ants_bet.inputs.brain_probability_mask = probmaskfile
+                        ants_bet.inputs.brain_template = self.config.ants_templatefile
+                        ants_bet.inputs.brain_probability_mask = self.config.ants_probmaskfile
+                        ants_bet.inputs.extraction_registration_mask = self.config.ants_regmaskfile
                         ants_bet.inputs.num_threads = mp.cpu_count()
 
                         flow.connect([

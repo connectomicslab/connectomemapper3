@@ -31,6 +31,8 @@ package_data = {'cmp':
                  'data/parcellation/lausanne2018/*/*.*',
 		        'data/segmentation/ants_template_IXI/*/*.*',
 		        'data/segmentation/ants_template_IXI/*.*',
+                'data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*/*.*',
+		        'data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*.*',
                 'data/parcellation/nativefreesurfer/*/*.*',
                 'data/colortable_and_gcs/*.*',
                 'data/colortable_and_gcs/my_atlas_gcs/*.*',
