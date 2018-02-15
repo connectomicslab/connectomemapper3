@@ -8,6 +8,7 @@
 """
 
 # Global imports
+import ast
 from traits.api import *
 from traitsui.api import *
 import shutil
@@ -37,7 +38,12 @@ def get_anat_process_detail(project_info, section, detail):
     config = ConfigParser.ConfigParser()
     #print('Loading config from file: %s' % project_info.config_file)
     config.read(project_info.anat_config_file)
-    return config.get(section, detail)
+    res = None
+    if detail == "atlas_info":
+        res = ast.literal_eval(config.get(section, detail))
+    else:
+        res = config.get(section, detail)
+    return res
 
 def get_dmri_process_detail(project_info, section, detail):
     config = ConfigParser.ConfigParser()
@@ -469,7 +475,7 @@ class ProjectHandler(Handler):
             print "Anatomical config file: %s"%loaded_project.anat_config_file
 
             loaded_project.parcellation_scheme = get_anat_process_detail(loaded_project,'parcellation_stage','parcellation_scheme')
-            # loaded_project.atlas_info = get_anat_process_detail(loaded_project,'parcellation_stage','atlas_info')
+            loaded_project.atlas_info = get_anat_process_detail(loaded_project,'parcellation_stage','atlas_info')
 
             self.anat_pipeline= init_anat_project(loaded_project, False)
             if self.anat_pipeline != None: #and self.dmri_pipeline != None:
@@ -513,7 +519,7 @@ class ProjectHandler(Handler):
                         update_dmri_last_processed(loaded_project, self.dmri_pipeline)
                         ui_info.ui.context["object"].project_info = loaded_project
                         self.dmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
-                        # self.dmri_pipeline.atlas_info = loaded_project.atlas_info
+                        self.dmri_pipeline.atlas_info = loaded_project.atlas_info
                         ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                         ui_info.ui.context["object"].dmri_pipeline.number_of_cores = ui_info.ui.context["object"].project_info.number_of_cores
                         #ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
@@ -536,7 +542,7 @@ class ProjectHandler(Handler):
                         # print "diffusion_imaging_model (pipeline): %s" % self.dmri_pipeline.diffusion_imaging_model
                         # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
                         self.dmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
-                        # self.dmri_pipeline.atlas_info = loaded_project.atlas_info
+                        self.dmri_pipeline.atlas_info = loaded_project.atlas_info
                         ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                         #self.diffusion_ready = True
                         dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
@@ -596,7 +602,7 @@ class ProjectHandler(Handler):
                     print "anat_outputs_checked : %s" % self.anat_outputs_checked
 
             changed_project.parcellation_scheme = get_anat_process_detail(changed_project,'parcellation_stage','parcellation_scheme')
-            # changed_project.atlas_info = get_anat_process_detail(changed_project,'parcellation_stage','atlas_info')
+            changed_project.atlas_info = get_anat_process_detail(changed_project,'parcellation_stage','atlas_info')
 
             if os.path.isfile(changed_project.dmri_config_file):
                 print "Existing diffusion config file for subject %s: %s" % ( changed_project.subject,changed_project.dmri_config_file)
@@ -611,7 +617,7 @@ class ProjectHandler(Handler):
                         update_dmri_last_processed(changed_project, self.dmri_pipeline)
                         ui_info.ui.context["object"].project_info = changed_project
                         self.dmri_pipeline.parcellation_scheme = changed_project.parcellation_scheme
-                        # self.dmri_pipeline.atlas_info = changed_project.atlas_info
+                        self.dmri_pipeline.atlas_info = changed_project.atlas_info
                         ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                         ui_info.ui.context["object"].dmri_pipeline.number_of_cores = ui_info.ui.context["object"].project_info.number_of_cores
                         #ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
@@ -635,7 +641,7 @@ class ProjectHandler(Handler):
                         # print "diffusion_imaging_model (pipeline): %s" % self.dmri_pipeline.diffusion_imaging_model
                         # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
                         self.dmri_pipeline.parcellation_scheme = changed_project.parcellation_scheme
-                        # self.dmri_pipeline.atlas_info = changed_project.atlas_info
+                        self.dmri_pipeline.atlas_info = changed_project.atlas_info
                         ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                         #self.diffusion_ready = True
                         dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
@@ -674,7 +680,7 @@ class ProjectHandler(Handler):
                     # print "diffusion_imaging_model (pipeline): %s" % self.dmri_pipeline.diffusion_imaging_model
                     # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
                     self.dmri_pipeline.parcellation_scheme = changed_project.parcellation_scheme
-                    # self.dmri_pipeline.atlas_info = changed_project.atlas_info
+                    self.dmri_pipeline.atlas_info = changed_project.atlas_info
                     ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                     #self.diffusion_ready = True
                     dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
@@ -711,7 +717,7 @@ class ProjectHandler(Handler):
         else:
             anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
             ui_info.ui.context["object"].project_info.parcellation_scheme = get_anat_process_detail(ui_info.ui.context["object"].project_info,'parcellation_stage','parcellation_scheme')
-            # ui_info.ui.context["object"].project_info.atlas_info = get_anat_process_detail(ui_info.ui.context["object"].project_info,'parcellation_stage','atlas_info')
+            ui_info.ui.context["object"].project_info.atlas_info = get_anat_process_detail(ui_info.ui.context["object"].project_info,'parcellation_stage','atlas_info')
 
             try:
                 self.anat_pipeline.launch_process()
@@ -739,7 +745,8 @@ class ProjectHandler(Handler):
             else:
                 self.dmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
                 print "self.dmri_pipeline.parcellation_scheme: %s" % self.dmri_pipeline.parcellation_scheme
-                # self.dmri_pipeline.atlas_info = ui_info.ui.context["object"].project_info.atlas_info
+                self.dmri_pipeline.atlas_info = ui_info.ui.context["object"].project_info.atlas_info
+                print "self.dmri_pipeline.atlas_info: %s" % self.dmri_pipeline.atlas_info
                 dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
                 self.dmri_pipeline.launch_process()
                 self.dmri_pipeline.launch_progress_window()

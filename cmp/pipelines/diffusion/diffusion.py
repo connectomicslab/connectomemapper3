@@ -88,7 +88,7 @@ class DiffusionPipeline(Pipeline):
     ordered_stage_list = ['Preprocessing','Registration','Diffusion','Connectome']# ,'MRTrixConnectome']
 
     parcellation_scheme = Str
-    # atlas_info = Dict()
+    atlas_info = Dict()
 
     global_conf = Global_Configuration()
 

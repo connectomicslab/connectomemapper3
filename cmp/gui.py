@@ -129,7 +129,7 @@ class CMP_Project_Info(HasTraits):
     #process_type = Enum('diffusion',['diffusion','fMRI'])
     diffusion_imaging_model = Enum('DSI',['DSI','DTI','HARDI'])
     parcellation_scheme = Str('Lausanne2008')
-    # atlas_info = Dict()
+    atlas_info = Dict()
 
 
     t1_available = Bool(False)
