@@ -17,6 +17,7 @@ import pickle
 import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
+import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
@@ -31,11 +32,17 @@ class DiffusionConfig(HasTraits):
     #resampling = Tuple(2,2,2)
     #interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
     # processing_tool_editor = List(['DTK','MRtrix','Camino','FSL','Gibbs'])
-    processing_tool_editor = List(['Dipy','MRtrix'])
+    processing_tool_editor = List(['Dipy','MRtrix','Custom'])
     dilate_rois = Bool(True)
     dilation_kernel = Enum(['Box','Gauss','Sphere'])
     dilation_radius = Enum([1,2,3,4])
     processing_tool = Str('MRtrix')
+    recon_processing_tool_editor = List(['Dipy','MRtrix','Custom'])
+    tracking_processing_tool_editor = List(['Dipy','MRtrix','Custom'])
+    processing_tool_editor = List(['Dipy','MRtrix','Custom'])
+    recon_processing_tool = Str('MRtrix')
+    tracking_processing_tool = Str('MRtrix')
+    custom_track_file = File
     dtk_recon_config = Instance(HasTraits)
     dipy_recon_config = Instance(HasTraits)
     mrtrix_recon_config = Instance(HasTraits)
@@ -57,21 +64,24 @@ class DiffusionConfig(HasTraits):
                        #'interpolation'),
                       Item('diffusion_imaging_model',editor=EnumEditor(name='diffusion_imaging_model_editor')),
 		              Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
+                      Item('custom_track_file',defined_when='processing_tool=="Custom"'),
                        HGroup(
                            Item('dilate_rois',visible_when='processing_tool!="DTK"'),
                            Item('dilation_radius',visible_when='dilate_rois',label="radius")
                            ),
-                       Group(Item('dtk_recon_config',style='custom',defined_when='processing_hallenging because each DWI section can only acquire one b-value for a stool=="DTK"'),
-                             Item('dipy_recon_config',style='custom',defined_when='processing_tool=="Dipy"'),
-			                Item('mrtrix_recon_config',style='custom',defined_when='processing_tool=="MRtrix"'),
+                       Group(Item('recon_processing_tool',label='Reconstruction processing tool',editor=EnumEditor(name='recon_processing_tool_editor')),
+                             Item('dtk_recon_config',style='custom',defined_when='processing_tool=="DTK"'),
+                             Item('dipy_recon_config',style='custom',defined_when='recon_processing_tool=="Dipy"'),
+			                 Item('mrtrix_recon_config',style='custom',defined_when='recon_processing_tool=="MRtrix"'),
 			                 Item('camino_recon_config',style='custom',defined_when='processing_tool=="Camino"'),
                              Item('fsl_recon_config',style='custom',defined_when='processing_tool=="FSL"'),
                              Item('gibbs_recon_config',style='custom',defined_when='processing_tool=="Gibbs"'),
-                             label='Reconstruction', show_border=True, show_labels=False),
-                       Group(Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
+                             label='Reconstruction', show_border=True, show_labels=False,defined_when='tracking_processing_tool!=Custom'),
+                       Group(Item('tracking_processing_tool',label='Tracking processing tool',editor=EnumEditor(name='tracking_processing_tool_editor')),
+                             Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor'),defined_when='processing_tool!="Custom"'),
                              Item('dtb_tracking_config',style='custom',defined_when='processing_tool=="DTK"'),
-                             Item('dipy_tracking_config',style='custom',defined_when='processing_tool=="Dipy"'),
-			                 Item('mrtrix_tracking_config',style='custom',defined_when='processing_tool=="MRtrix"'),
+                             Item('dipy_tracking_config',style='custom',defined_when='tracking_processing_tool=="Dipy"'),
+			                 Item('mrtrix_tracking_config',style='custom',defined_when='tracking_processing_tool=="MRtrix"'),
 			                 Item('camino_tracking_config',style='custom',defined_when='processing_tool=="Camino"'),
                              Item('fsl_tracking_config',style='custom',defined_when='processing_tool=="FSL"'),
                              Item('gibbs_tracking_config',style='custom',defined_when='processing_tool=="Gibbs"'),
@@ -106,7 +116,7 @@ class DiffusionConfig(HasTraits):
 
     def __init__(self):
         self.dtk_recon_config = DTK_recon_config(imaging_model=self.diffusion_imaging_model)
-        self.dipy_recon_config = Dipy_recon_config(imaging_model=self.diffusion_imaging_model,recon_mode=self.diffusion_model)
+        self.dipy_recon_config = Dipy_recon_config(imaging_model=self.diffusion_imaging_model,recon_mode=self.diffusion_model,tracking_processing_tool=self.tracking_processing_tool)
         self.mrtrix_recon_config = MRtrix_recon_config(imaging_model=self.diffusion_imaging_model,recon_mode=self.diffusion_model)
         self.camino_recon_config = Camino_recon_config(imaging_model=self.diffusion_imaging_model)
         self.fsl_recon_config = FSL_recon_config()
@@ -130,6 +140,11 @@ class DiffusionConfig(HasTraits):
         self.camino_recon_config.on_trait_change(self.update_camino_tracking_inversion,'inversion')
         self.camino_recon_config.on_trait_change(self.update_camino_tracking_inversion,'fallback_index')
 
+    def _tracking_processing_tool_changed(self,new):
+        self.dipy_recon_config.tracking_processing_tool = new
+        self.mrtrix_recon_config.tracking_processing_tool = new
+
+
     def _diffusion_imaging_model_changed(self, new):
         self.dtk_recon_config.imaging_model = new
         #self.mrtrix_recon_config.imaging_model = new
@@ -140,10 +155,21 @@ class DiffusionConfig(HasTraits):
         if new == 'DSI':
             self.processing_tool = 'Dipy'
             self.processing_tool_editor = ['Dipy']
+            self.recon_processing_tool = 'Dipy'
+            self.recon_processing_tool_editor = ['Dipy']
+            self.tracking_processing_tool = 'Dipy'
+            self.tracking_processing_tool_editor = ['Dipy']
+            self.diffusion_model_editor = ['Deterministic','Probabilistic']
         else:
             # self.processing_tool_editor = ['DTK','MRtrix','Camino','FSL','Gibbs']
             self.processing_tool_editor = ['Dipy','MRtrix']
+            self.recon_processing_tool_editor = ['Dipy','MRtrix']
+            self.tracking_processing_tool_editor = ['Dipy','MRtrix']
             if self.processing_tool == 'DTK':
+                self.diffusion_model_editor = ['Deterministic']
+            else:
+                self.diffusion_model_editor = ['Deterministic','Probabilistic']
+            if self.tracking_processing_tool == 'DTK':
                 self.diffusion_model_editor = ['Deterministic']
             else:
                 self.diffusion_model_editor = ['Deterministic','Probabilistic']
@@ -167,6 +193,14 @@ class DiffusionConfig(HasTraits):
             # self.configure_traits(view='mrtrix_traits_view')
         #self.edit_traits()
         #self.trait_view('traits_view').updated = True
+
+    def _recon_processing_tool_changed(self, new):
+        print "recon_processing_tool_changed"
+        if new == 'Dipy':
+            self.tracking_processing_tool_editor = ['Dipy']
+        else:
+            self.tracking_processing_tool_editor = ['Dipy','MRtrix']
+
 
     def _diffusion_model_changed(self,new):
         # self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
@@ -353,7 +387,7 @@ class DiffusionStage(Stage):
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')])
                         ])
 
-        elif self.config.processing_tool == 'Dipy':
+        elif self.config.tracking_processing_tool == 'Dipy':
             track_flow = create_dipy_tracking_flow(self.config.dipy_tracking_config)
             flow.connect([
                         (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
@@ -373,7 +407,17 @@ class DiffusionStage(Stage):
                         (track_flow,outputnode,[('outputnode.track_file','track_file')])
                         ])
 
-        elif self.config.processing_tool == 'MRtrix':
+        elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'MRtrix':
+            track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
+            flow.connect([
+                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
+                        (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
+                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'),('outputnode.grad','inputnode.grad')]),
+                        (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
+			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
+                        ])
+
+        elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'Dipy':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
             flow.connect([
                         (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
@@ -439,6 +483,14 @@ class DiffusionStage(Stage):
         flow.connect([
                     (temp_node,outputnode,[("diffusion_model","diffusion_model")])
                     ])
+
+        if self.config.processing_tool == 'Custom':
+            custom_node = pe.Node(interface=util.IdentityInterface(fields=["custom_track_file"]),name="read_custom_track")
+            custom_node.inputs.custom_track_file = self.config.custom_track_file
+            flow.connect([
+                        (custom_node,outputnode,[("custom_track_file","track_file")])
+                        ])
+
 
     def define_inspect_outputs(self):
         print "stage_dir : %s" % self.stage_dir

@@ -580,9 +580,13 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
     #print "Header trackvis id_string : ",hdr['id_string']
     #print "Fibers trackvis : ",fib
 
+    print('Parcellation_scheme : %s' % parcellation_scheme)
+
     if parcellation_scheme != "Custom":
+        print "get resolutions from parcellation_scheme"
         resolutions = get_parcellation(parcellation_scheme)
     else:
+        print "get resolutions from atlas_info"
         resolutions = atlas_info
 
     #print "resolutions : %s" % resolutions
