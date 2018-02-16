@@ -549,7 +549,7 @@ class DiffusionPipeline(Pipeline):
         sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
 
         #Dataname substitutions in order to comply with BIDS derivatives specifications
-        sinker.inputs.substitutions = [ ('T1', self.subject+'_T1w_head'),
+        sinker.inputs.substitutions = [ #('T1', self.subject+'_T1w_head'),
                                         ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
                                         ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
                                         #('wm_mask',self.subject+'_T1w_class-WM'),
