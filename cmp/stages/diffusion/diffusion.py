@@ -64,27 +64,27 @@ class DiffusionConfig(HasTraits):
                        #'interpolation'),
                       Item('diffusion_imaging_model',editor=EnumEditor(name='diffusion_imaging_model_editor')),
 		              Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
-                      Item('custom_track_file',defined_when='processing_tool=="Custom"'),
+                      Item('custom_track_file',visible_when='processing_tool=="Custom"'),
                        HGroup(
                            Item('dilate_rois',visible_when='processing_tool!="DTK"'),
                            Item('dilation_radius',visible_when='dilate_rois',label="radius")
                            ),
                        Group(Item('recon_processing_tool',label='Reconstruction processing tool',editor=EnumEditor(name='recon_processing_tool_editor')),
-                             Item('dtk_recon_config',style='custom',defined_when='processing_tool=="DTK"'),
-                             Item('dipy_recon_config',style='custom',defined_when='recon_processing_tool=="Dipy"'),
-			                 Item('mrtrix_recon_config',style='custom',defined_when='recon_processing_tool=="MRtrix"'),
-			                 Item('camino_recon_config',style='custom',defined_when='processing_tool=="Camino"'),
-                             Item('fsl_recon_config',style='custom',defined_when='processing_tool=="FSL"'),
-                             Item('gibbs_recon_config',style='custom',defined_when='processing_tool=="Gibbs"'),
-                             label='Reconstruction', show_border=True, show_labels=False,defined_when='tracking_processing_tool!=Custom'),
+                             Item('dtk_recon_config',style='custom',visible_when='processing_tool=="DTK"'),
+                             Item('dipy_recon_config',style='custom',visible_when='recon_processing_tool=="Dipy"'),
+			                 Item('mrtrix_recon_config',style='custom',visible_when='recon_processing_tool=="MRtrix"'),
+			                 Item('camino_recon_config',style='custom',visible_when='processing_tool=="Camino"'),
+                             Item('fsl_recon_config',style='custom',visible_when='processing_tool=="FSL"'),
+                             Item('gibbs_recon_config',style='custom',visible_when='processing_tool=="Gibbs"'),
+                             label='Reconstruction', show_border=True, show_labels=False,visible_when='tracking_processing_tool!=Custom'),
                        Group(Item('tracking_processing_tool',label='Tracking processing tool',editor=EnumEditor(name='tracking_processing_tool_editor')),
-                             Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor'),defined_when='processing_tool!="Custom"'),
-                             Item('dtb_tracking_config',style='custom',defined_when='processing_tool=="DTK"'),
-                             Item('dipy_tracking_config',style='custom',defined_when='tracking_processing_tool=="Dipy"'),
-			                 Item('mrtrix_tracking_config',style='custom',defined_when='tracking_processing_tool=="MRtrix"'),
-			                 Item('camino_tracking_config',style='custom',defined_when='processing_tool=="Camino"'),
-                             Item('fsl_tracking_config',style='custom',defined_when='processing_tool=="FSL"'),
-                             Item('gibbs_tracking_config',style='custom',defined_when='processing_tool=="Gibbs"'),
+                             Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor'),visible_when='processing_tool!="Custom"'),
+                             Item('dtb_tracking_config',style='custom',visible_when='processing_tool=="DTK"'),
+                             Item('dipy_tracking_config',style='custom',visible_when='tracking_processing_tool=="Dipy"'),
+			                 Item('mrtrix_tracking_config',style='custom',visible_when='tracking_processing_tool=="MRtrix"'),
+			                 Item('camino_tracking_config',style='custom',visible_when='processing_tool=="Camino"'),
+                             Item('fsl_tracking_config',style='custom',visible_when='processing_tool=="FSL"'),
+                             Item('gibbs_tracking_config',style='custom',visible_when='processing_tool=="Gibbs"'),
                              label='Tracking', show_border=True, show_labels=False),
                        )
 
@@ -197,9 +197,9 @@ class DiffusionConfig(HasTraits):
     def _recon_processing_tool_changed(self, new):
         print "recon_processing_tool_changed"
         if new == 'Dipy':
-            self.tracking_processing_tool_editor = ['Dipy']
+            self.tracking_processing_tool_editor = ['Dipy','Custom']
         else:
-            self.tracking_processing_tool_editor = ['Dipy','MRtrix']
+            self.tracking_processing_tool_editor = ['Dipy','MRtrix','Custom']
 
 
     def _diffusion_model_changed(self,new):

@@ -586,8 +586,9 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
         print "get resolutions from parcellation_scheme"
         resolutions = get_parcellation(parcellation_scheme)
     else:
-        print "get resolutions from atlas_info"
+        print "get resolutions from atlas_info: "
         resolutions = atlas_info
+        print resolutions
 
     #print "resolutions : %s" % resolutions
 

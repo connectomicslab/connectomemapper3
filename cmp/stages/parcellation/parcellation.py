@@ -57,6 +57,8 @@ class ParcellationConfig(HasTraits):
         atlas_name = os.path.basename(self.atlas_nifti_file)
         atlas_name = os.path.splitext(os.path.splitext(atlas_name)[0])[0].encode('ascii')
         self.atlas_info = {atlas_name : {'number_of_regions':self.number_of_regions,'node_information_graphml':self.graphml_file}}
+        print "Update atlas information"
+        print self.atlas_info
 
     def _atlas_nifti_file_changed(self,new):
         self.update_atlas_info()
@@ -133,6 +135,9 @@ class ParcellationStage(Stage):
     def define_inspect_outputs(self):
         print "stage_dir : %s" % self.stage_dir
         print "parcellation scheme : %s" % self.config.parcellation_scheme
+        print "atlas info : "
+        print self.config.atlas_info
+        
         if self.config.parcellation_scheme != "Custom":
             parc_results_path = os.path.join(self.stage_dir,"%s_parcellation" % self.config.parcellation_scheme,"result_%s_parcellation.pklz" % self.config.parcellation_scheme)
             print "parc_results_path : %s" % parc_results_path

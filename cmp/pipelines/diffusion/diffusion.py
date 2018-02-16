@@ -182,6 +182,10 @@ class DiffusionPipeline(Pipeline):
             if stage == custom_last_stage:
                 break
 
+    def _atlas_info_changed(self, new):
+        print "Atlas info changed : "
+        print new
+
     def old_check_input(self, gui=True):
         print '**** Check Inputs ****'
         diffusion_available = False
@@ -607,7 +611,7 @@ class DiffusionPipeline(Pipeline):
         diffusion_flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
         diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')# ,'atlas_info'
         diffusion_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
-        # diffusion_inputnode.inputs.atlas_info = self.config.atlas_info
+        diffusion_inputnode.inputs.atlas_info = self.atlas_info
 
         diffusion_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectivity_matrices']),name='outputnode')
         diffusion_flow.add_nodes([diffusion_inputnode,diffusion_outputnode])
@@ -715,7 +719,7 @@ class DiffusionPipeline(Pipeline):
                 self.stages['Connectome'].config.probtrackx = False
             con_flow = self.create_stage_flow("Connectome")
             diffusion_flow.connect([
-                        (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
+                        (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme'),('atlas_info','inputnode.atlas_info')]),
                         (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),('outputnode.ADC','inputnode.ADC'),
                                               ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
                                               ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
