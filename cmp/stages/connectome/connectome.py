@@ -228,7 +228,9 @@ class ConnectomeStage(Stage):
                 print "is str"
                 if 'gpickle' in mat:
                     # 'Fiber number','Fiber length','Fiber density','ADC','gFA'
-                    con_name = os.path.basename(mat).split(".")[0].split("_")
+                    con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
+                    print "con_name:"
+                    print con_name
                     if any('Fiber number' in m for m in self.config.connectivity_metrics):
                         self.inspect_outputs_dict[con_name+' - number of fibers'] = ["showmatrix_gpickle",mat, "number_of_fibers", "False", con_name+' - number of fibers', map_scale]
                     if any('Fiber length' in m for m in self.config.connectivity_metrics):
