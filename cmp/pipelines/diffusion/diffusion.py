@@ -713,10 +713,10 @@ class DiffusionPipeline(Pipeline):
         #         diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
 
         if self.stages['Connectome'].enabled:
-            if self.stages['Diffusion'].config.processing_tool == 'FSL':
-                self.stages['Connectome'].config.probtrackx = True
-            else:
-                self.stages['Connectome'].config.probtrackx = False
+            # if self.stages['Diffusion'].config.processing_tool == 'FSL':
+            #     self.stages['Connectome'].config.probtrackx = True
+            # else:
+            self.stages['Connectome'].config.probtrackx = False
             con_flow = self.create_stage_flow("Connectome")
             diffusion_flow.connect([
                         (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme'),('atlas_info','inputnode.atlas_info')]),
