@@ -185,12 +185,16 @@ class CSDInputSpec(DipyBaseInterfaceInputSpec):
                           desc=('maximal shperical harmonics order'))
     save_fods = traits.Bool(True, usedefault=True,
                             desc=('save fODFs in file'))
+    save_shm_coeff= traits.Bool(True, usedefault=True,
+                            desc=('save Spherical Harmonics Coefficients in file'))
     out_fods = File(desc=('fODFs output file name'))
+    out_shm_coeff = File(desc=('Spherical Harmonics Coefficients output file name'))
 
 
 class CSDOutputSpec(TraitedSpec):
     model = File(desc='Python pickled object of the CSD model fitted.')
     out_fods = File(desc=('fODFs output file name'))
+    out_shm_coeff = File(desc=('Spherical Harmonics Coefficients output file name'))
 
 
 class CSD(DipyDiffusionInterface):
@@ -265,7 +269,7 @@ class CSD(DipyDiffusionInterface):
             response, _, counts = auto_response(gtab, data, fa_thr=0.7, return_number_of_voxels=True)
             IFLOGGER.info("nbr_voxel_used: %g"%counts)
 
-        sphere = get_sphere('repulsion724')
+        sphere = get_sphere('symmetric724')
         csd_model = ConstrainedSphericalDeconvModel(gtab, response, sh_order=self.inputs.sh_order, reg_sphere=sphere, lambda_=np.sqrt(1. / 2))
 
         # IFLOGGER.info('Fitting CSD model')
@@ -275,14 +279,14 @@ class CSD(DipyDiffusionInterface):
         pickle.dump(csd_model, f, -1)
         f.close()
 
-        # if self.inputs.save_fods:
-        #     # isphere = get_sphere('symmetric724')
-        #     IFLOGGER.info('Fitting CSD model')
-        #     csd_fit = csd_model.fit(data, msk)
-        #     fods = csd_fit.odf(sphere)
-        #     IFLOGGER.info(fods)
-        #     IFLOGGER.info(fods.shape)
-        #     nb.Nifti1Image(fods, img.affine,None).to_filename(self._gen_filename('fods'))
+        if self.inputs.save_shm_coeff:
+            # isphere = get_sphere('symmetric724')
+            IFLOGGER.info('Fitting CSD model')
+            csd_fit = csd_model.fit(data, msk)
+            # fods = csd_fit.odf(sphere)
+            # IFLOGGER.info(fods)
+            # IFLOGGER.info(fods.shape)
+            nb.Nifti1Image( csd_fit.shm_coeff, img.affine,None).to_filename(self._gen_filename('shm_coeff'))
 
         return runtime
 
@@ -290,7 +294,9 @@ class CSD(DipyDiffusionInterface):
         outputs = self._outputs().get()
         outputs['model'] = self._gen_filename('csdmodel', ext='.pklz')
         if self.inputs.save_fods:
-            outputs['out_fods'] = self._gen_filename('fods')
+            outputs['out_shm_coeff'] = self._gen_filename('shm_coeff')
+        # if self.inputs.save_fods:
+        #     outputs['out_fods'] = self._gen_filename('fods')
         return outputs
 
 class TensorInformedEudXTractographyInputSpec(BaseInterfaceInputSpec):

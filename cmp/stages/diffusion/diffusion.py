@@ -143,8 +143,8 @@ class DiffusionConfig(HasTraits):
     def _tracking_processing_tool_changed(self,new):
         if new == 'MRtrix':
             self.mrtrix_recon_config.tracking_processing_tool = new
-            self.recon_processing_tool = new
-            self.recon_processing_tool_editor = ['Dipy','MRtrix']
+            # self.recon_processing_tool = new
+            # self.recon_processing_tool_editor = ['Dipy','MRtrix']
         elif new == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = new
             self.recon_processing_tool = new
@@ -429,9 +429,9 @@ class DiffusionStage(Stage):
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'Dipy':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
             flow.connect([
-                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
+                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),('grad','inputnode.grad')]),
                         (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
-                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'),('outputnode.grad','inputnode.grad')]),
+                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
                         (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
 			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                         ])

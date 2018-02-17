@@ -597,8 +597,13 @@ def create_dipy_recon_flow(config):
     else:
         # Perform spherical deconvolution
         dipy_CSD = pe.Node(interface=CSD(),name="dipy_CSD")
-        dipy_CSD.inputs.save_fods=True
-        dipy_CSD.inputs.out_fods='diffusion_fODFs.nii.gz'
+
+        if config.tracking_processing_tool != 'Dipy':
+            dipy_CSD.inputs.save_shm_coeff = True
+            dipy_CSD.inputs.out_shm_coeff='diffusion_shm_coeff.nii.gz'
+
+        # dipy_CSD.inputs.save_fods=True
+        # dipy_CSD.inputs.out_fods='diffusion_fODFs.nii.gz'
 
         if config.lmax_order != 'Auto':
             dipy_CSD.inputs.sh_order = config.lmax_order
@@ -610,9 +615,19 @@ def create_dipy_recon_flow(config):
                 # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
                 (dipy_erode, dipy_CSD,[('out_file','in_mask')]),
                 #(dipy_tensor, dipy_CSD,[('response','response')]),
-                (inputnode,outputnode,[('diffusion_resampled','DWI')]),
                 (dipy_CSD,outputnode,[('model','model')])
                 ])
+
+        if config.tracking_processing_tool != 'Dipy':
+            flow.connect([
+                    (dipy_CSD,outputnode,[('out_shm_coeff','DWI')])
+                    ])
+        else:
+            flow.connect([
+                    (inputnode,outputnode,[('diffusion_resampled','DWI')])
+                    ])
+
+
 
     if config.mapmri:
         from cmp.interfaces.dipy import MAPMRI
