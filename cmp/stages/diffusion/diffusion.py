@@ -19,11 +19,14 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.utility as util
 
+import nibabel as nib
+
 # Own imports
 from cmp.stages.common import Stage
 from reconstruction import *
 from tracking import *
-from cmp.interfaces.misc import ExtractImageVoxelSizes
+from cmp.interfaces.misc import ExtractImageVoxelSizes, Tck2Trk
+
 
 class DiffusionConfig(HasTraits):
 
@@ -496,10 +499,23 @@ class DiffusionStage(Stage):
         if self.config.tracking_processing_tool == 'Custom':
             custom_node = pe.Node(interface=util.IdentityInterface(fields=["custom_track_file"]),name="read_custom_track")
             custom_node.inputs.custom_track_file = self.config.custom_track_file
-            flow.connect([
-                        (custom_node,outputnode,[("custom_track_file","track_file")])
-                        ])
+            if nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TrkFile:
+                print "load TRK tractography file"
+                flow.connect([
+                            (custom_node,outputnode,[("custom_track_file","track_file")])
+                            ])
+            elif nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TckFile:
+                print "load TCK tractography file and convert to TRK format"
+                converter = pe.Node(interface=Tck2Trk(),name="trackvis")
+                converter.inputs.out_tracks = 'converted.trk'
 
+                flow.connect([
+                    (custom_node,converter,[('custom_track_file','in_tracks')]),
+                    (inputnode,converter,[('wm_mask_registered','in_image')]),
+                    (converter,outputnode,[('out_tracks','track_file')])
+                    ])
+            else:
+                print "Invalid tractography input format. Valid formats are .tck (MRtrix) and .trk (DTK/Trackvis)"
 
     def define_inspect_outputs(self):
         print "stage_dir : %s" % self.stage_dir
