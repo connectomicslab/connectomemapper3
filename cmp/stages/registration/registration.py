@@ -734,7 +734,8 @@ class RegistrationStage(Stage):
             affine_registration.inputs.smoothing_sigmas=[[3, 2, 1, 0]]*2
             affine_registration.inputs.transform_parameters=[(self.config.ants_linear_gradient_step,),(self.config.ants_linear_gradient_step,)]#[(0.1,),(0.1,)]
             affine_registration.inputs.use_histogram_matching=True
-            affine_registration.inputs.write_composite_transform=True
+            if self.config.ants_perform_syn:
+                affine_registration.inputs.write_composite_transform=True
             affine_registration.inputs.verbose = True
 
             flow.connect([
@@ -878,11 +879,11 @@ class RegistrationStage(Stage):
                             ])
             else:
                 flow.connect([
-                            (affine_registration, ants_applywarp_T1, [(('composite_transform',reverse_order_transforms),'transforms')]),
-                            (affine_registration, ants_applywarp_brain, [(('composite_transform',reverse_order_transforms),'transforms')]),
-                            (affine_registration, ants_applywarp_wm, [(('composite_transform',reverse_order_transforms),'transforms')]),
-                            (affine_registration, ants_applywarp_rois, [(('composite_transform',reverse_order_transforms),'transforms')]),
-                            (affine_registration, ants_applywarp_pves, [(('composite_transform',reverse_order_transforms),'transforms')]),
+                            (affine_registration, ants_applywarp_T1, [(('forward_transforms',reverse_order_transforms),'transforms')]),
+                            (affine_registration, ants_applywarp_brain, [(('forward_transforms',reverse_order_transforms),'transforms')]),
+                            (affine_registration, ants_applywarp_wm, [(('forward_transforms',reverse_order_transforms),'transforms')]),
+                            (affine_registration, ants_applywarp_rois, [(('forward_transforms',reverse_order_transforms),'transforms')]),
+                            (affine_registration, ants_applywarp_pves, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             ])
 
             flow.connect([
