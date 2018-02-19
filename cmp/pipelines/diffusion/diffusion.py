@@ -37,6 +37,7 @@ except ImportError:
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
+from nipype.interfaces.utility import Merge
 from nipype import config, logging
 from nipype.caching import Memory
 from pyface.api import ImageResource
@@ -530,7 +531,7 @@ class DiffusionPipeline(Pipeline):
 
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
-        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals','T1','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volumes']), name='datasource')
+        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals','T1','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5']), name='datasource')
         datasource.inputs.base_directory = deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
@@ -539,9 +540,14 @@ class DiffusionPipeline(Pipeline):
                                                 T1='anat/'+self.subject+'_T1w_head.nii.gz',brain='anat/'+self.subject+'_T1w_brain.nii.gz',brain_mask='anat/'+self.subject+'_T1w_brainmask.nii.gz',
                                                 wm_mask_file='anat/'+self.subject+'_T1w_class-WM.nii.gz',wm_eroded='anat/'+self.subject+'_T1w_class-WM.nii.gz',
                                                 brain_eroded='anat/'+self.subject+'_T1w_brainmask.nii.gz',csf_eroded='anat/'+self.subject+'_T1w_class-CSF.nii.gz',
-                                                roi_volumes='anat/'+self.subject+'_T1w_parc_scale*.nii.gz')
+                                                roi_volume_s1='anat/'+self.subject+'_T1w_parc_scale1.nii.gz',roi_volume_s2='anat/'+self.subject+'_T1w_parc_scale2.nii.gz',roi_volume_s3='anat/'+self.subject+'_T1w_parc_scale3.nii.gz',
+                                                roi_volume_s4='anat/'+self.subject+'_T1w_parc_scale4.nii.gz',roi_volume_s5='anat/'+self.subject+'_T1w_parc_scale5.nii.gz')
+        # datasource.inputs.field_template_args = dict(diffusion=[], bvecs=[], bvals=[],T1=[],brain=[],brain_mask=[],
+        #                                         wm_mask_file=[],wm_eroded=[],brain_eroded=[],csf_eroded=[],
+        #                                         roi_volumes=[['%s'%self.subject],[1,2,3,4,5]])
         #datasource.inputs.field_template_args = dict(T1=[['subject']], T2=[['subject']], diffusion=[['subject', ['subject']]], bvecs=[['subject', ['subject']]], bvals=[['subject', ['subject']]])
         datasource.inputs.sort_filelist=True
+
         #datasource.inputs.subject = self.subject
 
         # Data sinker for output
@@ -628,13 +634,22 @@ class DiffusionPipeline(Pipeline):
         #                                            ("outputnode.atlas_info","atlas_info")]),
         #               ])
 
+        merge_roi_volumes = pe.Node(interface=Merge(5),name='merge_roi_volumes')
+
+        def remove_non_existing_scales(roi_volumes):
+            out_roi_volumes = []
+            for vol in roi_volumes:
+                if vol != None: out_roi_volumes.append(vol)
+            return out_roi_volumes
+
+        diffusion_flow.connect([
+                      (datasource,merge_roi_volumes,[("roi_volume_s1","in1"),("roi_volume_s2","in2"),("roi_volume_s3","in3"),("roi_volume_s4","in4"),("roi_volume_s5","in5")])
+                      ])
+
         diffusion_flow.connect([
                       (datasource,diffusion_inputnode,[("diffusion","diffusion"),("bvecs","bvecs"),("bvals","bvals")]),
-                      (datasource,diffusion_inputnode,[("T1","T1"),
-                                                   ("brain","brain"),
-                                                   ("brain_mask","brain_mask"),
-                                                   ("wm_mask_file","wm_mask_file"),
-                                                   ( "roi_volumes","roi_volumes")])
+                      (datasource,diffusion_inputnode,[("T1","T1"),("brain","brain"),("brain_mask","brain_mask"),("wm_mask_file","wm_mask_file")]), #,( "roi_volumes","roi_volumes")])
+                      (merge_roi_volumes,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_volumes")])
                                                 #    ("parcellation_scheme","parcellation_scheme"),
                                                 #    ("atlas_info","atlas_info")]),
                       ])

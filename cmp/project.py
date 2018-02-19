@@ -495,6 +495,9 @@ class ProjectHandler(Handler):
                     # ui_info.ui.context["object"].anat_pipeline.flow = ui_info.ui.context["object"].anat_pipeline.create_pipeline_flow()
 
             loaded_project.dmri_available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','%s_diffusion_config.ini'%loaded_project.subject))]
+            print "loaded_project.dmri_available_config:"
+            print loaded_project.dmri_available_config
+
             if len(loaded_project.dmri_available_config) > 1:
                 loaded_project.dmri_available_config.sort()
                 loaded_project.dmri_config_to_load = loaded_project.dmri_available_config[0]
@@ -504,10 +507,11 @@ class ProjectHandler(Handler):
             else:
                 loaded_project.dmri_config_to_load = loaded_project.dmri_available_config[0]
 
-            if os.path.isfile(loaded_project.dmri_config_to_load):
-                print "Diffusion config to load: %s"%loaded_project.dmri_config_to_load
-                loaded_project.dmri_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_config.ini' % loaded_project.dmri_config_to_load)
-                print "Diffusion config file: %s"%loaded_project.dmri_config_file
+            print "Diffusion config to load: %s"%loaded_project.dmri_config_to_load
+            loaded_project.dmri_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_config.ini' % loaded_project.dmri_config_to_load)
+            print "Diffusion config file: %s"%loaded_project.dmri_config_file
+
+            if os.path.isfile(loaded_project.dmri_config_file):
 
                 loaded_project.process_type = get_dmri_process_detail(loaded_project,'Global','process_type')
                 loaded_project.diffusion_imaging_model = get_dmri_process_detail(loaded_project,'Global','diffusion_imaging_model')
