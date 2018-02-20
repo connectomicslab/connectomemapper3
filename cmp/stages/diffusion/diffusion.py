@@ -497,6 +497,7 @@ class DiffusionStage(Stage):
                     ])
 
         if self.config.tracking_processing_tool == 'Custom':
+            # FIXME make sure header of TRK / TCK are consistent with DWI
             custom_node = pe.Node(interface=util.IdentityInterface(fields=["custom_track_file"]),name="read_custom_track")
             custom_node.inputs.custom_track_file = self.config.custom_track_file
             if nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TrkFile:
