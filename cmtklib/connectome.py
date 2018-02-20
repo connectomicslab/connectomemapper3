@@ -797,6 +797,10 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
         # make final fiber labels as array
         final_fiberlabels_array = np.array(final_fiberlabels, dtype = np.int32)
 
+        total_fibers = 0
+        for u,v,d in G.edges_iter(data=True):
+            total_fibers += len(d['fiblist'])
+
         # update edges
         # measures to add here
         for u,v,d in G.edges_iter(data=True):
@@ -814,6 +818,8 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
             di['fiber_length_mean'] = float( np.mean(final_fiberlength_array[idx]) )
             di['fiber_length_median'] = float( np.median(final_fiberlength_array[idx]) )
             di['fiber_length_std'] = float( np.std(final_fiberlength_array[idx]) )
+
+            di['fiber_proportion'] = float((di['number_of_fibers'] / total_fibers) )
 
             # Compute density
             # density = (#fibers / mean_fibers_length) * (2 / (area_roi_u + area_roi_v))

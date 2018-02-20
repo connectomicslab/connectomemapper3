@@ -35,7 +35,7 @@ class ConnectomeConfig(HasTraits):
     probtrackx = Bool(False)
     compute_curvature = Bool(False)
     output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
-    connectivity_metrics = List(['Fiber number','Fiber length','Fiber density','ADC','gFA'], editor=CheckListEditor(values=['Fiber number','Fiber length','Fiber density','ADC','gFA'],cols=4))
+    connectivity_metrics = List(['Fiber number','Fiber length','Fiber density','Fiber proportion','Fiber proportion density','ADC','gFA'], editor=CheckListEditor(values=['Fiber number','Fiber length','Fiber density','Fiber proportion','Fiber proportion density','ADC','gFA'],cols=4))
     log_visualization = Bool(True)
     subject = Str
 
@@ -240,6 +240,8 @@ class ConnectomeStage(Stage):
                         self.inspect_outputs_dict[con_name+' - fiber length std'] = ["showmatrix_gpickle",mat, "fiber_length_std", "False", self.config.subject+' - '+con_name+' - fiber length std', map_scale]
                     if any('Fiber density' in m for m in self.config.connectivity_metrics):
                         self.inspect_outputs_dict[con_name+' - fiber density'] = ["showmatrix_gpickle",mat, "fiber_density", "False", self.config.subject+' - '+con_name+' - fiber density', map_scale]
+                    if any('Fiber proportion' in m for m in self.config.connectivity_metrics):
+                        self.inspect_outputs_dict[con_name+' - fiber proportion'] = ["showmatrix_gpickle",mat, "fiber_proportion", "False", self.config.subject+' - '+con_name+' - fiber proportion', map_scale]
                     if any('gFA' in m for m in self.config.connectivity_metrics):
                         self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA mean', map_scale]
                         self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",mat, "FA_median", "False",self.config.subject+' - '+con_name+' - gFA median', map_scale]
@@ -262,6 +264,8 @@ class ConnectomeStage(Stage):
                             self.inspect_outputs_dict[con_name+' - fiber length median'] = ["showmatrix_gpickle",mat, "fiber_length_median", "False", self.config.subject+' - '+con_name+' - fiber length median', map_scale]
                         if any('Fiber density' in m for m in self.config.connectivity_metrics):
                             self.inspect_outputs_dict[con_name+' - fiber density'] = ["showmatrix_gpickle",mat, "fiber_density", "False", self.config.subject+' - '+con_name+' - fiber density', map_scale]
+                        if any('Fiber proportion' in m for m in self.config.connectivity_metrics):
+                            self.inspect_outputs_dict[con_name+' - fiber proportion'] = ["showmatrix_gpickle",mat, "fiber_proportion", "False", self.config.subject+' - '+con_name+' - fiber proportion', map_scale]
                         if any('gFA' in m for m in self.config.connectivity_metrics):
                             self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA mean', map_scale]
                             self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",mat, "FA_std", "False", self.config.subject+' - '+con_name+' - gFA std', map_scale]
