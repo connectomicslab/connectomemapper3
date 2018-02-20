@@ -798,8 +798,13 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
         final_fiberlabels_array = np.array(final_fiberlabels, dtype = np.int32)
 
         total_fibers = 0
+        total_volume = 0
+        u_old = -1
         for u,v,d in G.edges_iter(data=True):
             total_fibers += len(d['fiblist'])
+            if u != u_old:
+                total_volume += G.node[int(u)]['roi_volume']
+            u_old = u
 
         # update edges
         # measures to add here
@@ -819,11 +824,12 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
             di['fiber_length_median'] = float( np.median(final_fiberlength_array[idx]) )
             di['fiber_length_std'] = float( np.std(final_fiberlength_array[idx]) )
 
-            di['fiber_proportion'] = float((di['number_of_fibers'] / total_fibers) )
+            di['fiber_proportion'] = float(100.0*(di['number_of_fibers'] / float(total_fibers)))
 
             # Compute density
             # density = (#fibers / mean_fibers_length) * (2 / (area_roi_u + area_roi_v))
-            di['fiber_density'] = float( (di['number_of_fibers'] / di['fiber_length_mean']) * (2 / G.node[int(u)]['roi_volume']+G.node[int(v)]['roi_volume']) )
+            di['fiber_density'] = float( (float(di['number_of_fibers']) / float(di['fiber_length_mean'])) * float(2.0 / (G.node[int(u)]['roi_volume']+G.node[int(v)]['roi_volume'])) )
+            di['normalized_fiber_density'] = float( ((float(di['number_of_fibers'])/float(total_fibers)) / float(di['fiber_length_mean'])) * ( (2.0 * float(total_volume)) / (G.node[int(u)]['roi_volume']+G.node[int(v)]['roi_volume']) ) )
 
             # this is indexed into the fibers that are valid in the sense of touching start
             # and end roi and not going out of the volume
