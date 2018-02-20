@@ -150,11 +150,11 @@ class DiffusionConfig(HasTraits):
             # self.recon_processing_tool_editor = ['Dipy','MRtrix']
         elif new == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = new
-            self.recon_processing_tool = new
             self.recon_processing_tool_editor = ['Dipy']
-        else:
             self.recon_processing_tool = new
+        else:
             self.recon_processing_tool_editor = ['Custom']
+            self.recon_processing_tool = new
 
 
     def _diffusion_imaging_model_changed(self, new):
