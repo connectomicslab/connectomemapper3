@@ -585,7 +585,7 @@ class DiffusionPipeline(Pipeline):
                                         ('fast__pve_1_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-GM_pve.nii.gz'),
                                         ('fast__pve_2_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-WM_pve.nii.gz'),
 
-                                        ('connectome',self.subject+'_dwi_connectome'),
+                                        ('connectome_'+self.subject+'_T1w_parc',self.subject+'_dwi_connectome'),
                                         ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
                                         ('dwi.bval',self.subject+'_dwi.bval'),
                                         ('dwi.bvec',self.subject+'_dwi.bvec'),
@@ -602,8 +602,8 @@ class DiffusionPipeline(Pipeline):
                                         ('diffusion_preproc_resampled.nii.gz',self.subject+'_dwi_preproc.nii.gz'),
                                         ('endpoints',self.subject+'_tract_endpoints'),
                                         ('filtered_fiberslabel',self.subject+'_dwi_tract_fiberslabel_filt'),
-                                        ('final_fiberlabels',self.subject+'_dwi_tract_fiberlabels_filt'),
-                                        ('final_fiberslength',self.subject+'_dwi_tract_fiberslength_filt'),
+                                        ('final_fiberlabels_'+self.subject+'_T1w_parc',self.subject+'_dwi_tract_fiberlabels_filt'),
+                                        ('final_fiberslength_'+self.subject+'_T1w_parc',self.subject+'_dwi_tract_fiberslength_filt'),
                                         ('streamline_final',self.subject+'_dwi_tract_filt'),
                                         ('_trackvis0/converted',self.subject+'_dwi_tract'),#MRtrix tracts
                                         ('diffusion_preproc_resampled_tracked',self.subject+'_dwi_tract') #Dipy tracts
