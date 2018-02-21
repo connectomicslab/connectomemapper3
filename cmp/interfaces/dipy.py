@@ -267,8 +267,15 @@ class CSD(DipyDiffusionInterface):
                 IFLOGGER.warn(('Estimated response is not prolate enough. '
                                'Ratio=%0.3f.') % ratio)
         else:
-            response, _, counts = auto_response(gtab, data, fa_thr=self.inputs.fa_thresh, return_number_of_voxels=True)
+            response, ratio, counts = auto_response(gtab, data, fa_thr=0.5, return_number_of_voxels=True)
+            IFLOGGER.info("response: ")
+            IFLOGGER.info(response)
+            IFLOGGER.info("ratio: %g"%ratio)
             IFLOGGER.info("nbr_voxel_used: %g"%counts)
+
+            if abs(ratio - 0.2) > 0.1:
+                IFLOGGER.warn(('Estimated response is not prolate enough. '
+                               'Ratio=%0.3f.') % ratio)
 
         sphere = get_sphere('symmetric724')
         csd_model = ConstrainedSphericalDeconvModel(gtab, response, sh_order=self.inputs.sh_order, reg_sphere=sphere, lambda_=np.sqrt(1. / 2))

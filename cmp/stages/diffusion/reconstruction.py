@@ -553,7 +553,7 @@ def create_dipy_recon_flow(config):
 
     # Compute single fiber voxel mask
     dipy_erode = pe.Node(interface=Erode(out_filename="wm_mask_resampled.nii.gz"),name="dipy_erode")
-    dipy_erode.inputs.number_of_passes = 3
+    dipy_erode.inputs.number_of_passes = 1
     dipy_erode.inputs.filtertype = 'erode'
 
     flow.connect([
@@ -708,7 +708,7 @@ def create_mrtrix_recon_flow(config):
         print "CSD true"
         # Compute single fiber voxel mask
         mrtrix_erode = pe.Node(interface=Erode(out_filename='wm_mask_res_eroded.nii.gz'),name="mrtrix_erode")
-        mrtrix_erode.inputs.number_of_passes = 3
+        mrtrix_erode.inputs.number_of_passes = 1
         mrtrix_erode.inputs.filtertype = 'erode'
         mrtrix_mul_eroded_FA = pe.Node(interface=MRtrix_mul(),name='mrtrix_mul_eroded_FA')
         mrtrix_mul_eroded_FA.inputs.out_filename = "diffusion_resampled_tensor_FA_masked.mif"
