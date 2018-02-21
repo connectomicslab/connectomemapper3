@@ -281,12 +281,33 @@ class CSD(DipyDiffusionInterface):
 
         if self.inputs.save_shm_coeff:
             # isphere = get_sphere('symmetric724')
+            from dipy.direction import peaks_from_model
             IFLOGGER.info('Fitting CSD model')
-            csd_fit = csd_model.fit(data, msk)
+            csd_peaks = peaks_from_model(model=csd_model,
+                             data=data,
+                             sphere=sphere,
+                             relative_peak_threshold=.5,
+                             min_separation_angle=25,
+                             mask=msk,
+                             return_sh=True,
+                             return_odf=False,
+                             normalize_peaks=True,
+                             npeaks=3,
+                             parallel=False,
+                             nbr_processes=None)
             # fods = csd_fit.odf(sphere)
             # IFLOGGER.info(fods)
             # IFLOGGER.info(fods.shape)
-            nb.Nifti1Image( csd_fit.shm_coeff, img.affine,None).to_filename(self._gen_filename('shm_coeff'))
+            IFLOGGER.info('Save Spherical Harmonics image')
+            nb.Nifti1Image( csd_peaks.shm_coeff, img.affine,None).to_filename(self._gen_filename('shm_coeff'))
+
+            from dipy.viz import actor, window
+            ren = window.Renderer()
+            ren.add(actor.peak_slicer(csd_peaks.peak_dirs,
+                                      csd_peaks.peak_values,
+                                      colors=None))
+
+            window.record(ren, out_path=self._gen_filename('csd_direction_field', ext='.png'), size=(900, 900))
 
         return runtime
 
@@ -709,7 +730,7 @@ class DirectionGetterTractography(DipyBaseInterface):
                        mask=tmsk,
                        return_sh=True,
                        #sh_basis_type=args.basis,
-                       sh_order=8,
+                       sh_order=6,
                        normalize_peaks=False, ##changed
                        parallel=True)
 

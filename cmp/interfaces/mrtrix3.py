@@ -641,7 +641,7 @@ class EstimateResponseForSHInputSpec(CommandLineInputSpec):
     mask_image = File(exists=True, mandatory=True, argstr='-mask %s', position=-1, desc='only perform computation within the specified binary brain mask image')
     out_filename = File(genfile=True, argstr='%s', position=3, desc='Output filename')
     encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2, desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
-    maximum_harmonic_order = traits.Float(argstr='-lmax %s', position=-3, desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
+    maximum_harmonic_order = traits.Int(argstr='-lmax %s', position=-3, desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     # normalise = traits.Bool(argstr='-normalise', desc='normalise the DW signal to the b=0 image')
 
     quiet = traits.Bool(argstr='-quiet', desc='Do not display information messages or progress status.')

@@ -159,7 +159,7 @@ class Dipy_recon_config(HasTraits):
 
 class MRtrix_recon_config(HasTraits):
     # gradient_table = File
-    # flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
+    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
     local_model = Bool(True)
     lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
@@ -168,7 +168,7 @@ class MRtrix_recon_config(HasTraits):
     recon_mode = Str
 
     traits_view = View(#Item('gradient_table',label='Gradient table (x,y,z,b):'),
-                       #Item('flip_table_axis',style='custom',label='Flip table:'),
+                       Item('flip_table_axis',style='custom',label='Flip gradient table:'),
                        #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
 		       #Item('b_value'),
 		       #Item('b0_volumes'),
@@ -658,26 +658,26 @@ def create_mrtrix_recon_flow(config):
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","ADC","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
 
     # Flip gradient table
-    # flip_table = pe.Node(interface=flipTable(),name='flip_table')
+    flip_table = pe.Node(interface=flipTable(),name='flip_table')
 
-    # flip_table.inputs.flipping_axis = config.flip_table_axis
-    # flip_table.inputs.delimiter = ' '
-    # flip_table.inputs.header_lines = 0
-    # flip_table.inputs.orientation = 'v'
-    # flow.connect([
-    #             (inputnode,flip_table,[("grad","table")]),
-    #             (flip_table,outputnode,[("table","grad")])
-    #             ])
+    flip_table.inputs.flipping_axis = config.flip_table_axis
+    flip_table.inputs.delimiter = ' '
+    flip_table.inputs.header_lines = 0
+    flip_table.inputs.orientation = 'v'
     flow.connect([
-                (inputnode,outputnode,[("grad","grad")])
+                (inputnode,flip_table,[("grad","table")]),
+                (flip_table,outputnode,[("table","grad")])
                 ])
+    # flow.connect([
+    #             (inputnode,outputnode,[("grad","grad")])
+    #             ])
 
     # Tensor
     mrtrix_tensor = pe.Node(interface=DWI2Tensor(),name='mrtrix_make_tensor')
 
     flow.connect([
 		(inputnode, mrtrix_tensor,[('diffusion_resampled','in_file')]),
-        (inputnode,mrtrix_tensor,[("grad","encoding_file")]),
+        (flip_table,mrtrix_tensor,[("table","encoding_file")]),
 		])
 
     # Tensor -> FA map
@@ -703,6 +703,7 @@ def create_mrtrix_recon_flow(config):
 
     # Constrained Spherical Deconvolution
     if config.local_model:
+        print "CSD true"
         # Compute single fiber voxel mask
         mrtrix_erode = pe.Node(interface=Erode(out_filename='wm_mask_res_eroded.nii.gz'),name="mrtrix_erode")
         mrtrix_erode.inputs.number_of_passes = 3
@@ -720,15 +721,15 @@ def create_mrtrix_recon_flow(config):
 		    ])
         # Compute single fiber response function
         mrtrix_rf = pe.Node(interface=EstimateResponseForSH(),name="mrtrix_rf")
-        if config.lmax_order != 'Auto':
-            mrtrix_rf.inputs.maximum_harmonic_order = config.lmax_order
+        #if config.lmax_order != 'Auto':
+        mrtrix_rf.inputs.maximum_harmonic_order = 6 #int(config.lmax_order)
 
         mrtrix_rf.inputs.algorithm='tournier'
         #mrtrix_rf.inputs.normalise = config.normalize_to_B0
         flow.connect([
 		    (inputnode,mrtrix_rf,[("diffusion_resampled","in_file")]),
 		    (mrtrix_thr_FA,mrtrix_rf,[("thresholded","mask_image")]),
-            (inputnode,mrtrix_rf,[("grad","encoding_file")]),
+            (flip_table,mrtrix_rf,[("table","encoding_file")]),
 		    ])
 
         # Perform spherical deconvolution
@@ -740,7 +741,7 @@ def create_mrtrix_recon_flow(config):
 		    (mrtrix_rf,mrtrix_CSD,[('response','response_file')]),
 		    (mrtrix_rf,outputnode,[('response','RF')]),
 		    (inputnode,mrtrix_CSD,[("wm_mask_resampled",'mask_image')]),
-            (inputnode,mrtrix_CSD,[("grad","encoding_file")]),
+            (flip_table,mrtrix_CSD,[("table","encoding_file")]),
 		    (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
 		    ])
     else:

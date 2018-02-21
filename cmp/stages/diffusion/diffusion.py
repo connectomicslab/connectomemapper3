@@ -146,20 +146,22 @@ class DiffusionConfig(HasTraits):
     def _tracking_processing_tool_changed(self,new):
         if new == 'MRtrix':
             self.mrtrix_recon_config.tracking_processing_tool = new
+            # self.recon_processing_tool_editor = ['Dipy','MRtrix']
             # self.recon_processing_tool = new
             # self.recon_processing_tool_editor = ['Dipy','MRtrix']
         elif new == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = new
-            self.recon_processing_tool_editor = ['Dipy']
-            self.recon_processing_tool = new
-        else:
-            self.recon_processing_tool_editor = ['Custom']
-            self.recon_processing_tool = new
+            # self.recon_processing_tool_editor = ['Dipy']
+            # self.recon_processing_tool = new
+        # else:
+            # self.recon_processing_tool_editor = ['Custom']
+            # self.recon_processing_tool = new
 
 
     def _diffusion_imaging_model_changed(self, new):
         self.dtk_recon_config.imaging_model = new
-        #self.mrtrix_recon_config.imaging_model = new
+        self.mrtrix_recon_config.imaging_model = new
+        self.dipy_recon_config.imaging_model = new
         #self.camino_recon_config.diffusion_imaging_model = new
         self.dtk_tracking_config.imaging_model = new
         self.dtb_tracking_config.imaging_model = new
@@ -168,15 +170,15 @@ class DiffusionConfig(HasTraits):
             #self.processing_tool = 'Dipy'
             #self.processing_tool_editor = ['Dipy']
             self.recon_processing_tool = 'Dipy'
-            self.recon_processing_tool_editor = ['Dipy']
+            self.recon_processing_tool_editor = ['Dipy','Custom']
             self.tracking_processing_tool = 'Dipy'
-            self.tracking_processing_tool_editor = ['Dipy']
+            self.tracking_processing_tool_editor = ['Dipy','Custom']
             self.diffusion_model_editor = ['Deterministic','Probabilistic']
         else:
             # self.processing_tool_editor = ['DTK','MRtrix','Camino','FSL','Gibbs']
             #self.processing_tool_editor = ['Dipy','MRtrix']
-            self.recon_processing_tool_editor = ['Dipy','MRtrix']
-            self.tracking_processing_tool_editor = ['Dipy','MRtrix']
+            self.recon_processing_tool_editor = ['Dipy','MRtrix','Custom']
+            self.tracking_processing_tool_editor = ['Dipy','MRtrix','Custom']
             #if self.processing_tool == 'DTK':
             #    self.diffusion_model_editor = ['Deterministic']
             #else:
@@ -208,11 +210,13 @@ class DiffusionConfig(HasTraits):
 
     def _recon_processing_tool_changed(self, new):
         print "recon_processing_tool_changed"
-        self.tracking_processing_tool = new
+        # self.tracking_processing_tool = new
         if new == 'Dipy':
             self.tracking_processing_tool_editor = ['Dipy','MRtrix','Custom']
-        else:
-            self.tracking_processing_tool_editor = ['Dipy','Custom']
+        elif new == 'MRtrix':
+            self.tracking_processing_tool_editor = ['MRtrix','Custom']
+        elif new == 'Custom':
+            self.tracking_processing_tool_editor = ['Custom']
 
     def _diffusion_model_changed(self,new):
         # self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
@@ -427,6 +431,10 @@ class DiffusionStage(Stage):
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'),('outputnode.grad','inputnode.grad')]),
                         (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
 			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
+                        ])
+
+            flow.connect([
+                        (track_flow,outputnode,[('outputnode.track_file','track_file')])
                         ])
 
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'Dipy':
