@@ -608,6 +608,8 @@ def create_dipy_recon_flow(config):
         if config.lmax_order != 'Auto':
             dipy_CSD.inputs.sh_order = config.lmax_order
 
+        dipy_CSD.inputs.fa_thresh = config.single_fib_thr
+
         flow.connect([
                 (inputnode, dipy_CSD,[('diffusion_resampled','in_file')]),
                 (inputnode, dipy_CSD,[('bvals','in_bval')]),

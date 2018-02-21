@@ -177,10 +177,11 @@ class DTIEstimateResponseSH(DipyDiffusionInterface):
             outputs["{}_file".format(metric)] = self._gen_filename(metric)
         return outputs
 
-
 class CSDInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute tensors'))
     response = File(exists=True, desc=('single fiber estimated response'))
+    fa_thresh = traits.Float(0.7, usedefault=True,
+                            desc=('FA threshold used for response estimation'))
     sh_order = traits.Int(8, usedefault=True,
                           desc=('maximal shperical harmonics order'))
     save_fods = traits.Bool(True, usedefault=True,
@@ -266,7 +267,7 @@ class CSD(DipyDiffusionInterface):
                 IFLOGGER.warn(('Estimated response is not prolate enough. '
                                'Ratio=%0.3f.') % ratio)
         else:
-            response, _, counts = auto_response(gtab, data, fa_thr=0.7, return_number_of_voxels=True)
+            response, _, counts = auto_response(gtab, data, fa_thr=self.inputs.fa_thresh, return_number_of_voxels=True)
             IFLOGGER.info("nbr_voxel_used: %g"%counts)
 
         sphere = get_sphere('symmetric724')
