@@ -47,7 +47,7 @@ if __name__ == "__main__":
             b = c
         else:
             b = bb
-        title("%s (#fibers: %i)" (sys.argv[4],b.sum()))
+        title("%s (#fibers: %i)"%(sys.argv[4],b.sum()))
         imshow(b, interpolation='nearest',cmap=cm.jet, vmin = b.min(), vmax=b.max())
         show()
     elif len(sys.argv) == 6 and os.path.exists(sys.argv[1]):
@@ -66,7 +66,7 @@ if __name__ == "__main__":
             b = c
         else:
             b = bb
-        title("%s (#fibers: %i)" (sys.argv[4],b.sum()))
+        title("%s (#fibers: %i)"%(sys.argv[4],b.sum()))
         print "sys.argv[5]==%s" % sys.argv[5]
         if sys.argv[5]=="log":
             print "log scaling..."
