@@ -49,6 +49,7 @@ class SegmentationConfig(HasTraits):
     freesurfer_subject_id = Str
     freesurfer_args = Str
     white_matter_mask = File(exist=True)
+
     traits_view = View(Item('seg_tool',label="Segmentation tool"),
                        Group(
                         HGroup('make_isotropic',Item('isotropic_vox_size',label="Voxel size (mm)",visible_when='make_isotropic')),
@@ -64,6 +65,7 @@ class SegmentationConfig(HasTraits):
                         visible_when="seg_tool=='Freesurfer'"),
                        Group(
                         'white_matter_mask',
+                        Item('brain_mask_path',label='Brain mask'),
                         visible_when='seg_tool=="Custom segmentation"')
                         )
 
@@ -89,8 +91,8 @@ class SegmentationStage(Stage):
         self.config.ants_templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz'))
         self.config.ants_probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz'))
         self.config.ants_regmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumMask.nii.gz'))
-        self.inputs = ["T1"]
-        self.outputs = ["subjects_dir","subject_id","custom_wm_mask"]
+        self.inputs = ["T1","brain_mask"]
+        self.outputs = ["subjects_dir","subject_id","custom_wm_mask","brain_mask","brain"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         if self.config.seg_tool == "Freesurfer":
@@ -231,6 +233,16 @@ class SegmentationStage(Stage):
 
         elif self.config.seg_tool == "Custom segmentation":
 
+            apply_mask = pe.Node(interface=fsl.ApplyMask(),name='apply_mask')
+            apply_mask.inputs.mask_file = self.config.brain_mask_path
+            apply_mask.inputs.out_file = 'brain.nii.gz'
+
+            flow.connect([
+                        (inputnode,apply_mask,[("T1","in_file")]),
+                        (apply_mask,outputnode,[("out_file","brain")]),
+                        ])
+
+            outputnode.inputs.brain_mask = self.config.brain_mask_path
             outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
 
     def define_inspect_outputs(self):

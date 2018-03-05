@@ -349,7 +349,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
 
         #Dataname substitutions in order to comply with BIDS derivatives specifications
-        sinker.inputs.substitutions = [ ('T1', self.subject+'_T1w_head'),
+        sinker.inputs.substitutions = [ (self.subject+'_T1w.nii.gz', self.subject+'_T1w_head.nii.gz'),
                                         ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
                                         ('brainmask_eroded.nii.gz', self.subject+'_T1w_brainmask_eroded.nii.gz'),
                                         ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
@@ -358,6 +358,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                         ('csf_mask_eroded.nii.gz',self.subject+'_T1w_class-CSF_eroded.nii.gz'),
                                         #('gm_mask',self.subject+'_T1w_class-GM'),
                                         #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
+                                        ('T1w_class-GM.nii.gz',self.subject+'_T1w_class-GM.nii.gz'),
                                         ('ROIv_HR_th_scale1.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
                                         ('ROIv_HR_th_scale2.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
                                         ('ROIv_HR_th_scale3.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
@@ -382,7 +383,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         anat_flow.add_nodes([anat_inputnode,anat_outputnode])
 
         anat_flow.connect([
-                        (datasource,anat_inputnode,[("T1","T1")])
+                        (datasource,anat_inputnode,[("T1","T1")]),
+                        (anat_inputnode,anat_outputnode,[("T1","T1")])
                         ])
 
         if self.stages['Segmentation'].enabled:
@@ -396,8 +398,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
             seg_flow = self.create_stage_flow("Segmentation")
 
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                anat_flow.connect([(anat_inputnode,seg_flow, [('T1','inputnode.T1')])])
+            anat_flow.connect([(anat_inputnode,seg_flow, [('T1','inputnode.T1')])])
+
+            if self.stages['Segmentation'].config.seg_tool == "Custom segmentation":
+                anat_flow.connect([
+                            (seg_flow,anat_outputnode,[("outputnode.brain_mask","brain_mask"),
+                                                         ("outputnode.brain","brain")])
+                            ])
 
             anat_flow.connect([
                         (seg_flow,anat_outputnode,[("outputnode.subjects_dir","subjects_dir"),
@@ -414,25 +421,41 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 anat_flow.connect([
                                      (seg_flow,parc_flow,[("outputnode.custom_wm_mask","inputnode.custom_wm_mask")])
                                      ])
-            anat_flow.connect([
-                                 (parc_flow,anat_outputnode,[("outputnode.wm_mask_file","wm_mask_file"),
+            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
+                anat_flow.connect([
+                                    (parc_flow,anat_outputnode,[("outputnode.wm_mask_file","wm_mask_file"),
                                                                ("outputnode.parcellation_scheme","parcellation_scheme"),
                                                                ("outputnode.atlas_info","atlas_info"),
                                                                ("outputnode.roi_volumes","roi_volumes"),
                                                                ("outputnode.wm_eroded","wm_eroded"),
+                                                               ("outputnode.gm_mask_file","gm_mask_file"),
                                                                ("outputnode.csf_eroded","csf_eroded"),
                                                                ("outputnode.brain_eroded","brain_eroded"),
                                                                ("outputnode.T1","T1"),
                                                                ("outputnode.brain_mask","brain_mask"),
                                                                ("outputnode.brain","brain"),
                                                                ])
-                                 ])
+                                ])
+            else:
+                anat_flow.connect([
+                                    (parc_flow,anat_outputnode,[("outputnode.wm_mask_file","wm_mask_file"),
+                                                               ("outputnode.parcellation_scheme","parcellation_scheme"),
+                                                               ("outputnode.atlas_info","atlas_info"),
+                                                               ("outputnode.roi_volumes","roi_volumes"),
+                                                               ("outputnode.wm_eroded","wm_eroded"),
+                                                               ("outputnode.gm_mask_file","gm_mask_file"),
+                                                               ("outputnode.csf_eroded","csf_eroded"),
+                                                               ("outputnode.brain_eroded","brain_eroded"),
+                                                               ]),
+                                ])
+
 
         anat_flow.connect([
                         (anat_outputnode,sinker,[("T1","anat.@T1")]),
                         (anat_outputnode,sinker,[("brain","anat.@brain")]),
                         (anat_outputnode,sinker,[("brain_mask","anat.@brain_mask")]),
                         (anat_outputnode,sinker,[("wm_mask_file","anat.@wm_mask")]),
+                        (anat_outputnode,sinker,[("gm_mask_file","anat.@gm_mask")]),
                         (anat_outputnode,sinker,[("roi_volumes","anat.@roivs")])
                         ])
 

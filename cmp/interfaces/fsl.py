@@ -5,7 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 """ The FSL module provides functions for interfacing with FSL functions missing in nipype or modified
-""" 
+"""
 
 import os
 from glob import glob
@@ -14,12 +14,51 @@ import warnings
 import numpy as np
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
-from nipype.interfaces.base import (traits, TraitedSpec,CommandLineInputSpec, CommandLine, InputMultiPath, OutputMultiPath, File, Directory, 
+from nipype.interfaces.base import (traits, TraitedSpec,CommandLineInputSpec, CommandLine, InputMultiPath, OutputMultiPath, File, Directory,
                                     isdefined)
 from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
+
+class BinaryThresholdInputSpec(FSLCommandInputSpec):
+
+    in_file = File(position=2, argstr="%s", exists=True, mandatory=True,
+                desc="image to operate on")
+    thresh = traits.Float(mandatory=True, position=3, argstr="-thr %s",
+                          desc="threshold value")
+
+    binarize = traits.Bool(True, position=4, argstr='-bin')
+
+    out_file = File(genfile=True, mandatory=True, position=5, argstr="%s", desc="image to write", hash_files=False)
+
+
+class BinaryThresholdOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc="image written after calculations")
+
+
+class BinaryThreshold(FSLCommand):
+    """Use fslmaths to apply a threshold to an image in a variety of ways.
+
+    """
+    _cmd = "fslmaths"
+    input_spec = BinaryThresholdInputSpec
+    output_spec = BinaryThresholdOutputSpec
+    _suffix = "_thresh"
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = self.inputs.out_file
+        if not isdefined(self.inputs.out_file):
+            outputs["out_file"] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
+        outputs["out_file"] = os.path.abspath(outputs["out_file"])
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_file":
+            return self._list_outputs()["out_file"]
+        return None
 
 
 class MathsInput(FSLCommandInputSpec):
@@ -90,11 +129,11 @@ class OrientInputSpec(FSLCommandInputSpec):
 
     in_file = File(exists=True, mandatory=True, argstr="%s", position="2",
                    desc="input image")
-                   
-    _options_xor = ['get_orient', 'get_sform', 'get_qform', 'set_sform', 'set_qform', 'get_sformcode', 'get_qformcode', 
+
+    _options_xor = ['get_orient', 'get_sform', 'get_qform', 'set_sform', 'set_qform', 'get_sformcode', 'get_qformcode',
                     'set_sformcode', 'set_qformcode', 'copy_sform2qform', 'copy_qform2sform', 'delete_orient',
                     'force_radiological', 'force_neurological', 'swap_orient']
-    
+
     get_orient = traits.Bool(argstr="-getorient", position="1", xor=_options_xor, desc="gets FSL left-right orientation")
     get_sform = traits.Bool(argstr="-getsform", position="1", xor=_options_xor, desc="gets the 16 elements of the sform matrix")
     get_qform = traits.Bool(argstr="-getqform", position="1", xor=_options_xor, desc="gets the 16 elements of the qform matrix")
@@ -129,11 +168,11 @@ class OrientOutputSpec(TraitedSpec):
 class Orient(FSLCommand):
     """Use fslorient to get/set orientation information from an image's header.
 
-     Advanced tool that reports or sets the orientation information in a file. 
-     Note that only in NIfTI files can the orientation be changed - 
-     Analyze files are always treated as "radiological" (meaning that they could be 
-     simply rotated into the same alignment as the MNI152 standard images - equivalent 
-     to the appropriate sform or qform in a NIfTI file having a negative determinant). 
+     Advanced tool that reports or sets the orientation information in a file.
+     Note that only in NIfTI files can the orientation be changed -
+     Analyze files are always treated as "radiological" (meaning that they could be
+     simply rotated into the same alignment as the MNI152 standard images - equivalent
+     to the appropriate sform or qform in a NIfTI file having a negative determinant).
 
 
     """
@@ -149,14 +188,14 @@ class Orient(FSLCommand):
         if isdefined(self.inputs.copy_sform2qform) or isdefined(self.inputs.copy_qform2sform) or isdefined(self.inputs.delete_orient) or isdefined(self.inputs.force_radiological) or isdefined(self.inputs.force_neurological) or isdefined(self.inputs.swap_orient):
             outputs.out_file = self.inputs.in_file
             #outputs['out_file'] = self.inputs.in_file
-            
+
         # Get information
         if isdefined(self.inputs.get_orient):
             outputs.orient = info
         if isdefined(self.inputs.get_sform):
             outputs.sform = info
         if isdefined(self.inputs.get_qform):
-            outputs.qform= info        
+            outputs.qform= info
         if isdefined(self.inputs.get_sformcode):
             outputs.sformcode = info
         if isdefined(self.inputs.get_qformcode):
@@ -172,7 +211,7 @@ class EddyInputSpec(FSLCommandInputSpec):
     acqp = File(exists=True, desc='File containing acquisition parameters', argstr='--acqp=%s', position=3, mandatory=True)
     bvecs = File(exists=True, desc='File containing the b-vectors for all volumes in --imain', argstr='--bvecs=%s', position=4, mandatory=True)
     bvals = File(exists=True, desc='File containing the b-values for all volumes in --imain', argstr='--bvals=%s', position=5, mandatory=True)
-    out_file = File(desc='Basename for output', argstr='--out=%s', position=6, genfile=True, hash_files=False)  
+    out_file = File(desc='Basename for output', argstr='--out=%s', position=6, genfile=True, hash_files=False)
     verbose = traits.Bool(argstr='--verbose', position=7, desc="Display debugging messages.")
 
 class EddyOutputSpec(TraitedSpec):
@@ -181,7 +220,7 @@ class EddyOutputSpec(TraitedSpec):
 
 
 class Eddy(FSLCommand):
-    """ 
+    """
 
     Example
     -------
@@ -224,7 +263,7 @@ class Eddy(FSLCommand):
 
 
 class EddyOpenMP(FSLCommand):
-    """ 
+    """
 
     Example
     -------
@@ -512,16 +551,16 @@ class mapped_ProbTrackXInputSpec(FSLCommandInputSpec):
     force_dir = traits.Bool(True, desc='use the actual directory name given - i.e. ' +
                             'do not add + to make a new directory', argstr='--forcedir',
                             usedefault=True)
-    
+
 class mapped_ProbTrackXOutputSpec(TraitedSpec):
     matrix = File(exists=True, desc='matrix_seeds_to_all_targets file')
 
 class mapped_ProbTrackX(FSLCommand):
     input_spec = mapped_ProbTrackXInputSpec
     output_spec = mapped_ProbTrackXOutputSpec
-    
+
     _cmd = "probtrackx"
-    
+
     def _run_interface(self, runtime):
         for i in range(1, len(self.inputs.thsamples) + 1):
             _, _, ext = split_filename(self.inputs.thsamples[i - 1])
@@ -547,7 +586,7 @@ class mapped_ProbTrackX(FSLCommand):
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
-    
+
     def _format_arg(self, name, spec, value):
         if name == 'target_masks' and isdefined(value):
             fname = "targets.txt"

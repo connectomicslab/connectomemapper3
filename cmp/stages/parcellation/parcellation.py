@@ -86,6 +86,7 @@ class ParcellationStage(Stage):
             "wm_eroded",
             "csf_eroded",
             "brain_eroded",
+            "gm_mask_file",
     	       #"cc_unknown_file","ribbon_file","roi_files",
             "roi_volumes","parcellation_scheme","atlas_info"]
 
@@ -115,6 +116,17 @@ class ParcellationStage(Stage):
                         (temp_node,outputnode,[("atlas_info","atlas_info")]),
                         (inputnode,outputnode,[("custom_wm_mask","wm_mask_file")])
                         ])
+            import cmp.interfaces.fsl as fsl
+            threshold_roi = pe.Node(interface=fsl.BinaryThreshold(thresh=0.0,binarize=True,out_file='T1w_class-GM.nii.gz'),name='threshold_roi_bin')
+
+            def get_first(roi_volumes):
+                return roi_volumes
+
+            flow.connect([
+                        (temp_node,threshold_roi,[(("roi_volumes",get_first),"in_file")]),
+                        (threshold_roi,outputnode,[("out_file","gm_mask_file")]),
+                        ])
+
             if self.config.pipeline_mode == "fMRI":
                 erode_wm = pe.Node(interface=cmtk.Erode(),name="erode_wm")
                 flow.connect([
@@ -137,7 +149,7 @@ class ParcellationStage(Stage):
         print "parcellation scheme : %s" % self.config.parcellation_scheme
         print "atlas info : "
         print self.config.atlas_info
-        
+
         if self.config.parcellation_scheme != "Custom":
             parc_results_path = os.path.join(self.stage_dir,"%s_parcellation" % self.config.parcellation_scheme,"result_%s_parcellation.pklz" % self.config.parcellation_scheme)
             print "parc_results_path : %s" % parc_results_path
