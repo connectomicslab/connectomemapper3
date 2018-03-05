@@ -14,8 +14,38 @@ except ImportError:
 from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec,\
     TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 
+import nibabel as nib
+
+class ComputeSphereRadiusInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True)
+    dilation_radius = Float(mandatory=True)
+
+class ComputeSphereRadiusOutputSpec(TraitedSpec):
+    sphere_radius = Float
+
+class ComputeSphereRadius(BaseInterface):
+
+    input_spec = ComputeSphereRadiusInputSpec
+    output_spec = ComputeSphereRadiusOutputSpec
+
+    def _run_interface(self, runtime):
+        img = nib.load(self.inputs.in_file)
+        voxel_sizes = img.get_header().get_zooms()[:3]
+        min_size = 100
+        for voxel_size in voxel_sizes:
+            if voxel_size < min_size:
+                min_size = voxel_size
+        self.sphere_radius =  0.5*min_size + self.inputs.dilation_radius * min_size
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['sphere_radius'] = self.sphere_radius
+        return outputs
+
 class ExtractImageVoxelSizesInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
+
 
 class ExtractImageVoxelSizesOutputSpec(TraitedSpec):
     voxel_sizes = List(Int(),Int(),Int())
@@ -27,7 +57,7 @@ class ExtractImageVoxelSizes(BaseInterface):
 
     def _run_interface(self, runtime):
         img = nib.load(self.inputs.in_file)
-        self.voxel_sizes = img.get_zooms()[:3]
+        self.voxel_sizes = img.get_header().get_zooms()[:3]
         return runtime
 
     def _list_outputs(self):
