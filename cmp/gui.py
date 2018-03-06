@@ -210,14 +210,15 @@ class CMP_Project_Info(HasTraits):
     traits_view = QtView(Include('data_manager'))
 
     create_view = QtView( #Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
-                        Item('base_directory',label='BIDS dataset directory'),
-                        title='Select BIDS base directory ',
+                        Item('base_directory',label='Base directory'),
+                        title='BIDS dataset selection',
                         kind='livemodal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
     subject_view = QtView(Item('subject',label='Subject to be processed'),
                         kind='modal',
+                        title='Subject selection',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
@@ -251,8 +252,11 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    anat_select_config_to_load = QtView(Item('anat_config_to_load_msg',style='readonly',show_label=False),
-                                  Item('anat_config_to_load',style='custom',editor=EnumEditor(name='anat_available_config'),show_label=False),
+    anat_select_config_to_load = QtView(
+                                  Group(
+                                      Item('anat_config_to_load_msg',style='readonly',show_label=False),
+                                      Item('anat_config_to_load',style='custom',editor=EnumEditor(name='anat_available_config'),show_label=False),
+                                      ),
                                   title='Select configuration for anatomical pipeline',
                                   kind='modal',
                                   #style_sheet=style_sheet,
