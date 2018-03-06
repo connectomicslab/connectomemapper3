@@ -876,15 +876,25 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
             size_nodes = parval['number_of_regions']
             node_keys = G.nodes(data=True)[0][1].keys()
 
+            print "size_nodes : "
+            print size_nodes
+
+            print "Number of nodes : %i" % len(G)
+
             node_struct = {}
             for node_key in node_keys:
                 if node_key == 'dn_position':
                     node_arr = np.zeros([size_nodes,3],dtype=np.float)
                 else:
                     node_arr = np.zeros(size_nodes,dtype=np.object_)
+
                 node_n = 0
                 for _,node_data in G.nodes(data=True):
                     node_arr[node_n] = node_data[node_key]
+
+                    print " node_arr[%i]:" % node_n
+                    print node_arr[node_n]
+
                     node_n += 1
                 node_struct[node_key] = node_arr
 

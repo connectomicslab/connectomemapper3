@@ -588,7 +588,7 @@ class DiffusionPipeline(Pipeline):
                                         ('connectome_'+self.subject+'_T1w_parc',self.subject+'_dwi_connectome'),
                                         ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
                                         ('dwi.bval',self.subject+'_dwi.bval'),
-                                        ('dwi.bvec',self.subject+'_dwi.bvec'),
+                                        # ('dwi.bvec',self.subject+'_dwi.bvec'),
                                         ('diffusion_resampled_CSD.mif',self.subject+'_dwi_CSD.mif'),
                                         ('diffusion_resampled_CSD_tracked',self.subject+'_dwi_tract'),
                                         ('eddy_corrected.nii.gz.eddy_rotated_bvecs',self.subject+'_dwi_preproc.eddy_rotated_bvec'),

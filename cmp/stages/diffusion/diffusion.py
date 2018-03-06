@@ -87,8 +87,10 @@ class DiffusionConfig(HasTraits):
 			                 #Item('camino_tracking_config',style='custom',visible_when='processing_tool=="Camino"'),
                              #Item('fsl_tracking_config',style='custom',visible_when='processing_tool=="FSL"'),
                              #Item('gibbs_tracking_config',style='custom',visible_when='processing_tool=="Gibbs"'),
-                             Item('custom_track_file',visible_when='tracking_processing_tool=="Custom"'),
                              label='Tracking', show_border=True, show_labels=False),
+                        Group(
+                            Item('custom_track_file', style='simple'),
+                            visible_when='tracking_processing_tool=="Custom"'),
                        )
 
     # dipy_traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),

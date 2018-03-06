@@ -384,8 +384,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         anat_flow.connect([
                         (datasource,anat_inputnode,[("T1","T1")]),
-                        (anat_inputnode,anat_outputnode,[("T1","T1")])
                         ])
+
 
         if self.stages['Segmentation'].enabled:
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
@@ -403,7 +403,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if self.stages['Segmentation'].config.seg_tool == "Custom segmentation":
                 anat_flow.connect([
                             (seg_flow,anat_outputnode,[("outputnode.brain_mask","brain_mask"),
-                                                         ("outputnode.brain","brain")])
+                                                         ("outputnode.brain","brain")]),
+                            (anat_inputnode,anat_outputnode,[("T1","T1")])
                             ])
 
             anat_flow.connect([
@@ -448,6 +449,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                                ("outputnode.brain_eroded","brain_eroded"),
                                                                ]),
                                 ])
+                
+                if not self.stages['Segmentation'].enabled:
+                    anat_flow.connect([
+                                        (anat_inputnode,anat_outputnode,[("T1","T1")])
+                                    ])
 
 
         anat_flow.connect([

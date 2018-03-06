@@ -458,20 +458,21 @@ class ProjectHandler(Handler):
             #     loaded_project.config_file = os.path.join(loaded_project.base_directory,'derivatives','config.ini')
             # # Load new format: <process_type>_config.ini
             # else:
-            loaded_project.anat_available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
+            loaded_project.anat_available_config = [os.path.basename(s)[:-11].split("_")[0] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
             if len(loaded_project.anat_available_config) > 1:
                 loaded_project.anat_available_config.sort()
                 loaded_project.anat_config_to_load = loaded_project.anat_available_config[0]
                 anat_config_selected = loaded_project.configure_traits(view='anat_select_config_to_load')
+
                 if not anat_config_selected:
                     return 0
             else:
                 loaded_project.anat_config_to_load = loaded_project.anat_available_config[0]
 
-            loaded_project.subject = loaded_project.anat_config_to_load.split("_")[0]
+            loaded_project.subject = loaded_project.anat_config_to_load
 
             print "Anatomical config to load: %s"%loaded_project.anat_config_to_load
-            loaded_project.anat_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_config.ini' % loaded_project.anat_config_to_load)
+            loaded_project.anat_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_anatomical_config.ini' % loaded_project.anat_config_to_load)
             print "Anatomical config file: %s"%loaded_project.anat_config_file
 
             loaded_project.parcellation_scheme = get_anat_process_detail(loaded_project,'parcellation_stage','parcellation_scheme')
