@@ -28,6 +28,16 @@ style_sheet = '''
                 border-radius: 6px;
                 background-color: transparent;
                 min-width: 80px;
+                icon-size: 450px;
+                font: 12pt "Verdana";
+                margin: 3px 3px 3px 3px;
+                padding: 3px 3px;
+            }
+            QPushButton#Custom {
+                border: 0px solid lightgray;
+                border-radius: 6px;
+                background-color: transparent;
+                min-width: 400px;
                 font: 12pt "Verdana";
                 margin: 3px 3px 3px 3px;
                 padding: 3px 3px;
