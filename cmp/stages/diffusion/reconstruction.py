@@ -97,6 +97,7 @@ class DTK_recon_config(HasTraits):
 class Dipy_recon_config(HasTraits):
     imaging_model = Str
     # flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
+    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     # gradient_table = File
     local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
     local_model = Bool(True)
@@ -123,7 +124,7 @@ class Dipy_recon_config(HasTraits):
                           desc=('Small data for gradient table (time interval)'))
 
     traits_view = View(#Item('gradient_table',label='Gradient table (x,y,z,b):'),
-                       #Item('flip_table_axis',style='custom',label='Flip table:'),
+                       Item('flip_table_axis',style='custom',label='Flip bvecs:'),
                        #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
                #Item('b_value'),
                #Item('b0_volumes'),
@@ -491,18 +492,18 @@ def create_dtk_recon_flow(config):
     return flow
 
 class flipBvecInputSpec(BaseInterfaceInputSpec):
-    table = File(exists=True)
+    bvecs = File(exists=True)
     flipping_axis = List()
     delimiter = Str()
     header_lines = Int(0)
     orientation = Enum(['v','h'])
 
 class flipBvecOutputSpec(TraitedSpec):
-    table = File(exists=True)
+    bvecs_flipped = File(exists=True)
 
 class flipBvec(BaseInterface):
-    input_spec = flipTableInputSpec
-    output_spec = flipTableOutputSpec
+    input_spec = flipBvecInputSpec
+    output_spec = flipBvecOutputSpec
 
     def _run_interface(self,runtime):
         axis_dict = {'x':0, 'y':1, 'z':2}
@@ -537,19 +538,19 @@ class flipBvec(BaseInterface):
 def create_dipy_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled","bvals","bvecs"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","model","eigVec","RF","grad","mapmri_maps"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","model","eigVec","RF","grad","bvecs","mapmri_maps"],mandatory_inputs=True),name="outputnode")
 
-    # Flip gradient table
-    # flip_table = pe.Node(interface=flipTable(),name='flip_table')
+    #Flip gradient table
+    flip_bvecs = pe.Node(interface=flipBvec(),name='flip_bvecs')
 
-    # flip_table.inputs.flipping_axis = config.flip_table_axis
-    # flip_table.inputs.delimiter = ' '
-    # flip_table.inputs.header_lines = 0
-    # flip_table.inputs.orientation = 'v'
-    # flow.connect([
-    #             (inputnode,flip_table,[("grad","table")]),
-    #             (flip_table,outputnode,[("table","grad")])
-    #             ])
+    flip_bvecs.inputs.flipping_axis = config.flip_table_axis
+    flip_bvecs.inputs.delimiter = ' '
+    flip_bvecs.inputs.header_lines = 0
+    flip_bvecs.inputs.orientation = 'h'
+    flow.connect([
+                (inputnode,flip_bvecs,[("bvecs","bvecs")]),
+                (flip_bvecs,outputnode,[("bvecs_flipped","bvecs")])
+                ])
 
     # Compute single fiber voxel mask
     dipy_erode = pe.Node(interface=Erode(out_filename="wm_mask_resampled.nii.gz"),name="dipy_erode")
@@ -570,7 +571,7 @@ def create_dipy_recon_flow(config):
     flow.connect([
         (inputnode, dipy_tensor,[('diffusion_resampled','in_file')]),
         (inputnode, dipy_tensor,[('bvals','in_bval')]),
-        (inputnode, dipy_tensor,[('bvecs','in_bvec')]),
+        (flip_bvecs, dipy_tensor,[('bvecs_flipped','in_bvec')]),
         (dipy_erode, dipy_tensor,[('out_file','in_mask')])
         ])
 
@@ -613,7 +614,7 @@ def create_dipy_recon_flow(config):
         flow.connect([
                 (inputnode, dipy_CSD,[('diffusion_resampled','in_file')]),
                 (inputnode, dipy_CSD,[('bvals','in_bval')]),
-                (inputnode, dipy_CSD,[('bvecs','in_bvec')]),
+                (flip_bvecs, dipy_CSD,[('bvecs_flipped','in_bvec')]),
                 # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
                 (dipy_erode, dipy_CSD,[('out_file','in_mask')]),
                 #(dipy_tensor, dipy_CSD,[('response','response')]),
@@ -647,7 +648,7 @@ def create_dipy_recon_flow(config):
         flow.connect([
                 (inputnode, dipy_MAPMRI,[('diffusion_resampled','in_file')]),
                 (inputnode, dipy_MAPMRI,[('bvals','in_bval')]),
-                (inputnode, dipy_MAPMRI,[('bvecs','in_bvec')]),
+                (flip_bvecs, dipy_MAPMRI,[('bvecs_flipped','in_bvec')]),
                 (dipy_MAPMRI, maps_merge, [('rtop_file','in1'),('rtap_file','in2'),('rtpp_file','in3'),('msd_file','in4'),('qiv_file','in5'),('ng_file','in6'),('ng_perp_file','in7'),('ng_para_file','in8')])
                 ])
 

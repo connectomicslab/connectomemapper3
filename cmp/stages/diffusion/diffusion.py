@@ -412,7 +412,7 @@ class DiffusionStage(Stage):
                         (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
                         (recon_flow, track_flow,[('outputnode.model','inputnode.model')]),
                         (inputnode,track_flow,[('bvals','inputnode.bvals')]),
-                        (inputnode,track_flow,[('bvecs','inputnode.bvecs')]),
+                        (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
                         (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
                         (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
                         # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
