@@ -79,7 +79,7 @@ class ParcellateOutputSpec(TraitedSpec):
     white_matter_mask_file = File(desc='White matter mask file')
     #cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
     #                exists=True)
-    #ribbon_file = File(desc='Image file detailing the cortical ribbon',
+    ribbon_file = File(desc='Image file detailing the cortical ribbon',
     #                exists=True)
     #aseg_file = File(desc='Automated segmentation file converted from Freesurfer "subjects" directory',
     #                exists=True)
@@ -162,7 +162,7 @@ class Parcellate(BaseInterface):
 
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         #outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
-        #outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
+        outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
         #outputs['aseg_file'] = op.abspath('aseg.nii.gz')
 
         #outputs['roi_files'] = self._gen_outfilenames('ROI_HR_th')

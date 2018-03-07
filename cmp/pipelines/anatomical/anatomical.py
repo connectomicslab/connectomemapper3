@@ -349,27 +349,50 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
 
         #Dataname substitutions in order to comply with BIDS derivatives specifications
-        sinker.inputs.substitutions = [ (self.subject+'_T1w.nii.gz', self.subject+'_T1w_head.nii.gz'),
-                                        ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
-                                        ('brainmask_eroded.nii.gz', self.subject+'_T1w_brainmask_eroded.nii.gz'),
-                                        ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
-                                        ('fsmask_1mm.nii.gz',self.subject+'_T1w_class-WM.nii.gz'),
-                                        ('fsmask_1mm_eroded.nii.gz',self.subject+'_T1w_class-WM_eroded.nii.gz'),
-                                        ('csf_mask_eroded.nii.gz',self.subject+'_T1w_class-CSF_eroded.nii.gz'),
-                                        #('gm_mask',self.subject+'_T1w_class-GM'),
-                                        #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
-                                        ('T1w_class-GM.nii.gz',self.subject+'_T1w_class-GM.nii.gz'),
-                                        ('ROIv_HR_th_scale1.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
-                                        ('ROIv_HR_th_scale2.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
-                                        ('ROIv_HR_th_scale3.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
-                                        ('ROIv_HR_th_scale4.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
-                                        ('ROIv_HR_th_scale5.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
-                                        ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
-                                        ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
-                                        ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
-                                        ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
-                                        ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
-                                      ]
+        if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
+            sinker.inputs.substitutions = [ ('T1.nii.gz', self.subject+'_T1w_head.nii.gz'),
+                                            ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
+                                            ('brainmask_eroded.nii.gz', self.subject+'_T1w_brainmask_eroded.nii.gz'),
+                                            ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
+                                            ('fsmask_1mm.nii.gz',self.subject+'_T1w_class-WM.nii.gz'),
+                                            ('fsmask_1mm_eroded.nii.gz',self.subject+'_T1w_class-WM_eroded.nii.gz'),
+                                            ('csf_mask_eroded.nii.gz',self.subject+'_T1w_class-CSF_eroded.nii.gz'),
+                                            #('gm_mask',self.subject+'_T1w_class-GM'),
+                                            #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
+                                            ('T1w_class-GM.nii.gz',self.subject+'_T1w_class-GM.nii.gz'),
+                                            ('ROIv_HR_th_scale1.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
+                                            ('ROIv_HR_th_scale2.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
+                                            ('ROIv_HR_th_scale3.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
+                                            ('ROIv_HR_th_scale4.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
+                                            ('ROIv_HR_th_scale5.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
+                                            ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
+                                            ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
+                                            ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
+                                            ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
+                                            ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
+                                          ]
+        else:
+            sinker.inputs.substitutions = [ (self.subject+'_T1w.nii.gz', self.subject+'_T1w_head.nii.gz'),
+                                            ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
+                                            ('brainmask_eroded.nii.gz', self.subject+'_T1w_brainmask_eroded.nii.gz'),
+                                            ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
+                                            ('fsmask_1mm.nii.gz',self.subject+'_T1w_class-WM.nii.gz'),
+                                            ('fsmask_1mm_eroded.nii.gz',self.subject+'_T1w_class-WM_eroded.nii.gz'),
+                                            ('csf_mask_eroded.nii.gz',self.subject+'_T1w_class-CSF_eroded.nii.gz'),
+                                            #('gm_mask',self.subject+'_T1w_class-GM'),
+                                            #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
+                                            ('T1w_class-GM.nii.gz',self.subject+'_T1w_class-GM.nii.gz'),
+                                            ('ROIv_HR_th_scale1.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
+                                            ('ROIv_HR_th_scale2.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
+                                            ('ROIv_HR_th_scale3.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
+                                            ('ROIv_HR_th_scale4.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
+                                            ('ROIv_HR_th_scale5.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
+                                            ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
+                                            ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
+                                            ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
+                                            ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
+                                            ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
+                                          ]
 
         # Clear previous outputs
         self.clear_stages_outputs()
@@ -449,7 +472,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                                ("outputnode.brain_eroded","brain_eroded"),
                                                                ]),
                                 ])
-                
+
                 if not self.stages['Segmentation'].enabled:
                     anat_flow.connect([
                                         (anat_inputnode,anat_outputnode,[("T1","T1")])
