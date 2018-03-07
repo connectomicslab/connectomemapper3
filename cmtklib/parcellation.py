@@ -79,8 +79,7 @@ class ParcellateOutputSpec(TraitedSpec):
     white_matter_mask_file = File(desc='White matter mask file')
     #cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
     #                exists=True)
-    ribbon_file = File(desc='Image file detailing the cortical ribbon',
-    #                exists=True)
+    ribbon_file = File(desc='Image file detailing the cortical ribbon',exists=True)
     #aseg_file = File(desc='Automated segmentation file converted from Freesurfer "subjects" directory',
     #                exists=True)
     wm_eroded = File(desc="Eroded wm file in original space")
