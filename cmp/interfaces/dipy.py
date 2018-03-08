@@ -433,39 +433,41 @@ class SHORE(DipyDiffusionInterface):
         # IFLOGGER.info('Fitting CSD model')
         # csd_fit = csd_model.fit(data, msk)
 
-        f = gzip.open(self._gen_filename('csdmodel', ext='.pklz'), 'wb')
-        pickle.dump(csd_model, f, -1)
+        f = gzip.open(self._gen_filename('shoremodel', ext='.pklz'), 'wb')
+        pickle.dump(shore_model, f, -1)
         f.close()
 
         if self.inputs.save_shm_coeff:
             # isphere = get_sphere('symmetric724')
             from dipy.direction import peaks_from_model
+            import multiprocessing as mp
             IFLOGGER.info('Fitting CSD model')
-            csd_peaks = peaks_from_model(model=csd_model,
+            shore_peaks = peaks_from_model(model=shore_model,
                              data=data,
                              sphere=sphere,
-                             relative_peak_threshold=.5,
+                             relative_peak_threshold=.1,
                              min_separation_angle=25,
                              mask=msk,
                              return_sh=True,
                              return_odf=False,
                              normalize_peaks=True,
+                             sh_order=self.inputs.radial_order,
                              npeaks=3,
-                             parallel=False,
-                             nbr_processes=None)
+                             parallel=True,
+                             nbr_processes=mp.cpu_count())
             # fods = csd_fit.odf(sphere)
             # IFLOGGER.info(fods)
             # IFLOGGER.info(fods.shape)
             IFLOGGER.info('Save Spherical Harmonics image')
-            nb.Nifti1Image( csd_peaks.shm_coeff, img.affine,None).to_filename(self._gen_filename('shm_coeff'))
+            nb.Nifti1Image( shore_peaks.shm_coeff, img.affine,None).to_filename(self._gen_filename('shm_coeff'))
 
-            from dipy.viz import actor, window
-            ren = window.Renderer()
-            ren.add(actor.peak_slicer(csd_peaks.peak_dirs,
-                                      csd_peaks.peak_values,
-                                      colors=None))
-
-            window.record(ren, out_path=self._gen_filename('csd_direction_field', ext='.png'), size=(900, 900))
+            # from dipy.viz import actor, window
+            # ren = window.Renderer()
+            # ren.add(actor.peak_slicer(csd_peaks.peak_dirs,
+            #                           csd_peaks.peak_values,
+            #                           colors=None))
+            #
+            # window.record(ren, out_path=self._gen_filename('csd_direction_field', ext='.png'), size=(900, 900))
 
         return runtime
 
