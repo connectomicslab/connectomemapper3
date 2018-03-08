@@ -33,7 +33,7 @@ from nipype.interfaces.mrtrix3.reconst import FitTensor, EstimateFOD
 from nipype.interfaces.mrtrix3.utils import TensorMetrics
 # from nipype.interfaces.mrtrix3.preprocess import ResponseSD
 
-from cmp.interfaces.dipy import DTIEstimateResponseSH, CSD
+from cmp.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE
 # from nipype.interfaces.dipy import CSD
 
 import cmp.interfaces.diffusion_toolkit as cmp_dtk
@@ -123,17 +123,42 @@ class Dipy_recon_config(HasTraits):
     big_delta = traits.Float(0.5, mandatory=True,
                           desc=('Small data for gradient table (time interval)'))
 
+    radial_order_values = traits.List([2,4,6,8,10,12])
+    shore_radial_order = Enum(6,values='radial_order_values', usedefault=True, desc=('Even number that represents the order of the basis'))
+    shore_zeta = traits.Int(700, usedefault=True, desc=('Scale factor'))
+    shore_lambdaN = traits.Float(1e-8, usedefault=True,desc=('radial regularisation constant'))
+    shore_lambdaL = traits.Float(1e-8, usedefault=True,desc=('angular regularisation constant'))
+    shore_tau = traits.Float(0.025330295910584444,desc=('Diffusion time. By default the value that makes q equal to the square root of the b-value.'))
+
+    shore_constrain_e0 = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
+    shore_positive_constraint = traits.Bool(False, usedefault=True,desc=('Constrain the propagator to be positive.'))
+
     traits_view = View(#Item('gradient_table',label='Gradient table (x,y,z,b):'),
                        Item('flip_table_axis',style='custom',label='Flip bvecs:'),
                        #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
                #Item('b_value'),
                #Item('b0_volumes'),
-                       Item('local_model',editor=EnumEditor(name='local_model_editor')),
                        Group(
-                           Item('lmax_order'),
-                           #Item('normalize_to_B0'),
-                           Item('single_fib_thr',label = 'FA threshold'),
-                        visible_when='local_model'),
+                            Item('local_model',editor=EnumEditor(name='local_model_editor')),
+                            Group(
+                                Item('lmax_order'),
+                                #Item('normalize_to_B0'),
+                                Item('single_fib_thr',label = 'FA threshold'),
+                                visible_when='local_model'
+                                ),
+                            visible_when='imaging_model != "DSI"'
+                            ),
+                       Group(
+                            Item('shore_radial_order',label='Radial order'),
+                            Item('shore_zeta',label='Scale factor (zeta)'),
+                            Item('shore_lambdaN',label='Radial regularization constant'),
+                            Item('shore_lambdaL',label='Angular regularization constant'),
+                            Item('shore_tau',label='Diffusion time (s)'),
+                            Item('shore_constrain_e0',label='Constrain the optimization such that E(0) = 1.'),
+                            Item('shore_positive_constraint',label='Constrain the propagator to be positive.'),
+                            label='Parameters of SHORE reconstruction model',
+                            visible_when='imaging_model == "DSI"'
+                            ),
                        Item('mapmri'),
                        Group(
                             VGroup(
@@ -152,9 +177,11 @@ class Dipy_recon_config(HasTraits):
 
 
     def _recon_mode_changed(self,new):
-        if new == 'Probabilistic':
+        if new == 'Probabilistic' and self.imaging_model != 'DSI':
             self.local_model_editor = {True:'Constrained Spherical Deconvolution'}
             self.local_model = True
+        elif new == 'Probabilistic' and self.imaging_model == 'DSI':
+            pass
         else:
             self.local_model_editor = {False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'}
 
@@ -561,75 +588,101 @@ def create_dipy_recon_flow(config):
         (inputnode,dipy_erode,[("wm_mask_resampled",'in_file')])
         ])
 
+    if config.imaging_model != 'DSI':
+        # Tensor -> EigenVectors / FA, AD, MD, RD maps
+        dipy_tensor = pe.Node(interface=DTIEstimateResponseSH(),name='dipy_tensor')
+        dipy_tensor.inputs.auto = True
+        dipy_tensor.inputs.roi_radius = 10
+        dipy_tensor.inputs.fa_thresh = config.single_fib_thr
 
-    # Tensor -> EigenVectors / FA, AD, MD, RD maps
-    dipy_tensor = pe.Node(interface=DTIEstimateResponseSH(),name='dipy_tensor')
-    dipy_tensor.inputs.auto = True
-    dipy_tensor.inputs.roi_radius = 10
-    dipy_tensor.inputs.fa_thresh = config.single_fib_thr
-
-    flow.connect([
-        (inputnode, dipy_tensor,[('diffusion_resampled','in_file')]),
-        (inputnode, dipy_tensor,[('bvals','in_bval')]),
-        (flip_bvecs, dipy_tensor,[('bvecs_flipped','in_bvec')]),
-        (dipy_erode, dipy_tensor,[('out_file','in_mask')])
-        ])
-
-    flow.connect([
-        (dipy_tensor,outputnode,[("response","RF")]),
-        (dipy_tensor,outputnode,[("fa_file","FA")])
-        ])
-
-    if not config.local_model:
         flow.connect([
-            (inputnode,outputnode,[('diffusion_resampled','DWI')]),
-            (dipy_tensor,outputnode,[("dti_model","model")])
+            (inputnode, dipy_tensor,[('diffusion_resampled','in_file')]),
+            (inputnode, dipy_tensor,[('bvals','in_bval')]),
+            (flip_bvecs, dipy_tensor,[('bvecs_flipped','in_bvec')]),
+            (dipy_erode, dipy_tensor,[('out_file','in_mask')])
             ])
 
-        # Tensor -> Eigenvectors
-        # mrtrix_eigVectors = pe.Node(interface=Tensor2Vector(),name="mrtrix_eigenvectors")
+        flow.connect([
+            (dipy_tensor,outputnode,[("response","RF")]),
+            (dipy_tensor,outputnode,[("fa_file","FA")])
+            ])
 
-        # flow.connect([
-        #     (mrtrix_tensor,mrtrix_eigVectors,[('tensor','in_file')]),
-        #     (mrtrix_eigVectors,outputnode,[('vector','eigVec')])
-        #     ])
+        if not config.local_model:
+            flow.connect([
+                (inputnode,outputnode,[('diffusion_resampled','DWI')]),
+                (dipy_tensor,outputnode,[("dti_model","model")])
+                ])
+            # Tensor -> Eigenvectors
+            # mrtrix_eigVectors = pe.Node(interface=Tensor2Vector(),name="mrtrix_eigenvectors")
 
-    # Constrained Spherical Deconvolution
+        # Constrained Spherical Deconvolution
+        else:
+            # Perform spherical deconvolution
+            dipy_CSD = pe.Node(interface=CSD(),name="dipy_CSD")
+
+            # if config.tracking_processing_tool != 'Dipy':
+            dipy_CSD.inputs.save_shm_coeff = True
+            dipy_CSD.inputs.out_shm_coeff='diffusion_shm_coeff.nii.gz'
+
+            # dipy_CSD.inputs.save_fods=True
+            # dipy_CSD.inputs.out_fods='diffusion_fODFs.nii.gz'
+
+            if config.lmax_order != 'Auto':
+                dipy_CSD.inputs.sh_order = config.lmax_order
+
+            dipy_CSD.inputs.fa_thresh = config.single_fib_thr
+
+            flow.connect([
+                    (inputnode, dipy_CSD,[('diffusion_resampled','in_file')]),
+                    (inputnode, dipy_CSD,[('bvals','in_bval')]),
+                    (flip_bvecs, dipy_CSD,[('bvecs_flipped','in_bvec')]),
+                    # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
+                    (dipy_erode, dipy_CSD,[('out_file','in_mask')]),
+                    #(dipy_tensor, dipy_CSD,[('response','response')]),
+                    (dipy_CSD,outputnode,[('model','model')])
+                    ])
+
+            if config.tracking_processing_tool != 'Dipy':
+                flow.connect([
+                        (dipy_CSD,outputnode,[('out_shm_coeff','DWI')])
+                        ])
+            else:
+                flow.connect([
+                        (inputnode,outputnode,[('diffusion_resampled','DWI')])
+                        ])
     else:
-        # Perform spherical deconvolution
-        dipy_CSD = pe.Node(interface=CSD(),name="dipy_CSD")
+        # Perform SHORE reconstruction (DSI)
+
+        dipy_SHORE = pe.Node(interface=SHORE(),name="dipy_SHORE")
 
         # if config.tracking_processing_tool != 'Dipy':
-        dipy_CSD.inputs.save_shm_coeff = True
-        dipy_CSD.inputs.out_shm_coeff='diffusion_shm_coeff.nii.gz'
+        dipy_SHORE.inputs.save_shm_coeff = True
+        dipy_SHORE.inputs.out_shm_coeff='diffusion_shm_coeff.nii.gz'
 
-        # dipy_CSD.inputs.save_fods=True
-        # dipy_CSD.inputs.out_fods='diffusion_fODFs.nii.gz'
-
-        if config.lmax_order != 'Auto':
-            dipy_CSD.inputs.sh_order = config.lmax_order
-
-        dipy_CSD.inputs.fa_thresh = config.single_fib_thr
+        dipy_SHORE.inputs.radial_order = float(config.shore_radial_order)
+        dipy_SHORE.inputs.zeta = config.shore_zeta
+        dipy_SHORE.inputs.lambdaN = config.shore_lambdaN
+        dipy_SHORE.inputs.lambdaL = config.shore_lambdaL
+        dipy_SHORE.inputs.tau = config.shore_tau
+        dipy_SHORE.inputs.constrain_e0 = config.shore_constrain_e0
+        dipy_SHORE.inputs.positive_constraint = config.shore_positive_constraint
+        dipy_SHORE.inputs.save_shm_coeff = True
+        dipy_SHORE.inputs.out_shm_coeff = 'diffusion_shore_shm_coeff.nii.gz'
 
         flow.connect([
-                (inputnode, dipy_CSD,[('diffusion_resampled','in_file')]),
-                (inputnode, dipy_CSD,[('bvals','in_bval')]),
-                (flip_bvecs, dipy_CSD,[('bvecs_flipped','in_bvec')]),
+                (inputnode, dipy_SHORE,[('diffusion_resampled','in_file')]),
+                (inputnode, dipy_SHORE,[('bvals','in_bval')]),
+                (flip_bvecs, dipy_SHORE,[('bvecs_flipped','in_bvec')]),
                 # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
-                (dipy_erode, dipy_CSD,[('out_file','in_mask')]),
+                (dipy_erode, dipy_SHORE,[('out_file','in_mask')]),
                 #(dipy_tensor, dipy_CSD,[('response','response')]),
-                (dipy_CSD,outputnode,[('model','model')])
+                (dipy_SHORE,outputnode,[('model','model')])
                 ])
 
-        if config.tracking_processing_tool != 'Dipy':
-            flow.connect([
-                    (dipy_CSD,outputnode,[('out_shm_coeff','DWI')])
-                    ])
-        else:
-            flow.connect([
-                    (inputnode,outputnode,[('diffusion_resampled','DWI')])
-                    ])
 
+        flow.connect([
+                (inputnode,outputnode,[('diffusion_resampled','DWI')])
+                ])
 
 
     if config.mapmri:

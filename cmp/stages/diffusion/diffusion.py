@@ -215,7 +215,7 @@ class DiffusionConfig(HasTraits):
         # self.tracking_processing_tool = new
         if new == 'Dipy' and self.diffusion_imaging_model != 'DSI':
             self.tracking_processing_tool_editor = ['Dipy','MRtrix']
-        else:
+        elif new == 'Dipy' and self.diffusion_imaging_model == 'DSI':
             self.tracking_processing_tool_editor = ['Dipy']
         elif new == 'MRtrix':
             self.tracking_processing_tool_editor = ['MRtrix']
