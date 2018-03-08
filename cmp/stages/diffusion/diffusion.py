@@ -213,10 +213,12 @@ class DiffusionConfig(HasTraits):
     def _recon_processing_tool_changed(self, new):
         print "recon_processing_tool_changed"
         # self.tracking_processing_tool = new
-        if new == 'Dipy':
-            self.tracking_processing_tool_editor = ['Dipy','MRtrix','Custom']
+        if new == 'Dipy' and self.diffusion_imaging_model != 'DSI':
+            self.tracking_processing_tool_editor = ['Dipy','MRtrix']
+        else:
+            self.tracking_processing_tool_editor = ['Dipy']
         elif new == 'MRtrix':
-            self.tracking_processing_tool_editor = ['MRtrix','Custom']
+            self.tracking_processing_tool_editor = ['MRtrix']
         elif new == 'Custom':
             self.tracking_processing_tool_editor = ['Custom']
 
