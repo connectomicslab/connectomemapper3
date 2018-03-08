@@ -328,6 +328,156 @@ class CSD(DipyDiffusionInterface):
         #     outputs['out_fods'] = self._gen_filename('fods')
         return outputs
 
+class SHOREInputSpec(DipyBaseInterfaceInputSpec):
+    in_mask = File(exists=True, desc=('input mask in which compute SHORE solution'))
+    response = File(exists=True, desc=('single fiber estimated response'))
+    radial_order = traits.Float(6, usedefault=True, desc=('Even number that represents the order of the basis'))
+    zeta = traits.Int(700, usedefault=True, desc=('Scale factor'))
+    lambdaN = traits.Float(1e-8, usedefault=True,desc=('radial regularisation constant'))
+    lambdaL = traits.Float(1e-8, usedefault=True,desc=('angular regularisation constant'))
+    tau = traits.Float(0.025330295910584444,desc=('Diffusion time. By default the value that makes q equal to the square root of the b-value.'))
+
+    constrain_e0 = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
+    positive_constraint = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
+
+    save_shm_coeff= traits.Bool(True, usedefault=True,desc=('save Spherical Harmonics Coefficients in file'))
+    out_shm_coeff = File(desc=('Spherical Harmonics Coefficients output file name'))
+
+
+class SHOREOutputSpec(TraitedSpec):
+    model = File(desc='Python pickled object of the CSD model fitted.')
+    out_shm_coeff = File(desc=('Spherical Harmonics Coefficients output file name'))
+
+
+class SHORE(DipyDiffusionInterface):
+
+    """
+    Uses SHORE [Merlet13]_ to generate the fODF of DWIs. The interface uses
+    :py:mod:`dipy`, as explained in `dipy's SHORE example
+    <http://nipy.org/dipy/examples_built/reconst_shore.html#merlet2013>`_.
+
+    .. [Merlet2013]	Merlet S. et. al, Medical Image Analysis, 2013.
+    “Continuous diffusion signal, EAP and ODF estimation via Compressive Sensing in diffusion MRI”
+
+
+    Example
+    -------
+
+    >>> from cmp.interfaces.dipy import SHORE
+    >>> asm = SHORE(radial_order=radial_order,zeta=zeta, lambdaN=lambdaN, lambdaL=lambdaL)
+    >>> asm.inputs.in_file = '4d_dwi.nii'
+    >>> asm.inputs.in_bval = 'bvals'
+    >>> asm.inputs.in_bvec = 'bvecs'
+    >>> res = asm.run() # doctest: +SKIP
+    """
+    input_spec = SHOREInputSpec
+    output_spec = SHOREOutputSpec
+
+    def _run_interface(self, runtime):
+        from dipy.reconst.shore import ShoreModel
+        from dipy.data import get_sphere, default_sphere
+        # import marshal as pickle
+        import pickle as pickle
+        import gzip
+
+        img = nb.load(self.inputs.in_file)
+        imref = nb.four_to_three(img)[0]
+        affine = img.affine
+
+        def clipMask(mask):
+            """This is a hack until we fix the behaviour of the tracking objects
+            around the edge of the image"""
+            out = mask.copy()
+            index = [slice(None)] * out.ndim
+            for i in range(len(index)):
+                idx = index[:]
+                idx[i] = [0, -1]
+                out[idx] = 0.
+            return out
+
+        if isdefined(self.inputs.in_mask):
+            msk = clipMask(nb.load(self.inputs.in_mask).get_data().astype('float32'))
+        else:
+            msk = clipMask(np.ones(imref.shape).astype('float32'))
+
+        data = img.get_data().astype(np.float32)
+        data[msk==0] *=0
+
+        hdr = imref.header.copy()
+
+        gtab = self._get_gradient_table()
+
+        # if isdefined(self.inputs.response):
+        #     resp_file = np.loadtxt(self.inputs.response)
+        #
+        #     response = (np.array(resp_file[0:3]), resp_file[-1])
+        #     ratio = response[0][1] / response[0][0]
+        #
+        #     if abs(ratio - 0.2) > 0.1:
+        #         IFLOGGER.warn(('Estimated response is not prolate enough. '
+        #                        'Ratio=%0.3f.') % ratio)
+        # else:
+        #     response, ratio, counts = auto_response(gtab, data, fa_thr=0.5, return_number_of_voxels=True)
+        #     IFLOGGER.info("response: ")
+        #     IFLOGGER.info(response)
+        #     IFLOGGER.info("ratio: %g"%ratio)
+        #     IFLOGGER.info("nbr_voxel_used: %g"%counts)
+        #
+        #     if abs(ratio - 0.2) > 0.1:
+        #         IFLOGGER.warn(('Estimated response is not prolate enough. '
+        #                        'Ratio=%0.3f.') % ratio)
+
+        sphere = get_sphere('symmetric724')
+        shore_model = ShoreModel(gtab, radial_order=self.inputs.radial_order, zeta=self.inputs.zeta, lambdaN=self.inputs.lambdaN, lambdaL=self.inputs.lambdaL)
+
+        # IFLOGGER.info('Fitting CSD model')
+        # csd_fit = csd_model.fit(data, msk)
+
+        f = gzip.open(self._gen_filename('csdmodel', ext='.pklz'), 'wb')
+        pickle.dump(csd_model, f, -1)
+        f.close()
+
+        if self.inputs.save_shm_coeff:
+            # isphere = get_sphere('symmetric724')
+            from dipy.direction import peaks_from_model
+            IFLOGGER.info('Fitting CSD model')
+            csd_peaks = peaks_from_model(model=csd_model,
+                             data=data,
+                             sphere=sphere,
+                             relative_peak_threshold=.5,
+                             min_separation_angle=25,
+                             mask=msk,
+                             return_sh=True,
+                             return_odf=False,
+                             normalize_peaks=True,
+                             npeaks=3,
+                             parallel=False,
+                             nbr_processes=None)
+            # fods = csd_fit.odf(sphere)
+            # IFLOGGER.info(fods)
+            # IFLOGGER.info(fods.shape)
+            IFLOGGER.info('Save Spherical Harmonics image')
+            nb.Nifti1Image( csd_peaks.shm_coeff, img.affine,None).to_filename(self._gen_filename('shm_coeff'))
+
+            from dipy.viz import actor, window
+            ren = window.Renderer()
+            ren.add(actor.peak_slicer(csd_peaks.peak_dirs,
+                                      csd_peaks.peak_values,
+                                      colors=None))
+
+            window.record(ren, out_path=self._gen_filename('csd_direction_field', ext='.png'), size=(900, 900))
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['model'] = self._gen_filename('csdmodel', ext='.pklz')
+        if self.inputs.save_fods:
+            outputs['out_shm_coeff'] = self._gen_filename('shm_coeff')
+        # if self.inputs.save_fods:
+        #     outputs['out_fods'] = self._gen_filename('fods')
+        return outputs
+
 class TensorInformedEudXTractographyInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     in_fa = File(exists=True, mandatory=True, desc=('input FA'))

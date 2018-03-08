@@ -33,15 +33,6 @@ style_sheet = '''
                 margin: 3px 3px 3px 3px;
                 padding: 3px 3px;
             }
-            QPushButton#Custom {
-                border: 0px solid lightgray;
-                border-radius: 6px;
-                background-color: transparent;
-                min-width: 400px;
-                font: 12pt "Verdana";
-                margin: 3px 3px 3px 3px;
-                padding: 3px 3px;
-            }
             QPushButton:pressed {
                 background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                                   stop: 0 #dadbde, stop: 1 #f6f7fa);
@@ -220,44 +211,64 @@ class CMP_Project_Info(HasTraits):
     traits_view = QtView(Include('data_manager'))
 
     create_view = QtView( #Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
-                        Item('base_directory',label='Base directory'),
-                        title='BIDS dataset selection',
+                        Group(
+                            Item('base_directory',label='Base directory'),
+                            ),
                         kind='livemodal',
+                        title='Data creation: BIDS dataset selection',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    subject_view = QtView(Item('subject',label='Subject to be processed'),
+    subject_view = QtView(
+                        Group(
+                            Item('subject',label='Subject to be processed'),
+                            ),
                         kind='modal',
                         title='Subject selection',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    dmri_warning_view = QtView( Item('dmri_warning_msg',style='readonly',show_label=False),
+    dmri_warning_view = QtView(
+                        Group(
+                            Item('dmri_warning_msg',style='readonly',show_label=False),
+                            ),
                         title='Warning : Diffusion data',
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    anat_warning_view = QtView( Item('anat_warning_msg',style='readonly',show_label=False),
+    anat_warning_view = QtView(
+                        Group(
+                            Item('anat_warning_msg',style='readonly',show_label=False),
+                            ),
                         title='Warning : Anatomical data',
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    anat_config_error_view = QtView( Item('anat_config_error_msg', style='readonly',show_label=False),
-                              title='Error',
-                              kind = 'modal',
-                              style_sheet=style_sheet,
-                              buttons=['OK','Cancel'])
+    anat_config_error_view = QtView(
+                            Group(
+                                Item('anat_config_error_msg', style='readonly',show_label=False),
+                                ),
+                            title='Error',
+                            kind = 'modal',
+                            #style_sheet=style_sheet,
+                            buttons=['OK','Cancel'])
 
-    dmri_config_error_view = QtView( Item('dmri_config_error_msg', style='readonly',show_label=False),
-                              title='Error',
-                              kind = 'modal',
-                              style_sheet=style_sheet,
-                              buttons=['OK','Cancel'])
+    dmri_config_error_view = QtView(
+                            Group(
+                                Item('dmri_config_error_msg', style='readonly',show_label=False),
+                                ),
+                            title='Error',
+                            kind = 'modal',
+                            #style_sheet=style_sheet,
+                            buttons=['OK','Cancel'])
 
-    open_view = QtView(Item('base_directory',label='BIDS dataset directory'),
-                        title='Select BIDS directory with existing Connectome Data',
+    open_view = QtView(
+                        Group(
+                            Item('base_directory',label='Base directory'),
+                            ),
+                        title='Data loading: BIDS dataset selection',
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
@@ -272,25 +283,37 @@ class CMP_Project_Info(HasTraits):
                                   #style_sheet=style_sheet,
                                   buttons=['OK','Cancel'])
 
-    anat_custom_map_view = QtView(Item('anat_custom_last_stage',editor=EnumEditor(name='anat_stage_names'),style='custom',show_label=False),
+    anat_custom_map_view = QtView(
+                        Group(
+                            Item('anat_custom_last_stage',editor=EnumEditor(name='anat_stage_names'),style='custom',show_label=False),
+                            ),
                         title='Select until which stage to process the anatomical pipeline.',
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    diffusion_imaging_model_select_view = QtView(Item('diffusion_imaging_model',label='Diffusion MRI modality'),
-                                                 title='Please select diffusion MRI modality',
-                                                 kind='modal',
-                                                 buttons=['OK','Cancel'])
+    diffusion_imaging_model_select_view = QtView(
+                                                Group(
+                                                    Item('diffusion_imaging_model',label='Diffusion MRI modality'),
+                                                    ),
+                                                title='Please select diffusion MRI modality',
+                                                kind='modal',
+                                                buttons=['OK','Cancel'])
 
-    dmri_select_config_to_load = QtView(Item('dmri_config_to_load_msg',style='readonly',show_label=False),
-                                  Item('dmri_config_to_load',style='custom',editor=EnumEditor(name='dmri_available_config'),show_label=False),
-                                  title='Select configuration for diffusion pipeline',
-                                  kind='modal',
-                                  #style_sheet=style_sheet,
-                                  buttons=['OK','Cancel'])
+    dmri_select_config_to_load = QtView(
+                                Group(
+                                    Item('dmri_config_to_load_msg',style='readonly',show_label=False),
+                                    ),
+                                Item('dmri_config_to_load',style='custom',editor=EnumEditor(name='dmri_available_config'),show_label=False),
+                                title='Select configuration for diffusion pipeline',
+                                kind='modal',
+                                #style_sheet=style_sheet,
+                                buttons=['OK','Cancel'])
 
-    dmri_custom_map_view = QtView(Item('dmri_custom_last_stage',editor=EnumEditor(name='dmri_stage_names'),style='custom',show_label=False),
+    dmri_custom_map_view = QtView(
+                        Group(
+                            Item('dmri_custom_last_stage',editor=EnumEditor(name='dmri_stage_names'),style='custom',show_label=False),
+                            ),
                         title='Select until which stage to process the diffusion pipeline.',
                         kind='modal',
                         #style_sheet=style_sheet,
@@ -306,7 +329,7 @@ class CMP_MainWindow(HasTraits):
 
     new_project = Action(name='New Connectome data...',action='new_project')
     load_project = Action(name='Load Connectome data...',action='load_project')
-    process_anatomical = Action(name='Process anatomical data!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
+    process_anatomical = Action(name='Process Anatomical Data!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
     #preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
     map_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked==True')
     #map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
