@@ -508,7 +508,7 @@ class flipBvec(BaseInterface):
     def _run_interface(self,runtime):
         axis_dict = {'x':0, 'y':1, 'z':2}
         import numpy as np
-        f = open(self.inputs.table,'r')
+        f = open(self.inputs.bvecs,'r')
         header = ''
         for h in range(self.inputs.header_lines):
             header += f.readline()
