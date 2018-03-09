@@ -222,6 +222,13 @@ class DiffusionConfig(HasTraits):
         elif new == 'Custom':
             self.tracking_processing_tool_editor = ['Custom']
 
+    def _tracking_processing_tool_changed(self, new):
+        print "tracking_processing_tool changed"
+        if new == 'Dipy' and self.recon_processing_tool == 'Dipy':
+            self.dipy_recon_config.tracking_processing_tool = 'Dipy'
+        elif new == 'MRtrix' and self.recon_processing_tool == 'Dipy':
+            self.dipy_recon_config.tracking_processing_tool = 'MRtrix'
+
     def _diffusion_model_changed(self,new):
         # self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
         self.mrtrix_tracking_config.tracking_mode = new
@@ -541,6 +548,11 @@ class DiffusionStage(Stage):
 
         if self.config.tracking_processing_tool == 'Dipy':
             if self.config.mrtrix_recon_config.local_model:
+                recon_results_path = os.path.join(self.stage_dir,"reconstrution","dipy_CSD","result_dipy_CSD.pklz")
+                if os.path.exists(recon_results_path):
+                    recon_results = pickle.load(gzip.open(recon_results_path))
+                    shm_coeff_res = recon_results.outputs.out_shm_coeff
+                    self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
                 if self.config.diffusion_model == 'Deterministic':
                     diff_results_path = os.path.join(self.stage_dir,"tracking","dipy_deterministic_tracking","result_dipy_deterministic_tracking.pklz")
                     if os.path.exists(diff_results_path):

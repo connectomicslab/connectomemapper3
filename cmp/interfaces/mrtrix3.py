@@ -761,7 +761,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
 
 
 class StreamlineTrackInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the image containing the source data.' \
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=2, desc='the image containing the source data.' \
     'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, ' \
     'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
 

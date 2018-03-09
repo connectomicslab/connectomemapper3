@@ -108,6 +108,8 @@ class Dipy_recon_config(HasTraits):
 
     mapmri = Bool(False)
 
+    tracking_processing_tool = Str
+
     laplacian_regularization = traits.Bool(True, usedefault=True, desc = ('Apply laplacian regularization'))
 
     laplacian_weighting= traits.Float(0.05, usedefault=True, desc = ('Regularization weight'))
