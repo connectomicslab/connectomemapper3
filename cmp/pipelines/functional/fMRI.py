@@ -147,36 +147,53 @@ class fMRIPipeline(Pipeline):
         t2_available = False
         valid_inputs = False
 
-        mem = Memory(base_dir=os.path.join(self.base_directory,'NIPYPE'))
-        swap_and_reorient = mem.cache(SwapAndReorient)
+        fmri_file = os.path.join(self.subject_directory,'func',self.subject+'_task-rest_bold.nii.gz')
+        t1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
+        t2_file = os.path.join(self.subject_directory,'anat',self.subject+'_T2w.nii.gz')
 
-        # Check for (and if existing, convert) functional data
-        input_dir = os.path.join(self.base_directory,'RAWDATA','fMRI')
-        if len(os.listdir(input_dir)) > 0:
-            if convert_rawdata(self.base_directory, input_dir, 'fMRI'):
-                fMRI_available = True
+        print "Looking for...."
+        print "fmri_file : %s" % fmri_file
+        print "t1_file : %s" % t1_file
+        print "t2_file : %s" % t2_file
 
-        # Check for (and if existing, convert)  T1
-        input_dir = os.path.join(self.base_directory,'RAWDATA','T1')
-        if len(os.listdir(input_dir)) > 0:
-            if convert_rawdata(self.base_directory, input_dir, 'T1_orig'):
-                t1_available = True
+        try:
+            layout = BIDSLayout(self.base_directory)
+            print "Valid BIDS dataset with %s subjects" % len(layout.get_subjects())
+            for subj in layout.get_subjects():
+                self.global_conf.subjects.append('sub-'+str(subj))
+            # self.global_conf.subjects = ['sub-'+str(subj) for subj in layout.get_subjects()]
+            self.global_conf.modalities = [str(mod) for mod in layout.get_modalities()]
+            # mods = layout.get_modalities()
+            types = layout.get_types()
+            # print "Available modalities :"
+            # for mod in mods:
+            #     print "-%s" % mod
 
-        # Check for (and if existing, convert)  T2
-        input_dir = os.path.join(self.base_directory,'RAWDATA','T2')
-        if len(os.listdir(input_dir)) > 0:
-            if convert_rawdata(self.base_directory, input_dir, 'T2_orig'):
-                t2_available = True
+            for typ in types:
+                if typ == 'T1w' and os.path.isfile(t1_file):
+                    print "%s available" % typ
+                    t1_available = True
+                if typ == 'T2w' and os.path.isfile(t2_file):
+                    print "%s available" % typ
+                    t2_available = True
+                if typ == 'bold' and os.path.isfile(fmri_file):
+                    print "%s available" % typ
+                    fMRI_available = True
+
+        except:
+            error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+            return
 
         if fMRI_available:
             if t2_available:
-                swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T2_orig.nii.gz'),
-                                  ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
-                                  out_file=os.path.join(self.base_directory,'NIFTI','T2.nii.gz'))
+                out_t2_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T2w.nii.gz')
+                shutil.copy(src=t2_file,dst=out_t2_file)
+                # swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T2_orig.nii.gz'),
+                #                   ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
+                #                   out_file=os.path.join(self.base_directory,'NIFTI','T2.nii.gz'))
             if t1_available:
-                swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T1_orig.nii.gz'),
-                                  ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
-                                  out_file=os.path.join(self.base_directory,'NIFTI','T1.nii.gz'))
+                out_t1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
+                shutil.copy(src=t1_file,dst=out_t1_file)
                 valid_inputs = True
                 input_message = 'Inputs check finished successfully.\nfMRI and morphological data available.'
             else:
