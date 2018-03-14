@@ -5,4 +5,4 @@
 *.mp4
 atom-config.txt
 
-build/lib
+build
