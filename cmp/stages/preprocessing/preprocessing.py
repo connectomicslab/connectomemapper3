@@ -146,6 +146,62 @@ class PreprocessingConfig(HasTraits):
         if new < 0:
             self.start_vol = 0
 
+class splitBvecBvalInputSpec(BaseInterfaceInputSpec):
+    bvecs = File(exists=True)
+    bvals = File(exists=True)
+    start = Int(0)
+    end = Int(300)
+    delimiter = Str()
+    orientation = Enum(['v','h'])
+
+class splitBvecBvalOutputSpec(TraitedSpec):
+    bvecs_split = File(exists=True)
+    bvals_split = File(exists=True)
+
+class splitBvecBval(BaseInterface):
+    input_spec = splitBvecBvalInputSpec
+    output_spec = splitBvecBvalOutputSpec
+
+    def _run_interface(self,runtime):
+        import numpy as np
+
+        f_bvecs = open(self.inputs.bvecs,'r')
+        if self.inputs.delimiter == ' ':
+            bvecs = np.loadtxt(f_bvecs)
+        else:
+            bvecs = np.loadtxt(f_bvecs, delimiter=self.inputs.delimiter)
+        f_bvecs.close()
+
+        f_bvals = open(self.inputs.bvals,'r')
+        if self.inputs.delimiter == ' ':
+            bvals = np.loadtxt(f_bvals)
+        else:
+            bvals = np.loadtxt(f_bvals, delimiter=self.inputs.delimiter)
+        f_bvals.close()
+
+        if self.inputs.orientation == 'v':
+            bvecs = bvecs[self.inputs.start:self.inputs.end+1,:]
+            bvals = bvals[self.inputs.start:self.inputs.end+1]
+        elif self.inputs.orientation == 'h':
+            bvecs = bvecs[:,self.inputs.start:self.inputs.end+1]
+            bvals = bvals[self.inputs.start:self.inputs.end+1]
+
+        out_f = file(os.path.abspath('dwi_split.bvec'),'a')
+        np.savetxt(out_f,bvecs,delimiter=self.inputs.delimiter)
+        out_f.close()
+
+        out_f = file(os.path.abspath('dwi_split.bval'),'a')
+        np.savetxt(out_f,bvals.T,newline=self.inputs.delimiter)
+        out_f.close()
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["bvecs_split"] = os.path.abspath('dwi_split.bvec')
+        outputs["bvals_split"] = os.path.abspath('dwi_split.bval')
+        return outputs
+
 class PreprocessingStage(Stage):
     # General and UI members
     def __init__(self):
@@ -167,8 +223,20 @@ class PreprocessingStage(Stage):
             flow.connect([
                         (inputnode,split_vol,[('diffusion','in_file')]),
                         (split_vol,processing_input,[('data','diffusion')]),
-                        (inputnode,processing_input,[('T1','T1'),('brain','brain'),('brain_mask','brain_mask'),('bvecs','bvecs'),('bvals','bvals'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')])
+                        (inputnode,processing_input,[('T1','T1'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')])
                         ])
+
+            split_bvecbval = pe.Node(interface=splitBvecBval(),name='split_bvecsbvals')
+            split_bvecbval.inputs.start = self.config.start_vol
+            split_bvecbval.inputs.end = self.config.end_vol
+            split_bvecbval.inputs.orientation = 'h'
+            split_bvecbval.inputs.delimiter = ' '
+
+            flow.connect([
+                        (inputnode,split_bvecbval,[('bvecs','bvecs'),('bvals','bvals')]),
+                        (split_bvecbval,processing_input,[('bvecs_split','bvecs'),('bvals_split','bvals')])
+                        ])
+
         else:
             flow.connect([
                         (inputnode,processing_input,[('diffusion','diffusion'),('bvecs','bvecs'),('bvals','bvals'),('T1','T1'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),
