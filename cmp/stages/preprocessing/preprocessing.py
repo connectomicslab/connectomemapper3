@@ -136,7 +136,7 @@ class PreprocessingConfig(HasTraits):
 
     def _max_vol_changed(self,new):
         self.max_str = '(max: %d)' % new
-        self.end_vol = new
+        #self.end_vol = new
 
     def _end_vol_changed(self,new):
         if new > self.max_vol:
@@ -208,7 +208,7 @@ class PreprocessingStage(Stage):
         self.name = 'preprocessing_stage'
         self.config = PreprocessingConfig()
         self.inputs = ["diffusion","bvecs","bvals","T1","brain","brain_mask","wm_mask_file","roi_volumes"]
-        self.outputs = ["diffusion_preproc","bvecs_rot","dwi_brain_mask","T1","brain","brain_mask","brain_mask_full","wm_mask_file","partial_volume_files","roi_volumes"]
+        self.outputs = ["diffusion_preproc","bvecs_rot","bvals","dwi_brain_mask","T1","brain","brain_mask","brain_mask_full","wm_mask_file","partial_volume_files","roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         print inputnode
@@ -217,14 +217,10 @@ class PreprocessingStage(Stage):
 
         # For DSI acquisition: extract the hemisphere that contains the data
         if self.config.start_vol > 0 or self.config.end_vol < self.config.max_vol:
+
             split_vol = pe.Node(interface=splitDiffusion(),name='split_vol')
             split_vol.inputs.start = self.config.start_vol
             split_vol.inputs.end = self.config.end_vol
-            flow.connect([
-                        (inputnode,split_vol,[('diffusion','in_file')]),
-                        (split_vol,processing_input,[('data','diffusion')]),
-                        (inputnode,processing_input,[('T1','T1'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')])
-                        ])
 
             split_bvecbval = pe.Node(interface=splitBvecBval(),name='split_bvecsbvals')
             split_bvecbval.inputs.start = self.config.start_vol
@@ -233,14 +229,22 @@ class PreprocessingStage(Stage):
             split_bvecbval.inputs.delimiter = ' '
 
             flow.connect([
+                        (inputnode,split_vol,[('diffusion','in_file')]),
+                        (split_vol,processing_input,[('data','diffusion')]),
                         (inputnode,split_bvecbval,[('bvecs','bvecs'),('bvals','bvals')]),
                         (split_bvecbval,processing_input,[('bvecs_split','bvecs'),('bvals_split','bvals')])
                         ])
 
         else:
             flow.connect([
-                        (inputnode,processing_input,[('diffusion','diffusion'),('bvecs','bvecs'),('bvals','bvals'),('T1','T1'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),
+                        (inputnode,processing_input,[('diffusion','diffusion'),('bvecs','bvecs'),('bvals','bvals')]),
                         ])
+
+        flow.connect([
+                    (inputnode,processing_input,[('T1','T1'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),
+                    (processing_input,outputnode,[('bvals','bvals')])
+                    ])
+
         print inputnode.inputs
         #TODO: Add denoising (DWdenoise)/ bias field correction (FSL FIRST)/ New registration: FSL FLIRT and FNIRT (if no top up), SPM rigid coregistration (if topup)
         # if self.config.denoising:
@@ -551,7 +555,7 @@ class PreprocessingStage(Stage):
 
 
                 flow.connect([
-                            (inputnode,outputnode,[("bvecs","bvecs_rot")])
+                            (processing_input,outputnode,[("bvecs","bvecs_rot")])
                             ])
 
                 if self.config.eddy_correct_motion_correction:

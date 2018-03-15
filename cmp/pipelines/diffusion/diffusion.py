@@ -739,8 +739,8 @@ class DiffusionPipeline(Pipeline):
             reg_flow = self.create_stage_flow("Registration")
             diffusion_flow.connect([
                                     #(diffusion_inputnode,reg_flow,[('T2','inputnode.T2')]),
-                                    (diffusion_inputnode,reg_flow,[("bvals","inputnode.bvals")]),
-                                    (preproc_flow,reg_flow, [('outputnode.T1','inputnode.T1'),('outputnode.bvecs_rot','inputnode.bvecs'),('outputnode.wm_mask_file','inputnode.wm_mask'),
+                                    #(diffusion_inputnode,reg_flow,[("bvals","inputnode.bvals")]),
+                                    (preproc_flow,reg_flow, [('outputnode.T1','inputnode.T1'),('outputnode.bvecs_rot','inputnode.bvecs'),('outputnode.bvals','inputnode.bvals'),('outputnode.wm_mask_file','inputnode.wm_mask'),
                                                             ('outputnode.partial_volume_files','inputnode.partial_volume_files'),('outputnode.roi_volumes','inputnode.roi_volumes'),
                                                             ("outputnode.brain","inputnode.brain"),("outputnode.brain_mask","inputnode.brain_mask"),("outputnode.brain_mask_full","inputnode.brain_mask_full"),
                                                             ('outputnode.diffusion_preproc','inputnode.target'),('outputnode.dwi_brain_mask','inputnode.target_mask')]),
