@@ -661,7 +661,7 @@ def create_dipy_recon_flow(config):
         #dipy_SHORE.inputs.save_shm_coeff = True
         #dipy_SHORE.inputs.out_shm_coeff='diffusion_shm_coeff.nii.gz'
 
-        dipy_SHORE.inputs.radial_order = float(config.shore_radial_order)
+        dipy_SHORE.inputs.radial_order = int(config.shore_radial_order)
         dipy_SHORE.inputs.zeta = config.shore_zeta
         dipy_SHORE.inputs.lambdaN = config.shore_lambdaN
         dipy_SHORE.inputs.lambdaL = config.shore_lambdaL

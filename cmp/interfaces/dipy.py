@@ -10,6 +10,7 @@ from builtins import str, open
 
 import os.path as op
 
+import time
 import numpy as np
 import nibabel as nb
 import gzip
@@ -331,7 +332,7 @@ class CSD(DipyDiffusionInterface):
 class SHOREInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute SHORE solution'))
     response = File(exists=True, desc=('single fiber estimated response'))
-    radial_order = traits.Float(6, usedefault=True, desc=('Even number that represents the order of the basis'))
+    radial_order = traits.Int(6, usedefault=True, desc=('Even number that represents the order of the basis'))
     zeta = traits.Int(700, usedefault=True, desc=('Scale factor'))
     lambdaN = traits.Float(1e-8, usedefault=True,desc=('radial regularisation constant'))
     lambdaL = traits.Float(1e-8, usedefault=True,desc=('angular regularisation constant'))
@@ -374,6 +375,12 @@ class SHORE(DipyDiffusionInterface):
     def _run_interface(self, runtime):
         from dipy.reconst.shore import ShoreModel
         from dipy.data import get_sphere, default_sphere
+        from dipy.reconst.odf import gfa
+        from dipy.reconst.csdeconv import odf_sh_to_sharp
+        from dipy.reconst.shm import sh_to_sf, sf_to_sh
+        from dipy.core.ndindex import ndindex
+        import nibabel as nib
+
         # import marshal as pickle
         import pickle as pickle
         import gzip
@@ -435,6 +442,7 @@ class SHORE(DipyDiffusionInterface):
         pickle.dump(shore_model, f, -1)
         f.close()
 
+        lmax = self.inputs.radial_order
         datashape=data.shape
         dimsODF=list(datashape)
         dimsODF[3]=int((lmax+1)*(lmax+2)/2)
@@ -447,11 +455,11 @@ class SHORE(DipyDiffusionInterface):
         for i in ndindex(data.shape[:1]):
             IFLOGGER.info('Processing slice number: ', i)
             start_time = time.time()
-            shorefit   = shoremodel.fit(data[i])
+            shorefit   = shore_model.fit(data[i])
             sliceODF   = shorefit.odf(sphere)
             sliceGMSD  = shorefit.msd()
             sliceGFA   = gfa(sliceODF)
-            shODF[i]   = sf_to_sh(sliceODF,sphere,sh_order=lmax,basis_type='mrtrix')
+            shODF[i]   = np.nan_to_num(sf_to_sh(sliceODF,sphere,sh_order=lmax,basis_type='mrtrix'))
             GFA[i]     = np.nan_to_num(sliceGFA)
             MSD[i]     = np.nan_to_num(sliceGMSD)
             IFLOGGER.info("Computation Time: " + str(time.time() - start_time) + " seconds")
