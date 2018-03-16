@@ -459,7 +459,7 @@ class SHORE(DipyDiffusionInterface):
             sliceODF   = shorefit.odf(sphere)
             sliceGMSD  = shorefit.msd()
             sliceGFA   = gfa(sliceODF)
-            shODF[i]   = np.nan_to_num(sf_to_sh(sliceODF,sphere,sh_order=lmax,basis_type='mrtrix'))
+            shODF[i]   = sf_to_sh(sliceODF,sphere,sh_order=lmax,basis_type='mrtrix')
             GFA[i]     = np.nan_to_num(sliceGFA)
             MSD[i]     = np.nan_to_num(sliceGMSD)
             IFLOGGER.info("Computation Time: " + str(time.time() - start_time) + " seconds")
@@ -906,7 +906,8 @@ class DirectionGetterTractography(DipyBaseInterface):
             from dipy.io.image import load_nifti
 
             IFLOGGER.info('Loading SHORE FOD')
-            sh, _ = load_nifti(self.inputs.fod_file)
+            sh = nb.load(self.inputs.fod_file).get_data()
+            sh = np.nan_to_num(sh)
             IFLOGGER.info('Generating peaks from SHORE model')
             if self.inputs.algo == 'deterministic':
                 dg = DeterministicMaximumDirectionGetter.from_shcoeff(sh, max_angle=self.inputs.max_angle, sphere=sphere)
