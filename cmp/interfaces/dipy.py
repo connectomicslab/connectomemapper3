@@ -694,6 +694,7 @@ class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
     use_act = traits.Bool(False, desc=('Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier'))
     fast_number_of_classes = traits.Int(3, desc=('Number of tissue classes used by FAST for Anatomically-Constrained Tractography (ACT)'))
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
+    fod_file = File(exists=True, desc=('input fod file (if SHORE)'))
     in_fa = File(exists=True, mandatory=True, desc=('input FA'))
     in_partial_volume_files = InputMultiPath(File(exists=True), desc='FAST partial volume estimation result files (required if performing ACT)')
     # in_t1 = File(exists=True, desc=('input T1w (required if performing ACT)'))

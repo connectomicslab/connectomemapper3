@@ -128,7 +128,7 @@ class DiffusionConfig(HasTraits):
         self.gibbs_recon_config = Gibbs_recon_config()
         self.dtk_tracking_config = DTK_tracking_config()
         self.dtb_tracking_config = DTB_tracking_config(imaging_model=self.diffusion_imaging_model)
-        self.dipy_tracking_config = Dipy_tracking_config(imaging_model=self.diffusion_imaging_model,tracking_mode=self.diffusion_model,SD=self.mrtrix_recon_config.local_model,sh_order=self.dipy_recon_config.lmax_order)
+        self.dipy_tracking_config = Dipy_tracking_config(imaging_model=self.diffusion_imaging_model,tracking_mode=self.diffusion_model,SD=self.mrtrix_recon_config.local_model)
         self.mrtrix_tracking_config = MRtrix_tracking_config(tracking_mode=self.diffusion_model,SD=self.mrtrix_recon_config.local_model)
         self.camino_tracking_config = Camino_tracking_config(imaging_model=self.diffusion_imaging_model,tracking_mode=self.diffusion_model)
         self.fsl_tracking_config = FSL_tracking_config()

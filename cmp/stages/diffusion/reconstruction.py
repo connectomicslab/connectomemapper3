@@ -658,8 +658,8 @@ def create_dipy_recon_flow(config):
         dipy_SHORE = pe.Node(interface=SHORE(),name="dipy_SHORE")
 
         # if config.tracking_processing_tool != 'Dipy':
-        dipy_SHORE.inputs.save_shm_coeff = True
-        dipy_SHORE.inputs.out_shm_coeff='diffusion_shm_coeff.nii.gz'
+        #dipy_SHORE.inputs.save_shm_coeff = True
+        #dipy_SHORE.inputs.out_shm_coeff='diffusion_shm_coeff.nii.gz'
 
         dipy_SHORE.inputs.radial_order = float(config.shore_radial_order)
         dipy_SHORE.inputs.zeta = config.shore_zeta
@@ -668,8 +668,8 @@ def create_dipy_recon_flow(config):
         dipy_SHORE.inputs.tau = config.shore_tau
         dipy_SHORE.inputs.constrain_e0 = config.shore_constrain_e0
         dipy_SHORE.inputs.positive_constraint = config.shore_positive_constraint
-        dipy_SHORE.inputs.save_shm_coeff = True
-        dipy_SHORE.inputs.out_shm_coeff = 'diffusion_shore_shm_coeff.nii.gz'
+        #dipy_SHORE.inputs.save_shm_coeff = True
+        #dipy_SHORE.inputs.out_shm_coeff = 'diffusion_shore_shm_coeff.nii.gz'
 
         flow.connect([
                 (inputnode, dipy_SHORE,[('diffusion_resampled','in_file')]),

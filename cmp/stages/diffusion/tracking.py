@@ -686,7 +686,7 @@ class extractHeaderVoxel2WorldMatrix(BaseInterface):
 def create_dipy_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','FA','T1','partial_volumes','wm_mask_resampled','gm_registered','bvals','bvecs','model']),name='inputnode')
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','fod_file','FA','T1','partial_volumes','wm_mask_resampled','gm_registered','bvals','bvecs','model']),name='inputnode')
     # outputnode
 
     #CRS2XYZtkReg = subprocess.check_output
