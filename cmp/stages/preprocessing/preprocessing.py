@@ -574,54 +574,55 @@ class PreprocessingStage(Stage):
                                 (mr_convert_b,eddy_correct,[("converted","in_file")])
                                 ])
 
-                if self.config.start_vol > 0 and self.config.end_vol == self.config.max_vol:
-                    merge_filenames = pe.Node(interface=util.Merge(2),name='merge_files')
-                    flow.connect([
-                                (split_vol,merge_filenames,[("padding1","in1")]),
-                                (eddy_correct,merge_filenames,[("eddy_corrected","in2")]),
-                                ])
-                    merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
-                    flow.connect([
-                                (merge_filenames,merge,[("out","in_files")]),
-                                ])
-                    flow.connect([
-                                (merge,fs_mriconvert,[('merged_file','in_file')]),
-                                (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                                ])
-                elif self.config.start_vol > 0 and self.config.end_vol < self.config.max_vol:
-                    merge_filenames = pe.Node(interface=util.Merge(3),name='merge_files')
-                    flow.connect([
-                                (split_vol,merge_filenames,[("padding1","in1")]),
-                                (eddy_correct,merge_filenames,[("eddy_corrected","in2")]),
-                                (split_vol,merge_filenames,[("padding2","in3")]),
-                                ])
-                    merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
-                    flow.connect([
-                                (merge_filenames,merge,[("out","in_files")])
-                                ])
-                    flow.connect([
-                                (merge,fs_mriconvert,[('merged_file','in_file')]),
-                                (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                                ])
-                elif self.config.start_vol == 0 and self.config.end_vol < self.config.max_vol:
-                    merge_filenames = pe.Node(interface=util.Merge(2),name='merge_files')
-                    flow.connect([
-                                (eddy_correct,merge_filenames,[("eddy_corrected","in1")]),
-                                (split_vol,merge_filenames,[("padding2","in2")]),
-                                ])
-                    merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
-                    flow.connect([
-                                (merge_filenames,merge,[("out","in_files")])
-                                ])
-                    flow.connect([
-                                (merge,fs_mriconvert,[('merged_file','in_file')]),
-                                (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                                ])
-                else:
-                    flow.connect([
-                                (eddy_correct,fs_mriconvert,[('eddy_corrected','in_file')]),
-                                (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                                ])
+                # # DTK needs fixed number of directions (512)
+                # if self.config.start_vol > 0 and self.config.end_vol == self.config.max_vol:
+                #     merge_filenames = pe.Node(interface=util.Merge(2),name='merge_files')
+                #     flow.connect([
+                #                 (split_vol,merge_filenames,[("padding1","in1")]),
+                #                 (eddy_correct,merge_filenames,[("eddy_corrected","in2")]),
+                #                 ])
+                #     merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
+                #     flow.connect([
+                #                 (merge_filenames,merge,[("out","in_files")]),
+                #                 ])
+                #     flow.connect([
+                #                 (merge,fs_mriconvert,[('merged_file','in_file')]),
+                #                 (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
+                #                 ])
+                # elif self.config.start_vol > 0 and self.config.end_vol < self.config.max_vol:
+                #     merge_filenames = pe.Node(interface=util.Merge(3),name='merge_files')
+                #     flow.connect([
+                #                 (split_vol,merge_filenames,[("padding1","in1")]),
+                #                 (eddy_correct,merge_filenames,[("eddy_corrected","in2")]),
+                #                 (split_vol,merge_filenames,[("padding2","in3")]),
+                #                 ])
+                #     merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
+                #     flow.connect([
+                #                 (merge_filenames,merge,[("out","in_files")])
+                #                 ])
+                #     flow.connect([
+                #                 (merge,fs_mriconvert,[('merged_file','in_file')]),
+                #                 (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
+                #                 ])
+                # elif self.config.start_vol == 0 and self.config.end_vol < self.config.max_vol:
+                #     merge_filenames = pe.Node(interface=util.Merge(2),name='merge_files')
+                #     flow.connect([
+                #                 (eddy_correct,merge_filenames,[("eddy_corrected","in1")]),
+                #                 (split_vol,merge_filenames,[("padding2","in2")]),
+                #                 ])
+                #     merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
+                #     flow.connect([
+                #                 (merge_filenames,merge,[("out","in_files")])
+                #                 ])
+                #     flow.connect([
+                #                 (merge,fs_mriconvert,[('merged_file','in_file')]),
+                #                 (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
+                #                 ])
+                # else:
+                flow.connect([
+                            (eddy_correct,fs_mriconvert,[('eddy_corrected','in_file')]),
+                            (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
+                            ])
 
             else:
                 eddy_correct = pe.Node(interface=cmp_fsl.EddyOpenMP(out_file="eddy_corrected.nii.gz",verbose=True),name='eddy')
@@ -638,59 +639,60 @@ class PreprocessingStage(Stage):
                             (eddy_correct,outputnode,[("bvecs_rotated","bvecs_rot")])
                             ])
 
-                if self.config.start_vol > 0 and self.config.end_vol == self.config.max_vol:
-                    merge_filenames = pe.Node(interface=util.Merge(2),name='merge_files')
-                    flow.connect([
-                                (split_vol,merge_filenames,[("padding1","in1")]),
-                                (eddy_correct,merge_filenames,[("eddy_corrected","in1")])
-                                ])
-                    merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
-                    flow.connect([
-                                (merge_filenames,merge,[("out","in_files")]),
-                                ])
-                    # resampling diffusion image and setting output type to short
-                    flow.connect([
-                                (merge,fs_mriconvert,[('merged_file','in_file')]),
-                                (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                                ])
-
-                elif self.config.start_vol > 0 and self.config.end_vol < self.config.max_vol:
-                    merge_filenames = pe.Node(interface=util.Merge(3),name='merge_files')
-                    flow.connect([
-                                (split_vol,merge_filenames,[("padding1","in1")]),
-                                (eddy_correct,merge_filenames,[("eddy_corrected","in1")]),
-                                (split_vol,merge_filenames,[("padding2","in3")])
-                                ])
-                    merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
-                    flow.connect([
-                                (merge_filenames,merge,[("out","in_files")]),
-                                ])
-                    # resampling diffusion image and setting output type to short
-                    flow.connect([
-                                (merge,fs_mriconvert,[('merged_file','in_file')]),
-                                (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                                ])
-                elif self.config.start_vol == 0 and self.config.end_vol < self.config.max_vol:
-                    merge_filenames = pe.Node(interface=util.Merge(2),name='merge_files')
-                    flow.connect([
-                                (eddy_correct,merge_filenames,[("eddy_corrected","in1")]),
-                                (split_vol,merge_filenames,[("padding2","in2")])
-                                ])
-                    merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
-                    flow.connect([
-                                (merge_filenames,merge,[("out","in_files")]),
-                                ])
-                    # resampling diffusion image and setting output type to short
-                    flow.connect([
-                                (merge,fs_mriconvert,[('merged_file','in_file')]),
-                                (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                                ])
-                else:
-                    # resampling diffusion image and setting output type to short
-                    flow.connect([
-                                (eddy_correct,fs_mriconvert,[('eddy_corrected','in_file')]),
-                                (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                                ])
+                # # DTK needs fixed number of directions (512)
+                # if self.config.start_vol > 0 and self.config.end_vol == self.config.max_vol:
+                #     merge_filenames = pe.Node(interface=util.Merge(2),name='merge_files')
+                #     flow.connect([
+                #                 (split_vol,merge_filenames,[("padding1","in1")]),
+                #                 (eddy_correct,merge_filenames,[("eddy_corrected","in1")])
+                #                 ])
+                #     merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
+                #     flow.connect([
+                #                 (merge_filenames,merge,[("out","in_files")]),
+                #                 ])
+                #     # resampling diffusion image and setting output type to short
+                #     flow.connect([
+                #                 (merge,fs_mriconvert,[('merged_file','in_file')]),
+                #                 (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
+                #                 ])
+                #
+                # elif self.config.start_vol > 0 and self.config.end_vol < self.config.max_vol:
+                #     merge_filenames = pe.Node(interface=util.Merge(3),name='merge_files')
+                #     flow.connect([
+                #                 (split_vol,merge_filenames,[("padding1","in1")]),
+                #                 (eddy_correct,merge_filenames,[("eddy_corrected","in1")]),
+                #                 (split_vol,merge_filenames,[("padding2","in3")])
+                #                 ])
+                #     merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
+                #     flow.connect([
+                #                 (merge_filenames,merge,[("out","in_files")]),
+                #                 ])
+                #     # resampling diffusion image and setting output type to short
+                #     flow.connect([
+                #                 (merge,fs_mriconvert,[('merged_file','in_file')]),
+                #                 (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
+                #                 ])
+                # elif self.config.start_vol == 0 and self.config.end_vol < self.config.max_vol:
+                #     merge_filenames = pe.Node(interface=util.Merge(2),name='merge_files')
+                #     flow.connect([
+                #                 (eddy_correct,merge_filenames,[("eddy_corrected","in1")]),
+                #                 (split_vol,merge_filenames,[("padding2","in2")])
+                #                 ])
+                #     merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
+                #     flow.connect([
+                #                 (merge_filenames,merge,[("out","in_files")]),
+                #                 ])
+                #     # resampling diffusion image and setting output type to short
+                #     flow.connect([
+                #                 (merge,fs_mriconvert,[('merged_file','in_file')]),
+                #                 (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
+                #                 ])
+                # else:
+                # resampling diffusion image and setting output type to short
+                flow.connect([
+                            (eddy_correct,fs_mriconvert,[('eddy_corrected','in_file')]),
+                            (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
+                            ])
         else:
             # resampling diffusion image and setting output type to short
             flow.connect([
