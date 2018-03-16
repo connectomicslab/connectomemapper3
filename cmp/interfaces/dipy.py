@@ -340,13 +340,11 @@ class SHOREInputSpec(DipyBaseInterfaceInputSpec):
     constrain_e0 = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
     positive_constraint = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
 
-    save_shm_coeff= traits.Bool(True, usedefault=True,desc=('save Spherical Harmonics Coefficients in file'))
-    out_shm_coeff = File(desc=('Spherical Harmonics Coefficients output file name'))
-
 
 class SHOREOutputSpec(TraitedSpec):
     model = File(desc='Python pickled object of the CSD model fitted.')
-    out_shm_coeff = File(desc=('Spherical Harmonics Coefficients output file name'))
+    fod = File(desc=('Spherical Harmonics Coefficients output file name'))
+    GFA = File(desc=('Generalized Fractional Anisotropy output file name'))
 
 
 class SHORE(DipyDiffusionInterface):
@@ -437,47 +435,40 @@ class SHORE(DipyDiffusionInterface):
         pickle.dump(shore_model, f, -1)
         f.close()
 
-        if self.inputs.save_shm_coeff:
-            # isphere = get_sphere('symmetric724')
-            from dipy.direction import peaks_from_model
-            import multiprocessing as mp
-            IFLOGGER.info('Fitting CSD model')
-            shore_peaks = peaks_from_model(model=shore_model,
-                             data=data,
-                             sphere=sphere,
-                             relative_peak_threshold=.1,
-                             min_separation_angle=25,
-                             mask=msk,
-                             return_sh=True,
-                             return_odf=False,
-                             normalize_peaks=True,
-                             sh_order=self.inputs.radial_order,
-                             npeaks=3,
-                             parallel=True,
-                             nbr_processes=mp.cpu_count())
-            # fods = csd_fit.odf(sphere)
-            # IFLOGGER.info(fods)
-            # IFLOGGER.info(fods.shape)
-            IFLOGGER.info('Save Spherical Harmonics image')
-            nb.Nifti1Image( shore_peaks.shm_coeff, img.affine,None).to_filename(self._gen_filename('shm_coeff'))
+        datashape=data.shape
+        dimsODF=list(datashape)
+        dimsODF[3]=int((lmax+1)*(lmax+2)/2)
+        shODF=np.zeros(dimsODF)
+        GFA=np.zeros(dimsODF[:3])
+        MSD=np.zeros(dimsODF[:3])
 
-            # from dipy.viz import actor, window
-            # ren = window.Renderer()
-            # ren.add(actor.peak_slicer(csd_peaks.peak_dirs,
-            #                           csd_peaks.peak_values,
-            #                           colors=None))
-            #
-            # window.record(ren, out_path=self._gen_filename('csd_direction_field', ext='.png'), size=(900, 900))
+        # calculate odf per slice
+        IFLOGGER.info('Fitting SHORE model')
+        for i in ndindex(data.shape[:1]):
+            IFLOGGER.info('Processing slice number: ', i)
+            start_time = time.time()
+            shorefit   = shoremodel.fit(data[i])
+            sliceODF   = shorefit.odf(sphere)
+            sliceGMSD  = shorefit.msd()
+            sliceGFA   = gfa(sliceODF)
+            shODF[i]   = sf_to_sh(sliceODF,sphere,sh_order=lmax,basis_type='mrtrix')
+            GFA[i]     = np.nan_to_num(sliceGFA)
+            MSD[i]     = np.nan_to_num(sliceGMSD)
+            IFLOGGER.info("Computation Time: " + str(time.time() - start_time) + " seconds")
+
+        IFLOGGER.info('Save Spherical Harmonics / MSD / GFA images')
+
+        nib.Nifti1Image(GFA,affine).to_filename(self._gen_filename('shore_gfa', ext='.nii.gz'))
+        nib.Nifti1Image(MSD,affine).to_filename(self._gen_filename('shore_msd', ext='.nii.gz'))
+        nib.Nifti1Image(shODF,affine).to_filename(self._gen_filename('shore_fod', ext='.nii.gz'))
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['model'] = self._gen_filename('csdmodel', ext='.pklz')
-        if self.inputs.save_fods:
-            outputs['out_shm_coeff'] = self._gen_filename('shm_coeff')
-        # if self.inputs.save_fods:
-        #     outputs['out_fods'] = self._gen_filename('fods')
+        outputs['model'] = self._gen_filename('shoremodel', ext='.pklz')
+        outputs['fod'] = self._gen_filename('shore_fod', ext='.nii.gz')
+        outputs['GFA'] = self._gen_filename('shore_gfa', ext='.nii.gz')
         return outputs
 
 class TensorInformedEudXTractographyInputSpec(BaseInterfaceInputSpec):
@@ -698,6 +689,8 @@ class TensorInformedEudXTractography(DipyBaseInterface):
 class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
     algo = traits.Enum(["deterministic","probabilistic"], usedefault=True,
                               desc=('Use either deterministic maximum (default) or probabilistic direction getter tractography'))
+    recon_model = traits.Enum(["CSD","SHORE"], usedefault=True, desc=('Use either fODFs from CSD (default) or SHORE models'))
+    recon_order = traits.Int(8)
     use_act = traits.Bool(False, desc=('Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier'))
     fast_number_of_classes = traits.Int(3, desc=('Number of tissue classes used by FAST for Anatomically-Constrained Tractography (ACT)'))
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
@@ -876,28 +869,41 @@ class DirectionGetterTractography(DipyBaseInterface):
             # classifier = ThresholdTissueClassifier(fa,self.inputs.fa_thresh)
             classifier = BinaryTissueClassifier(tmsk)
 
-        IFLOGGER.info('Loading CSD model')
-        f = gzip.open(self.inputs.in_model, 'rb')
-        csd_model = pickle.load(f)
-        f.close()
+        if self.inputs.recon_model == 'CSD':
+            IFLOGGER.info('Loading CSD model')
+            f = gzip.open(self.inputs.in_model, 'rb')
+            csd_model = pickle.load(f)
+            f.close()
 
-        IFLOGGER.info('Generating peaks from CSD model')
-        pfm = peaks_from_model(model=csd_model,
-                       data=data,
-                       sphere=sphere,
-                       relative_peak_threshold=.2,
-                       min_separation_angle=25,
-                       mask=tmsk,
-                       return_sh=True,
-                       #sh_basis_type=args.basis,
-                       sh_order=6,
-                       normalize_peaks=False, ##changed
-                       parallel=True)
+            IFLOGGER.info('Generating peaks from CSD model')
+            pfm = peaks_from_model(model=csd_model,
+                           data=data,
+                           sphere=sphere,
+                           relative_peak_threshold=.2,
+                           min_separation_angle=25,
+                           mask=tmsk,
+                           return_sh=True,
+                           #sh_basis_type=args.basis,
+                           sh_order=self.inputs.recon_order,
+                           normalize_peaks=False, ##changed
+                           parallel=True)
 
-        if self.inputs.algo == 'deterministic':
-            dg = DeterministicMaximumDirectionGetter.from_shcoeff(pfm.shm_coeff, max_angle=self.inputs.max_angle, sphere=sphere)
+            if self.inputs.algo == 'deterministic':
+                dg = DeterministicMaximumDirectionGetter.from_shcoeff(pfm.shm_coeff, max_angle=self.inputs.max_angle, sphere=sphere)
+            else:
+                dg = ProbabilisticDirectionGetter.from_shcoeff(pfm.shm_coeff, max_angle=self.inputs.max_angle, sphere=sphere)
+
         else:
-            dg = ProbabilisticDirectionGetter.from_shcoeff(pfm.shm_coeff, max_angle=self.inputs.max_angle, sphere=sphere)
+            from dipy.io.image import load_nifti
+
+            IFLOGGER.info('Loading SHORE FOD')
+            sh, _ = load_nifti(self.inputs.fod_file)
+            IFLOGGER.info('Generating peaks from SHORE model')
+            if self.inputs.algo == 'deterministic':
+                dg = DeterministicMaximumDirectionGetter.from_shcoeff(sh, max_angle=self.inputs.max_angle, sphere=sphere)
+            else:
+                dg = ProbabilisticDirectionGetter.from_shcoeff(sh, max_angle=self.inputs.max_angle, sphere=sphere)
+
 
         IFLOGGER.info(('Performing %s tractography') % (self.inputs.algo))
 

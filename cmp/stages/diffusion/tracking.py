@@ -67,6 +67,7 @@ class Dipy_tracking_config(HasTraits):
     fa_thresh = Float(0.2)
     step_size = traits.Float(0.5)
     max_angle = Float(25.0)
+    sh_order = Int(8)
 
     use_act = traits.Bool(False, desc='Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier')
     fast_number_of_classes = Int(3)
@@ -692,7 +693,7 @@ def create_dipy_tracking_flow(config):
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
 
-    if not config.SD: # If tensor fitting was used
+    if not config.SD and config.imaging_model != 'DSI': # If tensor fitting was used
         dipy_tracking = pe.Node(interface=TensorInformedEudXTractography(),name='dipy_dtieudx_tracking')
         dipy_tracking.inputs.num_seeds = config.number_of_seeds
         dipy_tracking.inputs.fa_thresh = config.fa_thresh
@@ -748,6 +749,12 @@ def create_dipy_tracking_flow(config):
             dipy_tracking.inputs.use_act = config.use_act
             dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
 
+            if config.imaging_model == 'DSI':
+                dipy_tracking.inputs.recon_model = 'SHORE'
+            else:
+                dipy_tracking.inputs.recon_model = 'CSD'
+                dipy_tracking.inputs.recon_order = config.sh_order
+
             # flow.connect([
             #               (inputnode,dipy_tracking,[("bvals","bvals")]),
             #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
@@ -757,6 +764,11 @@ def create_dipy_tracking_flow(config):
                 (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
                 (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
                 ])
+
+            if config.imaging_model == 'DSI':
+                flow.connect([
+                            (inputnode,dipy_tracking,[('fod_file','fod_file')]),
+                            ])
 
             flow.connect([
                 #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
@@ -787,10 +799,21 @@ def create_dipy_tracking_flow(config):
             dipy_tracking.inputs.use_act = config.use_act
             dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
 
+            if config.imaging_model == 'DSI':
+                dipy_tracking.inputs.recon_model = 'SHORE'
+            else:
+                dipy_tracking.inputs.recon_model = 'CSD'
+                dipy_tracking.inputs.recon_order = config.sh_order
+
             # flow.connect([
             #               (inputnode,dipy_tracking,[("bvals","bvals")]),
             #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
             #             ])
+
+            if config.imaging_model == 'DSI':
+                flow.connect([
+                            (inputnode,dipy_tracking,[('fod_file','fod_file')]),
+                            ])
 
             flow.connect([
                 #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),

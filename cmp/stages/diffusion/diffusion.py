@@ -128,7 +128,7 @@ class DiffusionConfig(HasTraits):
         self.gibbs_recon_config = Gibbs_recon_config()
         self.dtk_tracking_config = DTK_tracking_config()
         self.dtb_tracking_config = DTB_tracking_config(imaging_model=self.diffusion_imaging_model)
-        self.dipy_tracking_config = Dipy_tracking_config(imaging_model=self.diffusion_imaging_model,tracking_mode=self.diffusion_model,SD=self.mrtrix_recon_config.local_model)
+        self.dipy_tracking_config = Dipy_tracking_config(imaging_model=self.diffusion_imaging_model,tracking_mode=self.diffusion_model,SD=self.mrtrix_recon_config.local_model,sh_order=self.dipy_recon_config.lmax_order)
         self.mrtrix_tracking_config = MRtrix_tracking_config(tracking_mode=self.diffusion_model,SD=self.mrtrix_recon_config.local_model)
         self.camino_tracking_config = Camino_tracking_config(imaging_model=self.diffusion_imaging_model,tracking_mode=self.diffusion_model)
         self.fsl_tracking_config = FSL_tracking_config()
@@ -139,6 +139,7 @@ class DiffusionConfig(HasTraits):
 
         self.mrtrix_recon_config.on_trait_change(self.update_mrtrix_tracking_SD,'local_model')
         self.dipy_recon_config.on_trait_change(self.update_dipy_tracking_SD,'local_model')
+        self.dipy_recon_config.on_trait_change(self.update_dipy_tracking_sh_order,'lmax_order')
 
         self.camino_recon_config.on_trait_change(self.update_camino_tracking_model,'model_type')
         self.camino_recon_config.on_trait_change(self.update_camino_tracking_model,'local_model')
@@ -235,6 +236,12 @@ class DiffusionConfig(HasTraits):
         self.dipy_tracking_config.tracking_mode = new
         self.camino_tracking_config.tracking_mode = new
         self.update_camino_tracking_model()
+
+    def update_dipy_tracking_sh_order(self,new):
+        if new != 'Auto':
+            self.dipy_tracking_config.sh_order = new
+        else:
+            self.dipy_tracking_config.sh_order = 8
 
     def update_mrtrix_tracking_SD(self,new):
         self.mrtrix_tracking_config.SD = new
@@ -363,6 +370,7 @@ class DiffusionStage(Stage):
 
         elif self.config.recon_processing_tool == 'Dipy':
             recon_flow = create_dipy_recon_flow(self.config.dipy_recon_config)
+
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (inputnode,recon_flow,[('bvals','inputnode.bvals')]),
@@ -372,6 +380,7 @@ class DiffusionStage(Stage):
                         (recon_flow,outputnode,[("outputnode.FA","gFA")]),
                         (recon_flow,outputnode,[("outputnode.mapmri_maps","mapmri_maps")]),
                         ])
+
 
         elif self.config.recon_processing_tool == 'MRtrix':
             recon_flow = create_mrtrix_recon_flow(self.config.mrtrix_recon_config)
@@ -416,19 +425,36 @@ class DiffusionStage(Stage):
 
         elif self.config.tracking_processing_tool == 'Dipy':
             track_flow = create_dipy_tracking_flow(self.config.dipy_tracking_config)
-            flow.connect([
-                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                        (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
-                        (recon_flow, track_flow,[('outputnode.model','inputnode.model')]),
-                        (inputnode,track_flow,[('bvals','inputnode.bvals')]),
-                        (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
-                        (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
-                        (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
-                        # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
-                        (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
-                        (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
-                        # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
-                        ])
+
+            if self.config.diffusion_imaging_model != 'DSI':
+                flow.connect([
+                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
+                            (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
+                            (recon_flow, track_flow,[('outputnode.model','inputnode.model')]),
+                            (inputnode,track_flow,[('bvals','inputnode.bvals')]),
+                            (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
+                            (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
+                            (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
+                            # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
+                            (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
+                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
+                            # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
+                            ])
+            else:
+                flow.connect([
+                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
+                            (recon_flow, outputnode,[('outputnode.fod','fod_file')]),
+                            (recon_flow,track_flow,[('outputnode.fod','inputnode.fod_file')]),
+                            (recon_flow, track_flow,[('outputnode.model','inputnode.model')]),
+                            (inputnode,track_flow,[('bvals','inputnode.bvals')]),
+                            (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
+                            (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
+                            (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
+                            # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
+                            (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
+                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
+                            # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
+                            ])
 
             flow.connect([
                         (track_flow,outputnode,[('outputnode.track_file','track_file')])

@@ -567,7 +567,7 @@ class flipBvec(BaseInterface):
 def create_dipy_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled","bvals","bvecs"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","model","eigVec","RF","grad","bvecs","mapmri_maps"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","MSD","fod","model","eigVec","RF","grad","bvecs","mapmri_maps"],mandatory_inputs=True),name="outputnode")
 
     #Flip gradient table
     flip_bvecs = pe.Node(interface=flipBvec(),name='flip_bvecs')
@@ -678,7 +678,9 @@ def create_dipy_recon_flow(config):
                 # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
                 (dipy_erode, dipy_SHORE,[('out_file','in_mask')]),
                 #(dipy_tensor, dipy_CSD,[('response','response')]),
-                (dipy_SHORE,outputnode,[('model','model')])
+                (dipy_SHORE,outputnode,[('model','model')]),
+                (dipy_SHORE,outputnode,[('fod','fod')]),
+                (dipy_SHORE,outputnode,[('GFA','FA')])
                 ])
 
 
