@@ -31,7 +31,7 @@ from cmp.interfaces.misc import ExtractImageVoxelSizes, Tck2Trk
 class DiffusionConfig(HasTraits):
 
     diffusion_imaging_model_editor = List(['DSI','DTI','HARDI'])
-    diffusion_imaging_model = Str('DSI')
+    diffusion_imaging_model = Str('DTI')
     #resampling = Tuple(2,2,2)
     #interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
     # processing_tool_editor = List(['DTK','MRtrix','Camino','FSL','Gibbs'])
@@ -116,7 +116,7 @@ class DiffusionConfig(HasTraits):
     #                    Group(
     #                         Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
     #                         Item('mrtrix_tracking_config',style='custom'),
-    #                         label='Tracking', show_border=True, show_labels=False),
+    #                         label='Tracking', show_border=True, show_lab514els=False),
     #                    )
 
     def __init__(self):
@@ -175,7 +175,7 @@ class DiffusionConfig(HasTraits):
             self.recon_processing_tool = 'Dipy'
             self.recon_processing_tool_editor = ['Dipy','Custom']
             self.tracking_processing_tool = 'Dipy'
-            self.tracking_processing_tool_editor = ['Dipy','Custom']
+            self.tracking_processing_tool_editor = ['Dipy','MRtrix','Custom']
             self.diffusion_model_editor = ['Deterministic','Probabilistic']
         else:
             # self.processing_tool_editor = ['DTK','MRtrix','Camino','FSL','Gibbs']
@@ -217,7 +217,7 @@ class DiffusionConfig(HasTraits):
         if new == 'Dipy' and self.diffusion_imaging_model != 'DSI':
             self.tracking_processing_tool_editor = ['Dipy','MRtrix']
         elif new == 'Dipy' and self.diffusion_imaging_model == 'DSI':
-            self.tracking_processing_tool_editor = ['Dipy']
+            self.tracking_processing_tool_editor = ['Dipy','MRtrix']
         elif new == 'MRtrix':
             self.tracking_processing_tool_editor = ['MRtrix']
         elif new == 'Custom':
@@ -476,13 +476,23 @@ class DiffusionStage(Stage):
 
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'Dipy':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
-            flow.connect([
-                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),('grad','inputnode.grad')]),
-                        (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
-                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
-                        (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
-			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
-                        ])
+
+            if self.config.diffusion_imaging_model != 'DSI':
+                flow.connect([
+                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),('grad','inputnode.grad')]),
+                            (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
+                            (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
+                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
+    			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
+                            ])
+            else:
+                flow.connect([
+                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),('grad','inputnode.grad')]),
+                            (recon_flow, outputnode,[('outputnode.fod','fod_file')]),
+                            (recon_flow, track_flow,[('outputnode.fod','inputnode.DWI')]),
+                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
+    			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
+                            ])
 
            #  if self.config.diffusion_model == 'Probabilistic':
            #      flow.connect([

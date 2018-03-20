@@ -639,7 +639,8 @@ def create_dipy_recon_flow(config):
                     (inputnode, dipy_CSD,[('bvals','in_bval')]),
                     (flip_bvecs, dipy_CSD,[('bvecs_flipped','in_bvec')]),
                     # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
-                    (dipy_erode, dipy_CSD,[('out_file','in_mask')]),
+                    # (dipy_erode, dipy_CSD,[('out_file','in_mask')]),
+                    (inputnode,dipy_CSD,[("wm_mask_resampled",'in_mask')]),
                     #(dipy_tensor, dipy_CSD,[('response','response')]),
                     (dipy_CSD,outputnode,[('model','model')])
                     ])
@@ -676,7 +677,8 @@ def create_dipy_recon_flow(config):
                 (inputnode, dipy_SHORE,[('bvals','in_bval')]),
                 (flip_bvecs, dipy_SHORE,[('bvecs_flipped','in_bvec')]),
                 # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
-                (dipy_erode, dipy_SHORE,[('out_file','in_mask')]),
+                # (dipy_erode, dipy_SHORE,[('out_file','in_mask')]),
+                (inputnode,dipy_SHORE,[("wm_mask_resampled",'in_mask')]),
                 #(dipy_tensor, dipy_CSD,[('response','response')]),
                 (dipy_SHORE,outputnode,[('model','model')]),
                 (dipy_SHORE,outputnode,[('fod','fod')]),

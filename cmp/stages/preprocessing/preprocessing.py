@@ -286,7 +286,6 @@ class PreprocessingStage(Stage):
 
         flow.connect([
             # (processing_input,concatnode,[('bvecs','in1'),('bvals','in2')]),
-            (processing_input,mr_convert,[('diffusion','in_file')]),
             (processing_input,concatnode,[('bvecs','in1')]),
             (processing_input,concatnode,[('bvals','in2')]),
             (concatnode,mr_convert,[(('out',convertList2Tuple),'grad_fsl')])
@@ -385,6 +384,7 @@ class PreprocessingStage(Stage):
 
                 flow.connect([
                     # (processing_input,mr_convert,[('diffusion','in_file')]),
+                    (processing_input,mr_convert,[('diffusion','in_file')]),
                     (mr_convert,dwi_denoise,[('converted','in_file')]),
                     (flirt_dwimask,dwi_denoise,[('out_file','mask')]),
                     ])
@@ -401,6 +401,10 @@ class PreprocessingStage(Stage):
                     (flirt_dwimask,dwi_denoise,[('out_file','in_mask')]),
                     (dwi_denoise,mr_convert,[('out_file','in_file')])
                     ])
+        else:
+            flow.connect([
+                        (processing_input,mr_convert,[('diffusion','in_file')])
+                        ])
 
         mr_convert_b = pe.Node(interface=MRConvert(out_filename='diffusion_corrected.nii.gz',stride=[+1,+2,+3,+4]),name='mr_convert_b')
 

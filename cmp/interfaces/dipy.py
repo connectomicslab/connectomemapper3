@@ -453,7 +453,7 @@ class SHORE(DipyDiffusionInterface):
         # calculate odf per slice
         IFLOGGER.info('Fitting SHORE model')
         for i in ndindex(data.shape[:1]):
-            IFLOGGER.info('Processing slice number: ', i)
+            IFLOGGER.info("Processing slice #%i " % i)
             start_time = time.time()
             shorefit   = shore_model.fit(data[i])
             sliceODF   = shorefit.odf(sphere)
