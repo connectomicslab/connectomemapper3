@@ -26,7 +26,7 @@ from cmp.stages.diffusion.reconstruction import DTB_gfa
 
 def info():
     print "\nconnectomemapper " + __version__
-    print """Copyright (C) 2009-2017, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
+    print """Copyright (C) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
              Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
              All rights reserved.\n"""
 

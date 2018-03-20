@@ -22,7 +22,8 @@ packages=["cmp","cmp.interfaces","cmp.stages",
           "cmtklib"]
 
 package_data = {'cmp':
-                ['pipelines/anatomical/*.png',
+                ['cmp3_icon.png'
+                'pipelines/anatomical/*.png',
                 'pipelines/diffusion/*.png',
                 'pipelines/functional/*.png'
                 ],

@@ -429,7 +429,7 @@ class ProjectHandler(Handler):
         loaded_project = gui.CMP_Project_Info()
         np_res = loaded_project.configure_traits(view='open_view')
 
-        print "Default subject : "+loaded_project.subject
+        # print "Default subject : "+loaded_project.subject
 
         is_bids = False
 

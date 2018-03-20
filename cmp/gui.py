@@ -13,6 +13,7 @@ import multiprocessing
 from traits.api import *
 from traitsui.api import *
 from traitsui.qt4.extra.qt_view import QtView
+from pyface.api import ImageResource
 
 # CMP imports
 import project
@@ -56,6 +57,7 @@ style_sheet = '''
             }
             QMainWindow {
                 background-color: yellow;
+                image: url("cmp3_icon.png");
             }
             QMainWindow::separator {
                 background: yellow;
@@ -121,7 +123,7 @@ style_sheet = '''
 
 class CMP_Project_Info(HasTraits):
     base_directory = Directory
-    subjects = List(['sub-01','sub-02'])
+    subjects = List([])
     subject = Enum(values='subjects')
     #current_subj = Str()
     anat_warning_msg = Str('\nWarning: selected directory is already configured for anatomical data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
@@ -382,5 +384,6 @@ class CMP_MainWindow(HasTraits):
                        style_sheet=style_sheet,
                        buttons = [process_anatomical,map_connectome],
                        #buttons = [preprocessing, map_connectome, map_custom],
-                       width=0.5, height=0.8, resizable=True#, scrollable=True, resizable=True
+                       width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
+                       icon=ImageResource('cmp3_icon')
                    )
