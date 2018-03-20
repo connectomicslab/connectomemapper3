@@ -553,6 +553,7 @@ class PreprocessingStage(Stage):
                     (fs_mriconvert_dwimask,outputnode,[('out_file','dwi_brain_mask')])
                     ])
 
+        # TODO Implementation of FSL Topup 
 
         if self.config.eddy_current_and_motion_correction:
 
@@ -567,10 +568,12 @@ class PreprocessingStage(Stage):
 
                 if self.config.eddy_correct_motion_correction:
 
-                    mc_flirt = pe.Node(interface=fsl.MCFLIRT(out_file='motion_corrected.nii.gz',ref_vol=0),name='motion_correction')
+                    mc_flirt = pe.Node(interface=fsl.MCFLIRT(out_file='motion_corrected.nii.gz',ref_vol=0, save_mats=True),name='motion_correction')
                     flow.connect([
                                 (mr_convert_b,mc_flirt,[("converted","in_file")])
                                 ])
+
+                    #FIXME rotate b vectors after motion correction (mcflirt)
 
                     flow.connect([
                                 (mc_flirt,eddy_correct,[("out_file","in_file")])
