@@ -274,7 +274,7 @@ class PreprocessingStage(Stage):
         #flipbrain2mrtrix
 
         #Conversion to MRTrix image format ".mif", grad_fsl=(inputnode.inputs.bvecs,inputnode.inputs.bvals)
-        mr_convert = pe.Node(interface=MRConvert(out_filename='diffusion.mif',stride=[1,2,+3,+4]), name='mr_convert')
+        mr_convert = pe.Node(interface=MRConvert(stride=[1,2,+3,+4]), name='mr_convert')
         mr_convert.inputs.quiet = True
         mr_convert.inputs.force_writing = True
 
@@ -377,6 +377,7 @@ class PreprocessingStage(Stage):
         #Diffusion data denoising
         if self.config.denoising:
             if self.config.denoising_algo == "MRtrix (MP-PCA)":
+                mr_convert.inputs.out_filename='diffusion.mif'
                 dwi_denoise = pe.Node(interface=DWIDenoise(out_file='diffusion_denoised.mif',out_noisemap='diffusion_noisemap.mif') , name='dwi_denoise')
                 dwi_denoise.inputs.force_writing = True
                 dwi_denoise.inputs.debug = True
@@ -390,6 +391,7 @@ class PreprocessingStage(Stage):
                     ])
 
             elif self.config.denoising_algo == "Dipy (NLM)":
+                mr_convert.inputs.out_filename='diffusion_denoised.mif'
                 dwi_denoise = pe.Node(interface=dipy.Denoise() , name='dwi_denoise')
                 if self.config.dipy_noise_model == "Gaussian":
                     dwi_denoise.inputs.noise_model = "gaussian"
@@ -402,6 +404,7 @@ class PreprocessingStage(Stage):
                     (dwi_denoise,mr_convert,[('out_file','in_file')])
                     ])
         else:
+            mr_convert.inputs.out_filename='diffusion.mif'
             flow.connect([
                         (processing_input,mr_convert,[('diffusion','in_file')])
                         ])
