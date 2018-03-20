@@ -419,7 +419,7 @@ class RegistrationStage(Stage):
             fsl_flirt.inputs.verbose = False
 
             flow.connect([
-                        (inputnode, fsl_flirt, [('T1','in_file')]),
+                        (inputnode, fsl_flirt, [('brain','in_file')]),
                         (mr_convert_b0, fsl_flirt, [('converted','reference')])
                         ])
 
@@ -533,7 +533,7 @@ class RegistrationStage(Stage):
 
             flow.connect([
                         (mr_convert_b0, fsl_fnirt_crop, [('converted','ref_file')]),
-                        (inputnode, fsl_fnirt_crop, [('T1','in_file')]),
+                        (inputnode, fsl_fnirt_crop, [('brain','in_file')]),
                         (fsl_flirt, fsl_fnirt_crop, [('out_matrix_file','affine_file')]),
                         # (inputnode, fsl_fnirt_crop, [('target_mask','refmask_file')])
                         ])
@@ -739,7 +739,7 @@ class RegistrationStage(Stage):
             affine_registration.inputs.verbose = True
 
             flow.connect([
-                        (inputnode, affine_registration, [('T1','moving_image')]),
+                        (inputnode, affine_registration, [('brain','moving_image')]),
                         (mr_convert_b0, affine_registration, [('converted','fixed_image')])
                         ])
 
@@ -844,7 +844,7 @@ class RegistrationStage(Stage):
 
                 flow.connect([
                         (affine_registration, SyN_registration, [('composite_transform','initial_moving_transform')]),
-                        (inputnode, SyN_registration, [('T1','moving_image')]),
+                        (inputnode, SyN_registration, [('brain','moving_image')]),
                         (mr_convert_b0, SyN_registration, [('converted','fixed_image')])
                         ])
 
