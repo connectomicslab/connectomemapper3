@@ -200,41 +200,46 @@ def refresh_folder(derivatives_directory, subject, input_folders):
 
 def init_dmri_project(project_info, is_new_project):
     dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
+    dmri_inputs_checked = dmri_pipeline.check_input()
 
     derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
 
-    if is_new_project and dmri_pipeline!= None: #and dmri_pipeline!= None:
-        if not os.path.exists(derivatives_directory):
-            try:
-                os.makedirs(derivatives_directory)
-            except os.error:
-                print "%s was already existing" % derivatives_directory
-            finally:
-                print "Created directory %s" % derivatives_directory
+    if dmri_inputs_checked:
+        if is_new_project and dmri_pipeline!= None: #and dmri_pipeline!= None:
+            if not os.path.exists(derivatives_directory):
+                try:
+                    os.makedirs(derivatives_directory)
+                except os.error:
+                    print "%s was already existing" % derivatives_directory
+                finally:
+                    print "Created directory %s" % derivatives_directory
 
-        project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
+            project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
 
-        if os.path.exists(project_info.dmri_config_file):
-            warn_res = project_info.configure_traits(view='dmri_warning_view')
-            if warn_res:
-                dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
+            if os.path.exists(project_info.dmri_config_file):
+                warn_res = project_info.configure_traits(view='dmri_warning_view')
+                if warn_res:
+                    dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
+                else:
+                    return None
             else:
-                return None
+                dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
         else:
-            dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
+            print "int_project dmri_pipeline.global_config.subjects : "
+            print dmri_pipeline.global_conf.subjects
+
+            dmri_conf_loaded = dmri_load_config(dmri_pipeline, project_info.dmri_config_file)
+
+            if not dmri_conf_loaded:
+                return None
+
+        print dmri_pipeline
+        refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
+        dmri_pipeline.config_file = project_info.dmri_config_file
     else:
-        print "int_project dmri_pipeline.global_config.subjects : "
-        print dmri_pipeline.global_conf.subjects
+        print "Missing diffusion inputs"
 
-        dmri_conf_loaded = dmri_load_config(dmri_pipeline, project_info.dmri_config_file)
-
-        if not dmri_conf_loaded:
-            return None
-
-    print dmri_pipeline
-    refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
-    dmri_pipeline.config_file = project_info.dmri_config_file
-    return dmri_pipeline
+    return dmri_inputs_checked, dmri_pipeline
 
 def init_anat_project(project_info, is_new_project):
     anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
@@ -405,9 +410,8 @@ class ProjectHandler(Handler):
                     ui_info.ui.context["object"].project_info.parcellation_scheme = get_anat_process_detail(new_project,'parcellation_stage','parcellation_scheme')
                     # ui_info.ui.context["object"].project_info.atlas_info = get_anat_process_detail(new_project,'parcellation_stage','atlas_info')
 
-                    self.dmri_pipeline= init_dmri_project(new_project, True)
+                    dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(new_project, True)
                     if self.dmri_pipeline != None: #and self.dmri_pipeline != None:
-                        dmri_inputs_checked = self.dmri_pipeline.check_input()
                         if dmri_inputs_checked:
                             # new_project.configure_traits(view='diffusion_imaging_model_select_view')
                             # self.dmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
@@ -517,9 +521,8 @@ class ProjectHandler(Handler):
                 loaded_project.process_type = get_dmri_process_detail(loaded_project,'Global','process_type')
                 loaded_project.diffusion_imaging_model = get_dmri_process_detail(loaded_project,'Global','diffusion_imaging_model')
 
-                self.dmri_pipeline= init_dmri_project(loaded_project, False)
+                dmri_inputs_checked, self.dmri_pipeline= init_dmri_project(loaded_project, False)
                 if self.dmri_pipeline != None: #and self.dmri_pipeline != None:
-                    dmri_inputs_checked = self.dmri_pipeline.check_input()
                     if dmri_inputs_checked:
                         update_dmri_last_processed(loaded_project, self.dmri_pipeline)
                         ui_info.ui.context["object"].project_info = loaded_project
@@ -534,10 +537,9 @@ class ProjectHandler(Handler):
                         dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
                         self.project_loaded = True
             else:
-                self.dmri_pipeline= init_dmri_project(loaded_project, True)
+                dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(loaded_project, True)
                 print "No existing config for diffusion pipeline found - Created new diffusion pipeline with default parameters"
                 if self.dmri_pipeline != None: #and self.dmri_pipeline != None:
-                    dmri_inputs_checked = self.dmri_pipeline.check_input()
                     if dmri_inputs_checked:
                         ui_info.ui.context["object"].project_info = loaded_project
                         # new_project.configure_traits(view='diffusion_imaging_model_select_view')
@@ -615,9 +617,8 @@ class ProjectHandler(Handler):
                 changed_project.process_type = get_dmri_process_detail(changed_project,'Global','process_type')
                 changed_project.diffusion_imaging_model = get_dmri_process_detail(changed_project,'Global','diffusion_imaging_model')
 
-                self.dmri_pipeline= init_dmri_project(changed_project, False)
+                dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(changed_project, False)
                 if self.dmri_pipeline != None: #and self.dmri_pipeline != None:
-                    dmri_inputs_checked = self.dmri_pipeline.check_input()
                     if dmri_inputs_checked:
                         update_dmri_last_processed(changed_project, self.dmri_pipeline)
                         ui_info.ui.context["object"].project_info = changed_project
@@ -634,9 +635,8 @@ class ProjectHandler(Handler):
 
             else:
                 print "Not existing diffusion config file (%s) for subject %s - Created new diffusion pipeline" % (changed_project,changed_project.subject)
-                self.dmri_pipeline= init_dmri_project(changed_project, True)
+                dmri_inputs_checked, self.dmri_pipeline= init_dmri_project(changed_project, True)
                 if self.dmri_pipeline != None: #and self.dmri_pipeline != None:
-                    dmri_inputs_checked = self.dmri_pipeline.check_input()
                     if dmri_inputs_checked:
                         ui_info.ui.context["object"].project_info = changed_project
                         # new_project.configure_traits(view='diffusion_imaging_model_select_view')
