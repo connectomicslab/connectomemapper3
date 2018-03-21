@@ -509,6 +509,8 @@ class ProjectHandler(Handler):
                 dmri_config_selected = loaded_project.configure_traits(view='dmri_select_config_to_load')
                 if not dmri_config_selected:
                     return 0
+            elif not loaded_project.dmri_available_config:
+                loaded_project.dmri_config_to_load = ''
             else:
                 loaded_project.dmri_config_to_load = loaded_project.dmri_available_config[0]
 

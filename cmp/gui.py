@@ -333,7 +333,7 @@ class CMP_MainWindow(HasTraits):
     load_project = Action(name='Load Connectome Data...',action='load_project')
     process_anatomical = Action(name='Process Anatomical Data!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
     #preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
-    map_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked==True')
+    map_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked')
     #map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
     change_subject = Action(name='Change subject',action='change_subject',enabled_when='handler.project_loaded==True')
 
@@ -356,7 +356,7 @@ class CMP_MainWindow(HasTraits):
                             ),
                             HGroup(
                                 Item('dmri_pipeline',style='custom',show_label=False),
-                                label='Diffusion pipeline',enabled_when='handler.anat_outputs_checked==True'
+                                label='Diffusion pipeline',visible_when='handler.anat_outputs_checked and handler.dmri_inputs_checked'
                             ),
                             orientation='horizontal', layout='tabbed', springy=True, visible_when='handler.anat_inputs_checked==True'),
                         title='Connectome Mapper 3',
