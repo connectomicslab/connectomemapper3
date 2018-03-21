@@ -84,11 +84,11 @@ if __name__ == "__main__":
         #traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
         mw = cmp.gui.CMP_MainWindow()
         mw_res = mw.configure_traits()
-    elif argc==3: # connectomemapper bids_folder sub-<label> anatomical_ini_file diffusion_ini_file
+    elif argc==5: # connectomemapper bids_folder sub-<label> anatomical_ini_file diffusion_ini_file
 
         project = cmp.gui.CMP_Project_Info()
         project.base_directory = os.path.abspath(sys.argv[1])
-        project.subject = os.path.abspath(sys.argv[2])
+        project.subject = ['%s' % sys.argv[2]]
         project.anat_config_file = os.path.abspath(sys.argv[3])
         project.dmri_config_file = os.path.abspath(sys.argv[4])
 

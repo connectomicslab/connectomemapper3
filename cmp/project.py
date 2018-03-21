@@ -206,6 +206,7 @@ def init_dmri_project(project_info, is_new_project):
 
     if dmri_inputs_checked:
         if is_new_project and dmri_pipeline!= None: #and dmri_pipeline!= None:
+            print "Initialize dmri project"
             if not os.path.exists(derivatives_directory):
                 try:
                     os.makedirs(derivatives_directory)
@@ -216,13 +217,16 @@ def init_dmri_project(project_info, is_new_project):
 
             project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
 
+
             if os.path.exists(project_info.dmri_config_file):
                 warn_res = project_info.configure_traits(view='dmri_warning_view')
                 if warn_res:
+                    print "Read diffusion config file (%s)" % project_info.dmri_config_file
                     dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
                 else:
                     return None
             else:
+                print "Create diffusion config file (%s)" % project_info.dmri_config_file
                 dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
         else:
             print "int_project dmri_pipeline.global_config.subjects : "
@@ -510,7 +514,7 @@ class ProjectHandler(Handler):
                 if not dmri_config_selected:
                     return 0
             elif not loaded_project.dmri_available_config:
-                loaded_project.dmri_config_to_load = ''
+                loaded_project.dmri_config_to_load = '%s_diffusion' % loaded_project.subject
             else:
                 loaded_project.dmri_config_to_load = loaded_project.dmri_available_config[0]
 
@@ -519,7 +523,7 @@ class ProjectHandler(Handler):
             print "Diffusion config file: %s"%loaded_project.dmri_config_file
 
             if os.path.isfile(loaded_project.dmri_config_file):
-
+                print "Load existing diffusion config file"
                 loaded_project.process_type = get_dmri_process_detail(loaded_project,'Global','process_type')
                 loaded_project.diffusion_imaging_model = get_dmri_process_detail(loaded_project,'Global','diffusion_imaging_model')
 
