@@ -130,7 +130,7 @@ class CMP_Project_Info(HasTraits):
     dmri_warning_msg = Str('\nWarning: selected directory is already configured for diffusion data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
 
     #process_type = Enum('diffusion',['diffusion','fMRI'])
-    diffusion_imaging_model = Enum('DSI',['DSI','DTI','HARDI'])
+    diffusion_imaging_model = Enum('DTI',['DSI','DTI','HARDI'])
     parcellation_scheme = Str('Lausanne2008')
     atlas_info = Dict()
 
@@ -142,7 +142,7 @@ class CMP_Project_Info(HasTraits):
     anat_config_error_msg = Str('')
     anat_config_to_load = Str()
     anat_available_config = List()
-    anat_config_to_load_msg = Str('Several configuration files available.Select which one to load:\n')
+    anat_config_to_load_msg = Str('Several configuration files available. Select which one to load:\n')
     anat_last_date_processed = Str('Not yet processed')
     anat_last_stage_processed = Str('Not yet processed')
 
@@ -152,7 +152,7 @@ class CMP_Project_Info(HasTraits):
     dmri_config_error_msg = Str('')
     dmri_config_to_load = Str()
     dmri_available_config = List()
-    dmri_config_to_load_msg = Str('Several configuration files available.Select which one to load:\n')
+    dmri_config_to_load_msg = Str('Several configuration files available. Select which one to load:\n')
     dmri_last_date_processed = Str('Not yet processed')
     dmri_last_stage_processed = Str('Not yet processed')
 
@@ -212,7 +212,7 @@ class CMP_Project_Info(HasTraits):
 
     traits_view = QtView(Include('data_manager'))
 
-    create_view = QtView( #Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
+    create_view = View( #Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
                         Group(
                             Item('base_directory',label='Base directory'),
                             ),
@@ -221,7 +221,7 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    subject_view = QtView(
+    subject_view = View(
                         Group(
                             Item('subject',label='Subject to be processed'),
                             ),
@@ -230,7 +230,7 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    dmri_warning_view = QtView(
+    dmri_warning_view = View(
                         Group(
                             Item('dmri_warning_msg',style='readonly',show_label=False),
                             ),
@@ -239,7 +239,7 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    anat_warning_view = QtView(
+    anat_warning_view = View(
                         Group(
                             Item('anat_warning_msg',style='readonly',show_label=False),
                             ),
@@ -248,7 +248,7 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    anat_config_error_view = QtView(
+    anat_config_error_view = View(
                             Group(
                                 Item('anat_config_error_msg', style='readonly',show_label=False),
                                 ),
@@ -257,7 +257,7 @@ class CMP_Project_Info(HasTraits):
                             #style_sheet=style_sheet,
                             buttons=['OK','Cancel'])
 
-    dmri_config_error_view = QtView(
+    dmri_config_error_view = View(
                             Group(
                                 Item('dmri_config_error_msg', style='readonly',show_label=False),
                                 ),
@@ -266,7 +266,7 @@ class CMP_Project_Info(HasTraits):
                             #style_sheet=style_sheet,
                             buttons=['OK','Cancel'])
 
-    open_view = QtView(
+    open_view = View(
                         Group(
                             Item('base_directory',label='Base directory'),
                             ),
@@ -275,7 +275,7 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    anat_select_config_to_load = QtView(
+    anat_select_config_to_load = View(
                                   Group(
                                       Item('anat_config_to_load_msg',style='readonly',show_label=False),
                                       Item('anat_config_to_load',style='custom',editor=EnumEditor(name='anat_available_config'),show_label=False),
@@ -285,7 +285,7 @@ class CMP_Project_Info(HasTraits):
                                   #style_sheet=style_sheet,
                                   buttons=['OK','Cancel'])
 
-    anat_custom_map_view = QtView(
+    anat_custom_map_view = View(
                         Group(
                             Item('anat_custom_last_stage',editor=EnumEditor(name='anat_stage_names'),style='custom',show_label=False),
                             ),
@@ -294,7 +294,7 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    diffusion_imaging_model_select_view = QtView(
+    diffusion_imaging_model_select_view = View(
                                                 Group(
                                                     Item('diffusion_imaging_model',label='Diffusion MRI modality'),
                                                     ),
@@ -302,7 +302,7 @@ class CMP_Project_Info(HasTraits):
                                                 kind='modal',
                                                 buttons=['OK','Cancel'])
 
-    dmri_select_config_to_load = QtView(
+    dmri_select_config_to_load = View(
                                 Group(
                                     Item('dmri_config_to_load_msg',style='readonly',show_label=False),
                                     ),
@@ -312,7 +312,7 @@ class CMP_Project_Info(HasTraits):
                                 #style_sheet=style_sheet,
                                 buttons=['OK','Cancel'])
 
-    dmri_custom_map_view = QtView(
+    dmri_custom_map_view = View(
                         Group(
                             Item('dmri_custom_last_stage',editor=EnumEditor(name='dmri_stage_names'),style='custom',show_label=False),
                             ),

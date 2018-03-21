@@ -165,6 +165,7 @@ class DiffusionConfig(HasTraits):
         self.dtk_recon_config.imaging_model = new
         self.mrtrix_recon_config.imaging_model = new
         self.dipy_recon_config.imaging_model = new
+        self.dipy_tracking_config.imaging_model = new
         #self.camino_recon_config.diffusion_imaging_model = new
         self.dtk_tracking_config.imaging_model = new
         self.dtb_tracking_config.imaging_model = new
