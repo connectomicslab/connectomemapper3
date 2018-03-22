@@ -88,7 +88,8 @@ if __name__ == "__main__":
 
         project = cmp.gui.CMP_Project_Info()
         project.base_directory = os.path.abspath(sys.argv[1])
-        project.subject = ['%s' % sys.argv[2]]
+        project.subjects = ['%s' % sys.argv[2]]
+        project.subject = '%s' % sys.argv[2]
         project.anat_config_file = os.path.abspath(sys.argv[3])
         project.dmri_config_file = os.path.abspath(sys.argv[4])
 
@@ -103,7 +104,7 @@ if __name__ == "__main__":
         dmri_pipeline = cmp.project.init_dmri_project(project, False)
         if dmri_pipeline != None:
             dmri_valid_inputs = dmri_pipeline.check_input(gui=False)
-            anat_valid_outputs = anat_pipeline.check_output(gui=False)
+            anat_valid_outputs, msg = anat_pipeline.check_output()
             if anat_valid_outputs and dmri_valid_inputs:
                 dmri_pipeline.process()
             else:
