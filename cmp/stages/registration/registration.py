@@ -1467,7 +1467,9 @@ class RegistrationStage(Stage):
             if self.config.registration_mode == 'FSL':
                 fnirt_results_path = os.path.join(self.stage_dir,"fsl_fnirt_crop","result_fsl_fnirt_crop.pklz")
             elif self.config.registration_mode == 'ANTs':
-                syn_results_path = os.path.join(self.stage_dir,"SyN_registration","result_SyN_registration.pklz")
+                if self.config.ants_perform_syn:
+                    syn_results_path = os.path.join(self.stage_dir,"SyN_registration","result_SyN_registration.pklz")
+
         else:
             target_path = os.path.join(self.stage_dir,"fMRI_skullstrip","result_fMRI_skullstrip.pklz")
             reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
@@ -1515,30 +1517,45 @@ class RegistrationStage(Stage):
 
                     elif self.config.registration_mode == 'ANTs':
                         if(os.path.exists(syn_results_path)):
-                            syn_results = pickle.load(gzip.open(syn_results_path))
+
                             print("reg_results.inputs['fixed_image']: %s"%reg_results.inputs['fixed_image'][0])
                             print("reg_results.outputs.warped_image: %s"%reg_results.outputs.warped_image)
-                            print("syn_results.inputs['fixed_image']: %s"%syn_results.inputs['fixed_image'][0])
+
                             print("T1_results.outputs.output_image: %s"%T1_results.outputs.output_image)
                             self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['fixed_image'][0],reg_results.outputs.warped_image,'-l',"Copper",'-t','0.5']
-                            self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',syn_results.inputs['fixed_image'][0],T1_results.outputs.output_image,'-l',"Copper",'-t','0.5']
-                            #self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
+
+                            if self.config.ants_perform_syn:
+                                syn_results = pickle.load(gzip.open(syn_results_path))
+                                print("syn_results.inputs['fixed_image']: %s"%syn_results.inputs['fixed_image'][0])
+                                self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',syn_results.inputs['fixed_image'][0],T1_results.outputs.output_image,'-l',"Copper",'-t','0.5']
+                                #self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
 
                             print("rois_results.outputs.output_images: %s"%rois_results.outputs.output_images)
                             print("pves_results.outputs.output_images: %s"%pves_results.outputs.output_images)
 
                             if type(rois_results.outputs.output_images) == str:
+                                if self.config.ants_perform_syn:
                                     self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fslview',syn_results.inputs['fixed_image'][0],rois_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
+                                else:
+                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fslview',reg_results.inputs['fixed_image'][0],rois_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
                             else:
                                 for roi_output in rois_results.outputs.output_images:
+                                    if self.config.ants_perform_syn:
                                         self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',syn_results.inputs['fixed_image'][0],roi_output,'-l','Random-Rainbow','-t','0.5']
+                                    else:
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',reg_results.inputs['fixed_image'][0],roi_output,'-l','Random-Rainbow','-t','0.5']
 
                             if type(pves_results.outputs.output_images) == str:
+                                if self.config.ants_perform_syn:
                                     self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fslview',syn_results.inputs['fixed_image'][0],pves_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
+                                else:
+                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fslview',reg_results.inputs['fixed_image'][0],pves_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
                             else:
                                 for pve_output in pves_results.outputs.output_images:
+                                    if self.config.ants_perform_syn:
                                         self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',syn_results.inputs['fixed_image'][0],pve_output,'-l','Random-Rainbow','-t','0.5']
-
+                                    else:
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',reg_results.inputs['fixed_image'][0],pve_output,'-l','Random-Rainbow','-t','0.5']
         else:
             target = pickle.load(gzip.open(target_path))
             reg_results = pickle.load(gzip.open(reg_results_path))
