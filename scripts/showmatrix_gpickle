@@ -8,9 +8,9 @@ import numpy as np
 import copy
 try:
     import matplotlib.colors as colors
-    import matplotlib
+    # import matplotlib
     #matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
-    from matplotlib import title, imshow, show, cm, figure, pcolor, colorbar, savefig
+    from matplotlib.pyplot import title, imshow, show, cm, figure, pcolor, colorbar, savefig
 except ImportError:
     print("matplotlib not available. Can not plot matrix")
 
@@ -506,7 +506,7 @@ if __name__ == "__main__":
             print "sys.argv[5]==%s" % sys.argv[6]
             if sys.argv[6]=="log":
                 print("Warning: log scale not employed as circular layout used")
-                
+
             fig, axes = plot_connectivity_circle(b, node_names, title=title)
         else:
             print("Error: invalid layout mode ('matrix' or 'circular')")
