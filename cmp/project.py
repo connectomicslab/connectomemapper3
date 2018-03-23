@@ -198,12 +198,13 @@ def refresh_folder(derivatives_directory, subject, input_folders):
             finally:
                 print "Created directory %s" % full_p
 
-def init_dmri_project(project_info, is_new_project):
+def init_dmri_project(project_info, is_new_project, gui=True):
     dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
-    dmri_inputs_checked = dmri_pipeline.check_input()
 
     derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
+    refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
 
+    dmri_inputs_checked = dmri_pipeline.check_input(gui=gui)
     if dmri_inputs_checked:
         if is_new_project and dmri_pipeline!= None: #and dmri_pipeline!= None:
             print "Initialize dmri project"
@@ -238,7 +239,6 @@ def init_dmri_project(project_info, is_new_project):
                 return None
 
         print dmri_pipeline
-        refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
         dmri_pipeline.config_file = project_info.dmri_config_file
     else:
         print "Missing diffusion inputs"

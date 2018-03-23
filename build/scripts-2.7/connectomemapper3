@@ -101,9 +101,10 @@ if __name__ == "__main__":
             else:
                 sys.exit(1)
 
-        dmri_pipeline = cmp.project.init_dmri_project(project, False)
+        dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, False)
         if dmri_pipeline != None:
-            dmri_valid_inputs = dmri_pipeline.check_input(gui=False)
+            dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+            dmri_pipeline.atlas_info = anat_pipeline.atlas_info
             anat_valid_outputs, msg = anat_pipeline.check_output()
             if anat_valid_outputs and dmri_valid_inputs:
                 dmri_pipeline.process()
