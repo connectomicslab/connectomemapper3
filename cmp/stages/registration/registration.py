@@ -1516,7 +1516,6 @@ class RegistrationStage(Stage):
                                             self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',fnirt_results.inputs['ref_file'],pve_output,'-l','Random-Rainbow','-t','0.5']
 
                     elif self.config.registration_mode == 'ANTs':
-                        if(os.path.exists(syn_results_path)):
 
                             print("reg_results.inputs['fixed_image']: %s"%reg_results.inputs['fixed_image'][0])
                             print("reg_results.outputs.warped_image: %s"%reg_results.outputs.warped_image)
@@ -1525,35 +1524,39 @@ class RegistrationStage(Stage):
                             self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['fixed_image'][0],reg_results.outputs.warped_image,'-l',"Copper",'-t','0.5']
 
                             if self.config.ants_perform_syn:
-                                syn_results = pickle.load(gzip.open(syn_results_path))
-                                print("syn_results.inputs['fixed_image']: %s"%syn_results.inputs['fixed_image'][0])
-                                self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',syn_results.inputs['fixed_image'][0],T1_results.outputs.output_image,'-l',"Copper",'-t','0.5']
-                                #self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
-
+                                if(os.path.exists(syn_results_path)):
+                                    syn_results = pickle.load(gzip.open(syn_results_path))
+                                    print("syn_results.inputs['fixed_image']: %s"%syn_results.inputs['fixed_image'][0])
+                                    self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',syn_results.inputs['fixed_image'][0],T1_results.outputs.output_image,'-l',"Copper",'-t','0.5']
+                                    #self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
                             print("rois_results.outputs.output_images: %s"%rois_results.outputs.output_images)
                             print("pves_results.outputs.output_images: %s"%pves_results.outputs.output_images)
 
                             if type(rois_results.outputs.output_images) == str:
                                 if self.config.ants_perform_syn:
-                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fslview',syn_results.inputs['fixed_image'][0],rois_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
+                                    if(os.path.exists(syn_results_path)):
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fslview',syn_results.inputs['fixed_image'][0],rois_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
                                 else:
                                     self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fslview',reg_results.inputs['fixed_image'][0],rois_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
                             else:
                                 for roi_output in rois_results.outputs.output_images:
                                     if self.config.ants_perform_syn:
-                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',syn_results.inputs['fixed_image'][0],roi_output,'-l','Random-Rainbow','-t','0.5']
+                                        if(os.path.exists(syn_results_path)):
+                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',syn_results.inputs['fixed_image'][0],roi_output,'-l','Random-Rainbow','-t','0.5']
                                     else:
                                         self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',reg_results.inputs['fixed_image'][0],roi_output,'-l','Random-Rainbow','-t','0.5']
 
                             if type(pves_results.outputs.output_images) == str:
                                 if self.config.ants_perform_syn:
-                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fslview',syn_results.inputs['fixed_image'][0],pves_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
+                                    if(os.path.exists(syn_results_path)):
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fslview',syn_results.inputs['fixed_image'][0],pves_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
                                 else:
                                     self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fslview',reg_results.inputs['fixed_image'][0],pves_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
                             else:
                                 for pve_output in pves_results.outputs.output_images:
                                     if self.config.ants_perform_syn:
-                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',syn_results.inputs['fixed_image'][0],pve_output,'-l','Random-Rainbow','-t','0.5']
+                                        if(os.path.exists(syn_results_path)):
+                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',syn_results.inputs['fixed_image'][0],pve_output,'-l','Random-Rainbow','-t','0.5']
                                     else:
                                         self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',reg_results.inputs['fixed_image'][0],pve_output,'-l','Random-Rainbow','-t','0.5']
         else:
