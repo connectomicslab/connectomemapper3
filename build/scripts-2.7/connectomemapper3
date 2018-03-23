@@ -31,7 +31,14 @@ def info():
              All rights reserved.\n"""
 
 def usage():
-    print "Usage: connectomemapper3 input_folder ini_file"
+    print "Usage: connectomemapper3 bids_directory sub-<label> anatomical_config_ini_file prdiffusion_config_ini_file"
+    print ""
+    print "bids_directory <Str> : full path of root directory of bids dataset"
+    print "sub-<label> <Str>: subject name"
+    print "anatomical_config_ini <Str>: full path of .ini configuration file for anatomical pipeline"
+    print "process_anatomical <Bool> : If True, process anatomical pipeline"
+    print "diffusion_config_ini_file <Str>: full path of .ini configuration file for diffusion pipeline"
+    print "process_diffusion <Bool> : If True, process diffusion pipeline"
 
 # Checks the needed dependencies. We call directly the functions instead
 # of just checking existence in $PATH in order to handl missing libraries.
@@ -84,19 +91,18 @@ if __name__ == "__main__":
         #traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
         mw = cmp.gui.CMP_MainWindow()
         mw_res = mw.configure_traits()
-    elif argc==5: # connectomemapper bids_folder sub-<label> anatomical_ini_file diffusion_ini_file
+    elif argc==5: # connectomemapper bids_folder sub-<label> anatomical_ini_file process_anatomical
 
         project = cmp.gui.CMP_Project_Info()
         project.base_directory = os.path.abspath(sys.argv[1])
         project.subjects = ['%s' % sys.argv[2]]
         project.subject = '%s' % sys.argv[2]
         project.anat_config_file = os.path.abspath(sys.argv[3])
-        project.dmri_config_file = os.path.abspath(sys.argv[4])
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline != None:
             anat_valid_inputs = anat_pipeline.check_input(gui=False)
-            if anat_valid_inputs:
+            if anat_valid_inputs and sys.argv[4]:
                 anat_pipeline.process()
             else:
                 sys.exit(1)
@@ -107,6 +113,33 @@ if __name__ == "__main__":
             dmri_pipeline.atlas_info = anat_pipeline.atlas_info
             anat_valid_outputs, msg = anat_pipeline.check_output()
             if anat_valid_outputs and dmri_valid_inputs:
+                dmri_pipeline.process()
+            else:
+                sys.exit(1)
+
+    elif argc==7: # connectomemapper bids_folder sub-<label> anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion
+
+        project = cmp.gui.CMP_Project_Info()
+        project.base_directory = os.path.abspath(sys.argv[1])
+        project.subjects = ['%s' % sys.argv[2]]
+        project.subject = '%s' % sys.argv[2]
+        project.anat_config_file = os.path.abspath(sys.argv[3])
+        project.dmri_config_file = os.path.abspath(sys.argv[5])
+
+        anat_pipeline = cmp.project.init_anat_project(project, False)
+        if anat_pipeline != None:
+            anat_valid_inputs = anat_pipeline.check_input(gui=False)
+            if anat_valid_inputs and sys.argv[4]:
+                anat_pipeline.process()
+            else:
+                sys.exit(1)
+
+        dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, False)
+        if dmri_pipeline != None:
+            dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+            dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+            anat_valid_outputs, msg = anat_pipeline.check_output()
+            if anat_valid_outputs and dmri_valid_inputs and sys.argv[6]:
                 dmri_pipeline.process()
             else:
                 sys.exit(1)

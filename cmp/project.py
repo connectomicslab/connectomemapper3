@@ -382,6 +382,7 @@ class ProjectHandler(Handler):
         if np_res and os.path.exists(new_project.base_directory):
             try:
                 bids_layout = BIDSLayout(new_project.base_directory)
+                print bids_layout
                 for subj in bids_layout.get_subjects():
                     new_project.subjects.append('sub-'+str(subj))
                 # new_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
