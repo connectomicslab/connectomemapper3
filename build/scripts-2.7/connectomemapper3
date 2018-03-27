@@ -104,6 +104,8 @@ if __name__ == "__main__":
             anat_valid_inputs = anat_pipeline.check_input(gui=False)
             if anat_valid_inputs and sys.argv[4]:
                 anat_pipeline.process()
+            elif anat_valid_inputs and sys.argv[4]==False:
+                pass
             else:
                 sys.exit(1)
 
@@ -129,9 +131,15 @@ if __name__ == "__main__":
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline != None:
             anat_valid_inputs = anat_pipeline.check_input(gui=False)
-            if anat_valid_inputs and sys.argv[4]:
+
+            if anat_valid_inputs and sys.argv[4]=='True':
+                print "Process anatomical pipeline"
                 anat_pipeline.process()
+            elif anat_valid_inputs and sys.argv[4]=='False':
+                print "collecting precomputed anatomical pipeline"
+                pass
             else:
+                print "Invalid inputs"
                 sys.exit(1)
 
         dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, False)
@@ -139,7 +147,8 @@ if __name__ == "__main__":
             dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
             dmri_pipeline.atlas_info = anat_pipeline.atlas_info
             anat_valid_outputs, msg = anat_pipeline.check_output()
-            if anat_valid_outputs and dmri_valid_inputs and sys.argv[6]:
+            print sys.argv[6]
+            if anat_valid_outputs and dmri_valid_inputs and sys.argv[6]=='True':
                 dmri_pipeline.process()
             else:
                 sys.exit(1)
