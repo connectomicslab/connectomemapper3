@@ -125,6 +125,10 @@ class CMP_Project_Info(HasTraits):
     base_directory = Directory
     subjects = List([])
     subject = Enum(values='subjects')
+
+    subject_sessions = List([])
+    subject_session = Enum(values='subject_sessions')
+
     #current_subj = Str()
     anat_warning_msg = Str('\nWarning: selected directory is already configured for anatomical data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
     dmri_warning_msg = Str('\nWarning: selected directory is already configured for diffusion data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
@@ -175,6 +179,7 @@ class CMP_Project_Info(HasTraits):
                         spring,
                         Group(
                             Item('subject',style='readonly',show_label=False,resizable=True),
+                            Item('session',style='readonly',show_label=False,resizable=True),
                             label='Subject',
                         ),
                         spring,
@@ -224,9 +229,11 @@ class CMP_Project_Info(HasTraits):
     subject_view = View(
                         Group(
                             Item('subject',label='Subject to be processed'),
+                            Item('session',label='Session to be processed'),
+                            Item('diffusion_imaging_model',style='custom'),
                             ),
                         kind='modal',
-                        title='Subject selection',
+                        title='Subject and session selection',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
