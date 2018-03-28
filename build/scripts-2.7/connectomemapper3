@@ -136,7 +136,7 @@ if __name__ == "__main__":
                 print "Process anatomical pipeline"
                 anat_pipeline.process()
             elif anat_valid_inputs and sys.argv[4]=='False':
-                print "collecting precomputed anatomical pipeline"
+                print "Collecting precomputed anatomical pipeline"
                 pass
             else:
                 print "Invalid inputs"

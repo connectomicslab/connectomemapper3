@@ -56,6 +56,7 @@ class Global_Configuration(HasTraits):
     process_type = Str('anatomical')
     subjects = List(trait=Str)
     subject = Str
+    subject_session = Str
 
 class Check_Input_Notification(HasTraits):
     message = Str
@@ -132,7 +133,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = self.subject
 
-        self.subject_directory =  os.path.join(self.base_directory,self.subject)
+        if len(project_info.subject_sessions) > 0:
+            self.global_conf.subject_session = project_info.subject_session
+            self.subject_directory =  os.path.join(self.base_directory,self.subject,self.global_conf.subject_session)
+        else:
+            self.global_conf.subject_session = ''
+            self.subject_directory =  os.path.join(self.base_directory,self.subject)
+
         self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
 
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
@@ -206,7 +213,15 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         t1_available = False
         valid_inputs = False
 
-        T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
+        if self.global_conf.subject_session == '':
+            T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
+        else:
+            files = layout.get(subject=subj,type='T1w',extensions='.nii.gz',session=self.global_conf.subject_session)
+            if len(files) > 0:
+                T1_file = os.path.abspath(files[0].path)
+            else:
+                error(message="T1w image not found for subject %s, session %s."%(self.subject,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                return
 
         print "Looking in %s for...." % self.base_directory
         print "T1_file : %s" % T1_file
@@ -235,7 +250,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         if t1_available:
             #Copy diffusion data to derivatives / cmp  / subject / dwi
-            out_T1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
+            if self.global_conf.subject_session == '':
+                out_T1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
+            else:
+                out_T1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'anat',self.subject+'_'+self.global_conf.subject_session+'_T1w.nii.gz')
+
             shutil.copy(src=T1_file,dst=out_T1_file)
 
             valid_inputs = True
@@ -275,13 +294,21 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         wm_available = False
         roivs_available = False
         valid_output = False
-        anat_deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,'anat')
 
-        T1_file = os.path.join(anat_deriv_subject_directory,self.subject+'_T1w_head.nii.gz')
-        brain_file = os.path.join(anat_deriv_subject_directory,self.subject+'_T1w_brain.nii.gz')
-        brainmask_file = os.path.join(anat_deriv_subject_directory,self.subject+'_T1w_brainmask.nii.gz')
-        wm_mask_file = os.path.join(anat_deriv_subject_directory,self.subject+'_T1w_class-WM.nii.gz')
-        roiv_files = glob.glob(anat_deriv_subject_directory+"/"+self.subject+"_T1w_parc_scale*.nii.gz")
+        subject = self.subject
+
+        if self.global_conf.subject_session == '':
+            anat_deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,'anat')
+        else:
+            anat_deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session,'anat')
+            subject = "_".join(subject,self.global_conf.subject_session)
+
+
+        T1_file = os.path.join(anat_deriv_subject_directory,subject+'_T1w_head.nii.gz')
+        brain_file = os.path.join(anat_deriv_subject_directory,subject+'_T1w_brain.nii.gz')
+        brainmask_file = os.path.join(anat_deriv_subject_directory,subject+'_T1w_brainmask.nii.gz')
+        wm_mask_file = os.path.join(anat_deriv_subject_directory,subject+'_T1w_class-WM.nii.gz')
+        roiv_files = glob.glob(anat_deriv_subject_directory+"/"+subject+"_T1w_parc_scale*.nii.gz")
 
         error_message = ''
 
@@ -331,9 +358,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         return valid_output,error_message
 
-    def create_pipeline_flow(self):
-        subject_directory = os.path.join(self.base_directory,self.subject)
-        deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+    def create_pipeline_flow(self,deriv_subject_directory):
+        subject_directory = self.subject_directory
 
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
@@ -501,7 +527,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
-        deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+        if self.global_conf.subject_session == '':
+            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+        else:
+            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session)
+            self.subject = "_".join(self.subject,self.global_conf.subject_session)
 
         # Initialization
         if os.path.isfile(os.path.join(deriv_subject_directory,"anatomical_pipeline.log")):
@@ -516,7 +546,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         iflogger = logging.getLogger('interface')
 
         iflogger.info("**** Processing ****")
-        anat_flow = self.create_pipeline_flow()
+        anat_flow = self.create_pipeline_flow(deriv_subject_directory=deriv_subject_directory)
         anat_flow.write_graph(graph2use='colored', format='svg', simple_form=True)
 
         if(self.number_of_cores != 1):
@@ -533,7 +563,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         #         os.remove(os.path.join(self.base_directory,file_to_rm))
 
         # copy .ini and log file
-        outdir = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+        outdir = deriv_subject_directory
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         shutil.copy(self.config_file,outdir)
@@ -612,9 +642,8 @@ class Pipeline(HasTraits):
         self.subject = project_info.subject
         self.last_date_processed = project_info.last_date_processed
         for stage in self.stages.keys():
-            if self.stages[stage].name == 'segmentation_stage' or self.stages[stage].name == 'parcellation_stage':
-                #self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject,self.stages[stage].name)
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp',self.pipeline_name,self.stages[stage].name)
+            if len(project_info.subject_sessions) > 0:
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject, project_info.subject_session, 'tmp',self.pipeline_name,self.stages[stage].name)
             else:
                 self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp',self.pipeline_name,self.stages[stage].name)
 

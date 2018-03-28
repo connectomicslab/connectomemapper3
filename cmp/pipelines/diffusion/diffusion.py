@@ -60,6 +60,7 @@ class Global_Configuration(HasTraits):
     diffusion_imaging_model = Str
     subjects = List(trait=Str)
     subject = Str
+    subject_session = Str
     modalities = []
 
 
@@ -148,7 +149,13 @@ class DiffusionPipeline(Pipeline):
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = self.subject
 
-        self.subject_directory =  os.path.join(self.base_directory,self.subject)
+        if len(project_info.subject_sessions) > 0:
+            self.global_conf.subject_session = project_info.subject_session
+            self.subject_directory =  os.path.join(self.base_directory,self.subject,project_info.subject_session)
+        else:
+            self.global_conf.subject_session = ''
+            self.subject_directory =  os.path.join(self.base_directory,self.subject)
+
         self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
 
         # self.anat_flow = anat_flow
@@ -431,9 +438,14 @@ class DiffusionPipeline(Pipeline):
         bvals_available = False
         valid_inputs = False
 
-        dwi_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
-        bval_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.bval')
-        bvec_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.bvec')
+        if self.global_conf.subject_session == '':
+            subject = self.subject
+        else:
+            subject = "_".join(self.subject,self.global_conf.subject_session)
+
+        dwi_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.nii.gz')
+        bval_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.bval')
+        bvec_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.bvec')
 
         print "Looking for...."
         print "dwi_file : %s" % dwi_file
@@ -472,9 +484,14 @@ class DiffusionPipeline(Pipeline):
                 self.stages['Diffusion'].config.diffusion_imaging_model_choices = self.diffusion_imaging_model
 
                 #Copy diffusion data to derivatives / cmp  / subject / dwi
-                out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.nii.gz')
-                out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bval')
-                out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bvec')
+                if self.global_conf.subject_session == '':
+                    out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.nii.gz')
+                    out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bval')
+                    out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bvec')
+                else:
+                    out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',self.subject+'_dwi.nii.gz')
+                    out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',self.subject+'_dwi.bval')
+                    out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',self.subject+'_dwi.bvec')
 
                 shutil.copy(src=dwi_file,dst=out_dwi_file)
                 shutil.copy(src=bvec_file,dst=out_bvec_file)
@@ -485,8 +502,10 @@ class DiffusionPipeline(Pipeline):
             else:
                 input_message = 'Error during inputs check.\nDiffusion bvec or bval files not available.'
         else:
-            input_message = 'Error during inputs check. No diffusion data available in folder '+os.path.join(self.base_directory,self.subject,'dwi')+'!'
-
+            if self.global_conf.subject_session == '':
+                input_message = 'Error during inputs check. No diffusion data available in folder '+os.path.join(self.base_directory,self.subject,'dwi')+'!'
+            else:
+                input_message = 'Error during inputs check. No diffusion data available in folder '+os.path.join(self.base_directory,self.subject,self.global_conf.subject_session,'dwi')+'!'
         #diffusion_imaging_model = diffusion_imaging_model[0]
 
         if gui:
@@ -509,8 +528,7 @@ class DiffusionPipeline(Pipeline):
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
 
             if diffusion_available:
-                diffusion_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
-                n_vol = nib.load(diffusion_file).shape[3]
+                n_vol = nib.load(dwi_file).shape[3]
                 if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
                     self.stages['Preprocessing'].config.end_vol = n_vol-1
                 self.stages['Preprocessing'].config.max_vol = n_vol-1
@@ -534,10 +552,9 @@ class DiffusionPipeline(Pipeline):
 
         return valid_inputs
 
-    def create_pipeline_flow(self):
+    def create_pipeline_flow(self,deriv_subject_directory):
 
-        subject_directory = os.path.join(self.base_directory,self.subject)
-        deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+        subject_directory = self.subject_directory
 
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
@@ -835,8 +852,11 @@ class DiffusionPipeline(Pipeline):
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
-        subject_directory = os.path.join(self.base_directory,self.subject)
-        deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+        if self.global_conf.subject_session == '':
+            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+        else:
+            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session)
+            self.subject = "_".join(self.subject,self.global_conf.subject_session)
 
         # Initialization
         if os.path.isfile(os.path.join(deriv_subject_directory,"pypeline.log")):
@@ -853,7 +873,7 @@ class DiffusionPipeline(Pipeline):
         iflogger.info("**** Processing ****")
         print self.anat_flow
 
-        flow = self.create_pipeline_flow()
+        flow = self.create_pipeline_flow(deriv_subject_directory=deriv_subject_directory)
         flow.write_graph(graph2use='colored', format='svg', simple_form=True)
         if(self.number_of_cores != 1):
             flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
@@ -869,7 +889,7 @@ class DiffusionPipeline(Pipeline):
         #         os.remove(os.path.join(self.base_directory,file_to_rm))
 
         # copy .ini and log file
-        outdir = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+        outdir = deriv_subject_directory
         if not os.path.exists(outdir):
             os.makedirs(outdir)
         shutil.copy(self.config_file,outdir)

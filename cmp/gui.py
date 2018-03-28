@@ -229,11 +229,20 @@ class CMP_Project_Info(HasTraits):
     subject_view = View(
                         Group(
                             Item('subject',label='Subject to be processed'),
-                            Item('session',label='Session to be processed'),
-                            Item('diffusion_imaging_model',style='custom'),
+                            # Item('session',label='Session to be processed'),
+                            # Item('diffusion_imaging_model',style='custom'),
                             ),
                         kind='modal',
                         title='Subject and session selection',
+                        #style_sheet=style_sheet,
+                        buttons=['OK','Cancel'])
+
+    subject_session_view = View(
+                        Group(
+                            Item('subject_session',label='Session to be processed'),
+                            ),
+                        kind='modal',
+                        title='Session selection (subject: %s)'%self.subject,
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 

@@ -418,13 +418,13 @@ if __name__ == "__main__":
 
         if sys.argv[1] == 'matrix':
             figure()
-            imshow(b, interpolation='nearest', cmap=cm.jet, vmin = b.min(), vmax=b.max())
+            imshow(b, interpolation='nearest', cmap=cm.inferno, vmin = b.min(), vmax=b.max())
             show()
         elif sys.argv[1] == 'circular':
             node_names = []
             for u_gml,d_gml in a.nodes(data=True):
                 node_names.append(d_gml['dn_fsname'])
-            fig, axes = plot_connectivity_circle(b, node_names, title="%s"%(sys.argv[3]))
+            fig, axes = plot_connectivity_circle(b, node_names, title="%s"%(sys.argv[3]), colormap='inferno')
             # fig_fn=''
             # fig.savefig(fig_fn,facecolor='black',dpi=200)
 
@@ -451,7 +451,7 @@ if __name__ == "__main__":
                 title("%s (#fibers: %i)"%(sys.argv[5],b.sum()))
             else:
                 title("%s"%(sys.argv[5]))
-            imshow(b, interpolation='nearest',cmap=cm.jet, vmin = b.min(), vmax=b.max())
+            imshow(b, interpolation='nearest',cmap=cm.inferno, vmin = b.min(), vmax=b.max())
             show()
         elif sys.argv[1] == 'circular':
             node_names = []
@@ -461,7 +461,7 @@ if __name__ == "__main__":
                 title="%s (#fibers: %i)"%(sys.argv[5],b.sum())
             else:
                 title="%s"%(sys.argv[5])
-            fig, axes = plot_connectivity_circle(b, node_names, title=title)
+            fig, axes = plot_connectivity_circle(b, node_names, title=title, colormap='inferno')
         else:
             print("Error: invalid layout mode ('matrix' or 'circular')")
 
@@ -487,13 +487,13 @@ if __name__ == "__main__":
             print "sys.argv[5]==%s" % sys.argv[6]
             if sys.argv[6]=="log":
                 print "log scaling..."
-                my_cmap = copy.copy(cm.get_cmap('jet')) # copy the default cmap
-                my_cmap.set_bad((0,0,0.5156))
+                my_cmap = copy.copy(cm.get_cmap('inferno')) # copy the default cmap (0,0,0.5156)
+                my_cmap.set_bad((0,0,0))
                 imshow(b, interpolation='nearest',norm=colors.LogNorm(),cmap=my_cmap)
                 colorbar()
             else:
                 print "normal scaling"
-                imshow(b, interpolation='nearest',norm=None,cmap=cm.jet, vmin = b.min(), vmax=b.max())
+                imshow(b, interpolation='nearest',norm=None,cmap=cm.inferno, vmin = b.min(), vmax=b.max())
             show()
         elif sys.argv[1] == 'circular':
             node_names = []
@@ -507,6 +507,6 @@ if __name__ == "__main__":
             if sys.argv[6]=="log":
                 print("Warning: log scale not employed as circular layout used")
 
-            fig, axes = plot_connectivity_circle(b, node_names, title=title)
+            fig, axes = plot_connectivity_circle(b, node_names, title=title, colormap='inferno')
         else:
             print("Error: invalid layout mode ('matrix' or 'circular')")

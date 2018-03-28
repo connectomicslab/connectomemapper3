@@ -216,7 +216,10 @@ class Pipeline(HasTraits):
         self.number_of_cores = project_info.number_of_cores
 
         for stage in self.stages.keys():
-            self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp',self.pipeline_name,self.stages[stage].name)
+            if len(project_info.subject_sessions)>0:
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,project_info.subject_session,'tmp',self.pipeline_name,self.stages[stage].name)
+            else:
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp',self.pipeline_name,self.stages[stage].name)
             # if self.stages[stage].name == 'segmentation_stage' or self.stages[stage].name == 'parcellation_stage':
             #     #self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject,self.stages[stage].name)
             #     self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype','common_stages',self.stages[stage].name)

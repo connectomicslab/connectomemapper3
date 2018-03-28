@@ -178,16 +178,25 @@ def dmri_load_config(pipeline, config_path):
 
 ## Creates (if needed) the folder hierarchy
 #
-def refresh_folder(derivatives_directory, subject, input_folders):
+def refresh_folder(derivatives_directory, subject, input_folders, session=None):
     paths = []
 
-    paths.append(os.path.join(derivatives_directory,'freesurfer',subject))
-    paths.append(os.path.join(derivatives_directory,'cmp',subject))
+    if session == None:
+        paths.append(os.path.join(derivatives_directory,'freesurfer',subject))
+        paths.append(os.path.join(derivatives_directory,'cmp',subject))
 
-    for in_f in input_folders:
-        paths.append(os.path.join(derivatives_directory,'cmp',subject,in_f))
+        for in_f in input_folders:
+            paths.append(os.path.join(derivatives_directory,'cmp',subject,in_f))
 
-    paths.append(os.path.join(derivatives_directory,'cmp',subject,'tmp'))
+        paths.append(os.path.join(derivatives_directory,'cmp',subject,'tmp'))
+    else:
+        paths.append(os.path.join(derivatives_directory,'freesurfer','%s_%s'%(subject,session)))
+        paths.append(os.path.join(derivatives_directory,'cmp',subject,session))
+
+        for in_f in input_folders:
+            paths.append(os.path.join(derivatives_directory,'cmp',subject,session,in_f))
+
+        paths.append(os.path.join(derivatives_directory,'cmp',subject,session,'tmp'))
 
     for full_p in paths:
         if not os.path.exists(full_p):
@@ -202,7 +211,11 @@ def init_dmri_project(project_info, is_new_project, gui=True):
     dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
 
     derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
-    refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
+
+    if len(project_info.subject_sessions)>0:
+        refresh_folder(derivatives_directory, project_info.subject, project_info.subject_session, dmri_pipeline.input_folders)
+    else:
+        refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
 
     dmri_inputs_checked = dmri_pipeline.check_input(gui=gui)
     if dmri_inputs_checked:
@@ -216,7 +229,10 @@ def init_dmri_project(project_info, is_new_project, gui=True):
                 finally:
                     print "Created directory %s" % derivatives_directory
 
-            project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
+            if len(project_info.subject_sessions) > 0:
+                project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_%s_diffusion_config.ini' % (project_info.subject,project_info.subject_session))
+            else:
+                project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
 
 
             if os.path.exists(project_info.dmri_config_file):
@@ -267,7 +283,10 @@ def init_anat_project(project_info, is_new_project):
             finally:
                 print "Created directory %s" % derivatives_directory
 
-        project_info.anat_config_file = os.path.join(derivatives_directory,'%s_anatomical_config.ini' % (project_info.subject))
+        if len(project_info.subject_sessions) > 0:
+            project_info.anat_config_file = os.path.join(derivatives_directory,'%s_%s_anatomical_config.ini' % (project_info.subject,project_info.subject_session))
+        else:
+            project_info.anat_config_file = os.path.join(derivatives_directory,'%s_anatomical_config.ini' % (project_info.subject))
         #project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
 
         if os.path.exists(project_info.anat_config_file):
@@ -302,7 +321,11 @@ def init_anat_project(project_info, is_new_project):
 
     print anat_pipeline
     #print dmri_pipeline
-    refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders)
+    if len(project_info.subject_sessions) > 0:
+        refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders, session=project_info.subject_session)
+    else:
+        refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders)
+
     #refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
     anat_pipeline.config_file = project_info.anat_config_file
     #dmri_pipeline.config_file = project_info.dmri_config_file
@@ -390,14 +413,26 @@ class ProjectHandler(Handler):
                 # new_project.configure_traits(subject=Enum(*subjects))
                 # print new_project.subjects
 
-                print "Default subject : "+new_project.subject
+                print "Available subjects : "
+                print new_project.subjects
+
                 np_res = new_project.configure_traits(view='subject_view')
                 print "Selected subject : "+new_project.subject
+
+                sessions = layout.get(target='session', return_type='id', subject=subj)
+
+                if len(sessions) > 0:
+                    print "Warning: multiple sessions"
+                    for ses in sessions:
+                        new_project.subject_sessions.append('ses-'+str(ses))
+                    np_res = new_project.configure_traits(view='subject_session_view')
+                    print "Selected session : "+new_project.subject_session
+
             except:
                 error(message="Invalid BIDS dataset. Please see documentation for more details.",title="BIDS error")
                 return
 
-            self.anat_pipeline= init_anat_project(new_project, True)
+            self.anat_pipeline = init_anat_project(new_project, True)
             if self.anat_pipeline != None: #and self.dmri_pipeline != None:
                 anat_inputs_checked = self.anat_pipeline.check_input()
                 if anat_inputs_checked:
@@ -452,6 +487,10 @@ class ProjectHandler(Handler):
                 loaded_project.subjects.append('sub-'+str(subj))
             # loaded_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
             loaded_project.subjects.sort()
+
+            print "Available subjects : "
+            print loaded_project.subjects
+
         except:
             error(message="Invalid BIDS dataset. Please see documentation for more details.",title="BIDS error")
             return
@@ -467,7 +506,19 @@ class ProjectHandler(Handler):
             #     loaded_project.config_file = os.path.join(loaded_project.base_directory,'derivatives','config.ini')
             # # Load new format: <process_type>_config.ini
             # else:
-            loaded_project.anat_available_config = [os.path.basename(s)[:-11].split("_")[0] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
+            sessions = layout.get(target='session', return_type='id', subject=subj)
+
+            if len(sessions) > 0:
+                loaded_project.subject_sessions = sessions
+                loaded_project.subject_session = get_anat_process_detail(loaded_project,'Global','subject_session')
+                print "Selected session : "+new_project.subject_session
+                loaded_project.anat_available_config = ["_".join(os.path.basename(s)[:-11].split("_")[0:1]) for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
+            else:
+                loaded_project.subject_sessions = []
+                loaded_project.subject_session = ''
+                loaded_project.anat_available_config = [os.path.basename(s)[:-11].split("_")[0] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
+
+
             if len(loaded_project.anat_available_config) > 1:
                 loaded_project.anat_available_config.sort()
                 loaded_project.anat_config_to_load = loaded_project.anat_available_config[0]
@@ -478,7 +529,7 @@ class ProjectHandler(Handler):
             else:
                 loaded_project.anat_config_to_load = loaded_project.anat_available_config[0]
 
-            loaded_project.subject = loaded_project.anat_config_to_load
+            loaded_project.subject = get_anat_process_detail(loaded_project,'Global','subject')
 
             print "Anatomical config to load: %s"%loaded_project.anat_config_to_load
             loaded_project.anat_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_anatomical_config.ini' % loaded_project.anat_config_to_load)
