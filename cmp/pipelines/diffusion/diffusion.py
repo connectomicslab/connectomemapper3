@@ -485,13 +485,13 @@ class DiffusionPipeline(Pipeline):
 
                 #Copy diffusion data to derivatives / cmp  / subject / dwi
                 if self.global_conf.subject_session == '':
-                    out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.nii.gz')
-                    out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bval')
-                    out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bvec')
+                    out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',subject+'_dwi.nii.gz')
+                    out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',subject+'_dwi.bval')
+                    out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',subject+'_dwi.bvec')
                 else:
-                    out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',self.subject+'_dwi.nii.gz')
-                    out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',self.subject+'_dwi.bval')
-                    out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',self.subject+'_dwi.bvec')
+                    out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.nii.gz')
+                    out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.bval')
+                    out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.bvec')
 
                 shutil.copy(src=dwi_file,dst=out_dwi_file)
                 shutil.copy(src=bvec_file,dst=out_bvec_file)
@@ -515,8 +515,7 @@ class DiffusionPipeline(Pipeline):
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
 
             if diffusion_available:
-                diffusion_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
-                n_vol = nib.load(diffusion_file).shape[3]
+                n_vol = nib.load(dwi_file).shape[3]
                 if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
                     self.stages['Preprocessing'].config.end_vol = n_vol-1
                 self.stages['Preprocessing'].config.max_vol = n_vol-1

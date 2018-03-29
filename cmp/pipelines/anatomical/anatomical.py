@@ -213,19 +213,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         t1_available = False
         valid_inputs = False
 
-        if self.global_conf.subject_session == '':
-            T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
-        else:
-            files = layout.get(subject=subj,type='T1w',extensions='.nii.gz',session=self.global_conf.subject_session)
-            if len(files) > 0:
-                T1_file = os.path.abspath(files[0].path)
-            else:
-                error(message="T1w image not found for subject %s, session %s."%(self.subject,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
-                return
-
-        print "Looking in %s for...." % self.base_directory
-        print "T1_file : %s" % T1_file
-
         try:
             layout = BIDSLayout(self.base_directory)
             print "Valid BIDS dataset with %s subjects" % len(layout.get_subjects())
@@ -238,6 +225,19 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             # print "Available modalities :"
             # for mod in mods:
             #     print "-%s" % mod
+
+            if self.global_conf.subject_session == '':
+                T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
+            else:
+                files = layout.get(subject=self.subject,type='T1w',extensions='.nii.gz',session=self.global_conf.subject_session)
+                if len(files) > 0:
+                    T1_file = os.path.abspath(files[0].path)
+                else:
+                    error(message="T1w image not found for subject %s, session %s."%(self.subject,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                    return
+
+            print "Looking in %s for...." % self.base_directory
+            print "T1_file : %s" % T1_file
 
             for typ in types:
                 if typ == 'T1w' and os.path.isfile(T1_file):

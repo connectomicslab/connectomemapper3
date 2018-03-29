@@ -171,7 +171,7 @@ class CMP_Project_Info(HasTraits):
                                 # '20',Item('base_directory',width=-0.3,height=-0.2, style='custom',show_label=False,resizable=True),
                                 '20',Item('base_directory',width=-0.3,style='readonly',show_label=False,resizable=True),
                                 ),
-                            # HGroup(
+                            # HGroup(subj
                             #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)
                             #     ),
                         label='BIDS base directory',
@@ -179,7 +179,7 @@ class CMP_Project_Info(HasTraits):
                         spring,
                         Group(
                             Item('subject',style='readonly',show_label=False,resizable=True),
-                            Item('session',style='readonly',show_label=False,resizable=True),
+                            Item('subject_session',style='readonly',show_label=False,resizable=True),
                             label='Subject',
                         ),
                         spring,
@@ -242,7 +242,7 @@ class CMP_Project_Info(HasTraits):
                             Item('subject_session',label='Session to be processed'),
                             ),
                         kind='modal',
-                        title='Session selection (subject: %s)'%self.subject,
+                        title='Session selection (subject: %s)'% subject,
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 

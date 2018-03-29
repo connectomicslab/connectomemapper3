@@ -419,7 +419,12 @@ class ProjectHandler(Handler):
                 np_res = new_project.configure_traits(view='subject_view')
                 print "Selected subject : "+new_project.subject
 
-                sessions = layout.get(target='session', return_type='id', subject=subj)
+                subject = new_project.subject.split('-')[1]
+                print "Subject: %s" % subject
+                sessions = bids_layout.get(target='session', return_type='id', subject=subject)
+
+                print "Sessions: "
+                print sessions
 
                 if len(sessions) > 0:
                     print "Warning: multiple sessions"
@@ -506,7 +511,7 @@ class ProjectHandler(Handler):
             #     loaded_project.config_file = os.path.join(loaded_project.base_directory,'derivatives','config.ini')
             # # Load new format: <process_type>_config.ini
             # else:
-            sessions = layout.get(target='session', return_type='id', subject=subj)
+            ##sessions = layout.get(target='session', return_type='id', subject=subj)
 
             if len(sessions) > 0:
                 loaded_project.subject_sessions = sessions
