@@ -441,7 +441,7 @@ class DiffusionPipeline(Pipeline):
         if self.global_conf.subject_session == '':
             subject = self.subject
         else:
-            subject = "_".join(self.subject,self.global_conf.subject_session)
+            subject = "_".join((self.subject,self.global_conf.subject_session))
 
         dwi_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.nii.gz')
         bval_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.bval')
@@ -493,9 +493,12 @@ class DiffusionPipeline(Pipeline):
                     out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.bval')
                     out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.bvec')
 
-                shutil.copy(src=dwi_file,dst=out_dwi_file)
-                shutil.copy(src=bvec_file,dst=out_bvec_file)
-                shutil.copy(src=bval_file,dst=out_bval_file)
+                if not os.path.isfile(out_dwi_file):
+                    shutil.copy(src=dwi_file,dst=out_dwi_file)
+                if not os.path.isfile(out_bvec_file):
+                    shutil.copy(src=bvec_file,dst=out_bvec_file)
+                if not os.path.isfile(out_bval_file):
+                    shutil.copy(src=bval_file,dst=out_bval_file)
 
                 valid_inputs = True
                 input_message = 'Inputs check finished successfully.\nDiffusion and morphological data available.'
@@ -855,7 +858,7 @@ class DiffusionPipeline(Pipeline):
             deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
         else:
             deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session)
-            self.subject = "_".join(self.subject,self.global_conf.subject_session)
+            self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
         # Initialization
         if os.path.isfile(os.path.join(deriv_subject_directory,"pypeline.log")):

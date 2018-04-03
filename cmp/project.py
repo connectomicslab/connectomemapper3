@@ -213,7 +213,7 @@ def init_dmri_project(project_info, is_new_project, gui=True):
     derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
 
     if len(project_info.subject_sessions)>0:
-        refresh_folder(derivatives_directory, project_info.subject, project_info.subject_session, dmri_pipeline.input_folders)
+        refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders, session=project_info.subject_session)
     else:
         refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
 

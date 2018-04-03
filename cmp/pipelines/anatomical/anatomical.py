@@ -229,11 +229,14 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if self.global_conf.subject_session == '':
                 T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
             else:
-                files = layout.get(subject=self.subject,type='T1w',extensions='.nii.gz',session=self.global_conf.subject_session)
+                subjid = self.subject.split("-")[1]
+                sessid = self.global_conf.subject_session.split("-")[1]
+                files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz',session=sessid)
                 if len(files) > 0:
-                    T1_file = os.path.abspath(files[0].path)
+                    T1_file = files[0].filename
+                    print T1_file
                 else:
-                    error(message="T1w image not found for subject %s, session %s."%(self.subject,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                    error(message="T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
 
             print "Looking in %s for...." % self.base_directory
@@ -255,7 +258,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             else:
                 out_T1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'anat',self.subject+'_'+self.global_conf.subject_session+'_T1w.nii.gz')
 
-            shutil.copy(src=T1_file,dst=out_T1_file)
+            if not os.path.isfile(out_T1_file):
+                shutil.copy(src=T1_file,dst=out_T1_file)
 
             valid_inputs = True
             input_message = 'Inputs check finished successfully. \nOnly anatomical data (T1) available.'
@@ -531,7 +535,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
         else:
             deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session)
-            self.subject = "_".join(self.subject,self.global_conf.subject_session)
+            self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
         # Initialization
         if os.path.isfile(os.path.join(deriv_subject_directory,"anatomical_pipeline.log")):
