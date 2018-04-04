@@ -81,7 +81,7 @@ def anat_load_config(pipeline, config_path):
     config.read(config_path)
     global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
     for key in global_keys:
-        if key != "subject" and key != "subjects":
+        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
             conf_value = config.get('Global', key)
             setattr(pipeline.global_conf, key, conf_value)
     for stage in pipeline.stages.values():
@@ -144,7 +144,7 @@ def dmri_load_config(pipeline, config_path):
     config.read(config_path)
     global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
     for key in global_keys:
-        if key != "subject" and key != "subjects":
+        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
             conf_value = config.get('Global', key)
             setattr(pipeline.global_conf, key, conf_value)
     for stage in pipeline.stages.values():
@@ -511,18 +511,39 @@ class ProjectHandler(Handler):
             #     loaded_project.config_file = os.path.join(loaded_project.base_directory,'derivatives','config.ini')
             # # Load new format: <process_type>_config.ini
             # else:
-            ##sessions = layout.get(target='session', return_type='id', subject=subj)
 
-            if len(sessions) > 0:
-                loaded_project.subject_sessions = sessions
-                loaded_project.subject_session = get_anat_process_detail(loaded_project,'Global','subject_session')
-                print "Selected session : "+new_project.subject_session
-                loaded_project.anat_available_config = ["_".join(os.path.basename(s)[:-11].split("_")[0:1]) for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
-            else:
-                loaded_project.subject_sessions = []
-                loaded_project.subject_session = ''
-                loaded_project.anat_available_config = [os.path.basename(s)[:-11].split("_")[0] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
+            sessions = []
+            for subj in bids_layout.get_subjects():
+                subj_sessions = bids_layout.get(target='session', return_type='id', subject=subj)
+                for subj_session in subj_sessions:
+                    sessions.append(subj_session)
 
+            print "sessions:"
+            print sessions
+
+            loaded_project.anat_available_config = []
+
+            for subj in bids_layout.get_subjects():
+                subj_sessions = bids_layout.get(target='session', return_type='id', subject=subj)
+                if len(subj_sessions) > 0:
+                    for subj_session in subj_sessions:
+                        config_file = os.path.join(loaded_project.base_directory,'derivatives',"sub-%s_ses-%s_anatomical_config.ini" % (subj, subj_session))
+                        if os.path.isfile(config_file):
+                            loaded_project.anat_available_config.append( "sub-%s_ses-%s" % (subj, subj_session) )
+                else:
+                    config_file = os.path.join(loaded_project.base_directory,'derivatives',"sub-%s_anatomical_config.ini" % (subj))
+                    if os.path.isfile(config_file):
+                        loaded_project.anat_available_config.append( "sub-%s" % (subj) )
+                        print "no session"
+
+            # if len(sessions) > 0:
+            #     print ["_".join((os.path.basename(s)[:-11].split("_")[0],os.path.basename(s)[:-11].split("_")[1])) for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
+            #     loaded_project.anat_available_config = ["_".join((os.path.basename(s)[:-11].split("_")[0],os.path.basename(s)[:-11].split("_")[1])) for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
+            # else:
+            #     loaded_project.anat_available_config = [os.path.basename(s)[:-11].split("_")[0] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
+
+            print "loaded_project.anat_available_config : "
+            print loaded_project.anat_available_config
 
             if len(loaded_project.anat_available_config) > 1:
                 loaded_project.anat_available_config.sort()
@@ -534,11 +555,26 @@ class ProjectHandler(Handler):
             else:
                 loaded_project.anat_config_to_load = loaded_project.anat_available_config[0]
 
-            loaded_project.subject = get_anat_process_detail(loaded_project,'Global','subject')
+            print "loaded_project.anat_config_to_load:"
+            print loaded_project.anat_config_to_load
 
             print "Anatomical config to load: %s"%loaded_project.anat_config_to_load
             loaded_project.anat_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_anatomical_config.ini' % loaded_project.anat_config_to_load)
             print "Anatomical config file: %s"%loaded_project.anat_config_file
+
+            loaded_project.subject = get_anat_process_detail(loaded_project,'Global','subject')
+            loaded_project.subject_sessions = ["ses-%s"%s for s in bids_layout.get(target='session', return_type='id', subject=loaded_project.subject.split('-')[1])]
+
+            if len(loaded_project.subject_sessions)>0:
+
+                loaded_project.subject_session = get_anat_process_detail(loaded_project,'Global','subject_session')
+                print "Selected session : "+loaded_project.subject_session
+            else:
+                loaded_project.subject_sessions = []
+                loaded_project.subject_session = ''
+                print "No session"
+
+
 
             loaded_project.parcellation_scheme = get_anat_process_detail(loaded_project,'parcellation_stage','parcellation_scheme')
             loaded_project.atlas_info = get_anat_process_detail(loaded_project,'parcellation_stage','atlas_info')
@@ -560,7 +596,25 @@ class ProjectHandler(Handler):
                     print "anat_outputs_checked : %s" % self.anat_outputs_checked
                     # ui_info.ui.context["object"].anat_pipeline.flow = ui_info.ui.context["object"].anat_pipeline.create_pipeline_flow()
 
-            loaded_project.dmri_available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','%s_diffusion_config.ini'%loaded_project.subject))]
+            loaded_project.dmri_available_config = []
+
+            subjid = loaded_project.subject.split("-")[1]
+            subj_sessions = bids_layout.get(target='session', return_type='id', subject=subjid)
+
+            if len(subj_sessions) > 0:
+                for subj_session in subj_sessions:
+                    config_file = os.path.join(loaded_project.base_directory,'derivatives',"sub-%s_ses-%s_diffusion_config.ini" % (subj, subj_session))
+                    print "config_file: %s " % config_file
+                    if os.path.isfile(config_file) and subj_session == loaded_project.subject_session.split("-")[1]:
+                        loaded_project.dmri_available_config.append( "sub-%s_ses-%s" % (subj, subj_session) )
+            else:
+                config_file = os.path.join(loaded_project.base_directory,'derivatives',"sub-%s_diffusion_config.ini" % (subj))
+                if os.path.isfile(config_file):
+                    loaded_project.dmri_available_config.append( "sub-%s" % (subj) )
+                    print "no session"
+
+            # loaded_project.dmri_available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','%s_diffusion_config.ini'%loaded_project.subject))]
+
             print "loaded_project.dmri_available_config:"
             print loaded_project.dmri_available_config
 
@@ -576,7 +630,7 @@ class ProjectHandler(Handler):
                 loaded_project.dmri_config_to_load = loaded_project.dmri_available_config[0]
 
             print "Diffusion config to load: %s"%loaded_project.dmri_config_to_load
-            loaded_project.dmri_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_config.ini' % loaded_project.dmri_config_to_load)
+            loaded_project.dmri_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_diffusion_config.ini' % loaded_project.dmri_config_to_load)
             print "Diffusion config file: %s"%loaded_project.dmri_config_file
 
             if os.path.isfile(loaded_project.dmri_config_file):

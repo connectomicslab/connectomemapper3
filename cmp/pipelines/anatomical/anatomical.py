@@ -305,7 +305,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             anat_deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,'anat')
         else:
             anat_deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session,'anat')
-            subject = "_".join(subject,self.global_conf.subject_session)
+            subject = "_".join((subject,self.global_conf.subject_session))
 
 
         T1_file = os.path.join(anat_deriv_subject_directory,subject+'_T1w_head.nii.gz')

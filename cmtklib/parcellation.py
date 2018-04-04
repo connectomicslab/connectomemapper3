@@ -33,6 +33,7 @@ except ImportError:
     raise Exception('Need scipy for binary erosion of white matter and CSF masks')
 
 def erode_mask(maskFile):
+    """ Erodes the mask """
     # Define erosion mask
     imerode = nd.binary_erosion
     se = np.zeros( (3,3,3) )

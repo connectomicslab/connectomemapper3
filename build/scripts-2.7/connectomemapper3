@@ -142,16 +142,21 @@ if __name__ == "__main__":
                 print "Invalid inputs"
                 sys.exit(1)
 
-        dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, False)
-        if dmri_pipeline != None:
-            dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-            dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-            anat_valid_outputs, msg = anat_pipeline.check_output()
-            print sys.argv[6]
-            if anat_valid_outputs and dmri_valid_inputs and sys.argv[6]=='True':
-                dmri_pipeline.process()
-            else:
-                sys.exit(1)
+        anat_valid_outputs, msg = anat_pipeline.check_output()
+
+        if anat_valid_outputs:
+            dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, False)
+            if dmri_pipeline != None:
+                dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                print sys.argv[6]
+                if dmri_valid_inputs and sys.argv[6]=='True':
+                    dmri_pipeline.process()
+                else:
+                    sys.exit(1)
+        else:
+            print msg
+            sys.exit(1)
 
     else:
         usage()
