@@ -345,13 +345,13 @@ class CMP_MainWindow(HasTraits):
 
     project_info = Instance(CMP_Project_Info)
 
-    new_project = Action(name='New Connectome Data...',action='new_project')
-    load_project = Action(name='Load Connectome Data...',action='load_project')
+    new_project = Action(name='New Unprocessed Subject from BIDS Dataset...',action='new_project')
+    load_project = Action(name='Load Processed Subject from BIDS Dataset...',action='load_project')
     process_anatomical = Action(name='Process Anatomical Data!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
     #preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
     map_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked')
     #map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
-    change_subject = Action(name='Change subject',action='change_subject',enabled_when='handler.project_loaded==True')
+    #change_subject = Action(name='Change subject',action='change_subject',enabled_when='handler.project_loaded==True')
 
     anat_save_config = Action(name='Save anatomical pipeline configuration as...',action='anat_save_config_file',enabled_when='handler.project_loaded==True')
     anat_load_config = Action(name='Load anatomical pipeline configuration...',action='anat_load_config_file',enabled_when='handler.project_loaded==True')
