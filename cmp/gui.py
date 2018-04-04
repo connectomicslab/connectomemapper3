@@ -179,8 +179,12 @@ class CMP_Project_Info(HasTraits):
                         spring,
                         Group(
                             Item('subject',style='readonly',show_label=False,resizable=True),
-                            Item('subject_session',style='readonly',show_label=False,resizable=True),
                             label='Subject',
+                        ),
+                        spring,
+                        Group(
+                            Item('subject_session',style='readonly',show_label=False,resizable=True),
+                            label='Session',visible_when='subject_session!=""'
                         ),
                         spring,
                         Group(

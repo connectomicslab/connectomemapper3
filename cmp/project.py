@@ -570,7 +570,7 @@ class ProjectHandler(Handler):
                 loaded_project.subject_session = get_anat_process_detail(loaded_project,'Global','subject_session')
                 print "Selected session : "+loaded_project.subject_session
             else:
-                loaded_project.subject_sessions = []
+                loaded_project.subject_sessions = ['']
                 loaded_project.subject_session = ''
                 print "No session"
 
