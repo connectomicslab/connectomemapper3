@@ -808,6 +808,7 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
 
         # update edges
         # measures to add here
+        # FIXME treat case of self-connection that gives di['fiber_length_mean'] = 0.0
         for u,v,d in G.edges_iter(data=True):
             G.remove_edge(u,v)
             di = { 'number_of_fibers' : len(d['fiblist']), }
@@ -831,9 +832,12 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
             print "G.node[int(u)]['roi_volume'] : %i / G.node[int(v)]['roi_volume'] : %i" % (G.node[int(u)]['roi_volume'],G.node[int(v)]['roi_volume'])
             print "di['number_of_fibers'] : %i / di['fiber_length_mean'] : %i" % (di['number_of_fibers'],di['fiber_length_mean'])
 
-            di['fiber_density'] = float( (float(di['number_of_fibers']) / float(di['fiber_length_mean'])) * float(2.0 / (G.node[int(u)]['roi_volume']+G.node[int(v)]['roi_volume'])) )
-            di['normalized_fiber_density'] = float( ((float(di['number_of_fibers'])/float(total_fibers)) / float(di['fiber_length_mean'])) * ( (2.0 * float(total_volume)) / (G.node[int(u)]['roi_volume']+G.node[int(v)]['roi_volume']) ) )
-
+            if di['fiber_length_mean'] > 0.0:
+                di['fiber_density'] = float( (float(di['number_of_fibers']) / float(di['fiber_length_mean'])) * float(2.0 / (G.node[int(u)]['roi_volume']+G.node[int(v)]['roi_volume'])) )
+                di['normalized_fiber_density'] = float( ((float(di['number_of_fibers'])/float(total_fibers)) / float(di['fiber_length_mean'])) * ( (2.0 * float(total_volume)) / (G.node[int(u)]['roi_volume']+G.node[int(v)]['roi_volume']) ) )
+            else:
+                di['fiber_density'] = 0.0
+                di['normalized_fiber_density'] = 0.0
             # this is indexed into the fibers that are valid in the sense of touching start
             # and end roi and not going out of the volume
             idx_valid = np.where( (fiberlabels[:,0] == int(u)) & (fiberlabels[:,1] == int(v)) )[0]
