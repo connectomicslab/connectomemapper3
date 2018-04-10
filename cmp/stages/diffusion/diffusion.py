@@ -175,7 +175,7 @@ class DiffusionConfig(HasTraits):
             #self.processing_tool_editor = ['Dipy']
             self.recon_processing_tool = 'Dipy'
             self.recon_processing_tool_editor = ['Dipy','Custom']
-            self.tracking_processing_tool = 'Dipy'
+            #self.tracking_processing_tool = 'Dipy'
             self.tracking_processing_tool_editor = ['Dipy','MRtrix','Custom']
             self.diffusion_model_editor = ['Deterministic','Probabilistic']
         else:
@@ -213,19 +213,25 @@ class DiffusionConfig(HasTraits):
         #self.trait_view('traits_view').updated = True
 
     def _recon_processing_tool_changed(self, new):
-        print "recon_processing_tool_changed"
-        # self.tracking_processing_tool = new
+        print("recon_processing_tool_changed : %s"%new)
+        #
         if new == 'Dipy' and self.diffusion_imaging_model != 'DSI':
+            tracking_processing_tool = self.tracking_processing_tool
             self.tracking_processing_tool_editor = ['Dipy','MRtrix']
+            if tracking_processing_tool == 'Dipy' or tracking_processing_tool == 'MRtrix':
+                self.tracking_processing_tool = tracking_processing_tool
         elif new == 'Dipy' and self.diffusion_imaging_model == 'DSI':
+            tracking_processing_tool = self.tracking_processing_tool
             self.tracking_processing_tool_editor = ['Dipy','MRtrix']
+            if tracking_processing_tool == 'Dipy' or tracking_processing_tool == 'MRtrix':
+                self.tracking_processing_tool = tracking_processing_tool
         elif new == 'MRtrix':
             self.tracking_processing_tool_editor = ['MRtrix']
         elif new == 'Custom':
             self.tracking_processing_tool_editor = ['Custom']
 
     def _tracking_processing_tool_changed(self, new):
-        print "tracking_processing_tool changed"
+        print("tracking_processing_tool changed: %s"%new)
         if new == 'Dipy' and self.recon_processing_tool == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = 'Dipy'
         elif new == 'MRtrix' and self.recon_processing_tool == 'Dipy':
@@ -426,6 +432,7 @@ class DiffusionStage(Stage):
 
         elif self.config.tracking_processing_tool == 'Dipy':
             track_flow = create_dipy_tracking_flow(self.config.dipy_tracking_config)
+            print "Dipy tracking"
 
             if self.config.diffusion_imaging_model != 'DSI':
                 flow.connect([
@@ -463,6 +470,8 @@ class DiffusionStage(Stage):
 
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'MRtrix':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
+            print "MRtrix tracking"
+
             flow.connect([
                         (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
@@ -477,6 +486,7 @@ class DiffusionStage(Stage):
 
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'Dipy':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
+            print "MRtrix tracking"
 
             if self.config.diffusion_imaging_model != 'DSI':
                 flow.connect([
