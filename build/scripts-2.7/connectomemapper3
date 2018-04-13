@@ -102,7 +102,9 @@ if __name__ == "__main__":
             offset = 1
             project.subject_sessions = ['%s' % sys.argv[3]]
             project.subject_session = '%s' % sys.argv[3]
+            print "session"
         else:
+            print "No session"
             offset = 0
             project.subject_sessions = ['']
             project.subject_session = ''

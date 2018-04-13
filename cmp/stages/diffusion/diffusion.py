@@ -170,7 +170,7 @@ class DiffusionConfig(HasTraits):
         self.dtk_tracking_config.imaging_model = new
         self.dtb_tracking_config.imaging_model = new
         # Remove MRtrix from recon and tracking methods and Probabilistic from diffusion model if diffusion_imaging_model is DSI
-        if new == 'DSI':
+        if (new == 'DSI') and (self.recon_processing_tool != 'Custom'):
             #self.processing_tool = 'Dipy'
             #self.processing_tool_editor = ['Dipy']
             self.recon_processing_tool = 'Dipy'
