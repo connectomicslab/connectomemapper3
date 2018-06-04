@@ -106,15 +106,19 @@ class MRtrix_tracking_config(HasTraits):
     tracking_mode = Str
     SD = Bool
     desired_number_of_tracks = Int(1000000)
-    max_number_of_tracks = Int(5000000)
+    max_number_of_seeds = Int(1000000000)
     curvature = Float(2.0)
-    step_size = Float(0.2)
-    min_length = Float(10)
-    max_length = Float(200)
+    step_size = Float(0.5)
+    min_length = Float(5)
+    max_length = Float(500)
+    angle = Float(45)
+    cutoff_value = Float(1)
 
-    traits_view = View( VGroup('desired_number_of_tracks','max_number_of_tracks'),
+    traits_view = View( VGroup('desired_number_of_tracks','max_number_of_seeds'),
+            'angle',
 			Item('curvature',label="Curvature radius"),'step_size',
-			VGroup('min_length','max_length')
+			VGroup('min_length','max_length'),
+            'cutoff_value'
 		      )
 
     def _SD_changed(self,new):
@@ -842,10 +846,13 @@ def create_mrtrix_tracking_flow(config):
         mrtrix_seeds = pe.Node(interface=make_mrtrix_seeds(),name="mrtrix_seeds")
         mrtrix_tracking = pe.Node(interface=StreamlineTrack(),name="mrtrix_deterministic_tracking")
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
-        mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
+        mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_seeds
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
         mrtrix_tracking.inputs.minimum_tract_length = config.min_length
         mrtrix_tracking.inputs.step_size = config.step_size
+        mrtrix_tracking.inputs.angle = config.angle
+        mrtrix_tracking.inputs.cutoff_value = config.cutoff_value
+
         # mrtrix_tracking.inputs.args = '2>/dev/null'
         if config.curvature >= 0.000001:
             mrtrix_tracking.inputs.rk4 = True

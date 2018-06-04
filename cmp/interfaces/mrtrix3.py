@@ -790,23 +790,26 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     # no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
 
     step_size = traits.Float(argstr='-step %s', units='mm',
-        desc="Set the step size of the algorithm in mm (default is 0.2).")
+        desc="Set the step size of the algorithm in mm (default is 0.5).")
     # minimum_radius_of_curvature = traits.Float(argstr='-curvature %s', units='mm',
     #     desc="Set the minimum radius of curvature (default is 2 mm for DT_STREAM, 0 for SD_STREAM, 1 mm for SD_PROB and DT_PROB)")
     desired_number_of_tracks = traits.Int(argstr='-select %d', desc='Sets the desired number of tracks.'   \
     'The program will continue to generate tracks until this number of tracks have been selected and written to the output file' \
     '(default is 100 for *_STREAM methods, 1000 for *_PROB methods).')
-    maximum_number_of_tracks = traits.Int(argstr='-seeds %d', desc='Sets the maximum number of tracks to generate.' \
+    maximum_number_of_seeds = traits.Int(argstr='-seeds %d', desc='Sets the maximum number of tracks to generate.' \
     "The program will not generate more tracks than this number, even if the desired number of tracks hasn't yet been reached" \
-    '(default is 100 x number).')
+    '(default is 1000 x number of streamlines).')
     rk4 = traits.Bool(argstr='-rk4',desc='use 4th-order Runge-Kutta integration (slower, but eliminates curvature overshoot in 1st-order deterministic methods)')
     minimum_tract_length = traits.Float(argstr='-minlength %s', units='mm',
-        desc="Sets the minimum length of any track in millimeters (default is 10 mm).")
+        desc="Sets the minimum length of any track in millimeters (default is 5 mm).")
     maximum_tract_length = traits.Float(argstr='-maxlength %s', units='mm',
-        desc="Sets the maximum length of any track in millimeters (default is 200 mm).")
+        desc="Sets the maximum length of any track in millimeters (default is 500 mm).")
+
+    angle = traits.Float(argstr='-angle %s', units='degrees',
+        desc="Set the maximum angle between successive steps (default is 90deg x stepsize / voxelsize).")
 
     cutoff_value = traits.Float(argstr='-cutoff %s', units='NA',
-        desc="Set the FA or FOD amplitude cutoff for terminating tracks (default is 0.1).")
+        desc="Set the FA or FOD amplitude cutoff for terminating tracks (default is 0.5).")
     initial_cutoff_value = traits.Float(argstr='-seed_cutoff %s', units='NA',
         desc="Sets the minimum FA or FOD amplitude for initiating tracks (default is twice the normal cutoff).")
 
