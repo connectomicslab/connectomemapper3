@@ -846,7 +846,7 @@ def create_mrtrix_tracking_flow(config):
         mrtrix_seeds = pe.Node(interface=make_mrtrix_seeds(),name="mrtrix_seeds")
         mrtrix_tracking = pe.Node(interface=StreamlineTrack(),name="mrtrix_deterministic_tracking")
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
-        mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_seeds
+        mrtrix_tracking.inputs.maximum_number_of_seeds = config.max_number_of_seeds
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
         mrtrix_tracking.inputs.minimum_tract_length = config.min_length
         mrtrix_tracking.inputs.step_size = config.step_size
