@@ -793,10 +793,10 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
         desc="Set the step size of the algorithm in mm (default is 0.2).")
     # minimum_radius_of_curvature = traits.Float(argstr='-curvature %s', units='mm',
     #     desc="Set the minimum radius of curvature (default is 2 mm for DT_STREAM, 0 for SD_STREAM, 1 mm for SD_PROB and DT_PROB)")
-    desired_number_of_tracks = traits.Int(argstr='-number %d', desc='Sets the desired number of tracks.'   \
+    desired_number_of_tracks = traits.Int(argstr='-select %d', desc='Sets the desired number of tracks.'   \
     'The program will continue to generate tracks until this number of tracks have been selected and written to the output file' \
     '(default is 100 for *_STREAM methods, 1000 for *_PROB methods).')
-    maximum_number_of_tracks = traits.Int(argstr='-maxnum %d', desc='Sets the maximum number of tracks to generate.' \
+    maximum_number_of_tracks = traits.Int(argstr='-seeds %d', desc='Sets the maximum number of tracks to generate.' \
     "The program will not generate more tracks than this number, even if the desired number of tracks hasn't yet been reached" \
     '(default is 100 x number).')
     rk4 = traits.Bool(argstr='-rk4',desc='use 4th-order Runge-Kutta integration (slower, but eliminates curvature overshoot in 1st-order deterministic methods)')
