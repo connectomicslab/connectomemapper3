@@ -917,10 +917,12 @@ def create_mrtrix_tracking_flow(config):
         mrtrix_seeds = pe.Node(interface=make_mrtrix_seeds(),name="mrtrix_seeds")
         mrtrix_tracking = pe.MapNode(interface=StreamlineTrack(),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
-        mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
+        mrtrix_tracking.inputs.maximum_number_of_seeds = config.max_number_of_seeds
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
         mrtrix_tracking.inputs.minimum_tract_length = config.min_length
         mrtrix_tracking.inputs.step_size = config.step_size
+        mrtrix_tracking.inputs.angle = config.angle
+        mrtrix_tracking.inputs.cutoff_value = config.cutoff_value
         # mrtrix_tracking.inputs.args = '2>/dev/null'
         #if config.curvature >= 0.000001:
         #    mrtrix_tracking.inputs.rk4 = True
