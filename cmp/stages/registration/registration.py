@@ -718,7 +718,7 @@ class RegistrationStage(Stage):
             elif self.config.ants_interpolation=="MultiLabel":
                 affine_registration.inputs.interpolation_parameters=self.config.ants_multilab_interpolation_parameters#(5,5,)
 
-            affine_registration.inputs.terminal_output='file'
+            #affine_registration.inputs.terminal_output='file'
             affine_registration.inputs.winsorize_lower_quantile=self.config.ants_lower_quantile#0.005
             affine_registration.inputs.winsorize_upper_quantile=self.config.ants_upper_quantile#0.995
             affine_registration.inputs.convergence_threshold=[self.config.ants_convergence_thresh]*2#[1e-06]*2
@@ -766,7 +766,7 @@ class RegistrationStage(Stage):
                 elif self.config.ants_interpolation=="MultiLabel":
                     SyN_registration.inputs.interpolation_parameters=self.config.ants_multilab_interpolation_parameters#(5,5,)
 
-                SyN_registration.inputs.terminal_output='file'
+                #SyN_registration.inputs.terminal_output='file'
                 SyN_registration.inputs.winsorize_lower_quantile=self.config.ants_lower_quantile#0.005
                 SyN_registration.inputs.winsorize_upper_quantile=self.config.ants_upper_quantile#0.995
                 SyN_registration.inputs.convergence_threshold=[self.config.ants_convergence_thresh]*1#[1e-06]*1
