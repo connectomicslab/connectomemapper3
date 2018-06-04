@@ -109,7 +109,7 @@ class DWIDenoiseOutputSpec(TraitedSpec):
     out_noisemap = File(exists=True, desc='Output noise map (if generated).')
 
 class DWIDenoise(CommandLine):
-    cmd = 'dwidenoise'
+    _cmd = 'dwidenoise'
     input_spec = DWIDenoiseInputSpec
     output_spec = DWIDenoiseOutputSpec
 
@@ -204,7 +204,7 @@ class DWIBiasCorrectOutputSpec(TraitedSpec):
     out_bias = File(exists=True, desc='Output estimated bias field')
 
 class DWIBiasCorrect(CommandLine):
-    cmd = 'dwibiascorrect'
+    _cmd = 'dwibiascorrect'
     input_spec = DWIBiasCorrectInputSpec
     output_spec = DWIBiasCorrectOutputSpec
 

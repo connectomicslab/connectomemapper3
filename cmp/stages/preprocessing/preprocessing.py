@@ -553,7 +553,7 @@ class PreprocessingStage(Stage):
                     (fs_mriconvert_dwimask,outputnode,[('out_file','dwi_brain_mask')])
                     ])
 
-        # TODO Implementation of FSL Topup 
+        # TODO Implementation of FSL Topup
 
         if self.config.eddy_current_and_motion_correction:
 
