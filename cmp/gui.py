@@ -372,13 +372,13 @@ class CMP_MainWindow(HasTraits):
                             ),
                             Group(
                                 Item('anat_pipeline',style='custom',show_label=False),
-                                label='Anatomical pipeline',enabled_when='handler.anat_inputs_checked==True', dock='tab'
+                                label='Anatomical pipeline', dock='tab'
                             ),
                             Group(
-                                Item('dmri_pipeline',style='custom',show_label=False),
-                                label='Diffusion pipeline',visible_when='handler.anat_outputs_checked and handler.dmri_inputs_checked', dock='tab'
+                                Item('dmri_pipeline',style='custom',show_label=False, enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked'),
+                                label='Diffusion pipeline', dock='tab'
                             ),
-                            orientation='horizontal', layout='tabbed', springy=True, visible_when='handler.anat_inputs_checked==True'),
+                            orientation='horizontal', layout='tabbed', springy=True, enabled_when='handler.anat_inputs_checked==True'),
                         title='Connectome Mapper 3',
                         menubar=MenuBar(
                                     Menu(
