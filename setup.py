@@ -16,8 +16,8 @@ packages=["cmp","cmp.interfaces","cmp.stages",
           "cmp.stages.functional",
           "cmp.stages.connectome",
           "cmp.pipelines",
-          "cmp.pipelines.diffusion",
           "cmp.pipelines.anatomical",
+          "cmp.pipelines.diffusion",
           "cmp.pipelines.functional",
           "cmtklib"]
 
