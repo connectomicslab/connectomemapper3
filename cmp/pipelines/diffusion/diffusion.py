@@ -122,10 +122,10 @@ class DiffusionPipeline(Pipeline):
     #              )
 
     pipeline_group = VGroup(
-                        HGroup(spring,Item('preprocessing',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False.label=""),
-                        HGroup(spring,Item('registration',style='custom',width=500,height=110,resizable=True,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False.label=""),
-                        HGroup(spring,Item('diffusion',style='custom',width=450,height=240,resizable=True,editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False.label=""),
-                        HGroup(spring,Item('connectome',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False.label=""),
+                        HGroup(spring,Item('preprocessing',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False,label=""),
+                        HGroup(spring,Item('registration',style='custom',width=500,height=110,resizable=True,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False,label=""),
+                        HGroup(spring,Item('diffusion',style='custom',width=450,height=240,resizable=True,editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False,label=""),
+                        HGroup(spring,Item('connectome',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False,label=""),
                         # HGroup(spring,Item('preprocessing',style='custom',editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False),
                         # HGroup(spring,Item('registration',style='custom',editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False),
                         # HGroup(spring,Item('diffusion',style='custom',editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False),
