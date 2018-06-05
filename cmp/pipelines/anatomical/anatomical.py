@@ -104,8 +104,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     flow = Instance(pe.Workflow)
 
     pipeline_group = VGroup(
-                        HGroup(spring,Item('segmentation',style='custom',width=450,height=170,resizable=True,editor_args={'image':ImageResource('segmentation',search_path=['./']),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
-                        HGroup(spring,Item('parcellation',style='custom',width=450,height=200,resizable=True,editor_args={'image':ImageResource('parcellation',search_path=['./']),'label':""}),spring,show_labels=False),
+                        HGroup(spring,Item('segmentation',style='custom',width=450,height=170,resizable=True,editor_args={'image':ImageResource('segmentation'),'label':""}),spring,show_labels=False,label=""),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
+                        HGroup(spring,Item('parcellation',style='custom',width=450,height=200,resizable=True,editor_args={'image':ImageResource('parcellation'),'label':""}),spring,show_labels=False,label=""),
                         # HGroup(spring,Item('segmentation',style='custom',width=550,height=170,editor_args={'image':ImageResource('segmentation',search_path=['./']),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
                         # HGroup(spring,Item('parcellation',style='custom',width=550,height=200,editor_args={'image':ImageResource('parcellation',search_path=['./']),'label':""}),spring,show_labels=False),
                         # HGroup(spring,Item('segmentation',style='custom',editor_args={'image':ImageResource('segmentation',search_path=['./']),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
