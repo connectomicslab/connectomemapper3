@@ -366,17 +366,17 @@ class CMP_MainWindow(HasTraits):
     project_info.style_sheet = style_sheet
 
     traits_view = QtView(Group(
-                            HGroup(
+                            Group(
                                 # Include('data_manager'),label='Data manager',springy=True
-                                Item('project_info',style='custom',show_label=False),label='Data manager',springy=True
+                                Item('project_info',style='custom',show_label=False),label='Data manager',springy=True, dock='tab'
                             ),
-                            HGroup(
+                            Group(
                                 Item('anat_pipeline',style='custom',show_label=False),
-                                label='Anatomical pipeline',enabled_when='handler.anat_inputs_checked==True'
+                                label='Anatomical pipeline',enabled_when='handler.anat_inputs_checked==True', dock='tab'
                             ),
-                            HGroup(
+                            Group(
                                 Item('dmri_pipeline',style='custom',show_label=False),
-                                label='Diffusion pipeline',visible_when='handler.anat_outputs_checked and handler.dmri_inputs_checked'
+                                label='Diffusion pipeline',visible_when='handler.anat_outputs_checked and handler.dmri_inputs_checked', dock='tab'
                             ),
                             orientation='horizontal', layout='tabbed', springy=True, visible_when='handler.anat_inputs_checked==True'),
                         title='Connectome Mapper 3',
