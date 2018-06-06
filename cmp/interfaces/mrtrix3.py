@@ -838,8 +838,8 @@ class GenerateGMWMInterface(CommandLine):
     """
 
     _cmd = '5tt2gmwmi'
-    input_spec = Generate5ttInputSpec
-    output_spec = Generate5ttOutputSpec
+    input_spec = GenerateGMWMInterfaceInputSpec
+    output_spec = GenerateGMWMInterfaceOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
