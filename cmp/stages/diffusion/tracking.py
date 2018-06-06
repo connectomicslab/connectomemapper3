@@ -981,7 +981,7 @@ def create_mrtrix_tracking_flow(config):
 		    ])
 
         if config.use_act:
-            mrtrix_5tt = pe.Node(interface=Generate5tt(),name='mrtrix_5tt')
+            mrtrix_5tt = pe.Node(interface=Generate5tt(out_file='mrtrix_5tt.mif'),name='mrtrix_5tt')
             mrtrix_5tt.inputs.algorithm = 'freesurfer'
 
             flow.connect([
@@ -990,7 +990,7 @@ def create_mrtrix_tracking_flow(config):
     		    ])
 
         if config.seed_from_gmwmi:
-            mrtrix_gmwmi = pe.Node(interface=GenerateGMWMInterface(),name='mrtrix_gmwmi')
+            mrtrix_gmwmi = pe.Node(interface=GenerateGMWMInterface(out_file='gmwmi.mif'),name='mrtrix_gmwmi')
             flow.connect([
                 (mrtrix_5tt,mrtrix_gmwmi,[('out_file','in_file')]),
                 (mrtrix_gmwmi,mrtrix_tracking,[('out_file','seed_gmwmi')]),
