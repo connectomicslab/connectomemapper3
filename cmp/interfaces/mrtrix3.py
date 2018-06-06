@@ -760,7 +760,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
         return name + '_CSD.mif'
 
 
-class Generate5ttInputSpec(MRTrix3BaseInputSpec):
+class Generate5ttInputSpec(CommandLineInputSpec):
     algorithm = traits.Enum(
         'fsl',
         'gif',
@@ -783,7 +783,7 @@ class Generate5ttOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='output image')
 
 
-class Generate5tt(MRTrix3Base):
+class Generate5tt(CommandLine):
     """
     Generate a 5TT image suitable for ACT using the selected algorithm
     Example
@@ -807,7 +807,7 @@ class Generate5tt(MRTrix3Base):
         outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
 
-class GenerateGMWMInterfaceInputSpec(MRTrix3BaseInputSpec):
+class GenerateGMWMInterfaceInputSpec(CommandLineInputSpec):
 
     in_file = File(
         exists=True,
@@ -821,7 +821,7 @@ class GenerateGMWMInterfaceInputSpec(MRTrix3BaseInputSpec):
 class GenerateGMWMInterfaceOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='output image')
 
-class GenerateGMWMInterface(MRTrix3Base):
+class GenerateGMWMInterface(CommandLine):
     """
      Generate a mask image appropriate for seeding streamlines on the grey
      matter-white matter interface
