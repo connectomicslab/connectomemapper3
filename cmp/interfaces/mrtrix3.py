@@ -852,7 +852,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, ' \
     'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
 
-    seed_file = File(exists=True, argstr='-seed_image %s', mandatory=True, desc='seed file')
+    seed_file = File(exists=True, argstr='-seed_image %s',desc='seed file')
     seed_spec = traits.List(traits.Int, desc='seed specification in voxels and radius (x y z r)',
         argstr='-seed_sphere %s', minlen=4, maxlen=4, sep=',', units='voxels')
     # include_file = File(exists=True, argstr='-include %s', mandatory=False, desc='inclusion file')
