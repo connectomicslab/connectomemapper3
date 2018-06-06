@@ -476,9 +476,17 @@ class DiffusionStage(Stage):
                         (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
                         (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'),('outputnode.grad','inputnode.grad')]),
-                        (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
 			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                         ])
+
+            if self.config.dilate_rois:
+                flow.connect([
+                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
+                            ])
+            else:
+                flow.connect([
+                            (inputnode,track_flow,[('roi_volumes','inputnode.gm_registered')])
+                            ])
 
             flow.connect([
                         (track_flow,outputnode,[('outputnode.track_file','track_file')])
@@ -493,7 +501,6 @@ class DiffusionStage(Stage):
                             (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),('grad','inputnode.grad')]),
                             (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
                             (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
-                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
     			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                             ])
             else:
@@ -501,8 +508,16 @@ class DiffusionStage(Stage):
                             (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),('grad','inputnode.grad')]),
                             (recon_flow, outputnode,[('outputnode.fod','fod_file')]),
                             (recon_flow, track_flow,[('outputnode.fod','inputnode.DWI')]),
-                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
     			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
+                            ])
+
+            if self.config.dilate_rois:
+                flow.connect([
+                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
+                            ])
+            else:
+                flow.connect([
+                            (inputnode,track_flow,[('roi_volumes','inputnode.gm_registered')])
                             ])
 
            #  if self.config.diffusion_model == 'Probabilistic':
