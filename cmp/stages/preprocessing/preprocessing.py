@@ -33,7 +33,7 @@ import nipype.interfaces.dipy as dipy
 import nibabel as nib
 
 # from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
-from cmp.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, MRThreshold, ExtractFSLGrad, ExtractMRTrixGrad
+from cmp.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, MRThreshold, ExtractFSLGrad, ExtractMRTrixGrad, Generate5tt, GenerateGMWMInterface
 import cmp.interfaces.fsl as cmp_fsl
 
 from nipype.interfaces.mrtrix3.preprocess import ResponseSD
@@ -207,12 +207,12 @@ class PreprocessingStage(Stage):
     def __init__(self):
         self.name = 'preprocessing_stage'
         self.config = PreprocessingConfig()
-        self.inputs = ["diffusion","bvecs","bvals","T1","brain","brain_mask","wm_mask_file","roi_volumes"]
-        self.outputs = ["diffusion_preproc","bvecs_rot","bvals","dwi_brain_mask","T1","brain","brain_mask","brain_mask_full","wm_mask_file","partial_volume_files","roi_volumes"]
+        self.inputs = ["diffusion","bvecs","bvals","T1","aseg","brain","brain_mask","wm_mask_file","roi_volumes"]
+        self.outputs = ["diffusion_preproc","bvecs_rot","bvals","dwi_brain_mask","T1","act_5TT","gmwmi","brain","brain_mask","brain_mask_full","wm_mask_file","partial_volume_files","roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         print inputnode
-        processing_input = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','grad','acqp','index','T1','brain','brain_mask','wm_mask_file','roi_volumes']),name='processing_input')
+        processing_input = pe.Node(interface=util.IdentityInterface(fields=['diffusion','aseg','bvecs','bvals','grad','acqp','index','T1','brain','brain_mask','wm_mask_file','roi_volumes']),name='processing_input')
 
 
         # For DSI acquisition: extract the hemisphere that contains the data
@@ -241,7 +241,7 @@ class PreprocessingStage(Stage):
                         ])
 
         flow.connect([
-                    (inputnode,processing_input,[('T1','T1'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),
+                    (inputnode,processing_input,[('T1','T1'),('aseg','aseg'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),
                     (processing_input,outputnode,[('bvals','bvals')])
                     ])
 
@@ -756,6 +756,21 @@ class PreprocessingStage(Stage):
          #         flow.connect([
          #                     (mc_flirt,outputnode,[("out_file","diffusion_preproc")])
          #                     ])
+
+        mrtrix_5tt = pe.Node(interface=Generate5tt(out_file='mrtrix_5tt.nii.gz'),name='mrtrix_5tt')
+        mrtrix_5tt.inputs.algorithm = 'freesurfer'
+
+        flow.connect([
+    		    (processing_input,mrtrix_5tt,[('aseg','in_file')]),
+                (mrtrix_5tt,outputnode,[('out_file','act_5TT')]),
+    		    ])
+
+        mrtrix_gmwmi = pe.Node(interface=GenerateGMWMInterface(out_file='gmwmi.nii.gz'),name='mrtrix_gmwmi')
+
+        flow.connect([
+                (mrtrix_5tt,mrtrix_gmwmi,[('out_file','in_file')]),
+                (mrtrix_gmwmi,outputnode,[('out_file','gmwmi')]),
+    		    ])
 
     def define_inspect_outputs(self):
         print "stage_dir : %s" % self.stage_dir

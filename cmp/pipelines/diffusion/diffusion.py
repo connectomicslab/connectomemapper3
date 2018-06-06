@@ -560,13 +560,13 @@ class DiffusionPipeline(Pipeline):
 
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
-        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals','T1','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5']), name='datasource')
+        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals','T1','aseg','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5']), name='datasource')
         datasource.inputs.base_directory = deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
         datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval',
-                                                T1='anat/'+self.subject+'_T1w_head.nii.gz',brain='anat/'+self.subject+'_T1w_brain.nii.gz',brain_mask='anat/'+self.subject+'_T1w_brainmask.nii.gz',
+                                                T1='anat/'+self.subject+'_T1w_head.nii.gz',aseg='anat/'+self.subject+'_T1w_aseg.nii.gz',brain='anat/'+self.subject+'_T1w_brain.nii.gz',brain_mask='anat/'+self.subject+'_T1w_brainmask.nii.gz',
                                                 wm_mask_file='anat/'+self.subject+'_T1w_class-WM.nii.gz',wm_eroded='anat/'+self.subject+'_T1w_class-WM.nii.gz',
                                                 brain_eroded='anat/'+self.subject+'_T1w_brainmask.nii.gz',csf_eroded='anat/'+self.subject+'_T1w_class-CSF.nii.gz',
                                                 roi_volume_s1='anat/'+self.subject+'_T1w_parc_scale1.nii.gz',roi_volume_s2='anat/'+self.subject+'_T1w_parc_scale2.nii.gz',roi_volume_s3='anat/'+self.subject+'_T1w_parc_scale3.nii.gz',
@@ -749,7 +749,7 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
             diffusion_flow.connect([
-                                    (diffusion_inputnode,preproc_flow,[('diffusion','inputnode.diffusion'),('brain','inputnode.brain'),('brain_mask','inputnode.brain_mask'),
+                                    (diffusion_inputnode,preproc_flow,[('diffusion','inputnode.diffusion'),('brain','inputnode.brain'),('aseg','inputnode.aseg'),('brain_mask','inputnode.brain_mask'),
                                                                         ('wm_mask_file','inputnode.wm_mask_file'),('roi_volumes','inputnode.roi_volumes'),
                                                                         ('bvecs','inputnode.bvecs'),('bvals','inputnode.bvals'),('T1','inputnode.T1')]),
                                     ])
@@ -759,7 +759,7 @@ class DiffusionPipeline(Pipeline):
             diffusion_flow.connect([
                                     #(diffusion_inputnode,reg_flow,[('T2','inputnode.T2')]),
                                     #(diffusion_inputnode,reg_flow,[("bvals","inputnode.bvals")]),
-                                    (preproc_flow,reg_flow, [('outputnode.T1','inputnode.T1'),('outputnode.bvecs_rot','inputnode.bvecs'),('outputnode.bvals','inputnode.bvals'),('outputnode.wm_mask_file','inputnode.wm_mask'),
+                                    (preproc_flow,reg_flow, [('outputnode.T1','inputnode.T1'),('outputnode.act_5TT','inputnode.act_5TT'),('outputnode.gmwmi','inputnode.gmwmi'),('outputnode.bvecs_rot','inputnode.bvecs'),('outputnode.bvals','inputnode.bvals'),('outputnode.wm_mask_file','inputnode.wm_mask'),
                                                             ('outputnode.partial_volume_files','inputnode.partial_volume_files'),('outputnode.roi_volumes','inputnode.roi_volumes'),
                                                             ("outputnode.brain","inputnode.brain"),("outputnode.brain_mask","inputnode.brain_mask"),("outputnode.brain_mask_full","inputnode.brain_mask_full"),
                                                             ('outputnode.diffusion_preproc','inputnode.target'),('outputnode.dwi_brain_mask','inputnode.target_mask')]),
@@ -783,12 +783,16 @@ class DiffusionPipeline(Pipeline):
                                     (reg_flow,diff_flow, [('outputnode.wm_mask_registered_crop','inputnode.wm_mask_registered')]),
                                     (reg_flow,diff_flow,[('outputnode.partial_volumes_registered_crop','inputnode.partial_volumes')]),
                                     (reg_flow,diff_flow,[('outputnode.roi_volumes_registered_crop','inputnode.roi_volumes')]),
+                                    (reg_flow,diff_flow,[('outputnode.act_5tt_registered_crop','inputnode.act_5tt_registered')]),
+                                    (reg_flow,diff_flow,[('outputnode.gmwmi_registered_crop','inputnode.gmwmi_registered')]),
                                     (reg_flow,diff_flow,[('outputnode.grad','inputnode.grad')]),
                                     (reg_flow,diff_flow,[('outputnode.bvals','inputnode.bvals')]),
                                     (reg_flow,diff_flow,[('outputnode.bvecs','inputnode.bvecs')]),
                                     (reg_flow,sinker,[("outputnode.target_epicorrected","dwi.@bdiffusion_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.grad","dwi.@diffusion_grad")]),
                                     (reg_flow,sinker,[("outputnode.T1_registered_crop","anat.@T1_reg_crop")]),
+                                    (reg_flow,sinker,[("outputnode.act_5tt_registered_crop","anat.@act_5tt_reg_crop")]),
+                                    (reg_flow,sinker,[("outputnode.gmwmi_registered_crop","anat.@gmwmi_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.brain_registered_crop","anat.@brain_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.brain_mask_registered_crop","anat.@brain_mask_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.wm_mask_registered_crop","anat.@wm_mask_reg_crop")]),

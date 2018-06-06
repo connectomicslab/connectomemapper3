@@ -81,12 +81,13 @@ class ParcellationStage(Stage):
         self.config.pipeline_mode = pipeline_mode
         self.inputs = ["subjects_dir","subject_id","custom_wm_mask"]
         self.outputs = [#"aseg_file",
-            "T1","brain","brain_mask",
+            "T1","brain","aseg","brain_mask",
     		"wm_mask_file",
             "wm_eroded",
             "csf_eroded",
             "brain_eroded",
             "gm_mask_file",
+            "aseg",
     	       #"cc_unknown_file","ribbon_file","roi_files",
             "roi_volumes","parcellation_scheme","atlas_info"]
 
@@ -107,6 +108,11 @@ class ParcellationStage(Stage):
                              ("wm_eroded","wm_eroded"),("csf_eroded","csf_eroded"),("brain_eroded","brain_eroded"),
                              ("T1","T1"),("brain","brain"),("brain_mask","brain_mask")])
                         ])
+
+            flow.connect([
+                        (parc_node,outputnode,[("aseg","aseg")]),
+                        ])
+
         else:
             temp_node = pe.Node(interface=util.IdentityInterface(fields=["roi_volumes","atlas_info"]),name="custom_parcellation")
             temp_node.inputs.roi_volumes = self.config.atlas_nifti_file

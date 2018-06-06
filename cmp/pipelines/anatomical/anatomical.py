@@ -387,6 +387,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         #Dataname substitutions in order to comply with BIDS derivatives specifications
         if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
             sinker.inputs.substitutions = [ ('T1.nii.gz', self.subject+'_T1w_head.nii.gz'),
+                                            ('aseg.nii.gz', self.subject+'_T1w_aseg.nii.gz'),
                                             ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
                                             ('brainmask_eroded.nii.gz', self.subject+'_T1w_brainmask_eroded.nii.gz'),
                                             ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
@@ -437,7 +438,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         anat_flow = pe.Workflow(name='anatomical_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
         anat_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
-        anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","brain","brain_mask","wm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
+        anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","aseg","brain","brain_mask","wm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
             "roi_volumes","parcellation_scheme","atlas_info"]),name="outputnode")
         anat_flow.add_nodes([anat_inputnode,anat_outputnode])
 
@@ -492,6 +493,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                                ("outputnode.csf_eroded","csf_eroded"),
                                                                ("outputnode.brain_eroded","brain_eroded"),
                                                                ("outputnode.T1","T1"),
+                                                               ("outputnode.aseg","aseg"),
                                                                ("outputnode.brain_mask","brain_mask"),
                                                                ("outputnode.brain","brain"),
                                                                ])
@@ -514,9 +516,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                         (anat_inputnode,anat_outputnode,[("T1","T1")])
                                     ])
 
-
         anat_flow.connect([
                         (anat_outputnode,sinker,[("T1","anat.@T1")]),
+                        (anat_outputnode,sinker,[("aseg","anat.@aseg")]),
                         (anat_outputnode,sinker,[("brain","anat.@brain")]),
                         (anat_outputnode,sinker,[("brain_mask","anat.@brain_mask")]),
                         (anat_outputnode,sinker,[("wm_mask_file","anat.@wm_mask")]),

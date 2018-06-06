@@ -282,7 +282,7 @@ class DiffusionStage(Stage):
     def __init__(self):
         self.name = 'diffusion_stage'
         self.config = DiffusionConfig()
-        self.inputs = ["diffusion","partial_volumes","wm_mask_registered","roi_volumes","grad","bvals","bvecs"]
+        self.inputs = ["diffusion","partial_volumes","wm_mask_registered","act_5tt_registered","gmwmi_registered","roi_volumes","grad","bvals","bvecs"]
         self.outputs = ["diffusion_model","track_file","fod_file","gFA","ADC","skewness","kurtosis","P0","roi_volumes","mapmri_maps"]
 
 
@@ -489,6 +489,11 @@ class DiffusionStage(Stage):
                             ])
 
             flow.connect([
+                        (inputnode,track_flow,[('act_5tt_registered','inputnode.act_5tt_registered')]),
+                        (inputnode,track_flow,[('gmwmi_registered','inputnode.gmwmi_registered')])
+                        ])
+
+            flow.connect([
                         (track_flow,outputnode,[('outputnode.track_file','track_file')])
                         ])
 
@@ -519,6 +524,11 @@ class DiffusionStage(Stage):
                 flow.connect([
                             (inputnode,track_flow,[('roi_volumes','inputnode.gm_registered')])
                             ])
+
+            flow.connect([
+                        (inputnode,track_flow,[('act_5tt_registered','inputnode.act_5tt_registered')]),
+                        (inputnode,track_flow,[('gmwmi_registered','inputnode.gmwmi_registered')])
+                        ])
 
            #  if self.config.diffusion_model == 'Probabilistic':
            #      flow.connect([

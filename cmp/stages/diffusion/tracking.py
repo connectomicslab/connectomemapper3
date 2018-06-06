@@ -33,7 +33,7 @@ import nipype.interfaces.dipy as dipy
 
 #  import nipype.interfaces.camino2trackvis as camino2trackvis
 import cmp.interfaces.camino2trackvis as camino2trackvis
-from cmp.interfaces.mrtrix3 import Generate5tt,GenerateGMWMInterface,StreamlineTrack
+from cmp.interfaces.mrtrix3 import StreamlineTrack
 from cmp.interfaces.fsl import mapped_ProbTrackX
 from cmp.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
 from cmp.interfaces.misc import Tck2Trk
@@ -901,22 +901,15 @@ def create_mrtrix_tracking_flow(config):
             ])
 
         if config.use_act:
-            mrtrix_5tt = pe.Node(interface=Generate5tt(out_file='mrtrix_5tt.mif'),name='mrtrix_5tt')
-            mrtrix_5tt.inputs.algorithm = 'freesurfer'
-
             flow.connect([
-    		    (inputnode,mrtrix_5tt,[(('gm_registered',get_freesurfer_parcellation),'in_file')]),
-                (mrtrix_5tt,mrtrix_tracking,[('out_file','act_file')]),
+                (inputnode,mrtrix_tracking,[('act_5tt_registered','act_file')]),
     		    ])
-
             mrtrix_tracking.inputs.backtrack = config.backtrack
             mrtrix_tracking.inputs.crop_at_gmwmi = config.crop_at_gmwmi
 
         if config.seed_from_gmwmi:
-            mrtrix_gmwmi = pe.Node(interface=GenerateGMWMInterface(out_file='gmwmi.mif'),name='mrtrix_gmwmi')
             flow.connect([
-                (mrtrix_5tt,mrtrix_gmwmi,[('out_file','in_file')]),
-                (mrtrix_gmwmi,mrtrix_tracking,[('out_file','seed_gmwmi')]),
+                (inputnode,mrtrix_tracking,[('gmwmi_registered','seed_gmwmi')]),
     		    ])
         else:
             flow.connect([

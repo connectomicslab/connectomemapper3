@@ -91,6 +91,7 @@ class ParcellateOutputSpec(TraitedSpec):
     T1 = File(desc="T1 image file")
     brain = File(desc="Brain-masked T1 image file")
     brain_mask = File(desc="Brain mask file")
+    aseg = File(desc="ASeg image file")
 
 
 class Parcellate(BaseInterface):
@@ -159,6 +160,8 @@ class Parcellate(BaseInterface):
         outputs['T1'] = op.abspath('T1.nii.gz')
         outputs['brain'] = op.abspath('brain.nii.gz')
         outputs['brain_mask'] = op.abspath('brain_mask.nii.gz')
+
+        outputs['aseg'] = op.abspath('aseg.nii.gz')
 
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         #outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
@@ -316,6 +319,10 @@ def create_T1_and_Brain(subject_id, subjects_dir):
 
     # Convert Brain_masked T1 image
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brain.mgz'),'-o',op.join(fs_dir,'mri','brain.nii.gz')]
+    subprocess.check_call(mri_cmd)
+
+    # Convert ASeg image
+    mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','aseg.mgz'),'-o',op.join(fs_dir,'mri','aseg.nii.gz')]
     subprocess.check_call(mri_cmd)
 
     print("[DONE]")

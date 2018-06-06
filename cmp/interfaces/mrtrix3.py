@@ -771,7 +771,7 @@ class Generate5ttInputSpec(CommandLineInputSpec):
         desc='tissue segmentation algorithm')
     in_file = File(
         exists=True,
-        argstr='%s',
+        argstr='-nocrop %s',
         mandatory=True,
         position=-2,
         desc='input image')
