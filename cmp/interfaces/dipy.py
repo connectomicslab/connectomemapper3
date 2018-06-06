@@ -385,6 +385,8 @@ class SHORE(DipyDiffusionInterface):
         import pickle as pickle
         import gzip
 
+        import multiprocessing as mp
+
         img = nb.load(self.inputs.in_file)
         imref = nb.four_to_three(img)[0]
         affine = img.affine
@@ -462,7 +464,7 @@ class SHORE(DipyDiffusionInterface):
             shODF[i]   = sf_to_sh(sliceODF,sphere,sh_order=lmax,basis_type='mrtrix')
             GFA[i]     = np.nan_to_num(sliceGFA)
             MSD[i]     = np.nan_to_num(sliceGMSD)
-            IFLOGGER.info("Computation Time: " + str(time.time() - start_time) + " seconds")
+            IFLOGGER.info("Computation Time (slice %s): "%str(i) + str(time.time() - start_time) + " seconds")
 
         IFLOGGER.info('Save Spherical Harmonics / MSD / GFA images')
 

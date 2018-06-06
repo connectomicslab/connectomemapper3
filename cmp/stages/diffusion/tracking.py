@@ -33,7 +33,7 @@ import nipype.interfaces.dipy as dipy
 
 #  import nipype.interfaces.camino2trackvis as camino2trackvis
 import cmp.interfaces.camino2trackvis as camino2trackvis
-from cmp.interfaces.mrtrix3 import StreamlineTrack
+from cmp.interfaces.mrtrix3 import Generate5tt,GenerateGMWMInterface,StreamlineTrack
 from cmp.interfaces.fsl import mapped_ProbTrackX
 from cmp.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
 from cmp.interfaces.misc import Tck2Trk
@@ -106,7 +106,7 @@ class MRtrix_tracking_config(HasTraits):
     tracking_mode = Str
     SD = Bool
     desired_number_of_tracks = Int(1000000)
-    max_number_of_seeds = Int(1000000000)
+    # max_number_of_seeds = Int(1000000000)
     curvature = Float(2.0)
     step_size = Float(0.5)
     min_length = Float(5)
@@ -114,12 +114,27 @@ class MRtrix_tracking_config(HasTraits):
     angle = Float(45)
     cutoff_value = Float(1)
 
-    traits_view = View( VGroup('desired_number_of_tracks','max_number_of_seeds'),
-            'angle',
-			Item('curvature',label="Curvature radius"),'step_size',
-			VGroup('min_length','max_length'),
-            'cutoff_value'
-		      )
+    use_act = traits.Bool(True, desc="Anatomically-Constrained Tractography (ACT) based on Freesurfer parcellation")
+    seed_from_gmwmi = traits.Bool(False, desc="Seed from Grey Matter / White Matter interface (requires Anatomically-Constrained Tractography (ACT))")
+    crop_at_gmwmi = traits.Bool(True, desc="Crop streamline endpoints more precisely as they cross the GM-WM interface (requires Anatomically-Constrained Tractography (ACT))")
+    backtrack = traits.Bool(True, desc="Allow tracks to be truncated (requires Anatomically-Constrained Tractography (ACT))")
+
+    traits_view = View( VGroup('desired_number_of_tracks',
+                               # 'max_number_of_seeds',
+                               HGroup('min_length','max_length'),
+                               'angle',
+                   			   Item('curvature',label="Curvature radius"),'step_size',
+                               'cutoff_value',
+                               label='Streamline settings'
+                               ),
+                        VGroup(
+                            Item('use_act',label='Use ACT based on Freesurfer parcellation'),
+                            Item('crop_at_gmwmi',visible_when='use_act'),
+                            Item('backtrack',visible_when='use_act'),
+                            Item('seed_from_gmwmi',visible_when='use_act'),
+                            label='Anatomically-Constrained Tractography (ACT)'
+                            )
+		              )
 
     def _SD_changed(self,new):
         if self.tracking_mode == "Deterministic" and not new:
@@ -832,6 +847,9 @@ def create_dipy_tracking_flow(config):
 
     return flow
 
+def get_freesurfer_parcellation(roi_files):
+    print "%s"%roi_files[0]
+    return roi_files[0]
 
 def create_mrtrix_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
@@ -846,7 +864,7 @@ def create_mrtrix_tracking_flow(config):
         mrtrix_seeds = pe.Node(interface=make_mrtrix_seeds(),name="mrtrix_seeds")
         mrtrix_tracking = pe.Node(interface=StreamlineTrack(),name="mrtrix_deterministic_tracking")
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
-        mrtrix_tracking.inputs.maximum_number_of_seeds = config.max_number_of_seeds
+        #mrtrix_tracking.inputs.maximum_number_of_seeds = config.max_number_of_seeds
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
         mrtrix_tracking.inputs.minimum_tract_length = config.min_length
         mrtrix_tracking.inputs.step_size = config.step_size
@@ -882,13 +900,35 @@ def create_mrtrix_tracking_flow(config):
             (inputnode,mrtrix_seeds,[('gm_registered','ROI_files')]),
             ])
 
+        if config.use_act:
+            mrtrix_5tt = pe.Node(interface=Generate5tt(),name='mrtrix_5tt')
+            mrtrix_5tt.inputs.algorithm = 'freesurfer'
+
+            flow.connect([
+    		    (inputnode,mrtrix_5tt,[(('gm_registered',get_freesurfer_parcellation),'in_file')]),
+                (mrtrix_5tt,mrtrix_tracking,[('out_file','act_file')]),
+    		    ])
+
+            mrtrix_tracking.inputs.backtrack = config.backtrack
+            mrtrix_tracking.inputs.crop_at_gmwmi = config.crop_at_gmwmi
+
+        if config.seed_from_gmwmi:
+            mrtrix_gmwmi = pe.Node(interface=GenerateGMWMInterface(),name='mrtrix_gmwmi')
+            flow.connect([
+                (mrtrix_5tt,mrtrix_gmwmi,[('out_file','in_file')]),
+                (mrtrix_gmwmi,mrtrix_tracking,[('out_file','seed_gmwmi')]),
+    		    ])
+        else:
+            flow.connect([
+    		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
+                ])
+
         # converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
         converter = pe.Node(interface=Tck2Trk(),name="trackvis")
         converter.inputs.out_tracks = 'converted.trk'
 
         flow.connect([
             #(mrtrix_seeds,mrtrix_tracking,[('seed_files','seed_file')]),
-            (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
             (inputnode,mrtrix_tracking,[('DWI','in_file')]),
             (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
             #(mrtrix_tracking,outputnode,[('tracked','track_file')]),
@@ -917,7 +957,7 @@ def create_mrtrix_tracking_flow(config):
         mrtrix_seeds = pe.Node(interface=make_mrtrix_seeds(),name="mrtrix_seeds")
         mrtrix_tracking = pe.MapNode(interface=StreamlineTrack(),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
-        mrtrix_tracking.inputs.maximum_number_of_seeds = config.max_number_of_seeds
+        #mrtrix_tracking.inputs.maximum_number_of_seeds = config.max_number_of_seeds
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
         mrtrix_tracking.inputs.minimum_tract_length = config.min_length
         mrtrix_tracking.inputs.step_size = config.step_size
@@ -939,8 +979,28 @@ def create_mrtrix_tracking_flow(config):
 		    (inputnode,mrtrix_seeds,[('wm_mask_resampled','WM_file')]),
 		    (inputnode,mrtrix_seeds,[('gm_registered','ROI_files')]),
 		    ])
+
+        if config.use_act:
+            mrtrix_5tt = pe.Node(interface=Generate5tt(),name='mrtrix_5tt')
+            mrtrix_5tt.inputs.algorithm = 'freesurfer'
+
+            flow.connect([
+    		    (inputnode,mrtrix_5tt,[(('gm_registered',get_freesurfer_parcellation),'in_file')]),
+                (mrtrix_5tt,mrtrix_tracking,[('out_file','act_file')]),
+    		    ])
+
+        if config.seed_from_gmwmi:
+            mrtrix_gmwmi = pe.Node(interface=GenerateGMWMInterface(),name='mrtrix_gmwmi')
+            flow.connect([
+                (mrtrix_5tt,mrtrix_gmwmi,[('out_file','in_file')]),
+                (mrtrix_gmwmi,mrtrix_tracking,[('out_file','seed_gmwmi')]),
+    		    ])
+        else:
+            flow.connect([
+    		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
+                ])
+
         flow.connect([
-		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
 		    (inputnode,mrtrix_tracking,[('DWI','in_file')]),
 		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
             #(mrtrix_tracking,outputnode,[('tracked','track_file')]),

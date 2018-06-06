@@ -760,6 +760,93 @@ class ConstrainedSphericalDeconvolution(CommandLine):
         return name + '_CSD.mif'
 
 
+class Generate5ttInputSpec(MRTrix3BaseInputSpec):
+    algorithm = traits.Enum(
+        'fsl',
+        'gif',
+        'freesurfer',
+        argstr='%s',
+        position=-3,
+        mandatory=True,
+        desc='tissue segmentation algorithm')
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=-2,
+        desc='input image')
+    out_file = File(
+        argstr='%s', mandatory=True, position=-1, desc='output image')
+
+
+class Generate5ttOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output image')
+
+
+class Generate5tt(MRTrix3Base):
+    """
+    Generate a 5TT image suitable for ACT using the selected algorithm
+    Example
+    -------
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> gen5tt = mrt.Generate5tt()
+    >>> gen5tt.inputs.in_file = 'T1.nii.gz'
+    >>> gen5tt.inputs.algorithm = 'fsl'
+    >>> gen5tt.inputs.out_file = '5tt.mif'
+    >>> gen5tt.cmdline                             # doctest: +ELLIPSIS
+    '5ttgen fsl T1.nii.gz 5tt.mif'
+    >>> gen5tt.run()                               # doctest: +SKIP
+    """
+
+    _cmd = '5ttgen'
+    input_spec = Generate5ttInputSpec
+    output_spec = Generate5ttOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+class GenerateGMWMInterfaceInputSpec(MRTrix3BaseInputSpec):
+
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=-2,
+        desc='input 5TT image')
+    out_file = File(
+        argstr='%s', mandatory=True, position=-1, desc='output GW/WM interface image')
+
+class GenerateGMWMInterfaceOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output image')
+
+class GenerateGMWMInterface(MRTrix3Base):
+    """
+     Generate a mask image appropriate for seeding streamlines on the grey
+     matter-white matter interface
+
+    Example
+    -------
+    >>> import cmp.interfaces.mrtrix3 as cmp_mrt
+    >>> genWMGMI = cmp_mrt.Generate5tt()
+    >>> genWMGMI.inputs.in_file = '5tt.mif'
+    >>> genWMGMI.inputs.out_file = 'gmwmi.mif'
+    >>> genWMGMI.cmdline                             # doctest: +ELLIPSIS
+    '5tt2gmwmi 5tt.mif gmwmi.mif'
+    >>> genGMWMI.run()                               # doctest: +SKIP
+    """
+
+    _cmd = '5tt2gmwmi'
+    input_spec = Generate5ttInputSpec
+    output_spec = Generate5ttOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
 class StreamlineTrackInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=2, desc='the image containing the source data.' \
     'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, ' \
@@ -815,6 +902,28 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
 
     initial_direction = traits.List(traits.Int, desc='Specify the initial tracking direction as a vector',
         argstr='-seed_direction %s', minlen=2, maxlen=2, units='voxels')
+
+     # Anatomically-Constrained Tractography options
+    act_file = File(
+        exists=True,
+        argstr='-act %s',
+        desc=('use the Anatomically-Constrained Tractography framework during'
+              ' tracking; provided image must be in the 5TT '
+              '(five - tissue - type) format'))
+
+    backtrack = traits.Bool(
+        argstr='-backtrack', desc='allow tracks to be truncated')
+
+    crop_at_gmwmi = traits.Bool(
+        argstr='-crop_at_gmwmi',
+        desc=('crop streamline endpoints more precisely as they cross the GM-WM interface'))
+
+    seed_gmwmi = File(
+        exists=True,
+        argstr='-seed_gmwmi %s',
+        requires=['act_file'],
+        desc=('seed from the grey matter - white matter interface (only valid if using ACT framework)'))
+
     out_file = File(argstr='%s', position= -1, genfile=True, desc='output data file')
 
 class StreamlineTrackOutputSpec(TraitedSpec):
