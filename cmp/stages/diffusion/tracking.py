@@ -854,7 +854,7 @@ def get_freesurfer_parcellation(roi_files):
 def create_mrtrix_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','wm_mask_resampled','gm_registered','grad']),name='inputnode')
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','wm_mask_resampled','gm_registered','act_5tt_registered','gmwmi_registered','grad']),name='inputnode')
     # outputnode
 
     #CRS2XYZtkReg = subprocess.check_output
