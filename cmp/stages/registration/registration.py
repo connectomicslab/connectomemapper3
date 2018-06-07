@@ -893,10 +893,12 @@ class RegistrationStage(Stage):
             ants_applywarp_5tt = pe.Node(interface=ants.ApplyTransforms(default_value=0,interpolation="Gaussian",out_postfix="_warped"),name="apply_warp_5tt")
             ants_applywarp_5tt.inputs.dimension = 3
             ants_applywarp_5tt.inputs.input_image_type = 3
+            ants_applywarp_5tt.inputs.float = True
 
             ants_applywarp_gmwmi = pe.Node(interface=ants.ApplyTransforms(default_value=0,interpolation="Gaussian",out_postfix="_warped"),name="apply_warp_gmwmi")
             ants_applywarp_gmwmi.inputs.dimension = 3
             ants_applywarp_gmwmi.inputs.input_image_type = 3
+            ants_applywarp_gmwmi.inputs.float = True
 
             def reverse_order_transforms(transforms):
                 return transforms[::-1]
