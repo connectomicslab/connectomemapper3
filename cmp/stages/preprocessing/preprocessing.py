@@ -757,19 +757,29 @@ class PreprocessingStage(Stage):
          #                     (mc_flirt,outputnode,[("out_file","diffusion_preproc")])
          #                     ])
 
+        fs_mriconvert_5tt = pe.Node(interface=fs.MRIConvert(out_type='niigz',out_file='act_5tt_resampled.nii.gz'),name="5tt_resample")
+        fs_mriconvert_5tt.inputs.vox_size = self.config.resampling
+        fs_mriconvert_5tt.inputs.resample_type = self.config.interpolation
+
         mrtrix_5tt = pe.Node(interface=Generate5tt(out_file='mrtrix_5tt.nii.gz'),name='mrtrix_5tt')
         mrtrix_5tt.inputs.algorithm = 'freesurfer'
 
         flow.connect([
     		    (processing_input,mrtrix_5tt,[('aseg','in_file')]),
-                (mrtrix_5tt,outputnode,[('out_file','act_5TT')]),
+                (mrtrix_5tt,fs_mriconvert_5tt,[('out_file','in_file')]),
+                (fs_mriconvert_5tt,outputnode,[('out_file','act_5TT')]),
     		    ])
+
+        fs_mriconvert_gmwmi = pe.Node(interface=fs.MRIConvert(out_type='niigz',out_file='gmwmi_resampled.nii.gz'),name="gmwmi_resample")
+        fs_mriconvert_gmwmi.inputs.vox_size = self.config.resampling
+        fs_mriconvert_gmwmi.inputs.resample_type = self.config.interpolation
 
         mrtrix_gmwmi = pe.Node(interface=GenerateGMWMInterface(out_file='gmwmi.nii.gz'),name='mrtrix_gmwmi')
 
         flow.connect([
                 (mrtrix_5tt,mrtrix_gmwmi,[('out_file','in_file')]),
-                (mrtrix_gmwmi,outputnode,[('out_file','gmwmi')]),
+                (mrtrix_gmwmi,fs_mriconvert_gmwmi,[('out_file','in_file')]),
+                (fs_mriconvert_gmwmi,outputnode,[('out_file','gmwmi')]),
     		    ])
 
     def define_inspect_outputs(self):
