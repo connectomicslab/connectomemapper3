@@ -705,7 +705,7 @@ class DiffusionPipeline(Pipeline):
         # Create diffusion flow
 
         diffusion_flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
-        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')# ,'atlas_info'
+        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','aseg','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')# ,'atlas_info'
         diffusion_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         diffusion_inputnode.inputs.atlas_info = self.atlas_info
 
@@ -738,7 +738,7 @@ class DiffusionPipeline(Pipeline):
 
         diffusion_flow.connect([
                       (datasource,diffusion_inputnode,[("diffusion","diffusion"),("bvecs","bvecs"),("bvals","bvals")]),
-                      (datasource,diffusion_inputnode,[("T1","T1"),("brain","brain"),("brain_mask","brain_mask"),("wm_mask_file","wm_mask_file")]), #,( "roi_volumes","roi_volumes")])
+                      (datasource,diffusion_inputnode,[("T1","T1"),("aseg","aseg"),("brain","brain"),("brain_mask","brain_mask"),("wm_mask_file","wm_mask_file")]), #,( "roi_volumes","roi_volumes")])
                       (merge_roi_volumes,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_volumes")])
                                                 #    ("parcellation_scheme","parcellation_scheme"),
                                                 #    ("atlas_info","atlas_info")]),
