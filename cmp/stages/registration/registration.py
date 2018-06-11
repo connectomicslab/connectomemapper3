@@ -886,6 +886,7 @@ class RegistrationStage(Stage):
 
             ants_applywarp_T1 = pe.Node(interface=ants.ApplyTransforms(default_value=0,interpolation="Gaussian",out_postfix="_warped"),name="apply_warp_T1")
             ants_applywarp_brain = pe.Node(interface=ants.ApplyTransforms(default_value=0,interpolation="Gaussian",out_postfix="_warped"),name="apply_warp_brain")
+            ants_applywarp_brainmask = pe.Node(interface=ants.ApplyTransforms(default_value=0,interpolation="NearestNeighbor",out_postfix="_warped"),name="apply_warp_brainmask")
             ants_applywarp_wm = pe.Node(interface=ants.ApplyTransforms(default_value=0,interpolation="NearestNeighbor",out_postfix="_warped"),name="apply_warp_wm")
             ants_applywarp_rois = pe.Node(interface=MultipleANTsApplyTransforms(interpolation="NearestNeighbor",default_value=0,out_postfix="_warped"),name="apply_warp_roivs")
             ants_applywarp_pves = pe.Node(interface=MultipleANTsApplyTransforms(interpolation="Gaussian",default_value=0,out_postfix="_warped"),name="apply_warp_pves")
@@ -919,6 +920,7 @@ class RegistrationStage(Stage):
                             (affine_registration, ants_applywarp_5tt, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (affine_registration, ants_applywarp_gmwmi, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (affine_registration, ants_applywarp_brain, [(('forward_transforms',reverse_order_transforms),'transforms')]),
+                            (affine_registration, ants_applywarp_brainmask, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (affine_registration, ants_applywarp_wm, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (affine_registration, ants_applywarp_rois, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (affine_registration, ants_applywarp_pves, [(('forward_transforms',reverse_order_transforms),'transforms')]),
@@ -950,6 +952,13 @@ class RegistrationStage(Stage):
                         (mr_convert_b0, ants_applywarp_brain, [('converted','reference_image')]),
                         #(multitransforms, ants_applywarp_brain, [('out','transforms')]),
                         (ants_applywarp_brain, outputnode, [('output_image','brain_registered_crop')]),
+                        ])
+
+            flow.connect([
+                        (inputnode, ants_applywarp_brainmask, [('brain_mask','input_image')]),
+                        (mr_convert_b0, ants_applywarp_brainmask, [('converted','reference_image')]),
+                        #(multitransforms, ants_applywarp_brainmask, [('out','transforms')]),
+                        (ants_applywarp_brainmask, outputnode, [('output_image','brain_mask_registered_crop')]),
                         ])
 
             flow.connect([
