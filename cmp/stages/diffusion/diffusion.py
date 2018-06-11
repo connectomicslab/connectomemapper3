@@ -282,7 +282,7 @@ class DiffusionStage(Stage):
     def __init__(self):
         self.name = 'diffusion_stage'
         self.config = DiffusionConfig()
-        self.inputs = ["diffusion","partial_volumes","wm_mask_registered","act_5tt_registered","gmwmi_registered","roi_volumes","grad","bvals","bvecs"]
+        self.inputs = ["diffusion","partial_volumes","wm_mask_registered","brain_mask_registered","act_5tt_registered","gmwmi_registered","roi_volumes","grad","bvals","bvecs"]
         self.outputs = ["diffusion_model","track_file","fod_file","gFA","ADC","skewness","kurtosis","P0","roi_volumes","mapmri_maps"]
 
 
@@ -384,6 +384,7 @@ class DiffusionStage(Stage):
                         (inputnode,recon_flow,[('bvecs','inputnode.bvecs')]),
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
                         (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
+                        (inputnode, recon_flow,[('brain_mask_registered','inputnode.brain_mask_resampled')]),
                         (recon_flow,outputnode,[("outputnode.FA","gFA")]),
                         (recon_flow,outputnode,[("outputnode.mapmri_maps","mapmri_maps")]),
                         ])

@@ -781,6 +781,7 @@ class DiffusionPipeline(Pipeline):
                                     (reg_flow,diff_flow, [('outputnode.target_epicorrected','inputnode.diffusion')]),
                                     # (reg_flow,diff_flow, [('outputnode.T1_registered_crop','inputnode.T1')]),
                                     (reg_flow,diff_flow, [('outputnode.wm_mask_registered_crop','inputnode.wm_mask_registered')]),
+                                    (reg_flow,diff_flow, [('outputnode.brain_mask_registered_crop','inputnode.brain_mask_registered')]),
                                     (reg_flow,diff_flow,[('outputnode.partial_volumes_registered_crop','inputnode.partial_volumes')]),
                                     (reg_flow,diff_flow,[('outputnode.roi_volumes_registered_crop','inputnode.roi_volumes')]),
                                     (reg_flow,diff_flow,[('outputnode.act_5tt_registered_crop','inputnode.act_5tt_registered')]),
