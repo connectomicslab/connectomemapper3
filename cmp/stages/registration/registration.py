@@ -780,7 +780,7 @@ class RegistrationStage(Stage):
                 SyN_registration.inputs.output_warped_image='Syn_warped_image.nii.gz'
                 SyN_registration.inputs.sigma_units=['vox']*1
                 SyN_registration.inputs.transforms=['SyN']
-                SyN_registration.inputs.restrict_deformation=[[1,1,0]]
+                SyN_registration.inputs.restrict_deformation=[[0,1,0]]
 
                 SyN_registration.inputs.interpolation=self.config.ants_interpolation#'BSpline'
                 if self.config.ants_interpolation=="BSpline":
