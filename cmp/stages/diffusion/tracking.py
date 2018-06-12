@@ -33,7 +33,7 @@ import nipype.interfaces.dipy as dipy
 
 #  import nipype.interfaces.camino2trackvis as camino2trackvis
 import cmp.interfaces.camino2trackvis as camino2trackvis
-from cmp.interfaces.mrtrix3 import StreamlineTrack
+from cmp.interfaces.mrtrix3 import Erode, StreamlineTrack
 from cmp.interfaces.fsl import mapped_ProbTrackX
 from cmp.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
 from cmp.interfaces.misc import Tck2Trk
@@ -860,6 +860,16 @@ def create_mrtrix_tracking_flow(config):
     #CRS2XYZtkReg = subprocess.check_output
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
+
+    # Compute single fiber voxel mask
+    wm_erode = pe.Node(interface=Erode(out_filename="wm_mask_resampled.nii.gz"),name="wm_erode")
+    wm_erode.inputs.number_of_passes = 1
+    wm_erode.inputs.filtertype = 'erode'
+
+    flow.connect([
+        (inputnode,wm_erode,[("wm_mask_resampled",'in_file')])
+        ])
+
     if config.tracking_mode == 'Deterministic':
         mrtrix_seeds = pe.Node(interface=make_mrtrix_seeds(),name="mrtrix_seeds")
         mrtrix_tracking = pe.Node(interface=StreamlineTrack(),name="mrtrix_deterministic_tracking")
@@ -923,7 +933,8 @@ def create_mrtrix_tracking_flow(config):
         flow.connect([
             #(mrtrix_seeds,mrtrix_tracking,[('seed_files','seed_file')]),
             (inputnode,mrtrix_tracking,[('DWI','in_file')]),
-            (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
+            #(inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
+            (wm_erode, mrtrix_tracking,[('out_file','mask_file')]),
             #(mrtrix_tracking,outputnode,[('tracked','track_file')]),
             # (mrtrix_tracking,converter,[('tracked','in_file')]),
             # (inputnode,converter,[('wm_mask_resampled','image_file')]),
@@ -991,7 +1002,8 @@ def create_mrtrix_tracking_flow(config):
 
         flow.connect([
 		    (inputnode,mrtrix_tracking,[('DWI','in_file')]),
-		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
+		    #(inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
+            (wm_erode, mrtrix_tracking,[('out_file','mask_file')]),
             #(mrtrix_tracking,outputnode,[('tracked','track_file')]),
             ##(mrtrix_tracking,converter,[('tracked','in_file')]),
             # (mrtrix_tracking,converter,[('tracked','in_file')]),
