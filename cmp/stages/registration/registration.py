@@ -910,6 +910,7 @@ class RegistrationStage(Stage):
                             (SyN_registration, ants_applywarp_5tt, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (SyN_registration, ants_applywarp_gmwmi, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (SyN_registration, ants_applywarp_brain, [(('forward_transforms',reverse_order_transforms),'transforms')]),
+                            (SyN_registration, ants_applywarp_brainmask, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (SyN_registration, ants_applywarp_wm, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (SyN_registration, ants_applywarp_rois, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (SyN_registration, ants_applywarp_pves, [(('forward_transforms',reverse_order_transforms),'transforms')]),
