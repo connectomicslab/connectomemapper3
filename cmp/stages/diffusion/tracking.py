@@ -863,7 +863,7 @@ def create_mrtrix_tracking_flow(config):
 
     # Compute single fiber voxel mask
     wm_erode = pe.Node(interface=Erode(out_filename="wm_mask_resampled.nii.gz"),name="wm_erode")
-    wm_erode.inputs.number_of_passes = 1
+    wm_erode.inputs.number_of_passes = 3
     wm_erode.inputs.filtertype = 'erode'
 
     flow.connect([
