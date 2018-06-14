@@ -466,7 +466,7 @@ class SHORE(DipyDiffusionInterface):
             MSD[i]     = np.nan_to_num(sliceGMSD)
             IFLOGGER.info("Computation Time (slice %s): "%str(i) + str(time.time() - start_time) + " seconds")
 
-        shFODF =odf_sh_to_sharp(shODF,sphere,basis='mrtrix',ratio=0.2, sh_order=lmax, lambda=1.0, tau=0.1, r2_term=True)
+        shFODF = odf_sh_to_sharp((shODF,sphere,basis='mrtrix',ratio=0.2, sh_order=lmax, lambda_=1.0, tau=0.1, r2_term=True)
 
         IFLOGGER.info('Save Spherical Harmonics / MSD / GFA images')
 
