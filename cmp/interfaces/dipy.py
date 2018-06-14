@@ -466,18 +466,21 @@ class SHORE(DipyDiffusionInterface):
             MSD[i]     = np.nan_to_num(sliceGMSD)
             IFLOGGER.info("Computation Time (slice %s): "%str(i) + str(time.time() - start_time) + " seconds")
 
+        shFODF =odf_sh_to_sharp(shODF,sphere,basis='mrtrix',ratio=0.2, sh_order=lmax, lambda=1.0, tau=0.1, r2_term=True)
+
         IFLOGGER.info('Save Spherical Harmonics / MSD / GFA images')
 
         nib.Nifti1Image(GFA,affine).to_filename(self._gen_filename('shore_gfa', ext='.nii.gz'))
         nib.Nifti1Image(MSD,affine).to_filename(self._gen_filename('shore_msd', ext='.nii.gz'))
-        nib.Nifti1Image(shODF,affine).to_filename(self._gen_filename('shore_fod', ext='.nii.gz'))
+        nib.Nifti1Image(shODF,affine).to_filename(self._gen_filename('shore_dodf', ext='.nii.gz'))
+        nib.Nifti1Image(shFODF,affine).to_filename(self._gen_filename('shore_fodf', ext='.nii.gz'))
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['model'] = self._gen_filename('shoremodel', ext='.pklz')
-        outputs['fod'] = self._gen_filename('shore_fod', ext='.nii.gz')
+        outputs['fod'] = self._gen_filename('shore_fodf', ext='.nii.gz')
         outputs['GFA'] = self._gen_filename('shore_gfa', ext='.nii.gz')
         return outputs
 
