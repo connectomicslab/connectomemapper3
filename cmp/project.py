@@ -389,14 +389,21 @@ def update_dmri_last_processed(project_info, pipeline):
                 project_info.dmri_last_stage_processed = stage
 
 class ProjectHandler(Handler):
-    anat_pipeline = Instance(HasTraits)
-    dmri_pipeline = Instance(HasTraits)
     project_loaded = Bool(False)
-    anatomical_processed = Bool(False)
-    dmri_processed = Bool(False)
+
+    anat_pipeline = Instance(HasTraits)
     anat_inputs_checked = Bool(False)
     anat_outputs_checked = Bool(False)
+    anatomical_processed = Bool(False)
+
+    dmri_pipeline = Instance(HasTraits)
     dmri_inputs_checked = Bool(False)
+    dmri_processed = Bool(False)
+
+    fmri_pipeline = Instance(HasTraits)
+    fmri_inputs_checked = Bool(False)
+    fmri_processed = Bool(False)
+
 
     def new_project(self, ui_info ):
         new_project = gui.CMP_Project_Info()
@@ -874,6 +881,10 @@ class ProjectHandler(Handler):
                 self.dmri_pipeline.launch_progress_window()
                 update_dmri_last_processed(ui_info.ui.context["object"].project_info, self.dmri_pipeline)
             dmri_processed = True
+
+
+    def map_fmri_connectome(self, ui_info):
+        pass
 
     # def process_anatomical_and_diffusion(self, ui_info):
 

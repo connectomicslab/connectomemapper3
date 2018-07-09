@@ -141,7 +141,7 @@ class CMP_Project_Info(HasTraits):
 
     t1_available = Bool(False)
     dmri_available = Bool(False)
-    # fmri_available = Bool(False)
+    fmri_available = Bool(False)
 
     anat_config_error_msg = Str('')
     anat_config_to_load = Str()
@@ -162,6 +162,16 @@ class CMP_Project_Info(HasTraits):
 
     dmri_stage_names = List
     dmri_custom_last_stage = Str
+
+    fmri_config_error_msg = Str('')
+    fmri_config_to_load = Str()
+    fmri_available_config = List()
+    fmri_config_to_load_msg = Str('Several configuration files available. Select which one to load:\n')
+    fmri_last_date_processed = Str('Not yet processed')
+    fmri_last_stage_processed = Str('Not yet processed')
+
+    fmri_stage_names = List
+    fmri_custom_last_stage = Str
 
     number_of_cores = Enum(1,range(1,multiprocessing.cpu_count()+1))
 
@@ -207,6 +217,11 @@ class CMP_Project_Info(HasTraits):
                                 Item('dmri_last_date_processed',style='readonly',resizable=True),
                                 Item('dmri_last_stage_processed',style='readonly',resizable=True),
                                 label="Diffusion pipeline",enabled_when='dmri_available'
+                            ),
+                            Group(
+                                Item('fmri_last_date_processed',style='readonly',resizable=True),
+                                Item('fmri_last_stage_processed',style='readonly',resizable=True),
+                                label="fMRI pipeline",enabled_when='fmri_available'
                             )
                         ),
                         spring,
@@ -250,20 +265,11 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
-    dmri_warning_view = View(
-                        Group(
-                            Item('dmri_warning_msg',style='readonly',show_label=False),
-                            ),
-                        title='Warning : Diffusion data',
-                        kind='modal',
-                        #style_sheet=style_sheet,
-                        buttons=['OK','Cancel'])
-
     anat_warning_view = View(
                         Group(
                             Item('anat_warning_msg',style='readonly',show_label=False),
                             ),
-                        title='Warning : Anatomical data',
+                        title='Warning : Anatomical T1w data',
                         kind='modal',
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
@@ -277,9 +283,36 @@ class CMP_Project_Info(HasTraits):
                             #style_sheet=style_sheet,
                             buttons=['OK','Cancel'])
 
+    dmri_warning_view = View(
+                        Group(
+                            Item('dmri_warning_msg',style='readonly',show_label=False),
+                            ),
+                        title='Warning : Diffusion MRI data',
+                        kind='modal',
+                        #style_sheet=style_sheet,
+                        buttons=['OK','Cancel'])
+
     dmri_config_error_view = View(
                             Group(
                                 Item('dmri_config_error_msg', style='readonly',show_label=False),
+                                ),
+                            title='Error',
+                            kind = 'modal',
+                            #style_sheet=style_sheet,
+                            buttons=['OK','Cancel'])
+
+    fmri_warning_view = View(
+                        Group(
+                            Item('fmri_warning_msg',style='readonly',show_label=False),
+                            ),
+                        title='Warning : fMRI data',
+                        kind='modal',
+                        #style_sheet=style_sheet,
+                        buttons=['OK','Cancel'])
+
+    fmri_config_error_view = View(
+                            Group(
+                                Item('fmri_config_error_msg', style='readonly',show_label=False),
                                 ),
                             title='Error',
                             kind = 'modal',
@@ -341,11 +374,31 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
+    fmri_select_config_to_load = View(
+                                Group(
+                                    Item('fmri_config_to_load_msg',style='readonly',show_label=False),
+                                    ),
+                                Item('fmri_config_to_load',style='custom',editor=EnumEditor(name='fmri_available_config'),show_label=False),
+                                title='Select configuration for fMRI pipeline',
+                                kind='modal',
+                                #style_sheet=style_sheet,
+                                buttons=['OK','Cancel'])
+
+    fmri_custom_map_view = View(
+                        Group(
+                            Item('fmri_custom_last_stage',editor=EnumEditor(name='fmri_stage_names'),style='custom',show_label=False),
+                            ),
+                        title='Select until which stage to process the fMRI pipeline.',
+                        kind='modal',
+                        #style_sheet=style_sheet,
+                        buttons=['OK','Cancel'])
+
 ## Main window class of the ConnectomeMapper_Pipeline
 #
 class CMP_MainWindow(HasTraits):
     anat_pipeline = Instance(HasTraits)
     dmri_pipeline = Instance(HasTraits)
+    fmri_pipeline = Instance(HasTraits)
 
     project_info = Instance(CMP_Project_Info)
 
@@ -353,7 +406,8 @@ class CMP_MainWindow(HasTraits):
     load_project = Action(name='Load Processed Subject from BIDS Dataset...',action='load_project')
     process_anatomical = Action(name='Process Anatomical Data!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
     #preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
-    map_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked')
+    map_dmri_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked')
+    map_fmri_connectome = Action(name='Map Functional Connectome!',action='map_fmri_connectome',enabled_when='handler.anat_outputs_checked and handler.fmri_inputs_checked')
     #map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
     #change_subject = Action(name='Change subject',action='change_subject',enabled_when='handler.project_loaded==True')
 
@@ -402,7 +456,7 @@ class CMP_MainWindow(HasTraits):
                                 ),
                        handler = project.ProjectHandler(),
                        style_sheet=style_sheet,
-                       buttons = [process_anatomical,map_connectome],
+                       buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
                        #buttons = [preprocessing, map_connectome, map_custom],
                        width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
                        icon=ImageResource('cmp3_icon')
