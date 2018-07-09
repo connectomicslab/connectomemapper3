@@ -76,6 +76,9 @@ class fMRIPipeline(Pipeline):
 
     config_file = Str
 
+    subjects_dir = Str
+    subject_id = Str
+
     pipeline_group = VGroup(
                         HGroup(spring,Item('preprocessing',editor=ToolkitEditorFactory(image=ImageResource('preprocessing'))),spring,show_labels=False),
                         HGroup(spring,Item('registration',editor=ToolkitEditorFactory(image=ImageResource('registration'))),spring,show_labels=False),
@@ -185,6 +188,8 @@ class fMRIPipeline(Pipeline):
             return
 
         if fMRI_available:
+            out_fmri_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'func',self.subject+'_task-rest_bold.nii.gz')
+            shutil.copy(src=fmri_file,dst=out_fmri_file)
             if t2_available:
                 out_t2_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T2w.nii.gz')
                 shutil.copy(src=t2_file,dst=out_t2_file)
@@ -238,24 +243,93 @@ class fMRIPipeline(Pipeline):
 
     def process(self):
         # Process time
-        now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+
+        if self.global_conf.subject_session == '':
+            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+        else:
+            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session)
+            self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
         # Initialization
-        if os.path.exists(os.path.join(self.base_directory,"LOG","pypeline.log")):
-            os.unlink(os.path.join(self.base_directory,"LOG","pypeline.log"))
-        config.update_config({'logging': {'log_directory': os.path.join(self.base_directory,"LOG"),
+        if os.path.isfile(os.path.join(deriv_subject_directory,"fmri_pypeline.log")):
+            os.unlink(os.path.join(deriv_subject_directory,"fmri_pypeline.log"))
+        config.update_config({'logging': {'log_directory': deriv_subject_directory,
                                   'log_to_file': True},
-                              'execution': {'remove_unnecessary_outputs': False}
+                              'execution': {'remove_unnecessary_outputs': False,
+                              'stop_on_first_crash': True,'stop_on_first_rerun': False,
+                              'crashfile_format': "txt"}
                               })
         logging.update_logging(config)
         iflogger = logging.getLogger('interface')
 
+        iflogger.info("**** Processing ****")
+        print self.anat_flow
+
+        flow = self.create_pipeline_flow(deriv_subject_directory=deriv_subject_directory)
+        flow.write_graph(graph2use='colored', format='svg', simple_form=True)
+
+        if(self.number_of_cores != 1):
+            flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
+        else:
+            flow.run()
+
+        self.fill_stages_outputs()
+
+        # # Clean undesired folders/files
+        # rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
+        # for file_to_rm in rm_file_list:
+        #     if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
+        #         os.remove(os.path.join(self.base_directory,file_to_rm))
+        #
+        # # copy .ini and log file
+        # outdir = os.path.join(self.base_directory,"RESULTS",'fMRI',now)
+        # if not os.path.exists(outdir):
+        #     os.makedirs(outdir)
+        # shutil.copy(self.config_file,outdir)
+        # shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
+
+        iflogger.info("**** Processing finished ****")
+
+        return True,'Processing sucessful'
+
+    def create_pipeline_flow(self,deriv_subject_directory):
+
+        subject_directory = self.subject_directory
+
+        #datasource.inputs.subject = self.subject
+
+        # Data sinker for output
+        sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
+        sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
+
+        flow.connect([
+                      (datasource,common_flow,[("T1","inputnode.T1")]),
+                      (datasource,fMRI_flow,[("fMRI","inputnode.fMRI"),("T1","inputnode.T1"),("T2","inputnode.T2")]),
+                      (common_flow,fMRI_flow,[("outputnode.subjects_dir","inputnode.subjects_dir"),
+                                              ("outputnode.subject_id","inputnode.subject_id"),
+                                              ("outputnode.wm_mask_file","inputnode.wm_mask_file"),
+                                              ("outputnode.roi_volumes","inputnode.roi_volumes"),
+                                              ("outputnode.wm_eroded","inputnode.wm_eroded"),
+                                              ("outputnode.brain_eroded","inputnode.brain_eroded"),
+                                              ("outputnode.csf_eroded","inputnode.csf_eroded"),
+                                              ("outputnode.parcellation_scheme","inputnode.parcellation_scheme"),
+                                              ("outputnode.atlas_info","inputnode.atlas_info")]),
+                      (fMRI_flow,sinker,[("outputnode.connectivity_matrices","fMRI.%s.connectivity_matrices"%now)])
+                    ])
+
+
         # Data import
-        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['fMRI','T1','T2']), name='datasource')
-        datasource.inputs.base_directory = os.path.join(self.base_directory,'NIFTI')
+        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['fMRI','T1','T2','aseg','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5']), name='datasource')
+        datasource.inputs.base_directory = deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
-        datasource.inputs.field_template = dict(fMRI='fMRI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
+        #datasource.inputs.field_template = dict(fMRI='fMRI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
+        datasource.inputs.field_template = dict(fMRI='func/'+self.subject+'_task-rest_bold.nii.gz',T1='anat/'+self.subject+'_T1w_head.nii.gz',T2='anat/'+self.subject+'_T2w.nii.gz',aseg='anat/'+self.subject+'_T1w_aseg.nii.gz',brain='anat/'+self.subject+'_T1w_brain.nii.gz',brain_mask='anat/'+self.subject+'_T1w_brainmask.nii.gz',
+                                                wm_mask_file='anat/'+self.subject+'_T1w_class-WM.nii.gz',wm_eroded='anat/'+self.subject+'_T1w_class-WM.nii.gz',
+                                                brain_eroded='anat/'+self.subject+'_T1w_brainmask.nii.gz',csf_eroded='anat/'+self.subject+'_T1w_class-CSF.nii.gz',
+                                                roi_volume_s1='anat/'+self.subject+'_T1w_parc_scale1.nii.gz',roi_volume_s2='anat/'+self.subject+'_T1w_parc_scale2.nii.gz',roi_volume_s3='anat/'+self.subject+'_T1w_parc_scale3.nii.gz',
+                                                roi_volume_s4='anat/'+self.subject+'_T1w_parc_scale4.nii.gz',roi_volume_s5='anat/'+self.subject+'_T1w_parc_scale5.nii.gz')
         datasource.inputs.sort_filelist=False
 
         # Data sinker for output
@@ -265,15 +339,33 @@ class fMRIPipeline(Pipeline):
         # Clear previous outputs
         self.clear_stages_outputs()
 
-        # Create common_flow
-        common_flow = self.create_common_flow()
-
         # Create fMRI flow
-
         fMRI_flow = pe.Workflow(name='fMRI_pipeline')
-        fMRI_inputnode = pe.Node(interface=util.IdentityInterface(fields=["fMRI","T1","T2","subjects_dir","subject_id","wm_mask_file","roi_volumes","wm_eroded","brain_eroded","csf_eroded","parcellation_scheme","atlas_info"]),name="inputnode")
+        fMRI_inputnode = pe.Node(interface=util.IdentityInterface(fields=["fMRI","T1","T2","subjects_dir","subject_id","wm_mask_file","roi_volumes","wm_eroded","brain_eroded","csf_eroded"]),name="inputnode")
+        fMRI_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
+        fMRI_inputnode.inputs.atlas_info = self.atlas_info
+        fMRI_inputnode.subjects_dir = self.subjects_dir
+        fMRI_inputnode.subject_id = self.subject_id
+
         fMRI_outputnode = pe.Node(interface=util.IdentityInterface(fields=["connectivity_matrices"]),name="outputnode")
         fMRI_flow.add_nodes([fMRI_inputnode,fMRI_outputnode])
+
+        merge_roi_volumes = pe.Node(interface=Merge(5),name='merge_roi_volumes')
+
+        def remove_non_existing_scales(roi_volumes):
+            out_roi_volumes = []
+            for vol in roi_volumes:
+                if vol != None: out_roi_volumes.append(vol)
+            return out_roi_volumes
+
+        fMRI_flow.connect([
+                      (datasource,merge_roi_volumes,[("roi_volume_s1","in1"),("roi_volume_s2","in2"),("roi_volume_s3","in3"),("roi_volume_s4","in4"),("roi_volume_s5","in5")])
+                      ])
+
+        fMRI_flow.connect([
+                      (datasource,diffusion_inputnode,[("T1","T1"),("T2","T2"),("aseg","aseg"),("wm_mask_file","wm_mask_file"),("brain_eroded","brain_eroded"),("wm_eroded","wm_eroded"),("csf_eroded","csf_eroded")]), #,( "roi_volumes","roi_volumes")])
+                      (merge_roi_volumes,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_volumes")]),
+                      ])
 
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
@@ -329,52 +421,8 @@ class fMRIPipeline(Pipeline):
             if self.parcellation_scheme == "Custom":
                 fMRI_flow.connect([(fMRI_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
 
-        # Create NIPYPE flow
+        return fMRI_flow
 
-        flow = pe.Workflow(name='nipype', base_dir=os.path.join(self.base_directory))
-
-        flow.connect([
-                      (datasource,common_flow,[("T1","inputnode.T1")]),
-                      (datasource,fMRI_flow,[("fMRI","inputnode.fMRI"),("T1","inputnode.T1"),("T2","inputnode.T2")]),
-                      (common_flow,fMRI_flow,[("outputnode.subjects_dir","inputnode.subjects_dir"),
-                                              ("outputnode.subject_id","inputnode.subject_id"),
-                                              ("outputnode.wm_mask_file","inputnode.wm_mask_file"),
-                                              ("outputnode.roi_volumes","inputnode.roi_volumes"),
-                                              ("outputnode.wm_eroded","inputnode.wm_eroded"),
-                                              ("outputnode.brain_eroded","inputnode.brain_eroded"),
-                                              ("outputnode.csf_eroded","inputnode.csf_eroded"),
-                                              ("outputnode.parcellation_scheme","inputnode.parcellation_scheme"),
-                                              ("outputnode.atlas_info","inputnode.atlas_info")]),
-                      (fMRI_flow,sinker,[("outputnode.connectivity_matrices","fMRI.%s.connectivity_matrices"%now)])
-                    ])
-
-        # Process pipeline
-
-        iflogger.info("**** Processing ****")
-
-        if(self.number_of_cores != 1):
-            flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
-        else:
-            flow.run()
-
-        self.fill_stages_outputs()
-
-        # Clean undesired folders/files
-        rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
-        for file_to_rm in rm_file_list:
-            if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
-                os.remove(os.path.join(self.base_directory,file_to_rm))
-
-        # copy .ini and log file
-        outdir = os.path.join(self.base_directory,"RESULTS",'fMRI',now)
-        if not os.path.exists(outdir):
-            os.makedirs(outdir)
-        shutil.copy(self.config_file,outdir)
-        shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
-
-        iflogger.info("**** Processing finished ****")
-
-        return True,'Processing sucessful'
 
     def old_check_input(self, gui=True):
         print '**** Check Inputs ****'

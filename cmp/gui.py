@@ -320,13 +320,13 @@ class CMP_Project_Info(HasTraits):
                             buttons=['OK','Cancel'])
 
     open_view = View(
-                        Group(
-                            Item('base_directory',label='Base directory'),
-                            ),
-                        title='Data loading: BIDS dataset selection',
-                        kind='modal',
-                        #style_sheet=style_sheet,
-                        buttons=['OK','Cancel'])
+                    Group(
+                        Item('base_directory',label='Base directory'),
+                        ),
+                    title='Data loading: BIDS dataset selection',
+                    kind='modal',
+                    #style_sheet=style_sheet,
+                    buttons=['OK','Cancel'])
 
     anat_select_config_to_load = View(
                                   Group(

@@ -884,7 +884,8 @@ class ProjectHandler(Handler):
 
 
     def map_fmri_connectome(self, ui_info):
-        pass
+        ui_info.ui.context["object"].project_info.fmri_config_error_msg = self.fmri_pipeline.check_config()
+        valid_anat_output,ui_info.ui.context["object"].project_info.anat_config_error_msg = self.anat_pipeline.check_output()
 
     # def process_anatomical_and_diffusion(self, ui_info):
 
