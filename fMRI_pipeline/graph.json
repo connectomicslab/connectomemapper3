@@ -1,0 +1,90 @@
+[
+    {
+        "group": 1,
+        "imports": [],
+        "name": "00_datasource",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "00_datasource"
+        ],
+        "name": "01_merge_roi_volumes",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "00_datasource"
+        ],
+        "name": "02_slice_timing",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "02_slice_timing"
+        ],
+        "name": "03_motion_correction",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "03_motion_correction"
+        ],
+        "name": "04_fMRI_skullstrip",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "03_motion_correction"
+        ],
+        "name": "05_nuisance_regression",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "05_nuisance_regression"
+        ],
+        "name": "06_detrending",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "06_detrending"
+        ],
+        "name": "07_temporal_filter",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "07_temporal_filter",
+            "03_motion_correction"
+        ],
+        "name": "08_scrubbing",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "07_temporal_filter",
+            "08_scrubbing"
+        ],
+        "name": "09_compute_matrice",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "00_datasource"
+        ],
+        "name": "10_T1_skullstrip",
+        "size": 1
+    }
+]

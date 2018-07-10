@@ -149,8 +149,8 @@ class RegistrationConfig(HasTraits):
                                 ),
                             label='ANTs registration settings',show_border=True,visible_when='registration_mode=="ANTs"'
                             ),
-                        # Group('init','contrast_type',
-                        #       show_border=True,visible_when='registration_mode=="BBregister (FS)"'),
+                        Group('init','contrast_type',
+                              label='BBregister registration settings', show_border=True,visible_when='registration_mode=="BBregister (FS)"'),
                        kind='live',
                        )
 
@@ -313,7 +313,7 @@ class RegistrationStage(Stage):
         self.outputs = ["T1_registered_crop", "act_5tt_registered_crop", "gmwmi_registered_crop", "brain_registered_crop", "brain_mask_registered_crop", "wm_mask_registered_crop","partial_volumes_registered_crop","roi_volumes_registered_crop","target_epicorrected","grad","bvecs","bvals"]
         if self.config.pipeline == "fMRI":
             self.inputs = self.inputs + ["eroded_csf","eroded_wm","eroded_brain"]
-            self.outputs = self.outputs + ["eroded_wm_registered","eroded_csf_registered","eroded_brain_registered"]
+            self.outputs = self.outputs + ["eroded_wm_registered_crop","eroded_csf_registered_crop","eroded_brain_registered_crop"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         # Extract first volume and resample it to 1x1x1mm3
@@ -324,6 +324,7 @@ class RegistrationStage(Stage):
                         ])
             fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_file="target_first.nii.gz",vox_size=(1,1,1)),name="target_resample")
             flow.connect([(extract_first, fs_mriconvert,[('roi_file','in_file')])])
+
         elif self.config.pipeline == "fMRI":
             fmri_bet = pe.Node(interface=fsl.BET(),name="fMRI_skullstrip")
             T1_bet = pe.Node(interface=fsl.BET(),name="T1_skullstrip")
@@ -986,6 +987,251 @@ class RegistrationStage(Stage):
                         (inputnode, outputnode, [('target','target_epicorrected')]),
                         ])
 
+        if self.config.registration_mode == 'FSL (Linear)':
+            fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-TARGET.nii.gz',out_matrix_file='T1-TO-TARGET.mat'),name="linear_registration")
+            fsl_flirt.inputs.uses_qform = self.config.uses_qform
+            fsl_flirt.inputs.dof = self.config.dof
+            fsl_flirt.inputs.cost = self.config.fsl_cost
+            fsl_flirt.inputs.no_search = self.config.no_search
+            fsl_flirt.inputs.args = self.config.flirt_args
+
+            fsl_applyxfm_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
+            fsl_applyxfm_rois = pe.Node(interface=ApplymultipleXfm(),name="apply_registration_roivs")
+
+            flow.connect([
+                        (inputnode, fsl_applyxfm_wm, [('wm_mask','in_file')]),
+                        (fsl_flirt,outputnode,[("out_file","T1_registered_crop")]),
+                        (fsl_flirt, fsl_applyxfm_wm, [('out_matrix_file','in_matrix_file')]),
+                        (fsl_applyxfm_wm, outputnode, [('out_file','wm_mask_registered_crop')]),
+                        (inputnode, fsl_applyxfm_rois, [('roi_volumes','in_files')]),
+                        (fsl_flirt, fsl_applyxfm_rois, [('out_matrix_file','xfm_file')]),
+                        (fsl_applyxfm_rois, outputnode, [('out_files','roi_volumes_registered_crop')])
+                        ])
+
+            if self.config.pipeline == "fMRI":
+                flow.connect([
+                            (T1_bet, fsl_flirt, [('out_file','in_file')]),
+                            (fmri_bet, fsl_flirt, [('out_file','reference')]),
+                            (fmri_bet, fsl_applyxfm_wm, [('out_file','reference')]),
+                            (fmri_bet, fsl_applyxfm_rois, [('out_file','reference')])
+                            ])
+                fsl_applyxfm_eroded_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_wm_registered.nii.gz"),name="apply_registration_wm_eroded")
+                if self.config.apply_to_eroded_csf:
+                    fsl_applyxfm_eroded_csf = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_csf_registered.nii.gz"),name="apply_registration_csf_eroded")
+                    flow.connect([
+                                  (inputnode, fsl_applyxfm_eroded_csf, [('eroded_csf','in_file')]),
+                                  (fmri_bet, fsl_applyxfm_eroded_csf, [('out_file','reference')]),
+                                  (fsl_flirt, fsl_applyxfm_eroded_csf, [('out_matrix_file','in_matrix_file')]),
+                                  (fsl_applyxfm_eroded_csf, outputnode, [('out_file','eroded_csf_registered_crop')])
+                                ])
+                if self.config.apply_to_eroded_brain:
+                    fsl_applyxfm_eroded_brain = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_brain_registered.nii.gz"),name="apply_registration_brain_eroded")
+                    flow.connect([
+                                  (inputnode, fsl_applyxfm_eroded_brain, [('eroded_brain','in_file')]),
+                                  (fmri_bet, fsl_applyxfm_eroded_brain, [('out_file','reference')]),
+                                  (fsl_flirt, fsl_applyxfm_eroded_brain, [('out_matrix_file','in_matrix_file')]),
+                                  (fsl_applyxfm_eroded_brain, outputnode, [('out_file','eroded_brain_registered_crop')])
+                                ])
+                flow.connect([
+                            (inputnode, fsl_applyxfm_eroded_wm, [('eroded_wm','in_file')]),
+                            (fmri_bet, fsl_applyxfm_eroded_wm, [('out_file','reference')]),
+                            (fsl_flirt, fsl_applyxfm_eroded_wm, [('out_matrix_file','in_matrix_file')]),
+                            (fsl_applyxfm_eroded_wm, outputnode, [('out_file','eroded_wm_registered_crop')])
+                            ])
+            else:
+                flow.connect([
+                            (inputnode, fsl_flirt, [('T1','in_file')]),
+                            (fs_mriconvert, fsl_flirt, [('out_file','reference')]),
+                            (fs_mriconvert, fsl_applyxfm_wm, [('out_file','reference')]),
+                            (fs_mriconvert, fsl_applyxfm_rois, [('out_file','reference')]),
+                            ])
+
+        # if self.config.registration_mode == 'FSL (Nonlinear)':
+        #     # [SUB-STEP 1] LINEAR register "T2" onto "Target_resampled
+        #     # [1.1] linear register "T1" onto "T2"
+        #     fsl_flirt_1 = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-T2.nii.gz',out_matrix_file='T1-TO-T2.mat'),name="t1tot2_lin_registration")
+        #     fsl_flirt_1.inputs.dof = 6
+        #     fsl_flirt_1.inputs.cost = "mutualinfo"
+        #     fsl_flirt_1.inputs.no_search = True
+        #     #[1.2] -> linear register "T2" onto "target_resampled"
+        #     fsl_flirt_2 = pe.Node(interface=fsl.FLIRT(out_file='T2-TO-TARGET.nii.gz',out_matrix_file='T2-TO-TARGET.mat'),name="t2totarget_lin_registration")
+        #     fsl_flirt_2.inputs.dof = 12
+        #     fsl_flirt_2.inputs.cost = "normmi"
+        #     fsl_flirt_2.inputs.no_search = True
+        #     #[1.3] -> apply the linear registration "T1" --> "target" (for comparison)
+        #     fsl_concatxfm = pe.Node(interface=fsl.ConvertXFM(concat_xfm=True),name="fsl_concatxfm")
+        #     fsl_applyxfm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True, interp="sinc",out_file='T1-TO-target.nii.gz',out_matrix_file='T1-TO-TARGET.mat'),name="linear_registration")
+        #     #"[SUB-STEP 2] Create BINARY MASKS for nonlinear registration"
+        #     # [2.1] -> create a T2 brain mask
+        #     fsl_bet_1 = pe.Node(interface=fsl.BET(out_file='T2-brain',mask=True,no_output=True,robust=True),name="t2_brain_mask")
+        #     fsl_bet_1.inputs.frac = 0.35
+        #     fsl_bet_1.inputs.vertical_gradient = 0.15
+        #     #[2.2] -> create a DSI_target brain mask
+        #     fsl_bet_2 = pe.Node(interface=fsl.BET(out_file='target-brain',mask=True,no_output=True,robust=True),name="target_brain_mask")
+        #     fsl_bet_2.inputs.frac = 0.2
+        #     fsl_bet_2.inputs.vertical_gradient = 0.2
+        #     # [SUB-STEP 3] NONLINEAR register "T2" onto "target_resampled"
+        #     # [3.1] 'Started FNIRT to find 'T2 --> target' nonlinear transformation at
+        #     fsl_fnirt = pe.Node(interface=fsl.FNIRT(field_file='T2-TO-target_warp.nii.gz'),name="t2totarget_nlin_registration")
+        #     fsl_fnirt.inputs.subsampling_scheme = [8,4,2,2]
+        #     fsl_fnirt.inputs.max_nonlin_iter = [5,5,5,5]
+        #     fsl_fnirt.inputs.regularization_lambda = [240,120,90,30]
+        #     fsl_fnirt.inputs.spline_order = 3
+        #     fsl_fnirt.inputs.apply_inmask = [0,0,1,1]
+        #     fsl_fnirt.inputs.apply_refmask = [0,0,1,1]
+        #     #[3.2] -> apply the warp found for "T2" also onto "T1"
+        #     fsl_applywarp = pe.Node(interface=fsl.ApplyWarp(out_file='T1_warped.nii.gz'),name="nonlinear_registration")
+        #     fsl_applywarp_wm = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
+        #     fsl_applywarp_rois = pe.Node(interface=Applynlinmultiplewarps(),name="apply_registration_roivs") # TO FIX: Applynlinmultiplewarps() done because applying MapNode to fsl.ApplyWarp crashes
+        #     #fsl_applywarp_rois = pe.MapNode(interface=fsl.ApplyWarp(interp="nn"),name="apply_registration_roivs",iterfield=["in_file"])
+        #
+        #     flow.connect([
+        #             (inputnode,fsl_flirt_1,[('T1','in_file'),('T2','reference')]),
+        #             (inputnode,fsl_flirt_2,[('T2','in_file')]),
+        #             (fsl_flirt_1,fsl_concatxfm,[('out_matrix_file','in_file')]),
+        #             (fsl_flirt_2,fsl_concatxfm,[('out_matrix_file','in_file2')]),
+        #             (inputnode,fsl_applyxfm,[('T1','in_file')]),
+        #             (fsl_concatxfm,fsl_applyxfm,[('out_file','in_matrix_file')]),
+        #             (inputnode,fsl_bet_1,[('T2','in_file')]),
+        #             (inputnode,fsl_fnirt,[('T2','in_file')]),
+        #             (fsl_flirt_2,fsl_fnirt,[('out_matrix_file','affine_file')]),
+        #             (fsl_bet_1,fsl_fnirt,[('mask_file','inmask_file')]),
+        #             (fsl_bet_2,fsl_fnirt,[('mask_file','refmask_file')]),
+        #             (inputnode,fsl_applywarp,[('T1','in_file')]),
+        #             (fsl_flirt_1,fsl_applywarp,[('out_matrix_file','premat')]),
+        #             (fsl_fnirt,fsl_applywarp,[('field_file','field_file')]),
+        #             (inputnode, fsl_applywarp_wm, [('wm_mask','in_file')]),
+        #             (fsl_flirt_1, fsl_applywarp_wm, [('out_matrix_file','premat')]),
+        #             (fsl_fnirt,fsl_applywarp_wm,[('field_file','field_file')]),
+        #             (fsl_applywarp_wm, outputnode, [('out_file','wm_mask_registered_crop')]),
+        #             (inputnode, fsl_applywarp_rois, [('roi_volumes','in_files')]),
+        #             (fsl_flirt_1, fsl_applywarp_rois, [('out_matrix_file','premat_file')]),
+        #             (fsl_fnirt,fsl_applywarp_rois,[('field_file','field_file')]),
+        #             (fsl_applywarp_rois, outputnode, [('warped_files','roi_volumes_registered_crop')])
+        #             ])
+        #     if self.config.pipeline == "fMRI":
+        #         flow.connect([
+        #                     (inputnode,fsl_flirt_2,[('target','reference')]),
+        #                     (inputnode,fsl_applyxfm,[('target','reference')]),
+        #                     (inputnode,fsl_bet_2,[('target','in_file')]),
+        #                     (inputnode,fsl_fnirt,[('target','ref_file')]),
+        #                     (inputnode,fsl_applywarp,[('target','ref_file')]),
+        #                     (inputnode, fsl_applywarp_wm, [('target','ref_file')]),
+        #                     (inputnode, fsl_applywarp_rois, [('target','ref_file')]),
+        #                     ])
+        #         fsl_applywarp_eroded_wm = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_wm_registered.nii.gz"),name="apply_registration_eroded_wm")
+        #         if self.config.apply_to_eroded_csf:
+        #             fsl_applywarp_eroded_csf = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_csf_registered.nii.gz"),name="apply_registration_eroded_csf")
+        #             flow.connect([
+        #                           (inputnode, fsl_applywarp_eroded_csf, [('eroded_csf','in_file')]),
+        #                           (inputnode, fsl_applywarp_eroded_csf, [('target','ref_file')]),
+        #                           (fsl_flirt_1, fsl_applywarp_eroded_csf, [('out_matrix_file','premat')]),
+        #                           (fsl_fnirt,fsl_applywarp_eroded_csf,[('field_file','field_file')]),
+        #                           (fsl_applywarp_eroded_csf, outputnode, [('out_file','eroded_csf_registered_crop')])
+        #                         ])
+        #         if self.config.apply_to_eroded_brain:
+        #             fsl_applywarp_eroded_brain = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_brain_registered.nii.gz"),name="apply_registration_eroded_brain")
+        #             flow.connect([
+        #                           (inputnode, fsl_applywarp_eroded_brain, [('eroded_brain','in_file')]),
+        #                           (inputnode, fsl_applywarp_eroded_brain, [('target','ref_file')]),
+        #                           (fsl_flirt_1, fsl_applywarp_eroded_brain, [('out_matrix_file','premat')]),
+        #                           (fsl_fnirt,fsl_applywarp_eroded_brain,[('field_file','field_file')]),
+        #                           (fsl_applywarp_eroded_brain, outputnode, [('out_file','eroded_brain_registered_crop')])
+        #                         ])
+        #         flow.connect([
+        #                     (inputnode, fsl_applywarp_eroded_wm, [('eroded_wm','in_file')]),
+        #                     (inputnode, fsl_applywarp_eroded_wm, [('target','ref_file')]),
+        #                     (fsl_flirt_1, fsl_applywarp_eroded_wm, [('out_matrix_file','premat')]),
+        #                     (fsl_fnirt,fsl_applywarp_eroded_wm,[('field_file','field_file')]),
+        #                     (fsl_applywarp_eroded_wm, outputnode, [('out_file','eroded_wm_registered_crop')])
+        #                     ])
+        #     else:
+        #         flow.connect([
+        #                     (fs_mriconvert,fsl_flirt_2,[('out_file','reference')]),
+        #                     (fs_mriconvert,fsl_applyxfm,[('out_file','reference')]),
+        #                     (fs_mriconvert,fsl_bet_2,[('out_file','in_file')]),
+        #                     (fs_mriconvert,fsl_fnirt,[('out_file','ref_file')]),
+        #                     (fs_mriconvert,fsl_applywarp,[('out_file','ref_file')]),
+        #                     (fs_mriconvert, fsl_applywarp_wm, [('out_file','ref_file')]),
+        #                     (fs_mriconvert, fsl_applywarp_rois, [('out_file','ref_file')]),
+        #                     ])
+
+        if self.config.registration_mode == 'FreeSurfer (BBregister)':
+            fs_bbregister = pe.Node(interface=cmp_fs.BBRegister(out_fsl_file="target-TO-orig.mat"),name="bbregister")
+            fs_bbregister.inputs.init = self.config.init
+            fs_bbregister.inputs.contrast_type = self.config.contrast_type
+
+            fsl_invertxfm = pe.Node(interface=fsl.ConvertXFM(invert_xfm=True),name="fsl_invertxfm")
+
+            fs_source = pe.Node(interface=fs.preprocess.FreeSurferSource(),name="get_fs_files")
+
+            fs_tkregister2 = pe.Node(interface=Tkregister2(regheader=True,noedit=True),name="fs_tkregister2")
+            fs_tkregister2.inputs.reg_out = 'T1-TO-orig.dat'
+            fs_tkregister2.inputs.fslreg_out = 'T1-TO-orig.mat'
+
+            fsl_concatxfm = pe.Node(interface=fsl.ConvertXFM(concat_xfm=True),name="fsl_concatxfm")
+
+            fsl_applyxfm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,out_file="T1-TO-TARGET.nii.gz"),name="linear_registration")
+            fsl_applyxfm_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
+            fsl_applyxfm_rois = pe.Node(interface=ApplymultipleXfm(),name="apply_registration_roivs")
+
+            flow.connect([
+                        (inputnode, fs_bbregister, [(('subjects_dir',unicode2str),'subjects_dir'),(('subject_id',os.path.basename),'subject_id')]),
+                        (fs_bbregister, fsl_invertxfm, [('out_fsl_file','in_file')]),
+                        (fsl_invertxfm, fsl_concatxfm, [('out_file','in_file2')]),
+                        (inputnode,fs_source,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
+                        (inputnode, fs_tkregister2, [('subjects_dir','subjects_dir'),(('subject_id',os.path.basename),'subject_id')]),
+                        (fs_source,fs_tkregister2,[("orig","target_file"),("rawavg","in_file")]),
+                        (fs_tkregister2, fsl_concatxfm, [('fslregout_file','in_file')]),
+                        (inputnode, fsl_applyxfm, [('T1','in_file')]),
+                        (fsl_concatxfm, fsl_applyxfm, [('out_file','in_matrix_file')]),
+                        (fsl_applyxfm,outputnode,[("out_file","T1_registered_crop")]),
+                        (inputnode, fsl_applyxfm_wm, [('wm_mask','in_file')]),
+                        (fsl_concatxfm, fsl_applyxfm_wm, [('out_file','in_matrix_file')]),
+                        (fsl_applyxfm_wm, outputnode, [('out_file','wm_mask_registered_crop')]),
+                        (inputnode, fsl_applyxfm_rois, [('roi_volumes','in_files')]),
+                        (fsl_concatxfm, fsl_applyxfm_rois, [('out_file','xfm_file')]),
+                        (fsl_applyxfm_rois, outputnode, [('out_files','roi_volumes_registered_crop')])
+                        ])
+
+            if self.config.pipeline == "fMRI":
+                flow.connect([
+                            (inputnode, fs_bbregister, [('target','source_file')]),
+                            (inputnode, fsl_applyxfm, [('target','reference')]),
+                            (inputnode, fsl_applyxfm_wm, [('target','reference')]),
+                            (inputnode, fsl_applyxfm_rois, [('target','reference')]),
+                            ])
+                fsl_applyxfm_eroded_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_wm_registered.nii.gz"),name="apply_registration_wm_eroded")
+                if self.config.apply_to_eroded_csf:
+                    fsl_applyxfm_eroded_csf = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_csf_registered.nii.gz"),name="apply_registration_csf_eroded")
+                    flow.connect([
+                                  (inputnode, fsl_applyxfm_eroded_csf, [('eroded_csf','in_file')]),
+                                  (inputnode, fsl_applyxfm_eroded_csf, [('target','reference')]),
+                                  (fsl_concatxfm, fsl_applyxfm_eroded_csf, [('out_file','in_matrix_file')]),
+                                  (fsl_applyxfm_eroded_csf, outputnode, [('out_file','eroded_csf_registered_crop')])
+                                ])
+                if self.config.apply_to_eroded_brain:
+                    fsl_applyxfm_eroded_brain = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_brain_registered.nii.gz"),name="apply_registration_brain_eroded")
+                    flow.connect([
+                                  (inputnode, fsl_applyxfm_eroded_brain, [('eroded_brain','in_file')]),
+                                  (inputnode, fsl_applyxfm_eroded_brain, [('target','reference')]),
+                                  (fsl_concatxfm, fsl_applyxfm_eroded_brain, [('out_file','in_matrix_file')]),
+                                  (fsl_applyxfm_eroded_brain, outputnode, [('out_file','eroded_brain_registered_crop')])
+                                ])
+                flow.connect([
+                            (inputnode, fsl_applyxfm_eroded_wm, [('eroded_wm','in_file')]),
+                            (inputnode, fsl_applyxfm_eroded_wm, [('target','reference')]),
+                            (fsl_concatxfm, fsl_applyxfm_eroded_wm, [('out_file','in_matrix_file')]),
+                            (fsl_applyxfm_eroded_wm, outputnode, [('out_file','eroded_wm_registered_crop')])
+                            ])
+            else:
+                flow.connect([
+                            (fs_mriconvert, fs_bbregister, [('out_file','source_file')]),
+                            (fs_mriconvert, fsl_applyxfm, [('out_file','reference')]),
+                            (fs_mriconvert, fsl_applyxfm_wm, [('out_file','reference')]),
+                            (fs_mriconvert, fsl_applyxfm_rois, [('out_file','reference')]),
+                            ])
+
 
 
     def old_create_workflow(self, flow, inputnode, outputnode):
@@ -1205,142 +1451,6 @@ class RegistrationStage(Stage):
             #TODO: Connect all outputs and creates those missing
 
 
-
-
-            # if self.config.registration_mode == 'Linear (FSL)':
-        #     fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-TARGET.nii.gz',out_matrix_file='T1-TO-TARGET.mat'),name="linear_registration")
-        #     fsl_flirt.inputs.uses_qform = self.config.uses_qform
-        #     fsl_flirt.inputs.dof = self.config.dof
-        #     fsl_flirt.inputs.cost = self.config.fsl_cost
-        #     fsl_flirt.inputs.no_search = self.config.no_search
-        #     fsl_flirt.inputs.args = self.config.flirt_args
-
-        #     fsl_applyxfm_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
-        #     fsl_applyxfm_rois = pe.Node(interface=ApplymultipleXfm(),name="apply_registration_roivs")
-
-        #     flow.connect([
-        #                 (inputnode, fsl_applyxfm_wm, [('wm_mask','in_file')]),
-        #                 (fsl_flirt,outputnode,[("out_file","T1_registered")]),
-        #                 (fsl_flirt, fsl_applyxfm_wm, [('out_matrix_file','in_matrix_file')]),
-        #                 (fsl_applyxfm_wm, outputnode, [('out_file','wm_mask_registered')]),
-        #                 (inputnode, fsl_applyxfm_rois, [('roi_volumes','in_files')]),
-        #                 (fsl_flirt, fsl_applyxfm_rois, [('out_matrix_file','xfm_file')]),
-        #                 (fsl_applyxfm_rois, outputnode, [('out_files','roi_volumes_registered')])
-        #                 ])
-
-        #     if self.config.pipeline == "fMRI":
-        #         flow.connect([
-        #                     (T1_bet, fsl_flirt, [('out_file','in_file')]),
-        #                     (fmri_bet, fsl_flirt, [('out_file','reference')]),
-        #                     (fmri_bet, fsl_applyxfm_wm, [('out_file','reference')]),
-        #                     (fmri_bet, fsl_applyxfm_rois, [('out_file','reference')])
-        #                     ])
-        #         fsl_applyxfm_eroded_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_wm_registered.nii.gz"),name="apply_registration_wm_eroded")
-        #         if self.config.apply_to_eroded_csf:
-        #             fsl_applyxfm_eroded_csf = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_csf_registered.nii.gz"),name="apply_registration_csf_eroded")
-        #             flow.connect([
-        #                           (inputnode, fsl_applyxfm_eroded_csf, [('eroded_csf','in_file')]),
-        #                           (fmri_bet, fsl_applyxfm_eroded_csf, [('out_file','reference')]),
-        #                           (fsl_flirt, fsl_applyxfm_eroded_csf, [('out_matrix_file','in_matrix_file')]),
-        #                           (fsl_applyxfm_eroded_csf, outputnode, [('out_file','eroded_csf_registered')])
-        #                         ])
-        #         if self.config.apply_to_eroded_brain:
-        #             fsl_applyxfm_eroded_brain = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_brain_registered.nii.gz"),name="apply_registration_brain_eroded")
-        #             flow.connect([
-        #                           (inputnode, fsl_applyxfm_eroded_brain, [('eroded_brain','in_file')]),
-        #                           (fmri_bet, fsl_applyxfm_eroded_brain, [('out_file','reference')]),
-        #                           (fsl_flirt, fsl_applyxfm_eroded_brain, [('out_matrix_file','in_matrix_file')]),
-        #                           (fsl_applyxfm_eroded_brain, outputnode, [('out_file','eroded_brain_registered')])
-        #                         ])
-        #         flow.connect([
-        #                     (inputnode, fsl_applyxfm_eroded_wm, [('eroded_wm','in_file')]),
-        #                     (fmri_bet, fsl_applyxfm_eroded_wm, [('out_file','reference')]),
-        #                     (fsl_flirt, fsl_applyxfm_eroded_wm, [('out_matrix_file','in_matrix_file')]),
-        #                     (fsl_applyxfm_eroded_wm, outputnode, [('out_file','eroded_wm_registered')])
-        #                     ])
-        #     else:
-        #         flow.connect([
-        #                     (inputnode, fsl_flirt, [('T1','in_file')]),
-        #                     (fs_mriconvert, fsl_flirt, [('out_file','reference')]),
-        #                     (fs_mriconvert, fsl_applyxfm_wm, [('out_file','reference')]),
-        #                     (fs_mriconvert, fsl_applyxfm_rois, [('out_file','reference')]),
-        #                     ])
-
-        # if self.config.registration_mode == 'BBregister (FS)':
-        #     fs_bbregister = pe.Node(interface=cmp_fs.BBRegister(out_fsl_file="target-TO-orig.mat"),name="bbregister")
-        #     fs_bbregister.inputs.init = self.config.init
-        #     fs_bbregister.inputs.contrast_type = self.config.contrast_type
-
-        #     fsl_invertxfm = pe.Node(interface=fsl.ConvertXFM(invert_xfm=True),name="fsl_invertxfm")
-
-        #     fs_source = pe.Node(interface=fs.preprocess.FreeSurferSource(),name="get_fs_files")
-
-        #     fs_tkregister2 = pe.Node(interface=Tkregister2(regheader=True,noedit=True),name="fs_tkregister2")
-        #     fs_tkregister2.inputs.reg_out = 'T1-TO-orig.dat'
-        #     fs_tkregister2.inputs.fslreg_out = 'T1-TO-orig.mat'
-
-        #     fsl_concatxfm = pe.Node(interface=fsl.ConvertXFM(concat_xfm=True),name="fsl_concatxfm")
-
-        #     fsl_applyxfm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,out_file="T1-TO-TARGET.nii.gz"),name="linear_registration")
-        #     fsl_applyxfm_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
-        #     fsl_applyxfm_rois = pe.Node(interface=ApplymultipleXfm(),name="apply_registration_roivs")
-
-        #     flow.connect([
-        #                 (inputnode, fs_bbregister, [(('subjects_dir',unicode2str),'subjects_dir'),(('subject_id',os.path.basename),'subject_id')]),
-        #                 (fs_bbregister, fsl_invertxfm, [('out_fsl_file','in_file')]),
-        #                 (fsl_invertxfm, fsl_concatxfm, [('out_file','in_file2')]),
-        #                 (inputnode,fs_source,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
-        #                 (inputnode, fs_tkregister2, [('subjects_dir','subjects_dir'),(('subject_id',os.path.basename),'subject_id')]),
-        #                 (fs_source,fs_tkregister2,[("orig","target_file"),("rawavg","in_file")]),
-        #                 (fs_tkregister2, fsl_concatxfm, [('fslregout_file','in_file')]),
-        #                 (inputnode, fsl_applyxfm, [('T1','in_file')]),
-        #                 (fsl_concatxfm, fsl_applyxfm, [('out_file','in_matrix_file')]),
-        #                 (fsl_applyxfm,outputnode,[("out_file","T1_registered")]),
-        #                 (inputnode, fsl_applyxfm_wm, [('wm_mask','in_file')]),
-        #                 (fsl_concatxfm, fsl_applyxfm_wm, [('out_file','in_matrix_file')]),
-        #                 (fsl_applyxfm_wm, outputnode, [('out_file','wm_mask_registered')]),
-        #                 (inputnode, fsl_applyxfm_rois, [('roi_volumes','in_files')]),
-        #                 (fsl_concatxfm, fsl_applyxfm_rois, [('out_file','xfm_file')]),
-        #                 (fsl_applyxfm_rois, outputnode, [('out_files','roi_volumes_registered')])
-        #                 ])
-
-        #     if self.config.pipeline == "fMRI":
-        #         flow.connect([
-        #                     (inputnode, fs_bbregister, [('target','source_file')]),
-        #                     (inputnode, fsl_applyxfm, [('target','reference')]),
-        #                     (inputnode, fsl_applyxfm_wm, [('target','reference')]),
-        #                     (inputnode, fsl_applyxfm_rois, [('target','reference')]),
-        #                     ])
-        #         fsl_applyxfm_eroded_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_wm_registered.nii.gz"),name="apply_registration_wm_eroded")
-        #         if self.config.apply_to_eroded_csf:
-        #             fsl_applyxfm_eroded_csf = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_csf_registered.nii.gz"),name="apply_registration_csf_eroded")
-        #             flow.connect([
-        #                           (inputnode, fsl_applyxfm_eroded_csf, [('eroded_csf','in_file')]),
-        #                           (inputnode, fsl_applyxfm_eroded_csf, [('target','reference')]),
-        #                           (fsl_concatxfm, fsl_applyxfm_eroded_csf, [('out_file','in_matrix_file')]),
-        #                           (fsl_applyxfm_eroded_csf, outputnode, [('out_file','eroded_csf_registered')])
-        #                         ])
-        #         if self.config.apply_to_eroded_brain:
-        #             fsl_applyxfm_eroded_brain = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="eroded_brain_registered.nii.gz"),name="apply_registration_brain_eroded")
-        #             flow.connect([
-        #                           (inputnode, fsl_applyxfm_eroded_brain, [('eroded_brain','in_file')]),
-        #                           (inputnode, fsl_applyxfm_eroded_brain, [('target','reference')]),
-        #                           (fsl_concatxfm, fsl_applyxfm_eroded_brain, [('out_file','in_matrix_file')]),
-        #                           (fsl_applyxfm_eroded_brain, outputnode, [('out_file','eroded_brain_registered')])
-        #                         ])
-        #         flow.connect([
-        #                     (inputnode, fsl_applyxfm_eroded_wm, [('eroded_wm','in_file')]),
-        #                     (inputnode, fsl_applyxfm_eroded_wm, [('target','reference')]),
-        #                     (fsl_concatxfm, fsl_applyxfm_eroded_wm, [('out_file','in_matrix_file')]),
-        #                     (fsl_applyxfm_eroded_wm, outputnode, [('out_file','eroded_wm_registered')])
-        #                     ])
-        #     else:
-        #         flow.connect([
-        #                     (fs_mriconvert, fs_bbregister, [('out_file','source_file')]),
-        #                     (fs_mriconvert, fsl_applyxfm, [('out_file','reference')]),
-        #                     (fs_mriconvert, fsl_applyxfm_wm, [('out_file','reference')]),
-        #                     (fs_mriconvert, fsl_applyxfm_rois, [('out_file','reference')]),
-        #                     ])
 
         # if self.config.registration_mode == 'Nonlinear (FSL)':
 
@@ -1622,29 +1732,30 @@ class RegistrationStage(Stage):
                                     else:
                                         self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',reg_results.inputs['fixed_image'][0],pve_output,'-l','Random-Rainbow','-t','0.5']
         else:
-            target = pickle.load(gzip.open(target_path))
-            reg_results = pickle.load(gzip.open(reg_results_path))
+            if (os.path.exists(target_path)) and (os.path.exists(reg_results)):
+                target = pickle.load(gzip.open(target_path))
+                reg_results = pickle.load(gzip.open(reg_results_path))
 
-            self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fslview',target.inputs['in_file'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
+                self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fslview',target.inputs['in_file'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
 
-            if type(rois_results.outputs.out_files) == str:
-                    self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
-            else:
-                for roi_output in rois_results.outputs.out_files:
-                        self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+                if type(rois_results.outputs.out_files) == str:
+                        self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
+                else:
+                    for roi_output in rois_results.outputs.out_files:
+                            self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
 
-                # elif self.config.registration_mode == 'Nonlinear (FSL)':
-                #     if type(rois_results.outputs.warped_files) == str:
-                #         if self.config.pipeline == "Diffusion":
-                #             self.inspect_outputs_dict['B0/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.warped_files,'-l','Random-Rainbow','-t','0.5']
-                #         else:
-                #             self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.warped_files,'-l','Random-Rainbow','-t','0.5']
-                #     elif type(rois_results.outputs.warped_files) == TraitListObject:
-                #         for roi_output in rois_results.outputs.warped_files:
-                #             if self.config.pipeline == "Diffusion":
-                #                 self.inspect_outputs_dict['B0/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
-                #             else:
-                #                 self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+                    # elif self.config.registration_mode == 'Nonlinear (FSL)':
+                    #     if type(rois_results.outputs.warped_files) == str:
+                    #         if self.config.pipeline == "Diffusion":
+                    #             self.inspect_outputs_dict['B0/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.warped_files,'-l','Random-Rainbow','-t','0.5']
+                    #         else:
+                    #             self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.warped_files,'-l','Random-Rainbow','-t','0.5']
+                    #     elif type(rois_results.outputs.warped_files) == TraitListObject:
+                    #         for roi_output in rois_results.outputs.warped_files:
+                    #             if self.config.pipeline == "Diffusion":
+                    #                 self.inspect_outputs_dict['B0/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+                    #             else:
+                    #                 self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
 
 
         self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)

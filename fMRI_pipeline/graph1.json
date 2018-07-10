@@ -1,0 +1,152 @@
+{
+    "groups": [
+        {
+            "name": "Group_00001",
+            "procs": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+            ],
+            "total": 11
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "target": 10,
+            "value": 1
+        },
+        {
+            "source": 7,
+            "target": 9,
+            "value": 1
+        },
+        {
+            "source": 8,
+            "target": 9,
+            "value": 1
+        },
+        {
+            "source": 6,
+            "target": 7,
+            "value": 1
+        },
+        {
+            "source": 5,
+            "target": 6,
+            "value": 1
+        },
+        {
+            "source": 0,
+            "target": 2,
+            "value": 1
+        },
+        {
+            "source": 3,
+            "target": 4,
+            "value": 1
+        },
+        {
+            "source": 7,
+            "target": 8,
+            "value": 1
+        },
+        {
+            "source": 3,
+            "target": 8,
+            "value": 1
+        },
+        {
+            "source": 2,
+            "target": 3,
+            "value": 1
+        },
+        {
+            "source": 3,
+            "target": 5,
+            "value": 1
+        },
+        {
+            "source": 0,
+            "target": 1,
+            "value": 1
+        }
+    ],
+    "maxN": 11,
+    "nodes": [
+        {
+            "group": 1,
+            "name": "0_datasource",
+            "report": "/tmp/tmp_3RBcR/fMRI_pipeline/datasource/_report/report.rst",
+            "result": "/tmp/tmp_3RBcR/fMRI_pipeline/datasource/result_datasource.pklz"
+        },
+        {
+            "group": 1,
+            "name": "1_merge_roi_volumes",
+            "report": "/tmp/tmpSIMLVK/fMRI_pipeline/merge_roi_volumes/_report/report.rst",
+            "result": "/tmp/tmpSIMLVK/fMRI_pipeline/merge_roi_volumes/result_merge_roi_volumes.pklz"
+        },
+        {
+            "group": 1,
+            "name": "2_slice_timing",
+            "report": "/tmp/tmpJKAm6j/fMRI_pipeline/preprocessing_stage/slice_timing/_report/report.rst",
+            "result": "/tmp/tmpJKAm6j/fMRI_pipeline/preprocessing_stage/slice_timing/result_slice_timing.pklz"
+        },
+        {
+            "group": 1,
+            "name": "3_motion_correction",
+            "report": "/tmp/tmpboZxMH/fMRI_pipeline/preprocessing_stage/motion_correction/_report/report.rst",
+            "result": "/tmp/tmpboZxMH/fMRI_pipeline/preprocessing_stage/motion_correction/result_motion_correction.pklz"
+        },
+        {
+            "group": 1,
+            "name": "4_fMRI_skullstrip",
+            "report": "/tmp/tmpi3WMx9/fMRI_pipeline/registration_stage/fMRI_skullstrip/_report/report.rst",
+            "result": "/tmp/tmpi3WMx9/fMRI_pipeline/registration_stage/fMRI_skullstrip/result_fMRI_skullstrip.pklz"
+        },
+        {
+            "group": 1,
+            "name": "5_nuisance_regression",
+            "report": "/tmp/tmpoOAtK4/fMRI_pipeline/functional_stage/nuisance_regression/_report/report.rst",
+            "result": "/tmp/tmpoOAtK4/fMRI_pipeline/functional_stage/nuisance_regression/result_nuisance_regression.pklz"
+        },
+        {
+            "group": 1,
+            "name": "6_detrending",
+            "report": "/tmp/tmpCOBbuI/fMRI_pipeline/functional_stage/detrending/_report/report.rst",
+            "result": "/tmp/tmpCOBbuI/fMRI_pipeline/functional_stage/detrending/result_detrending.pklz"
+        },
+        {
+            "group": 1,
+            "name": "7_temporal_filter",
+            "report": "/tmp/tmpF212ou/fMRI_pipeline/functional_stage/temporal_filter/_report/report.rst",
+            "result": "/tmp/tmpF212ou/fMRI_pipeline/functional_stage/temporal_filter/result_temporal_filter.pklz"
+        },
+        {
+            "group": 1,
+            "name": "8_scrubbing",
+            "report": "/tmp/tmpFu3gka/fMRI_pipeline/functional_stage/scrubbing/_report/report.rst",
+            "result": "/tmp/tmpFu3gka/fMRI_pipeline/functional_stage/scrubbing/result_scrubbing.pklz"
+        },
+        {
+            "group": 1,
+            "name": "9_compute_matrice",
+            "report": "/tmp/tmpmXUDxp/fMRI_pipeline/connectome_stage/compute_matrice/_report/report.rst",
+            "result": "/tmp/tmpmXUDxp/fMRI_pipeline/connectome_stage/compute_matrice/result_compute_matrice.pklz"
+        },
+        {
+            "group": 1,
+            "name": "10_T1_skullstrip",
+            "report": "/tmp/tmpQ51UFy/fMRI_pipeline/registration_stage/T1_skullstrip/_report/report.rst",
+            "result": "/tmp/tmpQ51UFy/fMRI_pipeline/registration_stage/T1_skullstrip/result_T1_skullstrip.pklz"
+        }
+    ]
+}

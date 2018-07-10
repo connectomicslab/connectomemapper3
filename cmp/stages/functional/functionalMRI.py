@@ -32,7 +32,7 @@ import scipy.io as sio
 import statsmodels.api as sm
 from scipy import signal
 
-class FunctionalConfig(HasTraits):
+class FunctionalMRIConfig(HasTraits):
     smoothing = Float(0.0)
     discard_n_volumes = Int(5)
     # Nuisance factors
@@ -373,11 +373,11 @@ class Scrubbing(BaseInterface):
         outputs["dvars_npy"] = os.path.abspath("DVARS.npy")
         return outputs
 
-class FunctionalStage(Stage):
+class FunctionalMRIStage(Stage):
 
     def __init__(self):
         self.name = 'functional_stage'
-        self.config = FunctionalConfig()
+        self.config = FunctionalMRIConfig()
         self.inputs = ["preproc_file","motion_par_file","registered_roi_volumes","registered_wm","eroded_wm","eroded_csf","eroded_brain"]
         self.outputs = ["func_file","FD","DVARS"]
 
@@ -421,7 +421,7 @@ class FunctionalStage(Stage):
                         (discard_output,nuisance,[("discard_output","in_file")]),
                         (inputnode,nuisance,[("eroded_brain","brainfile")]),
                         (inputnode,nuisance,[("eroded_csf","csf_file")]),
-                        (inputnode,nuisance,[("eroded_wm","wm_file")]),
+                        (inputnode,nuisance,[("registered_wm","wm_file")]),
                         (inputnode,nuisance,[("motion_par_file","motion_file")]),
                         (inputnode,nuisance,[("registered_roi_volumes","gm_file")]),
                         (nuisance,nuisance_output,[("out_file","nuisance_output")])

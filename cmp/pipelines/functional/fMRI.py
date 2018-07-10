@@ -9,7 +9,6 @@
 
 import os
 import datetime
-from cmp.pipelines.common import *
 
 # try:
 #     from traitsui.api import *
@@ -20,17 +19,19 @@ from cmp.pipelines.common import *
 #     from enthought.traits.ui.api import *
 #     from  enthought.traits.ui.wx.themed_button_editor import ThemedButtonEditor
 
-try:
-    from traitsui.api import *
-    from traits.api import *
-    from traitsui.qt4.button_editor import ToolkitEditorFactory
-except ImportError:
-    from enthought.traits.api import *
-    from enthought.traits.ui.api import *
-    from  enthought.traits.ui.qt4.button_editor import ToolkitEditorFactory
+from traits.api import *
+from traitsui.api import *
+from traitsui.qt4.extra.qt_view import QtView
+from pyface.ui.qt4.image_resource import ImageResource
+
+import apptools.io.api as io
+
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
+from nipype.interfaces.utility import Merge
 from nipype import config, logging
 from nipype.caching import Memory
 from pyface.api import ImageResource
@@ -38,11 +39,15 @@ import shutil
 
 import nibabel as nib
 
+from bids.grabbids import BIDSLayout
+
+from cmp.pipelines.common import *
+from cmp.pipelines.anatomical.anatomical import AnatomicalPipeline
 from cmp.stages.preprocessing.fmri_preprocessing import PreprocessingStage
 from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
 from cmp.stages.registration.registration import RegistrationStage
-from cmp.stages.functional.functional import FunctionalStage
+from cmp.stages.functional.functionalMRI import FunctionalMRIStage
 from cmp.stages.connectome.fmri_connectome import ConnectomeStage
 
 class Global_Configuration(HasTraits):
@@ -61,9 +66,14 @@ class Check_Input_Notification(HasTraits):
                        title="Check inputs")
 
 class fMRIPipeline(Pipeline):
+    now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("fMRI_pipeline")
-    input_folders = ['fMRI','T1','T2']
+    input_folders = ['anat','func']
     seg_tool = Str
+
+    subject = Str
+    subject_directory = Directory
+    derivatives_directory = Directory
 
     ordered_stage_list = ['Preprocessing','Registration','FunctionalMRI','Connectome']
 
@@ -79,24 +89,48 @@ class fMRIPipeline(Pipeline):
     subjects_dir = Str
     subject_id = Str
 
+    # pipeline_group = VGroup(
+    #                     HGroup(spring,Item('preprocessing',editor=ToolkitEditorFactory(image=ImageResource('preprocessing'))),spring,show_labels=False),
+    #                     HGroup(spring,Item('registration',editor=ToolkitEditorFactory(image=ImageResource('registration'))),spring,show_labels=False),
+    #                     HGroup(spring,Item('functionalMRI',editor=ToolkitEditorFactory(image=ImageResource('functionalMRI'))),spring,show_labels=False),
+    #                     HGroup(spring,Item('connectome',editor=ToolkitEditorFactory(image=ImageResource('connectome'))),spring,show_labels=False),
+    #                     springy=True
+    #                     )
+
     pipeline_group = VGroup(
-                        HGroup(spring,Item('preprocessing',editor=ToolkitEditorFactory(image=ImageResource('preprocessing'))),spring,show_labels=False),
-                        HGroup(spring,Item('registration',editor=ToolkitEditorFactory(image=ImageResource('registration'))),spring,show_labels=False),
-                        HGroup(spring,Item('functionalMRI',editor=ToolkitEditorFactory(image=ImageResource('functionalMRI'))),spring,show_labels=False),
-                        HGroup(spring,Item('connectome',editor=ToolkitEditorFactory(image=ImageResource('connectome'))),spring,show_labels=False),
+                        HGroup(spring,UItem('preprocessing',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False,label=""),
+                        HGroup(spring,UItem('registration',style='custom',width=500,height=110,resizable=True,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False,label=""),
+                        HGroup(spring,UItem('functionalMRI',style='custom',width=450,height=240,resizable=True,editor_args={'image':ImageResource('functionalMRI'),'label':""}),spring,show_labels=False,label=""),
+                        HGroup(spring,UItem('connectome',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False,label=""),
+                        spring,
                         springy=True
-                        )
+                    )
 
     def __init__(self,project_info):
         self.stages = {'Preprocessing':PreprocessingStage(),
             'Registration':RegistrationStage(pipeline_mode = "fMRI"),
-            'FunctionalMRI':FMRIStage(),
+            'FunctionalMRI':FunctionalMRIStage(),
             'Connectome':ConnectomeStage()}
         Pipeline.__init__(self, project_info)
         self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements,'global_nuisance')
         self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements,'csf')
         self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements,'wm')
         self.stages['Connectome'].config.on_trait_change(self.update_scrubbing,'apply_scrubbing')
+
+        self.subject = project_info.subject
+
+        self.global_conf.subjects = project_info.subjects
+        self.global_conf.subject = self.subject
+
+        if len(project_info.subject_sessions) > 0:
+            self.global_conf.subject_session = project_info.subject_session
+            self.subject_directory =  os.path.join(self.base_directory,self.subject,project_info.subject_session)
+        else:
+            self.global_conf.subject_session = ''
+            self.subject_directory =  os.path.join(self.base_directory,self.subject)
+
+        self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
+
 
     def update_registration(self):
         if self.seg_tool == "Custom segmentation" :
@@ -121,9 +155,11 @@ class fMRIPipeline(Pipeline):
         self.stages['FunctionalMRI'].config.scrubbing = self.stages['Connectome'].config.apply_scrubbing
 
     def _preprocessing_fired(self, info):
+        print "preproc fired"
         self.stages['Preprocessing'].configure_traits()
 
-    def _functional_fired(self, info):
+    def _functionalMRI_fired(self, info):
+        print "func fired"
         self.stages['FunctionalMRI'].configure_traits()
 
     def _registration_fired(self, info):
@@ -150,9 +186,14 @@ class fMRIPipeline(Pipeline):
         t2_available = False
         valid_inputs = False
 
-        fmri_file = os.path.join(self.subject_directory,'func',self.subject+'_task-rest_bold.nii.gz')
-        t1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
-        t2_file = os.path.join(self.subject_directory,'anat',self.subject+'_T2w.nii.gz')
+        if self.global_conf.subject_session == '':
+            subject = self.subject
+        else:
+            subject = "_".join((self.subject,self.global_conf.subject_session))
+
+        fmri_file = os.path.join(self.subject_directory,'func',subject+'_task-rest_bold.nii.gz')
+        t1_file = os.path.join(self.subject_directory,'anat',subject+'_T1w.nii.gz')
+        t2_file = os.path.join(self.subject_directory,'anat',subject+'_T2w.nii.gz')
 
         print "Looking for...."
         print "fmri_file : %s" % fmri_file
@@ -160,6 +201,7 @@ class fMRIPipeline(Pipeline):
         print "t2_file : %s" % t2_file
 
         try:
+            print('base_directory :',self.base_directory)
             layout = BIDSLayout(self.base_directory)
             print "Valid BIDS dataset with %s subjects" % len(layout.get_subjects())
             for subj in layout.get_subjects():
@@ -168,9 +210,9 @@ class fMRIPipeline(Pipeline):
             self.global_conf.modalities = [str(mod) for mod in layout.get_modalities()]
             # mods = layout.get_modalities()
             types = layout.get_types()
-            # print "Available modalities :"
-            # for mod in mods:
-            #     print "-%s" % mod
+            print "Available modalities :"
+            for typ in types:
+                print "-%s" % typ
 
             for typ in types:
                 if typ == 'T1w' and os.path.isfile(t1_file):
@@ -187,18 +229,27 @@ class fMRIPipeline(Pipeline):
             error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
             return
 
+        print('fMRI :',fMRI_available)
+        print('t1 :',t1_available)
+        print('t2 :',t2_available)
+
         if fMRI_available:
-            out_fmri_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'func',self.subject+'_task-rest_bold.nii.gz')
+            if self.global_conf.subject_session == '':
+                out_dir = os.path.join(self.derivatives_directory,'cmp',self.subject)
+            else:
+                out_dir = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session)
+
+            out_fmri_file = os.path.join(out_dir,'func',subject+'_task-rest_bold.nii.gz')
             shutil.copy(src=fmri_file,dst=out_fmri_file)
             if t2_available:
-                out_t2_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T2w.nii.gz')
+                out_t2_file = os.path.join(out_dir,'anat',subject+'_T2w.nii.gz')
                 shutil.copy(src=t2_file,dst=out_t2_file)
                 # swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T2_orig.nii.gz'),
                 #                   ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
                 #                   out_file=os.path.join(self.base_directory,'NIFTI','T2.nii.gz'))
             if t1_available:
-                out_t1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
-                shutil.copy(src=t1_file,dst=out_t1_file)
+                # out_t1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
+                # shutil.copy(src=t1_file,dst=out_t1_file)
                 valid_inputs = True
                 input_message = 'Inputs check finished successfully.\nfMRI and morphological data available.'
             else:
@@ -208,38 +259,32 @@ class fMRIPipeline(Pipeline):
         else:
             input_message = 'Error during inputs check. No fMRI or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
 
+        print input_message
+
         if gui:
             input_notification = Check_Input_Notification(message=input_message, imaging_model='fMRI')
             input_notification.configure_traits()
             self.global_conf.imaging_model = input_notification.imaging_model
             self.stages['Registration'].config.imaging_model = input_notification.imaging_model
         else:
-            print input_message
             self.global_conf.imaging_model = 'fMRI'
             self.stages['Registration'].config.imaging_model = 'fMRI'
 
         if t2_available:
-            self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)','Nonlinear (FSL)']
+            self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear))','BBregister (FS)']
+        else:
+            self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear))','BBregister (FS)']
 
         self.fill_stages_outputs()
 
         return valid_inputs
 
     def check_config(self):
-        common_check = Pipeline.check_config(self)
-        if common_check == '':
-            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['FunctionalMRI'].config.global_nuisance and not os.path.exists(self.stages['Parcellation'].config.brain_file):
-                return('\n\tGlobal signal regression selected but no existing brain mask provided.\t\n\tPlease provide a brain mask in the parcellation configuration window,\n\tor disable the global signal regression in the functional configuration window.\t\n')
-            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['FunctionalMRI'].config.csf and not os.path.exists(self.stages['Parcellation'].config.csf_file):
-                return('\n\tCSF signal regression selected but no existing csf mask provided.\t\n\tPlease provide a csf mask in the parcellation configuration window,\n\tor disable the csf signal regression in the functional configuration window.\t\n')
-            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['FunctionalMRI'].config.wm and not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
-                return('\n\tWM signal regression selected but no existing wm mask provided.\t\n\tPlease provide a wm mask in the segmentation configuration window,\n\tor disable the wm signal regression in the functional configuration window.\t\n')
-            if self.stages['FunctionalMRI'].config.motion == True and self.stages['Preprocessing'].config.motion_correction == False:
-                return('\n\tMotion signal regression selected but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configuration window,\n\tor disable the motion signal regression in the functional configuration window.\t\n')
-            if self.stages['Connectome'].config.apply_scrubbing == True and self.stages['Preprocessing'].config.motion_correction == False:
-                return('\n\tScrubbing applied but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configutation window,\n\tor disable scrubbing in the connectome configuration window.\t\n')
-            return ''
-        return common_check
+        if self.stages['FunctionalMRI'].config.motion == True and self.stages['Preprocessing'].config.motion_correction == False:
+            return('\n\tMotion signal regression selected but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configuration window,\n\tor disable the motion signal regression in the functional configuration window.\t\n')
+        if self.stages['Connectome'].config.apply_scrubbing == True and self.stages['Preprocessing'].config.motion_correction == False:
+            return('\n\tScrubbing applied but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configutation window,\n\tor disable scrubbing in the connectome configuration window.\t\n')
+        return ''
 
     def process(self):
         # Process time
@@ -267,7 +312,7 @@ class fMRIPipeline(Pipeline):
         print self.anat_flow
 
         flow = self.create_pipeline_flow(deriv_subject_directory=deriv_subject_directory)
-        flow.write_graph(graph2use='colored', format='svg', simple_form=True)
+        flow.write_graph(graph2use='colored', format='svg', simple_form=False)
 
         if(self.number_of_cores != 1):
             flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
@@ -303,21 +348,6 @@ class fMRIPipeline(Pipeline):
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
         sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
 
-        flow.connect([
-                      (datasource,common_flow,[("T1","inputnode.T1")]),
-                      (datasource,fMRI_flow,[("fMRI","inputnode.fMRI"),("T1","inputnode.T1"),("T2","inputnode.T2")]),
-                      (common_flow,fMRI_flow,[("outputnode.subjects_dir","inputnode.subjects_dir"),
-                                              ("outputnode.subject_id","inputnode.subject_id"),
-                                              ("outputnode.wm_mask_file","inputnode.wm_mask_file"),
-                                              ("outputnode.roi_volumes","inputnode.roi_volumes"),
-                                              ("outputnode.wm_eroded","inputnode.wm_eroded"),
-                                              ("outputnode.brain_eroded","inputnode.brain_eroded"),
-                                              ("outputnode.csf_eroded","inputnode.csf_eroded"),
-                                              ("outputnode.parcellation_scheme","inputnode.parcellation_scheme"),
-                                              ("outputnode.atlas_info","inputnode.atlas_info")]),
-                      (fMRI_flow,sinker,[("outputnode.connectivity_matrices","fMRI.%s.connectivity_matrices"%now)])
-                    ])
-
 
         # Data import
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['fMRI','T1','T2','aseg','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5']), name='datasource')
@@ -332,15 +362,11 @@ class fMRIPipeline(Pipeline):
                                                 roi_volume_s4='anat/'+self.subject+'_T1w_parc_scale4.nii.gz',roi_volume_s5='anat/'+self.subject+'_T1w_parc_scale5.nii.gz')
         datasource.inputs.sort_filelist=False
 
-        # Data sinker for output
-        sinker = pe.Node(nio.DataSink(), name="fMRI_sinker")
-        sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS")
-
         # Clear previous outputs
         self.clear_stages_outputs()
 
         # Create fMRI flow
-        fMRI_flow = pe.Workflow(name='fMRI_pipeline')
+        fMRI_flow = pe.Workflow(name='fMRI_pipeline',base_dir=os.path.join(deriv_subject_directory,'tmp'))
         fMRI_inputnode = pe.Node(interface=util.IdentityInterface(fields=["fMRI","T1","T2","subjects_dir","subject_id","wm_mask_file","roi_volumes","wm_eroded","brain_eroded","csf_eroded"]),name="inputnode")
         fMRI_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         fMRI_inputnode.inputs.atlas_info = self.atlas_info
@@ -363,9 +389,10 @@ class fMRIPipeline(Pipeline):
                       ])
 
         fMRI_flow.connect([
-                      (datasource,diffusion_inputnode,[("T1","T1"),("T2","T2"),("aseg","aseg"),("wm_mask_file","wm_mask_file"),("brain_eroded","brain_eroded"),("wm_eroded","wm_eroded"),("csf_eroded","csf_eroded")]), #,( "roi_volumes","roi_volumes")])
-                      (merge_roi_volumes,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_volumes")]),
+                      (datasource,fMRI_inputnode,[("fMRI","fMRI"),("T1","T1"),("T2","T2"),("aseg","aseg"),("wm_mask_file","wm_mask_file"),("brain_eroded","brain_eroded"),("wm_eroded","wm_eroded"),("csf_eroded","csf_eroded")]), #,( "roi_volumes","roi_volumes")])
+                      (merge_roi_volumes,fMRI_inputnode,[( ("out",remove_non_existing_scales),"roi_volumes")]),
                       ])
+
 
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
@@ -399,9 +426,9 @@ class fMRIPipeline(Pipeline):
             func_flow = self.create_stage_flow("FunctionalMRI")
             fMRI_flow.connect([
                         (preproc_flow,func_flow, [('outputnode.functional_preproc','inputnode.preproc_file')]),
-                        (reg_flow,func_flow, [('outputnode.wm_mask_registered','inputnode.registered_wm'),('outputnode.roi_volumes_registered','inputnode.registered_roi_volumes'),
-                                              ('outputnode.eroded_wm_registered','inputnode.eroded_wm'),('outputnode.eroded_csf_registered','inputnode.eroded_csf'),
-                                              ('outputnode.eroded_brain_registered','inputnode.eroded_brain')])
+                        (reg_flow,func_flow, [('outputnode.wm_mask_registered_crop','inputnode.registered_wm'),('outputnode.roi_volumes_registered_crop','inputnode.registered_roi_volumes'),
+                                              ('outputnode.eroded_wm_registered_crop','inputnode.eroded_wm'),('outputnode.eroded_csf_registered_crop','inputnode.eroded_csf'),
+                                              ('outputnode.eroded_brain_registered_crop','inputnode.eroded_brain')])
                         ])
             if self.stages['FunctionalMRI'].config.scrubbing or self.stages['FunctionalMRI'].config.motion:
                 fMRI_flow.connect([
@@ -414,7 +441,7 @@ class fMRIPipeline(Pipeline):
 		                (fMRI_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
 		                (func_flow,con_flow, [('outputnode.func_file','inputnode.func_file'),("outputnode.FD","inputnode.FD"),
                                               ("outputnode.DVARS","inputnode.DVARS")]),
-                        (reg_flow,con_flow,[("outputnode.roi_volumes_registered","inputnode.roi_volumes_registered")]),
+                        (reg_flow,con_flow,[("outputnode.roi_volumes_registered_crop","inputnode.roi_volumes_registered")]),
                         (con_flow,fMRI_outputnode,[("outputnode.connectivity_matrices","connectivity_matrices")])
 		                ])
 

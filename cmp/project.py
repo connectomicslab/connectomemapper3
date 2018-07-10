@@ -23,7 +23,7 @@ from bids.grabbids import BIDSLayout
 
 # Own imports
 #import pipelines.diffusion.diffusion as Diffusion_pipeline
-#import pipelines.functional.functional as FMRI_pipeline
+from pipelines.functional import fMRI as FMRI_pipeline
 from pipelines.diffusion import diffusion as Diffusion_pipeline
 from pipelines.anatomical import anatomical as Anatomical_pipeline
 #import pipelines.egg.eeg as EEG_pipeline
@@ -49,6 +49,12 @@ def get_dmri_process_detail(project_info, section, detail):
     config = ConfigParser.ConfigParser()
     #print('Loading config from file: %s' % project_info.config_file)
     config.read(project_info.dmri_config_file)
+    return config.get(section, detail)
+
+def get_fmri_process_detail(project_info, section, detail):
+    config = ConfigParser.ConfigParser()
+    #print('Loading config from file: %s' % project_info.config_file)
+    config.read(project_info.fmri_config_file)
     return config.get(section, detail)
 
 def anat_save_config(pipeline, config_path):
@@ -176,6 +182,68 @@ def dmri_load_config(pipeline, config_path):
     setattr(pipeline,'number_of_cores',int(config.get('Multi-processing','number_of_cores')))
     return True
 
+def fmri_save_config(pipeline, config_path):
+    config = ConfigParser.RawConfigParser()
+    config.add_section('Global')
+    global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+    for key in global_keys:
+        #if key != "subject" and key != "subjects":
+        config.set('Global', key, getattr(pipeline.global_conf, key))
+    for stage in pipeline.stages.values():
+        config.add_section(stage.name)
+        stage_keys = [prop for prop in stage.config.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+        for key in stage_keys:
+            keyval = getattr(stage.config, key)
+            if 'config' in key: # subconfig
+                stage_sub_keys = [prop for prop in keyval.traits().keys() if not 'trait' in prop]
+                for sub_key in stage_sub_keys:
+                    config.set(stage.name, key+'.'+sub_key, getattr(keyval, sub_key))
+            else:
+                config.set(stage.name, key, keyval)
+
+    config.add_section('Multi-processing')
+    config.set('Multi-processing','number_of_cores',pipeline.number_of_cores)
+
+    with open(config_path, 'wb') as configfile:
+        config.write(configfile)
+
+def fmri_load_config(pipeline, config_path):
+    config = ConfigParser.ConfigParser()
+    config.read(config_path)
+    global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+    for key in global_keys:
+        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
+            conf_value = config.get('Global', key)
+            setattr(pipeline.global_conf, key, conf_value)
+    for stage in pipeline.stages.values():
+        stage_keys = [prop for prop in stage.config.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+        for key in stage_keys:
+            if 'config' in key: #subconfig
+                sub_config = getattr(stage.config, key)
+                stage_sub_keys = [prop for prop in sub_config.traits().keys() if not 'trait' in prop]
+                for sub_key in stage_sub_keys:
+                    try:
+                        conf_value = config.get(stage.name, key+'.'+sub_key)
+                        try:
+                            conf_value = eval(conf_value)
+                        except:
+                            pass
+                        setattr(sub_config, sub_key, conf_value)
+                    except:
+                        pass
+            else:
+                try:
+                    conf_value = config.get(stage.name, key)
+                    try:
+                        conf_value = eval(conf_value)
+                    except:
+                        pass
+                    setattr(stage.config, key, conf_value)
+                except:
+                    pass
+    setattr(pipeline,'number_of_cores',int(config.get('Multi-processing','number_of_cores')))
+    return True
+
 ## Creates (if needed) the folder hierarchy
 #
 def refresh_folder(derivatives_directory, subject, input_folders, session=None):
@@ -260,6 +328,60 @@ def init_dmri_project(project_info, is_new_project, gui=True):
         print "Missing diffusion inputs"
 
     return dmri_inputs_checked, dmri_pipeline
+
+def init_fmri_project(project_info, is_new_project, gui=True):
+    fmri_pipeline = FMRI_pipeline.fMRIPipeline(project_info)
+
+    derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
+
+    if len(project_info.subject_sessions)>0:
+        refresh_folder(derivatives_directory, project_info.subject, fmri_pipeline.input_folders, session=project_info.subject_session)
+    else:
+        refresh_folder(derivatives_directory, project_info.subject, fmri_pipeline.input_folders)
+
+    fmri_inputs_checked = fmri_pipeline.check_input(gui=gui)
+    if fmri_inputs_checked:
+        if is_new_project and fmri_pipeline!= None: #and fmri_pipeline!= None:
+            print "Initialize fmri project"
+            if not os.path.exists(derivatives_directory):
+                try:
+                    os.makedirs(derivatives_directory)
+                except os.error:
+                    print "%s was already existing" % derivatives_directory
+                finally:
+                    print "Created directory %s" % derivatives_directory
+
+            if len(project_info.subject_sessions) > 0:
+                project_info.fmri_config_file = os.path.join(derivatives_directory,'%s_%s_fMRI_config.ini' % (project_info.subject,project_info.subject_session))
+            else:
+                project_info.fmri_config_file = os.path.join(derivatives_directory,'%s_fMRI_config.ini' % (project_info.subject))
+
+
+            if os.path.exists(project_info.fmri_config_file):
+                warn_res = project_info.configure_traits(view='fmri_warning_view')
+                if warn_res:
+                    print "Read fMRI config file (%s)" % project_info.fmri_config_file
+                    fmri_save_config(fmri_pipeline, project_info.fmri_config_file)
+                else:
+                    return None
+            else:
+                print "Create fMRI config file (%s)" % project_info.fmri_config_file
+                fmri_save_config(fmri_pipeline, project_info.fmri_config_file)
+        else:
+            print "int_project fmri_pipeline.global_config.subjects : "
+            print fmri_pipeline.global_conf.subjects
+
+            fmri_conf_loaded = fmri_load_config(fmri_pipeline, project_info.fmri_config_file)
+
+            if not fmri_conf_loaded:
+                return None
+
+        print fmri_pipeline
+        fmri_pipeline.config_file = project_info.fmri_config_file
+    else:
+        print "Missing fmri inputs"
+
+    return fmri_inputs_checked, fmri_pipeline
 
 def init_anat_project(project_info, is_new_project):
     anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
@@ -388,6 +510,32 @@ def update_dmri_last_processed(project_info, pipeline):
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
 
+def update_fmri_last_processed(project_info, pipeline):
+    # last date
+    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject)):
+        out_dirs = os.listdir(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject))
+        # for out in out_dirs:
+        #     if (project_info.last_date_processed == "Not yet processed" or
+        #         out > project_info.last_date_processed):
+        #         pipeline.last_date_processed = out
+        #         project_info.last_date_processed = out
+
+        if (project_info.fmri_last_date_processed == "Not yet processed" or
+            pipeline.now > project_info.fmri_last_date_processed):
+            pipeline.fmri_last_date_processed = pipeline.now
+            project_info.fmri_last_date_processed = pipeline.now
+
+    # last stage
+    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','fMRI_pipeline')):
+        stage_dirs = []
+        for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','fMRI_pipeline')):
+            for dirname in fnmatch.filter(dirnames, '*_stage'):
+                stage_dirs.append(dirname)
+        for stage in pipeline.ordered_stage_list:
+            if stage.lower()+'_stage' in stage_dirs:
+                pipeline.last_stage_processed = stage
+                project_info.dmri_last_stage_processed = stage
+
 class ProjectHandler(Handler):
     project_loaded = Bool(False)
 
@@ -478,6 +626,24 @@ class ProjectHandler(Handler):
                             dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
                             self.dmri_inputs_checked = dmri_inputs_checked
                             ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
+                            self.project_loaded = True
+
+                    fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(new_project, True)
+                    if self.fmri_pipeline != None: #and self.fmri_pipeline != None:
+                        if fmri_inputs_checked:
+                            # new_project.configure_traits(view='diffusion_imaging_model_select_view')
+                            # self.fmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
+                            self.fmri_pipeline.number_of_cores  = new_project.number_of_cores
+                            print "number of cores (pipeline): %s" % self.fmri_pipeline.number_of_cores
+                            # print "diffusion_imaging_model (pipeline): %s" % self.fmri_pipeline.diffusion_imaging_model
+                            # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
+                            self.fmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
+                            # self.fmri_pipeline.atlas_info = ui_info.ui.context["object"].project_info.atlas_info
+                            ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
+                            #self.diffusion_ready = True
+                            fmri_save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
+                            self.fmri_inputs_checked = fmri_inputs_checked
+                            ui_info.ui.context["object"].project_info.fmri_available = self.fmri_inputs_checked
                             self.project_loaded = True
 
 
@@ -679,6 +845,78 @@ class ProjectHandler(Handler):
                         dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
                         self.dmri_inputs_checked = dmri_inputs_checked
                         ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
+                        self.project_loaded = True
+
+            if len(subj_sessions) > 0:
+                for subj_session in subj_sessions:
+                    config_file = os.path.join(loaded_project.base_directory,'derivatives',"sub-%s_ses-%s_fMRI_config.ini" % (subj, subj_session))
+                    print "config_file: %s " % config_file
+                    if os.path.isfile(config_file) and subj_session == loaded_project.subject_session.split("-")[1]:
+                        loaded_project.fmri_available_config.append( "sub-%s_ses-%s" % (subj, subj_session) )
+            else:
+                config_file = os.path.join(loaded_project.base_directory,'derivatives',"sub-%s_fMRI_config.ini" % (subj))
+                if os.path.isfile(config_file):
+                    loaded_project.fmri_available_config.append( "sub-%s" % (subj) )
+                    print "no session"
+
+            # loaded_project.fmri_available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','%s_diffusion_config.ini'%loaded_project.subject))]
+
+            print "loaded_project.fmri_available_config:"
+            print loaded_project.fmri_available_config
+
+            if len(loaded_project.fmri_available_config) > 1:
+                loaded_project.fmri_available_config.sort()
+                loaded_project.fmri_config_to_load = loaded_project.fmri_available_config[0]
+                fmri_config_selected = loaded_project.configure_traits(view='fmri_select_config_to_load')
+                if not fmri_config_selected:
+                    return 0
+            elif not loaded_project.fmri_available_config:
+                loaded_project.fmri_config_to_load = '%s_fMRI' % loaded_project.subject
+            else:
+                loaded_project.fmri_config_to_load = loaded_project.fmri_available_config[0]
+
+            print "fMRI config to load: %s"%loaded_project.fmri_config_to_load
+            loaded_project.fmri_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_fMRI_config.ini' % loaded_project.fmri_config_to_load)
+            print "fMRI config file: %s"%loaded_project.fmri_config_file
+
+            if os.path.isfile(loaded_project.fmri_config_file):
+                print "Load existing diffusion config file"
+                loaded_project.process_type = get_fmri_process_detail(loaded_project,'Global','process_type')
+
+                fmri_inputs_checked, self.fmri_pipeline= init_fmri_project(loaded_project, False)
+                if self.fmri_pipeline != None: #and self.fmri_pipeline != None:
+                    if fmri_inputs_checked:
+                        update_fmri_last_processed(loaded_project, self.fmri_pipeline)
+                        ui_info.ui.context["object"].project_info = loaded_project
+                        self.fmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
+                        self.fmri_pipeline.atlas_info = loaded_project.atlas_info
+                        ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
+                        ui_info.ui.context["object"].fmri_pipeline.number_of_cores = ui_info.ui.context["object"].project_info.number_of_cores
+                        #ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
+                        #self.diffusion_ready = True
+                        self.fmri_inputs_checked = fmri_inputs_checked
+                        ui_info.ui.context["object"].project_info.fmri_available = self.fmri_inputs_checked
+                        fmri_save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
+                        self.project_loaded = True
+            else:
+                fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(loaded_project, True)
+                print "No existing config for diffusion pipeline found - Created new diffusion pipeline with default parameters"
+                if self.fmri_pipeline != None: #and self.fmri_pipeline != None:
+                    if fmri_inputs_checked:
+                        ui_info.ui.context["object"].project_info = loaded_project
+                        # new_project.configure_traits(view='diffusion_imaging_model_select_view')
+                        # self.fmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
+                        self.fmri_pipeline.number_of_cores  = loaded_project.number_of_cores
+                        print "number of cores (pipeline): %s" % self.fmri_pipeline.number_of_cores
+                        # print "diffusion_imaging_model (pipeline): %s" % self.fmri_pipeline.diffusion_imaging_model
+                        # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
+                        self.fmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
+                        self.fmri_pipeline.atlas_info = loaded_project.atlas_info
+                        ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
+                        #self.diffusion_ready = True
+                        fmri_save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
+                        self.fmri_inputs_checked = fmri_inputs_checked
+                        ui_info.ui.context["object"].project_info.fmri_available = self.fmri_inputs_checked
                         self.project_loaded = True
 
 
@@ -886,6 +1124,22 @@ class ProjectHandler(Handler):
     def map_fmri_connectome(self, ui_info):
         ui_info.ui.context["object"].project_info.fmri_config_error_msg = self.fmri_pipeline.check_config()
         valid_anat_output,ui_info.ui.context["object"].project_info.anat_config_error_msg = self.anat_pipeline.check_output()
+
+        if ui_info.ui.context["object"].project_info.anat_config_error_msg != '':
+            ui_info.ui.context["object"].project_info.configure_traits(view='anat_config_error_view')
+        else:
+            if ui_info.ui.context["object"].project_info.fmri_config_error_msg != '':
+                ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
+            else:
+                self.fmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
+                print "self.fmri_pipeline.parcellation_scheme: %s" % self.fmri_pipeline.parcellation_scheme
+                self.fmri_pipeline.atlas_info = ui_info.ui.context["object"].project_info.atlas_info
+                print "self.fmri_pipeline.atlas_info: %s" % self.fmri_pipeline.atlas_info
+                fmri_save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
+                self.fmri_pipeline.launch_process()
+                self.fmri_pipeline.launch_progress_window()
+                update_fmri_last_processed(ui_info.ui.context["object"].project_info, self.fmri_pipeline)
+            fmri_processed = True
 
     # def process_anatomical_and_diffusion(self, ui_info):
 

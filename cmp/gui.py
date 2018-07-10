@@ -417,6 +417,9 @@ class CMP_MainWindow(HasTraits):
     dmri_save_config = Action(name='Save diffusion pipeline configuration as...',action='dmri_save_config_file',enabled_when='handler.project_loaded==True')
     dmri_load_config = Action(name='Load diffusion pipeline configuration...',action='dmri_load_config_file',enabled_when='handler.project_loaded==True')
 
+    fmri_save_config = Action(name='Save fMRI pipeline configuration as...',action='fmri_save_config_file',enabled_when='handler.project_loaded==True')
+    fmri_load_config = Action(name='Load fMRI pipeline configuration...',action='fmri_load_config_file',enabled_when='handler.project_loaded==True')
+
     project_info.style_sheet = style_sheet
 
     traits_view = QtView(Group(
@@ -431,6 +434,10 @@ class CMP_MainWindow(HasTraits):
                             Group(
                                 Item('dmri_pipeline',style='custom',show_label=False, enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked'),
                                 label='Diffusion pipeline', dock='tab'
+                            ),
+                            Group(
+                                Item('fmri_pipeline',style='custom',show_label=False, enabled_when='handler.anat_outputs_checked and handler.fmri_inputs_checked'),
+                                label='fMRI pipeline', dock='tab'
                             ),
                             orientation='horizontal', layout='tabbed', springy=True, enabled_when='handler.anat_inputs_checked==True'),
                         title='Connectome Mapper 3',
