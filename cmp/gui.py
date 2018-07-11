@@ -137,6 +137,8 @@ class CMP_Project_Info(HasTraits):
     diffusion_imaging_model = Enum('DTI',['DSI','DTI','HARDI'])
     parcellation_scheme = Str('Lausanne2008')
     atlas_info = Dict()
+    freesurfer_subjects_dir = Str('')
+    freesurfer_subject_id = Str('')
 
 
     t1_available = Bool(False)

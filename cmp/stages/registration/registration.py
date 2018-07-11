@@ -110,7 +110,13 @@ class RegistrationConfig(HasTraits):
                               Item('fsl_cost',label="FLIRT metric"),
                               Item('no_search'),
                               Item('flirt_args'),
-                            label='FLS registration settings', show_border=True,visible_when='registration_mode=="FSL"'),
+                            label='FSL registration settings', show_border=True,visible_when='registration_mode=="FSL"'),
+                        Group(Item('uses_qform'),
+                              Item('dof'),
+                              Item('fsl_cost',label="FLIRT metric"),
+                              Item('no_search'),
+                              Item('flirt_args'),
+                            label='FSL registration settings', show_border=True,visible_when='registration_mode=="Linear (FSL))"'),
                         Group(
                             Group(
                                 HGroup(
@@ -1156,7 +1162,7 @@ class RegistrationStage(Stage):
         #                     (fs_mriconvert, fsl_applywarp_rois, [('out_file','ref_file')]),
         #                     ])
 
-        if self.config.registration_mode == 'FreeSurfer (BBregister)':
+        if self.config.registration_mode == 'BBregister (FS)':
             fs_bbregister = pe.Node(interface=cmp_fs.BBRegister(out_fsl_file="target-TO-orig.mat"),name="bbregister")
             fs_bbregister.inputs.init = self.config.init
             fs_bbregister.inputs.contrast_type = self.config.contrast_type

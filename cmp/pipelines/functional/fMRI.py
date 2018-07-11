@@ -290,10 +290,13 @@ class fMRIPipeline(Pipeline):
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
+        old_subject = self.subject
+
         if self.global_conf.subject_session == '':
             deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
         else:
             deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session)
+
             self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
         # Initialization
@@ -314,12 +317,27 @@ class fMRIPipeline(Pipeline):
         flow = self.create_pipeline_flow(deriv_subject_directory=deriv_subject_directory)
         flow.write_graph(graph2use='colored', format='svg', simple_form=False)
 
-        if(self.number_of_cores != 1):
-            flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
-        else:
-            flow.run()
+        try:
 
-        self.fill_stages_outputs()
+            if(self.number_of_cores != 1):
+                flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
+            else:
+                flow.run()
+
+            self.fill_stages_outputs()
+
+            iflogger.info("**** Processing finished ****")
+
+            return True,'Processing sucessful'
+
+            self.subject = old_subject
+
+        except:
+
+            self.subject = old_subject
+            iflogger.info("**** Processing terminated :< ****")
+
+            return False,'Processing unsucessful'
 
         # # Clean undesired folders/files
         # rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
@@ -334,9 +352,9 @@ class fMRIPipeline(Pipeline):
         # shutil.copy(self.config_file,outdir)
         # shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
 
-        iflogger.info("**** Processing finished ****")
-
-        return True,'Processing sucessful'
+        # iflogger.info("**** Processing finished ****")
+        #
+        # return True,'Processing sucessful'
 
     def create_pipeline_flow(self,deriv_subject_directory):
 

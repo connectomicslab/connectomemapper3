@@ -80,7 +80,7 @@ class discard_tp(BaseInterface):
         dataimg = nib.load( self.inputs.in_file )
         data = dataimg.get_data()
 
-        n_discard = float(self.inputs.n_discard) - 1
+        n_discard = int(self.inputs.n_discard) - 1
 
         new_data = data.copy()
         new_data = new_data[:,:,:,n_discard:-1]
@@ -171,7 +171,7 @@ class nuisance_regression(BaseInterface):
 
         gm = nib.load(self.inputs.gm_file[0]).get_data().astype( np.uint32 )
         if float(self.inputs.n_discard) > 0:
-            n_discard = float(self.inputs.n_discard) - 1
+            n_discard = int(self.inputs.n_discard) - 1
             if self.inputs.motion_nuisance:
                 move = move[n_discard:-1,:]
 
