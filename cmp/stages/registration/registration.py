@@ -1645,6 +1645,7 @@ class RegistrationStage(Stage):
         else:
             target_path = os.path.join(self.stage_dir,"fMRI_skullstrip","result_fMRI_skullstrip.pklz")
             reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
+            warpedROIVs_results_path = os.path.join(self.stage_dir,"apply_registration_roivs","result_apply_registration_roivs.pklz")
 
         # print "target:",target_path
         # print "fnirt_results_path:",fnirt_results_path
@@ -1732,9 +1733,10 @@ class RegistrationStage(Stage):
                                     else:
                                         self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',reg_results.inputs['fixed_image'][0],pve_output,'-l','Random-Rainbow','-t','0.5']
         else:
-            if (os.path.exists(target_path)) and (os.path.exists(reg_results)):
+            if (os.path.exists(target_path)) and (os.path.exists(reg_results_path)) and (os.path.exists(warpedROIVs_results_path)):
                 target = pickle.load(gzip.open(target_path))
                 reg_results = pickle.load(gzip.open(reg_results_path))
+                rois_results = pickle.load(gzip.open(warpedROIVs_results_path))
 
                 self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fslview',target.inputs['in_file'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
 

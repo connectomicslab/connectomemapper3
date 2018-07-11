@@ -271,9 +271,9 @@ class fMRIPipeline(Pipeline):
             self.stages['Registration'].config.imaging_model = 'fMRI'
 
         if t2_available:
-            self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear))','BBregister (FS)']
+            self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
         else:
-            self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear))','BBregister (FS)']
+            self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
 
         self.fill_stages_outputs()
 
