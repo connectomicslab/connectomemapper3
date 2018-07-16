@@ -119,6 +119,9 @@ class fMRIPipeline(Pipeline):
 
         self.subject = project_info.subject
 
+        self.subjects_dir = project_info.freesurfer_subjects_dir
+        self.subject_id = project_info.freesurfer_subject_id
+
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = self.subject
 
@@ -289,6 +292,9 @@ class fMRIPipeline(Pipeline):
     def process(self):
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+
+        if '_' in self.subject:
+            self.subject = self.subject.split('_')[0]
 
         old_subject = self.subject
 

@@ -755,6 +755,8 @@ class ProjectHandler(Handler):
 
             loaded_project.parcellation_scheme = get_anat_process_detail(loaded_project,'parcellation_stage','parcellation_scheme')
             loaded_project.atlas_info = get_anat_process_detail(loaded_project,'parcellation_stage','atlas_info')
+            loaded_project.freesurfer_subjects_dir = get_anat_process_detail(loaded_project,'segmentation_stage','freesurfer_subjects_dir')
+            loaded_project.freesurfer_subject_id = get_anat_process_detail(loaded_project,'segmentation_stage','freesurfer_subject_id')
 
             self.anat_pipeline= init_anat_project(loaded_project, False)
             if self.anat_pipeline != None: #and self.dmri_pipeline != None:
@@ -894,6 +896,8 @@ class ProjectHandler(Handler):
                         ui_info.ui.context["object"].project_info = loaded_project
                         self.fmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
                         self.fmri_pipeline.atlas_info = loaded_project.atlas_info
+                        self.fmri_pipeline.subjects_dir = loaded_project.freesurfer_subjects_dir
+                        self.fmri_pipeline.subject_id = loaded_project.freesurfer_subject_id
                         ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
                         ui_info.ui.context["object"].fmri_pipeline.number_of_cores = ui_info.ui.context["object"].project_info.number_of_cores
                         #ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
@@ -916,6 +920,8 @@ class ProjectHandler(Handler):
                         # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
                         self.fmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
                         self.fmri_pipeline.atlas_info = loaded_project.atlas_info
+                        self.fmri_pipeline.subjects_dir = loaded_project.freesurfer_subjects_dir
+                        self.fmri_pipeline.subject_id = loaded_project.freesurfer_subject_id
                         ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
                         #self.diffusion_ready = True
                         fmri_save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
@@ -1139,6 +1145,10 @@ class ProjectHandler(Handler):
                 print "self.fmri_pipeline.parcellation_scheme: %s" % self.fmri_pipeline.parcellation_scheme
                 self.fmri_pipeline.atlas_info = ui_info.ui.context["object"].project_info.atlas_info
                 print "self.fmri_pipeline.atlas_info: %s" % self.fmri_pipeline.atlas_info
+                self.fmri_pipeline.subjects_dir = ui_info.ui.context["object"].project_info.freesurfer_subjects_dir
+                print "self.fmri_pipeline.subjects_dir: %s" % self.fmri_pipeline.subjects_dir
+                self.fmri_pipeline.subject_id = ui_info.ui.context["object"].project_info.freesurfer_subject_id
+                print "self.fmri_pipeline.subject_id: %s" % self.fmri_pipeline.subject_id
                 fmri_save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
                 self.fmri_pipeline.launch_process()
                 self.fmri_pipeline.launch_progress_window()
