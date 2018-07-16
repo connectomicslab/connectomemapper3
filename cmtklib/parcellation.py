@@ -67,6 +67,7 @@ class Erode(BaseInterface):
         outputs = self._outputs().get()
         outputs['out_file'] = op.abspath('%s_eroded.nii.gz' % os.path.splitext(op.splitext(op.basename(self.inputs.in_file))[0])[0])
         return outputs
+        
 
 class ParcellateInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(desc='Freesurfer main directory')
