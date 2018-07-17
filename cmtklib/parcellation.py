@@ -174,6 +174,57 @@ class ParcellateBrainstemStructures(BaseInterface):
         outputs['brainstem_structures'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','brainstem.nii.gz')
         return outputs
 
+
+class ParcellateThalamusInputSpec(BaseInterfaceInputSpec):
+    T1w_image = File(mandatory=True, desc='T1w image to be parcellated')
+    template_image = File(mandatory=True, desc='Template T1w')
+    thalamic_nuclei_maps = File(mandatory=True, desc='Probability maps of thalamic nuclei (4D image) in template space')
+
+class ParcellateThalamusOutputSpec(TraitedSpec):
+    max_prob_registered = File(desc='max probability label image')
+    prob_maps_registered = File(desc='probabilistic map of thalamus nuclei')
+
+class ParcellateThalamus(BaseInterface):
+    input_spec = ParcellateThalamusInputSpec
+    output_spec = ParcellateThalamusOutputSpec
+
+    def _run_interface(self,runtime):
+        iflogger.info("Parcellation of Thalamic Nuclei")
+        iflogger.info("=============================================")
+
+        fs_string = 'export ANTSPATH=/usr/lib/ants/'
+        iflogger.info('- Input T1w image:\n  {}\n'.format(self.inputs.T1w_image))
+        iflogger.info('- Template image:\n  {}\n'.format(self.inputs.template_image))
+        iflogger.info('- Thalamic nuclei maps:\n  {}\n'.format(self.inputs.thalamic_nuclei_maps))
+
+        outprefixName = self.inputs.T1w_image.split(".")[0]
+        outprefixName = outprefixName.split("/")[-1:][0]
+        outprefixName = '{}_Ind2temp'.format(outprefixName)
+
+        cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,6,outprefixName)
+
+        iflogger.info('Processing cmd: %s' % cmd)
+
+        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        #subprocess.check_call(reconall_cmd)
+
+        #cmd = ['recon-all', '-s', self.inputs.subject_id, '-hippocampal-subfields-T1']
+
+        #subprocess.check_call(cmd)
+        iflogger.info(proc_stdout)
+
+        iflogger.info('Done')
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        #outputs['lh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','lh_subFields.nii.gz')
+        #outputs['rh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','rh_subFields.nii.gz')
+        return outputs
+
+
 class ParcellateInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(desc='Freesurfer main directory')
     subject_id = traits.String(mandatory=True, desc='Subject ID')

@@ -22,6 +22,29 @@ from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineIn
 
 from nipype.interfaces.ants.resampling import ApplyTransforms
 
+import multiprocessing as mp
+
+class RegistrationSyNInputSpec(BaseInterfaceInputSpec):
+    input_image = File(desc='image to be registered')
+    target_image = File(desc='Fixed (target) image')
+    transform_type = Str('s')
+    number_of_cores = Int(mp.cpu_count())
+
+class RegitrationSyNOutputSpec(TraitedSpec):
+
+class RegistrationSyN(BaseInterface):
+    input_spec = RegistrationSyNInputSpec
+    output_spec = RegistrationSyNOutputSpec
+
+    def _run_interface(self, runtime):
+        
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['output_images'] = glob.glob(os.path.abspath("*.nii.gz"))
+        return outputs
+
 class MultipleANTsApplyTransformsInputSpec(BaseInterfaceInputSpec):
     input_images = InputMultiPath(File(desc='files to be registered', mandatory = True, exists = True))
     transforms = InputMultiPath(File(exists=True), mandatory=True,
