@@ -29,6 +29,7 @@ package_data = {'cmp':
                 ],
                 'cmtklib':
                 ['data/parcellation/lausanne2008/*/*.*',
+                 'data/parcellation/lausanne2018/*.*',
                  'data/parcellation/lausanne2018/*/*.*',
 		        'data/segmentation/ants_template_IXI/*/*.*',
 		        'data/segmentation/ants_template_IXI/*.*',
@@ -39,6 +40,7 @@ package_data = {'cmp':
                 'data/colortable_and_gcs/my_atlas_gcs/*.*',
                 'data/diffusion/odf_directions/*.*',
                 'data/diffusion/gradient_tables/*.*',
+                'data/segmentation/thalamus2018/*.*',
                  ]}
 
 ################################################################################

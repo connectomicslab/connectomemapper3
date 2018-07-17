@@ -101,19 +101,19 @@ class ParcellateHippocampalSubfields(BaseInterface):
         #subprocess.check_call(cmd)
         iflogger.info(proc_stdout)
 
-        mov = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','lh.hippoSfLabels-T1.v10.mgz')
-        targ = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','rawavg.mgz')
-        out = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','lh_subFields.nii.gz')
-        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % ()
+        mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','lh.hippoSfLabels-T1.v10.mgz')
+        targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rawavg.mgz')
+        out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','lh_subFields.nii.gz')
+        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
         iflogger.info(proc_stdout)
 
-        mov = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','rh.hippoSfLabels-T1.v10.mgz')
-        targ = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','rawavg.mgz')
-        out = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','rh_subFields.nii.gz')
-        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % ()
+        mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rh.hippoSfLabels-T1.v10.mgz')
+        targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rawavg.mgz')
+        out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','rh_subFields.nii.gz')
+        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
@@ -125,8 +125,8 @@ class ParcellateHippocampalSubfields(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['lh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','lh_subFields.nii.gz')
-        outputs['rh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','rh_subFields.nii.gz')
+        outputs['lh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','lh_subFields.nii.gz')
+        outputs['rh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','rh_subFields.nii.gz')
         return outputs
 
 class ParcellateBrainstemStructuresInputSpec(BaseInterfaceInputSpec):
@@ -156,10 +156,10 @@ class ParcellateBrainstemStructures(BaseInterface):
         proc_stdout = process.communicate()[0].strip()
         iflogger.info(proc_stdout)
 
-        mov = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','brainstemSsLabels.v10.mgz')
-        targ = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','rawavg.mgz')
-        out = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','brainstem.nii.gz')
-        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % ()
+        mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','brainstemSsLabels.v10.mgz')
+        targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rawavg.mgz')
+        out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','brainstem.nii.gz')
+        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
@@ -171,7 +171,7 @@ class ParcellateBrainstemStructures(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['brainstem_structures'] = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','brainstem.nii.gz')
+        outputs['brainstem_structures'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','brainstem.nii.gz')
         return outputs
 
 class ParcellateInputSpec(BaseInterfaceInputSpec):
@@ -742,347 +742,173 @@ def define_atlas_variables():
 
     return paths, comp, pardic, parkeys
 
-def create_roi_v2(subject_id, subjects_dir):
+
+def create_roi_v2(subject_id, subjects_dir,v=True):
     """ Creates the ROI_%s.nii.gz files using the given parcellation information
     from networks. Iteratively create volume. """
 
-    print("Create the ROIs:")
-    fs_dir = op.join(subjects_dir,subject_id)
-    if not ( op.isdir(fs_dir) and op.isdir(os.path.join(fs_dir, 'mri')) and op.isdir(os.path.join(fs_dir, 'surf')) ):
-		print('Requested subject directory is invalid.')
+    freesurfer_subj = os.path.abspath(subjects_dir)
+    if not ( os.path.isdir(freesurfer_subj) and os.path.isdir(os.path.join(freesurfer_subj, 'fsaverage')) ):
+        parser.error('FreeSurfer subject directory is invalid. The folder does not exist or does not contain \'fsaverage\'')
     else:
-        print('- Input subject directory:\n  {}\n'.format(fs_dir))
+        if v:
+            print('- FreeSurfer subject directory ($SUBJECTS_DIR):\n  {}\n'.format(freesurfer_subj))
 
-	# Check existence of required FreeSurfer recon-all output files
-	this_file = 'mri/orig/001.mgz'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'mri/aseg.mgz'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'mri/orig.mgz'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'mri/ribbon.mgz'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'surf/lh.pial'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'surf/rh.pial'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'surf/lh.smoothwm'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'surf/rh.smoothwm'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'surf/lh.sphere.reg'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'surf/rh.sphere.reg'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'surf/lh.white'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
-	this_file = 'surf/rh.white'
-	if not os.path.isfile(os.path.join(fs_dir, this_file)):
-		parser.error('"{0}" is a required input file!'.format(this_file))
+    subject_dir = os.path.join(freesurfer_subj, subject_id)
+    if not ( os.path.isdir(subject_dir) ):
+        parser.error('No input subject directory was found in FreeSurfer $SUBJECTS_DIR')
+    else:
+        if v:
+            print('- Input subject id:\n  {}\n'.format(subject_id))
+            print('- Input subject directory:\n  {}\n'.format(subject_dir))
 
-	temp = re.split('\/',fs_dir)
-	subject = temp[-1]
-	if not subject:
-		subject = temp[-2]
-		fs_subj_dir = fs_dir[0:-len(subject)-1]
-	else:
-		fs_subj_dir = fs_dir[0:-len(subject)-1]
-	print('- Subject identifier:\n  {}\n'.format(subject))
+	# Multiscale parcellation - define annotation and segmentation variables
+	rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
+	lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
+	annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
+	aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
+	# Number of scales in multiscale parcellation
+	nscales = 5
+	# Freesurfer IDs for subcortical structures and brain stem
+	lh_sub = np.array([10,11,12,13,26,17,18])
+	rh_sub = np.array([49,50,51,52,58,53,54])
+	brain_stem = np.array([16])
 
-	# Define atlas variables
-	paths, comp, pardic, parkeys = define_atlas_variables()
-
-    # FreeSurfer directories and $SUBJECTS_DIR
-    subject_dir = fs_dir
-    fs_label_dir = os.path.join(fs_dir, 'label')
-    fs_string = 'export SUBJECTS_DIR=' + fs_subj_dir
-    print('- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(fs_subj_dir))
-    print('\nPROCESSING\n')
-
-    # load aseg volume
-    #aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
-    #asegd = aseg.get_data()	# numpy.ndarray
-
-    # 1. Generate new annot files from FreeSurfer recon-all output
-    # Loop over parcellation scales
-    for out in comp:
-        # Build new annotation files combining the recon-all segmentation (cortical surface) and the multi-scale gcs atlases 'Lausanne 2008'
-        # mris_ca_label: for a single subject, produces an annotation file, in which each cortical surface vertex is assigned a neuroanatomical label (according to a given gcs atlas)
-        #                Requires surf/?h.smoothwm, surf/?h.sphere.reg
-        print(' ... generate new annot file {}\n'.format(out[2]))
-        mris_cmd = fs_string + '; mris_ca_label "%s" %s "%s/surf/%s.sphere.reg" "%s" "%s" ' % (subject, out[0], subject_dir, out[0], out[5], os.path.join(fs_label_dir, out[2]))
-        print mris_cmd
-        process = subprocess.Popen(mris_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-        proc_stdout = process.communicate()[0].strip()
-        # if v:
-        #     print proc_stdout
-        #     print ' '
-
-    # Path orig volume
-    orig = os.path.join(subject_dir, 'mri', 'orig', '001.mgz')
-
-    # extract cc and unknown to add to tractography mask, we do not want this as a region of interest
-    # in FS 5.0, unknown and corpuscallosum are not available for the 35 scale (why?),
-    # but for the other scales only, take the ones from _60
-    # rhun = op.join(fs_dir, 'label', 'rh.unknown.label')
-    # lhun = op.join(fs_dir, 'label', 'lh.unknown.label')
-    # rhco = op.join(fs_dir, 'label', 'rh.corpuscallosum.label')
-    # lhco = op.join(fs_dir, 'label', 'lh.corpuscallosum.label')
-    # shutil.copy(op.join(fs_dir, 'label', 'regenerated_rh_2', 'rh.unknown.label'), rhun)
-    # shutil.copy(op.join(fs_dir, 'label', 'regenerated_lh_2', 'lh.unknown.label'), lhun)
-    # shutil.copy(op.join(fs_dir, 'label', 'regenerated_rh_2', 'rh.corpuscallosum.label'), rhco)
-    # shutil.copy(op.join(fs_dir, 'label', 'regenerated_lh_2', 'lh.corpuscallosum.label'), lhco)
+	# Check existence of multiscale atlas fsaverage annot files
+	# for i in range(0, nscales):
+	# 	this_file = os.path.join(freesurfer_subj, 'fsaverage/label', rh_annot_files[i])
+    #     this_file = pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i]))
+    #     # try:
+    #     #     shutil.copy(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),this_file)
+    #     # except PermissionError:
+    #     shutil.os.system('sudo cp "{}" "{}"'.format(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),this_file))
     #
-    # mri_cmd = ['mri_label2vol','--label',rhun,'--label',lhun,'--label',rhco,'--label',lhco,'--temp',op.join(fs_dir, 'mri', 'orig.mgz'),'--o',op.join(fs_dir, 'label', 'cc_unknown.nii.gz'),'--identity']
-    # subprocess.check_call(mri_cmd)
+    #     if not os.path.isfile(this_file):
+    #         parser.error('"{0}" is required! Please, copy the annot files FROM \'connectome_atlas/misc/multiscale_parcellation/fsaverage/label\' TO your FreeSurfer \'$SUBJECTS_DIR/fsaverage/label\' folder'.format(this_file))
+    #         return
+    #
+    #     this_file = os.path.join(freesurfer_subj, 'fsaverage/label', lh_annot_files[i])
+    #     this_file = pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i]))
+    #     # try:
+    #     #     shutil.copy(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),this_file)
+    #     # except PermissionError:
+    #     shutil.os.system('sudo cp "{}" "{}"'.format(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),this_file))
+    #
+    #     if not os.path.isfile(this_file):
+	# 		parser.error('"{0}" is required! Please, copy the annot files FROM \'connectome_atlas/misc/multiscale_parcellation/fsaverage/label\' TO your FreeSurfer \'$SUBJECTS_DIR/fsaverage/label\' folder'.format(this_file))
+	# 		return
 
-    mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','ribbon.mgz'),'-o',op.join(fs_dir,'mri','ribbon.nii.gz')]
-    subprocess.check_call(mri_cmd)
 
-    mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','aseg.mgz'),'-o',op.join(fs_dir,'mri','aseg.nii.gz')]
-    subprocess.check_call(mri_cmd)
+	# Check existence of tmp folder in input subject folder
+	this_dir = os.path.join(subject_dir, 'tmp')
+	if not ( os.path.isdir(this_dir) ):
+		os.makedirs(this_dir)
 
-    shape = (25,25,25)
-    center = np.array(shape) // 2
-    # dist: distances from the center of the neighbourhood
-    dist = np.zeros(shape, dtype='float32')
-    for x in range(shape[0]):
-        for y in range(shape[1]):
-            for z in range(shape[2]):
-                distxyz = center - [x,y,z]
-                dist[x,y,z] = math.sqrt(np.sum(np.multiply(distxyz,distxyz)))
 
-    # LOOP over parcellation SCALES
-    for i,parkey in enumerate(parkeys):
-        # Dictionary entry for current key
-        parval = pardic[parkey]
+	# We need to add these instructions when running FreeSurfer commands from Python
+	# (if these instructions are not present, Python rises a 'Symbol not found: ___emutls_get_address' exception in macOS)
+	fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
 
-        print('\n\n SCALE: {}\n'.format(parkey))
 
-        if parkey!='scale5':
-            # 2. Generate parcellation volume for current scale using mri_aparc2aseg
-            # mri_aparc2aseg: maps the cortical labels from a cortical parcellation (annot) to the automatic segmentation volume (aseg)
-            #                 Requires mri/aseg.mgz, mri/ribbon.mgz, surf/?h.pial, surf/?h.white and annot files generated in previous step
-            # Path temporary file
-            temp = os.path.join(fs_subj_dir, subject, 'mri/tmp.nii.gz')
-            print(' ... generate new Nifti volume for parcellation {}\n'.format(parval['annotation']))
-            mri_cmd = fs_string + '; mri_aparc2aseg --s "%s" --o "%s" --new-ribbon --annot "%s"' % (subject, temp, parval['annotation'])
-            process = subprocess.Popen(mri_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-            proc_stdout = process.communicate()[0].strip()
-            # if v:
-            #     print proc_stdout
-            #     print ' '
+	# Redirect ouput if low verbose
+	FNULL = open(os.devnull, 'w')
 
-            # 3. Re-assign regions' numerical ID using the information contianed in the graphml files
-            #    of the multi-scale parcellation atlas
-            #
-            # Load parcellation Nifti 3D volume with FreeSurfer numerical IDs
-            fsid = ni.load(temp)
-            fsidd = fsid.get_data()	# numpy.ndarray
-            # Header information
-            hdr = fsid.get_header()
-            hdr2 = hdr.copy()
-            hdr2.set_data_dtype(np.uint16)
 
-            # Create output volume for current parcellation
-            rois = np.zeros( fsid.shape, dtype=np.int16 )
+	# Loop over parcellation scales
+	if v:
+		print('Generete MULTISCALE PARCELLATION for input subject')
+	for i in range(0, nscales):
 
-            # Read graphml information
-            # (pg is a NetworkX graph)
-            pg = nx.read_graphml(parval['node_information_graphml'])
+		if v:
+			print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
 
-            # LOOP over NODES in current parcellation scale
-            print(' ... relabel brain regions according to {}:\n'.format(parval['node_information_graphml']))
-            count = 0
+		# 1. Resample fsaverage CorticalSurface onto SUBJECT_ID CorticalSurface and map annotation for current scale
+		# Left hemisphere
+		if v:
+			print('     > resample fsaverage CorticalSurface to individual CorticalSurface')
+		mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi lh --sval-annot %s --tval %s' % (
+					subject_id,
+					pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),
+					os.path.join(subject_dir, 'label', lh_annot_files[i]))
+		if v == 2:
+			status = subprocess.call(mri_cmd, shell=True)
+		else:
+			status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+		# Right hemisphere
+		mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi rh --sval-annot %s --tval %s' % (
+					subject_id,
+					pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),
+					os.path.join(subject_dir, 'label', rh_annot_files[i]))
+		if v == 2:
+			status = subprocess.call(mri_cmd, shell=True)
+		else:
+			status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
-            for brk, brv in pg.nodes_iter(data=True):
-                count = count + 1
-                print('      {} of {}\n'.format(count,pg.number_of_nodes()))
-                idx = np.where(fsidd == int(brv['dn_fsID']))
-                rois[idx] = int(brv['dn_multiscaleID'])
-                # idx = np.where(fsidd == int(brv['dn_correspondence_id']))
-                # rois[idx] = int(brv['dn_correspondence_id'])
+		# 2. Generate Nifti volume from annotation
+		#    Note: change here --wmparc-dmax (FS default 5mm) to dilate cortical regions toward the WM
+		if v:
+			print('     > generate Nifti volume from annotation')
+		mri_cmd = fs_string + '; mri_aparc2aseg --s %s --annot %s --wmparc-dmax 0 --labelwm --hypo-as-wm --new-ribbon --o %s' % (
+					subject_id,
+					annot[i],
+					os.path.join(subject_dir, 'tmp', aseg_output[i]))
+		if v == 2:
+			status = subprocess.call(mri_cmd, shell=True)
+		else:
+			status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
-            newrois = rois.copy()
-            # store scale500 volume for correction on multi-resolution consistency
-            if i == 0:
-                print("Storing ROIs volume maximal resolution...")
-                roisMax = rois.copy()
-                idxMax = np.where(roisMax > 0)
-                xxMax = idxMax[0]
-                yyMax = idxMax[1]
-                zzMax = idxMax[2]
-            # correct cortical surfaces using as reference the roisMax volume (for consistency between resolutions)
-            else:
-                print("Adapt cortical surfaces...")
-                #adaptstart = time()
-                idxRois = np.where(rois > 0)
-                xxRois = idxRois[0]
-                yyRois = idxRois[1]
-                zzRois = idxRois[2]
-                # correct voxels labeled in current resolution, but not labeled in highest resolution
-                for j in range(xxRois.size):
-                    if ( roisMax[xxRois[j],yyRois[j],zzRois[j]]==0 ):
-                        newrois[xxRois[j],yyRois[j],zzRois[j]] = 0;
-                # correct voxels not labeled in current resolution, but labeled in highest resolution
-                for j in range(xxMax.size):
-                    if ( newrois[xxMax[j],yyMax[j],zzMax[j]]==0 ):
-                        local = extract(rois, shape, position=(xxMax[j],yyMax[j],zzMax[j]), fill=0)
-                        mask = local.copy()
-                        mask[np.nonzero(local>0)] = 1
-                        thisdist = np.multiply(dist,mask)
-                        thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
-                        value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
-                        if value.size > 1:
-                            counts = np.bincount(value)
-                            value = np.argmax(counts)
-                        newrois[xxMax[j],yyMax[j],zzMax[j]] = value
-                #print("Cortical ROIs adaptation took %s seconds to process." % (time()-adaptstart))
+		# 3. Update numerical IDs of cortical and subcortical regions
+		# Load Nifti volume
+		if v:
+			print('     > relabel cortical and subcortical regions')
+		this_nifti = ni.load(os.path.join(subject_dir, 'tmp', aseg_output[i]))
+		vol = this_nifti.get_data()	# numpy.ndarray
+		hdr = this_nifti.header
+		# Initialize output
+		hdr2 = hdr.copy()
+		hdr2.set_data_dtype(np.uint16)
+		vol2 = np.zeros( this_nifti.shape, dtype=np.int16 )
+		# Relabelling Right hemisphere (2000+)
+		ii = np.where((vol > 2000) & (vol < 3000))
+		vol2[ii] = vol[ii] - 2000
+		nlabel = np.amax(vol2)	# keep track of the number of assigned labels
+		# Relabelling Subcortical Right hemisphere
+		# NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
+		newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
+		for j in range(0, len(rh_sub)):
+			ii = np.where(vol == rh_sub[j])
+			vol2[ii] = newLabels[j]
+		nlabel = np.amax(vol2)
+		# Relabelling Left hemisphere (1000+)
+		ii = np.where((vol > 1000) & (vol < 2000))
+		vol2[ii] = vol[ii] - 1000 + nlabel
+		nlabel = np.amax(vol2)	# n cortical label in right hemisphere
+		# Relabelling Subcortical Right hemisphere
+		# NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
+		newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
+		for j in range(0, len(lh_sub)):
+			ii = np.where(vol == lh_sub[j])
+			vol2[ii] = newLabels[j]
+		nlabel = np.amax(vol2)
+		# Relabelling Brain Stem
+		ii = np.where(vol == brain_stem)
+		vol2[ii] = nlabel + 1
 
-            # store volume eg in ROI_scale33.nii.gz
-            out_roi = op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % parkey)
-            print("Save output image to %s" % out_roi)
-            img = ni.Nifti1Image(newrois, fsid.get_affine(), hdr2)
-            ni.save(img, out_roi)
+		# 4. Save Nifti and mgz volumes
+		if v:
+			print('     > save output volumes')
+		this_out = os.path.join(subject_dir, 'mri', aseg_output[i])
+		img = ni.Nifti1Image(vol2, this_nifti.affine, hdr2)
+		ni.save(img, this_out)
+		mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
+					this_out,
+					os.path.join(subject_dir, 'mri', aseg_output[i][0:-4]+'.mgz'))
+		if v == 2:
+			status = subprocess.call(mri_cmd, shell=True)
+		else:
+			status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+		os.remove(os.path.join(subject_dir, 'tmp', aseg_output[i]))
 
-            # 4. Store output volume
-            print('\n ... crop and save output volume\n')
-            out_vol_temp = os.path.join(subject_dir, 'mri/ROIv_%s.nii.gz' % parkey)
-            img = ni.Nifti1Image(rois, fsid.get_affine(), hdr2)
-            ni.save(img, out_vol_temp)
-
-            # Crop mask to match orig-mgz volume
-            out_vol = os.path.join(subject_dir, 'label', 'ROIv_%s.nii.gz' % parkey)
-            mri_cmd = 'mri_convert -rl "%s" -rt nearest "%s" -nc "%s"' % (orig, out_vol_temp, out_vol)
-            process = subprocess.Popen(mri_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-            proc_stdout = process.communicate()[0].strip()
-            # if v:
-            #     print proc_stdout
-            #     print ' '
-
-            # Delete temporary file
-            #os.remove(temp)
-
-        # Scale 5 needs a different processing as parcellaiton informaiton is spread over three distinct annot files
-        else:
-            # 2. Generate parcellation volumes for scale 5 using mri_aparc2aseg
-            # mri_aparc2aseg: maps the cortical labels from a cortical parcellation (annot) to the automatic segmentation volume (aseg)
-            #                 Requires mri/aseg.mgz, mri/ribbon.mgz, surf/?h.pial, surf/?h.white and annot files generated in previous step
-            # Path temporary file
-            temp = [os.path.join(fs_subj_dir, subject, 'mri/tmp1.nii.gz'),
-                    os.path.join(fs_subj_dir, subject, 'mri/tmp2.nii.gz'),
-                    os.path.join(fs_subj_dir, subject, 'mri/tmp3.nii.gz')]
-
-            for k in range(0,3):
-                print(' ... generate new Nifti volume for parcellation {}\n'.format(parval['annotation'][k]))
-                mri_cmd = fs_string + '; mri_aparc2aseg --s "%s" --o "%s" --new-ribbon --annot "%s"' % (subject, temp[k], parval['annotation'][k])
-                process = subprocess.Popen(mri_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-                proc_stdout = process.communicate()[0].strip()
-                # if v:
-                #     print proc_stdout
-                #     print ' '    print("[ DONE ]")
-
-            # 3. Re-assign regions' numerical ID using the information contianed in the graphml files
-            #    of the multi-scale parcellation atlas
-            #
-            # Load parcellation Nifti 3D volumes (3 volumes for scale 5) with FreeSurfer numerical IDs
-            fsid = ni.load(temp[0])
-            fsidd1 = fsid.get_data()	# numpy.ndarray
-            fsid = ni.load(temp[1])
-            fsidd2 = fsid.get_data()
-            fsid = ni.load(temp[2])
-            fsidd3 = fsid.get_data()
-            # Header information
-            hdr = fsid.get_header()
-            hdr2 = hdr.copy()
-            hdr2.set_data_dtype(np.uint16)
-
-            # Creat output volume for current parcellation
-            rois = np.zeros( fsid.shape, dtype=np.int16 )
-
-            # Read graphml information
-            # (pg is a NetworkX graph)
-            pg = nx.read_graphml(parval['node_information_graphml'])
-
-            # LOOP over NODES in current parcellation scale
-            print(' ... relabel brain regions according to {}:\n'.format(parval['node_information_graphml']))
-            count = 0
-            for brk, brv in pg.nodes_iter(data=True):
-                count = count + 1
-                print('      {} of {}\n'.format(count,pg.number_of_nodes()))
-
-                if int(brv['dn_annotfile']) == 0 or int(brv['dn_annotfile']) == 1:
-                    idx = np.where(fsidd1 == int(brv['dn_fsID']))
-                elif int(brv['dn_annotfile']) == 2:
-                    idx = np.where(fsidd2 == int(brv['dn_fsID']))
-                else:
-                    idx = np.where(fsidd3 == int(brv['dn_fsID']))
-
-                rois[idx] = int(brv['dn_multiscaleID'])
-
-            newrois = rois.copy()
-            # store scale500 volume for correction on multi-resolution consistency
-            print("Adapt cortical surfaces...")
-            #adaptstart = time()
-            idxRois = np.where(rois > 0)
-            xxRois = idxRois[0]
-            yyRois = idxRois[1]
-            zzRois = idxRois[2]
-            # correct voxels labeled in current resolution, but not labeled in highest resolution
-            for j in range(xxRois.size):
-                if ( roisMax[xxRois[j],yyRois[j],zzRois[j]]==0 ):
-                    newrois[xxRois[j],yyRois[j],zzRois[j]] = 0;
-            # correct voxels not labeled in current resolution, but labeled in highest resolution
-            for j in range(xxMax.size):
-                if ( newrois[xxMax[j],yyMax[j],zzMax[j]]==0 ):
-                    local = extract(rois, shape, position=(xxMax[j],yyMax[j],zzMax[j]), fill=0)
-                    mask = local.copy()
-                    mask[np.nonzero(local>0)] = 1
-                    thisdist = np.multiply(dist,mask)
-                    thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
-                    value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
-                    if value.size > 1:
-                        counts = np.bincount(value)
-                        value = np.argmax(counts)
-                    newrois[xxMax[j],yyMax[j],zzMax[j]] = value
-            #print("Cortical ROIs adaptation took %s seconds to process." % (time()-adaptstart))
-
-            # store volume eg in ROI_scale33.nii.gz
-            out_roi = op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % parkey)
-            print("Save output image to %s" % out_roi)
-            img = ni.Nifti1Image(newrois, fsid.get_affine(), hdr2)
-            ni.save(img, out_roi)
-
-            # 4. Store output volume
-            print('\n ... crop and save output volume\n')
-            out_vol_temp = os.path.join(subject_dir, 'mri/ROIv_%s.nii.gz' % parkey)
-            img = ni.Nifti1Image(newrois, fsid.get_affine(), hdr2)
-            ni.save(img, out_vol_temp)
-
-            # Crop mask to match orig-mgz volume
-            out_vol = os.path.join(subject_dir, 'label', 'ROIv_%s.nii.gz' % parkey)
-            mri_cmd = 'mri_convert -rl "%s" -rt nearest "%s" -nc "%s"' % (orig, out_vol_temp, out_vol)
-            process = subprocess.Popen(mri_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-            proc_stdout = process.communicate()[0].strip()
-            # if v:
-            #     print proc_stdout
-            #     print ' '
-
-            # Delete temporary file
-            #os.remove(temp[0])
-            #os.remove(temp[1])
-            #os.remove(temp[2])
 
     print("[ DONE ]")
 
@@ -1443,8 +1269,8 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
             ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
     elif parcellation_scheme == 'Lausanne2018':
         for p in get_parcellation('Lausanne2018').keys():
-            ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
-            ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
+            #ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
+            ds.append( (op.join(fs_dir, 'mri','ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
 #        try:
 #            os.makedirs(op.join('.', p))
 #        except:
