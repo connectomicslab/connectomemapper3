@@ -48,6 +48,9 @@ class SegmentationConfig(HasTraits):
     freesurfer_subject_id_trait = List
     freesurfer_subject_id = Str
     freesurfer_args = Str
+    segment_hippocampal_subfields = Bool(True)
+    segment_brainstem = Bool(True)
+
     white_matter_mask = File(exist=True)
 
     traits_view = View(Item('seg_tool',label="Segmentation tool"),
@@ -59,7 +62,10 @@ class SegmentationConfig(HasTraits):
                         Item('ants_probmaskfile',label='Probability mask',visible_when='brain_mask_extraction_tool == "ANTs"'),
                         Item('ants_regmaskfile',label='Extraction mask',visible_when='brain_mask_extraction_tool == "ANTs"'),
                         Item('brain_mask_path',label='Brain mask path',visible_when='brain_mask_extraction_tool == "Custom"'),
-                        'freesurfer_args','use_existing_freesurfer_data',
+                        'freesurfer_args',
+                        'use_existing_freesurfer_data',
+                        Item('segment_hippocampal_subfields',enabled_when='use_existing_freesurfer_data == False'),
+                        Item('segment_brainstem',enabled_when='use_existing_freesurfer_data == False'),
                         Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
                         Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True'),
                         visible_when="seg_tool=='Freesurfer'"),
@@ -119,6 +125,9 @@ class SegmentationStage(Stage):
 
                     #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
                     fs_reconall.inputs.subjects_dir = self.config.freesurfer_subjects_dir
+
+                    fs_reconall.inputs.hippocampal_subfields_T1 = self.config.segment_hippocampal_subfields
+                    fs_reconall.inputs.brainstem = self.config.segment_brainstem
 
                     def isavailable(file):
                         print "T1 is available"
@@ -221,6 +230,8 @@ class SegmentationStage(Stage):
                     #fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
                     fs_reconall23.inputs.subjects_dir = self.config.freesurfer_subjects_dir
 
+                    fs_reconall.inputs.hippocampal_subfields_T1 = self.config.segment_hippocampal_subfields
+                    fs_reconall.inputs.brainstem = self.config.segment_brainstem
 
                     flow.connect([
                                 (copy_brainmask_to_fs,fs_reconall23,[(("out_brainmask_file",get_freesurfer_subject_id),"subject_id")]),

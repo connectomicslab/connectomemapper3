@@ -31,8 +31,8 @@ class ParcellationConfig(HasTraits):
     parcellation_scheme = Str('Lausanne2008')
     parcellation_scheme_editor = List(['NativeFreesurfer','Lausanne2008','Lausanne2018','Custom'])
     include_thalamic_nuclei_parcellation = Bool(True)
-    include_hippocampal_subfields = Bool(True)
-    include_brainstem_parcellation = Bool(True)
+    segment_hippocampal_subfields = Bool(True)
+    segment_brainstem_parcellation = Bool(True)
     pre_custom = Str('Lausanne2008')
     #atlas_name = Str()
     number_of_regions = Int()
@@ -53,11 +53,9 @@ class ParcellationConfig(HasTraits):
                                    visible_when="pipeline_mode=='fMRI'"
                                    ),
                              visible_when='parcellation_scheme=="Custom"'
-                             )
+                             ),
                        Group(
                              'include_thalamic_nuclei_parcellation',
-                             'include_hippocampal_subfields',
-                             'include_brainstem_parcellation',
                              visible_when='parcellation_scheme=="Lausanne2018"'
                              )
                        )

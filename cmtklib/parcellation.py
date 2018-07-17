@@ -67,7 +67,112 @@ class Erode(BaseInterface):
         outputs = self._outputs().get()
         outputs['out_file'] = op.abspath('%s_eroded.nii.gz' % os.path.splitext(op.splitext(op.basename(self.inputs.in_file))[0])[0])
         return outputs
-        
+
+class ParcellateHippocampalSubfieldsInputSpec(BaseInterfaceInputSpec):
+    subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
+    subject_id = traits.String(mandatory=True, desc='Subject ID')
+
+class ParcellateHippocampalSubfieldsOutputSpec(TraitedSpec):
+    lh_hipposubfields = File(desc='Left hemisphere hippocampal subfields file')
+    rh_hipposubfields = File(desc='Right hemisphere hippocampal subfields  file')
+
+class ParcellateHippocampalSubfields(BaseInterface):
+    input_spec = ParcellateHippocampalSubfieldsInputSpec
+    output_spec = ParcellateHippocampalSubfieldsOutputSpec
+
+    def _run_interface(self,runtime):
+        iflogger.info("Parcellation of hippocampal subfields (FreeSurfer)")
+        iflogger.info("=============================================")
+
+        fs_string = 'export SUBJECTS_DIR=' + self.inputs.subjects_dir
+        iflogger.info('- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
+
+        reconall_cmd = fs_string + '; recon-all -no-isrunning -s "%s" -hippocampal-subfields-T1 ' % (self.inputs.subject_id)
+        #reconall_cmd = [fs_string , ";" , "recon-all" , "-no-isrunning" , "-s" , "%s"% (self.inputs.subject_id) , "-hippocampal-subfields-T1" ]
+
+        iflogger.info('Processing cmd: %s' % reconall_cmd)
+
+        process = subprocess.Popen(reconall_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        #subprocess.check_call(reconall_cmd)
+
+        #cmd = ['recon-all', '-s', self.inputs.subject_id, '-hippocampal-subfields-T1']
+
+        #subprocess.check_call(cmd)
+        iflogger.info(proc_stdout)
+
+        mov = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','lh.hippoSfLabels-T1.v10.mgz')
+        targ = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','rawavg.mgz')
+        out = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','lh_subFields.nii.gz')
+        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % ()
+
+        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        iflogger.info(proc_stdout)
+
+        mov = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','rh.hippoSfLabels-T1.v10.mgz')
+        targ = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','rawavg.mgz')
+        out = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','rh_subFields.nii.gz')
+        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % ()
+
+        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        iflogger.info(proc_stdout)
+
+        iflogger.info('Done')
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['lh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','lh_subFields.nii.gz')
+        outputs['rh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','rh_subFields.nii.gz')
+        return outputs
+
+class ParcellateBrainstemStructuresInputSpec(BaseInterfaceInputSpec):
+    subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
+    subject_id = traits.String(mandatory=True, desc='Subject ID')
+
+class ParcellateBrainstemStructuresOutputSpec(TraitedSpec):
+    brainstem_structures = File(desc='Parcellated brainstem structures file')
+
+class ParcellateBrainstemStructures(BaseInterface):
+    input_spec = ParcellateBrainstemStructuresInputSpec
+    output_spec = ParcellateBrainstemStructuresOutputSpec
+
+    def _run_interface(self,runtime):
+        iflogger.info("Parcellation of brainstem structures (FreeSurfer)")
+        iflogger.info("=============================================")
+
+        fs_string = 'export SUBJECTS_DIR=' + self.inputs.subjects_dir
+        iflogger.info('- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
+
+        reconall_cmd = fs_string + '; recon-all -no-isrunning -s "%s" -brainstem-structures ' % (self.inputs.subject_id)
+        #reconall_cmd = [fs_string , ";" , "recon-all" , "-no-isrunning" , "-s" , "%s"% (self.inputs.subject_id) , "-hippocampal-subfields-T1" ]
+
+        iflogger.info('Processing cmd: %s' % reconall_cmd)
+
+        process = subprocess.Popen(reconall_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        iflogger.info(proc_stdout)
+
+        mov = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','brainstemSsLabels.v10.mgz')
+        targ = op.join(self.inputs.subjects_dir,self.inputs.subject,'mri','rawavg.mgz')
+        out = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','brainstem.nii.gz')
+        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % ()
+
+        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        iflogger.info(proc_stdout)
+
+        iflogger.info('Done')
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['brainstem_structures'] = op.join(self.inputs.subjects_dir,self.inputs.subject,'tmp','brainstem.nii.gz')
+        return outputs
 
 class ParcellateInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(desc='Freesurfer main directory')
