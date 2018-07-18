@@ -106,7 +106,7 @@ class ParcellateHippocampalSubfields(BaseInterface):
         mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','lh.hippoSfLabels-T1.v10.mgz')
         targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rawavg.mgz')
         out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','lh_subFields.nii.gz')
-        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
+        cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
@@ -115,7 +115,7 @@ class ParcellateHippocampalSubfields(BaseInterface):
         mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rh.hippoSfLabels-T1.v10.mgz')
         targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rawavg.mgz')
         out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','rh_subFields.nii.gz')
-        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
+        cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
@@ -161,7 +161,7 @@ class ParcellateBrainstemStructures(BaseInterface):
         mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','brainstemSsLabels.v10.mgz')
         targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rawavg.mgz')
         out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','brainstem.nii.gz')
-        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
+        cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
@@ -279,11 +279,14 @@ class ParcellateThalamus(BaseInterface):
 
         iflogger.info('Creating Thalamus mask from FreeSurfer aparc+aseg ')
 
+        fs_string = 'export SUBJECTS_DIR=' + self.inputs.subjects_dir
+        iflogger.info('- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
+
         # Moving aparc+aseg.mgz back to its original space for thalamic parcellation
         mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','aparc+aseg.mgz')
         targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rawavg.mgz')
         out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','aparc+aseg.nii.gz')
-        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
+        cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
