@@ -18,6 +18,8 @@ import networkx as nx
 import numpy as np
 import math
 
+from scipy import ndimage
+
 import scipy.ndimage.morphology as nd
 import sys
 from time import time
@@ -177,12 +179,20 @@ class ParcellateBrainstemStructures(BaseInterface):
 
 class ParcellateThalamusInputSpec(BaseInterfaceInputSpec):
     T1w_image = File(mandatory=True, desc='T1w image to be parcellated')
+    bids_dir = Directory(desc='BIDS root directory')
+    subject = traits.Str(desc='Subject id')
+    session = traits.Str('',desc='Session id')
     template_image = File(mandatory=True, desc='Template T1w')
     thalamic_nuclei_maps = File(mandatory=True, desc='Probability maps of thalamic nuclei (4D image) in template space')
 
 class ParcellateThalamusOutputSpec(TraitedSpec):
-    max_prob_registered = File(desc='max probability label image')
-    prob_maps_registered = File(desc='probabilistic map of thalamus nuclei')
+    warped_image = File(desc='Template registered to T1w image (native)')
+    inverse_warped_image = File(desc='Inverse warped template')
+    max_prob_registered = File(desc='Max probability label image (native)')
+    prob_maps_registered = File(desc='Probabilistic map of thalamus nuclei (native)')
+    transform_file = File(desc='Transform file')
+    warp_file = File(desc='Deformation file')
+    thalamus_mask = File(desc='Thalamus mask')
 
 class ParcellateThalamus(BaseInterface):
     input_spec = ParcellateThalamusInputSpec
@@ -199,9 +209,11 @@ class ParcellateThalamus(BaseInterface):
 
         outprefixName = self.inputs.T1w_image.split(".")[0]
         outprefixName = outprefixName.split("/")[-1:][0]
-        outprefixName = '{}_Ind2temp'.format(outprefixName)
+        outprefixName = op.abspath('{}_Ind2temp'.format(outprefixName))
 
-        cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,6,outprefixName)
+        # sub-A006_ses-20160520161029_T1w_brain_Ind2temp,sub-A006_ses-20160520161029_T1w_brain_Ind2tempWarped.nii.gz,sub-A006_ses-20160520161029_T1w_brain_Ind2tempInverseWarped.nii.gz
+
+        cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
 
         iflogger.info('Processing cmd: %s' % cmd)
 
@@ -209,10 +221,132 @@ class ParcellateThalamus(BaseInterface):
         proc_stdout = process.communicate()[0].strip()
         #subprocess.check_call(reconall_cmd)
 
+        # img = ni.Nifti1Image(er_mask, ni.load( maskFile ).get_affine(), ni.load( maskFile ).get_header())
+        # ni.save(img, op.abspath('%s_eroded.nii.gz' % os.path.splitext(op.splitext(op.basename(maskFile))[0])[0]))
+        # mask = ni.load( maskFile ).get_data().astype( np.uint32 )
+
         #cmd = ['recon-all', '-s', self.inputs.subject_id, '-hippocampal-subfields-T1']
 
         #subprocess.check_call(cmd)
         iflogger.info(proc_stdout)
+        # cad = ['antsApplyTransforms -d 3 -i ' spamImage ' -o ' spamIndImage ' -r ' IndImage ' -t ' defFile(1:end-7) '1Warp.nii.gz -t ' defFile(1:end-7) '0GenericAffine.mat -n BSpline[3]' ];
+
+        outprefixName = self.inputs.T1w_image.split(".")[0]
+        outprefixName = outprefixName.split("/")[-1:][0]
+        transform_file = op.abspath('{}_Ind2temp0GenericAffine.mat'.format(outprefixName))
+        warp_file = op.abspath('{}_Ind2temp1Warp.nii.gz'.format(outprefixName))
+        output_maps = op.abspath('{}_class-thalamus_probtissue.nii.gz'.format(outprefixName))
+        jacobian_file = op.abspath('{}_class-thalamus_probtissue_jacobian.nii.gz'.format(outprefixName))
+
+        cmd = fs_string + '; CreateJacobianDeterminantImage 3 "%s" "%s" ' % (warp_file,jacobian_file)
+
+        iflogger.info('Processing cmd: %s' % cmd)
+        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        iflogger.info(proc_stdout)
+
+        cmd = fs_string + '; antsApplyTransforms --float -d 3 -e 3 -i "%s" -o "%s" -r "%s" -t "%s" -t "%s" -n BSpline[3]' % (self.inputs.thalamic_nuclei_maps,output_maps,self.inputs.T1w_image,warp_file,transform_file)
+
+        iflogger.info('Processing cmd: %s' % cmd)
+        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        iflogger.info(proc_stdout)
+
+        iflogger.info('Correcting the volumes after the interpolation ')
+
+        Ij = ni.load(jacobian_file).get_data()	# numpy.ndarray
+
+        imgVspams = ni.load(output_maps)
+        Vspams = imgVspams.get_data()	# numpy.ndarray
+        Vspams[Vspams < 0] = 0
+        Vspams[Vspams > 1] = 1
+
+        Ispams = np.zeros(Vspams.shape)
+        for nuc in np.arange(Vspams.shape[3]):
+            tempImage = Vspams[:,:,:,nuc]
+            T = np.multiply(tempImage,Ij)
+            Ispams[:,:,:,nuc] = T / T.max()
+
+        # update the header
+        hdr = imgVspams.get_header()
+        hdr2 = hdr.copy()
+        hdr2.set_data_dtype(np.uint16)
+        print("Save output image to %s" % output_maps)
+        img = ni.Nifti1Image(Ispams, imgVspams.get_affine(), hdr2)
+        ni.save(img, output_maps)
+
+        iflogger.info('Creating Thalamus mask from FreeSurfer aparc+aseg ')
+
+        # Moving aparc+aseg.mgz back to its original space for thalamic parcellation
+        mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','aparc+aseg.mgz')
+        targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rawavg.mgz')
+        out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','aparc+aseg.nii.gz')
+        cmd = fs_string + ': mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
+
+        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        iflogger.info(proc_stdout)
+
+        Vatlas = ni.load(out)
+        Ia = Vatlas.get_data();
+        indl = np.where(Ia == 10)
+        indr = np.where(Ia == 49)
+
+        def filter_isolated_cells(array, struct):
+            """ Return array with completely isolated single cells removed
+            :param array: Array with completely isolated single cells
+            :param struct: Structure array for generating unique regions
+            :return: Array with minimum region size > 1
+            """
+            filtered_array = np.copy(array)
+            id_regions, num_ids = ndimage.label(filtered_array, structure=struct)
+            id_sizes = np.array(ndimage.sum(array, id_regions, range(num_ids + 1)))
+            area_mask = (id_sizes == 1)
+            filtered_array[area_mask[id_regions]] = 0
+            return filtered_array
+
+
+        struct = np.zeros(3,3,3)
+        struct[1,1,1] = 1
+
+        # Left Hemisphere
+        # Removing isolated points
+        tempI = np.zeros(Ia.shape)
+        tempI[indl] = 1;
+        tempI = filter_isolated_cells(tempI,struct=struct)
+        indl = np.where(tempI == 1);
+
+        # Right Hemisphere
+        # Removing isolated points
+        tempI = np.zeros(Ia.shape)
+        tempI[indr] = 1;
+        tempI = filter_isolated_cells(tempI,struct=struct)
+        indr = np.where(tempI == 1);
+
+        # Creating Thalamic Mask (1: Left, 2:Right)
+        Ithal = np.zeros(Ia.shape)
+        Ithal[indl]  = 1;
+        Ithal[indr] = 2;
+
+        #TODO: Masking according to csf
+        # unzip_nifti([freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii.gz']);
+        # Outfiles = Extract_brain([freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii'],[freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii']);
+        #
+        # csfFilename = deblank(Outfiles(4,:));
+        # Vcsf = spm_vol_gzip(csfFilename);
+        # Icsf = spm_read_vols_gzip(Vcsf);
+        # ind = find(Icsf > csfThresh);
+        # Ithal(ind) = 0;
+
+        thalamus_mask = op.abspath('{}_class-thalamus_dtissue.nii.gz'.format(outprefixName))
+        # update the header
+        hdr = Vatlas.get_header()
+        hdr2 = hdr.copy()
+        hdr2.set_data_dtype(np.uint16)
+        print("Save output image to %s" % thalamus_mask)
+        Vthal = ni.Nifti1Image(Ithal, Vatlas.get_affine(), hdr2)
+        ni.save(Vthal, thalamus_mask)
+
 
         iflogger.info('Done')
 
@@ -220,6 +354,19 @@ class ParcellateThalamus(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
+        outprefixName = self.inputs.T1w_image.split(".")[0]
+        outprefixName = outprefixName.split("/")[-1:][0]
+
+        outputs['prob_maps_registered'] =op.abspath('{}_class-thalamus_probtissue.nii.gz'.format(outprefixName))
+        outputs['thalamus_mask'] = op.abspath('{}_class-thalamus_dtissue.nii.gz'.format(outprefixName))
+
+        outprefixName = op.abspath('{}_Ind2temp'.format(outprefixName))
+
+        outputs['warped_image'] = op.abspath('{}Warped.nii.gz'.format(outprefixName))
+        outputs['inverse_warped_image'] = op.abspath('{}InverseWarped.nii.gz'.format(outprefixName))
+        outputs['transform_file'] = op.abspath('{}0GenericAffine.mat'.format(outprefixName))
+        outputs['warp_file'] = op.abspath('{}1Warp.nii.gz'.format(outprefixName))
+
         #outputs['lh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','lh_subFields.nii.gz')
         #outputs['rh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','rh_subFields.nii.gz')
         return outputs
