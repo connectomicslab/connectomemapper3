@@ -309,22 +309,29 @@ class CombineParcellations(BaseInterface):
             It[ind] = I[ind] - 2000;
             nlabel = It.max()
 
+            def ismember(a, b):
+                bind = {}
+                for i, elt in enumerate(b):
+                    if elt not in bind:
+                        bind[elt] = i
+                return [bind.get(itm, None) for itm in a]  # None can be replaced by any other "not in b" value
+
             # Relabelling Thalamic Nuclei
-            newLabels = np.arange(nlabel+1,nlabel+1+right_thalNuclei.size())
+            newLabels = np.arange(nlabel+1,nlabel+1+right_thalNuclei.shape[0])
             [bool,ord] = ismember(Ithal,right_thalNuclei)
             ind = np.where(bool)
             It[ind] = newLabels[ord[ind]]
             nlabel = It.max()
 
             # Relabelling Subcortical Structures
-            newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].size())
+            newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
             [bool,ord] = ismember(I,right_subcIds[1:])
             ind = np.where(bool)
             It[ind] = newLabels[ord[ind]]
             nlabel = It.max()
 
             # Relabelling Subfields
-            newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.size())
+            newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
             [bool,ord] = ismember(Isubrh,hippo_subf)
             ind = np.where(bool)
             It[ind] = newLabels[ord[ind]]
@@ -344,21 +351,21 @@ class CombineParcellations(BaseInterface):
             nlabel = It.max()
 
             # Relabelling Thalamic Nuclei
-            newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.size())
+            newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.shape[0])
             [bool,ord] = ismember(Ithal,left_thalNuclei)
             ind = np.where(bool)
             It[ind] = newLabels[ord[ind]]
             nlabel = It.max()
 
             # Relabelling Subcortical Structures
-            newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].size())
+            newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
             [bool,ord] = ismember(I,left_subcIds[1:])
             ind = np.where(bool)
             It[ind] = newLabels[ord[ind]]
             nlabel = It.max()
 
             # Relabelling Subfields
-            newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.size())
+            newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
             [bool,ord] = ismember(Isublh,hippo_subf)
             ind = np.where(bool)
             It[ind] = newLabels[ord[ind]]
@@ -374,18 +381,35 @@ class CombineParcellations(BaseInterface):
             newIds_LH_ventralDC = newLabels;
 
             # Relabelling Brain Stem
-            newLabels = np.arange(nlabel+1,nlabel+1+brainstem.size())
+            newLabels = np.arange(nlabel+1,nlabel+1+brainstem.shape[0])
             [bool,ord] = ismember(I,brainstem);
             ind = np.where(bool)
             It[ind] = newLabels[ord[ind]]
             nlabel = It.max()
 
+            # Saving the new parcellation
+            outprefixName = roi.split(".")[0]
+            outprefixName = outprefixName.split("/")[-1:][0]
+            output_roi = op.abspath('{}_final.nii.gz'.format(outprefixName))
+            hdr = V.get_header()
+            hdr2 = hdr.copy()
+            hdr2.set_data_dtype(np.uint16)
+            print("Save output image to %s" % output_roi)
+            img = ni.Nifti1Image(It, V.get_affine(), hdr2)
+            ni.save(img, output_roi)
+
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        # outputs['final_rois_in_structural_space'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','brainstem.nii.gz')
+        outputs['output_rois'] = self._gen_outfilenames('ROIv_HR_th')
         return outputs
+
+    def _gen_outfilenames(self, basename):
+        filepaths = []
+        for scale in get_parcellation('Lausanne2018').keys():
+            filepaths.append(op.abspath(basename+'_'+scale+'_final.nii.gz'))
+        return filepaths
 
 class ParcellateThalamusInputSpec(BaseInterfaceInputSpec):
     T1w_image = File(mandatory=True, desc='T1w image to be parcellated')

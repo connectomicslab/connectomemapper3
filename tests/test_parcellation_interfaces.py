@@ -2,6 +2,19 @@ import sys
 import os
 from os import path as op
 
+def test_combine_parcellation(input_rois,lh_subfields,rh_subfields,brainstem,thalamus,base_dir):
+    from cmtklib.parcellation import CombineParcellations
+    from nipype import Node
+
+    combiner = Node(interface=CombineParcellations(),name='combine_parcellations',base_dir=base_dir)
+    combiner.inputs.input_rois = input_rois
+    combiner.inputs.lh_hippocampal_subfields = lh_subfields
+    combiner.inputs.rh_hippocampal_subfields = rh_subfields
+    combiner.inputs.brainstem_structures = brainstem
+    combiner.inputs.thalamus_nuclei = thalamus
+
+    # Execute the node
+    combiner.run()
 
 def test_parcellate_hippocampal_subfields(subjects_dir,subject_id,base_dir):
 
@@ -273,11 +286,21 @@ if __name__ == '__main__':
 
     #test_parcellate(subjects_dir,subject_id,'Lausanne2018',base_dir)
 
-    test_parcellate_thalamus(subjects_dir,subject_id,subject_T1w,template,thalamic_maps,base_dir)
+    #test_parcellate_thalamus(subjects_dir,subject_id,subject_T1w,template,thalamic_maps,base_dir)
 
-    test_parcellate_brainstem(subjects_dir,subject_id,base_dir)
+    #test_parcellate_brainstem(subjects_dir,subject_id,base_dir)
 
-    test_parcellate_hippocampal_subfields(subjects_dir,subject_id,base_dir)
+    #test_parcellate_hippocampal_subfields(subjects_dir,subject_id,base_dir)
+    input_rois = ['/home/localadmin/~/Desktop/parcellation_tests/parcellate/ROIv_HR_th_scale1.nii.gz',
+                  '/home/localadmin/~/Desktop/parcellation_tests/parcellate/ROIv_HR_th_scale2.nii.gz',
+                  '/home/localadmin/~/Desktop/parcellation_tests/parcellate/ROIv_HR_th_scale3.nii.gz',
+                  '/home/localadmin/~/Desktop/parcellation_tests/parcellate/ROIv_HR_th_scale4.nii.gz',
+                  '/home/localadmin/~/Desktop/parcellation_tests/parcellate/ROIv_HR_th_scale5.nii.gz']
+    lh_subfields = '/home/localadmin/~/Desktop/parcellation_tests/parcellate_hipposubfield/lh_subFields.nii.gz'
+    rh_subfields = '/home/localadmin/~/Desktop/parcellation_tests/parcellate_hipposubfield/rh_subFields.nii.gz'
+    brainstem = '/home/localadmin/~/Desktop/parcellation_tests/parcellate_brainstem/brainstem.nii.gz'
+    thalamus = '/home/localadmin/~/Desktop/parcellation_tests/parcellate_thalamus/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_probtissue_maxprob.nii.gz'
+    test_combine_parcellation(input_rois,lh_subfields,rh_subfields,brainstem,thalamus,base_dir)
 
     #test_thalamus_masking(subjects_dir,subject_id,thalamus_mask,thalamus_maps,output_maps,max_prob,base_dir)
 
