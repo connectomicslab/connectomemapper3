@@ -213,25 +213,13 @@ class ParcellateThalamus(BaseInterface):
         outprefixName = outprefixName.split("/")[-1:][0]
         outprefixName = op.abspath('{}_Ind2temp'.format(outprefixName))
 
-        # sub-A006_ses-20160520161029_T1w_brain_Ind2temp,sub-A006_ses-20160520161029_T1w_brain_Ind2tempWarped.nii.gz,sub-A006_ses-20160520161029_T1w_brain_Ind2tempInverseWarped.nii.gz
-
         cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
 
         iflogger.info('Processing cmd: %s' % cmd)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
-        #subprocess.check_call(reconall_cmd)
-
-        # img = ni.Nifti1Image(er_mask, ni.load( maskFile ).get_affine(), ni.load( maskFile ).get_header())
-        # ni.save(img, op.abspath('%s_eroded.nii.gz' % os.path.splitext(op.splitext(op.basename(maskFile))[0])[0]))
-        # mask = ni.load( maskFile ).get_data().astype( np.uint32 )
-
-        #cmd = ['recon-all', '-s', self.inputs.subject_id, '-hippocampal-subfields-T1']
-
-        #subprocess.check_call(cmd)
         iflogger.info(proc_stdout)
-        # cad = ['antsApplyTransforms -d 3 -i ' spamImage ' -o ' spamIndImage ' -r ' IndImage ' -t ' defFile(1:end-7) '1Warp.nii.gz -t ' defFile(1:end-7) '0GenericAffine.mat -n BSpline[3]' ];
 
         outprefixName = self.inputs.T1w_image.split(".")[0]
         outprefixName = outprefixName.split("/")[-1:][0]
@@ -240,6 +228,7 @@ class ParcellateThalamus(BaseInterface):
         output_maps = op.abspath('{}_class-thalamus_probtissue.nii.gz'.format(outprefixName))
         jacobian_file = op.abspath('{}_class-thalamus_probtissue_jacobian.nii.gz'.format(outprefixName))
 
+        # Compute and save jacobian
         cmd = fs_string + '; CreateJacobianDeterminantImage 3 "%s" "%s" ' % (warp_file,jacobian_file)
 
         iflogger.info('Processing cmd: %s' % cmd)
@@ -255,14 +244,16 @@ class ParcellateThalamus(BaseInterface):
         iflogger.info(proc_stdout)
 
         iflogger.info('Correcting the volumes after the interpolation ')
-
+        # Load jacobian file
         Ij = ni.load(jacobian_file).get_data()	# numpy.ndarray
 
+        # Load probability maps in native space after applying estimated transform and deformation
         imgVspams = ni.load(output_maps)
         Vspams = imgVspams.get_data()	# numpy.ndarray
         Vspams[Vspams < 0] = 0
         Vspams[Vspams > 1] = 1
 
+        # Take into account jacobian to correct the probability maps after interpolation
         Ispams = np.zeros(Vspams.shape)
         for nuc in np.arange(Vspams.shape[3]):
             tempImage = Vspams[:,:,:,nuc]
@@ -285,6 +276,7 @@ class ParcellateThalamus(BaseInterface):
         proc_stdout = process.communicate()[0].strip()
         iflogger.info(proc_stdout)
 
+        # Load aparc+aseg file in native space
         Vatlas_fn = out
         Vatlas = ni.load(Vatlas_fn)
         Ia = Vatlas.get_data();
@@ -344,7 +336,7 @@ class ParcellateThalamus(BaseInterface):
         # ind = find(Icsf > csfThresh);
         # Ithal(ind) = 0;
 
-        # update the header
+        # update the header and save thalamus mask
         thalamus_mask = op.abspath('{}_class-thalamus_dtissue.nii.gz'.format(outprefixName))
         hdr = Vatlas.get_header()
         hdr2 = hdr.copy()
@@ -369,10 +361,10 @@ class ParcellateThalamus(BaseInterface):
             IthalR = np.zeros(Ithal.shape)
             indr = np.where(Ithal == 2)
             IthalR[indr] = 1
-            del indr
 
             del Ithal
 
+            # Mask probability maps using the left-hemisphere thalamus mask
             tmpIthalL = np.zeros((IthalL.shape[0],IthalL.shape[1],IthalL.shape[2],1))
             tmpIthalL[:,:,:,0] = IthalL
             tempM = np.repeat(tmpIthalL,Nspams/2,axis=3)
@@ -391,6 +383,7 @@ class ParcellateThalamus(BaseInterface):
             #?MaxProbL = ndimage.binary_fill_holes(MaxProbL)
             #?MaxProbL = Atlas_Corr(IthalL,MaxProbL)
 
+            # Mask probability maps using the right-hemisphere thalamus mask
             tmpIthalR = np.zeros((IthalR.shape[0],IthalR.shape[1],IthalR.shape[2],1))
             tmpIthalR[:,:,:,0] = IthalR
             tempM = np.repeat(tmpIthalR,Nspams/2,axis=3)
@@ -409,10 +402,12 @@ class ParcellateThalamus(BaseInterface):
             #?MaxProbR = Atlas_Corr(IthalR,MaxProbR);
             MaxProbR[indr] = MaxProbR[indr] + Nspams/2;
 
+            del indr
+
             Ispams[:,:,:,0:Nspams/2] = IspamL
             Ispams[:,:,:,Nspams/2:Nspams] = IspamR
 
-        # Saving Volume
+        # Save corrected probability maps of thalamic nuclei
         # update the header
         hdr = imgVspams.get_header()
         hdr2 = hdr.copy()
@@ -423,7 +418,7 @@ class ParcellateThalamus(BaseInterface):
 
         del hdr, img, imgVspams
 
-        # Saving Maxprob
+        # Save Maxprob
         # update the header
         max_prob = op.abspath('{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefixName))
         hdr = Vatlas.get_header()
@@ -459,6 +454,7 @@ class ParcellateThalamus(BaseInterface):
         outprefixName = outprefixName.split("/")[-1:][0]
 
         outputs['prob_maps_registered'] =op.abspath('{}_class-thalamus_probtissue.nii.gz'.format(outprefixName))
+        outputs['max_prob_registered'] = op.abspath('{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefixName))
         outputs['thalamus_mask'] = op.abspath('{}_class-thalamus_dtissue.nii.gz'.format(outprefixName))
 
         outprefixName = op.abspath('{}_Ind2temp'.format(outprefixName))
@@ -467,8 +463,6 @@ class ParcellateThalamus(BaseInterface):
         outputs['inverse_warped_image'] = op.abspath('{}InverseWarped.nii.gz'.format(outprefixName))
         outputs['transform_file'] = op.abspath('{}0GenericAffine.mat'.format(outprefixName))
         outputs['warp_file'] = op.abspath('{}1Warp.nii.gz'.format(outprefixName))
-
-        outputs['max_prob_registered'] = op.abspath('{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefixName))
 
         #outputs['lh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','lh_subFields.nii.gz')
         #outputs['rh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','rh_subFields.nii.gz')

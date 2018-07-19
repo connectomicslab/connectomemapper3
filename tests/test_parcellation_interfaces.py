@@ -271,12 +271,14 @@ if __name__ == '__main__':
     #from cmtklib.parcellation import create_roi_v2
     #create_roi_v2(subject_id,subjects_dir,2)
 
-    #test_parcellate(subjects_dir,subject_id,'Lausanne2018',base_dir)
-
-    #test_parcellate_hippocampal_subfields(subjects_dir,subject_id,base_dir)
-    #test_parcellate_brainstem(subjects_dir,subject_id,base_dir)
+    test_parcellate(subjects_dir,subject_id,'Lausanne2018',base_dir)
 
     test_parcellate_thalamus(subjects_dir,subject_id,subject_T1w,template,thalamic_maps,base_dir)
+
+    test_parcellate_brainstem(subjects_dir,subject_id,base_dir)
+
+    test_parcellate_hippocampal_subfields(subjects_dir,subject_id,base_dir)
+
     #test_thalamus_masking(subjects_dir,subject_id,thalamus_mask,thalamus_maps,output_maps,max_prob,base_dir)
 
     #jacobian_file = '/home/localadmin/~/Desktop/parcellation_tests/parcellate_thalamus/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_probtissue_jacobian.nii.gz'
