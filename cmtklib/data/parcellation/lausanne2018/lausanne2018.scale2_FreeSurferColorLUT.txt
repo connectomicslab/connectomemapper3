@@ -1,0 +1,197 @@
+#$Id: lausanne2018.scale2_FreeSurferColorLUT.txt 29-Jun-2018 02:12:51
+
+#No. Label Name:                            R   G   B   A
+
+# Right Hemisphere. Cortical Structures
+ 0   ctx-rh-unknown                                  0   0   0 0
+ 1   ctx-rh-lateralorbitofrontal_1                 230 145  40 0
+ 2   ctx-rh-lateralorbitofrontal_2                 175  17  75 0
+ 3   ctx-rh-parsorbitalis_1                         51 240 148 0
+ 4   ctx-rh-frontalpole_1                          160 233 142 0
+ 5   ctx-rh-medialorbitofrontal_1                   96  21 205 0
+ 6   ctx-rh-medialorbitofrontal_2                  120 217 233 0
+ 7   ctx-rh-parstriangularis_1                      50 211  94 0
+ 8   ctx-rh-parsopercularis_1                      212  27  86 0
+ 9   ctx-rh-rostralmiddlefrontal_1                 209  24 110 0
+10   ctx-rh-rostralmiddlefrontal_2                  71 152  44 0
+11   ctx-rh-superiorfrontal_1                      124 116  23 0
+12   ctx-rh-superiorfrontal_2                      233 160  64 0
+13   ctx-rh-superiorfrontal_3                       80 225 218 0
+14   ctx-rh-superiorfrontal_4                      105 167  47 0
+15   ctx-rh-caudalmiddlefrontal_1                   72 215  85 0
+16   ctx-rh-precentral_1                           206 120 169 0
+17   ctx-rh-precentral_2                           143 120 251 0
+18   ctx-rh-precentral_3                           232  20 203 0
+19   ctx-rh-paracentral_1                           88 122 164 0
+20   ctx-rh-rostralanteriorcingulate_1             195   0 235 0
+21   ctx-rh-caudalanteriorcingulate_1              249 128 143 0
+22   ctx-rh-posteriorcingulate_1                   170 251 210 0
+23   ctx-rh-isthmuscingulate_1                     234 217  36 0
+24   ctx-rh-postcentral_1                           74  41 106 0
+25   ctx-rh-postcentral_2                           39  83 173 0
+26   ctx-rh-supramarginal_1                        107  29  31 0
+27   ctx-rh-supramarginal_2                        235  34 162 0
+28   ctx-rh-superiorparietal_1                     171 196 221 0
+29   ctx-rh-superiorparietal_2                     119 135 185 0
+30   ctx-rh-superiorparietal_3                     191   9 162 0
+31   ctx-rh-inferiorparietal_1                     130  29 221 0
+32   ctx-rh-inferiorparietal_2                     211 149 192 0
+33   ctx-rh-inferiorparietal_3                      55 112 104 0
+34   ctx-rh-precuneus_1                             92 213 159 0
+35   ctx-rh-precuneus_2                            149 198  13 0
+36   ctx-rh-cuneus_1                               235 161 200 0
+37   ctx-rh-pericalcarine_1                        226  60   4 0
+38   ctx-rh-lateraloccipital_1                     127 172 201 0
+39   ctx-rh-lateraloccipital_2                     207  43  47 0
+40   ctx-rh-lateraloccipital_3                      96 187  95 0
+41   ctx-rh-lingual_1                               67  95 228 0
+42   ctx-rh-lingual_2                               17 190   8 0
+43   ctx-rh-fusiform_1                             182 232 168 0
+44   ctx-rh-fusiform_2                             229 222  11 0
+45   ctx-rh-parahippocampal_1                       63 208  70 0
+46   ctx-rh-entorhinal_1                            49 244 224 0
+47   ctx-rh-temporalpole_1                         206 127  95 0
+48   ctx-rh-inferiortemporal_1                     108 226 223 0
+49   ctx-rh-inferiortemporal_2                      76  20  54 0
+50   ctx-rh-middletemporal_1                        51  51 138 0
+51   ctx-rh-middletemporal_2                        24 251 115 0
+52   ctx-rh-bankssts_1                             192  96  43 0
+53   ctx-rh-superiortemporal_1                     126  53  38 0
+54   ctx-rh-superiortemporal_2                     231 105 189 0
+55   ctx-rh-transversetemporal_1                   254 136 246 0
+56   ctx-rh-insula_1                               215 253 185 0
+57   ctx-rh-insula_2                                27   8  81 0
+
+# Right Hemisphere. Subcortical Structures (Thalamic Nuclei)
+58   Right-Pulvinar                                                      255   0   0 0
+59   Right-Anterior                                                        0 255   0 0
+60   Right-Medio_Dorsal                                                  255 255   0 0
+61   Right-Ventral_Latero_Dorsal                                         255 123   0 0
+62   Right-Central_Lateral-Lateral_Posterior-Medial_Pulvinar               0 255 255 0
+63   Right-Ventral_Anterior                                              255   0 255 0
+64   Right-Ventral_Latero_Ventral                                          0   0 255 0
+
+# Right Hemisphere. Subcortical Structures
+65   Right-Caudate                    122 186 220 0
+66   Right-Putamen                    236  13 176 0
+67   Right-Pallidum                    12  48 255 0
+68   Right-Accumbens_area             255 165   0 0
+69   Right-Amygdala                   103 255 255 0
+70   Right-Hippocampus                220 216  20 0
+
+# Right Hemisphere. Subcortical Structures (Hippocampal Subfields)
+71   Right-Hippocampus_Parasubiculum                   255 255   0 0
+72   Right-Hippocampus_Presubiculum                     64   0  64 0
+73   Right-Hippocampus_Subiculum                         0   0 255 0
+74   Right-Hippocampus_CA1                             255   0   0 0
+75   Right-Hippocampus_CA3                               0 128   0 0
+76   Right-Hippocampus_CA4                             196 160 128 0
+77   Right-Hippocampus_GCDG                             32 200 255 0
+78   Right-Hippocampus_HATA                            128 255 128 0
+79   Right-Hippocampus_Fimbria                         204 153 204 0
+80   Right-Hippocampus_Molecular_layer_HP              128   0   0 0
+81   Right-Hippocampus_Hippocampal_fissure             128  32 255 0
+82   Right-Hippocampus_Tail                            170 170 255 0
+
+# Right Hemisphere. Ventral Diencephalon
+83   Right-VentralDC             165 42 42 0
+
+# Left Hemisphere. Cortical Structures
+ 84   ctx-lh-lateralorbitofrontal_1                 230 145  40 0
+ 85   ctx-lh-lateralorbitofrontal_2                 175  17  75 0
+ 86   ctx-lh-parsorbitalis_1                         51 240 148 0
+ 87   ctx-lh-frontalpole_1                          160 233 142 0
+ 88   ctx-lh-medialorbitofrontal_1                   96  21 205 0
+ 89   ctx-lh-medialorbitofrontal_2                  120 217 233 0
+ 90   ctx-lh-parstriangularis_1                      50 211  94 0
+ 91   ctx-lh-parsopercularis_1                      212  27  86 0
+ 92   ctx-lh-rostralmiddlefrontal_1                 209  24 110 0
+ 93   ctx-lh-rostralmiddlefrontal_2                  71 152  44 0
+ 94   ctx-lh-superiorfrontal_1                      124 116  23 0
+ 95   ctx-lh-superiorfrontal_2                      233 160  64 0
+ 96   ctx-lh-superiorfrontal_3                       80 225 218 0
+ 97   ctx-lh-superiorfrontal_4                      105 167  47 0
+ 98   ctx-lh-caudalmiddlefrontal_1                   72 215  85 0
+ 99   ctx-lh-precentral_1                           206 120 169 0
+100   ctx-lh-precentral_2                           143 120 251 0
+101   ctx-lh-precentral_3                           232  20 203 0
+102   ctx-lh-paracentral_1                           88 122 164 0
+103   ctx-lh-rostralanteriorcingulate_1             195   0 235 0
+104   ctx-lh-caudalanteriorcingulate_1              249 128 143 0
+105   ctx-lh-posteriorcingulate_1                   170 251 210 0
+106   ctx-lh-isthmuscingulate_1                     234 217  36 0
+107   ctx-lh-postcentral_1                           74  41 106 0
+108   ctx-lh-postcentral_2                           39  83 173 0
+109   ctx-lh-supramarginal_1                        107  29  31 0
+110   ctx-lh-supramarginal_2                        235  34 162 0
+111   ctx-lh-superiorparietal_1                     171 196 221 0
+112   ctx-lh-superiorparietal_2                     119 135 185 0
+113   ctx-lh-superiorparietal_3                     191   9 162 0
+114   ctx-lh-inferiorparietal_1                     130  29 221 0
+115   ctx-lh-inferiorparietal_2                     211 149 192 0
+116   ctx-lh-inferiorparietal_3                      55 112 104 0
+117   ctx-lh-precuneus_1                             92 213 159 0
+118   ctx-lh-precuneus_2                            149 198  13 0
+119   ctx-lh-cuneus_1                               235 161 200 0
+120   ctx-lh-pericalcarine_1                        226  60   4 0
+121   ctx-lh-lateraloccipital_1                     127 172 201 0
+122   ctx-lh-lateraloccipital_2                     207  43  47 0
+123   ctx-lh-lateraloccipital_3                      96 187  95 0
+124   ctx-lh-lingual_1                               67  95 228 0
+125   ctx-lh-lingual_2                               17 190   8 0
+126   ctx-lh-fusiform_1                             182 232 168 0
+127   ctx-lh-fusiform_2                             229 222  11 0
+128   ctx-lh-parahippocampal_1                       63 208  70 0
+129   ctx-lh-entorhinal_1                            49 244 224 0
+130   ctx-lh-temporalpole_1                         206 127  95 0
+131   ctx-lh-inferiortemporal_1                     108 226 223 0
+132   ctx-lh-inferiortemporal_2                      76  20  54 0
+133   ctx-lh-middletemporal_1                        51  51 138 0
+134   ctx-lh-middletemporal_2                        24 251 115 0
+135   ctx-lh-bankssts_1                             192  96  43 0
+136   ctx-lh-superiortemporal_1                     126  53  38 0
+137   ctx-lh-superiortemporal_2                     231 105 189 0
+138   ctx-lh-transversetemporal_1                   254 136 246 0
+139   ctx-lh-insula_1                               215 253 185 0
+140   ctx-lh-insula_2                                27   8  81 0
+
+# Left Hemisphere. Subcortical Structures (Thalamic Nuclei)
+141   Left-Pulvinar                                                      255   0   0 0
+142   Left-Anterior                                                        0 255   0 0
+143   Left-Medio_Dorsal                                                  255 255   0 0
+144   Left-Ventral_Latero_Dorsal                                         255 123   0 0
+145   Left-Central_Lateral-Lateral_Posterior-Medial_Pulvinar               0 255 255 0
+146   Left-Ventral_Anterior                                              255   0 255 0
+147   Left-Ventral_Latero_Ventral                                          0   0 255 0
+
+# Left Hemisphere. Subcortical Structures
+148   Left-Caudate                    122 186 220 0
+149   Left-Putamen                    236  13 176 0
+150   Left-Pallidum                    12  48 255 0
+151   Left-Accumbens_area             255 165   0 0
+152   Left-Amygdala                   103 255 255 0
+153   Left-Hippocampus                220 216  20 0
+
+# Left Hemisphere. Subcortical Structures (Hippocampal Subfields)
+154   Left-Hippocampus_Parasubiculum                   255 255   0 0
+155   Left-Hippocampus_Presubiculum                     64   0  64 0
+156   Left-Hippocampus_Subiculum                         0   0 255 0
+157   Left-Hippocampus_CA1                             255   0   0 0
+158   Left-Hippocampus_CA3                               0 128   0 0
+159   Left-Hippocampus_CA4                             196 160 128 0
+160   Left-Hippocampus_GCDG                             32 200 255 0
+161   Left-Hippocampus_HATA                            128 255 128 0
+162   Left-Hippocampus_Fimbria                         204 153 204 0
+163   Left-Hippocampus_Molecular_layer_HP              128   0   0 0
+164   Left-Hippocampus_Hippocampal_fissure             128  32 255 0
+165   Left-Hippocampus_Tail                            170 170 255 0
+
+# Left Hemisphere. Ventral Diencephalon
+166   Left-VentralDC             165 42 42 0
+
+# Brain Stem Structures
+167   Brain_Stem-Midbrain             242 104  76 0
+168   Brain_Stem-Pons                 206 195  58 0
+169   Brain_Stem-Medulla              119 159 176 0
+170   Brain_Stem-SCP                  142 182   0 0
+

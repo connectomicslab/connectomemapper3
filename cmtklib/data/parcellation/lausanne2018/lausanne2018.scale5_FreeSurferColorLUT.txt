@@ -1,0 +1,1083 @@
+#$Id: lausanne2018.scale5_FreeSurferColorLUT.txt 29-Jun-2018 02:27:08
+
+#No. Label Name:                            R   G   B   A
+
+# Right Hemisphere. Cortical Structures
+  0   ctx-rh-unknown                                  0   0   0 0
+  1   ctx-rh-lateralorbitofrontal_9                 232  50  56 0
+  2   ctx-rh-lateralorbitofrontal_11                 54  52  89 0
+  3   ctx-rh-lateralorbitofrontal_5                 250 207 204 0
+  4   ctx-rh-lateralorbitofrontal_6                  14  40 246 0
+  5   ctx-rh-lateralorbitofrontal_7                  74  87 124 0
+  6   ctx-rh-lateralorbitofrontal_10                 15 185  29 0
+  7   ctx-rh-lateralorbitofrontal_4                 234 216 237 0
+  8   ctx-rh-lateralorbitofrontal_17                  2  18 139 0
+  9   ctx-rh-lateralorbitofrontal_8                 159  83 107 0
+ 10   ctx-rh-lateralorbitofrontal_15                142  58 136 0
+ 11   ctx-rh-lateralorbitofrontal_13                126  17  68 0
+ 12   ctx-rh-lateralorbitofrontal_12                 90  27 246 0
+ 13   ctx-rh-lateralorbitofrontal_1                  32  65  87 0
+ 14   ctx-rh-lateralorbitofrontal_3                 103  52 222 0
+ 15   ctx-rh-lateralorbitofrontal_16                112  97 218 0
+ 16   ctx-rh-lateralorbitofrontal_14                172 137  44 0
+ 17   ctx-rh-lateralorbitofrontal_2                 246 126 178 0
+ 18   ctx-rh-parsorbitalis_4                        239 184 165 0
+ 19   ctx-rh-parsorbitalis_1                         34  82 174 0
+ 20   ctx-rh-parsorbitalis_2                        195  93 198 0
+ 21   ctx-rh-parsorbitalis_3                        158 204 112 0
+ 22   ctx-rh-frontalpole_2                          116 240 138 0
+ 23   ctx-rh-frontalpole_1                          198 127 157 0
+ 24   ctx-rh-medialorbitofrontal_1                   23 200  17 0
+ 25   ctx-rh-medialorbitofrontal_9                   83  47  37 0
+ 26   ctx-rh-medialorbitofrontal_7                    7  13 177 0
+ 27   ctx-rh-medialorbitofrontal_3                  115 253 108 0
+ 28   ctx-rh-medialorbitofrontal_10                 247  72  87 0
+ 29   ctx-rh-medialorbitofrontal_8                   32  18 156 0
+ 30   ctx-rh-medialorbitofrontal_5                  175  39  64 0
+ 31   ctx-rh-medialorbitofrontal_4                  114 163  91 0
+ 32   ctx-rh-medialorbitofrontal_2                  221  72 183 0
+ 33   ctx-rh-medialorbitofrontal_6                  198 249 116 0
+ 34   ctx-rh-medialorbitofrontal_11                 215  72  72 0
+ 35   ctx-rh-parstriangularis_8                     243 148  90 0
+ 36   ctx-rh-parstriangularis_5                       8 156   3 0
+ 37   ctx-rh-parstriangularis_3                     131 214 154 0
+ 38   ctx-rh-parstriangularis_4                     198  87 147 0
+ 39   ctx-rh-parstriangularis_1                     166 254  31 0
+ 40   ctx-rh-parstriangularis_2                      57 146 170 0
+ 41   ctx-rh-parstriangularis_7                      14 187 144 0
+ 42   ctx-rh-parstriangularis_6                     143 138 127 0
+ 43   ctx-rh-parsopercularis_8                       81 220 219 0
+ 44   ctx-rh-parsopercularis_4                       57 100 171 0
+ 45   ctx-rh-parsopercularis_5                      102 118 252 0
+ 46   ctx-rh-parsopercularis_9                      229 242  23 0
+ 47   ctx-rh-parsopercularis_3                       49 114  25 0
+ 48   ctx-rh-parsopercularis_1                       49 188  24 0
+ 49   ctx-rh-parsopercularis_7                       90 236 132 0
+ 50   ctx-rh-parsopercularis_6                      113 232 149 0
+ 51   ctx-rh-parsopercularis_2                      176  23  45 0
+ 52   ctx-rh-rostralmiddlefrontal_19                113  36 155 0
+ 53   ctx-rh-rostralmiddlefrontal_21                166  77  69 0
+ 54   ctx-rh-rostralmiddlefrontal_16                210 244  13 0
+ 55   ctx-rh-rostralmiddlefrontal_22                109 111 254 0
+ 56   ctx-rh-rostralmiddlefrontal_24                100  44 228 0
+ 57   ctx-rh-rostralmiddlefrontal_10                207 151  43 0
+ 58   ctx-rh-rostralmiddlefrontal_20                 94 123 135 0
+ 59   ctx-rh-rostralmiddlefrontal_15                124 162 219 0
+ 60   ctx-rh-rostralmiddlefrontal_18                219 231 203 0
+ 61   ctx-rh-rostralmiddlefrontal_7                  75  13 206 0
+ 62   ctx-rh-rostralmiddlefrontal_25                 37 132 105 0
+ 63   ctx-rh-rostralmiddlefrontal_23                 10 201 231 0
+ 64   ctx-rh-rostralmiddlefrontal_4                 219 203 129 0
+ 65   ctx-rh-rostralmiddlefrontal_27                 62  32 183 0
+ 66   ctx-rh-rostralmiddlefrontal_14                193 164 161 0
+ 67   ctx-rh-rostralmiddlefrontal_17                233   9 216 0
+ 68   ctx-rh-rostralmiddlefrontal_9                 226  34 126 0
+ 69   ctx-rh-rostralmiddlefrontal_12                 96  28 111 0
+ 70   ctx-rh-rostralmiddlefrontal_2                 146 160  12 0
+ 71   ctx-rh-rostralmiddlefrontal_13                221 196  27 0
+ 72   ctx-rh-rostralmiddlefrontal_11                202  18 192 0
+ 73   ctx-rh-rostralmiddlefrontal_3                 212  71 248 0
+ 74   ctx-rh-rostralmiddlefrontal_5                 177  48  71 0
+ 75   ctx-rh-rostralmiddlefrontal_8                 196 115   0 0
+ 76   ctx-rh-rostralmiddlefrontal_26                158  16 232 0
+ 77   ctx-rh-rostralmiddlefrontal_1                  15 119  74 0
+ 78   ctx-rh-rostralmiddlefrontal_6                 171 141 123 0
+ 79   ctx-rh-superiorfrontal_40                      83 111  44 0
+ 80   ctx-rh-superiorfrontal_4                      103  39  19 0
+ 81   ctx-rh-superiorfrontal_3                       83 234 129 0
+ 82   ctx-rh-superiorfrontal_14                     134 106  10 0
+ 83   ctx-rh-superiorfrontal_7                      220  79 163 0
+ 84   ctx-rh-superiorfrontal_23                     139   3 171 0
+ 85   ctx-rh-superiorfrontal_10                      74 158 253 0
+ 86   ctx-rh-superiorfrontal_39                     197  69   6 0
+ 87   ctx-rh-superiorfrontal_19                     223 173  65 0
+ 88   ctx-rh-superiorfrontal_29                     140  70  94 0
+ 89   ctx-rh-superiorfrontal_1                      128  81 167 0
+ 90   ctx-rh-superiorfrontal_27                     192  79  63 0
+ 91   ctx-rh-superiorfrontal_30                     138  82 158 0
+ 92   ctx-rh-superiorfrontal_15                     237 126  49 0
+ 93   ctx-rh-superiorfrontal_2                       11 171 227 0
+ 94   ctx-rh-superiorfrontal_11                      37  37 179 0
+ 95   ctx-rh-superiorfrontal_37                     135  70 146 0
+ 96   ctx-rh-superiorfrontal_8                      190  56 154 0
+ 97   ctx-rh-superiorfrontal_36                     180 112  56 0
+ 98   ctx-rh-superiorfrontal_25                     250 165  67 0
+ 99   ctx-rh-superiorfrontal_24                     206 200 224 0
+100   ctx-rh-superiorfrontal_38                     224   7   9 0
+101   ctx-rh-superiorfrontal_20                      85  62  24 0
+102   ctx-rh-superiorfrontal_5                      235 247  81 0
+103   ctx-rh-superiorfrontal_22                     187  57   0 0
+104   ctx-rh-superiorfrontal_21                      80 239  22 0
+105   ctx-rh-superiorfrontal_12                      22  49  54 0
+106   ctx-rh-superiorfrontal_18                     224  48  37 0
+107   ctx-rh-superiorfrontal_42                     153 185  84 0
+108   ctx-rh-superiorfrontal_13                     210  29  87 0
+109   ctx-rh-superiorfrontal_32                      95  33 128 0
+110   ctx-rh-superiorfrontal_33                      16  71 156 0
+111   ctx-rh-superiorfrontal_28                     202 183  72 0
+112   ctx-rh-superiorfrontal_41                      28   1 110 0
+113   ctx-rh-superiorfrontal_16                     150 170  77 0
+114   ctx-rh-superiorfrontal_6                       49 117  46 0
+115   ctx-rh-superiorfrontal_9                      199  95 167 0
+116   ctx-rh-superiorfrontal_17                     143  10 103 0
+117   ctx-rh-superiorfrontal_31                      34 107 117 0
+118   ctx-rh-superiorfrontal_35                     198 160 138 0
+119   ctx-rh-superiorfrontal_34                       2 135 109 0
+120   ctx-rh-superiorfrontal_26                       2  55 208 0
+121   ctx-rh-caudalmiddlefrontal_8                   61   5 222 0
+122   ctx-rh-caudalmiddlefrontal_4                    4 142 122 0
+123   ctx-rh-caudalmiddlefrontal_2                  139  79  78 0
+124   ctx-rh-caudalmiddlefrontal_3                   16 128 204 0
+125   ctx-rh-caudalmiddlefrontal_7                  111  44  62 0
+126   ctx-rh-caudalmiddlefrontal_5                  217  47  68 0
+127   ctx-rh-caudalmiddlefrontal_11                  18  26 140 0
+128   ctx-rh-caudalmiddlefrontal_10                   4  76  95 0
+129   ctx-rh-caudalmiddlefrontal_1                  201 133 165 0
+130   ctx-rh-caudalmiddlefrontal_9                  233 238 106 0
+131   ctx-rh-caudalmiddlefrontal_6                   97 219 203 0
+132   ctx-rh-precentral_12                           79 141   2 0
+133   ctx-rh-precentral_35                          114 110 145 0
+134   ctx-rh-precentral_28                          115 238 140 0
+135   ctx-rh-precentral_36                           90 214  29 0
+136   ctx-rh-precentral_31                          121  34  10 0
+137   ctx-rh-precentral_5                           233 248  29 0
+138   ctx-rh-precentral_21                            7  23 110 0
+139   ctx-rh-precentral_1                           100  29 158 0
+140   ctx-rh-precentral_8                            32 127  51 0
+141   ctx-rh-precentral_20                           17 197 237 0
+142   ctx-rh-precentral_34                           17  42 124 0
+143   ctx-rh-precentral_2                           105  15  28 0
+144   ctx-rh-precentral_23                           87 247  49 0
+145   ctx-rh-precentral_19                          212  63  92 0
+146   ctx-rh-precentral_22                           20 165  70 0
+147   ctx-rh-precentral_26                           45 140  39 0
+148   ctx-rh-precentral_6                           251  76 204 0
+149   ctx-rh-precentral_10                          186  18 236 0
+150   ctx-rh-precentral_3                           236 254  48 0
+151   ctx-rh-precentral_9                            54  84  41 0
+152   ctx-rh-precentral_4                            99 239  58 0
+153   ctx-rh-precentral_32                           81 178 189 0
+154   ctx-rh-precentral_16                          127 168 171 0
+155   ctx-rh-precentral_15                           85 190 130 0
+156   ctx-rh-precentral_30                           95  92  76 0
+157   ctx-rh-precentral_18                           44  32 107 0
+158   ctx-rh-precentral_27                           80  13   7 0
+159   ctx-rh-precentral_7                           178 251 194 0
+160   ctx-rh-precentral_11                          223 150 138 0
+161   ctx-rh-precentral_14                           41 241  13 0
+162   ctx-rh-precentral_33                           53 159 224 0
+163   ctx-rh-precentral_24                          113  65  63 0
+164   ctx-rh-precentral_13                          215 160  22 0
+165   ctx-rh-precentral_29                           94 205  57 0
+166   ctx-rh-precentral_25                           29 194 147 0
+167   ctx-rh-precentral_17                          140 137  39 0
+168   ctx-rh-paracentral_1                           41 145  69 0
+169   ctx-rh-paracentral_9                          223  71 159 0
+170   ctx-rh-paracentral_4                          209  73   3 0
+171   ctx-rh-paracentral_2                          113  52 243 0
+172   ctx-rh-paracentral_3                          118 168  79 0
+173   ctx-rh-paracentral_5                          203  41 234 0
+174   ctx-rh-paracentral_12                          65 172  98 0
+175   ctx-rh-paracentral_6                          161  44  38 0
+176   ctx-rh-paracentral_10                          38  42 187 0
+177   ctx-rh-paracentral_11                         206  35  12 0
+178   ctx-rh-paracentral_7                          226 206 150 0
+179   ctx-rh-paracentral_8                          186  72  50 0
+180   ctx-rh-rostralanteriorcingulate_2             224  47 129 0
+181   ctx-rh-rostralanteriorcingulate_1             169  96  88 0
+182   ctx-rh-rostralanteriorcingulate_4             152  70  14 0
+183   ctx-rh-rostralanteriorcingulate_3             175 217  14 0
+184   ctx-rh-caudalanteriorcingulate_1              155 216  78 0
+185   ctx-rh-caudalanteriorcingulate_6              249 239 228 0
+186   ctx-rh-caudalanteriorcingulate_4              199 168 129 0
+187   ctx-rh-caudalanteriorcingulate_2               92 153  22 0
+188   ctx-rh-caudalanteriorcingulate_3              128  73  14 0
+189   ctx-rh-caudalanteriorcingulate_5              104  19  15 0
+190   ctx-rh-posteriorcingulate_8                   157 150 194 0
+191   ctx-rh-posteriorcingulate_1                   138   4 249 0
+192   ctx-rh-posteriorcingulate_7                   208   7 163 0
+193   ctx-rh-posteriorcingulate_2                    56  52 226 0
+194   ctx-rh-posteriorcingulate_5                   209  89 146 0
+195   ctx-rh-posteriorcingulate_3                   143  73 122 0
+196   ctx-rh-posteriorcingulate_9                   215 243 195 0
+197   ctx-rh-posteriorcingulate_4                    70  28  66 0
+198   ctx-rh-posteriorcingulate_6                   151 234 140 0
+199   ctx-rh-isthmuscingulate_3                     114 198  69 0
+200   ctx-rh-isthmuscingulate_1                     155 227  47 0
+201   ctx-rh-isthmuscingulate_2                     180 101 230 0
+202   ctx-rh-isthmuscingulate_4                     250 111 125 0
+203   ctx-rh-isthmuscingulate_5                      17 231 211 0
+204   ctx-rh-isthmuscingulate_6                      38 244 253 0
+205   ctx-rh-postcentral_24                          53 116 208 0
+206   ctx-rh-postcentral_26                         199  17 210 0
+207   ctx-rh-postcentral_6                          245  99 103 0
+208   ctx-rh-postcentral_20                         243 183 134 0
+209   ctx-rh-postcentral_25                          40  56   5 0
+210   ctx-rh-postcentral_11                         147 106 191 0
+211   ctx-rh-postcentral_3                          202  83 192 0
+212   ctx-rh-postcentral_18                         206 172 233 0
+213   ctx-rh-postcentral_27                         177  68 236 0
+214   ctx-rh-postcentral_13                         144  49 180 0
+215   ctx-rh-postcentral_23                         134  16 156 0
+216   ctx-rh-postcentral_9                          151 120  53 0
+217   ctx-rh-postcentral_17                         102 240  46 0
+218   ctx-rh-postcentral_30                          48  82 243 0
+219   ctx-rh-postcentral_22                          60  92 126 0
+220   ctx-rh-postcentral_7                          133 126   3 0
+221   ctx-rh-postcentral_4                          167 106 134 0
+222   ctx-rh-postcentral_5                          235 198 248 0
+223   ctx-rh-postcentral_29                         144  58 113 0
+224   ctx-rh-postcentral_1                          105 112 161 0
+225   ctx-rh-postcentral_16                          44 208  54 0
+226   ctx-rh-postcentral_14                         185  59  24 0
+227   ctx-rh-postcentral_12                          29  97 226 0
+228   ctx-rh-postcentral_21                         153 247 229 0
+229   ctx-rh-postcentral_8                          210 242 247 0
+230   ctx-rh-postcentral_10                          47  31  37 0
+231   ctx-rh-postcentral_2                          200 188 159 0
+232   ctx-rh-postcentral_19                          16 142  23 0
+233   ctx-rh-postcentral_15                         225 167 125 0
+234   ctx-rh-postcentral_28                          46  41 234 0
+235   ctx-rh-supramarginal_19                       169 130  37 0
+236   ctx-rh-supramarginal_10                        83   0 206 0
+237   ctx-rh-supramarginal_11                       176 197  93 0
+238   ctx-rh-supramarginal_13                       147   2 138 0
+239   ctx-rh-supramarginal_18                       248 194 191 0
+240   ctx-rh-supramarginal_20                       148 137  11 0
+241   ctx-rh-supramarginal_8                        148  91  35 0
+242   ctx-rh-supramarginal_4                          9 147  77 0
+243   ctx-rh-supramarginal_15                       239 117  24 0
+244   ctx-rh-supramarginal_9                        201  30 213 0
+245   ctx-rh-supramarginal_3                        169  92  62 0
+246   ctx-rh-supramarginal_14                       223  76 237 0
+247   ctx-rh-supramarginal_16                        90 207  34 0
+248   ctx-rh-supramarginal_2                        227  26  22 0
+249   ctx-rh-supramarginal_6                        169 102  21 0
+250   ctx-rh-supramarginal_12                       110  38  99 0
+251   ctx-rh-supramarginal_1                         73  88  65 0
+252   ctx-rh-supramarginal_7                        214  90 250 0
+253   ctx-rh-supramarginal_5                         40 193 124 0
+254   ctx-rh-supramarginal_17                       186 138 161 0
+255   ctx-rh-superiorparietal_13                    211 190  27 0
+256   ctx-rh-superiorparietal_24                    102 140 207 0
+257   ctx-rh-superiorparietal_18                    123  62 234 0
+258   ctx-rh-superiorparietal_10                     44  84  55 0
+259   ctx-rh-superiorparietal_29                    105 113 109 0
+260   ctx-rh-superiorparietal_4                     170 119  51 0
+261   ctx-rh-superiorparietal_12                    162 203   5 0
+262   ctx-rh-superiorparietal_15                     35 210 153 0
+263   ctx-rh-superiorparietal_28                    251 204 227 0
+264   ctx-rh-superiorparietal_16                    244 131  33 0
+265   ctx-rh-superiorparietal_17                    181 126  57 0
+266   ctx-rh-superiorparietal_7                     210 227  49 0
+267   ctx-rh-superiorparietal_20                    167 110  83 0
+268   ctx-rh-superiorparietal_25                    191  46 200 0
+269   ctx-rh-superiorparietal_22                    232   8  53 0
+270   ctx-rh-superiorparietal_9                      30 244 193 0
+271   ctx-rh-superiorparietal_5                     157  44 162 0
+272   ctx-rh-superiorparietal_26                      8 128  65 0
+273   ctx-rh-superiorparietal_23                     25 255  36 0
+274   ctx-rh-superiorparietal_2                     126  10 164 0
+275   ctx-rh-superiorparietal_14                     82 138 114 0
+276   ctx-rh-superiorparietal_11                     89  17 117 0
+277   ctx-rh-superiorparietal_21                    115 158 156 0
+278   ctx-rh-superiorparietal_19                    232  54 253 0
+279   ctx-rh-superiorparietal_6                      17   3 103 0
+280   ctx-rh-superiorparietal_27                    140 101 122 0
+281   ctx-rh-superiorparietal_1                     250 127 158 0
+282   ctx-rh-superiorparietal_3                     124 221 141 0
+283   ctx-rh-superiorparietal_8                     116 252 228 0
+284   ctx-rh-inferiorparietal_13                    225 155 235 0
+285   ctx-rh-inferiorparietal_21                    194 246 163 0
+286   ctx-rh-inferiorparietal_11                     33 139  27 0
+287   ctx-rh-inferiorparietal_3                      89 188  13 0
+288   ctx-rh-inferiorparietal_4                     191  95 170 0
+289   ctx-rh-inferiorparietal_25                    224 242  43 0
+290   ctx-rh-inferiorparietal_12                    211 177 147 0
+291   ctx-rh-inferiorparietal_8                      62 233 183 0
+292   ctx-rh-inferiorparietal_16                    227  26 106 0
+293   ctx-rh-inferiorparietal_26                    207  63 163 0
+294   ctx-rh-inferiorparietal_2                     116  60  63 0
+295   ctx-rh-inferiorparietal_17                     84  16 128 0
+296   ctx-rh-inferiorparietal_5                     142  41 102 0
+297   ctx-rh-inferiorparietal_1                     176 162 135 0
+298   ctx-rh-inferiorparietal_19                    199 169 105 0
+299   ctx-rh-inferiorparietal_14                     19 121 211 0
+300   ctx-rh-inferiorparietal_9                      43  43 255 0
+301   ctx-rh-inferiorparietal_18                     42  73 164 0
+302   ctx-rh-inferiorparietal_10                    196  48 115 0
+303   ctx-rh-inferiorparietal_20                    194 154   7 0
+304   ctx-rh-inferiorparietal_22                    174  53 102 0
+305   ctx-rh-inferiorparietal_23                     32  61 112 0
+306   ctx-rh-inferiorparietal_6                     149 240 219 0
+307   ctx-rh-inferiorparietal_7                       2 182   8 0
+308   ctx-rh-inferiorparietal_15                    136 187  38 0
+309   ctx-rh-inferiorparietal_24                     72 194  22 0
+310   ctx-rh-precuneus_2                             39  27   6 0
+311   ctx-rh-precuneus_1                            252 159  18 0
+312   ctx-rh-precuneus_3                             40 217 143 0
+313   ctx-rh-precuneus_6                            195 204 205 0
+314   ctx-rh-precuneus_19                            24 169 160 0
+315   ctx-rh-precuneus_10                           163 122 219 0
+316   ctx-rh-precuneus_16                           193 143 123 0
+317   ctx-rh-precuneus_12                           117   7  28 0
+318   ctx-rh-precuneus_22                            29 237  70 0
+319   ctx-rh-precuneus_9                             58 204  64 0
+320   ctx-rh-precuneus_21                           218  35 140 0
+321   ctx-rh-precuneus_7                             86 140  37 0
+322   ctx-rh-precuneus_15                            12  27  72 0
+323   ctx-rh-precuneus_14                            46   7 152 0
+324   ctx-rh-precuneus_11                             6  87  17 0
+325   ctx-rh-precuneus_8                            214 122 151 0
+326   ctx-rh-precuneus_20                           102 123 188 0
+327   ctx-rh-precuneus_4                            104  49 173 0
+328   ctx-rh-precuneus_5                             58 105   5 0
+329   ctx-rh-precuneus_23                           168  81  19 0
+330   ctx-rh-precuneus_18                           181 251  55 0
+331   ctx-rh-precuneus_13                            40  91 220 0
+332   ctx-rh-precuneus_17                           230 181 147 0
+333   ctx-rh-cuneus_1                               128  59 177 0
+334   ctx-rh-cuneus_2                               160 159  26 0
+335   ctx-rh-cuneus_8                               136  97 170 0
+336   ctx-rh-cuneus_3                               202 131  65 0
+337   ctx-rh-cuneus_7                               112  53  16 0
+338   ctx-rh-cuneus_6                                84 166 238 0
+339   ctx-rh-cuneus_5                                 5  46 147 0
+340   ctx-rh-cuneus_4                               202 106   0 0
+341   ctx-rh-pericalcarine_1                         49  57 124 0
+342   ctx-rh-pericalcarine_5                         39  36 145 0
+343   ctx-rh-pericalcarine_3                        160  35  20 0
+344   ctx-rh-pericalcarine_7                         26  70  94 0
+345   ctx-rh-pericalcarine_2                          7  55 123 0
+346   ctx-rh-pericalcarine_6                        159  19 199 0
+347   ctx-rh-pericalcarine_4                        219  14 133 0
+348   ctx-rh-pericalcarine_8                         33 162  10 0
+349   ctx-rh-lateraloccipital_18                    202  27 198 0
+350   ctx-rh-lateraloccipital_13                     89 183  40 0
+351   ctx-rh-lateraloccipital_12                     24  85 174 0
+352   ctx-rh-lateraloccipital_20                    150 179   1 0
+353   ctx-rh-lateraloccipital_1                      90 213  93 0
+354   ctx-rh-lateraloccipital_9                      57 143  79 0
+355   ctx-rh-lateraloccipital_15                     46  94  86 0
+356   ctx-rh-lateraloccipital_16                     36 224  13 0
+357   ctx-rh-lateraloccipital_23                     68  40 125 0
+358   ctx-rh-lateraloccipital_7                     195 147 111 0
+359   ctx-rh-lateraloccipital_3                      14 150  51 0
+360   ctx-rh-lateraloccipital_17                     83 180  67 0
+361   ctx-rh-lateraloccipital_14                    154  89 251 0
+362   ctx-rh-lateraloccipital_21                     72 108   8 0
+363   ctx-rh-lateraloccipital_10                    255  10  43 0
+364   ctx-rh-lateraloccipital_8                      20  29 210 0
+365   ctx-rh-lateraloccipital_4                      22 104 238 0
+366   ctx-rh-lateraloccipital_19                      7 215  56 0
+367   ctx-rh-lateraloccipital_6                      25 119 176 0
+368   ctx-rh-lateraloccipital_2                     184  63 171 0
+369   ctx-rh-lateraloccipital_5                     255 169 223 0
+370   ctx-rh-lateraloccipital_22                     59 238 118 0
+371   ctx-rh-lateraloccipital_11                     58 101 241 0
+372   ctx-rh-lingual_16                             121  49   7 0
+373   ctx-rh-lingual_8                              116  17 244 0
+374   ctx-rh-lingual_14                              55   4  81 0
+375   ctx-rh-lingual_4                              152 201 187 0
+376   ctx-rh-lingual_10                             224  94 123 0
+377   ctx-rh-lingual_13                             152  44 221 0
+378   ctx-rh-lingual_11                              46  39  23 0
+379   ctx-rh-lingual_9                               82 103 203 0
+380   ctx-rh-lingual_12                             199  45  83 0
+381   ctx-rh-lingual_3                              240 182 120 0
+382   ctx-rh-lingual_2                              172  78   1 0
+383   ctx-rh-lingual_7                              182  56 156 0
+384   ctx-rh-lingual_1                              200  19 191 0
+385   ctx-rh-lingual_6                              189 248  53 0
+386   ctx-rh-lingual_15                              45  68 157 0
+387   ctx-rh-lingual_17                             236  57  89 0
+388   ctx-rh-lingual_5                              232 232  22 0
+389   ctx-rh-fusiform_9                              96 237 239 0
+390   ctx-rh-fusiform_2                             207 105 228 0
+391   ctx-rh-fusiform_5                             247  90 174 0
+392   ctx-rh-fusiform_12                             13   2 163 0
+393   ctx-rh-fusiform_14                            239  91 197 0
+394   ctx-rh-fusiform_8                             113 113 200 0
+395   ctx-rh-fusiform_6                             246  55  18 0
+396   ctx-rh-fusiform_17                            147 218 111 0
+397   ctx-rh-fusiform_15                            203  75 135 0
+398   ctx-rh-fusiform_11                             86  37 225 0
+399   ctx-rh-fusiform_13                            216 159  72 0
+400   ctx-rh-fusiform_7                              19  60 212 0
+401   ctx-rh-fusiform_4                              60 228 125 0
+402   ctx-rh-fusiform_3                             158  94 123 0
+403   ctx-rh-fusiform_1                             179  35  51 0
+404   ctx-rh-fusiform_10                             96  58 240 0
+405   ctx-rh-fusiform_16                             36  34  28 0
+406   ctx-rh-parahippocampal_3                       47 156 101 0
+407   ctx-rh-parahippocampal_2                       88  32  99 0
+408   ctx-rh-parahippocampal_1                      248  90 113 0
+409   ctx-rh-parahippocampal_6                       64 155 233 0
+410   ctx-rh-parahippocampal_5                       50 221 181 0
+411   ctx-rh-parahippocampal_4                      126 200 249 0
+412   ctx-rh-entorhinal_1                            72 207 162 0
+413   ctx-rh-entorhinal_2                           181  73  91 0
+414   ctx-rh-temporalpole_1                         199  32  93 0
+415   ctx-rh-temporalpole_2                         175   9  45 0
+416   ctx-rh-temporalpole_3                         195  60 224 0
+417   ctx-rh-inferiortemporal_16                     84  21 194 0
+418   ctx-rh-inferiortemporal_3                      27 100 171 0
+419   ctx-rh-inferiortemporal_5                     251  40 239 0
+420   ctx-rh-inferiortemporal_9                     138 125 245 0
+421   ctx-rh-inferiortemporal_11                     90 124 214 0
+422   ctx-rh-inferiortemporal_8                      60 212  85 0
+423   ctx-rh-inferiortemporal_1                      68 180  46 0
+424   ctx-rh-inferiortemporal_4                      46  63  39 0
+425   ctx-rh-inferiortemporal_7                     239 226  36 0
+426   ctx-rh-inferiortemporal_2                     235  60 192 0
+427   ctx-rh-inferiortemporal_6                      27 237 172 0
+428   ctx-rh-inferiortemporal_10                    250 193 246 0
+429   ctx-rh-inferiortemporal_12                     55  32 171 0
+430   ctx-rh-inferiortemporal_15                    159  48  84 0
+431   ctx-rh-inferiortemporal_14                    115  79 201 0
+432   ctx-rh-inferiortemporal_13                    206 121  73 0
+433   ctx-rh-middletemporal_12                      150 173 233 0
+434   ctx-rh-middletemporal_16                      138 186 222 0
+435   ctx-rh-middletemporal_13                       71  54  40 0
+436   ctx-rh-middletemporal_15                      136 181 250 0
+437   ctx-rh-middletemporal_6                       100 209 219 0
+438   ctx-rh-middletemporal_11                      170 248 197 0
+439   ctx-rh-middletemporal_10                      247 222 140 0
+440   ctx-rh-middletemporal_4                       174 244 109 0
+441   ctx-rh-middletemporal_14                      234 227 144 0
+442   ctx-rh-middletemporal_7                       140 227  64 0
+443   ctx-rh-middletemporal_17                       99 194   4 0
+444   ctx-rh-middletemporal_8                       181 199  51 0
+445   ctx-rh-middletemporal_9                       151 197 122 0
+446   ctx-rh-middletemporal_1                       172  10  17 0
+447   ctx-rh-middletemporal_3                       224 162  41 0
+448   ctx-rh-middletemporal_5                       239 241  19 0
+449   ctx-rh-middletemporal_19                      115 252 233 0
+450   ctx-rh-middletemporal_2                       111  50 241 0
+451   ctx-rh-middletemporal_18                      111  24 141 0
+452   ctx-rh-bankssts_3                             187 198 109 0
+453   ctx-rh-bankssts_6                             234 199  62 0
+454   ctx-rh-bankssts_2                              97 140  56 0
+455   ctx-rh-bankssts_1                              85 136 219 0
+456   ctx-rh-bankssts_4                              48  15 189 0
+457   ctx-rh-bankssts_5                              36 227 139 0
+458   ctx-rh-superiortemporal_9                     134 134  93 0
+459   ctx-rh-superiortemporal_25                      5 210 169 0
+460   ctx-rh-superiortemporal_14                    230  27  79 0
+461   ctx-rh-superiortemporal_6                     162 109  12 0
+462   ctx-rh-superiortemporal_7                     233   7  89 0
+463   ctx-rh-superiortemporal_16                     51 195 251 0
+464   ctx-rh-superiortemporal_19                    165 148 145 0
+465   ctx-rh-superiortemporal_15                    114 195 163 0
+466   ctx-rh-superiortemporal_12                    187 138  76 0
+467   ctx-rh-superiortemporal_21                    240 171  32 0
+468   ctx-rh-superiortemporal_24                    116 132 208 0
+469   ctx-rh-superiortemporal_2                     147 227  17 0
+470   ctx-rh-superiortemporal_22                    157  28 239 0
+471   ctx-rh-superiortemporal_13                     16 181  10 0
+472   ctx-rh-superiortemporal_5                      51 189  65 0
+473   ctx-rh-superiortemporal_11                     52 147 112 0
+474   ctx-rh-superiortemporal_3                       2 217 175 0
+475   ctx-rh-superiortemporal_17                    227 167 243 0
+476   ctx-rh-superiortemporal_18                     51  72  19 0
+477   ctx-rh-superiortemporal_8                     104 161 163 0
+478   ctx-rh-superiortemporal_4                       2  53 147 0
+479   ctx-rh-superiortemporal_23                    197 235 173 0
+480   ctx-rh-superiortemporal_20                     12  23  26 0
+481   ctx-rh-superiortemporal_10                    207 200  19 0
+482   ctx-rh-superiortemporal_1                     232  36 213 0
+483   ctx-rh-transversetemporal_1                   225 184   7 0
+484   ctx-rh-transversetemporal_2                   240  16 203 0
+485   ctx-rh-transversetemporal_3                   165 252 228 0
+486   ctx-rh-insula_16                               54 244  55 0
+487   ctx-rh-insula_13                              120 126  29 0
+488   ctx-rh-insula_6                               241 106 189 0
+489   ctx-rh-insula_4                               163 115  87 0
+490   ctx-rh-insula_5                               201 203 147 0
+491   ctx-rh-insula_15                               52 104  11 0
+492   ctx-rh-insula_8                               236 243 229 0
+493   ctx-rh-insula_11                              128  20   1 0
+494   ctx-rh-insula_10                              184  13   1 0
+495   ctx-rh-insula_1                                16 107 166 0
+496   ctx-rh-insula_7                               103   7 152 0
+497   ctx-rh-insula_14                              251  78 152 0
+498   ctx-rh-insula_3                                 5 172 182 0
+499   ctx-rh-insula_2                                98  74  66 0
+500   ctx-rh-insula_12                              225 202  75 0
+501   ctx-rh-insula_9                               221 131 194 0
+
+# Right Hemisphere. Subcortical Structures (Thalamic Nuclei)
+502   Right-Pulvinar                                                      255   0   0 0
+503   Right-Anterior                                                        0 255   0 0
+504   Right-Medio_Dorsal                                                  255 255   0 0
+505   Right-Ventral_Latero_Dorsal                                         255 123   0 0
+506   Right-Central_Lateral-Lateral_Posterior-Medial_Pulvinar               0 255 255 0
+507   Right-Ventral_Anterior                                              255   0 255 0
+508   Right-Ventral_Latero_Ventral                                          0   0 255 0
+
+# Right Hemisphere. Subcortical Structures
+509   Right-Caudate                    122 186 220 0
+510   Right-Putamen                    236  13 176 0
+511   Right-Pallidum                    12  48 255 0
+512   Right-Accumbens_area             255 165   0 0
+513   Right-Amygdala                   103 255 255 0
+514   Right-Hippocampus                220 216  20 0
+
+# Right Hemisphere. Subcortical Structures (Hippocampal Subfields)
+515   Right-Hippocampus_Parasubiculum                   255 255   0 0
+516   Right-Hippocampus_Presubiculum                     64   0  64 0
+517   Right-Hippocampus_Subiculum                         0   0 255 0
+518   Right-Hippocampus_CA1                             255   0   0 0
+519   Right-Hippocampus_CA3                               0 128   0 0
+520   Right-Hippocampus_CA4                             196 160 128 0
+521   Right-Hippocampus_GCDG                             32 200 255 0
+522   Right-Hippocampus_HATA                            128 255 128 0
+523   Right-Hippocampus_Fimbria                         204 153 204 0
+524   Right-Hippocampus_Molecular_layer_HP              128   0   0 0
+525   Right-Hippocampus_Hippocampal_fissure             128  32 255 0
+526   Right-Hippocampus_Tail                            170 170 255 0
+
+# Right Hemisphere. Ventral Diencephalon
+527   Right-VentralDC             165 42 42 0
+
+# Left Hemisphere. Cortical Structures
+ 528   ctx-lh-lateralorbitofrontal_9                 232  50  56 0
+ 529   ctx-lh-lateralorbitofrontal_4                 234 216 237 0
+ 530   ctx-lh-lateralorbitofrontal_6                  14  40 246 0
+ 531   ctx-lh-lateralorbitofrontal_3                 103  52 222 0
+ 532   ctx-lh-lateralorbitofrontal_13                126  17  68 0
+ 533   ctx-lh-lateralorbitofrontal_2                 246 126 178 0
+ 534   ctx-lh-lateralorbitofrontal_16                112  97 218 0
+ 535   ctx-lh-lateralorbitofrontal_7                  74  87 124 0
+ 536   ctx-lh-lateralorbitofrontal_10                 15 185  29 0
+ 537   ctx-lh-lateralorbitofrontal_12                 90  27 246 0
+ 538   ctx-lh-lateralorbitofrontal_14                172 137  44 0
+ 539   ctx-lh-lateralorbitofrontal_11                 54  52  89 0
+ 540   ctx-lh-lateralorbitofrontal_8                 159  83 107 0
+ 541   ctx-lh-lateralorbitofrontal_5                 250 207 204 0
+ 542   ctx-lh-lateralorbitofrontal_1                  32  65  87 0
+ 543   ctx-lh-lateralorbitofrontal_15                142  58 136 0
+ 544   ctx-lh-parsorbitalis_3                        158 204 112 0
+ 545   ctx-lh-parsorbitalis_2                        195  93 198 0
+ 546   ctx-lh-parsorbitalis_1                         34  82 174 0
+ 547   ctx-lh-parsorbitalis_4                        239 184 165 0
+ 548   ctx-lh-frontalpole_1                          198 127 157 0
+ 549   ctx-lh-frontalpole_2                          116 240 138 0
+ 550   ctx-lh-medialorbitofrontal_6                  198 249 116 0
+ 551   ctx-lh-medialorbitofrontal_8                   32  18 156 0
+ 552   ctx-lh-medialorbitofrontal_4                  114 163  91 0
+ 553   ctx-lh-medialorbitofrontal_5                  175  39  64 0
+ 554   ctx-lh-medialorbitofrontal_3                  115 253 108 0
+ 555   ctx-lh-medialorbitofrontal_10                 247  72  87 0
+ 556   ctx-lh-medialorbitofrontal_9                   83  47  37 0
+ 557   ctx-lh-medialorbitofrontal_7                    7  13 177 0
+ 558   ctx-lh-medialorbitofrontal_1                   23 200  17 0
+ 559   ctx-lh-medialorbitofrontal_2                  221  72 183 0
+ 560   ctx-lh-parstriangularis_3                     131 214 154 0
+ 561   ctx-lh-parstriangularis_4                     198  87 147 0
+ 562   ctx-lh-parstriangularis_7                      14 187 144 0
+ 563   ctx-lh-parstriangularis_5                       8 156   3 0
+ 564   ctx-lh-parstriangularis_6                     143 138 127 0
+ 565   ctx-lh-parstriangularis_2                      57 146 170 0
+ 566   ctx-lh-parstriangularis_1                     166 254  31 0
+ 567   ctx-lh-parsopercularis_6                      113 232 149 0
+ 568   ctx-lh-parsopercularis_7                       90 236 132 0
+ 569   ctx-lh-parsopercularis_2                      176  23  45 0
+ 570   ctx-lh-parsopercularis_9                      229 242  23 0
+ 571   ctx-lh-parsopercularis_8                       81 220 219 0
+ 572   ctx-lh-parsopercularis_4                       57 100 171 0
+ 573   ctx-lh-parsopercularis_10                      83  48 246 0
+ 574   ctx-lh-parsopercularis_3                       49 114  25 0
+ 575   ctx-lh-parsopercularis_5                      102 118 252 0
+ 576   ctx-lh-parsopercularis_1                       49 188  24 0
+ 577   ctx-lh-rostralmiddlefrontal_17                233   9 216 0
+ 578   ctx-lh-rostralmiddlefrontal_15                124 162 219 0
+ 579   ctx-lh-rostralmiddlefrontal_13                221 196  27 0
+ 580   ctx-lh-rostralmiddlefrontal_9                 226  34 126 0
+ 581   ctx-lh-rostralmiddlefrontal_19                113  36 155 0
+ 582   ctx-lh-rostralmiddlefrontal_16                210 244  13 0
+ 583   ctx-lh-rostralmiddlefrontal_6                 171 141 123 0
+ 584   ctx-lh-rostralmiddlefrontal_22                109 111 254 0
+ 585   ctx-lh-rostralmiddlefrontal_4                 219 203 129 0
+ 586   ctx-lh-rostralmiddlefrontal_26                158  16 232 0
+ 587   ctx-lh-rostralmiddlefrontal_18                219 231 203 0
+ 588   ctx-lh-rostralmiddlefrontal_24                100  44 228 0
+ 589   ctx-lh-rostralmiddlefrontal_5                 177  48  71 0
+ 590   ctx-lh-rostralmiddlefrontal_10                207 151  43 0
+ 591   ctx-lh-rostralmiddlefrontal_21                166  77  69 0
+ 592   ctx-lh-rostralmiddlefrontal_23                 10 201 231 0
+ 593   ctx-lh-rostralmiddlefrontal_12                 96  28 111 0
+ 594   ctx-lh-rostralmiddlefrontal_11                202  18 192 0
+ 595   ctx-lh-rostralmiddlefrontal_8                 196 115   0 0
+ 596   ctx-lh-rostralmiddlefrontal_20                 94 123 135 0
+ 597   ctx-lh-rostralmiddlefrontal_7                  75  13 206 0
+ 598   ctx-lh-rostralmiddlefrontal_14                193 164 161 0
+ 599   ctx-lh-rostralmiddlefrontal_3                 212  71 248 0
+ 600   ctx-lh-rostralmiddlefrontal_2                 146 160  12 0
+ 601   ctx-lh-rostralmiddlefrontal_25                 37 132 105 0
+ 602   ctx-lh-rostralmiddlefrontal_1                  15 119  74 0
+ 603   ctx-lh-superiorfrontal_11                      37  37 179 0
+ 604   ctx-lh-superiorfrontal_32                      95  33 128 0
+ 605   ctx-lh-superiorfrontal_8                      190  56 154 0
+ 606   ctx-lh-superiorfrontal_14                     134 106  10 0
+ 607   ctx-lh-superiorfrontal_16                     150 170  77 0
+ 608   ctx-lh-superiorfrontal_10                      74 158 253 0
+ 609   ctx-lh-superiorfrontal_35                     198 160 138 0
+ 610   ctx-lh-superiorfrontal_42                     153 185  84 0
+ 611   ctx-lh-superiorfrontal_24                     206 200 224 0
+ 612   ctx-lh-superiorfrontal_39                     197  69   6 0
+ 613   ctx-lh-superiorfrontal_23                     139   3 171 0
+ 614   ctx-lh-superiorfrontal_9                      199  95 167 0
+ 615   ctx-lh-superiorfrontal_1                      128  81 167 0
+ 616   ctx-lh-superiorfrontal_38                     224   7   9 0
+ 617   ctx-lh-superiorfrontal_45                      28 120 134 0
+ 618   ctx-lh-superiorfrontal_12                      22  49  54 0
+ 619   ctx-lh-superiorfrontal_4                      103  39  19 0
+ 620   ctx-lh-superiorfrontal_21                      80 239  22 0
+ 621   ctx-lh-superiorfrontal_29                     140  70  94 0
+ 622   ctx-lh-superiorfrontal_44                      82  24  91 0
+ 623   ctx-lh-superiorfrontal_19                     223 173  65 0
+ 624   ctx-lh-superiorfrontal_30                     138  82 158 0
+ 625   ctx-lh-superiorfrontal_28                     202 183  72 0
+ 626   ctx-lh-superiorfrontal_22                     187  57   0 0
+ 627   ctx-lh-superiorfrontal_27                     192  79  63 0
+ 628   ctx-lh-superiorfrontal_20                      85  62  24 0
+ 629   ctx-lh-superiorfrontal_37                     135  70 146 0
+ 630   ctx-lh-superiorfrontal_40                      83 111  44 0
+ 631   ctx-lh-superiorfrontal_36                     180 112  56 0
+ 632   ctx-lh-superiorfrontal_7                      220  79 163 0
+ 633   ctx-lh-superiorfrontal_2                       11 171 227 0
+ 634   ctx-lh-superiorfrontal_18                     224  48  37 0
+ 635   ctx-lh-superiorfrontal_34                       2 135 109 0
+ 636   ctx-lh-superiorfrontal_33                      16  71 156 0
+ 637   ctx-lh-superiorfrontal_3                       83 234 129 0
+ 638   ctx-lh-superiorfrontal_31                      34 107 117 0
+ 639   ctx-lh-superiorfrontal_25                     250 165  67 0
+ 640   ctx-lh-superiorfrontal_5                      235 247  81 0
+ 641   ctx-lh-superiorfrontal_15                     237 126  49 0
+ 642   ctx-lh-superiorfrontal_43                      45 246 205 0
+ 643   ctx-lh-superiorfrontal_26                       2  55 208 0
+ 644   ctx-lh-superiorfrontal_6                       49 117  46 0
+ 645   ctx-lh-superiorfrontal_13                     210  29  87 0
+ 646   ctx-lh-superiorfrontal_17                     143  10 103 0
+ 647   ctx-lh-superiorfrontal_41                      28   1 110 0
+ 648   ctx-lh-caudalmiddlefrontal_9                  233 238 106 0
+ 649   ctx-lh-caudalmiddlefrontal_8                   61   5 222 0
+ 650   ctx-lh-caudalmiddlefrontal_1                  201 133 165 0
+ 651   ctx-lh-caudalmiddlefrontal_13                  21 112 200 0
+ 652   ctx-lh-caudalmiddlefrontal_5                  217  47  68 0
+ 653   ctx-lh-caudalmiddlefrontal_3                   16 128 204 0
+ 654   ctx-lh-caudalmiddlefrontal_6                   97 219 203 0
+ 655   ctx-lh-caudalmiddlefrontal_11                  18  26 140 0
+ 656   ctx-lh-caudalmiddlefrontal_4                    4 142 122 0
+ 657   ctx-lh-caudalmiddlefrontal_12                 216 174 168 0
+ 658   ctx-lh-caudalmiddlefrontal_7                  111  44  62 0
+ 659   ctx-lh-caudalmiddlefrontal_2                  139  79  78 0
+ 660   ctx-lh-caudalmiddlefrontal_10                   4  76  95 0
+ 661   ctx-lh-precentral_31                          121  34  10 0
+ 662   ctx-lh-precentral_30                           95  92  76 0
+ 663   ctx-lh-precentral_12                           79 141   2 0
+ 664   ctx-lh-precentral_17                          140 137  39 0
+ 665   ctx-lh-precentral_24                          113  65  63 0
+ 666   ctx-lh-precentral_33                           53 159 224 0
+ 667   ctx-lh-precentral_3                           236 254  48 0
+ 668   ctx-lh-precentral_19                          212  63  92 0
+ 669   ctx-lh-precentral_26                           45 140  39 0
+ 670   ctx-lh-precentral_21                            7  23 110 0
+ 671   ctx-lh-precentral_10                          186  18 236 0
+ 672   ctx-lh-precentral_2                           105  15  28 0
+ 673   ctx-lh-precentral_16                          127 168 171 0
+ 674   ctx-lh-precentral_35                          114 110 145 0
+ 675   ctx-lh-precentral_9                            54  84  41 0
+ 676   ctx-lh-precentral_4                            99 239  58 0
+ 677   ctx-lh-precentral_13                          215 160  22 0
+ 678   ctx-lh-precentral_14                           41 241  13 0
+ 679   ctx-lh-precentral_5                           233 248  29 0
+ 680   ctx-lh-precentral_6                           251  76 204 0
+ 681   ctx-lh-precentral_25                           29 194 147 0
+ 682   ctx-lh-precentral_27                           80  13   7 0
+ 683   ctx-lh-precentral_20                           17 197 237 0
+ 684   ctx-lh-precentral_29                           94 205  57 0
+ 685   ctx-lh-precentral_11                          223 150 138 0
+ 686   ctx-lh-precentral_18                           44  32 107 0
+ 687   ctx-lh-precentral_8                            32 127  51 0
+ 688   ctx-lh-precentral_15                           85 190 130 0
+ 689   ctx-lh-precentral_32                           81 178 189 0
+ 690   ctx-lh-precentral_1                           100  29 158 0
+ 691   ctx-lh-precentral_22                           20 165  70 0
+ 692   ctx-lh-precentral_7                           178 251 194 0
+ 693   ctx-lh-precentral_34                           17  42 124 0
+ 694   ctx-lh-precentral_28                          115 238 140 0
+ 695   ctx-lh-precentral_23                           87 247  49 0
+ 696   ctx-lh-paracentral_7                          226 206 150 0
+ 697   ctx-lh-paracentral_1                           41 145  69 0
+ 698   ctx-lh-paracentral_8                          186  72  50 0
+ 699   ctx-lh-paracentral_2                          113  52 243 0
+ 700   ctx-lh-paracentral_10                          38  42 187 0
+ 701   ctx-lh-paracentral_9                          223  71 159 0
+ 702   ctx-lh-paracentral_3                          118 168  79 0
+ 703   ctx-lh-paracentral_4                          209  73   3 0
+ 704   ctx-lh-paracentral_6                          161  44  38 0
+ 705   ctx-lh-paracentral_5                          203  41 234 0
+ 706   ctx-lh-paracentral_11                         206  35  12 0
+ 707   ctx-lh-rostralanteriorcingulate_1             169  96  88 0
+ 708   ctx-lh-rostralanteriorcingulate_4             152  70  14 0
+ 709   ctx-lh-rostralanteriorcingulate_3             175 217  14 0
+ 710   ctx-lh-rostralanteriorcingulate_2             224  47 129 0
+ 711   ctx-lh-rostralanteriorcingulate_5             198  75  34 0
+ 712   ctx-lh-caudalanteriorcingulate_5              104  19  15 0
+ 713   ctx-lh-caudalanteriorcingulate_4              199 168 129 0
+ 714   ctx-lh-caudalanteriorcingulate_1              155 216  78 0
+ 715   ctx-lh-caudalanteriorcingulate_2               92 153  22 0
+ 716   ctx-lh-caudalanteriorcingulate_3              128  73  14 0
+ 717   ctx-lh-posteriorcingulate_5                   209  89 146 0
+ 718   ctx-lh-posteriorcingulate_4                    70  28  66 0
+ 719   ctx-lh-posteriorcingulate_8                   157 150 194 0
+ 720   ctx-lh-posteriorcingulate_2                    56  52 226 0
+ 721   ctx-lh-posteriorcingulate_3                   143  73 122 0
+ 722   ctx-lh-posteriorcingulate_6                   151 234 140 0
+ 723   ctx-lh-posteriorcingulate_9                   215 243 195 0
+ 724   ctx-lh-posteriorcingulate_7                   208   7 163 0
+ 725   ctx-lh-posteriorcingulate_1                   138   4 249 0
+ 726   ctx-lh-isthmuscingulate_5                      17 231 211 0
+ 727   ctx-lh-isthmuscingulate_6                      38 244 253 0
+ 728   ctx-lh-isthmuscingulate_7                      36 160 103 0
+ 729   ctx-lh-isthmuscingulate_1                     155 227  47 0
+ 730   ctx-lh-isthmuscingulate_4                     250 111 125 0
+ 731   ctx-lh-isthmuscingulate_2                     180 101 230 0
+ 732   ctx-lh-isthmuscingulate_3                     114 198  69 0
+ 733   ctx-lh-postcentral_6                          245  99 103 0
+ 734   ctx-lh-postcentral_23                         134  16 156 0
+ 735   ctx-lh-postcentral_28                          46  41 234 0
+ 736   ctx-lh-postcentral_2                          200 188 159 0
+ 737   ctx-lh-postcentral_14                         185  59  24 0
+ 738   ctx-lh-postcentral_24                          53 116 208 0
+ 739   ctx-lh-postcentral_18                         206 172 233 0
+ 740   ctx-lh-postcentral_25                          40  56   5 0
+ 741   ctx-lh-postcentral_16                          44 208  54 0
+ 742   ctx-lh-postcentral_21                         153 247 229 0
+ 743   ctx-lh-postcentral_22                          60  92 126 0
+ 744   ctx-lh-postcentral_29                         144  58 113 0
+ 745   ctx-lh-postcentral_30                          48  82 243 0
+ 746   ctx-lh-postcentral_13                         144  49 180 0
+ 747   ctx-lh-postcentral_4                          167 106 134 0
+ 748   ctx-lh-postcentral_17                         102 240  46 0
+ 749   ctx-lh-postcentral_8                          210 242 247 0
+ 750   ctx-lh-postcentral_31                          27  79  81 0
+ 751   ctx-lh-postcentral_3                          202  83 192 0
+ 752   ctx-lh-postcentral_1                          105 112 161 0
+ 753   ctx-lh-postcentral_9                          151 120  53 0
+ 754   ctx-lh-postcentral_26                         199  17 210 0
+ 755   ctx-lh-postcentral_27                         177  68 236 0
+ 756   ctx-lh-postcentral_12                          29  97 226 0
+ 757   ctx-lh-postcentral_10                          47  31  37 0
+ 758   ctx-lh-postcentral_20                         243 183 134 0
+ 759   ctx-lh-postcentral_15                         225 167 125 0
+ 760   ctx-lh-postcentral_11                         147 106 191 0
+ 761   ctx-lh-postcentral_19                          16 142  23 0
+ 762   ctx-lh-postcentral_5                          235 198 248 0
+ 763   ctx-lh-postcentral_7                          133 126   3 0
+ 764   ctx-lh-supramarginal_1                         73  88  65 0
+ 765   ctx-lh-supramarginal_7                        214  90 250 0
+ 766   ctx-lh-supramarginal_5                         40 193 124 0
+ 767   ctx-lh-supramarginal_14                       223  76 237 0
+ 768   ctx-lh-supramarginal_13                       147   2 138 0
+ 769   ctx-lh-supramarginal_2                        227  26  22 0
+ 770   ctx-lh-supramarginal_3                        169  92  62 0
+ 771   ctx-lh-supramarginal_12                       110  38  99 0
+ 772   ctx-lh-supramarginal_6                        169 102  21 0
+ 773   ctx-lh-supramarginal_11                       176 197  93 0
+ 774   ctx-lh-supramarginal_17                       186 138 161 0
+ 775   ctx-lh-supramarginal_4                          9 147  77 0
+ 776   ctx-lh-supramarginal_16                        90 207  34 0
+ 777   ctx-lh-supramarginal_15                       239 117  24 0
+ 778   ctx-lh-supramarginal_19                       169 130  37 0
+ 779   ctx-lh-supramarginal_8                        148  91  35 0
+ 780   ctx-lh-supramarginal_10                        83   0 206 0
+ 781   ctx-lh-supramarginal_9                        201  30 213 0
+ 782   ctx-lh-supramarginal_20                       148 137  11 0
+ 783   ctx-lh-supramarginal_21                        62  87 173 0
+ 784   ctx-lh-supramarginal_18                       248 194 191 0
+ 785   ctx-lh-superiorparietal_26                      8 128  65 0
+ 786   ctx-lh-superiorparietal_24                    102 140 207 0
+ 787   ctx-lh-superiorparietal_20                    167 110  83 0
+ 788   ctx-lh-superiorparietal_27                    140 101 122 0
+ 789   ctx-lh-superiorparietal_25                    191  46 200 0
+ 790   ctx-lh-superiorparietal_13                    211 190  27 0
+ 791   ctx-lh-superiorparietal_22                    232   8  53 0
+ 792   ctx-lh-superiorparietal_8                     116 252 228 0
+ 793   ctx-lh-superiorparietal_15                     35 210 153 0
+ 794   ctx-lh-superiorparietal_12                    162 203   5 0
+ 795   ctx-lh-superiorparietal_19                    232  54 253 0
+ 796   ctx-lh-superiorparietal_21                    115 158 156 0
+ 797   ctx-lh-superiorparietal_10                     44  84  55 0
+ 798   ctx-lh-superiorparietal_16                    244 131  33 0
+ 799   ctx-lh-superiorparietal_11                     89  17 117 0
+ 800   ctx-lh-superiorparietal_18                    123  62 234 0
+ 801   ctx-lh-superiorparietal_28                    251 204 227 0
+ 802   ctx-lh-superiorparietal_14                     82 138 114 0
+ 803   ctx-lh-superiorparietal_4                     170 119  51 0
+ 804   ctx-lh-superiorparietal_6                      17   3 103 0
+ 805   ctx-lh-superiorparietal_2                     126  10 164 0
+ 806   ctx-lh-superiorparietal_5                     157  44 162 0
+ 807   ctx-lh-superiorparietal_7                     210 227  49 0
+ 808   ctx-lh-superiorparietal_3                     124 221 141 0
+ 809   ctx-lh-superiorparietal_9                      30 244 193 0
+ 810   ctx-lh-superiorparietal_1                     250 127 158 0
+ 811   ctx-lh-superiorparietal_23                     25 255  36 0
+ 812   ctx-lh-superiorparietal_17                    181 126  57 0
+ 813   ctx-lh-superiorparietal_29                    105 113 109 0
+ 814   ctx-lh-inferiorparietal_3                      89 188  13 0
+ 815   ctx-lh-inferiorparietal_16                    227  26 106 0
+ 816   ctx-lh-inferiorparietal_19                    199 169 105 0
+ 817   ctx-lh-inferiorparietal_6                     149 240 219 0
+ 818   ctx-lh-inferiorparietal_9                      43  43 255 0
+ 819   ctx-lh-inferiorparietal_10                    196  48 115 0
+ 820   ctx-lh-inferiorparietal_15                    136 187  38 0
+ 821   ctx-lh-inferiorparietal_8                      62 233 183 0
+ 822   ctx-lh-inferiorparietal_4                     191  95 170 0
+ 823   ctx-lh-inferiorparietal_5                     142  41 102 0
+ 824   ctx-lh-inferiorparietal_2                     116  60  63 0
+ 825   ctx-lh-inferiorparietal_18                     42  73 164 0
+ 826   ctx-lh-inferiorparietal_17                     84  16 128 0
+ 827   ctx-lh-inferiorparietal_21                    194 246 163 0
+ 828   ctx-lh-inferiorparietal_12                    211 177 147 0
+ 829   ctx-lh-inferiorparietal_22                    174  53 102 0
+ 830   ctx-lh-inferiorparietal_7                       2 182   8 0
+ 831   ctx-lh-inferiorparietal_11                     33 139  27 0
+ 832   ctx-lh-inferiorparietal_13                    225 155 235 0
+ 833   ctx-lh-inferiorparietal_14                     19 121 211 0
+ 834   ctx-lh-inferiorparietal_1                     176 162 135 0
+ 835   ctx-lh-inferiorparietal_20                    194 154   7 0
+ 836   ctx-lh-precuneus_14                            46   7 152 0
+ 837   ctx-lh-precuneus_16                           193 143 123 0
+ 838   ctx-lh-precuneus_1                            252 159  18 0
+ 839   ctx-lh-precuneus_10                           163 122 219 0
+ 840   ctx-lh-precuneus_8                            214 122 151 0
+ 841   ctx-lh-precuneus_3                             40 217 143 0
+ 842   ctx-lh-precuneus_20                           102 123 188 0
+ 843   ctx-lh-precuneus_2                             39  27   6 0
+ 844   ctx-lh-precuneus_4                            104  49 173 0
+ 845   ctx-lh-precuneus_12                           117   7  28 0
+ 846   ctx-lh-precuneus_13                            40  91 220 0
+ 847   ctx-lh-precuneus_7                             86 140  37 0
+ 848   ctx-lh-precuneus_17                           230 181 147 0
+ 849   ctx-lh-precuneus_5                             58 105   5 0
+ 850   ctx-lh-precuneus_22                            29 237  70 0
+ 851   ctx-lh-precuneus_6                            195 204 205 0
+ 852   ctx-lh-precuneus_11                             6  87  17 0
+ 853   ctx-lh-precuneus_19                            24 169 160 0
+ 854   ctx-lh-precuneus_21                           218  35 140 0
+ 855   ctx-lh-precuneus_9                             58 204  64 0
+ 856   ctx-lh-precuneus_15                            12  27  72 0
+ 857   ctx-lh-precuneus_18                           181 251  55 0
+ 858   ctx-lh-cuneus_5                                 5  46 147 0
+ 859   ctx-lh-cuneus_6                                84 166 238 0
+ 860   ctx-lh-cuneus_1                               128  59 177 0
+ 861   ctx-lh-cuneus_4                               202 106   0 0
+ 862   ctx-lh-cuneus_2                               160 159  26 0
+ 863   ctx-lh-cuneus_3                               202 131  65 0
+ 864   ctx-lh-cuneus_7                               112  53  16 0
+ 865   ctx-lh-pericalcarine_7                         26  70  94 0
+ 866   ctx-lh-pericalcarine_1                         49  57 124 0
+ 867   ctx-lh-pericalcarine_4                        219  14 133 0
+ 868   ctx-lh-pericalcarine_2                          7  55 123 0
+ 869   ctx-lh-pericalcarine_5                         39  36 145 0
+ 870   ctx-lh-pericalcarine_3                        160  35  20 0
+ 871   ctx-lh-pericalcarine_6                        159  19 199 0
+ 872   ctx-lh-lateraloccipital_1                      90 213  93 0
+ 873   ctx-lh-lateraloccipital_20                    150 179   1 0
+ 874   ctx-lh-lateraloccipital_10                    255  10  43 0
+ 875   ctx-lh-lateraloccipital_6                      25 119 176 0
+ 876   ctx-lh-lateraloccipital_2                     184  63 171 0
+ 877   ctx-lh-lateraloccipital_4                      22 104 238 0
+ 878   ctx-lh-lateraloccipital_7                     195 147 111 0
+ 879   ctx-lh-lateraloccipital_11                     58 101 241 0
+ 880   ctx-lh-lateraloccipital_13                     89 183  40 0
+ 881   ctx-lh-lateraloccipital_12                     24  85 174 0
+ 882   ctx-lh-lateraloccipital_14                    154  89 251 0
+ 883   ctx-lh-lateraloccipital_15                     46  94  86 0
+ 884   ctx-lh-lateraloccipital_19                      7 215  56 0
+ 885   ctx-lh-lateraloccipital_3                      14 150  51 0
+ 886   ctx-lh-lateraloccipital_18                    202  27 198 0
+ 887   ctx-lh-lateraloccipital_22                     59 238 118 0
+ 888   ctx-lh-lateraloccipital_21                     72 108   8 0
+ 889   ctx-lh-lateraloccipital_23                     68  40 125 0
+ 890   ctx-lh-lateraloccipital_5                     255 169 223 0
+ 891   ctx-lh-lateraloccipital_17                     83 180  67 0
+ 892   ctx-lh-lateraloccipital_16                     36 224  13 0
+ 893   ctx-lh-lateraloccipital_9                      57 143  79 0
+ 894   ctx-lh-lateraloccipital_8                      20  29 210 0
+ 895   ctx-lh-lingual_14                              55   4  81 0
+ 896   ctx-lh-lingual_11                              46  39  23 0
+ 897   ctx-lh-lingual_3                              240 182 120 0
+ 898   ctx-lh-lingual_4                              152 201 187 0
+ 899   ctx-lh-lingual_16                             121  49   7 0
+ 900   ctx-lh-lingual_1                              200  19 191 0
+ 901   ctx-lh-lingual_8                              116  17 244 0
+ 902   ctx-lh-lingual_10                             224  94 123 0
+ 903   ctx-lh-lingual_6                              189 248  53 0
+ 904   ctx-lh-lingual_9                               82 103 203 0
+ 905   ctx-lh-lingual_13                             152  44 221 0
+ 906   ctx-lh-lingual_5                              232 232  22 0
+ 907   ctx-lh-lingual_2                              172  78   1 0
+ 908   ctx-lh-lingual_15                              45  68 157 0
+ 909   ctx-lh-lingual_12                             199  45  83 0
+ 910   ctx-lh-lingual_17                             236  57  89 0
+ 911   ctx-lh-lingual_7                              182  56 156 0
+ 912   ctx-lh-fusiform_12                             13   2 163 0
+ 913   ctx-lh-fusiform_7                              19  60 212 0
+ 914   ctx-lh-fusiform_17                            147 218 111 0
+ 915   ctx-lh-fusiform_15                            203  75 135 0
+ 916   ctx-lh-fusiform_6                             246  55  18 0
+ 917   ctx-lh-fusiform_5                             247  90 174 0
+ 918   ctx-lh-fusiform_10                             96  58 240 0
+ 919   ctx-lh-fusiform_1                             179  35  51 0
+ 920   ctx-lh-fusiform_11                             86  37 225 0
+ 921   ctx-lh-fusiform_4                              60 228 125 0
+ 922   ctx-lh-fusiform_16                             36  34  28 0
+ 923   ctx-lh-fusiform_2                             207 105 228 0
+ 924   ctx-lh-fusiform_3                             158  94 123 0
+ 925   ctx-lh-fusiform_8                             113 113 200 0
+ 926   ctx-lh-fusiform_9                              96 237 239 0
+ 927   ctx-lh-fusiform_14                            239  91 197 0
+ 928   ctx-lh-fusiform_13                            216 159  72 0
+ 929   ctx-lh-fusiform_18                            213  43  38 0
+ 930   ctx-lh-parahippocampal_3                       47 156 101 0
+ 931   ctx-lh-parahippocampal_6                       64 155 233 0
+ 932   ctx-lh-parahippocampal_1                      248  90 113 0
+ 933   ctx-lh-parahippocampal_4                      126 200 249 0
+ 934   ctx-lh-parahippocampal_5                       50 221 181 0
+ 935   ctx-lh-parahippocampal_2                       88  32  99 0
+ 936   ctx-lh-entorhinal_2                           181  73  91 0
+ 937   ctx-lh-entorhinal_1                            72 207 162 0
+ 938   ctx-lh-entorhinal_3                             8  72   3 0
+ 939   ctx-lh-temporalpole_2                         175   9  45 0
+ 940   ctx-lh-temporalpole_1                         199  32  93 0
+ 941   ctx-lh-temporalpole_3                         195  60 224 0
+ 942   ctx-lh-inferiortemporal_15                    159  48  84 0
+ 943   ctx-lh-inferiortemporal_11                     90 124 214 0
+ 944   ctx-lh-inferiortemporal_6                      27 237 172 0
+ 945   ctx-lh-inferiortemporal_2                     235  60 192 0
+ 946   ctx-lh-inferiortemporal_5                     251  40 239 0
+ 947   ctx-lh-inferiortemporal_8                      60 212  85 0
+ 948   ctx-lh-inferiortemporal_14                    115  79 201 0
+ 949   ctx-lh-inferiortemporal_13                    206 121  73 0
+ 950   ctx-lh-inferiortemporal_4                      46  63  39 0
+ 951   ctx-lh-inferiortemporal_1                      68 180  46 0
+ 952   ctx-lh-inferiortemporal_9                     138 125 245 0
+ 953   ctx-lh-inferiortemporal_3                      27 100 171 0
+ 954   ctx-lh-inferiortemporal_10                    250 193 246 0
+ 955   ctx-lh-inferiortemporal_12                     55  32 171 0
+ 956   ctx-lh-inferiortemporal_16                     84  21 194 0
+ 957   ctx-lh-inferiortemporal_7                     239 226  36 0
+ 958   ctx-lh-middletemporal_6                       100 209 219 0
+ 959   ctx-lh-middletemporal_16                      138 186 222 0
+ 960   ctx-lh-middletemporal_10                      247 222 140 0
+ 961   ctx-lh-middletemporal_7                       140 227  64 0
+ 962   ctx-lh-middletemporal_3                       224 162  41 0
+ 963   ctx-lh-middletemporal_1                       172  10  17 0
+ 964   ctx-lh-middletemporal_13                       71  54  40 0
+ 965   ctx-lh-middletemporal_8                       181 199  51 0
+ 966   ctx-lh-middletemporal_14                      234 227 144 0
+ 967   ctx-lh-middletemporal_5                       239 241  19 0
+ 968   ctx-lh-middletemporal_11                      170 248 197 0
+ 969   ctx-lh-middletemporal_9                       151 197 122 0
+ 970   ctx-lh-middletemporal_15                      136 181 250 0
+ 971   ctx-lh-middletemporal_2                       111  50 241 0
+ 972   ctx-lh-middletemporal_4                       174 244 109 0
+ 973   ctx-lh-middletemporal_12                      150 173 233 0
+ 974   ctx-lh-bankssts_1                              85 136 219 0
+ 975   ctx-lh-bankssts_3                             187 198 109 0
+ 976   ctx-lh-bankssts_2                              97 140  56 0
+ 977   ctx-lh-bankssts_6                             234 199  62 0
+ 978   ctx-lh-bankssts_4                              48  15 189 0
+ 979   ctx-lh-bankssts_5                              36 227 139 0
+ 980   ctx-lh-superiortemporal_26                    231 248 196 0
+ 981   ctx-lh-superiortemporal_20                     12  23  26 0
+ 982   ctx-lh-superiortemporal_11                     52 147 112 0
+ 983   ctx-lh-superiortemporal_4                       2  53 147 0
+ 984   ctx-lh-superiortemporal_24                    116 132 208 0
+ 985   ctx-lh-superiortemporal_18                     51  72  19 0
+ 986   ctx-lh-superiortemporal_3                       2 217 175 0
+ 987   ctx-lh-superiortemporal_21                    240 171  32 0
+ 988   ctx-lh-superiortemporal_17                    227 167 243 0
+ 989   ctx-lh-superiortemporal_25                      5 210 169 0
+ 990   ctx-lh-superiortemporal_9                     134 134  93 0
+ 991   ctx-lh-superiortemporal_19                    165 148 145 0
+ 992   ctx-lh-superiortemporal_16                     51 195 251 0
+ 993   ctx-lh-superiortemporal_6                     162 109  12 0
+ 994   ctx-lh-superiortemporal_13                     16 181  10 0
+ 995   ctx-lh-superiortemporal_8                     104 161 163 0
+ 996   ctx-lh-superiortemporal_23                    197 235 173 0
+ 997   ctx-lh-superiortemporal_15                    114 195 163 0
+ 998   ctx-lh-superiortemporal_12                    187 138  76 0
+ 999   ctx-lh-superiortemporal_5                      51 189  65 0
+1000   ctx-lh-superiortemporal_10                    207 200  19 0
+1001   ctx-lh-superiortemporal_1                     232  36 213 0
+1002   ctx-lh-superiortemporal_22                    157  28 239 0
+1003   ctx-lh-superiortemporal_14                    230  27  79 0
+1004   ctx-lh-superiortemporal_7                     233   7  89 0
+1005   ctx-lh-superiortemporal_2                     147 227  17 0
+1006   ctx-lh-transversetemporal_4                   195 125 139 0
+1007   ctx-lh-transversetemporal_1                   225 184   7 0
+1008   ctx-lh-transversetemporal_3                   165 252 228 0
+1009   ctx-lh-transversetemporal_2                   240  16 203 0
+1010   ctx-lh-insula_5                               201 203 147 0
+1011   ctx-lh-insula_2                                98  74  66 0
+1012   ctx-lh-insula_16                               54 244  55 0
+1013   ctx-lh-insula_12                              225 202  75 0
+1014   ctx-lh-insula_1                                16 107 166 0
+1015   ctx-lh-insula_8                               236 243 229 0
+1016   ctx-lh-insula_14                              251  78 152 0
+1017   ctx-lh-insula_10                              184  13   1 0
+1018   ctx-lh-insula_9                               221 131 194 0
+1019   ctx-lh-insula_13                              120 126  29 0
+1020   ctx-lh-insula_11                              128  20   1 0
+1021   ctx-lh-insula_6                               241 106 189 0
+1022   ctx-lh-insula_15                               52 104  11 0
+1023   ctx-lh-insula_4                               163 115  87 0
+1024   ctx-lh-insula_7                               103   7 152 0
+1025   ctx-lh-insula_3                                 5 172 182 0
+1026   ctx-lh-insula_17                              200 201  80 0
+
+# Left Hemisphere. Subcortical Structures (Thalamic Nuclei)
+1027   Left-Pulvinar                                                      255   0   0 0
+1028   Left-Anterior                                                        0 255   0 0
+1029   Left-Medio_Dorsal                                                  255 255   0 0
+1030   Left-Ventral_Latero_Dorsal                                         255 123   0 0
+1031   Left-Central_Lateral-Lateral_Posterior-Medial_Pulvinar               0 255 255 0
+1032   Left-Ventral_Anterior                                              255   0 255 0
+1033   Left-Ventral_Latero_Ventral                                          0   0 255 0
+
+# Left Hemisphere. Subcortical Structures
+1034   Left-Caudate                    122 186 220 0
+1035   Left-Putamen                    236  13 176 0
+1036   Left-Pallidum                    12  48 255 0
+1037   Left-Accumbens_area             255 165   0 0
+1038   Left-Amygdala                   103 255 255 0
+1039   Left-Hippocampus                220 216  20 0
+
+# Left Hemisphere. Subcortical Structures (Hippocampal Subfields)
+1040   Left-Hippocampus_Parasubiculum                   255 255   0 0
+1041   Left-Hippocampus_Presubiculum                     64   0  64 0
+1042   Left-Hippocampus_Subiculum                         0   0 255 0
+1043   Left-Hippocampus_CA1                             255   0   0 0
+1044   Left-Hippocampus_CA3                               0 128   0 0
+1045   Left-Hippocampus_CA4                             196 160 128 0
+1046   Left-Hippocampus_GCDG                             32 200 255 0
+1047   Left-Hippocampus_HATA                            128 255 128 0
+1048   Left-Hippocampus_Fimbria                         204 153 204 0
+1049   Left-Hippocampus_Molecular_layer_HP              128   0   0 0
+1050   Left-Hippocampus_Hippocampal_fissure             128  32 255 0
+1051   Left-Hippocampus_Tail                            170 170 255 0
+
+# Left Hemisphere. Ventral Diencephalon
+1052   Left-VentralDC             165 42 42 0
+
+# Brain Stem Structures
+1053   Brain_Stem-Midbrain             242 104  76 0
+1054   Brain_Stem-Pons                 206 195  58 0
+1055   Brain_Stem-Medulla              119 159 176 0
+1056   Brain_Stem-SCP                  142 182   0 0
+
