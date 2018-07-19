@@ -268,6 +268,7 @@ class ParcellateThalamus(BaseInterface):
             tempImage = Vspams[:,:,:,nuc]
             T = np.multiply(tempImage,Ij)
             Ispams[:,:,:,nuc] = T / T.max()
+        del tempImage, T, Vspams, Ij
 
         iflogger.info('Creating Thalamus mask from FreeSurfer aparc+aseg ')
 
@@ -322,12 +323,16 @@ class ParcellateThalamus(BaseInterface):
             tempI = np.zeros(Ia.shape)
             tempI[indr] = 1;
             tempI = filter_isolated_cells(tempI,struct=struct)
-            indr = np.where(tempI == 1);
+            indr = np.where(tempI == 1)
+
+            del struct, tempI
 
         # Creating Thalamic Mask (1: Left, 2:Right)
         Ithal = np.zeros(Ia.shape)
-        Ithal[indl]  = 1;
-        Ithal[indr] = 2;
+        Ithal[indl]  = 1
+        Ithal[indr] = 2
+
+        del indl, indr
 
         #TODO: Masking according to csf
         # unzip_nifti([freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii.gz']);
@@ -348,6 +353,9 @@ class ParcellateThalamus(BaseInterface):
         Vthal = ni.Nifti1Image(Ithal, Vatlas.get_affine(), hdr2)
         ni.save(Vthal, thalamus_mask)
 
+        del hdr, hdr2, Vthal
+
+
         Nspams = Ispams.shape[3]
         Thresh = 0.05
 
@@ -356,16 +364,22 @@ class ParcellateThalamus(BaseInterface):
             IthalL = np.zeros(Ithal.shape)
             indl = np.where(Ithal == 1)
             IthalL[indl] = 1
+            del indl
 
             IthalR = np.zeros(Ithal.shape)
             indr = np.where(Ithal == 2)
             IthalR[indr] = 1
+            del indr
 
-            tmpIthalL = np.zeros((Ithal.shape[0],Ithal.shape[1],Ithal.shape[2],1))
+            del Ithal
+
+            tmpIthalL = np.zeros((IthalL.shape[0],IthalL.shape[1],IthalL.shape[2],1))
             tmpIthalL[:,:,:,0] = IthalL
             tempM = np.repeat(tmpIthalL,Nspams/2,axis=3)
-
+            del tmpIthalL
             IspamL = np.multiply(Ispams[:,:,:,0:Nspams/2],tempM)
+            del tempM
+
             # Creating MaxProb
             ind = np.where(IspamL < Thresh)
             IspamL[ind] = 0
@@ -377,11 +391,13 @@ class ParcellateThalamus(BaseInterface):
             #?MaxProbL = ndimage.binary_fill_holes(MaxProbL)
             #?MaxProbL = Atlas_Corr(IthalL,MaxProbL)
 
-            tmpIthalR = np.zeros((Ithal.shape[0],Ithal.shape[1],Ithal.shape[2],1))
+            tmpIthalR = np.zeros((IthalR.shape[0],IthalR.shape[1],IthalR.shape[2],1))
             tmpIthalR[:,:,:,0] = IthalR
             tempM = np.repeat(tmpIthalR,Nspams/2,axis=3)
-
+            del tmpIthalR
             IspamR = np.multiply(Ispams[:,:,:,Nspams/2:Nspams],tempM)
+            del tempM
+
             # Creating MaxProb
             ind = np.where(IspamR < Thresh)
             IspamR[ind] = 0
@@ -405,6 +421,8 @@ class ParcellateThalamus(BaseInterface):
         img = ni.Nifti1Image(Ispams, imgVspams.get_affine(), hdr2)
         ni.save(img, output_maps)
 
+        del hdr, img, imgVspams
+
         # Saving Maxprob
         # update the header
         max_prob = op.abspath('{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefixName))
@@ -423,143 +441,13 @@ class ParcellateThalamus(BaseInterface):
             MaxProb[ind] = 0;
             #?MaxProb = imfill(MaxProb,'holes');
 
-        print("Save output image to %s" % max_prob)
-        img = ni.Nifti1Image(MaxProb, Vatlas.get_affine(), hdr2)
-        ni.save(img, max_prob)
-
-        Vatlas = ni.load(out)
-        Ia = Vatlas.get_data();
-        indl = np.where(Ia == 10)
-        indr = np.where(Ia == 49)
-
-        def filter_isolated_cells(array, struct):
-            """ Return array with completely isolated single cells removed
-            :param array: Array with completely isolated single cells
-            :param struct: Structure array for generating unique regions
-            :return: Array with minimum region size > 1
-            """
-            filtered_array = np.copy(array)
-            id_regions, num_ids = ndimage.label(filtered_array, structure=struct)
-            id_sizes = np.array(ndimage.sum(array, id_regions, range(num_ids + 1)))
-            area_mask = (id_sizes == 1)
-            filtered_array[area_mask[id_regions]] = 0
-            return filtered_array
-
-        remove_isolated_points = True
-        if remove_isolated_points:
-            struct = np.ones((3,3,3))
-
-            #struct = np.zeros((3,3,3))
-            #struct[1,1,1] = 1
-
-            # Left Hemisphere
-            # Removing isolated points
-            tempI = np.zeros(Ia.shape)
-            tempI[indl] = 1;
-            tempI = filter_isolated_cells(tempI,struct=struct)
-            indl = np.where(tempI == 1);
-
-            # Right Hemisphere
-            # Removing isolated points
-            tempI = np.zeros(Ia.shape)
-            tempI[indr] = 1;
-            tempI = filter_isolated_cells(tempI,struct=struct)
-            indr = np.where(tempI == 1);
-
-        # Creating Thalamic Mask (1: Left, 2:Right)
-        Ithal = np.zeros(Ia.shape)
-        Ithal[indl]  = 1;
-        Ithal[indr] = 2;
-
-        #TODO: Masking according to csf
-        # unzip_nifti([freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii.gz']);
-        # Outfiles = Extract_brain([freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii'],[freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii']);
-        #
-        # csfFilename = deblank(Outfiles(4,:));
-        # Vcsf = spm_vol_gzip(csfFilename);
-        # Icsf = spm_read_vols_gzip(Vcsf);
-        # ind = find(Icsf > csfThresh);
-        # Ithal(ind) = 0;
-
-        thalamus_mask = op.abspath('{}_class-thalamus_dtissue.nii.gz'.format(outprefixName))
-        # update the header
-        hdr = Vatlas.get_header()
-        hdr2 = hdr.copy()
-        hdr2.set_data_dtype(np.uint16)
-        print("Save output image to %s" % thalamus_mask)
-        Vthal = ni.Nifti1Image(Ithal, Vatlas.get_affine(), hdr2)
-        ni.save(Vthal, thalamus_mask)
-
-        Nspams = Ispams.shape[3]
-        Thresh = 0.05
-
-        use_thalamus_mask = False
-        if use_thalamus_mask:
-            IthalL = np.zeros(Ithal.shape)
-            indl = np.where(Ithal == 1)
-            IthalL[indl] = 1
-
-            IthalR = np.zeros(Ithal.shape)
-            indr = np.where(Ithal == 2)
-            IthalR[indr] = 1
-
-            IspamL = np.multiply(Ispams[:,:,:,0:Nspams/2],np.tile(IthalL,[1,1,1,Nspams/2]))
-            # Creating MaxProb
-            ind = np.where(IspamL < Thresh)
-            IspamL[ind] = 0
-            ind = np.where(np.sum(IspamL,axis=3) == 0)
-            #MaxProbL = IspamL.max(axis=3)
-            MaxProbR = np.argmax(IspamR,axis=3)
-            MaxProbR[ind] = 0
-            #MaxProbL[ind] = 0
-            #?MaxProbL = ndimage.binary_fill_holes(MaxProbL)
-            #?MaxProbL = Atlas_Corr(IthalL,MaxProbL)
-
-            IspamR = np.multiply(Ispams[:,:,:,Nspams/2:Nspams],np.tile(IthalR,[1,1,1,Nspams/2]))
-            # Creating MaxProb
-            ind = np.where(IspamR < Thresh)
-            IspamR[ind] = 0
-            ind = np.where(np.sum(IspamR,axis=3) == 0)
-            #MaxProbR = IspamR.max(axis=3)
-            MaxProbR = np.argmax(IspamR,axis=3)
-            MaxProbR[ind] = 0
-            #?MaxProbR = imfill(MaxProbR,'holes');
-            #?MaxProbR = Atlas_Corr(IthalR,MaxProbR);
-            #?MaxProbR[ind] = MaxProbR[indr] + Nspams/2;
-
-            Ispams[:,:,:,0:Nspams/2] = IspamL
-            Ispams[:,:,:,Nspams/2:Nspams] = IspamR
-
-        # Saving Volume
-        # update the header
-        hdr = imgVspams.get_header()
-        hdr2 = hdr.copy()
-        hdr2.set_data_dtype(np.uint16)
-        print("Save output image to %s" % output_maps)
-        img = ni.Nifti1Image(Ispams, imgVspams.get_affine(), hdr2)
-        ni.save(img, output_maps)
-
-        # Saving Maxprob
-        # update the header
-        max_prob = op.abspath('{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefixName))
-        hdr = Vatlas.get_header()
-        hdr2 = hdr.copy()
-        hdr2.set_data_dtype(np.uint16)
-
-        if use_thalamus_mask:
-            MaxProb = MaxProbL + MaxProbR
-        else:
-            # Creating MaxProb
-            ind = np.where(Ispams < Thresh)
-            Ispams[ind] = 0
-            ind = np.where(np.sum(Ispams,axis=3) == 0)
-            MaxProb = Ispams.argmax(axis=3)
-            MaxProb[ind] = 0;
-            #?MaxProb = imfill(MaxProb,'holes');
+        del Ispams
 
         print("Save output image to %s" % max_prob)
         img = ni.Nifti1Image(MaxProb, Vatlas.get_affine(), hdr2)
         ni.save(img, max_prob)
+
+        del hdr2, img, max_prob
 
         iflogger.info('Done')
 
