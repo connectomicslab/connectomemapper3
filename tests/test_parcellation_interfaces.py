@@ -23,7 +23,7 @@ def test_parcellate_brainstem(subjects_dir,subject_id,base_dir):
     from cmtklib.parcellation import ParcellateBrainstemStructures
     from nipype import Node, Workflow
 
-    parcellate_brainstem = Node(interface=ParcellateBrainstemStructures(), name='parcellate_hipposubfield',base_dir=base_dir)
+    parcellate_brainstem = Node(interface=ParcellateBrainstemStructures(), name='parcellate_brainstem',base_dir=base_dir)
     parcellate_brainstem.inputs.subjects_dir = subjects_dir
     parcellate_brainstem.inputs.subject_id = subject_id
 
@@ -45,7 +45,7 @@ def test_parcellate(subjects_dir,subject_id,parcellation_scheme,base_dir):
     # Execute the node
     parcellate.run()
 
-    print('Output : ', parcellate.roi_files_in_structural_space)
+    print('Output : ', parcellate.outputs.roi_files_in_structural_space)
 
 def test_parcellate_thalamus(subjects_dir,subject_id,subject_T1w,template,thalamic_maps,base_dir):
 
@@ -271,7 +271,7 @@ if __name__ == '__main__':
     #from cmtklib.parcellation import create_roi_v2
     #create_roi_v2(subject_id,subjects_dir,2)
 
-    test_parcellate(subjects_dir,subject_id,'Lausanne2018',base_dir)
+    #test_parcellate(subjects_dir,subject_id,'Lausanne2018',base_dir)
 
     test_parcellate_thalamus(subjects_dir,subject_id,subject_T1w,template,thalamic_maps,base_dir)
 

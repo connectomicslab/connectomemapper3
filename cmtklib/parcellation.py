@@ -24,7 +24,7 @@ import scipy.ndimage.morphology as nd
 import sys
 from time import time
 
-from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, BaseInterface, Directory, File, OutputMultiPath
+from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, BaseInterface, Directory, File, InputMultiPath, OutputMultiPath
 
 from nipype.utils.logger import logging
 iflogger = logging.getLogger('interface')
@@ -105,7 +105,7 @@ class ParcellateHippocampalSubfields(BaseInterface):
 
         mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','lh.hippoSfLabels-T1.v10.mgz')
         targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','orig/001.mgz')
-        out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','lh_subFields.nii.gz')
+        out = op.abspath('lh_subFields.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -114,7 +114,7 @@ class ParcellateHippocampalSubfields(BaseInterface):
 
         mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rh.hippoSfLabels-T1.v10.mgz')
         targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','orig/001.mgz')
-        out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','rh_subFields.nii.gz')
+        out = op.abspath('rh_subFields.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -127,8 +127,8 @@ class ParcellateHippocampalSubfields(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['lh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','lh_subFields.nii.gz')
-        outputs['rh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','rh_subFields.nii.gz')
+        outputs['lh_hipposubfields'] = op.abspath('lh_subFields.nii.gz')
+        outputs['rh_hipposubfields'] = op.abspath('rh_subFields.nii.gz')
         return outputs
 
 class ParcellateBrainstemStructuresInputSpec(BaseInterfaceInputSpec):
@@ -160,7 +160,7 @@ class ParcellateBrainstemStructures(BaseInterface):
 
         mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','brainstemSsLabels.v10.mgz')
         targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','orig/001.mgz')
-        out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','brainstem.nii.gz')
+        out = op.abspath('brainstem.nii.gz')
         cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -173,9 +173,219 @@ class ParcellateBrainstemStructures(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['brainstem_structures'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','brainstem.nii.gz')
+        outputs['brainstem_structures'] = op.abspath('brainstem.nii.gz')
         return outputs
 
+class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
+    input_rois = InputMultiPath(File(exists=True))
+    lh_hippocampal_subfields = File('')
+    rh_hippocampal_subfields = File('')
+    brainstem_structures = File('')
+    thalamus_nuclei = File('')
+
+class CombineParcellationsOutputSpec(TraitedSpec):
+    output_rois = OutputMultiPath(File(exists=True))
+
+class CombineParcellations(BaseInterface):
+    input_spec = CombineParcellationsInputSpec
+    output_spec = CombineParcellationsOutputSpec
+
+    def ismember(a, b):
+        bind = {}
+        for i, elt in enumerate(b):
+            if elt not in bind:
+                bind[elt] = i
+        return [bind.get(itm, None) for itm in a]  # None can be replaced by any other "not in b" value
+
+    def _run_interface(self,runtime):
+        # Freesurfer IDs for subcortical structures
+        left_subcIds = np.array([10, 11, 12, 13, 26, 18, 17])
+        # left_subcIds_colors_r = [0 122 236 12 255 103 220]';
+        # left_subcIds_colors_g = [118 186 13 48 165 255 216]';
+        # left_subcIds_colors_b = [14 220 176 255 0 255 20]';
+        # left_subcort_names = {'Left-Thalamus_Proper';'Left-Caudate';'Left-Putamen';'Left-Pallidum';'Left-Accumbens_area';'Left-Amygdala';'Left-Hippocampus'};
+
+        right_subcIds = np.array([49, 50, 51, 52, 58, 54, 53])
+        # right_subcIds_colors_r = [0 122 236 12 255 103 220]';
+        # right_subcIds_colors_g = [118 186 13 48 165 255 216]';
+        # right_subcIds_colors_b = [14 220 176 255 0 255 20]';
+        # right_subcort_names = {'Right-Thalamus_Proper';'Right-Caudate';'Right-Putamen';'Right-Pallidum';'Right-Accumbens_area';'Right-Amygdala';'Right-Hippocampus'};
+
+
+        # Thalamic Nuclei
+        left_thalNuclei = np.array([1, 2, 3, 4, 5, 6, 7])
+        # left_thalNuclei_colors_r = [255 0 255 255 0 255 0]';
+        # left_thalNuclei_colors_g = [0 255 255 123 255 0 0]';
+        # left_thalNuclei_colors_b = [0 0 0 0 255 255 255]';
+        # left_thalNuclei_names = {'Left-Pulvinar';'Left-Anterior';'Left-Medio_Dorsal';'Left-Ventral_Latero_Dorsal';'Left-Central_Lateral-Lateral_Posterior-Medial_Pulvinar';...
+        #     'Left-Ventral_Anterior';'Left-Ventral_Latero_Ventral'};
+
+        right_thalNuclei = np.array([8, 9, 10, 11, 12, 13, 14])
+        # right_thalNuclei_colors_r = [255 0 255 255 0 255 0]';
+        # right_thalNuclei_colors_g = [0 255 255 123 255 0 0]';
+        # right_thalNuclei_colors_b = [0 0 0 0 255 255 255]';
+        # right_thalNuclei_names = {'Right-Pulvinar';'Right-Anterior';'Right-Medio_Dorsal';'Right-Ventral_Latero_Dorsal';'Right-Central_Lateral-Lateral_Posterior-Medial_Pulvinar';...
+        #     'Right-Ventral_Anterior';'Right-Ventral_Latero_Ventral'};
+
+
+        # Hippocampus subfields
+        hippo_subf = np.array([203, 204, 205, 206, 208, 209, 210, 211, 212, 214, 215, 226])
+        # hippo_subf_colors_r = [255 64 0 255 0 196 32 128 204 128 128 170]';
+        # hippo_subf_colors_g = [255 0 0 0 128 160 200 255 153 0 32 170 ]';
+        # hippo_subf_colors_b = [0 64 255 0 0 128 255 128 204 0 255 255 ]';
+        # left_hippo_subf_names  = {'Left-Hippocampus_Parasubiculum';'Left-Hippocampus_Presubiculum';'Left-Hippocampus_Subiculum';'Left-Hippocampus_CA1';'Left-Hippocampus_CA3';'Left-Hippocampus_CA4';...
+        #     'Left-Hippocampus_GCDG';'Left-Hippocampus_HATA';'Left-Hippocampus_Fimbria';'Left-Hippocampus_Molecular_layer_HP';'Left-Hippocampus_Hippocampal_fissure';...
+        #     'Left-Hippocampus_Tail'};
+        # right_hippo_subf_names = {'Right-Hippocampus_Parasubiculum';'Right-Hippocampus_Presubiculum';'Right-Hippocampus_Subiculum';'Right-Hippocampus_CA1';'Right-Hippocampus_CA3';'Right-Hippocampus_CA4';...
+        #     'Right-Hippocampus_GCDG';'Right-Hippocampus_HATA';'Right-Hippocampus_Fimbria';'Right-Hippocampus_Molecular_layer_HP';'Right-Hippocampus_Hippocampal_fissure';...
+        #     'Right-Hippocampus_Tail';};
+
+
+        # Left Ventral Diencephalon
+        left_ventral = 28;
+        # left_ventral_colors_r = 165;
+        # left_ventral_colors_g = 42;
+        # left_ventral_colors_b = 42;
+        # left_ventral_names = {'Left-VentralDC'};
+
+        # Right Ventral Diencephalon
+        right_ventral = 60;
+        # right_ventral_colors_r = 165;
+        # right_ventral_colors_g = 42;
+        # right_ventral_colors_b = 42;
+        # right_ventral_names = {'Right-VentralDC'};
+
+        # Third Ventricle
+        ventricle3 = 14;
+        # ventricle3_colors_r = 204;
+        # ventricle3_colors_g = 182;
+        # ventricle3_colors_b = 142;
+        # ventricle3_names = {'Third-Ventricle'};
+
+        # Hypothalamus
+        ventricle3 = 14;
+        # hypothal_colors_r = 204;
+        # hypothal_colors_g = 182;
+        # hypothal_colors_b = 142;
+        # left_hypothal_names  = {'Left-Hypothalamus'};
+        # right_hypothal_names = {'Right-Hypothalamus'};
+
+        # BrainStem Parcellation
+        brainstem = np.array([173, 174, 175, 178 ])
+        # brainstem_colors_r = [242 206 119 142]';
+        # brainstem_colors_g = [104 195 159 182]';
+        # brainstem_colors_b = [76 58 176 0]';
+        # brainstem_names = {'Brain_Stem-Midbrain';'Brain_Stem-Pons';'Brain_Stem-Medulla';'Brain_Stem-SCP'};
+
+        # Reading Subfields Images
+        Vsublh = ni.load(self.inputs.lh_hippocampal_subfields)
+        Vsubrh =  ni.load(self.inputs.rh_hippocampal_subfields)
+        Isublh = Vsublh.get_data()
+        Isubrh = Vsubrh.get_data()
+
+        # Reading  Nuclei
+        Vthal = ni.load(self.inputs.thalamus_nuclei)
+        Ithal = Vthal.get_data()
+
+        # Reading Stem Image
+        Vstem = ni.load(self.inputs.brainstem_structures)
+        Istem = Vstem.get_data()
+        indstem = np.where(Istem > 0);
+
+        for roi in self.inputs.input_rois:
+            # Reading Cortical Parcellation
+            V = ni.load(roi)
+            I = V.get_data()
+
+            # Replacing the brain stem (Stem is replaced by its own parcellation. Mismatch between both global volumes, mainly due to partial volume effect in the global stem parcellation)
+            indrep = np.where(I == 16)
+            I[indrep] = 0;
+            I[indstem] = Istem[indstem]
+
+            ## Processing Left Hemisphere
+            # Relabelling Right hemisphere
+            It = np.zeros(I.shape)
+            ind = np.where((I > 2000) & (I <3000));
+            It[ind] = I[ind] - 2000;
+            nlabel = It.max()
+
+            # Relabelling Thalamic Nuclei
+            newLabels = np.arange(nlabel+1,nlabel+1+right_thalNuclei.size())
+            [bool,ord] = ismember(Ithal,right_thalNuclei)
+            ind = np.where(bool)
+            It[ind] = newLabels[ord[ind]]
+            nlabel = It.max()
+
+            # Relabelling Subcortical Structures
+            newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].size())
+            [bool,ord] = ismember(I,right_subcIds[1:])
+            ind = np.where(bool)
+            It[ind] = newLabels[ord[ind]]
+            nlabel = It.max()
+
+            # Relabelling Subfields
+            newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.size())
+            [bool,ord] = ismember(Isubrh,hippo_subf)
+            ind = np.where(bool)
+            It[ind] = newLabels[ord[ind]]
+            nlabel = It.max()
+
+            # Relabelling Right VentralDC
+            newLabels = np.arange(nlabel+1,nlabel+1)
+            [bool,ord] = ismember(I,right_ventral)
+            ind = np.where(bool)
+            It[ind] = newLabels[ord[ind]]
+            nlabel = It.max()
+
+            ## Processing Left Hemisphere
+            # Relabelling Left hemisphere
+            ind = np.where((I > 1000) & (I <2000));
+            It[ind] = I[ind] - 1000 + nlabel;
+            nlabel = It.max()
+
+            # Relabelling Thalamic Nuclei
+            newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.size())
+            [bool,ord] = ismember(Ithal,left_thalNuclei)
+            ind = np.where(bool)
+            It[ind] = newLabels[ord[ind]]
+            nlabel = It.max()
+
+            # Relabelling Subcortical Structures
+            newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].size())
+            [bool,ord] = ismember(I,left_subcIds[1:])
+            ind = np.where(bool)
+            It[ind] = newLabels[ord[ind]]
+            nlabel = It.max()
+
+            # Relabelling Subfields
+            newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.size())
+            [bool,ord] = ismember(Isublh,hippo_subf)
+            ind = np.where(bool)
+            It[ind] = newLabels[ord[ind]]
+            nlabel = It.max()
+            newIds_LH_subFields = newLabels
+
+            # Relabelling Left VentralDC
+            newLabels = np.arange(nlabel+1,nlabel+1)
+            [bool,ord] = ismember(I,left_ventral)
+            ind = np.where(bool)
+            It[ind] = newLabels[ord[ind]]
+            nlabel = It.max()
+            newIds_LH_ventralDC = newLabels;
+
+            # Relabelling Brain Stem
+            newLabels = np.arange(nlabel+1,nlabel+1+brainstem.size())
+            [bool,ord] = ismember(I,brainstem);
+            ind = np.where(bool)
+            It[ind] = newLabels[ord[ind]]
+            nlabel = It.max()
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        # outputs['final_rois_in_structural_space'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','brainstem.nii.gz')
+        return outputs
 
 class ParcellateThalamusInputSpec(BaseInterfaceInputSpec):
     T1w_image = File(mandatory=True, desc='T1w image to be parcellated')
