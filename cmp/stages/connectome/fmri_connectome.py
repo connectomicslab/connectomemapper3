@@ -178,6 +178,10 @@ class rsfmri_conmat(BaseInterface):
                 print(log_scrubbing)
                 np.save( os.path.abspath( 'tp_after_scrubbing.npy'), index )
                 sio.savemat( os.path.abspath('tp_after_scrubbing.mat'), {'index':index} )
+                ts_after_scrubbing = ts[:,index]
+                np.save( op.abspath('averageTimeseries_%s_after_scrubbing.npy' % s), ts_after_scrubbing )
+                sio.savemat( op.abspath('averageTimeseries_%s_after_scrubbing.mat' % s), {'ts':ts_after_scrubbing} )
+
             else:
                 index = np.linspace(0,tp-1,tp).astype('int')
 
