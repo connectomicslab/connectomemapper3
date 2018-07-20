@@ -196,10 +196,10 @@ class nuisance_regression(BaseInterface):
         #s = gconf.parcellation.keys()[0]
 
         gm = nib.load(self.inputs.gm_file[0]).get_data().astype( np.uint32 )
-        if float(self.inputs.n_discard) > 0:
-            n_discard = int(self.inputs.n_discard) - 1
-            if self.inputs.motion_nuisance:
-                move = move[n_discard:-1,:]
+        # if float(self.inputs.n_discard) > 0:
+        #     n_discard = int(self.inputs.n_discard) - 1
+        #     if self.inputs.motion_nuisance:
+        #         move = move[n_discard:-1,:]
 
         # build regressors matrix
         if self.inputs.global_nuisance:
