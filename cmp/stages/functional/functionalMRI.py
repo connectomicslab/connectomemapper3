@@ -31,6 +31,7 @@ import numpy as np
 import scipy.io as sio
 import statsmodels.api as sm
 from scipy import signal
+from obspy.signal.detrend import polynomial
 
 class FunctionalMRIConfig(HasTraits):
     smoothing = Float(0.0)
@@ -256,6 +257,7 @@ class nuisance_regression(BaseInterface):
 class detrending_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to detrend")
     gm_file = InputMultiPath(File(exists=True), desc="ROI files registered to fMRI space")
+    mode = traits.Enum(['linear','quadradic'])
 
 class detrending_OutputSpec(TraitedSpec):
     out_file = File(exists=True)
@@ -265,7 +267,7 @@ class Detrending(BaseInterface):
     output_spec = detrending_OutputSpec
 
     def _run_interface(self,runtime):
-        """ linear detrending
+        """ linear/quadratic detrending
         """
 
         print("Linear detrending")
@@ -292,6 +294,19 @@ class Detrending(BaseInterface):
 
         img = nib.Nifti1Image(new_data_det, dataimg.get_affine(), dataimg.get_header())
         nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
+
+        if self.inputs.mode == 'quadratic':
+
+        	# GLM: regress out nuisance covariates
+
+        	for index,value in np.ndenumerate( gm ):
+            	if value == 0:
+                		continue
+
+            	Ydet = polynomial(data[index[0],index[1],index[2],:], order=2)
+
+        	img = nib.Nifti1Image(new_data_det, dataimg.get_affine(), dataimg.get_header())
+        	nib.save(img, op.join(gconf.get_preproc(), 'fMRI_detrending.nii.gz'))
 
         print("[ DONE ]")
         return runtime
