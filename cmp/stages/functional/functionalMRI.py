@@ -19,6 +19,7 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.utility as util
+from nipype.interfaces import afni
 
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
 
@@ -424,29 +425,54 @@ class FunctionalMRIStage(Stage):
 
     def create_workflow(self, flow, inputnode, outputnode):
 
-        smoothing_output = pe.Node(interface=util.IdentityInterface(fields=["smoothing_output"]),name="smoothing_output")
-        if self.config.smoothing > 0.0:
-            smoothing = pe.Node(interface=fsl.SpatialFilter(operation='mean',kernel_shape = 'gauss'),name="smoothing")
-            smoothing.inputs.kernel_size = self.config.smoothing
+        # smoothing_output = pe.Node(interface=util.IdentityInterface(fields=["smoothing_output"]),name="smoothing_output")
+        # if self.config.smoothing > 0.0:
+        #     smoothing = pe.Node(interface=fsl.SpatialFilter(operation='mean',kernel_shape = 'gauss'),name="smoothing")
+        #     smoothing.inputs.kernel_size = self.config.smoothing
+        #     flow.connect([
+        #                 (inputnode,smoothing,[("preproc_file","in_file")]),
+        #                 (smoothing,smoothing_output,[("out_file","smoothing_output")])
+        #                 ])
+        # else:
+        #     flow.connect([
+        #                 (inputnode,smoothing_output,[("preproc_file","smoothing_output")])
+        #                 ])
+        #
+        # discard_output = pe.Node(interface=util.IdentityInterface(fields=["discard_output"]),name="discard_output")
+        # if self.config.discard_n_volumes > 0:
+        #     discard = pe.Node(interface=discard_tp(n_discard=self.config.discard_n_volumes),name='discard_volumes')
+        #     flow.connect([
+        #                 (smoothing_output,discard,[("smoothing_output","in_file")]),
+        #                 (discard,discard_output,[("out_file","discard_output")])
+        #                 ])
+        # else:
+        #     flow.connect([
+        #                 (smoothing_output,discard_output,[("smoothing_output","discard_output")])
+        #                 ])
+        # scrubbing_output = pe.Node(interface=util.IdentityInterface(fields=["scrubbing_output"]),name="scrubbing_output")
+        if self.config.scrubbing:
+            scrubbing = pe.Node(interface=Scrubbing(),name='scrubbing')
             flow.connect([
-                        (inputnode,smoothing,[("preproc_file","in_file")]),
-                        (smoothing,smoothing_output,[("out_file","smoothing_output")])
-                        ])
-        else:
-            flow.connect([
-                        (inputnode,smoothing_output,[("preproc_file","smoothing_output")])
+                        (inputnode,scrubbing,[("preproc_file","in_file")]),
+                        (inputnode,scrubbing,[("registered_wm","wm_mask")]),
+                        (inputnode,scrubbing,[("registered_roi_volumes","gm_file")]),
+                        (inputnode,scrubbing,[("motion_par_file","motion_parameters")]),
+                        (scrubbing,outputnode,[("fd_npy","FD")]),
+                        (scrubbing,outputnode,[("dvars_npy","DVARS")])
                         ])
 
-        discard_output = pe.Node(interface=util.IdentityInterface(fields=["discard_output"]),name="discard_output")
-        if self.config.discard_n_volumes > 0:
-            discard = pe.Node(interface=discard_tp(n_discard=self.config.discard_n_volumes),name='discard_volumes')
+        detrending_output = pe.Node(interface=util.IdentityInterface(fields=["detrending_output"]),name="detrending_output")
+        if self.config.detrending:
+            detrending = pe.Node(interface=Detrending(),name='detrending')
+            detrending.inputs.mode = 'quadratic'
             flow.connect([
-                        (smoothing_output,discard,[("smoothing_output","in_file")]),
-                        (discard,discard_output,[("out_file","discard_output")])
+                        (inputnode,detrending,[("preproc_file","in_file")]),
+                        (inputnode,detrending,[("registered_roi_volumes","gm_file")]),
+                        (detrending,detrending_output,[("out_file","detrending_output")])
                         ])
         else:
             flow.connect([
-                        (smoothing_output,discard_output,[("smoothing_output","discard_output")])
+                        (inputnode,detrending_output,[("preproc_file","detrending_output")])
                         ])
 
         nuisance_output = pe.Node(interface=util.IdentityInterface(fields=["nuisance_output"]),name="nuisance_output")
@@ -458,7 +484,7 @@ class FunctionalMRIStage(Stage):
             nuisance.inputs.motion_nuisance=self.config.motion
             nuisance.inputs.n_discard=self.config.discard_n_volumes
             flow.connect([
-                        (discard_output,nuisance,[("discard_output","in_file")]),
+                        (detrending_output,nuisance,[("detrending_output","in_file")]),
                         (inputnode,nuisance,[("eroded_brain","brainfile")]),
                         (inputnode,nuisance,[("eroded_csf","csf_file")]),
                         (inputnode,nuisance,[("registered_wm","wm_file")]),
@@ -468,46 +494,48 @@ class FunctionalMRIStage(Stage):
                         ])
         else:
             flow.connect([
-                        (discard_output,nuisance_output,[("discard_output","nuisance_output")])
-                        ])
-
-        detrending_output = pe.Node(interface=util.IdentityInterface(fields=["detrending_output"]),name="detrending_output")
-        if self.config.detrending:
-            detrending = pe.Node(interface=Detrending(),name='detrending')
-            flow.connect([
-                        (nuisance_output,detrending,[("nuisance_output","in_file")]),
-                        (inputnode,detrending,[("registered_roi_volumes","gm_file")]),
-                        (detrending,detrending_output,[("out_file","detrending_output")])
-                        ])
-        else:
-            flow.connect([
-                        (nuisance_output,detrending_output,[("nuisance_output","detrending_output")])
+                        (detrending_output,nuisance_output,[("detrending_output","nuisance_output")])
                         ])
 
         filter_output = pe.Node(interface=util.IdentityInterface(fields=["filter_output"]),name="filter_output")
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
-            filtering = pe.Node(interface=fsl.TemporalFilter(),name='temporal_filter')
-            filtering.inputs.lowpass_sigma = self.config.lowpass_filter
-            filtering.inputs.highpass_sigma = self.config.highpass_filter
+            filtering = pe.Node(interface=afni.Bandpass(),name='temporal_filter')
+            filtering.inputs.lowpass = self.config.lowpass_filter
+            filtering.inputs.highpass = self.config.highpass_filter
             flow.connect([
-                        (detrending_output,filtering,[("detrending_output","in_file")]),
+                        (nuisance_output,filtering,[("nuisance_output","in_file")]),
                         (filtering,filter_output,[("out_file","filter_output")])
                         ])
         else:
             flow.connect([
-                        (detrending_output,filter_output,[("detrending_output","filter_output")])
+                        (nuisance_output,filter_output,[("nuisance_output","filter_output")])
                         ])
 
-        if self.config.scrubbing:
-            scrubbing = pe.Node(interface=Scrubbing(),name='scrubbing')
-            flow.connect([
-                        (filter_output,scrubbing,[("filter_output","in_file")]),
-                        (inputnode,scrubbing,[("registered_wm","wm_mask")]),
-                        (inputnode,scrubbing,[("registered_roi_volumes","gm_file")]),
-                        (inputnode,scrubbing,[("motion_par_file","motion_parameters")]),
-                        (scrubbing,outputnode,[("fd_npy","FD")]),
-                        (scrubbing,outputnode,[("dvars_npy","DVARS")])
-                        ])
+        # OLD version using FSL
+        # filter_output = pe.Node(interface=util.IdentityInterface(fields=["filter_output"]),name="filter_output")
+        # if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
+        #     filtering = pe.Node(interface=fsl.TemporalFilter(),name='temporal_filter')
+        #     filtering.inputs.lowpass_sigma = self.config.lowpass_filter
+        #     filtering.inputs.highpass_sigma = self.config.highpass_filter
+        #     flow.connect([
+        #                 (detrending_output,filtering,[("detrending_output","in_file")]),
+        #                 (filtering,filter_output,[("out_file","filter_output")])
+        #                 ])
+        # else:
+        #     flow.connect([
+        #                 (detrending_output,filter_output,[("detrending_output","filter_output")])
+        #                 ])
+
+        # if self.config.scrubbing:
+        #     scrubbing = pe.Node(interface=Scrubbing(),name='scrubbing')
+        #     flow.connect([
+        #                 (filter_output,scrubbing,[("filter_output","in_file")]),
+        #                 (inputnode,scrubbing,[("registered_wm","wm_mask")]),
+        #                 (inputnode,scrubbing,[("registered_roi_volumes","gm_file")]),
+        #                 (inputnode,scrubbing,[("motion_par_file","motion_parameters")]),
+        #                 (scrubbing,outputnode,[("fd_npy","FD")]),
+        #                 (scrubbing,outputnode,[("dvars_npy","DVARS")])
+        #                 ])
 
         flow.connect([
                         (filter_output,outputnode,[("filter_output","func_file")])
