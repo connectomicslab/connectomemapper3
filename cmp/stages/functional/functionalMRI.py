@@ -45,21 +45,21 @@ class FunctionalMRIConfig(HasTraits):
 
     detrending = Bool(True)
 
-    lowpass_filter = Int(3)
-    highpass_filter = Int(25)
+    lowpass_filter = Int(0.01)
+    highpass_filter = Int(0.1)
 
     scrubbing = Bool(True)
 
-    traits_view = View(Item('smoothing'),
-                       Item('discard_n_volumes'),
-                       HGroup(
+    traits_view = View( #Item('smoothing'),
+                        #Item('discard_n_volumes'),
+                        Item('detrending'),
+                        HGroup(
                             Item('global_nuisance',label="Global"),
                             Item('csf'),
                             Item('wm'),
                             Item('motion'),
                             label='Nuisance factors',show_border=True
                             ),
-                        Item('detrending'),
                         HGroup(
                             Item('lowpass_filter',label='Low cutoff (volumes)'),
                             Item('highpass_filter',label='High cutoff (volumes)'),
@@ -281,7 +281,7 @@ class nuisance_regression(BaseInterface):
 class detrending_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to detrend")
     gm_file = InputMultiPath(File(exists=True), desc="ROI files registered to fMRI space")
-    mode = traits.Enum(['linear','quadradic'])
+    mode = Enum(['linear','quadradic'])
 
 class detrending_OutputSpec(TraitedSpec):
     out_file = File(exists=True)
@@ -320,17 +320,14 @@ class Detrending(BaseInterface):
         nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
 
         if self.inputs.mode == 'quadratic':
+            # GLM: regress out nuisance covariates
+            for index,value in np.ndenumerate( gm ):
+                if value == 0:
+                    continue
+                Ydet = polynomial(data[index[0],index[1],index[2],:], order=2)
 
-        	# GLM: regress out nuisance covariates
-
-        	for index,value in np.ndenumerate( gm ):
-            	if value == 0:
-                		continue
-
-            	Ydet = polynomial(data[index[0],index[1],index[2],:], order=2)
-
-        	img = nib.Nifti1Image(new_data_det, dataimg.get_affine(), dataimg.get_header())
-        	nib.save(img, op.join(gconf.get_preproc(), 'fMRI_detrending.nii.gz'))
+            img = nib.Nifti1Image(new_data_det, dataimg.get_affine(), dataimg.get_header())
+            nib.save(img, op.join(gconf.get_preproc(), 'fMRI_detrending.nii.gz'))
 
         print("[ DONE ]")
         return runtime

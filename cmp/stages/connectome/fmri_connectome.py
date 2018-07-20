@@ -111,17 +111,17 @@ class rsfmri_conmat(BaseInterface):
             infile       = nib.load(roi_fname)
             mask   = roi.get_data().astype( np.uint32 )
 
-        	# N: number of ROIs for current resolution
-        	N = mask.max()
-        	# matrix number of rois vs timepoints
-        	odata = np.zeros( (N,tp), dtype = np.float32 )
+            # N: number of ROIs for current resolution
+            N = mask.max()
+            # matrix number of rois vs timepoints
+            odata = np.zeros( (N,tp), dtype = np.float32 )
 
-        	# loop throughout all the ROIs (current resolution)
-        	for i in range(1,N+1):
-        		odata[i-1,:] = fdata[mask==i].mean( axis = 0 )
+            # loop throughout all the ROIs (current resolution)
+            for i in range(1,N+1):
+                odata[i-1,:] = fdata[mask==i].mean( axis = 0 )
 
             np.save( os.path.abspath( 'averageTimeseries_%s.npy' % s), odata )
-	        sio.savemat( os.path.abspath( 'averageTimeseries_%s.mat' % s), {'ts':odata} )
+            sio.savemat( os.path.abspath( 'averageTimeseries_%s.mat' % s), {'ts':odata} )
 
         ## Apply scrubbing (if enabled) and compute correlation
         # loop throughout all the resolutions ('scale33', ..., 'scale500')
