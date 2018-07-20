@@ -45,8 +45,8 @@ class FunctionalMRIConfig(HasTraits):
 
     detrending = Bool(True)
 
-    lowpass_filter = Int(0.01)
-    highpass_filter = Int(0.1)
+    lowpass_filter = Float(0.01)
+    highpass_filter = Float(0.1)
 
     scrubbing = Bool(True)
 
@@ -496,12 +496,14 @@ class FunctionalMRIStage(Stage):
 
         filter_output = pe.Node(interface=util.IdentityInterface(fields=["filter_output"]),name="filter_output")
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
-            filtering = pe.Node(interface=afni.Bandpass(),name='temporal_filter')
+            filtering = pe.Node(interface=afni.Bandpass(out_file='fMRI_bandpass+orig.BRIK'),name='temporal_filter')
+            converter = pe.Node(interface=afni.AFNItoNIFTI(out_file='fMRI_bandpass.nii.gz'), name='converter')
             filtering.inputs.lowpass = self.config.lowpass_filter
             filtering.inputs.highpass = self.config.highpass_filter
             flow.connect([
                         (nuisance_output,filtering,[("nuisance_output","in_file")]),
-                        (filtering,filter_output,[("out_file","filter_output")])
+                        (filtering,converter,[("out_file","in_file")]),
+                        (converter,filter_output,[("out_file","filter_output")])
                         ])
         else:
             flow.connect([

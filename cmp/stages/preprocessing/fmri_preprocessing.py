@@ -87,10 +87,12 @@ class PreprocessingStage(Stage):
 
         despiking_output = pe.Node(interface=util.IdentityInterface(fields=["despiking_output"]),name="despkiking_output")
         if self.config.despiking:
-            despike = pe.Node(interface=Despike(),name='afni_despike')
+            despike = pe.Node(interface=afni.Despike(out_file='despike+orig.BRIK'),name='afni_despike')
+            converter = pe.Node(interface=afni.AFNItoNIFTI(out_file='fMRI_despike.nii.gz'), name='converter')
             flow.connect([
                         (discard_output,despike,[("discard_output","in_file")]),
-                        (despike,despiking_output,[("out_file","despiking_output")])
+                        (despike,converter,[("out_file","in_file")]),
+                        (converter,despiking_output,[("out_file","despiking_output")])
                         ])
         else:
             flow.connect([
