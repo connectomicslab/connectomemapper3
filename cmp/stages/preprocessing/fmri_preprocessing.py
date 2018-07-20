@@ -18,12 +18,45 @@ import gzip
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.fsl as fsl
+from nipype.interfaces import afni
 
+class discard_tp_InputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True,mandatory=True)
+    n_discard = Int(mandatory=True)
+
+class discard_tp_OutputSpec(TraitedSpec):
+    out_file = File(exists = True)
+
+class discard_tp(BaseInterface):
+    input_spec = discard_tp_InputSpec
+    output_spec = discard_tp_OutputSpec
+
+    def _run_interface(self,runtime):
+        dataimg = nib.load( self.inputs.in_file )
+        data = dataimg.get_data()
+
+        n_discard = int(self.inputs.n_discard) - 1
+
+        new_data = data.copy()
+        new_data = new_data[:,:,:,n_discard:-1]
+
+        hd = dataimg.get_header()
+        hd.set_data_shape([hd.get_data_shape()[0],hd.get_data_shape()[1],hd.get_data_shape()[2],hd.get_data_shape()[3]-n_discard-1])
+        img = nib.Nifti1Image(new_data, dataimg.get_affine(), hd)
+        nib.save(img, os.path.abspath('fMRI_discard.nii.gz'))
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath("fMRI_discard.nii.gz")
+        return outputs
 
 
 class PreprocessingConfig(HasTraits):
-    slice_timing = Enum("none", ["none", "bottom-top interleaved", "top-bottom interleaved", "bottom-top", "top-bottom"])
-    repetition_time = Float(3.0)
+    discard_n_volumes = Int('5')
+    despiking = Bool(True)
+    slice_timing = Enum("none", ["bottom-top interleaved", "bottom-top interleaved", "top-bottom interleaved", "bottom-top", "top-bottom"])
+    repetition_time = Float(1.92)
     motion_correction = Bool(True)
 
     traits_view = View('slice_timing',Item('repetition_time',visible_when='slice_timing!="none"'),'motion_correction')
@@ -38,6 +71,29 @@ class PreprocessingStage(Stage):
         self.outputs = ["functional_preproc","par_file","mean_vol"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        discard_output = pe.Node(interface=util.IdentityInterface(fields=["discard_output"]),name="discard_output")
+        if self.config.discard_n_volumes > 0:
+            discard = pe.Node(interface=discard_tp(n_discard=self.config.discard_n_volumes),name='discard_volumes')
+            flow.connect([
+                        (inputnode,discard,[("functional","in_file")]),
+                        (discard,discard_output,[("out_file","discard_output")])
+                        ])
+        else:
+            flow.connect([
+                        (inputnode,discard,[("functional","discard_output")])
+                        ])
+
+        despiking_output = pe.Node(interface=util.IdentityInterface(fields=["despiking_output"]),name="despkiking_output")
+        if self.config.despiking:
+            despike = pe.Node(interface=Despike(),name='afni_despike')
+            flow.connect([
+                        (discard_output,despike,[("discard_output","in_file")]),
+                        (despike,despiking_output,[("out_file","despiking_output")])
+                        ])
+        else:
+            flow.connect([
+                        (discard_output,despiking_output,[("discard_output","despiking_output")])
+                        ])
 
         if self.config.slice_timing != "none":
             slc_timing = pe.Node(interface=fsl.SliceTimer(),name = 'slice_timing')
@@ -60,7 +116,7 @@ class PreprocessingStage(Stage):
 
         if self.config.slice_timing != "none":
             flow.connect([
-                        (inputnode,slc_timing,[("functional","in_file")])
+                        (despiking_output,slc_timing,[("despiking_output","in_file")])
                         ])
             if self.config.motion_correction:
                 flow.connect([
@@ -79,7 +135,7 @@ class PreprocessingStage(Stage):
         else:
             if self.config.motion_correction:
                 flow.connect([
-                            (inputnode,mo_corr,[("functional","in_file")]),
+                            (despiking_output,mo_corr,[("despiking_output","in_file")]),
                             (mo_corr,outputnode,[("out_file","functional_preproc")]),
                             (mo_corr,outputnode,[("par_file","par_file")]),
                             (mo_corr,outputnode,[("mean_img","mean_vol")]),
@@ -87,13 +143,19 @@ class PreprocessingStage(Stage):
             else:
                 mean = pe.Node(interface=fsl.MeanImage(),name="mean")
                 flow.connect([
-                            (inputnode,outputnode,[("functional","functional_preproc")]),
+                            (despiking_output,outputnode,[("despiking_output","functional_preproc")]),
                             (inputnode,mean,[("functional","in_file")]),
                             (mean,outputnode,[("out_file","mean_vol")])
                             ])
 
 
     def define_inspect_outputs(self):
+        if self.config.despiking:
+            despike_path = os.path.join(self.stage_dir,"despike","result_despike.pklz")
+            if(os.path.exists(despike_path)):
+                despike_results = pickle.load(gzip.open(despike_path))
+                self.inspect_outputs_dict['Spike corrected image'] = ['fslview',despike_results.outputs.out_file]
+
         if self.config.slice_timing:
             slc_timing_path = os.path.join(self.stage_dir,"slice_timing","result_slice_timing.pklz")
             if(os.path.exists(slc_timing_path)):
@@ -120,5 +182,7 @@ class PreprocessingStage(Stage):
             return os.path.exists(os.path.join(self.stage_dir,"motion_correction","result_motion_correction.pklz"))
         elif self.config.slice_timing:
             return os.path.exists(os.path.join(self.stage_dir,"slice_timing","result_slice_timing.pklz"))
+        elif:
+            return os.path.exists(os.path.join(self.stage_dir,"despike","result_despike.pklz"))
         else:
             return True
