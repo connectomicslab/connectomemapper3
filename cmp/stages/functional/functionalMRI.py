@@ -355,18 +355,20 @@ class Scrubbing(BaseInterface):
         DVARS = np.zeros((tp-1,1))
 
         # loop throughout all the time points
-        for i in xrange(0,tp-1):
+        FD[0] = 0
+        DVARS[0] = 0
+        for i in xrange(1,tp-1):
             # FD
-            move0 = move[i,:]
-            move1 = move[i+1,:]
+            move0 = move[i-1,:]
+            move1 = move[i,:]
             this_move = move1 - move0
             this_move = np.absolute(this_move)
             FD[i] = this_move.sum()
 
             # DVARS
             # extract current and following time points
-            temp0 = data[:,:,:,i]
-            temp1 = data[:,:,:,i+1]
+            temp0 = data[:,:,:,i-1]
+            temp1 = data[:,:,:,i]
             temp = temp1 - temp0
             temp = np.power(temp,2)
             temp = temp[mask>0]
