@@ -33,8 +33,8 @@ from cmp.stages.common import Stage
 
 class ConnectomeConfig(HasTraits):
     apply_scrubbing = Bool(False)
-    FD_thr = Float(0.5)
-    DVARS_thr = Float(5.0)
+    FD_thr = Float(0.2)
+    DVARS_thr = Float(4.0)
     output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
 
     traits_view = View(VGroup('apply_scrubbing',VGroup(Item('FD_thr',label='FD threshold'),Item('DVARS_thr',label='DVARS threshold'),visible_when="apply_scrubbing==True")),
@@ -76,24 +76,54 @@ class rsfmri_conmat(BaseInterface):
         else:
             resolutions = self.inputs.atlas_info
 
-        if self.inputs.apply_scrubbing:
-            # load scrubbing FD and DVARS series
-            FD = np.load( self.inputs.FD )
-            DVARS = np.load( self.inputs.DVARS )
-            # evaluate scrubbing mask
-            FD_th = self.inputs.FD_th
-            DVARS_th = self.inputs.DVARS_th
-            FD_mask = np.array(np.nonzero(FD < FD_th))[0,:]
-            DVARS_mask = np.array(np.nonzero(DVARS < DVARS_th))[0,:]
-            index = np.sort(np.unique(np.concatenate((FD_mask,DVARS_mask)))) + 1
-            index = np.concatenate(([0],index))
-            log_scrubbing = "DISCARDED time points after scrubbing: " + str(FD.shape[0]-index.shape[0]+1) + " over " + str(FD.shape[0]+1)
-            print(log_scrubbing)
-            np.save( os.path.abspath( 'tp_after_scrubbing.npy'), index )
-            sio.savemat( os.path.abspath('tp_after_scrubbing.mat'), {'index':index} )
-        else:
-            index = np.linspace(0,tp-1,tp).astype('int')
+        index = np.linspace(0,tp-1,tp).astype('int')
 
+        # if self.inputs.apply_scrubbing:
+        #     # load scrubbing FD and DVARS series
+        #     FD = np.load( self.inputs.FD )
+        #     DVARS = np.load( self.inputs.DVARS )
+        #     # evaluate scrubbing mask
+        #     FD_th = self.inputs.FD_th
+        #     DVARS_th = self.inputs.DVARS_th
+        #     FD_mask = np.array(np.nonzero(FD < FD_th))[0,:]
+        #     DVARS_mask = np.array(np.nonzero(DVARS < DVARS_th))[0,:]
+        #     index = np.sort(np.unique(np.concatenate((FD_mask,DVARS_mask)))) + 1
+        #     index = np.concatenate(([0],index))
+        #     log_scrubbing = "DISCARDED time points after scrubbing: " + str(FD.shape[0]-index.shape[0]+1) + " over " + str(FD.shape[0]+1)
+        #     print(log_scrubbing)
+        #     np.save( os.path.abspath( 'tp_after_scrubbing.npy'), index )
+        #     sio.savemat( os.path.abspath('tp_after_scrubbing.mat'), {'index':index} )
+        # else:
+        #     index = np.linspace(0,tp-1,tp).astype('int')
+
+        ## Compute average time-series
+        # loop throughout all the resolutions ('scale33', ..., 'scale500')
+        for parkey, parval in resolutions.items():
+            print("Resolution = "+parkey)
+
+            # Open the corresponding ROI
+            print("Open the corresponding ROI")
+            for vol in self.inputs.roi_volumes:
+                if parkey in vol:
+                    roi_fname = vol
+                    print roi_fname
+
+            infile       = nib.load(roi_fname)
+            mask   = roi.get_data().astype( np.uint32 )
+
+        	# N: number of ROIs for current resolution
+        	N = mask.max()
+        	# matrix number of rois vs timepoints
+        	odata = np.zeros( (N,tp), dtype = np.float32 )
+
+        	# loop throughout all the ROIs (current resolution)
+        	for i in range(1,N+1):
+        		odata[i-1,:] = fdata[mask==i].mean( axis = 0 )
+
+            np.save( os.path.abspath( 'averageTimeseries_%s.npy' % s), odata )
+	        sio.savemat( os.path.abspath( 'averageTimeseries_%s.mat' % s), {'ts':odata} )
+
+        ## Apply scrubbing (if enabled) and compute correlation
         # loop throughout all the resolutions ('scale33', ..., 'scale500')
         for parkey, parval in resolutions.items():
             print("Resolution = "+parkey)
@@ -120,17 +150,36 @@ class rsfmri_conmat(BaseInterface):
                 G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
                 ROI_idx.append(int(d["dn_correspondence_id"]))
 
-            # matrix number of rois vs timepoints
-            odata = np.zeros( (nROIs,tp), dtype = np.float32 )
+            # # matrix number of rois vs timepoints
+            # odata = np.zeros( (nROIs,tp), dtype = np.float32 )
+            #
+            # # loop throughout all the ROIs (current resolution)
+            # roi_line = 0
+            # for i in ROI_idx:
+            #     odata[roi_line,:] = fdata[roiData==i].mean( axis = 0 )
+            #     roi_line += 1
+            #
+            # np.save( os.path.abspath('averageTimeseries_%s.npy' % parkey), odata )
+            # sio.savemat( os.path.abspath('averageTimeseries_%s.mat' % parkey), {'TCS':odata} )
 
-            # loop throughout all the ROIs (current resolution)
-            roi_line = 0
-            for i in ROI_idx:
-                odata[roi_line,:] = fdata[roiData==i].mean( axis = 0 )
-                roi_line += 1
-
-            np.save( os.path.abspath('averageTimeseries_%s.npy' % parkey), odata )
-            sio.savemat( os.path.abspath('averageTimeseries_%s.mat' % parkey), {'TCS':odata} )
+            #Censoring time-series
+            if self.inputs.apply_scrubbing:
+                # load scrubbing FD and DVARS series
+                FD = np.load( self.inputs.FD )
+                DVARS = np.load( self.inputs.DVARS )
+                # evaluate scrubbing mask
+                FD_th = self.inputs.FD_th
+                DVARS_th = self.inputs.DVARS_th
+                FD_mask = np.array(np.nonzero(FD < FD_th))[0,:]
+                DVARS_mask = np.array(np.nonzero(DVARS < DVARS_th))[0,:]
+                index = np.sort(np.unique(np.concatenate((FD_mask,DVARS_mask)))) + 1
+                index = np.concatenate(([0],index))
+                log_scrubbing = "DISCARDED time points after scrubbing: " + str(FD.shape[0]-index.shape[0]+1) + " over " + str(FD.shape[0]+1)
+                print(log_scrubbing)
+                np.save( os.path.abspath( 'tp_after_scrubbing.npy'), index )
+                sio.savemat( os.path.abspath('tp_after_scrubbing.mat'), {'index':index} )
+            else:
+                index = np.linspace(0,tp-1,tp).astype('int')
 
             # Fill connectivity matrix
             i = -1
