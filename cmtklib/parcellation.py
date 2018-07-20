@@ -213,14 +213,14 @@ class CombineParcellations(BaseInterface):
 
 
         # Thalamic Nuclei
-        left_thalNuclei = np.array([1, 2, 3, 4, 5, 6, 7])
+        right_thalNuclei = np.array([1, 2, 3, 4, 5, 6, 7])
         # left_thalNuclei_colors_r = [255 0 255 255 0 255 0]';
         # left_thalNuclei_colors_g = [0 255 255 123 255 0 0]';
         # left_thalNuclei_colors_b = [0 0 0 0 255 255 255]';
         # left_thalNuclei_names = {'Left-Pulvinar';'Left-Anterior';'Left-Medio_Dorsal';'Left-Ventral_Latero_Dorsal';'Left-Central_Lateral-Lateral_Posterior-Medial_Pulvinar';...
         #     'Left-Ventral_Anterior';'Left-Ventral_Latero_Ventral'};
 
-        right_thalNuclei = np.array([8, 9, 10, 11, 12, 13, 14])
+        left_thalNuclei = np.array([8, 9, 10, 11, 12, 13, 14])
         # right_thalNuclei_colors_r = [255 0 255 255 0 255 0]';
         # right_thalNuclei_colors_g = [0 255 255 123 255 0 0]';
         # right_thalNuclei_colors_b = [0 0 0 0 255 255 255]';
@@ -298,93 +298,105 @@ class CombineParcellations(BaseInterface):
             I = V.get_data()
 
             # Replacing the brain stem (Stem is replaced by its own parcellation. Mismatch between both global volumes, mainly due to partial volume effect in the global stem parcellation)
-            indrep = np.where(I == 16)
-            I[indrep] = 0;
-            I[indstem] = Istem[indstem]
+            #indrep = np.where(I == 16)
+            #I[indrep] = 0;
+            #I[indstem] = Istem[indstem]
 
-            ## Processing Left Hemisphere
+            ## Processing right Hemisphere
             # Relabelling Right hemisphere
             It = np.zeros(I.shape)
-            ind = np.where((I > 2000) & (I <3000));
-            It[ind] = I[ind] - 2000;
-            nlabel = It.max()
 
-            def ismember(a, b):
-                bind = {}
-                for i, elt in enumerate(b):
-                    if elt not in bind:
-                        bind[elt] = i
-                return [bind.get(itm, None) for itm in a]  # None can be replaced by any other "not in b" value
 
-            # Relabelling Thalamic Nuclei
-            newLabels = np.arange(nlabel+1,nlabel+1+right_thalNuclei.shape[0])
-            [bool,ord] = ismember(Ithal,right_thalNuclei)
-            ind = np.where(bool)
-            It[ind] = newLabels[ord[ind]]
-            nlabel = It.max()
-
-            # Relabelling Subcortical Structures
-            newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
-            [bool,ord] = ismember(I,right_subcIds[1:])
-            ind = np.where(bool)
-            It[ind] = newLabels[ord[ind]]
-            nlabel = It.max()
-
-            # Relabelling Subfields
-            newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
-            [bool,ord] = ismember(Isubrh,hippo_subf)
-            ind = np.where(bool)
-            It[ind] = newLabels[ord[ind]]
-            nlabel = It.max()
-
-            # Relabelling Right VentralDC
-            newLabels = np.arange(nlabel+1,nlabel+1)
-            [bool,ord] = ismember(I,right_ventral)
-            ind = np.where(bool)
-            It[ind] = newLabels[ord[ind]]
-            nlabel = It.max()
-
-            ## Processing Left Hemisphere
-            # Relabelling Left hemisphere
-            ind = np.where((I > 1000) & (I <2000));
-            It[ind] = I[ind] - 1000 + nlabel;
+            ind = np.where((I > (I.max()-1)/2) & (I < I.max()+1));
+            It[ind] = I[ind] - (I.max()-1)/2;
+            It[It==It.max()] = 0 # remove brainstem (max label)
             nlabel = It.max()
 
             # Relabelling Thalamic Nuclei
             newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.shape[0])
-            [bool,ord] = ismember(Ithal,left_thalNuclei)
-            ind = np.where(bool)
-            It[ind] = newLabels[ord[ind]]
+            print(newLabels)
+
+            i=0
+            for lab in right_thalNuclei:
+                ind = np.where(Ithal == lab)
+                It[ind] = newLabels[i]
+                i += 1
+            nlabel = It.max()
+
+            # Relabelling Subcortical Structures
+            newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
+            i=0
+            for lab in right_subcIds[1:]:
+                ind = np.where(I == lab)
+                It[ind] = newLabels[i]
+                i += 1
+            nlabel = It.max()
+
+
+            # Relabelling Subfields
+            newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
+            i=0
+            for lab in hippo_subf:
+                ind = np.where(Isublh == lab)
+                It[ind] = newLabels[i]
+                i += 1
+            nlabel = It.max()
+
+            # Relabelling Right VentralDC
+            newLabels = np.arange(nlabel+1,nlabel+2)
+            ind = np.where(I == right_ventral)
+            It[ind] = newLabels[0]
+            nlabel = It.max()
+
+            ## Processing Left Hemisphere
+            # Relabelling Left hemisphere
+            ind = np.where((I > I[np.nonzero(I)].min()) & (I <(I.max()+1)/2));
+            It[ind] = I[ind] - I[np.nonzero(I)].min() + nlabel + 1;
+            nlabel = It.max()
+
+            # Relabelling Thalamic Nuclei
+            newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.shape[0])
+            i=0
+            for lab in left_thalNuclei:
+                ind = np.where(Ithal == lab)
+                It[ind] = newLabels[i]
+                i += 1
             nlabel = It.max()
 
             # Relabelling Subcortical Structures
             newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
-            [bool,ord] = ismember(I,left_subcIds[1:])
-            ind = np.where(bool)
-            It[ind] = newLabels[ord[ind]]
+            i=0
+            for lab in left_subcIds[1:]:
+                ind = np.where(I == lab)
+                It[ind] = newLabels[i]
+                i += 1
             nlabel = It.max()
 
             # Relabelling Subfields
             newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
-            [bool,ord] = ismember(Isublh,hippo_subf)
-            ind = np.where(bool)
-            It[ind] = newLabels[ord[ind]]
+            i=0
+            for lab in hippo_subf:
+                ind = np.where(Isubrh == lab)
+                It[ind] = newLabels[i]
+                i += 1
             nlabel = It.max()
             newIds_LH_subFields = newLabels
 
             # Relabelling Left VentralDC
-            newLabels = np.arange(nlabel+1,nlabel+1)
-            [bool,ord] = ismember(I,left_ventral)
-            ind = np.where(bool)
-            It[ind] = newLabels[ord[ind]]
+            newLabels = np.arange(nlabel+1,nlabel+2)
+            ind = np.where(I == left_ventral)
+            It[ind] = newLabels[0]
             nlabel = It.max()
             newIds_LH_ventralDC = newLabels;
 
             # Relabelling Brain Stem
             newLabels = np.arange(nlabel+1,nlabel+1+brainstem.shape[0])
-            [bool,ord] = ismember(I,brainstem);
-            ind = np.where(bool)
-            It[ind] = newLabels[ord[ind]]
+            i=0
+            for lab in brainstem:
+                print("update brainstem parcellation label (%i -> %i)"%(lab,newLabels[i]))
+                ind = np.where(Istem == lab)
+                It[ind] = newLabels[i]
+                i += 1
             nlabel = It.max()
 
             # Saving the new parcellation
