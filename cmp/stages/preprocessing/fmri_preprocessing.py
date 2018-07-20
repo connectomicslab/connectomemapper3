@@ -182,7 +182,7 @@ class PreprocessingStage(Stage):
             return os.path.exists(os.path.join(self.stage_dir,"motion_correction","result_motion_correction.pklz"))
         elif self.config.slice_timing:
             return os.path.exists(os.path.join(self.stage_dir,"slice_timing","result_slice_timing.pklz"))
-        elif:
+        elif self.config.despiking:
             return os.path.exists(os.path.join(self.stage_dir,"despike","result_despike.pklz"))
         else:
             return True
