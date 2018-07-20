@@ -2,7 +2,7 @@
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
 #
-#  This software is distributed under the open-source license Modified BSD.
+#  This software is distributed under the open-source license ModifFied BSD.
 
 """ CMP Stage for Diffusion reconstruction and tractography
 """
@@ -167,27 +167,28 @@ class nuisance_regression(BaseInterface):
             move = np.genfromtxt( self.inputs.motion_file )
             move = move - np.mean(move,0)
 
-            #Update
-            move_der1 = np.concatenate((np.zeros([1,6]), move[0:-1,:]), axis=0)
-            move_der2 = np.concatenate((np.zeros([2,6]), move[0:-2,:]), axis=0)
-            move_sq = np.square(move)
-            move_der1_sq = np.square(move_der1)
-            move_der2_sq = np.square(move_der2)
+            # #Update
+            # move_der1 = np.concatenate((np.zeros([1,6]), move[0:-1,:]), axis=0)
+            # move_der2 = np.concatenate((np.zeros([2,6]), move[0:-2,:]), axis=0)
+            # move_sq = np.square(move)
+            # move_der1_sq = np.square(move_der1)
+            # move_der2_sq = np.square(move_der2)
+            #
+            # move_der1 = move_der1 - np.mean(move_der1)
+            # move_der2 = move_der2 - np.mean(move_der2)
+            # move_der1_sq = move_der1_sq - np.mean(move_der1_sq)
+            # move_der2_sq = move_der2_sq - np.mean(move_der2_sq)
+            # move_sq = move_sq - np.mean(move_sq)
+            #
+            # if self.inputs.nuisance_motion_nb_reg == '12'or self.inputs.nuisance_motion_nb_reg == '24' or self.inputs.nuisance_motion_nb_reg == '36':
+           	# 	move = np.hstack((move, move_sq))
+            # if self.inputs.nuisance_motion_nb_reg == '24' or self.inputs.nuisance_motion_nb_reg == '36':
+           	# 	move = np.hstack((move, move_der1))
+           	# 	move = np.hstack((move, move_der1_sq))
+            # if self.inputs.nuisance_motion_nb_reg == '36':
+           	# 	move = np.hstack((move, move_der2))
+           	# 	move = np.hstack((move, move_der2_sq))
 
-            move_der1 = move_der1 - np.mean(move_der1)
-            move_der2 = move_der2 - np.mean(move_der2)
-            move_der1_sq = move_der1_sq - np.mean(move_der1_sq)
-            move_der2_sq = move_der2_sq - np.mean(move_der2_sq)
-            move_sq = move_sq - np.mean(move_sq)
-
-            if self.inputs.nuisance_motion_nb_reg == '12'or self.inputs.nuisance_motion_nb_reg == '24' or self.inputs.nuisance_motion_nb_reg == '36':
-           		move = np.hstack((move, move_sq))
-            if self.inputs.nuisance_motion_nb_reg == '24' or self.inputs.nuisance_motion_nb_reg == '36':
-           		move = np.hstack((move, move_der1))
-           		move = np.hstack((move, move_der1_sq))
-            if self.inputs.nuisance_motion_nb_reg == '36':
-           		move = np.hstack((move, move_der2))
-           		move = np.hstack((move, move_der2_sq))
 
         # GLM: regress out nuisance covariates
         new_data = data.copy()
@@ -211,6 +212,7 @@ class nuisance_regression(BaseInterface):
                     X = np.hstack((X,wm_values.reshape(tp,1)))
                     print('Detrend WM average signal')
                     if self.inputs.motion_nuisance:
+                        print('pre-Detrend motion average signals')
                         X = np.hstack((X,move))
                         print('Detrend motion average signals')
                 elif self.inputs.motion_nuisance:
@@ -241,6 +243,7 @@ class nuisance_regression(BaseInterface):
             X = np.hstack((wm_values.reshape(tp,1)))
             print('Detrend WM average signal')
             if self.inputs.motion_nuisance:
+                print('pre-Detrend motion average signals')
                 X = np.hstack((X.reshape(tp,1),move))
                 print('Detrend motion average signals')
         elif self.inputs.motion_nuisance:
@@ -281,7 +284,7 @@ class nuisance_regression(BaseInterface):
 class detrending_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to detrend")
     gm_file = InputMultiPath(File(exists=True), desc="ROI files registered to fMRI space")
-    mode = Enum(['linear','quadradic'])
+    mode = Enum(["linear","quadratic"])
 
 class detrending_OutputSpec(TraitedSpec):
     out_file = File(exists=True)
@@ -320,14 +323,18 @@ class Detrending(BaseInterface):
         nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
 
         if self.inputs.mode == 'quadratic':
+            print("quadratic detrending")
+            print("=================")
+
             # GLM: regress out nuisance covariates
+            new_data_det2 = new_data_det.copy()
             for index,value in np.ndenumerate( gm ):
                 if value == 0:
                     continue
-                Ydet = polynomial(data[index[0],index[1],index[2],:], order=2)
+                Ydet = polynomial(new_data_det[index[0],index[1],index[2],:], order=2)
 
-            img = nib.Nifti1Image(new_data_det, dataimg.get_affine(), dataimg.get_header())
-            nib.save(img, op.join(gconf.get_preproc(), 'fMRI_detrending.nii.gz'))
+            img = nib.Nifti1Image(new_data_det2, dataimg.get_affine(), dataimg.get_header())
+            nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
 
         print("[ DONE ]")
         return runtime
@@ -461,7 +468,7 @@ class FunctionalMRIStage(Stage):
         detrending_output = pe.Node(interface=util.IdentityInterface(fields=["detrending_output"]),name="detrending_output")
         if self.config.detrending:
             detrending = pe.Node(interface=Detrending(),name='detrending')
-            detrending.inputs.mode = 'quadratic'
+            detrending.inputs.mode = "linear"
             flow.connect([
                         (inputnode,detrending,[("preproc_file","in_file")]),
                         (inputnode,detrending,[("registered_roi_volumes","gm_file")]),

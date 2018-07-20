@@ -10,6 +10,7 @@
 from traits.api import *
 from traitsui.api import *
 
+import nipype.interfaces.utility as util
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
 
 from cmp.stages.common import Stage
@@ -21,6 +22,8 @@ import gzip
 import nipype.pipeline.engine as pe
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces import afni
+
+import nibabel as nib
 
 class discard_tp_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True,mandatory=True)
