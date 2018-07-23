@@ -22,9 +22,9 @@ from scipy import ndimage
 
 import scipy.ndimage.morphology as nd
 import sys
-from time import time
-
+from time import time, localtime, strftime
 from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, BaseInterface, Directory, File, InputMultiPath, OutputMultiPath
+
 
 from nipype.utils.logger import logging
 iflogger = logging.getLogger('interface')
@@ -182,9 +182,15 @@ class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
     rh_hippocampal_subfields = File('')
     brainstem_structures = File('')
     thalamus_nuclei = File('')
+    create_colorLUT = traits.Bool(True)
+    create_graphml = traits.Bool(True)
+    subjects_dir = Directory(desc='Freesurfer subjects dir')
+    subject_id = traits.Str(desc='Freesurfer subject id')
 
 class CombineParcellationsOutputSpec(TraitedSpec):
     output_rois = OutputMultiPath(File(exists=True))
+    colorLUT_files = OutputMultiPath(File(exists=True))
+    graphml_files = OutputMultiPath(File(exists=True))
 
 class CombineParcellations(BaseInterface):
     input_spec = CombineParcellationsInputSpec
@@ -198,84 +204,85 @@ class CombineParcellations(BaseInterface):
         return [bind.get(itm, None) for itm in a]  # None can be replaced by any other "not in b" value
 
     def _run_interface(self,runtime):
+
         # Freesurfer IDs for subcortical structures
         left_subcIds = np.array([10, 11, 12, 13, 26, 18, 17])
-        # left_subcIds_colors_r = [0 122 236 12 255 103 220]';
-        # left_subcIds_colors_g = [118 186 13 48 165 255 216]';
-        # left_subcIds_colors_b = [14 220 176 255 0 255 20]';
-        # left_subcort_names = {'Left-Thalamus_Proper';'Left-Caudate';'Left-Putamen';'Left-Pallidum';'Left-Accumbens_area';'Left-Amygdala';'Left-Hippocampus'};
+        left_subcIds_colors_r = np.array([0, 122, 236, 12, 255, 103, 220])
+        left_subcIds_colors_g = np.array([118, 186, 13, 48, 165, 255, 216])
+        left_subcIds_colors_b = np.array([14, 220, 176, 255, 0, 255, 20])
+        left_subcort_names = ["Left-Thalamus_Proper","Left-Caudate","Left-Putamen","Left-Pallidum","Left-Accumbens_area","Left-Amygdala","Left-Hippocampus"]
 
         right_subcIds = np.array([49, 50, 51, 52, 58, 54, 53])
-        # right_subcIds_colors_r = [0 122 236 12 255 103 220]';
-        # right_subcIds_colors_g = [118 186 13 48 165 255 216]';
-        # right_subcIds_colors_b = [14 220 176 255 0 255 20]';
-        # right_subcort_names = {'Right-Thalamus_Proper';'Right-Caudate';'Right-Putamen';'Right-Pallidum';'Right-Accumbens_area';'Right-Amygdala';'Right-Hippocampus'};
+        right_subcIds_colors_r = np.array([0, 122, 236, 12, 255, 103, 220])
+        right_subcIds_colors_g = np.array([118, 186, 13, 48, 165, 255, 216])
+        right_subcIds_colors_b = np.array([14, 220, 176, 255, 0, 255, 20])
+        right_subcort_names = ["Right-Thalamus_Proper","Right-Caudate","Right-Putamen","Right-Pallidum","Right-Accumbens_area","Right-Amygdala","Right-Hippocampus"]
 
 
         # Thalamic Nuclei
-        right_thalNuclei = np.array([1, 2, 3, 4, 5, 6, 7])
-        # left_thalNuclei_colors_r = [255 0 255 255 0 255 0]';
-        # left_thalNuclei_colors_g = [0 255 255 123 255 0 0]';
-        # left_thalNuclei_colors_b = [0 0 0 0 255 255 255]';
-        # left_thalNuclei_names = {'Left-Pulvinar';'Left-Anterior';'Left-Medio_Dorsal';'Left-Ventral_Latero_Dorsal';'Left-Central_Lateral-Lateral_Posterior-Medial_Pulvinar';...
-        #     'Left-Ventral_Anterior';'Left-Ventral_Latero_Ventral'};
+        left_thalNuclei  = np.array([1, 2, 3, 4, 5, 6, 7])
+        left_thalNuclei_colors_r = np.array([255, 0, 255, 255, 0, 255, 0])
+        left_thalNuclei_colors_g = np.array([0, 255, 255, 123, 255, 0, 0])
+        left_thalNuclei_colors_b = np.array([0, 0, 0, 0, 255, 255, 255])
+        left_thalNuclei_names = ["Left-Pulvinar","Left-Anterior","Left-Medio_Dorsal","Left-Ventral_Latero_Dorsal","Left-Central_Lateral-Lateral_Posterior-Medial_Pulvinar",
+                                 "Left-Ventral_Anterior","Left-Ventral_Latero_Ventral"]
 
-        left_thalNuclei = np.array([8, 9, 10, 11, 12, 13, 14])
-        # right_thalNuclei_colors_r = [255 0 255 255 0 255 0]';
-        # right_thalNuclei_colors_g = [0 255 255 123 255 0 0]';
-        # right_thalNuclei_colors_b = [0 0 0 0 255 255 255]';
-        # right_thalNuclei_names = {'Right-Pulvinar';'Right-Anterior';'Right-Medio_Dorsal';'Right-Ventral_Latero_Dorsal';'Right-Central_Lateral-Lateral_Posterior-Medial_Pulvinar';...
-        #     'Right-Ventral_Anterior';'Right-Ventral_Latero_Ventral'};
+        right_thalNuclei = np.array([8, 9, 10, 11, 12, 13, 14])
+        right_thalNuclei_colors_r = np.array([255, 0, 255, 255, 0, 255, 0])
+        right_thalNuclei_colors_g = np.array([0, 255, 255, 123, 255, 0, 0])
+        right_thalNuclei_colors_b = np.array([0, 0, 0, 0, 255, 255, 255])
+        right_thalNuclei_names = ["Right-Pulvinar","Right-Anterior","Right-Medio_Dorsal","Right-Ventral_Latero_Dorsal","Right-Central_Lateral-Lateral_Posterior-Medial_Pulvinar",
+                                  "Right-Ventral_Anterior","Right-Ventral_Latero_Ventral"]
 
 
         # Hippocampus subfields
         hippo_subf = np.array([203, 204, 205, 206, 208, 209, 210, 211, 212, 214, 215, 226])
-        # hippo_subf_colors_r = [255 64 0 255 0 196 32 128 204 128 128 170]';
-        # hippo_subf_colors_g = [255 0 0 0 128 160 200 255 153 0 32 170 ]';
-        # hippo_subf_colors_b = [0 64 255 0 0 128 255 128 204 0 255 255 ]';
-        # left_hippo_subf_names  = {'Left-Hippocampus_Parasubiculum';'Left-Hippocampus_Presubiculum';'Left-Hippocampus_Subiculum';'Left-Hippocampus_CA1';'Left-Hippocampus_CA3';'Left-Hippocampus_CA4';...
-        #     'Left-Hippocampus_GCDG';'Left-Hippocampus_HATA';'Left-Hippocampus_Fimbria';'Left-Hippocampus_Molecular_layer_HP';'Left-Hippocampus_Hippocampal_fissure';...
-        #     'Left-Hippocampus_Tail'};
-        # right_hippo_subf_names = {'Right-Hippocampus_Parasubiculum';'Right-Hippocampus_Presubiculum';'Right-Hippocampus_Subiculum';'Right-Hippocampus_CA1';'Right-Hippocampus_CA3';'Right-Hippocampus_CA4';...
-        #     'Right-Hippocampus_GCDG';'Right-Hippocampus_HATA';'Right-Hippocampus_Fimbria';'Right-Hippocampus_Molecular_layer_HP';'Right-Hippocampus_Hippocampal_fissure';...
-        #     'Right-Hippocampus_Tail';};
+        hippo_subf_colors_r = np.array([255, 64, 0, 255, 0, 196, 32, 128, 204, 128, 128, 170])
+        hippo_subf_colors_g = np.array([255, 0, 0, 0, 128, 160, 200, 255, 153, 0, 32, 170 ])
+        hippo_subf_colors_b = np.array([0, 64, 255, 0, 0, 128, 255, 128, 204, 0, 255, 255 ])
+        left_hippo_subf_names  = ["Left-Hippocampus_Parasubiculum","Left-Hippocampus_Presubiculum","Left-Hippocampus_Subiculum","Left-Hippocampus_CA1","Left-Hippocampus_CA3","Left-Hippocampus_CA4",
+                                  "Left-Hippocampus_GCDG","Left-Hippocampus_HATA","Left-Hippocampus_Fimbria","Left-Hippocampus_Molecular_layer_HP","Left-Hippocampus_Hippocampal_fissure",
+                                  "Left-Hippocampus_Tail"]
+        right_hippo_subf_names = ["Right-Hippocampus_Parasubiculum","Right-Hippocampus_Presubiculum","Right-Hippocampus_Subiculum","Right-Hippocampus_CA1","Right-Hippocampus_CA3","Right-Hippocampus_CA4",
+                                  "Right-Hippocampus_GCDG","Right-Hippocampus_HATA","Right-Hippocampus_Fimbria","Right-Hippocampus_Molecular_layer_HP","Right-Hippocampus_Hippocampal_fissure",
+                                  "Right-Hippocampus_Tail"]
 
 
         # Left Ventral Diencephalon
         left_ventral = 28;
-        # left_ventral_colors_r = 165;
-        # left_ventral_colors_g = 42;
-        # left_ventral_colors_b = 42;
-        # left_ventral_names = {'Left-VentralDC'};
+        left_ventral_colors_r = 165;
+        left_ventral_colors_g = 42;
+        left_ventral_colors_b = 42;
+        left_ventral_names = ["Left-VentralDC"]
 
         # Right Ventral Diencephalon
         right_ventral = 60;
-        # right_ventral_colors_r = 165;
-        # right_ventral_colors_g = 42;
-        # right_ventral_colors_b = 42;
-        # right_ventral_names = {'Right-VentralDC'};
+        right_ventral_colors_r = 165;
+        right_ventral_colors_g = 42;
+        right_ventral_colors_b = 42;
+        right_ventral_names = ["Right-VentralDC"]
 
         # Third Ventricle
         ventricle3 = 14;
         # ventricle3_colors_r = 204;
         # ventricle3_colors_g = 182;
         # ventricle3_colors_b = 142;
-        # ventricle3_names = {'Third-Ventricle'};
+        # ventricle3_names = ["Third-Ventricle"]
 
         # Hypothalamus
         ventricle3 = 14;
         # hypothal_colors_r = 204;
         # hypothal_colors_g = 182;
         # hypothal_colors_b = 142;
-        # left_hypothal_names  = {'Left-Hypothalamus'};
-        # right_hypothal_names = {'Right-Hypothalamus'};
+        # left_hypothal_names  = ["Left-Hypothalamus"]
+        # right_hypothal_names = ["Right-Hypothalamus"]
 
         # BrainStem Parcellation
         brainstem = np.array([173, 174, 175, 178 ])
-        # brainstem_colors_r = [242 206 119 142]';
-        # brainstem_colors_g = [104 195 159 182]';
-        # brainstem_colors_b = [76 58 176 0]';
-        # brainstem_names = {'Brain_Stem-Midbrain';'Brain_Stem-Pons';'Brain_Stem-Medulla';'Brain_Stem-SCP'};
+        brainstem_colors_r = np.array([242, 206, 119, 142])
+        brainstem_colors_g = np.array([104, 195, 159, 182])
+        brainstem_colors_b = np.array([76, 58, 176, 0])
+        brainstem_names = ["Brain_Stem-Midbrain","Brain_Stem-Pons","Brain_Stem-Medulla","Brain_Stem-SCP"]
 
         # Reading Subfields Images
         Vsublh = ni.load(self.inputs.lh_hippocampal_subfields)
@@ -292,7 +299,28 @@ class CombineParcellations(BaseInterface):
         Istem = Vstem.get_data()
         indstem = np.where(Istem > 0);
 
-        for roi in self.inputs.input_rois:
+        #Annot files for creating colorLUT and graphml files
+        rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
+    	lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
+
+        f_colorLUT = None
+
+        print("create color look up table : ",self.inputs.create_colorLUT)
+
+        for i, roi in enumerate(self.inputs.input_rois):
+            # colorLUT creation if enabled
+            if self.inputs.create_colorLUT:
+                outprefixName = roi.split(".")[0]
+                outprefixName = outprefixName.split("/")[-1:][0]
+                colorLUT_file = op.abspath('{}_FreeSurferColorLUT.txt'.format(outprefixName))
+                print("Create colorLUT file as %s" % colorLUT_file)
+                f_colorLUT = open(colorLUT_file,'w+')
+                time_now = strftime("%a, %d %b %Y %H:%M:%S",localtime())
+                hdr_lines = ['#$Id: {}_FreeSurferColorLUT.txt {} \n \n'.format(outprefixName,time_now),
+                            "#No. Label Name:                                R   G   B   A \n \n"]
+                f_colorLUT.writelines (hdr_lines)
+                del hdr_lines
+
             # Reading Cortical Parcellation
             V = ni.load(roi)
             I = V.get_data()
@@ -305,19 +333,33 @@ class CombineParcellations(BaseInterface):
             ## Processing right Hemisphere
             # Relabelling Right hemisphere
             It = np.zeros(I.shape)
-
-
-            ind = np.where((I > (I.max()-1)/2) & (I < I.max()+1));
-            It[ind] = I[ind] - (I.max()-1)/2;
+            ind = np.where((I > 2000) & (I < 3000))
+            It[ind] = I[ind] - 2000
             It[It==It.max()] = 0 # remove brainstem (max label)
             nlabel = It.max()
 
+            #ColorLUT (cortical)
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Right Hemisphere. Cortical Structures \n")
+                rh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',rh_annot_files[i]))
+                rgb_table = rh_annot[1][:,0:3]
+                roi_names = rh_annot[2]
+
+                lines = []
+                for index, name in enumerate(roi_names):
+                    name = 'ctx-rh-{}'.format(name)
+                    r = rgb_table[index,0]
+                    g = rgb_table[index,1]
+                    b = rgb_table[index,2]
+                    f_colorLUT.write('{:<4} {:<40} {:>3} {:>3} {:>3} 0 \n'.format(index,name,r,g,b))
+
             # Relabelling Thalamic Nuclei
-            newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.shape[0])
+            newLabels = np.arange(nlabel+1,nlabel+1+right_thalNuclei.shape[0])
             print(newLabels)
 
             i=0
             for lab in right_thalNuclei:
+                print("update right thalamic nucleus label (%i -> %i)"%(lab,newLabels[i]))
                 ind = np.where(Ithal == lab)
                 It[ind] = newLabels[i]
                 i += 1
@@ -327,6 +369,7 @@ class CombineParcellations(BaseInterface):
             newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
             i=0
             for lab in right_subcIds[1:]:
+                print("update right subcortical label (%i -> %i)"%(lab,newLabels[i]))
                 ind = np.where(I == lab)
                 It[ind] = newLabels[i]
                 i += 1
@@ -337,6 +380,7 @@ class CombineParcellations(BaseInterface):
             newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
             i=0
             for lab in hippo_subf:
+                print("update right hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
                 ind = np.where(Isublh == lab)
                 It[ind] = newLabels[i]
                 i += 1
@@ -344,20 +388,22 @@ class CombineParcellations(BaseInterface):
 
             # Relabelling Right VentralDC
             newLabels = np.arange(nlabel+1,nlabel+2)
+            print("update right ventral DC label (%i -> %i)"%(right_ventral,newLabels[0]))
             ind = np.where(I == right_ventral)
             It[ind] = newLabels[0]
             nlabel = It.max()
 
             ## Processing Left Hemisphere
             # Relabelling Left hemisphere
-            ind = np.where((I > I[np.nonzero(I)].min()) & (I <(I.max()+1)/2));
-            It[ind] = I[ind] - I[np.nonzero(I)].min() + nlabel + 1;
+            ind = np.where((I > 1000) & (I <2000))
+            It[ind] = I[ind] - 1000 + nlabel + 1
             nlabel = It.max()
 
             # Relabelling Thalamic Nuclei
             newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.shape[0])
             i=0
             for lab in left_thalNuclei:
+                print("update left thalamic nucleus label (%i -> %i)"%(lab,newLabels[i]))
                 ind = np.where(Ithal == lab)
                 It[ind] = newLabels[i]
                 i += 1
@@ -367,6 +413,7 @@ class CombineParcellations(BaseInterface):
             newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
             i=0
             for lab in left_subcIds[1:]:
+                print("update left subcortical label (%i -> %i)"%(lab,newLabels[i]))
                 ind = np.where(I == lab)
                 It[ind] = newLabels[i]
                 i += 1
@@ -376,6 +423,7 @@ class CombineParcellations(BaseInterface):
             newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
             i=0
             for lab in hippo_subf:
+                print("update left hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
                 ind = np.where(Isubrh == lab)
                 It[ind] = newLabels[i]
                 i += 1
@@ -384,6 +432,7 @@ class CombineParcellations(BaseInterface):
 
             # Relabelling Left VentralDC
             newLabels = np.arange(nlabel+1,nlabel+2)
+            print("update left ventral DC label (%i -> %i)"%(right_ventral,newLabels[0]))
             ind = np.where(I == left_ventral)
             It[ind] = newLabels[0]
             nlabel = It.max()
@@ -410,17 +459,21 @@ class CombineParcellations(BaseInterface):
             img = ni.Nifti1Image(It, V.get_affine(), hdr2)
             ni.save(img, output_roi)
 
+            if self.inputs.create_colorLUT:
+                f_colorLUT.close()
+
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_rois'] = self._gen_outfilenames('ROIv_HR_th')
+        outputs['output_rois'] = self._gen_outfilenames('ROIv_HR_th','_final.nii.gz')
+        outputs['colorLUT_files'] = self._gen_outfilenames('ROIv_HR_th','_FreeSurferColorLUT.txt')
         return outputs
 
-    def _gen_outfilenames(self, basename):
+    def _gen_outfilenames(self, basename, posfix):
         filepaths = []
         for scale in get_parcellation('Lausanne2018').keys():
-            filepaths.append(op.abspath(basename+'_'+scale+'_final.nii.gz'))
+            filepaths.append(op.abspath(basename+'_'+scale+posfix))
         return filepaths
 
 class ParcellateThalamusInputSpec(BaseInterfaceInputSpec):
@@ -455,11 +508,30 @@ class ParcellateThalamus(BaseInterface):
         iflogger.info('- Template image:\n  {}\n'.format(self.inputs.template_image))
         iflogger.info('- Thalamic nuclei maps:\n  {}\n'.format(self.inputs.thalamic_nuclei_maps))
 
+        # Moving aparc+aseg.mgz back to its original space for thalamic parcellation
+        mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','aparc+aseg.mgz')
+        targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','orig/001.mgz')
+        out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','aparc+aseg.nii.gz')
+        cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
+
+        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        iflogger.info(proc_stdout)
+
+        # Load aparc+aseg file in native space
+        Vatlas_fn = out
+        Vatlas = ni.load(Vatlas_fn)
+        Ia = Vatlas.get_data()
+        hdr = Vatlas.get_header()
+        hdr2 = hdr.copy()
+        hdr2.set_data_dtype(np.uint16)
+
         outprefixName = self.inputs.T1w_image.split(".")[0]
         outprefixName = outprefixName.split("/")[-1:][0]
         outprefixName = op.abspath('{}_Ind2temp'.format(outprefixName))
 
-        cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
+        # Register the template image image to the subject T1w image
+        ##cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
 
         iflogger.info('Processing cmd: %s' % cmd)
 
@@ -469,8 +541,10 @@ class ParcellateThalamus(BaseInterface):
 
         outprefixName = self.inputs.T1w_image.split(".")[0]
         outprefixName = outprefixName.split("/")[-1:][0]
-        transform_file = op.abspath('{}_Ind2temp0GenericAffine.mat'.format(outprefixName))
-        warp_file = op.abspath('{}_Ind2temp1Warp.nii.gz'.format(outprefixName))
+        ##transform_file = op.abspath('{}_Ind2temp0GenericAffine.mat'.format(outprefixName))
+        ##warp_file = op.abspath('{}_Ind2temp1Warp.nii.gz'.format(outprefixName))
+        transform_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_Ind2temp0GenericAffine.mat'
+        warp_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_Ind2temp1Warp.nii.gz'
         output_maps = op.abspath('{}_class-thalamus_probtissue.nii.gz'.format(outprefixName))
         jacobian_file = op.abspath('{}_class-thalamus_probtissue_jacobian.nii.gz'.format(outprefixName))
 
@@ -482,6 +556,7 @@ class ParcellateThalamus(BaseInterface):
         proc_stdout = process.communicate()[0].strip()
         iflogger.info(proc_stdout)
 
+        # Propagate nuclei probability maps to subject T1w space using estimated transforms and deformation
         cmd = fs_string + '; antsApplyTransforms --float -d 3 -e 3 -i "%s" -o "%s" -r "%s" -t "%s" -t "%s" -n BSpline[3]' % (self.inputs.thalamic_nuclei_maps,output_maps,self.inputs.T1w_image,warp_file,transform_file)
 
         iflogger.info('Processing cmd: %s' % cmd)
@@ -499,6 +574,23 @@ class ParcellateThalamus(BaseInterface):
         Vspams[Vspams < 0] = 0
         Vspams[Vspams > 1] = 1
 
+        Thresh = 0.05
+        # Creating MaxProb
+        Ispams = Vspams.copy()
+        ind = np.where(Ispams < Thresh)
+        Ispams[ind] = 0
+        ind = np.where(np.sum(Ispams,axis=3) == 0)
+        MaxProb = Ispams.argmax(axis=3) + 1
+        MaxProb[ind] = 0;
+        #?MaxProb = imfill(MaxProb,'holes');
+
+        del Ispams
+
+        debug_file = op.abspath('{}_class-thalamus_dtissue_after_ants.nii.gz'.format(outprefixName))
+        print("Save output image to %s" % debug_file)
+        img = ni.Nifti1Image(MaxProb, Vatlas.get_affine(), hdr2)
+        ni.save(img, debug_file)
+
         # Take into account jacobian to correct the probability maps after interpolation
         Ispams = np.zeros(Vspams.shape)
         for nuc in np.arange(Vspams.shape[3]):
@@ -507,25 +599,25 @@ class ParcellateThalamus(BaseInterface):
             Ispams[:,:,:,nuc] = T / T.max()
         del tempImage, T, Vspams, Ij
 
+        # Creating MaxProb
+        ind = np.where(Ispams < Thresh)
+        Ispams[ind] = 0
+        ind = np.where(np.sum(Ispams,axis=3) == 0)
+        MaxProb = Ispams.argmax(axis=3) + 1
+        MaxProb[ind] = 0;
+        #?MaxProb = imfill(MaxProb,'holes');
+
+        debug_file = op.abspath('{}_class-thalamus_dtissue_after_jacobiancorr.nii.gz'.format(outprefixName))
+        print("Save output image to %s" % debug_file)
+        img = ni.Nifti1Image(MaxProb, Vatlas.get_affine(), hdr2)
+        ni.save(img, debug_file)
+
         iflogger.info('Creating Thalamus mask from FreeSurfer aparc+aseg ')
 
         fs_string = 'export SUBJECTS_DIR=' + self.inputs.subjects_dir
         iflogger.info('- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
 
-        # Moving aparc+aseg.mgz back to its original space for thalamic parcellation
-        mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','aparc+aseg.mgz')
-        targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','orig/001.mgz')
-        out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','aparc+aseg.nii.gz')
-        cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
-
-        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-        proc_stdout = process.communicate()[0].strip()
-        iflogger.info(proc_stdout)
-
-        # Load aparc+aseg file in native space
-        Vatlas_fn = out
-        Vatlas = ni.load(Vatlas_fn)
-        Ia = Vatlas.get_data();
+        #Extract indices of left/right thalamus mask from aparc+aseg volume
         indl = np.where(Ia == 10)
         indr = np.where(Ia == 49)
 
@@ -616,6 +708,7 @@ class ParcellateThalamus(BaseInterface):
             tempM = np.repeat(tmpIthalL,Nspams/2,axis=3)
             del tmpIthalL
             IspamL = np.multiply(Ispams[:,:,:,0:Nspams/2],tempM)
+            print('IspamL shape:',IspamL.shape)
             del tempM
 
             # Creating MaxProb
@@ -635,6 +728,7 @@ class ParcellateThalamus(BaseInterface):
             tempM = np.repeat(tmpIthalR,Nspams/2,axis=3)
             del tmpIthalR
             IspamR = np.multiply(Ispams[:,:,:,Nspams/2:Nspams],tempM)
+            print('IspamR shape:',IspamR.shape)
             del tempM
 
             # Creating MaxProb
@@ -643,10 +737,10 @@ class ParcellateThalamus(BaseInterface):
             ind = np.where(np.sum(IspamR,axis=3) == 0)
             #MaxProbR = IspamR.max(axis=3)
             MaxProbR = np.argmax(IspamR,axis=3) + 1
-            MaxProbR[ind] = 0
             #?MaxProbR = imfill(MaxProbR,'holes');
             #?MaxProbR = Atlas_Corr(IthalR,MaxProbR);
             MaxProbR[indr] = MaxProbR[indr] + Nspams/2;
+            MaxProbR[ind] = 0
 
             del indr
 
@@ -683,6 +777,16 @@ class ParcellateThalamus(BaseInterface):
             #?MaxProb = imfill(MaxProb,'holes');
 
         del Ispams
+
+        debug_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_maxprobL.nii.gz'
+        print("Save output image to %s" % debug_file)
+        img = ni.Nifti1Image(MaxProbL, Vatlas.get_affine(), hdr2)
+        ni.save(img, debug_file)
+
+        debug_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_maxprobR.nii.gz'
+        print("Save output image to %s" % debug_file)
+        img = ni.Nifti1Image(MaxProbR, Vatlas.get_affine(), hdr2)
+        ni.save(img, debug_file)
 
         print("Save output image to %s" % max_prob)
         img = ni.Nifti1Image(MaxProb, Vatlas.get_affine(), hdr2)
@@ -1408,38 +1512,38 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 		# Initialize output
 		hdr2 = hdr.copy()
 		hdr2.set_data_dtype(np.uint16)
-		vol2 = np.zeros( this_nifti.shape, dtype=np.int16 )
-		# Relabelling Right hemisphere (2000+)
-		ii = np.where((vol > 2000) & (vol < 3000))
-		vol2[ii] = vol[ii] - 2000
-		nlabel = np.amax(vol2)	# keep track of the number of assigned labels
-		# Relabelling Subcortical Right hemisphere
-		# NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
-		newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
-		for j in range(0, len(rh_sub)):
-			ii = np.where(vol == rh_sub[j])
-			vol2[ii] = newLabels[j]
-		nlabel = np.amax(vol2)
-		# Relabelling Left hemisphere (1000+)
-		ii = np.where((vol > 1000) & (vol < 2000))
-		vol2[ii] = vol[ii] - 1000 + nlabel
-		nlabel = np.amax(vol2)	# n cortical label in right hemisphere
-		# Relabelling Subcortical Right hemisphere
-		# NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
-		newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
-		for j in range(0, len(lh_sub)):
-			ii = np.where(vol == lh_sub[j])
-			vol2[ii] = newLabels[j]
-		nlabel = np.amax(vol2)
-		# Relabelling Brain Stem
-		ii = np.where(vol == brain_stem)
-		vol2[ii] = nlabel + 1
+		# vol2 = np.zeros( this_nifti.shape, dtype=np.int16 )
+		# # Relabelling Right hemisphere (2000+)
+		# ii = np.where((vol > 2000) & (vol < 3000))
+		# vol2[ii] = vol[ii] - 2000
+		# nlabel = np.amax(vol2)	# keep track of the number of assigned labels
+		# # Relabelling Subcortical Right hemisphere
+		# # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
+		# newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
+		# for j in range(0, len(rh_sub)):
+		# 	ii = np.where(vol == rh_sub[j])
+		# 	vol2[ii] = newLabels[j]
+		# nlabel = np.amax(vol2)
+		# # Relabelling Left hemisphere (1000+)
+		# ii = np.where((vol > 1000) & (vol < 2000))
+		# vol2[ii] = vol[ii] - 1000 + nlabel
+		# nlabel = np.amax(vol2)	# n cortical label in right hemisphere
+		# # Relabelling Subcortical Right hemisphere
+		# # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
+		# newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
+		# for j in range(0, len(lh_sub)):
+		# 	ii = np.where(vol == lh_sub[j])
+		# 	vol2[ii] = newLabels[j]
+		# nlabel = np.amax(vol2)
+		# # Relabelling Brain Stem
+		# ii = np.where(vol == brain_stem)
+		# vol2[ii] = nlabel + 1
 
 		# 4. Save Nifti and mgz volumes
 		if v:
 			print('     > save output volumes')
 		this_out = os.path.join(subject_dir, 'mri', aseg_output[i])
-		img = ni.Nifti1Image(vol2, this_nifti.affine, hdr2)
+		img = ni.Nifti1Image(vol, this_nifti.affine, hdr2)
 		ni.save(img, this_out)
 		mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
 					this_out,
