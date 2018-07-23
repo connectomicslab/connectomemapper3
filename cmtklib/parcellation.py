@@ -307,7 +307,7 @@ class CombineParcellations(BaseInterface):
 
         print("create color look up table : ",self.inputs.create_colorLUT)
 
-        for i, roi in enumerate(self.inputs.input_rois):
+        for roi_index, roi in enumerate(self.inputs.input_rois):
             # colorLUT creation if enabled
             if self.inputs.create_colorLUT:
                 outprefixName = roi.split(".")[0]
@@ -317,7 +317,7 @@ class CombineParcellations(BaseInterface):
                 f_colorLUT = open(colorLUT_file,'w+')
                 time_now = strftime("%a, %d %b %Y %H:%M:%S",localtime())
                 hdr_lines = ['#$Id: {}_FreeSurferColorLUT.txt {} \n \n'.format(outprefixName,time_now),
-                            "#No. Label Name:                                R   G   B   A \n \n"]
+                            '{:<4} {:<55} {:>3} {:>3} {:>3} {} \n \n'.format("#No.","Label Name:","R","G","B","A")]
                 f_colorLUT.writelines (hdr_lines)
                 del hdr_lines
 
@@ -341,50 +341,91 @@ class CombineParcellations(BaseInterface):
             #ColorLUT (cortical)
             if self.inputs.create_colorLUT:
                 f_colorLUT.write("# Right Hemisphere. Cortical Structures \n")
-                rh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',rh_annot_files[i]))
+                rh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',rh_annot_files[roi_index]))
                 rgb_table = rh_annot[1][:,0:3]
                 roi_names = rh_annot[2]
 
                 lines = []
-                for index, name in enumerate(roi_names):
+                for label, name in enumerate(roi_names):
                     name = 'ctx-rh-{}'.format(name)
-                    r = rgb_table[index,0]
-                    g = rgb_table[index,1]
-                    b = rgb_table[index,2]
-                    f_colorLUT.write('{:<4} {:<40} {:>3} {:>3} {:>3} 0 \n'.format(index,name,r,g,b))
+                    r = rgb_table[label,0]
+                    g = rgb_table[label,1]
+                    b = rgb_table[label,2]
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label,name,r,g,b))
+                f_colorLUT.write("\n")
 
             # Relabelling Thalamic Nuclei
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Right Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
+
             newLabels = np.arange(nlabel+1,nlabel+1+right_thalNuclei.shape[0])
             print(newLabels)
 
             i=0
             for lab in right_thalNuclei:
                 print("update right thalamic nucleus label (%i -> %i)"%(lab,newLabels[i]))
+
+                if self.inputs.create_colorLUT:
+                    r = right_thalNuclei_colors_r[i]
+                    g = right_thalNuclei_colors_g[i]
+                    b = right_thalNuclei_colors_b[i]
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_thalNuclei_names[i],r,g,b))
+
                 ind = np.where(Ithal == lab)
                 It[ind] = newLabels[i]
                 i += 1
             nlabel = It.max()
 
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("\n")
+
             # Relabelling Subcortical Structures
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Right Hemisphere. Subcortical Structures \n")
+
             newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
             i=0
             for lab in right_subcIds[1:]:
                 print("update right subcortical label (%i -> %i)"%(lab,newLabels[i]))
+
+                if self.inputs.create_colorLUT:
+                    r = right_subcIds_colors_r[i]
+                    g = right_subcIds_colors_g[i]
+                    b = right_subcIds_colors_b[i]
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_subcort_names[i],r,g,b))
+
                 ind = np.where(I == lab)
                 It[ind] = newLabels[i]
                 i += 1
             nlabel = It.max()
 
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("\n")
 
             # Relabelling Subfields
+            # if self.inputs.create_colorLUT:
+            #     f_colorLUT.write("# Right Hemisphere. Subcortical Structures (Hippocampal Subfields) \n")
+
             newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
             i=0
             for lab in hippo_subf:
                 print("update right hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
+
                 ind = np.where(Isublh == lab)
+
+                # if self.inputs.create_colorLUT:
+                #     if ind.sum() > 0:
+                #         r = right_sub_colors_r[i]
+                #         g = right_subcIds_colors_g[i]
+                #         b = right_subcIds_colors_b[i]
+                #         f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_hippo_subf_names[i],r,g,b))
+
                 It[ind] = newLabels[i]
                 i += 1
             nlabel = It.max()
+
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("\n")
 
             # Relabelling Right VentralDC
             newLabels = np.arange(nlabel+1,nlabel+2)
@@ -393,31 +434,84 @@ class CombineParcellations(BaseInterface):
             It[ind] = newLabels[0]
             nlabel = It.max()
 
+            #ColorLUT (right ventral DC)
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Right Hemisphere. Ventral Diencephalon \n")
+                r = right_ventral_colors_r
+                g = right_ventral_colors_g
+                b = right_ventral_colors_b
+                f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),right_ventral_names[0],r,g,b))
+
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("\n")
+
             ## Processing Left Hemisphere
             # Relabelling Left hemisphere
             ind = np.where((I > 1000) & (I <2000))
             It[ind] = I[ind] - 1000 + nlabel + 1
             nlabel = It.max()
 
+            #ColorLUT (cortical)
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Left Hemisphere. Cortical Structures \n")
+                lh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',lh_annot_files[roi_index]))
+                rgb_table = lh_annot[1][:,0:3]
+                roi_names = lh_annot[2]
+
+                lines = []
+                for label, name in enumerate(roi_names):
+                    name = 'ctx-lh-{}'.format(name)
+                    r = rgb_table[label,0]
+                    g = rgb_table[label,1]
+                    b = rgb_table[label,2]
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label,name,r,g,b))
+                f_colorLUT.write("\n")
+
             # Relabelling Thalamic Nuclei
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Right Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
+
             newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.shape[0])
             i=0
             for lab in left_thalNuclei:
                 print("update left thalamic nucleus label (%i -> %i)"%(lab,newLabels[i]))
+
+                if self.inputs.create_colorLUT:
+                    r = left_thalNuclei_colors_r[i]
+                    g = left_thalNuclei_colors_g[i]
+                    b = left_thalNuclei_colors_b[i]
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_thalNuclei_names[i],r,g,b))
+
                 ind = np.where(Ithal == lab)
                 It[ind] = newLabels[i]
                 i += 1
             nlabel = It.max()
 
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("\n")
+
             # Relabelling Subcortical Structures
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Left Hemisphere. Subcortical Structures \n")
+
             newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
             i=0
             for lab in left_subcIds[1:]:
                 print("update left subcortical label (%i -> %i)"%(lab,newLabels[i]))
+
+                if self.inputs.create_colorLUT:
+                    r = left_subcIds_colors_r[i]
+                    g = left_subcIds_colors_g[i]
+                    b = left_subcIds_colors_b[i]
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_subcort_names[i],r,g,b))
+
                 ind = np.where(I == lab)
                 It[ind] = newLabels[i]
                 i += 1
             nlabel = It.max()
+
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("\n")
 
             # Relabelling Subfields
             newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
@@ -432,21 +526,44 @@ class CombineParcellations(BaseInterface):
 
             # Relabelling Left VentralDC
             newLabels = np.arange(nlabel+1,nlabel+2)
-            print("update left ventral DC label (%i -> %i)"%(right_ventral,newLabels[0]))
+            print("update left ventral DC label (%i -> %i)"%(left_ventral,newLabels[0]))
             ind = np.where(I == left_ventral)
             It[ind] = newLabels[0]
             nlabel = It.max()
             newIds_LH_ventralDC = newLabels;
 
+            #ColorLUT (left ventral DC)
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Left Hemisphere. Ventral Diencephalon \n")
+                r = left_ventral_colors_r
+                g = left_ventral_colors_g
+                b = left_ventral_colors_b
+                f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),left_ventral_names[0],r,g,b))
+                f_colorLUT.write("\n")
+
+
             # Relabelling Brain Stem
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Brain Stem Structures \n")
+
             newLabels = np.arange(nlabel+1,nlabel+1+brainstem.shape[0])
             i=0
             for lab in brainstem:
                 print("update brainstem parcellation label (%i -> %i)"%(lab,newLabels[i]))
+
+                if self.inputs.create_colorLUT:
+                    r = brainstem_colors_r[i]
+                    g = brainstem_colors_g[i]
+                    b = brainstem_colors_b[i]
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),brainstem_names[i],r,g,b))
+
                 ind = np.where(Istem == lab)
                 It[ind] = newLabels[i]
                 i += 1
             nlabel = It.max()
+
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("\n")
 
             # Saving the new parcellation
             outprefixName = roi.split(".")[0]
