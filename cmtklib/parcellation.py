@@ -403,23 +403,22 @@ class CombineParcellations(BaseInterface):
                 f_colorLUT.write("\n")
 
             # Relabelling Subfields
-            # if self.inputs.create_colorLUT:
-            #     f_colorLUT.write("# Right Hemisphere. Subcortical Structures (Hippocampal Subfields) \n")
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Right Hemisphere. Subcortical Structures (Hippocampal Subfields) \n")
 
             newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
             i=0
             for lab in hippo_subf:
                 print("update right hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
 
+                if self.inputs.create_colorLUT:
+                    # if len(ind) > 0:
+                        r = hippo_subf_colors_r[i]
+                        g = hippo_subf_colors_g[i]
+                        b = hippo_subf_colors_b[i]
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_hippo_subf_names[i],r,g,b))
+
                 ind = np.where(Isublh == lab)
-
-                # if self.inputs.create_colorLUT:
-                #     if ind.sum() > 0:
-                #         r = right_sub_colors_r[i]
-                #         g = right_subcIds_colors_g[i]
-                #         b = right_subcIds_colors_b[i]
-                #         f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_hippo_subf_names[i],r,g,b))
-
                 It[ind] = newLabels[i]
                 i += 1
             nlabel = It.max()
@@ -514,15 +513,29 @@ class CombineParcellations(BaseInterface):
                 f_colorLUT.write("\n")
 
             # Relabelling Subfields
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Left Hemisphere. Subcortical Structures (Hippocampal Subfields) \n")
+
             newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
             i=0
             for lab in hippo_subf:
                 print("update left hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
+
+                if self.inputs.create_colorLUT:
+                    # if len(ind) > 0:
+                        r = hippo_subf_colors_r[i]
+                        g = hippo_subf_colors_g[i]
+                        b = hippo_subf_colors_b[i]
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_hippo_subf_names[i],r,g,b))
+
                 ind = np.where(Isubrh == lab)
                 It[ind] = newLabels[i]
                 i += 1
             nlabel = It.max()
             newIds_LH_subFields = newLabels
+
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("\n")
 
             # Relabelling Left VentralDC
             newLabels = np.arange(nlabel+1,nlabel+2)
