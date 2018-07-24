@@ -321,6 +321,26 @@ class CombineParcellations(BaseInterface):
                 f_colorLUT.writelines (hdr_lines)
                 del hdr_lines
 
+            # Create GraphML if enabled
+            if self.inputs.create_graphml:
+                outprefixName = roi.split(".")[0]
+                outprefixName = outprefixName.split("/")[-1:][0]
+                graphML_file = op.abspath('{}.graphml'.format(outprefixName))
+                print("Create graphML_file as %s" % graphML_file)
+                f_graphML = open(graphML_file,'w+')
+
+                hdr_lines = ['{} \n'.format('<?xml version="1.0" encoding="utf-8"?>'),
+                             '{} \n'.format('<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">'),
+                             '{} \n'.format('  <key attr.name="dn_region" attr.type="string" for="node" id="d0" />'),
+                             '{} \n'.format('  <key attr.name="dn_fsname" attr.type="string" for="node" id="d1" />'),
+                             '{} \n'.format('  <key attr.name="dn_hemisphere" attr.type="string" for="node" id="d2" />'),
+                             '{} \n'.format('  <key attr.name="dn_multiscaleID" attr.type="int" for="node" id="d3" />'),
+                             '{} \n'.format('  <key attr.name="dn_name" attr.type="string" for="node" id="d4" />'),
+                             '{} \n'.format('  <key attr.name="dn_fsID" attr.type="int" for="node" id="d5" />'),
+                             '{} \n'.format('  <graph edgedefault="undirected" id="">'),]
+                f_graphML.writelines (hdr_lines)
+                del hdr_lines
+
             # Reading Cortical Parcellation
             V = ni.load(roi)
             I = V.get_data()
@@ -339,7 +359,7 @@ class CombineParcellations(BaseInterface):
             nlabel = It.max()
 
             #ColorLUT (cortical)
-            if self.inputs.create_colorLUT:
+            if self.inputs.create_colorLUT or self.inputs.create_graphml:
                 f_colorLUT.write("# Right Hemisphere. Cortical Structures \n")
                 rh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',rh_annot_files[roi_index]))
                 rgb_table = rh_annot[1][:,0:3]
@@ -348,11 +368,26 @@ class CombineParcellations(BaseInterface):
                 lines = []
                 for label, name in enumerate(roi_names):
                     name = 'ctx-rh-{}'.format(name)
-                    r = rgb_table[label,0]
-                    g = rgb_table[label,1]
-                    b = rgb_table[label,2]
-                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label,name,r,g,b))
-                f_colorLUT.write("\n")
+                    if self.inputs.create_colorLUT:
+                        r = rgb_table[label,0]
+                        g = rgb_table[label,1]
+                        b = rgb_table[label,2]
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label,name,r,g,b))
+
+                    if self.inputs.create_graphml:
+                        node_lines = ['{} \n'.format('    <node id="%i" />'%label),
+                                     '{} \n'.format('      <data key="d0">"%s"</data>'%("cortical")),
+                                     '{} \n'.format('      <data key="d1">"%s"</data>'%(name)),
+                                     '{} \n'.format('      <data key="d2">"%s"</data>'%("right")),
+                                     '{} \n'.format('      <data key="d3">"%i"</data>'%(label)),
+                                     '{} \n'.format('      <data key="d4">"%s"</data>'%(name)),
+                                     '{} \n'.format('      <data key="d5">"%s"</data>'%(label+2000)),
+                                     '{} \n'.format('    </node>')]
+                        f_graphML.writelines(node_lines)
+
+
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("\n")
 
             # Relabelling Thalamic Nuclei
             if self.inputs.create_colorLUT:
@@ -591,6 +626,11 @@ class CombineParcellations(BaseInterface):
 
             if self.inputs.create_colorLUT:
                 f_colorLUT.close()
+
+            if self.inputs.create_graphml:
+                bottom_lines = ['{} \n'.format('  </graph>'),
+                             '{} \n'.format('</graphml>'),]
+                f_graphML.writelines(bottom_lines)
 
         return runtime
 

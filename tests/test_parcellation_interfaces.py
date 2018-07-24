@@ -15,6 +15,7 @@ def test_combine_parcellation(subjects_dir,subject_id,input_rois,lh_subfields,rh
     combiner.inputs.brainstem_structures = brainstem
     combiner.inputs.thalamus_nuclei = thalamus
     combiner.inputs.create_colorLUT = True
+    combiner.inputs.create_graphml = True
 
     # Execute the node
     combiner.run()
