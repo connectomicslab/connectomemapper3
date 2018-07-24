@@ -190,7 +190,7 @@ class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
 class CombineParcellationsOutputSpec(TraitedSpec):
     output_rois = OutputMultiPath(File(exists=True))
     colorLUT_files = OutputMultiPath(File(exists=True))
-    graphml_files = OutputMultiPath(File(exists=True))
+    graphML_files = OutputMultiPath(File(exists=True))
 
 class CombineParcellations(BaseInterface):
     input_spec = CombineParcellationsInputSpec
@@ -375,13 +375,13 @@ class CombineParcellations(BaseInterface):
                         f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label,name,r,g,b))
 
                     if self.inputs.create_graphml:
-                        node_lines = ['{} \n'.format('    <node id="%i" />'%label),
-                                     '{} \n'.format('      <data key="d0">"%s"</data>'%("cortical")),
-                                     '{} \n'.format('      <data key="d1">"%s"</data>'%(name)),
-                                     '{} \n'.format('      <data key="d2">"%s"</data>'%("right")),
-                                     '{} \n'.format('      <data key="d3">"%i"</data>'%(label)),
-                                     '{} \n'.format('      <data key="d4">"%s"</data>'%(name)),
-                                     '{} \n'.format('      <data key="d5">"%s"</data>'%(label+2000)),
+                        node_lines = ['{} \n'.format('    <node id="%i">'%label),
+                                     '{} \n'.format('      <data key="d0">%s</data>'%("cortical")),
+                                     '{} \n'.format('      <data key="d1">%s</data>'%(name)),
+                                     '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(label)),
+                                     '{} \n'.format('      <data key="d4">%s</data>'%(name)),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(label+2000))),
                                      '{} \n'.format('    </node>')]
                         f_graphML.writelines(node_lines)
 
@@ -406,6 +406,17 @@ class CombineParcellations(BaseInterface):
                     b = right_thalNuclei_colors_b[i]
                     f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_thalNuclei_names[i],r,g,b))
 
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("thalamus")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_thalNuclei_names[i])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(49))),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
+
                 ind = np.where(Ithal == lab)
                 It[ind] = newLabels[i]
                 i += 1
@@ -428,6 +439,17 @@ class CombineParcellations(BaseInterface):
                     g = right_subcIds_colors_g[i]
                     b = right_subcIds_colors_b[i]
                     f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_subcort_names[i],r,g,b))
+
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_subcort_names[i])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
 
                 ind = np.where(I == lab)
                 It[ind] = newLabels[i]
@@ -453,6 +475,17 @@ class CombineParcellations(BaseInterface):
                         b = hippo_subf_colors_b[i]
                         f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_hippo_subf_names[i],r,g,b))
 
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("hippocampus")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_hippo_subf_names[i])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
+
                 ind = np.where(Isublh == lab)
                 It[ind] = newLabels[i]
                 i += 1
@@ -475,14 +508,25 @@ class CombineParcellations(BaseInterface):
                 g = right_ventral_colors_g
                 b = right_ventral_colors_b
                 f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),right_ventral_names[0],r,g,b))
-
-            if self.inputs.create_colorLUT:
                 f_colorLUT.write("\n")
+
+            if self.inputs.create_graphml:
+                node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+                             '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                             '{} \n'.format('      <data key="d1">%s</data>'%("ventral-diencephalon")),
+                             '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+                             '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+                             '{} \n'.format('      <data key="d4">%s</data>'%(right_ventral_names[0])),
+                             '{} \n'.format('      <data key="d5">%i</data>'%(int(right_ventral))),
+                             '{} \n'.format('    </node>')]
+                f_graphML.writelines(node_lines)
 
             ## Processing Left Hemisphere
             # Relabelling Left hemisphere
             ind = np.where((I > 1000) & (I <2000))
             It[ind] = I[ind] - 1000 + nlabel + 1
+            old_nlabel = nlabel
+
             nlabel = It.max()
 
             #ColorLUT (cortical)
@@ -495,10 +539,25 @@ class CombineParcellations(BaseInterface):
                 lines = []
                 for label, name in enumerate(roi_names):
                     name = 'ctx-lh-{}'.format(name)
-                    r = rgb_table[label,0]
-                    g = rgb_table[label,1]
-                    b = rgb_table[label,2]
-                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label,name,r,g,b))
+
+                    if self.inputs.create_colorLUT:
+                        r = rgb_table[label,0]
+                        g = rgb_table[label,1]
+                        b = rgb_table[label,2]
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label,name,r,g,b))
+
+                    if self.inputs.create_graphml:
+                        node_lines = ['{} \n'.format('    <node id="%i">'%(int(label))),
+                                     '{} \n'.format('      <data key="d0">%s</data>'%("cortical")),
+                                     '{} \n'.format('      <data key="d1">%s</data>'%(name)),
+                                     '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(int(label))),
+                                     '{} \n'.format('      <data key="d4">%s</data>'%(name)),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(label + 1000 - old_nlabel - 1))),
+                                     '{} \n'.format('    </node>')]
+                        f_graphML.writelines(node_lines)
+
+
                 f_colorLUT.write("\n")
 
             # Relabelling Thalamic Nuclei
@@ -515,6 +574,17 @@ class CombineParcellations(BaseInterface):
                     g = left_thalNuclei_colors_g[i]
                     b = left_thalNuclei_colors_b[i]
                     f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_thalNuclei_names[i],r,g,b))
+
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("thalamus")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(left_thalNuclei_names[i])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(10))),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
 
                 ind = np.where(Ithal == lab)
                 It[ind] = newLabels[i]
@@ -539,6 +609,17 @@ class CombineParcellations(BaseInterface):
                     b = left_subcIds_colors_b[i]
                     f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_subcort_names[i],r,g,b))
 
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(left_subcort_names[i])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
+
                 ind = np.where(I == lab)
                 It[ind] = newLabels[i]
                 i += 1
@@ -557,11 +638,21 @@ class CombineParcellations(BaseInterface):
                 print("update left hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
 
                 if self.inputs.create_colorLUT:
-                    # if len(ind) > 0:
-                        r = hippo_subf_colors_r[i]
-                        g = hippo_subf_colors_g[i]
-                        b = hippo_subf_colors_b[i]
-                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_hippo_subf_names[i],r,g,b))
+                    r = hippo_subf_colors_r[i]
+                    g = hippo_subf_colors_g[i]
+                    b = hippo_subf_colors_b[i]
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_hippo_subf_names[i],r,g,b))
+
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("hippocampus")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(left_hippo_subf_names[i])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
 
                 ind = np.where(Isubrh == lab)
                 It[ind] = newLabels[i]
@@ -589,6 +680,17 @@ class CombineParcellations(BaseInterface):
                 f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),left_ventral_names[0],r,g,b))
                 f_colorLUT.write("\n")
 
+            if self.inputs.create_graphml:
+                node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+                             '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                             '{} \n'.format('      <data key="d1">%s</data>'%("ventral-diencephalon")),
+                             '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+                             '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+                             '{} \n'.format('      <data key="d4">%s</data>'%(left_ventral_names[0])),
+                             '{} \n'.format('      <data key="d5">%i</data>'%(int(left_ventral))),
+                             '{} \n'.format('    </node>')]
+                f_graphML.writelines(node_lines)
+
 
             # Relabelling Brain Stem
             if self.inputs.create_colorLUT:
@@ -604,6 +706,17 @@ class CombineParcellations(BaseInterface):
                     g = brainstem_colors_g[i]
                     b = brainstem_colors_b[i]
                     f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),brainstem_names[i],r,g,b))
+
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("brainstem")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("central")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(brainstem_names[i])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
 
                 ind = np.where(Istem == lab)
                 It[ind] = newLabels[i]
@@ -631,6 +744,7 @@ class CombineParcellations(BaseInterface):
                 bottom_lines = ['{} \n'.format('  </graph>'),
                              '{} \n'.format('</graphml>'),]
                 f_graphML.writelines(bottom_lines)
+                f_graphML.close()
 
         return runtime
 
@@ -638,6 +752,7 @@ class CombineParcellations(BaseInterface):
         outputs = self._outputs().get()
         outputs['output_rois'] = self._gen_outfilenames('ROIv_HR_th','_final.nii.gz')
         outputs['colorLUT_files'] = self._gen_outfilenames('ROIv_HR_th','_FreeSurferColorLUT.txt')
+        outputs['graphML_files'] = self._gen_outfilenames('ROIv_HR_th','.graphml')
         return outputs
 
     def _gen_outfilenames(self, basename, posfix):
