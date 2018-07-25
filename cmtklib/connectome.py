@@ -593,7 +593,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                         roi_fname = vol
                         print roi_fname
                     if parkey in graphml:
-                        roi_graphml_fname = vol
+                        roi_graphml_fname = graphml
                         print roi_graphml_fname
                 #roi_fname = roi_volumes[r]
                 #r += 1
