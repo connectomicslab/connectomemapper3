@@ -22,7 +22,7 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import cmtklib as cmtk
 import nipype.interfaces.utility as util
 
-from cmtklib.parcellation import Parcellate
+from cmtklib.parcellation import Parcellate, ParcellateBrainstemStructures, ParcellateHippocampalSubfields, ParcellateThalamus, CombineParcellations
 # Own imports
 from cmp.stages.common import Stage
 
@@ -31,8 +31,10 @@ class ParcellationConfig(HasTraits):
     parcellation_scheme = Str('Lausanne2008')
     parcellation_scheme_editor = List(['NativeFreesurfer','Lausanne2008','Lausanne2018','Custom'])
     include_thalamic_nuclei_parcellation = Bool(True)
+    template_thalamus = File()
+    thalamic_nuclei_maps = File()
     segment_hippocampal_subfields = Bool(True)
-    segment_brainstem_parcellation = Bool(True)
+    segment_brainstem = Bool(True)
     pre_custom = Str('Lausanne2008')
     #atlas_name = Str()
     number_of_regions = Int()
@@ -55,6 +57,8 @@ class ParcellationConfig(HasTraits):
                              visible_when='parcellation_scheme=="Custom"'
                              ),
                        Group(
+                             'segment_hippocampal_subfields',
+                             'segment_brainstem',
                              'include_thalamic_nuclei_parcellation',
                              visible_when='parcellation_scheme=="Lausanne2018"'
                              )
@@ -85,6 +89,8 @@ class ParcellationStage(Stage):
     def __init__(self,pipeline_mode):
         self.name = 'parcellation_stage'
         self.config = ParcellationConfig()
+        self.config.template_thalamus = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz'))
+        self.config.thalamic_nuclei_maps = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz'))
         self.config.pipeline_mode = pipeline_mode
         self.inputs = ["subjects_dir","subject_id","custom_wm_mask"]
         self.outputs = [#"aseg_file",
@@ -96,12 +102,13 @@ class ParcellationStage(Stage):
             "gm_mask_file",
             "aseg",
     	       #"cc_unknown_file","ribbon_file","roi_files",
-            "roi_volumes","parcellation_scheme","atlas_info"]
+            "roi_volumes","roi_colorLUTs","roi_graphMLs","parcellation_scheme","atlas_info"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
 
         if self.config.parcellation_scheme != "Custom":
+
             parc_node = pe.Node(interface=Parcellate(),name="%s_parcellation" % self.config.parcellation_scheme)
             parc_node.inputs.parcellation_scheme = self.config.parcellation_scheme
             parc_node.inputs.erode_masks = True
@@ -111,7 +118,7 @@ class ParcellationStage(Stage):
                          (parc_node,outputnode,[#("aseg_file","aseg_file"),("cc_unknown_file","cc_unknown_file"),
                                                 #("ribbon_file","ribbon_file"),("roi_files","roi_files"),
     					     ("white_matter_mask_file","wm_mask_file"),
-                             ("roi_files_in_structural_space","roi_volumes"),
+                             #("roi_files_in_structural_space","roi_volumes"),
                              ("wm_eroded","wm_eroded"),("csf_eroded","csf_eroded"),("brain_eroded","brain_eroded"),
                              ("T1","T1"),("brain","brain"),("brain_mask","brain_mask")])
                         ])
@@ -119,6 +126,73 @@ class ParcellationStage(Stage):
             flow.connect([
                         (parc_node,outputnode,[("aseg","aseg")]),
                         ])
+
+            if self.config.parcellation_scheme == 'Lausanne2018':
+                parcCombiner = pe.Node(interface=CombineParcellations(),name="parcCombiner")
+                parcCombiner.inputs.create_colorLUT = True
+                parcCombiner.inputs.create_graphml = True
+
+                flow.connect([
+                            (inputnode,parcCombiner,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
+                            (parc_node,parcCombiner,[("roi_files_in_structural_space","input_rois")]),
+                            ])
+
+                if self.config.segment_brainstem:
+                    parcBrainStem = pe.Node(interface=ParcellateBrainstemStructures(),name="parcBrainStem")
+
+                    flow.connect([
+                                (inputnode,parcBrainStem,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
+                                (parcBrainStem,parcCombiner,[("brainstem_structures","brainstem_structures")]),
+                                ])
+
+                if self.config.segment_hippocampal_subfields:
+                    parcHippo = pe.Node(interface=ParcellateHippocampalSubfields(),name="parcHippo")
+
+                    flow.connect([
+                                (inputnode,parcHippo,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
+                                (parcHippo,parcCombiner,[("lh_hipposubfields","lh_hippocampal_subfields")]),
+                                (parcHippo,parcCombiner,[("rh_hipposubfields","rh_hippocampal_subfields")]),
+                                ])
+
+                if self.config.include_thalamic_nuclei_parcellation:
+                    parcThal = pe.Node(interface=ParcellateThalamus(),name="parcThal")
+                    parThal.inputs.template_image = template_thalamus
+                    parcThal.inputs.thalamic_nuclei_maps = thalamic_nuclei_maps
+
+                    flow.connect([
+                                (inputnode,parcThal,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
+                                (parc_node,parcThal,[("T1","T1w_image")]),
+                                (parcThal,parcCombiner,[("max_prob_registered","thalamus_nuclei")]),
+                                ])
+
+                if self.config.segment_brainstem or self.config.segment_hippocampal_subfields or self.config.include_thalamic_nuclei_parcellation:
+                    flow.connect([
+                                (parcCombiner,outputnode,[("output_rois","roi_volumes")]),
+                                (parcCombiner,outputnode,[("colorLUT_files","roi_colorLUTs")]),
+                                (parcCombiner,outputnode,[("graphML_files","roi_graphMLs")]),
+                            ])
+            else:
+                flow.connect([
+                            (parc_node,outputnode,[("roi_files_in_structural_space","roi_volumes")]),
+                        ])
+
+            # TODO
+            # if self.config.pipeline_mode == "fMRI":
+            #     erode_wm = pe.Node(interface=cmtk.Erode(),name="erode_wm")
+            #     flow.connect([
+            #                 (inputnode,erode_wm,[("custom_wm_mask","in_file")]),
+            #                 (erode_wm,outputnode,[("out_file","wm_eroded")]),
+            #                 ])
+            #     if os.path.exists(self.config.csf_file):
+            #         erode_csf = pe.Node(interface=cmtk.Erode(in_file = self.config.csf_file),name="erode_csf")
+            #         flow.connect([
+            #                     (erode_csf,outputnode,[("out_file","csf_eroded")])
+            #                     ])
+            #     if os.path.exists(self.config.brain_file):
+            #         erode_brain = pe.Node(interface=cmtk.Erode(in_file = self.config.brain_file),name="erode_brain")
+            #         flow.connect([
+            #                     (erode_brain,outputnode,[("out_file","brain_eroded")])
+            #                     ])
 
         else:
             temp_node = pe.Node(interface=util.IdentityInterface(fields=["roi_volumes","atlas_info"]),name="custom_parcellation")
@@ -192,15 +266,17 @@ class ParcellationStage(Stage):
                                                                                white_matter_file+':colormap=GEColor',
                                                                                roi_v+":colormap=lut:lut="+lut_file]
                     elif self.config.parcellation_scheme == 'Lausanne2018':
-                        resolution = {'1':'resolution1','2':'resolution2','3':'resolution3','4':'resolution4','5':'resolution5'}
-                        for roi_v in parc_results.outputs.roi_files_in_structural_space:
-                            roi_basename = os.path.basename(roi_v)
-                            scale = roi_basename[16:-7]
-                            print scale
-                            lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2018',resolution[scale],resolution[scale] + '_LUT.txt'))
-                            self.inspect_outputs_dict[roi_basename] = ['freeview','-v',
-                                                                               white_matter_file+':colormap=GEColor',
-                                                                               roi_v+":colormap=lut:lut="+lut_file]
+                        # resolution = {'1':'resolution1','2':'resolution2','3':'resolution3','4':'resolution4','5':'resolution5'}
+                        parc_results_path = os.path.join(self.stage_dir,"parcCombiner","result_parcCombiner.pklz")
+
+                        if(os.path.exists(parc_results_path)):
+                            parc_results = pickle.load(gzip.open(parc_results_path))
+
+                            for roi_v, lut_file in zip(parc_results.outputs.output_rois,parc_results.outputs.colorLUT_files):
+                                roi_basename = os.path.basename(roi_v)
+                                self.inspect_outputs_dict[roi_basename] = ['freeview','-v',
+                                                                                   white_matter_file+':colormap=GEColor',
+                                                                                   roi_v+":colormap=lut:lut="+lut_file]
 
                 #self.inspect_outputs = self.inspect_outputs_dict.keys()
         else:
@@ -210,6 +286,9 @@ class ParcellationStage(Stage):
 
     def has_run(self):
         if self.config.parcellation_scheme != "Custom":
-            return os.path.exists(os.path.join(self.stage_dir,"%s_parcellation" % self.config.parcellation_scheme,"result_%s_parcellation.pklz" % self.config.parcellation_scheme))
+            if self.config.parcellation_scheme == 'Lausanne2018':
+                return os.path.exists(os.path.join(self.stage_dir,"parcCombiner","result_parcCombiner.pklz"))
+            else:
+                return os.path.exists(os.path.join(self.stage_dir,"%s_parcellation" % self.config.parcellation_scheme,"result_%s_parcellation.pklz" % self.config.parcellation_scheme))
         else:
             return os.path.exists(self.config.atlas_nifti_file)

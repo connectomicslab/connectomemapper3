@@ -402,6 +402,21 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                             ('ROIv_HR_th_scale3.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
                                             ('ROIv_HR_th_scale4.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
                                             ('ROIv_HR_th_scale5.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
+                                            ('ROIv_HR_th_scale1_final.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
+                                            ('ROIv_HR_th_scale2_final.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
+                                            ('ROIv_HR_th_scale3_final.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
+                                            ('ROIv_HR_th_scale4_final.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
+                                            ('ROIv_HR_th_scale5_final.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
+                                            ('ROIv_HR_th_scale1.graphml',self.subject+'_T1w_parc_scale1.graphml'),
+                                            ('ROIv_HR_th_scale2.graphml',self.subject+'_T1w_parc_scale2.graphml'),
+                                            ('ROIv_HR_th_scale3.graphml',self.subject+'_T1w_parc_scale3.graphml'),
+                                            ('ROIv_HR_th_scale4.graphml',self.subject+'_T1w_parc_scale4.graphml'),
+                                            ('ROIv_HR_th_scale5.graphml',self.subject+'_T1w_parc_scale5.graphml'),
+                                            ('ROIv_HR_th_scale1_FreeSurferColorLUT.txt',self.subject+'_T1w_parc_scale1_FreeSurferColorLUT.txt'),
+                                            ('ROIv_HR_th_scale2_FreeSurferColorLUT.txt',self.subject+'_T1w_parc_scale2_FreeSurferColorLUT.txt'),
+                                            ('ROIv_HR_th_scale3_FreeSurferColorLUT.txt',self.subject+'_T1w_parc_scale3_FreeSurferColorLUT.txt'),
+                                            ('ROIv_HR_th_scale4_FreeSurferColorLUT.txt',self.subject+'_T1w_parc_scale4_FreeSurferColorLUT.txt'),
+                                            ('ROIv_HR_th_scale5_FreeSurferColorLUT.txt',self.subject+'_T1w_parc_scale5_FreeSurferColorLUT.txt'),
                                             ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
                                             ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
                                             ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
@@ -439,7 +454,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         anat_flow = pe.Workflow(name='anatomical_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
         anat_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
         anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","aseg","brain","brain_mask","wm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
-            "roi_volumes","parcellation_scheme","atlas_info"]),name="outputnode")
+            "roi_volumes","parcellation_scheme","atlas_info","roi_colorLUTs", "roi_graphMLs"]),name="outputnode")
         anat_flow.add_nodes([anat_inputnode,anat_outputnode])
 
         anat_flow.connect([
@@ -488,6 +503,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                                ("outputnode.parcellation_scheme","parcellation_scheme"),
                                                                ("outputnode.atlas_info","atlas_info"),
                                                                ("outputnode.roi_volumes","roi_volumes"),
+                                                               ("outputnode.roi_colorLUTs","roi_colorLUTs"),
+                                                               ("outputnode.roi_graphMLs","roi_graphMLs"),
                                                                ("outputnode.wm_eroded","wm_eroded"),
                                                                ("outputnode.gm_mask_file","gm_mask_file"),
                                                                ("outputnode.csf_eroded","csf_eroded"),
@@ -523,7 +540,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                         (anat_outputnode,sinker,[("brain_mask","anat.@brain_mask")]),
                         (anat_outputnode,sinker,[("wm_mask_file","anat.@wm_mask")]),
                         (anat_outputnode,sinker,[("gm_mask_file","anat.@gm_mask")]),
-                        (anat_outputnode,sinker,[("roi_volumes","anat.@roivs")])
+                        (anat_outputnode,sinker,[("roi_volumes","anat.@roivs")]),
+                        (anat_outputnode,sinker,[("roi_colorLUTs","anat.@luts")]),
+                        (anat_outputnode,sinker,[("roi_graphMLs","anat.@graphmls")])
                         ])
 
         self.flow = anat_flow

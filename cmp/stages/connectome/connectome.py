@@ -68,7 +68,7 @@ class MRTrixConnectomeConfig(HasTraits):
 class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     track_file = InputMultiPath(File(exists=True),desc='Tractography result', mandatory=True)
     roi_volumes = InputMultiPath(File(exists=True), desc='ROI volumes registered to diffusion space')
-    parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','NativeFreesurfer','Custom'], usedefault=True)
+    parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','Lausanne2018','NativeFreesurfer','Custom'], usedefault=True)
     atlas_info = Dict(mandatory = False,desc="custom atlas information")
     compute_curvature = traits.Bool(True, desc='Compute curvature', usedefault=True)
     additional_maps = traits.List(File,desc='Additional calculated maps (ADC, gFA, ...)')
