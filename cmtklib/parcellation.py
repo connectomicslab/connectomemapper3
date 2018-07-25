@@ -367,7 +367,14 @@ class CombineParcellations(BaseInterface):
             #ColorLUT (cortical)
             if self.inputs.create_colorLUT or self.inputs.create_graphml:
                 f_colorLUT.write("# Right Hemisphere. Cortical Structures \n")
-                rh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',rh_annot_files[roi_index]))
+                outprefixName = roi.split(".")[0]
+                outprefixName = outprefixName.split("/")[-1:][0]
+                for elem in outprefixName.split("_"):
+                    if "scale" in elem:
+                        scale = elem
+                rh_annot_file = 'rh.lausanne2008.%s.annot'%scale
+                print("Load %s"%rh_annot_file)
+                rh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',rh_annot_file))
                 rgb_table = rh_annot[1][:,0:3]
                 roi_names = rh_annot[2]
                 roi_labels = rh_annot[0]
@@ -545,7 +552,14 @@ class CombineParcellations(BaseInterface):
             #ColorLUT (cortical)
             if self.inputs.create_colorLUT or self.inputs.create_graphml:
                 f_colorLUT.write("# Left Hemisphere. Cortical Structures \n")
-                lh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',lh_annot_files[roi_index]))
+                outprefixName = roi.split(".")[0]
+                outprefixName = outprefixName.split("/")[-1:][0]
+                for elem in outprefixName.split("_"):
+                    if "scale" in elem:
+                        scale = elem
+                lh_annot_file = 'lh.lausanne2008.%s.annot'%scale
+                print("Load %s"%lh_annot_file)
+                lh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',lh_annot_file))
                 rgb_table = lh_annot[1][:,0:3]
                 roi_names = lh_annot[2][1:]
 

@@ -560,7 +560,7 @@ class DiffusionPipeline(Pipeline):
 
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
-        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals','T1','aseg','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5']), name='datasource')
+        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals','T1','aseg','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5','roi_graphml_s1','roi_graphml_s2','roi_graphml_s3','roi_graphml_s4','roi_graphml_s5']), name='datasource')
         datasource.inputs.base_directory = deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
@@ -570,7 +570,8 @@ class DiffusionPipeline(Pipeline):
                                                 wm_mask_file='anat/'+self.subject+'_T1w_class-WM.nii.gz',wm_eroded='anat/'+self.subject+'_T1w_class-WM.nii.gz',
                                                 brain_eroded='anat/'+self.subject+'_T1w_brainmask.nii.gz',csf_eroded='anat/'+self.subject+'_T1w_class-CSF.nii.gz',
                                                 roi_volume_s1='anat/'+self.subject+'_T1w_parc_scale1.nii.gz',roi_volume_s2='anat/'+self.subject+'_T1w_parc_scale2.nii.gz',roi_volume_s3='anat/'+self.subject+'_T1w_parc_scale3.nii.gz',
-                                                roi_volume_s4='anat/'+self.subject+'_T1w_parc_scale4.nii.gz',roi_volume_s5='anat/'+self.subject+'_T1w_parc_scale5.nii.gz')
+                                                roi_volume_s4='anat/'+self.subject+'_T1w_parc_scale4.nii.gz',roi_volume_s5='anat/'+self.subject+'_T1w_parc_scale5.nii.gz',roi_graphml_s1='anat/'+self.subject+'_T1w_parc_scale1.graphml',roi_graphml_s2='anat/'+self.subject+'_T1w_parc_scale2.graphml',roi_graphml_s3='anat/'+self.subject+'_T1w_parc_scale3.graphml',
+                                                roi_graphml_s4='anat/'+self.subject+'_T1w_parc_scale4.graphml',roi_graphml_s5='anat/'+self.subject+'_T1w_parc_scale5.graphml')
         # datasource.inputs.field_template_args = dict(diffusion=[], bvecs=[], bvals=[],T1=[],brain=[],brain_mask=[],
         #                                         wm_mask_file=[],wm_eroded=[],brain_eroded=[],csf_eroded=[],
         #                                         roi_volumes=[['%s'%self.subject],[1,2,3,4,5]])
@@ -705,7 +706,7 @@ class DiffusionPipeline(Pipeline):
         # Create diffusion flow
 
         diffusion_flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
-        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','aseg','brain','T2','brain_mask','wm_mask_file','roi_volumes','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')# ,'atlas_info'
+        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','aseg','brain','T2','brain_mask','wm_mask_file','roi_volumes','roi_graphMLs','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')# ,'atlas_info'
         diffusion_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         diffusion_inputnode.inputs.atlas_info = self.atlas_info
 
@@ -725,6 +726,7 @@ class DiffusionPipeline(Pipeline):
         #               ])
 
         merge_roi_volumes = pe.Node(interface=Merge(5),name='merge_roi_volumes')
+        merge_roi_graphmls = pe.Node(interface=Merge(5),name='merge_roi_graphmls')
 
         def remove_non_existing_scales(roi_volumes):
             out_roi_volumes = []
@@ -737,9 +739,14 @@ class DiffusionPipeline(Pipeline):
                       ])
 
         diffusion_flow.connect([
+                      (datasource,merge_roi_graphmls,[("roi_graphml_s1","in1"),("roi_graphml_s2","in2"),("roi_graphml_s3","in3"),("roi_graphml_s4","in4"),("roi_graphml_s5","in5")])
+                      ])
+
+        diffusion_flow.connect([
                       (datasource,diffusion_inputnode,[("diffusion","diffusion"),("bvecs","bvecs"),("bvals","bvals")]),
                       (datasource,diffusion_inputnode,[("T1","T1"),("aseg","aseg"),("brain","brain"),("brain_mask","brain_mask"),("wm_mask_file","wm_mask_file")]), #,( "roi_volumes","roi_volumes")])
-                      (merge_roi_volumes,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_volumes")])
+                      (merge_roi_volumes,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_volumes")]),
+                      (merge_roi_graphmls,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_graphMLs")])
                                                 #    ("parcellation_scheme","parcellation_scheme"),
                                                 #    ("atlas_info","atlas_info")]),
                       ])
@@ -830,7 +837,7 @@ class DiffusionPipeline(Pipeline):
             self.stages['Connectome'].config.subject = self.global_conf.subject
             con_flow = self.create_stage_flow("Connectome")
             diffusion_flow.connect([
-                        (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme'),('atlas_info','inputnode.atlas_info')]),
+                        (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme'),('atlas_info','inputnode.atlas_info'),('roi_graphMLs','inputnode.roi_graphMLs')]),
                         (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),('outputnode.ADC','inputnode.ADC'),
                                               ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
                                               ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),

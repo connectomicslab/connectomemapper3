@@ -156,8 +156,8 @@ class ParcellationStage(Stage):
 
                 if self.config.include_thalamic_nuclei_parcellation:
                     parcThal = pe.Node(interface=ParcellateThalamus(),name="parcThal")
-                    parThal.inputs.template_image = template_thalamus
-                    parcThal.inputs.thalamic_nuclei_maps = thalamic_nuclei_maps
+                    parcThal.inputs.template_image = self.config.template_thalamus
+                    parcThal.inputs.thalamic_nuclei_maps = self.config.thalamic_nuclei_maps
 
                     flow.connect([
                                 (inputnode,parcThal,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
@@ -171,6 +171,15 @@ class ParcellationStage(Stage):
                                 (parcCombiner,outputnode,[("colorLUT_files","roi_colorLUTs")]),
                                 (parcCombiner,outputnode,[("graphML_files","roi_graphMLs")]),
                             ])
+
+
+
+                    # create_atlas_info = pe.Node(interface=CreateLausanne2018AtlasInfo(),name="create_atlas_info")
+                    # flow.connect([
+                    #             (parcCombiner,create_atlas_info,[("output_rois","roi_volumes")]),
+                    #             (parcCombiner,create_atlas_info,[("graphML_files","roi_graphMLs")]),
+                    #             (create_atlas_info,outputnode,[("atlas_info","atlas_info")]),
+                    #         ])
             else:
                 flow.connect([
                             (parc_node,outputnode,[("roi_files_in_structural_space","roi_volumes")]),

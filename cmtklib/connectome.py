@@ -562,9 +562,7 @@ def mrtrixcmat(intck, fod_file, roi_volumes, parcellation_scheme, compute_curvat
 
 
 
-
-
-def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additional_maps={}, output_types=['gPickle'], atlas_info = {}):
+def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvature=True, additional_maps={}, output_types=['gPickle'], atlas_info = {}):
     """ Create the connection matrix for each resolution using fibers and ROIs. """
 
     # create the endpoints for each fibers
@@ -583,8 +581,32 @@ def cmat(intrk, roi_volumes, parcellation_scheme, compute_curvature=True, additi
     print('Parcellation_scheme : %s' % parcellation_scheme)
 
     if parcellation_scheme != "Custom":
-        print "get resolutions from parcellation_scheme"
-        resolutions = get_parcellation(parcellation_scheme)
+        if parcellation_scheme != "Lausanne2018":
+            print "get resolutions from parcellation_scheme"
+            resolutions = get_parcellation(parcellation_scheme)
+        else:
+            resolutions = get_parcellation(parcellation_scheme)
+            for parkey, parval in resolutions.items():
+                for vol, graphml in zip(roi_volumes,roi_graphmls):
+                    print parkey
+                    if parkey in vol:
+                        roi_fname = vol
+                        print roi_fname
+                    if parkey in graphml:
+                        roi_graphml_fname = vol
+                        print roi_graphml_fname
+                #roi_fname = roi_volumes[r]
+                #r += 1
+                roi       = nibabel.load(roi_fname)
+                roiData   = roi.get_data()
+                resolutions[parkey]['number_of_regions'] = roiData.max()
+                resolutions[parkey]['node_information_graphml'] = op.abspath(roi_graphml_fname)
+
+            del roi, roiData
+            print("##################################################")
+            print("Atlas info (Lausanne2018) :")
+            print(resolutions)
+            print("##################################################")
     else:
         print "get resolutions from atlas_info: "
         resolutions = atlas_info
