@@ -108,11 +108,11 @@ class rsfmri_conmat(BaseInterface):
                     roi_fname = vol
                     print roi_fname
 
-            infile       = nib.load(roi_fname)
-            mask   = roi.get_data().astype( np.uint32 )
+            roi = nib.load(roi_fname)
+            mask = roi.get_data()
 
             # N: number of ROIs for current resolution
-            N = mask.max()
+            N = int(mask.max())
             # matrix number of rois vs timepoints
             odata = np.zeros( (N,tp), dtype = np.float32 )
 
@@ -120,8 +120,8 @@ class rsfmri_conmat(BaseInterface):
             for i in range(1,N+1):
                 odata[i-1,:] = fdata[mask==i].mean( axis = 0 )
 
-            np.save( os.path.abspath( 'averageTimeseries_%s.npy' % s), odata )
-            sio.savemat( os.path.abspath( 'averageTimeseries_%s.mat' % s), {'ts':odata} )
+            np.save( os.path.abspath( 'averageTimeseries_%s.npy' % parkey), odata )
+            sio.savemat( os.path.abspath( 'averageTimeseries_%s.mat' % parkey), {'ts':odata} )
 
         ## Apply scrubbing (if enabled) and compute correlation
         # loop throughout all the resolutions ('scale33', ..., 'scale500')
@@ -135,21 +135,23 @@ class rsfmri_conmat(BaseInterface):
                     roi_fname = vol
                     print roi_fname
             roi       = nib.load(roi_fname)
-            roiData   = roi.get_data().astype( np.uint32 )
+            roiData   = roi.get_data()
 
             # Create matrix, add node information from parcellation and recover ROI indexes
             nROIs = parval['number_of_regions']
             print("Create the connection matrix (%s rois)" % nROIs)
             G     = nx.Graph()
+            print('cfmri-0')
             gp = nx.read_graphml(parval['node_information_graphml'])
             ROI_idx = []
+            print('cfmri-1')
             for u,d in gp.nodes_iter(data=True):
                 G.add_node(int(u), d)
                 # compute a position for the node based on the mean position of the
                 # ROI in voxel coordinates (segmentation volume )
                 G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
                 ROI_idx.append(int(d["dn_correspondence_id"]))
-
+            print('cfmri-2')
             # # matrix number of rois vs timepoints
             # odata = np.zeros( (nROIs,tp), dtype = np.float32 )
             #
