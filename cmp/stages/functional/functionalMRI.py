@@ -167,27 +167,27 @@ class nuisance_regression(BaseInterface):
             move = np.genfromtxt( self.inputs.motion_file )
             move = move - np.mean(move,0)
 
-            # #Update
-            # move_der1 = np.concatenate((np.zeros([1,6]), move[0:-1,:]), axis=0)
-            # move_der2 = np.concatenate((np.zeros([2,6]), move[0:-2,:]), axis=0)
-            # move_sq = np.square(move)
-            # move_der1_sq = np.square(move_der1)
-            # move_der2_sq = np.square(move_der2)
-            #
-            # move_der1 = move_der1 - np.mean(move_der1)
-            # move_der2 = move_der2 - np.mean(move_der2)
-            # move_der1_sq = move_der1_sq - np.mean(move_der1_sq)
-            # move_der2_sq = move_der2_sq - np.mean(move_der2_sq)
-            # move_sq = move_sq - np.mean(move_sq)
-            #
-            # if self.inputs.nuisance_motion_nb_reg == '12'or self.inputs.nuisance_motion_nb_reg == '24' or self.inputs.nuisance_motion_nb_reg == '36':
-           	# 	move = np.hstack((move, move_sq))
-            # if self.inputs.nuisance_motion_nb_reg == '24' or self.inputs.nuisance_motion_nb_reg == '36':
-           	# 	move = np.hstack((move, move_der1))
-           	# 	move = np.hstack((move, move_der1_sq))
-            # if self.inputs.nuisance_motion_nb_reg == '36':
-           	# 	move = np.hstack((move, move_der2))
-           	# 	move = np.hstack((move, move_der2_sq))
+            #Update
+            move_der1 = np.concatenate((np.zeros([1,6]), move[0:-1,:]), axis=0)
+            move_der2 = np.concatenate((np.zeros([2,6]), move[0:-2,:]), axis=0)
+            move_sq = np.square(move)
+            move_der1_sq = np.square(move_der1)
+            move_der2_sq = np.square(move_der2)
+
+            move_der1 = move_der1 - np.mean(move_der1)
+            move_der2 = move_der2 - np.mean(move_der2)
+            move_der1_sq = move_der1_sq - np.mean(move_der1_sq)
+            move_der2_sq = move_der2_sq - np.mean(move_der2_sq)
+            move_sq = move_sq - np.mean(move_sq)
+
+            if self.inputs.nuisance_motion_nb_reg == '12'or self.inputs.nuisance_motion_nb_reg == '24' or self.inputs.nuisance_motion_nb_reg == '36':
+           		move = np.hstack((move, move_sq))
+            if self.inputs.nuisance_motion_nb_reg == '24' or self.inputs.nuisance_motion_nb_reg == '36':
+           		move = np.hstack((move, move_der1))
+           		move = np.hstack((move, move_der1_sq))
+            if self.inputs.nuisance_motion_nb_reg == '36':
+           		move = np.hstack((move, move_der2))
+           		move = np.hstack((move, move_der2_sq))
 
 
         # GLM: regress out nuisance covariates
@@ -244,7 +244,11 @@ class nuisance_regression(BaseInterface):
             print('Detrend WM average signal')
             if self.inputs.motion_nuisance:
                 print('pre-Detrend motion average signals')
-                X = np.hstack((X.reshape(tp,1),move))
+                print('move shape :',move.shape)
+                print('X shape :',X.shape)
+                Y = X.reshape(tp,1)
+                print('Y shape :',Y.shape)
+                X = np.hstack((Y,move))
                 print('Detrend motion average signals')
         elif self.inputs.motion_nuisance:
             X = move
