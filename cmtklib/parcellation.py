@@ -178,10 +178,10 @@ class ParcellateBrainstemStructures(BaseInterface):
 
 class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
     input_rois = InputMultiPath(File(exists=True))
-    lh_hippocampal_subfields = File('')
-    rh_hippocampal_subfields = File('')
-    brainstem_structures = File('')
-    thalamus_nuclei = File('')
+    lh_hippocampal_subfields = File(' ')
+    rh_hippocampal_subfields = File(' ')
+    brainstem_structures = File(' ')
+    thalamus_nuclei = File(' ')
     create_colorLUT = traits.Bool(True)
     create_graphml = traits.Bool(True)
     subjects_dir = Directory(desc='Freesurfer subjects dir')
@@ -284,20 +284,43 @@ class CombineParcellations(BaseInterface):
         brainstem_colors_b = np.array([76, 58, 176, 0])
         brainstem_names = ["Brain_Stem-Midbrain","Brain_Stem-Pons","Brain_Stem-Medulla","Brain_Stem-SCP"]
 
+        lh_subfield_defined = False
         # Reading Subfields Images
-        Vsublh = ni.load(self.inputs.lh_hippocampal_subfields)
-        Vsubrh =  ni.load(self.inputs.rh_hippocampal_subfields)
-        Isublh = Vsublh.get_data()
-        Isubrh = Vsubrh.get_data()
+        try:
+            Vsublh = ni.load(self.inputs.lh_hippocampal_subfields)
+            Isublh = Vsublh.get_data()
+            lh_subfield_defined = True
+        except TypeError:
+            print('Subfields image (Left hemisphere) not provided')
 
+        rh_subfield_defined = False
+        try:
+            Vsubrh =  ni.load(self.inputs.rh_hippocampal_subfields)
+            Isubrh = Vsubrh.get_data()
+            rh_subfield_defined = True
+        except TypeError:
+            print('Subfields image (Right hemisphere) not provided')
+
+
+        thalamus_nuclei_defined = False
         # Reading  Nuclei
-        Vthal = ni.load(self.inputs.thalamus_nuclei)
-        Ithal = Vthal.get_data()
+        try:
+            Vthal = ni.load(self.inputs.thalamus_nuclei)
+            Ithal = Vthal.get_data()
 
+            thalamus_nuclei_defined = True
+        except TypeError:
+            print('Thalamic nuclei image not provided')
+
+        brainstem_defined = False
         # Reading Stem Image
-        Vstem = ni.load(self.inputs.brainstem_structures)
-        Istem = Vstem.get_data()
-        indstem = np.where(Istem > 0);
+        try:
+            Vstem = ni.load(self.inputs.brainstem_structures)
+            Istem = Vstem.get_data()
+            indstem = np.where(Istem > 0)
+            brainstem_defined = True
+        except TypeError:
+            print('Brain stem image not provided')
 
         #Annot files for creating colorLUT and graphml files
         rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
@@ -348,13 +371,12 @@ class CombineParcellations(BaseInterface):
             # Replacing the brain stem (Stem is replaced by its own parcellation. Mismatch between both global volumes, mainly due to partial volume effect in the global stem parcellation)
             indrep = np.where(I == 16)
             I[indrep] = 0;
-            #I[indstem] = Istem[indstem]
 
-            ## Processing right Hemisphere
+            ## Processing Right Hemisphere
             # Relabelling Right hemisphere
-            It = np.zeros(I.shape)
+            It = np.zeros(I.shape,dtype=np.int16)
             ind = np.where((I >= 2000) & (I < 3000))
-            It[ind] = I[ind] - 2001
+            It[ind] = (I[ind] - 2001)
             nlabel = It.max() + 1
 
 
@@ -410,40 +432,41 @@ class CombineParcellations(BaseInterface):
                     f_colorLUT.write("\n")
 
             # Relabelling Thalamic Nuclei
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Right Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
+            if thalamus_nuclei_defined:
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Right Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
 
-            newLabels = np.arange(nlabel+1,nlabel+1+right_thalNuclei.shape[0])
-            print(newLabels)
+                newLabels = np.arange(nlabel+1,nlabel+1+right_thalNuclei.shape[0])
+                print(newLabels)
 
-            i=0
-            for lab in right_thalNuclei:
-                print("update right thalamic nucleus label (%i -> %i)"%(lab,newLabels[i]))
+                i=0
+                for lab in right_thalNuclei:
+                    print("update right thalamic nucleus label (%i -> %i)"%(lab,newLabels[i]))
+
+                    if self.inputs.create_colorLUT:
+                        r = right_thalNuclei_colors_r[i]
+                        g = right_thalNuclei_colors_g[i]
+                        b = right_thalNuclei_colors_b[i]
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_thalNuclei_names[i],r,g,b))
+
+                    if self.inputs.create_graphml:
+                        node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                     '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                     '{} \n'.format('      <data key="d1">%s</data>'%("thalamus")),
+                                     '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                     '{} \n'.format('      <data key="d4">%s</data>'%(right_thalNuclei_names[i])),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(49))),
+                                     '{} \n'.format('    </node>')]
+                        f_graphML.writelines(node_lines)
+
+                    ind = np.where(Ithal == lab)
+                    It[ind] = newLabels[i]
+                    i += 1
+                nlabel = It.max()
 
                 if self.inputs.create_colorLUT:
-                    r = right_thalNuclei_colors_r[i]
-                    g = right_thalNuclei_colors_g[i]
-                    b = right_thalNuclei_colors_b[i]
-                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_thalNuclei_names[i],r,g,b))
-
-                if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                                 '{} \n'.format('      <data key="d1">%s</data>'%("thalamus")),
-                                 '{} \n'.format('      <data key="d2">%s</data>'%("right")),
-                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_thalNuclei_names[i])),
-                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(49))),
-                                 '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
-
-                ind = np.where(Ithal == lab)
-                It[ind] = newLabels[i]
-                i += 1
-            nlabel = It.max()
-
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("\n")
+                    f_colorLUT.write("\n")
 
             # Relabelling Subcortical Structures
             if self.inputs.create_colorLUT:
@@ -480,39 +503,40 @@ class CombineParcellations(BaseInterface):
                 f_colorLUT.write("\n")
 
             # Relabelling Subfields
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Right Hemisphere. Subcortical Structures (Hippocampal Subfields) \n")
+            if rh_subfield_defined:
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Right Hemisphere. Subcortical Structures (Hippocampal Subfields) \n")
 
-            newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
-            i=0
-            for lab in hippo_subf:
-                print("update right hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
+                newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
+                i=0
+                for lab in hippo_subf:
+                    print("update right hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
+
+                    if self.inputs.create_colorLUT:
+                        # if len(ind) > 0:
+                            r = hippo_subf_colors_r[i]
+                            g = hippo_subf_colors_g[i]
+                            b = hippo_subf_colors_b[i]
+                            f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_hippo_subf_names[i],r,g,b))
+
+                    if self.inputs.create_graphml:
+                        node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                     '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                     '{} \n'.format('      <data key="d1">%s</data>'%("hippocampus")),
+                                     '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                     '{} \n'.format('      <data key="d4">%s</data>'%(right_hippo_subf_names[i])),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
+                                     '{} \n'.format('    </node>')]
+                        f_graphML.writelines(node_lines)
+
+                    ind = np.where(Isublh == lab)
+                    It[ind] = newLabels[i]
+                    i += 1
+                nlabel = It.max()
 
                 if self.inputs.create_colorLUT:
-                    # if len(ind) > 0:
-                        r = hippo_subf_colors_r[i]
-                        g = hippo_subf_colors_g[i]
-                        b = hippo_subf_colors_b[i]
-                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_hippo_subf_names[i],r,g,b))
-
-                if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                                 '{} \n'.format('      <data key="d1">%s</data>'%("hippocampus")),
-                                 '{} \n'.format('      <data key="d2">%s</data>'%("right")),
-                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_hippo_subf_names[i])),
-                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
-                                 '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
-
-                ind = np.where(Isublh == lab)
-                It[ind] = newLabels[i]
-                i += 1
-            nlabel = It.max()
-
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("\n")
+                    f_colorLUT.write("\n")
 
             # Relabelling Right VentralDC
             newLabels = np.arange(nlabel+1,nlabel+2)
@@ -544,7 +568,7 @@ class CombineParcellations(BaseInterface):
             ## Processing Left Hemisphere
             # Relabelling Left hemisphere
             ind = np.where((I > 1000) & (I <2000))
-            It[ind] = I[ind] - 1000 + nlabel
+            It[ind] = (I[ind] - 1000 + nlabel)
             old_nlabel = nlabel
 
             nlabel = It.max()
@@ -594,38 +618,39 @@ class CombineParcellations(BaseInterface):
                 f_colorLUT.write("\n")
 
             # Relabelling Thalamic Nuclei
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Left Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
+            if thalamus_nuclei_defined:
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Left Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
 
-            newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.shape[0])
-            i=0
-            for lab in left_thalNuclei:
-                print("update left thalamic nucleus label (%i -> %i)"%(lab,newLabels[i]))
+                newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.shape[0])
+                i=0
+                for lab in left_thalNuclei:
+                    print("update left thalamic nucleus label (%i -> %i)"%(lab,newLabels[i]))
+
+                    if self.inputs.create_colorLUT:
+                        r = left_thalNuclei_colors_r[i]
+                        g = left_thalNuclei_colors_g[i]
+                        b = left_thalNuclei_colors_b[i]
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_thalNuclei_names[i],r,g,b))
+
+                    if self.inputs.create_graphml:
+                        node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                     '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                     '{} \n'.format('      <data key="d1">%s</data>'%("thalamus")),
+                                     '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                     '{} \n'.format('      <data key="d4">%s</data>'%(left_thalNuclei_names[i])),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(10))),
+                                     '{} \n'.format('    </node>')]
+                        f_graphML.writelines(node_lines)
+
+                    ind = np.where(Ithal == lab)
+                    It[ind] = newLabels[i]
+                    i += 1
+                nlabel = It.max()
 
                 if self.inputs.create_colorLUT:
-                    r = left_thalNuclei_colors_r[i]
-                    g = left_thalNuclei_colors_g[i]
-                    b = left_thalNuclei_colors_b[i]
-                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_thalNuclei_names[i],r,g,b))
-
-                if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                                 '{} \n'.format('      <data key="d1">%s</data>'%("thalamus")),
-                                 '{} \n'.format('      <data key="d2">%s</data>'%("left")),
-                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d4">%s</data>'%(left_thalNuclei_names[i])),
-                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(10))),
-                                 '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
-
-                ind = np.where(Ithal == lab)
-                It[ind] = newLabels[i]
-                i += 1
-            nlabel = It.max()
-
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("\n")
+                    f_colorLUT.write("\n")
 
             # Relabelling Subcortical Structures
             if self.inputs.create_colorLUT:
@@ -662,39 +687,40 @@ class CombineParcellations(BaseInterface):
                 f_colorLUT.write("\n")
 
             # Relabelling Subfields
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Left Hemisphere. Subcortical Structures (Hippocampal Subfields) \n")
+            if lh_subfield_defined:
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Left Hemisphere. Subcortical Structures (Hippocampal Subfields) \n")
 
-            newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
-            i=0
-            for lab in hippo_subf:
-                print("update left hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
+                newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
+                i=0
+                for lab in hippo_subf:
+                    print("update left hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
+
+                    if self.inputs.create_colorLUT:
+                        r = hippo_subf_colors_r[i]
+                        g = hippo_subf_colors_g[i]
+                        b = hippo_subf_colors_b[i]
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_hippo_subf_names[i],r,g,b))
+
+                    if self.inputs.create_graphml:
+                        node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                     '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                     '{} \n'.format('      <data key="d1">%s</data>'%("hippocampus")),
+                                     '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                     '{} \n'.format('      <data key="d4">%s</data>'%(left_hippo_subf_names[i])),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
+                                     '{} \n'.format('    </node>')]
+                        f_graphML.writelines(node_lines)
+
+                    ind = np.where(Isubrh == lab)
+                    It[ind] = newLabels[i]
+                    i += 1
+                nlabel = It.max()
+                newIds_LH_subFields = newLabels
 
                 if self.inputs.create_colorLUT:
-                    r = hippo_subf_colors_r[i]
-                    g = hippo_subf_colors_g[i]
-                    b = hippo_subf_colors_b[i]
-                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_hippo_subf_names[i],r,g,b))
-
-                if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                                 '{} \n'.format('      <data key="d1">%s</data>'%("hippocampus")),
-                                 '{} \n'.format('      <data key="d2">%s</data>'%("left")),
-                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d4">%s</data>'%(left_hippo_subf_names[i])),
-                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
-                                 '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
-
-                ind = np.where(Isubrh == lab)
-                It[ind] = newLabels[i]
-                i += 1
-            nlabel = It.max()
-            newIds_LH_subFields = newLabels
-
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("\n")
+                    f_colorLUT.write("\n")
 
             # Relabelling Left VentralDC
             newLabels = np.arange(nlabel+1,nlabel+2)
@@ -726,38 +752,42 @@ class CombineParcellations(BaseInterface):
 
 
             # Relabelling Brain Stem
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Brain Stem Structures \n")
+            if brainstem_defined:
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Brain Stem Structures \n")
 
-            newLabels = np.arange(nlabel+1,nlabel+1+brainstem.shape[0])
-            i=0
-            for lab in brainstem:
-                print("update brainstem parcellation label (%i -> %i)"%(lab,newLabels[i]))
+                newLabels = np.arange(nlabel+1,nlabel+1+brainstem.shape[0])
+                i=0
+                for lab in brainstem:
+                    print("update brainstem parcellation label (%i -> %i)"%(lab,newLabels[i]))
+
+                    if self.inputs.create_colorLUT:
+                        r = brainstem_colors_r[i]
+                        g = brainstem_colors_g[i]
+                        b = brainstem_colors_b[i]
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),brainstem_names[i],r,g,b))
+
+                    if self.inputs.create_graphml:
+                        node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
+                                     '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                     '{} \n'.format('      <data key="d1">%s</data>'%("brainstem")),
+                                     '{} \n'.format('      <data key="d2">%s</data>'%("central")),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
+                                     '{} \n'.format('      <data key="d4">%s</data>'%(brainstem_names[i])),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
+                                     '{} \n'.format('    </node>')]
+                        f_graphML.writelines(node_lines)
+
+                    ind = np.where(Istem == lab)
+                    It[ind] = newLabels[i]
+                    i += 1
+                nlabel = It.max()
 
                 if self.inputs.create_colorLUT:
-                    r = brainstem_colors_r[i]
-                    g = brainstem_colors_g[i]
-                    b = brainstem_colors_b[i]
-                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),brainstem_names[i],r,g,b))
+                    f_colorLUT.write("\n")
 
-                if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                                 '{} \n'.format('      <data key="d1">%s</data>'%("brainstem")),
-                                 '{} \n'.format('      <data key="d2">%s</data>'%("central")),
-                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d4">%s</data>'%(brainstem_names[i])),
-                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
-                                 '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
-
-                ind = np.where(Istem == lab)
-                It[ind] = newLabels[i]
-                i += 1
-            nlabel = It.max()
-
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("\n")
+            # Fix negative values
+            It[It<0] = 0
 
             # Saving the new parcellation
             outprefixName = roi.split(".")[0]
@@ -765,7 +795,7 @@ class CombineParcellations(BaseInterface):
             output_roi = op.abspath('{}_final.nii.gz'.format(outprefixName))
             hdr = V.get_header()
             hdr2 = hdr.copy()
-            hdr2.set_data_dtype(np.uint16)
+            hdr2.set_data_dtype(np.int16)
             print("Save output image to %s" % output_roi)
             img = ni.Nifti1Image(It, V.get_affine(), hdr2)
             ni.save(img, output_roi)
@@ -849,7 +879,7 @@ class ParcellateThalamus(BaseInterface):
         outprefixName = op.abspath('{}_Ind2temp'.format(outprefixName))
 
         # Register the template image image to the subject T1w image
-        ##cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
+        cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
 
         iflogger.info('Processing cmd: %s' % cmd)
 
@@ -859,10 +889,10 @@ class ParcellateThalamus(BaseInterface):
 
         outprefixName = self.inputs.T1w_image.split(".")[0]
         outprefixName = outprefixName.split("/")[-1:][0]
-        ##transform_file = op.abspath('{}_Ind2temp0GenericAffine.mat'.format(outprefixName))
-        ##warp_file = op.abspath('{}_Ind2temp1Warp.nii.gz'.format(outprefixName))
-        transform_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_Ind2temp0GenericAffine.mat'
-        warp_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_Ind2temp1Warp.nii.gz'
+        transform_file = op.abspath('{}_Ind2temp0GenericAffine.mat'.format(outprefixName))
+        warp_file = op.abspath('{}_Ind2temp1Warp.nii.gz'.format(outprefixName))
+        #transform_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_Ind2temp0GenericAffine.mat'
+        #warp_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_Ind2temp1Warp.nii.gz'
         output_maps = op.abspath('{}_class-thalamus_probtissue.nii.gz'.format(outprefixName))
         jacobian_file = op.abspath('{}_class-thalamus_probtissue_jacobian.nii.gz'.format(outprefixName))
 

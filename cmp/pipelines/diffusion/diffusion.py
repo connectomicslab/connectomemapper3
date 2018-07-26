@@ -866,16 +866,22 @@ class DiffusionPipeline(Pipeline):
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
+        if '_' in self.subject:
+            self.subject = self.subject.split('_')[0]
+
+        old_subject = self.subject
+
         if self.global_conf.subject_session == '':
             deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
         else:
             deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session)
+
             self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
         # Initialization
-        if os.path.isfile(os.path.join(deriv_subject_directory,"pypeline.log")):
-            os.unlink(os.path.join(deriv_subject_directory,"pypeline.log"))
-        config.update_config({'logging': {'log_directory': deriv_subject_directory,
+        if os.path.isfile(os.path.join(deriv_subject_directory,"dwi","pypeline.log")):
+            os.unlink(os.path.join(deriv_subject_directory,"dwi","pypeline.log"))
+        config.update_config({'logging': {'log_directory': os.path.join(deriv_subject_directory,"dwi"),
                                   'log_to_file': True},
                               'execution': {'remove_unnecessary_outputs': False,
                               'stop_on_first_crash': True,'stop_on_first_rerun': False,

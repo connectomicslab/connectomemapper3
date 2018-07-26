@@ -690,9 +690,14 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             G.add_node(int(u), d)
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
-            G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
-            G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_correspondence_id"]) )
-            print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_correspondence_id"]) ))
+            if parcellation_scheme != "Lausanne2018":
+                G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
+                G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_correspondence_id"]) )
+                print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_correspondence_id"]) ))
+            else:
+                G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_multiscaleID"]) ) , axis = 1))
+                G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_multiscaleID"]) )
+                print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_multiscaleID"]) ))
 
         dis = 0
 
