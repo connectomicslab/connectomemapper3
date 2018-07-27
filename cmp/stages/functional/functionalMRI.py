@@ -44,6 +44,7 @@ class FunctionalMRIConfig(HasTraits):
     motion = Bool(True)
 
     detrending = Bool(True)
+    detrending_mode = Enum(["linear",["linear,quadratic"]])
 
     lowpass_filter = Float(0.01)
     highpass_filter = Float(0.1)
@@ -52,7 +53,9 @@ class FunctionalMRIConfig(HasTraits):
 
     traits_view = View( #Item('smoothing'),
                         #Item('discard_n_volumes'),
-                        Item('detrending'),
+                        HGroup(
+                            Item('detrending'),Item('detrending_mode',visible_when='detrending')
+                            ),
                         HGroup(
                             Item('global_nuisance',label="Global"),
                             Item('csf'),
@@ -472,7 +475,7 @@ class FunctionalMRIStage(Stage):
         detrending_output = pe.Node(interface=util.IdentityInterface(fields=["detrending_output"]),name="detrending_output")
         if self.config.detrending:
             detrending = pe.Node(interface=Detrending(),name='detrending')
-            detrending.inputs.mode = "linear"
+            detrending.inputs.mode = self.config.detrending_mode
             flow.connect([
                         (inputnode,detrending,[("preproc_file","in_file")]),
                         (inputnode,detrending,[("registered_roi_volumes","gm_file")]),
