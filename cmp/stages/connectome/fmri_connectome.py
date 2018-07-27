@@ -149,18 +149,14 @@ class rsfmri_conmat(BaseInterface):
             # Create matrix, add node information from parcellation and recover ROI indexes
             print("Create the connection matrix (%s rois)" % nROIs)
             G     = nx.Graph()
-            print('cfmri-0')
             gp = nx.read_graphml(parval['node_information_graphml'])
             ROI_idx = []
-            print('cfmri-1')
             for u,d in gp.nodes_iter(data=True):
                 G.add_node(int(u), d)
                 # compute a position for the node based on the mean position of the
                 # ROI in voxel coordinates (segmentation volume )
-                print('cfmri-2')
                 G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(mask== int(d["dn_correspondence_id"]) ) , axis = 1))
                 ROI_idx.append(int(d["dn_correspondence_id"]))
-            print('cfmri-3')
 
             # # matrix number of rois vs timepoints
             # ts = np.zeros( (nROIs,tp), dtype = np.float32 )
@@ -190,11 +186,15 @@ class rsfmri_conmat(BaseInterface):
                 print(log_scrubbing)
                 np.save( os.path.abspath( 'tp_after_scrubbing.npy'), index )
                 sio.savemat( os.path.abspath('tp_after_scrubbing.mat'), {'index':index} )
+                print('cfmri-5-scr')
                 ts_after_scrubbing = ts[:,index]
+                print('cfmri-6-scr')
                 np.save( op.abspath('averageTimeseries_%s_after_scrubbing.npy' % s), ts_after_scrubbing )
                 sio.savemat( op.abspath('averageTimeseries_%s_after_scrubbing.mat' % s), {'ts':ts_after_scrubbing} )
-                print('cfmri-4-scr')
+                print('cfmri-7-scr')
                 ts = ts_after_scrubbing
+                print('ts.shape : ',ts.shape)
+                
                 # initialize connectivity matrix
                 nnodes = ts.shape[0]
                 i = -1
@@ -206,32 +206,24 @@ class rsfmri_conmat(BaseInterface):
                         G.add_edge(ROI_idx[i],ROI_idx[j],corr = value)
                     	# fmat[i,j] = value
                 		# fmat[j,i] = value
-                print('cfmri-5-scr')
+                print('cfmri-8-scr')
         		# np.save( op.join(gconf.get_timeseries(), 'fconnectome_%s_after_scrubbing.npy' % s), fmat )
         		# sio.savemat( op.join(gconf.get_timeseries(), 'fconnectome_%s_after_scrubbing.mat' % s), {'fmat':fmat} )
             else:
-                print('cfmri-4')
                 nnodes = ts.shape[0]
 
                 i = -1
                 for i_signal in ts:
                     i += 1
                     for j in xrange(i,nnodes):
-                        print('cfmri-4-1')
                         j_signal = ts[j,:]
-                        print('cfmri-4-2')
                         value = np.corrcoef(i_signal,j_signal)[0,1]
-                        print('cfmri-4-3')
-                        print(nnodes)
                         G.add_edge(ROI_idx[i],ROI_idx[j],corr = value)
-                        print('cfmri-4-4')
-                print('cfmri-5')
                         # fmat[i,j] = value
                         # fmat[j,i] = value
             	# np.save( op.join(gconf.get_timeseries(), 'fconnectome_%s.npy' % s), fmat )
             	# sio.savemat( op.join(gconf.get_timeseries(), 'fconnectome_%s.mat' % s), {'fmat':fmat} )
 
-            print('cfmri-6')
             # storing network
             if 'gPickle' in self.inputs.output_types:
                 nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
