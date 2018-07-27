@@ -165,13 +165,11 @@ class ParcellationStage(Stage):
                                 (parcThal,parcCombiner,[("max_prob_registered","thalamus_nuclei")]),
                                 ])
 
-                if self.config.segment_brainstem or self.config.segment_hippocampal_subfields or self.config.include_thalamic_nuclei_parcellation:
-                    flow.connect([
-                                (parcCombiner,outputnode,[("output_rois","roi_volumes")]),
-                                (parcCombiner,outputnode,[("colorLUT_files","roi_colorLUTs")]),
-                                (parcCombiner,outputnode,[("graphML_files","roi_graphMLs")]),
-                            ])
-
+                flow.connect([
+                            (parcCombiner,outputnode,[("output_rois","roi_volumes")]),
+                            (parcCombiner,outputnode,[("colorLUT_files","roi_colorLUTs")]),
+                            (parcCombiner,outputnode,[("graphML_files","roi_graphMLs")]),
+                        ])
 
 
                     # create_atlas_info = pe.Node(interface=CreateLausanne2018AtlasInfo(),name="create_atlas_info")

@@ -695,9 +695,15 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_correspondence_id"]) )
                 print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_correspondence_id"]) ))
             else:
+                if int(u) == 53:
+                    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                 G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_multiscaleID"]) ) , axis = 1))
                 G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_multiscaleID"]) )
-                print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_multiscaleID"]) ))
+                if int(u) == 53:
+                    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+                print "Add node %g - roi volume (2018): %g " % (int(u),np.sum( roiData== int(d["dn_multiscaleID"]) ))
+                if int(u) == 53:
+                    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
         dis = 0
 
@@ -830,6 +836,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         for u,v,d in G.edges_iter(data=True):
             total_fibers += len(d['fiblist'])
             if u != u_old:
+                print("Node %i"%int(u))
+                print(G.node[int(u)])
                 total_volume += G.node[int(u)]['roi_volume']
             u_old = u
 
