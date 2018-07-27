@@ -44,7 +44,7 @@ class FunctionalMRIConfig(HasTraits):
     motion = Bool(True)
 
     detrending = Bool(True)
-    detrending_mode = Enum(["linear",["linear,quadratic"]])
+    detrending_mode = Enum("linear","quadratic")
 
     lowpass_filter = Float(0.01)
     highpass_filter = Float(0.1)
@@ -54,7 +54,8 @@ class FunctionalMRIConfig(HasTraits):
     traits_view = View( #Item('smoothing'),
                         #Item('discard_n_volumes'),
                         HGroup(
-                            Item('detrending'),Item('detrending_mode',visible_when='detrending')
+                            Item('detrending'),Item('detrending_mode',visible_when='detrending'),
+                            label='Detrending',show_border=True
                             ),
                         HGroup(
                             Item('global_nuisance',label="Global"),

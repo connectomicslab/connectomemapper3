@@ -315,11 +315,12 @@ class ConnectomeStage(Stage):
             if type(con_results.outputs.connectivity_matrices) == str:
                 mat = con_results.outputs.connectivity_matrices
                 if 'gpickle' in mat:
-                    self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "corr", "False"]
+                    self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - number of fibers', "default"]
             else:
                 for mat in con_results.outputs.connectivity_matrices:
                     if 'gpickle' in mat:
-                        self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",mat, "corr", "False"]
+                        con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
+                        self.inspect_outputs_dict[con_name+' - Correlation'] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - number of fibers', "default"]
 
             self.inspect_outputs = self.inspect_outputs_dict.keys()
 
