@@ -404,9 +404,9 @@ class CMP_MainWindow(HasTraits):
 
     project_info = Instance(CMP_Project_Info)
 
-    new_project = Action(name='New Unprocessed Subject from BIDS Dataset...',action='new_project')
-    load_project = Action(name='Load Processed Subject from BIDS Dataset...',action='load_project')
-    process_anatomical = Action(name='Process Anatomical Data!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
+    new_project = Action(name='Load BIDS Dataset (New)...',action='new_project')
+    load_project = Action(name='Load BIDS Dataset (Processed)...',action='load_project')
+    process_anatomical = Action(name='Parcellate Brain!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
     #preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
     map_dmri_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked')
     map_fmri_connectome = Action(name='Map Functional Connectome!',action='map_fmri_connectome',enabled_when='handler.anat_outputs_checked and handler.fmri_inputs_checked')

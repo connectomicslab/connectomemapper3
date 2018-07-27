@@ -96,7 +96,6 @@ class rsfmri_conmat(BaseInterface):
         # else:
         #     index = np.linspace(0,tp-1,tp).astype('int')
 
-        ## Compute average time-series
         # loop throughout all the resolutions ('scale33', ..., 'scale500')
         for parkey, parval in resolutions.items():
             print("Resolution = "+parkey)
@@ -111,17 +110,21 @@ class rsfmri_conmat(BaseInterface):
             roi = nib.load(roi_fname)
             mask = roi.get_data()
 
-            # N: number of ROIs for current resolution
-            N = int(mask.max())
+            ## Compute average time-series
+            # nROIs: number of ROIs for current resolution
+            nROIs = parval['number_of_regions']
+
             # matrix number of rois vs timepoints
-            odata = np.zeros( (N,tp), dtype = np.float32 )
+            ts = np.zeros( (nROIs,tp), dtype = np.float32 )
 
             # loop throughout all the ROIs (current resolution)
-            for i in range(1,N+1):
-                odata[i-1,:] = fdata[mask==i].mean( axis = 0 )
+            for i in range(1,nROIs+1):
+                ts[i-1,:] = fdata[mask==i].mean( axis = 0 )
+            print("ts_shape:",ts.shape)
 
-            np.save( os.path.abspath( 'averageTimeseries_%s.npy' % parkey), odata )
-            sio.savemat( os.path.abspath( 'averageTimeseries_%s.mat' % parkey), {'ts':odata} )
+            np.save( os.path.abspath( 'averageTimeseries_%s.npy' % parkey), ts )
+            sio.savemat( os.path.abspath( 'averageTimeseries_%s.mat' % parkey), {'ts':ts} )
+
 
         ## Apply scrubbing (if enabled) and compute correlation
         # loop throughout all the resolutions ('scale33', ..., 'scale500')
@@ -137,8 +140,13 @@ class rsfmri_conmat(BaseInterface):
             roi       = nib.load(roi_fname)
             roiData   = roi.get_data()
 
-            # Create matrix, add node information from parcellation and recover ROI indexes
+            #Average roi time-series
+            ts = np.load(os.path.abspath( 'averageTimeseries_%s.npy' % parkey))
+
+            # nROIs: number of ROIs for current resolution
             nROIs = parval['number_of_regions']
+
+            # Create matrix, add node information from parcellation and recover ROI indexes
             print("Create the connection matrix (%s rois)" % nROIs)
             G     = nx.Graph()
             print('cfmri-0')
@@ -149,20 +157,22 @@ class rsfmri_conmat(BaseInterface):
                 G.add_node(int(u), d)
                 # compute a position for the node based on the mean position of the
                 # ROI in voxel coordinates (segmentation volume )
-                G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
+                print('cfmri-2')
+                G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(mask== int(d["dn_correspondence_id"]) ) , axis = 1))
                 ROI_idx.append(int(d["dn_correspondence_id"]))
-            print('cfmri-2')
+            print('cfmri-3')
+
             # # matrix number of rois vs timepoints
-            # odata = np.zeros( (nROIs,tp), dtype = np.float32 )
+            # ts = np.zeros( (nROIs,tp), dtype = np.float32 )
             #
             # # loop throughout all the ROIs (current resolution)
             # roi_line = 0
             # for i in ROI_idx:
-            #     odata[roi_line,:] = fdata[roiData==i].mean( axis = 0 )
+            #     ts[roi_line,:] = fdata[roiData==i].mean( axis = 0 )
             #     roi_line += 1
             #
-            # np.save( os.path.abspath('averageTimeseries_%s.npy' % parkey), odata )
-            # sio.savemat( os.path.abspath('averageTimeseries_%s.mat' % parkey), {'TCS':odata} )
+            # np.save( os.path.abspath('averageTimeseries_%s.npy' % parkey), ts )
+            # sio.savemat( os.path.abspath('averageTimeseries_%s.mat' % parkey), {'TCS':ts} )
 
             #Censoring time-series
             if self.inputs.apply_scrubbing:
@@ -183,20 +193,45 @@ class rsfmri_conmat(BaseInterface):
                 ts_after_scrubbing = ts[:,index]
                 np.save( op.abspath('averageTimeseries_%s_after_scrubbing.npy' % s), ts_after_scrubbing )
                 sio.savemat( op.abspath('averageTimeseries_%s_after_scrubbing.mat' % s), {'ts':ts_after_scrubbing} )
-
+                print('cfmri-4-scr')
+                ts = ts_after_scrubbing
+                # initialize connectivity matrix
+                nnodes = ts.shape[0]
+                i = -1
+                for i_signal in ts:
+                    i += 1
+                    for j in xrange(i,nnodes):
+                        j_signal = ts[j,:]
+                        value = np.corrcoef(i_signal,j_signal)[0,1]
+                        G.add_edge(ROI_idx[i],ROI_idx[j],corr = value)
+                    	# fmat[i,j] = value
+                		# fmat[j,i] = value
+                print('cfmri-5-scr')
+        		# np.save( op.join(gconf.get_timeseries(), 'fconnectome_%s_after_scrubbing.npy' % s), fmat )
+        		# sio.savemat( op.join(gconf.get_timeseries(), 'fconnectome_%s_after_scrubbing.mat' % s), {'fmat':fmat} )
             else:
-                index = np.linspace(0,tp-1,tp).astype('int')
+                print('cfmri-4')
+                nnodes = ts.shape[0]
 
-            # Fill connectivity matrix
-            i = -1
-            for i_signal in odata:
-                i += 1
-                for j in xrange(i,nROIs):
-                    j_signal = odata[j,:]
-                    # apply scrubbing
-                    value = np.corrcoef(i_signal[index],j_signal[index])[0,1]
-                    G.add_edge(ROI_idx[i],ROI_idx[j],corr = value)
+                i = -1
+                for i_signal in ts:
+                    i += 1
+                    for j in xrange(i,nnodes):
+                        print('cfmri-4-1')
+                        j_signal = ts[j,:]
+                        print('cfmri-4-2')
+                        value = np.corrcoef(i_signal,j_signal)[0,1]
+                        print('cfmri-4-3')
+                        print(nnodes)
+                        G.add_edge(ROI_idx[i],ROI_idx[j],corr = value)
+                        print('cfmri-4-4')
+                print('cfmri-5')
+                        # fmat[i,j] = value
+                        # fmat[j,i] = value
+            	# np.save( op.join(gconf.get_timeseries(), 'fconnectome_%s.npy' % s), fmat )
+            	# sio.savemat( op.join(gconf.get_timeseries(), 'fconnectome_%s.mat' % s), {'fmat':fmat} )
 
+            print('cfmri-6')
             # storing network
             if 'gPickle' in self.inputs.output_types:
                 nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
