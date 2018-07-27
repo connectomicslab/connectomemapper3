@@ -189,12 +189,12 @@ class rsfmri_conmat(BaseInterface):
                 print('cfmri-5-scr')
                 ts_after_scrubbing = ts[:,index]
                 print('cfmri-6-scr')
-                np.save( op.abspath('averageTimeseries_%s_after_scrubbing.npy' % s), ts_after_scrubbing )
-                sio.savemat( op.abspath('averageTimeseries_%s_after_scrubbing.mat' % s), {'ts':ts_after_scrubbing} )
+                np.save( op.abspath('averageTimeseries_%s_after_scrubbing.npy' % parkey), ts_after_scrubbing )
+                sio.savemat( op.abspath('averageTimeseries_%s_after_scrubbing.mat' % parkey), {'ts':ts_after_scrubbing} )
                 print('cfmri-7-scr')
                 ts = ts_after_scrubbing
                 print('ts.shape : ',ts.shape)
-                
+
                 # initialize connectivity matrix
                 nnodes = ts.shape[0]
                 i = -1
