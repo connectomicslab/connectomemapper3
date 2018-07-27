@@ -323,27 +323,27 @@ class fMRIPipeline(Pipeline):
         flow = self.create_pipeline_flow(deriv_subject_directory=deriv_subject_directory)
         flow.write_graph(graph2use='colored', format='svg', simple_form=False)
 
-        try:
+        # try:
 
-            if(self.number_of_cores != 1):
-                flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
-            else:
-                flow.run()
+        if(self.number_of_cores != 1):
+            flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
+        else:
+            flow.run()
 
-            self.fill_stages_outputs()
+        self.fill_stages_outputs()
 
-            iflogger.info("**** Processing finished ****")
+        iflogger.info("**** Processing finished ****")
 
-            return True,'Processing sucessful'
+        return True,'Processing sucessful'
 
-            self.subject = old_subject
+        self.subject = old_subject
 
-        except:
-
-            self.subject = old_subject
-            iflogger.info("**** Processing terminated :< ****")
-
-            return False,'Processing unsucessful'
+        # except:
+        #
+        #     self.subject = old_subject
+        #     iflogger.info("**** Processing terminated :< ****")
+        #
+        #     return False,'Processing unsucessful'
 
         # # Clean undesired folders/files
         # rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
@@ -460,6 +460,7 @@ class fMRIPipeline(Pipeline):
                                 ])
 
         if self.stages['Connectome'].enabled:
+            self.stages['Connectome'].config.subject = self.global_conf.subject
             con_flow = self.create_stage_flow("Connectome")
             fMRI_flow.connect([
 		                (fMRI_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
@@ -674,14 +675,14 @@ class fMRIPipeline(Pipeline):
             flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
         else:
             flow.run()
-
+        print('out of run')
         self.fill_stages_outputs()
-
+        print('after filling stages outputs')
         # Clean undesired folders/files
-        rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
-        for file_to_rm in rm_file_list:
-            if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
-                os.remove(os.path.join(self.base_directory,file_to_rm))
+        #rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
+        #for file_to_rm in rm_file_list:
+        #    if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
+        #        os.remove(os.path.join(self.base_directory,file_to_rm))
 
         # copy .ini and log file
         outdir = os.path.join(self.base_directory,"RESULTS",'fMRI',now)

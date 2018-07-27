@@ -189,9 +189,10 @@ class rsfmri_conmat(BaseInterface):
                 print('cfmri-5-scr')
                 ts_after_scrubbing = ts[:,index]
                 print('cfmri-6-scr')
-                np.save( op.abspath('averageTimeseries_%s_after_scrubbing.npy' % parkey), ts_after_scrubbing )
-                sio.savemat( op.abspath('averageTimeseries_%s_after_scrubbing.mat' % parkey), {'ts':ts_after_scrubbing} )
+                np.save( os.path.abspath('averageTimeseries_%s_after_scrubbing.npy' % parkey), ts_after_scrubbing )
                 print('cfmri-7-scr')
+                sio.savemat( os.path.abspath('averageTimeseries_%s_after_scrubbing.mat' % parkey), {'ts':ts_after_scrubbing} )
+                print('cfmri-8-scr')
                 ts = ts_after_scrubbing
                 print('ts.shape : ',ts.shape)
 
@@ -310,17 +311,23 @@ class ConnectomeStage(Stage):
 
     def define_inspect_outputs(self):
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
+        print('con_results_path : ',con_results_path)
         if(os.path.exists(con_results_path)):
+
             con_results = pickle.load(gzip.open(con_results_path))
-            if type(con_results.outputs.connectivity_matrices) == str:
+            print(con_results)
+
+            if isinstance(con_results.outputs.connectivity_matrices, basestring):
                 mat = con_results.outputs.connectivity_matrices
+                print(mat)
                 if 'gpickle' in mat:
-                    self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - number of fibers', "default"]
+                    self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]
             else:
                 for mat in con_results.outputs.connectivity_matrices:
+                    print(mat)
                     if 'gpickle' in mat:
                         con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
-                        self.inspect_outputs_dict[con_name+' - Correlation'] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - number of fibers', "default"]
+                        self.inspect_outputs_dict[con_name+' - Correlation'] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]
 
             self.inspect_outputs = self.inspect_outputs_dict.keys()
 
