@@ -375,19 +375,20 @@ class fMRIPipeline(Pipeline):
         sinker.inputs.substitutions = [
                                         ('wm_mask_registered.nii.gz', self.subject+'_T1w_space-bold_class-WM.nii.gz'),
                                         ('eroded_wm_registered.nii.gz', self.subject+'_T1w_space-bold_class-WM_eroded.nii.gz'),
-                                        ('fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz', self.subject+'_task-rest_bold_mean.nii.gz'),
+                                        ('fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz', self.subject+'_task-rest_meanBOLD.nii.gz'),
                                         ('fMRI_despike_st_mcf.nii.gz.par', self.subject+'_task-rest_bold_motion.par'),
                                         ('FD.npy',self.subject+'_task-rest_bold_srubbing_FD.npy'),
                                         ('DVARS.npy', self.subject+'_task-rest_bold_scrubbing_DVARS.npy'),
                                         ('fMRI_bandpass.nii.gz',self.subject+'_task-rest_bold_bandpass.nii.gz'),
 
-                                        (self.subject+'_T1w_parc_scale1_flirt.nii.gz',self.subject+'_T1w_space-bold_parc_scale1.nii.gz'),
-                                        (self.subject+'_T1w_parc_scale2_flirt.nii.gz',self.subject+'_T1w_space-bold_parc_scale2.nii.gz'),
-                                        (self.subject+'_T1w_parc_scale3_flirt.nii.gz',self.subject+'_T1w_space-bold_parc_scale3.nii.gz'),
-                                        (self.subject+'_T1w_parc_scale4_flirt.nii.gz',self.subject+'_T1w_space-bold_parc_scale4.nii.gz'),
-                                        (self.subject+'_T1w_parc_scale5_flirt.nii.gz',self.subject+'_T1w_space-bold_parc_scale5.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale1_flirt.nii.gz',self.subject+'_T1w_space-meanBOLD_parc_scale1.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale2_flirt.nii.gz',self.subject+'_T1w_space-meanBOLD_parc_scale2.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale3_flirt.nii.gz',self.subject+'_T1w_space-meanBOLD_parc_scale3.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale4_flirt.nii.gz',self.subject+'_T1w_space-meanBOLD_parc_scale4.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale5_flirt.nii.gz',self.subject+'_T1w_space-meanBOLD_parc_scale5.nii.gz'),
 
                                         ('connectome_scale',self.subject+'_bold_connectome_scale'),
+                                        ('averageTimeseries_scale',self.subject+'_bold_averageTimeseries_scale'),
 
                                       ]
 
