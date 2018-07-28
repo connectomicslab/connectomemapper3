@@ -372,6 +372,24 @@ class fMRIPipeline(Pipeline):
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
         sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
 
+        sinker.inputs.substitutions = [
+                                        ('wm_mask_registered.nii.gz', self.subject+'_T1w_space-bold_class-WM.nii.gz'),
+                                        ('eroded_wm_registered.nii.gz', self.subject+'_T1w_space-bold_class-WM_eroded.nii.gz'),
+                                        ('fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz', self.subject+'_task-rest_bold_mean.nii.gz'),
+                                        ('fMRI_despike_st_mcf.nii.gz.par', self.subject+'_task-rest_bold_motion.par'),
+                                        ('FD.npy',self.subject+'_task-rest_bold_srubbing_FD.npy'),
+                                        ('DVARS.npy', self.subject+'_task-rest_bold_scrubbing_DVARS.npy'),
+                                        ('fMRI_bandpass.nii.gz',self.subject+'_task-rest_bold_bandpass.nii.gz'),
+
+                                        (self.subject+'_T1w_parc_scale1_flirt.nii.gz',self.subject+'_T1w_space-bold_parc_scale1.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale2_flirt.nii.gz',self.subject+'_T1w_space-bold_parc_scale2.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale3_flirt.nii.gz',self.subject+'_T1w_space-bold_parc_scale3.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale4_flirt.nii.gz',self.subject+'_T1w_space-bold_parc_scale4.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale5_flirt.nii.gz',self.subject+'_T1w_space-bold_parc_scale5.nii.gz'),
+
+                                        ('connectome_scale',self.subject+'_bold_connectome_scale'),
+
+                                      ]
 
         # Data import
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['fMRI','T1','T2','aseg','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5','roi_graphml_s1','roi_graphml_s2','roi_graphml_s3','roi_graphml_s4','roi_graphml_s5']), name='datasource')
@@ -429,6 +447,7 @@ class fMRIPipeline(Pipeline):
             preproc_flow = self.create_stage_flow("Preprocessing")
             fMRI_flow.connect([
                 (fMRI_inputnode,preproc_flow,[("fMRI","inputnode.functional")]),
+                (preproc_flow,sinker,[("outputnode.mean_vol","func.@mean_vol")]),
                 ])
 
         if self.stages['Registration'].enabled:
@@ -437,7 +456,10 @@ class fMRIPipeline(Pipeline):
                           (fMRI_inputnode,reg_flow,[('T1','inputnode.T1')]),(fMRI_inputnode,reg_flow,[('T2','inputnode.T2')]),
                           (preproc_flow,reg_flow, [('outputnode.mean_vol','inputnode.target')]),
                           (fMRI_inputnode,reg_flow, [('wm_mask_file','inputnode.wm_mask'),('roi_volumes','inputnode.roi_volumes'),
-                                                ('wm_eroded','inputnode.eroded_wm')])
+                                                ('wm_eroded','inputnode.eroded_wm')]),
+                          (reg_flow,sinker, [('outputnode.wm_mask_registered_crop','func.@registered_wm'),('outputnode.roi_volumes_registered_crop','func.@registered_roi_volumes'),
+                                                 ('outputnode.eroded_wm_registered_crop','func.@eroded_wm'),('outputnode.eroded_csf_registered_crop','func.@eroded_csf'),
+                                                 ('outputnode.eroded_brain_registered_crop','func.@eroded_brain')]),
                           ])
             if self.stages['FunctionalMRI'].config.global_nuisance:
                 fMRI_flow.connect([
@@ -459,11 +481,14 @@ class fMRIPipeline(Pipeline):
                         (preproc_flow,func_flow, [('outputnode.functional_preproc','inputnode.preproc_file')]),
                         (reg_flow,func_flow, [('outputnode.wm_mask_registered_crop','inputnode.registered_wm'),('outputnode.roi_volumes_registered_crop','inputnode.registered_roi_volumes'),
                                               ('outputnode.eroded_wm_registered_crop','inputnode.eroded_wm'),('outputnode.eroded_csf_registered_crop','inputnode.eroded_csf'),
-                                              ('outputnode.eroded_brain_registered_crop','inputnode.eroded_brain')])
+                                              ('outputnode.eroded_brain_registered_crop','inputnode.eroded_brain')]),
+                        (func_flow,sinker,[('outputnode.func_file','func.@func_file'),("outputnode.FD","func.@FD"),
+                                              ("outputnode.DVARS","func.@DVARS")]),
                         ])
             if self.stages['FunctionalMRI'].config.scrubbing or self.stages['FunctionalMRI'].config.motion:
                 fMRI_flow.connect([
-                                   (preproc_flow,func_flow,[("outputnode.par_file","inputnode.motion_par_file")])
+                                   (preproc_flow,func_flow,[("outputnode.par_file","inputnode.motion_par_file")]),
+                                   (preproc_flow,sinker,[("outputnode.par_file","func.@motion_par_file")])
                                 ])
 
         if self.stages['Connectome'].enabled:
@@ -474,7 +499,9 @@ class fMRIPipeline(Pipeline):
 		                (func_flow,con_flow, [('outputnode.func_file','inputnode.func_file'),("outputnode.FD","inputnode.FD"),
                                               ("outputnode.DVARS","inputnode.DVARS")]),
                         (reg_flow,con_flow,[("outputnode.roi_volumes_registered_crop","inputnode.roi_volumes_registered")]),
-                        (con_flow,fMRI_outputnode,[("outputnode.connectivity_matrices","connectivity_matrices")])
+                        (con_flow,fMRI_outputnode,[("outputnode.connectivity_matrices","connectivity_matrices")]),
+                        (con_flow,sinker,[("outputnode.connectivity_matrices","func.@connectivity_matrices")]),
+                        (con_flow,sinker,[("outputnode.avg_timeseries","func.@avg_timeseries")])
 		                ])
 
             if self.parcellation_scheme == "Custom":

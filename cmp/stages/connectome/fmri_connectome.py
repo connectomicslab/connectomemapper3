@@ -40,6 +40,8 @@ class ConnectomeConfig(HasTraits):
     traits_view = View(VGroup('apply_scrubbing',VGroup(Item('FD_thr',label='FD threshold'),Item('DVARS_thr',label='DVARS threshold'),visible_when="apply_scrubbing==True")),
                        Item('output_types',style='custom'))
 
+    subject = Str()
+
 class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
     func_file = File(exists=True, mandatory=True, desc="fMRI volume")
     roi_volumes = InputMultiPath(File(exists=True), desc='ROI volumes registered to functional space')
