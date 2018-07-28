@@ -81,8 +81,8 @@ class rsfmri_conmat(BaseInterface):
         # NEW
         print('Parcellation_scheme : %s' % parcellation_scheme)
 
-        if parcellation_scheme != "Custom":
-            if parcellation_scheme != "Lausanne2018":
+        if self.inputs.parcellation_scheme != "Custom":
+            if self.inputs.parcellation_scheme != "Lausanne2018":
                 print "get resolutions from parcellation_scheme"
                 resolutions = get_parcellation(self.inputs.parcellation_scheme)
             else:
@@ -98,7 +98,7 @@ class rsfmri_conmat(BaseInterface):
                             print roi_graphml_fname
                     #roi_fname = roi_volumes[r]
                     #r += 1
-                    roi       = nibabel.load(roi_fname)
+                    roi       = nib.load(roi_fname)
                     roiData   = roi.get_data()
                     resolutions[parkey]['number_of_regions'] = roiData.max()
                     resolutions[parkey]['node_information_graphml'] = op.abspath(roi_graphml_fname)
