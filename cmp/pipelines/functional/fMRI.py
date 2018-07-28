@@ -383,7 +383,8 @@ class fMRIPipeline(Pipeline):
                                                 wm_mask_file='anat/'+self.subject+'_T1w_class-WM.nii.gz',wm_eroded='anat/'+self.subject+'_T1w_class-WM.nii.gz',
                                                 brain_eroded='anat/'+self.subject+'_T1w_brainmask.nii.gz',csf_eroded='anat/'+self.subject+'_T1w_class-CSF.nii.gz',
                                                 roi_volume_s1='anat/'+self.subject+'_T1w_parc_scale1.nii.gz',roi_volume_s2='anat/'+self.subject+'_T1w_parc_scale2.nii.gz',roi_volume_s3='anat/'+self.subject+'_T1w_parc_scale3.nii.gz',
-                                                roi_volume_s4='anat/'+self.subject+'_T1w_parc_scale4.nii.gz',roi_volume_s5='anat/'+self.subject+'_T1w_parc_scale5.nii.gz')
+                                                roi_volume_s4='anat/'+self.subject+'_T1w_parc_scale4.nii.gz',roi_volume_s5='anat/'+self.subject+'_T1w_parc_scale5.nii.gz',roi_graphml_s1='anat/'+self.subject+'_T1w_parc_scale1.graphml',roi_graphml_s2='anat/'+self.subject+'_T1w_parc_scale2.graphml',roi_graphml_s3='anat/'+self.subject+'_T1w_parc_scale3.graphml',
+                                                roi_graphml_s4='anat/'+self.subject+'_T1w_parc_scale4.graphml',roi_graphml_s5='anat/'+self.subject+'_T1w_parc_scale5.graphml')
         datasource.inputs.sort_filelist=False
 
         # Clear previous outputs
@@ -391,7 +392,7 @@ class fMRIPipeline(Pipeline):
 
         # Create fMRI flow
         fMRI_flow = pe.Workflow(name='fMRI_pipeline',base_dir=os.path.join(deriv_subject_directory,'tmp'))
-        fMRI_inputnode = pe.Node(interface=util.IdentityInterface(fields=["fMRI","T1","T2","subjects_dir","subject_id","wm_mask_file","roi_volumes","wm_eroded","brain_eroded","csf_eroded"]),name="inputnode")
+        fMRI_inputnode = pe.Node(interface=util.IdentityInterface(fields=["fMRI","T1","T2","subjects_dir","subject_id","wm_mask_file","roi_volumes","roi_graphMLs","wm_eroded","brain_eroded","csf_eroded"]),name="inputnode")
         fMRI_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         fMRI_inputnode.inputs.atlas_info = self.atlas_info
         fMRI_inputnode.subjects_dir = self.subjects_dir
@@ -401,6 +402,7 @@ class fMRIPipeline(Pipeline):
         fMRI_flow.add_nodes([fMRI_inputnode,fMRI_outputnode])
 
         merge_roi_volumes = pe.Node(interface=Merge(5),name='merge_roi_volumes')
+        merge_roi_graphmls = pe.Node(interface=Merge(5),name='merge_roi_graphmls')
 
         def remove_non_existing_scales(roi_volumes):
             out_roi_volumes = []
@@ -413,8 +415,13 @@ class fMRIPipeline(Pipeline):
                       ])
 
         fMRI_flow.connect([
+                      (datasource,merge_roi_graphmls,[("roi_graphml_s1","in1"),("roi_graphml_s2","in2"),("roi_graphml_s3","in3"),("roi_graphml_s4","in4"),("roi_graphml_s5","in5")])
+                      ])
+
+        fMRI_flow.connect([
                       (datasource,fMRI_inputnode,[("fMRI","fMRI"),("T1","T1"),("T2","T2"),("aseg","aseg"),("wm_mask_file","wm_mask_file"),("brain_eroded","brain_eroded"),("wm_eroded","wm_eroded"),("csf_eroded","csf_eroded")]), #,( "roi_volumes","roi_volumes")])
                       (merge_roi_volumes,fMRI_inputnode,[( ("out",remove_non_existing_scales),"roi_volumes")]),
+                      (merge_roi_graphmls,fMRI_inputnode,[( ("out",remove_non_existing_scales),"roi_graphMLs")]),
                       ])
 
 
@@ -463,7 +470,7 @@ class fMRIPipeline(Pipeline):
             self.stages['Connectome'].config.subject = self.global_conf.subject
             con_flow = self.create_stage_flow("Connectome")
             fMRI_flow.connect([
-		                (fMRI_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
+		                (fMRI_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme'),('roi_graphMLs','inputnode.roi_graphMLs')]),
 		                (func_flow,con_flow, [('outputnode.func_file','inputnode.func_file'),("outputnode.FD","inputnode.FD"),
                                               ("outputnode.DVARS","inputnode.DVARS")]),
                         (reg_flow,con_flow,[("outputnode.roi_volumes_registered_crop","inputnode.roi_volumes_registered")]),

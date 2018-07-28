@@ -43,6 +43,7 @@ class ConnectomeConfig(HasTraits):
 class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
     func_file = File(exists=True, mandatory=True, desc="fMRI volume")
     roi_volumes = InputMultiPath(File(exists=True), desc='ROI volumes registered to functional space')
+    roi_graphmls = InputMultiPath(File(exists=True), desc='GraphML description file for ROI volumes (used only if parcellation_scheme == Lausanne2018)')
     parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','NativeFreesurfer','Custom'], usedefault=True)
     atlas_info = Dict(mandatory = False,desc="custom atlas information")
     apply_scrubbing = Bool(False)
@@ -71,10 +72,46 @@ class rsfmri_conmat(BaseInterface):
 
         tp = fdata.shape[3]
 
-        if self.inputs.parcellation_scheme != "Custom":
-            resolutions = get_parcellation(self.inputs.parcellation_scheme)
+        # OLD
+        # if self.inputs.parcellation_scheme != "Custom":
+        #     resolutions = get_parcellation(self.inputs.parcellation_scheme)
+        # else:
+        #     resolutions = self.inputs.atlas_info
+
+        # NEW
+        print('Parcellation_scheme : %s' % parcellation_scheme)
+
+        if parcellation_scheme != "Custom":
+            if parcellation_scheme != "Lausanne2018":
+                print "get resolutions from parcellation_scheme"
+                resolutions = get_parcellation(self.inputs.parcellation_scheme)
+            else:
+                resolutions = get_parcellation(self.inputs.parcellation_scheme)
+                for parkey, parval in resolutions.items():
+                    for vol, graphml in zip(self.inputs.roi_volumes,self.inputs.roi_graphmls):
+                        print parkey
+                        if parkey in vol:
+                            roi_fname = vol
+                            print roi_fname
+                        if parkey in graphml:
+                            roi_graphml_fname = graphml
+                            print roi_graphml_fname
+                    #roi_fname = roi_volumes[r]
+                    #r += 1
+                    roi       = nibabel.load(roi_fname)
+                    roiData   = roi.get_data()
+                    resolutions[parkey]['number_of_regions'] = roiData.max()
+                    resolutions[parkey]['node_information_graphml'] = op.abspath(roi_graphml_fname)
+
+                del roi, roiData
+                print("##################################################")
+                print("Atlas info (Lausanne2018) :")
+                print(resolutions)
+                print("##################################################")
         else:
+            print "get resolutions from atlas_info: "
             resolutions = self.inputs.atlas_info
+            print resolutions
 
         index = np.linspace(0,tp-1,tp).astype('int')
 
@@ -293,7 +330,7 @@ class ConnectomeStage(Stage):
         self.name = 'connectome_stage'
         self.config = ConnectomeConfig()
         self.inputs = ["roi_volumes_registered","func_file", "FD","DVARS",
-                  "parcellation_scheme","atlas_info"]
+                  "parcellation_scheme","atlas_info","roi_graphMLs"]
         self.outputs = ["connectivity_matrices","avg_timeseries"]
 
 
@@ -305,7 +342,7 @@ class ConnectomeStage(Stage):
         cmtk_cmat.inputs.DVARS_th = self.config.DVARS_thr
 
         flow.connect([
-                     (inputnode,cmtk_cmat, [('func_file','func_file'),("FD","FD"),("DVARS","DVARS"),('parcellation_scheme','parcellation_scheme'),('atlas_info','atlas_info'),('roi_volumes_registered','roi_volumes')]),
+                     (inputnode,cmtk_cmat, [('func_file','func_file'),("FD","FD"),("DVARS","DVARS"),('parcellation_scheme','parcellation_scheme'),('atlas_info','atlas_info'),('roi_volumes_registered','roi_volumes'),('roi_graphMLs','roi_graphmls')]),
                      (cmtk_cmat,outputnode, [('connectivity_matrices','connectivity_matrices'),("avg_timeseries","avg_timeseries")])
                      ])
 
