@@ -44,7 +44,7 @@ class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
     func_file = File(exists=True, mandatory=True, desc="fMRI volume")
     roi_volumes = InputMultiPath(File(exists=True), desc='ROI volumes registered to functional space')
     roi_graphmls = InputMultiPath(File(exists=True), desc='GraphML description file for ROI volumes (used only if parcellation_scheme == Lausanne2018)')
-    parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','NativeFreesurfer','Custom'], usedefault=True)
+    parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','Lausanne2018','NativeFreesurfer','Custom'], usedefault=True)
     atlas_info = Dict(mandatory = False,desc="custom atlas information")
     apply_scrubbing = Bool(False)
     FD = File(exists=True)
