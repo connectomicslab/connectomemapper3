@@ -79,7 +79,7 @@ class rsfmri_conmat(BaseInterface):
         #     resolutions = self.inputs.atlas_info
 
         # NEW
-        print('Parcellation_scheme : %s' % parcellation_scheme)
+        print('Parcellation_scheme : %s' % self.inputs.parcellation_scheme)
 
         if self.inputs.parcellation_scheme != "Custom":
             if self.inputs.parcellation_scheme != "Lausanne2018":
@@ -101,7 +101,7 @@ class rsfmri_conmat(BaseInterface):
                     roi       = nib.load(roi_fname)
                     roiData   = roi.get_data()
                     resolutions[parkey]['number_of_regions'] = roiData.max()
-                    resolutions[parkey]['node_information_graphml'] = op.abspath(roi_graphml_fname)
+                    resolutions[parkey]['node_information_graphml'] = os.path.abspath(roi_graphml_fname)
 
                 del roi, roiData
                 print("##################################################")
@@ -109,7 +109,7 @@ class rsfmri_conmat(BaseInterface):
                 print(resolutions)
                 print("##################################################")
         else:
-            print "get resolutions from atlas_info: "
+            print("get resolutions from atlas_info: ")
             resolutions = self.inputs.atlas_info
             print resolutions
 
@@ -192,9 +192,12 @@ class rsfmri_conmat(BaseInterface):
                 G.add_node(int(u), d)
                 # compute a position for the node based on the mean position of the
                 # ROI in voxel coordinates (segmentation volume )
-                G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(mask== int(d["dn_correspondence_id"]) ) , axis = 1))
-                ROI_idx.append(int(d["dn_correspondence_id"]))
-
+                if self.inputs.parcellation_scheme != "Lausanne2018":
+                    G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(mask== int(d["dn_correspondence_id"]) ) , axis = 1))
+                    ROI_idx.append(int(d["dn_correspondence_id"]))
+                else:
+                    G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(mask== int(d["dn_multiscaleID"]) ) , axis = 1))
+                    ROI_idx.append(int(d["dn_multiscaleID"]))
             # # matrix number of rois vs timepoints
             # ts = np.zeros( (nROIs,tp), dtype = np.float32 )
             #
@@ -291,10 +294,25 @@ class rsfmri_conmat(BaseInterface):
                     node_struct[node_key] = node_arr
 
                 sio.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
-            if 'graphml' in self.inputs.output_types:
+            if 'graphml' in self.inputs.output_types and self.inputs.parcellation_scheme != "Lausanne2018":
                 g2 = nx.Graph()
                 for u_gml,d_gml in G.nodes(data=True):
                     g2.add_node(u_gml,{'dn_correspondence_id':d_gml['dn_correspondence_id'],
+                                   'dn_fsname':d_gml['dn_fsname'],
+                                   'dn_hemisphere':d_gml['dn_hemisphere'],
+                                   'dn_name':d_gml['dn_name'],
+                                   'dn_position_x':float(d_gml['dn_position'][0]),
+                                   'dn_position_y':float(d_gml['dn_position'][1]),
+                                   'dn_position_z':float(d_gml['dn_position'][2]),
+                                   'dn_region':d_gml['dn_region']})
+                for u_gml,v_gml,d_gml in G.edges_iter(data=True):
+                    g2.add_edge(u_gml,v_gml,{'corr' : float(d_gml['corr'])})
+                nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
+
+            if 'graphml' in self.inputs.output_types and self.inputs.parcellation_scheme == "Lausanne2018":
+                g2 = nx.Graph()
+                for u_gml,d_gml in G.nodes(data=True):
+                    g2.add_node(u_gml,{'dn_multiscaleID':d_gml['dn_multiscaleID'],
                                    'dn_fsname':d_gml['dn_fsname'],
                                    'dn_hemisphere':d_gml['dn_hemisphere'],
                                    'dn_name':d_gml['dn_name'],
