@@ -631,6 +631,7 @@ class ProjectHandler(Handler):
                             self.dmri_inputs_checked = dmri_inputs_checked
                             ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
                             self.project_loaded = True
+                            ui_info.ui.context["object"].project_info.on_trait_change(ui_info.ui.context["object"].update_diffusion_imaging_model,'diffusion_imaging_model')
 
                     fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(new_project,bids_layout, True)
                     if self.fmri_pipeline != None: #and self.fmri_pipeline != None:
@@ -836,6 +837,7 @@ class ProjectHandler(Handler):
                         ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
                         dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
                         self.project_loaded = True
+                        ui_info.ui.context["object"].project_info.on_trait_change(ui_info.ui.context["object"].update_diffusion_imaging_model,'diffusion_imaging_model')
             else:
                 dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(loaded_project, bids_layout, True)
                 print "No existing config for diffusion pipeline found - Created new diffusion pipeline with default parameters"
@@ -856,6 +858,7 @@ class ProjectHandler(Handler):
                         self.dmri_inputs_checked = dmri_inputs_checked
                         ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
                         self.project_loaded = True
+                        ui_info.ui.context["object"].project_info.on_trait_change(ui_info.ui.context["object"].update_diffusion_imaging_model,'diffusion_imaging_model')
 
             if len(subj_sessions) > 0:
                 for subj_session in subj_sessions:

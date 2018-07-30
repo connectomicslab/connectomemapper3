@@ -162,6 +162,7 @@ class DiffusionPipeline(Pipeline):
 
     def _diffusion_imaging_model_changed(self,new):
         print "diffusion model changed"
+        self.stages['Diffusion'].config.diffusion_imaging_model = new
 
     def check_config(self):
         # if self.stages['MRTrixConnectome'].config.output_types == []:

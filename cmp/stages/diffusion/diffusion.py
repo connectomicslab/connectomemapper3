@@ -65,8 +65,9 @@ class DiffusionConfig(HasTraits):
 
     traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
                        #'interpolation'),
-                      Item('diffusion_imaging_model',editor=EnumEditor(name='diffusion_imaging_model_editor')),
-		              #Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
+                      #Item('diffusion_imaging_model',editor=EnumEditor(name='diffusion_imaging_model_editor')),
+                        Item('diffusion_imaging_model',style='readonly'),
+                          #Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
                       HGroup(
                            Item('dilate_rois'),#,visible_when='processing_tool!="DTK"'),
                            Item('dilation_radius',visible_when='dilate_rois',label="radius")

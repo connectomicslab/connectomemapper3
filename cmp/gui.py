@@ -237,7 +237,7 @@ class CMP_Project_Info(HasTraits):
 
     create_view = View( #Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
                         Group(
-                            Item('base_directory',label='Base directory'),
+                            Item('base_directory',label='BIDS Dataset'),
                             ),
                         kind='livemodal',
                         title='Data creation: BIDS dataset selection',
@@ -320,7 +320,7 @@ class CMP_Project_Info(HasTraits):
 
     open_view = View(
                     Group(
-                        Item('base_directory',label='Base directory'),
+                        Item('base_directory',label='BIDS Dataset'),
                         ),
                     title='Data loading: BIDS dataset selection',
                     kind='modal',
@@ -467,3 +467,6 @@ class CMP_MainWindow(HasTraits):
                        width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
                        icon=ImageResource('cmp3_icon')
                    )
+
+    def update_diffusion_imaging_model(self,new):
+        self.dmri_pipeline.diffusion_imaging_model = new
