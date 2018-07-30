@@ -61,8 +61,8 @@ FREESURFER_HOME variable is exported and the SetUpFreeSurfer.sh setup
 script is sourced."""
 
     # Check for MRtrix
-    if subprocess.call("mrconvert",stdout=nul,stderr=nul,shell=True) != 255:
-        error = """MRtrix3 not installed or not working correctly. Check that PATH variable is updated with MRtrix3 binary (bin) directory."""
+    # if subprocess.call("mrconvert",stdout=nul,stderr=nul,shell=True) != 255:
+    #     error = """MRtrix3 not installed or not working correctly. Check that PATH variable is updated with MRtrix3 binary (bin) directory."""
 
     # Check for DTK
 #     if subprocess.call("dti_recon",stdout=nul,stderr=nul,shell=True) != 0 or "DSI_PATH" not in os.environ:
@@ -192,6 +192,7 @@ if __name__ == "__main__":
 
         project.anat_config_file = os.path.abspath(sys.argv[offset+3])
         project.dmri_config_file = os.path.abspath(sys.argv[offset+5])
+        project.fmri_config_file = os.path.abspath(sys.argv[offset+7])
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline != None:

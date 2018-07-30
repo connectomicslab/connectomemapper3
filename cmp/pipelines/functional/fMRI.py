@@ -264,14 +264,17 @@ class fMRIPipeline(Pipeline):
 
         print input_message
 
-        if gui:
-            input_notification = Check_Input_Notification(message=input_message, imaging_model='fMRI')
-            input_notification.configure_traits()
-            self.global_conf.imaging_model = input_notification.imaging_model
-            self.stages['Registration'].config.imaging_model = input_notification.imaging_model
-        else:
-            self.global_conf.imaging_model = 'fMRI'
-            self.stages['Registration'].config.imaging_model = 'fMRI'
+        # if gui:
+        #     # input_notification = Check_Input_Notification(message=input_message, imaging_model='fMRI')
+        #     # input_notification.configure_traits()
+        #     self.global_conf.imaging_model = input_notification.imaging_model
+        #     self.stages['Registration'].config.imaging_model = input_notification.imaging_model
+        # else:
+        #     self.global_conf.imaging_model = 'fMRI'
+        #     self.stages['Registration'].config.imaging_model = 'fMRI'
+
+        self.global_conf.imaging_model = 'fMRI'
+        self.stages['Registration'].config.imaging_model = 'fMRI'
 
         if t2_available:
             self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
