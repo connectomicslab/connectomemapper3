@@ -337,6 +337,7 @@ class SHOREInputSpec(DipyBaseInterfaceInputSpec):
     lambdaN = traits.Float(1e-8, usedefault=True,desc=('radial regularisation constant'))
     lambdaL = traits.Float(1e-8, usedefault=True,desc=('angular regularisation constant'))
     tau = traits.Float(0.025330295910584444,desc=('Diffusion time. By default the value that makes q equal to the square root of the b-value.'))
+    tracking_tool = Enum("mrtrix","dipy")
 
     constrain_e0 = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
     positive_constraint = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
@@ -440,7 +441,7 @@ class SHORE(DipyDiffusionInterface):
         # IFLOGGER.info('Fitting CSD model')
         # csd_fit = csd_model.fit(data, msk)
 
-        f = gzip.open(self._gen_filename('shoremodel', ext='.pklz'), 'wb')
+        f = gzip.open(op.abspath('shoremodel.pklz'), 'wb')
         pickle.dump(shore_model, f, -1)
         f.close()
 
@@ -452,6 +453,11 @@ class SHORE(DipyDiffusionInterface):
         GFA=np.zeros(dimsODF[:3])
         MSD=np.zeros(dimsODF[:3])
 
+        if self.inputs.tracking_tool == "mrtrix":
+            basis = 'mrtrix'
+        else:
+            basis = None
+
         # calculate odf per slice
         IFLOGGER.info('Fitting SHORE model')
         for i in ndindex(data.shape[:1]):
@@ -461,7 +467,7 @@ class SHORE(DipyDiffusionInterface):
             sliceODF   = shorefit.odf(sphere)
             sliceGMSD  = shorefit.msd()
             sliceGFA   = gfa(sliceODF)
-            shODF[i]   = sf_to_sh(sliceODF,sphere,sh_order=lmax,basis_type='mrtrix')
+            shODF[i]   = sf_to_sh(sliceODF,sphere,sh_order=lmax,basis_type=basis)
             GFA[i]     = np.nan_to_num(sliceGFA)
             MSD[i]     = np.nan_to_num(sliceGMSD)
             IFLOGGER.info("Computation Time (slice %s): "%str(i) + str(time.time() - start_time) + " seconds")
