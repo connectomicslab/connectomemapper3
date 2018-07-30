@@ -337,7 +337,7 @@ class SHOREInputSpec(DipyBaseInterfaceInputSpec):
     lambdaN = traits.Float(1e-8, usedefault=True,desc=('radial regularisation constant'))
     lambdaL = traits.Float(1e-8, usedefault=True,desc=('angular regularisation constant'))
     tau = traits.Float(0.025330295910584444,desc=('Diffusion time. By default the value that makes q equal to the square root of the b-value.'))
-    tracking_tool = Enum("mrtrix","dipy")
+    tracking_processing_tool = traits.Enum("mrtrix","dipy")
 
     constrain_e0 = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
     positive_constraint = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
@@ -453,7 +453,7 @@ class SHORE(DipyDiffusionInterface):
         GFA=np.zeros(dimsODF[:3])
         MSD=np.zeros(dimsODF[:3])
 
-        if self.inputs.tracking_tool == "mrtrix":
+        if self.inputs.tracking_processing_tool == "mrtrix":
             basis = 'mrtrix'
         else:
             basis = None
@@ -476,18 +476,18 @@ class SHORE(DipyDiffusionInterface):
 
         IFLOGGER.info('Save Spherical Harmonics / MSD / GFA images')
 
-        nib.Nifti1Image(GFA,affine).to_filename(self._gen_filename('shore_gfa', ext='.nii.gz'))
-        nib.Nifti1Image(MSD,affine).to_filename(self._gen_filename('shore_msd', ext='.nii.gz'))
-        nib.Nifti1Image(shODF,affine).to_filename(self._gen_filename('shore_dodf', ext='.nii.gz'))
-        nib.Nifti1Image(shFODF,affine).to_filename(self._gen_filename('shore_fodf', ext='.nii.gz'))
+        nib.Nifti1Image(GFA,affine).to_filename(op.abspath('shore_gfa.nii.gz'))
+        nib.Nifti1Image(MSD,affine).to_filename(op.abspath('shore_msd.nii.gz'))
+        nib.Nifti1Image(shODF,affine).to_filename(op.abspath('shore_dodf.nii.gz'))
+        nib.Nifti1Image(shFODF,affine).to_filename(op.abspath('shore_fodf.nii.gz'))
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['model'] = self._gen_filename('shoremodel', ext='.pklz')
-        outputs['fod'] = self._gen_filename('shore_fodf', ext='.nii.gz')
-        outputs['GFA'] = self._gen_filename('shore_gfa', ext='.nii.gz')
+        outputs['model'] = op.abspath('shoremodel.pklz')
+        outputs['fod'] = op.abspath('shore_fodf.nii.gz')
+        outputs['GFA'] = op.abspath('shore_gfa.nii.gz')
         return outputs
 
 class TensorInformedEudXTractographyInputSpec(BaseInterfaceInputSpec):

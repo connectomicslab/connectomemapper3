@@ -108,7 +108,7 @@ class Dipy_recon_config(HasTraits):
 
     mapmri = Bool(False)
 
-    tracking_processing_tool = Str
+    tracking_processing_tool = Enum('MRtrix','Dipy')
 
     laplacian_regularization = traits.Bool(True, usedefault=True, desc = ('Apply laplacian regularization'))
 
@@ -657,6 +657,11 @@ def create_dipy_recon_flow(config):
         # Perform SHORE reconstruction (DSI)
 
         dipy_SHORE = pe.Node(interface=SHORE(),name="dipy_SHORE")
+
+        if config.tracking_processing_tool == 'MRtrix':
+            dipy_SHORE.inputs.tracking_processing_tool = 'mrtrix'
+        elif config.tracking_processing_tool == 'Dipy':
+            dipy_SHORE.inputs.tracking_processing_tool = 'dipy'
 
         # if config.tracking_processing_tool != 'Dipy':
         #dipy_SHORE.inputs.save_shm_coeff = True
