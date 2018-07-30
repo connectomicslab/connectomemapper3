@@ -60,16 +60,20 @@ FSL_DIR variable is exported and the fsl.sh setup script is sourced."""
 FREESURFER_HOME variable is exported and the SetUpFreeSurfer.sh setup
 script is sourced."""
 
+    # Check for MRtrix
+    if subprocess.call("mrconvert",stdout=nul,stderr=nul,shell=True) != 255:
+        error = """MRtrix3 not installed or not working correctly. Check that PATH variable is updated with MRtrix3 binary (bin) directory."""
+
     # Check for DTK
-    if subprocess.call("dti_recon",stdout=nul,stderr=nul,shell=True) != 0 or "DSI_PATH" not in os.environ:
-        error = """Diffusion Toolkit not installed or not working correctly. Check that
-the DSI_PATH variable is exported and that the dtk binaries (e.g. dti_recon) are in
-your path."""
+#     if subprocess.call("dti_recon",stdout=nul,stderr=nul,shell=True) != 0 or "DSI_PATH" not in os.environ:
+#         error = """Diffusion Toolkit not installed or not working correctly. Check that
+# the DSI_PATH variable is exported and that the dtk binaries (e.g. dti_recon) are in
+# your path."""
 
     # Check for DTB
-    if subprocess.call("DTB_dtk2dir",stdout=nul,stderr=nul,shell=True) != 1:
-        error = """DTB binaries not installed or not working correctly. Check that the
-DTB binaries (e.g. DTB_dtk2dir) are in your path and don't give any error."""
+#     if subprocess.call("DTB_dtk2dir",stdout=nul,stderr=nul,shell=True) != 1:
+#         error = """DTB binaries not installed or not working correctly. Check that the
+# DTB binaries (e.g. DTB_dtk2dir) are in your path and don't give any error."""
 
     if error != "":
         print error
@@ -166,6 +170,67 @@ if __name__ == "__main__":
                     dmri_pipeline.process()
                 else:
                     sys.exit(1)
+        else:
+            print msg
+            sys.exit(1)
+
+    elif (argc==9) or (argc==10): # connectomemapper bids_folder sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion fmri_ini_file process_fmri
+
+        project = cmp.gui.CMP_Project_Info()
+        project.base_directory = os.path.abspath(sys.argv[1])
+        project.subjects = ['%s' % sys.argv[2]]
+        project.subject = '%s' % sys.argv[2]
+
+        if "ses-" in sys.argv[3]:
+            offset = 1
+            project.subject_sessions = ['%s' % sys.argv[3]]
+            project.subject_session = '%s' % sys.argv[3]
+        else:
+            offset = 0
+            project.subject_sessions = ['']
+            project.subject_session = ''
+
+        project.anat_config_file = os.path.abspath(sys.argv[offset+3])
+        project.dmri_config_file = os.path.abspath(sys.argv[offset+5])
+
+        anat_pipeline = cmp.project.init_anat_project(project, False)
+        if anat_pipeline != None:
+            anat_valid_inputs = anat_pipeline.check_input(gui=False)
+
+            if anat_valid_inputs and sys.argv[offset+4]=='True':
+                print "Process anatomical pipeline"
+                anat_pipeline.process()
+            elif anat_valid_inputs and sys.argv[offset+4]=='False':
+                print "Collecting precomputed anatomical pipeline"
+                pass
+            else:
+                print "Invalid inputs"
+                sys.exit(1)
+
+        anat_valid_outputs, msg = anat_pipeline.check_output()
+
+        if anat_valid_outputs:
+            dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, False)
+            if dmri_pipeline != None:
+                dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                print sys.argv[offset+6]
+                if dmri_valid_inputs and sys.argv[offset+6]=='True':
+                    print "Process diffusion pipeline"
+                    dmri_pipeline.process()
+                else:
+                    print "WARNING: Diffusion pipeline set to not be executed"
+
+            fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, False)
+            if fmri_pipeline != None:
+                fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                print sys.argv[offset+8]
+                if fmri_valid_inputs and sys.argv[offset+8]=='True':
+                    print "Process fmri pipeline"
+                    fmri_pipeline.process()
+                else:
+                    print "WARNING: Diffusion pipeline set to not be executed"
         else:
             print msg
             sys.exit(1)

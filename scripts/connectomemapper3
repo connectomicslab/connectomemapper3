@@ -216,9 +216,10 @@ if __name__ == "__main__":
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
                 print sys.argv[offset+6]
                 if dmri_valid_inputs and sys.argv[offset+6]=='True':
+                    print "Process diffusion pipeline"
                     dmri_pipeline.process()
                 else:
-                    sys.exit(1)
+                    print "WARNING: Diffusion pipeline set to not be executed"
 
             fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, False)
             if fmri_pipeline != None:
@@ -226,9 +227,10 @@ if __name__ == "__main__":
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
                 print sys.argv[offset+8]
                 if fmri_valid_inputs and sys.argv[offset+8]=='True':
+                    print "Process fmri pipeline"
                     fmri_pipeline.process()
                 else:
-                    sys.exit(1)
+                    print "WARNING: Diffusion pipeline set to not be executed"
         else:
             print msg
             sys.exit(1)

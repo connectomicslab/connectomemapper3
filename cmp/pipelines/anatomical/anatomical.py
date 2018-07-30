@@ -599,7 +599,12 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         outdir = deriv_subject_directory
         if not os.path.exists(outdir):
             os.makedirs(outdir)
-        shutil.copy(self.config_file,outdir)
+
+        try:
+            shutil.copy(self.config_file,outdir)
+        except shutil.Error:
+            print("Skipped copy of config file")
+
         #shutil.copy(os.path.join(self.base_directory,"derivatives","cmp",self.subject,'pypeline.log'),outdir)
 
         iflogger.info("**** Processing finished ****")
