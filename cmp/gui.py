@@ -126,6 +126,8 @@ class CMP_Project_Info(HasTraits):
     subjects = List([])
     subject = Enum(values='subjects')
 
+    number_of_subjects = Int()
+
     subject_sessions = List([])
     subject_session = Enum(values='subject_sessions')
 
@@ -181,22 +183,23 @@ class CMP_Project_Info(HasTraits):
                         VGroup(
                             HGroup(
                                 # '20',Item('base_directory',width=-0.3,height=-0.2, style='custom',show_label=False,resizable=True),
-                                '20',Item('base_directory',width=-0.3,style='readonly',show_label=False,resizable=True),
+                                Item('base_directory',width=-0.3,style='readonly',label="",resizable=True),
+                                Item('number_of_subjects',width=-0.3,style='readonly',label="Number of participants",resizable=True),
                                 ),
                             # HGroup(subj
                             #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)
                             #     ),
-                        label='BIDS base directory',
+                        label='BIDS Dataset',
                         ),
                         spring,
-                        Group(
+                        HGroup(
+                            Group(
                             Item('subject',style='readonly',show_label=False,resizable=True),
-                            label='Subject',
-                        ),
-                        spring,
-                        Group(
+                            label='Subject',),
+                            Group(
                             Item('subject_session',style='readonly',show_label=False,resizable=True),
-                            label='Session',visible_when='subject_session!=""'
+                            label='Session',visible_when='subject_session!=""'),
+                            springy = True
                         ),
                         spring,
                         Group(
@@ -205,26 +208,20 @@ class CMP_Project_Info(HasTraits):
                                 Item('dmri_available',style='readonly',label='Diffusion',resizable=True),
                                 Item('diffusion_imaging_model',label='Model',resizable=True,enabled_when='dmri_available'),
                                 ),
+                            Item('fmri_available',style='readonly',label='BOLD',resizable=True),
                             # Item('t1_available',style='readonly',label='T1',resizable=True),
                             label='Modalities'
                         ),
                         spring,
                         Group(
-                            Group(
-                                Item('anat_last_date_processed',style='readonly',resizable=True),
-                                Item('anat_last_stage_processed',style='readonly',resizable=True),
-                                label="Anatomical pipeline"
-                            ),
-                            Group(
-                                Item('dmri_last_date_processed',style='readonly',resizable=True),
-                                Item('dmri_last_stage_processed',style='readonly',resizable=True),
-                                label="Diffusion pipeline",enabled_when='dmri_available'
-                            ),
-                            Group(
-                                Item('fmri_last_date_processed',style='readonly',resizable=True),
-                                Item('fmri_last_stage_processed',style='readonly',resizable=True),
-                                label="fMRI pipeline",enabled_when='fmri_available'
-                            )
+
+                            Item('anat_last_date_processed',label="Anatomical pipeline", style='readonly',resizable=True,enabled_when='t1_available'),
+
+                            Item('dmri_last_date_processed',label="Diffusion pipeline",style='readonly',resizable=True,enabled_when='dmri_available'),
+
+                            Item('fmri_last_date_processed',label="fMRI pipeline",style='readonly',resizable=True,enabled_when='fmri_available'),
+
+                            label="Last date processed"
                         ),
                         spring,
                         Group(

@@ -431,7 +431,7 @@ class DiffusionPipeline(Pipeline):
 
         return valid_inputs
 
-    def check_input(self, gui=True):
+    def check_input(self, layout, gui=True):
         print '**** Check Inputs  ****'
         diffusion_available = False
         bvecs_available = False

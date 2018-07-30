@@ -182,7 +182,7 @@ class fMRIPipeline(Pipeline):
             if stage == custom_last_stage:
                 break
 
-    def check_input(self, gui=True):
+    def check_input(self, layout, gui=True):
         print '**** Check Inputs ****'
         fMRI_available = False
         t1_available = False
@@ -203,34 +203,22 @@ class fMRIPipeline(Pipeline):
         print "t1_file : %s" % t1_file
         print "t2_file : %s" % t2_file
 
-        try:
-            print('base_directory :',self.base_directory)
-            layout = BIDSLayout(self.base_directory)
-            print "Valid BIDS dataset with %s subjects" % len(layout.get_subjects())
-            for subj in layout.get_subjects():
-                self.global_conf.subjects.append('sub-'+str(subj))
-            # self.global_conf.subjects = ['sub-'+str(subj) for subj in layout.get_subjects()]
-            self.global_conf.modalities = [str(mod) for mod in layout.get_modalities()]
-            # mods = layout.get_modalities()
-            types = layout.get_types()
-            print "Available modalities :"
-            for typ in types:
-                print "-%s" % typ
+        # mods = layout.get_modalities()
+        types = layout.get_types()
+        print "Available modalities :"
+        for typ in types:
+            print "-%s" % typ
 
-            for typ in types:
-                if typ == 'T1w' and os.path.isfile(t1_file):
-                    print "%s available" % typ
-                    t1_available = True
-                if typ == 'T2w' and os.path.isfile(t2_file):
-                    print "%s available" % typ
-                    t2_available = True
-                if typ == 'bold' and os.path.isfile(fmri_file):
-                    print "%s available" % typ
-                    fMRI_available = True
-
-        except:
-            error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
-            return
+        for typ in types:
+            if typ == 'T1w' and os.path.isfile(t1_file):
+                print "%s available" % typ
+                t1_available = True
+            if typ == 'T2w' and os.path.isfile(t2_file):
+                print "%s available" % typ
+                t2_available = True
+            if typ == 'bold' and os.path.isfile(fmri_file):
+                print "%s available" % typ
+                fMRI_available = True
 
         print('fMRI :',fMRI_available)
         print('t1 :',t1_available)

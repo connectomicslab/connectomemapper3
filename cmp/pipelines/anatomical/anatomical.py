@@ -208,48 +208,33 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     #         self.launch_progress_window()
     #         # update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline)
 
-    def check_input(self, gui=True):
+    def check_input(self, layout, gui=True):
         print '**** Check Inputs  ****'
         t1_available = False
         valid_inputs = False
 
-        try:
-            layout = BIDSLayout(self.base_directory)
-            print "Valid BIDS dataset with %s subjects" % len(layout.get_subjects())
-            for subj in layout.get_subjects():
-                self.global_conf.subjects.append('sub-'+str(subj))
-            # self.global_conf.subjects = ['sub-'+str(subj) for subj in layout.get_subjects()]
-            self.global_conf.modalities = [str(mod) for mod in layout.get_modalities()]
-            # mods = layout.get_modalities()
-            types = layout.get_types()
-            # print "Available modalities :"
-            # for mod in mods:
-            #     print "-%s" % mod
+        types = layout.get_types()
 
-            if self.global_conf.subject_session == '':
-                T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
+        if self.global_conf.subject_session == '':
+            T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
+        else:
+            subjid = self.subject.split("-")[1]
+            sessid = self.global_conf.subject_session.split("-")[1]
+            files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz',session=sessid)
+            if len(files) > 0:
+                T1_file = files[0].filename
+                print T1_file
             else:
-                subjid = self.subject.split("-")[1]
-                sessid = self.global_conf.subject_session.split("-")[1]
-                files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz',session=sessid)
-                if len(files) > 0:
-                    T1_file = files[0].filename
-                    print T1_file
-                else:
-                    error(message="T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
-                    return
+                error(message="T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                return
 
-            print "Looking in %s for...." % self.base_directory
-            print "T1_file : %s" % T1_file
+        print "Looking in %s for...." % self.base_directory
+        print "T1_file : %s" % T1_file
 
-            for typ in types:
-                if typ == 'T1w' and os.path.isfile(T1_file):
-                    print "%s available" % typ
-                    t1_available = True
-
-        except:
-            error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
-            return
+        for typ in types:
+            if typ == 'T1w' and os.path.isfile(T1_file):
+                print "%s available" % typ
+                t1_available = True
 
         if t1_available:
             #Copy diffusion data to derivatives / cmp  / subject / dwi
