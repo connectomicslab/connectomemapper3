@@ -15,6 +15,8 @@ from traitsui.api import *
 from traitsui.qt4.extra.qt_view import QtView
 from pyface.api import ImageResource
 
+from bids.grabbids import BIDSLayout
+
 # CMP imports
 import project
 
@@ -123,6 +125,8 @@ style_sheet = '''
 
 class CMP_Project_Info(HasTraits):
     base_directory = Directory
+
+    bids_layout = Instance(BIDSLayout)
     subjects = List([])
     subject = Enum(values='subjects')
 
@@ -194,11 +198,11 @@ class CMP_Project_Info(HasTraits):
                         spring,
                         HGroup(
                             Group(
-                            Item('subject',style='readonly',show_label=False,resizable=True),
-                            label='Subject',),
+                            Item('subject',style='simple',show_label=True,resizable=True),
+                            ),
                             Group(
-                            Item('subject_session',style='readonly',show_label=False,resizable=True),
-                            label='Session',visible_when='subject_session!=""'),
+                            Item('subject_session',style='readonly',label="Session",resizable=True),
+                            visible_when='subject_session!=""'),
                             springy = True
                         ),
                         spring,
@@ -401,6 +405,8 @@ class CMP_MainWindow(HasTraits):
 
     project_info = Instance(CMP_Project_Info)
 
+    handler = Instance(project.ProjectHandler)
+
     new_project = Action(name='Load BIDS Dataset (New)...',action='new_project')
     load_project = Action(name='Load BIDS Dataset (Processed)...',action='load_project')
     process_anatomical = Action(name='Parcellate Brain!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
@@ -470,3 +476,28 @@ class CMP_MainWindow(HasTraits):
 
     def update_diffusion_imaging_model(self,new):
         self.dmri_pipeline.diffusion_imaging_model = new
+
+    def update_subject_anat_pipeline(self,new):
+        try:
+            print "update subject anat"
+            self = self.handler.update_subject_anat_pipeline(self)
+        except AttributeError:
+            print "AttributeError: update subject anat"
+            return
+
+    def update_subject_dmri_pipeline(self,new):
+        try:
+            print "update subject dmri"
+            print self.project_info.bids_layout
+            self = self.handler.update_subject_dmri_pipeline(self)
+        except AttributeError:
+            print "AttributeError: update subject dmri"
+            return
+
+    def update_subject_fmri_pipeline(self,new):
+        try:
+            print "update subject fmri"
+            self = self.handler.update_subject_fmri_pipeline(self)
+        except AttributeError:
+            print "AttributeError: update subject fmri"
+            return
