@@ -201,7 +201,7 @@ class CMP_Project_Info(HasTraits):
                             Item('subject',style='simple',show_label=True,resizable=True),
                             ),
                             Group(
-                            Item('subject_session',style='readonly',label="Session",resizable=True),
+                            Item('subject_session',style='simple',label="Session",resizable=True),
                             visible_when='subject_session!=""'),
                             springy = True
                         ),
@@ -480,6 +480,12 @@ class CMP_MainWindow(HasTraits):
     def update_subject_anat_pipeline(self,new):
         try:
             print "update subject anat"
+            bids_layout = BIDSLayout(self.project_info.base_directory)
+            self.project_info.subject_sessions = ["ses-%s"%s for s in bids_layout.get(target='session', return_type='id', subject=self.project_info.subject.split('-')[1])]
+            if len(self.project_info.subject_sessions)>0:
+                self.project_info.subject_session = self.project_info.subject_sessions[0]
+            else:
+                self.project_info.subject_session = ''
             self = self.handler.update_subject_anat_pipeline(self)
         except AttributeError:
             print "AttributeError: update subject anat"
@@ -488,7 +494,12 @@ class CMP_MainWindow(HasTraits):
     def update_subject_dmri_pipeline(self,new):
         try:
             print "update subject dmri"
-            print self.project_info.bids_layout
+            bids_layout = BIDSLayout(self.project_info.base_directory)
+            self.project_info.subject_sessions = ["ses-%s"%s for s in bids_layout.get(target='session', return_type='id', subject=self.project_info.subject.split('-')[1])]
+            if len(self.project_info.subject_sessions)>0:
+                self.project_info.subject_session = self.project_info.subject_sessions[0]
+            else:
+                self.project_info.subject_session = ''
             self = self.handler.update_subject_dmri_pipeline(self)
         except AttributeError:
             print "AttributeError: update subject dmri"
@@ -497,6 +508,36 @@ class CMP_MainWindow(HasTraits):
     def update_subject_fmri_pipeline(self,new):
         try:
             print "update subject fmri"
+            bids_layout = BIDSLayout(self.project_info.base_directory)
+            self.project_info.subject_sessions = ["ses-%s"%s for s in bids_layout.get(target='session', return_type='id', subject=self.project_info.subject.split('-')[1])]
+            if len(self.project_info.subject_sessions)>0:
+                self.project_info.subject_session = self.project_info.subject_sessions[0]
+            else:
+                self.project_info.subject_session = ''
+            self = self.handler.update_subject_fmri_pipeline(self)
+        except AttributeError:
+            print "AttributeError: update subject fmri"
+            return
+
+    def update_session_anat_pipeline(self,new):
+        try:
+            print "update subject session anat"
+            self = self.handler.update_subject_anat_pipeline(self)
+        except AttributeError:
+            print "AttributeError: update subject anat"
+            return
+
+    def update_session_dmri_pipeline(self,new):
+        try:
+            print "update subject session dmri"
+            self = self.handler.update_subject_dmri_pipeline(self)
+        except AttributeError:
+            print "AttributeError: update subject dmri"
+            return
+
+    def update_session_fmri_pipeline(self,new):
+        try:
+            print "update subject session fmri"
             self = self.handler.update_subject_fmri_pipeline(self)
         except AttributeError:
             print "AttributeError: update subject fmri"
