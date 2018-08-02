@@ -110,17 +110,6 @@ class DiffusionPipeline(Pipeline):
 
     # anat_flow = Instance(pe.Workflow)
 
-    # pipeline_group = VGroup(
-    #                     HGroup(spring,Item('segmentation',editor=ToolkitEditorFactory(image=ImageResource('segmentation'),theme='@G')),spring,show_labels=False),#Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),show_labels=False),
-    #                     HGroup(spring,Item('parcellation',editor=ToolkitEditorFactory(image=ImageResource('parcellation'),theme='@G')),spring,show_labels=False),
-    #                     HGroup(spring,Item('preprocessing',editor=ToolkitEditorFactory(image=ImageResource('preprocessing'),theme='@G')),spring,show_labels=False),
-    #                     HGroup(spring,Item('registration',editor=ToolkitEditorFactory(image=ImageResource('registration'),theme='@G')),spring,show_labels=False),
-    #                     HGroup(spring,Item('diffusion',editor=ToolkitEditorFactory(image=ImageResource('diffusion'),theme='@G')),spring,show_labels=False),
-    #                     HGroup(spring,Item('connectome',editor=ToolkitEditorFactory(image=ImageResource('connectome'),theme='@G')),spring,show_labels=False),
-    #                     springy=True
-    #
-    #              )
-
     pipeline_group = VGroup(
                         HGroup(spring,UItem('preprocessing',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False,label=""),
                         HGroup(spring,UItem('registration',style='custom',width=500,height=110,resizable=True,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False,label=""),

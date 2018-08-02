@@ -621,12 +621,23 @@ class DiffusionStage(Stage):
         #         self.inspect_outputs_dict['DTK streamline'] = ['trackvis',diff_results.outputs.out_file]
 
         if self.config.tracking_processing_tool == 'Dipy':
-            if self.config.mrtrix_recon_config.local_model:
-                recon_results_path = os.path.join(self.stage_dir,"reconstrution","dipy_CSD","result_dipy_CSD.pklz")
+
+            if self.config.mrtrix_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
+                if self.config.diffusion_imaging_model == 'DSI':
+                    recon_results_path = os.path.join(self.stage_dir,"reconstrution","dipy_SHORE","result_dipy_SHORE.pklz")
+                else:
+                    recon_results_path = os.path.join(self.stage_dir,"reconstrution","dipy_CSD","result_dipy_CSD.pklz")
+
                 if os.path.exists(recon_results_path):
                     recon_results = pickle.load(gzip.open(recon_results_path))
-                    shm_coeff_res = recon_results.outputs.out_shm_coeff
+
+                    if self.config.diffusion_imaging_model == 'DSI':
+                        shm_coeff_res = recon_results.outputs.fod
+                    else:
+                        shm_coeff_res = recon_results.outputs.out_shm_coeff
+
                     self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
+
                 if self.config.diffusion_model == 'Deterministic':
                     diff_results_path = os.path.join(self.stage_dir,"tracking","dipy_deterministic_tracking","result_dipy_deterministic_tracking.pklz")
                     if os.path.exists(diff_results_path):
