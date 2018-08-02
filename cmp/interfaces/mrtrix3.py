@@ -197,7 +197,7 @@ class DWIBiasCorrectInputSpec(CommandLineInputSpec):
 
     force_writing = traits.Bool(argstr='-force', position=4, desc="Force file overwriting.")
     #quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
-    verbose = traits.Bool(argstr='-verbose', position=5, desc="Display debugging messages.")
+    debug = traits.Bool(argstr='-debug', position=5, desc="Display debugging messages.")
 
 class DWIBiasCorrectOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Output corrected DWI image')

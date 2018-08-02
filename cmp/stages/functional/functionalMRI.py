@@ -573,7 +573,7 @@ class FunctionalMRIStage(Stage):
                 results = pickle.load(gzip.open(res_path))
                 self.inspect_outputs_dict['Detrending output'] = ['fslview',results.outputs.out_file]
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
-            res_path = os.path.join(self.stage_dir,"temporal_filter","result_temporal_filter.pklz")
+            res_path = os.path.join(self.stage_dir,"converter","result_converter.pklz")
             if(os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
                 self.inspect_outputs_dict['Filter output'] = ['fslview',results.outputs.out_file]

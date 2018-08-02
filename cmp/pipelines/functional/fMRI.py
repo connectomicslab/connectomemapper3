@@ -134,6 +134,8 @@ class fMRIPipeline(Pipeline):
 
         self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
 
+    def _subject_changed(self,new):
+        self.stages['Connectome'].config.subject = new
 
     def update_registration(self):
         if self.seg_tool == "Custom segmentation" :

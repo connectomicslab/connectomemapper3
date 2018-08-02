@@ -158,7 +158,7 @@ class PreprocessingStage(Stage):
 
     def define_inspect_outputs(self):
         if self.config.despiking:
-            despike_path = os.path.join(self.stage_dir,"despike","result_despike.pklz")
+            despike_path = os.path.join(self.stage_dir,"converter","result_converter.pklz")
             if(os.path.exists(despike_path)):
                 despike_results = pickle.load(gzip.open(despike_path))
                 self.inspect_outputs_dict['Spike corrected image'] = ['fslview',despike_results.outputs.out_file]
@@ -190,6 +190,6 @@ class PreprocessingStage(Stage):
         elif self.config.slice_timing:
             return os.path.exists(os.path.join(self.stage_dir,"slice_timing","result_slice_timing.pklz"))
         elif self.config.despiking:
-            return os.path.exists(os.path.join(self.stage_dir,"despike","result_despike.pklz"))
+            return os.path.exists(os.path.join(self.stage_dir,"converter","result_converter.pklz"))
         else:
             return True

@@ -804,10 +804,16 @@ class PreprocessingStage(Stage):
                 self.inspect_outputs_dict['Bias field'] = ['mrview',dwi_biascorrect_results.outputs.out_bias]
 
         if self.config.eddy_current_and_motion_correction:
-            eddy_results_path = os.path.join(self.stage_dir,"eddy","result_eddy.pklz")
-            if(os.path.exists(eddy_results_path)):
-                eddy_results = pickle.load(gzip.open(eddy_results_path))
-                self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview',eddy_results.outputs.eddy_corrected]
+            if self.config.eddy_correction_algo == 'FSL eddy_correct':
+                eddy_results_path = os.path.join(self.stage_dir,"eddy_correct","result_eddy_correct.pklz")
+                if(os.path.exists(eddy_results_path)):
+                    eddy_results = pickle.load(gzip.open(eddy_results_path))
+                    self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview',eddy_results.outputs.eddy_corrected]
+            else:
+                eddy_results_path = os.path.join(self.stage_dir,"eddy","result_eddy.pklz")
+                if(os.path.exists(eddy_results_path)):
+                    eddy_results = pickle.load(gzip.open(eddy_results_path))
+                    self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview',eddy_results.outputs.eddy_corrected]
 
         self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
 

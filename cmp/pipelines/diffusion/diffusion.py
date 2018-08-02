@@ -160,6 +160,9 @@ class DiffusionPipeline(Pipeline):
 
         # self.anat_flow = anat_flow
 
+    def _subject_changed(self,new):
+        self.stages['Connectome'].config.subject = new
+
     def _diffusion_imaging_model_changed(self,new):
         print "diffusion model changed"
         self.stages['Diffusion'].config.diffusion_imaging_model = new
