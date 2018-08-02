@@ -123,6 +123,7 @@ style_sheet = '''
             }
             '''
 
+
 class CMP_Project_Info(HasTraits):
     base_directory = Directory
 
@@ -146,6 +147,7 @@ class CMP_Project_Info(HasTraits):
     freesurfer_subjects_dir = Str('')
     freesurfer_subject_id = Str('')
 
+    pipeline_processing_summary = List()
 
     t1_available = Bool(False)
     dmri_available = Bool(False)
@@ -183,12 +185,18 @@ class CMP_Project_Info(HasTraits):
 
     number_of_cores = Enum(1,range(1,multiprocessing.cpu_count()+1))
 
-    data_manager = VGroup(
+    summary_view_button = Button('Pipeline processing summary')
+
+    pipeline_processing_summary_view = VGroup(
+                                            Item('pipeline_processing_summary'),
+                                            )
+    dataset_view = VGroup(
                         VGroup(
                             HGroup(
                                 # '20',Item('base_directory',width=-0.3,height=-0.2, style='custom',show_label=False,resizable=True),
                                 Item('base_directory',width=-0.3,style='readonly',label="",resizable=True),
                                 Item('number_of_subjects',width=-0.3,style='readonly',label="Number of participants",resizable=True),
+                                'summary_view_button',
                                 ),
                             # HGroup(subj
                             #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)
@@ -237,7 +245,7 @@ class CMP_Project_Info(HasTraits):
                         springy=True)
 
 
-    traits_view = QtView(Include('data_manager'))
+    traits_view = QtView(Include('dataset_view'))
 
     create_view = View( #Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
                         Group(
@@ -396,6 +404,9 @@ class CMP_Project_Info(HasTraits):
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
+    def _summary_view_button_fired(self):
+        self.configure_traits(view='pipeline_processing_summary_view')
+
 ## Main window class of the ConnectomeMapper_Pipeline
 #
 class CMP_MainWindow(HasTraits):
@@ -429,7 +440,7 @@ class CMP_MainWindow(HasTraits):
 
     traits_view = QtView(Group(
                             Group(
-                                # Include('data_manager'),label='Data manager',springy=True
+                                # Include('dataset_view'),label='Data manager',springy=True
                                 Item('project_info',style='custom',show_label=False),label='Data manager',springy=True, dock='tab'
                             ),
                             Group(
