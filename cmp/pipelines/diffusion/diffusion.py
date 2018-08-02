@@ -158,7 +158,18 @@ class DiffusionPipeline(Pipeline):
 
         self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
 
+        self.stages['Connectome'].config.subject = self.subject
+        self.stages['Connectome'].config.on_trait_change(self.update_vizualization_layout,'circular_layout')
+        self.stages['Connectome'].config.on_trait_change(self.update_vizualization_logscale,'log_visualization')
         # self.anat_flow = anat_flow
+
+    def update_vizualization_layout(self,new):
+        self.stages['Connectome'].define_inspect_outputs()
+        self.stages['Connectome'].config.subject = self.subject
+
+    def update_vizualization_logscale(self,new):
+        self.stages['Connectome'].define_inspect_outputs()
+        self.stages['Connectome'].config.subject = self.subject
 
     def _subject_changed(self,new):
         self.stages['Connectome'].config.subject = new
