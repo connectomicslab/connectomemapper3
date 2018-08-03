@@ -634,9 +634,9 @@ class DiffusionStage(Stage):
 
                     if self.config.diffusion_imaging_model == 'DSI':
                         gfa_res = recon_results.outputs.GFA
-                        self.inspect_outputs_dict[self.config.tracking_processing_tool + ' gFA image'] = ['mrview',gfa_res]
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' gFA image'] = ['mrview',gfa_res]
                         shm_coeff_res = recon_results.outputs.fod
-                        self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH (SHORE) image'] = ['mrview',gfa_res,'-odf.load_sh',shm_coeff_res]
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH (SHORE) image'] = ['mrview',gfa_res,'-odf.load_sh',shm_coeff_res]
 
                     else:
                         recon_tensor_results_path = os.path.join(self.stage_dir,"reconstruction","dipy_tensor","result_dipy_tensor.pklz")
@@ -645,13 +645,13 @@ class DiffusionStage(Stage):
                             recon_tensor_results = pickle.load(gzip.open(recon_tensor_results_path))
 
                             fa_res = recon_tensor_results.outputs.fa_file
-                            self.inspect_outputs_dict[self.config.tracking_processing_tool + ' FA image'] = ['mrview',fa_res]
+                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',fa_res]
 
                             shm_coeff_res = recon_results.outputs.out_shm_coeff
-                            self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH (CSD) image'] = ['mrview',fa_res,'-odf.load_sh',shm_coeff_res]
+                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH (CSD) image'] = ['mrview',fa_res,'-odf.load_sh',shm_coeff_res]
                         else:
                             shm_coeff_res = recon_results.outputs.out_shm_coeff
-                            self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH (CSD) image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
+                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH (CSD) image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
 
 
 
@@ -665,15 +665,15 @@ class DiffusionStage(Stage):
                 recon_results = pickle.load(gzip.open(recon_results_path))
 
             fa_res = recon_results.outputs.out_fa
-            self.inspect_outputs_dict[self.config.tracking_processing_tool + ' FA image'] = ['mrview',fa_res]
+            self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',fa_res]
 
             adc_res = recon_results.outputs.out_fa
-            self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ADC image'] = ['mrview',adc_res]
+            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ADC image'] = ['mrview',adc_res]
 
             if not self.config.mrtrix_recon_config.local_mode: # Tensor model (DTI)
 
                     tensor_res = recon_results.outputs.tensor
-                    self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH image'] = ['mrview',tensor_res,'-odf.load_tensor',tensor_res]
+                    self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',tensor_res,'-odf.load_tensor',tensor_res]
 
             else: # CSD model
 
@@ -682,13 +682,8 @@ class DiffusionStage(Stage):
                 if os.path.exists(recon_results_path):
                     recon_results = pickle.load(gzip.open(recon_results_path))
                     shm_coeff_res = recon_results.outputs.spherical_harmonics_image
-                    self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
-
-
-
-
-
-
+                    self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
+            s
 
         if self.config.tracking_processing_tool == 'Dipy':
 
