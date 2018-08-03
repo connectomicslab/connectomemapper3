@@ -620,24 +620,60 @@ class DiffusionStage(Stage):
         #         diff_results = pickle.load(gzip.open(diff_results_path))
         #         self.inspect_outputs_dict['DTK streamline'] = ['trackvis',diff_results.outputs.out_file]
 
-        if self.config.tracking_processing_tool == 'Dipy':
+        if self.config.recon_processing_tool == 'Dipy':
 
-            if self.config.mrtrix_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
+            if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI': # SHORE or CSD models
+
                 if self.config.diffusion_imaging_model == 'DSI':
-                    recon_results_path = os.path.join(self.stage_dir,"reconstrution","dipy_SHORE","result_dipy_SHORE.pklz")
+                    recon_results_path = os.path.join(self.stage_dir,"reconstruction","dipy_SHORE","result_dipy_SHORE.pklz")
                 else:
-                    recon_results_path = os.path.join(self.stage_dir,"reconstrution","dipy_CSD","result_dipy_CSD.pklz")
+                    recon_results_path = os.path.join(self.stage_dir,"reconstruction","dipy_CSD","result_dipy_CSD.pklz")
 
                 if os.path.exists(recon_results_path):
                     recon_results = pickle.load(gzip.open(recon_results_path))
 
                     if self.config.diffusion_imaging_model == 'DSI':
                         shm_coeff_res = recon_results.outputs.fod
+                        self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH (SHORE) image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
                     else:
                         shm_coeff_res = recon_results.outputs.out_shm_coeff
+                        self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH (CSD) image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
+
+
+
+            # TODO: add Tensor image in case of DTI+Tensor modeling
+
+        elif self.config.recon_processing_tool == 'MRtrix':
+
+            if not self.config.mrtrix_recon_config.local_mode: # Tensor model (DTI)
+
+                recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_tensor","result_mrtrix_tensor.pklz")
+
+                if os.path.exists(recon_results_path):
+                    recon_results = pickle.load(gzip.open(recon_results_path))
+                    tensor_res = recon_results.outputs.tensor
+
+                    self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH image'] = ['mrview',tensor_res,'-odf.load_tensor',tensor_res]
+
+            else: # CSD model
+
+                recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_CSD","result_mrtrix_CSD.pklz")
+
+                if os.path.exists(recon_results_path):
+                    recon_results = pickle.load(gzip.open(recon_results_path))
+                    shm_coeff_res = recon_results.outputs.spherical_harmonics_image
 
                     self.inspect_outputs_dict[self.config.tracking_processing_tool + ' SH image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
 
+
+
+
+
+
+
+        if self.config.tracking_processing_tool == 'Dipy':
+
+            if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
                 if self.config.diffusion_model == 'Deterministic':
                     diff_results_path = os.path.join(self.stage_dir,"tracking","dipy_deterministic_tracking","result_dipy_deterministic_tracking.pklz")
                     if os.path.exists(diff_results_path):
@@ -667,7 +703,7 @@ class DiffusionStage(Stage):
                     print streamline_res
                     self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
             elif self.config.diffusion_model == 'Probabilistic':
-                diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","mapflow","_trackvis0","result__trackvis0.pklz")
+                diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
                 print diff_results_path
                 if os.path.exists(diff_results_path):
                     diff_results = pickle.load(gzip.open(diff_results_path))
