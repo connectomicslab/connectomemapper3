@@ -55,10 +55,6 @@ class RegistrationConfig(HasTraits):
     # Pipeline mode
     pipeline = Enum(["Diffusion","fMRI"])
 
-    # DWI resampling selection
-    # resampling = Tuple(1,1,1)
-    # interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
-
     # Registration selection
     registration_mode = Str('ANTs')#Str('FSL')
     registration_mode_trait = List(['FSL','ANTs']) #,'BBregister (FS)'])
@@ -101,9 +97,7 @@ class RegistrationConfig(HasTraits):
     apply_to_eroded_csf = Bool(True)
     apply_to_eroded_brain = Bool(False)
 
-    traits_view = View(# HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-                       # 'interpolation'),
-
+    traits_view = View(
                         Item('registration_mode',editor=EnumEditor(name='registration_mode_trait')),
                         Group(Item('uses_qform'),
                               Item('dof'),
@@ -377,18 +371,6 @@ class RegistrationStage(Stage):
                 (inputnode,mr_convert_b0,[('target','in_file')])
             ])
 
-            # dwi2tensor = pe.Node(interface=mrt.DWI2Tensor(out_filename='dt_corrected.mif'),name='dwi2tensor')
-            # dwi2tensor_unmasked = pe.Node(interface=mrt.DWI2Tensor(out_filename='dt_corrected_unmasked.mif'),name='dwi2tensor_unmasked')
-
-            # tensor2FA = pe.Node(interface=mrt.Tensor2FractionalAnisotropy(out_filename='fa_corrected.mif'),name='tensor2FA')
-            # tensor2FA_unmasked = pe.Node(interface=mrt.Tensor2FractionalAnisotropy(out_filename='fa_corrected_unmasked.mif'),name='tensor2FA_unmasked')
-
-            # mr_convert_FA = pe.Node(interface=MRConvert(out_filename='fa_corrected.nii.gz',stride=[-1,-2,+3]), name='mr_convert_FA')
-            # mr_convert_FA_unmasked = pe.Node(interface=MRConvert(out_filename='fa_corrected_unmasked.nii.gz',stride=[-1,-2,+3]), name='mr_convert_FA_unmasked')
-
-            # FA_noNaN = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_nonan.nii.gz',nan2zeros=True),name='FA_noNaN')
-            # FA_noNaN_unmasked = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_unmasked_nonan.nii.gz',nan2zeros=True),name='FA_noNaN_unmasked')
-
             dwi2tensor = pe.Node(interface=DWI2Tensor(out_filename='dt_corrected.mif'),name='dwi2tensor')
             dwi2tensor_unmasked = pe.Node(interface=DWI2Tensor(out_filename='dt_corrected_unmasked.mif'),name='dwi2tensor_unmasked')
 
@@ -430,22 +412,11 @@ class RegistrationStage(Stage):
                         (mr_convert_b0, fsl_flirt, [('converted','reference')])
                         ])
 
-            # [1.3] Transforming T1-space images using reverse affine transform to avoid rotation of bvecs
+            # [1.3] Transforming T1-space images to avoid rotation of bvecs
             T12DWIaff = pe.Node(interface=fsl.ConvertXFM(invert_xfm=False),name='T12DWIaff')
             flow.connect([
                         (fsl_flirt, T12DWIaff, [('out_matrix_file','in_file')])
                         ])
-
-            # flow.connect([
-            #             (FA_noNaN, fsl_flirt, [('out_file','reference')]),
-            #             (inputnode, fsl_flirt, [('brain','in_file')])
-            #             ])
-
-            # # [1.3] Transforming T1-space images using reverse affine transform to avoid rotation of bvecs
-            # T12DWIaff = pe.Node(interface=fsl.ConvertXFM(invert_xfm=True),name='T12DWIaff')
-            # flow.connect([
-            #             (fsl_flirt, T12DWIaff, [('out_matrix_file','in_file')])
-            #             ])
 
             fsl_applyxfm_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
             fsl_applyxfm_rois = pe.Node(interface=ApplymultipleXfm(),name="apply_registration_roivs")
@@ -498,51 +469,6 @@ class RegistrationStage(Stage):
             flow.connect([
                         (fsl_applyxfm_brain_mask, outputnode, [('out_file','brain_mask_registered_crop')]),
                         ])
-            # [1.4] Cropping T1 data to save memory
-            # mr_crop_T1 = pe.Node(interface=MRCrop(out_filename='T1_registered_crop.nii.gz'),name='mr_crop_T1')
-            # mr_crop_brain_mask = pe.Node(interface=MRTransform(out_filename='brain_mask2_registered_crop.nii.gz',interp='cubic'),name='mr_crop_brain_mask')
-            # mr_crop_brain_mask_full = pe.Node(interface=MRTransform(out_filename='brain_mask_registered_crop.nii.gz',interp='cubic'),name='mr_crop_brain_mask_full')
-            # mr_crop_brain = pe.Node(interface=MRTransform(out_filename='brain_registered_crop.nii.gz',interp='cubic'),name='mr_crop_brain')
-            # mr_crop_wm = pe.Node(interface=MRTransform(out_filename='wm_registered_crop.nii.gz',interp='nearest'),name='mr_crop_wm')
-            # mr_crop_rois = pe.Node(interface=ApplymultipleMRTransforms(),name='mr_crop_rois')
-
-            # flow.connect([
-            #             (fsl_applyxfm_T1, mr_threshold_T1, [('out_file','in_file')]),
-            #             (fsl_applyxfm_brain_mask, mr_threshold_brain_mask, [('out_file','in_file')]),
-            #             (fsl_applyxfm_T1, mr_crop_T1, [('out_file','in_file')]),
-            #             (mr_threshold_T1, mr_crop_T1, [('thresholded','in_mask_file')]),
-            #             (fsl_applyxfm_brain_mask, mr_crop_brain_mask, [('out_file','in_files')]),
-            #             (mr_crop_T1, mr_crop_brain_mask, [('cropped','template_image')]),
-            #             (fsl_applyxfm_brain_mask_full, mr_crop_brain_mask_full, [('out_file','in_files')]),
-            #             (mr_crop_T1, mr_crop_brain_mask_full, [('cropped','template_image')]),
-            #             (fsl_applyxfm_brain, mr_crop_brain, [('out_file','in_files')]),
-            #             (mr_crop_T1, mr_crop_brain, [('cropped','template_image')]),
-            #             (fsl_applyxfm_wm, mr_crop_wm, [('out_file','in_files')]),
-            #             (mr_crop_T1, mr_crop_wm, [('cropped','template_image')]),
-            #             (fsl_applyxfm_rois, mr_crop_rois, [('out_files','in_files')]),
-            #             (mr_crop_T1, mr_crop_rois, [('cropped','template_image')])
-            #             ])
-
-            # flow.connect([
-            #             #(mr_crop_wm, outputnode, [('out_file','wm_mask_registered_crop')]),
-            #             #(mr_crop_rois, outputnode, [('out_files','roi_volumes_registered_crop')]),
-            #             (mr_crop_brain_mask_full, outputnode, [('out_file','brain_mask_registered_crop')]),
-            #             #(mr_crop_brain, outputnode, [('out_file','brain_registered_crop')]),
-            #             #(mr_crop_T1, outputnode, [('cropped','T1_registered_crop')]),
-            #             ])
-
-            # [1.5] Non linear registration of the DW data to the rotated T1 data
-            # fsl_flirt_crop = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-B0_masked_crop.nii.gz',out_matrix_file='T12DWIaffcrop.mat'),name='fsl_flirt_crop')
-            # fsl_flirt_crop.inputs.dof = self.config.dof
-            # fsl_flirt_crop.inputs.cost = self.config.fsl_cost
-            # fsl_flirt_crop.inputs.cost_func = self.config.cost
-            # fsl_flirt_crop.inputs.no_search = self.config.no_search
-            # fsl_flirt_crop.inputs.verbose = False
-
-            # flow.connect([
-            #             (mr_convert_b0, fsl_flirt_crop, [('converted','reference')]),
-            #             (mr_crop_T1, fsl_flirt_crop, [('cropped','in_file')]),
-            #             ])
 
             fsl_fnirt_crop = pe.Node(interface=fsl.FNIRT(fieldcoeff_file=True),name='fsl_fnirt_crop')
 
@@ -552,7 +478,6 @@ class RegistrationStage(Stage):
                         (fsl_flirt, fsl_fnirt_crop, [('out_matrix_file','affine_file')]),
                         # (inputnode, fsl_fnirt_crop, [('target_mask','refmask_file')])
                         ])
-
 
             fsl_applywarp_T1 = pe.Node(interface=fsl.ApplyWarp(interp="spline",out_file="T1_warped.nii.gz"),name="apply_warp_T1")
             fsl_applywarp_5tt = pe.Node(interface=fsl.ApplyWarp(interp="spline",out_file="5tt_warped.nii.gz"),name="apply_warp_5tt")
@@ -607,23 +532,6 @@ class RegistrationStage(Stage):
                         (inputnode, outputnode, [('target','target_epicorrected')]),
                         ])
 
-            # fsl_applywarp = pe.Node(interface=fsl.ApplyWarp(out_file='target_epicorrected.nii.gz'),name='fsl_apply_warp')
-
-            # flow.connect([
-            #             (inputnode, fsl_applywarp, [('target','in_file')]),
-            #             (mr_crop_T1, fsl_applywarp, [('cropped','ref_file')]),
-            #             (fsl_fnirt_crop, fsl_applywarp, [('fieldcoeff_file','field_file')]),
-            #             (fsl_applywarp, outputnode, [('out_file','target_epicorrected')]),
-            #             ])
-
-            # fsl_applywarp_FA_noNaN = pe.Node(interface=fsl.ApplyWarp(out_file='FA_epicorrected.nii.gz'),name='fsl_applywarp_FA_noNaN')
-
-            # flow.connect([
-            #             (mr_convert_FA, fsl_applywarp_FA_noNaN, [('converted','in_file')]),
-            #             (mr_crop_T1, fsl_applywarp_FA_noNaN, [('cropped','ref_file')]),
-            #             (fsl_fnirt_crop, fsl_applywarp_FA_noNaN, [('fieldcoeff_file','field_file')])
-            #             ])
-
         elif self.config.registration_mode == 'ANTs':
             # [SUB-STEP 1] Linear register "T1" onto"Target_FA_resampled"
             # [1.1] Convert diffusion data to mrtrix format using rotated bvecs
@@ -662,18 +570,6 @@ class RegistrationStage(Stage):
                 (inputnode,mr_convert_b0,[('target','in_file')])
             ])
 
-            # dwi2tensor = pe.Node(interface=mrt.DWI2Tensor(out_filename='dt_corrected.mif'),name='dwi2tensor')
-            # dwi2tensor_unmasked = pe.Node(interface=mrt.DWI2Tensor(out_filename='dt_corrected_unmasked.mif'),name='dwi2tensor_unmasked')
-
-            # tensor2FA = pe.Node(interface=mrt.Tensor2FractionalAnisotropy(out_filename='fa_corrected.mif'),name='tensor2FA')
-            # tensor2FA_unmasked = pe.Node(interface=mrt.Tensor2FractionalAnisotropy(out_filename='fa_corrected_unmasked.mif'),name='tensor2FA_unmasked')
-
-            # mr_convert_FA = pe.Node(interface=MRConvert(out_filename='fa_corrected.nii.gz',stride=[-1,-2,+3]), name='mr_convert_FA')
-            # mr_convert_FA_unmasked = pe.Node(interface=MRConvert(out_filename='fa_corrected_unmasked.nii.gz',stride=[-1,-2,+3]), name='mr_convert_FA_unmasked')
-
-            # FA_noNaN = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_nonan.nii.gz',nan2zeros=True),name='FA_noNaN')
-            # FA_noNaN_unmasked = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_unmasked_nonan.nii.gz',nan2zeros=True),name='FA_noNaN_unmasked')
-
             dwi2tensor = pe.Node(interface=DWI2Tensor(out_filename='dt_corrected.mif'),name='dwi2tensor')
             dwi2tensor_unmasked = pe.Node(interface=DWI2Tensor(out_filename='dt_corrected_unmasked.mif'),name='dwi2tensor_unmasked')
 
@@ -703,33 +599,6 @@ class RegistrationStage(Stage):
                 ])
 
             # [1.2] Linear registration of the DW data to the T1 data
-            # ants_registration = pe.Node(interface=ants.ANTS(),name="ants_registration")
-            # ants_registration.inputs.dimension = 3
-            # ants_registration.inputs.output_transform_prefix = 'T1-TO-B0'
-            # ants_registration.inputs.metric = ['MI']
-            # ants_registration.inputs.metric_weight = [1.0]
-            # ants_registration.inputs.radius = [5]
-            # ants_registration.inputs.transformation_model = 'SyN'
-            # ants_registration.inputs.gradient_step_length = 0.25
-            # ants_registration.inputs.number_of_iterations = [50, 35, 15]
-            # ants_registration.inputs.use_histogram_matching = False
-            # ants_registration.inputs.regularization = 'Gauss'
-            # ants_registration.inputs.regularization_gradient_field_sigma = 3
-            # ants_registration.inputs.regularization_deformation_field_sigma = 0
-            # ants_registration.inputs.mi_option = [32, 16000]
-            # ants_registration.inputs.number_of_affine_iterations = [10000,10000,1000]
-            #
-            # # fsl_flirt.inputs.dof = self.config.dof
-            # # fsl_flirt.inputs.cost = self.config.fsl_cost
-            # # fsl_flirt.inputs.cost_func = self.config.fsl_cost
-            # # fsl_flirt.inputs.no_search = self.config.no_search
-            # # fsl_flirt.inputs.verbose = False
-            #
-            # flow.connect([
-            #             (inputnode, ants_registration, [('T1','moving_image')]),
-            #             (mr_convert_b0, ants_registration, [('converted','fixed_image')])
-            #             ])
-
             affine_registration = pe.Node(interface=ants.Registration(), name='linear_registration')
             affine_registration.inputs.collapse_output_transforms=True
             #affine_registration.inputs.initialize_transforms_per_stage=True
@@ -1239,406 +1108,13 @@ class RegistrationStage(Stage):
                             ])
 
 
-
-    def old_create_workflow(self, flow, inputnode, outputnode):
-        # Extract first volume and resample it to 1x1x1mm3
-        if self.config.pipeline == "Diffusion":
-            extract_first = pe.Node(interface=fsl.ExtractROI(t_min=0,t_size=1,roi_file='first.nii.gz'),name='extract_first')
-            flow.connect([
-                          (inputnode,extract_first,[("target","in_file")])
-                        ])
-            fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_file="target_first.nii.gz",vox_size=(1,1,1)),name="target_resample")
-            flow.connect([(extract_first, fs_mriconvert,[('roi_file','in_file')])])
-        elif self.config.pipeline == "fMRI":
-            fmri_bet = pe.Node(interface=fsl.BET(),name="fMRI_skullstrip")
-            T1_bet = pe.Node(interface=fsl.BET(),name="T1_skullstrip")
-            flow.connect([
-                        (inputnode,fmri_bet,[("target","in_file")]),
-                        (inputnode,T1_bet,[("T1","in_file")])
-                        ])
-
-        if self.config.registration_mode == 'FSL':
-            # [SUB-STEP 1] Linear register "T1" onto"Target_FA_resampled"
-            # [1.1] Convert diffusion data to mrtrix format using rotated bvecs
-            mr_convert = pe.Node(interface=MRConvert(out_filename='diffusion.mif',stride=[-1,-2,+3,+4]), name='mr_convert')
-            mr_convert.inputs.quiet = True
-            mr_convert.inputs.force_writing = True
-
-            concatnode = pe.Node(interface=util.Merge(2),name='concatnode')
-
-            def convertList2Tuple(lists):
-                print "******************************************",tuple(lists)
-                return tuple(lists)
-
-            flow.connect([
-                (inputnode,concatnode,[('bvecs','in1')]),
-                (inputnode,concatnode,[('bvals','in2')]),
-                (concatnode,mr_convert,[(('out',convertList2Tuple),'grad_fsl')]),
-                (inputnode,mr_convert,[('target','in_file')])
-                ])
-            grad_mrtrix = pe.Node(ExtractMRTrixGrad(out_grad_mrtrix='grad.txt'),name='extract_grad')
-            flow.connect([
-                        (mr_convert,grad_mrtrix,[("converted","in_file")]),
-                        (grad_mrtrix,outputnode,[("out_grad_mrtrix","grad")])
-                        ])
-
-            mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[-1,-2,+3]), name='mr_convert_b0')
-            mr_convert_b0.inputs.extract_at_axis = 3
-            mr_convert_b0.inputs.extract_at_coordinate = [0.0]
-
-            # dwi2tensor = pe.Node(interface=mrt.DWI2Tensor(out_filename='dt_corrected.mif'),name='dwi2tensor')
-            # dwi2tensor_unmasked = pe.Node(interface=mrt.DWI2Tensor(out_filename='dt_corrected_unmasked.mif'),name='dwi2tensor_unmasked')
-
-            # tensor2FA = pe.Node(interface=mrt.Tensor2FractionalAnisotropy(out_filename='fa_corrected.mif'),name='tensor2FA')
-            # tensor2FA_unmasked = pe.Node(interface=mrt.Tensor2FractionalAnisotropy(out_filename='fa_corrected_unmasked.mif'),name='tensor2FA_unmasked')
-
-            # mr_convert_FA = pe.Node(interface=MRConvert(out_filename='fa_corrected.nii.gz',stride=[-1,-2,+3]), name='mr_convert_FA')
-            # mr_convert_FA_unmasked = pe.Node(interface=MRConvert(out_filename='fa_corrected_unmasked.nii.gz',stride=[-1,-2,+3]), name='mr_convert_FA_unmasked')
-
-            # FA_noNaN = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_nonan.nii.gz',nan2zeros=True),name='FA_noNaN')
-            # FA_noNaN_unmasked = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_unmasked_nonan.nii.gz',nan2zeros=True),name='FA_noNaN_unmasked')
-
-            dwi2tensor = pe.Node(interface=DWI2Tensor(out_filename='dt_corrected.mif'),name='dwi2tensor')
-            dwi2tensor_unmasked = pe.Node(interface=DWI2Tensor(out_filename='dt_corrected_unmasked.mif'),name='dwi2tensor_unmasked')
-
-            tensor2FA = pe.Node(interface=TensorMetrics(out_fa='fa_corrected.mif'),name='tensor2FA')
-            tensor2FA_unmasked = pe.Node(interface=TensorMetrics(out_fa='fa_corrected_unmasked.mif'),name='tensor2FA_unmasked')
-
-            mr_convert_FA = pe.Node(interface=MRConvert(out_filename='fa_corrected.nii.gz',stride=[-1,-2,+3]), name='mr_convert_FA')
-            mr_convert_FA_unmasked = pe.Node(interface=MRConvert(out_filename='fa_corrected_unmasked.nii.gz',stride=[-1,-2,+3]), name='mr_convert_FA_unmasked')
-
-            FA_noNaN = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_nonan.nii.gz',nan2zeros=True),name='FA_noNaN')
-            FA_noNaN_unmasked = pe.Node(interface=cmp_fsl.MathsCommand(out_file='fa_corrected_unmasked_nonan.nii.gz',nan2zeros=True),name='FA_noNaN_unmasked')
-
-            flow.connect([
-                (mr_convert,dwi2tensor,[('converted','in_file')]),
-                (inputnode,dwi2tensor,[('target_mask','in_mask_file')]),
-                (dwi2tensor,tensor2FA,[('tensor','in_file')]),
-                (inputnode,tensor2FA,[('target_mask','in_mask')]),
-                (tensor2FA,mr_convert_FA,[('out_fa','in_file')]),
-                (mr_convert_FA,FA_noNaN,[('converted','in_file')])
-                ])
-
-            flow.connect([
-                (mr_convert,dwi2tensor_unmasked,[('converted','in_file')]),
-                (dwi2tensor_unmasked,tensor2FA_unmasked,[('tensor','in_file')]),
-                (tensor2FA_unmasked,mr_convert_FA_unmasked,[('out_fa','in_file')]),
-                (mr_convert_FA_unmasked,FA_noNaN_unmasked,[('converted','in_file')])
-                ])
-
-            # [1.2] Linear registration of the DW data to the T1 data
-            fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='FA-TO-T1.nii.gz',out_matrix_file='FA2T1aff.mat'),name="linear_registration")
-            #fsl_flirt.inputs.dof = self.config.dof
-            #fsl_flirt.inputs.cost = self.config.fsl_cost
-            #fsl_flirt.inputs.no_search = self.config.no_search
-            fsl_flirt.inputs.verbose = True
-
-            flow.connect([
-                        (FA_noNaN, fsl_flirt, [('out_file','in_file')]),
-                        (inputnode, fsl_flirt, [('brain','reference')])
-                        ])
-
-            # [1.3] Transforming T1-space images using reverse affine transform to avoid rotation of bvecs
-            FA2T1aff = pe.Node(interface=fsl.ConvertXFM(invert_xfm=True),name='FA2T1aff')
-            flow.connect([
-                        (fsl_flirt, FA2T1aff, [('out_matrix_file','in_file')])
-                        ])
-
-            # flow.connect([
-            #             (FA_noNaN, fsl_flirt, [('out_file','reference')]),
-            #             (inputnode, fsl_flirt, [('brain','in_file')])
-            #             ])
-
-            # # [1.3] Transforming T1-space images using reverse affine transform to avoid rotation of bvecs
-            # FA2T1aff = pe.Node(interface=fsl.ConvertXFM(invert_xfm=True),name='FA2T1aff')
-            # flow.connect([
-            #             (fsl_flirt, FA2T1aff, [('out_matrix_file','in_file')])
-            #             ])
-
-            fsl_applyxfm_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
-            fsl_applyxfm_rois = pe.Node(interface=ApplymultipleXfm(),name="apply_registration_roivs")
-            fsl_applyxfm_brain_mask = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="spline",out_file="brain_mask_registered_temp.nii.gz"),name="apply_registration_brain_mask")
-            fsl_applyxfm_brain_mask_full = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="spline",out_file="brain_mask_full_registered_temp.nii.gz"),name="apply_registration_brain_mask_full")
-            fsl_applyxfm_brain = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="spline",out_file="brain_registered.nii.gz"),name="apply_registration_brain")
-            fsl_applyxfm_T1 = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="spline",out_file="T1_registered.nii.gz"),name="apply_registration_T1")
-
-            mr_threshold_brain_mask = pe.Node(interface=MRThreshold(abs_value=0.5,out_file='brain_mask2_registered.nii.gz',quiet=True,force_writing=True),name="mr_threshold_brain_mask")
-            mr_threshold_brain_mask_full = pe.Node(interface=MRThreshold(abs_value=1,out_file='brain_mask_registered.nii.gz',quiet=True,force_writing=True),name="mr_threshold_brain_mask_full")
-            mr_threshold_T1 = pe.Node(interface=MRThreshold(abs_value=10,out_file='T1_registered_th.nii.gz',quiet=True,force_writing=True),name="mr_threshold_T1")
-
-            fsl_create_HD = pe.Node(interface=FSLCreateHD(im_size=[256,256,256,1],vox_size=[1,1,1],origin=[0,0,0],tr=1,datatype='16',out_filename='tempref.nii.gz'),name='fsl_create_HD')
-
-            flow.connect([
-                        (inputnode, fsl_applyxfm_wm, [('wm_mask','in_file')]),
-                        (FA2T1aff, fsl_applyxfm_wm, [('out_file','in_matrix_file')]),
-                        (fsl_create_HD, fsl_applyxfm_wm, [('out_file','reference')]),
-                        (inputnode, fsl_applyxfm_rois, [('roi_volumes','in_files')]),
-                        (FA2T1aff, fsl_applyxfm_rois, [('out_file','xfm_file')]),
-                        (fsl_create_HD, fsl_applyxfm_rois, [('out_file','reference')]),
-                        (inputnode, fsl_applyxfm_brain_mask, [('brain_mask','in_file')]),
-                        (FA2T1aff, fsl_applyxfm_brain_mask, [('out_file','in_matrix_file')]),
-                        (fsl_create_HD, fsl_applyxfm_brain_mask, [('out_file','reference')]),
-                        (inputnode, fsl_applyxfm_brain_mask_full, [('brain_mask_full','in_file')]),
-                        (FA2T1aff, fsl_applyxfm_brain_mask_full, [('out_file','in_matrix_file')]),
-                        (fsl_create_HD, fsl_applyxfm_brain_mask_full, [('out_file','reference')]),
-                        (inputnode, fsl_applyxfm_brain, [('brain','in_file')]),
-                        (FA2T1aff, fsl_applyxfm_brain, [('out_file','in_matrix_file')]),
-                        (fsl_create_HD, fsl_applyxfm_brain, [('out_file','reference')]),
-                        (inputnode, fsl_applyxfm_T1, [('T1','in_file')]),
-                        (FA2T1aff, fsl_applyxfm_T1, [('out_file','in_matrix_file')]),
-                        (fsl_create_HD, fsl_applyxfm_T1, [('out_file','reference')]),
-                        ])
-            # [1.4] Cropping T1 data to save memory
-            mr_crop_T1 = pe.Node(interface=MRCrop(out_filename='T1_registered_crop.nii.gz'),name='mr_crop_T1')
-            mr_crop_brain_mask = pe.Node(interface=MRTransform(out_filename='brain_mask2_registered_crop.nii.gz',interp='cubic'),name='mr_crop_brain_mask')
-            mr_crop_brain_mask_full = pe.Node(interface=MRTransform(out_filename='brain_mask_registered_crop.nii.gz',interp='cubic'),name='mr_crop_brain_mask_full')
-            mr_crop_brain = pe.Node(interface=MRTransform(out_filename='brain_registered_crop.nii.gz',interp='cubic'),name='mr_crop_brain')
-            mr_crop_wm = pe.Node(interface=MRTransform(out_filename='wm_registered_crop.nii.gz',interp='nearest'),name='mr_crop_wm')
-            mr_crop_rois = pe.Node(interface=ApplymultipleMRTransforms(),name='mr_crop_rois')
-
-            flow.connect([
-                        (fsl_applyxfm_T1, mr_threshold_T1, [('out_file','in_file')]),
-                        (fsl_applyxfm_brain_mask, mr_threshold_brain_mask, [('out_file','in_file')]),
-                        (fsl_applyxfm_T1, mr_crop_T1, [('out_file','in_file')]),
-                        (mr_threshold_T1, mr_crop_T1, [('thresholded','in_mask_file')]),
-                        (fsl_applyxfm_brain_mask, mr_crop_brain_mask, [('out_file','in_files')]),
-                        (mr_crop_T1, mr_crop_brain_mask, [('cropped','template_image')]),
-                        (fsl_applyxfm_brain_mask_full, mr_crop_brain_mask_full, [('out_file','in_files')]),
-                        (mr_crop_T1, mr_crop_brain_mask_full, [('cropped','template_image')]),
-                        (fsl_applyxfm_brain, mr_crop_brain, [('out_file','in_files')]),
-                        (mr_crop_T1, mr_crop_brain, [('cropped','template_image')]),
-                        (fsl_applyxfm_wm, mr_crop_wm, [('out_file','in_files')]),
-                        (mr_crop_T1, mr_crop_wm, [('cropped','template_image')]),
-                        (fsl_applyxfm_rois, mr_crop_rois, [('out_files','in_files')]),
-                        (mr_crop_T1, mr_crop_rois, [('cropped','template_image')])
-                        ])
-
-            flow.connect([
-                        (mr_crop_wm, outputnode, [('out_file','wm_mask_registered_crop')]),
-                        (mr_crop_rois, outputnode, [('out_files','roi_volumes_registered_crop')]),
-                        (mr_crop_brain_mask_full, outputnode, [('out_file','brain_mask_registered_crop')]),
-                        (mr_crop_brain, outputnode, [('out_file','brain_registered_crop')]),
-                        (mr_crop_T1, outputnode, [('cropped','T1_registered_crop')]),
-                        ])
-
-            # [1.5] Non linear registration of the DW data to the rotated T1 data
-            fsl_flirt_crop = pe.Node(interface=fsl.FLIRT(out_file='FA-TO-T1_masked_crop.nii.gz',out_matrix_file='FA2T1affcrop.mat'),name='fsl_flirt_crop')
-
-            flow.connect([
-                        (FA_noNaN, fsl_flirt_crop, [('out_file','in_file')]),
-                        (mr_crop_brain, fsl_flirt_crop, [('out_file','reference')]),
-                        ])
-
-            fsl_fnirt_crop = pe.Node(interface=fsl.FNIRT(fieldcoeff_file=True),name='fsl_fnirt_crop')
-
-            flow.connect([
-                        (FA_noNaN_unmasked, fsl_fnirt_crop, [('out_file','in_file')]),
-                        (mr_crop_T1, fsl_fnirt_crop, [('cropped','ref_file')]),
-                        (fsl_flirt_crop, fsl_fnirt_crop, [('out_matrix_file','affine_file')]),
-                        (mr_crop_brain_mask_full, fsl_fnirt_crop, [('out_file','refmask_file')])
-                        ])
-
-            fsl_applywarp = pe.Node(interface=fsl.ApplyWarp(out_file='target_epicorrected.nii.gz'),name='fsl_apply_warp')
-
-            flow.connect([
-                        (inputnode, fsl_applywarp, [('target','in_file')]),
-                        (mr_crop_T1, fsl_applywarp, [('cropped','ref_file')]),
-                        (fsl_fnirt_crop, fsl_applywarp, [('fieldcoeff_file','field_file')]),
-                        (fsl_applywarp, outputnode, [('out_file','target_epicorrected')]),
-                        ])
-
-            fsl_applywarp_FA_noNaN = pe.Node(interface=fsl.ApplyWarp(out_file='FA_epicorrected.nii.gz'),name='fsl_applywarp_FA_noNaN')
-
-            flow.connect([
-                        (mr_convert_FA, fsl_applywarp_FA_noNaN, [('converted','in_file')]),
-                        (mr_crop_T1, fsl_applywarp_FA_noNaN, [('cropped','ref_file')]),
-                        (fsl_fnirt_crop, fsl_applywarp_FA_noNaN, [('fieldcoeff_file','field_file')])
-                        ])
-            #TODO: Connect all outputs and creates those missing
-
-
-
-        # if self.config.registration_mode == 'Nonlinear (FSL)':
-
-        #     # [SUB-STEP 1] LINEAR register "T2" onto "Target_resampled
-        #     # [1.1] linear register "T1" onto "T2"
-        #     fsl_flirt_1 = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-T2.nii.gz',out_matrix_file='T1-TO-T2.mat'),name="t1tot2_lin_registration")
-        #     fsl_flirt_1.inputs.dof = 6
-        #     fsl_flirt_1.inputs.cost = "mutualinfo"
-        #     fsl_flirt_1.inputs.no_search = True
-        #     #[1.2] -> linear register "T2" onto "target_resampled"
-        #     fsl_flirt_2 = pe.Node(interface=fsl.FLIRT(out_file='T2-TO-TARGET.nii.gz',out_matrix_file='T2-TO-TARGET.mat'),name="t2totarget_lin_registration")
-        #     fsl_flirt_2.inputs.dof = 12
-        #     fsl_flirt_2.inputs.cost = "normmi"
-        #     fsl_flirt_2.inputs.no_search = True
-        #     #[1.3] -> apply the linear registration "T1" --> "target" (for comparison)
-        #     fsl_concatxfm = pe.Node(interface=fsl.ConvertXFM(concat_xfm=True),name="fsl_concatxfm")
-        #     fsl_applyxfm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True, interp="sinc",out_file='T1-TO-target.nii.gz',out_matrix_file='T1-TO-TARGET.mat'),name="linear_registration")
-        #     #"[SUB-STEP 2] Create BINARY MASKS for nonlinear registration"
-        #     # [2.1] -> create a T2 brain mask
-        #     fsl_bet_1 = pe.Node(interface=fsl.BET(out_file='T2-brain',mask=True,no_output=True,robust=True),name="t2_brain_mask")
-        #     fsl_bet_1.inputs.frac = 0.35
-        #     fsl_bet_1.inputs.vertical_gradient = 0.15
-        #     #[2.2] -> create a DSI_target brain mask
-        #     fsl_bet_2 = pe.Node(interface=fsl.BET(out_file='target-brain',mask=True,no_output=True,robust=True),name="target_brain_mask")
-        #     fsl_bet_2.inputs.frac = 0.2
-        #     fsl_bet_2.inputs.vertical_gradient = 0.2
-        #     # [SUB-STEP 3] NONLINEAR register "T2" onto "target_resampled"
-        #     # [3.1] 'Started FNIRT to find 'T2 --> target' nonlinear transformation at
-        #     fsl_fnirt = pe.Node(interface=fsl.FNIRT(field_file='T2-TO-target_warp.nii.gz'),name="t2totarget_nlin_registration")
-        #     fsl_fnirt.inputs.subsampling_scheme = [8,4,2,2]
-        #     fsl_fnirt.inputs.max_nonlin_iter = [5,5,5,5]
-        #     fsl_fnirt.inputs.regularization_lambda = [240,120,90,30]
-        #     fsl_fnirt.inputs.spline_order = 3
-        #     fsl_fnirt.inputs.apply_inmask = [0,0,1,1]
-        #     fsl_fnirt.inputs.apply_refmask = [0,0,1,1]
-        #     #[3.2] -> apply the warp found for "T2" also onto "T1"
-        #     fsl_applywarp = pe.Node(interface=fsl.ApplyWarp(out_file='T1_warped.nii.gz'),name="nonlinear_registration")
-        #     fsl_applywarp_wm = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
-        #     fsl_applywarp_rois = pe.Node(interface=Applynlinmultiplewarps(),name="apply_registration_roivs") # TO FIX: Applynlinmultiplewarps() done because applying MapNode to fsl.ApplyWarp crashes
-        #     #fsl_applywarp_rois = pe.MapNode(interface=fsl.ApplyWarp(interp="nn"),name="apply_registration_roivs",iterfield=["in_file"])
-
-        #     flow.connect([
-        #             (inputnode,fsl_flirt_1,[('T1','in_file'),('T2','reference')]),
-        #             (inputnode,fsl_flirt_2,[('T2','in_file')]),
-        #             (fsl_flirt_1,fsl_concatxfm,[('out_matrix_file','in_file')]),
-        #             (fsl_flirt_2,fsl_concatxfm,[('out_matrix_file','in_file2')]),
-        #             (inputnode,fsl_applyxfm,[('T1','in_file')]),
-        #             (fsl_concatxfm,fsl_applyxfm,[('out_file','in_matrix_file')]),
-        #             (inputnode,fsl_bet_1,[('T2','in_file')]),
-        #             (inputnode,fsl_fnirt,[('T2','in_file')]),
-        #             (fsl_flirt_2,fsl_fnirt,[('out_matrix_file','affine_file')]),
-        #             (fsl_bet_1,fsl_fnirt,[('mask_file','inmask_file')]),
-        #             (fsl_bet_2,fsl_fnirt,[('mask_file','refmask_file')]),
-        #             (inputnode,fsl_applywarp,[('T1','in_file')]),
-        #             (fsl_flirt_1,fsl_applywarp,[('out_matrix_file','premat')]),
-        #             (fsl_fnirt,fsl_applywarp,[('field_file','field_file')]),
-        #             (inputnode, fsl_applywarp_wm, [('wm_mask','in_file')]),
-        #             (fsl_flirt_1, fsl_applywarp_wm, [('out_matrix_file','premat')]),
-        #             (fsl_fnirt,fsl_applywarp_wm,[('field_file','field_file')]),
-        #             (fsl_applywarp_wm, outputnode, [('out_file','wm_mask_registered')]),
-        #             (inputnode, fsl_applywarp_rois, [('roi_volumes','in_files')]),
-        #             (fsl_flirt_1, fsl_applywarp_rois, [('out_matrix_file','premat_file')]),
-        #             (fsl_fnirt,fsl_applywarp_rois,[('field_file','field_file')]),
-        #             (fsl_applywarp_rois, outputnode, [('warped_files','roi_volumes_registered')])
-        #             ])
-        # # if self.config.registration_mode == 'Nonlinear (FSL)':
-        # #     # [SUB-STEP 1] LINEAR register "T2" onto "Target_resampled
-        # #     # [1.1] linear register "T1" onto "T2"
-        # #     fsl_flirt_1 = pe.Node(interface=fsl.FLIRT(out_file='T1-TO-T2.nii.gz',out_matrix_file='T1-TO-T2.mat'),name="t1tot2_lin_registration")
-        # #     fsl_flirt_1.inputs.dof = 6
-        # #     fsl_flirt_1.inputs.cost = "mutualinfo"
-        # #     fsl_flirt_1.inputs.no_search = True
-        # #     #[1.2] -> linear register "T2" onto "target_resampled"
-        # #     fsl_flirt_2 = pe.Node(interface=fsl.FLIRT(out_file='T2-TO-TARGET.nii.gz',out_matrix_file='T2-TO-TARGET.mat'),name="t2totarget_lin_registration")
-        # #     fsl_flirt_2.inputs.dof = 12
-        # #     fsl_flirt_2.inputs.cost = "normmi"
-        # #     fsl_flirt_2.inputs.no_search = True
-        # #     #[1.3] -> apply the linear registration "T1" --> "target" (for comparison)
-        # #     fsl_concatxfm = pe.Node(interface=fsl.ConvertXFM(concat_xfm=True),name="fsl_concatxfm")
-        # #     fsl_applyxfm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True, interp="sinc",out_file='T1-TO-target.nii.gz',out_matrix_file='T1-TO-TARGET.mat'),name="linear_registration")
-        # #     #"[SUB-STEP 2] Create BINARY MASKS for nonlinear registration"
-        # #     # [2.1] -> create a T2 brain mask
-        # #     fsl_bet_1 = pe.Node(interface=fsl.BET(out_file='T2-brain',mask=True,no_output=True,robust=True),name="t2_brain_mask")
-        # #     fsl_bet_1.inputs.frac = 0.35
-        # #     fsl_bet_1.inputs.vertical_gradient = 0.15
-        # #     #[2.2] -> create a DSI_target brain mask
-        # #     fsl_bet_2 = pe.Node(interface=fsl.BET(out_file='target-brain',mask=True,no_output=True,robust=True),name="target_brain_mask")
-        # #     fsl_bet_2.inputs.frac = 0.2
-        # #     fsl_bet_2.inputs.vertical_gradient = 0.2
-        # #     # [SUB-STEP 3] NONLINEAR register "T2" onto "target_resampled"
-        # #     # [3.1] 'Started FNIRT to find 'T2 --> target' nonlinear transformation at
-        # #     fsl_fnirt = pe.Node(interface=fsl.FNIRT(field_file='T2-TO-target_warp.nii.gz'),name="t2totarget_nlin_registration")
-        # #     fsl_fnirt.inputs.subsampling_scheme = [8,4,2,2]
-        # #     fsl_fnirt.inputs.max_nonlin_iter = [5,5,5,5]
-        # #     fsl_fnirt.inputs.regularization_lambda = [240,120,90,30]
-        # #     fsl_fnirt.inputs.spline_order = 3
-        # #     fsl_fnirt.inputs.apply_inmask = [0,0,1,1]
-        # #     fsl_fnirt.inputs.apply_refmask = [0,0,1,1]
-        # #     #[3.2] -> apply the warp found for "T2" also onto "T1"
-        # #     fsl_applywarp = pe.Node(interface=fsl.ApplyWarp(out_file='T1_warped.nii.gz'),name="nonlinear_registration")
-        # #     fsl_applywarp_wm = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
-        # #     fsl_applywarp_rois = pe.Node(interface=Applynlinmultiplewarps(),name="apply_registration_roivs") # TO FIX: Applynlinmultiplewarps() done because applying MapNode to fsl.ApplyWarp crashes
-        # #     #fsl_applywarp_rois = pe.MapNode(interface=fsl.ApplyWarp(interp="nn"),name="apply_registration_roivs",iterfield=["in_file"])
-
-        # #     flow.connect([
-        # #             (inputnode,fsl_flirt_1,[('T1','in_file'),('T2','reference')]),
-        # #             (inputnode,fsl_flirt_2,[('T2','in_file')]),
-        # #             (fsl_flirt_1,fsl_concatxfm,[('out_matrix_file','in_file')]),
-        # #             (fsl_flirt_2,fsl_concatxfm,[('out_matrix_file','in_file2')]),
-        # #             (inputnode,fsl_applyxfm,[('T1','in_file')]),
-        # #             (fsl_concatxfm,fsl_applyxfm,[('out_file','in_matrix_file')]),
-        # #             (inputnode,fsl_bet_1,[('T2','in_file')]),
-        # #             (inputnode,fsl_fnirt,[('T2','in_file')]),
-        # #             (fsl_flirt_2,fsl_fnirt,[('out_matrix_file','affine_file')]),
-        # #             (fsl_bet_1,fsl_fnirt,[('mask_file','inmask_file')]),
-        # #             (fsl_bet_2,fsl_fnirt,[('mask_file','refmask_file')]),
-        # #             (inputnode,fsl_applywarp,[('T1','in_file')]),
-        # #             (fsl_flirt_1,fsl_applywarp,[('out_matrix_file','premat')]),
-        # #             (fsl_fnirt,fsl_applywarp,[('field_file','field_file')]),
-        # #             (inputnode, fsl_applywarp_wm, [('wm_mask','in_file')]),
-        # #             (fsl_flirt_1, fsl_applywarp_wm, [('out_matrix_file','premat')]),
-        # #             (fsl_fnirt,fsl_applywarp_wm,[('field_file','field_file')]),
-        # #             (fsl_applywarp_wm, outputnode, [('out_file','wm_mask_registered')]),
-        # #             (inputnode, fsl_applywarp_rois, [('roi_volumes','in_files')]),
-        # #             (fsl_flirt_1, fsl_applywarp_rois, [('out_matrix_file','premat_file')]),
-        # #             (fsl_fnirt,fsl_applywarp_rois,[('field_file','field_file')]),
-        # #             (fsl_applywarp_rois, outputnode, [('warped_files','roi_volumes_registered')])
-        # #             ])
-        #     if self.config.pipeline == "fMRI":
-        #         flow.connect([
-        #                     (inputnode,fsl_flirt_2,[('target','reference')]),
-        #                     (inputnode,fsl_applyxfm,[('target','reference')]),
-        #                     (inputnode,fsl_bet_2,[('target','in_file')]),
-        #                     (inputnode,fsl_fnirt,[('target','ref_file')]),
-        #                     (inputnode,fsl_applywarp,[('target','ref_file')]),
-        #                     (inputnode, fsl_applywarp_wm, [('target','ref_file')]),
-        #                     (inputnode, fsl_applywarp_rois, [('target','ref_file')]),
-        #                     ])
-        #         fsl_applywarp_eroded_wm = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_wm_registered.nii.gz"),name="apply_registration_eroded_wm")
-        #         if self.config.apply_to_eroded_csf:
-        #             fsl_applywarp_eroded_csf = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_csf_registered.nii.gz"),name="apply_registration_eroded_csf")
-        #             flow.connect([
-        #                           (inputnode, fsl_applywarp_eroded_csf, [('eroded_csf','in_file')]),
-        #                           (inputnode, fsl_applywarp_eroded_csf, [('target','ref_file')]),
-        #                           (fsl_flirt_1, fsl_applywarp_eroded_csf, [('out_matrix_file','premat')]),
-        #                           (fsl_fnirt,fsl_applywarp_eroded_csf,[('field_file','field_file')]),
-        #                           (fsl_applywarp_eroded_csf, outputnode, [('out_file','eroded_csf_registered')])
-        #                         ])
-        #         if self.config.apply_to_eroded_brain:
-        #             fsl_applywarp_eroded_brain = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_brain_registered.nii.gz"),name="apply_registration_eroded_brain")
-        #             flow.connect([
-        #                           (inputnode, fsl_applywarp_eroded_brain, [('eroded_brain','in_file')]),
-        #                           (inputnode, fsl_applywarp_eroded_brain, [('target','ref_file')]),
-        #                           (fsl_flirt_1, fsl_applywarp_eroded_brain, [('out_matrix_file','premat')]),
-        #                           (fsl_fnirt,fsl_applywarp_eroded_brain,[('field_file','field_file')]),
-        #                           (fsl_applywarp_eroded_brain, outputnode, [('out_file','eroded_brain_registered')])
-        #                         ])
-        #         flow.connect([
-        #                     (inputnode, fsl_applywarp_eroded_wm, [('eroded_wm','in_file')]),
-        #                     (inputnode, fsl_applywarp_eroded_wm, [('target','ref_file')]),
-        #                     (fsl_flirt_1, fsl_applywarp_eroded_wm, [('out_matrix_file','premat')]),
-        #                     (fsl_fnirt,fsl_applywarp_eroded_wm,[('field_file','field_file')]),
-        #                     (fsl_applywarp_eroded_wm, outputnode, [('out_file','eroded_wm_registered')])
-        #                     ])
-        #     else:
-        #         flow.connect([
-        #                     (fs_mriconvert,fsl_flirt_2,[('out_file','reference')]),
-        #                     (fs_mriconvert,fsl_applyxfm,[('out_file','reference')]),
-        #                     (fs_mriconvert,fsl_bet_2,[('out_file','in_file')]),
-        #                     (fs_mriconvert,fsl_fnirt,[('out_file','ref_file')]),
-        #                     (fs_mriconvert,fsl_applywarp,[('out_file','ref_file')]),
-        #                     (fs_mriconvert, fsl_applywarp_wm, [('out_file','ref_file')]),
-        #                     (fs_mriconvert, fsl_applywarp_rois, [('out_file','ref_file')]),
-        #                     ])
-
-
     def define_inspect_outputs(self):
         print "stage_dir : %s" % self.stage_dir
         if self.config.pipeline == "Diffusion":
             target_path = os.path.join(self.stage_dir,"target_resample","result_target_resample.pklz")
             reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
             warpedROIVs_results_path = os.path.join(self.stage_dir,"apply_warp_roivs","result_apply_warp_roivs.pklz")
+            warped5TT_results_path = os.path.join(self.stage_dir,"apply_warp_5tt","result_apply_warp_5tt.pklz")
             warpedPVEs_results_path = os.path.join(self.stage_dir,"apply_warp_pves","result_apply_warp_pves.pklz")
             warpedWM_results_path = os.path.join(self.stage_dir,"apply_warp_wm","result_apply_warp_wm.pklz")
             warpedT1_results_path = os.path.join(self.stage_dir,"apply_warp_T1","result_apply_warp_T1.pklz")
@@ -1666,11 +1142,12 @@ class RegistrationStage(Stage):
         #     reg_results_path = os.path.join(self.stage_dir,"nonlinear_registration","result_nonlinear_registration.pklz")
 
         if self.config.pipeline == "Diffusion":
-                if(os.path.exists(target_path) and os.path.exists(reg_results_path) and os.path.exists(warpedROIVs_results_path) and os.path.exists(warpedPVEs_results_path) and os.path.exists(warpedWM_results_path) and os.path.exists(warpedT1_results_path)):
+                if(os.path.exists(target_path) and os.path.exists(reg_results_path) and os.path.exists(warpedROIVs_results_path) and os.path.exists(warped5TT_results_path) and os.path.exists(warpedPVEs_results_path) and os.path.exists(warpedWM_results_path) and os.path.exists(warpedT1_results_path)):
 
                     target = pickle.load(gzip.open(target_path))
                     reg_results = pickle.load(gzip.open(reg_results_path))
                     rois_results = pickle.load(gzip.open(warpedROIVs_results_path))
+                    5tt_results = pickle.load(gzip.open(warped5TT_results_path))
                     pves_results = pickle.load(gzip.open(warpedPVEs_results_path))
                     wm_results = pickle.load(gzip.open(warpedWM_results_path))
                     T1_results = pickle.load(gzip.open(warpedT1_results_path))
@@ -1680,6 +1157,7 @@ class RegistrationStage(Stage):
                                 fnirt_results = pickle.load(gzip.open(fnirt_results_path))
                                 self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['reference'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
                                 self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',fnirt_results.inputs['ref_file'],T1_results.outputs.out_file,'-l',"Copper",'-t','0.5']
+                                self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fslview',fnirt_results.inputs['ref_file'],5tt_results.outputs.output_image,'-l',"Copper",'-t','0.5']
                                 self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
 
                                 if type(rois_results.outputs.out_files) == str:
@@ -1710,6 +1188,8 @@ class RegistrationStage(Stage):
                                     #self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
                             print("rois_results.outputs.output_images: %s"%rois_results.outputs.output_images)
                             print("pves_results.outputs.output_images: %s"%pves_results.outputs.output_images)
+
+                            self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fslview',reg_results.inputs['fixed_image'][0],5tt_results.outputs.output_image,'-l',"Copper",'-t','0.5']
 
                             if type(rois_results.outputs.output_images) == str:
                                 if self.config.ants_perform_syn:
@@ -1769,7 +1249,15 @@ class RegistrationStage(Stage):
         self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
 
     def has_run(self):
-        if self.config.registration_mode != 'Nonlinear (FSL)':
+
+        if self.config.registration_mode == 'ANTs':
+            if self.config.ants_perform_syn:
+                return os.path.exists(os.path.join(self.stage_dir,"SyN_registration","result_SyN_registration.pklz"))
+            else:
+                return os.path.exists(os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz"))
+
+        elif self.config.registration_mode != 'Nonlinear (FSL)':
             return os.path.exists(os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz"))
+
         elif self.config.registration_mode == 'Nonlinear (FSL)':
             return os.path.exists(os.path.join(self.stage_dir,"nonlinear_registration","result_nonlinear_registration.pklz"))
