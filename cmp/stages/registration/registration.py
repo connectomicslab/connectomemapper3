@@ -1147,7 +1147,7 @@ class RegistrationStage(Stage):
                     target = pickle.load(gzip.open(target_path))
                     reg_results = pickle.load(gzip.open(reg_results_path))
                     rois_results = pickle.load(gzip.open(warpedROIVs_results_path))
-                    5tt_results = pickle.load(gzip.open(warped5TT_results_path))
+                    mrtrix_5tt_results = pickle.load(gzip.open(warped5TT_results_path))
                     pves_results = pickle.load(gzip.open(warpedPVEs_results_path))
                     wm_results = pickle.load(gzip.open(warpedWM_results_path))
                     T1_results = pickle.load(gzip.open(warpedT1_results_path))
@@ -1157,7 +1157,7 @@ class RegistrationStage(Stage):
                                 fnirt_results = pickle.load(gzip.open(fnirt_results_path))
                                 self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['reference'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
                                 self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',fnirt_results.inputs['ref_file'],T1_results.outputs.out_file,'-l',"Copper",'-t','0.5']
-                                self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fslview',fnirt_results.inputs['ref_file'],5tt_results.outputs.output_image,'-l',"Copper",'-t','0.5']
+                                self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fslview',fnirt_results.inputs['ref_file'],mrtrix_5tt_results.outputs.output_image,'-l',"Copper",'-t','0.5']
                                 self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
 
                                 if type(rois_results.outputs.out_files) == str:
@@ -1189,7 +1189,7 @@ class RegistrationStage(Stage):
                             print("rois_results.outputs.output_images: %s"%rois_results.outputs.output_images)
                             print("pves_results.outputs.output_images: %s"%pves_results.outputs.output_images)
 
-                            self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fslview',reg_results.inputs['fixed_image'][0],5tt_results.outputs.output_image,'-l',"Copper",'-t','0.5']
+                            self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fslview',reg_results.inputs['fixed_image'][0],mrtrix_5tt_results.outputs.output_image,'-l',"Copper",'-t','0.5']
 
                             if type(rois_results.outputs.output_images) == str:
                                 if self.config.ants_perform_syn:
