@@ -378,15 +378,15 @@ class ConnectomeStage(Stage):
                 mat = con_results.outputs.connectivity_matrices
                 print(mat)
                 if 'gpickle' in mat:
-                    self.inspect_outputs_dict[os.path.basename(mat)] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]
+                    self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%os.path.basename(mat)] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]
             else:
                 for mat in con_results.outputs.connectivity_matrices:
                     print(mat)
                     if 'gpickle' in mat:
                         con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
-                        self.inspect_outputs_dict[con_name+' - Correlation'] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]
+                        self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%con_name] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]
 
-            self.inspect_outputs = self.inspect_outputs_dict.keys()
+            self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
 
     def has_run(self):
         return os.path.exists(os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz"))

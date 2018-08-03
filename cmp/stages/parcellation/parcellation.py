@@ -284,6 +284,27 @@ class ParcellationStage(Stage):
                                 self.inspect_outputs_dict[roi_basename] = ['freeview','-v',
                                                                                    white_matter_file+':colormap=GEColor',
                                                                                    roi_v+":colormap=lut:lut="+lut_file]
+                        # if self.config.include_thalamic_nuclei_parcellation:
+                        results_path = os.path.join(self.stage_dir,"parcThal","result_parcThal.pklz")
+
+                        if(os.path.exists(results_path)):
+                            results = pickle.load(gzip.open(results_path))
+                            self.inspect_outputs_dict['Thalamic nuclei - Probability maps'] = ['fslview',results.inputs['T1w_image'],results.outputs.prob_maps_registered,'-l',"Copper",'-t','0.5']
+                            self.inspect_outputs_dict['Thalamic nuclei - MaxProb labels'] = ['fslview',results.inputs['T1w_image'],results.outputs.max_prob_registered,"-l","Random-Rainbow",'-t','0.5']
+
+                        # if self.config.segment_brainstem:
+                        results_path = os.path.join(self.stage_dir,"parcBrainStem","result_parcBrainStem.pklz")
+
+                        if(os.path.exists(results_path)):
+                            results = pickle.load(gzip.open(results_path))
+                            self.inspect_outputs_dict['Brainstem structures'] = ['fslview',results.outputs.brainstem_structures,"-l","Random-Rainbow"]
+
+                        # if self.config.segment_hippocampal_subfields:
+                        results_path = os.path.join(self.stage_dir,"parcHippo","result_parcHippo.pklz")
+
+                        if(os.path.exists(results_path)):
+                            results = pickle.load(gzip.open(results_path))
+                            self.inspect_outputs_dict['Hippocampal subfields'] = ['fslview',results.outputs.lh_hipposubfields,"-l","Random-Rainbow",results.outputs.rh_hipposubfields,"-l","Random-Rainbow"]
 
                 #self.inspect_outputs = self.inspect_outputs_dict.keys()
         else:
