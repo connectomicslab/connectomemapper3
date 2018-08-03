@@ -683,7 +683,7 @@ class DiffusionStage(Stage):
                     recon_results = pickle.load(gzip.open(recon_results_path))
                     shm_coeff_res = recon_results.outputs.spherical_harmonics_image
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
-            s
+        
 
         if self.config.tracking_processing_tool == 'Dipy':
 
