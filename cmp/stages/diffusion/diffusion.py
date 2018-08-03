@@ -32,8 +32,6 @@ class DiffusionConfig(HasTraits):
 
     diffusion_imaging_model_editor = List(['DSI','DTI','HARDI'])
     diffusion_imaging_model = Str('DTI')
-    #resampling = Tuple(2,2,2)
-    #interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
     # processing_tool_editor = List(['DTK','MRtrix','Camino','FSL','Gibbs'])
     # processing_tool_editor = List(['Dipy','MRtrix','Custom'])
     dilate_rois = Bool(True)
@@ -63,12 +61,9 @@ class DiffusionConfig(HasTraits):
     diffusion_model = Str('Probabilistic')
     ## TODO import custom DWI and tractogram (need to register anatomical data to DWI to project parcellated ROIs onto the tractogram)
 
-    traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-                       #'interpolation'),
-                      #Item('diffusion_imaging_model',editor=EnumEditor(name='diffusion_imaging_model_editor')),
-                        Item('diffusion_imaging_model',style='readonly'),
-                          #Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
-                      HGroup(
+    traits_view = View(
+                       Item('diffusion_imaging_model',style='readonly'),
+                       HGroup(
                            Item('dilate_rois'),#,visible_when='processing_tool!="DTK"'),
                            Item('dilation_radius',visible_when='dilate_rois',label="radius")
                            ),
@@ -94,32 +89,6 @@ class DiffusionConfig(HasTraits):
                             visible_when='tracking_processing_tool=="Custom"'),
                        )
 
-    # dipy_traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-    #                    #'interpolation'),
-    #                     Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
-    #                     Item('dilate_rois'),
-    #                     Group(
-    #                         Item('dipy_recon_config',style='custom'),
-    #                         label='Reconstruction', show_border=True, show_labels=False),
-    #                     Group(
-    #                         Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
-    #                         Item('dipy_tracking_config',style='custom'),
-    #                         label='Tracking', show_border=True, show_labels=False),
-    #                     )
-
-    # mrtrix_traits_view = View(#HGroup(Item('resampling',label='Resampling (x,y,z)',editor=TupleEditor(cols=3)),
-    #                    #'interpolation'),
-    #                    Item('processing_tool',editor=EnumEditor(name='processing_tool_editor')),
-    #                    Item('dilate_rois'),
-    #                    Group(
-    #                         Item('mrtrix_recon_config',style='custom'),
-    #                         label='Reconstruction', show_border=True, show_labels=False),
-    #                    Group(
-    #                         Item('diffusion_model',editor=EnumEditor(name='diffusion_model_editor')),
-    #                         Item('mrtrix_tracking_config',style='custom'),
-    #                         label='Tracking', show_border=True, show_lab514els=False),
-    #                    )
-
     def __init__(self):
         self.dtk_recon_config = DTK_recon_config(imaging_model=self.diffusion_imaging_model)
         self.dipy_recon_config = Dipy_recon_config(imaging_model=self.diffusion_imaging_model,recon_mode=self.diffusion_model,tracking_processing_tool=self.tracking_processing_tool)
@@ -135,9 +104,6 @@ class DiffusionConfig(HasTraits):
         self.fsl_tracking_config = FSL_tracking_config()
         self.gibbs_tracking_config = Gibbs_tracking_config()
 
-        #self.mrtrix_recon_config.on_trait_change(self.update_mrtrix_tracking_SD,'local_model')
-        #self.on_trait_change(self._processing_tool_changed,'processing_tool')
-
         self.mrtrix_recon_config.on_trait_change(self.update_mrtrix_tracking_SD,'local_model')
         self.dipy_recon_config.on_trait_change(self.update_dipy_tracking_SD,'local_model')
         self.dipy_recon_config.on_trait_change(self.update_dipy_tracking_sh_order,'lmax_order')
@@ -150,17 +116,8 @@ class DiffusionConfig(HasTraits):
     def _tracking_processing_tool_changed(self,new):
         if new == 'MRtrix':
             self.mrtrix_recon_config.tracking_processing_tool = new
-            # self.recon_processing_tool_editor = ['Dipy','MRtrix']
-            # self.recon_processing_tool = new
-            # self.recon_processing_tool_editor = ['Dipy','MRtrix']
         elif new == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = new
-            # self.recon_processing_tool_editor = ['Dipy']
-            # self.recon_processing_tool = new
-        # else:
-            # self.recon_processing_tool_editor = ['Custom']
-            # self.recon_processing_tool = new
-
 
     def _diffusion_imaging_model_changed(self, new):
         self.dtk_recon_config.imaging_model = new
@@ -172,11 +129,8 @@ class DiffusionConfig(HasTraits):
         self.dtb_tracking_config.imaging_model = new
         # Remove MRtrix from recon and tracking methods and Probabilistic from diffusion model if diffusion_imaging_model is DSI
         if (new == 'DSI') and (self.recon_processing_tool != 'Custom'):
-            #self.processing_tool = 'Dipy'
-            #self.processing_tool_editor = ['Dipy']
             self.recon_processing_tool = 'Dipy'
             self.recon_processing_tool_editor = ['Dipy','Custom']
-            #self.tracking_processing_tool = 'Dipy'
             self.tracking_processing_tool_editor = ['Dipy','MRtrix','Custom']
             self.diffusion_model_editor = ['Deterministic','Probabilistic']
         else:
@@ -184,34 +138,11 @@ class DiffusionConfig(HasTraits):
             #self.processing_tool_editor = ['Dipy','MRtrix']
             self.recon_processing_tool_editor = ['Dipy','MRtrix','Custom']
             self.tracking_processing_tool_editor = ['Dipy','MRtrix','Custom']
-            #if self.processing_tool == 'DTK':
-            #    self.diffusion_model_editor = ['Deterministic']
-            #else:
-            #    self.diffusion_model_editor = ['Deterministic','Probabilistic']
+
             if self.tracking_processing_tool == 'DTK':
                 self.diffusion_model_editor = ['Deterministic']
             else:
                 self.diffusion_model_editor = ['Deterministic','Probabilistic']
-
-    # def _processing_tool_changed(self, new):
-    #     print "processing_tool_changed"
-    #     if new == 'DTK' or new == 'Gibbs':
-    #         self.diffusion_model_editor = ['Deterministic']
-    #         self.diffusion_model = 'Deterministic'
-    #         self._diffusion_model_changed('Deterministic')
-    #     elif new == "FSL":
-    #         self.diffusion_model_editor = ['Probabilistic']
-    #         self.diffusion_model = 'Probabilistic'
-    #     elif new == "Dipy":
-    #         self.diffusion_model_editor = ['Deterministic','Probabilistic']
-    #         self.diffusion_model = 'Deterministic'
-    #         # self.configure_traits(view='dipy_traits_view')
-    #     elif new == "MRtrix":
-    #         self.diffusion_model_editor = ['Deterministic','Probabilistic']
-    #         self.diffusion_model = 'Deterministic'
-            # self.configure_traits(view='mrtrix_traits_view')
-        #self.edit_traits()
-        #self.trait_view('traits_view').updated = True
 
     def _recon_processing_tool_changed(self, new):
         print("recon_processing_tool_changed : %s"%new)
@@ -288,37 +219,6 @@ class DiffusionStage(Stage):
 
 
     def create_workflow(self, flow, inputnode, outputnode):
-        # # resampling diffusion image and setting output type to short
-        # fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii',out_file='diffusion_resampled.nii'),name="diffusion_resample")
-        # fs_mriconvert.inputs.vox_size = self.config.resampling
-        # fs_mriconvert.inputs.resample_type = self.config.interpolation
-        # flow.connect([(inputnode,fs_mriconvert,[('diffusion','in_file')])])
-
-        # fs_mriconvert_wm_mask = pe.Node(interface=fs.MRIConvert(out_type='nii',resample_type='nearest',out_file='wm_mask_resampled.nii'),name="mask_resample")
-        # fs_mriconvert_wm_mask.inputs.vox_size = self.config.resampling
-        # flow.connect([(inputnode,fs_mriconvert_wm_mask,[('wm_mask_registered','in_file')])])
-
-        # if self.config.processing_tool != 'DTK':
-
-        #     fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='nii',resample_type='nearest'),name="ROIs_resample",iterfield=['in_file'])
-        #     fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
-        #     flow.connect([(inputnode,fs_mriconvert_ROIs,[('roi_volumes','in_file')])])
-
-        #     if self.config.dilate_rois:
-        #         dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
-        #         dilate_rois.inputs.operation = 'modal'
-        #         flow.connect([
-        #                       (fs_mriconvert_ROIs,dilate_rois,[("out_file","in_file")]),
-        #                       (dilate_rois,outputnode,[("out_file","roi_volumes")])
-        #                     ])
-        #     else:
-        #         flow.connect([
-        #                     (fs_mriconvert_ROIs,outputnode,[("out_file","roi_volumes")])
-        #                     ])
-        # else:
-        #     flow.connect([
-        #                   (inputnode,outputnode,[("roi_volumes","roi_volumes")])
-        #                 ])
 
         if self.config.recon_processing_tool != 'DTK':
 
@@ -659,7 +559,7 @@ class DiffusionStage(Stage):
 
         elif self.config.recon_processing_tool == 'MRtrix':
 
-            recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_tensor","result_mrtrix_tensor.pklz")
+            recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_make_tensor","result_mrtrix_make_tensor.pklz")
 
             if os.path.exists(recon_results_path):
                 recon_results = pickle.load(gzip.open(recon_results_path))
@@ -667,33 +567,40 @@ class DiffusionStage(Stage):
             fa_res = recon_results.outputs.out_fa
             self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',fa_res]
 
-            adc_res = recon_results.outputs.out_fa
+            adc_res = recon_results.outputs.out_adc
             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ADC image'] = ['mrview',adc_res]
 
             if not self.config.mrtrix_recon_config.local_mode: # Tensor model (DTI)
 
                     tensor_res = recon_results.outputs.tensor
-                    self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',tensor_res,'-odf.load_tensor',tensor_res]
+                    self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_tensor',tensor_res]
 
             else: # CSD model
+
+                RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
+                if(os.path.exists(RF_path)):
+                    RF_results = pickle.load(gzip.open(RF_path))
+                    self.inspect_outputs_dict['MRTRIX Response function'] = ['shview','-response',RF_results.outputs.response]
 
                 recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_CSD","result_mrtrix_CSD.pklz")
 
                 if os.path.exists(recon_results_path):
                     recon_results = pickle.load(gzip.open(recon_results_path))
                     shm_coeff_res = recon_results.outputs.spherical_harmonics_image
-                    self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
-        
+                    self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_sh',shm_coeff_res]
+
 
         if self.config.tracking_processing_tool == 'Dipy':
 
             if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
+
                 if self.config.diffusion_model == 'Deterministic':
                     diff_results_path = os.path.join(self.stage_dir,"tracking","dipy_deterministic_tracking","result_dipy_deterministic_tracking.pklz")
                     if os.path.exists(diff_results_path):
                         diff_results = pickle.load(gzip.open(diff_results_path))
                         streamline_res = diff_results.outputs.tracks
                         self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
+
                 if self.config.diffusion_model == 'Probabilistic':
                     diff_results_path = os.path.join(self.stage_dir,"tracking","dipy_probabilistic_tracking","result_dipy_probabilistic_tracking.pklz")
                     if os.path.exists(diff_results_path):
@@ -701,7 +608,9 @@ class DiffusionStage(Stage):
                         streamline_res = diff_results.outputs.tracks
                         self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
             else:
+
                 diff_results_path = os.path.join(self.stage_dir,"tracking","dipy_dtieudx_tracking","result_dipy_dtieudx_tracking.pklz")
+
                 if os.path.exists(diff_results_path):
                     diff_results = pickle.load(gzip.open(diff_results_path))
                     streamline_res = diff_results.outputs.tracks
@@ -709,6 +618,7 @@ class DiffusionStage(Stage):
 
 
         elif self.config.tracking_processing_tool == "MRtrix":
+
             if self.config.diffusion_model == 'Deterministic':
                 diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
                 if os.path.exists(diff_results_path):
@@ -716,6 +626,7 @@ class DiffusionStage(Stage):
                     streamline_res = diff_results.outputs.out_tracks
                     print streamline_res
                     self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
+
             elif self.config.diffusion_model == 'Probabilistic':
                 diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
                 print diff_results_path
@@ -725,40 +636,28 @@ class DiffusionStage(Stage):
                     print streamline_res
                     self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
 
-            if self.config.mrtrix_recon_config.local_model:
-
-                RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
-                if(os.path.exists(RF_path)):
-                    RF_results = pickle.load(gzip.open(RF_path))
-                    self.inspect_outputs_dict['MRTRIX Response function'] = ['shview','-response',RF_results.outputs.response]
-
-                CSD_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_CSD","result_mrtrix_CSD.pklz")
-                tensor_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_make_tensor","result_mrtrix_make_tensor.pklz")
-                if(os.path.exists(CSD_path) and os.path.exists(tensor_path)):
-                    CSD_results = pickle.load(gzip.open(CSD_path))
-                    self.inspect_outputs_dict['MRTrix Spherical Harmonics image'] = ['mrview',CSD_results.outputs.spherical_harmonics_image]
-                    Tensor_results = pickle.load(gzip.open(tensor_path))
-                    self.inspect_outputs_dict['MRTrix SH/tensor images'] = ['mrview',CSD_results.outputs.spherical_harmonics_image,'-odf.load_tensor',Tensor_results.outputs.tensor]
-                    self.inspect_outputs = self.inspect_outputs_dict.keys()
-
-                FA_path = os.path.join(self.stage_dir,"reconstruction","convert_FA","result_convert_FA.pklz")
-                if(os.path.exists(FA_path)):
-                    FA_results = pickle.load(gzip.open(FA_path))
-                    self.inspect_outputs_dict['MRTrix FA'] = ['mrview',FA_results.outputs.converted]
-
-
-        # else:
-        #     if self.config.diffusion_model == 'Deterministic':
-        #         diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
-        #         FA_path = os.path.join(self.stage_dir,"reconstruction","convert_FA","result_convert_FA.pklz")
-        #         if os.path.exists(diff_results_path):
-        #             diff_results = pickle.load(gzip.open(diff_results_path))
-        #             streamline_res = diff_results.outputs.trackvis
-        #             self.inspect_outputs_dict[self.config.processing_tool + ' streamline'] = ['trackvis',streamline_res]
+            # if self.config.mrtrix_recon_config.local_model:
+            #
+            #     RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
+            #     if(os.path.exists(RF_path)):
+            #         RF_results = pickle.load(gzip.open(RF_path))
+            #         self.inspect_outputs_dict['MRTRIX Response function'] = ['shview','-response',RF_results.outputs.response]
+            #
+            #     CSD_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_CSD","result_mrtrix_CSD.pklz")
+            #     tensor_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_make_tensor","result_mrtrix_make_tensor.pklz")
+            #     if(os.path.exists(CSD_path) and os.path.exists(tensor_path)):
+            #         CSD_results = pickle.load(gzip.open(CSD_path))
+            #         self.inspect_outputs_dict['MRTrix Spherical Harmonics image'] = ['mrview',CSD_results.outputs.spherical_harmonics_image]
+            #         Tensor_results = pickle.load(gzip.open(tensor_path))
+            #         self.inspect_outputs_dict['MRTrix SH/tensor images'] = ['mrview',CSD_results.outputs.spherical_harmonics_image,'-odf.load_tensor',Tensor_results.outputs.tensor]
+            #         self.inspect_outputs = self.inspect_outputs_dict.keys()
+            #
+            #     FA_path = os.path.join(self.stage_dir,"reconstruction","convert_FA","result_convert_FA.pklz")
+            #     if(os.path.exists(FA_path)):
+            #         FA_results = pickle.load(gzip.open(FA_path))
+            #         self.inspect_outputs_dict['MRTrix FA'] = ['mrview',FA_results.outputs.converted]
 
         self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
-
-
 
 
     def has_run(self):
