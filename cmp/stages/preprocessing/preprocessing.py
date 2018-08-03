@@ -417,7 +417,7 @@ class PreprocessingStage(Stage):
             elif self.config.bias_field_algo == "FSL FAST":
                 dwi_biascorrect = pe.Node(interface=DWIBiasCorrect(use_fsl=True,out_bias='diffusion_denoised_biasfield.mif'), name='dwi_biascorrect')
 
-            dwi_biascorrect.inputs.verbose = True
+            dwi_biascorrect.inputs.debug = True
 
             if self.config.denoising:
                 if self.config.denoising_algo == "MRtrix (MP-PCA)":

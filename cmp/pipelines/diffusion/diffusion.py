@@ -150,7 +150,15 @@ class DiffusionPipeline(Pipeline):
         self.stages['Connectome'].config.subject = self.subject
         self.stages['Connectome'].config.on_trait_change(self.update_vizualization_layout,'circular_layout')
         self.stages['Connectome'].config.on_trait_change(self.update_vizualization_logscale,'log_visualization')
+        self.stages['Diffusion'].config.on_trait_change(self.update_outputs_recon,'recon_processing_tool')
+        self.stages['Diffusion'].config.on_trait_change(self.update_outputs_tracking,'tracking_processing_tool')
         # self.anat_flow = anat_flow
+
+    def update_outputs_recon(self,new):
+        self.stages['Diffusion'].define_inspect_outputs()
+
+    def update_outputs_tracking(self,new):
+        self.stages['Diffusion'].define_inspect_outputs()
 
     def update_vizualization_layout(self,new):
         self.stages['Connectome'].define_inspect_outputs()
