@@ -3,22 +3,35 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-image: atlassian/default-image:2
+image: bids/freesurfer
 
 pipelines:
-  default:
-    - step:
-        name: Deploy to Docker
-        deployment: production
-        services:
-          - docker
-        script: # Modify the commands below to build your repository.
-          # Set $DOCKER_HUB_USERNAME and $DOCKER_HUB_PASSWORD as environment variables in repository settings
-          - export IMAGE_NAME=sebastientourbier/connectomemapper:$BITBUCKET_COMMIT
-
-          # build the Docker image (this will use the Dockerfile in the root of the repo)
-          - docker build -t $IMAGE_NAME .
-          # authenticate with the Docker Hub registry
-          - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
-          # push the new Docker image to the Docker registry
-          - docker push $IMAGE_NAME
+  branches:
+    master:
+      - step:
+          name: Deploy master to Docker
+          deployment: production
+          services:
+              - docker
+          script: # Modify the commands below to build your repository.
+              - export IMAGE_NAME=sebastientourbier/connectomemapper:$BITBUCKET_COMMIT
+              # build the Docker image (this will use the Dockerfile in the root of the repo)
+              - docker build -t $IMAGE_NAME .
+              # authenticate with the Docker Hub registry
+              - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
+              # push the new Docker image to the Docker registry
+              - docker push $IMAGE_NAME
+    experimental:
+      - step:
+          name: Deploy experimental to Docker
+          deployment: staging
+          services:
+              - docker
+          script: # Modify the commands below to build your repository.
+              - export IMAGE_NAME=sebastientourbier/connectomemapper:$BITBUCKET_COMMIT
+              # build the Docker image (this will use the Dockerfile in the root of the repo)
+              - docker build -t $IMAGE_NAME .
+              # authenticate with the Docker Hub registry
+              - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
+              # push the new Docker image to the Docker registry
+              - docker push $IMAGE_NAME    
