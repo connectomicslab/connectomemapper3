@@ -7,6 +7,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
+#Imports
 import argparse
 import os
 import subprocess
@@ -14,6 +15,7 @@ import nibabel
 import numpy
 from glob import glob
 
+#Own imports
 #import cmp.gui
 import gui
 import project
@@ -21,36 +23,6 @@ from info import __version__
 
 # __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                 'version')).read()
-
-def info():
-    print "\nConnectome Mapper (CMP) " + __version__
-    print unicode("""Copyright (C) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
-             Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
-             All rights reserved.\n""")
-
-# Checks the needed dependencies. We call directly the functions instead
-# of just checking existence in $PATH in order to handl missing libraries.
-# Note that not all the commands give the awaited 1 exit code...
-def dep_check():
-
-    nul = open(os.devnull, 'w')
-
-    error = ""
-
-    # Check for FSL
-    if subprocess.call("fslorient",stdout=nul,stderr=nul,shell=True) != 255:
-        error = """FSL not installed or not working correctly. Check that the
-                FSL_DIR variable is exported and the fsl.sh setup script is sourced."""
-
-    # Check for Freesurfer
-    if subprocess.call("mri_info",stdout=nul,stderr=nul,shell=True) != 1:
-        error = """FREESURFER not installed or not working correctly. Check that the
-                FREESURFER_HOME variable is exported and the SetUpFreeSurfer.sh setup
-                script is sourced."""
-
-    if error != "":
-        print error
-        sys.exit(2)
 
 def create_cmp_command(project):
 
@@ -83,15 +55,15 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type)
     f = open(subject_conf_file,'w')
     for line in readLineByLine(ref_conf_file):
         if "subject = " in line:
-            f.write("subject = {}".format(project.subject) + os.linesep)
+            f.write("subject = {}\n".format(project.subject))
         elif "subjects = " in line:
-            f.write("subjects = {}".format(project.subjects) + os.linesep)
+            f.write("subjects = {}\n".format(project.subjects))
         elif "subject_sessions = " in line:
-            f.write("subject_sessions = {}".format(project.subject_sessions) + os.linesep)
+            f.write("subject_sessions = {}\n".format(project.subject_sessions))
         elif "subject_session = " in line:
-            f.write("subject_session = {}".format(project.subject_session) + os.linesep)
+            f.write("subject_session = {}\n".format(project.subject_session))
         else:
-            f.write(line)
+            f.write("{}\n".format(line))
     f.close()
 
     return subject_conf_file
@@ -104,7 +76,7 @@ def run(command, env={}):
                                env=merged_env)
     while True:
         line = process.stdout.readline()
-        line = str(line, 'utf-8')[:-1]
+        line = str(line)[:-1]
         print(line)
         if line == '' and process.poll() != None:
             break
@@ -129,9 +101,9 @@ parser.add_argument('--participant_label', help='The label(s) of the participant
                    'participants can be specified with a space separated list.',
                    nargs="+")
 
-parser.add_argument('anat_pipeline_config', help='Configuration .txt file for processing stages of the anatomical MRI processing pipeline')
-parser.add_argument('dwi_pipeline_config', help='Configuration .txt file for processing stages of the diffusion MRI processing pipeline')
-parser.add_argument('func_pipeline_config', help='Configuration .txt file for processing stages of the fMRI processing pipeline')
+parser.add_argument('--anat_pipeline_config', help='Configuration .txt file for processing stages of the anatomical MRI processing pipeline')
+parser.add_argument('--dwi_pipeline_config', help='Configuration .txt file for processing stages of the diffusion MRI processing pipeline')
+parser.add_argument('--func_pipeline_config', help='Configuration .txt file for processing stages of the fMRI processing pipeline')
 
 # parser.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation',
 #                    action='store_true')
@@ -140,15 +112,6 @@ parser.add_argument('-v', '--version', action='version',
 
 
 args = parser.parse_args()
-
-# check dependencies
-dep_check()
-
-# add current directory to the path, useful if DTB_ bins not installed
-os.environ["PATH"] += os.pathsep + os.path.dirname(sys.argv[0])
-
-# version and copyright message
-info()
 
 # if not args.skip_bids_validator:
 #     run('bids-validator %s'%args.bids_dir)
@@ -162,7 +125,7 @@ else:
     subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
     subjects_to_analyze = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
 
-project = cmp.gui.CMP_Project_Info()
+project = gui.CMP_Project_Info()
 project.base_directory = args.bids_dir
 project.subjects = ['sub-{}'.format(label) for label in subjects_to_analyze]
 
@@ -193,9 +156,9 @@ if args.analysis_level == "participant":
                 if not os.path.isdir(session_derivatives_dir):
                     os.makedirs(session_derivatives_dir)
 
-                project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config)
-                project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config)
-                project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config)
+                project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical')
+                project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion')
+                project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI')
 
                 cmd = create_cmp_command(project=project)
                 run(command=cmd)

@@ -7,6 +7,7 @@ import os
 #import wx
 from pyface.qt import QtCore, QtGui
 
+
 import subprocess
 
 # try:
@@ -14,11 +15,16 @@ import subprocess
 # except ImportError:
 #     import enthought.traits.ui.wx
 
+#Traits/traituiQt4
 try:
     import traitsui.qt4
 except ImportError:
     import enthought.traits.ui.qt4
 
+#BIDS import
+from bids.grabbids import BIDSLayout
+
+#CMP imports
 import cmp.gui
 import cmp.project
 from cmp.info import __version__
@@ -102,6 +108,12 @@ if __name__ == "__main__":
         project.subjects = ['%s' % sys.argv[2]]
         project.subject = '%s' % sys.argv[2]
 
+        try:
+            bids_layout = BIDSLayout(project.base_directory)
+        except:
+            print "Exception"
+            sys.exit(1)
+
         if "ses-" in sys.argv[3]:
             offset = 1
             project.subject_sessions = ['%s' % sys.argv[3]]
@@ -117,7 +129,7 @@ if __name__ == "__main__":
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline != None:
-            anat_valid_inputs = anat_pipeline.check_input(gui=False)
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
             if anat_valid_inputs and sys.argv[offset+4]:
                 anat_pipeline.process()
             elif anat_valid_inputs and sys.argv[offset+4]=='False':
@@ -131,6 +143,11 @@ if __name__ == "__main__":
         project.base_directory = os.path.abspath(sys.argv[1])
         project.subjects = ['%s' % sys.argv[2]]
         project.subject = '%s' % sys.argv[2]
+
+        try:
+            bids_layout = BIDSLayout(project.base_directory)
+        except:
+            sys.exit(1)
 
         if "ses-" in sys.argv[3]:
             offset = 1
@@ -146,7 +163,7 @@ if __name__ == "__main__":
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline != None:
-            anat_valid_inputs = anat_pipeline.check_input(gui=False)
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             if anat_valid_inputs and sys.argv[offset+4]=='True':
                 print "Process anatomical pipeline"
@@ -161,7 +178,7 @@ if __name__ == "__main__":
         anat_valid_outputs, msg = anat_pipeline.check_output()
 
         if anat_valid_outputs:
-            dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, False)
+            dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
             if dmri_pipeline != None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
@@ -181,6 +198,13 @@ if __name__ == "__main__":
         project.subjects = ['%s' % sys.argv[2]]
         project.subject = '%s' % sys.argv[2]
 
+        try:
+            bids_layout = BIDSLayout(project.base_directory)
+        except:
+            print("Exception {}".format(project.base_directory))
+            print("Exception {}".format(bids_layout))
+            sys.exit(1)
+
         if "ses-" in sys.argv[3]:
             offset = 1
             project.subject_sessions = ['%s' % sys.argv[3]]
@@ -196,7 +220,7 @@ if __name__ == "__main__":
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline != None:
-            anat_valid_inputs = anat_pipeline.check_input(gui=False)
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
 
             if anat_valid_inputs and sys.argv[offset+4]=='True':
                 print "Process anatomical pipeline"
@@ -211,7 +235,7 @@ if __name__ == "__main__":
         anat_valid_outputs, msg = anat_pipeline.check_output()
 
         if anat_valid_outputs:
-            dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, False)
+            dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
             if dmri_pipeline != None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
@@ -222,7 +246,7 @@ if __name__ == "__main__":
                 else:
                     print "WARNING: Diffusion pipeline set to not be executed"
 
-            fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, False)
+            fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
             if fmri_pipeline != None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
