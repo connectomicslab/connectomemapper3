@@ -11,13 +11,6 @@ RUN apt-get update && apt-get -qq -y install curl bzip2 && \
     rm -rf /tmp/miniconda.sh && \
     conda install -y python=2 && \
     conda update conda && \
-    conda install python ipython jupyter matplotlib networkx \
-    numpy scipy sphinx traits dateutil nose pydot traitsui dipy nibabel \
-    mne nipype obspy graphviz && \
-    conda install -c aramislab pybids && \
-    conda install pyqt=4 && \
-    conda install networkx=1 && \ 
-    conda clean --packages --tarballs && \
     apt-get -qq -y remove curl bzip2 && \
     apt-get -qq -y autoremove && \
     apt-get autoclean && \
@@ -26,6 +19,14 @@ RUN apt-get update && apt-get -qq -y install curl bzip2 && \
 ENV PATH /opt/conda/bin:$PATH
 # Note: (fix nodes_iter() to nodes() for networkx2 support)
 
+RUN conda install python ipython jupyter matplotlib networkx \
+    numpy scipy sphinx traits dateutil nose pydot traitsui dipy nibabel \
+    mne nipype obspy graphviz \
+    
+RUN conda install -c aramislab pybids
+RUN conda install pyqt=4 
+RUN conda install networkx=1  
+RUN conda clean --packages --tarballs 
 ## Install Neurodebian
 
 RUN apt-get install neurodebian && \
