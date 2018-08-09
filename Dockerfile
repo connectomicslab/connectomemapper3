@@ -28,7 +28,25 @@ ENV PATH /opt/conda/bin:$PATH
 RUN conda config --add channels conda-forge
 RUN conda config --add channels aramislab
 
-RUN conda install -y ipython jupyter matplotlib networkx=1.11 numpy=1.11.3 scipy=1.1.0 sphinx=1.5.1 traits=4.6.0 dateutil=2.4.1 nose=1.3.7 pydot=1.0.28 traitsui=5.1.0 dipy=0.13.0 nibabel=2.2.1 mne=0.15 nipype=1.0 obspy=1.1.0 graphviz=2.38.0 pyqt=4 pybids=0.1
+RUN conda install -y ipython jupyter matplotlib 
+
+RUN conda install -y networkx=1.11 
+RUN conda install -y numpy=1.11.3 
+RUN conda install -y scipy=1.1.0 
+RUN conda install -y sphinx=1.5.1 
+RUN conda install -y traits=4.6.0 
+RUN conda install -y dateutil=2.4.1 
+RUN conda install -y nose=1.3.7 
+RUN conda install -y pydot=1.0.28 
+RUN conda install -y traitsui=5.1.0 
+RUN conda install -y dipy=0.13.0 
+RUN conda install -y nibabel=2.2.1 
+RUN conda install -y mne=0.15 
+RUN conda install -y nipype=1.0 
+RUN conda install -y obspy=1.1.0 
+RUN conda install -y graphviz=2.38.0 
+RUN conda install -y pyqt=4 
+RUN conda install -y pybids=0.1
     
 RUN conda install -c aramislab -y 
 RUN conda install -y  
