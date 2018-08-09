@@ -15,7 +15,7 @@ RUN apt-get update && apt-get -qq -y install curl bzip2 && \
     curl -sSL https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
     bash /tmp/miniconda.sh -bfp /usr/local && \
     rm -rf /tmp/miniconda.sh && \
-    conda install -y python=2 && \
+    conda install -y python=2.7.13 && \
     conda update conda && \
     apt-get -qq -y remove curl bzip2 && \
     apt-get -qq -y autoremove && \
@@ -26,11 +26,13 @@ ENV PATH /opt/conda/bin:$PATH
 # Note: (fix nodes_iter() to nodes() for networkx2 support)
 
 RUN conda config --add channels conda-forge
-RUN conda install -y python ipython jupyter matplotlib networkx numpy scipy sphinx traits dateutil nose pydot traitsui dipy nibabel mne nipype obspy graphviz
+RUN conda config --add channels aramislab
+
+RUN conda install -y ipython jupyter matplotlib networkx=1.11 numpy=1.11.3 scipy=1.1.0 sphinx=1.5.1 traits=4.6.0 dateutil=2.4.1 nose=1.3.7 pydot=1.0.28 traitsui=5.1.0 dipy=0.13.0 nibabel=2.2.1 mne=0.15 nipype=1.0 obspy=1.1.0 graphviz=2.38.0 pyqt=4 pybids=0.1
     
-RUN conda install -c aramislab -y pybids
-RUN conda install -y pyqt=4 
-RUN conda install -y networkx=1  
+RUN conda install -c aramislab -y 
+RUN conda install -y  
+
 RUN conda clean --all --yes
 
 ## Install Neurodebian
