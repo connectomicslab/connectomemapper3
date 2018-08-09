@@ -1,6 +1,8 @@
 # Use an official Python runtime as a parent image
 
-FROM ubuntu:xenial
+FROM freesurfer/freesurfer:6.0
+COPY license /opt/freesurfer/.license
+
 MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 
 ## Install miniconda2 and CMP dependencies
