@@ -1,16 +1,30 @@
-#!/home/localadmin/anaconda2/bin/python
+#!/usr/bin/python
 #-*- coding:utf-8 -*-
 
 import sys
 import os
-import wx
+
+#import wx
+from pyface.qt import QtCore, QtGui
+
+
 import subprocess
 
-try: 
-    import traitsui.wx
-except ImportError: 
-    import enthought.traits.ui.wx
+# try:
+#     import traitsui.wx
+# except ImportError:
+#     import enthought.traits.ui.wx
 
+#Traits/traituiQt4
+try:
+    import traitsui.qt4
+except ImportError:
+    import enthought.traits.ui.qt4
+
+#BIDS import
+from bids.grabbids import BIDSLayout
+
+#CMP imports
 import cmp.gui
 import cmp.project
 from cmp.info import __version__
@@ -18,44 +32,55 @@ from cmp.stages.diffusion.reconstruction import DTB_gfa
 
 def info():
     print "\nconnectomemapper " + __version__
-    print """Copyright (C) 2009-2014, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
+    print """Copyright (C) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
              Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
              All rights reserved.\n"""
-          
+
 def usage():
-    print "Usage: connectomemapper3 input_folder ini_file"
-    
+    print "Usage: connectomemapper3 bids_directory sub-<label> anatomical_config_ini_file prdiffusion_config_ini_file"
+    print ""
+    print "bids_directory <Str> : full path of root directory of bids dataset"
+    print "sub-<label> <Str>: subject name"
+    print "anatomical_config_ini <Str>: full path of .ini configuration file for anatomical pipeline"
+    print "process_anatomical <Bool> : If True, process anatomical pipeline"
+    print "diffusion_config_ini_file <Str>: full path of .ini configuration file for diffusion pipeline"
+    print "process_diffusion <Bool> : If True, process diffusion pipeline"
+
 # Checks the needed dependencies. We call directly the functions instead
 # of just checking existence in $PATH in order to handl missing libraries.
 # Note that not all the commands give the awaited 1 exit code...
 def dep_check():
 
     nul = open(os.devnull, 'w')
-    
+
     error = ""
-    
+
     # Check for FSL
     if subprocess.call("fslorient",stdout=nul,stderr=nul,shell=True) != 255:
-        error = """FSL not installed or not working correctly. Check that the 
+        error = """FSL not installed or not working correctly. Check that the
 FSL_DIR variable is exported and the fsl.sh setup script is sourced."""
-        
+
     # Check for Freesurfer
     if subprocess.call("mri_info",stdout=nul,stderr=nul,shell=True) != 1:
-        error = """FREESURFER not installed or not working correctly. Check that the 
-FREESURFER_HOME variable is exported and the SetUpFreeSurfer.sh setup 
+        error = """FREESURFER not installed or not working correctly. Check that the
+FREESURFER_HOME variable is exported and the SetUpFreeSurfer.sh setup
 script is sourced."""
-        
+
+    # Check for MRtrix
+    # if subprocess.call("mrconvert",stdout=nul,stderr=nul,shell=True) != 255:
+    #     error = """MRtrix3 not installed or not working correctly. Check that PATH variable is updated with MRtrix3 binary (bin) directory."""
+
     # Check for DTK
-    if subprocess.call("dti_recon",stdout=nul,stderr=nul,shell=True) != 0 or "DSI_PATH" not in os.environ:
-        error = """Diffusion Toolkit not installed or not working correctly. Check that 
-the DSI_PATH variable is exported and that the dtk binaries (e.g. dti_recon) are in 
-your path."""
-        
+#     if subprocess.call("dti_recon",stdout=nul,stderr=nul,shell=True) != 0 or "DSI_PATH" not in os.environ:
+#         error = """Diffusion Toolkit not installed or not working correctly. Check that
+# the DSI_PATH variable is exported and that the dtk binaries (e.g. dti_recon) are in
+# your path."""
+
     # Check for DTB
-    if subprocess.call("DTB_dtk2dir",stdout=nul,stderr=nul,shell=True) != 1:
-        error = """DTB binaries not installed or not working correctly. Check that the 
-DTB binaries (e.g. DTB_dtk2dir) are in your path and don't give any error."""
-        
+#     if subprocess.call("DTB_dtk2dir",stdout=nul,stderr=nul,shell=True) != 1:
+#         error = """DTB binaries not installed or not working correctly. Check that the
+# DTB binaries (e.g. DTB_dtk2dir) are in your path and don't give any error."""
+
     if error != "":
         print error
         sys.exit(2)
@@ -64,29 +89,177 @@ DTB binaries (e.g. DTB_dtk2dir) are in your path and don't give any error."""
 if __name__ == "__main__":
     # check dependencies
     dep_check()
-    
+
     # add current directory to the path, useful if DTB_ bins not installed
     os.environ["PATH"] += os.pathsep + os.path.dirname(sys.argv[0])
-    
+
     # version and copyright message
     info()
-    
+
     argc = len(sys.argv)
     if argc==1: # no args, launch the GUI
-        traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
+        #traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
         mw = cmp.gui.CMP_MainWindow()
         mw_res = mw.configure_traits()
-    elif argc==3: # connectomemapper input_folder ini_file
+    elif (argc==5) or (argc==6): # connectomemapper bids_folder sub-<label> (ses-<label>) anatomical_ini_file process_anatomical
+
         project = cmp.gui.CMP_Project_Info()
         project.base_directory = os.path.abspath(sys.argv[1])
-        project.config_file = os.path.abspath(sys.argv[2])
-        pipeline = cmp.project.init_project(project, False)
-        if pipeline != None:
-            valid_inputs = pipeline.check_input(gui=False)
-            if valid_inputs:
-                pipeline.process()
+        project.subjects = ['%s' % sys.argv[2]]
+        project.subject = '%s' % sys.argv[2]
+
+        try:
+            bids_layout = BIDSLayout(project.base_directory)
+        except:
+            print "Exception"
+            sys.exit(1)
+
+        if "ses-" in sys.argv[3]:
+            offset = 1
+            project.subject_sessions = ['%s' % sys.argv[3]]
+            project.subject_session = '%s' % sys.argv[3]
+            print "session"
+        else:
+            print "No session"
+            offset = 0
+            project.subject_sessions = ['']
+            project.subject_session = ''
+
+        project.anat_config_file = os.path.abspath(sys.argv[offset+3])
+
+        anat_pipeline = cmp.project.init_anat_project(project, False)
+        if anat_pipeline != None:
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
+            if anat_valid_inputs and sys.argv[offset+4]:
+                anat_pipeline.process()
+            elif anat_valid_inputs and sys.argv[offset+4]=='False':
+                pass
             else:
                 sys.exit(1)
+
+    elif (argc==7) or (argc==8): # connectomemapper bids_folder sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion
+
+        project = cmp.gui.CMP_Project_Info()
+        project.base_directory = os.path.abspath(sys.argv[1])
+        project.subjects = ['%s' % sys.argv[2]]
+        project.subject = '%s' % sys.argv[2]
+
+        try:
+            bids_layout = BIDSLayout(project.base_directory)
+        except:
+            sys.exit(1)
+
+        if "ses-" in sys.argv[3]:
+            offset = 1
+            project.subject_sessions = ['%s' % sys.argv[3]]
+            project.subject_session = '%s' % sys.argv[3]
+        else:
+            offset = 0
+            project.subject_sessions = ['']
+            project.subject_session = ''
+
+        project.anat_config_file = os.path.abspath(sys.argv[offset+3])
+        project.dmri_config_file = os.path.abspath(sys.argv[offset+5])
+
+        anat_pipeline = cmp.project.init_anat_project(project, False)
+        if anat_pipeline != None:
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
+
+            if anat_valid_inputs and sys.argv[offset+4]=='True':
+                print "Process anatomical pipeline"
+                anat_pipeline.process()
+            elif anat_valid_inputs and sys.argv[offset+4]=='False':
+                print "Collecting precomputed anatomical pipeline"
+                pass
+            else:
+                print "Invalid inputs"
+                sys.exit(1)
+
+        anat_valid_outputs, msg = anat_pipeline.check_output()
+
+        if anat_valid_outputs:
+            dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
+            if dmri_pipeline != None:
+                dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                print sys.argv[offset+6]
+                if dmri_valid_inputs and sys.argv[offset+6]=='True':
+                    dmri_pipeline.process()
+                else:
+                    sys.exit(1)
+        else:
+            print msg
+            sys.exit(1)
+
+    elif (argc==9) or (argc==10): # connectomemapper bids_folder sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion fmri_ini_file process_fmri
+
+        project = cmp.gui.CMP_Project_Info()
+        project.base_directory = os.path.abspath(sys.argv[1])
+        project.subjects = ['%s' % sys.argv[2]]
+        project.subject = '%s' % sys.argv[2]
+
+        try:
+            bids_layout = BIDSLayout(project.base_directory)
+        except:
+            print("Exception {}".format(project.base_directory))
+            print("Exception {}".format(bids_layout))
+            sys.exit(1)
+
+        if "ses-" in sys.argv[3]:
+            offset = 1
+            project.subject_sessions = ['%s' % sys.argv[3]]
+            project.subject_session = '%s' % sys.argv[3]
+        else:
+            offset = 0
+            project.subject_sessions = ['']
+            project.subject_session = ''
+
+        project.anat_config_file = os.path.abspath(sys.argv[offset+3])
+        project.dmri_config_file = os.path.abspath(sys.argv[offset+5])
+        project.fmri_config_file = os.path.abspath(sys.argv[offset+7])
+
+        anat_pipeline = cmp.project.init_anat_project(project, False)
+        if anat_pipeline != None:
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
+
+            if anat_valid_inputs and sys.argv[offset+4]=='True':
+                print "Process anatomical pipeline"
+                anat_pipeline.process()
+            elif anat_valid_inputs and sys.argv[offset+4]=='False':
+                print "Collecting precomputed anatomical pipeline"
+                pass
+            else:
+                print "Invalid inputs"
+                sys.exit(1)
+
+        anat_valid_outputs, msg = anat_pipeline.check_output()
+
+        if anat_valid_outputs:
+            dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
+            if dmri_pipeline != None:
+                dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                print sys.argv[offset+6]
+                if dmri_valid_inputs and sys.argv[offset+6]=='True':
+                    print "Process diffusion pipeline"
+                    dmri_pipeline.process()
+                else:
+                    print "WARNING: Diffusion pipeline set to not be executed"
+
+            fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
+            if fmri_pipeline != None:
+                fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                print sys.argv[offset+8]
+                if fmri_valid_inputs and sys.argv[offset+8]=='True':
+                    print "Process fmri pipeline"
+                    fmri_pipeline.process()
+                else:
+                    print "WARNING: Diffusion pipeline set to not be executed"
+        else:
+            print msg
+            sys.exit(1)
+
     else:
         usage()
         sys.exit(2)

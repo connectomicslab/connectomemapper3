@@ -5,7 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 """ The FreeSurfer module provides functions for interfacing with Freesurfer functions missing in nipype or modified
-""" 
+"""
 
 import os
 import os.path as op
@@ -14,14 +14,70 @@ from glob import glob
 import numpy as np
 
 from nibabel import load
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.io import FreeSurferSource
+from nipype.utils.filemanip import fname_presuffix, copyfile
+from nipype.interfaces.io import FreeSurferSource, IOBase
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
                                     OutputMultiPath, CommandLine,
-                                    CommandLineInputSpec, isdefined)
+                                    CommandLineInputSpec, isdefined, BaseInterface, BaseInterfaceInputSpec)
+
+class copyFileToFreesurfer_InputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True)
+    out_file = File(exists=False)
+
+class copyFileToFreesurfer_OutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+class copyFileToFreesurfer(IOBase):
+    input_spec = copyFileToFreesurfer_InputSpec
+    output_spec = copyFileToFreesurfer_OutputSpec
+
+    # def _run_interface(self,runtime):
+    #     copyfile(self.inputs.in_file,self.inputs.out_file, copy=True)
+    #     return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        copyfile(self.inputs.in_file,self.inputs.out_file, copy=True)
+        outputs["out_file"] = self.inputs.out_file
+        return outputs
+
+
+class copyBrainMaskToFreesurfer_InputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True)
+    subject_dir = Directory(exists=True)
+
+class copyBrainMaskToFreesurfer_OutputSpec(TraitedSpec):
+    out_brainmask_file = File(exists=True)
+    out_brainmaskauto_file = File(exists=True)
+
+class copyBrainMaskToFreesurfer(IOBase):
+    input_spec = copyBrainMaskToFreesurfer_InputSpec
+    output_spec = copyBrainMaskToFreesurfer_OutputSpec
+
+    # def _run_interface(self,runtime):
+    #     copyfile(self.inputs.in_file,self.inputs.out_file, copy=True)
+    #     return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+
+        brainmask_file = op.join(self.inputs.subject_dir,'mri','brainmask.mgz')
+        if op.isfile(brainmask_file):
+            copyfile(brainmask_file, op.join(self.inputs.subject_dir,'mri','brainmask.old.mgz'), copy=True)
+        copyfile(self.inputs.in_file, brainmask_file, copy=True)
+
+        brainmaskauto_file = op.join(self.inputs.subject_dir,'mri','brainmask.auto.mgz')
+        if op.isfile(brainmaskauto_file):
+            copyfile(brainmaskauto_file, op.join(self.inputs.subject_dir,'mri','brainmask.auto.old.mgz'), copy=True)
+        copyfile(self.inputs.in_file, brainmaskauto_file, copy=True)
+
+        outputs["out_brainmask_file"] = brainmask_file
+        outputs["out_brainmaskauto_file"] = brainmaskauto_file
+
+        return outputs
 
 
 class BBRegisterInputSpec(FSTraitedSpec):
@@ -136,4 +192,3 @@ class BBRegister(FSCommand):
         if name == 'out_reg_file':
             return self._list_outputs()[name]
         return None
-

@@ -1,18 +1,18 @@
-# Copyright (C) 2009-2015, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
 
 """ Tracking methods and workflows of the diffusion stage
-""" 
+"""
 
 from traits.api import *
 from traitsui.api import *
 
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
     traits, File, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, isdefined, OutputMultiPath, InputMultiPath
-    
+
 from nipype.utils.filemanip import copyfile
 
 import glob
@@ -29,11 +29,14 @@ from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 import nipype.interfaces.diffusion_toolkit as dtk
 import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.camino as camino
+import nipype.interfaces.dipy as dipy
 
 #  import nipype.interfaces.camino2trackvis as camino2trackvis
 import cmp.interfaces.camino2trackvis as camino2trackvis
-from cmp.interfaces.mrtrix3 import StreamlineTrack
+from cmp.interfaces.mrtrix3 import Erode, StreamlineTrack
 from cmp.interfaces.fsl import mapped_ProbTrackX
+from cmp.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
+from cmp.interfaces.misc import Tck2Trk
 
 from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
 
@@ -53,24 +56,32 @@ class DTB_tracking_config(HasTraits):
     angle = Int(60)
     step_size = traits.Float(1.0)
     seeds = Int(32)
-    
+
     traits_view = View(Item('flip_input',style='custom'),'angle','step_size','seeds')
 
-class MRtrix_tracking_config(HasTraits):
+class Dipy_tracking_config(HasTraits):
+    imaging_model = Str
     tracking_mode = Str
     SD = Bool
-    desired_number_of_tracks = Int(1000)
-    max_number_of_tracks = Int(1000)
-    curvature = Float(2.0)
-    step_size = Float(0.2)
-    min_length = Float(10)
-    max_length = Float(200)
-    
-    traits_view = View( HGroup('desired_number_of_tracks','max_number_of_tracks'),
-			Item('curvature',label="Curvature radius"),'step_size',
-			HGroup('min_length','max_length')
-		      )
-    
+    number_of_seeds = Int(1000)
+    fa_thresh = Float(0.2)
+    step_size = traits.Float(0.5)
+    max_angle = Float(25.0)
+    sh_order = Int(8)
+
+    use_act = traits.Bool(False, desc='Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier')
+    fast_number_of_classes = Int(3)
+
+    traits_view = View( Item('number_of_seeds',label="Number of seeds"),
+                        Item('step_size',label="Step size)"),
+                        Item('max_angle',label="Max angle (degree)"),
+                        HGroup(
+                            Item('use_act',label="Anatomically-Constrained Tractography using FAST"),
+                            Item('fast_number_of_classes', label='Number of tissue classes (FAST)')
+                            ),
+                        Item('fa_thresh',label="FA threshold (classifier)",visible_when='use_act == False')
+                        )
+
     def _SD_changed(self,new):
         if self.tracking_mode == "Deterministic" and not new:
             self.curvature = 2.0
@@ -78,7 +89,7 @@ class MRtrix_tracking_config(HasTraits):
             self.curvature = 0.0
         elif self.tracking_mode == "Probabilistic":
             self.curvature = 1.0
-            
+
     def _tracking_mode_changed(self,new):
         if new == "Deterministic" and not self.SD:
             self.curvature = 2.0
@@ -86,10 +97,64 @@ class MRtrix_tracking_config(HasTraits):
             self.curvature = 0.0
         elif new == "Probabilistic":
             self.curvature = 1.0
-            
+
     def _curvature_changed(self,new):
         if new <= 0.000001:
-            self.curvature = 0.0                
+            self.curvature = 0.0
+
+class MRtrix_tracking_config(HasTraits):
+    tracking_mode = Str
+    SD = Bool
+    desired_number_of_tracks = Int(1000000)
+    # max_number_of_seeds = Int(1000000000)
+    curvature = Float(2.0)
+    step_size = Float(0.5)
+    min_length = Float(5)
+    max_length = Float(500)
+    angle = Float(45)
+    cutoff_value = Float(1)
+
+    use_act = traits.Bool(True, desc="Anatomically-Constrained Tractography (ACT) based on Freesurfer parcellation")
+    seed_from_gmwmi = traits.Bool(False, desc="Seed from Grey Matter / White Matter interface (requires Anatomically-Constrained Tractography (ACT))")
+    crop_at_gmwmi = traits.Bool(True, desc="Crop streamline endpoints more precisely as they cross the GM-WM interface (requires Anatomically-Constrained Tractography (ACT))")
+    backtrack = traits.Bool(True, desc="Allow tracks to be truncated (requires Anatomically-Constrained Tractography (ACT))")
+
+    traits_view = View( VGroup('desired_number_of_tracks',
+                               # 'max_number_of_seeds',
+                               HGroup('min_length','max_length'),
+                               'angle',
+                   			   Item('curvature',label="Curvature radius"),'step_size',
+                               'cutoff_value',
+                               label='Streamline settings'
+                               ),
+                        VGroup(
+                            Item('use_act',label='Use ACT based on Freesurfer parcellation'),
+                            Item('crop_at_gmwmi',visible_when='use_act'),
+                            Item('backtrack',visible_when='use_act'),
+                            Item('seed_from_gmwmi',visible_when='use_act'),
+                            label='Anatomically-Constrained Tractography (ACT)'
+                            )
+		              )
+
+    def _SD_changed(self,new):
+        if self.tracking_mode == "Deterministic" and not new:
+            self.curvature = 2.0
+        elif self.tracking_mode == "Deterministic" and new:
+            self.curvature = 0.0
+        elif self.tracking_mode == "Probabilistic":
+            self.curvature = 1.0
+
+    def _tracking_mode_changed(self,new):
+        if new == "Deterministic" and not self.SD:
+            self.curvature = 2.0
+        elif new == "Deterministic" and self.SD:
+            self.curvature = 0.0
+        elif new == "Probabilistic":
+            self.curvature = 1.0
+
+    def _curvature_changed(self,new):
+        if new <= 0.000001:
+            self.curvature = 0.0
 
 class Camino_tracking_config(HasTraits):
     imaging_model = Str
@@ -111,20 +176,20 @@ class Camino_tracking_config(HasTraits):
                         Item('cross_angle', label="Crossing angle", visible_when='(tracking_mode=="Probabilistic") and (inversion_index > 9)'),
                         HGroup('trace','units')
                         )
-    
+
     def _units_changed(self,new):
         if new == "s/mm^2":
             self.trace = self.trace * 1000000
         elif new == "m^2/s":
             self.trace = self.trace / 1000000
 
-    
+
 class FSL_tracking_config(HasTraits):
     number_of_samples = Int(5000)
     number_of_steps = Int(2000)
     distance_threshold = Float(0)
     curvature_threshold = Float(0.2)
-    
+
     traits_view = View('number_of_samples','number_of_steps','distance_threshold','curvature_threshold')
 
 class Gibbs_tracking_config(HasTraits):
@@ -137,7 +202,7 @@ class Gibbs_tracking_config(HasTraits):
     inexbalance=Int(-2)
     fiber_length=Float(20)
     curvature_threshold=Float(90)
-    
+
     traits_view = View('iterations','particle_length','particle_width','particle_weight','temp_start','temp_end','inexbalance','fiber_length','curvature_threshold')
 
 
@@ -166,7 +231,7 @@ class DTB_dtk2dir(CommandLine):
         shutil.move(self.inputs.prefix+'dir.nii',os.path.abspath(base+'dir.nii'))
         outputs["out_file"] = os.path.abspath(base+'dir.nii')
         return outputs
-        
+
 class DTB_streamlineInputSpec(CommandLineInputSpec):
     dir_file = File(desc='DIR path/filename (e.g. "data/dsi_DIR.nii")', position=1,
                     mandatory=True, exists=True, argstr="--dir %s")
@@ -189,21 +254,21 @@ class DTB_streamline(CommandLine):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
-        
+
 class CMTK_filterfibersInputSpec(BaseInterfaceInputSpec):
     track_file = File(desc='Input trk file', mandatory=True, exists=True)
     fiber_cutoff_lower = traits.Int(20, desc='Lower length threshold of the fibers', usedefault=True)
     fiber_cutoff_upper = traits.Int(500, desc='Upper length threshold of the fibers', usedefault=True)
     filtered_track_file = File(desc='Filtered trk file')
-    
+
 class CMTK_filterfibersOutputSpec(TraitedSpec):
     filtered_track_file= File(desc='Filtered trk file', exists=True)
     lengths_file= File(desc='Streamline lengths file', exists=True)
-    
+
 class CMTK_filterfibers(BaseInterface):
     input_spec = CMTK_filterfibersInputSpec
     output_spec = CMTK_filterfibersOutputSpec
-    
+
     def _run_interface(self, runtime):
         if isdefined(self.inputs.filtered_track_file):
             filter_fibers(intrk=self.inputs.track_file, outtrk=self.filtered_track_file,
@@ -214,7 +279,7 @@ class CMTK_filterfibers(BaseInterface):
                           fiber_cutoff_lower=self.inputs.fiber_cutoff_lower,
                           fiber_cutoff_upper=self.inputs.fiber_cutoff_upper)
         return runtime
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         if not isdefined(self.inputs.filtered_track_file):
@@ -224,7 +289,7 @@ class CMTK_filterfibers(BaseInterface):
             outputs["filtered_track_file"] = os.path.abspath(self.inputs.filtered_track_file)
         outputs["lengths_file"] = os.path.abspath("lengths.npy")
         return outputs
-        
+
 class StreamlineAndFilterInputSpect(BaseInterfaceInputSpec):
     # streamline input specs
     dir_file = File(desc='DIR path/filename (e.g. "data/dsi_DIR.nii")', position=1,
@@ -240,14 +305,14 @@ class StreamlineAndFilterInputSpect(BaseInterfaceInputSpec):
     spline_filter_step_length = traits.Int(1,usedefault=True)
     # fiberlenght filtering specs
     fiberlength_filter = Bool(True,usedefault=True)
-    
+
 class StreamlineAndFilterOutputSpect(TraitedSpec):
     out_file = File(desc='Resulting trk file', exists = True)
 
 class StreamlineAndFilter(BaseInterface):
     input_spec = StreamlineAndFilterInputSpect
     output_spec = StreamlineAndFilterOutputSpect
-    
+
     def _run_interface(self, runtime):
         # run streamline
         dtb_streamline = DTB_streamline(out_file=self.inputs.out_file)
@@ -258,7 +323,7 @@ class StreamlineAndFilter(BaseInterface):
         dtb_streamline.inputs.seeds = self.inputs.seeds
         dtb_streamline.inputs.out_file = self.inputs.out_file
         res_stream = dtb_streamline.run()
-        
+
         if self.inputs.spline_filter:
             dtk_splinefilter = dtk.SplineFilter(step_length=1)
             dtk_splinefilter.inputs.step_length = self.inputs.spline_filter_step_length
@@ -267,14 +332,14 @@ class StreamlineAndFilter(BaseInterface):
             out_track_file = res_splinefilter.outputs.smoothed_track_file
         else:
             out_track_file = res_stream.outputs.out_file
-            
+
         if self.inputs.fiberlength_filter:
             cmtk_filterfibers = CMTK_filterfibers()
             cmtk_filterfibers.inputs.track_file = out_track_file
             cmtk_filterfibers.run()
 
         return runtime
-        
+
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -285,7 +350,7 @@ class StreamlineAndFilter(BaseInterface):
                 out_trk = 'spline*trk'
             else:
                 out_trk = self.inputs.out_file
-            
+
         outputs["out_file"] = os.path.abspath(glob.glob(out_trk)[0])
         return outputs
 
@@ -295,10 +360,10 @@ class DTK_tracking_config(HasTraits):
     mask1_threshold_auto = Bool(True)
     mask1_threshold = List([0.0,1.0])
     mask1_input = Enum('DWI',['B0','DWI'])
-    
+
     traits_view = View('mask1_input','angle_threshold','mask1_threshold_auto',
                         Item('mask1_threshold',enabled_when='mask1_threshold_auto==False'))
-        
+
 def strip_suffix(file_input, prefix):
     import os
     from nipype.utils.filemanip import split_filename
@@ -341,7 +406,7 @@ class transform_trk_CRS2XYZtkRegInputSpec(CommandLineInputSpec):
 
 class transform_trk_CRS2XYZtkRegOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Trackvis file in the same space than Freesurfer data')
-    out_transform = File(exists=True, desc='CRS to XYZtkReg transform file') 
+    out_transform = File(exists=True, desc='CRS to XYZtkReg transform file')
 
 class transform_trk_CRS2XYZtkReg(BaseInterface):
     input_spec = transform_trk_CRS2XYZtkRegInputSpec
@@ -365,7 +430,7 @@ class transform_trk_CRS2XYZtkReg(BaseInterface):
 
         #print "STDOUT:",runtime.stdout
         #Run "mrinfo path-to-ref_image_file --crs2ras-tkr" command to get 'CRS' to 'XYZtkReg' transform
-        #cmd = 'mrinfo  --crs2ras-tkr' + ' ' + self.inputs.ref_image_file 
+        #cmd = 'mrinfo  --crs2ras-tkr' + ' ' + self.inputs.ref_image_file
         #cmd = ['mrinfo',self.inputs.ref_image_file,'--crs2ras-tkr']
 
         #transform_file = open(transform_filename,'w')
@@ -380,7 +445,7 @@ class transform_trk_CRS2XYZtkReg(BaseInterface):
         _, name , _ = split_filename(self.inputs.trackvis_file)
         transform_filename = 'CRS2XYZtkReg.txt'
         out_trackvis_filename = name + '_tkreg.trk'
-    
+
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.abspath(out_trackvis_filename)
         outputs['out_transform'] = os.path.abspath(transform_filename)
@@ -395,16 +460,16 @@ class match_orientationOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Trackvis file with orientation matching gibbs input')
 
 class match_orientations(BaseInterface):
-    
+
     input_spec = match_orientationInputSpec
     output_spec = match_orientationOutputSpec
-    
-    def _run_interface(self, runtime):    
+
+    def _run_interface(self, runtime):
         #filename = os.path.basename(self.inputs.trackvis_file)
 
         _, name , _ = split_filename(self.inputs.trackvis_file)
         filename = name + '_orcor.trk'
-        
+
         dx, dy, dz = get_data_dims(self.inputs.ref_image_file)
         vx, vy, vz = get_vox_dims(self.inputs.ref_image_file)
         image_file = nib.load(self.inputs.ref_image_file)
@@ -439,25 +504,25 @@ class match_orientations(BaseInterface):
         nib.trackvis.write(os.path.abspath(filename), new_fib, trk_header, points_space = 'voxmm')
         iflogger.info('file written to %s' % os.path.abspath(filename))
         return runtime
-    
+
     def _list_outputs(self):
         #filename = os.path.basename(self.inputs.trackvis_file)
         _, name , _ = split_filename(self.inputs.trackvis_file)
         filename = name + '_orcor.trk'
-    
+
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.abspath(filename)
         return outputs
-    
+
 def create_dtb_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
-    
+
     # inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_registered"]),name="inputnode")
-    
+
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
-    
+
     # Prepare data for tractography algorithm
     dtb_dtk2dir = pe.Node(interface=DTB_dtk2dir(), name="dtb_dtk2dir")
     if config.imaging_model == 'DSI':
@@ -477,8 +542,8 @@ def create_dtb_tracking_flow(config):
         dtb_dtk2dir.inputs.invert_y = True
     if 'z' in config.flip_input:
         dtb_dtk2dir.inputs.invert_z = True
-   
-    fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii', vox_size=(1,1,1), 
+
+    fs_mriconvert = pe.Node(interface=fs.MRIConvert(out_type='nii', vox_size=(1,1,1),
                             out_datatype='uchar', out_file='fsmask_1mm.nii'), name="fs_mriconvert")
 
     # Streamline AND filtering (to avoid temp files)
@@ -486,7 +551,7 @@ def create_dtb_tracking_flow(config):
     streamline_filter.inputs.angle = config.angle
     streamline_filter.inputs.step_size = config.step_size
     streamline_filter.inputs.seeds = config.seeds
-    
+
     # Workflow connections
     flow.connect([
                  (inputnode,dtb_dtk2dir, [(('DWI',strip_suffix,prefix),'prefix')]),
@@ -495,14 +560,14 @@ def create_dtb_tracking_flow(config):
                  (fs_mriconvert,streamline_filter, [('out_file','wm_mask')]),
                  (streamline_filter,outputnode, [('out_file','track_file')]),
                  ])
-        
+
     return flow
 
 class make_seedsInputSpec(BaseInterfaceInputSpec):
     ROI_files = InputMultiPath(File(exists=True),desc='ROI files registered to diffusion space')
     WM_file = File(mandatory=True,desc='WM mask file registered to diffusion space')
     #DWI = File(mandatory=True,desc='Diffusion data file for probabilistic tractography')
-    
+
 
 class make_seedsOutputSpec(TraitedSpec):
     seed_files = OutputMultiPath(File(exists=True),desc='Seed files for probabilistic tractography')
@@ -539,7 +604,7 @@ class make_seeds(BaseInterface):
             print self.ROI_idx.shape
             print self.ROI_idx
             # Take overlap between dilated ROIs and WM to define seeding regions
-            border = (np.multiply(ROI_data,WM_data)).astype(int) 
+            border = (np.multiply(ROI_data,WM_data)).astype(int)
             # Save one nifti file per seeding ROI
             temp = border.copy()
             # print border.max
@@ -553,12 +618,12 @@ class make_seeds(BaseInterface):
                 nib.save(new_image,save_as)
         txt_file.close()
         return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["seed_files"] = self.gen_outputfilelist()
         return outputs
-    
+
     def gen_outputfilelist(self):
         output_list = []
         for i in self.ROI_idx:
@@ -576,7 +641,7 @@ class make_mrtrix_seeds(BaseInterface):
     def _run_interface(self,runtime):
         iflogger.info("Computing seed files for probabilistic tractography\n===================================================")
         # Load ROI file
-        
+
         print self.inputs.ROI_files
 
         for ROI_file in self.inputs.ROI_files:
@@ -597,15 +662,15 @@ class make_mrtrix_seeds(BaseInterface):
             print self.ROI_idx.shape
             print self.ROI_idx
             # Take overlap between dilated ROIs and WM to define seeding regions
-            border = (np.multiply(ROI_data,WM_data)).astype(int) 
+            border = (np.multiply(ROI_data,WM_data)).astype(int)
             # Save one nifti file per seeding ROI
             _,self.base_name,_ = split_filename(ROI_file)
-            
+
             new_image = nib.Nifti1Image(border,ROI_affine)
             save_as = os.path.abspath(self.base_name+'_seeds.nii.gz')
             nib.save(new_image,save_as)
         return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["seed_files"] = os.path.abspath(self.base_name+'_seeds.nii.gz')
@@ -636,36 +701,199 @@ class extractHeaderVoxel2WorldMatrix(BaseInterface):
         outputs["out_matrix"] = os.path.abspath('voxel2world.txt')
         return outputs
 
-def create_mrtrix_tracking_flow(config):
+
+def create_dipy_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','wm_mask_resampled','gm_registered','grad']),name='inputnode')
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','fod_file','FA','T1','partial_volumes','wm_mask_resampled','gm_registered','bvals','bvecs','model']),name='inputnode')
     # outputnode
 
     #CRS2XYZtkReg = subprocess.check_output
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
+
+    if not config.SD and config.imaging_model != 'DSI': # If tensor fitting was used
+        dipy_tracking = pe.Node(interface=TensorInformedEudXTractography(),name='dipy_dtieudx_tracking')
+        dipy_tracking.inputs.num_seeds = config.number_of_seeds
+        dipy_tracking.inputs.fa_thresh = config.fa_thresh
+        dipy_tracking.inputs.max_angle = config.max_angle
+        dipy_tracking.inputs.step_size = config.step_size
+
+        flow.connect([
+                #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+                (inputnode,dipy_tracking,[('DWI','in_file')]),
+                (inputnode,dipy_tracking,[('model','in_model')]),
+                (inputnode,dipy_tracking,[('FA','in_fa')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
+                (dipy_tracking,outputnode,[('tracks','track_file')])
+                ])
+
+    else: # If CSD was used
+        if config.tracking_mode == 'Deterministic':
+            # dipy_seeds = pe.Node(interface=make_seeds(),name="dipy_seeds")
+            # dipy_tracking = pe.Node(interface=dipy.StreamlineTractography(),name="dipy_deterministic_tracking")
+
+            # dipy_tracking.inputs.num_seeds = config.number_of_tracks
+            # dipy_tracking.inputs.gfa_thresh = config.gfa_thresh
+            # dipy_tracking.inputs.peak_threshold = config.peak_thresh
+            # dipy_tracking.inputs.min_angle = config.min_angle
+
+            # # flow.connect([
+            # #               (inputnode,dipy_tracking,[("bvals","bvals")]),
+            # #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
+            # #             ])
+
+            # flow.connect([
+            #     (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
+            #     (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
+            #     ])
+
+            # flow.connect([
+            #     #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
+            #     (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+            #     (inputnode,dipy_tracking,[('DWI','in_file')]),
+            #     (inputnode,dipy_tracking,[('model','in_model')]),
+            #     (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
+            #     (dipy_tracking,outputnode,[('tracks','track_file')])
+            #     ])
+
+            dipy_seeds = pe.Node(interface=make_seeds(),name="dipy_seeds")
+            dipy_tracking = pe.Node(interface=DirectionGetterTractography(),name="dipy_deterministic_tracking")
+            dipy_tracking.inputs.algo = 'deterministic'
+            dipy_tracking.inputs.num_seeds = config.number_of_seeds
+            dipy_tracking.inputs.fa_thresh = config.fa_thresh
+            dipy_tracking.inputs.max_angle = config.max_angle
+            dipy_tracking.inputs.step_size = config.step_size
+            dipy_tracking.inputs.use_act = config.use_act
+            dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
+
+            if config.imaging_model == 'DSI':
+                dipy_tracking.inputs.recon_model = 'SHORE'
+            else:
+                dipy_tracking.inputs.recon_model = 'CSD'
+                dipy_tracking.inputs.recon_order = config.sh_order
+
+            # flow.connect([
+            #               (inputnode,dipy_tracking,[("bvals","bvals")]),
+            #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
+            #             ])
+
+            flow.connect([
+                (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
+                (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
+                ])
+
+            if config.imaging_model == 'DSI':
+                flow.connect([
+                            (inputnode,dipy_tracking,[('fod_file','fod_file')]),
+                            ])
+
+            flow.connect([
+                #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+                (inputnode,dipy_tracking,[('DWI','in_file')]),
+                (inputnode,dipy_tracking,[('partial_volumes','in_partial_volume_files')]),
+                (inputnode,dipy_tracking,[('model','in_model')]),
+                (inputnode,dipy_tracking,[('FA','in_fa')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
+                (dipy_tracking,outputnode,[('tracks','track_file')])
+                ])
+
+        elif config.tracking_mode == 'Probabilistic':
+
+            dipy_seeds = pe.Node(interface=make_seeds(),name="dipy_seeds")
+
+            flow.connect([
+                (inputnode,dipy_seeds,[('wm_mask_resampled','WM_file')]),
+                (inputnode,dipy_seeds,[('gm_registered','ROI_files')]),
+                ])
+
+            dipy_tracking = pe.Node(interface=DirectionGetterTractography(),name="dipy_probabilistic_tracking")
+            dipy_tracking.inputs.algo = 'probabilistic'
+            dipy_tracking.inputs.num_seeds = config.number_of_seeds
+            dipy_tracking.inputs.fa_thresh = config.fa_thresh
+            dipy_tracking.inputs.max_angle = config.max_angle
+            dipy_tracking.inputs.step_size = config.step_size
+            dipy_tracking.inputs.use_act = config.use_act
+            dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
+
+            if config.imaging_model == 'DSI':
+                dipy_tracking.inputs.recon_model = 'SHORE'
+            else:
+                dipy_tracking.inputs.recon_model = 'CSD'
+                dipy_tracking.inputs.recon_order = config.sh_order
+
+            # flow.connect([
+            #               (inputnode,dipy_tracking,[("bvals","bvals")]),
+            #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
+            #             ])
+
+            if config.imaging_model == 'DSI':
+                flow.connect([
+                            (inputnode,dipy_tracking,[('fod_file','fod_file')]),
+                            ])
+
+            flow.connect([
+                #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+                (inputnode,dipy_tracking,[('DWI','in_file')]),
+                (inputnode,dipy_tracking,[('partial_volumes','in_partial_volume_files')]),
+                (inputnode,dipy_tracking,[('model','in_model')]),
+                (inputnode,dipy_tracking,[('FA','in_fa')]),
+                (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
+                (dipy_tracking,outputnode,[('tracks','track_file')])
+                ])
+
+    return flow
+
+def get_freesurfer_parcellation(roi_files):
+    print "%s"%roi_files[0]
+    return roi_files[0]
+
+def create_mrtrix_tracking_flow(config):
+    flow = pe.Workflow(name="tracking")
+    # inputnode
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','wm_mask_resampled','gm_registered','act_5tt_registered','gmwmi_registered','grad']),name='inputnode')
+    # outputnode
+
+    #CRS2XYZtkReg = subprocess.check_output
+
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
+
+    # Compute single fiber voxel mask
+    wm_erode = pe.Node(interface=Erode(out_filename="wm_mask_resampled.nii.gz"),name="wm_erode")
+    wm_erode.inputs.number_of_passes = 3
+    wm_erode.inputs.filtertype = 'erode'
+
+    flow.connect([
+        (inputnode,wm_erode,[("wm_mask_resampled",'in_file')])
+        ])
+
     if config.tracking_mode == 'Deterministic':
         mrtrix_seeds = pe.Node(interface=make_mrtrix_seeds(),name="mrtrix_seeds")
         mrtrix_tracking = pe.Node(interface=StreamlineTrack(),name="mrtrix_deterministic_tracking")
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
-        mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
+        #mrtrix_tracking.inputs.maximum_number_of_seeds = config.max_number_of_seeds
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
         mrtrix_tracking.inputs.minimum_tract_length = config.min_length
         mrtrix_tracking.inputs.step_size = config.step_size
+        mrtrix_tracking.inputs.angle = config.angle
+        mrtrix_tracking.inputs.cutoff_value = config.cutoff_value
+
         # mrtrix_tracking.inputs.args = '2>/dev/null'
         if config.curvature >= 0.000001:
             mrtrix_tracking.inputs.rk4 = True
-            mrtrix_tracking.inputs.inputmodel = 'SD_Stream'  
+            mrtrix_tracking.inputs.inputmodel = 'SD_Stream'
         else:
             mrtrix_tracking.inputs.inputmodel = 'SD_Stream'
         flow.connect([
                       (inputnode,mrtrix_tracking,[("grad","gradient_encoding_file")])
                     ])
-        converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
+
 
         voxel2WorldMatrixExtracter = pe.Node(interface=extractHeaderVoxel2WorldMatrix(),name='voxel2WorldMatrixExtracter')
-        
+
         flow.connect([
                       (inputnode,voxel2WorldMatrixExtracter,[("wm_mask_resampled","in_file")])
                     ])
@@ -681,15 +909,43 @@ def create_mrtrix_tracking_flow(config):
             (inputnode,mrtrix_seeds,[('wm_mask_resampled','WM_file')]),
             (inputnode,mrtrix_seeds,[('gm_registered','ROI_files')]),
             ])
+
+        if config.use_act:
+            flow.connect([
+                (inputnode,mrtrix_tracking,[('act_5tt_registered','act_file')]),
+    		    ])
+            mrtrix_tracking.inputs.backtrack = config.backtrack
+            mrtrix_tracking.inputs.crop_at_gmwmi = config.crop_at_gmwmi
+        else:
+            flow.connect([
+                (wm_erode, mrtrix_tracking,[('out_file','mask_file')]),
+    		    ])
+
+        if config.seed_from_gmwmi:
+            flow.connect([
+                (inputnode,mrtrix_tracking,[('gmwmi_registered','seed_gmwmi')]),
+    		    ])
+        else:
+            flow.connect([
+    		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
+                ])
+
+        # converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
+        converter = pe.Node(interface=Tck2Trk(),name="trackvis")
+        converter.inputs.out_tracks = 'converted.trk'
+
         flow.connect([
             #(mrtrix_seeds,mrtrix_tracking,[('seed_files','seed_file')]),
-            (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
             (inputnode,mrtrix_tracking,[('DWI','in_file')]),
-            (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
-            (mrtrix_tracking,outputnode,[('tracked','track_file')]),
-            (mrtrix_tracking,converter,[('tracked','in_file')]),
-            (inputnode,converter,[('wm_mask_resampled','image_file')])
-            #(converter,outputnode,[('out_file','track_file')])
+            #(inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
+            # (wm_erode, mrtrix_tracking,[('out_file','mask_file')]),
+            #(mrtrix_tracking,outputnode,[('tracked','track_file')]),
+            # (mrtrix_tracking,converter,[('tracked','in_file')]),
+            # (inputnode,converter,[('wm_mask_resampled','image_file')]),
+            # (converter,outputnode,[('out_file','track_file')])
+            (mrtrix_tracking,converter,[('tracked','in_tracks')]),
+            (inputnode,converter,[('wm_mask_resampled','in_image')]),
+            (converter,outputnode,[('out_tracks','track_file')])
             ])
 
         # flow.connect([
@@ -707,12 +963,14 @@ def create_mrtrix_tracking_flow(config):
 
     elif config.tracking_mode == 'Probabilistic':
         mrtrix_seeds = pe.Node(interface=make_mrtrix_seeds(),name="mrtrix_seeds")
-        mrtrix_tracking = pe.MapNode(interface=StreamlineTrack(),name="mrtrix_probabilistic_tracking",iterfield=['seed_file'])
+        mrtrix_tracking = pe.Node(interface=StreamlineTrack(),name="mrtrix_probabilistic_tracking")
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
-        mrtrix_tracking.inputs.maximum_number_of_tracks = config.max_number_of_tracks
+        #mrtrix_tracking.inputs.maximum_number_of_seeds = config.max_number_of_seeds
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
         mrtrix_tracking.inputs.minimum_tract_length = config.min_length
         mrtrix_tracking.inputs.step_size = config.step_size
+        mrtrix_tracking.inputs.angle = config.angle
+        mrtrix_tracking.inputs.cutoff_value = config.cutoff_value
         # mrtrix_tracking.inputs.args = '2>/dev/null'
         #if config.curvature >= 0.000001:
         #    mrtrix_tracking.inputs.rk4 = True
@@ -720,21 +978,51 @@ def create_mrtrix_tracking_flow(config):
             mrtrix_tracking.inputs.inputmodel='iFOD2'
         else:
             mrtrix_tracking.inputs.inputmodel='Tensor_Prob'
-        converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name='trackvis')
+        #converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name='trackvis')
+        converter = pe.Node(interface=Tck2Trk(),name='trackvis')
+        converter.inputs.out_tracks = 'converted.trk'
         #orientation_matcher = pe.Node(interface=match_orientation(), name="orient_matcher")
 
         flow.connect([
 		    (inputnode,mrtrix_seeds,[('wm_mask_resampled','WM_file')]),
 		    (inputnode,mrtrix_seeds,[('gm_registered','ROI_files')]),
 		    ])
+
+        if config.use_act:
+            flow.connect([
+                (inputnode,mrtrix_tracking,[('act_5tt_registered','act_file')]),
+    		    ])
+            mrtrix_tracking.inputs.backtrack = config.backtrack
+            mrtrix_tracking.inputs.crop_at_gmwmi = config.crop_at_gmwmi
+        else:
+            flow.connect([
+                (wm_erode, mrtrix_tracking,[('out_file','mask_file')]),
+    		    ])
+
+        if config.seed_from_gmwmi:
+            flow.connect([
+                (inputnode,mrtrix_tracking,[('gmwmi_registered','seed_gmwmi')]),
+    		    ])
+        else:
+            flow.connect([
+    		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','seed_file')]),
+                ])
+
         flow.connect([
-		    (mrtrix_seeds,mrtrix_tracking,[('seed_files','seed_file')]),
 		    (inputnode,mrtrix_tracking,[('DWI','in_file')]),
-		    (inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
-            (mrtrix_tracking,outputnode,[('tracked','track_file')])
+		    #(inputnode,mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
+            #(mrtrix_tracking,outputnode,[('tracked','track_file')]),
+            ##(mrtrix_tracking,converter,[('tracked','in_file')]),
+            # (mrtrix_tracking,converter,[('tracked','in_file')]),
+            # (inputnode,converter,[('wm_mask_resampled','image_file')]),
+            # # (converter,outputnode,[('out_file','track_file')])
+            # (converter,outputnode,[('out_tracks','track_file')])
             #(mrtrix_tracking,converter,[('tracked','in_file')]),
             #(inputnode,converter,[('wm_mask_resampled','image_file')]),
 		    #(converter,outputnode,[('out_file','track_file')])
+            (mrtrix_tracking,converter,[('tracked','in_tracks')]),
+            (inputnode,converter,[('wm_mask_resampled','in_image')]),
+            (converter,outputnode,[('out_tracks','track_file')])
 		    ])
 
     return flow
@@ -744,12 +1032,12 @@ def create_camino_tracking_flow(config):
 
     # inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","wm_mask_resampled","gm_registered", "grad"]),name="inputnode")
-    
+
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file"]),name="outputnode")
-    
+
     if config.tracking_mode == 'Deterministic':
-        
+
         # Camino tracking
         camino_tracking = pe.Node(interface=camino.Track(),name='camino_tracking')
         camino_tracking.inputs.curvethresh = config.angle
@@ -762,7 +1050,7 @@ def create_camino_tracking_flow(config):
         # Converter
         converter = pe.Node(interface=camino2trackvis.Camino2Trackvis(),name='trackvis')
         converter.inputs.phys_coords = True
-    
+
         flow.connect([
     		(inputnode,camino_tracking,[('DWI','in_file')]),
     		(inputnode,camino_tracking,[('wm_mask_resampled','seed_file')]),
@@ -771,7 +1059,7 @@ def create_camino_tracking_flow(config):
             (inputnode,converter,[('wm_mask_resampled','nifti_file')]),
             (converter,outputnode,[('trackvis','track_file')]),
     		])
-        
+
     elif config.tracking_mode == 'Probabilistic':
         # Make seeds
         camino_seeds = pe.Node(interface=make_seeds(),name="camino_seeds")
@@ -789,7 +1077,7 @@ def create_camino_tracking_flow(config):
             dtlutgen.inputs.watson = True
         if config.pdf == 'acg':
             dtlutgen.inputs.acg = True
-            
+
         if config.inversion_index >= 10:
             dtlutgen.inputs.cross = config.cross_angle
             dtlutgen2 = pe.Node(interface=camino.DTLUTGen(),name='dtlutgen2')
@@ -805,7 +1093,7 @@ def create_camino_tracking_flow(config):
                 dtlutgen2.inputs.watson = True
             if config.pdf == 'acg':
                 dtlutgen2.inputs.acg = True
-                
+
         # Pico PDF generation
         picopdf = pe.Node(interface=camino.PicoPDFs(),name='picopdf')
         picopdf.inputs.pdf = config.pdf
@@ -817,13 +1105,13 @@ def create_camino_tracking_flow(config):
                         (dtlutgen,merge,[("dtLUT","in2")]),
                         (merge,picopdf,[("out","luts")]),
                         ])
-            
+
         else:
             picopdf.inputs.inputmodel = 'dt'
             flow.connect([
                         (dtlutgen,picopdf,[("dtLUT","luts")]),
-                        ])         
-            
+                        ])
+
         # Camino tracking
         camino_tracking = pe.MapNode(interface=camino.TrackPICo(),iterfield=['seed_file'],name='camino_tracking')
         camino_tracking.inputs.curvethresh = config.angle
@@ -835,11 +1123,11 @@ def create_camino_tracking_flow(config):
             camino_tracking.inputs.numpds = 2
         else:
             camino_tracking.inputs.numpds = 3
-        
+
         # Convert to trk format
         converter = pe.MapNode(interface=camino2trackvis.Camino2Trackvis(),iterfield=['in_file'],name='trackvis')
         converter.inputs.phys_coords = True
-        
+
         flow.connect([
             (inputnode,camino_seeds,[('wm_mask_resampled','WM_file')]),
             (inputnode,camino_seeds,[('gm_registered','ROI_files')]),
@@ -851,24 +1139,24 @@ def create_camino_tracking_flow(config):
             (inputnode,converter,[('wm_mask_resampled','nifti_file')]),
             (converter,outputnode,[('trackvis','track_file')]),
             ])
-        
+
 
     return flow
 
 
 def create_fsl_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
-    
+
     # inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["phsamples","fsamples","thsamples","wm_mask_resampled","gm_registered"]),name="inputnode")
-    
+
     # outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["targets"]),name="outputnode")
-    
+
     fsl_seeds = pe.Node(interface=make_seeds(),name="fsl_seeds")
-    
+
     probtrackx = pe.MapNode(interface=mapped_ProbTrackX(),iterfield=['seed'],name='probtrackx') #
-    
+
     probtrackx.inputs.n_samples = config.number_of_samples
     probtrackx.inputs.n_steps = config.number_of_steps
     probtrackx.inputs.dist_thresh = config.distance_threshold
@@ -880,7 +1168,7 @@ def create_fsl_tracking_flow(config):
     probtrackx.inputs.network = False
     probtrackx.inputs.mode = "seedmask"
     probtrackx.inputs.force_dir = True
-    
+
     flow.connect([
             (inputnode,fsl_seeds,[('wm_mask_resampled','WM_file')]),
             (inputnode,fsl_seeds,[('gm_registered','ROI_files')]),
@@ -892,7 +1180,7 @@ def create_fsl_tracking_flow(config):
             (inputnode,probtrackx,[("thsamples","thsamples")]),
             (probtrackx,outputnode,[("matrix","targets")])
             ])
-    
+
     return flow
 
 class gibbs_tracking_CMDInputSpec(CommandLineInputSpec):
@@ -913,7 +1201,7 @@ class gibbs_tracking_CMD(CommandLine):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file_name)
         return outputs
-    
+
 class gibbs_trackingInputSpec(BaseInterfaceInputSpec):
 
     # Inputs for XML file
@@ -945,7 +1233,7 @@ class gibbs_tracking(BaseInterface):
         xml_text = '<?xml version="1.0" ?>\n<global_tracking_parameter_file file_version="0.1">\n    <parameter_set iterations="%s" particle_length="%s" particle_width="%s" particle_weight="%s" temp_start="%s" temp_end="%s" inexbalance="%s" fiber_length="%s" curvature_threshold="%s" />\n</global_tracking_parameter_file>' % (self.inputs.iterations,self.inputs.particle_length,self.inputs.particle_width,self.inputs.particle_weight,self.inputs.temp_start,self.inputs.temp_end,self.inputs.inexbalance,self.inputs.fiber_length, self.inputs.curvature_threshold)
         f.write(xml_text)
         f.close()
-        
+
         # Call gibbs software
         gibbs = gibbs_tracking_CMD(in_file=self.inputs.in_file,parameter_file=os.path.abspath('gibbs_parameters.gtp'))
         gibbs.inputs.mask = self.inputs.mask
@@ -967,7 +1255,7 @@ def create_gibbs_tracking_flow(config):
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["track_file","param_file"],mandatory_inputs=True),name="outputnode")
 
     gibbs = pe.Node(interface=gibbs_tracking(iterations = config.iterations, particle_length=config.particle_length, particle_width=config.particle_width, particle_weight=config.particle_weight, temp_start=config.temp_start, temp_end=config.temp_end, inexbalance=config.inexbalance, fiber_length=config.fiber_length, curvature_threshold=config.curvature_threshold),name="gibbs_tracking")
-        
+
     match_orient = pe.Node(interface=match_orientations(),name='match_orientations')
 
     flow.connect([

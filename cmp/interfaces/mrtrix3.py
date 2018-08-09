@@ -5,7 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 """ The MRTrix3 module provides functions for interfacing with MRTrix3 functions missing in nipype or modified
-""" 
+"""
 
 import nipype.interfaces.base as nibase
 import nipype.interfaces.utility as util
@@ -78,19 +78,24 @@ class Erode(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name is 'out_filename':
+        if name is 'out_file':
             return self._gen_outfilename()
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
-        return name + '_erode.mif'
+        if isdefined(self.inputs.out_filename):
+            outfilename = self.inputs.out_filename
+        else:
+            _, name , _ = split_filename(self.inputs.in_file)
+            outfilename = name + '_erode.mif'
+
+        return outfilename
 
 
 class DWIDenoiseInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='Input diffusion-weighted image filename')
     out_file = File(genfile=True, argstr='%s', position=-1, desc='Output denoised DWI image filename.')
-    
+
     mask = File(argstr="-mask %s",position=1,mandatory=False,desc="Only perform computation within the specified binary brain mask image. (optional)")
     extent_window = traits.List(traits.Float, argstr='-extent %s', sep=',',position=2, minlen=3, maxlen=3,desc='Three comma-separated numbers giving the window size of the denoising filter.')
     out_noisemap = File(argstr='-noise %s', position=3, desc='Output noise map filename.')
@@ -104,7 +109,7 @@ class DWIDenoiseOutputSpec(TraitedSpec):
     out_noisemap = File(exists=True, desc='Output noise map (if generated).')
 
 class DWIDenoise(CommandLine):
-    cmd = 'dwidenoise'
+    _cmd = 'dwidenoise'
     input_spec = DWIDenoiseInputSpec
     output_spec = DWIDenoiseOutputSpec
 
@@ -182,7 +187,7 @@ class DWIDenoise(CommandLine):
 class DWIBiasCorrectInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='The input image series to be corrected')
     out_file = File(genfile=True, argstr='%s', position=-1, desc='The output corrected image series')
-    
+
     mask = File(argstr="-mask %s",position=2,mandatory=False,desc="Manually provide a mask image for bias field estimation (optional)")
     out_bias = File(genfile=True, argstr='-bias %s', position=3, desc='Output the estimated bias field')
 
@@ -192,14 +197,14 @@ class DWIBiasCorrectInputSpec(CommandLineInputSpec):
 
     force_writing = traits.Bool(argstr='-force', position=4, desc="Force file overwriting.")
     #quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
-    verbose = traits.Bool(argstr='-verbose', position=5, desc="Display debugging messages.")
+    debug = traits.Bool(argstr='-debug', position=5, desc="Display debugging messages.")
 
 class DWIBiasCorrectOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Output corrected DWI image')
     out_bias = File(exists=True, desc='Output estimated bias field')
 
 class DWIBiasCorrect(CommandLine):
-    cmd = 'dwibiascorrect'
+    _cmd = 'dwibiascorrect'
     input_spec = DWIBiasCorrectInputSpec
     output_spec = DWIBiasCorrectOutputSpec
 
@@ -366,7 +371,7 @@ class MRCrop(CommandLine):
     Example
     -------
 
-    >>> 
+    >>>
     """
 
     _cmd = 'mrcrop'
@@ -474,10 +479,10 @@ class ExtractFSLGradInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Input images to be read')
     out_grad_fsl =  traits.Tuple(File(),File(), argstr='-export_grad_fsl %s %s', desc='export the DWI gradient table to files in FSL (bvecs / bvals) format')
-    
+
 class ExtractFSLGradOutputSpec(TraitedSpec):
     out_grad_fsl = traits.Tuple(File(exists=True),File(exists=True), desc='Outputs [bvecs, bvals] DW gradient scheme (FSL format) if set')
-    
+
 class ExtractFSLGrad(CommandLine):
     """
     Prints out relevant header information found in the image specified.
@@ -507,10 +512,10 @@ class ExtractMRTrixGradInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='Input images to be read')
     out_grad_mrtrix = File(argstr='-export_grad_mrtrix %s',desc='export the DWI gradient table to file in MRtrix format')
-    
+
 class ExtractMRTrixGradOutputSpec(TraitedSpec):
     out_grad_mrtrix = File(exits=True,desc='Output MRtrix gradient text file if set')
-    
+
 class ExtractMRTrixGrad(CommandLine):
     """
     Prints out relevant header information found in the image specified.
@@ -636,9 +641,9 @@ class EstimateResponseForSHInputSpec(CommandLineInputSpec):
     mask_image = File(exists=True, mandatory=True, argstr='-mask %s', position=-1, desc='only perform computation within the specified binary brain mask image')
     out_filename = File(genfile=True, argstr='%s', position=3, desc='Output filename')
     encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2, desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
-    maximum_harmonic_order = traits.Float(argstr='-lmax %s', position=-3, desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
+    maximum_harmonic_order = traits.Int(argstr='-lmax %s', position=-3, desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     # normalise = traits.Bool(argstr='-normalise', desc='normalise the DW signal to the b=0 image')
-    
+
     quiet = traits.Bool(argstr='-quiet', desc='Do not display information messages or progress status.')
     debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
 
@@ -755,12 +760,99 @@ class ConstrainedSphericalDeconvolution(CommandLine):
         return name + '_CSD.mif'
 
 
+class Generate5ttInputSpec(CommandLineInputSpec):
+    algorithm = traits.Enum(
+        'fsl',
+        'gif',
+        'freesurfer',
+        argstr='%s',
+        position=-3,
+        mandatory=True,
+        desc='tissue segmentation algorithm')
+    in_file = File(
+        exists=True,
+        argstr='-nocrop %s',
+        mandatory=True,
+        position=-2,
+        desc='input image')
+    out_file = File(
+        argstr='%s', mandatory=True, position=-1, desc='output image')
+
+
+class Generate5ttOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output image')
+
+
+class Generate5tt(CommandLine):
+    """
+    Generate a 5TT image suitable for ACT using the selected algorithm
+    Example
+    -------
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> gen5tt = mrt.Generate5tt()
+    >>> gen5tt.inputs.in_file = 'T1.nii.gz'
+    >>> gen5tt.inputs.algorithm = 'fsl'
+    >>> gen5tt.inputs.out_file = '5tt.mif'
+    >>> gen5tt.cmdline                             # doctest: +ELLIPSIS
+    '5ttgen fsl T1.nii.gz 5tt.mif'
+    >>> gen5tt.run()                               # doctest: +SKIP
+    """
+
+    _cmd = '5ttgen'
+    input_spec = Generate5ttInputSpec
+    output_spec = Generate5ttOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+class GenerateGMWMInterfaceInputSpec(CommandLineInputSpec):
+
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=-2,
+        desc='input 5TT image')
+    out_file = File(
+        argstr='%s', mandatory=True, position=-1, desc='output GW/WM interface image')
+
+class GenerateGMWMInterfaceOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output image')
+
+class GenerateGMWMInterface(CommandLine):
+    """
+     Generate a mask image appropriate for seeding streamlines on the grey
+     matter-white matter interface
+
+    Example
+    -------
+    >>> import cmp.interfaces.mrtrix3 as cmp_mrt
+    >>> genWMGMI = cmp_mrt.Generate5tt()
+    >>> genWMGMI.inputs.in_file = '5tt.mif'
+    >>> genWMGMI.inputs.out_file = 'gmwmi.mif'
+    >>> genWMGMI.cmdline                             # doctest: +ELLIPSIS
+    '5tt2gmwmi 5tt.mif gmwmi.mif'
+    >>> genGMWMI.run()                               # doctest: +SKIP
+    """
+
+    _cmd = '5tt2gmwmi'
+    input_spec = GenerateGMWMInterfaceInputSpec
+    output_spec = GenerateGMWMInterfaceOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
 class StreamlineTrackInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the image containing the source data.' \
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=2, desc='the image containing the source data.' \
     'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, ' \
     'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
 
-    seed_file = File(exists=True, argstr='-seed_image %s', mandatory=True, desc='seed file')
+    seed_file = File(exists=True, argstr='-seed_image %s',desc='seed file')
     seed_spec = traits.List(traits.Int, desc='seed specification in voxels and radius (x y z r)',
         argstr='-seed_sphere %s', minlen=4, maxlen=4, sep=',', units='voxels')
     # include_file = File(exists=True, argstr='-include %s', mandatory=False, desc='inclusion file')
@@ -776,7 +868,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     gradient_encoding_file = File(exists=True, argstr='-grad %s', mandatory=False,
     desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
 
-    inputmodel = traits.Enum('FACT', 'iFOD1', 'iFOD2', 'Nulldist1', 'Nulldist2', 'SD_Stream', 'Seedtest', 'Tensor_Det', 'Tensor_Prob', 
+    inputmodel = traits.Enum('FACT', 'iFOD1', 'iFOD2', 'Nulldist1', 'Nulldist2', 'SD_Stream', 'Seedtest', 'Tensor_Det', 'Tensor_Prob',
         argstr='-algorithm %s', desc='specify the tractography algorithm to use. Valid choices are: FACT, iFOD1, iFOD2, Nulldist1, Nulldist2, SD_Stream, Seedtest, Tensor_Det, Tensor_Prob (default: iFOD2).', usedefault=True, position=-3)
 
     stop = traits.Bool(argstr='-stop', desc="stop track as soon as it enters any of the include regions.")
@@ -785,28 +877,53 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     # no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
 
     step_size = traits.Float(argstr='-step %s', units='mm',
-        desc="Set the step size of the algorithm in mm (default is 0.2).")
+        desc="Set the step size of the algorithm in mm (default is 0.5).")
     # minimum_radius_of_curvature = traits.Float(argstr='-curvature %s', units='mm',
     #     desc="Set the minimum radius of curvature (default is 2 mm for DT_STREAM, 0 for SD_STREAM, 1 mm for SD_PROB and DT_PROB)")
-    desired_number_of_tracks = traits.Int(argstr='-number %d', desc='Sets the desired number of tracks.'   \
+    desired_number_of_tracks = traits.Int(argstr='-select %d', desc='Sets the desired number of tracks.'   \
     'The program will continue to generate tracks until this number of tracks have been selected and written to the output file' \
     '(default is 100 for *_STREAM methods, 1000 for *_PROB methods).')
-    maximum_number_of_tracks = traits.Int(argstr='-maxnum %d', desc='Sets the maximum number of tracks to generate.' \
+    maximum_number_of_seeds = traits.Int(argstr='-seeds %d', desc='Sets the maximum number of tracks to generate.' \
     "The program will not generate more tracks than this number, even if the desired number of tracks hasn't yet been reached" \
-    '(default is 100 x number).')
+    '(default is 1000 x number of streamlines).')
     rk4 = traits.Bool(argstr='-rk4',desc='use 4th-order Runge-Kutta integration (slower, but eliminates curvature overshoot in 1st-order deterministic methods)')
     minimum_tract_length = traits.Float(argstr='-minlength %s', units='mm',
-        desc="Sets the minimum length of any track in millimeters (default is 10 mm).")
+        desc="Sets the minimum length of any track in millimeters (default is 5 mm).")
     maximum_tract_length = traits.Float(argstr='-maxlength %s', units='mm',
-        desc="Sets the maximum length of any track in millimeters (default is 200 mm).")
+        desc="Sets the maximum length of any track in millimeters (default is 500 mm).")
+
+    angle = traits.Float(argstr='-angle %s', units='degrees',
+        desc="Set the maximum angle between successive steps (default is 90deg x stepsize / voxelsize).")
 
     cutoff_value = traits.Float(argstr='-cutoff %s', units='NA',
-        desc="Set the FA or FOD amplitude cutoff for terminating tracks (default is 0.1).")
+        desc="Set the FA or FOD amplitude cutoff for terminating tracks (default is 0.5).")
     initial_cutoff_value = traits.Float(argstr='-seed_cutoff %s', units='NA',
         desc="Sets the minimum FA or FOD amplitude for initiating tracks (default is twice the normal cutoff).")
 
     initial_direction = traits.List(traits.Int, desc='Specify the initial tracking direction as a vector',
         argstr='-seed_direction %s', minlen=2, maxlen=2, units='voxels')
+
+     # Anatomically-Constrained Tractography options
+    act_file = File(
+        exists=True,
+        argstr='-act %s',
+        desc=('use the Anatomically-Constrained Tractography framework during'
+              ' tracking; provided image must be in the 5TT '
+              '(five - tissue - type) format'))
+
+    backtrack = traits.Bool(
+        argstr='-backtrack', desc='allow tracks to be truncated')
+
+    crop_at_gmwmi = traits.Bool(
+        argstr='-crop_at_gmwmi',
+        desc=('crop streamline endpoints more precisely as they cross the GM-WM interface'))
+
+    seed_gmwmi = File(
+        exists=True,
+        argstr='-seed_gmwmi %s',
+        requires=['act_file'],
+        desc=('seed from the grey matter - white matter interface (only valid if using ACT framework)'))
+
     out_file = File(argstr='%s', position= -1, genfile=True, desc='output data file')
 
 class StreamlineTrackOutputSpec(TraitedSpec):
