@@ -53,3 +53,4 @@ RUN apt-get install git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
 
 ## Install AFNI
 RUN apt-get install afni
+
