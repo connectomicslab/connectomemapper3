@@ -20,7 +20,7 @@ ENV PATH /opt/conda/bin:$PATH
 # Note: (fix nodes_iter() to nodes() for networkx2 support)
 
 RUN conda config --add channels conda-forge
-RUN conda install -y python ipython jupyter matplotlib networkx numpy scipy sphinx traits dateutil nose pydot traitsui dipy nibabel mne nipype obspy graphviz \
+RUN conda install -y python ipython jupyter matplotlib networkx numpy scipy sphinx traits dateutil nose pydot traitsui dipy nibabel mne nipype obspy graphviz
     
 RUN conda install -c aramislab -y pybids
 RUN conda install -y pyqt=4 
