@@ -46,11 +46,7 @@ RUN conda install -y nipype=1.0
 RUN conda install -y obspy=1.1.0 
 RUN conda install -y graphviz=2.38.0 
 RUN conda install -y pyqt=4 
-RUN conda install -y pybids=0.1
-    
-RUN conda install -c aramislab -y 
-RUN conda install -y  
-
+RUN conda install -c aramislab -y pybids=0.1
 RUN conda clean --all --yes
 
 ## Install Neurodebian
