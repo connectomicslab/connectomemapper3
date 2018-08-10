@@ -17,10 +17,6 @@ RUN apt-get update && apt-get -qq -y install curl bzip2 && \
     rm -rf /tmp/miniconda.sh && \
     conda install -y python=2.7.13 && \
     conda update conda && \
-    apt-get -qq -y remove curl bzip2 && \
-    apt-get -qq -y autoremove && \
-    apt-get autoclean && \
-    rm -rf /var/lib/apt/lists/* /var/log/dpkg.log && \
     conda clean --all --yes
 ENV PATH /opt/conda/bin:$PATH
 # Note: (fix nodes_iter() to nodes() for networkx2 support)
@@ -53,9 +49,67 @@ RUN conda clean --all --yes
 #RUN apt-get install neurodebian && \
 #    apt-get update
 
-## Install FSL from Neurodebian
+# # Installing freesurfer
+RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
+    --exclude='freesurfer/trctrain' \
+    --exclude='freesurfer/subjects/fsaverage_sym' \
+    --exclude='freesurfer/subjects/fsaverage3' \
+    --exclude='freesurfer/subjects/fsaverage4' \
+    --exclude='freesurfer/subjects/cvs_avg35' \
+    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' \
+    --exclude='freesurfer/subjects/bert' \
+    --exclude='freesurfer/subjects/V1_average' \
+    --exclude='freesurfer/average/mult-comp-cor' \
+    --exclude='freesurfer/lib/cuda' \
+    --exclude='freesurfer/lib/qt'
 
+ENV FSL_DIR=/usr/share/fsl/5.0 \
+    OS=Linux \
+    FS_OVERRIDE=0 \
+    FIX_VERTEX_AREA= \
+    FSF_OUTPUT_FORMAT=nii.gz \
+    FREESURFER_HOME=/opt/freesurfer
+ENV SUBJECTS_DIR=$FREESURFER_HOME/subjects \
+    FUNCTIONALS_DIR=$FREESURFER_HOME/sessions \
+    MNI_DIR=$FREESURFER_HOME/mni \
+    LOCAL_DIR=$FREESURFER_HOME/local \
+    FSFAST_HOME=$FREESURFER_HOME/fsfast \
+    MINC_BIN_DIR=$FREESURFER_HOME/mni/bin \
+    MINC_LIB_DIR=$FREESURFER_HOME/mni/lib \
+    MNI_DATAPATH=$FREESURFER_HOME/mni/data \
+    FMRI_ANALYSIS_DIR=$FREESURFER_HOME/fsfast
+ENV PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
+    MNI_PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
+    PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH
+
+## Install FSL from Neurodebian
 RUN apt-get install fsl-complete
+
+## Install AFNI
+RUN apt-get install afni
+
+ENV FSLDIR=/usr/share/fsl/5.0 \
+    FSLOUTPUTTYPE=NIFTI_GZ \
+    FSLMULTIFILEQUIT=TRUE \
+    POSSUMDIR=/usr/share/fsl/5.0 \
+    LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
+    FSLTCLSH=/usr/bin/tclsh \
+    FSLWISH=/usr/bin/wish \
+    AFNI_MODELPATH=/usr/lib/afni/models \
+    AFNI_IMSAVE_WARNINGS=NO \
+    AFNI_TTATLAS_DATASET=/usr/share/afni/atlases \
+    AFNI_PLUGINPATH=/usr/lib/afni/plugins
+ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
+
+## Install ANTs
+RUN apt-get install ants
+ENV ANTSPATH=/usr/lib/ants
+ENV PATH=$ANTSPATH:$PATH
+
+RUN apt-get -qq -y remove curl bzip2 && \
+    apt-get -qq -y autoremove && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/* /var/log/dpkg.log && \
 
 ## Install MRTRIX
 
@@ -64,6 +118,4 @@ RUN apt-get install git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
     libgl1-mesa-dev libfftw3-dev libtiff5-dev
 # Get the latest version of MRtrix3
 
-## Install AFNI
-RUN apt-get install afni
 
