@@ -157,11 +157,3 @@ RUN npm install -g bids-validator
 
 #ENV BIN_DIR "/usr/local/bin"
 ENV DISPLAY :0
-
-# # Acquire script to be executed
-# COPY mrtrix3_connectome.py /mrtrix3_connectome.py
-# RUN chmod 775 /mrtrix3_connectome.py
-
-# COPY version /version
-
-# ENTRYPOINT ["/mrtrix3_connectome.py"]
