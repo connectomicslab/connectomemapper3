@@ -11,14 +11,31 @@ MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 
 # Set the working directory to /connectomemapper3
 
+
+
 WORKDIR /connectomemapper3
 
 # Copy the current directory contents into the container at /app
 ADD . /connectomemapper3
 WORKDIR /connectomemapper3
-RUN python setup.py install
+
+## Xvfb installed as a Service to smulate a Xserver in the container
+#RUN apt-get update && apt-get install -y xvfb x11vnc x11-xkb-utils xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic x11-apps
+#ADD docker/files/xvfb_init /etc/init.d/xvfb
+#RUN chmod a+x /etc/init.d/xvfb
+#ADD docker/files/xvfb_daemon_run /usr/bin/xvfb-daemon-run
+#RUN chmod a+x /usr/bin/xvfb-daemon-run
+
+#ENV DISPLAY :99
+
+RUN apt-get install -y x11-apps x11-xserver-utils
+RUN xhost +
+
 
 ## Install the connectomemapper3
+RUN python setup.py install
+
+
 
 # Acquire script to be executed
 COPY run_connectomemapper3.py /run_connectomemapper3.py
@@ -29,4 +46,4 @@ RUN chmod 775 /run_connectomemapper3.py
 #ENTRYPOINT ["/run_connectomemapper3.py"]
 
 # # Display for X11 pipe
-# ENV DISPLAY :0
+#ENV DISPLAY :0

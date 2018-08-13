@@ -7,6 +7,11 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
+# Remove warnings visible whenever you import scipy (or another package) that was compiled against an older numpy than is installed.
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
 #Imports
 print("External imports")
 import argparse
@@ -25,11 +30,6 @@ import cmp.project
 print("cmp.project")
 from cmp.info import __version__
 print("cmp.info")
-
-# Remove warnings visible whenever you import scipy (or another package) that was compiled against an older numpy than is installed.
-import warnings
-warnings.filterwarnings("ignore", message="numpy.dtype size changed")
-warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 # __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                 'version')).read()

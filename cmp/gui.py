@@ -11,11 +11,19 @@
 import multiprocessing
 
 from traits.api import *
-from traitsui.api import *
-from traitsui.qt4.extra.qt_view import QtView
-from pyface.api import ImageResource
+print("traits.api")
+try:
+    from traitsui.api import *
+except:
+    pass
 
+print("traitsui.api")
+from traitsui.qt4.extra.qt_view import QtView
+print("traitsui.qt4.extra.qt_view")
+from pyface.api import ImageResource
+print("pyface.api")
 from bids.grabbids import BIDSLayout
+print("bids.grabbids")
 
 # CMP imports
 import project
