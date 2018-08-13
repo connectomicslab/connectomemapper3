@@ -10,15 +10,23 @@ MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 # EXPOSE 80
 
 # Set the working directory to /connectomemapper3
+
 WORKDIR /connectomemapper3
 
 # Copy the current directory contents into the container at /app
 ADD . /connectomemapper3
+WORKDIR /connectomemapper3
+RUN python setup.py install
 
 ## Install the connectomemapper3
 
-# Define environment variable
-# ENV NAME World
+# Acquire script to be executed
+COPY run_connectomemapper3.py /run_connectomemapper3.py
+RUN chmod 775 /run_connectomemapper3.py
 
-# Run app.py when the container launches
-CMD ["python", "run.py"]
+#COPY version /version
+
+#ENTRYPOINT ["/run_connectomemapper3.py"]
+
+# # Display for X11 pipe
+# ENV DISPLAY :0
