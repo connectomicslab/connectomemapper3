@@ -24,9 +24,9 @@ from glob import glob
 #Own imports
 #import cmp.gui
 print("CMP imports")
-import cmp.gui
+import cmp.gui as gui
 print("cmp.gui")
-import cmp.project
+import cmp.project as project
 print("cmp.project")
 from cmp.info import __version__
 print("cmp.info")
@@ -123,6 +123,8 @@ parser.add_argument('-v', '--version', action='version',
 
 args = parser.parse_args()
 
+print('BIDS dataset: {}'.format(args.bids_dir))
+
 # if not args.skip_bids_validator:
 #     run('bids-validator %s'%args.bids_dir)
 
@@ -135,9 +137,15 @@ else:
     subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
     subjects_to_analyze = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
 
+print("subjects to analyze : ")
+print(subjects_to_analyze)
+
 project = gui.CMP_Project_Info()
 project.base_directory = args.bids_dir
 project.subjects = ['sub-{}'.format(label) for label in subjects_to_analyze]
+
+print("project.subjects: ")
+print(project.subjects)
 
 #Derivatives directory creation if it does not exist
 cmp_derivatives_dir = os.path.join(args.bids_dir, "derivatives" , "cmp")

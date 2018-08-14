@@ -1846,6 +1846,10 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
     from networks. Iteratively create volume. """
 
     freesurfer_subj = os.path.abspath(subjects_dir)
+
+    print("Freesurfer subjects dir : %s"%freesurfer_subj)
+    print("Freesurfer subject id : %s"%subject_id)
+    
     if not ( os.path.isdir(freesurfer_subj) and os.path.isdir(os.path.join(freesurfer_subj, 'fsaverage')) ):
         parser.error('FreeSurfer subject directory is invalid. The folder does not exist or does not contain \'fsaverage\'')
     else:
