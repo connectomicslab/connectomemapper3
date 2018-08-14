@@ -10,9 +10,6 @@ MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 # EXPOSE 80
 
 # Set the working directory to /connectomemapper3
-
-
-
 WORKDIR /connectomemapper3
 
 # Copy the current directory contents into the container at /app
@@ -28,9 +25,9 @@ WORKDIR /connectomemapper3
 
 #ENV DISPLAY :99
 
-RUN apt-get install -y x11-apps x11-xserver-utils
-RUN xhost +
-
+RUN apt-get install -y xvfb
+RUN Xvfb :1 -screen 0 1024x768x16 &> /xvfb.log
+ENV DISPLAY :1
 
 ## Install the connectomemapper3
 RUN python setup.py install
