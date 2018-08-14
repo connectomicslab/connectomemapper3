@@ -8,7 +8,7 @@ MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 
 ## Install miniconda2 and CMP dependencies
 
-RUN apt-get update && apt-get -qq -y install npm curl bzip2 && \
+RUN apt-get update && apt-get -qq -y install npm curl bzip2 xvfb && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
@@ -32,6 +32,10 @@ RUN conda install -y scipy=1.1.0
 RUN conda install -y sphinx=1.5.1
 RUN conda install -y traits=4.6.0
 RUN conda install -y dateutil=2.4.1
+RUN conda install -y certifi=2018.4.16
+RUN conda install -y pandas=0.19.2
+RUN conda install -y patsy=0.4.1
+RUN conda install -y statsmodels=0.8.0
 RUN conda install -y nose=1.3.7
 RUN conda install -y pydot=1.0.28
 RUN conda install -y traitsui=5.1.0
@@ -156,4 +160,4 @@ RUN npm install -g bids-validator
 #
 
 #ENV BIN_DIR "/usr/local/bin"
-ENV DISPLAY :0
+#ENV DISPLAY :0
