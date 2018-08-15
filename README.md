@@ -1,7 +1,8 @@
 ## Connectome Mapper 3 BIDS App
 ### Description
 This BIDS app implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper 3,
-from raw Diffusion/T1/T2/BOLD data to multi-resolution connection matrices.
+from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
+
 The Connectome Mapper 3 is part of the Connectome Mapping Toolkit.
 
 Copyright (C) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
@@ -83,9 +84,9 @@ This App has the following command line arguments:
 To run it in participant level mode (for one participant):
 
         docker run -it --rm \
-        -v /media/localadmin/17646e81-4a2d-474e-9af6-31b511af858e/DS-Schizo2:/bids_dataset \
+        -v /home/localadmin/data/ds001:/bids_dataset \
         -v /media/localadmin/17646e81-4a2d-474e-9af6-31b511af858e/DS-Schizo2/derivatives:/outputs \
-        -v /media/localadmin/17646e81-4a2d-474e-9af6-31b511af858e/DS-Schizo2/code:/code \
+        -v /home/localadmin/data/ds001/code:/code \
         -v /usr/local/freesurfer/subjects/fsaverage:/bids_dataset/derivatives/freesurfer/fsaverage \
         -v /usr/local/freesurfer/license.txt:/opt/freesurfer/license.txt \
         sebastientourbier/connectomemapper3 \
