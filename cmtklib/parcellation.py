@@ -2452,7 +2452,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
             continue
 
         print("Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parkey) )
-        roi = ni.load(op.join(fs_dir, 'mri', 'ROI_%s.nii.gz' % parkey))
+        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % parkey))
         roid = roi.get_data()
 
         assert roid.shape[0] == wmmask.shape[0]
