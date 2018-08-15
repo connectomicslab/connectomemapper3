@@ -13,7 +13,6 @@ warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 #Imports
-print("External imports")
 import argparse
 import os
 import subprocess
@@ -23,13 +22,9 @@ from glob import glob
 
 #Own imports
 #import cmp.gui
-print("CMP imports")
 import cmp.gui as gui
-print("cmp.gui")
 import cmp.project as project
-print("cmp.project")
 from cmp.info import __version__
-print("cmp.info")
 
 # __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                 'version')).read()

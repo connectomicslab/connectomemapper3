@@ -7,23 +7,20 @@
 """ Connectome Mapper GUI
 """
 
+# Remove warnings visible whenever you import scipy (or another package) that was compiled against an older numpy than is installed.
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
 # Libraries imports
 import multiprocessing
 
 from traits.api import *
-print("traits.api")
-try:
-    from traitsui.api import *
-except:
-    pass
-
-print("traitsui.api")
+from traitsui.api import *
 from traitsui.qt4.extra.qt_view import QtView
-print("traitsui.qt4.extra.qt_view")
 from pyface.api import ImageResource
-print("pyface.api")
+
 from bids.grabbids import BIDSLayout
-print("bids.grabbids")
 
 # CMP imports
 import project

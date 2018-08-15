@@ -2475,7 +2475,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     ni.save(img, wm_out)
 
     # Extract cortical gray matter mask
-    fslmaths_cmd = ['fslmaths', op.join(fs_dir, 'mri', 'aseg.nii.gz'), '-thr 0', '-uthr 82', '-bin', op.join(fs_dir,'mri','gmmask.nii.gz')]
+    fslmaths_cmd = ['fslmaths', op.join(fs_dir, 'mri', 'aseg.nii.gz'), '-thr', '0', '-uthr', '82', '-bin', op.join(fs_dir,'mri','gmmask.nii.gz')]
     subprocess.check_call(fslmaths_cmd)
 
     # Convert whole brain mask
