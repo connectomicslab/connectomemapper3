@@ -1184,6 +1184,7 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
 class ParcellateOutputSpec(TraitedSpec):
     #roi_files = OutputMultiPath(File(exists=True),desc='Region of Interest files for connectivity mapping')
     white_matter_mask_file = File(desc='White matter mask file')
+    gray_matter_mask_file = File(desc='Cortical gray matter mask file')
     #cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
     #                exists=True)
     ribbon_file = File(desc='Image file detailing the cortical ribbon',exists=True)
@@ -1270,6 +1271,7 @@ class Parcellate(BaseInterface):
         outputs['aseg'] = op.abspath('aseg.nii.gz')
 
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
+        outputs['gray_matter_mask_file'] = op.abspath('gmmask.nii.gz')
         #outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
         outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
         #outputs['aseg_file'] = op.abspath('aseg.nii.gz')
@@ -1849,7 +1851,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 
     print("Freesurfer subjects dir : %s"%freesurfer_subj)
     print("Freesurfer subject id : %s"%subject_id)
-    
+
     if not ( os.path.isdir(freesurfer_subj) and os.path.isdir(os.path.join(freesurfer_subj, 'fsaverage')) ):
         parser.error('FreeSurfer subject directory is invalid. The folder does not exist or does not contain \'fsaverage\'')
     else:
@@ -2133,6 +2135,9 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 	# Ensure all of the processes have finished
 	for j in jobs:
 		j.join()
+
+    mri_cmd = ['mri_convert','-i',op.join(subject_dir,'mri','ribbon.mgz'),'-o',op.join(subject_dir,'mri','ribbon.nii.gz')]
+    subprocess.check_call(mri_cmd)
 
     print("[ DONE ]")
 
@@ -2447,7 +2452,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
             continue
 
         print("Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parkey) )
-        roi = ni.load(op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % parkey))
+        roi = ni.load(op.join(fs_dir, 'mri', 'ROI_%s.nii.gz' % parkey))
         roid = roi.get_data()
 
         assert roid.shape[0] == wmmask.shape[0]
@@ -2469,6 +2474,10 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     print("Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
 
+    # Extract cortical gray matter mask
+    fslmaths_cmd = ['fslmaths', op.join(fs_dir, 'mri', 'aseg.nii.gz'), '-thr 0', '-uthr 82', '-bin', op.join(fs_dir,'mri','gmmask.nii.gz')]
+    subprocess.check_call(fslmaths_cmd)
+
     # Convert whole brain mask
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
     subprocess.check_call(mri_cmd)
@@ -2485,6 +2494,7 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
           (op.join(fs_dir, 'mri', 'aseg.nii.gz'), 'aseg.nii.gz'),
           (op.join(fs_dir, 'mri', 'ribbon.nii.gz'), 'ribbon.nii.gz'),
           (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
+          (op.join(fs_dir, 'mri', 'gmmask.nii.gz'), 'gmmask.nii.gz'),
           ]
     if parcellation_scheme == 'Lausanne2008':
         ds.append( (op.join(fs_dir, 'label', 'cc_unknown.nii.gz'), 'cc_unknown.nii.gz') )

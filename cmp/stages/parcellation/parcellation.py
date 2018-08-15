@@ -118,6 +118,7 @@ class ParcellationStage(Stage):
                          (parc_node,outputnode,[#("aseg_file","aseg_file"),("cc_unknown_file","cc_unknown_file"),
                                                 #("ribbon_file","ribbon_file"),("roi_files","roi_files"),
     					     ("white_matter_mask_file","wm_mask_file"),
+                             ("gray_matter_mask_file","gm_mask_file"),
                              #("roi_files_in_structural_space","roi_volumes"),
                              ("wm_eroded","wm_eroded"),("csf_eroded","csf_eroded"),("brain_eroded","brain_eroded"),
                              ("T1","T1"),("brain","brain"),("brain_mask","brain_mask")])

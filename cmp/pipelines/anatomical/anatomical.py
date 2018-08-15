@@ -377,6 +377,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                             ('brainmask_eroded.nii.gz', self.subject+'_T1w_brainmask_eroded.nii.gz'),
                                             ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
                                             ('fsmask_1mm.nii.gz',self.subject+'_T1w_class-WM.nii.gz'),
+                                            ('gmmask.nii.gz',self.subject+'_T1w_class-GM.nii.gz'),
                                             ('fsmask_1mm_eroded.nii.gz',self.subject+'_T1w_class-WM_eroded.nii.gz'),
                                             ('csf_mask_eroded.nii.gz',self.subject+'_T1w_class-CSF_eroded.nii.gz'),
                                             #('gm_mask',self.subject+'_T1w_class-GM'),
@@ -438,7 +439,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         anat_flow = pe.Workflow(name='anatomical_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
         anat_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
-        anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","aseg","brain","brain_mask","wm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
+        anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","aseg","brain","brain_mask","wm_mask_file", "gm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
             "roi_volumes","parcellation_scheme","atlas_info","roi_colorLUTs", "roi_graphMLs"]),name="outputnode")
         anat_flow.add_nodes([anat_inputnode,anat_outputnode])
 
