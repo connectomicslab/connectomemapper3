@@ -16,18 +16,6 @@ WORKDIR /connectomemapper3
 ADD . /connectomemapper3
 WORKDIR /connectomemapper3
 
-## Xvfb installed as a Service to smulate a Xserver in the container
-#RUN apt-get update && apt-get install -y xvfb x11vnc x11-xkb-utils xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic x11-apps
-#ADD docker/files/xvfb_init /etc/init.d/xvfb
-#RUN chmod a+x /etc/init.d/xvfb
-#ADD docker/files/xvfb_daemon_run /usr/bin/xvfb-daemon-run
-#RUN chmod a+x /usr/bin/xvfb-daemon-run
-
-#ENV DISPLAY :99
-
-#RUN Xvfb :1 -screen 0 1024x768x16 &> /xvfb.log
-#ENV DISPLAY :1
-
 ## Install the connectomemapper3
 RUN python setup.py install
 
@@ -41,6 +29,3 @@ RUN chmod 775 /run_connectomemapper3.sh
 #COPY version /version
 
 ENTRYPOINT ["/run_connectomemapper3.sh"]
-
-# # Display for X11 pipe
-#ENV DISPLAY :0

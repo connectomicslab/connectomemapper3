@@ -2475,6 +2475,18 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     ni.save(img, wm_out)
 
     # Extract cortical gray matter mask
+    # remove remaining structure, e.g. brainstem
+    gmmask = np.zeros( asegd.shape )
+    idx = np.where( asegd == 3 )
+    gmmask[idx] = 1
+    idx = np.where( asegd == 42 )
+    gmmask[idx] = 1
+
+    gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
+    img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header() )
+    print("Save white matter mask: %s" % gm_out)
+    ni.save(img, gm_out)
+
     fslmaths_cmd = ['fslmaths', op.join(fs_dir, 'mri', 'aseg.nii.gz'), '-thr', '0', '-uthr', '82', '-bin', op.join(fs_dir,'mri','gmmask.nii.gz')]
     subprocess.check_call(fslmaths_cmd)
 

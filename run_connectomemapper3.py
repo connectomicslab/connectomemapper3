@@ -29,12 +29,26 @@ from cmp.info import __version__
 # __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                 'version')).read()
 
-def create_cmp_command(project):
+def create_cmp_command(project,run_anat,run_dmri,run_fmri):
 
     if len(project.subject_sessions)>0:
-        cmd = "connectomemapper3 %s %s %s %s %s %s %s %s %s"%(project.base_directory,project.subject,project.subject_session,project.anat_config_file,True,project.dmri_config_file,True,project.fmri_config_file,True)
+        if run_fmri:
+            cmd = "connectomemapper3 %s %s %s %s %s %s %s %s %s"%(project.base_directory,project.subject,project.subject_session,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri,project.fmri_config_file,run_fmri)
+        else:
+            if run_dmri:
+                cmd = "connectomemapper3 %s %s %s %s %s %s %s"%(project.base_directory,project.subject,project.subject_session,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri)
+            else:
+                if run_anat:
+                    cmd = "connectomemapper3 %s %s %s %s %s"%(project.base_directory,project.subject,project.subject_session,project.anat_config_file,run_anat)
     else:
-        cmd = "connectomemapper3 %s %s %s %s %s %s %s %s"%(project.base_directory,project.subject,project.anat_config_file,True,project.dmri_config_file,True,project.fmri_config_file,True)
+        if run_fmri:
+            cmd = "connectomemapper3 %s %s %s %s %s %s %s %s"%(project.base_directory,project.subject,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri,project.fmri_config_file,run_fmri)
+        else:
+            if run_dmri:
+                cmd = "connectomemapper3 %s %s %s %s %s %s"%(project.base_directory,project.subject,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri)
+            else:
+                if run_anat:
+                    cmd = "connectomemapper3 %s %s %s %s"%(project.base_directory,project.subject,project.anat_config_file,run_anat)
 
     return cmd
 
@@ -169,13 +183,32 @@ if args.analysis_level == "participant":
                 if not os.path.isdir(session_derivatives_dir):
                     os.makedirs(session_derivatives_dir)
 
-                project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical')
-                project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion')
-                project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI')
+                run_anat = False
+                run_dmri = False
+                run_fmri = False
 
-                cmd = create_cmp_command(project=project)
-                run(command=cmd)
+                if args.anat_pipeline_config is not None:
+                    project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical')
+                    run_anat = True
+                if args.dwi_pipeline_config is not None:
+                    project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion')
+                    run_dmri = True
+                if args.func_pipeline_config is not None:
+                    project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI')
+                    run_fmri = True
 
+                if args.anat_pipeline_config is not None:
+                    print("Running pipelines : ")
+                    print("- anatomical MRI (segmentation and parcellation)")
+
+                    if args.dwi_pipeline_config is not None:
+                        print("- diffusion MRI (structural connectivity matrices)")
+
+                        if args.func_pipeline_config is not None:
+                            print("- fMRI (functional connectivity matrices)")
+
+                    cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
+                    print cmd
 
         else: #No session structure
             project.subject_sessions = ['']
@@ -186,14 +219,37 @@ if args.analysis_level == "participant":
             if not os.path.isdir(subject_derivatives_dir):
                 os.makedirs(subject_derivatives_dir)
 
-            project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical')
-            project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion')
-            project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI')
+            run_anat = False
+            run_dmri = False
+            run_fmri = False
 
-            cmd = create_cmp_command(project=project)
+            if args.anat_pipeline_config is not None:
+                project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical')
+                run_anat = True
+            if args.dwi_pipeline_config is not None:
+                project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion')
+                run_dmri = True
+            if args.func_pipeline_config is not None:
+                project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI')
+                run_fmri = True
 
-            print cmd
-            #run(command=cmd)
+            if args.anat_pipeline_config is not None:
+                print("Running pipelines : ")
+                print("- anatomical MRI (segmentation and parcellation)")
+
+                if args.dwi_pipeline_config is not None:
+                    print("- diffusion MRI (structural connectivity matrices)")
+
+                    if args.func_pipeline_config is not None:
+                        print("- fMRI (functional connectivity matrices)")
+
+                cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
+                print cmd
+
+            else:
+                print "Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
+
+        run(command=cmd)
 
 
 # running group level; ultimately it will compute average connectivity matrices
