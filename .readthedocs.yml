@@ -8,6 +8,6 @@ formats:
 python:
     setup_py_install: true
     pip_install: false
-    version: 2.7.13
+    version: 2.7
     extra_requirements:
       - documentation
