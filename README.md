@@ -9,8 +9,15 @@ The Connectome Mapper 3 is part of the Connectome Mapping Toolkit (CMTK).
 
 ### Documentation
 
+More information and documentation can be found at [https://connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io)
+
 ### License
-This software is distributed under the open-source license Modified BSD. See [license](LICENSE) for more details.
+This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
+
+All trademarks referenced herein are property of their respective holders.
+
+Copyright (C) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
+Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland.
 
 ### Usage
 This App has the following command line arguments:

@@ -17,6 +17,13 @@ from info import __minor_version__
 from info import __version__
 from info import __release_date__
 
+from recommonmark.parser import CommonMarkParser
+
+# Use Markdown and reStructuredText in the same Sphinx project
+source_parsers = {
+    '.md': CommonMarkParser,
+}
+source_suffix = ['.rst', '.md']
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
