@@ -37,7 +37,9 @@ def info():
              All rights reserved.\n"""
 
 def usage():
-    print "Usage: connectomemapper3 bids_directory sub-<label> anatomical_config_ini_file prdiffusion_config_ini_file"
+    print "Usage 1: connectomemapper3 bids_folder sub-<label> (ses-<label>) anatomical_ini_file process_anatomical"
+    print "Usage 2: connectomemapper3 bids_folder sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion"
+    print "Usage 3: connectomemapper3 bids_folder sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion fmri_ini_file process_fmri"
     print ""
     print "bids_directory <Str> : full path of root directory of bids dataset"
     print "sub-<label> <Str>: subject name"
@@ -45,6 +47,8 @@ def usage():
     print "process_anatomical <Bool> : If True, process anatomical pipeline"
     print "diffusion_config_ini_file <Str>: full path of .ini configuration file for diffusion pipeline"
     print "process_diffusion <Bool> : If True, process diffusion pipeline"
+    print "fmri_config_ini_file <Str>: full path of .ini configuration file for fMRI pipeline"
+    print "process_fmri <Bool> : If True, process fMRI pipeline"
 
 # Checks the needed dependencies. We call directly the functions instead
 # of just checking existence in $PATH in order to handl missing libraries.
