@@ -17,7 +17,7 @@ This App has the following command line arguments:
 
         $connectomemapper3 --help
 
-        usage: run_connectomemapper3.py [-h]
+        <!-- usage: run_connectomemapper3.py [-h]
                                         [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
                                         [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
                                         [--dwi_pipeline_config DWI_PIPELINE_CONFIG]
@@ -56,9 +56,9 @@ This App has the following command line arguments:
           --func_pipeline_config FUNC_PIPELINE_CONFIG
                                 Configuration .txt file for processing stages of the
                                 fMRI processing pipeline
-          -v, --version         show program's version number and exit
+          -v, --version         show program's version number and exit -->
 
-#### Participant level
+<!-- #### Participant level
 To run it in participant level mode (for one participant):
 
         docker run -it --rm \
@@ -71,7 +71,7 @@ To run it in participant level mode (for one participant):
         /bids_dataset /outputs participant --participant_label 01 \
         --anat_pipeline_config /code/ref_anatomical_config.ini \
         --dwi_pipeline_config /code/ref_diffusion_config.ini \
-        --func_pipeline_config /code/ref_fMRI_config.ini
+        --func_pipeline_config /code/ref_fMRI_config.ini -->
 
 ### Credits
 * Jean-Philippe Thiran
