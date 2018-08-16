@@ -26,14 +26,14 @@ This neuroimage processing pipeline software is developed by the Hagmann's group
 ``Connectome Mapper 3``, part of the Connectome Mapping Toolkit (CMTK), implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
 The ``Connectome Mapper 3`` pipelines uses a combination of tools from well-known software
-packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy and AFNI_.
+packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy_ and AFNI_.
 This pipeline was designed to provide the best software implementation for each
 state of processing, and will be updated as newer and better neuroimaging
 software become available.
 
 This tool allows you to easily do the following:
 
-- Take T1 / Diffusion / resting-state MRI data from raw to fully preprocessed form.
+- Take T1 / Diffusion / resting-state MRI data from raw to multi-resolution connection matrices.
 - Implement tools from different software packages.
 - Achieve optimal data processing quality by using the best tools available
 - Automate and parallelize processing steps, which provides a significant
@@ -59,7 +59,7 @@ Citations
 License information
 *******************
 
-This software is distributed under the open-source license Modified BSD. See [license](LICENSE) for more details.
+This software is distributed under the open-source license Modified BSD. See `license <LICENSE>`_ for more details.
 
 All trademarks referenced herein are property of their respective holders.
 
