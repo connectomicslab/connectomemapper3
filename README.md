@@ -1,5 +1,5 @@
 ## Connectome Mapper 3 BIDS App
-### Description
+
 This BIDS App implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper 3,
 from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
