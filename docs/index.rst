@@ -2,7 +2,7 @@
 Connectome Mapper 3
 =======================================================
 
-This neuroimage processing pipeline software is developed by the Hagmann's group at the University Hospital of Lausanne (CHUV) and the Signal Processing Laboratory (LTS5) of the Ecole Polytechnique Fédérale de Lausanne (EPFL) for use at the Center for BioMedical Imaging (CIBM) within the `SNFS Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
+This neuroimage processing pipeline software is developed by the Hagmann's group at the University Hospital of Lausanne (CHUV) and the Signal Processing Laboratory (LTS5) of the Ecole Polytechnique Fédérale de Lausanne (EPFL) for use at the Center for BioMedical Imaging (CIBM) within the `FNSNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
 
 .. image:: http://bids.neuroimaging.io/openneuro_badge.svg
   :target: https://openneuro.org
@@ -18,6 +18,11 @@ This neuroimage processing pipeline software is developed by the Hagmann's group
 .. image:: https://img.shields.io/pypi/v/fmriprep.svg
   :target: https://pypi.python.org/pypi/fmriprep/
   :alt: Latest Version
+
+
+*********
+About
+*********
 
 .. image:: images/flowchart.jpg
 	:height: 300
@@ -39,8 +44,9 @@ This tool allows you to easily do the following:
 - Automate and parallelize processing steps, which provides a significant
   speed-up from typical linear, manual processing.
 
+
 *********
-Citations
+Acknowledgement
 *********
 
 .. important::
@@ -55,6 +61,7 @@ Citations
 
 	* If you use the Connectome Mapper 3 in your research, please acknowledge this work by mentioning explicitly the name of this software (connectomemapper3) and the version, along with a link to the BitBucket repository or the Zenodo reference.
 
+
 *******************
 License information
 *******************
@@ -65,6 +72,7 @@ All trademarks referenced herein are property of their respective holders.
 
 Copyright (C) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
 Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland.
+
 
 ********
 Contents
