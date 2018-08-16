@@ -5,9 +5,9 @@
 
 formats:
     - html
-build:
-    image: latest
 python:
     setup_py_install: true
     pip_install: false
     version: 2.7.13
+    extra_requirements:
+      - documentation
