@@ -15,14 +15,15 @@ ADD . /app
 
 #Clone the master branch of connectomemapper 3 from BitBucket
 ARG password
-RUN git clone https://sebastientourbier:$password@bitbucket.org/sebastientourbier/connectomemapper3.git connectomemapper3
+RUN git clone --progress --verbose https://sebastientourbier:$password@bitbucket.org/sebastientourbier/connectomemapper3.git connectomemapper3
+RUN git checkout master
 
 # Set the working directory to /app/connectomemapper3 and install connectomemapper3
 WORKDIR /app/connectomemapper3
 RUN python setup.py install
 
 # Create entrypoint script that simulated a X server - required by traitsui
-RUN echo '#! /bin/sh \n xvfb-run python "/run_connectomemapper3.py" "$@"' > /run_connectomemapper3.sh
+RUN echo '#! /bin/sh \n xvfb-run python "/app/run_connectomemapper3.py" "$@"' > /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed
