@@ -2,7 +2,7 @@
 Connectome Mapper 3
 =======================================================
 
-This neuroimage processing pipeline software is developed by the Hagmann's group at the University Hospital of Lausanne (CHUV) and the Signal Processing Laboratory (LTS5) of the Ecole Polytechnique Fédérale de Lausanne (EPFL) for use at the Center for BioMedical Imaging (CIBM) within the [SNFS Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
+This neuroimage processing pipeline software is developed by the Hagmann's group at the University Hospital of Lausanne (CHUV) and the Signal Processing Laboratory (LTS5) of the Ecole Polytechnique Fédérale de Lausanne (EPFL) for use at the Center for BioMedical Imaging (CIBM) within the `SNFS Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
 
 .. image:: http://bids.neuroimaging.io/openneuro_badge.svg
   :target: https://openneuro.org
