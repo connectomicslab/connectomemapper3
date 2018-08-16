@@ -73,11 +73,11 @@ To run it in participant level mode (for one participant):
         --dwi_pipeline_config /code/ref_diffusion_config.ini \
         --func_pipeline_config /code/ref_fMRI_config.ini
 
-###Credits
+### Credits
 * Patric Hagmann (pahagman)
 * Sebastien Tourbier (sebastientourbier)
 
-###Copyright
+### Copyright
 Copyright (C) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
 Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland.
 
