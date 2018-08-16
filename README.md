@@ -3,6 +3,8 @@
 This BIDS app implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper 3,
 from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
+![Image not found](http://www.connectomics.org/mapper/_images/flowchart.jpg)
+
 The Connectome Mapper 3 is part of the Connectome Mapping Toolkit.
 
 Copyright (C) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
@@ -13,7 +15,7 @@ This software is distributed under the open-source license Modified BSD.
 ### Usage
 This App has the following command line arguments:
 
-        $ docker -ti --rm sebastientourbier/connectomemapper3 --help
+        $connectomemapper3 --help
 
         usage: run_connectomemapper3.py [-h]
                                         [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
@@ -71,7 +73,7 @@ To run it in participant level mode (for one participant):
         --dwi_pipeline_config /code/ref_diffusion_config.ini \
         --func_pipeline_config /code/ref_fMRI_config.ini
 
-###Credits
+### Credits
 * Jean-Philippe Thiran
 * Reto Meuli
 * Patric Hagmann (pahagman)
@@ -87,7 +89,7 @@ To run it in participant level mode (for one participant):
 * David Romascano
 * Sebastien Tourbier (sebastientourbier)
 
-###Contributors
+### Contributors
 Collaboration Children's Hospital Boston
 
 * Ellen Grant
