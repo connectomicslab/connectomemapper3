@@ -32,7 +32,7 @@ About
 
 The ``Connectome Mapper 3`` pipelines uses a combination of tools from well-known software
 packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy_ and AFNI_.
-This pipeline was designed to provide the best software implementation for each
+These pipelines were designed to provide the best software implementation for each
 state of processing, and will be updated as newer and better neuroimaging
 software become available.
 
