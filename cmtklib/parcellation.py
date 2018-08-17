@@ -2109,7 +2109,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 
     # Loop over parcellation scales
     if v:
-        print('Generete MULTISCALE PARCELLATION for input subject')
+        print('Generate MULTISCALE PARCELLATION for input subject')
 
     import multiprocessing as mp
     jobs = []
@@ -2440,10 +2440,10 @@ def create_wm_mask_v2(subject_id, subjects_dir):
 #    fsmask.img(cc_unknown.img==4)    =  1;
 
     # output white matter mask. crop and move it afterwards
-    wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm_all.nii.gz')
-    img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
-    print("Save white matter mask: %s" % wm_out)
-    ni.save(img, wm_out)
+    # wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm_all.nii.gz')
+    # img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
+    # print("Save white matter mask: %s" % wm_out)
+    # ni.save(img, wm_out)
 
     # Extract cortical gray matter mask
     # remove remaining structure, e.g. brainstem
