@@ -6,6 +6,8 @@
 
 """ Connectome Mapper Controler for handling GUI and non GUI general events
 """
+import warnings
+warnings.filterwarnings("ignore", message="No valid root directory found for domain 'derivatives'.")
 
 # Global imports
 import ast
