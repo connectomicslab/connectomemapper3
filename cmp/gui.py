@@ -144,6 +144,7 @@ class CMP_Project_Info(HasTraits):
     #current_subj = Str()
     anat_warning_msg = Str('\nWarning: selected directory is already configured for anatomical data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
     dmri_warning_msg = Str('\nWarning: selected directory is already configured for diffusion data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
+    fmri_warning_msg = Str('\nWarning: selected directory is already configured for resting-state data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
 
     #process_type = Enum('diffusion',['diffusion','fMRI'])
     diffusion_imaging_model = Enum('DTI',['DSI','DTI','HARDI'])
