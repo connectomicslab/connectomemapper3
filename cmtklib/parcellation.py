@@ -2324,8 +2324,8 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     # these data is stored and could be extracted from fs_dir/stats/aseg.txt
 
     # extract right and left white matter
-    idx_lh = np.where(fsmaskd == 120)
-    idx_rh = np.where(fsmaskd == 20)
+    idx_lh = np.where(fsmaskd == 41)
+    idx_rh = np.where(fsmaskd == 2)
 
     wmmask[idx_lh] = 1
     wmmask[idx_rh] = 1
@@ -2439,6 +2439,16 @@ def create_wm_mask_v2(subject_id, subjects_dir):
 #    fsmask.img(cc_unknown.img==3)    =  1;
 #    fsmask.img(cc_unknown.img==4)    =  1;
 
+    # output white matter mask. crop and move it afterwards
+    wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm_all.nii.gz')
+    img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
+    print("Save white matter mask: %s" % wm_out)
+    ni.save(img, wm_out)
+
+    # Extract cortical gray matter mask
+    # remove remaining structure, e.g. brainstem
+    gmmask = np.zeros( asegd.shape )
+
     # XXX: subtracting wmmask from ROI. necessary?
     for parkey, parval in get_parcellation('Lausanne2018').items():
 
@@ -2467,20 +2477,13 @@ def create_wm_mask_v2(subject_id, subjects_dir):
 
                 idx = np.where(roid == int(brv['dn_multiscaleID']))
                 wmmask[idx] = 0
+                gmmask[idx] = 1
 
     # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
     img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
     print("Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
-
-    # Extract cortical gray matter mask
-    # remove remaining structure, e.g. brainstem
-    gmmask = np.zeros( asegd.shape )
-    idx = np.where( asegd == 3 )
-    gmmask[idx] = 1
-    idx = np.where( asegd == 42 )
-    gmmask[idx] = 1
 
     gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
     img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header() )
