@@ -50,14 +50,16 @@ Acknowledgement
 *********
 
 .. important::
+	* If you use the Connectome Mapper 3 in your research, please acknowledge this work by mentioning explicitly the name of this software (connectomemapper3) and the version, along with a link to the BitBucket repository or the Zenodo reference.
+
 	* If you use the Connectome Mapper 2 in your research, please cite:
 
-	A. Daducci, S. Gerhard, A. Griffa, A. Lemkaddem, L. Cammoun, X. Gigandet, R. Meuli, P. Hagmann and J.-P. Thiran
-	*The Connectome Mapper: An Open-Source Processing Pipeline to Map Connectomes with MRI*
+		A. Daducci, S. Gerhard, A. Griffa, A. Lemkaddem, L. Cammoun, X. Gigandet, R. Meuli, P. Hagmann and J.-P. Thiran
+		*The Connectome Mapper: An Open-Source Processing Pipeline to Map Connectomes with MRI*
 
-	Plos One 7(12):e48121 (2012)
+		Plos One 7(12):e48121 (2012)
 
-	`Link to manuscript <http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0048121>`_
+		`Link to manuscript <http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0048121>`_
 
 	* If you use the Connectome Mapper 3 in your research, please acknowledge this work by mentioning explicitly the name of this software (connectomemapper3) and the version, along with a link to the BitBucket repository or the Zenodo reference.
 
