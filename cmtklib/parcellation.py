@@ -2487,11 +2487,8 @@ def create_wm_mask_v2(subject_id, subjects_dir):
 
     gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
     img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header() )
-    print("Save white matter mask: %s" % gm_out)
+    print("Save gray matter mask: %s" % gm_out)
     ni.save(img, gm_out)
-
-    fslmaths_cmd = ['fslmaths', op.join(fs_dir, 'mri', 'aseg.nii.gz'), '-thr', '0', '-uthr', '82', '-bin', op.join(fs_dir,'mri','gmmask.nii.gz')]
-    subprocess.check_call(fslmaths_cmd)
 
     # Convert whole brain mask
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
