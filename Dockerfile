@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM sebastientourbier/neurodocker-image:cmp-ready
+FROM sebastientourbier/connectomemapper-ubuntu16.04:latest
 MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 
 ##
@@ -15,7 +15,7 @@ ADD . /app
 
 #Clone the master branch of connectomemapper 3 from BitBucket
 ARG password
-RUN git clone --progress --verbose https://sebastientourbier:$password@bitbucket.org/sebastientourbier/connectomemapper3.git connectomemapper3
+RUN git clone --progress --verbose https://sebastientourbier:$password@bitbucket.org/sinergiaconnectomics/connectomemapper3.git connectomemapper3
 RUN git checkout master
 
 # Set the working directory to /app/connectomemapper3 and install connectomemapper3
