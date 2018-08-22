@@ -72,8 +72,7 @@ This software is distributed under the open-source license Modified BSD. See `li
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (C) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
-Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland.
+Copyright (C) 2009-2018, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Hospital Center and University of Geneva (UNIGE-HUG), Switzerland.
 
 
 ********
