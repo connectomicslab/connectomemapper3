@@ -63,6 +63,11 @@ Acknowledgement
 
 	* If you use the Connectome Mapper 3 in your research, please acknowledge this work by mentioning explicitly the name of this software (connectomemapper3) and the version, along with a link to the BitBucket repository or the Zenodo reference.
 
+*********
+Funding
+*********
+
+Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
 
 *******************
 License information

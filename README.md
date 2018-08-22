@@ -102,3 +102,7 @@ Collaboration Children's Hospital Boston
 * Daniel Ginsburg (danginsburg)
 * Rudolph Pienaar (rudolphpienaar)
 * Nicolas Rannou (NicolasRannou)
+
+### Funding
+
+Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
