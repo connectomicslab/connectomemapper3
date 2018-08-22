@@ -2327,8 +2327,12 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     idx_lh = np.where(fsmaskd == 41)
     idx_rh = np.where(fsmaskd == 2)
 
+    # extract right and left
     wmmask[idx_lh] = 1
     wmmask[idx_rh] = 1
+
+    idx = np.where(asegd == i)
+    csfB[idx] = 1
 
     # remove subcortical nuclei from white matter mask
     aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
@@ -2450,34 +2454,34 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     gmmask = np.zeros( asegd.shape )
 
     # XXX: subtracting wmmask from ROI. necessary?
-    for parkey, parval in get_parcellation('Lausanne2018').items():
-
-        print parkey
-
-        # check if we should subtract the cortical rois from this parcellation
-        if parval.has_key('subtract_from_wm_mask'):
-            if not bool(int(parval['subtract_from_wm_mask'])):
-                continue
-        else:
-            continue
-
-        print("Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parkey) )
-        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % parkey))
-        roid = roi.get_data()
-
-        assert roid.shape[0] == wmmask.shape[0]
-
-        pg = nx.read_graphml(parval['node_information_graphml'])
-
-        for brk, brv in pg.nodes_iter(data=True):
-
-            if brv['dn_region'] == 'cortical':
-
-                print("Subtracting region %s with intensity value %s" % (brv['dn_region'], brv['dn_multiscaleID']))
-
-                idx = np.where(roid == int(brv['dn_multiscaleID']))
-                wmmask[idx] = 0
-                gmmask[idx] = 1
+    # for parkey, parval in get_parcellation('Lausanne2018').items():
+    #
+    #     print parkey
+    #
+    #     # check if we should subtract the cortical rois from this parcellation
+    #     if parval.has_key('subtract_from_wm_mask'):
+    #         if not bool(int(parval['subtract_from_wm_mask'])):
+    #             continue
+    #     else:
+    #         continue
+    #
+    #     print("Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parkey) )
+    #     roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % parkey))
+    #     roid = roi.get_data()
+    #
+    #     assert roid.shape[0] == wmmask.shape[0]
+    #
+    #     pg = nx.read_graphml(parval['node_information_graphml'])
+    #
+    #     for brk, brv in pg.nodes_iter(data=True):
+    #
+    #         if brv['dn_region'] == 'cortical':
+    #
+    #             print("Subtracting region %s with intensity value %s" % (brv['dn_region'], brv['dn_multiscaleID']))
+    #
+    #             idx = np.where(roid == int(brv['dn_multiscaleID']))
+    #             wmmask[idx] = 0
+    #             gmmask[idx] = 1
 
     # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
