@@ -249,33 +249,28 @@ class CombineParcellations(BaseInterface):
 
 
         # Left Ventral Diencephalon
-        left_ventral = 28;
-        left_ventral_colors_r = 165;
-        left_ventral_colors_g = 42;
-        left_ventral_colors_b = 42;
+        left_ventral = 28
+        left_ventral_colors_r = 165
+        left_ventral_colors_g = 42
+        left_ventral_colors_b = 42
         left_ventral_names = ["Left-VentralDC"]
 
         # Right Ventral Diencephalon
-        right_ventral = 60;
-        right_ventral_colors_r = 165;
-        right_ventral_colors_g = 42;
-        right_ventral_colors_b = 42;
+        right_ventral = 60
+        right_ventral_colors_r = 165
+        right_ventral_colors_g = 42
+        right_ventral_colors_b = 42
         right_ventral_names = ["Right-VentralDC"]
 
         # Third Ventricle
         ventricle3 = 14;
-        # ventricle3_colors_r = 204;
-        # ventricle3_colors_g = 182;
-        # ventricle3_colors_b = 142;
-        # ventricle3_names = ["Third-Ventricle"]
 
         # Hypothalamus
-        ventricle3 = 14;
-        # hypothal_colors_r = 204;
-        # hypothal_colors_g = 182;
-        # hypothal_colors_b = 142;
-        # left_hypothal_names  = ["Left-Hypothalamus"]
-        # right_hypothal_names = ["Right-Hypothalamus"]
+        hypothal_colors_r = 204
+        hypothal_colors_g = 182
+        hypothal_colors_b = 142
+        left_hypothal_names  = ["Left-Hypothalamus"]
+        right_hypothal_names = ["Right-Hypothalamus"]
 
         # BrainStem Parcellation
         brainstem = np.array([173, 174, 175, 178 ])
@@ -370,7 +365,31 @@ class CombineParcellations(BaseInterface):
 
             # Replacing the brain stem (Stem is replaced by its own parcellation. Mismatch between both global volumes, mainly due to partial volume effect in the global stem parcellation)
             indrep = np.where(I == 16)
-            I[indrep] = 0;
+            I[indrep] = 0
+
+            #Dilate third ventricle and intersect with right and left ventral DC to get voxels of left and right hypothalamus
+            tmp = np.zeros(I.shape)
+            indV = np.where(I == ventricle3)
+            tmp[indV] = 1
+
+            thirdV = op.abspath('{}.nii.gz'.format("ventricle3"))
+            hdr = V.get_header()
+            hdr2 = hdr.copy()
+            hdr2.set_data_dtype(np.int16)
+            print("Save output image to %s" % thirdV)
+            img = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
+            ni.save(img, thirdV)
+
+            thirdV_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
+            fslmaths_cmd = ["fslmaths",thirdV,"-kernel", "sphere", 1, "-dilD", thirdV_dil]
+            print("RUN")
+            print(fslmaths_cmd)
+            subprocess.call(fslmaths_cmd)
+
+            tmp = ni.load(thirdV_dil).get_data()
+            indrhypothal = np.where((tmp == 1) & (I == right_ventral))
+            indlhypothal = np.where((tmp == 1) & (I == left_ventral))
+            del(tmp)
 
             ## Processing Right Hemisphere
             # Relabelling Right hemisphere
@@ -378,8 +397,6 @@ class CombineParcellations(BaseInterface):
             ind = np.where((I >= 2000) & (I < 3000))
             It[ind] = (I[ind] - 2001)
             nlabel = It.max() + 1
-
-
 
             # nlabel = rh_annot[2].size()
 
@@ -562,6 +579,32 @@ class CombineParcellations(BaseInterface):
                              '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
                              '{} \n'.format('      <data key="d4">%s</data>'%(right_ventral_names[0])),
                              '{} \n'.format('      <data key="d5">%i</data>'%(int(right_ventral))),
+                             '{} \n'.format('    </node>')]
+                f_graphML.writelines(node_lines)
+
+            # Relabelling Right Hypothalamus
+            newLabels = np.arange(nlabel+1,nlabel+2)
+            print("update right hypothalamus label (%i -> %i)"%(right_ventral,newLabels[0]))
+            It[indrhypothal] = newLabels[0]
+            nlabel = It.max()
+
+            #ColorLUT (right hypothalamus)
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Right Hemisphere. Hypothalamus \n")
+                r = hypothal_colors_r
+                g = hypothal_colors_g
+                b = hypothal_colors_b
+                f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),right_hypothal_names[0],r,g,b))
+                f_colorLUT.write("\n")
+
+            if self.inputs.create_graphml:
+                node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+                             '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                             '{} \n'.format('      <data key="d1">%s</data>'%("hypothalamus")),
+                             '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+                             '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+                             '{} \n'.format('      <data key="d4">%s</data>'%(right_hypothal_names[0])),
+                             '{} \n'.format('      <data key="d5">%i</data>'%(-1)),
                              '{} \n'.format('    </node>')]
                 f_graphML.writelines(node_lines)
 
@@ -757,6 +800,31 @@ class CombineParcellations(BaseInterface):
                              '{} \n'.format('    </node>')]
                 f_graphML.writelines(node_lines)
 
+            # Relabelling Left Hypothalamus
+            newLabels = np.arange(nlabel+1,nlabel+2)
+            print("update leftt hypothalamus label (%i -> %i)"%(-1,newLabels[0]))
+            It[indlhypothal] = newLabels[0]
+            nlabel = It.max()
+
+            #ColorLUT (right hypothalamus)
+            if self.inputs.create_colorLUT:
+                f_colorLUT.write("# Left Hemisphere. Hypothalamus \n")
+                r = hypothal_colors_r
+                g = hypothal_colors_g
+                b = hypothal_colors_b
+                f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),left_hypothal_names[0],r,g,b))
+                f_colorLUT.write("\n")
+
+            if self.inputs.create_graphml:
+                node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+                             '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                             '{} \n'.format('      <data key="d1">%s</data>'%("hypothalamus")),
+                             '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+                             '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+                             '{} \n'.format('      <data key="d4">%s</data>'%(left_hypothal_names[0])),
+                             '{} \n'.format('      <data key="d5">%i</data>'%(-1)),
+                             '{} \n'.format('    </node>')]
+                f_graphML.writelines(node_lines)
 
             # Relabelling Brain Stem
             if brainstem_defined:
