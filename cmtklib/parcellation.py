@@ -2383,7 +2383,10 @@ def create_wm_mask_v2(subject_id, subjects_dir):
 
     fs_dir = op.join(subjects_dir,subject_id)
 
+    print("FS dir: %s"%fs_dir)
+
     # load ribbon as basis for white matter mask
+    print("load ribbon")
     fsmask = ni.load(op.join(fs_dir, 'mri', 'ribbon.nii.gz'))
     fsmaskd = fsmask.get_data()
 
@@ -2392,6 +2395,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     # these data is stored and could be extracted from fs_dir/stats/aseg.txt
 
     # extract right and left white matter
+    print("Extract right and left wm")
     idx_lh = np.where(fsmaskd == 41)
     idx_rh = np.where(fsmaskd == 2)
 
@@ -2399,10 +2403,12 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     wmmask[idx_lh] = 1
     wmmask[idx_rh] = 1
 
+    print("CSF B")
     idx = np.where(asegd == i)
     csfB[idx] = 1
 
     # remove subcortical nuclei from white matter mask
+    print("Load aseg")
     aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
     asegd = aseg.get_data()
 
@@ -2415,6 +2421,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     imerode = nd.binary_erosion
 
     # ventricle erosion
+    print("Ventricle erosion")
     csfA = np.zeros( asegd.shape )
     csfB = np.zeros( asegd.shape )
 
@@ -2435,6 +2442,8 @@ def create_wm_mask_v2(subject_id, subjects_dir):
                     (asegd == 10) |
                     (asegd == 49) )
     csfA[idx] = 1
+
+    print("Save CSF mask")
     img = ni.Nifti1Image(csfA, aseg.get_affine(), aseg.get_header())
     ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
     csfA = imerode(imerode(csfA, se1),se)
@@ -2468,6 +2477,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     # would stop the fiber going to the segmented "brainstem"
 
     # grey nuclei, either with or without erosion
+    print("grey nuclei, either with or without erosion")
     gr_ncl = np.zeros( asegd.shape )
 
     # with erosion
@@ -2486,6 +2496,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
         gr_ncl[idx] = 1
 
     # remove remaining structure, e.g. brainstem
+    print("remove remaining structure, e.g. brainstem")
     remaining = np.zeros( asegd.shape )
     idx = np.where( asegd == 16 )
     remaining[idx] = 1
