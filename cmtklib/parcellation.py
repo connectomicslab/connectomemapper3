@@ -2403,10 +2403,6 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     wmmask[idx_lh] = 1
     wmmask[idx_rh] = 1
 
-    print("CSF B")
-    idx = np.where(asegd == i)
-    csfB[idx] = 1
-
     # remove subcortical nuclei from white matter mask
     print("Load aseg")
     aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
@@ -2416,6 +2412,10 @@ def create_wm_mask_v2(subject_id, subjects_dir):
         import scipy.ndimage.morphology as nd
     except ImportError:
         raise Exception('Need scipy for binary erosion of white matter mask')
+    
+    print("CSF B")
+    idx = np.where(asegd == i)
+    csfB[idx] = 1
 
     # need binary erosion function
     imerode = nd.binary_erosion
