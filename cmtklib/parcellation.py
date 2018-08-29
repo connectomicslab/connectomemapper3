@@ -2413,10 +2413,6 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     except ImportError:
         raise Exception('Need scipy for binary erosion of white matter mask')
     
-    print("CSF B")
-    idx = np.where(asegd == i)
-    csfB[idx] = 1
-
     # need binary erosion function
     imerode = nd.binary_erosion
 
