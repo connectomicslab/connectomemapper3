@@ -1206,15 +1206,15 @@ class ParcellateThalamus(BaseInterface):
 
         del Ispams
 
-        debug_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_maxprobL.nii.gz'
-        print("Save output image to %s" % debug_file)
-        img = ni.Nifti1Image(MaxProbL, Vatlas.get_affine(), hdr2)
-        ni.save(img, debug_file)
-
-        debug_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_maxprobR.nii.gz'
-        print("Save output image to %s" % debug_file)
-        img = ni.Nifti1Image(MaxProbR, Vatlas.get_affine(), hdr2)
-        ni.save(img, debug_file)
+        # debug_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_maxprobL.nii.gz'
+        # print("Save output image to %s" % debug_file)
+        # img = ni.Nifti1Image(MaxProbL, Vatlas.get_affine(), hdr2)
+        # ni.save(img, debug_file)
+        #
+        # debug_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_maxprobR.nii.gz'
+        # print("Save output image to %s" % debug_file)
+        # img = ni.Nifti1Image(MaxProbR, Vatlas.get_affine(), hdr2)
+        # ni.save(img, debug_file)
 
         print("Save output image to %s" % max_prob)
         img = ni.Nifti1Image(MaxProb, Vatlas.get_affine(), hdr2)
