@@ -926,7 +926,8 @@ class ParcellateThalamus(BaseInterface):
         iflogger.info("Parcellation of Thalamic Nuclei")
         iflogger.info("=============================================")
 
-        fs_string = 'export ANTSPATH=/usr/lib/ants/'
+        # fs_string = 'export ANTSPATH=/usr/lib/ants/'
+        fs_string = ''
         iflogger.info('- Input T1w image:\n  {}\n'.format(self.inputs.T1w_image))
         iflogger.info('- Template image:\n  {}\n'.format(self.inputs.template_image))
         iflogger.info('- Thalamic nuclei maps:\n  {}\n'.format(self.inputs.thalamic_nuclei_maps))
@@ -935,7 +936,8 @@ class ParcellateThalamus(BaseInterface):
         mov = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','aparc+aseg.mgz')
         targ = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','orig/001.mgz')
         out = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','aparc+aseg.nii.gz')
-        cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
+        # cmd = fs_string + '; mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
+        cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
@@ -954,7 +956,8 @@ class ParcellateThalamus(BaseInterface):
         outprefixName = op.abspath('{}_Ind2temp'.format(outprefixName))
 
         # Register the template image image to the subject T1w image
-        cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
+        # cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
+        cmd = 'antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
 
         iflogger.info('Processing cmd: %s' % cmd)
 
@@ -972,7 +975,8 @@ class ParcellateThalamus(BaseInterface):
         jacobian_file = op.abspath('{}_class-thalamus_probtissue_jacobian.nii.gz'.format(outprefixName))
 
         # Compute and save jacobian
-        cmd = fs_string + '; CreateJacobianDeterminantImage 3 "%s" "%s" ' % (warp_file,jacobian_file)
+        # cmd = fs_string + '; CreateJacobianDeterminantImage 3 "%s" "%s" ' % (warp_file,jacobian_file)
+        cmd = 'CreateJacobianDeterminantImage 3 "%s" "%s" ' % (warp_file,jacobian_file)
 
         iflogger.info('Processing cmd: %s' % cmd)
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -980,7 +984,8 @@ class ParcellateThalamus(BaseInterface):
         iflogger.info(proc_stdout)
 
         # Propagate nuclei probability maps to subject T1w space using estimated transforms and deformation
-        cmd = fs_string + '; antsApplyTransforms --float -d 3 -e 3 -i "%s" -o "%s" -r "%s" -t "%s" -t "%s" -n BSpline[3]' % (self.inputs.thalamic_nuclei_maps,output_maps,self.inputs.T1w_image,warp_file,transform_file)
+        # cmd = fs_string + '; antsApplyTransforms --float -d 3 -e 3 -i "%s" -o "%s" -r "%s" -t "%s" -t "%s" -n BSpline[3]' % (self.inputs.thalamic_nuclei_maps,output_maps,self.inputs.T1w_image,warp_file,transform_file)
+        cmd = 'antsApplyTransforms --float -d 3 -e 3 -i "%s" -o "%s" -r "%s" -t "%s" -t "%s" -n BSpline[3]' % (self.inputs.thalamic_nuclei_maps,output_maps,self.inputs.T1w_image,warp_file,transform_file)
 
         iflogger.info('Processing cmd: %s' % cmd)
         process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -2412,7 +2417,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
         import scipy.ndimage.morphology as nd
     except ImportError:
         raise Exception('Need scipy for binary erosion of white matter mask')
-    
+
     # need binary erosion function
     imerode = nd.binary_erosion
 
