@@ -204,8 +204,8 @@ if args.analysis_level == "participant":
                     if args.dwi_pipeline_config is not None:
                         print("- diffusion MRI (structural connectivity matrices)")
 
-                        if args.func_pipeline_config is not None:
-                            print("- fMRI (functional connectivity matrices)")
+                    if args.func_pipeline_config is not None:
+                        print("- fMRI (functional connectivity matrices)")
 
                     cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
                     print cmd

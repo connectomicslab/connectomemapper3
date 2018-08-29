@@ -1,5 +1,6 @@
 # Use an official Python runtime as a parent image
 FROM sebastientourbier/connectomemapper-ubuntu16.04:latest
+
 MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 
 ##
@@ -12,6 +13,8 @@ MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 # Set the working directory to /app and copy contents of this repository
 WORKDIR /app
 ADD . /app
+
+#RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
 
 #Clone the master branch of connectomemapper 3 from BitBucket
 ARG password
