@@ -26,6 +26,7 @@ RUN conda config --add channels aramislab
 
 RUN conda install -y ipython jupyter matplotlib
 
+RUN conda install -c aramislab -y ants=2.2.0
 RUN conda install -y networkx=1.11
 RUN conda install -y numpy=1.11.3
 RUN conda install -y scipy=1.1.0
@@ -69,10 +70,13 @@ RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/frees
 
 # Installing the Matlab R2012b (v8.0) runtime
 # Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
-RUN curl "https://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" -o "/opt/freesurfer/runtime.tar.gz"
-RUN tar xvf /opt/freesurfer/runtime.tar.gz
-RUN rm /opt/freesurfer/runtime.tar.gz
-
+#RUN curl "https://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" -o "/opt/freesurfer/runtime.tar.gz"
+#RUN tar xvf /opt/freesurfer/runtime.tar.gz
+#RUN rm /opt/freesurfer/runtime.tar.gz
+WORKDIR /opt/freesurfer
+RUN curl "http://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" -o "runtime2012b.tar.gz"
+RUN tar xvf runtime2012b.tar.gz
+RUN rm runtime2012b.tar.gz
 # Make FreeSurfer happy
 ENV FSL_DIR=/usr/share/fsl/5.0 \
     OS=Linux \
@@ -126,16 +130,16 @@ ENV FSLDIR=/usr/share/fsl/5.0 \
     AFNI_PLUGINPATH=/usr/lib/afni/plugins
 ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
 
-## Install ANTs
-RUN apt-get install -y ants=2.2.0-1~nd16.04+1
-ENV ANTSPATH=/usr/lib/ants
-ENV PATH=$ANTSPATH:$PATH
+## Install ANTs --no-install-suggests
+#RUN apt-get install -y ants=2.2.0-1~nd16.04+1
+#ENV ANTSPATH=/usr/lib/ants
+#ENV PATH=$ANTSPATH:$PATH
 
 ## Install MRTRIX
 
 # Additional dependencies for MRtrix3 compilation
 RUN apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
-    libgl1-mesa-dev libfftw3-dev libtiff5-dev
+    libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev
 # Get the latest version of MRtrix3
 # MRtrix3 setup
 RUN git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
@@ -152,6 +156,7 @@ ENV PYTHONPATH=/mrtrix3/lib:$PYTHONPATH
 #BIDS validator
 RUN npm install -g bids-validator
 
+ENV LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
 # Cleanup
 #RUN apt-get -y remove git g++ curl bzip2
     #apt-get -qq -y autoremove && \
