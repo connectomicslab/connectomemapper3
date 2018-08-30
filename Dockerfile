@@ -24,6 +24,8 @@ RUN git checkout master
 # Set the working directory to /app/connectomemapper3 and install connectomemapper3
 WORKDIR /app/connectomemapper3
 RUN python setup.py install
+ENV ANTSPATH=/usr/local/bin
+#ENV PATH=$ANTSPATH:$PATH
 
 # Create entrypoint script that simulated a X server - required by traitsui
 RUN echo '#! /bin/sh \n xvfb-run python "/app/run_connectomemapper3.py" "$@"' > /app/run_connectomemapper3.sh
