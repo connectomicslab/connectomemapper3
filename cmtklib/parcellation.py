@@ -381,10 +381,11 @@ class CombineParcellations(BaseInterface):
             ni.save(img, thirdV)
 
             thirdV_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
-            fslmaths_cmd = ["fslmaths",thirdV,"-kernel", "sphere", 1, "-dilD", thirdV_dil]
+            fslmaths_cmd = 'fslmaths %s -kernel sphere 5 -dilD %s' % (thirdV,thirdV_dil)
             print("RUN")
             print(fslmaths_cmd)
-            subprocess.call(fslmaths_cmd)
+            process = subprocess.Popen(fslmaths_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+            proc_stdout = process.communicate()[0].strip()
 
             tmp = ni.load(thirdV_dil).get_data()
             indrhypothal = np.where((tmp == 1) & (I == right_ventral))
