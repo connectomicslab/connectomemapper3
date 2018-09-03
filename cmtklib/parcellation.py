@@ -2400,10 +2400,17 @@ def create_wm_mask_v2(subject_id, subjects_dir):
 
     # these data is stored and could be extracted from fs_dir/stats/aseg.txt
 
+    #FIXME understand when ribbon file has default value or has "aseg" value
     # extract right and left white matter
     print("Extract right and left wm")
-    idx_lh = np.where(fsmaskd == 41)
-    idx_rh = np.where(fsmaskd == 2)
+    #Ribbon labels by default
+    if fsmaskd.max() == 120:
+        idx_lh = np.where(fsmaskd == 120)
+        idx_rh = np.where(fsmaskd == 20)
+    #Ribbon labels w.r.t aseg label
+    else:
+        idx_lh = np.where(fsmaskd == 41)
+        idx_rh = np.where(fsmaskd == 2)
 
     # extract right and left
     wmmask[idx_lh] = 1
