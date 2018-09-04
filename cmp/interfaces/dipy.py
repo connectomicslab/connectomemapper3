@@ -715,7 +715,7 @@ class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     fod_file = File(exists=True, desc=('input fod file (if SHORE)'))
     in_fa = File(exists=True, mandatory=True, desc=('input FA'))
-    in_partial_volume_files = InputMultiPath(File(exists=True), desc='FAST partial volume estimation result files (required if performing ACT)')
+    in_partial_volume_files = InputMultiPath(File(exists=True), desc='Partial volume estimation result files (required if performing ACT)')
     # in_t1 = File(exists=True, desc=('input T1w (required if performing ACT)'))
     in_model = File(exists=True, mandatory=True, desc=('input f/d-ODF model extracted from.'))
     tracking_mask = File(exists=True, mandatory=True,
@@ -763,7 +763,7 @@ class DirectionGetterTractography(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.tracking import utils
         from dipy.direction import DeterministicMaximumDirectionGetter, ProbabilisticDirectionGetter
-        from dipy.tracking.local import ThresholdTissueClassifier, BinaryTissueClassifier, ActTissueClassifier, LocalTracking
+        from dipy.tracking.local import ThresholdTissueClassifier, BinaryTissueClassifier, ActTissueClassifier, LocalTracking, CmcTissueClassifier, ParticleFilteringTracking
         from dipy.reconst.peaks import peaks_from_model
         from dipy.data import get_sphere, default_sphere
         from dipy.io.trackvis import save_trk
@@ -862,28 +862,41 @@ class DirectionGetterTractography(DipyBaseInterface):
             # IFLOGGER.info("partial_volume_files :")
             # IFLOGGER.info(fastr.outputs.partial_volume_files)
 
-            background = np.ones(imref.shape)
-            pve_sum = np.zeros(imref.shape)
-            for pve_file in self.inputs.in_partial_volume_files:
-                pve_img = nb.load(pve_file)
-                pve_data = pve_img.get_data().astype(np.float32)
-                pve_sum = pve_sum + pve_data
+            img_pve_csf = nb.load(self.inputs.in_partial_volume_files[0])
+            img_pve_gm = nb.load(self.inputs.in_partial_volume_files[1])
+            img_pve_wm = nb.load(self.inputs.in_partial_volume_files[2])
 
-            background[pve_sum>0] = 0
+            voxel_size = np.average(img_pve_wm.get_header()['pixdim'][1:4])
+            step_size = self.inputs.step_size
 
-            include_map = np.zeros(imref.shape)
-            exclude_map = np.zeros(imref.shape)
-            for pve_file in self.inputs.in_partial_volume_files:
-                pve_img = nb.load(pve_file)
-                pve_data = pve_img.get_data().astype(np.float32)
-                if "pve_0" in pve_file:# CSF
-                    exclude_map = pve_data
-                elif "pve_1" in pve_file:# GM
-                    include_map = pve_data
+            cmc_classifier = CmcTissueClassifier.from_pve(img_pve_wm.get_data(),
+                                                          img_pve_gm.get_data(),
+                                                          img_pve_csf.get_data(),
+                                                          step_size=step_size,
+                                                          average_voxel_size=voxel_size)
 
-            include_map[background>0] = 1
-            IFLOGGER.info('Building ACT Tissue Classifier')
-            classifier = ActTissueClassifier(include_map,exclude_map)
+            # background = np.ones(imref.shape)
+            # pve_sum = np.zeros(imref.shape)
+            # for pve_file in self.inputs.in_partial_volume_files:
+            #     pve_img = nb.load(pve_file)
+            #     pve_data = pve_img.get_data().astype(np.float32)
+            #     pve_sum = pve_sum + pve_data
+            #
+            # background[pve_sum>0] = 0
+            #
+            # include_map = np.zeros(imref.shape)
+            # exclude_map = np.zeros(imref.shape)
+            # for pve_file in self.inputs.in_partial_volume_files:
+            #     pve_img = nb.load(pve_file)
+            #     pve_data = pve_img.get_data().astype(np.float32)
+            #     if "pve_0" in pve_file:# CSF
+            #         exclude_map = pve_data
+            #     elif "pve_1" in pve_file:# GM
+            #         include_map = pve_data
+            #
+            # include_map[background>0] = 1
+            # IFLOGGER.info('Building ACT Tissue Classifier')
+            # classifier = ActTissueClassifier(include_map,exclude_map)
         else:
             IFLOGGER.info('Building Binary Tissue Classifier')
             # classifier = ThresholdTissueClassifier(fa,self.inputs.fa_thresh)
@@ -925,13 +938,34 @@ class DirectionGetterTractography(DipyBaseInterface):
             else:
                 dg = ProbabilisticDirectionGetter.from_shcoeff(sh, max_angle=self.inputs.max_angle, sphere=sphere)
 
+        if not self.inputs.use_act:
 
-        IFLOGGER.info(('Performing %s tractography') % (self.inputs.algo))
+            IFLOGGER.info(('Performing %s tractography') % (self.inputs.algo))
 
-        streamlines = LocalTracking(dg, classifier, tseeds, affine, step_size=self.inputs.step_size, max_cross=1)
+            streamlines = LocalTracking(dg, classifier, tseeds, affine, step_size=self.inputs.step_size, max_cross=1)
 
-        IFLOGGER.info('Saving tracks')
-        save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
+            IFLOGGER.info('Saving tracks')
+            save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
+
+        else:
+            # Particle Filtering Tractography
+            pft_streamline_generator = ParticleFilteringTracking(dg,
+                                                                 cmc_classifier,
+                                                                 tseeds,
+                                                                 affine,
+                                                                 max_cross=1,
+                                                                 step_size=step_size,
+                                                                 maxlen=1000,
+                                                                 pft_back_tracking_dist=2,
+                                                                 pft_front_tracking_dist=1,
+                                                                 particle_count=15,
+                                                                 return_all=False)
+
+            #streamlines = list(pft_streamline_generator)
+            from dipy.tracking.streamline import Streamlines
+            streamlines = Streamlines(pft_streamline_generator)
+
+            save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
 
         # IFLOGGER.info('Loading CSD model and fitting')
         # f = gzip.open(self.inputs.in_model, 'rb')
