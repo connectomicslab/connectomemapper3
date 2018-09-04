@@ -23,9 +23,7 @@ class ExtractPVEsFrom5TTInputSpec(BaseInterfaceInputSpec):
     pve_wm_file = File(desc="WM Partial Volume Estimation volume estimated from",mandatory=True)
 
 class ExtractPVEsFrom5TTOutputSpec(TraitedSpec):
-    pve_csf_file = File(desc="CSF Partial Volume Estimation volume estimated from",exists=True,mandatory=True)
-    pve_gm_file = File(desc="GM Partial Volume Estimation volume estimated from",exists=True,mandatory=True)
-    pve_wm_file = File(desc="WM Partial Volume Estimation volume estimated from",exists=True,mandatory=True)
+    partial_volume_files = OutputMultiPath(File,desc="CSF/GM/WM Partial Volume Estimation images estimated from",exists=True)
 
 class ExtractPVEsFrom5TT(BaseInterface):
 
@@ -134,9 +132,14 @@ class ExtractPVEsFrom5TT(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['pve_csf_file'] = os.path.abspath(self.inputs.pve_csf_file)
-        outputs['pve_wm_file'] = os.path.abspath(self.inputs.pve_wm_file)
-        outputs['pve_gm_file'] = os.path.abspath(self.inputs.pve_gm_file)
+
+        pve_files = []
+        pve_files.append(os.path.abspath(self.inputs.pve_csf_file))
+        pve_files.append(os.path.abspath(self.inputs.pve_gm_file))
+        pve_files.append(os.path.abspath(self.inputs.pve_wm_file))
+
+        outputs['partial_volume_files'] = pve_files
+
         return outputs
 
 
