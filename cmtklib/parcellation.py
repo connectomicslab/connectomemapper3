@@ -2407,7 +2407,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     if fsmaskd.max() == 120:
         idx_lh = np.where(fsmaskd == 120)
         idx_rh = np.where(fsmaskd == 20)
-    #Ribbon labels w.r.t aseg label
+    #Ribbon label w.r.t aseg label
     else:
         idx_lh = np.where(fsmaskd == 41)
         idx_rh = np.where(fsmaskd == 2)
