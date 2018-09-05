@@ -784,9 +784,9 @@ class PreprocessingStage(Stage):
 
         # if self.config.partial_volume_estimation:
         pve_extractor_from_5tt = pe.Node(interface=ExtractPVEsFrom5TT(),name='pve_extractor_from_5tt')
-        pve_extractor.inputs.pve_csf_file = 'pve_0.nii.gz'
-        pve_extractor.inputs.pve_csf_file = 'pve_1.nii.gz'
-        pve_extractor.inputs.pve_csf_file = 'pve_2.nii.gz'
+        pve_extractor_from_5tt.inputs.pve_csf_file = 'pve_0.nii.gz'
+        pve_extractor_from_5tt.inputs.pve_gm_file = 'pve_1.nii.gz'
+        pve_extractor_from_5tt.inputs.pve_wm_file = 'pve_2.nii.gz'
 
         flow.connect([
                     (mrtrix_5tt,pve_extractor_from_5tt,[('out_file','in_5tt')]),
