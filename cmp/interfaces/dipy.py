@@ -766,7 +766,7 @@ class DirectionGetterTractography(DipyBaseInterface):
         from dipy.tracking.local import ThresholdTissueClassifier, BinaryTissueClassifier, ActTissueClassifier, LocalTracking, CmcTissueClassifier, ParticleFilteringTracking
         from dipy.reconst.peaks import peaks_from_model
         from dipy.data import get_sphere, default_sphere
-        from dipy.io.trackvis import save_trk
+        from dipy.io.streamline import save_trk
         # import marshal as pickle
         import pickle as pickle
         import gzip
@@ -866,7 +866,7 @@ class DirectionGetterTractography(DipyBaseInterface):
             img_pve_gm = nb.load(self.inputs.in_partial_volume_files[1])
             img_pve_wm = nb.load(self.inputs.in_partial_volume_files[2])
 
-            voxel_size = np.average(img_pve_wm.get_header()['pixdim'][1:4])
+            voxel_size = np.average(img_pve_wm.header['pixdim'][1:4])
             step_size = self.inputs.step_size
 
             cmc_classifier = CmcTissueClassifier.from_pve(img_pve_wm.get_data(),
