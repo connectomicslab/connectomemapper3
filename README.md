@@ -68,7 +68,7 @@ To run it in participant level mode (for one participant):
         -v /home/localadmin/data/ds001/code:/code \
         -v /usr/local/freesurfer/subjects/fsaverage:/bids_dataset/derivatives/freesurfer/fsaverage \
         -v /usr/local/freesurfer/license.txt:/opt/freesurfer/license.txt \
-        sebastientourbier/connectomemapper3 \
+        sebastientourbier/connectomemapper-bidsapp:latest \
         /bids_dataset /outputs participant --participant_label 01 \
         --anat_pipeline_config /code/ref_anatomical_config.ini \
         --dwi_pipeline_config /code/ref_diffusion_config.ini \
