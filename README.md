@@ -16,7 +16,7 @@ This software is distributed under the open-source license Modified BSD. See [li
 ### Usage
 This App has the following command line arguments:
 
-        $ docker -ti --rm sebastientourbier/connectomemapper3 --help
+        $ docker -ti --rm sebastientourbier/connectomemapper-bidsapp --help
 
         usage: run_connectomemapper3.py [-h]
                                         [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
