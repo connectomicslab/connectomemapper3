@@ -32,7 +32,7 @@ from cmp.interfaces.mrtrix3 import Erode, MRtrix_mul, MRThreshold, MRConvert, Es
 from nipype.interfaces.mrtrix3.reconst import FitTensor, EstimateFOD
 from nipype.interfaces.mrtrix3.utils import TensorMetrics
 # from nipype.interfaces.mrtrix3.preprocess import ResponseSD
-
+from cmp.interfaces.misc import flipBvec
 from cmp.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE
 # from nipype.interfaces.dipy import CSD
 
@@ -520,49 +520,6 @@ def create_dtk_recon_flow(config):
 
     return flow
 
-class flipBvecInputSpec(BaseInterfaceInputSpec):
-    bvecs = File(exists=True)
-    flipping_axis = List()
-    delimiter = Str()
-    header_lines = Int(0)
-    orientation = Enum(['v','h'])
-
-class flipBvecOutputSpec(TraitedSpec):
-    bvecs_flipped = File(exists=True)
-
-class flipBvec(BaseInterface):
-    input_spec = flipBvecInputSpec
-    output_spec = flipBvecOutputSpec
-
-    def _run_interface(self,runtime):
-        axis_dict = {'x':0, 'y':1, 'z':2}
-        import numpy as np
-        f = open(self.inputs.bvecs,'r')
-        header = ''
-        for h in range(self.inputs.header_lines):
-            header += f.readline()
-        if self.inputs.delimiter == ' ':
-            table = np.loadtxt(f)
-        else:
-            table = np.loadtxt(f, delimiter=self.inputs.delimiter)
-        f.close()
-        if self.inputs.orientation == 'v':
-            for i in self.inputs.flipping_axis:
-                table[:,axis_dict[i]] = -table[:,axis_dict[i]]
-        elif self.inputs.orientation == 'h':
-            for i in self.inputs.flipping_axis:
-                table[axis_dict[i],:] = -table[axis_dict[i],:]
-        out_f = file(os.path.abspath('flipped_bvecs.bvec'),'a')
-        if self.inputs.header_lines > 0:
-            out_f.write(header)
-        np.savetxt(out_f,table,delimiter=self.inputs.delimiter)
-        out_f.close()
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["bvecs_flipped"] = os.path.abspath('flipped_bvecs.bvec')
-        return outputs
 
 def create_dipy_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
