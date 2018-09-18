@@ -148,7 +148,7 @@ class ComputeSphereRadiusInputSpec(BaseInterfaceInputSpec):
     dilation_radius = traits.Float(mandatory=True)
 
 class ComputeSphereRadiusOutputSpec(TraitedSpec):
-    sphere_radius = traits.Float
+    sphere_radius = Float
 
 class ComputeSphereRadius(BaseInterface):
 
