@@ -35,6 +35,7 @@ import nibabel as nib
 # from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
 from cmp.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, MRThreshold, ExtractFSLGrad, ExtractMRTrixGrad, Generate5tt, GenerateGMWMInterface
 import cmp.interfaces.fsl as cmp_fsl
+from cmp.interfaces.misc import ExtractPVEsFrom5TT
 
 from nipype.interfaces.mrtrix3.preprocess import ResponseSD
 
@@ -306,40 +307,51 @@ class PreprocessingStage(Stage):
                     (processing_input,mr_convert_wm_mask_file,[('wm_mask_file','in_file')])
                     ])
 
-        if self.config.partial_volume_estimation:
-            from nipype.interfaces import fsl
-            # Run FAST for partial volume estimation (WM;GM;CSF)
-            fastr = pe.Node(interface=fsl.FAST(),name='fastr')
-            fastr.inputs.out_basename = 'fast_'
-            fastr.inputs.number_classes = 3
+        # if self.config.partial_volume_estimation:
+        #     pve_extractor_from_5tt = pe.Node(interface=ExtractPVEsFrom5TT(),name='pve_extractor_from_5tt')
+        #     pve_extractor.inputs.pve_csf_file = 'pve_0.nii.gz'
+        #     pve_extractor.inputs.pve_csf_file = 'pve_1.nii.gz'
+        #     pve_extractor.inputs.pve_csf_file = 'pve_2.nii.gz'
+        #
+        #     flow.connect([
+        #                 (mrtrix_5tt,pve_extractor_from_5tt,[('out_file','in_5tt')]),
+        #                 (processing_input,pve_extractor_from_5tt,[('T1','ref_image')]),
+        #                 ])
 
-            if self.config.fast_use_priors:
-                fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='Template2Input.nii.gz',out_matrix_file='template2input.mat'),name="linear_registration")
-                #fsl_flirt.inputs.in_file = os.environ['FSLDIR']+'/data/standard/MNI152_T1_1mm.nii.gz'
-                template_path = os.path.join('data', 'segmentation', 'ants_template_IXI')
-                fsl_flirt.inputs.in_file = pkg_resources.resource_filename('cmtklib', os.path.join(template_path, 'T_template2.nii.gz'))
-                #fsl_flirt.inputs.dof = self.config.dof
-                #fsl_flirt.inputs.cost = self.config.fsl_cost
-                #fsl_flirt.inputs.no_search = self.config.no_search
-                fsl_flirt.inputs.verbose = True
+            # from nipype.interfaces import fsl
+            # # Run FAST for partial volume estimation (WM;GM;CSF)
+            # fastr = pe.Node(interface=fsl.FAST(),name='fastr')
+            # fastr.inputs.out_basename = 'fast_'
+            # fastr.inputs.number_classes = 3
+            #
+            # if self.config.fast_use_priors:
+            #     fsl_flirt = pe.Node(interface=fsl.FLIRT(out_file='Template2Input.nii.gz',out_matrix_file='template2input.mat'),name="linear_registration")
+            #     #fsl_flirt.inputs.in_file = os.environ['FSLDIR']+'/data/standard/MNI152_T1_1mm.nii.gz'
+            #     template_path = os.path.join('data', 'segmentation', 'ants_template_IXI')
+            #     fsl_flirt.inputs.in_file = pkg_resources.resource_filename('cmtklib', os.path.join(template_path, 'T_template2.nii.gz'))
+            #     #fsl_flirt.inputs.dof = self.config.dof
+            #     #fsl_flirt.inputs.cost = self.config.fsl_cost
+            #     #fsl_flirt.inputs.no_search = self.config.no_search
+            #     fsl_flirt.inputs.verbose = True
+            #
+            #     flow.connect([
+            #                 (mr_convert_T1, fsl_flirt, [('converted','reference')]),
+            #                 ])
+            #
+            #     fastr.inputs.use_priors = True
+            #     fastr.inputs.other_priors = [pkg_resources.resource_filename('cmtklib', os.path.join(template_path,'3Class-Priors','priors1.nii.gz')),
+            #                                  pkg_resources.resource_filename('cmtklib', os.path.join(template_path,'3Class-Priors','priors2.nii.gz')),
+            #                                  pkg_resources.resource_filename('cmtklib', os.path.join(template_path,'3Class-Priors','priors3.nii.gz'))
+            #                                 ]
+            #     flow.connect([
+            #                 (fsl_flirt, fastr, [('out_matrix_file','init_transform')]),
+            #                 ])
+            #
+            # flow.connect([
+            #             (mr_convert_brain,fastr,[('converted','in_files')]),
+            #             # (fastr,outputnode,[('partial_volume_files','partial_volume_files')])
+            #             ])
 
-                flow.connect([
-                            (mr_convert_T1, fsl_flirt, [('converted','reference')]),
-                            ])
-
-                fastr.inputs.use_priors = True
-                fastr.inputs.other_priors = [pkg_resources.resource_filename('cmtklib', os.path.join(template_path,'3Class-Priors','priors1.nii.gz')),
-                                             pkg_resources.resource_filename('cmtklib', os.path.join(template_path,'3Class-Priors','priors2.nii.gz')),
-                                             pkg_resources.resource_filename('cmtklib', os.path.join(template_path,'3Class-Priors','priors3.nii.gz'))
-                                            ]
-                flow.connect([
-                            (fsl_flirt, fastr, [('out_matrix_file','init_transform')]),
-                            ])
-
-            flow.connect([
-                        (mr_convert_brain,fastr,[('converted','in_files')]),
-                        # (fastr,outputnode,[('partial_volume_files','partial_volume_files')])
-                        ])
 
         #Threshold converted Freesurfer brainmask into a binary mask
         mr_threshold_brainmask = pe.Node(interface=MRThreshold(abs_value=1,out_file='brain_mask.nii.gz'),name='mr_threshold_brainmask')
@@ -536,14 +548,14 @@ class PreprocessingStage(Stage):
                     (fs_mriconvert_ROIs,outputnode,[("out_file","roi_volumes")])
                     ])
 
-        fs_mriconvert_PVEs = pe.MapNode(interface=fs.MRIConvert(out_type='niigz'),name="PVEs_resample",iterfield=['in_file'])
-        fs_mriconvert_PVEs.inputs.vox_size = self.config.resampling
-        fs_mriconvert_PVEs.inputs.resample_type = self.config.interpolation
-        flow.connect([
-                    (fastr,fs_mriconvert_PVEs,[('partial_volume_files','in_file')]),
-                    #(mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
-                    (fs_mriconvert_PVEs,outputnode,[("out_file","partial_volume_files")])
-                    ])
+        # fs_mriconvert_PVEs = pe.MapNode(interface=fs.MRIConvert(out_type='niigz'),name="PVEs_resample",iterfield=['in_file'])
+        # fs_mriconvert_PVEs.inputs.vox_size = self.config.resampling
+        # fs_mriconvert_PVEs.inputs.resample_type = self.config.interpolation
+        # flow.connect([
+        #             (fastr,fs_mriconvert_PVEs,[('partial_volume_files','in_file')]),
+        #             #(mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
+        #             (fs_mriconvert_PVEs,outputnode,[("out_file","partial_volume_files")])
+        #             ])
 
         fs_mriconvert_dwimask = pe.Node(interface=fs.MRIConvert(out_type='niigz',resample_type='nearest',out_file='dwi_brain_mask_resampled.nii.gz'),name="dwi_brainmask_resample")
         #fs_mriconvert_dwimask.inputs.vox_size = self.config.resampling
@@ -769,6 +781,26 @@ class PreprocessingStage(Stage):
                 (mrtrix_5tt,fs_mriconvert_5tt,[('out_file','in_file')]),
                 (fs_mriconvert_5tt,outputnode,[('out_file','act_5TT')]),
     		    ])
+
+        # if self.config.partial_volume_estimation:
+        pve_extractor_from_5tt = pe.Node(interface=ExtractPVEsFrom5TT(),name='pve_extractor_from_5tt')
+        pve_extractor_from_5tt.inputs.pve_csf_file = 'pve_0.nii.gz'
+        pve_extractor_from_5tt.inputs.pve_gm_file = 'pve_1.nii.gz'
+        pve_extractor_from_5tt.inputs.pve_wm_file = 'pve_2.nii.gz'
+
+        flow.connect([
+                    (mrtrix_5tt,pve_extractor_from_5tt,[('out_file','in_5tt')]),
+                    (processing_input,pve_extractor_from_5tt,[('T1','ref_image')]),
+                    ])
+
+        fs_mriconvert_PVEs = pe.MapNode(interface=fs.MRIConvert(out_type='niigz'),name="PVEs_resample",iterfield=['in_file'])
+        fs_mriconvert_PVEs.inputs.vox_size = self.config.resampling
+        fs_mriconvert_PVEs.inputs.resample_type = self.config.interpolation
+        flow.connect([
+                    (pve_extractor_from_5tt,fs_mriconvert_PVEs,[('partial_volume_files','in_file')]),
+                    #(mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
+                    (fs_mriconvert_PVEs,outputnode,[("out_file","partial_volume_files")])
+                    ])
 
         fs_mriconvert_gmwmi = pe.Node(interface=fs.MRIConvert(out_type='niigz',out_file='gmwmi_resampled.nii.gz'),name="gmwmi_resample")
         fs_mriconvert_gmwmi.inputs.vox_size = self.config.resampling

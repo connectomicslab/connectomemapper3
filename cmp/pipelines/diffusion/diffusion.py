@@ -684,9 +684,9 @@ class DiffusionPipeline(Pipeline):
                                             ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale3.nii.gz'),
                                             ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale4.nii.gz'),
                                             ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale5.nii.gz'),
-                                            ('fast__pve_0_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-CSF_pve.nii.gz'),
-                                            ('fast__pve_1_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-GM_pve.nii.gz'),
-                                            ('fast__pve_2_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-WM_pve.nii.gz'),
+                                            ('pve_0_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-CSF_probtissue.nii.gz'),
+                                            ('pve_1_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-GM_probtissue.nii.gz'),
+                                            ('pve_2_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-WM_probtissue.nii.gz'),
 
                                             ('connectome',self.subject+'_dwi_connectome'),
                                             ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
