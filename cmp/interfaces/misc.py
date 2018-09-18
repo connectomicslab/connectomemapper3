@@ -2,16 +2,16 @@ import os
 import glob
 import numpy as np
 
-try:
-    from traitsui.api import *
-    from traits.api import *
-
-except ImportError:
-    from enthought.traits.api import *
-    from enthought.traits.ui.api import *
+# try:
+#     from traitsui.api import *
+#     from traits.api import *
+#
+# except ImportError:
+#     from enthought.traits.api import *
+#     from enthought.traits.ui.api import *
 
 from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec,\
-    TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
+    TraitedSpec, File, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 
 import nibabel as nib
 
@@ -145,7 +145,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
 
 class ComputeSphereRadiusInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
-    dilation_radius = Float(mandatory=True)
+    dilation_radius = traits.Float(mandatory=True)
 
 class ComputeSphereRadiusOutputSpec(TraitedSpec):
     sphere_radius = Float
@@ -175,7 +175,7 @@ class ExtractImageVoxelSizesInputSpec(BaseInterfaceInputSpec):
 
 
 class ExtractImageVoxelSizesOutputSpec(TraitedSpec):
-    voxel_sizes = List(Int(),Int(),Int())
+    voxel_sizes = traits.List(traits.Int(),traits.Int(),traits.Int())
 
 class ExtractImageVoxelSizes(BaseInterface):
 
@@ -235,10 +235,10 @@ class Tck2Trk(BaseInterface):
 
 class flipBvecInputSpec(BaseInterfaceInputSpec):
     bvecs = File(exists=True)
-    flipping_axis = List()
-    delimiter = Str()
-    header_lines = Int(0)
-    orientation = Enum(['v','h'])
+    flipping_axis = traits.List()
+    delimiter = traits.Str()
+    header_lines = traits.Int(0)
+    orientation = traits.Enum(['v','h'])
 
 class flipBvecOutputSpec(TraitedSpec):
     bvecs_flipped = File(exists=True)
