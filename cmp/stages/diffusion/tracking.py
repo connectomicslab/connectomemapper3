@@ -996,7 +996,7 @@ def create_mrtrix_tracking_flow(config):
             mrtrix_tracking.inputs.crop_at_gmwmi = config.crop_at_gmwmi
         else:
             flow.connect([
-                (wm_erode, mrtrix_tracking,[('out_file','mask_file')]),
+                (inputnode, mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
     		    ])
 
         if config.seed_from_gmwmi:

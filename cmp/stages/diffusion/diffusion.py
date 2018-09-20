@@ -558,35 +558,42 @@ class DiffusionStage(Stage):
         # TODO: add Tensor image in case of DTI+Tensor modeling
 
         #MRtrix
-        recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_make_tensor","result_mrtrix_make_tensor.pklz")
+        metrics_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_tensor_metrics","result_mrtrix_tensor_metrics.pklz")
 
-        if os.path.exists(recon_results_path):
-            recon_results = pickle.load(gzip.open(recon_results_path))
+        if os.path.exists(metrics_results_path):
+            metrics_results = pickle.load(gzip.open(metrics_results_path))
 
-            fa_res = recon_results.outputs.out_fa
+            fa_res = metrics_results.outputs.out_fa
             self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',fa_res]
 
-            adc_res = recon_results.outputs.out_adc
+            adc_res = metrics_results.outputs.out_adc
             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ADC image'] = ['mrview',adc_res]
 
-            if not self.config.mrtrix_recon_config.local_mode: # Tensor model (DTI)
 
-                tensor_res = recon_results.outputs.tensor
-                self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_tensor',tensor_res]
+        if not self.config.mrtrix_recon_config.local_model: # Tensor model (DTI)
+            recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_make_tensor","result_mrtrix_make_tensor.pklz")
 
-            else: # CSD model
+            if os.path.exists(recon_results_path):
+                recon_results = pickle.load(gzip.open(recon_results_path))
 
-                RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
-                if(os.path.exists(RF_path)):
-                    RF_results = pickle.load(gzip.open(RF_path))
-                    self.inspect_outputs_dict['MRTRIX Response function'] = ['shview','-response',RF_results.outputs.response]
+            tensor_res = recon_results.outputs.tensor
+            self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_tensor',tensor_res]
 
-                recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_CSD","result_mrtrix_CSD.pklz")
+        else: # CSD model
 
-                if os.path.exists(recon_results_path):
-                    recon_results = pickle.load(gzip.open(recon_results_path))
-                    shm_coeff_res = recon_results.outputs.spherical_harmonics_image
-                    self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_sh',shm_coeff_res]
+            RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
+            if(os.path.exists(RF_path)):
+                RF_results = pickle.load(gzip.open(RF_path))
+                self.inspect_outputs_dict['MRTRIX Response function'] = ['shview','-response',RF_results.outputs.response]
+
+            recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_CSD","result_mrtrix_CSD.pklz")
+
+            if os.path.exists(recon_results_path):
+                recon_results = pickle.load(gzip.open(recon_results_path))
+                shm_coeff_res = recon_results.outputs.spherical_harmonics_image
+                self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_sh',shm_coeff_res]
+
+
 
         ## Tracking outputs
         # Dipy

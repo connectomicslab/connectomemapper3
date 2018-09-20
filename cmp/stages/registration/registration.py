@@ -639,7 +639,7 @@ class RegistrationStage(Stage):
             affine_registration.inputs.verbose = True
 
             flow.connect([
-                        (inputnode, affine_registration, [('brain','moving_image')]),
+                        (inputnode, affine_registration, [('T1','moving_image')]),
                         (mr_convert_b0, affine_registration, [('converted','fixed_image')])
                         ])
 
@@ -744,7 +744,7 @@ class RegistrationStage(Stage):
 
                 flow.connect([
                         (affine_registration, SyN_registration, [('composite_transform','initial_moving_transform')]),
-                        (inputnode, SyN_registration, [('brain','moving_image')]),
+                        (inputnode, SyN_registration, [('T1','moving_image')]),
                         (mr_convert_b0, SyN_registration, [('converted','fixed_image')])
                         ])
 
