@@ -13,13 +13,16 @@ RUN apt-get update && apt-get -qq -y install npm curl bzip2 xvfb && \
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
     curl -sSL https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
-    bash /tmp/miniconda.sh -bfp /usr/local && \
-    rm -rf /tmp/miniconda.sh && \
-    conda install -y python=2.7.13 && \
+    bash /tmp/miniconda.sh -bfp /opt/conda && \
+    rm -rf /tmp/miniconda.sh
+
+ENV PATH /opt/conda/bin:$PATH
+
+RUN conda install -y python=2.7.13 && \
     conda update conda && \
     conda clean --all --yes
-ENV PATH /opt/conda/bin:$PATH
-# Note: (fix nodes_iter() to nodes() for networkx2 support)
+
+## FIXME: (fix nodes_iter() to nodes() for networkx2 support)
 
 RUN conda config --add channels conda-forge
 RUN conda config --add channels aramislab
@@ -50,6 +53,8 @@ RUN conda install -y pyqt=4
 RUN conda install -c aramislab -y pybids
 RUN conda clean --all --yes
 
+#Make ANTs happy
+ENV ANTSPATH=/opt/conda/bin
 ## Install Neurodebian
 #RUN apt-get install neurodebian && \
 #    apt-get update
@@ -142,6 +147,7 @@ RUN apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-o
     libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev
 # Get the latest version of MRtrix3
 # MRtrix3 setup
+WORKDIR /opt
 RUN git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
     cd mrtrix3 && \
     git checkout 3.0_RC3 && \
@@ -150,8 +156,8 @@ RUN git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
     git describe --tags > /mrtrix3_version
 
 # Setup environment variables for MRtrix3
-ENV PATH=/mrtrix3/bin:$PATH
-ENV PYTHONPATH=/mrtrix3/lib:$PYTHONPATH
+ENV PATH=/opt/mrtrix3/bin:$PATH
+ENV PYTHONPATH=/opt/mrtrix3/lib:$PYTHONPATH
 
 #BIDS validator
 RUN npm install -g bids-validator
