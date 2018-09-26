@@ -562,7 +562,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                               'crashfile_format': "txt"}
                               })
         logging.update_logging(config)
-        iflogger = logging.getLogger('interface')
+        iflogger = logging.getLogger('nipype.interface')
 
         iflogger.info("**** Processing ****")
         anat_flow = self.create_pipeline_flow(deriv_subject_directory=deriv_subject_directory)

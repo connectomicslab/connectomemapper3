@@ -308,7 +308,7 @@ class fMRIPipeline(Pipeline):
                               'crashfile_format': "txt"}
                               })
         logging.update_logging(config)
-        iflogger = logging.getLogger('interface')
+        iflogger = logging.getLogger('nipype.interface')
 
         iflogger.info("**** Processing ****")
         print self.anat_flow
@@ -595,7 +595,7 @@ class fMRIPipeline(Pipeline):
                               'execution': {'remove_unnecessary_outputs': False}
                               })
         logging.update_logging(config)
-        iflogger = logging.getLogger('interface')
+        iflogger = logging.getLogger('nipype.interface')
 
         # Data import
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['fMRI','T1','T2']), name='datasource')

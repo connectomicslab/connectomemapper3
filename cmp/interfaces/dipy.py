@@ -22,7 +22,7 @@ from nipype.interfaces.base import TraitedSpec, File, traits, isdefined, BaseInt
 from nipype.interfaces.dipy.base import DipyDiffusionInterface, DipyBaseInterface, DipyBaseInterfaceInputSpec
 
 
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 class DTIEstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(

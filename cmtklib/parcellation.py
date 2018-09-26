@@ -27,7 +27,7 @@ from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, 
 
 
 from nipype.utils.logger import logging
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 try:
     import scipy.ndimage.morphology as nd
@@ -1641,7 +1641,7 @@ def create_roi(subject_id, subjects_dir):
         # create a big 256^3 volume for storage of all ROIs
         rois = np.zeros( (256, 256, 256), dtype=np.int16 ) # numpy.ndarray
 
-        for brk, brv in pg.nodes_iter(data=True):   # slow loop
+        for brk, brv in pg.nodes(data=True):   # slow loop
 
             if brv['dn_hemisphere'] == 'left':
                 hemi = 'lh'
@@ -2363,7 +2363,7 @@ def create_wm_mask(subject_id, subjects_dir):
 
         pg = nx.read_graphml(parval['node_information_graphml'])
 
-        for brk, brv in pg.nodes_iter(data=True):
+        for brk, brv in pg.nodes(data=True):
 
             if brv['dn_region'] == 'cortical':
 
@@ -2561,7 +2561,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     #
     #     pg = nx.read_graphml(parval['node_information_graphml'])
     #
-    #     for brk, brv in pg.nodes_iter(data=True):
+    #     for brk, brv in pg.nodes(data=True):
     #
     #         if brv['dn_region'] == 'cortical':
     #

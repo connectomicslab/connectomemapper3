@@ -48,7 +48,7 @@ from cmtklib.diffusion import filter_fibers
 import matplotlib.pyplot as plt
 
 from nipype import logging
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 class DTB_tracking_config(HasTraits):
     imaging_model = Str

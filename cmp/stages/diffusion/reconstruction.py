@@ -39,7 +39,7 @@ from cmp.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE
 import cmp.interfaces.diffusion_toolkit as cmp_dtk
 
 from nipype import logging
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 # Reconstruction configuration
 

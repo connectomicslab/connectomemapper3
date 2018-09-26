@@ -190,7 +190,7 @@ class rsfmri_conmat(BaseInterface):
             G     = nx.Graph()
             gp = nx.read_graphml(parval['node_information_graphml'])
             ROI_idx = []
-            for u,d in gp.nodes_iter(data=True):
+            for u,d in gp.nodes(data=True):
                 G.add_node(int(u), d)
                 # compute a position for the node based on the mean position of the
                 # ROI in voxel coordinates (segmentation volume )
@@ -307,7 +307,7 @@ class rsfmri_conmat(BaseInterface):
                                    'dn_position_y':float(d_gml['dn_position'][1]),
                                    'dn_position_z':float(d_gml['dn_position'][2]),
                                    'dn_region':d_gml['dn_region']})
-                for u_gml,v_gml,d_gml in G.edges_iter(data=True):
+                for u_gml,v_gml,d_gml in G.edges(data=True):
                     g2.add_edge(u_gml,v_gml,{'corr' : float(d_gml['corr'])})
                 nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
@@ -322,7 +322,7 @@ class rsfmri_conmat(BaseInterface):
                                    'dn_position_y':float(d_gml['dn_position'][1]),
                                    'dn_position_z':float(d_gml['dn_position'][2]),
                                    'dn_region':d_gml['dn_region']})
-                for u_gml,v_gml,d_gml in G.edges_iter(data=True):
+                for u_gml,v_gml,d_gml in G.edges(data=True):
                     g2.add_edge(u_gml,v_gml,{'corr' : float(d_gml['corr'])})
                 nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
