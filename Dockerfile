@@ -18,7 +18,7 @@ RUN apt-get update && apt-get -qq -y install npm curl bzip2 xvfb && \
 
 ENV PATH /opt/conda/bin:$PATH
 
-RUN conda install -y python=2.7.13 && \
+RUN conda install -y python=2.7.15 && \
     conda update conda && \
     conda clean --all --yes
 
@@ -30,27 +30,33 @@ RUN conda config --add channels aramislab
 RUN conda install -y ipython jupyter matplotlib
 
 RUN conda install -c aramislab -y ants=2.2.0
-RUN conda install -y networkx=1.11
-RUN conda install -y numpy=1.11.3
+RUN conda install -y networkx=2.2
+
+# RUN conda install -y pyqt=5.6.0
+RUN conda install -y pyqt=4
+
 RUN conda install -y scipy=1.1.0
 RUN conda install -y sphinx=1.5.1
 RUN conda install -y traits=4.6.0
 RUN conda install -y dateutil=2.4.1
 RUN conda install -y certifi=2018.4.16
-RUN conda install -y pandas=0.19.2
+RUN conda install -y pandas=0.23.4
 RUN conda install -y patsy=0.4.1
 RUN conda install -y statsmodels=0.8.0
 RUN conda install -y nose=1.3.7
-RUN conda install -y pydot=1.0.28
+RUN conda install -y pydot=1.2.3
 RUN conda install -y traitsui=5.1.0
+RUN conda install -y numpy=1.14
+RUN conda install -y nipype=1.1.3
+RUN conda install -c anaconda -y configparser=3.5.0
 RUN conda install -y dipy=0.14.0
-RUN conda install -y nibabel=2.2.1
+RUN conda install -y nibabel=2.3.0
 RUN conda install -y mne=0.15
-RUN conda install -y nipype=1.0
 RUN conda install -y obspy=1.1.0
 RUN conda install -y graphviz=2.38.0
-RUN conda install -y pyqt=4
 RUN conda install -c aramislab -y pybids
+RUN conda install -c anaconda -y configparser=3.5.0
+RUN conda install -c conda-forge python-dateutil=2.5.3
 RUN conda clean --all --yes
 
 #Make ANTs happy
