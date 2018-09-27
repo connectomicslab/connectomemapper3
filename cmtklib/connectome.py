@@ -153,7 +153,7 @@ def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, 
         # add node information from parcellation
         gp = nx.read_graphml(parval['node_information_graphml'])
         for u,d in gp.nodes(data=True):
-            G.add_node(int(u), d)
+            G.add_node(int(u), **d)
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
@@ -195,7 +195,7 @@ def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, 
         for u,v,d in G.edges(data=True):
             G.remove_edge(u,v)
             di = { 'number_of_fibers' : (float(d['n_tracks']) / tot_tracks.astype(float))}
-            G.add_edge(u,v, di)
+            G.add_edge(u,v, **di)
 
         # storing network
         if 'gPickle' in output_types:
@@ -229,7 +229,7 @@ def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, 
         if 'graphml' in output_types:
             g2 = nx.Graph()
             for u_gml,v_gml,d_gml in G.edges(data=True):
-                g2.add_edge(u_gml,v_gml,d_gml)
+                g2.add_edge(u_gml,v_gml,**d_gml)
             for u_gml,d_gml in G.nodes(data=True):
                 g2.add_node(u_gml,{'dn_correspondence_id':d_gml['dn_correspondence_id'],
                                'dn_fsname':d_gml['dn_fsname'],
@@ -274,7 +274,7 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
         # add node information from parcellation
         gp = nx.read_graphml(parval['node_information_graphml'])
         for u,d in gp.nodes(data=True):
-            G.add_node(int(u), d)
+            G.add_node(int(u), **d)
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
@@ -338,7 +338,7 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
         for u,v,d in G.edges(data=True):
             G.remove_edge(u,v)
             di = { 'number_of_fibers' : (float(d['n_tracks']) / tot_tracks.astype(float))}
-            G.add_edge(u,v, di)
+            G.add_edge(u,v, **di)
 
         # storing network
         if 'gPickle' in output_types:
@@ -372,7 +372,7 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
         if 'graphml' in output_types:
             g2 = nx.Graph()
             for u_gml,v_gml,d_gml in G.edges(data=True):
-                g2.add_edge(u_gml,v_gml,d_gml)
+                g2.add_edge(u_gml,v_gml,**d_gml)
             for u_gml,d_gml in G.nodes(data=True):
                 g2.add_node(u_gml,{'dn_correspondence_id':d_gml['dn_correspondence_id'],
                                'dn_fsname':d_gml['dn_fsname'],
@@ -687,7 +687,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         # add node information from parcellation
         gp = nx.read_graphml(parval['node_information_graphml'])
         for u,d in gp.nodes(data=True):
-            G.add_node(int(u), d)
+            G.add_node(int(u)), **d)
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             if parcellation_scheme != "Lausanne2018":
@@ -900,7 +900,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 del da
                 del val
 
-            G.add_edge(u,v, di)
+            G.add_edge(u,v, **di)
 
         # storing network
         if 'gPickle' in output_types:
@@ -944,16 +944,17 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         if 'graphml' in output_types:
             g2 = nx.Graph()
             for u_gml,v_gml,d_gml in G.edges(data=True):
-                g2.add_edge(u_gml,v_gml,d_gml)
+                g2.add_edge(u_gml,v_gml,**d_gml)
             for u_gml,d_gml in G.nodes(data=True):
-                g2.add_node(u_gml,{'dn_correspondence_id':d_gml['dn_correspondence_id'],
-                               'dn_fsname':d_gml['dn_fsname'],
-                               'dn_hemisphere':d_gml['dn_hemisphere'],
-                               'dn_name':d_gml['dn_name'],
-                               'dn_position_x':float(d_gml['dn_position'][0]),
-                               'dn_position_y':float(d_gml['dn_position'][1]),
-                               'dn_position_z':float(d_gml['dn_position'][2]),
-                               'dn_region':d_gml['dn_region']})
+                g2.add_node(u_gml)
+                g2.nodes[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+                g2.nodes[u_gml]['dn_fsname'] = d_gml['dn_fsname']
+                g2.nodes[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
+                g2.nodes[u_gml]['dn_name'] = d_gml['dn_name']
+                g2.nodes[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
+                g2.nodes[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
+                g2.nodes[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
+                g2.nodes[u_gml]['dn_region'] = d_gml['dn_region']
             nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
         print("Storing final fiber length array")
