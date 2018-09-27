@@ -209,6 +209,8 @@ if args.analysis_level == "participant":
 
                     cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
                     print cmd
+                else:
+                    print "Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
 
         else: #No session structure
             project.subject_sessions = ['']
