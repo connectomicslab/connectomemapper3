@@ -702,7 +702,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         # add node information from parcellation
         gp = nx.read_graphml(parval['node_information_graphml'])
         for u,d in gp.nodes(data=True):
-            G.add_node(int(u)))
+            G.add_node(int(u))
             for key in d:
                 G.node[int(u)][key] = d[key]
             # compute a position for the node based on the mean position of the
