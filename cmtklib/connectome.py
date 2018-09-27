@@ -188,7 +188,7 @@ def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, 
                 if startROI != endROI: # Excludes loops (connections within the same ROI)
                     # Add edge to graph
                     if G.has_edge(startROI, endROI):
-                        G.edge[startROI][endROI]['n_tracks'] += ROImat[target]
+                        G[startROI][endROI]['n_tracks'] += ROImat[target]
                     else:
                         G.add_edge(startROI, endROI, n_tracks  = ROImat[target])
 
@@ -337,7 +337,7 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
 
                 # Add edge to graph
                 if G.has_edge(startROI, endROI):
-                    G.edge[startROI][endROI]['n_tracks'] += 1
+                    G[startROI][endROI]['n_tracks'] += 1
                 else:
                     G.add_edge(startROI, endROI, n_tracks  = 1)
 
@@ -824,7 +824,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
             # Add edge to graph
             if G.has_edge(startROI, endROI):
-                G.edge[startROI][endROI]['fiblist'].append(i)
+                G[startROI][endROI]['fiblist'].append(i)
             else:
                 G.add_edge(startROI, endROI, fiblist   = [i])
 
