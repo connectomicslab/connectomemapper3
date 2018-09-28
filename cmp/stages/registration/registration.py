@@ -640,7 +640,9 @@ class RegistrationStage(Stage):
 
             flow.connect([
                         (inputnode, affine_registration, [('T1','moving_image')]),
-                        (mr_convert_b0, affine_registration, [('converted','fixed_image')])
+                        (mr_convert_b0, affine_registration, [('converted','fixed_image')]),
+                        (inputnode, affine_registration, [('brain_mask','moving_image_mask')]),
+                        (inputnode, affine_registration, [('target_mask','fixed_image_mask')])
                         ])
 
             SyN_registration = pe.Node(interface=ants.Registration(),name='SyN_registration')
@@ -745,7 +747,9 @@ class RegistrationStage(Stage):
                 flow.connect([
                         (affine_registration, SyN_registration, [('composite_transform','initial_moving_transform')]),
                         (inputnode, SyN_registration, [('T1','moving_image')]),
-                        (mr_convert_b0, SyN_registration, [('converted','fixed_image')])
+                        (mr_convert_b0, SyN_registration, [('converted','fixed_image')]),
+                        (inputnode, affine_registration, [('brain_mask','moving_image_mask')]),
+                        (inputnode, affine_registration, [('target_mask','fixed_image_mask')])
                         ])
 
             # multitransforms = pe.Node(interface=util.Merge(2),name='multitransforms')
