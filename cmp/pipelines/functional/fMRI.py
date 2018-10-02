@@ -26,8 +26,8 @@ from pyface.ui.qt4.image_resource import ImageResource
 
 import apptools.io.api as io
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from pyface.qt.QtCore import *
+from pyface.qt.QtGui import *
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio

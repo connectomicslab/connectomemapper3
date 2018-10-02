@@ -34,8 +34,8 @@ from traitsui.api import *
 
 import apptools.io.api as io
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from pyface.qt.QtCore import *
+from pyface.qt.QtGui import *
 from traitsui.qt4.extra.qt_view import QtView
 
 class ProgressWindow(HasTraits):

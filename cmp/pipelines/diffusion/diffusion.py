@@ -11,8 +11,8 @@ import os
 import datetime
 from cmp.pipelines.common import *
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from pyface.qt.QtCore import *
+from pyface.qt.QtGui import *
 
 from cmp.interfaces.traitsuiQt4 import QPushButtonCustomEditor
 
