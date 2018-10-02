@@ -25,10 +25,10 @@ from bids.grabbids import BIDSLayout
 
 # Own imports
 #import pipelines.diffusion.diffusion as Diffusion_pipeline
-from pipelines.functional import fMRI as FMRI_pipeline
-from pipelines.diffusion import diffusion as Diffusion_pipeline
-from pipelines.anatomical import anatomical as Anatomical_pipeline
-import gui
+from cmp.configurator.pipelines.functional import fMRI as FMRI_pipeline
+from cmp.configurator.pipelines.diffusion import diffusion as Diffusion_pipeline
+from cmp.configurator.pipelines.anatomical import anatomical as Anatomical_pipeline
+import cmp.configurator.gui
 
 #import CMP_MainWindow
 #import pipelines.egg.eeg as EEG_pipeline

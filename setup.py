@@ -19,10 +19,25 @@ packages=["cmp","cmp.interfaces","cmp.stages",
           "cmp.pipelines.anatomical",
           "cmp.pipelines.diffusion",
           "cmp.pipelines.functional",
-          "cmtklib"]
+          "cmtklib",
+          "cmp.configurator","cmp.configurator.stages",
+          "cmp.configurator.stages.preprocessing",
+          "cmp.configurator.stages.segmentation",
+          "cmp.configurator.stages.parcellation",
+          "cmp.configurator.stages.registration",
+          "cmp.configurator.stages.diffusion",
+          "cmp.configurator.stages.functional",
+          "cmp.configurator.stages.connectome",
+          "cmp.configurator.pipelines",
+          "cmp.configurator.pipelines.anatomical",
+          "cmp.configurator.pipelines.diffusion",
+          "cmp.configurator.pipelines.functional"]
 
 package_data = {'cmp':
-                ['cmp3_icon.png'
+                ['cmp3_icon.png',
+                'configurator/pipelines/anatomical/*.png',
+                'configurator/pipelines/diffusion/*.png',
+                'configurator/pipelines/functional/*.png',
                 'pipelines/anatomical/*.png',
                 'pipelines/diffusion/*.png',
                 'pipelines/functional/*.png'

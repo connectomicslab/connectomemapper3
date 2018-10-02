@@ -23,7 +23,7 @@ from pyface.api import ImageResource
 from bids.grabbids import BIDSLayout
 
 # CMP imports
-import project
+import cmp.configurator.project
 
 global style_sheet
 style_sheet = '''
