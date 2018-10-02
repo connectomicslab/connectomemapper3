@@ -10,34 +10,18 @@
 import os
 import datetime
 
-# try:
-#     from traitsui.api import *
-#     from traits.api import *
-#     from traitsui.wx.themed_button_editor import ThemedButtonEditor
-# except ImportError:
-#     from enthought.traits.api import *
-#     from enthought.traits.ui.api import *
-#     from  enthought.traits.ui.wx.themed_button_editor import ThemedButtonEditor
-
 from traits.api import *
 from traitsui.api import *
 from traitsui.qt4.extra.qt_view import QtView
+
 from pyface.ui.qt4.image_resource import ImageResource
-
-import apptools.io.api as io
-
 from pyface.qt.QtCore import *
 from pyface.qt.QtGui import *
 
 import nipype.pipeline.engine as pe
-import nipype.interfaces.io as nio
-from nipype.interfaces.utility import Merge
-from nipype import config, logging
-from nipype.caching import Memory
 from pyface.api import ImageResource
-import shutil
 
-import nibabel as nib
+import shutil
 
 from bids.grabbids import BIDSLayout
 

@@ -10,35 +10,13 @@
 import datetime
 import os
 import glob
-import fnmatch
+
 import shutil
-import threading
-import multiprocessing
-import time
-
-from nipype.utils.filemanip import copyfile
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
-from nipype.interfaces.dcm2nii import Dcm2niix
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.freesurfer as fs
-
-
-# from pyface.api import ImageResource
-import nipype.interfaces.io as nio
-from nipype import config, logging
-
-from nipype.caching import Memory
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, BaseInterface, \
-    BaseInterfaceInputSpec, File, TraitedSpec, isdefined, Directory, InputMultiPath
-from nipype.utils.filemanip import split_filename
 
 from traits.api import *
 from traitsui.api import *
 from traitsui.qt4.extra.qt_view import QtView
 from pyface.ui.qt4.image_resource import ImageResource
-
-import apptools.io.api as io
 
 from pyface.qt.QtCore import *
 from pyface.qt.QtGui import *
@@ -46,8 +24,6 @@ from pyface.qt.QtGui import *
 from bids.grabbids import BIDSLayout
 
 # Own import
-import cmp.interfaces.fsl as cmp_fsl
-
 import cmp.configurator.pipelines.common as cmp_common
 from cmp.configurator.stages.segmentation.segmentation import SegmentationStage
 from cmp.configurator.stages.parcellation.parcellation import ParcellationStage

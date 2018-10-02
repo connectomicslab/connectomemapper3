@@ -9,37 +9,15 @@
 
 import os
 import datetime
-from cmp.pipelines.common import *
 
 from pyface.qt.QtCore import *
 from pyface.qt.QtGui import *
 
-from cmp.interfaces.traitsuiQt4 import QPushButtonCustomEditor
+from traitsui.api import *
+from traits.api import *
 
-# try:
-#     from traitsui.api import *
-#     from traits.api import *
-#     from traitsui.wx.themed_button_editor import ThemedButtonEditor
-# except ImportError:
-#     from enthought.traits.api import *
-#     from enthought.traits.ui.api import *
-#     from  enthought.traits.ui.wx.themed_button_editor import ThemedButtonEditor
+from traitsui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
 
-try:
-    from traitsui.api import *
-    from traits.api import *
-    from traitsui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
-except ImportError:
-    print "Enthought used"
-    from enthought.traits.api import *
-    from enthought.traits.ui.api import *
-    from  enthought.traits.ui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
-
-import nipype.pipeline.engine as pe
-import nipype.interfaces.io as nio
-from nipype.interfaces.utility import Merge
-from nipype import config, logging
-from nipype.caching import Memory
 from pyface.api import ImageResource
 import shutil
 
