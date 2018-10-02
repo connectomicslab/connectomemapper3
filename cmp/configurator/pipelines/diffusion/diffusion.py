@@ -29,7 +29,7 @@ from cmp.configurator.pipelines.anatomical.anatomical import AnatomicalPipeline
 from cmp.configurator.stages.preprocessing.preprocessing import PreprocessingStage
 from cmp.configurator.stages.diffusion.diffusion import DiffusionStage
 from cmp.configurator.stages.registration.registration import RegistrationStage
-from cmp.configurator.stages.connectome.connectome import ConnectomeStage, MRTrixConnectomeStage
+from cmp.configurator.stages.connectome.connectome import ConnectomeStage
 
 from bids.grabbids import BIDSLayout
 

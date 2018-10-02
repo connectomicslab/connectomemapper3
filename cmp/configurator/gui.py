@@ -23,7 +23,7 @@ from pyface.api import ImageResource
 from bids.grabbids import BIDSLayout
 
 # CMP imports
-import cmp.configurator.project
+import cmp.configurator.project as project
 
 global style_sheet
 style_sheet = '''
@@ -459,7 +459,7 @@ class CMP_MainWindow(HasTraits):
                                 label='fMRI pipeline', dock='tab'
                             ),
                             orientation='horizontal', layout='tabbed', springy=True, enabled_when='handler.anat_inputs_checked==True'),
-                        title='Connectome Mapper 3',
+                        title='Connectome Mapper 3 Configurator',
                         menubar=MenuBar(
                                     Menu(
                                         ActionGroup(
@@ -472,11 +472,8 @@ class CMP_MainWindow(HasTraits):
                                         name='File'),
                                     Menu(
                                         anat_save_config,
-                                        anat_load_config,
                                         dmri_save_config,
-                                        dmri_load_config,
                                         fmri_save_config,
-                                        fmri_load_config,
                                     name='Configuration'),
                                     # Menu(
                                     #     change_subject,

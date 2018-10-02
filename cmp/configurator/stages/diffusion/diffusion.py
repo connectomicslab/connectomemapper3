@@ -17,7 +17,8 @@ from traitsui.api import *
 
 # Own imports
 from cmp.configurator.stages.common import Stage
-
+from cmp.configurator.stages.diffusion.reconstruction import *
+from cmp.configurator.stages.diffusion.tracking import *
 
 class DiffusionConfig(HasTraits):
 

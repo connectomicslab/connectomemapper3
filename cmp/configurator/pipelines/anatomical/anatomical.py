@@ -76,8 +76,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
     config_file = Str
 
-    flow = Instance(pe.Workflow)
-
     pipeline_group = VGroup(
                         HGroup(spring,UItem('segmentation',style='custom',width=450,height=170,resizable=True,editor_args={'image':ImageResource('segmentation'),'label':""}),spring,show_labels=False,label=""),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
                         HGroup(spring,UItem('parcellation',style='custom',width=450,height=200,resizable=True,editor_args={'image':ImageResource('parcellation'),'label':""}),spring,show_labels=False,label=""),

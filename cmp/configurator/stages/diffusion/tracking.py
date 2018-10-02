@@ -15,7 +15,7 @@ class DTB_tracking_config(HasTraits):
     imaging_model = Str
     flip_input = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     angle = Int(60)
-    step_size = traits.Float(1.0)
+    step_size = Float(1.0)
     seeds = Int(32)
 
     traits_view = View(Item('flip_input',style='custom'),'angle','step_size','seeds')
@@ -26,11 +26,11 @@ class Dipy_tracking_config(HasTraits):
     SD = Bool
     number_of_seeds = Int(1000)
     fa_thresh = Float(0.2)
-    step_size = traits.Float(0.5)
+    step_size = Float(0.5)
     max_angle = Float(25.0)
     sh_order = Int(8)
 
-    use_act = traits.Bool(False, desc='Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier')
+    use_act = Bool(False, desc='Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier')
     fast_number_of_classes = Int(3)
 
     traits_view = View( Item('number_of_seeds',label="Number of seeds"),
@@ -75,10 +75,10 @@ class MRtrix_tracking_config(HasTraits):
     angle = Float(45)
     cutoff_value = Float(1)
 
-    use_act = traits.Bool(True, desc="Anatomically-Constrained Tractography (ACT) based on Freesurfer parcellation")
-    seed_from_gmwmi = traits.Bool(False, desc="Seed from Grey Matter / White Matter interface (requires Anatomically-Constrained Tractography (ACT))")
-    crop_at_gmwmi = traits.Bool(True, desc="Crop streamline endpoints more precisely as they cross the GM-WM interface (requires Anatomically-Constrained Tractography (ACT))")
-    backtrack = traits.Bool(True, desc="Allow tracks to be truncated (requires Anatomically-Constrained Tractography (ACT))")
+    use_act = Bool(True, desc="Anatomically-Constrained Tractography (ACT) based on Freesurfer parcellation")
+    seed_from_gmwmi = Bool(False, desc="Seed from Grey Matter / White Matter interface (requires Anatomically-Constrained Tractography (ACT))")
+    crop_at_gmwmi = Bool(True, desc="Crop streamline endpoints more precisely as they cross the GM-WM interface (requires Anatomically-Constrained Tractography (ACT))")
+    backtrack = Bool(True, desc="Allow tracks to be truncated (requires Anatomically-Constrained Tractography (ACT))")
 
     traits_view = View( VGroup('desired_number_of_tracks',
                                # 'max_number_of_seeds',

@@ -28,7 +28,8 @@ from bids.grabbids import BIDSLayout
 from cmp.configurator.pipelines.functional import fMRI as FMRI_pipeline
 from cmp.configurator.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.configurator.pipelines.anatomical import anatomical as Anatomical_pipeline
-import cmp.configurator.gui
+
+import gui
 
 #import CMP_MainWindow
 #import pipelines.egg.eeg as EEG_pipeline

@@ -84,30 +84,30 @@ class Dipy_recon_config(HasTraits):
 
     tracking_processing_tool = Enum('MRtrix','Dipy')
 
-    laplacian_regularization = traits.Bool(True, usedefault=True, desc = ('Apply laplacian regularization'))
+    laplacian_regularization = Bool(True, usedefault=True, desc = ('Apply laplacian regularization'))
 
-    laplacian_weighting= traits.Float(0.05, usedefault=True, desc = ('Regularization weight'))
+    laplacian_weighting= Float(0.05, usedefault=True, desc = ('Regularization weight'))
 
-    positivity_constraint = traits.Bool(True, usedefault=True, desc = ('Apply positivity constraint'))
+    positivity_constraint = Bool(True, usedefault=True, desc = ('Apply positivity constraint'))
 
-    radial_order = traits.Int(8, usedefault=True,
+    radial_order = Int(8, usedefault=True,
                           desc=('radial order'))
 
-    small_delta = traits.Float(0.02, mandatory=True,
+    small_delta = Float(0.02, mandatory=True,
                           desc=('Small data for gradient table (pulse duration)'))
 
-    big_delta = traits.Float(0.5, mandatory=True,
+    big_delta = Float(0.5, mandatory=True,
                           desc=('Small data for gradient table (time interval)'))
 
-    radial_order_values = traits.List([2,4,6,8,10,12])
+    radial_order_values = List([2,4,6,8,10,12])
     shore_radial_order = Enum(6,values='radial_order_values', usedefault=True, desc=('Even number that represents the order of the basis'))
-    shore_zeta = traits.Int(700, usedefault=True, desc=('Scale factor'))
-    shore_lambdaN = traits.Float(1e-8, usedefault=True,desc=('radial regularisation constant'))
-    shore_lambdaL = traits.Float(1e-8, usedefault=True,desc=('angular regularisation constant'))
-    shore_tau = traits.Float(0.025330295910584444,desc=('Diffusion time. By default the value that makes q equal to the square root of the b-value.'))
+    shore_zeta = Int(700, usedefault=True, desc=('Scale factor'))
+    shore_lambdaN = Float(1e-8, usedefault=True,desc=('radial regularisation constant'))
+    shore_lambdaL = Float(1e-8, usedefault=True,desc=('angular regularisation constant'))
+    shore_tau = Float(0.025330295910584444,desc=('Diffusion time. By default the value that makes q equal to the square root of the b-value.'))
 
-    shore_constrain_e0 = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
-    shore_positive_constraint = traits.Bool(False, usedefault=True,desc=('Constrain the propagator to be positive.'))
+    shore_constrain_e0 = Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
+    shore_positive_constraint = Bool(False, usedefault=True,desc=('Constrain the propagator to be positive.'))
 
     traits_view = View(#Item('gradient_table',label='Gradient table (x,y,z,b):'),
                        Item('flip_table_axis',style='custom',label='Flip bvecs:'),
