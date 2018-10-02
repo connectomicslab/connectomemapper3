@@ -413,6 +413,49 @@ class CMP_Project_Info(HasTraits):
     def _summary_view_button_fired(self):
         self.configure_traits(view='pipeline_processing_summary_view')
 
+class CMP_BIDSAppWindow(HasTraits):
+
+    project_info = Instance(CMP_Project_Info)
+
+    bids_root = Directory()
+    subjects = List()
+
+    list_of_subjects_to_be_processed = List()
+
+    anat_config = File()
+    dmri_config = File()
+    fmri_config = File()
+
+    traits_view = QtView(
+                        Group(
+                            Item('bids_root', label='Base directory'),
+                        label='BIDS dataset'),
+                        Group(
+                            UItem('list_of_subjects_to_be_processed', editor=CheckListEditor(values=subjects,cols=2), style='custom', label='Base directory'),
+                        label='Participants to be processed'),
+                        Group(
+                            Item('anat_config', label='Anatomical pipeline'),
+                            Item('dmri_config', label='Diffusion pipeline'),
+                            Item('fmri_config', label='fMRI pipeline'),
+                        label='Configuration files used as references')
+                        )
+
+    def __init__(self,ui_info):
+
+        print ui_info.ui.context["object"].project_info
+
+        self.anat_config = ui_info.ui.context["object"].project_info.anat_config_to_load
+
+        if ui_info.ui.context["object"].project_info.dmri_config_to_load != None:
+            self.dmri_config = ui_info.ui.context["object"].project_info.dmri_config_to_load
+        if ui_info.ui.context["object"].project_info.fmri_config_to_load != None:
+            self.fmri_config = ui_info.ui.context["object"].project_info.fmri_config_to_load
+
+        self.bids_root = ui_info.ui.context["object"].project_info.base_directory
+        self.subjects = ui_info.ui.context["object"].project_info.subjects
+        self.list_of_subjects_to_be_processed = ui_info.ui.context["object"].project_info.subjects
+
+
 ## Main window class of the ConnectomeMapper_Pipeline
 #
 class CMP_MainWindow(HasTraits):
@@ -421,6 +464,8 @@ class CMP_MainWindow(HasTraits):
     fmri_pipeline = Instance(HasTraits)
 
     project_info = Instance(CMP_Project_Info)
+
+    bidsapp = Instance(CMP_BIDSAppWindow)
 
     handler = Instance(project.ProjectHandler)
 
@@ -438,6 +483,8 @@ class CMP_MainWindow(HasTraits):
 
     fmri_save_config = Action(name='Save fMRI pipeline configuration as...',action='fmri_save_config_file',enabled_when='handler.project_loaded==True')
     fmri_load_config = Action(name='Load fMRI pipeline configuration...',action='fmri_load_config_file',enabled_when='handler.project_loaded==True')
+
+    show_bidsapp_window = Action(name='Show interface...',action='show_bidsapp_window',enabled_when='handler.project_loaded==True')
 
     project_info.style_sheet = style_sheet
 
@@ -475,6 +522,9 @@ class CMP_MainWindow(HasTraits):
                                         dmri_save_config,
                                         fmri_save_config,
                                     name='Configuration'),
+                                    Menu(
+                                        show_bidsapp_window,
+                                    name='BIDS App'),
                                     # Menu(
                                     #     change_subject,
                                     # name='Subjects'),
