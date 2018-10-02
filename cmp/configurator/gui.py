@@ -426,12 +426,9 @@ class CMP_MainWindow(HasTraits):
 
     new_project = Action(name='Load BIDS Dataset (New)...',action='new_project')
     load_project = Action(name='Load BIDS Dataset (Processed)...',action='load_project')
-    process_anatomical = Action(name='Parcellate Brain!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
-    #preprocessing = Action(name='Check BIDS dataset',action='check_input',enabled_when='handler.project_loaded==True')
-    map_dmri_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked')
-    map_fmri_connectome = Action(name='Map Functional Connectome!',action='map_fmri_connectome',enabled_when='handler.anat_outputs_checked and handler.fmri_inputs_checked')
-    #map_custom = Action(name='Custom mapping...',action='map_custom',enabled_when='handler.inputs_checked==True')
-    #change_subject = Action(name='Change subject',action='change_subject',enabled_when='handler.project_loaded==True')
+    # process_anatomical = Action(name='Parcellate Brain!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
+    # map_dmri_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked')
+    # map_fmri_connectome = Action(name='Map Functional Connectome!',action='map_fmri_connectome',enabled_when='handler.anat_outputs_checked and handler.fmri_inputs_checked')
 
     anat_save_config = Action(name='Save anatomical pipeline configuration as...',action='anat_save_config_file',enabled_when='handler.project_loaded==True')
     anat_load_config = Action(name='Load anatomical pipeline configuration...',action='anat_load_config_file',enabled_when='handler.project_loaded==True')
@@ -478,6 +475,8 @@ class CMP_MainWindow(HasTraits):
                                         anat_load_config,
                                         dmri_save_config,
                                         dmri_load_config,
+                                        fmri_save_config,
+                                        fmri_load_config,
                                     name='Configuration'),
                                     # Menu(
                                     #     change_subject,
@@ -485,7 +484,7 @@ class CMP_MainWindow(HasTraits):
                                 ),
                        handler = project.ProjectHandler(),
                        style_sheet=style_sheet,
-                       buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
+                       # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
                        #buttons = [preprocessing, map_connectome, map_custom],
                        width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
                        icon=ImageResource('cmp3_icon')

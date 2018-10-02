@@ -1183,327 +1183,6 @@ class ProjectHandler(Handler):
 
         return ui_info
 
-    # def change_subject_bids(self, ui_info):
-    #     changed_project = ui_info.ui.context["object"].project_info
-    #     print "New selected subject : %s" % changed_project.subject
-    #
-    #     self.anat_inputs_checked = False
-    #
-    #     changed_project.anat_config_file = os.path.join(changed_project.base_directory,'derivatives','%s_anatomical_config.ini' % (changed_project.subject))
-    #     changed_project.dmri_config_file = os.path.join(changed_project.base_directory,'derivatives','%s_diffusion_config.ini' % (changed_project.subject))
-    #     changed_project.fmri_config_file = os.path.join(changed_project.base_directory,'derivatives','%s_fmri_config.ini' % (changed_project.subject))
-    #
-    #     if os.path.isfile(changed_project.anat_config_file):
-    #         print "Existing anatomical config file for subject %s: %s" % ( changed_project.subject,changed_project.anat_config_file)
-    #
-    #         changed_project.parcellation_scheme = get_anat_process_detail(changed_project,'parcellation_stage','parcellation_scheme')
-    #         changed_project.atlas_info = get_anat_process_detail(changed_project,'parcellation_stage','atlas_info')
-    #         changed_project.freesurfer_subjects_dir = get_anat_process_detail(changed_project,'segmentation_stage','freesurfer_subjects_dir')
-    #         changed_project.freesurfer_subject_id = get_anat_process_detail(changed_project,'segmentation_stage','freesurfer_subject_id')
-    #
-    #         self.anat_pipeline= init_anat_project(changed_project, False)
-    #         if self.anat_pipeline != None: #and self.dmri_pipeline != None:
-    #             anat_inputs_checked = self.anat_pipeline.check_input(changed_project.bids_layout)
-    #             if anat_inputs_checked:
-    #                 update_anat_last_processed(changed_project, self.anat_pipeline) # Not required as the project is new, so no update should be done on processing status
-    #                 ui_info.ui.context["object"].project_info = changed_project
-    #                 ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
-    #                 ui_info.ui.context["object"].anat_pipeline.number_of_cores = ui_info.ui.context["object"].project_info.number_of_cores
-    #                 #ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-    #                 self.anat_inputs_checked = anat_inputs_checked
-    #                 ui_info.ui.context["object"].project_info.t1_available = self.anat_inputs_checked
-    #                 anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
-    #                 self.project_loaded = True
-    #                 self.anat_outputs_checked, msg = self.anat_pipeline.check_output()
-    #                 print "anat_outputs_checked : %s" % self.anat_outputs_checked
-    #                 # ui_info.ui.context["object"].anat_pipeline.flow = ui_info.ui.context["object"].anat_pipeline.create_pipeline_flow()
-    #     else:
-    #
-    #         self.anat_pipeline = init_anat_project(changed_project, True)
-    #         if self.anat_pipeline != None: #and self.dmri_pipeline != None:
-    #             anat_inputs_checked = self.anat_pipeline.check_input(bids_layout)
-    #             if anat_inputs_checked:
-    #                 # update_last_processed(new_project, self.pipeline) # Not required as the project is new, so no update should be done on processing status
-    #                 ui_info.ui.context["object"].project_info = changed_project
-    #                 self.anat_pipeline.number_of_cores = new_project.number_of_cores
-    #                 # self.anat_pipeline.flow = self.anat_pipeline.create_pipeline_flow()
-    #                 ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
-    #                 #ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-    #                 self.anat_inputs_checked = anat_inputs_checked
-    #                 ui_info.ui.context["object"].project_info.t1_available = self.anat_inputs_checked
-    #                 anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
-    #                 self.project_loaded = True
-    #
-    #         ui_info.ui.context["object"].project_info.parcellation_scheme = get_anat_process_detail(new_project,'parcellation_stage','parcellation_scheme')
-    #         ui_info.ui.context["object"].project_info.freesurfer_subjects_dir = get_anat_process_detail(new_project,'segmentation_stage','freesurfer_subjects_dir')
-    #         ui_info.ui.context["object"].project_info.freesurfer_subject_id = get_anat_process_detail(new_project,'segmentation_stage','freesurfer_subject_id')
-    #         # ui_info.ui.context["object"].project_info.atlas_info = get_anat_process_detail(new_project,'parcellation_stage','atlas_info')
-    #
-    #     if os.path.isfile(changed_project.dmri_config_file):
-    #
-
-
-    def change_subject(self, ui_info):
-        changed_project = ui_info.ui.context["object"].project_info
-
-        print "BIDS directoy : %s" % changed_project.base_directory
-        try:
-            bids_layout = BIDSLayout(changed_project.base_directory)
-            changed_project.subjects = []
-            for subj in bids_layout.get_subjects():
-                changed_project.subjects.append('sub-'+str(subj))
-            # changed_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
-            print "Subjects : %s" % changed_project.subjects
-
-            print "Previous selected subject : %s" % changed_project.subject
-            changed_project.configure_traits(view='subject_view')
-            print "New selected subject : %s" % changed_project.subject
-        except:
-            error(message="Invalid BIDS dataset. Please see documentation for more details.",title="BIDS error")
-
-        self.anat_inputs_checked = False
-        #self.dmri_inputs_checked = False
-
-        changed_project.anat_config_file = os.path.join(changed_project.base_directory,'derivatives','%s_anatomical_config.ini' % (changed_project.subject))
-        changed_project.dmri_config_file = os.path.join(changed_project.base_directory,'derivatives','%s_diffusion_config.ini' % (changed_project.subject))
-
-        if os.path.isfile(changed_project.anat_config_file): # and os.path.isfile(changed_project.dmri_config_file): # If existing config file / connectome data, load subject project
-
-            print "Existing anatomical config file for subject %s: %s" % ( changed_project.subject,changed_project.anat_config_file)
-
-            #changed_project.process_type = get_process_detail(changed_project,'Global','process_type')
-            #changed_project.diffusion_imaging_model = get_process_detail(changed_project,'Global','diffusion_imaging_model')
-
-            #self.anat_pipeline, self.dmri_pipeline = init_project(changed_project, False)
-
-            self.anat_pipeline= init_anat_project(changed_project, False)
-            if self.anat_pipeline != None: #and self.dmri_pipeline != None:
-                anat_inputs_checked = self.anat_pipeline.check_input(bids_layout)
-                if anat_inputs_checked:
-                    update_anat_last_processed(changed_project, self.anat_pipeline) # Not required as the project is new, so no update should be done on processing status
-                    ui_info.ui.context["object"].project_info = changed_project
-                    ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
-                    ui_info.ui.context["object"].anat_pipeline.number_of_cores = ui_info.ui.context["object"].project_info.number_of_cores
-                    #ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                    self.anat_inputs_checked = anat_inputs_checked
-                    ui_info.ui.context["object"].project_info.t1_available = self.anat_inputs_checked
-                    anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
-                    self.project_loaded = True
-                    print "Config loaded !"
-                    self.anat_outputs_checked, msg = self.anat_pipeline.check_output()
-                    print "anat_outputs_checked : %s" % self.anat_outputs_checked
-
-            changed_project.parcellation_scheme = get_anat_process_detail(changed_project,'parcellation_stage','parcellation_scheme')
-            changed_project.atlas_info = get_anat_process_detail(changed_project,'parcellation_stage','atlas_info')
-
-            if os.path.isfile(changed_project.dmri_config_file):
-                print "Existing diffusion config file for subject %s: %s" % ( changed_project.subject,changed_project.dmri_config_file)
-
-                changed_project.process_type = get_dmri_process_detail(changed_project,'Global','process_type')
-                changed_project.diffusion_imaging_model = get_dmri_process_detail(changed_project,'Global','diffusion_imaging_model')
-
-                dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(changed_project, False)
-                if self.dmri_pipeline != None: #and self.dmri_pipeline != None:
-                    if dmri_inputs_checked:
-                        update_dmri_last_processed(changed_project, self.dmri_pipeline)
-                        ui_info.ui.context["object"].project_info = changed_project
-                        self.dmri_pipeline.parcellation_scheme = changed_project.parcellation_scheme
-                        self.dmri_pipeline.atlas_info = changed_project.atlas_info
-                        ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                        ui_info.ui.context["object"].dmri_pipeline.number_of_cores = ui_info.ui.context["object"].project_info.number_of_cores
-                        #ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                        #self.diffusion_ready = True
-                        self.dmri_inputs_checked = dmri_inputs_checked
-                        ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
-                        dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
-                        self.project_loaded = True
-
-            else:
-                print "Not existing diffusion config file (%s) for subject %s - Created new diffusion pipeline" % (changed_project,changed_project.subject)
-                dmri_inputs_checked, self.dmri_pipeline= init_dmri_project(changed_project, True)
-                if self.dmri_pipeline != None: #and self.dmri_pipeline != None:
-                    if dmri_inputs_checked:
-                        ui_info.ui.context["object"].project_info = changed_project
-                        # new_project.configure_traits(view='diffusion_imaging_model_select_view')
-                        # self.dmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
-                        self.dmri_pipeline.number_of_cores  = changed_project.number_of_cores
-                        print "number of cores (pipeline): %s" % self.dmri_pipeline.number_of_cores
-                        # print "diffusion_imaging_model (pipeline): %s" % self.dmri_pipeline.diffusion_imaging_model
-                        # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
-                        self.dmri_pipeline.parcellation_scheme = changed_project.parcellation_scheme
-                        self.dmri_pipeline.atlas_info = changed_project.atlas_info
-                        ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                        #self.diffusion_ready = True
-                        dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
-                        self.dmri_inputs_checked = dmri_inputs_checked
-                        ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
-                        self.project_loaded = True
-
-        else:
-            print "Not existing anatomical config file (%s) for subject %s - Created new anatomical and diffusion pipeline" % (changed_project,changed_project.subject)
-            #self.anat_pipeline, self.dmri_pipeline = init_project(changed_project, True)
-            self.anat_pipeline= init_anat_project(changed_project, True)
-            if self.anat_pipeline != None: #and self.dmri_pipeline != None:
-                anat_inputs_checked = self.anat_pipeline.check_input(bids_layout)
-                if anat_inputs_checked:
-                    # update_last_processed(new_project, self.pipeline) # Not required as the project is new, so no update should be done on processing status
-                    ui_info.ui.context["object"].project_info = changed_project
-                    self.anat_pipeline.number_of_cores = changed_project.number_of_cores
-                    # self.anat_pipeline.flow = self.anat_pipeline.create_pipeline_flow()
-                    ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
-                    #ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                    self.anat_inputs_checked = anat_inputs_checked
-                    ui_info.ui.context["object"].project_info.t1_available = self.anat_inputs_checked
-                    anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
-                    self.project_loaded = True
-                    print "New anatomical pipeline created (config: %s)" % ui_info.ui.context["object"].project_info.anat_config_file
-
-            self.dmri_pipeline= init_dmri_project(changed_project, True)
-            if self.dmri_pipeline != None: #and self.dmri_pipeline != None:
-                dmri_inputs_checked = self.dmri_pipeline.check_input(bids_layout)
-                if dmri_inputs_checked:
-                    ui_info.ui.context["object"].project_info = changed_project
-                    # new_project.configure_traits(view='diffusion_imaging_model_select_view')
-                    # self.dmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
-                    self.dmri_pipeline.number_of_cores  = changed_project.number_of_cores
-                    print "number of cores (pipeline): %s" % self.dmri_pipeline.number_of_cores
-                    # print "diffusion_imaging_model (pipeline): %s" % self.dmri_pipeline.diffusion_imaging_model
-                    # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
-                    self.dmri_pipeline.parcellation_scheme = changed_project.parcellation_scheme
-                    self.dmri_pipeline.atlas_info = changed_project.atlas_info
-                    ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                    #self.diffusion_ready = True
-                    dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
-                    self.dmri_inputs_checked = dmri_inputs_checked
-                    ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
-                    self.project_loaded = True
-                    print "New diffusion pipeline created (config: %s)" % ui_info.ui.context["object"].project_info.dmri_config_file
-
-    # def check_anat_input(self, ui_info):
-    #     self.anat_inputs_checked = self.anat_pipeline.check_input()
-    #     if self.anat_inputs_checked:
-    #         anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
-
-    # def check_dmri_input(self, ui_info):
-    #     self.dmri_inputs_checked = self.dmri_pipeline.check_input()
-    #     if self.dmri_inputs_checked:
-    #         dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
-
-    # def map_connectome(self, ui_info):
-    #     ui_info.ui.context["object"].project_info.config_error_msg = self.pipeline.check_config()
-    #     if ui_info.ui.context["object"].project_info.config_error_msg != '':
-    #         ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
-    #     else:
-    #         save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
-    #         self.pipeline.launch_process()
-    #         self.pipeline.launch_progress_window()
-    #         update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline)
-
-
-    def process_anatomical(self, ui_info):
-        ui_info.ui.context["object"].project_info.anat_config_error_msg = self.anat_pipeline.check_config()
-        if ui_info.ui.context["object"].project_info.anat_config_error_msg != '':
-            ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
-        else:
-            anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
-            ui_info.ui.context["object"].project_info.parcellation_scheme = get_anat_process_detail(ui_info.ui.context["object"].project_info,'parcellation_stage','parcellation_scheme')
-            ui_info.ui.context["object"].project_info.atlas_info = get_anat_process_detail(ui_info.ui.context["object"].project_info,'parcellation_stage','atlas_info')
-
-            try:
-                self.anat_pipeline.launch_process()
-                self.anat_pipeline.launch_progress_window()
-                update_anat_last_processed(ui_info.ui.context["object"].project_info, self.anat_pipeline)
-                anatomical_processed = True
-                self.anat_outputs_checked = True
-            except:
-                self.anat_outputs_checked = False
-        # ui_info.ui.context["object"].dmri_pipeline.anat_flow = self.anat_pipeline.flow
-
-        #self.anat_pipeline,self.dmri_pipeline = init_project(new_project, True)
-
-
-
-    def map_dmri_connectome(self, ui_info):
-        ui_info.ui.context["object"].project_info.dmri_config_error_msg = self.dmri_pipeline.check_config()
-        valid_anat_output,ui_info.ui.context["object"].project_info.anat_config_error_msg = self.anat_pipeline.check_output()
-
-        if ui_info.ui.context["object"].project_info.anat_config_error_msg != '':
-            ui_info.ui.context["object"].project_info.configure_traits(view='anat_config_error_view')
-        else:
-            if ui_info.ui.context["object"].project_info.dmri_config_error_msg != '':
-                ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
-            else:
-                self.dmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
-                print "self.dmri_pipeline.parcellation_scheme: %s" % self.dmri_pipeline.parcellation_scheme
-                self.dmri_pipeline.atlas_info = ui_info.ui.context["object"].project_info.atlas_info
-                print "self.dmri_pipeline.atlas_info: %s" % self.dmri_pipeline.atlas_info
-                dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
-                self.dmri_pipeline.launch_process()
-                self.dmri_pipeline.launch_progress_window()
-                update_dmri_last_processed(ui_info.ui.context["object"].project_info, self.dmri_pipeline)
-            dmri_processed = True
-
-
-    def map_fmri_connectome(self, ui_info):
-        ui_info.ui.context["object"].project_info.fmri_config_error_msg = self.fmri_pipeline.check_config()
-        valid_anat_output,ui_info.ui.context["object"].project_info.anat_config_error_msg = self.anat_pipeline.check_output()
-
-        if ui_info.ui.context["object"].project_info.anat_config_error_msg != '':
-            ui_info.ui.context["object"].project_info.configure_traits(view='anat_config_error_view')
-        else:
-            if ui_info.ui.context["object"].project_info.fmri_config_error_msg != '':
-                ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
-            else:
-                self.fmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
-                print "self.fmri_pipeline.parcellation_scheme: %s" % self.fmri_pipeline.parcellation_scheme
-                self.fmri_pipeline.atlas_info = ui_info.ui.context["object"].project_info.atlas_info
-                print "self.fmri_pipeline.atlas_info: %s" % self.fmri_pipeline.atlas_info
-                self.fmri_pipeline.subjects_dir = ui_info.ui.context["object"].project_info.freesurfer_subjects_dir
-                print "self.fmri_pipeline.subjects_dir: %s" % self.fmri_pipeline.subjects_dir
-                self.fmri_pipeline.subject_id = ui_info.ui.context["object"].project_info.freesurfer_subject_id
-                print "self.fmri_pipeline.subject_id: %s" % self.fmri_pipeline.subject_id
-                fmri_save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
-                self.fmri_pipeline.launch_process()
-                self.fmri_pipeline.launch_progress_window()
-                update_fmri_last_processed(ui_info.ui.context["object"].project_info, self.fmri_pipeline)
-            fmri_processed = True
-
-    # def process_anatomical_and_diffusion(self, ui_info):
-
-    # def map_dmri_connectome(self, ui_info):
-    #     ui_info.ui.context["object"].project_info.dmri_config_error_msg = self.dmri_pipeline.check_config()
-    #     if ui_info.ui.context["object"].project_info.dmri_config_error_msg != '':
-    #         ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
-    #     else:
-    #         dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
-    #         self.dmri_pipeline.launch_process()
-    #         self.dmri_pipeline.launch_progress_window()
-    #         update_dmri_last_processed(ui_info.ui.context["object"].project_info, self.dmri_pipeline)
-
-    # def map_custom(self, ui_info):
-    #     if ui_info.ui.context["object"].project_info.custom_last_stage == '':
-    #         ui_info.ui.context["object"].project_info.custom_last_stage = self.pipeline.ordered_stage_list[0]
-    #     ui_info.ui.context["object"].project_info.stage_names = self.pipeline.ordered_stage_list
-    #     cus_res = ui_info.ui.context["object"].project_info.configure_traits(view='custom_map_view')
-    #     if cus_res:
-    #         self.pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.custom_last_stage)
-
-    # def map_dmri_custom(self, ui_info):
-    #     if ui_info.ui.context["object"].project_info.dmri_custom_last_stage == '':
-    #         ui_info.ui.context["object"].project_info.dmri_custom_last_stage = self.dmri_pipeline.ordered_stage_list[0]
-    #     ui_info.ui.context["object"].project_info.dmri_stage_names = self.dmri_pipeline.ordered_stage_list
-    #     cus_res = ui_info.ui.context["object"].project_info.configure_traits(view='dmri_custom_map_view')
-    #     if cus_res:
-    #         self.dmri_pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.dmri_custom_last_stage)
-
-    def process_anatomical_custom(self, ui_info):
-        if ui_info.ui.context["object"].project_info.anat_custom_last_stage == '':
-            ui_info.ui.context["object"].project_info.anat_custom_last_stage = self.anat_pipeline.ordered_stage_list[0]
-        ui_info.ui.context["object"].project_info.anat_stage_names = self.anat_pipeline.ordered_stage_list
-        cus_res = ui_info.ui.context["object"].project_info.configure_traits(view='anat_custom_map_view')
-        if cus_res:
-            self.anat_pipeline.define_custom_mapping(ui_info.ui.context["object"].project_info.anat_custom_last_stage)
-
     def save_anat_config_file(self, ui_info):
         dialog = FileDialog(action="save as", default_filename="anatomical_config.ini")
         dialog.open()
@@ -1521,18 +1200,34 @@ class ProjectHandler(Handler):
             load_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
             #TODO: load_config (anat_ or dmri_ ?)
 
-    # def save_dmri_config_file(self, ui_info):
-    #     dialog = FileDialog(action="save as", default_filename="diffusion_config.ini")
-    #     dialog.open()
-    #     if dialog.return_code == OK:
-    #         save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
-    #         if dialog.path != ui_info.ui.context["object"].project_info.dmri_config_file:
-    #             shutil.copy(ui_info.ui.context["object"].project_info.dmri_config_file, dialog.path)
-    #
-    # def load_dmri_config_file(self, ui_info):
-    #     dialog = FileDialog(action="open", wildcard="*diffusion_config.ini")
-    #     dialog.open()
-    #     if dialog.return_code == OK:
-    #         if dialog.path != ui_info.ui.context["object"].project_info.dmri_config_file:
-    #             shutil.copy(dialog.path, ui_info.ui.context["object"].project_info.dmri_config_file)
-    #         load_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
+    def save_dmri_config_file(self, ui_info):
+        dialog = FileDialog(action="save as", default_filename="diffusion_config.ini")
+        dialog.open()
+        if dialog.return_code == OK:
+            save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
+            if dialog.path != ui_info.ui.context["object"].project_info.dmri_config_file:
+                shutil.copy(ui_info.ui.context["object"].project_info.dmri_config_file, dialog.path)
+
+    def load_dmri_config_file(self, ui_info):
+        dialog = FileDialog(action="open", wildcard="*diffusion_config.ini")
+        dialog.open()
+        if dialog.return_code == OK:
+            if dialog.path != ui_info.ui.context["object"].project_info.dmri_config_file:
+                shutil.copy(dialog.path, ui_info.ui.context["object"].project_info.dmri_config_file)
+            load_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
+
+    def save_fmri_config_file(self, ui_info):
+        dialog = FileDialog(action="save as", default_filename="diffusion_config.ini")
+        dialog.open()
+        if dialog.return_code == OK:
+            save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
+            if dialog.path != ui_info.ui.context["object"].project_info.fmri_config_file:
+                shutil.copy(ui_info.ui.context["object"].project_info.fmri_config_file, dialog.path)
+
+    def load_fmri_config_file(self, ui_info):
+        dialog = FileDialog(action="open", wildcard="*diffusion_config.ini")
+        dialog.open()
+        if dialog.return_code == OK:
+            if dialog.path != ui_info.ui.context["object"].project_info.fmri_config_file:
+                shutil.copy(dialog.path, ui_info.ui.context["object"].project_info.fmri_config_file)
+            load_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
