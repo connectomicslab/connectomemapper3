@@ -40,9 +40,3 @@ class Stage(HasTraits):
 
     def _inspect_output_button_fired(self,info):
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])
-
-    def is_running(self):
-        unfinished_files = [os.path.join(dirpath, f)
-                                          for dirpath, dirnames, files in os.walk(self.stage_dir)
-                                          for f in files if f.endswith('_unfinished.json')]
-        return len(unfinished_files)

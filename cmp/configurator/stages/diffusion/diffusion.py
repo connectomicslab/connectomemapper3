@@ -22,7 +22,7 @@ import nipype.interfaces.utility as util
 import nibabel as nib
 
 # Own imports
-from cmp.stages.common import Stage
+from cmp.configurator.stages.common import Stage
 from reconstruction import *
 from tracking import *
 from cmp.interfaces.misc import ExtractImageVoxelSizes, Tck2Trk
@@ -217,308 +217,8 @@ class DiffusionStage(Stage):
         self.inputs = ["diffusion","partial_volumes","wm_mask_registered","brain_mask_registered","act_5tt_registered","gmwmi_registered","roi_volumes","grad","bvals","bvecs"]
         self.outputs = ["diffusion_model","track_file","fod_file","gFA","ADC","skewness","kurtosis","P0","roi_volumes","mapmri_maps"]
 
-
-    def create_workflow(self, flow, inputnode, outputnode):
-
-        if self.config.recon_processing_tool != 'DTK':
-
-            if self.config.dilate_rois:
-
-                dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
-                dilate_rois.inputs.operation = 'modal'
-
-                if self.config.dilation_kernel == 'Box':
-                    kernel_size = 2*self.config.dilation_radius + 1
-                    dilate_rois.inputs.kernel_shape = 'boxv'
-                    dilate_rois.inputs.kernel_size = kernel_size
-                else:
-                    extract_sizes = pe.Node(interface=ExtractImageVoxelSizes(),name='extract_sizes')
-                    flow.connect([
-                                (inputnode,extract_sizes,[("diffusion","in_file")])
-                                ])
-                    extract_sizes.run()
-                    print "Voxel sizes : ",extract_sizes.outputs.voxel_sizes
-
-                    min_size = 100
-                    for voxel_size in extract_sizes.outputs.voxel_sizes:
-                        if voxel_size < min_size:
-                            min_size = voxel_size
-
-                    print("voxel size (min): %g"%min_size)
-                    if self.confi.dilation_kernel == 'Gauss':
-                        kernel_size = 2*extract_sizes.outputs.voxel_sizes + 1
-                        sigma = kernel_size / 2.355 # FWHM criteria, i.e. sigma = FWHM / 2(sqrt(2ln(2)))
-                        dilate_rois.inputs.kernel_shape = 'gauss'
-                        dilate_rois.inputs.kernel_size = sigma
-                    elif self.config.dilation_kernel == 'Sphere':
-                        radius =  0.5*min_size + self.config.dilation_radius * min_size
-                        dilate_rois.inputs.kernel_shape = 'sphere'
-                        dilate_rois.inputs.kernel_size = radius
-
-                flow.connect([
-                            (inputnode,dilate_rois,[("roi_volumes","in_file")]),
-                            (dilate_rois,outputnode,[("out_file","roi_volumes")])
-                            ])
-            else:
-                flow.connect([
-                            (inputnode,outputnode,[("roi_volumes","roi_volumes")])
-                            ])
-        else:
-            flow.connect([
-                          (inputnode,outputnode,[("roi_volumes","roi_volumes")])
-                        ])
-
-        # Reconstruction
-        if self.config.recon_processing_tool == 'DTK':
-            recon_flow = create_dtk_recon_flow(self.config.dtk_recon_config)
-            flow.connect([
-                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
-                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
-                        ])
-
-        elif self.config.recon_processing_tool == 'Dipy':
-            recon_flow = create_dipy_recon_flow(self.config.dipy_recon_config)
-
-            flow.connect([
-                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
-                        (inputnode,recon_flow,[('bvals','inputnode.bvals')]),
-                        (inputnode,recon_flow,[('bvecs','inputnode.bvecs')]),
-                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
-                        (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                        (inputnode, recon_flow,[('brain_mask_registered','inputnode.brain_mask_resampled')]),
-                        (recon_flow,outputnode,[("outputnode.FA","gFA")]),
-                        (recon_flow,outputnode,[("outputnode.mapmri_maps","mapmri_maps")]),
-                        ])
-
-
-        elif self.config.recon_processing_tool == 'MRtrix':
-            recon_flow = create_mrtrix_recon_flow(self.config.mrtrix_recon_config)
-            flow.connect([
-                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
-                        (inputnode,recon_flow,[('grad','inputnode.grad')]),
-                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
-			            (inputnode, recon_flow,[('brain_mask_registered','inputnode.wm_mask_resampled')]),
-                        (recon_flow,outputnode,[("outputnode.FA","gFA")]),
-                        (recon_flow,outputnode,[("outputnode.ADC","ADC")]),
-                        ])
-
-        elif self.config.recon_processing_tool == 'Camino':
-            recon_flow = create_camino_recon_flow(self.config.camino_recon_config)
-            flow.connect([
-                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
-                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
-                        (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                        (recon_flow,outputnode,[("outputnode.FA","gFA")])
-                        ])
-
-        elif self.config.recon_processing_tool == 'FSL':
-            recon_flow = create_fsl_recon_flow(self.config.fsl_recon_config)
-            flow.connect([
-                        (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
-                        (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')])
-                        ])
-
-        elif self.config.recon_processing_tool == 'Gibbs':
-            recon_flow = create_gibbs_recon_flow(self.config.gibbs_recon_config)
-            flow.connect([
-                          (inputnode,recon_flow,[("diffusion","inputnode.diffusion_resampled")])
-                        ])
-
-        # Tracking
-        if self.config.tracking_processing_tool == 'DTK':
-            track_flow = create_dtb_tracking_flow(self.config.dtb_tracking_config)
-            flow.connect([
-                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_registered')]),
-                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')])
-                        ])
-
-        elif self.config.tracking_processing_tool == 'Dipy':
-            track_flow = create_dipy_tracking_flow(self.config.dipy_tracking_config)
-            print "Dipy tracking"
-
-            if self.config.diffusion_imaging_model != 'DSI':
-                flow.connect([
-                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                            (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
-                            (recon_flow, track_flow,[('outputnode.model','inputnode.model')]),
-                            (inputnode,track_flow,[('bvals','inputnode.bvals')]),
-                            (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
-                            (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
-                            (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
-                            # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
-                            (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
-                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
-                            # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
-                            ])
-            else:
-                flow.connect([
-                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                            (recon_flow, outputnode,[('outputnode.fod','fod_file')]),
-                            (recon_flow,track_flow,[('outputnode.fod','inputnode.fod_file')]),
-                            (recon_flow, track_flow,[('outputnode.model','inputnode.model')]),
-                            (inputnode,track_flow,[('bvals','inputnode.bvals')]),
-                            (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
-                            (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
-                            (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
-                            # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
-                            (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
-                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
-                            # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
-                            ])
-
-            flow.connect([
-                        (track_flow,outputnode,[('outputnode.track_file','track_file')])
-                        ])
-
-        elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'MRtrix':
-            track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
-            print "MRtrix tracking"
-
-            flow.connect([
-                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                        (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
-                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'),('outputnode.grad','inputnode.grad')]),
-			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
-                        ])
-
-            if self.config.dilate_rois:
-                flow.connect([
-                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
-                            ])
-            else:
-                flow.connect([
-                            (inputnode,track_flow,[('roi_volumes','inputnode.gm_registered')])
-                            ])
-
-            flow.connect([
-                        (inputnode,track_flow,[('act_5tt_registered','inputnode.act_5tt_registered')]),
-                        (inputnode,track_flow,[('gmwmi_registered','inputnode.gmwmi_registered')])
-                        ])
-
-            flow.connect([
-                        (track_flow,outputnode,[('outputnode.track_file','track_file')])
-                        ])
-
-        elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'Dipy':
-            track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
-            print "MRtrix tracking"
-
-            if self.config.diffusion_imaging_model != 'DSI':
-                flow.connect([
-                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),('grad','inputnode.grad')]),
-                            (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
-                            (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
-    			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
-                            ])
-            else:
-                flow.connect([
-                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),('grad','inputnode.grad')]),
-                            (recon_flow, outputnode,[('outputnode.fod','fod_file')]),
-                            (recon_flow, track_flow,[('outputnode.fod','inputnode.DWI')]),
-    			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
-                            ])
-
-            if self.config.dilate_rois:
-                flow.connect([
-                            (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
-                            ])
-            else:
-                flow.connect([
-                            (inputnode,track_flow,[('roi_volumes','inputnode.gm_registered')])
-                            ])
-
-            flow.connect([
-                        (inputnode,track_flow,[('act_5tt_registered','inputnode.act_5tt_registered')]),
-                        (inputnode,track_flow,[('gmwmi_registered','inputnode.gmwmi_registered')])
-                        ])
-
-           #  if self.config.diffusion_model == 'Probabilistic':
-           #      flow.connect([
-    			    # (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')]),
-    			    # ])
-
-            flow.connect([
-                        (track_flow,outputnode,[('outputnode.track_file','track_file')])
-                        ])
-
-        elif self.config.tracking_processing_tool == 'Camino':
-            track_flow = create_camino_tracking_flow(self.config.camino_tracking_config)
-            flow.connect([
-                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                        (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'), ('outputnode.grad','inputnode.grad')])
-                        ])
-            if self.config.diffusion_model == 'Probabilistic':
-                flow.connect([
-                    (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')]),
-                    ])
-            flow.connect([
-                        (track_flow,outputnode,[('outputnode.track_file','track_file')])
-                        ])
-
-        elif self.config.tracking_processing_tool == 'FSL':
-            track_flow = create_fsl_tracking_flow(self.config.fsl_tracking_config)
-            flow.connect([
-                        (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                        (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')]),
-                        (recon_flow,track_flow,[('outputnode.fsamples','inputnode.fsamples')]),
-                        (recon_flow,track_flow,[('outputnode.phsamples','inputnode.phsamples')]),
-                        (recon_flow,track_flow,[('outputnode.thsamples','inputnode.thsamples')]),
-                        ])
-            flow.connect([
-                        (track_flow,outputnode,[("outputnode.targets","track_file")]),
-                        ])
-        elif self.config.tracking_processing_tool == 'Gibbs':
-            track_flow = create_gibbs_tracking_flow(self.config.gibbs_tracking_config)
-            flow.connect([
-                          (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                          (recon_flow,track_flow,[("outputnode.recon_file","inputnode.recon_file")]),
-                          (track_flow,outputnode,[('outputnode.track_file','track_file')])
-                        ])
-
-
-        if self.config.tracking_processing_tool == 'DTK':
-            flow.connect([
-			    (recon_flow,outputnode, [("outputnode.gFA","gFA"),("outputnode.skewness","skewness"),
-			                             ("outputnode.kurtosis","kurtosis"),("outputnode.P0","P0")]),
-			    (track_flow,outputnode, [('outputnode.track_file','track_file')])
-			    ])
-
-        temp_node = pe.Node(interface=util.IdentityInterface(fields=["diffusion_model"]),name="diffusion_model")
-        temp_node.inputs.diffusion_model = self.config.diffusion_model
-        flow.connect([
-                    (temp_node,outputnode,[("diffusion_model","diffusion_model")])
-                    ])
-
-        if self.config.tracking_processing_tool == 'Custom':
-            # FIXME make sure header of TRK / TCK are consistent with DWI
-            custom_node = pe.Node(interface=util.IdentityInterface(fields=["custom_track_file"]),name="read_custom_track")
-            custom_node.inputs.custom_track_file = self.config.custom_track_file
-            if nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TrkFile:
-                print "load TRK tractography file"
-                flow.connect([
-                            (custom_node,outputnode,[("custom_track_file","track_file")])
-                            ])
-            elif nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TckFile:
-                print "load TCK tractography file and convert to TRK format"
-                converter = pe.Node(interface=Tck2Trk(),name="trackvis")
-                converter.inputs.out_tracks = 'converted.trk'
-
-                flow.connect([
-                    (custom_node,converter,[('custom_track_file','in_tracks')]),
-                    (inputnode,converter,[('wm_mask_registered','in_image')]),
-                    (converter,outputnode,[('out_tracks','track_file')])
-                    ])
-            else:
-                print "Invalid tractography input format. Valid formats are .tck (MRtrix) and .trk (DTK/Trackvis)"
-
     def define_inspect_outputs(self):
         print "stage_dir : %s" % self.stage_dir
-
-        # if self.config.processing_tool == 'DTK':
-        #     diff_results_path = os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz")
-        #     if(os.path.exists(diff_results_path)):
-        #         diff_results = pickle.load(gzip.open(diff_results_path))
-        #         self.inspect_outputs_dict['DTK streamline'] = ['trackvis',diff_results.outputs.out_file]
 
         ## RECON outputs
         # Dipy
@@ -593,8 +293,6 @@ class DiffusionStage(Stage):
                 shm_coeff_res = recon_results.outputs.spherical_harmonics_image
                 self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_sh',shm_coeff_res]
 
-
-
         ## Tracking outputs
         # Dipy
         if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
@@ -664,8 +362,6 @@ class DiffusionStage(Stage):
 
 
     def has_run(self):
-        # if self.config.processing_tool == 'DTK':
-        #     return os.path.exists(os.path.join(self.stage_dir,"tracking","dtb_streamline","result_dtb_streamline.pklz"))
         if self.config.tracking_processing_tool == 'Dipy':
             if self.config.diffusion_model == 'Deterministic':
                 return os.path.exists(os.path.join(self.stage_dir,"tracking","dipy_deterministic_tracking","result_dipy_deterministic_tracking.pklz"))
@@ -673,9 +369,3 @@ class DiffusionStage(Stage):
                 return os.path.exists(os.path.join(self.stage_dir,"tracking","dipy_probabilistic_tracking","result_dipy_probabilistic_tracking.pklz"))
         elif self.config.tracking_processing_tool == 'MRtrix':
             return os.path.exists(os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz"))
-        # elif self.config.processing_tool == 'Camino':
-        #     return os.path.exists(os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz"))
-        # elif self.config.processing_tool == 'FSL':
-        #     return os.path.exists(os.path.join(self.stage_dir,"tracking","probtrackx","result_probtrackx.pklz"))
-        # elif self.config.processing_tool == 'Gibbs':
-        #     return os.path.exists(os.path.join(self.stage_dir,"reconstruction","match_orientations","result_match_orientations.pklz"))

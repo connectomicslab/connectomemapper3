@@ -29,7 +29,7 @@ from nipype.utils.filemanip import split_filename
 from cmtklib.parcellation import get_parcellation
 import cmtklib as cmtk
 # import nipype.interfaces.cmtk as cmtk
-from cmp.stages.common import Stage
+from cmp.configurator.stages.common import Stage
 
 class ConnectomeConfig(HasTraits):
     apply_scrubbing = Bool(False)
