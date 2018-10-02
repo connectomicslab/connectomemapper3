@@ -598,6 +598,15 @@ class RegistrationStage(Stage):
                 (mr_convert_FA_unmasked,FA_noNaN_unmasked,[('converted','in_file')])
                 ])
 
+
+            from nipype.interfaces.fsl.maths import ApplyMask
+            b0_masking = pe.Node(interface=ApplyMask(out_file='b0_masked.nii.gz'),name='b0_masking')
+
+            flow.connect([
+                    (mr_convert_b0, b0_masking, [('converted','in_file')]),
+                    (inputnode, b0_masking, [('target_mask','mask_file')])
+                ])
+
             # [1.2] Linear registration of the DW data to the T1 data
             affine_registration = pe.Node(interface=ants.Registration(), name='linear_registration')
             affine_registration.inputs.collapse_output_transforms=True
@@ -639,10 +648,12 @@ class RegistrationStage(Stage):
             affine_registration.inputs.verbose = True
 
             flow.connect([
-                        (inputnode, affine_registration, [('T1','moving_image')]),
-                        (mr_convert_b0, affine_registration, [('converted','fixed_image')]),
-                        (inputnode, affine_registration, [('brain_mask','moving_image_mask')]),
-                        (inputnode, affine_registration, [('target_mask','fixed_image_mask')])
+                        (b0_masking, affine_registration, [('out_file','fixed_image')]),
+                        (inputnode, affine_registration, [('brain','moving_image')]),
+                        # (inputnode, affine_registration, [('T1','moving_image')]),
+                        # (mr_convert_b0, affine_registration, [('converted','fixed_image')]),
+                        # (inputnode, affine_registration, [('brain_mask','moving_image_mask')]),
+                        # (inputnode, affine_registration, [('target_mask','fixed_image_mask')])
                         ])
 
             SyN_registration = pe.Node(interface=ants.Registration(),name='SyN_registration')
@@ -746,10 +757,12 @@ class RegistrationStage(Stage):
 
                 flow.connect([
                         (affine_registration, SyN_registration, [('composite_transform','initial_moving_transform')]),
-                        (inputnode, SyN_registration, [('T1','moving_image')]),
-                        (mr_convert_b0, SyN_registration, [('converted','fixed_image')]),
-                        (inputnode, SyN_registration, [('brain_mask','moving_image_mask')]),
-                        (inputnode, SyN_registration, [('target_mask','fixed_image_mask')])
+                        (b0_masking, SyN_registration, [('out_file','fixed_image')]),
+                        (inputnode, SyN_registration, [('brain','moving_image')])
+                        # (inputnode, SyN_registration, [('T1','moving_image')]),
+                        # (mr_convert_b0, SyN_registration, [('converted','fixed_image')]),
+                        # (inputnode, SyN_registration, [('brain_mask','moving_image_mask')]),
+                        # (inputnode, SyN_registration, [('target_mask','fixed_image_mask')])
                         ])
 
             # multitransforms = pe.Node(interface=util.Merge(2),name='multitransforms')
