@@ -10,45 +10,6 @@
 from traits.api import *
 from traitsui.api import *
 
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
-    traits, File, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, isdefined, OutputMultiPath, InputMultiPath
-
-from nipype.utils.filemanip import copyfile
-
-import glob
-import os
-import pkg_resources
-import subprocess, shutil
-from nipype.utils.filemanip import split_filename
-
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.fsl as fsl
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-import nipype.interfaces.diffusion_toolkit as dtk
-import nipype.interfaces.mrtrix as mrtrix
-import nipype.interfaces.camino as camino
-import nipype.interfaces.dipy as dipy
-
-#  import nipype.interfaces.camino2trackvis as camino2trackvis
-import cmp.interfaces.camino2trackvis as camino2trackvis
-from cmp.interfaces.mrtrix3 import Erode, StreamlineTrack
-from cmp.interfaces.fsl import mapped_ProbTrackX
-from cmp.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
-from cmp.interfaces.misc import Tck2Trk
-
-from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
-
-import nibabel as nib
-import numpy as np
-
-from cmtklib.diffusion import filter_fibers
-
-import matplotlib.pyplot as plt
-
-from nipype import logging
-iflogger = logging.getLogger('nipype.interface')
 
 class DTB_tracking_config(HasTraits):
     imaging_model = Str

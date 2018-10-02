@@ -9,26 +9,15 @@
 
 # General imports
 import os
-from traits.api import *
-from traitsui.api import *
 import pickle
 import gzip
-import shutil
 import pkg_resources
-import multiprocessing as mp
 
-# Nipype imports
-import nipype.pipeline.engine as pe
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.ants as ants
-from nipype.interfaces.io import FreeSurferSource
-import nipype.interfaces.utility as util
-
+from traits.api import *
+from traitsui.api import *
 
 # Own imports
 from cmp.configurator.stages.common import Stage
-from cmp.interfaces.freesurfer import copyBrainMaskToFreesurfer, copyFileToFreesurfer
 
 class SegmentationConfig(HasTraits):
     seg_tool = Enum(["Freesurfer","Custom segmentation"])

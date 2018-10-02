@@ -10,36 +10,10 @@
 # General imports
 import re
 import os
-import shutil
 from traits.api import *
 from traitsui.api import *
 import pkg_resources
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
-import nipype.interfaces.diffusion_toolkit as dtk
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.mrtrix as mrtrix
-import nipype.interfaces.camino as camino
-from nipype.utils.filemanip import split_filename
-
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
-    traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec
-import nipype.interfaces.base as nibase
-
-from cmp.interfaces.mrtrix3 import Erode, MRtrix_mul, MRThreshold, MRConvert, EstimateResponseForSH, ConstrainedSphericalDeconvolution, DWI2Tensor, Tensor2Vector
-from nipype.interfaces.mrtrix3.reconst import FitTensor, EstimateFOD
-from nipype.interfaces.mrtrix3.utils import TensorMetrics
-# from nipype.interfaces.mrtrix3.preprocess import ResponseSD
-from cmp.interfaces.misc import flipBvec
-from cmp.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE
-# from nipype.interfaces.dipy import CSD
-
-import cmp.interfaces.diffusion_toolkit as cmp_dtk
-
-from nipype import logging
-iflogger = logging.getLogger('nipype.interface')
 
 # Reconstruction configuration
 

@@ -6,49 +6,17 @@
 
 """ CMP registration stage
 """
-try:
-    from traitsui.api import *
-    from traits.api import *
-
-except ImportError:
-    from enthought.traits.api import *
-    from enthought.traits.ui.api import *
 
 # General imports
-# from traits.api import *
-# from traitsui.api import *
 import os
 import pickle
 import gzip
-import glob
 
-# Nipype imports
-import nipype.interfaces.utility as util
-import nipype.pipeline.engine as pe
-import nipype.interfaces.mrtrix as mrt
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.fsl as fsl
-from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec,\
-    TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
-
-import nipype.interfaces.ants as ants
-# from nipype.interfaces.ants.registration import ANTS
-# from nipype.interfaces.ants.resampling import ApplyTransforms, WarpImageMultiTransform
-
-import nibabel as nib
+from traitsui.api import *
+from traits.api import *
 
 # Own imports
 from cmp.configurator.stages.common import Stage
-
-# from cmp.pipelines.common import MRThreshold, MRCrop, ExtractMRTrixGrad, FSLCreateHD
-from cmp.interfaces.mrtrix3 import DWI2Tensor, MRConvert, MRTransform, MRThreshold, MRCrop, ExtractMRTrixGrad
-from cmp.interfaces.fsl import FSLCreateHD
-import cmp.interfaces.freesurfer as cmp_fs
-import cmp.interfaces.fsl as cmp_fsl
-from cmp.interfaces.ants import MultipleANTsApplyTransforms
-
-from nipype.interfaces.mrtrix3.reconst import FitTensor
-from nipype.interfaces.mrtrix3.utils import TensorMetrics
 
 
 class RegistrationConfig(HasTraits):

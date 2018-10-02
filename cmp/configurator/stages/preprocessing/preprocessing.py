@@ -7,37 +7,15 @@
 """ CMP preprocessing Stage (not used yet!)
 """
 
-from traits.api import *
-from traitsui.api import *
-
-from nipype.interfaces.base import traits, BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, CommandLine, InputMultiPath, OutputMultiPath, TraitedSpec, Interface, InterfaceResult, isdefined
-import nipype.interfaces.utility as util
-
-from cmp.configurator.stages.common import Stage
-
 import os
 import pickle
 import gzip
-import glob
-import pkg_resources
 
-import nipype.pipeline.engine as pe
-import nipype.pipeline as pip
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.utility as util
-import nipype.interfaces.mrtrix as mrt
-import nipype.interfaces.ants as ants
-import nipype.interfaces.dipy as dipy
+from traits.api import *
+from traitsui.api import *
 
-import nibabel as nib
+from cmp.configurator.stages.common import Stage
 
-# from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
-from cmp.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, MRThreshold, ExtractFSLGrad, ExtractMRTrixGrad, Generate5tt, GenerateGMWMInterface
-import cmp.interfaces.fsl as cmp_fsl
-from cmp.interfaces.misc import ExtractPVEsFrom5TT
-
-from nipype.interfaces.mrtrix3.preprocess import ResponseSD
 
 class PreprocessingConfig(HasTraits):
     total_readout = Float(0.0)

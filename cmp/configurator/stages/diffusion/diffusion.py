@@ -8,36 +8,24 @@
 """
 
 # General imports
-from traits.api import *
-from traitsui.api import *
+import os
 import gzip
 import pickle
 
-# Nipype imports
-import nipype.pipeline.engine as pe
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.utility as util
-
-import nibabel as nib
+from traits.api import *
+from traitsui.api import *
 
 # Own imports
 from cmp.configurator.stages.common import Stage
-from reconstruction import *
-from tracking import *
-from cmp.interfaces.misc import ExtractImageVoxelSizes, Tck2Trk
 
 
 class DiffusionConfig(HasTraits):
 
     diffusion_imaging_model_editor = List(['DSI','DTI','HARDI'])
     diffusion_imaging_model = Str('DTI')
-    # processing_tool_editor = List(['DTK','MRtrix','Camino','FSL','Gibbs'])
-    # processing_tool_editor = List(['Dipy','MRtrix','Custom'])
     dilate_rois = Bool(True)
     dilation_kernel = Enum(['Box','Gauss','Sphere'])
     dilation_radius = Enum([1,2,3,4])
-    # processing_tool = Str('MRtrix')
     recon_processing_tool_editor = List(['Dipy','MRtrix','Custom'])
     tracking_processing_tool_editor = List(['Dipy','MRtrix','Custom'])
     processing_tool_editor = List(['Dipy','MRtrix','Custom'])
@@ -202,12 +190,6 @@ class DiffusionConfig(HasTraits):
         self.camino_tracking_config.inversion_index = self.camino_recon_config.inversion
         self.camino_tracking_config.fallback_index = self.camino_recon_config.fallback_index
 
-
-def strip_suffix(file_input, prefix):
-    import os
-    from nipype.utils.filemanip import split_filename
-    path, _, _ = split_filename(file_input)
-    return os.path.join(path, prefix+'_')
 
 class DiffusionStage(Stage):
 

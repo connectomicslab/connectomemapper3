@@ -8,31 +8,16 @@
 """
 
 # General imports
-from traits.api import *
-from traitsui.api import *
+import os
 import gzip
 import pickle
-import os
 
-# Nipype imports
-import nipype.pipeline.engine as pe
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.utility as util
-from nipype.interfaces import afni
-
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
+from traits.api import *
+from traitsui.api import *
 
 # Own imports
 from cmp.configurator.stages.common import Stage
 
-# Imports for processing
-import nibabel as nib
-import numpy as np
-import scipy.io as sio
-import statsmodels.api as sm
-from scipy import signal
-from obspy.signal.detrend import polynomial
 
 class FunctionalMRIConfig(HasTraits):
     smoothing = Float(0.0)

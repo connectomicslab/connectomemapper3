@@ -8,21 +8,16 @@
 """
 
 # General imports
-from traits.api import *
-from traitsui.api import *
-import pkg_resources
 import os
 import pickle
 import gzip
+import pkg_resources
+
+from traits.api import *
 from traits.trait_handlers import TraitListObject
 
-# Nipype imports
-import nipype.pipeline.engine as pe          # pypeline engine
-# import nipype.interfaces.cmtk as cmtk
-import cmtklib as cmtk
-import nipype.interfaces.utility as util
+from traitsui.api import *
 
-from cmtklib.parcellation import Parcellate, ParcellateBrainstemStructures, ParcellateHippocampalSubfields, ParcellateThalamus, CombineParcellations
 # Own imports
 from cmp.configurator.stages.common import Stage
 

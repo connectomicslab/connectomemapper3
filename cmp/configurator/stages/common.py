@@ -8,10 +8,10 @@
 """
 
 # Libraries imports
+import subprocess
+
 from traits.api import *
 from traitsui.api import *
-import subprocess
-import os
 
 ##  Stage master class, will be inherited by the various stage subclasses. Inherits from HasTraits.
 #

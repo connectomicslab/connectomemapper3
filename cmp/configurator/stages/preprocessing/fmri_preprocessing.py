@@ -7,23 +7,15 @@
 """ CMP preprocessing Stage (not used yet!)
 """
 
-from traits.api import *
-from traitsui.api import *
-
-import nipype.interfaces.utility as util
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
-
-from cmp.configurator.stages.common import Stage
-
 import os
 import pickle
 import gzip
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.fsl as fsl
-from nipype.interfaces import afni
+from traits.api import *
+from traitsui.api import *
 
-import nibabel as nib
+from cmp.configurator.stages.common import Stage
+
 
 class PreprocessingConfig(HasTraits):
     discard_n_volumes = Int('5')

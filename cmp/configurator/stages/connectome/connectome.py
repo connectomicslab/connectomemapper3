@@ -15,19 +15,7 @@ import os
 import pickle
 import gzip
 
-# Nipype imports
-import nipype.interfaces.utility as util
-import nipype.pipeline.engine as pe
-# import nipype.interfaces.cmtk as cmtk
-import cmtklib as cmtk
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec,\
-    traits, File, TraitedSpec, InputMultiPath, OutputMultiPath, isdefined
-from nipype.utils.filemanip import split_filename
-
 # Own imports
-from cmtklib.connectome import mrtrixcmat, cmat, prob_cmat, probtrackx_cmat
-from nipype.interfaces.mrtrix3.connectivity import BuildConnectome
-from cmp.interfaces.mrtrix3 import FilterTractogram
 from cmp.configurator.stages.common import Stage
 
 class ConnectomeConfig(HasTraits):
