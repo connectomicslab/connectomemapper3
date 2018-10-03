@@ -1109,8 +1109,8 @@ class ProjectHandler(Handler):
 
     def show_bidsapp_window(self,ui_info):
         print "Show BIDS App interface"
-        bidsapp = gui.CMP_BIDSAppWindow(ui_info)
-        bidsapp.configure_traits()
+        ui_info.ui.context["object"].show_bidsapp_interface()
+        
 
     def update_subject_fmri_pipeline(self,ui_info):
         ui_info.handler = self

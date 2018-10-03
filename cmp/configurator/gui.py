@@ -13,6 +13,9 @@ warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 # Libraries imports
+import sys
+from subprocess import Popen
+import os
 import multiprocessing
 
 from traits.api import *
@@ -413,47 +416,184 @@ class CMP_Project_Info(HasTraits):
     def _summary_view_button_fired(self):
         self.configure_traits(view='pipeline_processing_summary_view')
 
+class CMP_BIDSAppWindowHandler(Handler):
+
+    settings_checked = Bool(False)
+    docker_running = Bool(False)
+    docker_process = Instance(Popen)
+
+    def check_settings(self, ui_info):
+        self.settings_checked = True
+
+        if os.path.isdir(ui_info.ui.context["object"].bids_root):
+            print("BIDS root directory : {}".format(ui_info.ui.context["object"].bids_root))
+        else:
+            print("Error: BIDS root invalid!")
+            self.settings_checked = False
+
+        # if not ui_info.ui.context["object"].list_of_subjects_to_be_processed.empty():
+        #     print("List of subjects to be processed : {}".format(ui_info.ui.context["object"].list_of_subjects_to_be_processed))
+        # else:
+        #     print("Warning: List of subjects empty!")
+
+        if os.path.isfile(ui_info.ui.context["object"].anat_config):
+            print("Anatomical configuration file : {}".format(ui_info.ui.context["object"].anat_config))
+        else:
+            print("Error: Configuration file for anatomical pipeline not existing!")
+            self.settings_checked = False
+
+        if os.path.isfile(ui_info.ui.context["object"].dmri_config):
+            print("Diffusion configuration file : {}".format(ui_info.ui.context["object"].dmri_config))
+        else:
+            print("Warning: Configuration file for diffusion pipeline not existing!")
+
+        if os.path.isfile(ui_info.ui.context["object"].fmri_config):
+            print("fMRI configuration file : {}".format(ui_info.ui.context["object"].fmri_config))
+        else:
+            print("Warning: Configuration file for fMRI pipeline not existing!")
+
+        if os.path.isfile(ui_info.ui.context["object"].fs_license):
+            print("Freesurfer license : {}".format(ui_info.ui.context["object"].fs_license))
+        else:
+            print("Error: Invalid Freesurfer license ({})!".format(ui_info.ui.context["object"].fs_license))
+            self.settings_checked = False
+
+        if os.path.isdir(ui_info.ui.context["object"].fs_average):
+            print("fsaverage directory : {}".format(ui_info.ui.context["object"].fs_average))
+        else:
+            print("Error: fsaverage directory ({}) not existing!".format(ui_info.ui.context["object"].fs_average))
+            self.settings_checked = False
+
+        return True
+
+    def start_bids_app(self, ui_info):
+        print("Start BIDS App")
+
+        cmd = ['docker','run','-it','--rm',
+               '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
+               '-v', '{}/derivatives:/outputs'.format(ui_info.ui.context["object"].bids_root),
+               '-v', '{}:/code/ref_anatomical_config.ini'.format(ui_info.ui.context["object"].anat_config),
+               '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
+               '-v', '{}:/opt/freesurfer/license.txt'.format(ui_info.ui.context["object"].fs_license),
+               'sebastientourbier/connectomemapper-bidsapp:latest',
+               '/bids_dataset', '/outputs', 'participant']
+
+        cmd.append('--participant_label')
+
+        for label in ui_info.ui.context["object"].list_of_subjects_to_be_processed:
+            cmd.append('{}'.format(label))
+
+        cmd.append('--anat_pipeline_config')
+        cmd.append('/code/ref_anatomical_config.ini')
+
+        print(cmd)
+
+        self.docker_process = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
+        self.docker_process.communicate()
+        self.docker_running = True
+
+        # cmd = ['docker','run','-it','--rm',
+        #        '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
+        #        '-v', '{}/derivatives:/outputs'.format(ui_info.ui.context["object"].bids_root),
+        #        '-v', '{}:/code/ref_anatomical_config.ini'.format(ui_info.ui.context["object"].anat_config),
+        #        '-v', '{}:/code/ref_diffusion_config.ini'.format(ui_info.ui.context["object"].dmri_config),
+        #        '-v', '{}:/code/ref_fMRI_config.ini'.format(ui_info.ui.context["object"].fmri_config),
+        #        '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
+        #        '-v', '{}:/opt/freesurfer/license.txt'.format(ui_info.ui.context["object"].fs_license),
+        #        'sebastientourbier/connectomemapper3',
+        #        '/bids_dataset', '/outputs participant', '--participant_label', '01',
+        #        '--anat_pipeline_config', '/code/ref_anatomical_config.ini',
+        #        '--dwi_pipeline_config', '/code/ref_diffusion_config.ini',
+        #        '--func_pipeline_config', '/code/ref_fMRI_config.ini']
+
+        # new_project = gui.CMP_Project_Info()
+        # np_res = new_project.configure_traits(view='create_view')
+        # ui_info.ui.context["object"].handler = self
+        #
+        return True
+
+    def stop_bids_app(self, ui_info):
+        print("Stop BIDS App")
+        self.docker_process.kill()
+        self.docker_running = False
+        return True
+
 class CMP_BIDSAppWindow(HasTraits):
 
     project_info = Instance(CMP_Project_Info)
 
     bids_root = Directory()
-    subjects = List()
+    subjects = List(Str)
 
-    list_of_subjects_to_be_processed = List()
+    fs_license = File(os.path.join(os.environ['FREESURFER_HOME'],'license.txt'))
+    fs_average = Directory(os.path.join(os.environ['FREESURFER_HOME'],'subjects','fsaverage'))
+
+    list_of_subjects_to_be_processed = List(Str)
 
     anat_config = File()
     dmri_config = File()
     fmri_config = File()
 
+    check = Action(name='Check settings!',action='check_settings')
+    start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='handler.settings_checked and not handler.docker_running')
+    stop_bidsapp = Action(name='Stop BIDS App!',action='stop_bids_app',enabled_when='handler.settings_checked and handler.docker_running')
+
     traits_view = QtView(
-                        Group(
+                        VGroup(
                             Item('bids_root', label='Base directory'),
                         label='BIDS dataset'),
-                        Group(
-                            UItem('list_of_subjects_to_be_processed', editor=CheckListEditor(values=subjects,cols=2), style='custom', label='Base directory'),
+                        VGroup(
+                            UItem('list_of_subjects_to_be_processed', editor=CheckListEditor(name='subjects'), style='custom', label='Selection'),
                         label='Participants to be processed'),
-                        Group(
+                        VGroup(
                             Item('anat_config', label='Anatomical pipeline'),
                             Item('dmri_config', label='Diffusion pipeline'),
                             Item('fmri_config', label='fMRI pipeline'),
-                        label='Configuration files used as references')
+                            label='Configuration files used as references'),
+                        VGroup(
+                            Item('fs_license', label='LICENSE'),
+                            Item('fs_average', label='FSaverage directory'),
+                        label='Freesurfer configuration'),
+                        title='Connectome Mapper 3 BIDS App GUI',
+                        handler=CMP_BIDSAppWindowHandler(),
+                        buttons = [check,start_bidsapp,stop_bidsapp],
+                        # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
+                        #buttons = [preprocessing, map_connectome, map_custom],
+                        width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
                         )
 
-    def __init__(self,ui_info):
+    def __init__(self, project_info=None, bids_root='', subjects=[''], list_of_subjects_to_be_processed=[''], anat_config='', dmri_config='', fmri_config=''):
 
-        print ui_info.ui.context["object"].project_info
+        self.project_info = project_info
+        self.bids_root = bids_root
+        self.subjects = subjects
+        # self.list_of_subjects_to_be_processed = list_of_subjects_to_be_processed
+        self.anat_config = anat_config
+        self.dmri_config = dmri_config
+        self.fmri_config = fmri_config
 
-        self.anat_config = ui_info.ui.context["object"].project_info.anat_config_to_load
+        print(self.list_of_subjects_to_be_processed)
+        print(self.bids_root)
+        print(self.anat_config)
+        print(self.dmri_config)
+        print(self.fmri_config)
+        print(self.fs_license)
+        print(self.fs_average)
 
-        if ui_info.ui.context["object"].project_info.dmri_config_to_load != None:
-            self.dmri_config = ui_info.ui.context["object"].project_info.dmri_config_to_load
-        if ui_info.ui.context["object"].project_info.fmri_config_to_load != None:
-            self.fmri_config = ui_info.ui.context["object"].project_info.fmri_config_to_load
-
-        self.bids_root = ui_info.ui.context["object"].project_info.base_directory
-        self.subjects = ui_info.ui.context["object"].project_info.subjects
-        self.list_of_subjects_to_be_processed = ui_info.ui.context["object"].project_info.subjects
+    # def __init__(self,ui_info):
+    #
+    #     print ui_info.ui.context["object"].project_info
+    #
+    #     self.anat_config = ui_info.ui.context["object"].project_info.anat_config_to_load
+    #
+    #     if ui_info.ui.context["object"].project_info.dmri_config_to_load != None:
+    #         self.dmri_config = ui_info.ui.context["object"].project_info.dmri_config_to_load
+    #     if ui_info.ui.context["object"].project_info.fmri_config_to_load != None:
+    #         self.fmri_config = ui_info.ui.context["object"].project_info.fmri_config_to_load
+    #
+    #     self.bids_root = ui_info.ui.context["object"].project_info.base_directory
+    #     self.subjects = ui_info.ui.context["object"].project_info.subjects
+    #     self.list_of_subjects_to_be_processed = ui_info.ui.context["object"].project_info.subjects
 
 
 ## Main window class of the ConnectomeMapper_Pipeline
@@ -605,3 +745,24 @@ class CMP_MainWindow(HasTraits):
         except AttributeError:
             print "AttributeError: update subject fmri"
             return
+
+    def show_bidsapp_interface(self):
+        print("list_of_subjects_to_be_processed:")
+        print(self.project_info.subjects)
+
+        bids_layout = BIDSLayout(self.project_info.base_directory)
+        subjects = bids_layout.get_subjects()
+
+        anat_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_anatomical_config.ini'%self.project_info.anat_config_to_load)
+        dmri_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_diffusion_config.ini'%self.project_info.dmri_config_to_load)
+        fmri_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_fMRI_config.ini'%self.project_info.fmri_config_to_load)
+
+        self.bidsapp = CMP_BIDSAppWindow(project_info=self.project_info,
+                                         bids_root=self.project_info.base_directory,
+                                         subjects=subjects,
+                                         list_of_subjects_to_be_processed=subjects,
+                                         anat_config=anat_config,
+                                         dmri_config=dmri_config,
+                                         fmri_config=fmri_config
+                                         )
+        self.bidsapp.configure_traits()
