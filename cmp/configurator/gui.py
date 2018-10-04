@@ -553,7 +553,8 @@ class CMP_BIDSAppWindow(HasTraits):
                         VGroup(
                             Item('fs_license', label='LICENSE'),
                             Item('fs_average', label='FSaverage directory'),
-                        label='Freesurfer configuration'),
+                        label='Freesurfer configuration',
+                        orientation='vertical',springy=True),
                         title='Connectome Mapper 3 BIDS App GUI',
                         handler=CMP_BIDSAppWindowHandler(),
                         buttons = [check,start_bidsapp,stop_bidsapp],
@@ -615,14 +616,14 @@ class CMP_MainWindow(HasTraits):
     # map_dmri_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked')
     # map_fmri_connectome = Action(name='Map Functional Connectome!',action='map_fmri_connectome',enabled_when='handler.anat_outputs_checked and handler.fmri_inputs_checked')
 
-    anat_save_config = Action(name='Save anatomical pipeline configuration as...',action='anat_save_config_file',enabled_when='handler.project_loaded==True')
+    anat_save_config = Action(name='Save anatomical pipeline configuration as...',action='save_anat_config_file',enabled_when='handler.project_loaded==True')
     anat_load_config = Action(name='Load anatomical pipeline configuration...',action='anat_load_config_file',enabled_when='handler.project_loaded==True')
 
-    dmri_save_config = Action(name='Save diffusion pipeline configuration as...',action='dmri_save_config_file',enabled_when='handler.project_loaded==True')
-    dmri_load_config = Action(name='Load diffusion pipeline configuration...',action='dmri_load_config_file',enabled_when='handler.project_loaded==True')
+    dmri_save_config = Action(name='Save diffusion pipeline configuration as...',action='save_dmri_config_file',enabled_when='handler.project_loaded==True')
+    dmri_load_config = Action(name='Load diffusion pipeline configuration...',action='load_dmri_config_file',enabled_when='handler.project_loaded==True')
 
-    fmri_save_config = Action(name='Save fMRI pipeline configuration as...',action='fmri_save_config_file',enabled_when='handler.project_loaded==True')
-    fmri_load_config = Action(name='Load fMRI pipeline configuration...',action='fmri_load_config_file',enabled_when='handler.project_loaded==True')
+    fmri_save_config = Action(name='Save fMRI pipeline configuration as...',action='save_fmri_config_file',enabled_when='handler.project_loaded==True')
+    fmri_load_config = Action(name='Load fMRI pipeline configuration...',action='load_fmri_config_file',enabled_when='handler.project_loaded==True')
 
     show_bidsapp_window = Action(name='Show interface...',action='show_bidsapp_window',enabled_when='handler.project_loaded==True')
 
@@ -753,9 +754,13 @@ class CMP_MainWindow(HasTraits):
         bids_layout = BIDSLayout(self.project_info.base_directory)
         subjects = bids_layout.get_subjects()
 
-        anat_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_anatomical_config.ini'%self.project_info.anat_config_to_load)
-        dmri_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_diffusion_config.ini'%self.project_info.dmri_config_to_load)
-        fmri_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_fMRI_config.ini'%self.project_info.fmri_config_to_load)
+        # anat_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_anatomical_config.ini'%self.project_info.anat_config_to_load)
+        # dmri_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_diffusion_config.ini'%self.project_info.dmri_config_to_load)
+        # fmri_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_fMRI_config.ini'%self.project_info.fmri_config_to_load)
+
+        anat_config = os.path.join(self.project_info.base_directory,'code/','ref_anatomical_config.ini')
+        dmri_config = os.path.join(self.project_info.base_directory,'code/','ref_diffusion_config.ini')
+        fmri_config = os.path.join(self.project_info.base_directory,'code/','ref_fMRI_config.ini')
 
         self.bidsapp = CMP_BIDSAppWindow(project_info=self.project_info,
                                          bids_root=self.project_info.base_directory,

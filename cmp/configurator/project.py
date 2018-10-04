@@ -1110,7 +1110,7 @@ class ProjectHandler(Handler):
     def show_bidsapp_window(self,ui_info):
         print "Show BIDS App interface"
         ui_info.ui.context["object"].show_bidsapp_interface()
-        
+
 
     def update_subject_fmri_pipeline(self,ui_info):
         ui_info.handler = self
@@ -1190,10 +1190,10 @@ class ProjectHandler(Handler):
         return ui_info
 
     def save_anat_config_file(self, ui_info):
-        dialog = FileDialog(action="save as", default_filename="anatomical_config.ini")
+        dialog = FileDialog(action="save as", default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,'code','ref_anatomical_config.ini'))
         dialog.open()
         if dialog.return_code == OK:
-            save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
+            anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
             if dialog.path != ui_info.ui.context["object"].project_info.anat_config_file:
                 shutil.copy(ui_info.ui.context["object"].project_info.anat_config_file, dialog.path)
 
@@ -1203,14 +1203,14 @@ class ProjectHandler(Handler):
         if dialog.return_code == OK:
             if dialog.path != ui_info.ui.context["object"].project_info.anat_config_file:
                 shutil.copy(dialog.path, ui_info.ui.context["object"].project_info.anat_config_file)
-            load_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
+            anat_load_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
             #TODO: load_config (anat_ or dmri_ ?)
 
     def save_dmri_config_file(self, ui_info):
-        dialog = FileDialog(action="save as", default_filename="diffusion_config.ini")
+        dialog = FileDialog(action="save as", default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,'code','ref_diffusion_config.ini'))
         dialog.open()
         if dialog.return_code == OK:
-            save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
+            dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
             if dialog.path != ui_info.ui.context["object"].project_info.dmri_config_file:
                 shutil.copy(ui_info.ui.context["object"].project_info.dmri_config_file, dialog.path)
 
@@ -1220,13 +1220,13 @@ class ProjectHandler(Handler):
         if dialog.return_code == OK:
             if dialog.path != ui_info.ui.context["object"].project_info.dmri_config_file:
                 shutil.copy(dialog.path, ui_info.ui.context["object"].project_info.dmri_config_file)
-            load_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
+            dmri_load_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
 
     def save_fmri_config_file(self, ui_info):
-        dialog = FileDialog(action="save as", default_filename="diffusion_config.ini")
+        dialog = FileDialog(action="save as", default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,'code','ref_fMRI_config.ini'))
         dialog.open()
         if dialog.return_code == OK:
-            save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
+            fmri_save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
             if dialog.path != ui_info.ui.context["object"].project_info.fmri_config_file:
                 shutil.copy(ui_info.ui.context["object"].project_info.fmri_config_file, dialog.path)
 
@@ -1236,4 +1236,4 @@ class ProjectHandler(Handler):
         if dialog.return_code == OK:
             if dialog.path != ui_info.ui.context["object"].project_info.fmri_config_file:
                 shutil.copy(dialog.path, ui_info.ui.context["object"].project_info.fmri_config_file)
-            load_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
+            fmri_load_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
