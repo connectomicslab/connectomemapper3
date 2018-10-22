@@ -466,9 +466,7 @@ class CMP_BIDSAppWindowHandler(Handler):
 
         return True
 
-    def start_bids_app(self, ui_info):
-        print("Start BIDS App")
-
+    def start_bidsapp_process(self, ui_info, participant_label):
         cmd = ['docker','run','-it','--rm',
                '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
                '-v', '{}/derivatives:/outputs'.format(ui_info.ui.context["object"].bids_root),
@@ -478,18 +476,64 @@ class CMP_BIDSAppWindowHandler(Handler):
                'sebastientourbier/connectomemapper-bidsapp:latest',
                '/bids_dataset', '/outputs', 'participant']
 
-        cmd.append('--participant_label')
 
-        for label in ui_info.ui.context["object"].list_of_subjects_to_be_processed:
-            cmd.append('{}'.format(label))
+        cmd.append('--participant_label')
+        cmd.append('{}'.format(participant_label))
 
         cmd.append('--anat_pipeline_config')
         cmd.append('/code/ref_anatomical_config.ini')
 
         print(cmd)
 
-        self.docker_process = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
-        self.docker_process.communicate()
+        log_filename = os.path.join(ui_info.ui.context["object"].bids_root,'derivatives/cmp','sub-{}_log-cmpbidsapp.txt'.format(participant_label))
+
+        with open(log_filename, 'w+') as log:
+            proc = Popen(cmd, stdout=log, stderr=log)
+            #docker_process.communicate()
+
+        return proc
+
+    def manage_bidsapp_procs(self, proclist):
+        for proc in proclist:
+            if proc.poll() is not None:
+                proclist.remove(proc)
+
+    def start_bids_app(self, ui_info):
+        print("Start BIDS App")
+
+        maxprocs = multiprocessing.cpu_count()
+        processes = []
+
+        for label in ui_info.ui.context["object"].list_of_subjects_to_be_processed:
+            while len(processes) == maxprocs:
+                self.manage_bidsapp_procs(processes)
+            proc = self.start_bidsapp_process(ui_info, label)
+            processes.append(proc)
+
+        while len(processes) > 0:
+            self.manage_bidsapp_procs(processes)
+
+        # cmd = ['docker','run','-it','--rm',
+        #        '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
+        #        '-v', '{}/derivatives:/outputs'.format(ui_info.ui.context["object"].bids_root),
+        #        '-v', '{}:/code/ref_anatomical_config.ini'.format(ui_info.ui.context["object"].anat_config),
+        #        '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
+        #        '-v', '{}:/opt/freesurfer/license.txt'.format(ui_info.ui.context["object"].fs_license),
+        #        'sebastientourbier/connectomemapper-bidsapp:latest',
+        #        '/bids_dataset', '/outputs', 'participant']
+        #
+        # cmd.append('--participant_label')
+        #
+        # for label in ui_info.ui.context["object"].list_of_subjects_to_be_processed:
+        #     cmd.append('{}'.format(label))
+        #
+        # cmd.append('--anat_pipeline_config')
+        # cmd.append('/code/ref_anatomical_config.ini')
+        #
+        # print(cmd)
+        #
+        # self.docker_process = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
+        # self.docker_process.communicate()
         self.docker_running = True
 
         # cmd = ['docker','run','-it','--rm',
@@ -514,7 +558,7 @@ class CMP_BIDSAppWindowHandler(Handler):
 
     def stop_bids_app(self, ui_info):
         print("Stop BIDS App")
-        self.docker_process.kill()
+        #self.docker_process.kill()
         self.docker_running = False
         return True
 
