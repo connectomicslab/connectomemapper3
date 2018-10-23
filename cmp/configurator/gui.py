@@ -18,6 +18,10 @@ from subprocess import Popen
 import os
 import multiprocessing
 
+import gzip
+import pickle
+import string
+
 from traits.api import *
 from traitsui.api import *
 from traitsui.qt4.extra.qt_view import QtView
@@ -504,14 +508,21 @@ class CMP_BIDSAppWindowHandler(Handler):
         maxprocs = multiprocessing.cpu_count()
         processes = []
 
+        self.docker_running = True
+
+        project.fix_dataset_directory_in_pickles(local_dir=ui_info.ui.context["object"].bids_root,mode='bidsapp')
+
         for label in ui_info.ui.context["object"].list_of_subjects_to_be_processed:
             while len(processes) == maxprocs:
                 self.manage_bidsapp_procs(processes)
+
             proc = self.start_bidsapp_process(ui_info, label)
             processes.append(proc)
 
         while len(processes) > 0:
             self.manage_bidsapp_procs(processes)
+
+        project.fix_dataset_directory_in_pickles(local_dir=ui_info.ui.context["object"].bids_root,mode='local')
 
         # cmd = ['docker','run','-it','--rm',
         #        '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
@@ -534,7 +545,7 @@ class CMP_BIDSAppWindowHandler(Handler):
         #
         # self.docker_process = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
         # self.docker_process.communicate()
-        self.docker_running = True
+
 
         # cmd = ['docker','run','-it','--rm',
         #        '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),

@@ -18,6 +18,10 @@ import os
 import glob
 import fnmatch
 
+import pickle
+import string
+import gzip
+
 import ConfigParser
 from pyface.api import FileDialog, OK
 
@@ -33,6 +37,117 @@ import gui
 
 #import CMP_MainWindow
 #import pipelines.egg.eeg as EEG_pipeline
+
+def fix_dataset_directory_in_pickles(local_dir, mode='local'):
+    #mode can be local or bidsapp (local by default)
+
+    searchdir = os.path.join(local_dir,'derivatives/cmp')
+
+    for root, dirs, files in os.walk(searchdir):
+        files = [ fi for fi in files if fi.endswith(".pklz") ]
+
+        print('----------------------------------------------------')
+
+        for fi in files:
+            print("Processing file {} {} {}".format(root,dirs,fi))
+            pick = gzip.open(os.path.join(root,fi))
+            cont = pick.read()
+
+            # Change pickles: bids app dataset directory -> local dataset directory
+            if (mode == 'local') and cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
+                new_cont = string.replace(cont,'V/bids_dataset','V{}'.format(local_dir))
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont)
+
+            # Change pickles: local dataset directory -> bids app dataset directory
+            elif (mode == 'bidsapp') and not cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
+                new_cont = string.replace(cont,'V{}'.format(local_dir),'V/bids_dataset')
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont)
+    return True
+
+# def fix_dataset_directory_in_pickles(local_dir, subject, session='', mode='local'):
+#     #mode can be local or bidsapp (local by default)
+#
+#     if session == '':
+#         searchdir = os.path.join(local_dir,'derivatives/cmp',subject,'tmp')
+#     else:
+#         searchdir = os.path.join(local_dir,'derivatives/cmp',subject,session,'tmp')
+#
+#     for root, dirs, files in os.walk(searchdir):
+#         files = [ fi for fi in files if fi.endswith(".pklz") ]
+#
+#         print('----------------------------------------------------')
+#
+#         for fi in files:
+#             print("Processing file {} {} {}".format(root,dirs,fi))
+#             pick = gzip.open(os.path.join(root,fi))
+#             cont = pick.read()
+#
+#             # Change pickles: bids app dataset directory -> local dataset directory
+#             if (mode == 'local') and cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
+#                 new_cont = string.replace(cont,'V/bids_dataset','V{}'.format(local_dir))
+#                 pref = fi.split(".")[0]
+#                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+#                     f.write(new_cont)
+#
+#             # Change pickles: local dataset directory -> bids app dataset directory
+#             elif (mode == 'bidsapp') and not cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
+#                 new_cont = string.replace(cont,'V{}'.format(local_dir),'V/bids_dataset')
+#                 pref = fi.split(".")[0]
+#                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+#                     f.write(new_cont)
+#     return True
+
+
+def remove_aborded_interface_pickles(local_dir):
+
+    searchdir = os.path.join(local_dir,'derivatives/cmp')
+
+    for root, dirs, files in os.walk(searchdir):
+        files = [ fi for fi in files if fi.endswith(".pklz") ]
+
+        print('----------------------------------------------------')
+
+        for fi in files:
+            print("Processing file {} {} {}".format(root,dirs,fi))
+            try:
+                cont = pickle.load(gzip.open(os.path.join(root,fi)))
+            except Exception as e:
+                # Remove pickle if unpickling error raised
+                print('Unpickling Error: removed {}'.format(os.path.join(root,fi)))
+                shutil.remove(os.path.join(root,fi))
+
+
+def remove_aborded_interface_pickles(local_dir, subject, session=''):
+
+    if session == '':
+        searchdir = os.path.join(local_dir,'derivatives/cmp',subject,'tmp')
+    else:
+        searchdir = os.path.join(local_dir,'derivatives/cmp',subject,session,'tmp')
+
+    for root, dirs, files in os.walk(searchdir):
+        files = [ fi for fi in files if fi.endswith(".pklz") ]
+
+        print('----------------------------------------------------')
+
+        for fi in files:
+            print("Processing file {} {} {}".format(root,dirs,fi))
+            try:
+                cont = pickle.load(gzip.open(os.path.join(root,fi)))
+            except Exception as e:
+                # Remove pickle if unpickling error raised
+                print('Unpickling Error: removed {}'.format(os.path.join(root,fi)))
+                shutil.remove(os.path.join(root,fi))
+            # except pickle.UnpicklingError as e:
+            #     # normal, somewhat expected
+            #     continue
+            # except (AttributeError,  EOFError, ImportError, IndexError) as e:
+            #     # secondary errors
+            #     print(traceback.format_exc(e))
+            #     continue
 
 def get_process_detail(project_info, section, detail):
     config = ConfigParser.ConfigParser()
@@ -775,7 +890,7 @@ class ProjectHandler(Handler):
                 loaded_project.subject_session = ''
                 print "No session"
 
-
+            remove_aborded_interface_pickles(local_dir=loaded_project.base_directory,subject=loaded_project.subject,session=loaded_project.subject_session)
 
             loaded_project.parcellation_scheme = get_anat_process_detail(loaded_project,'parcellation_stage','parcellation_scheme')
             loaded_project.atlas_info = get_anat_process_detail(loaded_project,'parcellation_stage','atlas_info')
