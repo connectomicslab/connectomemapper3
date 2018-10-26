@@ -477,6 +477,7 @@ class CMP_BIDSAppWindowHandler(Handler):
                '-v', '{}:/code/ref_anatomical_config.ini'.format(ui_info.ui.context["object"].anat_config),
                '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
                '-v', '{}:/opt/freesurfer/license.txt'.format(ui_info.ui.context["object"].fs_license),
+               '-u', '{}:{}'.format(os.geteuid(),os.getegid()),
                'sebastientourbier/connectomemapper-bidsapp:latest',
                '/bids_dataset', '/outputs', 'participant']
 

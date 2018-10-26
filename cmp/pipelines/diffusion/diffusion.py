@@ -117,7 +117,7 @@ class DiffusionPipeline(Pipeline):
                         HGroup(spring,UItem('connectome',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False,label=""),
                         # HGroup(spring,Item('preprocessing',style='custom',editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False),
                         # HGroup(spring,Item('registration',style='custom',editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False),
-                        # HGroup(spring,Item('diffusion',style='custom',editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False),
+                        # HGroup(spring,Item('diffusion',style='custom',editor_private where to storeargs={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False),
                         # HGroup(spring,Item('connectome',style='custom',editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False),
                         spring,
                         springy=True
@@ -459,10 +459,7 @@ class DiffusionPipeline(Pipeline):
         bval_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.bval')
         bvec_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.bvec')
 
-        print "Looking for...."
-        print "dwi_file : %s" % dwi_file
-        print "bvecs_file : %s" % bvec_file
-        print "bvals_file : %s" % bval_file
+        subjid = self.subject.split("-")[1]
 
         try:
             layout = BIDSLayout(self.base_directory)
@@ -477,6 +474,63 @@ class DiffusionPipeline(Pipeline):
             # for mod in mods:
             #     print "-%s" % mod
 
+            if self.global_conf.subject_session == '':
+
+                files = layout.get(subject=subjid,type='dwi',extensions='.nii.gz')
+                if len(files) > 0:
+                    dwi_file = files[0].filename
+                    print dwi_file
+                else:
+                    error(message="Diffusion image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                    return
+
+                files = layout.get(subject=subjid,type='dwi',extensions='.bval')
+                if len(files) > 0:
+                    bval_file = files[0].filename
+                    print bval_file
+                else:
+                    error(message="Diffusion bval image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                    return
+
+                files = layout.get(subject=subjid,type='dwi',extensions='.bvec')
+                if len(files) > 0:
+                    bvec_file = files[0].filename
+                    print bvec_file
+                else:
+                    error(message="Diffusion bvec image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                    return
+            else:
+                sessid = self.global_conf.subject_session.split("-")[1]
+
+                files = layout.get(subject=subjid,type='dwi',extensions='.nii.gz',session=sessid)
+                if len(files) > 0:
+                    dwi_file = files[0].filename
+                    print dwi_file
+                else:
+                    error(message="Diffusion image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                    return
+
+                files = layout.get(subject=subjid,type='dwi',extensions='.bval',session=sessid)
+                if len(files) > 0:
+                    bval_file = files[0].filename
+                    print bval_file
+                else:
+                    error(message="Diffusion bval image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                    return
+
+                files = layout.get(subject=subjid,type='dwi',extensions='.bvec',session=sessid)
+                if len(files) > 0:
+                    bvec_file = files[0].filename
+                    print bvec_file
+                else:
+                    error(message="Diffusion bvec image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                    return
+
+            print "Looking for...."
+            print "dwi_file : %s" % dwi_file
+            print "bvecs_file : %s" % bvec_file
+            print "bvals_file : %s" % bval_file
+
             for typ in types:
                 if typ == 'dwi' and os.path.isfile(dwi_file):
                     print "%s available" % typ
@@ -486,7 +540,7 @@ class DiffusionPipeline(Pipeline):
             error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
             return
 
-
+        
         if os.path.isfile(bval_file): bvals_available = True
 
         if os.path.isfile(bvec_file): bvecs_available = True

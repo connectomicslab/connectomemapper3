@@ -118,7 +118,7 @@ def remove_aborded_interface_pickles(local_dir):
             except Exception as e:
                 # Remove pickle if unpickling error raised
                 print('Unpickling Error: removed {}'.format(os.path.join(root,fi)))
-                shutil.remove(os.path.join(root,fi))
+                os.remove(os.path.join(root,fi))
 
 
 def remove_aborded_interface_pickles(local_dir, subject, session=''):
@@ -140,7 +140,7 @@ def remove_aborded_interface_pickles(local_dir, subject, session=''):
             except Exception as e:
                 # Remove pickle if unpickling error raised
                 print('Unpickling Error: removed {}'.format(os.path.join(root,fi)))
-                shutil.remove(os.path.join(root,fi))
+                os.remove(os.path.join(root,fi))
             # except pickle.UnpicklingError as e:
             #     # normal, somewhat expected
             #     continue
