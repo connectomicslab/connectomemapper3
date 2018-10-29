@@ -370,7 +370,7 @@ def fmri_load_config(pipeline, config_path):
 def refresh_folder(derivatives_directory, subject, input_folders, session=None):
     paths = []
 
-    if session == None:
+    if session == None or session == '':
         paths.append(os.path.join(derivatives_directory,'freesurfer',subject))
         paths.append(os.path.join(derivatives_directory,'cmp',subject))
 
@@ -401,7 +401,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
 
     derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
 
-    if len(project_info.subject_sessions)>0:
+    if (project_info.subject_session != '') and (project_info.subject_session != None) :
         refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders, session=project_info.subject_session)
     else:
         refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
@@ -418,7 +418,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
                 finally:
                     print "Created directory %s" % derivatives_directory
 
-            if len(project_info.subject_sessions) > 0:
+            if (project_info.subject_session != '') and (project_info.subject_session != None) :
                 project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_%s_diffusion_config.ini' % (project_info.subject,project_info.subject_session))
             else:
                 project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
@@ -455,7 +455,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
 
     derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
 
-    if len(project_info.subject_sessions)>0:
+    if (project_info.subject_session != '') and (project_info.subject_session != None) :
         refresh_folder(derivatives_directory, project_info.subject, fmri_pipeline.input_folders, session=project_info.subject_session)
     else:
         refresh_folder(derivatives_directory, project_info.subject, fmri_pipeline.input_folders)
@@ -472,7 +472,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
                 finally:
                     print "Created directory %s" % derivatives_directory
 
-            if len(project_info.subject_sessions) > 0:
+            if (project_info.subject_session != '') and (project_info.subject_session != None) :
                 project_info.fmri_config_file = os.path.join(derivatives_directory,'%s_%s_fMRI_config.ini' % (project_info.subject,project_info.subject_session))
             else:
                 project_info.fmri_config_file = os.path.join(derivatives_directory,'%s_fMRI_config.ini' % (project_info.subject))
@@ -505,6 +505,11 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
     return fmri_inputs_checked, fmri_pipeline
 
 def init_anat_project(project_info, is_new_project):
+    print('Init anat pipeline project_info :')
+    print(project_info.base_directory)
+    print(project_info.subject)
+    print(project_info.subject_session)
+
     anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
     #dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info,anat_pipeline.flow)
     #fmri_pipeline = FMRI_pipeline.fMRIPipeline
@@ -526,7 +531,7 @@ def init_anat_project(project_info, is_new_project):
             finally:
                 print "Created directory %s" % derivatives_directory
 
-        if len(project_info.subject_sessions) > 0:
+        if (project_info.subject_session != '') and (project_info.subject_session != None) :
             project_info.anat_config_file = os.path.join(derivatives_directory,'%s_%s_anatomical_config.ini' % (project_info.subject,project_info.subject_session))
         else:
             project_info.anat_config_file = os.path.join(derivatives_directory,'%s_anatomical_config.ini' % (project_info.subject))
@@ -564,7 +569,7 @@ def init_anat_project(project_info, is_new_project):
 
     print anat_pipeline
     #print dmri_pipeline
-    if len(project_info.subject_sessions) > 0:
+    if (project_info.subject_session != '') and (project_info.subject_session != None) :
         refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders, session=project_info.subject_session)
     else:
         refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders)
@@ -701,6 +706,11 @@ class ProjectHandler(Handler):
 
                 subject = new_project.subject.split('-')[1]
                 print "Subject: %s" % subject
+
+                new_project.subject_sessions = ['']
+                new_project.subject_session = ''
+
+
                 sessions = bids_layout.get(target='session', return_type='id', subject=subject)
 
                 print "Sessions: "
@@ -890,7 +900,7 @@ class ProjectHandler(Handler):
                 loaded_project.subject_session = ''
                 print "No session"
 
-            remove_aborded_interface_pickles(local_dir=loaded_project.base_directory,subject=loaded_project.subject,session=loaded_project.subject_session)
+            #remove_aborded_interface_pickles(local_dir=loaded_project.base_directory,subject=loaded_project.subject,session=loaded_project.subject_session)
 
             loaded_project.parcellation_scheme = get_anat_process_detail(loaded_project,'parcellation_stage','parcellation_scheme')
             loaded_project.atlas_info = get_anat_process_detail(loaded_project,'parcellation_stage','atlas_info')

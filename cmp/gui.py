@@ -499,7 +499,7 @@ class CMP_MainWindow(HasTraits):
             print "update subject anat"
             bids_layout = BIDSLayout(self.project_info.base_directory)
             self.project_info.subject_sessions = ["ses-%s"%s for s in bids_layout.get(target='session', return_type='id', subject=self.project_info.subject.split('-')[1])]
-            if len(self.project_info.subject_sessions)>0:
+            if len(self.project_info.subject_sessions) > 0:
                 self.project_info.subject_session = self.project_info.subject_sessions[0]
             else:
                 self.project_info.subject_session = ''
@@ -513,7 +513,7 @@ class CMP_MainWindow(HasTraits):
             print "update subject dmri"
             bids_layout = BIDSLayout(self.project_info.base_directory)
             self.project_info.subject_sessions = ["ses-%s"%s for s in bids_layout.get(target='session', return_type='id', subject=self.project_info.subject.split('-')[1])]
-            if len(self.project_info.subject_sessions)>0:
+            if len(self.project_info.subject_sessions) > 0:
                 self.project_info.subject_session = self.project_info.subject_sessions[0]
             else:
                 self.project_info.subject_session = ''
@@ -527,7 +527,7 @@ class CMP_MainWindow(HasTraits):
             print "update subject fmri"
             bids_layout = BIDSLayout(self.project_info.base_directory)
             self.project_info.subject_sessions = ["ses-%s"%s for s in bids_layout.get(target='session', return_type='id', subject=self.project_info.subject.split('-')[1])]
-            if len(self.project_info.subject_sessions)>0:
+            if len(self.project_info.subject_sessions) > 0:
                 self.project_info.subject_session = self.project_info.subject_sessions[0]
             else:
                 self.project_info.subject_session = ''

@@ -525,6 +525,8 @@ class CMP_BIDSAppWindowHandler(Handler):
 
         project.fix_dataset_directory_in_pickles(local_dir=ui_info.ui.context["object"].bids_root,mode='local')
 
+        print('Processing with BIDS App Finished')
+
         # cmd = ['docker','run','-it','--rm',
         #        '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
         #        '-v', '{}/derivatives:/outputs'.format(ui_info.ui.context["object"].bids_root),

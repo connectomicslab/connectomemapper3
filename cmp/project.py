@@ -15,7 +15,9 @@ from traits.api import *
 from traitsui.api import *
 import shutil
 import os
+import gzip
 import glob
+import string
 import fnmatch
 
 import ConfigParser
@@ -30,8 +32,82 @@ from pipelines.diffusion import diffusion as Diffusion_pipeline
 from pipelines.anatomical import anatomical as Anatomical_pipeline
 import gui
 
+##from cmp.configurator.project import fix_dataset_directory_in_pickles, remove_aborded_interface_pickles
+
 #import CMP_MainWindow
 #import pipelines.egg.eeg as EEG_pipeline
+
+def fix_dataset_directory_in_pickles(local_dir, mode='local'):
+    #mode can be local or bidsapp (local by default)
+
+    searchdir = os.path.join(local_dir,'derivatives/cmp')
+
+    for root, dirs, files in os.walk(searchdir):
+        files = [ fi for fi in files if fi.endswith(".pklz") ]
+
+        print('----------------------------------------------------')
+
+        for fi in files:
+            print("Processing file {} {} {}".format(root,dirs,fi))
+            pick = gzip.open(os.path.join(root,fi))
+            cont = pick.read()
+
+            # Change pickles: bids app dataset directory -> local dataset directory
+            if (mode == 'local') and cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
+                new_cont = string.replace(cont,'V/bids_dataset','V{}'.format(local_dir))
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont)
+
+            # Change pickles: local dataset directory -> bids app dataset directory
+            elif (mode == 'bidsapp') and not cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
+                new_cont = string.replace(cont,'V{}'.format(local_dir),'V/bids_dataset')
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont)
+    return True
+
+
+def remove_aborded_interface_pickles(local_dir):
+
+    searchdir = os.path.join(local_dir,'derivatives/cmp')
+
+    for root, dirs, files in os.walk(searchdir):
+        files = [ fi for fi in files if fi.endswith(".pklz") ]
+
+        print('----------------------------------------------------')
+
+        for fi in files:
+            print("Processing file {} {} {}".format(root,dirs,fi))
+            try:
+                cont = pickle.load(gzip.open(os.path.join(root,fi)))
+            except Exception as e:
+                # Remove pickle if unpickling error raised
+                print('Unpickling Error: removed {}'.format(os.path.join(root,fi)))
+                os.remove(os.path.join(root,fi))
+
+
+# def remove_aborded_interface_pickles(local_dir, subject, session=''):
+#
+#     if session == '':
+#         searchdir = os.path.join(local_dir,'derivatives/cmp',subject,'tmp')
+#     else:
+#         searchdir = os.path.join(local_dir,'derivatives/cmp',subject,session,'tmp')
+#
+#     for root, dirs, files in os.walk(searchdir):
+#         files = [ fi for fi in files if fi.endswith(".pklz") ]
+#
+#         print('----------------------------------------------------')
+#
+#         for fi in files:
+#             print("Processing file {} {} {}".format(root,dirs,fi))
+#             try:
+#                 cont = pickle.load(gzip.open(os.path.join(root,fi)))
+#             except Exception as e:
+#                 # Remove pickle if unpickling error raised
+#                 print('Unpickling Error: removed {}'.format(os.path.join(root,fi)))
+#                 os.remove(os.path.join(root,fi))
+
 
 def get_process_detail(project_info, section, detail):
     config = ConfigParser.ConfigParser()
@@ -86,6 +162,8 @@ def anat_save_config(pipeline, config_path):
 
     with open(config_path, 'wb') as configfile:
         config.write(configfile)
+
+    print('Config file (anat) saved as {}'.format(config_path))
 
 def anat_load_config(pipeline, config_path):
     config = ConfigParser.ConfigParser()
@@ -150,6 +228,8 @@ def dmri_save_config(pipeline, config_path):
     with open(config_path, 'wb') as configfile:
         config.write(configfile)
 
+    print('Config file (dmri) saved as {}'.format(config_path))
+
 def dmri_load_config(pipeline, config_path):
     config = ConfigParser.ConfigParser()
     config.read(config_path)
@@ -212,6 +292,8 @@ def fmri_save_config(pipeline, config_path):
     with open(config_path, 'wb') as configfile:
         config.write(configfile)
 
+    print('Config file (fmri) saved as {}'.format(config_path))
+
 def fmri_load_config(pipeline, config_path):
     config = ConfigParser.ConfigParser()
     config.read(config_path)
@@ -254,7 +336,7 @@ def fmri_load_config(pipeline, config_path):
 def refresh_folder(derivatives_directory, subject, input_folders, session=None):
     paths = []
 
-    if session == None:
+    if session == None or session == '':
         paths.append(os.path.join(derivatives_directory,'freesurfer',subject))
         paths.append(os.path.join(derivatives_directory,'cmp',subject))
 
@@ -302,7 +384,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
                 finally:
                     print "Created directory %s" % derivatives_directory
 
-            if len(project_info.subject_sessions) > 0:
+            if (project_info.subject_session != '') and (project_info.subject_session != None) :
                 project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_%s_diffusion_config.ini' % (project_info.subject,project_info.subject_session))
             else:
                 project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
@@ -356,7 +438,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
                 finally:
                     print "Created directory %s" % derivatives_directory
 
-            if len(project_info.subject_sessions) > 0:
+            if (project_info.subject_session != '') and (project_info.subject_session != None) :
                 project_info.fmri_config_file = os.path.join(derivatives_directory,'%s_%s_fMRI_config.ini' % (project_info.subject,project_info.subject_session))
             else:
                 project_info.fmri_config_file = os.path.join(derivatives_directory,'%s_fMRI_config.ini' % (project_info.subject))
@@ -390,6 +472,17 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
 
 def init_anat_project(project_info, is_new_project):
     anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
+
+    print anat_pipeline
+
+    if (project_info.subject_session != '') and (project_info.subject_session != None) :
+        print('Refresh folder WITH session')
+        refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders, session=project_info.subject_session)
+    else:
+        print('Refresh folder WITHOUT session')
+        refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders)
+
+
     #dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info,anat_pipeline.flow)
     #fmri_pipeline = FMRI_pipeline.fMRIPipeline
     #egg_pipeline = None
@@ -410,7 +503,7 @@ def init_anat_project(project_info, is_new_project):
             finally:
                 print "Created directory %s" % derivatives_directory
 
-        if len(project_info.subject_sessions) > 0:
+        if (project_info.subject_session != '') and (project_info.subject_session != None) :
             project_info.anat_config_file = os.path.join(derivatives_directory,'%s_%s_anatomical_config.ini' % (project_info.subject,project_info.subject_session))
         else:
             project_info.anat_config_file = os.path.join(derivatives_directory,'%s_anatomical_config.ini' % (project_info.subject))
@@ -448,10 +541,6 @@ def init_anat_project(project_info, is_new_project):
 
     print anat_pipeline
     #print dmri_pipeline
-    if len(project_info.subject_sessions) > 0:
-        refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders, session=project_info.subject_session)
-    else:
-        refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders)
 
     #refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
     anat_pipeline.config_file = project_info.anat_config_file
@@ -698,6 +787,14 @@ class ProjectHandler(Handler):
         except:
             error(message="Invalid BIDS dataset. Please see documentation for more details.",title="BIDS error")
             return
+
+        # print('Fix dataset directory in pickles of dataset {}'.format(loaded_project.base_directory))
+        # fix_dataset_directory_in_pickles(loaded_project.base_directory, mode='local')
+        # print('Done')
+        #
+        # print('Removed aborded interface pickles of dataset {}'.format(loaded_project.base_directory))
+        # remove_aborded_interface_pickles(loaded_project.base_directory)
+        # print('Done')
 
         self.anat_inputs_checked = False
         #self.dmri_inputs_checked = False

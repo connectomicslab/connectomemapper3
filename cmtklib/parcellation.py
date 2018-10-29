@@ -396,8 +396,8 @@ class CombineParcellations(BaseInterface):
             # Relabelling Right hemisphere
             It = np.zeros(I.shape,dtype=np.int16)
             ind = np.where((I >= 2000) & (I < 3000))
-            It[ind] = (I[ind] - 2001)
-            nlabel = It.max() + 1
+            It[ind] = (I[ind] - 2000)
+            nlabel = It.max()
 
             # nlabel = rh_annot[2].size()
 
@@ -415,9 +415,9 @@ class CombineParcellations(BaseInterface):
                 rh_annot_file = 'rh.lausanne2008.%s.annot'%scale
                 print("Load %s"%rh_annot_file)
                 rh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',rh_annot_file))
-                rgb_table = rh_annot[1][:,0:3]
-                roi_names = rh_annot[2]
-                roi_labels = rh_annot[0]
+                rgb_table = rh_annot[1][1:,0:3]
+                roi_names = rh_annot[2][1:]
+                #roi_labels = rh_annot[0][1:]
 
                 lines = []
                 for label, name in enumerate(roi_names):
@@ -432,16 +432,16 @@ class CombineParcellations(BaseInterface):
                             g = 0
                             b = 0
 
-                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label,name,r,g,b))
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label+1,name,r,g,b))
 
                     if self.inputs.create_graphml and label > 0:
                         node_lines = ['{} \n'.format('    <node id="%i">'%label),
                                      '{} \n'.format('      <data key="d0">%s</data>'%("cortical")),
                                      '{} \n'.format('      <data key="d1">%s</data>'%(name)),
                                      '{} \n'.format('      <data key="d2">%s</data>'%("right")),
-                                     '{} \n'.format('      <data key="d3">%i</data>'%(label)),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(label+1)),
                                      '{} \n'.format('      <data key="d4">%s</data>'%(name)),
-                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(label+2001))),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(label+2000+1))),
                                      '{} \n'.format('    </node>')]
                         f_graphML.writelines(node_lines)
 
@@ -615,7 +615,7 @@ class CombineParcellations(BaseInterface):
             It[ind] = (I[ind] - 1000 + nlabel)
             old_nlabel = nlabel
 
-            nlabel = It.max()
+
 
             #ColorLUT (cortical)
             if self.inputs.create_colorLUT or self.inputs.create_graphml:
@@ -652,7 +652,7 @@ class CombineParcellations(BaseInterface):
                         print('?????????????????????????????????????????????????????????????')
                         print('?????????????????????????????????????????????????????????????')
 
-                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(label+old_nlabel-1),name,r,g,b))
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(label+old_nlabel+1),name,r,g,b))
 
                     if self.inputs.create_graphml:
                         node_lines = ['{} \n'.format('    <node id="%i">'%(int(label+old_nlabel+1))),
@@ -803,7 +803,7 @@ class CombineParcellations(BaseInterface):
 
             # Relabelling Left Hypothalamus
             newLabels = np.arange(nlabel+1,nlabel+2)
-            print("update leftt hypothalamus label (%i -> %i)"%(-1,newLabels[0]))
+            print("update left hypothalamus label (%i -> %i)"%(-1,newLabels[0]))
             It[indlhypothal] = newLabels[0]
             nlabel = It.max()
 
@@ -857,6 +857,36 @@ class CombineParcellations(BaseInterface):
                     ind = np.where(Istem == lab)
                     It[ind] = newLabels[i]
                     i += 1
+                nlabel = It.max()
+
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("\n")
+            else:
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Brain Stem \n")
+
+                newLabels = np.arange(nlabel+1,nlabel+2)
+                It[indrep] = newLabels[0]
+
+                print("update brainstem parcellation label (%i -> %i)"%(lab,newLabels[0]))
+
+                if self.inputs.create_colorLUT:
+                    r = brainstem_colors_r[i]
+                    g = brainstem_colors_g[i]
+                    b = brainstem_colors_b[i]
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),'brainstem',r,g,b))
+
+                    if self.inputs.create_graphml:
+                        node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+                                     '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                     '{} \n'.format('      <data key="d1">%s</data>'%("brainstem")),
+                                     '{} \n'.format('      <data key="d2">%s</data>'%("central")),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+                                     '{} \n'.format('      <data key="d4">%s</data>'%("brainstem")),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
+                                     '{} \n'.format('    </node>')]
+                        f_graphML.writelines(node_lines)
+
                 nlabel = It.max()
 
                 if self.inputs.create_colorLUT:
