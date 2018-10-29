@@ -556,32 +556,32 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_colorLUT:
                     f_colorLUT.write("\n")
 
-            # Relabelling Right VentralDC
-            newLabels = np.arange(nlabel+1,nlabel+2)
-            print("update right ventral DC label (%i -> %i)"%(right_ventral,newLabels[0]))
-            ind = np.where(I == right_ventral)
-            It[ind] = newLabels[0]
-            nlabel = It.max()
-
-            #ColorLUT (right ventral DC)
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Right Hemisphere. Ventral Diencephalon \n")
-                r = right_ventral_colors_r
-                g = right_ventral_colors_g
-                b = right_ventral_colors_b
-                f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),right_ventral_names[0],r,g,b))
-                f_colorLUT.write("\n")
-
-            if self.inputs.create_graphml:
-                node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                             '{} \n'.format('      <data key="d1">%s</data>'%("ventral-diencephalon")),
-                             '{} \n'.format('      <data key="d2">%s</data>'%("right")),
-                             '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d4">%s</data>'%(right_ventral_names[0])),
-                             '{} \n'.format('      <data key="d5">%i</data>'%(int(right_ventral))),
-                             '{} \n'.format('    </node>')]
-                f_graphML.writelines(node_lines)
+            # # Relabelling Right VentralDC
+            # newLabels = np.arange(nlabel+1,nlabel+2)
+            # print("update right ventral DC label (%i -> %i)"%(right_ventral,newLabels[0]))
+            # ind = np.where(I == right_ventral)
+            # It[ind] = newLabels[0]
+            # nlabel = It.max()
+            #
+            # #ColorLUT (right ventral DC)
+            # if self.inputs.create_colorLUT:
+            #     f_colorLUT.write("# Right Hemisphere. Ventral Diencephalon \n")
+            #     r = right_ventral_colors_r
+            #     g = right_ventral_colors_g
+            #     b = right_ventral_colors_b
+            #     f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),right_ventral_names[0],r,g,b))
+            #     f_colorLUT.write("\n")
+            #
+            # if self.inputs.create_graphml:
+            #     node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+            #                  '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+            #                  '{} \n'.format('      <data key="d1">%s</data>'%("ventral-diencephalon")),
+            #                  '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+            #                  '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+            #                  '{} \n'.format('      <data key="d4">%s</data>'%(right_ventral_names[0])),
+            #                  '{} \n'.format('      <data key="d5">%i</data>'%(int(right_ventral))),
+            #                  '{} \n'.format('    </node>')]
+            #     f_graphML.writelines(node_lines)
 
             # Relabelling Right Hypothalamus
             newLabels = np.arange(nlabel+1,nlabel+2)
@@ -772,33 +772,33 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_colorLUT:
                     f_colorLUT.write("\n")
 
-            # Relabelling Left VentralDC
-            newLabels = np.arange(nlabel+1,nlabel+2)
-            print("update left ventral DC label (%i -> %i)"%(left_ventral,newLabels[0]))
-            ind = np.where(I == left_ventral)
-            It[ind] = newLabels[0]
-            nlabel = It.max()
-            newIds_LH_ventralDC = newLabels;
-
-            #ColorLUT (left ventral DC)
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Left Hemisphere. Ventral Diencephalon \n")
-                r = left_ventral_colors_r
-                g = left_ventral_colors_g
-                b = left_ventral_colors_b
-                f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),left_ventral_names[0],r,g,b))
-                f_colorLUT.write("\n")
-
-            if self.inputs.create_graphml:
-                node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                             '{} \n'.format('      <data key="d1">%s</data>'%("ventral-diencephalon")),
-                             '{} \n'.format('      <data key="d2">%s</data>'%("left")),
-                             '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d4">%s</data>'%(left_ventral_names[0])),
-                             '{} \n'.format('      <data key="d5">%i</data>'%(int(left_ventral))),
-                             '{} \n'.format('    </node>')]
-                f_graphML.writelines(node_lines)
+            # # Relabelling Left VentralDC
+            # newLabels = np.arange(nlabel+1,nlabel+2)
+            # print("update left ventral DC label (%i -> %i)"%(left_ventral,newLabels[0]))
+            # ind = np.where(I == left_ventral)
+            # It[ind] = newLabels[0]
+            # nlabel = It.max()
+            # newIds_LH_ventralDC = newLabels;
+            #
+            # #ColorLUT (left ventral DC)
+            # if self.inputs.create_colorLUT:
+            #     f_colorLUT.write("# Left Hemisphere. Ventral Diencephalon \n")
+            #     r = left_ventral_colors_r
+            #     g = left_ventral_colors_g
+            #     b = left_ventral_colors_b
+            #     f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),left_ventral_names[0],r,g,b))
+            #     f_colorLUT.write("\n")
+            #
+            # if self.inputs.create_graphml:
+            #     node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+            #                  '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+            #                  '{} \n'.format('      <data key="d1">%s</data>'%("ventral-diencephalon")),
+            #                  '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+            #                  '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+            #                  '{} \n'.format('      <data key="d4">%s</data>'%(left_ventral_names[0])),
+            #                  '{} \n'.format('      <data key="d5">%i</data>'%(int(left_ventral))),
+            #                  '{} \n'.format('    </node>')]
+            #     f_graphML.writelines(node_lines)
 
             # Relabelling Left Hypothalamus
             newLabels = np.arange(nlabel+1,nlabel+2)
