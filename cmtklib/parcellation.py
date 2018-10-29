@@ -614,8 +614,7 @@ class CombineParcellations(BaseInterface):
             ind = np.where((I > 1000) & (I <2000))
             It[ind] = (I[ind] - 1000 + nlabel)
             old_nlabel = nlabel
-
-
+            nlabel = It.max()
 
             #ColorLUT (cortical)
             if self.inputs.create_colorLUT or self.inputs.create_graphml:
@@ -665,8 +664,8 @@ class CombineParcellations(BaseInterface):
                                      '{} \n'.format('    </node>')]
                         f_graphML.writelines(node_lines)
 
-
-                f_colorLUT.write("\n")
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("\n")
 
             # Relabelling Thalamic Nuclei
             if thalamus_nuclei_defined:
