@@ -475,6 +475,8 @@ def init_anat_project(project_info, is_new_project):
 
     print anat_pipeline
 
+    derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
+
     if (project_info.subject_session != '') and (project_info.subject_session != None) :
         print('Refresh folder WITH session')
         refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders, session=project_info.subject_session)
@@ -491,8 +493,6 @@ def init_anat_project(project_info, is_new_project):
     #     pipeline = diffusion_pipeline.DiffusionPipeline(project_info)
     # elif project_info.process_type == 'fMRI':
     #     pipeline = fMRI_pipeline.fMRIPipeline(project_info)
-
-    derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
 
     if is_new_project and anat_pipeline!= None: #and dmri_pipeline!= None:
         if not os.path.exists(derivatives_directory):
