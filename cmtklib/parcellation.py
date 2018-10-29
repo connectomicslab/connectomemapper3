@@ -871,9 +871,9 @@ class CombineParcellations(BaseInterface):
                 print("update brainstem parcellation label (%i -> %i)"%(lab,newLabels[0]))
 
                 if self.inputs.create_colorLUT:
-                    r = brainstem_colors_r[i]
-                    g = brainstem_colors_g[i]
-                    b = brainstem_colors_b[i]
+                    r = 119
+                    g = 159
+                    b = 176
                     f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),'brainstem',r,g,b))
 
                     if self.inputs.create_graphml:
