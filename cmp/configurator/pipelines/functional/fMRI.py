@@ -252,10 +252,13 @@ class fMRIPipeline(Pipeline):
                 out_dir = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session)
 
             out_fmri_file = os.path.join(out_dir,'func',subject+'_task-rest_bold.nii.gz')
-            shutil.copy(src=fmri_file,dst=out_fmri_file)
+            if fmri_file != out_fmri_file:
+                shutil.copy(src=fmri_file,dst=out_fmri_file)
+
             if t2_available:
                 out_t2_file = os.path.join(out_dir,'anat',subject+'_T2w.nii.gz')
-                shutil.copy(src=t2_file,dst=out_t2_file)
+                if t2_file != out_t2_file:
+                    shutil.copy(src=t2_file,dst=out_t2_file)
                 # swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T2_orig.nii.gz'),
                 #                   ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
                 #                   out_file=os.path.join(self.base_directory,'NIFTI','T2.nii.gz'))

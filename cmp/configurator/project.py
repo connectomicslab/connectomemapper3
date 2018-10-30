@@ -49,20 +49,24 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
         print('----------------------------------------------------')
 
         for fi in files:
-            print("Processing file {} {} {}".format(root,dirs,fi))
+            print("Processing file {} {} {} (mode: {})".format(root,dirs,fi,mode))
             pick = gzip.open(os.path.join(root,fi))
             cont = pick.read()
 
+            print("local_dir : {} , cont.find('/bids_dataset/derivatives'): {} (mode: {})".format(local_dir,cont.find('/bids_dataset/derivatives'),mode))
+
             # Change pickles: bids app dataset directory -> local dataset directory
-            if (mode == 'local') and cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
-                new_cont = string.replace(cont,'V/bids_dataset','V{}'.format(local_dir))
+            if (mode == 'local'):
+                print(' bids app dataset directory -> local dataset directory')
+                new_cont = string.replace(cont,'/bids_dataset','{}'.format(local_dir))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                     f.write(new_cont)
 
             # Change pickles: local dataset directory -> bids app dataset directory
-            elif (mode == 'bidsapp') and not cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
-                new_cont = string.replace(cont,'V{}'.format(local_dir),'V/bids_dataset')
+            elif (mode == 'bidsapp'):
+                print(' local dataset directory -> bids app dataset directory')
+                new_cont = string.replace(cont,'{}'.format(local_dir),'/bids_dataset')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                     f.write(new_cont)
