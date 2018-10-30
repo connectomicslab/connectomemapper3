@@ -200,6 +200,8 @@ class fMRIPipeline(Pipeline):
         t1_file = os.path.join(self.subject_directory,'anat',subject+'_T1w.nii.gz')
         t2_file = os.path.join(self.subject_directory,'anat',subject+'_T2w.nii.gz')
 
+        subjid = self.subject.split("-")[1]
+
         if self.global_conf.subject_session == '':
 
             files = layout.get(subject=subjid,type='bold',extensions='.nii.gz')
@@ -224,7 +226,7 @@ class fMRIPipeline(Pipeline):
                 print t2_file
             else:
                 error(message="T2w image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
-                return
+
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
 
@@ -233,7 +235,7 @@ class fMRIPipeline(Pipeline):
                 fmri_file = files[0].filename
                 print fmri_file
             else:
-                error(message="Diffusion image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                error(message="BOLD image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                 return
 
             files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz',session=sessid)
@@ -250,7 +252,6 @@ class fMRIPipeline(Pipeline):
                 print t2_file
             else:
                 error(message="T2w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
-                return
 
         print "Looking for...."
         print "fmri_file : %s" % fmri_file
