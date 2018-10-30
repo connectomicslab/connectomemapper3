@@ -136,7 +136,7 @@ class ParcellationStage(Stage):
                     elif self.config.parcellation_scheme == 'Lausanne2018':
                         # resolution = {'1':'resolution1','2':'resolution2','3':'resolution3','4':'resolution4','5':'resolution5'}
                         parc_results_path = os.path.join(self.stage_dir,"parcCombiner","result_parcCombiner.pklz")
-
+                        print "parc_results_path : %s" % parc_results_path
                         if(os.path.exists(parc_results_path)):
                             parc_results = pickle.load(gzip.open(parc_results_path))
 

@@ -435,7 +435,7 @@ class CombineParcellations(BaseInterface):
                         f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label+1,name,r,g,b))
 
                     if self.inputs.create_graphml:
-                        node_lines = ['{} \n'.format('    <node id="%i">'%label+1),
+                        node_lines = ['{} \n'.format('    <node id="%i">'%(label+1)),
                                      '{} \n'.format('      <data key="d0">%s</data>'%("cortical")),
                                      '{} \n'.format('      <data key="d1">%s</data>'%(name)),
                                      '{} \n'.format('      <data key="d2">%s</data>'%("right")),
