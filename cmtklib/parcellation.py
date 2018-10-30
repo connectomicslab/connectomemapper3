@@ -548,7 +548,7 @@ class CombineParcellations(BaseInterface):
                                      '{} \n'.format('    </node>')]
                         f_graphML.writelines(node_lines)
 
-                    ind = np.where(Isublh == lab)
+                    ind = np.where(Isubrh == lab)
                     It[ind] = newLabels[i]
                     i += 1
                 nlabel = It.max()
@@ -757,7 +757,7 @@ class CombineParcellations(BaseInterface):
                                      '{} \n'.format('    </node>')]
                         f_graphML.writelines(node_lines)
 
-                    ind = np.where(Isubrh == lab)
+                    ind = np.where(Isublh == lab)
                     It[ind] = newLabels[i]
                     i += 1
                 nlabel = It.max()
