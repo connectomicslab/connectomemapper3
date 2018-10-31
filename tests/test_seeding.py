@@ -44,7 +44,7 @@ class UpdateGMWMInterfaceSeeding(BaseInterface):
 
 def main(argv):
 
-    bids_dir='/home/localadmin/Softwares/BitBucket/ds-test'
+    bids_dir='/home/localadmin/Softwares/BitBucket/ds-test-bidsapp'
     subject = 'sub-A006'
     session = 'ses-20170523161523'
     subject_derivatives_dir = op.join(bids_dir,'derivatives/cmp',subject,session)
