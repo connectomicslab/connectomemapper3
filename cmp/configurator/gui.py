@@ -474,19 +474,40 @@ class CMP_BIDSAppWindowHandler(Handler):
         cmd = ['docker','run','-it','--rm',
                '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
                '-v', '{}/derivatives:/outputs'.format(ui_info.ui.context["object"].bids_root),
-               '-v', '{}:/code/ref_anatomical_config.ini'.format(ui_info.ui.context["object"].anat_config),
                '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
                '-v', '{}:/opt/freesurfer/license.txt'.format(ui_info.ui.context["object"].fs_license),
-               '-u', '{}:{}'.format(os.geteuid(),os.getegid()),
-               'sebastientourbier/connectomemapper-bidsapp:latest',
-               '/bids_dataset', '/outputs', 'participant']
+               '-v', '{}:/code/ref_anatomical_config.ini'.format(ui_info.ui.context["object"].anat_config)]
 
+        if ui_info.ui.context["object"].run_dmri_pipeline:
+            cmd.append('-v')
+            cmd.append('{}:/code/ref_diffusion_config.ini'.format(ui_info.ui.context["object"].dmri_config))
+
+        if ui_info.ui.context["object"].run_fmri_pipeline:
+            cmd.append('-v')
+            cmd.append('{}:/code/ref_fMRI_config.ini'.format(ui_info.ui.context["object"].fmri_config))
+
+        cmd.append('-u')
+        cmd.append('{}:{}'.format(os.geteuid(),os.getegid()))
+
+        cmd.append('sebastientourbier/connectomemapper-bidsapp:latest')
+        cmd.append('/bids_dataset')
+        cmd.append('/outputs')
+        cmd.append('participant')
 
         cmd.append('--participant_label')
         cmd.append('{}'.format(participant_label))
 
         cmd.append('--anat_pipeline_config')
         cmd.append('/code/ref_anatomical_config.ini')
+
+        if ui_info.ui.context["object"].run_dmri_pipeline:
+            cmd.append('--dwi_pipeline_config')
+            cmd.append('/code/ref_diffusion_config.ini')
+
+        if ui_info.ui.context["object"].run_fmri_pipeline:
+            cmd.append('--func_pipeline_config')
+            cmd.append('/code/ref_fMRI_config.ini')
+
 
         print(cmd)
 
@@ -527,47 +548,7 @@ class CMP_BIDSAppWindowHandler(Handler):
 
         print('Processing with BIDS App Finished')
 
-        # cmd = ['docker','run','-it','--rm',
-        #        '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
-        #        '-v', '{}/derivatives:/outputs'.format(ui_info.ui.context["object"].bids_root),
-        #        '-v', '{}:/code/ref_anatomical_config.ini'.format(ui_info.ui.context["object"].anat_config),
-        #        '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
-        #        '-v', '{}:/opt/freesurfer/license.txt'.format(ui_info.ui.context["object"].fs_license),
-        #        'sebastientourbier/connectomemapper-bidsapp:latest',
-        #        '/bids_dataset', '/outputs', 'participant']
-        #
-        # cmd.append('--participant_label')
-        #
-        # for label in ui_info.ui.context["object"].list_of_subjects_to_be_processed:
-        #     cmd.append('{}'.format(label))
-        #
-        # cmd.append('--anat_pipeline_config')
-        # cmd.append('/code/ref_anatomical_config.ini')
-        #
-        # print(cmd)
-        #
-        # self.docker_process = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
-        # self.docker_process.communicate()
-
-
-        # cmd = ['docker','run','-it','--rm',
-        #        '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
-        #        '-v', '{}/derivatives:/outputs'.format(ui_info.ui.context["object"].bids_root),
-        #        '-v', '{}:/code/ref_anatomical_config.ini'.format(ui_info.ui.context["object"].anat_config),
-        #        '-v', '{}:/code/ref_diffusion_config.ini'.format(ui_info.ui.context["object"].dmri_config),
-        #        '-v', '{}:/code/ref_fMRI_config.ini'.format(ui_info.ui.context["object"].fmri_config),
-        #        '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
-        #        '-v', '{}:/opt/freesurfer/license.txt'.format(ui_info.ui.context["object"].fs_license),
-        #        'sebastientourbier/connectomemapper3',
-        #        '/bids_dataset', '/outputs participant', '--participant_label', '01',
-        #        '--anat_pipeline_config', '/code/ref_anatomical_config.ini',
-        #        '--dwi_pipeline_config', '/code/ref_diffusion_config.ini',
-        #        '--func_pipeline_config', '/code/ref_fMRI_config.ini']
-
-        # new_project = gui.CMP_Project_Info()
-        # np_res = new_project.configure_traits(view='create_view')
-        # ui_info.ui.context["object"].handler = self
-        #
+        # cmd = ['docke
         return True
 
     def stop_bids_app(self, ui_info):
@@ -592,29 +573,35 @@ class CMP_BIDSAppWindow(HasTraits):
     dmri_config = File()
     fmri_config = File()
 
+    run_anat_pipeline = Bool(True)
+    run_dmri_pipeline = Bool(True)
+    run_fmri_pipeline = Bool(True)
+
     check = Action(name='Check settings!',action='check_settings')
     start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='handler.settings_checked and not handler.docker_running')
     stop_bidsapp = Action(name='Stop BIDS App!',action='stop_bids_app',enabled_when='handler.settings_checked and handler.docker_running')
 
     traits_view = QtView(
-                        VGroup(
+                        Group(
+                        Group(
                             Item('bids_root', label='Base directory'),
                         label='BIDS dataset'),
-                        VGroup(
+                        Group(
                             UItem('list_of_subjects_to_be_processed', editor=CheckListEditor(name='subjects'), style='custom', label='Selection'),
                         label='Participants to be processed'),
-                        VGroup(
-                            Item('anat_config', label='Anatomical pipeline'),
-                            Item('dmri_config', label='Diffusion pipeline'),
-                            Item('fmri_config', label='fMRI pipeline'),
-                            label='Configuration files used as references'),
-                        VGroup(
+                        Group(
+                            Group(Item('anat_config',label='Configuration file',visible_when='run_anat_pipeline'), label='Anatomical pipeline'),
+                            Group(Item('run_dmri_pipeline',label='Run processing stages'),Item('dmri_config',label='Configuration file',visible_when='run_dmri_pipeline'), label='Diffusion pipeline'),
+                            Group(Item('run_fmri_pipeline',label='Run processing stages'),Item('fmri_config',label='Configuration file',visible_when='run_fmri_pipeline'), label='fMRI pipeline'),
+                            label='Configuration of processing pipelines'),
+                        Group(
                             Item('fs_license', label='LICENSE'),
                             Item('fs_average', label='FSaverage directory'),
-                        label='Freesurfer configuration',
+                            label='Freesurfer configuration'),
                         orientation='vertical',springy=True),
                         title='Connectome Mapper 3 BIDS App GUI',
                         handler=CMP_BIDSAppWindowHandler(),
+                        #style_sheet=style_sheet,
                         buttons = [check,start_bidsapp,stop_bidsapp],
                         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
                         #buttons = [preprocessing, map_connectome, map_custom],
@@ -638,6 +625,28 @@ class CMP_BIDSAppWindow(HasTraits):
         print(self.fmri_config)
         print(self.fs_license)
         print(self.fs_average)
+
+        #self.on_trait_change(self.update_run_anat_pipeline,'run_anat_pipeline')
+        self.on_trait_change(self.update_run_dmri_pipeline,'run_dmri_pipeline')
+        self.on_trait_change(self.update_run_fmri_pipeline,'run_fmri_pipeline')
+
+    def update_run_anat_pipeline(self,new):
+        print('Update run anat: %s'%new)
+        print('Update run anat: %s'%self.run_anat_pipeline)
+        if new == False:
+            print('At least anatomical pipeline should be run!')
+            self.run_anat_pipeline = True
+
+    def update_run_dmri_pipeline(self,new):
+        print('Update run diffusion: %s'%new)
+        print('Update run diffusion: %s'%self.run_dmri_pipeline)
+        self.run_anat_pipeline = True
+
+    def update_run_fmri_pipeline(self,new):
+        print('Update run fmri: %s'%new)
+        print('Update run fmri: %s'%self.run_fmri_pipeline)
+        self.run_anat_pipeline = True
+
 
     # def __init__(self,ui_info):
     #
