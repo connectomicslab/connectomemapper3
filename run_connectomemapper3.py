@@ -61,9 +61,13 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type)
 
     subject_derivatives_dir = os.path.join(project.base_directory,"derivatives")
 
-    if len(project.subject_sessions) > 0: #Session structure
+    print('project.subject_session: {}'.format(project.subject_session))
+
+    if project.subject_session != '': #Session structure
+        print('With session : {}'.format(project.subject_session))
         subject_conf_file = os.path.join(subject_derivatives_dir,"{}_{}_{}_config.ini".format(project.subject,project.subject_session,pipeline_type))
     else:
+        print('With NO session ')
         subject_conf_file = os.path.join(subject_derivatives_dir,"{}_{}_config.ini".format(project.subject,pipeline_type))
 
     if os.path.isfile(subject_conf_file):
@@ -176,6 +180,7 @@ if args.analysis_level == "participant":
         if len(project.subject_sessions) > 0: #Session structure
 
             for session in project.subject_sessions:
+                print('Process session {}'.format(session))
                 project.subject_session = session
 
                 #Derivatives folder creation (Folder is first deleted if it already exists)
