@@ -808,9 +808,14 @@ class PreprocessingStage(Stage):
 
         mrtrix_gmwmi = pe.Node(interface=GenerateGMWMInterface(out_file='gmwmi.nii.gz'),name='mrtrix_gmwmi')
 
+        update_gmwmi = pe.Node(interface=UpdateGMWMInterfaceSeeding(),name='update_gmwmi')
+        update_gmwmi.inputs.out_gmwmi_file = 'gmwmi_proc.nii.gz'
+
         flow.connect([
                 (mrtrix_5tt,mrtrix_gmwmi,[('out_file','in_file')]),
-                (mrtrix_gmwmi,fs_mriconvert_gmwmi,[('out_file','in_file')]),
+                (mrtrix_gmwmi,update_gmwmi,[('out_file','in_gmwmi_file')]),
+                (processing_input,update_gmwmi,[('roi_volumes','in_roi_volumes')]),
+                (update_gmwmi,fs_mriconvert_gmwmi,[('out_gmwmi_file','in_file')]),
                 (fs_mriconvert_gmwmi,outputnode,[('out_file','gmwmi')]),
     		    ])
 
