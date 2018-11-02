@@ -18,6 +18,9 @@ import os
 import glob
 import fnmatch
 
+from subprocess import Popen
+import multiprocessing
+
 import pickle
 import string
 import gzip
@@ -1366,3 +1369,344 @@ class ProjectHandler(Handler):
             if dialog.path != ui_info.ui.context["object"].project_info.fmri_config_file:
                 shutil.copy(dialog.path, ui_info.ui.context["object"].project_info.fmri_config_file)
             fmri_load_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
+
+
+class ProjectHandlerV2(Handler):
+    project_loaded = Bool(False)
+
+    anat_pipeline = Instance(HasTraits)
+    anat_inputs_checked = Bool(False)
+    anat_outputs_checked = Bool(False)
+    anatomical_processed = Bool(False)
+
+    dmri_pipeline = Instance(HasTraits)
+    dmri_inputs_checked = Bool(False)
+    dmri_processed = Bool(False)
+
+    fmri_pipeline = Instance(HasTraits)
+    fmri_inputs_checked = Bool(False)
+    fmri_processed = Bool(False)
+
+    def load_dataset(self, ui_info):
+        print('Load dataset')
+
+        loaded_project = gui.CMP_Project_Info()
+        np_res = loaded_project.configure_traits(view='open_view')
+
+        is_bids = False
+
+        t1_available = False
+        t2_available = False
+        diffusion_available = False
+        fmri_available = False
+
+        print "Base dir: %s" % loaded_project.base_directory
+        try:
+            bids_layout = BIDSLayout(loaded_project.base_directory)
+            loaded_project.bids_layout = bids_layout
+            is_bids = True
+
+            loaded_project.subjects = []
+            for subj in bids_layout.get_subjects():
+                print "sub: %s" % subj
+                if 'sub-'+str(subj) not in loaded_project.subjects:
+                    loaded_project.subjects.append('sub-'+str(subj))
+            # loaded_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
+            loaded_project.subjects.sort()
+
+            print "Available subjects : "
+            print loaded_project.subjects
+            loaded_project.number_of_subjects = len(loaded_project.subjects)
+
+            loaded_project.subject=loaded_project.subjects[0]
+            print(loaded_project.subject)
+
+            subject = loaded_project.subject.split('-')[1]
+
+
+            sessions = bids_layout.get(target='session', return_type='id', subject=subject)
+
+            print "Sessions: "
+            print sessions
+
+            if len(sessions) > 0:
+                loaded_project.subject_sessions = sessions
+                loaded_project.subject_session = sessions[0]
+            else:
+                loaded_project.subject_sessions = ['']
+                loaded_project.subject_session = ''
+
+            types = bids_layout.get_types()
+
+            print(types)
+            for typ in sorted(types):
+
+                if typ == 'dwi':
+                    print "%s available" % typ
+                    diffusion_available = True
+
+                if typ == 'T1w':
+                    print "%s available" % typ
+                    t1_available = True
+
+                if typ == 'T2w':
+                    print "%s available" % typ
+                    t2_available = True
+
+                if typ == 'bold':
+                    print "%s available" % typ
+                    fmri_available = True
+
+        except:
+            error(message="Invalid BIDS dataset. Please see documentation for more details.",title="BIDS error")
+            return
+
+        ui_info.ui.context["object"].project_info = loaded_project
+
+        anat_inputs_checked = False
+        if t1_available:
+            anat_inputs_checked = True
+
+        dmri_inputs_checked = False
+        if t1_available and diffusion_available:
+            dmri_inputs_checked = True
+
+        fmri_inputs_checked = False
+        if t1_available and fmri_available:
+            fmri_inputs_checked = True
+
+        self.anat_inputs_checked = anat_inputs_checked
+        self.dmri_inputs_checked = dmri_inputs_checked
+        self.fmri_inputs_checked = fmri_inputs_checked
+
+        if anat_inputs_checked:
+
+            self.anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(loaded_project)
+            self.anat_pipeline.number_of_cores = loaded_project.number_of_cores
+
+            code_directory = os.path.join(loaded_project.base_directory,'code')
+
+            anat_config_file = os.path.join(loaded_project.base_directory,'code','ref_anatomical_config.ini')
+            loaded_project.anat_config_file = anat_config_file
+
+            if self.anat_pipeline!= None and not os.path.isfile(anat_config_file): #and dmri_pipeline!= None:
+                if not os.path.exists(code_directory):
+                    try:
+                        os.makedirs(code_directory)
+                    except os.error:
+                        print "%s was already existing" % code_directory
+                    finally:
+                        print "Created directory %s" % code_directory
+
+                anat_save_config(self.anat_pipeline, loaded_project.anat_config_file)
+                print("Created reference anatomical config file :  %s"%loaded_project.anat_config_file)
+
+            else:
+                anat_conf_loaded = anat_load_config(self.anat_pipeline, loaded_project.anat_config_file)
+                print("Loaded reference anatomical config file :  %s"%loaded_project.anat_config_file)
+
+            self.anat_pipeline.config_file = loaded_project.anat_config_file
+
+            # update_last_processed(loaded_project, self.pipeline) # Not required as the project is new, so no update should be done on processing status
+            ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
+            loaded_project.t1_available = self.anat_inputs_checked
+
+            loaded_project.parcellation_scheme = get_anat_process_detail(loaded_project,'parcellation_stage','parcellation_scheme')
+            loaded_project.freesurfer_subjects_dir = get_anat_process_detail(loaded_project,'segmentation_stage','freesurfer_subjects_dir')
+            loaded_project.freesurfer_subject_id = get_anat_process_detail(loaded_project,'segmentation_stage','freesurfer_subject_id')
+
+            ui_info.ui.context["object"].project_info = loaded_project
+
+            self.project_loaded = True
+
+            if dmri_inputs_checked:
+                self.dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(loaded_project)
+                self.dmri_pipeline.number_of_cores  = loaded_project.number_of_cores
+                self.dmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
+
+                code_directory = os.path.join(loaded_project.base_directory,'code')
+
+                dmri_config_file = os.path.join(code_directory,'ref_diffusion_config.ini')
+                loaded_project.dmri_config_file = dmri_config_file
+
+                self.dmri_pipeline.config_file = dmri_config_file
+
+                if not os.path.isfile(dmri_config_file) and self.dmri_pipeline!= None: #and dmri_pipeline!= None:
+                    self.dmri_pipeline.diffusion_imaging_model  = 'DTI'
+                    loaded_project.diffusion_imaging_model = 'DTI'
+                    dmri_save_config(self.dmri_pipeline, dmri_config_file)
+                    print("Created reference diffusion config file :  %s"%loaded_project.dmri_config_file)
+                else:
+                    print("Loaded reference diffusion config file :  %s"%loaded_project.dmri_config_file)
+                    dmri_conf_loaded = dmri_load_config(self.dmri_pipeline, loaded_project.dmri_config_file)
+
+                ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
+                loaded_project.dmri_available = self.dmri_inputs_checked
+
+                ui_info.ui.context["object"].project_info = loaded_project
+
+                self.project_loaded = True
+
+                if fmri_inputs_checked: #and self.fmri_pipeline != None:
+                    self.fmri_pipeline = FMRI_pipeline.fMRIPipeline(loaded_project)
+                    self.fmri_pipeline.number_of_cores  = loaded_project.number_of_cores
+                    self.fmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
+
+                    code_directory = os.path.join(loaded_project.base_directory,'code')
+
+                    fmri_config_file = os.path.join(code_directory,'ref_fMRI_config.ini')
+                    loaded_project.fmri_config_file = fmri_config_file
+
+                    self.fmri_pipeline.config_file = fmri_config_file
+
+                    if not os.path.isfile(fmri_config_file) and self.fmri_pipeline!= None: #and fmri_pipeline!= None:
+                        fmri_save_config(self.fmri_pipeline, fmri_config_file)
+                        print("Created reference fMRI config file :  %s"%loaded_project.fmri_config_file)
+                    else:
+                        print("Loaded reference fMRI config file :  %s"%loaded_project.fmri_config_file)
+                        fmri_conf_loaded = fmri_load_config(self.fmri_pipeline, loaded_project.fmri_config_file)
+
+                    ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
+                    loaded_project.fmri_available = self.fmri_inputs_checked
+
+                    ui_info.ui.context["object"].project_info = loaded_project
+
+                    self.project_loaded = True
+
+
+class CMP_BIDSAppWindowHandler(Handler):
+
+    settings_checked = Bool(False)
+    docker_running = Bool(False)
+    docker_process = Instance(Popen)
+
+    def check_settings(self, ui_info):
+        self.settings_checked = True
+
+        if os.path.isdir(ui_info.ui.context["object"].bids_root):
+            print("BIDS root directory : {}".format(ui_info.ui.context["object"].bids_root))
+        else:
+            print("Error: BIDS root invalid!")
+            self.settings_checked = False
+
+        # if not ui_info.ui.context["object"].list_of_subjects_to_be_processed.empty():
+        #     print("List of subjects to be processed : {}".format(ui_info.ui.context["object"].list_of_subjects_to_be_processed))
+        # else:
+        #     print("Warning: List of subjects empty!")
+
+        if os.path.isfile(ui_info.ui.context["object"].anat_config):
+            print("Anatomical configuration file : {}".format(ui_info.ui.context["object"].anat_config))
+        else:
+            print("Error: Configuration file for anatomical pipeline not existing!")
+            self.settings_checked = False
+
+        if os.path.isfile(ui_info.ui.context["object"].dmri_config):
+            print("Diffusion configuration file : {}".format(ui_info.ui.context["object"].dmri_config))
+        else:
+            print("Warning: Configuration file for diffusion pipeline not existing!")
+
+        if os.path.isfile(ui_info.ui.context["object"].fmri_config):
+            print("fMRI configuration file : {}".format(ui_info.ui.context["object"].fmri_config))
+        else:
+            print("Warning: Configuration file for fMRI pipeline not existing!")
+
+        if os.path.isfile(ui_info.ui.context["object"].fs_license):
+            print("Freesurfer license : {}".format(ui_info.ui.context["object"].fs_license))
+        else:
+            print("Error: Invalid Freesurfer license ({})!".format(ui_info.ui.context["object"].fs_license))
+            self.settings_checked = False
+
+        if os.path.isdir(ui_info.ui.context["object"].fs_average):
+            print("fsaverage directory : {}".format(ui_info.ui.context["object"].fs_average))
+        else:
+            print("Error: fsaverage directory ({}) not existing!".format(ui_info.ui.context["object"].fs_average))
+            self.settings_checked = False
+
+        return True
+
+    def start_bidsapp_process(self, ui_info, participant_label):
+        cmd = ['docker','run','-it','--rm',
+               '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
+               '-v', '{}/derivatives:/outputs'.format(ui_info.ui.context["object"].bids_root),
+               '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
+               '-v', '{}:/opt/freesurfer/license.txt'.format(ui_info.ui.context["object"].fs_license),
+               '-v', '{}:/code/ref_anatomical_config.ini'.format(ui_info.ui.context["object"].anat_config)]
+
+        if ui_info.ui.context["object"].run_dmri_pipeline:
+            cmd.append('-v')
+            cmd.append('{}:/code/ref_diffusion_config.ini'.format(ui_info.ui.context["object"].dmri_config))
+
+        if ui_info.ui.context["object"].run_fmri_pipeline:
+            cmd.append('-v')
+            cmd.append('{}:/code/ref_fMRI_config.ini'.format(ui_info.ui.context["object"].fmri_config))
+
+        cmd.append('-u')
+        cmd.append('{}:{}'.format(os.geteuid(),os.getegid()))
+
+        cmd.append('sebastientourbier/connectomemapper-bidsapp:latest')
+        cmd.append('/bids_dataset')
+        cmd.append('/outputs')
+        cmd.append('participant')
+
+        cmd.append('--participant_label')
+        cmd.append('{}'.format(participant_label))
+
+        cmd.append('--anat_pipeline_config')
+        cmd.append('/code/ref_anatomical_config.ini')
+
+        if ui_info.ui.context["object"].run_dmri_pipeline:
+            cmd.append('--dwi_pipeline_config')
+            cmd.append('/code/ref_diffusion_config.ini')
+
+        if ui_info.ui.context["object"].run_fmri_pipeline:
+            cmd.append('--func_pipeline_config')
+            cmd.append('/code/ref_fMRI_config.ini')
+
+
+        print(cmd)
+
+        log_filename = os.path.join(ui_info.ui.context["object"].bids_root,'derivatives/cmp','sub-{}_log-cmpbidsapp.txt'.format(participant_label))
+
+        with open(log_filename, 'w+') as log:
+            proc = Popen(cmd, stdout=log, stderr=log)
+            #docker_process.communicate()
+
+        return proc
+
+    def manage_bidsapp_procs(self, proclist):
+        for proc in proclist:
+            if proc.poll() is not None:
+                proclist.remove(proc)
+
+    def start_bids_app(self, ui_info):
+        print("Start BIDS App")
+
+        maxprocs = multiprocessing.cpu_count()
+        processes = []
+
+        self.docker_running = True
+
+        project.fix_dataset_directory_in_pickles(local_dir=ui_info.ui.context["object"].bids_root,mode='bidsapp')
+
+        for label in ui_info.ui.context["object"].list_of_subjects_to_be_processed:
+            while len(processes) == maxprocs:
+                self.manage_bidsapp_procs(processes)
+
+            proc = self.start_bidsapp_process(ui_info, label)
+            processes.append(proc)
+
+        while len(processes) > 0:
+            self.manage_bidsapp_procs(processes)
+
+        project.fix_dataset_directory_in_pickles(local_dir=ui_info.ui.context["object"].bids_root,mode='local')
+
+        print('Processing with BIDS App Finished')
+
+        # cmd = ['docke
+        return True
+
+    def stop_bids_app(self, ui_info):
+        print("Stop BIDS App")
+        #self.docker_process.kill()
+        self.docker_running = False
+        return True
