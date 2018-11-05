@@ -236,7 +236,8 @@ def anat_load_config(pipeline, config_path):
                         pass
             else:
                 try:
-                    conf_value = config.get(stage.name, key)
+                    if key != 'modalities':
+                        conf_value = config.get(stage.name, key)
                     try:
                         conf_value = eval(conf_value)
                     except:
@@ -299,7 +300,8 @@ def dmri_load_config(pipeline, config_path):
                         pass
             else:
                 try:
-                    conf_value = config.get(stage.name, key)
+                    if key != 'modalities':
+                        conf_value = config.get(stage.name, key)
                     try:
                         conf_value = eval(conf_value)
                     except:
@@ -361,7 +363,8 @@ def fmri_load_config(pipeline, config_path):
                         pass
             else:
                 try:
-                    conf_value = config.get(stage.name, key)
+                    if key != 'modalities':
+                        conf_value = config.get(stage.name, key)
                     try:
                         conf_value = eval(conf_value)
                     except:
@@ -887,9 +890,6 @@ class ProjectHandler(Handler):
                     return 0
             else:
                 loaded_project.anat_config_to_load = loaded_project.anat_available_config[0]
-
-            print "loaded_project.anat_config_to_load:"
-            print loaded_project.anat_config_to_load
 
             print "Anatomical config to load: %s"%loaded_project.anat_config_to_load
             loaded_project.anat_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_anatomical_config.ini' % loaded_project.anat_config_to_load)
@@ -1516,6 +1516,7 @@ class ProjectHandlerV2(Handler):
             loaded_project.freesurfer_subject_id = get_anat_process_detail(loaded_project,'segmentation_stage','freesurfer_subject_id')
 
             ui_info.ui.context["object"].project_info = loaded_project
+            # ui_info.ui.context["object"].handler = self
 
             self.project_loaded = True
 
@@ -1544,6 +1545,7 @@ class ProjectHandlerV2(Handler):
                 loaded_project.dmri_available = self.dmri_inputs_checked
 
                 ui_info.ui.context["object"].project_info = loaded_project
+                # ui_info.ui.context["object"].handler = self
 
                 self.project_loaded = True
 
@@ -1570,24 +1572,24 @@ class ProjectHandlerV2(Handler):
                     loaded_project.fmri_available = self.fmri_inputs_checked
 
                     ui_info.ui.context["object"].project_info = loaded_project
+                    # ui_info.ui.context["object"].handler = self
 
                     self.project_loaded = True
 
 
 class CMP_BIDSAppWindowHandler(Handler):
 
-    settings_checked = Bool(False)
-    docker_running = Bool(False)
     docker_process = Instance(Popen)
 
     def check_settings(self, ui_info):
-        self.settings_checked = True
+        ui_info.ui.context["object"].settings_checked = True
+        ui_info.ui.context["object"].handler = self
 
         if os.path.isdir(ui_info.ui.context["object"].bids_root):
             print("BIDS root directory : {}".format(ui_info.ui.context["object"].bids_root))
         else:
             print("Error: BIDS root invalid!")
-            self.settings_checked = False
+            ui_info.ui.context["object"].settings_checked = False
 
         # if not ui_info.ui.context["object"].list_of_subjects_to_be_processed.empty():
         #     print("List of subjects to be processed : {}".format(ui_info.ui.context["object"].list_of_subjects_to_be_processed))
@@ -1598,7 +1600,7 @@ class CMP_BIDSAppWindowHandler(Handler):
             print("Anatomical configuration file : {}".format(ui_info.ui.context["object"].anat_config))
         else:
             print("Error: Configuration file for anatomical pipeline not existing!")
-            self.settings_checked = False
+            ui_info.ui.context["object"].settings_checked = False
 
         if os.path.isfile(ui_info.ui.context["object"].dmri_config):
             print("Diffusion configuration file : {}".format(ui_info.ui.context["object"].dmri_config))
@@ -1614,14 +1616,16 @@ class CMP_BIDSAppWindowHandler(Handler):
             print("Freesurfer license : {}".format(ui_info.ui.context["object"].fs_license))
         else:
             print("Error: Invalid Freesurfer license ({})!".format(ui_info.ui.context["object"].fs_license))
-            self.settings_checked = False
+            ui_info.ui.context["object"].settings_checked = False
 
         if os.path.isdir(ui_info.ui.context["object"].fs_average):
             print("fsaverage directory : {}".format(ui_info.ui.context["object"].fs_average))
         else:
             print("Error: fsaverage directory ({}) not existing!".format(ui_info.ui.context["object"].fs_average))
-            self.settings_checked = False
+            ui_info.ui.context["object"].settings_checked = False
 
+        print("Valid inputs for BIDS App : {}".format(ui_info.ui.context["object"].settings_checked))
+        print("Docker running ? {}".format(ui_info.ui.context["object"].docker_running))
         return True
 
     def start_bidsapp_process(self, ui_info, participant_label):
@@ -1684,9 +1688,9 @@ class CMP_BIDSAppWindowHandler(Handler):
         maxprocs = multiprocessing.cpu_count()
         processes = []
 
-        self.docker_running = True
+        ui_info.ui.context["object"].docker_running = True
 
-        project.fix_dataset_directory_in_pickles(local_dir=ui_info.ui.context["object"].bids_root,mode='bidsapp')
+        fix_dataset_directory_in_pickles(local_dir=ui_info.ui.context["object"].bids_root,mode='bidsapp')
 
         for label in ui_info.ui.context["object"].list_of_subjects_to_be_processed:
             while len(processes) == maxprocs:
@@ -1698,9 +1702,11 @@ class CMP_BIDSAppWindowHandler(Handler):
         while len(processes) > 0:
             self.manage_bidsapp_procs(processes)
 
-        project.fix_dataset_directory_in_pickles(local_dir=ui_info.ui.context["object"].bids_root,mode='local')
+        fix_dataset_directory_in_pickles(local_dir=ui_info.ui.context["object"].bids_root,mode='local')
 
         print('Processing with BIDS App Finished')
+
+        ui_info.ui.context["object"].docker_running = False
 
         # cmd = ['docke
         return True
@@ -1708,5 +1714,5 @@ class CMP_BIDSAppWindowHandler(Handler):
     def stop_bids_app(self, ui_info):
         print("Stop BIDS App")
         #self.docker_process.kill()
-        self.docker_running = False
+        ui_info.ui.context["object"].docker_running = False
         return True

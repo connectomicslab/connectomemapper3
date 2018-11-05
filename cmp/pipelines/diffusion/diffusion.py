@@ -61,7 +61,7 @@ class Global_Configuration(HasTraits):
     subjects = List(trait=Str)
     subject = Str
     subject_session = Str
-    modalities = []
+    modalities = List(trait=Str)
 
 
 class Check_Input_Notification(HasTraits):
@@ -540,7 +540,7 @@ class DiffusionPipeline(Pipeline):
             error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
             return
 
-        
+
         if os.path.isfile(bval_file): bvals_available = True
 
         if os.path.isfile(bvec_file): bvecs_available = True

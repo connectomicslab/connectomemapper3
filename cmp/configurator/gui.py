@@ -271,7 +271,7 @@ class CMP_Project_Info(HasTraits):
 
     subject_view = View(
                         Group(
-                            Item('subject',label='Subject to be processed'),
+                            Item('subject',label='Selected Subject'),
                             # Item('session',label='Session to be processed'),
                             # Item('diffusion_imaging_model',style='custom'),
                             ),
@@ -282,7 +282,7 @@ class CMP_Project_Info(HasTraits):
 
     subject_session_view = View(
                         Group(
-                            Item('subject_session',label='Session to be processed'),
+                            Item('subject_session',label='Selected Session'),
                             ),
                         kind='modal',
                         title='Session selection (subject: %s)'% subject,
@@ -428,6 +428,8 @@ class CMP_BIDSAppWindow(HasTraits):
     bids_root = Directory()
     subjects = List(Str)
 
+    handler = Instance(project.CMP_BIDSAppWindowHandler)
+
     fs_license = File(os.path.join(os.environ['FREESURFER_HOME'],'license.txt'))
     fs_average = Directory(os.path.join(os.environ['FREESURFER_HOME'],'subjects','fsaverage'))
 
@@ -441,9 +443,12 @@ class CMP_BIDSAppWindow(HasTraits):
     run_dmri_pipeline = Bool(True)
     run_fmri_pipeline = Bool(True)
 
+    settings_checked = Bool(False)
+    docker_running = Bool(False)
+
     check = Action(name='Check settings!',action='check_settings')
-    start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='handler.settings_checked and not handler.docker_running')
-    stop_bidsapp = Action(name='Stop BIDS App!',action='stop_bids_app',enabled_when='handler.settings_checked and handler.docker_running')
+    start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='settings_checked==True and docker_running==False')
+    #stop_bidsapp = Action(name='Stop BIDS App!',action='stop_bids_app',enabled_when='handler.settings_checked and handler.docker_running')
 
     traits_view = QtView(
                         Group(
@@ -528,6 +533,9 @@ class CMP_BIDSAppWindow(HasTraits):
     #     self.subjects = ui_info.ui.context["object"].project_info.subjects
     #     self.list_of_subjects_to_be_processed = ui_info.ui.context["object"].project_info.subjects
 
+
+## Main window class of the ConnectomeMapper_Pipeline Configurator
+#
 class CMP_ConfiguratorWindow(HasTraits):
     anat_pipeline = Instance(HasTraits)
     dmri_pipeline = Instance(HasTraits)
@@ -589,11 +597,186 @@ class CMP_ConfiguratorWindow(HasTraits):
         self.dmri_pipeline = dmri_pipeline
         self.fmri_pipeline = fmri_pipeline
 
+        self.anat_pipeline.view_mode = 'config_view'
+        self.dmri_pipeline.view_mode = 'config_view'
+        self.fmri_pipeline.view_mode = 'config_view'
+
         self.anat_inputs_checked = anat_inputs_checked
         self.dmri_inputs_checked = dmri_inputs_checked
         self.fmri_inputs_checked = fmri_inputs_checked
 
         #self.on_trait_change(self.update_run_anat_pipeline,'run_anat_pipeline')
+
+    def update_diffusion_imaging_model(self,new):
+        self.dmri_pipeline.diffusion_imaging_model = new
+
+
+## Window class of the ConnectomeMapper_Pipeline Quality Inspector
+#
+class CMP_QualityControlWindow(HasTraits):
+    anat_pipeline = Instance(HasTraits)
+    dmri_pipeline = Instance(HasTraits)
+    fmri_pipeline = Instance(HasTraits)
+
+    project_info = Instance(CMP_Project_Info)
+
+    anat_inputs_checked = Bool(False)
+    dmri_inputs_checked = Bool(False)
+    fmri_inputs_checked = Bool(False)
+
+    anat_save_config = Action(name='Save anatomical pipeline configuration as...',action='save_anat_config_file')
+    dmri_save_config = Action(name='Save diffusion pipeline configuration as...',action='save_dmri_config_file')
+    fmri_save_config = Action(name='Save fMRI pipeline configuration as...',action='save_fmri_config_file')
+
+    anat_load_config = Action(name='Load anatomical pipeline configuration...',action='anat_load_config_file')
+    dmri_load_config = Action(name='Load diffusion pipeline configuration...',action='load_dmri_config_file')
+    fmri_load_config = Action(name='Load fMRI pipeline configuration...',action='load_fmri_config_file')
+
+    traits_view = QtView(Group(
+                            # Group(
+                            #     # Include('dataset_view'),label='Data manager',springy=True
+                            #     Item('project_info',style='custom',show_label=False),label='Data manager',springy=True, dock='tab'
+                            # ),
+                            Group(
+                                Item('anat_pipeline',style='custom',show_label=False),
+                                label='Anatomical pipeline', dock='tab'
+                            ),
+                            Group(
+                                Item('dmri_pipeline',style='custom',show_label=False, enabled_when='dmri_inputs_checked'),
+                                label='Diffusion pipeline', dock='tab'
+                            ),
+                            Group(
+                                Item('fmri_pipeline',style='custom',show_label=False, enabled_when='fmri_inputs_checked'),
+                                label='fMRI pipeline', dock='tab'
+                            ),
+                            orientation='horizontal', layout='tabbed', springy=True, enabled_when='anat_inputs_checked'),
+                        title='Connectome Mapper 3 Quality Control',
+                        menubar=MenuBar(
+                                    Menu(
+                                        ActionGroup(
+                                            Action(name='Quit',action='_on_close'),
+                                        ),
+                                        name='File'),
+                                ),
+                       handler = project.ProjectHandler(),
+                       style_sheet=style_sheet,
+                       buttons = [anat_save_config, dmri_save_config, fmri_save_config,],
+                       #buttons = [preprocessing, map_connectome, map_custom],
+                       width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
+                       icon=ImageResource('cmp3_icon')
+                   )
+
+    error_msg = Str('')
+    error_view = View(
+                            Group(
+                                Item('error_msg', style='readonly',show_label=False),
+                                ),
+                            title='Error',
+                            kind = 'modal',
+                            #style_sheet=style_sheet,
+                            buttons=['OK'])
+
+    def __init__(self, project_info=None, anat_pipeline=None, dmri_pipeline=None, fmri_pipeline=None, anat_inputs_checked=False, dmri_inputs_checked=False, fmri_inputs_checked=False):
+
+        self.project_info = project_info
+
+        self.anat_pipeline = anat_pipeline
+        self.dmri_pipeline = dmri_pipeline
+        self.fmri_pipeline = fmri_pipeline
+
+        self.anat_pipeline.view_mode = 'inspect_outputs_view'
+        self.dmri_pipeline.view_mode = 'inspect_outputs_view'
+        self.fmri_pipeline.view_mode = 'inspect_outputs_view'
+
+        self.anat_inputs_checked = anat_inputs_checked
+        self.dmri_inputs_checked = dmri_inputs_checked
+        self.fmri_inputs_checked = fmri_inputs_checked
+
+        self.select_subject()
+
+        #self.on_trait_change(self.update_run_anat_pipeline,'run_anat_pipeline')
+
+    def select_subject(self):
+        valid_selected_subject = False
+
+        while not valid_selected_subject:
+
+            #Select subject from BIDS dataset
+            self.project_info.configure_traits(view='subject_view')
+            self.anat_pipeline.subject = self.project_info.subject
+            self.dmri_pipeline.subject = self.project_info.subject
+            self.fmri_pipeline.subject = self.project_info.subject
+            self.anat_pipeline.global_conf.ubject = self.project_info.subject
+            self.dmri_pipeline.global_conf.subject = self.project_info.subject
+            self.fmri_pipeline.global_conf.subject = self.project_info.subject
+
+            print("Selected subject: %s" % self.project_info.subject)
+
+            # Select session if any
+            bids_layout = BIDSLayout(self.project_info.base_directory)
+            subject = self.project_info.subject.split('-')[1]
+
+            sessions = bids_layout.get(target='session', return_type='id', subject=subject)
+
+            if len(sessions) > 0:
+                print("Detected sessions")
+                print sessions
+
+                self.project_info.subject_sessions = []
+
+                for ses in sessions:
+                    self.project_info.subject_sessions.append('ses-'+str(ses))
+
+                np_res = self.project_info.configure_traits(view='subject_session_view')
+
+                self.anat_pipeline.global_conf.subject_session = self.project_info.subject_session
+                self.dmri_pipeline.global_conf.subject_session = self.project_info.subject_session
+                self.fmri_pipeline.global_conf.subject_session = self.project_info.subject_session
+
+                print("Selected session %s" % self.project_info.subject_session)
+            else:
+                self.anat_pipeline.global_conf.subject_session.subject_session = ''
+
+                print("No session detected")
+
+            self.anat_pipeline.fill_stages_outputs()
+            self.dmri_pipeline.fill_stages_outputs()
+            self.fmri_pipeline.fill_stages_outputs()
+
+            # Check if available outputs
+            output_anat_available = False
+            output_dmri_available = False
+            output_fmri_available = False
+
+            for stage in self.anat_pipeline.stages.values():
+                stage.define_inspect_outputs()
+                print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
+                if len(stage.inspect_outputs) > 0:
+                    output_anat_available = True
+
+            print("Anatomical output(s) available : %s" % output_anat_available)
+
+            for stage in self.dmri_pipeline.stages.values():
+                stage.define_inspect_outputs()
+                print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
+                if len(stage.inspect_outputs) > 0:
+                    output_dmri_available = True
+
+            print("Diffusion output(s) available : %s" % output_dmri_available)
+
+            for stage in self.fmri_pipeline.stages.values():
+                stage.define_inspect_outputs()
+                print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
+                if len(stage.inspect_outputs) > 0:
+                    output_fmri_available = True
+
+            print("fMRI output(s) available : %s" % output_fmri_available)
+
+            if output_anat_available or output_dmri_available or output_fmri_available:
+                valid_selected_subject = True
+            else:
+                self.error_msg = "No output available! Please select another subject (and session if any)!"
+                self.configure_traits(view='error_view')
 
     def update_diffusion_imaging_model(self,new):
         self.dmri_pipeline.diffusion_imaging_model = new
@@ -781,6 +964,8 @@ class CMP_MainWindowV2(HasTraits):
 
     project_info = Instance(CMP_Project_Info)
 
+    # handler = project.ProjectHandlerV2()
+
     #configurator_ui = Instance(CMP_PipelineConfigurationWindow)
     bidsapp_ui = Instance(CMP_BIDSAppWindow)
     #quality_control_ui = Instance(CMP_QualityControlWindow)
@@ -815,7 +1000,7 @@ class CMP_MainWindowV2(HasTraits):
                                             editor_args={
                                             'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'qualitycontrol.png'))),'label':""}
                                             ),
-                               spring,show_labels=False,label="",enabled_when='handler.project_loaded==False'),
+                               spring,show_labels=False,label=""),
                         spring,springy=True,visible_when='handler.project_loaded==True'),
                     spring,springy=True)
 
@@ -895,7 +1080,35 @@ class CMP_MainWindowV2(HasTraits):
         self.configurator_ui.configure_traits()
 
     def _quality_control_fired(self):
-        pass
+        """ Callback of the "configurator" button. This displays the Configurator GUI.
+        """
+        if os.path.isfile(self.project_info.anat_config_file):
+            print("Load anatomical config file %s"%self.project_info.anat_config_file)
+
+        if os.path.isfile(self.project_info.dmri_config_file):
+            print("Load diffusion config file %s"%self.project_info.dmri_config_file)
+
+        if os.path.isfile(self.project_info.fmri_config_file):
+            print("Load fMRI config file %s"%self.project_info.fmri_config_file)
+
+        print(self.anat_pipeline)
+        print(self.dmri_pipeline)
+        print(self.fmri_pipeline)
+
+        print(self.project_info.t1_available)
+        print(self.project_info.dmri_available)
+        print(self.project_info.fmri_available)
+
+        self.quality_control_ui = CMP_QualityControlWindow(project_info = self.project_info,
+                                                    anat_pipeline=self.anat_pipeline,
+                                                    dmri_pipeline=self.dmri_pipeline,
+                                                    fmri_pipeline=self.fmri_pipeline,
+                                                    anat_inputs_checked=self.project_info.t1_available,
+                                                    dmri_inputs_checked=self.project_info.dmri_available,
+                                                    fmri_inputs_checked=self.project_info.fmri_available
+                                                    )
+
+        self.quality_control_ui.configure_traits()
 
     def show_bidsapp_interface(self):
         print("list_of_subjects_to_be_processed:")

@@ -39,7 +39,7 @@ class Global_Configuration(HasTraits):
     subjects = List(trait=Str)
     subject = Str
     subject_session = Str
-    modalities = []
+    modalities = List(trait=Str)
 
 
 class Check_Input_Notification(HasTraits):
