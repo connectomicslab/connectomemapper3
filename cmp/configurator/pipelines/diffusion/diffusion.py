@@ -72,6 +72,8 @@ class DiffusionPipeline(Pipeline):
 
     global_conf = Global_Configuration()
 
+    view_mode = Enum('config_view',['config_view','inspect_outputs_view'])
+
     preprocessing = Button('Preprocessing')
     #preprocessing.setIcon(QIcon(QPixmap("preprocessing.png")))
 
@@ -152,17 +154,17 @@ class DiffusionPipeline(Pipeline):
         return ''
 
     def _preprocessing_fired(self, info):
-        self.stages['Preprocessing'].configure_traits()
+        self.stages['Preprocessing'].configure_traits(view=self.view_mode)
 
     def _diffusion_fired(self, info):
-        self.stages['Diffusion'].configure_traits()
+        self.stages['Diffusion'].configure_traits(view=self.view_mode)
 
     def _registration_fired(self, info):
-        self.stages['Registration'].configure_traits()
+        self.stages['Registration'].configure_traits(view=self.view_mode)
 
     def _connectome_fired(self, info):
         # self.stages['MRTrixConnectome'].configure_traits()
-        self.stages['Connectome'].configure_traits()
+        self.stages['Connectome'].configure_traits(view=self.view_mode)
 
     def _atlas_info_changed(self, new):
         print "Atlas info changed : "

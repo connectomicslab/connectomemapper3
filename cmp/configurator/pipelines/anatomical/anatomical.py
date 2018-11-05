@@ -69,6 +69,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
     parcellation = Button()
 
+    view_mode = Enum('config_view',['config_view','inspect_outputs_view'])
+
     #parcellation.setIcon(QIcon(QPixmap("parcellation.png")))
 
     #custom_run = Button('Custom...')
@@ -137,10 +139,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
 
     def _segmentation_fired(self, info):
-        self.stages['Segmentation'].configure_traits()
+        self.stages['Segmentation'].configure_traits(view=self.view_mode)
 
     def _parcellation_fired(self, info):
-        self.stages['Parcellation'].configure_traits()
+        self.stages['Parcellation'].configure_traits(view=self.view_mode)
 
     def check_input(self, layout, gui=True):
         print '**** Check Inputs  ****'

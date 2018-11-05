@@ -38,5 +38,26 @@ class Stage(HasTraits):
                             scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
+    inspect_outputs_view = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('inspect_outputs_enum',show_label=False),
+                                Item('inspect_output_button',enabled_when='inspect_outputs_enum!="Outputs not available"',show_label=False),
+                                label = 'View outputs', show_border=True
+                                )
+                            ),
+                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
+
+    config_view = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('config',style='custom',show_label=False),
+                                label = 'Configuration', show_border=True
+                                ),
+                            ),
+                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
+
     def _inspect_output_button_fired(self,info):
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

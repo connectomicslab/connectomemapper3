@@ -864,7 +864,7 @@ class CMP_MainWindowV2(HasTraits):
         self.bidsapp_ui.configure_traits()
 
     def _configurator_fired(self):
-        """ Callback of the "configurator" button. This displays the BIDS APP GUI.
+        """ Callback of the "configurator" button. This displays the Configurator GUI.
         """
         if os.path.isfile(self.project_info.anat_config_file):
             print("Load anatomical config file %s"%self.project_info.anat_config_file)

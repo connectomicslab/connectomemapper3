@@ -63,6 +63,8 @@ class fMRIPipeline(Pipeline):
 
     global_conf = Global_Configuration()
 
+    view_mode = Enum('config_view',['config_view','inspect_outputs_view'])
+
     preprocessing = Button('Preprocessing')
     functionalMRI = Button('FunctionalMRI')
     registration = Button('Registration')
@@ -137,17 +139,17 @@ class fMRIPipeline(Pipeline):
 
     def _preprocessing_fired(self, info):
         print "preproc fired"
-        self.stages['Preprocessing'].configure_traits()
+        self.stages['Preprocessing'].configure_traits(view=self.view_mode)
 
     def _functionalMRI_fired(self, info):
         print "func fired"
-        self.stages['FunctionalMRI'].configure_traits()
+        self.stages['FunctionalMRI'].configure_traits(view=self.view_mode)
 
     def _registration_fired(self, info):
-        self.stages['Registration'].configure_traits()
+        self.stages['Registration'].configure_traits(view=self.view_mode)
 
     def _connectome_fired(self, info):
-        self.stages['Connectome'].configure_traits()
+        self.stages['Connectome'].configure_traits(view=self.view_mode)
 
     def check_input(self, layout, gui=True):
         print '**** Check Inputs ****'
