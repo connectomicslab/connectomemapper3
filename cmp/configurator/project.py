@@ -279,7 +279,7 @@ def dmri_load_config(pipeline, config_path):
     config.read(config_path)
     global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
     for key in global_keys:
-        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
+        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions" and key != 'modalities':
             conf_value = config.get('Global', key)
             setattr(pipeline.global_conf, key, conf_value)
     for stage in pipeline.stages.values():
