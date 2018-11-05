@@ -846,17 +846,20 @@ class CMP_MainWindowV2(HasTraits):
         bids_layout = BIDSLayout(self.project_info.base_directory)
         subjects = bids_layout.get_subjects()
 
-        anat_config = os.path.join(self.project_info.base_directory,'code/','ref_anatomical_config.ini')
-        dmri_config = os.path.join(self.project_info.base_directory,'code/','ref_diffusion_config.ini')
-        fmri_config = os.path.join(self.project_info.base_directory,'code/','ref_fMRI_config.ini')
+        # anat_config = os.path.join(self.project_info.base_directory,'code/','ref_anatomical_config.ini')
+        # dmri_config = os.path.join(self.project_info.base_directory,'code/','ref_diffusion_config.ini')
+        # fmri_config = os.path.join(self.project_info.base_directory,'code/','ref_fMRI_config.ini')
 
         self.bidsapp_ui = CMP_BIDSAppWindow(project_info=self.project_info,
                                          bids_root=self.project_info.base_directory,
                                          subjects=subjects,
                                          list_of_subjects_to_be_processed=subjects,
-                                         anat_config=anat_config,
-                                         dmri_config=dmri_config,
-                                         fmri_config=fmri_config
+                                         anat_config=self.project_info.anat_config_file,
+                                         dmri_config=self.project_info.dmri_config_file,
+                                         fmri_config=self.project_info.fmri_config_file
+                                          # anat_config=anat_config,
+                                          # dmri_config=dmri_config,
+                                          # fmri_config=fmri_config
                                          )
         self.bidsapp_ui.configure_traits()
 

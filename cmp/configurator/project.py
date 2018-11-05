@@ -1325,7 +1325,7 @@ class ProjectHandler(Handler):
         dialog = FileDialog(action="save as", default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,'code','ref_anatomical_config.ini'))
         dialog.open()
         if dialog.return_code == OK:
-            anat_save_config(self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
+            anat_save_config(ui_info.ui.context["object"].anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
             if dialog.path != ui_info.ui.context["object"].project_info.anat_config_file:
                 shutil.copy(ui_info.ui.context["object"].project_info.anat_config_file, dialog.path)
 
@@ -1342,7 +1342,7 @@ class ProjectHandler(Handler):
         dialog = FileDialog(action="save as", default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,'code','ref_diffusion_config.ini'))
         dialog.open()
         if dialog.return_code == OK:
-            dmri_save_config(self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
+            dmri_save_config(ui_info.ui.context["object"].dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
             if dialog.path != ui_info.ui.context["object"].project_info.dmri_config_file:
                 shutil.copy(ui_info.ui.context["object"].project_info.dmri_config_file, dialog.path)
 
@@ -1358,7 +1358,7 @@ class ProjectHandler(Handler):
         dialog = FileDialog(action="save as", default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,'code','ref_fMRI_config.ini'))
         dialog.open()
         if dialog.return_code == OK:
-            fmri_save_config(self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
+            fmri_save_config(ui_info.ui.context["object"].fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
             if dialog.path != ui_info.ui.context["object"].project_info.fmri_config_file:
                 shutil.copy(ui_info.ui.context["object"].project_info.fmri_config_file, dialog.path)
 
