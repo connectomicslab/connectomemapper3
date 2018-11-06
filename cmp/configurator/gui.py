@@ -36,17 +36,19 @@ global style_sheet
 style_sheet = '''
             QLabel {
                 font: 12pt "Verdana";
-                margin-left: 25px;
+                margin-left: 5px;
+                background-color: transparent;
             }
             QPushButton {
                 border: 0px solid lightgray;
-                border-radius: 6px;
+                border-radius: 4px;
+                color: transparent;
                 background-color: transparent;
-                min-width: 80px;
-                icon-size: 450px;
+                min-width: 20px;
+                icon-size: 250px;
                 font: 12pt "Verdana";
-                margin: 3px 3px 3px 3px;
-                padding: 3px 3px;
+                margin: 1px 1px 1px 1px;
+                padding:1px 1px;
             }
             QPushButton:pressed {
                 background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
@@ -71,7 +73,7 @@ style_sheet = '''
             }
             QMainWindow {
                 background-color: yellow;
-                image: url("cmp3_icon.png");
+                image: url("cmp.png");
             }
             QMainWindow::separator {
                 background: yellow;
@@ -448,34 +450,52 @@ class CMP_BIDSAppWindow(HasTraits):
 
     check = Action(name='Check settings!',action='check_settings')
     start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='settings_checked==True and docker_running==False')
+
+    check = Button()
+    start_bidsapp = Button()
+
     #stop_bidsapp = Action(name='Stop BIDS App!',action='stop_bids_app',enabled_when='handler.settings_checked and handler.docker_running')
 
-    traits_view = QtView(
-                        Group(
-                        Group(
-                            Item('bids_root', label='Base directory'),
-                        label='BIDS dataset'),
-                        Group(
-                            UItem('list_of_subjects_to_be_processed', editor=CheckListEditor(name='subjects'), style='custom', label='Selection'),
-                        label='Participants to be processed'),
-                        Group(
-                            Group(Item('anat_config',label='Configuration file',visible_when='run_anat_pipeline'), label='Anatomical pipeline'),
-                            Group(Item('run_dmri_pipeline',label='Run processing stages'),Item('dmri_config',label='Configuration file',visible_when='run_dmri_pipeline'), label='Diffusion pipeline'),
-                            Group(Item('run_fmri_pipeline',label='Run processing stages'),Item('fmri_config',label='Configuration file',visible_when='run_fmri_pipeline'), label='fMRI pipeline'),
-                            label='Configuration of processing pipelines'),
-                        Group(
-                            Item('fs_license', label='LICENSE'),
-                            Item('fs_average', label='FSaverage directory'),
-                            label='Freesurfer configuration'),
+    traits_view = QtView(Group(
+                            Group(
+                                Group(
+                                    Item('bids_root', label='Base directory'),
+                                label='BIDS dataset'),
+                                Group(
+                                    UItem('list_of_subjects_to_be_processed', editor=CheckListEditor(name='subjects'), style='custom', label='Selection'),
+                                label='Participants to be processed'),
+                                Group(
+                                    Group(Item('anat_config',label='Configuration file',visible_when='run_anat_pipeline'), label='Anatomical pipeline'),
+                                    Group(Item('run_dmri_pipeline',label='Run processing stages'),Item('dmri_config',label='Configuration file',visible_when='run_dmri_pipeline'), label='Diffusion pipeline'),
+                                    Group(Item('run_fmri_pipeline',label='Run processing stages'),Item('fmri_config',label='Configuration file',visible_when='run_fmri_pipeline'), label='fMRI pipeline'),
+                                    label='Configuration of processing pipelines'),
+                                Group(
+                                    Item('fs_license', label='LICENSE'),
+                                    Item('fs_average', label='FSaverage directory'),
+                                    label='Freesurfer configuration'),
+                            orientation='vertical',springy=True),
+                            spring,
+                            HGroup(spring,Item('check',style='custom',width=99,height=30,resizable=False,label='',show_label=False,
+                                                editor_args={
+                                                'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))),'label':"",'label_value':""}
+                                                ),spring,
+                                          Item('start_bidsapp',style='custom',width=99,height=30,resizable=False,label='',show_label=False,
+                                                editor_args={
+                                                'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))),'label':"",'label_value':""}
+                                                ),
+                            show_labels=False,label=""),
                         orientation='vertical',springy=True),
+
                         title='Connectome Mapper 3 BIDS App GUI',
-                        kind='modal',
+                        # kind='modal',
                         handler=project.CMP_BIDSAppWindowHandler(),
-                        #style_sheet=style_sheet,
-                        buttons = [check,start_bidsapp],
+                        style_sheet=style_sheet,
+                        buttons = [],
+                        #buttons = [check,start_bidsapp],
                         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
                         #buttons = [preprocessing, map_connectome, map_custom],
                         width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
+                        icon=ImageResource('bidsapp.png')
                         )
 
     def __init__(self, project_info=None, bids_root='', subjects=[''], list_of_subjects_to_be_processed=[''], anat_config='', dmri_config='', fmri_config=''):
@@ -586,7 +606,7 @@ class CMP_ConfiguratorWindow(HasTraits):
                        buttons = [anat_save_config, dmri_save_config, fmri_save_config,],
                        #buttons = [preprocessing, map_connectome, map_custom],
                        width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
-                       icon=ImageResource('cmp3_icon')
+                       icon=ImageResource('configurator.png')
                    )
 
     def __init__(self, project_info=None, anat_pipeline=None, dmri_pipeline=None, fmri_pipeline=None, anat_inputs_checked=False, dmri_inputs_checked=False, fmri_inputs_checked=False):
@@ -663,7 +683,7 @@ class CMP_QualityControlWindow(HasTraits):
                        buttons = [anat_save_config, dmri_save_config, fmri_save_config,],
                        #buttons = [preprocessing, map_connectome, map_custom],
                        width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
-                       icon=ImageResource('cmp3_icon')
+                       icon=ImageResource('qualitycontrol.png')
                    )
 
     error_msg = Str('')
@@ -860,7 +880,7 @@ class CMP_MainWindow(HasTraits):
                        # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
                        #buttons = [preprocessing, map_connectome, map_custom],
                        width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
-                       icon=ImageResource('cmp3_icon')
+                       icon=ImageResource('cmp.png')
                    )
 
     def update_diffusion_imaging_model(self,new):
@@ -970,7 +990,7 @@ class CMP_MainWindowV2(HasTraits):
     bidsapp_ui = Instance(CMP_BIDSAppWindow)
     #quality_control_ui = Instance(CMP_QualityControlWindow)
 
-    load_dataset = Action(name='Load...',action='load_dataset')
+    load_dataset = Action(name='Load BIDS Dataset...',action='load_dataset')
 
     # show_bidsapp_window = Action(name='Show interface...',action='show_bidsapp_window',enabled_when='handler.project_loaded==True')
 
@@ -986,19 +1006,19 @@ class CMP_MainWindowV2(HasTraits):
                     spring,
                         HGroup(
                         spring,
-                        HGroup(spring,Item('configurator',style='custom',width=50,height=50,resizable=False,label='',show_label=False,
+                        HGroup(spring,Item('configurator',style='custom',width=120,height=60,resizable=False,label='',show_label=False,
                                             editor_args={
-                                            'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'configurator.png'))),'label':"",'label_value':""}
+                                            'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('configurator/images', 'configurator.png'))),'label':"",'label_value':""}
                                             ),
                                spring,show_labels=False,label=""),
-                        HGroup(spring,Item('bidsapp',style='custom',width=50,height=50,resizable=False,
+                        HGroup(spring,Item('bidsapp',style='custom',width=120,height=60,resizable=False,
                                             editor_args={
-                                            'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp.png'))),'label':""}
+                                            'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('configurator/images', 'bidsapp.png'))),'label':""}
                                             ),
                                spring,show_labels=False,label=""),
-                        HGroup(spring,Item('quality_control',style='custom',width=50,height=50,resizable=False,
+                        HGroup(spring,Item('quality_control',style='custom',width=120,height=60,resizable=False,
                                             editor_args={
-                                            'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'qualitycontrol.png'))),'label':""}
+                                            'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('configurator/images', 'qualitycontrol.png'))),'label':""}
                                             ),
                                spring,show_labels=False,label=""),
                         spring,springy=True,visible_when='handler.project_loaded==True'),
@@ -1014,12 +1034,15 @@ class CMP_MainWindowV2(HasTraits):
                                          ActionGroup(
                                              load_dataset,
                                          ),
-                                         name='BIDS Dataset'),
+                                         ActionGroup(
+                                             Action(name='Quit',action='_on_close'),
+                                         ),
+                                         name='File'),
                                  ),
                         handler = project.ProjectHandlerV2(),
                         style_sheet=style_sheet,
                         width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
-                        icon=ImageResource('cmp3_icon')
+                        icon=ImageResource('cmp.png')
                          )
 
     def _bidsapp_fired(self):

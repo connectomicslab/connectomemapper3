@@ -36,6 +36,7 @@ packages=["cmp","cmp.interfaces","cmp.stages",
 
 package_data = {'cmp':
                 ['cmp3_icon.png',
+                'configurator/images/*.png',
                 'configurator/pipelines/anatomical/*.png',
                 'configurator/pipelines/diffusion/*.png',
                 'configurator/pipelines/functional/*.png',
