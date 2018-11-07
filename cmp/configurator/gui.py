@@ -16,6 +16,7 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 import sys
 import os
 import multiprocessing
+from subprocess import Popen
 import pkg_resources
 
 import gzip
@@ -45,9 +46,9 @@ style_sheet = '''
                 color: transparent;
                 background-color: transparent;
                 min-width: 20px;
-                icon-size: 250px;
+                icon-size: 240px;
                 font: 12pt "Verdana";
-                margin: 1px 1px 1px 1px;
+                margin: 5px 5px 5px 5px;
                 padding:1px 1px;
             }
             QPushButton:pressed {
@@ -73,7 +74,7 @@ style_sheet = '''
             }
             QMainWindow {
                 background-color: yellow;
-                image: url("cmp.png");
+                image: url("images/cmp.png");
             }
             QMainWindow::separator {
                 background: yellow;
@@ -83,31 +84,7 @@ style_sheet = '''
             QMainWindow::separator:hover {
                 background: red;
             }
-            QDockWidget {
-                border: 1px solid lightgray;
-                titlebar-close-icon: url(close.png);
-                titlebar-normal-icon: url(undock.png);
-            }
 
-            QDockWidget::title {
-                text-align: left; /* align the text to the left */
-                background: lightgray;
-                padding-left: 5px;
-            }
-
-            QDockWidget::close-button, QDockWidget::float-button {
-                border: 1px solid transparent;
-                background: darkgray;
-                padding: 0px;
-            }
-
-            QDockWidget::close-button:hover, QDockWidget::float-button:hover {
-                background: gray;
-            }
-
-            QDockWidget::close-button:pressed, QDockWidget::float-button:pressed {
-                padding: 1px -1px -1px 1px;
-            }
             QListView::item:selected {
                 border: 1px solid #6a6ea9;
             }
@@ -137,6 +114,31 @@ style_sheet = '''
             }
             '''
 
+# QDockWidget {
+#     border: 1px solid lightgray;
+#     titlebar-close-icon: url(close.png);
+#     titlebar-normal-icon: url(undock.png);
+# }
+#
+# QDockWidget::title {
+#     text-align: left; /* align the text to the left */
+#     background: lightgray;
+#     padding-left: 5px;
+# }
+#
+# QDockWidget::close-button, QDockWidget::float-button {
+#     border: 1px solid transparent;
+#     background: darkgray;
+#     padding: 0px;
+# }
+#
+# QDockWidget::close-button:hover, QDockWidget::float-button:hover {
+#     background: gray;
+# }
+#
+# QDockWidget::close-button:pressed, QDockWidget::float-button:pressed {
+#     padding: 1px -1px -1px 1px;
+# }
 
 class CMP_Project_Info(HasTraits):
     base_directory = Directory
@@ -430,7 +432,7 @@ class CMP_BIDSAppWindow(HasTraits):
     bids_root = Directory()
     subjects = List(Str)
 
-    handler = Instance(project.CMP_BIDSAppWindowHandler)
+    # handler = Instance(project.CMP_BIDSAppWindowHandler)
 
     fs_license = File(os.path.join(os.environ['FREESURFER_HOME'],'license.txt'))
     fs_average = Directory(os.path.join(os.environ['FREESURFER_HOME'],'subjects','fsaverage'))
@@ -448,8 +450,8 @@ class CMP_BIDSAppWindow(HasTraits):
     settings_checked = Bool(False)
     docker_running = Bool(False)
 
-    check = Action(name='Check settings!',action='check_settings')
-    start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='settings_checked==True and docker_running==False')
+    # check = Action(name='Check settings!',action='check_settings',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))))
+    # start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='settings_checked==True and docker_running==False',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))))
 
     check = Button()
     start_bidsapp = Button()
@@ -475,14 +477,14 @@ class CMP_BIDSAppWindow(HasTraits):
                                     label='Freesurfer configuration'),
                             orientation='vertical',springy=True),
                             spring,
-                            HGroup(spring,Item('check',style='custom',width=99,height=30,resizable=False,label='',show_label=False,
+                            HGroup(spring,Item('check',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
                                                 editor_args={
                                                 'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))),'label':"",'label_value':""}
-                                                ),spring,
-                                          Item('start_bidsapp',style='custom',width=99,height=30,resizable=False,label='',show_label=False,
-                                                editor_args={
-                                                'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))),'label':"",'label_value':""}
                                                 ),
+                                          Item('start_bidsapp',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
+                                                editor_args={
+                                                'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))),'label':"",'label_value':""},
+                                                enabled_when='settings_checked==True and docker_running==False'),
                             show_labels=False,label=""),
                         orientation='vertical',springy=True),
 
@@ -491,7 +493,7 @@ class CMP_BIDSAppWindow(HasTraits):
                         handler=project.CMP_BIDSAppWindowHandler(),
                         style_sheet=style_sheet,
                         buttons = [],
-                        #buttons = [check,start_bidsapp],
+                        # buttons = [check,start_bidsapp],
                         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
                         #buttons = [preprocessing, map_connectome, map_custom],
                         width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
@@ -536,6 +538,150 @@ class CMP_BIDSAppWindow(HasTraits):
         print('Update run fmri: %s'%new)
         print('Update run fmri: %s'%self.run_fmri_pipeline)
         self.run_anat_pipeline = True
+
+    def _check_fired(self):
+        self.check_settings()
+
+    def _start_bidsapp_fired(self):
+        self.start_bids_app()
+
+    def check_settings(self):
+        self.settings_checked = True
+
+        if os.path.isdir(self.bids_root):
+            print("BIDS root directory : {}".format(self.bids_root))
+        else:
+            print("Error: BIDS root invalid!")
+            self.settings_checked = False
+
+        # if not self.list_of_subjects_to_be_processed.empty():
+        #     print("List of subjects to be processed : {}".format(self.list_of_subjects_to_be_processed))
+        # else:
+        #     print("Warning: List of subjects empty!")
+
+        if os.path.isfile(self.anat_config):
+            print("Anatomical configuration file : {}".format(self.anat_config))
+        else:
+            print("Error: Configuration file for anatomical pipeline not existing!")
+            self.settings_checked = False
+
+        if os.path.isfile(self.dmri_config):
+            print("Diffusion configuration file : {}".format(self.dmri_config))
+        else:
+            print("Warning: Configuration file for diffusion pipeline not existing!")
+
+        if os.path.isfile(self.fmri_config):
+            print("fMRI configuration file : {}".format(self.fmri_config))
+        else:
+            print("Warning: Configuration file for fMRI pipeline not existing!")
+
+        if os.path.isfile(self.fs_license):
+            print("Freesurfer license : {}".format(self.fs_license))
+        else:
+            print("Error: Invalid Freesurfer license ({})!".format(self.fs_license))
+            self.settings_checked = False
+
+        if os.path.isdir(self.fs_average):
+            print("fsaverage directory : {}".format(self.fs_average))
+        else:
+            print("Error: fsaverage directory ({}) not existing!".format(self.fs_average))
+            self.settings_checked = False
+
+        print("Valid inputs for BIDS App : {}".format(self.settings_checked))
+        print("Docker running ? {}".format(self.docker_running))
+        return True
+
+    def start_bidsapp_process(self, participant_label):
+        cmd = ['docker','run','-it','--rm',
+               '-v', '{}:/bids_dataset'.format(self.bids_root),
+               '-v', '{}/derivatives:/outputs'.format(self.bids_root),
+               '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(self.fs_average),
+               '-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
+               '-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)]
+
+        if self.run_dmri_pipeline:
+            cmd.append('-v')
+            cmd.append('{}:/code/ref_diffusion_config.ini'.format(self.dmri_config))
+
+        if self.run_fmri_pipeline:
+            cmd.append('-v')
+            cmd.append('{}:/code/ref_fMRI_config.ini'.format(self.fmri_config))
+
+        cmd.append('-u')
+        cmd.append('{}:{}'.format(os.geteuid(),os.getegid()))
+
+        cmd.append('sebastientourbier/connectomemapper-bidsapp:latest')
+        cmd.append('/bids_dataset')
+        cmd.append('/outputs')
+        cmd.append('participant')
+
+        cmd.append('--participant_label')
+        cmd.append('{}'.format(participant_label))
+
+        cmd.append('--anat_pipeline_config')
+        cmd.append('/code/ref_anatomical_config.ini')
+
+        if self.run_dmri_pipeline:
+            cmd.append('--dwi_pipeline_config')
+            cmd.append('/code/ref_diffusion_config.ini')
+
+        if self.run_fmri_pipeline:
+            cmd.append('--func_pipeline_config')
+            cmd.append('/code/ref_fMRI_config.ini')
+
+
+        print(cmd)
+
+        log_filename = os.path.join(self.bids_root,'derivatives/cmp','sub-{}_log-cmpbidsapp.txt'.format(participant_label))
+
+        with open(log_filename, 'w+') as log:
+            proc = Popen(cmd, stdout=log, stderr=log)
+            #docker_process.communicate()
+
+        return proc
+
+    def manage_bidsapp_procs(self, proclist):
+        for proc in proclist:
+            if proc.poll() is not None:
+                proclist.remove(proc)
+
+    def start_bids_app(self):
+        print("Start BIDS App")
+
+        maxprocs = multiprocessing.cpu_count()
+        processes = []
+
+        self.docker_running = True
+
+        project.fix_dataset_directory_in_pickles(local_dir=self.bids_root,mode='bidsapp')
+
+        for label in self.list_of_subjects_to_be_processed:
+            while len(processes) == maxprocs:
+                self.manage_bidsapp_procs(processes)
+
+            proc = self.start_bidsapp_process(label)
+            processes.append(proc)
+
+        while len(processes) > 0:
+            self.manage_bidsapp_procs(processes)
+
+        project.fix_dataset_directory_in_pickles(local_dir=self.bids_root,mode='local')
+
+        print('Processing with BIDS App Finished')
+
+        self.docker_running = False
+
+        # cmd = ['docke
+        return True
+
+    # def stop_bids_app(self, ui_info):
+    #     print("Stop BIDS App")
+    #     #self.docker_process.kill()
+    #     self.docker_running = False
+    #     return True
+
+
+
 
 
     # def __init__(self,ui_info):
@@ -1006,23 +1152,27 @@ class CMP_MainWindowV2(HasTraits):
                     spring,
                         HGroup(
                         spring,
-                        HGroup(spring,Item('configurator',style='custom',width=120,height=60,resizable=False,label='',show_label=False,
+                        HGroup(Item('configurator',style='custom',width=240,height=240,resizable=False,label='',show_label=False,
                                             editor_args={
                                             'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('configurator/images', 'configurator.png'))),'label':"",'label_value':""}
                                             ),
-                               spring,show_labels=False,label=""),
-                        HGroup(spring,Item('bidsapp',style='custom',width=120,height=60,resizable=False,
+                               show_labels=False,label=""),
+                        spring,
+                        HGroup(Item('bidsapp',style='custom',width=240,height=240,resizable=False,
                                             editor_args={
                                             'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('configurator/images', 'bidsapp.png'))),'label':""}
                                             ),
-                               spring,show_labels=False,label=""),
-                        HGroup(spring,Item('quality_control',style='custom',width=120,height=60,resizable=False,
+                               show_labels=False,label=""),
+                        spring,
+                        HGroup(Item('quality_control',style='custom',width=240,height=240,resizable=False,
                                             editor_args={
                                             'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('configurator/images', 'qualitycontrol.png'))),'label':""}
                                             ),
-                               spring,show_labels=False,label=""),
-                        spring,springy=True,visible_when='handler.project_loaded==True'),
-                    spring,springy=True)
+                               show_labels=False,label=""),
+                        spring,
+                        springy=True,visible_when='handler.project_loaded==True'),
+                    spring,
+                    springy=True)
 
     traits_view = QtView(
                         HGroup(
