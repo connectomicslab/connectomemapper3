@@ -45,8 +45,8 @@ style_sheet = '''
                 border-radius: 4px;
                 color: transparent;
                 background-color: transparent;
-                min-width: 20px;
-                icon-size: 240px;
+                min-width: 5px;
+                icon-size: 415px;
                 font: 12pt "Verdana";
                 margin: 5px 5px 5px 5px;
                 padding:1px 1px;
@@ -477,14 +477,16 @@ class CMP_BIDSAppWindow(HasTraits):
                                     label='Freesurfer configuration'),
                             orientation='vertical',springy=True),
                             spring,
-                            HGroup(Item('check',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
+                            HGroup(spring,Item('check',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
                                                 editor_args={
                                                 'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))),'label':"",'label_value':""}
                                                 ),
+                                          spring,
                                           Item('start_bidsapp',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
                                                 editor_args={
                                                 'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))),'label':"",'label_value':""},
                                                 enabled_when='settings_checked==True and docker_running==False'),
+                                          spring,
                             show_labels=False,label=""),
                         orientation='vertical',springy=True),
 
@@ -713,10 +715,10 @@ class CMP_ConfiguratorWindow(HasTraits):
     dmri_inputs_checked = Bool(False)
     fmri_inputs_checked = Bool(False)
 
-    # anat_save_config = Action(name='Save anatomical pipeline configuration as...',action='save_anat_config_file')
-    # dmri_save_config = Action(name='Save diffusion pipeline configuration as...',action='save_dmri_config_file')
-    # fmri_save_config = Action(name='Save fMRI pipeline configuration as...',action='save_fmri_config_file')
-    #
+    anat_save_config = Action(name='Save anatomical pipeline configuration as...',action='save_anat_config_file')
+    dmri_save_config = Action(name='Save diffusion pipeline configuration as...',action='save_dmri_config_file')
+    fmri_save_config = Action(name='Save fMRI pipeline configuration as...',action='save_fmri_config_file')
+
     # anat_load_config = Action(name='Load anatomical pipeline configuration...',action='anat_load_config_file')
     # dmri_load_config = Action(name='Load diffusion pipeline configuration...',action='load_dmri_config_file')
     # fmri_load_config = Action(name='Load fMRI pipeline configuration...',action='load_fmri_config_file')
@@ -743,15 +745,21 @@ class CMP_ConfiguratorWindow(HasTraits):
                             ),
                         orientation='horizontal', layout='tabbed', springy=True, enabled_when='anat_inputs_checked'),
                         spring,
-                        HGroup(Item('save_all_config',style='custom',width=160,height=20,resizable=False,label='',show_label=False,
+                        HGroup(spring,Item('save_all_config',style='custom',width=160,height=20,resizable=False,label='',show_label=False,
                                             editor_args={
                                             'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'configurator-saveall.png'))),'label':"",'label_value':""},
                                             enabled_when='anat_inputs_checked==True'),
+                               spring,
                         show_labels=False,label=""),
 
                         title='Connectome Mapper 3 Configurator',
                         menubar=MenuBar(
                                     Menu(
+                                        ActionGroup(
+                                            anat_save_config,
+                                            dmri_save_config,
+                                            fmri_save_config,
+                                        ),
                                         ActionGroup(
                                             Action(name='Quit',action='_on_close'),
                                         ),
@@ -789,6 +797,21 @@ class CMP_ConfiguratorWindow(HasTraits):
 
     def _save_all_config_fired(self):
         print('Saving pipeline configuration files...')
+
+        if self.anat_inputs_checked:
+            anat_config_file = os.path.join(self.project_info.base_directory,'code','ref_anatomical_config.ini')
+            project.anat_save_config(self.anat_pipeline, anat_config_file)
+            print('Anatomical config saved as  {}'.format(anat_config_file))
+
+        if self.dmri_inputs_checked:
+            dmri_config_file = os.path.join(self.project_info.base_directory,'code','ref_diffusion_config.ini')
+            project.dmri_save_config(self.dmri_pipeline, dmri_config_file)
+            print('Diffusion config saved as  {}'.format(dmri_config_file))
+
+        if self.fmri_inputs_checked:
+            fmri_config_file = os.path.join(self.project_info.base_directory,'code','ref_fMRI_config.ini')
+            project.fmri_save_config(self.fmri_pipeline, fmri_config_file)
+            print('fMRI config saved as  {}'.format(fmri_config_file))
 
 
 ## Window class of the ConnectomeMapper_Pipeline Quality Inspector
