@@ -1436,26 +1436,45 @@ class ProjectHandlerV2(Handler):
                 loaded_project.subject_sessions = ['']
                 loaded_project.subject_session = ''
 
-            types = bids_layout.get_types()
+            query_files = [f.filename for f in bids_layout.get(subject=subject, type='T1w', extensions=['nii', 'nii.gz'])]
+            if len(query_files) > 0:
+                print "T1w available"
+                t1_available = True
 
-            print(types)
-            for typ in sorted(types):
+            query_files = [f.filename for f in bids_layout.get(subject=subject, type='T2w', extensions=['nii', 'nii.gz'])]
+            if len(query_files) > 0:
+                print "T2w available"
+                t2_available = True
 
-                if typ == 'dwi':
-                    print "%s available" % typ
-                    diffusion_available = True
+            query_files = [f.filename for f in bids_layout.get(subject=subject, type='dwi', extensions=['nii', 'nii.gz'])]
+            if len(query_files) > 0:
+                print "DWI available"
+                diffusion_available = True
 
-                if typ == 'T1w':
-                    print "%s available" % typ
-                    t1_available = True
+            query_files = [f.filename for f in bids_layout.get(subject=subject, type='bold', extensions=['nii', 'nii.gz'])]
+            if len(query_files) > 0:
+                print "BOLD available"
+                fmri_available = True
 
-                if typ == 'T2w':
-                    print "%s available" % typ
-                    t2_available = True
-
-                if typ == 'bold':
-                    print "%s available" % typ
-                    fmri_available = True
+            # types = bids_layout.get_types()
+            # print(types)
+            # for typ in sorted(types):
+            #
+            #     if typ == 'dwi':
+            #         print "%s available" % typ
+            #         diffusion_available = True
+            #
+            #     if typ == 'T1w':
+            #         print "%s available" % typ
+            #         t1_available = True
+            #
+            #     if typ == 'T2w':
+            #         print "%s available" % typ
+            #         t2_available = True
+            #
+            #     if typ == 'bold':
+            #         print "%s available" % typ
+            #         fmri_available = True
 
         except:
             error(message="Invalid BIDS dataset. Please see documentation for more details.",title="BIDS error")

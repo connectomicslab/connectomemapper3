@@ -782,9 +782,14 @@ class CMP_ConfiguratorWindow(HasTraits):
         self.dmri_pipeline = dmri_pipeline
         self.fmri_pipeline = fmri_pipeline
 
-        self.anat_pipeline.view_mode = 'config_view'
-        self.dmri_pipeline.view_mode = 'config_view'
-        self.fmri_pipeline.view_mode = 'config_view'
+        if self.anat_pipeline != None:
+            self.anat_pipeline.view_mode = 'config_view'
+
+        if self.dmri_pipeline != None:
+            self.dmri_pipeline.view_mode = 'config_view'
+
+        if self.fmri_pipeline != None:
+            self.fmri_pipeline.view_mode = 'config_view'
 
         self.anat_inputs_checked = anat_inputs_checked
         self.dmri_inputs_checked = dmri_inputs_checked
@@ -887,9 +892,14 @@ class CMP_QualityControlWindow(HasTraits):
         self.dmri_pipeline = dmri_pipeline
         self.fmri_pipeline = fmri_pipeline
 
-        self.anat_pipeline.view_mode = 'inspect_outputs_view'
-        self.dmri_pipeline.view_mode = 'inspect_outputs_view'
-        self.fmri_pipeline.view_mode = 'inspect_outputs_view'
+        if self.anat_pipeline != None:
+            self.anat_pipeline.view_mode = 'inspect_outputs_view'
+
+        if self.dmri_pipeline != None:
+            self.dmri_pipeline.view_mode = 'inspect_outputs_view'
+
+        if self.fmri_pipeline != None:
+            self.fmri_pipeline.view_mode = 'inspect_outputs_view'
 
         self.anat_inputs_checked = anat_inputs_checked
         self.dmri_inputs_checked = dmri_inputs_checked
@@ -907,11 +917,15 @@ class CMP_QualityControlWindow(HasTraits):
             #Select subject from BIDS dataset
             self.project_info.configure_traits(view='subject_view')
             self.anat_pipeline.subject = self.project_info.subject
-            self.dmri_pipeline.subject = self.project_info.subject
-            self.fmri_pipeline.subject = self.project_info.subject
-            self.anat_pipeline.global_conf.ubject = self.project_info.subject
-            self.dmri_pipeline.global_conf.subject = self.project_info.subject
-            self.fmri_pipeline.global_conf.subject = self.project_info.subject
+            self.anat_pipeline.global_conf.subject = self.project_info.subject
+
+            if self.dmri_pipeline != None:
+                self.dmri_pipeline.subject = self.project_info.subject
+                self.dmri_pipeline.global_conf.subject = self.project_info.subject
+
+            if self.fmri_pipeline != None:
+                self.fmri_pipeline.subject = self.project_info.subject
+                self.fmri_pipeline.global_conf.subject = self.project_info.subject
 
             print("Selected subject: %s" % self.project_info.subject)
 
@@ -933,8 +947,12 @@ class CMP_QualityControlWindow(HasTraits):
                 np_res = self.project_info.configure_traits(view='subject_session_view')
 
                 self.anat_pipeline.global_conf.subject_session = self.project_info.subject_session
-                self.dmri_pipeline.global_conf.subject_session = self.project_info.subject_session
-                self.fmri_pipeline.global_conf.subject_session = self.project_info.subject_session
+
+                if self.dmri_pipeline != None:
+                    self.dmri_pipeline.global_conf.subject_session = self.project_info.subject_session
+
+                if self.fmri_pipeline != None:
+                    self.fmri_pipeline.global_conf.subject_session = self.project_info.subject_session
 
                 print("Selected session %s" % self.project_info.subject_session)
             else:
@@ -942,37 +960,36 @@ class CMP_QualityControlWindow(HasTraits):
 
                 print("No session detected")
 
-            self.anat_pipeline.fill_stages_outputs()
-            self.dmri_pipeline.fill_stages_outputs()
-            self.fmri_pipeline.fill_stages_outputs()
-
             # Check if available outputs
             output_anat_available = False
             output_dmri_available = False
             output_fmri_available = False
 
+            self.anat_pipeline.fill_stages_outputs()
             for stage in self.anat_pipeline.stages.values():
                 stage.define_inspect_outputs()
                 print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
                 if len(stage.inspect_outputs) > 0:
                     output_anat_available = True
 
+            if self.dmri_pipeline != None:
+                self.dmri_pipeline.fill_stages_outputs()
+                for stage in self.dmri_pipeline.stages.values():
+                    stage.define_inspect_outputs()
+                    print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
+                    if len(stage.inspect_outputs) > 0:
+                        output_dmri_available = True
+
+            if self.fmri_pipeline != None:
+                self.fmri_pipeline.fill_stages_outputs()
+                for stage in self.fmri_pipeline.stages.values():
+                    stage.define_inspect_outputs()
+                    print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
+                    if len(stage.inspect_outputs) > 0:
+                        output_fmri_available = True
+
             print("Anatomical output(s) available : %s" % output_anat_available)
-
-            for stage in self.dmri_pipeline.stages.values():
-                stage.define_inspect_outputs()
-                print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
-                if len(stage.inspect_outputs) > 0:
-                    output_dmri_available = True
-
             print("Diffusion output(s) available : %s" % output_dmri_available)
-
-            for stage in self.fmri_pipeline.stages.values():
-                stage.define_inspect_outputs()
-                print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
-                if len(stage.inspect_outputs) > 0:
-                    output_fmri_available = True
-
             print("fMRI output(s) available : %s" % output_fmri_available)
 
             if output_anat_available or output_dmri_available or output_fmri_available:
@@ -1241,34 +1258,37 @@ class CMP_MainWindowV2(HasTraits):
         bids_layout = BIDSLayout(self.project_info.base_directory)
         subjects = bids_layout.get_subjects()
 
-        # anat_config = os.path.join(self.project_info.base_directory,'code/','ref_anatomical_config.ini')
-        # dmri_config = os.path.join(self.project_info.base_directory,'code/','ref_diffusion_config.ini')
-        # fmri_config = os.path.join(self.project_info.base_directory,'code/','ref_fMRI_config.ini')
+        anat_config = os.path.join(self.project_info.base_directory,'code/','ref_anatomical_config.ini')
+        dmri_config = os.path.join(self.project_info.base_directory,'code/','ref_diffusion_config.ini')
+        fmri_config = os.path.join(self.project_info.base_directory,'code/','ref_fMRI_config.ini')
 
         self.bidsapp_ui = CMP_BIDSAppWindow(project_info=self.project_info,
                                          bids_root=self.project_info.base_directory,
                                          subjects=subjects,
                                          list_of_subjects_to_be_processed=subjects,
-                                         anat_config=self.project_info.anat_config_file,
-                                         dmri_config=self.project_info.dmri_config_file,
-                                         fmri_config=self.project_info.fmri_config_file
-                                          # anat_config=anat_config,
-                                          # dmri_config=dmri_config,
-                                          # fmri_config=fmri_config
+                                         # anat_config=self.project_info.anat_config_file,
+                                         # dmri_config=self.project_info.dmri_config_file,
+                                         # fmri_config=self.project_info.fmri_config_file
+                                         anat_config=anat_config,
+                                         dmri_config=dmri_config,
+                                         fmri_config=fmri_config
                                          )
         self.bidsapp_ui.configure_traits()
 
     def _configurator_fired(self):
         """ Callback of the "configurator" button. This displays the Configurator GUI.
         """
-        if os.path.isfile(self.project_info.anat_config_file):
-            print("Load anatomical config file %s"%self.project_info.anat_config_file)
+        if self.project_info.t1_available:
+            if os.path.isfile(self.project_info.anat_config_file):
+                print("Anatomical config file : %s"%self.project_info.anat_config_file)
 
-        if os.path.isfile(self.project_info.dmri_config_file):
-            print("Load diffusion config file %s"%self.project_info.dmri_config_file)
+        if self.project_info.dmri_available:
+            if os.path.isfile(self.project_info.dmri_config_file):
+                print("Diffusion config file : %s"%self.project_info.dmri_config_file)
 
-        if os.path.isfile(self.project_info.fmri_config_file):
-            print("Load fMRI config file %s"%self.project_info.fmri_config_file)
+        if self.project_info.fmri_available:
+            if os.path.isfile(self.project_info.fmri_config_file):
+                print("fMRI config file : %s"%self.project_info.fmri_config_file)
 
         print(self.anat_pipeline)
         print(self.dmri_pipeline)
@@ -1292,14 +1312,17 @@ class CMP_MainWindowV2(HasTraits):
     def _quality_control_fired(self):
         """ Callback of the "configurator" button. This displays the Configurator GUI.
         """
-        if os.path.isfile(self.project_info.anat_config_file):
-            print("Load anatomical config file %s"%self.project_info.anat_config_file)
+        if self.project_info.t1_available:
+            if os.path.isfile(self.project_info.anat_config_file):
+                print("Anatomical config file : %s"%self.project_info.anat_config_file)
 
-        if os.path.isfile(self.project_info.dmri_config_file):
-            print("Load diffusion config file %s"%self.project_info.dmri_config_file)
+        if self.project_info.dmri_available:
+            if os.path.isfile(self.project_info.dmri_config_file):
+                print("Diffusion config file : %s"%self.project_info.dmri_config_file)
 
-        if os.path.isfile(self.project_info.fmri_config_file):
-            print("Load fMRI config file %s"%self.project_info.fmri_config_file)
+        if self.project_info.fmri_available:
+            if os.path.isfile(self.project_info.fmri_config_file):
+                print("fMRI config file : %s"%self.project_info.fmri_config_file)
 
         print(self.anat_pipeline)
         print(self.dmri_pipeline)
