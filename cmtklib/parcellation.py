@@ -514,7 +514,7 @@ class CombineParcellations(BaseInterface):
                                  '{} \n'.format('      <data key="d1">%s</data>'%("subcortical")),
                                  '{} \n'.format('      <data key="d2">%s</data>'%("right")),
                                  '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_subcort_names[i+1])),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_subcort_names[i])),
                                  '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
                                  '{} \n'.format('    </node>')]
                     f_graphML.writelines(node_lines)
