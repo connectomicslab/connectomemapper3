@@ -25,6 +25,7 @@ import string
 
 from traits.api import *
 from traitsui.api import *
+from traitsui.tabular_adapter import TabularAdapter
 from traitsui.qt4.extra.qt_view import QtView
 from pyface.api import ImageResource
 
@@ -424,6 +425,25 @@ class CMP_Project_Info(HasTraits):
     def _summary_view_button_fired(self):
         self.configure_traits(view='pipeline_processing_summary_view')
 
+class MultiSelectAdapter(TabularAdapter):
+    """ This adapter is used by both the left and right tables
+    """
+
+    # Titles and column names for each column of a table.
+    # In this example, each table has only one column.
+    columns = [('', 'myvalue')]
+    width = 300
+
+
+    # Magically named trait which gives the display text of the column named
+    # 'myvalue'. This is done using a Traits Property and its getter:
+    myvalue_text = Property
+
+    # The getter for Property 'myvalue_text' simply takes the value of the
+    # corresponding item in the list being displayed in this table.
+    # A more complicated example could format the item before displaying it.
+    def _get_myvalue_text(self):
+        return self.item
 
 class CMP_BIDSAppWindow(HasTraits):
 
@@ -453,6 +473,7 @@ class CMP_BIDSAppWindow(HasTraits):
     # check = Action(name='Check settings!',action='check_settings',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))))
     # start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='settings_checked==True and docker_running==False',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))))
 
+    update_selection = Button()
     check = Button()
     start_bidsapp = Button()
 
@@ -463,8 +484,12 @@ class CMP_BIDSAppWindow(HasTraits):
                                 Group(
                                     Item('bids_root', label='Base directory'),
                                 label='BIDS dataset'),
-                                Group(
-                                    UItem('list_of_subjects_to_be_processed', editor=CheckListEditor(name='subjects'), style='custom', label='Selection'),
+                                HGroup(
+                                    UItem('list_of_subjects_to_be_processed', editor=CheckListEditor(name='subjects'), style='readonly', label='Selection'),
+                                    UItem('update_selection',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
+                                                        editor_args={
+                                                        'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('icons', 'cmp.png'))),'label':"",'label_value':""}
+                                                        ),
                                 label='Participants to be processed'),
                                 Group(
                                     Group(Item('anat_config',label='Configuration file',visible_when='run_anat_pipeline'), label='Anatomical pipeline'),
@@ -501,6 +526,28 @@ class CMP_BIDSAppWindow(HasTraits):
                         width=0.5, height=0.8, resizable=True,#, scrollable=True, resizable=True
                         icon=ImageResource('bidsapp.png')
                         )
+
+    select_subjects_to_be_processed_view = View(
+                                        HGroup(
+                                            UItem('subjects',
+                                                editor=TabularEditor(
+                                                show_titles=True,
+                                                selected='list_of_subjects_to_be_processed',
+                                                editable=False,
+                                                multi_select=True,
+                                                adapter=MultiSelectAdapter(columns=[('Subjects in dataset','myvalue')]))
+                                                ),
+                                            UItem('list_of_subjects_to_be_processed',
+                                                editor=TabularEditor(
+                                                show_titles=True,
+                                                editable=False,
+                                                adapter=MultiSelectAdapter(columns=[('Subjects to be processed','myvalue')]))
+                                                )
+                                            ),
+                                        resizable=True,
+                                        width=600,height=400,
+		                                title='Selection of subjects to be processed by the BIDS App'
+                                        )
 
     def __init__(self, project_info=None, bids_root='', subjects=[''], list_of_subjects_to_be_processed=[''], anat_config='', dmri_config='', fmri_config=''):
 
@@ -540,6 +587,9 @@ class CMP_BIDSAppWindow(HasTraits):
         print('Update run fmri: %s'%new)
         print('Update run fmri: %s'%self.run_fmri_pipeline)
         self.run_anat_pipeline = True
+
+    def _update_selection_fired(self):
+        self.configure_traits(view='select_subjects_to_be_processed_view')
 
     def _check_fired(self):
         self.check_settings()

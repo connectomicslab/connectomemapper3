@@ -218,6 +218,18 @@ class CombineParcellations(BaseInterface):
         right_subcIds_colors_b = np.array([14, 220, 176, 255, 0, 255, 20])
         right_subcort_names = ["Right-Thalamus_Proper","Right-Caudate","Right-Putamen","Right-Pallidum","Right-Accumbens_area","Right-Amygdala","Right-Hippocampus"]
 
+        #Amygdala and hippocampus swapped between Lausanne2008 and Lausanne2018
+        left_subcIds_2008 = np.array([10, 11, 12, 13, 26, 17, 18])
+        left_subcIds_2008_colors_r = np.array([0, 122, 236, 12, 255, 220, 103])
+        left_subcIds_2008_colors_g = np.array([118, 186, 13, 48, 165, 216, 255])
+        left_subcIds_2008_colors_b = np.array([14, 220, 176, 255, 0, 20, 255])
+        left_subcort_2008_names = ["Left-Thalamus_Proper","Left-Caudate","Left-Putamen","Left-Pallidum","Left-Accumbens_area","Left-Hippocampus","Left-Amygdala"]
+
+        right_subcIds_2008 = np.array([49, 50, 51, 52, 58, 53, 54])
+        right_subcIds_2008_colors_r = np.array([0, 122, 236, 12, 255, 220, 103])
+        right_subcIds_2008_colors_g = np.array([118, 186, 13, 48, 165, 216, 255])
+        right_subcIds_2008_colors_b = np.array([14, 220, 176, 255, 0, 20, 255])
+        right_subcort_2008_names = ["Right-Thalamus_Proper","Right-Caudate","Right-Putamen","Right-Pallidum","Right-Accumbens_area","Right-Hippocampus","Right-Amygdala"]
 
         # Thalamic Nuclei
         left_thalNuclei  = np.array([1, 2, 3, 4, 5, 6, 7])
@@ -490,13 +502,18 @@ class CombineParcellations(BaseInterface):
             if self.inputs.create_colorLUT:
                 f_colorLUT.write("# Right Hemisphere. Subcortical Structures \n")
 
-            right_subc_labels = right_subcIds
-            newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds.shape[0])
 
             if thalamus_nuclei_defined:
                 right_subc_labels = right_subcIds[1:]
                 right_subcort_names = right_subcort_names[1:]
                 newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
+            elif not (thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined)):
+                right_subc_labels = right_subcIds_2008
+                right_subcort_names = right_subcort_2008_names
+                newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds_2008.shape[0])
+            else:
+                right_subc_labels = right_subcIds
+                newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds.shape[0])
 
             i=0
             for lab in right_subc_labels:
@@ -708,13 +725,19 @@ class CombineParcellations(BaseInterface):
             if self.inputs.create_colorLUT:
                 f_colorLUT.write("# Left Hemisphere. Subcortical Structures \n")
 
-            left_subc_labels = left_subcIds
-            newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds.shape[0])
+
 
             if thalamus_nuclei_defined:
                 left_subc_labels = left_subcIds[1:]
                 left_subcort_names = left_subcort_names[1:]
                 newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
+            elif not (thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined)):
+                left_subc_labels = left_subcIds_2008
+                left_subcort_names = left_subcort_2008_names
+                newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds_2008.shape[0])
+            else:
+                left_subc_labels = left_subcIds
+                newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds.shape[0])
 
             i=0
             for lab in left_subc_labels:

@@ -44,7 +44,8 @@ package_data = {'cmp':
                 'pipelines/diffusion/*.png',
                 'pipelines/functional/*.png'],
                 'resources':
-                ['buttons/*.png'],
+                ['buttons/*.png',
+                 'icons/*png'],
                 'cmtklib':
                 ['data/parcellation/lausanne2008/*/*.*',
                  'data/parcellation/lausanne2018/*.*',
