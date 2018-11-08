@@ -495,6 +495,7 @@ class CombineParcellations(BaseInterface):
 
             if thalamus_nuclei_defined:
                 right_subc_labels = right_subcIds[1:]
+                right_subcort_names = right_subcort_names[1:]
                 newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
 
             i=0
@@ -505,7 +506,7 @@ class CombineParcellations(BaseInterface):
                     r = right_subcIds_colors_r[i]
                     g = right_subcIds_colors_g[i]
                     b = right_subcIds_colors_b[i]
-                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_subcort_names[i+1],r,g,b))
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_subcort_names[i],r,g,b))
 
                 if self.inputs.create_graphml:
                     node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
@@ -712,6 +713,7 @@ class CombineParcellations(BaseInterface):
 
             if thalamus_nuclei_defined:
                 left_subc_labels = left_subcIds[1:]
+                left_subcort_names = left_subcort_names[1:]
                 newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
 
             i=0
@@ -722,7 +724,7 @@ class CombineParcellations(BaseInterface):
                     r = left_subcIds_colors_r[i]
                     g = left_subcIds_colors_g[i]
                     b = left_subcIds_colors_b[i]
-                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_subcort_names[i+1],r,g,b))
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_subcort_names[i],r,g,b))
 
                 if self.inputs.create_graphml:
                     node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
