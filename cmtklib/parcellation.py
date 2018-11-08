@@ -490,14 +490,14 @@ class CombineParcellations(BaseInterface):
             if self.inputs.create_colorLUT:
                 f_colorLUT.write("# Right Hemisphere. Subcortical Structures \n")
 
-            newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
-            i=0
-
             right_subc_labels = right_subcIds
+            newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds.shape[0])
 
             if thalamus_nuclei_defined:
                 right_subc_labels = right_subcIds[1:]
+                newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
 
+            i=0
             for lab in right_subc_labels:
                 print("update right subcortical label (%i -> %i)"%(lab,newLabels[i]))
 
@@ -707,13 +707,14 @@ class CombineParcellations(BaseInterface):
             if self.inputs.create_colorLUT:
                 f_colorLUT.write("# Left Hemisphere. Subcortical Structures \n")
 
-            newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
-            i=0
-
             left_subc_labels = left_subcIds
+            newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds.shape[0])
+
             if thalamus_nuclei_defined:
                 left_subc_labels = left_subcIds[1:]
+                newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
 
+            i=0
             for lab in left_subc_labels:
                 print("update left subcortical label (%i -> %i)"%(lab,newLabels[i]))
 
