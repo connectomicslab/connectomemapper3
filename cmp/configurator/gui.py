@@ -955,8 +955,10 @@ class CMP_QualityControlWindow(HasTraits):
                     self.fmri_pipeline.global_conf.subject_session = self.project_info.subject_session
 
                 print("Selected session %s" % self.project_info.subject_session)
+                self.anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.project_info.base_directory,'derivatives/freesurfer','{}_{}'.format( self.project_info.subject, self.project_info.subject_session))
             else:
-                self.anat_pipeline.global_conf.subject_session.subject_session = ''
+                self.anat_pipeline.global_conf.subject_session = ''
+                self.anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.project_info.base_directory,'derivatives/freesurfer','{}'.format(self.project_info.subject))
 
                 print("No session detected")
 
@@ -965,27 +967,24 @@ class CMP_QualityControlWindow(HasTraits):
             output_dmri_available = False
             output_fmri_available = False
 
-            self.anat_pipeline.fill_stages_outputs()
             for stage in self.anat_pipeline.stages.values():
                 stage.define_inspect_outputs()
                 print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
-                if len(stage.inspect_outputs) > 0:
+                if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                     output_anat_available = True
 
             if self.dmri_pipeline != None:
-                self.dmri_pipeline.fill_stages_outputs()
                 for stage in self.dmri_pipeline.stages.values():
                     stage.define_inspect_outputs()
                     print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
-                    if len(stage.inspect_outputs) > 0:
+                    if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         output_dmri_available = True
 
             if self.fmri_pipeline != None:
-                self.fmri_pipeline.fill_stages_outputs()
                 for stage in self.fmri_pipeline.stages.values():
                     stage.define_inspect_outputs()
                     print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
-                    if len(stage.inspect_outputs) > 0:
+                    if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         output_fmri_available = True
 
             print("Anatomical output(s) available : %s" % output_anat_available)

@@ -1430,8 +1430,8 @@ class ProjectHandlerV2(Handler):
             print sessions
 
             if len(sessions) > 0:
-                loaded_project.subject_sessions = sessions
-                loaded_project.subject_session = sessions[0]
+                loaded_project.subject_sessions = ['ses-{}'.format(sessions[0])]
+                loaded_project.subject_session = 'ses-{}'.format(sessions[0])
             else:
                 loaded_project.subject_sessions = ['']
                 loaded_project.subject_session = ''
