@@ -546,56 +546,10 @@ class CMP_BIDSAppWindow(HasTraits):
                         )
 
     log_view = QtView(Group(
-                            Group(
-                                Group(
-                                    Item('bids_root', label='Location'),
-                                label='BIDS dataset'),
-                                Group(
-                                    HGroup(
-                                    UItem('subjects',
-                                        editor=TabularEditor(
-                                        show_titles=True,
-                                        selected='list_of_subjects_to_be_processed',
-                                        editable=False,
-                                        multi_select=True,
-                                        adapter=MultiSelectAdapter(columns=[('Available labels','myvalue')]))
-                                        ),
-                                    UItem('list_of_subjects_to_be_processed',
-                                        editor=TabularEditor(
-                                        show_titles=True,
-                                        editable=False,
-                                        adapter=MultiSelectAdapter(columns=[('Labels to be processed','myvalue')]))
-                                        ),
-                                    ),
-                                label='Participant labels to be processed'),
-                                Group(
-                                    Group(Item('anat_config',label='Configuration file',visible_when='run_anat_pipeline'), label='Anatomical pipeline'),
-                                    Group(Item('run_dmri_pipeline',label='Run processing stages'),Item('dmri_config',label='Configuration file',visible_when='run_dmri_pipeline'), label='Diffusion pipeline'),
-                                    Group(Item('run_fmri_pipeline',label='Run processing stages'),Item('fmri_config',label='Configuration file',visible_when='run_fmri_pipeline'), label='fMRI pipeline'),
-                                    label='Configuration of processing pipelines'),
-                                Group(
-                                    Item('fs_license', label='LICENSE'),
-                                    Item('fs_average', label='FSaverage directory'),
-                                    label='Freesurfer configuration'),
-                            orientation='vertical',springy=True),
-                            Group(
-                                Item('bidsapp_tag', label='Release tag'),
-                            label='BIDS App Version'),
-                            spring,
-                            HGroup(spring,Item('check',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
-                                                editor_args={
-                                                'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))),'label':"",'label_value':""}
-                                                ),
-                                          spring,
-                                          Item('start_bidsapp',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
-                                                editor_args={
-                                                'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))),'label':"",'label_value':""},
-                                                enabled_when='settings_checked==True and docker_running==False'),
-                                          spring,
-                            show_labels=False,label=""),
+                            Item('list_of_processing_logfiles')
                         orientation='vertical',springy=True),
 
-                        title='Connectome Mapper 3 BIDS App GUI',
+                        title='Connectome Mapper 3 BIDS App Progress',
                         # kind='modal',
                         #handler=project.CMP_BIDSAppWindowHandler(),
                         style_sheet=style_sheet,
