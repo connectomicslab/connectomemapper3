@@ -502,15 +502,14 @@ class CombineParcellations(BaseInterface):
             if self.inputs.create_colorLUT:
                 f_colorLUT.write("# Right Hemisphere. Subcortical Structures \n")
 
-
-            if thalamus_nuclei_defined:
-                right_subc_labels = right_subcIds[1:]
-                right_subcort_names = right_subcort_names[1:]
-                newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
-            elif not (thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined)):
+            if not (thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined)):
                 right_subc_labels = right_subcIds_2008
                 right_subcort_names = right_subcort_2008_names
                 newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds_2008.shape[0])
+            elif thalamus_nuclei_defined:
+                right_subc_labels = right_subcIds[1:]
+                right_subcort_names = right_subcort_names[1:]
+                newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
             else:
                 right_subc_labels = right_subcIds
                 newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds.shape[0])
@@ -726,15 +725,14 @@ class CombineParcellations(BaseInterface):
                 f_colorLUT.write("# Left Hemisphere. Subcortical Structures \n")
 
 
-
-            if thalamus_nuclei_defined:
-                left_subc_labels = left_subcIds[1:]
-                left_subcort_names = left_subcort_names[1:]
-                newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
-            elif not (thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined)):
+            if not (thalamus_nuclei_defined and brainstem_defined and (lh_subfield_defined and rh_subfield_defined)):
                 left_subc_labels = left_subcIds_2008
                 left_subcort_names = left_subcort_2008_names
                 newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds_2008.shape[0])
+            elif thalamus_nuclei_defined:
+                left_subc_labels = left_subcIds[1:]
+                left_subcort_names = left_subcort_names[1:]
+                newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
             else:
                 left_subc_labels = left_subcIds
                 newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds.shape[0])
@@ -950,14 +948,7 @@ class CombineParcellations(BaseInterface):
 
         # Refine aparc+aseg.mgz with new subcortical and/or structures (if any)
         if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
-            for roi_fname in self.inputs.input_rois:
-                if 'scale1' in roi_fname:
-                    roi1_fname = roi_fname
             print("Correct Freesurfer generated aparc+aseg.mgz...")
-
-            print("    Load roi {}".format(roi1_fname))
-            Vroi = ni.load(roi1_fname)
-            Iroi = Vroi.get_data()
 
             orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
             aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
