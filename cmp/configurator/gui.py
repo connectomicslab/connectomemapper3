@@ -432,7 +432,7 @@ class MultiSelectAdapter(TabularAdapter):
     # Titles and column names for each column of a table.
     # In this example, each table has only one column.
     columns = [('', 'myvalue')]
-    width = 300
+    width = 100
 
 
     # Magically named trait which gives the display text of the column named
@@ -443,7 +443,7 @@ class MultiSelectAdapter(TabularAdapter):
     # corresponding item in the list being displayed in this table.
     # A more complicated example could format the item before displaying it.
     def _get_myvalue_text(self):
-        return self.item
+        return 'sub-%s'%self.item
 
 class CMP_BIDSAppWindow(HasTraits):
 
@@ -470,6 +470,8 @@ class CMP_BIDSAppWindow(HasTraits):
     settings_checked = Bool(False)
     docker_running = Bool(False)
 
+    bidsapp_tag = Enum('latest',['latest'])
+
     # check = Action(name='Check settings!',action='check_settings',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))))
     # start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='settings_checked==True and docker_running==False',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))))
 
@@ -482,15 +484,26 @@ class CMP_BIDSAppWindow(HasTraits):
     traits_view = QtView(Group(
                             Group(
                                 Group(
-                                    Item('bids_root', label='Base directory'),
+                                    Item('bids_root', label='Location'),
                                 label='BIDS dataset'),
-                                HGroup(
-                                    UItem('list_of_subjects_to_be_processed', editor=CheckListEditor(name='subjects'), style='readonly', label='Selection'),
-                                    UItem('update_selection',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
-                                                        editor_args={
-                                                        'image':ImageResource(pkg_resources.resource_filename('resources', os.path.join('icons', 'cmp.png'))),'label':"",'label_value':""}
-                                                        ),
-                                label='Participants to be processed'),
+                                Group(
+                                    HGroup(
+                                    UItem('subjects',
+                                        editor=TabularEditor(
+                                        show_titles=True,
+                                        selected='list_of_subjects_to_be_processed',
+                                        editable=False,
+                                        multi_select=True,
+                                        adapter=MultiSelectAdapter(columns=[('Available labels','myvalue')]))
+                                        ),
+                                    UItem('list_of_subjects_to_be_processed',
+                                        editor=TabularEditor(
+                                        show_titles=True,
+                                        editable=False,
+                                        adapter=MultiSelectAdapter(columns=[('Labels to be processed','myvalue')]))
+                                        ),
+                                    ),
+                                label='Participant labels to be processed'),
                                 Group(
                                     Group(Item('anat_config',label='Configuration file',visible_when='run_anat_pipeline'), label='Anatomical pipeline'),
                                     Group(Item('run_dmri_pipeline',label='Run processing stages'),Item('dmri_config',label='Configuration file',visible_when='run_dmri_pipeline'), label='Diffusion pipeline'),
@@ -501,6 +514,9 @@ class CMP_BIDSAppWindow(HasTraits):
                                     Item('fs_average', label='FSaverage directory'),
                                     label='Freesurfer configuration'),
                             orientation='vertical',springy=True),
+                            Group(
+                                Item('bidsapp_tag', label='Release tag'),
+                            label='BIDS App Version'),
                             spring,
                             HGroup(spring,Item('check',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
                                                 editor_args={
@@ -527,27 +543,7 @@ class CMP_BIDSAppWindow(HasTraits):
                         icon=ImageResource('bidsapp.png')
                         )
 
-    select_subjects_to_be_processed_view = View(
-                                        HGroup(
-                                            UItem('subjects',
-                                                editor=TabularEditor(
-                                                show_titles=True,
-                                                selected='list_of_subjects_to_be_processed',
-                                                editable=False,
-                                                multi_select=True,
-                                                adapter=MultiSelectAdapter(columns=[('Subjects in dataset','myvalue')]))
-                                                ),
-                                            UItem('list_of_subjects_to_be_processed',
-                                                editor=TabularEditor(
-                                                show_titles=True,
-                                                editable=False,
-                                                adapter=MultiSelectAdapter(columns=[('Subjects to be processed','myvalue')]))
-                                                )
-                                            ),
-                                        resizable=True,
-                                        width=600,height=400,
-		                                title='Selection of subjects to be processed by the BIDS App'
-                                        )
+
 
     def __init__(self, project_info=None, bids_root='', subjects=[''], list_of_subjects_to_be_processed=[''], anat_config='', dmri_config='', fmri_config=''):
 
@@ -606,6 +602,11 @@ class CMP_BIDSAppWindow(HasTraits):
             print("Error: BIDS root invalid!")
             self.settings_checked = False
 
+        if len(self.list_of_subjects_to_be_processed)>0:
+            print("Participant labels to be processed : {}".format(self.list_of_subjects_to_be_processed))
+        else:
+            print("Error: At least one participant label to be processed should selected!")
+            self.settings_checked = False
         # if not self.list_of_subjects_to_be_processed.empty():
         #     print("List of subjects to be processed : {}".format(self.list_of_subjects_to_be_processed))
         # else:
@@ -640,10 +641,11 @@ class CMP_BIDSAppWindow(HasTraits):
             self.settings_checked = False
 
         print("Valid inputs for BIDS App : {}".format(self.settings_checked))
-        print("Docker running ? {}".format(self.docker_running))
+        print("BIDS App Version Tag: {}".format(self.bidsapp_tag))
+
         return True
 
-    def start_bidsapp_process(self, participant_label):
+    def start_bidsapp_process(self, bidsapp_tag, participant_label):
         cmd = ['docker','run','-it','--rm',
                '-v', '{}:/bids_dataset'.format(self.bids_root),
                '-v', '{}/derivatives:/outputs'.format(self.bids_root),
@@ -662,7 +664,7 @@ class CMP_BIDSAppWindow(HasTraits):
         cmd.append('-u')
         cmd.append('{}:{}'.format(os.geteuid(),os.getegid()))
 
-        cmd.append('sebastientourbier/connectomemapper-bidsapp:latest')
+        cmd.append('sebastientourbier/connectomemapper-bidsapp:{}'.format(bidsapp_tag))
         cmd.append('/bids_dataset')
         cmd.append('/outputs')
         cmd.append('participant')
@@ -711,7 +713,7 @@ class CMP_BIDSAppWindow(HasTraits):
             while len(processes) == maxprocs:
                 self.manage_bidsapp_procs(processes)
 
-            proc = self.start_bidsapp_process(label)
+            proc = self.start_bidsapp_process(self.bidsapp_tag,label)
             processes.append(proc)
 
         while len(processes) > 0:

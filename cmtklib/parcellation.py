@@ -948,6 +948,41 @@ class CombineParcellations(BaseInterface):
                 f_graphML.writelines(bottom_lines)
                 f_graphML.close()
 
+        # Refine aparc+aseg.mgz with new subcortical and/or structures (if any)
+        if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
+            orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
+            aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
+            tmp_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.mgz')
+            aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.nii.gz')
+
+            shutil.copyfile(aparcaseg_fs,tmp_aparcaseg_fs)
+
+            mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
+            subprocess.check_call(mri_cmd)
+
+            aparcaseg_data = ni.load(aparcaseg_native)
+
+            # Thalamus
+            if thalamus_nuclei_defined :
+
+            # Hippocampal subfields
+            if (lh_subfield_defined and rh_subfield_defined):
+
+            # Brainstem
+            if brainstem_defined:
+
+        for d in ds:
+            print("Processing %s:" % d[0])
+
+            # does it exist at all?
+            if not op.exists(d[0]):
+                raise Exception('File %s does not exist.' % d[0])
+            # reslice to original volume because the roi creation with freesurfer
+            # changed to 256x256x256 resolution
+            #mri_cmd = 'mri_convert -rl "%s" -rt nearest "%s" -nc "%s"' % (orig, d[0], d[1])
+            #runCmd( mri_cmd,log )
+
+
         return runtime
 
     def _list_outputs(self):
