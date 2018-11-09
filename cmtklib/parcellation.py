@@ -950,38 +950,110 @@ class CombineParcellations(BaseInterface):
 
         # Refine aparc+aseg.mgz with new subcortical and/or structures (if any)
         if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
+            for roi_fname in self.inputs.input_rois:
+                if 'scale1' in roi_fname:
+                    roi1_fname = roi_fname
+            print("Correct Freesurfer generated aparc+aseg.mgz...")
+
+            print("    Load roi {}".format(roi1_fname))
+            Vroi = ni.load(roi1_fname)
+            Iroi = Vroi.get_data()
+
             orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
             aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
             tmp_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.mgz')
             aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.nii.gz')
 
+            print("    Copy aparc+aseg to {}".format(tmp_aparcaseg_fs))
             shutil.copyfile(aparcaseg_fs,tmp_aparcaseg_fs)
 
+            print("    Transform to native space")
             mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
             subprocess.check_call(mri_cmd)
+            Iaparcaseg= ni.load(aparcaseg_native)
 
-            aparcaseg_data = ni.load(aparcaseg_native)
+            Iaparcaseg_new = Iaparcaseg.copy()
 
-            # Thalamus
+            # Thalamus (aparc+aseg labels: 10 and 49)
             if thalamus_nuclei_defined :
 
-            # Hippocampal subfields
-            if (lh_subfield_defined and rh_subfield_defined):
+                ind = np.where(Iaparcaseg==10)
+                mask_aparc_lh = np.zeros(Iaparcaseg.shape)
+                mask_aparc_lh[ind] = 1
 
-            # Brainstem
+                ind = np.where(Iaparcaseg==49)
+                mask_aparc_rh = np.zeros(Iaparcaseg.shape)
+                mask_aparc_rh[ind] = 1
+
+                for lab in left_thalNuclei:
+                    ind = np.where(Ithal==lab)
+                    mask_thal_lh = np.zeros(Iaparcaseg.shape)
+                    mask_thal_lh[ind] = 1
+
+                    # Identify voxels not included by thalamic Nuclei - should set to 2 (Gm) or 0
+                    tmp = mask_aparc_lh - mask_thal_lh
+                    ind = np.where(tmp>0)
+                    Iaparcaseg_new[ind] = 2
+
+                    # Identify voxels not included by freesurfer thalamic mask
+                    tmp = mask_aparc_lh - mask_thal_lh
+                    ind = np.where(tmp<0)
+                    Iaparcaseg_new[ind] = 10
+
+                for lab in right_thalNuclei:
+                    ind = np.where(Ithal==lab)
+                    mask_thal_rh = np.zeros(Iaparcaseg.shape)
+                    mask_thal_rh[ind] = 1
+
+                    # Identify voxels not included by thalamic Nuclei - should set to 41 (Gm) or 0
+                    tmp = mask_aparc_rh - mask_thal_rh
+                    ind = np.where(tmp>0)
+                    Iaparcaseg_new[ind] = 41
+
+                    # Identify voxels not included by freesurfer thalamic mask
+                    tmp = mask_aparc_rh - mask_thal_rh
+                    ind = np.where(tmp<0)
+                    Iaparcaseg_new[ind] = 49
+
+            # # Hippocampal subfields (aparc+aseg labels: 17 and 53)
+            # if (lh_subfield_defined and rh_subfield_defined):
+            #
+            #     ind = np.where(Iaparcaseg==17)
+            #     mask_aparc_lh = np.zeros(Iaparcaseg.shape)
+            #     mask_aparc_lh[ind] = 1
+            #
+            #     ind = np.where(Iaparcaseg==53)
+            #     mask_aparc_rh = np.zeros(Iaparcaseg.shape)
+            #     mask_aparc_rh[ind] = 1
+            #
+            #     for lab in hippo_subf:
+            #         ind = np.where(Isublh==lab)
+            #         mask_subf_lh = np.zeros(Iaparcaseg.shape)
+            #         mask_subf_lh[ind] = 1
+            #
+            #     for lab in hippo_subf:
+            #         ind = np.where(Isubrh==lab)
+            #         mask_subf_rh = np.zeros(Iaparcaseg.shape)
+            #         mask_subf_rh[ind] = 1
+
+
+            # Brainstem (aparc+aseg labels: 16)
             if brainstem_defined:
+                ind = np.where(Iaparcaseg==16)
+                Iaparcaseg_new[ind] = 0
+                Iaparcaseg_new[indstem] = 16
 
-        for d in ds:
-            print("Processing %s:" % d[0])
+            new_aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
+            print("    Save relabeled image to {}".format(new_aparcaseg_native))
+            img = ni.Nifti1Image(Iaparcaseg_new, V.get_affine(), hdr2)
+            ni.save(img, new_aparcaseg_native)
 
-            # does it exist at all?
-            if not op.exists(d[0]):
-                raise Exception('File %s does not exist.' % d[0])
-            # reslice to original volume because the roi creation with freesurfer
-            # changed to 256x256x256 resolution
-            #mri_cmd = 'mri_convert -rl "%s" -rt nearest "%s" -nc "%s"' % (orig, d[0], d[1])
-            #runCmd( mri_cmd,log )
+            new_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.mgz')
+            aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
 
+            print("    Transform back to Freesurfer space and replace aparc+aseg.mgz file")
+            mri_cmd = ['mri_convert', '-rl', aparcaseg_fs, '-rt', 'nearest', new_aparcaseg_native, '-nc', new_aparcaseg_fs]
+            subprocess.check_call(mri_cmd)
 
         return runtime
 
