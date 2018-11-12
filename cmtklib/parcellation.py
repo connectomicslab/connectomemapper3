@@ -205,6 +205,10 @@ class CombineParcellations(BaseInterface):
 
     def _run_interface(self,runtime):
 
+        #Freesurfer subject dir
+        fs_dir = op.join(self.inputs.subject_dir,self.inputs.subject_id)
+        print("Freesurfer subject directory: {}".format(fs_dir))
+
         # Freesurfer IDs for subcortical structures
         left_subcIds = np.array([10, 11, 12, 13, 26, 18, 17])
         left_subcIds_colors_r = np.array([0, 122, 236, 12, 255, 103, 220])
@@ -228,7 +232,7 @@ class CombineParcellations(BaseInterface):
         right_subcIds_2008 = np.array([49, 50, 51, 52, 58, 53, 54])
         right_subcIds_2008_colors_r = np.array([0, 122, 236, 12, 255, 220, 103])
         right_subcIds_2008_colors_g = np.array([118, 186, 13, 48, 165, 216, 255])
-        right_subcIds_2008_colors_b = np.array([14, 220, 176, 255, 0, 20, 255])
+        right_subcIds_2008_colCombineParcellationsors_b = np.array([14, 220, 176, 255, 0, 20, 255])
         right_subcort_2008_names = ["Right-Thalamus_Proper","Right-Caudate","Right-Putamen","Right-Pallidum","Right-Accumbens_area","Right-Hippocampus","Right-Amygdala"]
 
         # Thalamic Nuclei
