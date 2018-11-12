@@ -546,7 +546,7 @@ class CMP_BIDSAppWindow(HasTraits):
                         )
 
     log_view = QtView(Group(
-                            Item('list_of_processing_logfiles')
+                            Item('list_of_processing_logfiles'),
                         orientation='vertical',springy=True),
 
                         title='Connectome Mapper 3 BIDS App Progress',
@@ -611,6 +611,7 @@ class CMP_BIDSAppWindow(HasTraits):
         self.run_anat_pipeline = True
 
     def update_checksettings(self,new):
+        print("RESET Check BIDS App Settings")
         self.settings_checked = False
 
     def _update_selection_fired(self):
@@ -674,7 +675,7 @@ class CMP_BIDSAppWindow(HasTraits):
 
         return True
 
-    def start_bidsapp_process(self, bidsapp_tag, participant_label):
+    def start_bidsapp_participant_level_process(self, bidsapp_tag, participant_label):
         cmd = ['docker','run','-it','--rm',
                '-v', '{}:/bids_dataset'.format(self.bids_root),
                '-v', '{}/derivatives:/outputs'.format(self.bids_root),
@@ -742,7 +743,7 @@ class CMP_BIDSAppWindow(HasTraits):
             while len(processes) == maxprocs:
                 self.manage_bidsapp_procs(processes)
 
-            proc = self.start_bidsapp_process(self.bidsapp_tag,label)
+            proc = self.start_bidsapp_participant_level_process(self.bidsapp_tag,label)
             processes.append(proc)
 
         while len(processes) > 0:

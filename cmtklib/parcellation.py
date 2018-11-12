@@ -206,7 +206,7 @@ class CombineParcellations(BaseInterface):
     def _run_interface(self,runtime):
 
         #Freesurfer subject dir
-        fs_dir = op.join(self.inputs.subject_dir,self.inputs.subject_id)
+        fs_dir = op.join(self.inputs.subjects_dir,self.inputs.subject_id)
         print("Freesurfer subject directory: {}".format(fs_dir))
 
         # Freesurfer IDs for subcortical structures
