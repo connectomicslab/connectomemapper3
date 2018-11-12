@@ -486,7 +486,7 @@ class CMP_BIDSAppWindow(HasTraits):
     traits_view = QtView(Group(
                             Group(
                                 Group(
-                                    Item('bids_root', label='Location'),
+                                    Item('bids_root', style='readonly', label='Location'),
                                 label='BIDS dataset'),
                                 Group(
                                     HGroup(
@@ -584,6 +584,15 @@ class CMP_BIDSAppWindow(HasTraits):
         self.on_trait_change(self.update_run_dmri_pipeline,'run_dmri_pipeline')
         self.on_trait_change(self.update_run_fmri_pipeline,'run_fmri_pipeline')
 
+        self.on_trait_change(self.update_checksettings, 'list_of_subjects_to_be_processed')
+        self.on_trait_change(self.update_checksettings, 'anat_config')
+        self.on_trait_change(self.update_checksettings, 'run_dmri_pipeline')
+        self.on_trait_change(self.update_checksettings, 'dmri_config')
+        self.on_trait_change(self.update_checksettings, 'run_fmri_pipeline')
+        self.on_trait_change(self.update_checksettings, 'fmri_config')
+        self.on_trait_change(self.update_checksettings, 'fs_license')
+        self.on_trait_change(self.update_checksettings, 'fs_average')
+
     def update_run_anat_pipeline(self,new):
         print('Update run anat: %s'%new)
         print('Update run anat: %s'%self.run_anat_pipeline)
@@ -600,6 +609,9 @@ class CMP_BIDSAppWindow(HasTraits):
         print('Update run fmri: %s'%new)
         print('Update run fmri: %s'%self.run_fmri_pipeline)
         self.run_anat_pipeline = True
+
+    def update_checksettings(self,new):
+        self.settings_checked = False
 
     def _update_selection_fired(self):
         self.configure_traits(view='select_subjects_to_be_processed_view')
