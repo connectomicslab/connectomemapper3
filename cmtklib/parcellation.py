@@ -975,35 +975,45 @@ class CombineParcellations(BaseInterface):
                 mask_aparc_rh = np.zeros(Iaparcaseg.shape)
                 mask_aparc_rh[ind] = 1
 
+                mask_thal_lh = np.zeros(Iaparcaseg.shape)
                 for lab in left_thalNuclei:
                     ind = np.where(Ithal==lab)
-                    mask_thal_lh = np.zeros(Iaparcaseg.shape)
                     mask_thal_lh[ind] = 1
 
-                    # Identify voxels not included by thalamic Nuclei - should set to 2 (Gm) or 0
-                    tmp = mask_aparc_lh - mask_thal_lh
-                    ind = np.where(tmp>0)
-                    Iaparcaseg_new[ind] = 2
+                # Identify voxels not included by thalamic Nuclei - should set to 2 (Gm) or 0
+                tmp = mask_aparc_lh - mask_thal_lh
+                ind = np.where(tmp>0)
+                Iaparcaseg_new[ind] = 2
 
-                    # Identify voxels not included by freesurfer thalamic mask
-                    tmp = mask_aparc_lh - mask_thal_lh
-                    ind = np.where(tmp<0)
-                    Iaparcaseg_new[ind] = 10
+                # Identify voxels not included by freesurfer thalamic mask
+                tmp = mask_aparc_lh - mask_thal_lh
+                ind = np.where(tmp<0)
+                Iaparcaseg_new[ind] = 10
 
+                out_tmp = op.join(fs_dir, 'tmp', 'aparc-thal.lh.native.nii.gz')
+                print("    Save tmp image to {}".format(out_tmp))
+                img_tmp = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
+                ni.save(img_tmp, out_tmp)
+
+                mask_thal_rh = np.zeros(Iaparcaseg.shape)
                 for lab in right_thalNuclei:
                     ind = np.where(Ithal==lab)
-                    mask_thal_rh = np.zeros(Iaparcaseg.shape)
                     mask_thal_rh[ind] = 1
 
-                    # Identify voxels not included by thalamic Nuclei - should set to 41 (Gm) or 0
-                    tmp = mask_aparc_rh - mask_thal_rh
-                    ind = np.where(tmp>0)
-                    Iaparcaseg_new[ind] = 41
+                # Identify voxels not included by thalamic Nuclei - should set to 41 (Gm) or 0
+                tmp = mask_aparc_rh - mask_thal_rh
+                ind = np.where(tmp>0)
+                Iaparcaseg_new[ind] = 41
 
-                    # Identify voxels not included by freesurfer thalamic mask
-                    tmp = mask_aparc_rh - mask_thal_rh
-                    ind = np.where(tmp<0)
-                    Iaparcaseg_new[ind] = 49
+                # Identify voxels not included by freesurfer thalamic mask
+                tmp = mask_aparc_rh - mask_thal_rh
+                ind = np.where(tmp<0)
+                Iaparcaseg_new[ind] = 49
+
+                out_tmp = op.join(fs_dir, 'tmp', 'aparc-thal.rh.native.nii.gz')
+                print("    Save tmp image to {}".format(out_tmp))
+                img_tmp = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
+                ni.save(img_tmp, out_tmp)
 
             # # Hippocampal subfields (aparc+aseg labels: 17 and 53)
             # if (lh_subfield_defined and rh_subfield_defined):
