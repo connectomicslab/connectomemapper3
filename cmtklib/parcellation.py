@@ -960,7 +960,7 @@ class CombineParcellations(BaseInterface):
             print("    Transform to native space")
             mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
             subprocess.check_call(mri_cmd)
-            Iaparcaseg= ni.load(aparcaseg_native)
+            Iaparcaseg= ni.load(aparcaseg_native).get_data()
 
             Iaparcaseg_new = Iaparcaseg.copy()
 
