@@ -1687,7 +1687,9 @@ def create_T1_and_Brain(subject_id, subjects_dir):
 
     print("Create aparc+aseg.nii.gz in native space as %s"%out)
     cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
-    subprocess.check_call(mri_cmd)
+    process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+    proc_stdout = process.communicate()[0].strip()
+    iflogger.info(proc_stdout)
 
     print("[DONE]")
 
