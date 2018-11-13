@@ -1684,6 +1684,8 @@ def create_T1_and_Brain(subject_id, subjects_dir):
     mov = op.join(fs_dir,'mri','aparc+aseg.mgz')
     targ = op.join(fs_dir,'mri','rawavg.mgz')
     out = op.join(fs_dir,'tmp','aparc+aseg.native.nii.gz')
+
+    print("Create aparc+aseg.nii.gz in native space as %s"%out)
     cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
     print("[DONE]")
