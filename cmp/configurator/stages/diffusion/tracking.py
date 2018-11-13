@@ -105,6 +105,16 @@ class MRtrix_tracking_config(HasTraits):
         elif self.tracking_mode == "Probabilistic":
             self.curvature = 1.0
 
+    def _use_act_changed(self,new):
+        if new == False:
+            self.crop_at_gmwmi = False
+            self.seed_from_gmwmi = False
+            self.backtrack = False
+        else:
+            self.crop_at_gmwmi = True
+            self.seed_from_gmwmi = True
+            self.backtrack = False
+
     def _tracking_mode_changed(self,new):
         if new == "Deterministic" and not self.SD:
             self.curvature = 2.0

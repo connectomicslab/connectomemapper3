@@ -1055,8 +1055,8 @@ class CombineParcellations(BaseInterface):
             mri_cmd = ['mri_convert', '-rl', aparcaseg_fs, '-rt', 'nearest', new_aparcaseg_native, '-nc', new_aparcaseg_fs]
             subprocess.check_call(mri_cmd)
 
-            print("    Replace aparc+aseg.mgz file {} by {}".format(aparcaseg_fs,new_aparcaseg_fs))
-            shutil.copyfile(new_aparcaseg_fs,aparcaseg_fs)
+            #print("    Replace aparc+aseg.mgz file {} by {}".format(aparcaseg_fs,new_aparcaseg_fs))
+            #shutil.copyfile(new_aparcaseg_fs,aparcaseg_fs)
 
         return runtime
 
