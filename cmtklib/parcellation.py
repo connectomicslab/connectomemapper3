@@ -952,7 +952,7 @@ class CombineParcellations(BaseInterface):
             orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
             aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
             tmp_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.mgz')
-            aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.nii.gz')
+            aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.native.nii.gz')
 
             print("    Copy aparc+aseg to {}".format(tmp_aparcaseg_fs))
             shutil.copyfile(aparcaseg_fs,tmp_aparcaseg_fs)
@@ -1048,12 +1048,12 @@ class CombineParcellations(BaseInterface):
             img = ni.Nifti1Image(Iaparcaseg_new, V.get_affine(), hdr2)
             ni.save(img, new_aparcaseg_native)
 
-            new_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.mgz')
-            aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
+            # new_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.mgz')
+            # aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
 
-            print("    Transform back to Freesurfer space and replace aparc+aseg.mgz file")
-            mri_cmd = ['mri_convert', '-rl', aparcaseg_fs, '-rt', 'nearest', new_aparcaseg_native, '-nc', new_aparcaseg_fs]
-            subprocess.check_call(mri_cmd)
+            # print("    Transform back to Freesurfer space and replace aparc+aseg.mgz file")
+            # mri_cmd = ['mri_convert', '-rl', aparcaseg_fs, '-rt', 'nearest', new_aparcaseg_native, '-nc', new_aparcaseg_fs]
+            # subprocess.check_call(mri_cmd)
 
             #print("    Replace aparc+aseg.mgz file {} by {}".format(aparcaseg_fs,new_aparcaseg_fs))
             #shutil.copyfile(new_aparcaseg_fs,aparcaseg_fs)
@@ -1679,6 +1679,12 @@ def create_T1_and_Brain(subject_id, subjects_dir):
     # Convert ASeg image
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','aseg.mgz'),'-o',op.join(fs_dir,'mri','aseg.nii.gz')]
     subprocess.check_call(mri_cmd)
+
+    # Moving aparc+aseg.mgz back to its original space for ACT
+    mov = op.join(fs_dir,'mri','aparc+aseg.mgz')
+    targ = op.join(fs_dir,'mri','rawavg.mgz')
+    out = op.join(fs_dir,'tmp','aparc+aseg.native.nii.gz')
+    cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
 
     print("[DONE]")
 

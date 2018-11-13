@@ -92,6 +92,8 @@ class DiffusionPipeline(Pipeline):
     parcellation_scheme = Str
     atlas_info = Dict()
 
+    fs_dir = Directory
+
     global_conf = Global_Configuration()
 
     preprocessing = Button('Preprocessing')
@@ -141,9 +143,11 @@ class DiffusionPipeline(Pipeline):
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
             self.subject_directory =  os.path.join(self.base_directory,self.subject,project_info.subject_session)
+            self.fs_dir = os.path.join(self.base_directory,'derivatives','freesurfer','{}_{}'.format(self.subject,project_info.subject_session))
         else:
             self.global_conf.subject_session = ''
             self.subject_directory =  os.path.join(self.base_directory,self.subject)
+            self.fs_dir = os.path.join(self.base_directory,'derivatives','freesurfer',self.subject)
 
         self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
 
@@ -772,9 +776,10 @@ class DiffusionPipeline(Pipeline):
         # Create diffusion flow
 
         diffusion_flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
-        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','aseg','brain','T2','brain_mask','wm_mask_file','roi_volumes','roi_graphMLs','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')# ,'atlas_info'
+        diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','fs_dir','aseg','brain','T2','brain_mask','wm_mask_file','roi_volumes','roi_graphMLs','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')# ,'atlas_info'
         diffusion_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         diffusion_inputnode.inputs.atlas_info = self.atlas_info
+        diffusion_inputnode.inputs.fs_dir = self.fs_dir
 
         diffusion_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectivity_matrices']),name='outputnode')
         diffusion_flow.add_nodes([diffusion_inputnode,diffusion_outputnode])
@@ -822,7 +827,7 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
             diffusion_flow.connect([
-                                    (diffusion_inputnode,preproc_flow,[('diffusion','inputnode.diffusion'),('brain','inputnode.brain'),('aseg','inputnode.aseg'),('brain_mask','inputnode.brain_mask'),
+                                    (diffusion_inputnode,preproc_flow,[('diffusion','inputnode.diffusion'),('brain','inputnode.brain'),('fs_dir','inputnode.fs_dir'),('aseg','inputnode.aseg'),('brain_mask','inputnode.brain_mask'),
                                                                         ('wm_mask_file','inputnode.wm_mask_file'),('roi_volumes','inputnode.roi_volumes'),
                                                                         ('bvecs','inputnode.bvecs'),('bvals','inputnode.bvals'),('T1','inputnode.T1')]),
                                     ])

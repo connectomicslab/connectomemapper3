@@ -208,12 +208,12 @@ class PreprocessingStage(Stage):
     def __init__(self):
         self.name = 'preprocessing_stage'
         self.config = PreprocessingConfig()
-        self.inputs = ["diffusion","bvecs","bvals","T1","aseg","brain","brain_mask","wm_mask_file","roi_volumes"]
+        self.inputs = ["diffusion","bvecs","bvals","T1","fs_dir","aseg","brain","brain_mask","wm_mask_file","roi_volumes"]
         self.outputs = ["diffusion_preproc","bvecs_rot","bvals","dwi_brain_mask","T1","act_5TT","gmwmi","brain","brain_mask","brain_mask_full","wm_mask_file","partial_volume_files","roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         print inputnode
-        processing_input = pe.Node(interface=util.IdentityInterface(fields=['diffusion','aseg','bvecs','bvals','grad','acqp','index','T1','brain','brain_mask','wm_mask_file','roi_volumes']),name='processing_input')
+        processing_input = pe.Node(interface=util.IdentityInterface(fields=['diffusion','fs_dir','aseg','bvecs','bvals','grad','acqp','index','T1','brain','brain_mask','wm_mask_file','roi_volumes']),name='processing_input')
 
 
         # For DSI acquisition: extract the hemisphere that contains the data
@@ -242,7 +242,7 @@ class PreprocessingStage(Stage):
                         ])
 
         flow.connect([
-                    (inputnode,processing_input,[('T1','T1'),('aseg','aseg'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),
+                    (inputnode,processing_input,[('T1','T1'),('fs_dir','fs_dir'),('aseg','aseg'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),
                     (processing_input,outputnode,[('bvals','bvals')])
                     ])
 
@@ -776,8 +776,19 @@ class PreprocessingStage(Stage):
         mrtrix_5tt = pe.Node(interface=Generate5tt(out_file='mrtrix_5tt.nii.gz'),name='mrtrix_5tt')
         mrtrix_5tt.inputs.algorithm = 'freesurfer'
 
+        def get_aparcaseg_file(fs_dir):
+            if os.path.isfile(os.path.join(fs_dir,'tmp','aparc+aseg.Lausanne2018.native.nii.gz')):
+                print("Return %s"%os.path.join(fs_dir,'tmp','aparc+aseg.Lausanne2018.native.nii.gz'))
+                return os.path.join(fs_dir,'tmp','aparc+aseg.Lausanne2018.native.nii.gz')
+            elif os.path.isfile(os.path.join(fs_dir,'tmp','aparc+aseg.native.nii.gz')):
+                print("Return %s"%os.path.join(fs_dir,'tmp','aparc+aseg.native.nii.gz'))
+                return os.path.join(fs_dir,'tmp','aparc+aseg.native.nii.gz')
+            else:
+                print("ERROR: No aparc+aseg file found for 5ttgen!")
+                return ''
+
         flow.connect([
-    		    (processing_input,mrtrix_5tt,[('aseg','in_file')]),
+    		    (processing_input,mrtrix_5tt,[(('fs_dir', get_aparcaseg_file),'in_file')]),
                 (mrtrix_5tt,fs_mriconvert_5tt,[('out_file','in_file')]),
                 (fs_mriconvert_5tt,outputnode,[('out_file','act_5TT')]),
     		    ])
