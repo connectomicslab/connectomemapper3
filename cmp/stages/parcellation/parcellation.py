@@ -100,7 +100,7 @@ class ParcellationStage(Stage):
             "csf_eroded",
             "brain_eroded",
             "gm_mask_file",
-            "aseg",
+            "aseg","aparc_aseg",
     	       #"cc_unknown_file","ribbon_file","roi_files",
             "roi_volumes","roi_colorLUTs","roi_graphMLs","parcellation_scheme","atlas_info"]
 
@@ -126,6 +126,7 @@ class ParcellationStage(Stage):
 
             flow.connect([
                         (parc_node,outputnode,[("aseg","aseg")]),
+                        (parc_node,outputnode,[("aparc_aseg","aparc_aseg")]),
                         ])
 
             if self.config.parcellation_scheme == 'Lausanne2018':
