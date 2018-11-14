@@ -8,6 +8,7 @@
 """
 
 import os
+import shutil
 import datetime
 from cmp.pipelines.common import *
 
@@ -41,7 +42,6 @@ from nipype.interfaces.utility import Merge
 from nipype import config, logging
 from nipype.caching import Memory
 from pyface.api import ImageResource
-import shutil
 
 import nibabel as nib
 
@@ -148,6 +148,8 @@ class DiffusionPipeline(Pipeline):
             self.global_conf.subject_session = ''
             self.subject_directory =  os.path.join(self.base_directory,self.subject)
             self.fs_dir = os.path.join(self.base_directory,'derivatives','freesurfer',self.subject)
+
+        print('FS DIR: {}'.format(self.fs_dir))
 
         self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
 
