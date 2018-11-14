@@ -1421,7 +1421,7 @@ class ParcellateThalamus(BaseInterface):
         return outputs
 
 
-class ParcellateInputSpec(BaseInterfaceInputSpec):
+class bidsappmanagerputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(desc='Freesurfer main directory')
     subject_id = traits.String(mandatory=True, desc='Subject ID')
     parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','Lausanne2018','NativeFreesurfer'], usedefault = True)
@@ -1445,8 +1445,8 @@ class ParcellateOutputSpec(TraitedSpec):
     T1 = File(desc="T1 image file")
     brain = File(desc="Brain-masked T1 image file")
     brain_mask = File(desc="Brain mask file")
-    aseg = File(desc="ASeg image file")
-
+    aseg = File(desc="ASeg image file (in native space)")
+    aparc_aseg = File(desc="APArc+ASeg image file (in native space)")
 
 class Parcellate(BaseInterface):
     """Subdivides segmented ROI file into smaller subregions
@@ -1516,6 +1516,7 @@ class Parcellate(BaseInterface):
         outputs['brain_mask'] = op.abspath('brain_mask.nii.gz')
 
         outputs['aseg'] = op.abspath('aseg.nii.gz')
+        outputs['aparc_aseg'] = op.abspath('aparc+aseg.native.nii.gz')
 
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         outputs['gray_matter_mask_file'] = op.abspath('gmmask.nii.gz')
@@ -2789,15 +2790,16 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
         for p in get_parcellation('Lausanne2008').keys():
             ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
             ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
+        ds.append( (op.join(fs_dir, 'mri','aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz') )
     elif parcellation_scheme == 'Lausanne2018':
         for p in get_parcellation('Lausanne2018').keys():
             #ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
             ds.append( (op.join(fs_dir, 'mri','ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
+        ds.append( (op.join(fs_dir, 'tmp','aparc+aseg.Lausanne2018.mgz'), 'aparc+aseg.native.nii.gz') )
 #        try:
 #            os.makedirs(op.join('.', p))
 #        except:
 #            pass
-
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
 
     for d in ds:
@@ -2960,7 +2962,8 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
 
     # datasets to crop and move: (from, to)
     ds = [
-          (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz')
+          (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
+          (op.join(fs_dir, 'mri', 'aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz')
           ]
 
     for p in get_parcellation('NativeFreesurfer').keys():

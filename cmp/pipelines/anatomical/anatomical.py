@@ -216,7 +216,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         types = layout.get_types()
 
         subjid = self.subject.split("-")[1]
-        
+
         if self.global_conf.subject_session == '':
             T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
             files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz')
@@ -390,6 +390,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                             ('csf_mask_eroded.nii.gz',self.subject+'_T1w_class-CSF_eroded.nii.gz'),
                                             #('gm_mask',self.subject+'_T1w_class-GM'),
                                             #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
+                                            ('aparc+aseg.native.nii.gz',self.subject+'_T1w_aparc+aseg.nii.gz'),
                                             ('T1w_class-GM.nii.gz',self.subject+'_T1w_class-GM.nii.gz'),
                                             ('ROIv_HR_th_scale1.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
                                             ('ROIv_HR_th_scale2.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
@@ -447,7 +448,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         anat_flow = pe.Workflow(name='anatomical_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
         anat_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
-        anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","aseg","brain","brain_mask","wm_mask_file", "gm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
+        anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","aseg","aparc_aseg","brain","brain_mask","wm_mask_file", "gm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
             "roi_volumes","parcellation_scheme","atlas_info","roi_colorLUTs", "roi_graphMLs"]),name="outputnode")
         anat_flow.add_nodes([anat_inputnode,anat_outputnode])
 
@@ -505,6 +506,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                                ("outputnode.brain_eroded","brain_eroded"),
                                                                ("outputnode.T1","T1"),
                                                                ("outputnode.aseg","aseg"),
+                                                               ("outputnode.aparc_aseg","aparc_aseg"),
                                                                ("outputnode.brain_mask","brain_mask"),
                                                                ("outputnode.brain","brain"),
                                                                ])
@@ -519,6 +521,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                                ("outputnode.gm_mask_file","gm_mask_file"),
                                                                ("outputnode.csf_eroded","csf_eroded"),
                                                                ("outputnode.brain_eroded","brain_eroded"),
+
                                                                ]),
                                 ])
 
@@ -530,6 +533,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         anat_flow.connect([
                         (anat_outputnode,sinker,[("T1","anat.@T1")]),
                         (anat_outputnode,sinker,[("aseg","anat.@aseg")]),
+                        (anat_outputnode,sinker,[("aparc_aseg","anat.@aparc_aseg")]),
                         (anat_outputnode,sinker,[("brain","anat.@brain")]),
                         (anat_outputnode,sinker,[("brain_mask","anat.@brain_mask")]),
                         (anat_outputnode,sinker,[("wm_mask_file","anat.@wm_mask")]),
