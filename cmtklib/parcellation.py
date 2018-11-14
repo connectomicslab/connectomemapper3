@@ -1421,7 +1421,7 @@ class ParcellateThalamus(BaseInterface):
         return outputs
 
 
-class bidsappmanagerputSpec(BaseInterfaceInputSpec):
+class ParcellateInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(desc='Freesurfer main directory')
     subject_id = traits.String(mandatory=True, desc='Subject ID')
     parcellation_scheme = traits.Enum('Lausanne2008',['Lausanne2008','Lausanne2018','NativeFreesurfer'], usedefault = True)
