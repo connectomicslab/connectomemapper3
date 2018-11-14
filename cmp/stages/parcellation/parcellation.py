@@ -126,7 +126,6 @@ class ParcellationStage(Stage):
 
             flow.connect([
                         (parc_node,outputnode,[("aseg","aseg")]),
-                        (parc_node,outputnode,[("aparc_aseg","aparc_aseg")]),
                         ])
 
             if self.config.parcellation_scheme == 'Lausanne2018':
@@ -168,6 +167,7 @@ class ParcellationStage(Stage):
                                 ])
 
                 flow.connect([
+                            (parcCombiner,outputnode,[("aparc_aseg","aparc_aseg")]),
                             (parcCombiner,outputnode,[("output_rois","roi_volumes")]),
                             (parcCombiner,outputnode,[("colorLUT_files","roi_colorLUTs")]),
                             (parcCombiner,outputnode,[("graphML_files","roi_graphMLs")]),
@@ -182,6 +182,7 @@ class ParcellationStage(Stage):
                     #         ])
             else:
                 flow.connect([
+                            (parc_node,outputnode,[("aparc_aseg","aparc_aseg")]),
                             (parc_node,outputnode,[("roi_files_in_structural_space","roi_volumes")]),
                         ])
 

@@ -188,6 +188,7 @@ class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
     subject_id = traits.Str(desc='Freesurfer subject id')
 
 class CombineParcellationsOutputSpec(TraitedSpec):
+    aparc_aseg = File(exists=True)
     output_rois = OutputMultiPath(File(exists=True))
     colorLUT_files = OutputMultiPath(File(exists=True))
     graphML_files = OutputMultiPath(File(exists=True))
@@ -1043,7 +1044,8 @@ class CombineParcellations(BaseInterface):
                 Iaparcaseg_new[ind] = 0
                 Iaparcaseg_new[indstem] = 16
 
-            new_aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
+            # new_aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
+            new_aparcaseg_native = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
             print("    Save relabeled image to {}".format(new_aparcaseg_native))
             img = ni.Nifti1Image(Iaparcaseg_new, V.get_affine(), hdr2)
             ni.save(img, new_aparcaseg_native)
@@ -1062,6 +1064,7 @@ class CombineParcellations(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
+        outputs['aparc_aseg'] = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
         outputs['output_rois'] = self._gen_outfilenames('ROIv_HR_th','_final.nii.gz')
         outputs['colorLUT_files'] = self._gen_outfilenames('ROIv_HR_th','_FreeSurferColorLUT.txt')
         outputs['graphML_files'] = self._gen_outfilenames('ROIv_HR_th','.graphml')

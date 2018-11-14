@@ -391,6 +391,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                             #('gm_mask',self.subject+'_T1w_class-GM'),
                                             #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
                                             ('aparc+aseg.native.nii.gz',self.subject+'_T1w_aparc+aseg.nii.gz'),
+                                            ('aparc+aseg.Lausanne2018.native.nii.gz',self.subject+'_T1w_aparc+aseg.nii.gz'),
                                             ('T1w_class-GM.nii.gz',self.subject+'_T1w_class-GM.nii.gz'),
                                             ('ROIv_HR_th_scale1.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
                                             ('ROIv_HR_th_scale2.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
