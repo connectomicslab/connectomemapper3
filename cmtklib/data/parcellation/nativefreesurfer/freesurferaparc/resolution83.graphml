@@ -1,0 +1,926 @@
+<?xml version="1.0" encoding="utf-8"?><graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key attr.name="dn_position_flatmap" attr.type="string" for="node" id="d7" />
+  <key attr.name="dn_href" attr.type="string" for="node" id="d6" />
+  <key attr.name="dn_hemisphere" attr.type="string" for="node" id="d5" />
+  <key attr.name="dn_label" attr.type="string" for="node" id="d4" />
+  <key attr.name="dn_fsname" attr.type="string" for="node" id="d3" />
+  <key attr.name="dn_correspondence_id" attr.type="string" for="node" id="d2" />
+  <key attr.name="dn_region" attr.type="string" for="node" id="d1" />
+  <key attr.name="dn_colorcode" attr.type="string" for="node" id="d0" />
+  <key attr.name="dn_name" attr.type="string" for="node" id="d8" />
+  <graph edgedefault="undirected" id="">
+    <node id="56">
+      <data key="d0">140,20,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">56</data>
+      <data key="d3">ctx-lh-isthmuscingulate</data>
+      <data key="d8">lh.isthmuscingulate</data>
+      <data key="d4">icRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/icRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-113.85361480712891, -132.67855834960938, 0.0)</data>
+    </node>
+    <node id="54">
+      <data key="d0">125,100,160</data>
+      <data key="d1">cortical</data>
+      <data key="d2">54</data>
+      <data key="d3">ctx-lh-caudalanteriorcingulate</data>
+      <data key="d8">lh.caudalanteriorcingulate</data>
+      <data key="d4">caccRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/caccRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-98.002021789550781, 71.687637329101562, 0.0)</data>
+    </node>
+    <node id="42">
+      <data key="d0">35,75,50</data>
+      <data key="d1">cortical</data>
+      <data key="d2">42</data>
+      <data key="d3">ctx-lh-lateralorbitofrontal</data>
+      <data key="d8">lh.lateralorbitofrontal</data>
+      <data key="d4">lofRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/lofRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-219.02761840820312, 99.057907104492188, 0.0)</data>
+    </node>
+    <node id="22">
+      <data key="d0">120,100,60</data>
+      <data key="d1">cortical</data>
+      <data key="d2">22</data>
+      <data key="d3">ctx-rh-pericalcarine</data>
+      <data key="d8">rh.pericalcarine</data>
+      <data key="d4">pcalRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/pcalRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(228.51571655273438, -148.13288879394531, 0.0)</data>
+    </node>
+    <node id="43">
+      <data key="d0">20,100,50</data>
+      <data key="d1">cortical</data>
+      <data key="d2">43</data>
+      <data key="d3">ctx-lh-parsorbitalis</data>
+      <data key="d8">lh.parsorbitalis</data>
+      <data key="d4">poRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/poRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-226.57292175292969, 73.565376281738281, 0.0)</data>
+    </node>
+    <node id="60">
+      <data key="d0">220,60,220</data>
+      <data key="d1">cortical</data>
+      <data key="d2">60</data>
+      <data key="d3">ctx-lh-inferiorparietal</data>
+      <data key="d8">lh.inferiorparietal</data>
+      <data key="d4">ipRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/ipRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-202.24066162109375, -86.3502197265625, 0.0)</data>
+    </node>
+    <node id="61">
+      <data key="d0">160,140,180</data>
+      <data key="d1">cortical</data>
+      <data key="d2">61</data>
+      <data key="d3">ctx-lh-precuneus</data>
+      <data key="d8">lh.precuneus</data>
+      <data key="d4">pcunRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/pcunRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-125.52231597900391, -113.10212707519531, 0.0)</data>
+    </node>
+    <node id="62">
+      <data key="d0">220,20,100</data>
+      <data key="d1">cortical</data>
+      <data key="d2">62</data>
+      <data key="d3">ctx-lh-cuneus</data>
+      <data key="d8">lh.cuneus</data>
+      <data key="d4">cunRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/cunRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-166.67817687988281, -144.14979553222656, 0.0)</data>
+    </node>
+    <node id="63">
+      <data key="d0">120,100,60</data>
+      <data key="d1">cortical</data>
+      <data key="d2">63</data>
+      <data key="d3">ctx-lh-pericalcarine</data>
+      <data key="d8">lh.pericalcarine</data>
+      <data key="d4">pcalRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/pcalRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-202.66438293457031, -160.99687194824219, 0.0)</data>
+    </node>
+    <node id="64">
+      <data key="d0">20,30,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">64</data>
+      <data key="d3">ctx-lh-lateraloccipital</data>
+      <data key="d8">lh.lateraloccipital</data>
+      <data key="d4">locRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/locRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-220.46424865722656, -128.98721313476562, 0.0)</data>
+    </node>
+    <node id="65">
+      <data key="d0">225,140,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">65</data>
+      <data key="d3">ctx-lh-lingual</data>
+      <data key="d8">lh.lingual</data>
+      <data key="d4">linRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/linRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-261.60980224609375, -158.47769165039062, 0.0)</data>
+    </node>
+    <node id="66">
+      <data key="d0">180,220,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">66</data>
+      <data key="d3">ctx-lh-fusiform</data>
+      <data key="d8">lh.fusiform</data>
+      <data key="d4">fusiRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/fusiRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-284.425048828125, -115.26324462890625, 0.0)</data>
+    </node>
+    <node id="67">
+      <data key="d0">20,220,60</data>
+      <data key="d1">cortical</data>
+      <data key="d2">67</data>
+      <data key="d3">ctx-lh-parahippocampal</data>
+      <data key="d8">lh.parahippocampal</data>
+      <data key="d4">paraRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/paraRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-306.39849853515625, -133.82810974121094, 0.0)</data>
+    </node>
+    <node id="68">
+      <data key="d0">220,20,10</data>
+      <data key="d1">cortical</data>
+      <data key="d2">68</data>
+      <data key="d3">ctx-lh-entorhinal</data>
+      <data key="d8">lh.entorhinal</data>
+      <data key="d4">entRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/entRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-327.41339111328125, -105.49823760986328, 0.0)</data>
+    </node>
+    <node id="69">
+      <data key="d0">70,70,70</data>
+      <data key="d1">cortical</data>
+      <data key="d2">69</data>
+      <data key="d3">ctx-lh-temporalpole</data>
+      <data key="d8">lh.temporalpole</data>
+      <data key="d4">tpRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/tpRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-333.05975341796875, -76.97882080078125, 0.0)</data>
+    </node>
+    <node id="80">
+      <data key="d0">231,159,21</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">80</data>
+      <data key="d3">Left-Accumbens-area</data>
+      <data key="d8">Left-Accumbens-area</data>
+      <data key="d4">NAcc_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://connectome.ch/wiki/NAcc_(Homo_sapiens)</data>
+      <data key="d7">(-12.699569702148438, -16.955726623535156, 0.0)</data>
+    </node>
+    <node id="81">
+      <data key="d0">150,246,255</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">81</data>
+      <data key="d3">Left-Hippocampus</data>
+      <data key="d8">Left-Hippocampus</data>
+      <data key="d4">hippRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/hippRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-25.25225830078125, -25.504560470581055, 0.0)</data>
+    </node>
+    <node id="53">
+      <data key="d0">80,20,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">53</data>
+      <data key="d3">ctx-lh-rostralanteriorcingulate</data>
+      <data key="d8">lh.rostralanteriorcingulate</data>
+      <data key="d4">raccRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/raccRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-138.74307250976562, 119.67246246337891, 0.0)</data>
+    </node>
+    <node id="24">
+      <data key="d0">225,140,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">24</data>
+      <data key="d3">ctx-rh-lingual</data>
+      <data key="d8">rh.lingual</data>
+      <data key="d4">linRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/linRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(276.22320556640625, -135.54867553710938, 0.0)</data>
+    </node>
+    <node id="25">
+      <data key="d0">180,220,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">25</data>
+      <data key="d3">ctx-rh-fusiform</data>
+      <data key="d8">rh.fusiform</data>
+      <data key="d4">fusiRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/fusiRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(296.927978515625, -86.519805908203125, 0.0)</data>
+    </node>
+    <node id="26">
+      <data key="d0">20,220,60</data>
+      <data key="d1">cortical</data>
+      <data key="d2">26</data>
+      <data key="d3">ctx-rh-parahippocampal</data>
+      <data key="d8">rh.parahippocampal</data>
+      <data key="d4">paraRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/paraRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(321.20687866210938, -97.857009887695312, 0.0)</data>
+    </node>
+    <node id="27">
+      <data key="d0">220,20,10</data>
+      <data key="d1">cortical</data>
+      <data key="d2">27</data>
+      <data key="d3">ctx-rh-entorhinal</data>
+      <data key="d8">rh.entorhinal</data>
+      <data key="d4">entRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/entRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(332.32293701171875, -60.190280914306641, 0.0)</data>
+    </node>
+    <node id="20">
+      <data key="d0">160,140,180</data>
+      <data key="d1">cortical</data>
+      <data key="d2">20</data>
+      <data key="d3">ctx-rh-precuneus</data>
+      <data key="d8">rh.precuneus</data>
+      <data key="d4">pcunRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/pcunRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(140.71604919433594, -108.33354949951172, 0.0)</data>
+    </node>
+    <node id="21">
+      <data key="d0">220,20,100</data>
+      <data key="d1">cortical</data>
+      <data key="d2">21</data>
+      <data key="d3">ctx-rh-cuneus</data>
+      <data key="d8">rh.cuneus</data>
+      <data key="d4">cunRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/cunRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(188.18595886230469, -137.62620544433594, 0.0)</data>
+    </node>
+    <node id="48">
+      <data key="d0">75,50,125</data>
+      <data key="d1">cortical</data>
+      <data key="d2">48</data>
+      <data key="d3">ctx-lh-rostralmiddlefrontal</data>
+      <data key="d8">lh.rostralmiddlefrontal</data>
+      <data key="d4">rmfRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/rmfRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-182.59782409667969, 69.125022888183594, 0.0)</data>
+    </node>
+    <node id="49">
+      <data key="d0">20,220,160</data>
+      <data key="d1">cortical</data>
+      <data key="d2">49</data>
+      <data key="d3">ctx-lh-superiorfrontal</data>
+      <data key="d8">lh.superiorfrontal</data>
+      <data key="d4">sfRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/sfRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-124.10546875, 55.665950775146484, 0.0)</data>
+    </node>
+    <node id="46">
+      <data key="d0">220,60,20</data>
+      <data key="d1">cortical</data>
+      <data key="d2">46</data>
+      <data key="d3">ctx-lh-parstriangularis</data>
+      <data key="d8">lh.parstriangularis</data>
+      <data key="d4">ptriRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/ptriRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-223.92721557617188, 51.826194763183594, 0.0)</data>
+    </node>
+    <node id="23">
+      <data key="d0">20,30,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">23</data>
+      <data key="d3">ctx-rh-lateraloccipital</data>
+      <data key="d8">rh.lateraloccipital</data>
+      <data key="d4">locRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/locRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(236.46867370605469, -118.19830322265625, 0.0)</data>
+    </node>
+    <node id="44">
+      <data key="d0">100,0,100</data>
+      <data key="d1">cortical</data>
+      <data key="d2">44</data>
+      <data key="d3">ctx-lh-frontalpole</data>
+      <data key="d8">lh.frontalpole</data>
+      <data key="d4">fpRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/fpRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-175.45909118652344, 109.31638336181641, 0.0)</data>
+    </node>
+    <node id="45">
+      <data key="d0">200,35,75</data>
+      <data key="d1">cortical</data>
+      <data key="d2">45</data>
+      <data key="d3">ctx-lh-medialorbitofrontal</data>
+      <data key="d8">lh.medialorbitofrontal</data>
+      <data key="d4">mofRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/mofRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-161.40394592285156, 135.23875427246094, 0.0)</data>
+    </node>
+    <node id="28">
+      <data key="d0">70,70,70</data>
+      <data key="d1">cortical</data>
+      <data key="d2">28</data>
+      <data key="d3">ctx-rh-temporalpole</data>
+      <data key="d8">rh.temporalpole</data>
+      <data key="d4">tpRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/tpRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(313.7781982421875, -7.524782657623291, 0.0)</data>
+    </node>
+    <node id="29">
+      <data key="d0">180,40,120</data>
+      <data key="d1">cortical</data>
+      <data key="d2">29</data>
+      <data key="d3">ctx-rh-inferiortemporal</data>
+      <data key="d8">rh.inferiortemporal</data>
+      <data key="d4">itRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/itRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(290.88983154296875, -62.0501708984375, 0.0)</data>
+    </node>
+    <node id="40">
+      <data key="d0">150,246,255</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">40</data>
+      <data key="d3">Right-Hippocampus</data>
+      <data key="d8">Right-Hippocampus</data>
+      <data key="d4">hippRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/hippRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(26.857749938964844, -24.793039321899414, 0.0)</data>
+    </node>
+    <node id="41">
+      <data key="d0">255,128,191</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">41</data>
+      <data key="d3">Right-Amygdala</data>
+      <data key="d8">Right-Amygdala</data>
+      <data key="d4">amgRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/amgRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(24.949569702148438, -6.3710041046142578, 0.0)</data>
+    </node>
+    <node id="1">
+      <data key="d0">35,75,50</data>
+      <data key="d1">cortical</data>
+      <data key="d2">1</data>
+      <data key="d3">ctx-rh-lateralorbitofrontal</data>
+      <data key="d8">rh.lateralorbitofrontal</data>
+      <data key="d4">lofRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/lofRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(261.222412109375, 78.513595581054688, 0.0)</data>
+    </node>
+    <node id="82">
+      <data key="d0">255,128,191</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">82</data>
+      <data key="d3">Left-Amygdala</data>
+      <data key="d8">Left-Amygdala</data>
+      <data key="d4">amgRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/amgRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-24.000558853149414, -7.5770430564880371, 0.0)</data>
+    </node>
+    <node id="3">
+      <data key="d0">100,0,100</data>
+      <data key="d1">cortical</data>
+      <data key="d2">3</data>
+      <data key="d3">ctx-rh-frontalpole</data>
+      <data key="d8">rh.frontalpole</data>
+      <data key="d4">fpRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/fpRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(217.58384704589844, 110.68553924560547, 0.0)</data>
+    </node>
+    <node id="2">
+      <data key="d0">20,100,50</data>
+      <data key="d1">cortical</data>
+      <data key="d2">2</data>
+      <data key="d3">ctx-rh-parsorbitalis</data>
+      <data key="d8">rh.parsorbitalis</data>
+      <data key="d4">poRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/poRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(239.9813232421875, 73.080757141113281, 0.0)</data>
+    </node>
+    <node id="5">
+      <data key="d0">220,60,20</data>
+      <data key="d1">cortical</data>
+      <data key="d2">5</data>
+      <data key="d3">ctx-rh-parstriangularis</data>
+      <data key="d8">rh.parstriangularis</data>
+      <data key="d4">ptriRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/ptriRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(232.71147155761719, 54.232433319091797, 0.0)</data>
+    </node>
+    <node id="4">
+      <data key="d0">200,35,75</data>
+      <data key="d1">cortical</data>
+      <data key="d2">4</data>
+      <data key="d3">ctx-rh-medialorbitofrontal</data>
+      <data key="d8">rh.medialorbitofrontal</data>
+      <data key="d4">mofRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/mofRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(212.99113464355469, 132.89321899414062, 0.0)</data>
+    </node>
+    <node id="7">
+      <data key="d0">75,50,125</data>
+      <data key="d1">cortical</data>
+      <data key="d2">7</data>
+      <data key="d3">ctx-rh-rostralmiddlefrontal</data>
+      <data key="d8">rh.rostralmiddlefrontal</data>
+      <data key="d4">rmfRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/rmfRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(198.322021484375, 73.374580383300781, 0.0)</data>
+    </node>
+    <node id="6">
+      <data key="d0">220,180,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">6</data>
+      <data key="d3">ctx-rh-parsopercularis</data>
+      <data key="d8">rh.parsopercularis</data>
+      <data key="d4">popRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/popRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(217.47889709472656, 37.538906097412109, 0.0)</data>
+    </node>
+    <node id="9">
+      <data key="d0">100,25,0</data>
+      <data key="d1">cortical</data>
+      <data key="d2">9</data>
+      <data key="d3">ctx-rh-caudalmiddlefrontal</data>
+      <data key="d8">rh.caudalmiddlefrontal</data>
+      <data key="d4">cmfRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/cmfRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(169.07188415527344, 41.908187866210938, 0.0)</data>
+    </node>
+    <node id="8">
+      <data key="d0">20,220,160</data>
+      <data key="d1">cortical</data>
+      <data key="d2">8</data>
+      <data key="d3">ctx-rh-superiorfrontal</data>
+      <data key="d8">rh.superiorfrontal</data>
+      <data key="d4">sfRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/sfRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(145.85946655273438, 71.091300964355469, 0.0)</data>
+    </node>
+    <node id="83">
+      <data key="d0">121,98,74</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">83</data>
+      <data key="d3">Brain-Stem</data>
+      <data key="d8">Brain-Stem</data>
+      <data key="d4">brstRes83</data>
+      <data key="d5">none</data>
+      <data key="d6">http://www.connectome.ch/wiki/brstRes83_(Homo sapiens)</data>
+      <data key="d7">(0.91352593898773193, -33.081859588623047, 0.0)</data>
+    </node>
+    <node id="39">
+      <data key="d0">231,159,21</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">39</data>
+      <data key="d3">Right-Accumbens-area</data>
+      <data key="d8">Right-Accumbens-area</data>
+      <data key="d4">NAcc_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://connectome.ch/wiki/NAcc_(Homo_sapiens)</data>
+      <data key="d7">(13.817050933837891, -16.249702453613281, 0.0)</data>
+    </node>
+    <node id="34">
+      <data key="d0">250,150,200</data>
+      <data key="d1">cortical</data>
+      <data key="d2">34 </data>
+      <data key="d3">ctx-rh-insula</data>
+      <data key="d8">rh.insula</data>
+      <data key="d4">IL</data>
+      <data key="d5">right</data>
+      <data key="d6">http://connectome.ch/wiki/IL_%28Homo_sapiens%29</data>
+      <data key="d7">(255.20555114746094, -3.5741846561431885, 0.0)</data>
+    </node>
+    <node id="77">
+      <data key="d0">32,101,149</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">77</data>
+      <data key="d3">Left-Caudate</data>
+      <data key="d8">Left-Caudate</data>
+      <data key="d4">CAN_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://connectome.ch/wiki/CAN_(Homo_sapiens)</data>
+      <data key="d7">(-26.122026443481445, -0.85831815004348755, 0.0)</data>
+    </node>
+    <node id="76">
+      <data key="d0">100,172,222</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">76</data>
+      <data key="d3">Left-Thalamus-Proper</data>
+      <data key="d8">Left-Thalamus-Proper</data>
+      <data key="d4">TH_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://connectome.ch/wiki/TH_(Homo_sapiens)</data>
+      <data key="d7">(-15.221392631530762, 7.1309566497802734, 0.0)</data>
+    </node>
+    <node id="75">
+      <data key="d0">250,150,200</data>
+      <data key="d1">cortical</data>
+      <data key="d2">75</data>
+      <data key="d3">ctx-lh-insula</data>
+      <data key="d8">lh.insula</data>
+      <data key="d4">IL</data>
+      <data key="d5">left</data>
+      <data key="d6">http://connectome.ch/wiki/IL_%28Homo_sapiens%29</data>
+      <data key="d7">(-255.43733215332031, -20.54136848449707, 0.0)</data>
+    </node>
+    <node id="38">
+      <data key="d0">255,43,78</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">38</data>
+      <data key="d3">Right-Pallidum</data>
+      <data key="d8">Right-Pallidum</data>
+      <data key="d4">GP_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/GP_(Homo sapiens)</data>
+      <data key="d7">(9.9014759063720703, 10.648186683654785, 0.0)</data>
+    </node>
+    <node id="73">
+      <data key="d0">140,220,220</data>
+      <data key="d1">cortical</data>
+      <data key="d2">73</data>
+      <data key="d3">ctx-lh-superiortemporal</data>
+      <data key="d8">lh.superiortemporal</data>
+      <data key="d4">stRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/stRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-266.26873779296875, -33.411460876464844, 0.0)</data>
+    </node>
+    <node id="72">
+      <data key="d0">25,100,40</data>
+      <data key="d1">cortical</data>
+      <data key="d2">72</data>
+      <data key="d3">ctx-lh-bankssts</data>
+      <data key="d8">lh.bankssts</data>
+      <data key="d4">bankRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/bankRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-240.77204895019531, -65.815574645996094, 0.0)</data>
+    </node>
+    <node id="71">
+      <data key="d0">160,100,50</data>
+      <data key="d1">cortical</data>
+      <data key="d2">71</data>
+      <data key="d3">ctx-lh-middletemporal</data>
+      <data key="d8">lh.middletemporal</data>
+      <data key="d4">mtRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/mtRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-272.36807250976562, -69.4500732421875, 0.0)</data>
+    </node>
+    <node id="70">
+      <data key="d0">180,40,120</data>
+      <data key="d1">cortical</data>
+      <data key="d2">70</data>
+      <data key="d3">ctx-lh-inferiortemporal</data>
+      <data key="d8">lh.inferiortemporal</data>
+      <data key="d4">itRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/itRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-283.32781982421875, -89.983329772949219, 0.0)</data>
+    </node>
+    <node id="59">
+      <data key="d0">20,180,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">59</data>
+      <data key="d3">ctx-lh-superiorparietal</data>
+      <data key="d8">lh.superiorparietal</data>
+      <data key="d4">spRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/spRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-154.48724365234375, -86.2080078125, 0.0)</data>
+    </node>
+    <node id="47">
+      <data key="d0">220,180,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">47</data>
+      <data key="d3">ctx-lh-parsopercularis</data>
+      <data key="d8">lh.parsopercularis</data>
+      <data key="d4">popRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/popRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-213.04705810546875, 30.706626892089844, 0.0)</data>
+    </node>
+    <node id="79">
+      <data key="d0">255,43,78</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">79</data>
+      <data key="d3">Left-Pallidum</data>
+      <data key="d8">Left-Pallidum</data>
+      <data key="d4">GP_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/GP_(Homo sapiens)</data>
+      <data key="d7">(-9.53814697265625, 10.86155891418457, 0.0)</data>
+    </node>
+    <node id="78">
+      <data key="d0">146,210,255</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">78</data>
+      <data key="d3">Left-Putamen</data>
+      <data key="d8">Left-Putamen</data>
+      <data key="d4">PU_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/PU_(Homo sapiens)</data>
+      <data key="d7">(-20.871604919433594, -5.4736289978027344, 0.0)</data>
+    </node>
+    <node id="11">
+      <data key="d0">60,220,60</data>
+      <data key="d1">cortical</data>
+      <data key="d2">11</data>
+      <data key="d3">ctx-rh-paracentral</data>
+      <data key="d8">rh.paracentral</data>
+      <data key="d4">pacRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/pacRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(107.80976104736328, -4.0554265975952148, 0.0)</data>
+    </node>
+    <node id="10">
+      <data key="d0">60,20,220</data>
+      <data key="d1">cortical</data>
+      <data key="d2">10</data>
+      <data key="d3">ctx-rh-precentral</data>
+      <data key="d8">rh.precentral</data>
+      <data key="d4">pcRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/pcRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(165.75750732421875, 9.7823667526245117, 0.0)</data>
+    </node>
+    <node id="13">
+      <data key="d0">125,100,160</data>
+      <data key="d1">cortical</data>
+      <data key="d2">13</data>
+      <data key="d3">ctx-rh-caudalanteriorcingulate</data>
+      <data key="d8">rh.caudalanteriorcingulate</data>
+      <data key="d4">caccRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/caccRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(144.343994140625, 115.56382751464844, 0.0)</data>
+    </node>
+    <node id="12">
+      <data key="d0">80,20,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">12</data>
+      <data key="d3">ctx-rh-rostralanteriorcingulate</data>
+      <data key="d8">rh.rostralanteriorcingulate</data>
+      <data key="d4">raccRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/raccRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(183.29811096191406, 122.58731842041016, 0.0)</data>
+    </node>
+    <node id="15">
+      <data key="d0">140,20,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">15</data>
+      <data key="d3">ctx-rh-isthmuscingulate</data>
+      <data key="d8">rh.isthmuscingulate</data>
+      <data key="d4">icRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/icRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(127.09011077880859, -126.81093597412109, 0.0)</data>
+    </node>
+    <node id="58">
+      <data key="d0">80,160,20</data>
+      <data key="d1">cortical</data>
+      <data key="d2">58</data>
+      <data key="d3">ctx-lh-supramarginal</data>
+      <data key="d8">lh.supramarginal</data>
+      <data key="d4">smRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/smRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-201.73707580566406, -45.044204711914062, 0.0)</data>
+    </node>
+    <node id="14">
+      <data key="d0">220,180,220</data>
+      <data key="d1">cortical</data>
+      <data key="d2">14</data>
+      <data key="d3">ctx-rh-posteriorcingulate</data>
+      <data key="d8">rh.posteriorcingulate</data>
+      <data key="d4">pcRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/pcRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(80.108184814453125, 19.095781326293945, 0.0)</data>
+    </node>
+    <node id="16">
+      <data key="d0">220,20,20</data>
+      <data key="d1">cortical</data>
+      <data key="d2">16</data>
+      <data key="d3">ctx-rh-postcentral</data>
+      <data key="d8">rh.postcentral</data>
+      <data key="d4">pocRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/pocRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(174.95878601074219, -19.974081039428711, 0.0)</data>
+    </node>
+    <node id="33">
+      <data key="d0">150,150,200</data>
+      <data key="d1">cortical</data>
+      <data key="d2">33</data>
+      <data key="d3">ctx-rh-transversetemporal</data>
+      <data key="d8">rh.transversetemporal</data>
+      <data key="d4">ttRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/ttRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(253.20555114746094, -3.5741846561431885, 0.0)</data>
+    </node>
+    <node id="32">
+      <data key="d0">140,220,220</data>
+      <data key="d1">cortical</data>
+      <data key="d2">32</data>
+      <data key="d3">ctx-rh-superiortemporal</data>
+      <data key="d8">rh.superiortemporal</data>
+      <data key="d4">stRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/stRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(265.99908447265625, -13.658275604248047, 0.0)</data>
+    </node>
+    <node id="57">
+      <data key="d0">220,20,20</data>
+      <data key="d1">cortical</data>
+      <data key="d2">57</data>
+      <data key="d3">ctx-lh-postcentral</data>
+      <data key="d8">lh.postcentral</data>
+      <data key="d4">pocRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/pocRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-167.583740234375, -27.730937957763672, 0.0)</data>
+    </node>
+    <node id="30">
+      <data key="d0">160,100,50</data>
+      <data key="d1">cortical</data>
+      <data key="d2">30</data>
+      <data key="d3">ctx-rh-middletemporal</data>
+      <data key="d8">rh.middletemporal</data>
+      <data key="d4">mtRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/mtRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(272.66232299804688, -50.058712005615234, 0.0)</data>
+    </node>
+    <node id="51">
+      <data key="d0">60,20,220</data>
+      <data key="d1">cortical</data>
+      <data key="d2">51</data>
+      <data key="d3">ctx-lh-precentral</data>
+      <data key="d8">lh.precentral</data>
+      <data key="d4">pcRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/pcRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-160.59272766113281, 1.4390984773635864, 0.0)</data>
+    </node>
+    <node id="36">
+      <data key="d0">32,101,149</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">36</data>
+      <data key="d3">Right-Caudate</data>
+      <data key="d8">Right-Caudate</data>
+      <data key="d4">CAN_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/CAN_(Homo sapiens)</data>
+      <data key="d7">(26.632448196411133, -0.2236466109752655, 0.0)</data>
+    </node>
+    <node id="35">
+      <data key="d0">100,172,222</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">35</data>
+      <data key="d3">Right-Thalamus-Proper</data>
+      <data key="d8">Right-Thalamus-Proper</data>
+      <data key="d4">TH_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/TH_(Homo sapiens)</data>
+      <data key="d7">(16.194923400878906, 7.176084041595459, 0.0)</data>
+    </node>
+    <node id="52">
+      <data key="d0">60,220,60</data>
+      <data key="d1">cortical</data>
+      <data key="d2">52</data>
+      <data key="d3">ctx-lh-paracentral</data>
+      <data key="d8">lh.paracentral</data>
+      <data key="d4">pacRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/pacRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-94.949958801269531, -11.080609321594238, 0.0)</data>
+    </node>
+    <node id="19">
+      <data key="d0">220,60,220</data>
+      <data key="d1">cortical</data>
+      <data key="d2">19</data>
+      <data key="d3">ctx-rh-inferiorparietal</data>
+      <data key="d8">rh.inferiorparietal</data>
+      <data key="d4">ipRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/ipRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(210.94496154785156, -73.816757202148438, 0.0)</data>
+    </node>
+    <node id="55">
+      <data key="d0">220,180,220</data>
+      <data key="d1">cortical</data>
+      <data key="d2">55</data>
+      <data key="d3">ctx-lh-posteriorcingulate</data>
+      <data key="d8">lh.posteriorcingulate</data>
+      <data key="d4">pcRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/pcRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-71.690185546875, 7.2128467559814453, 0.0)</data>
+    </node>
+    <node id="74">
+      <data key="d0">150,150,200</data>
+      <data key="d1">cortical</data>
+      <data key="d2">74</data>
+      <data key="d3">ctx-lh-transversetemporal</data>
+      <data key="d8">lh.transversetemporal</data>
+      <data key="d4">ttRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/ttRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-252.43733215332031, -20.54136848449707, 0.0)</data>
+    </node>
+    <node id="37">
+      <data key="d0">146,210,255</data>
+      <data key="d1">subcortical</data>
+      <data key="d2">37</data>
+      <data key="d3">Right-Putamen</data>
+      <data key="d8">Right-Putamen</data>
+      <data key="d4">PU_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/PU_(Homo sapiens)</data>
+      <data key="d7">(22.075174331665039, -5.1718478202819824, 0.0)</data>
+    </node>
+    <node id="18">
+      <data key="d0">20,180,140</data>
+      <data key="d1">cortical</data>
+      <data key="d2">18</data>
+      <data key="d3">ctx-rh-superiorparietal</data>
+      <data key="d8">rh.superiorparietal</data>
+      <data key="d4">spRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/spRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(165.23530578613281, -79.159011840820312, 0.0)</data>
+    </node>
+    <node id="17">
+      <data key="d0">80,160,20</data>
+      <data key="d1">cortical</data>
+      <data key="d2">17</data>
+      <data key="d3">ctx-rh-supramarginal</data>
+      <data key="d8">rh.supramarginal</data>
+      <data key="d4">smRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/smRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(208.45832824707031, -30.325946807861328, 0.0)</data>
+    </node>
+    <node id="31">
+      <data key="d0">25,100,40</data>
+      <data key="d1">cortical</data>
+      <data key="d2">31</data>
+      <data key="d3">ctx-rh-bankssts</data>
+      <data key="d8">rh.bankssts</data>
+      <data key="d4">bankRes83_RH</data>
+      <data key="d5">right</data>
+      <data key="d6">http://www.connectome.ch/wiki/bankRes83_RH_(Homo sapiens)</data>
+      <data key="d7">(242.01029968261719, -50.384899139404297, 0.0)</data>
+    </node>
+    <node id="50">
+      <data key="d0">100,25,0</data>
+      <data key="d1">cortical</data>
+      <data key="d2">50</data>
+      <data key="d3">ctx-lh-caudalmiddlefrontal</data>
+      <data key="d8">lh.caudalmiddlefrontal</data>
+      <data key="d4">cmfRes83_LH</data>
+      <data key="d5">left</data>
+      <data key="d6">http://www.connectome.ch/wiki/cmfRes83_LH_(Homo sapiens)</data>
+      <data key="d7">(-160.08601379394531, 32.238922119140625, 0.0)</data>
+    </node>
+  </graph>
+</graphml>

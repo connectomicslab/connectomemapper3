@@ -1,0 +1,19 @@
+Release 3.1.0-beta (Nov 13 2017)
+============================
+* Initial release of the new Connectome Mapper BIDS Manager
+
+Release 3.0.1-beta (Jul 13, 2017)
+=================================
+* ENH: Refactored code (diffusion pipeline) to support current Nipype release
+* ENH: Adoption of Brain Imaging Data Structure (BIDS) for input and derivatives data 
+* ENH: Added Mrtrix3 preprocessing (dwidenoise, dwibiascorrec), reconstruction (dwi2response, tensor2metrics, dwi2fod), tracking (tckgen)
+* ENH: Added option '-fsl_grad' to Mrtrix mrconvert interface
+* ENH: 
+* ENH: 
+* ENH: 
+* ENH: 
+
+Release 3.0.0-beta (Apr 06, 2017)
+============================
+* Initial beta release of the new Connectome Mapper
+

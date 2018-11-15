@@ -1,0 +1,13 @@
+*.pklz
+*.pyc
+*.npz
+*.xdebug_tkmedit
+*.mp4
+atom-config.txt
+
+build
+build/*
+
+_build
+_static
+_templates
