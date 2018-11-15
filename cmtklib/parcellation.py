@@ -959,11 +959,17 @@ class CombineParcellations(BaseInterface):
             shutil.copyfile(aparcaseg_fs,tmp_aparcaseg_fs)
 
             print("    Transform to native space")
-            mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
-            subprocess.check_call(mri_cmd)
+            cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (aparcaseg_fs,orig,aparcaseg_native)
+            process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+            proc_stdout = process.communicate()[0].strip()
+            iflogger.info(proc_stdout)
+
+            # mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
+            # subprocess.check_call(mri_cmd)
+
             Iaparcaseg= ni.load(aparcaseg_native).get_data()
 
-            Iaparcaseg_new = Iaparcaseg.copy()
+            Iaparcaseg_new = Iaparcaseg.astype(np.int32)
 
             # Thalamus (aparc+aseg labels: 10 and 49)
             if thalamus_nuclei_defined :
