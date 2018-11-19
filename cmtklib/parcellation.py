@@ -2804,7 +2804,7 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
         for p in get_parcellation('Lausanne2018').keys():
             #ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
             ds.append( (op.join(fs_dir, 'mri','ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
-        ds.append( (op.join(fs_dir, 'tmp','aparc+aseg.Lausanne2018.mgz'), 'aparc+aseg.native.nii.gz') )
+        ds.append( (op.join(fs_dir, 'mri','aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz') )
 #        try:
 #            os.makedirs(op.join('.', p))
 #        except:
