@@ -8,6 +8,7 @@ from glob import glob
 if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 
 packages=["cmtklib",
+          "cmp",
           "cmp.bidsappmanager","cmp.bidsappmanager.stages",
           "cmp.bidsappmanager.stages.preprocessing",
           "cmp.bidsappmanager.stages.segmentation",
