@@ -40,6 +40,7 @@ class Global_Configuration(HasTraits):
     subject = Str
     subject_session = Str
     modalities = List(trait=Str)
+    dmri_bids_acq = Str
 
 
 class Check_Input_Notification(HasTraits):

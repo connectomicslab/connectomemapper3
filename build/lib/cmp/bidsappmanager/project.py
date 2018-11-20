@@ -253,6 +253,7 @@ def dmri_save_config(pipeline, config_path):
     config = ConfigParser.RawConfigParser()
     config.add_section('Global')
     global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
+    print(global_keys)
     for key in global_keys:
         #if key != "subject" and key != "subjects":
         config.set('Global', key, getattr(pipeline.global_conf, key))
@@ -1438,22 +1439,22 @@ class ProjectHandlerV2(Handler):
 
             query_files = [f.filename for f in bids_layout.get(subject=subject, type='T1w', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
-                print "T1w available"
+                print("T1w available: {}".format(query_files))
                 t1_available = True
 
             query_files = [f.filename for f in bids_layout.get(subject=subject, type='T2w', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
-                print "T2w available"
+                print("T2w available: {}".format(query_files))
                 t2_available = True
 
             query_files = [f.filename for f in bids_layout.get(subject=subject, type='dwi', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
-                print "DWI available"
+                print("DWI available: {}".format(query_files))
                 diffusion_available = True
 
             query_files = [f.filename for f in bids_layout.get(subject=subject, type='bold', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
-                print "BOLD available"
+                print("BOLD available: {}".format(query_files))
                 fmri_available = True
 
             # types = bids_layout.get_types()
@@ -1552,13 +1553,60 @@ class ProjectHandlerV2(Handler):
                 self.dmri_pipeline.config_file = dmri_config_file
 
                 if not os.path.isfile(dmri_config_file) and self.dmri_pipeline!= None: #and dmri_pipeline!= None:
-                    self.dmri_pipeline.diffusion_imaging_model  = 'DTI'
-                    loaded_project.diffusion_imaging_model = 'DTI'
+
+                    #Look for diffusion acquisition model information from filename (acq-*)
+                    if loaded_project.subject_session != '':
+                        session = loaded_project.subject_session.split('-')[1]
+                        diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, session=session, type='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
+
+                        if len(diffusion_imaging_models)>0:
+                            if len(diffusion_imaging_models)>1:
+                                loaded_project.dmri_bids_acqs = diffusion_imaging_models
+                                loaded_project.configure_traits(view='dmri_bids_acq_view')
+                            else:
+                                loaded_project.dmri_bids_acq = diffusion_imaging_models[0]
+
+                            if ('dsi' in loaded_project.dmri_bids_acq) or ('DSI' in loaded_project.dmri_bids_acq):
+                                loaded_project.diffusion_imaging_model = 'DSI'
+                            elif ('dti' in loaded_project.dmri_bids_acq) or ('DTI' in loaded_project.dmri_bids_acq):
+                                loaded_project.diffusion_imaging_model = 'DTI'
+                            elif ('hardi' in loaded_project.dmri_bids_acq) or ('HARDI' in loaded_project.dmri_bids_acq):
+                                loaded_project.diffusion_imaging_model = 'HARDI'
+                            else:
+                                loaded_project.diffusion_imaging_model = 'DTI'
+                        else:
+                            loaded_project.configure_traits(view='diffusion_imaging_model_select_view')
+                    else:
+                        diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, type='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
+
+                        if len(diffusion_imaging_models)>0:
+                            if len(diffusion_imaging_models)>1:
+                                loaded_project.dmri_bids_acqs = diffusion_imaging_models
+                                loaded_project.configure_traits(view='dmri_bids_acq_view')
+                            else:
+                                loaded_project.dmri_bids_acq = diffusion_imaging_models[0]
+
+                            if ('dsi' in loaded_project.dmri_bids_acq) or ('DSI' in loaded_project.dmri_bids_acq):
+                                loaded_project.diffusion_imaging_model = 'DSI'
+                            elif ('dti' in loaded_project.dmri_bids_acq) or ('DTI' in loaded_project.dmri_bids_acq):
+                                loaded_project.diffusion_imaging_model = 'DTI'
+                            elif ('hardi' in loaded_project.dmri_bids_acq) or ('HARDI' in loaded_project.dmri_bids_acq):
+                                loaded_project.diffusion_imaging_model = 'HARDI'
+                            else:
+                                loaded_project.diffusion_imaging_model = 'DTI'
+                        else:
+                            loaded_project.dmri_bids_acq = ''
+                            loaded_project.configure_traits(view='diffusion_imaging_model_select_view')
+
+                    self.dmri_pipeline.diffusion_imaging_model  = loaded_project.diffusion_imaging_model
+                    self.dmri_pipeline.global_conf.dmri_bids_acq  = loaded_project.dmri_bids_acq
+                    self.dmri_pipeline.stages["Diffusion"].diffusion_imaging_model  = loaded_project.diffusion_imaging_model
                     dmri_save_config(self.dmri_pipeline, dmri_config_file)
                     print("Created reference diffusion config file :  %s"%loaded_project.dmri_config_file)
                 else:
                     print("Loaded reference diffusion config file :  %s"%loaded_project.dmri_config_file)
                     dmri_conf_loaded = dmri_load_config(self.dmri_pipeline, loaded_project.dmri_config_file)
+                    # TODO: check if diffusion imaging model (DSI/DTI/HARDI) is correct/valid.
 
                 ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                 loaded_project.dmri_available = self.dmri_inputs_checked

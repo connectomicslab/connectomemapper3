@@ -34,6 +34,9 @@ from bids.grabbids import BIDSLayout
 # CMP imports
 import cmp.bidsappmanager.project as project
 
+global modal_width
+modal_width = 300
+
 global style_sheet
 style_sheet = '''
             QLabel {
@@ -160,6 +163,18 @@ class CMP_Project_Info(HasTraits):
 
     #process_type = Enum('diffusion',['diffusion','fMRI'])
     diffusion_imaging_model = Enum('DTI',['DSI','DTI','HARDI'])
+    dmri_bids_acqs = List()
+    dmri_bids_acq = Enum(values='dmri_bids_acqs')
+
+    anat_runs = List()
+    anat_run = Enum(values='anat_runs')
+
+    dmri_runs = List()
+    dmri_run = Enum(values='dmri_runs')
+
+    fmri_runs = List()
+    fmri_run = Enum(values='fmri_runs')
+
     parcellation_scheme = Str('Lausanne2008')
     atlas_info = Dict()
     freesurfer_subjects_dir = Str('')
@@ -272,6 +287,7 @@ class CMP_Project_Info(HasTraits):
                         kind='livemodal',
                         title='Data creation: BIDS dataset selection',
                         #style_sheet=style_sheet,
+                        width=modal_width,
                         buttons=['OK','Cancel'])
 
     subject_view = View(
@@ -283,6 +299,7 @@ class CMP_Project_Info(HasTraits):
                         kind='modal',
                         title='Subject and session selection',
                         #style_sheet=style_sheet,
+                        width=modal_width,
                         buttons=['OK','Cancel'])
 
     subject_session_view = View(
@@ -292,6 +309,17 @@ class CMP_Project_Info(HasTraits):
                         kind='modal',
                         title='Session selection (subject: %s)'% subject,
                         #style_sheet=style_sheet,
+                        width=modal_width,
+                        buttons=['OK','Cancel'])
+
+    dmri_bids_acq_view = View(
+                        Group(
+                            Item('dmri_bids_acq',label='Selected model'),
+                            ),
+                        kind='modal',
+                        title='Selection of diffusion acquisition model',
+                        #style_sheet=style_sheet,
+                        width=modal_width,
                         buttons=['OK','Cancel'])
 
     anat_warning_view = View(
@@ -300,6 +328,7 @@ class CMP_Project_Info(HasTraits):
                             ),
                         title='Warning : Anatomical T1w data',
                         kind='modal',
+                        width=modal_width,
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
@@ -309,6 +338,7 @@ class CMP_Project_Info(HasTraits):
                                 ),
                             title='Error',
                             kind = 'modal',
+                            width=modal_width,
                             #style_sheet=style_sheet,
                             buttons=['OK','Cancel'])
 
@@ -318,6 +348,7 @@ class CMP_Project_Info(HasTraits):
                             ),
                         title='Warning : Diffusion MRI data',
                         kind='modal',
+                        width=modal_width,
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
@@ -327,6 +358,7 @@ class CMP_Project_Info(HasTraits):
                                 ),
                             title='Error',
                             kind = 'modal',
+                            width=modal_width,
                             #style_sheet=style_sheet,
                             buttons=['OK','Cancel'])
 
@@ -336,6 +368,7 @@ class CMP_Project_Info(HasTraits):
                             ),
                         title='Warning : fMRI data',
                         kind='modal',
+                        width=modal_width,
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
@@ -345,6 +378,7 @@ class CMP_Project_Info(HasTraits):
                                 ),
                             title='Error',
                             kind = 'modal',
+                            width=modal_width,
                             #style_sheet=style_sheet,
                             buttons=['OK','Cancel'])
 
@@ -354,6 +388,7 @@ class CMP_Project_Info(HasTraits):
                         ),
                     title='Data loading: BIDS dataset selection',
                     kind='modal',
+                    width=modal_width,
                     #style_sheet=style_sheet,
                     buttons=['OK','Cancel'])
 
@@ -364,6 +399,7 @@ class CMP_Project_Info(HasTraits):
                                       ),
                                   title='Select configuration for anatomical pipeline',
                                   kind='modal',
+                                  width=modal_width,
                                   #style_sheet=style_sheet,
                                   buttons=['OK','Cancel'])
 
@@ -373,6 +409,7 @@ class CMP_Project_Info(HasTraits):
                             ),
                         title='Select until which stage to process the anatomical pipeline.',
                         kind='modal',
+                        width=modal_width,
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
@@ -382,6 +419,7 @@ class CMP_Project_Info(HasTraits):
                                                     ),
                                                 title='Please select diffusion MRI modality',
                                                 kind='modal',
+                                                width=modal_width,
                                                 buttons=['OK','Cancel'])
 
     dmri_select_config_to_load = View(
@@ -391,6 +429,7 @@ class CMP_Project_Info(HasTraits):
                                 Item('dmri_config_to_load',style='custom',editor=EnumEditor(name='dmri_available_config'),show_label=False),
                                 title='Select configuration for diffusion pipeline',
                                 kind='modal',
+                                width=modal_width,
                                 #style_sheet=style_sheet,
                                 buttons=['OK','Cancel'])
 
@@ -400,6 +439,7 @@ class CMP_Project_Info(HasTraits):
                             ),
                         title='Select until which stage to process the diffusion pipeline.',
                         kind='modal',
+                        width=modal_width,
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
@@ -410,6 +450,7 @@ class CMP_Project_Info(HasTraits):
                                 Item('fmri_config_to_load',style='custom',editor=EnumEditor(name='fmri_available_config'),show_label=False),
                                 title='Select configuration for fMRI pipeline',
                                 kind='modal',
+                                width=modal_width,
                                 #style_sheet=style_sheet,
                                 buttons=['OK','Cancel'])
 
@@ -419,6 +460,7 @@ class CMP_Project_Info(HasTraits):
                             ),
                         title='Select until which stage to process the fMRI pipeline.',
                         kind='modal',
+                        width=modal_width,
                         #style_sheet=style_sheet,
                         buttons=['OK','Cancel'])
 
