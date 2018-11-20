@@ -62,6 +62,7 @@ class Global_Configuration(HasTraits):
     subject = Str
     subject_session = Str
     modalities = List(trait=Str)
+    dmri_bids_acq = Str
 
 
 class Check_Input_Notification(HasTraits):
@@ -478,24 +479,42 @@ class DiffusionPipeline(Pipeline):
 
                 files = layout.get(subject=subjid,type='dwi',extensions='.nii.gz')
                 if len(files) > 0:
-                    dwi_file = files[0].filename
-                    print dwi_file
+                    if self.global_conf.dmri_bids_acq != '':
+                        for file in files:
+                            if self.global_conf.dmri_bids_acq in file:
+                                dwi_file = file
+                                break
+                    else:#TODO: Better parsing of multiple runs
+                        dwi_file = files[0].filename
+                        print(dwi_file)
                 else:
                     error(message="Diffusion image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
 
                 files = layout.get(subject=subjid,type='dwi',extensions='.bval')
                 if len(files) > 0:
-                    bval_file = files[0].filename
-                    print bval_file
+                    if self.global_conf.dmri_bids_acq != '':
+                        for file in files:
+                            if self.global_conf.dmri_bids_acq in file:
+                                bval_file = file
+                                break
+                    else:#TODO: Better parsing of multiple runs
+                        bval_file = files[0].filename
+                        print(bval_file)
                 else:
                     error(message="Diffusion bval image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
 
                 files = layout.get(subject=subjid,type='dwi',extensions='.bvec')
                 if len(files) > 0:
-                    bvec_file = files[0].filename
-                    print bvec_file
+                    if self.global_conf.dmri_bids_acq != '':
+                        for file in files:
+                            if self.global_conf.dmri_bids_acq in file:
+                                bvec_file = file
+                                break
+                    else:#TODO: Better parsing of multiple runs
+                        bvec_file = files[0].filename
+                        print(bvec_file)
                 else:
                     error(message="Diffusion bvec image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
@@ -504,24 +523,42 @@ class DiffusionPipeline(Pipeline):
 
                 files = layout.get(subject=subjid,type='dwi',extensions='.nii.gz',session=sessid)
                 if len(files) > 0:
-                    dwi_file = files[0].filename
-                    print dwi_file
+                    if self.global_conf.dmri_bids_acq != '':
+                        for file in files:
+                            if self.global_conf.dmri_bids_acq in file:
+                                dwi_file = file
+                                break
+                    else:#TODO: Better parsing of multiple runs
+                        dwi_file = files[0].filename
+                        print(dwi_file)
                 else:
                     error(message="Diffusion image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
 
                 files = layout.get(subject=subjid,type='dwi',extensions='.bval',session=sessid)
                 if len(files) > 0:
-                    bval_file = files[0].filename
-                    print bval_file
+                    if self.global_conf.dmri_bids_acq != '':
+                        for file in files:
+                            if self.global_conf.dmri_bids_acq in file:
+                                bval_file = file
+                                break
+                    else:#TODO: Better parsing of multiple runs
+                        bval_file = files[0].filename
+                        print bval_file
                 else:
                     error(message="Diffusion bval image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
 
                 files = layout.get(subject=subjid,type='dwi',extensions='.bvec',session=sessid)
                 if len(files) > 0:
-                    bvec_file = files[0].filename
-                    print bvec_file
+                    if self.global_conf.dmri_bids_acq != '':
+                        for file in files:
+                            if self.global_conf.dmri_bids_acq in file:
+                                bvec_file = file
+                                break
+                    else:#TODO: Better parsing of multiple runs
+                        bvec_file = files[0].filename
+                        print bvec_file
                 else:
                     error(message="Diffusion bvec image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
