@@ -608,7 +608,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         iflogger.info("**** Processing finished ****")
 
-        return True,'Processing sucessful'
+        return True,'Processing successful'
 
 
 class Pipeline(HasTraits):
