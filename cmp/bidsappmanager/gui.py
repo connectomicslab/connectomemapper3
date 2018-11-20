@@ -555,7 +555,7 @@ class CMP_BIDSAppWindow(HasTraits):
                                     label='Configuration of processing pipelines'),
                                 Group(
                                     Item('fs_license', label='LICENSE'),
-                                    Item('fs_average', label='FSaverage directory'),
+                                    # Item('fs_average', label='FSaverage directory'),
                                     label='Freesurfer configuration'),
                             orientation='vertical',springy=True),
                             Group(
@@ -706,11 +706,11 @@ class CMP_BIDSAppWindow(HasTraits):
             print("Error: Invalid Freesurfer license ({})!".format(self.fs_license))
             self.settings_checked = False
 
-        if os.path.isdir(self.fs_average):
-            print("fsaverage directory : {}".format(self.fs_average))
-        else:
-            print("Error: fsaverage directory ({}) not existing!".format(self.fs_average))
-            self.settings_checked = False
+        # if os.path.isdir(self.fs_average):
+        #     print("fsaverage directory : {}".format(self.fs_average))
+        # else:
+        #     print("Error: fsaverage directory ({}) not existing!".format(self.fs_average))
+        #     self.settings_checked = False
 
         print("Valid inputs for BIDS App : {}".format(self.settings_checked))
         print("BIDS App Version Tag: {}".format(self.bidsapp_tag))
@@ -721,7 +721,7 @@ class CMP_BIDSAppWindow(HasTraits):
         cmd = ['docker','run','-it','--rm',
                '-v', '{}:/bids_dataset'.format(self.bids_root),
                '-v', '{}/derivatives:/outputs'.format(self.bids_root),
-               '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(self.fs_average),
+               # '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(self.fs_average),
                '-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
                '-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)]
 

@@ -1710,11 +1710,11 @@ class CMP_BIDSAppWindowHandler(Handler):
             print("Error: Invalid Freesurfer license ({})!".format(ui_info.ui.context["object"].fs_license))
             ui_info.ui.context["object"].settings_checked = False
 
-        if os.path.isdir(ui_info.ui.context["object"].fs_average):
-            print("fsaverage directory : {}".format(ui_info.ui.context["object"].fs_average))
-        else:
-            print("Error: fsaverage directory ({}) not existing!".format(ui_info.ui.context["object"].fs_average))
-            ui_info.ui.context["object"].settings_checked = False
+        # if os.path.isdir(ui_info.ui.context["object"].fs_average):
+        #     print("fsaverage directory : {}".format(ui_info.ui.context["object"].fs_average))
+        # else:
+        #     print("Error: fsaverage directory ({}) not existing!".format(ui_info.ui.context["object"].fs_average))
+        #     ui_info.ui.context["object"].settings_checked = False
 
         print("Valid inputs for BIDS App : {}".format(ui_info.ui.context["object"].settings_checked))
         print("Docker running ? {}".format(ui_info.ui.context["object"].docker_running))
@@ -1724,7 +1724,7 @@ class CMP_BIDSAppWindowHandler(Handler):
         cmd = ['docker','run','-it','--rm',
                '-v', '{}:/bids_dataset'.format(ui_info.ui.context["object"].bids_root),
                '-v', '{}/derivatives:/outputs'.format(ui_info.ui.context["object"].bids_root),
-               '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
+               # '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(ui_info.ui.context["object"].fs_average),
                '-v', '{}:/opt/freesurfer/license.txt'.format(ui_info.ui.context["object"].fs_license),
                '-v', '{}:/code/ref_anatomical_config.ini'.format(ui_info.ui.context["object"].anat_config)]
 
