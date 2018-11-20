@@ -29,6 +29,7 @@ import ConfigParser
 from pyface.api import FileDialog, OK
 
 from bids.grabbids import BIDSLayout
+import nibabel as nib
 
 # Own imports
 #import pipelines.diffusion.diffusion as Diffusion_pipeline
@@ -1577,6 +1578,16 @@ class ProjectHandlerV2(Handler):
                                 loaded_project.diffusion_imaging_model = 'DTI'
                         else:
                             loaded_project.configure_traits(view='diffusion_imaging_model_select_view')
+
+                        files = [f.filename for f in bids_layout.get(subject=subject, session=session, type='dwi', extensions=['nii', 'nii.gz'])]
+
+                        if (loaded_project.dmri_bids_acq != ''):
+                            for file in files:
+                                if (loaded_project.dmri_bids_acq in file):
+                                    dwi_file = file
+                                    break
+                        else:
+                            dwi_file = files[0]
                     else:
                         diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, type='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
 
@@ -1599,6 +1610,18 @@ class ProjectHandlerV2(Handler):
                             loaded_project.dmri_bids_acq = ''
                             loaded_project.configure_traits(view='diffusion_imaging_model_select_view')
 
+                        files = [f.filename for f in bids_layout.get(subject=subject, type='dwi', extensions=['nii', 'nii.gz'])]
+
+                        if (loaded_project.dmri_bids_acq != ''):
+                            for file in files:
+                                if (loaded_project.dmri_bids_acq in file):
+                                    dwi_file = file
+                                    break
+                        else:
+                            dwi_file = files[0]
+                    max_volume_idx = nib.load(dwi_file).shape[3] - 1
+                    self.dmri_pipeline.stages["Preprocessing"].end_vol = max_volume_idx
+                    self.dmri_pipeline.stages["Preprocessing"].max_vol = max_volume_idx
                     self.dmri_pipeline.diffusion_imaging_model  = loaded_project.diffusion_imaging_model
                     self.dmri_pipeline.global_conf.diffusion_imaging_model  = loaded_project.diffusion_imaging_model
                     self.dmri_pipeline.global_conf.dmri_bids_acq  = loaded_project.dmri_bids_acq
