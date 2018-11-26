@@ -56,7 +56,7 @@ Prerequisites
 
 .. _manual-install-cmpbidsapp:
 
-Manual installation of the Connectome Mapper 3 BIDS App
+Manual installation
 ---------------------------------------
 
 Installation of the Connectome Mapper 3 has been facilicated through the distribution of a BIDSApp relying on the Docker sofware container technology.
@@ -72,29 +72,42 @@ Installation of the Connectome Mapper 3 has been facilicated through the distrib
   You should see the docker image "connectomemapper-bidsapp" with tag "latest" is now available.
 
 
+The Connectome Mapper 3 BIDSApp Manager (GUI)
+===============================
+
+Prerequisites
+-------------
+
+* Installed miniconda2 (Python 2.7)
+
+  firefox https://conda.io/miniconda.html
+
+  Download the Python 2.7 installer corresponding to your system (Windows/MacOSX/Linux)
+
+
 .. _manual-install-cmpbidsappmanager:
 
-Manual installation of the Connectome Mapper 3 BIDS App
+Manual installation
 ---------------------------------------
 
-Manual installation is divided between the Python libraries needed by the Connectome Mapper and the CMTKlib and the libraries needed by the DTB binaries. Files for manual installation is the zipped archive of the Connectome Mapper.
+The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager) consists of a clone of the GitHub repository, the creation of conda environment with all python dependencies installed, and eventually the installation of the CMPBIDSAPPManager itself, as follows::
 
-* Download the zipped archive from `here <download.html>`_
-* As we will use `easy_install` in order to have access to the latest libraries even on older systems the python-setuptools package is needed. Ipython is strongly recommended for debugging purposes. Debian/Ubuntu command::
+* Clone the GitHub repository::
 
-	sudo apt-get install python-setuptools ipython
+  git clone https://github.com/sebastientourbier/cmpbidsappmanager.git cmpbidsappmanager
 
-* Python libraries needed: traits, traitsui, pyface, nibabel, numpy, networkx, scipy. Easy_install command::
+* Create a miniconda2 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
 
-	sudo easy_install traits traitsui pyface nibabel numpy networkx scipy nose
+	conda create --name cmppy27 --file /absolute/path/to/conda_packages_list.txt
 
-* Install our forked version of Nipype (http://nipy.sourceforge.net/nipype/). For now, we require a modified vesion Nipype interfaces that is available on our Github repository (https://github.com/LTS5/nipype). To install it clone to your machine the nipype fork by typing `git clone git://github.com/LTS5/nipype.git` from your home folder, and run the install script with `sudo python setup.py install`. You will have to remove already installed versions of nipype if they were installed through apt-get (installation location: `/usr/lib/pyshared`) as it will take precedence over versions installed through the setup.py script.
-* Libraries needed by the DTB binaries: boost (module program-options), nifti, blitz: `sudo apt-get install libboost-program-options-dev libnifti-dev libblitz0-dev`
-* Extract the source code and install the Connectome Mapper from the Bash Shell using following commands::
+* Activate the conda environment::
 
-	tar xzf <cmp-release>.tar.gz
-	cd <cmp-release>/
-	sudo python setup.py install
+  source activate cmppy27
+
+* Install the Connectome Mapper BIDS App Manager from the Bash Shell using following commands::
+
+	cd cmpbidsappmanager/
+	python setup.py install
 
 Help/Questions
 --------------
