@@ -143,7 +143,7 @@ html_last_updated_fmt = '%b %d, %Y'
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-html_sidebars = {'**': ['sidebar_version.html', 'localtoc.html','relations.html', 'sourcelink.html', 'searchbox.html']}
+#html_sidebars = {'**': ['sidebar_version.html', 'localtoc.html','relations.html', 'sourcelink.html', 'searchbox.html']}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -197,7 +197,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'CMP.tex', u'CMP Documentation',
-   u'EPFL & UNIL-CHUV', 'manual'),
+   u'Brain Communication Pathways Sinergia Consortium', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -227,7 +227,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'cmp', u'CMP Documentation',
-     [u'EPFL & UNIL-CHUV'], 1)
+     [u'Brain Communication Pathways Sinergia Consortium'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -241,7 +241,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'CMP', u'CMP Documentation',
-   u'EPFL & UNIL-CHUV', 'CMP', 'One line description of project.',
+   u'Brain Communication Pathways Sinergia Consortium', 'CMP', 'One line description of project.',
    'Miscellaneous'),
 ]
 
