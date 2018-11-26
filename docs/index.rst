@@ -89,4 +89,4 @@ Contents
 .. toctree::
    :maxdepth: 3
 
-   cmpbidsapp/*
+   cmpbidsapp/installation
