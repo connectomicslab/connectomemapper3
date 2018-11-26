@@ -36,14 +36,15 @@ By downloading Connectome Mapper, you agree to the terms and conditions of the f
 	OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE
 	PROVISION OF PATIENT CARE.
 
-	
-Souce code (`git repository <http://www.github.com/LTS5/cmp>`_)
+
+Source code
 ----------------------------------------------------------------------
 
 .. raw:: html
 
 	<blockquote>
 	<div><ul class="simple">
+	<li><tt class="xref download docutils literal"><a href="https://bitbucket.org/sinergiaconsortium/connectomemapper3/get/e6457cf1c205.zip")>3.x branch (beta)</a></tt></li>
 	<li><tt class="xref download docutils literal"><a href="https://github.com/LTS5/cmp/releases" onmousedown="_gaq.push(['_trackEvent', 'source_release-2.1.0-beta', 'download']);">2.x branch (beta)</a></tt></li>
 	<li><tt class="xref download docutils literal"><a href="https://github.com/LTS5/cmp/releases" onmousedown="_gaq.push(['_trackEvent', 'source_release-1.2.0', 'download']);">1.x branch</a></tt></li>
 	</ul>
@@ -52,13 +53,11 @@ Souce code (`git repository <http://www.github.com/LTS5/cmp>`_)
 ..
 	Deb package
 	-----------
-		
+
 	.. raw:: html
-	
+
 		<blockquote>
 		<div><ul class="simple">
 		<li><tt class="xref download docutils literal"><a class="reference download internal" href="_downloads/cmp_2.1.0-beta_all.deb" onmousedown="_gaq.push(['_trackEvent', 'debian_release-2.1.0-beta', 'download']);">Debian package, current release 2.1.0-beta</a></tt></li>
 		</ul>
 		</div></blockquote>
-
-
