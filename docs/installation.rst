@@ -27,9 +27,10 @@ The Connectome Mapper 3 BIDSApp
 Prerequisites
 -------------
 
-* Installed Docker Engine
+* Installed Docker Engine::
 
   firefox https://store.docker.com/search?type=edition&offering=community
+
 
 * Docker managed as a non-root user
 
@@ -46,12 +47,6 @@ Prerequisites
     After reboot, test if docker is managed as non-root::
 
       $ docker run hello-world
-
-* Installed miniconda2 (Python 2.7)
-
-  firefox https://conda.io/miniconda.html
-
-  Download the Python 2.7 installer corresponding to your system (Windows/MacOSX/Linux)
 
 
 .. _manual-install-cmpbidsapp:
