@@ -89,4 +89,8 @@ Contents
 .. toctree::
    :maxdepth: 3
 
-   cmpbidsapp/installation
+   installation
+   download
+   conf
+   stages
+   exampleresults
