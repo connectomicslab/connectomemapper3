@@ -18,7 +18,7 @@ The Connectome Mapper 3 is composed of a Docker image, namely the Connectome Map
 ..
 	The steps to add the NeuroDebian repository are explained here::
 
-		firefox http://neuro.debian.net/
+		$ firefox http://neuro.debian.net/
 
 Make sure that you have installed the following prerequisites.
 
@@ -30,8 +30,9 @@ Prerequisites
 
 * Installed Docker Engine::
 
-  firefox https://store.docker.com/search?type=edition&offering=community
+  $ firefox https://store.docker.com/search?type=edition&offering=community
 
+  Download the Docker Community Edition installer corresponding to your system (Windows/Mac/Debian/CentOS/Fedora)
 
 * Docker managed as a non-root user
 
