@@ -44,6 +44,8 @@ This tool allows you to easily do the following:
 - Automate and parallelize processing steps, which provides a significant
   speed-up from typical linear, manual processing.
 
+Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which provide a frozen environment where versions of all external softwares and libraries are fixed.
+
 
 *********
 Acknowledgement
@@ -77,7 +79,7 @@ This software is distributed under the open-source license Modified BSD. See `li
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (C) 2009-2018, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Hospital Center and University of Geneva (UNIGE-HUG), Switzerland.
+Copyright (C) 2009-2018, Brain Communication Pathways Sinergia Consortium, Switzerland.
 
 
 ********
@@ -87,8 +89,8 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   installation
-   download
-   conf
-   stages
-   exampleresults
+   cmp2/installation
+   cmp2/download
+   cmp2/conf
+   cmp2/stages
+   cmp2/exampleresults
