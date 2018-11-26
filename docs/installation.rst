@@ -59,17 +59,17 @@ Prerequisites
 Manual installation
 ---------------------------------------
 
-Installation of the Connectome Mapper 3 has been facilicated through the distribution of a BIDSApp relying on the Docker sofware container technology.
+Installation of the Connectome Mapper 3 has been facilicated through the distribution of a BIDSApp relying on the Docker software container technology.
 
-* Get the latest release of the BIDS App
+* Get the latest release of the BIDS App::
 
   $ docker pull sebastientourbier/connectomemapper-bidsapp:latest
 
-* To display all docker images available
+* To display all docker images available::
 
   $ docker images
 
-  You should see the docker image "connectomemapper-bidsapp" with tag "latest" is now available.
+You should see the docker image "connectomemapper-bidsapp" with tag "latest" is now available.
 
 
 The Connectome Mapper 3 BIDSApp Manager (GUI)
@@ -80,7 +80,7 @@ Prerequisites
 
 * Installed miniconda2 (Python 2.7)
 
-  firefox https://conda.io/miniconda.html
+  $ firefox https://conda.io/miniconda.html
 
   Download the Python 2.7 installer corresponding to your system (Windows/MacOSX/Linux)
 
@@ -89,25 +89,24 @@ Prerequisites
 
 Manual installation
 ---------------------------------------
-
-The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager) consists of a clone of the GitHub repository, the creation of conda environment with all python dependencies installed, and eventually the installation of the CMPBIDSAPPManager itself, as follows::
+The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager) consists of a clone of the GitHub repository, the creation of conda environment with all python dependencies installed, and eventually the installation of the CMPBIDSAPPManager itself, as follows:
 
 * Clone the GitHub repository::
 
-  git clone https://github.com/sebastientourbier/cmpbidsappmanager.git cmpbidsappmanager
+  $ git clone https://github.com/sebastientourbier/cmpbidsappmanager.git cmpbidsappmanager
 
 * Create a miniconda2 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
 
-	conda create --name cmppy27 --file /absolute/path/to/conda_packages_list.txt
+	$ conda create --name cmppy27 --file /absolute/path/to/conda_packages_list.txt
 
 * Activate the conda environment::
 
-  source activate cmppy27
+  $ source activate cmppy27
 
 * Install the Connectome Mapper BIDS App Manager from the Bash Shell using following commands::
 
-	cd cmpbidsappmanager/
-	python setup.py install
+	$ cd cmpbidsappmanager/
+	$ python setup.py install
 
 Help/Questions
 --------------
