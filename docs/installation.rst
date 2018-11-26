@@ -78,7 +78,7 @@ The Connectome Mapper 3 BIDSApp Manager (GUI)
 Prerequisites
 -------------
 
-* Installed miniconda2 (Python 2.7)
+* Installed miniconda2 (Python 2.7)::
 
   $ firefox https://conda.io/miniconda.html
 
