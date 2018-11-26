@@ -89,8 +89,8 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   cmp2/installation
-   cmp2/download
-   cmp2/conf
-   cmp2/stages
-   cmp2/exampleresults
+   installation
+   download
+   conf
+   stages
+   exampleresults
