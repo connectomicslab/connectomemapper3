@@ -39,8 +39,7 @@ source_suffix = ['.rst', '.md']
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
-              'sphinx.ext.viewcode',
-              'sphinxcontrib.httpdomain']
+              'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
