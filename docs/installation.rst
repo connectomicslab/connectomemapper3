@@ -11,15 +11,16 @@ Installation Instruction
 
 
 The Connectome Mapper 3 is composed of a Docker image, namely the Connectome Mapper 3 BIDS App, and a Python Graphical User Interface, namely the Connectome Mapper BIDS App Manager.
-Installation instructions for the Connectome mapper 3 BIDS App are found in :ref:`manual-install-cmpbidsapp`.
-Installation instructions for the Connectome mapper 3 BIDS App are found in :ref:`manual-install-cmpbidsappmanager`.
+
+* Installation instructions for the Connectome mapper 3 BIDS App are found in :ref:`manual-install-cmpbidsapp`.
+* Installation instructionsfor the Connectome mapper 3 BIDS App Manager are found in :ref:`manual-install-cmpbidsappmanager`.
 
 ..
 	The steps to add the NeuroDebian repository are explained here::
 
 		firefox http://neuro.debian.net/
 
-But before, make sure that you have installed the following prerequisites.
+Make sure that you have installed the following prerequisites.
 
 The Connectome Mapper 3 BIDSApp
 ===============================
