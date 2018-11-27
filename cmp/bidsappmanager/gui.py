@@ -1331,19 +1331,19 @@ class CMP_MainWindowV2(HasTraits):
                         spring,
                         HGroup(Item('configurator',style='custom',width=240,height=240,resizable=False,label='',show_label=False,
                                             editor_args={
-                                            'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('configurator/images', 'configurator.png'))),'label':"",'label_value':""}
+                                            'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('bidsappmanager/images', 'configurator.png'))),'label':"",'label_value':""}
                                             ),
                                show_labels=False,label=""),
                         spring,
                         HGroup(Item('bidsapp',style='custom',width=240,height=240,resizable=False,
                                             editor_args={
-                                            'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('configurator/images', 'bidsapp.png'))),'label':""}
+                                            'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('bidsappmanager/images', 'bidsapp.png'))),'label':""}
                                             ),
                                show_labels=False,label=""),
                         spring,
                         HGroup(Item('quality_control',style='custom',width=240,height=240,resizable=False,
                                             editor_args={
-                                            'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('configurator/images', 'qualitycontrol.png'))),'label':""}
+                                            'image':ImageResource(pkg_resources.resource_filename('cmp', os.path.join('bidsappmanager/images', 'qualitycontrol.png'))),'label':""}
                                             ),
                                show_labels=False,label=""),
                         spring,

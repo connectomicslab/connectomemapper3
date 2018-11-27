@@ -5,14 +5,14 @@ import sys
 import os
 
 #import wx
-from pyface.qt import QtCore, QtGui
+##from PySide2 import QtCore, QtGui
 
 
 import subprocess
 
 
 #Traits/traituiQt4
-import traitsui.qt4
+##import traitsui.qt4
 
 #BIDS import
 from bids.grabbids import BIDSLayout
