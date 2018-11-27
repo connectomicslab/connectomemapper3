@@ -1,3 +1,5 @@
+..  _LICENSE:
+
 BSD 3-Clause License
 
 Copyright (c) 2016-2018, Brain Communication Pathways Sinergia Consortium, Switzerland.
