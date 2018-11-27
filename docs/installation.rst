@@ -42,7 +42,7 @@ Prerequisites
 
     $ firefox https://store.docker.com/editions/community/docker-ce-desktop-windows
 
-  ..note:: Connectome Mapper 3 BIDSApp has been tested only on Ubuntu and MacOSX. For Windows users, few patches in the Dockerfile might be necessary.
+..note:: Connectome Mapper 3 BIDSApp has been tested only on Ubuntu and MacOSX. For Windows users, few patches in the Dockerfile might be necessary.
 
 
 * Docker managed as a non-root user
