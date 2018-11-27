@@ -1,5 +1,5 @@
 ====================
-Download Instruction
+Download Instruction for Contributors
 ====================
 
 By downloading Connectome Mapper, you agree to the terms and conditions of the following Modified BSD license.

@@ -1,5 +1,5 @@
 ************************
-Installation Instruction
+Installation Instruction for Users
 ************************
 
 .. warning:: This software is for research purposes only and shall not be used for
