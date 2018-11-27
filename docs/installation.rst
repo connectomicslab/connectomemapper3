@@ -29,21 +29,17 @@ Prerequisites
 -------------
 
 * Installed Docker Engine corresponding to your system::
-
   * For Ubuntu 14.04/16.04/18.04, follow the instructions from the web page::
 
     $ firefox https://docs.docker.com/install/linux/docker-ce/ubuntu/
-
 
   * For Mac OSX (>=10.10.3), get the .dmg installer from the web page::
 
     $ firefox https://store.docker.com/editions/community/docker-ce-desktop-mac
 
-
   * For Windows (>=10), get the installer from the web page:
 
     $ firefox https://store.docker.com/editions/community/docker-ce-desktop-windows
-
 
   ..note:: Connectome Mapper 3 BIDSApp has been tested only on Ubuntu and MacOSX. For Windows users, few patches in the Dockerfile might be necessary.
 
