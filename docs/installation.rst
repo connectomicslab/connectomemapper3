@@ -47,6 +47,8 @@ Prerequisites
 
 * Docker managed as a non-root user
 
+  * Open a terminal
+
   * Create the docker group::
 
     $ sudo groupadd docker
@@ -69,6 +71,8 @@ Manual installation
 
 Installation of the Connectome Mapper 3 has been facilicated through the distribution of a BIDSApp relying on the Docker software container technology.
 
+* Open a terminal
+
 * Get the latest release of the BIDS App::
 
   $ docker pull sebastientourbier/connectomemapper-bidsapp:latest
@@ -86,11 +90,11 @@ The Connectome Mapper 3 BIDSApp Manager (GUI)
 Prerequisites
 -------------
 
-* Installed miniconda2 (Python 2.7)::
+* Installed miniconda2 (Python 2.7) from the web page::
 
   $ firefox https://conda.io/miniconda.html
 
-  Download the Python 2.7 installer corresponding to your system (Windows/MacOSX/Linux)
+  Download the Python 2.7 installer corresponding to your 32/64bits system (Windows/MacOSX/Linux)
 
 
 .. _manual-install-cmpbidsappmanager:
