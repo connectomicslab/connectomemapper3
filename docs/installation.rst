@@ -28,11 +28,30 @@ The Connectome Mapper 3 BIDSApp
 Prerequisites
 -------------
 
-* Installed Docker Engine::
+* Installed Docker Engine corresponding to your system::
 
-  $ firefox https://store.docker.com/search?type=edition&offering=community
+  * For Ubuntu 14.04/16.04/18.04::
 
-  Download the Docker Community Edition installer corresponding to your system (Windows/Mac/Debian/CentOS/Fedora)
+    $ firefox https://docs.docker.com/install/linux/docker-ce/ubuntu/
+
+    Follow the instructions on `https://docs.docker.com/install/linux/docker-ce/ubuntu/ <https://docs.docker.com/install/linux/docker-ce/ubuntu/>`.
+
+
+  * For Mac OSX (https://store.docker.com/editions/community/docker-ce-desktop-mac)::
+
+    $ firefox https://store.docker.com/editions/community/docker-ce-desktop-mac
+
+    Get the .dmg installer from `https://store.docker.com/editions/community/docker-ce-desktop-mac <https://store.docker.com/editions/community/docker-ce-desktop-mac>`.
+
+
+  * For Windows (>=10):
+
+    $ firefox https://store.docker.com/editions/community/docker-ce-desktop-windows
+
+    Get the .dmg installer from `https://store.docker.com/editions/community/docker-ce-desktop-windows <https://store.docker.com/editions/community/docker-ce-desktop-windows>`.
+
+
+  ..note:: Connectome Mapper 3 BIDSApp has been tested only on Ubuntu and MacOSX. For Windows users, few patches in the Dockerfile might be necessary.
 
 * Docker managed as a non-root user
 
@@ -100,6 +119,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * Add additional distribution channels and create a miniconda2 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
 
+  $ conda config --add channels conda-forge --add channels aramislab --add channels anaconda
 	$ conda create --name py27cmp --file cmpbidsappmanager/conda_packages_list.txt
 
 * Activate the conda environment::
