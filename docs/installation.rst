@@ -94,7 +94,7 @@ Prerequisites
 
   $ firefox https://conda.io/miniconda.html
 
-  Download the Python 2.7 installer corresponding to your 32/64bits system (Windows/MacOSX/Linux)
+  Download the Python 2.7 installer corresponding to your 32/64bits MacOSX/Linux/Win system.
 
 
 .. _manual-install-cmpbidsappmanager:
@@ -105,7 +105,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * Open a terminal
 
-* Go to the folder in which you would like to clone the source code repository
+* Go to the folder in which you would like to clone the source code repository::
 
   $ cd <INSTALL DIRECTORY>
 
