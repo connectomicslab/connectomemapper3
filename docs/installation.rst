@@ -86,26 +86,32 @@ Prerequisites
 
 Manual installation
 ---------------------------------------
-The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager) consists of a clone of the GitHub repository, the creation of conda environment with all python dependencies installed, and eventually the installation of the CMPBIDSAPPManager itself, as follows:
+The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager) consists of a clone of the source code repository, the creation of conda environment with all python dependencies installed, and eventually the installation of the CMPBIDSAPPManager itself, as follows:
 
-* Clone the GitHub repository::
+* Open a terminal
+
+* Go to the folder in which you would like to clone the source code repository
+
+  $ cd <INSTALL DIRECTORY>
+
+* Clone the source code repository::
 
   $ git clone https://github.com/sebastientourbier/cmpbidsappmanager.git cmpbidsappmanager
 
-* Create a miniconda2 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
+* Add additional distribution channels and create a miniconda2 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
 
-	$ conda create --name cmppy27 --file /absolute/path/to/conda_packages_list.txt
+	$ conda create --name py27cmp --file cmpbidsappmanager/conda_packages_list.txt
 
 * Activate the conda environment::
 
-  $ source activate cmppy27
+  $ source activate py27cmp
 
 * Install the Connectome Mapper BIDS App Manager from the Bash Shell using following commands::
 
-	(cmppy27)$ cd cmpbidsappmanager/
-	(cmppy27)$ python setup.py install
+	(py27cmp)$ cd cmpbidsappmanager/
+	(py27cmp)$ python setup.py install
 
 Help/Questions
 --------------
 
-If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_. Code bugs can be reported by creating a "New Issue" on the `public repository <https://github.com/LTS5/cmp/issues>`_.
+If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_. Code bugs can be reported by creating a "New Issue" on the `source code repository <https://github.com/LTS5/cmp/issues>`_.
