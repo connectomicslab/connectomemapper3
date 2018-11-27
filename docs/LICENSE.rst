@@ -1,6 +1,6 @@
 BSD 3-Clause License
 
-Copyright (c) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland.
+Copyright (c) 2016-2018, Brain Communication Pathways Sinergia Consortium, Switzerland.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
