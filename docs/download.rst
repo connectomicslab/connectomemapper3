@@ -42,9 +42,7 @@ Source code
 
 	<blockquote>
 	<div><ul class="simple">
-	<li><tt class="xref download docutils literal"><a href="https://bitbucket.org/sinergiaconsortium/connectomemapper3/get/e6457cf1c205.zip")>3.x branch (beta)</a></tt></li>
-	..<li><tt class="xref download docutils literal"><a href="https://github.com/LTS5/cmp/releases" onmousedown="_gaq.push(['_trackEvent', 'source_release-2.1.0-beta', 'download']);">2.x branch (beta)</a></tt></li>
-	..<li><tt class="xref download docutils literal"><a href="https://github.com/LTS5/cmp/releases" onmousedown="_gaq.push(['_trackEvent', 'source_release-1.2.0', 'download']);">1.x branch</a></tt></li>
+	<li><tt class="xref download docutils literal"><a href="https://bitbucket.org/sinergiaconsortium/connectomemapper3/get/e6457cf1c205.zip")>3.0.x branch (beta)</a></tt></li>
 	</ul>
 	</div></blockquote>
 
