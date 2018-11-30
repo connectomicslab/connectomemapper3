@@ -758,7 +758,10 @@ class CMP_BIDSAppWindow(HasTraits):
 
         print(cmd)
 
-        log_filename = os.path.join(self.bids_root,'derivatives/cmp','sub-{}_log-cmpbidsapp.txt'.format(participant_label))
+        log_filename = os.path.join(self.bids_root,'derivatives','cmp','sub-{}_log-cmpbidsapp.txt'.format(participant_label))
+
+        if not os.path.exists(os.path.join(self.bids_root,'derivatives','cmp')):
+            os.makedirs(os.path.join(self.bids_root,'derivatives','cmp'))
 
         with open(log_filename, 'w+') as log:
             proc = Popen(cmd, stdout=log, stderr=log)

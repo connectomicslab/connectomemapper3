@@ -84,8 +84,11 @@ class ParcellationStage(Stage):
     def __init__(self,pipeline_mode):
         self.name = 'parcellation_stage'
         self.config = ParcellationConfig()
-        self.config.template_thalamus = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz'))
-        self.config.thalamic_nuclei_maps = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz'))
+        self.config.template_thalamus = os.path.join('app','connectomemapper3','cmtklib','data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')
+        self.config.thalamic_nuclei_maps = os.path.join('app','connectomemapper3','cmtklib','data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')
+        #FIXME Bids App / local
+        #self.config.template_thalamus = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz'))
+        #self.config.thalamic_nuclei_maps = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz'))
         self.config.pipeline_mode = pipeline_mode
         self.inputs = ["subjects_dir","subject_id","custom_wm_mask"]
         self.outputs = [#"aseg_file",
@@ -115,7 +118,10 @@ class ParcellationStage(Stage):
                 white_matter_file = parc_results.outputs.white_matter_mask_file
                 if isinstance(parc_results.outputs.roi_files_in_structural_space, (str,unicode)):
                     print "str: %s" % parc_results.outputs.roi_files_in_structural_space
-                    lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))
+
+                    lut_file = os.path.join('app','connectomemapper3','cmtklib','data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt')
+                    # FIXME
+                    # lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))
                     roi_v = parc_results.outputs.roi_files_in_structural_space
                     print "roi_v : %s" % os.path.basename(roi_v)
                     self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview','-v',
@@ -129,7 +135,9 @@ class ParcellationStage(Stage):
                             roi_basename = os.path.basename(roi_v)
                             scale = roi_basename[16:-7]
                             print scale
-                            lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008',resolution[scale],resolution[scale] + '_LUT.txt'))
+                            lut_file = os.path.join('app','connectomemapper3','cmtklib','data','parcellation','lausanne2008',resolution[scale],resolution[scale] + '_LUT.txt')
+                            # FIXME
+                            # lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008',resolution[scale],resolution[scale] + '_LUT.txt'))
                             self.inspect_outputs_dict[roi_basename] = ['freeview','-v',
                                                                                white_matter_file+':colormap=GEColor',
                                                                                roi_v+":colormap=lut:lut="+lut_file]

@@ -1577,9 +1577,17 @@ class ProjectHandlerV2(Handler):
                             else:
                                 loaded_project.diffusion_imaging_model = 'DTI'
                         else:
+                            loaded_project.dmri_bids_acqs = ['']
+                            loaded_project.dmri_bids_acq = ''
                             loaded_project.configure_traits(view='diffusion_imaging_model_select_view')
 
                         files = [f.filename for f in bids_layout.get(subject=subject, session=session, type='dwi', extensions=['nii', 'nii.gz'])]
+
+                        print('****************************************')
+                        print()
+                        print('****************************************')
+                        print(files)
+                        print('****************************************')
 
                         if (loaded_project.dmri_bids_acq != ''):
                             for file in files:
@@ -1607,6 +1615,7 @@ class ProjectHandlerV2(Handler):
                             else:
                                 loaded_project.diffusion_imaging_model = 'DTI'
                         else:
+                            loaded_project.dmri_bids_acqs = ['']
                             loaded_project.dmri_bids_acq = ''
                             loaded_project.configure_traits(view='diffusion_imaging_model_select_view')
 
@@ -1619,6 +1628,14 @@ class ProjectHandlerV2(Handler):
                                     break
                         else:
                             dwi_file = files[0]
+                    img = nib.load(dwi_file)
+                    print('#####################')
+                    print(dwi_file)
+                    print(img)
+                    print('#####################')
+                    print(img.shape)
+                    print('#####################')
+
                     max_volume_idx = nib.load(dwi_file).shape[3] - 1
                     self.dmri_pipeline.stages["Preprocessing"].end_vol = max_volume_idx
                     self.dmri_pipeline.stages["Preprocessing"].max_vol = max_volume_idx

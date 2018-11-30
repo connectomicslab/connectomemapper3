@@ -75,9 +75,15 @@ class SegmentationStage(Stage):
     def __init__(self):
         self.name = 'segmentation_stage'
         self.config = SegmentationConfig()
-        self.config.ants_templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz'))
-        self.config.ants_probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz'))
-        self.config.ants_regmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumMask.nii.gz'))
+
+
+        self.config.ants_templatefile = os.path.join('app','connectomemapper3','cmtklib','data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz')
+        self.config.ants_probmaskfile = os.path.join('app','connectomemapper3','cmtklib','data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz')
+        self.config.ants_regmaskfile = os.path.join('app','connectomemapper3','cmtklib','data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumMask.nii.gz')
+        # FIXME
+        # self.config.ants_templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz'))
+        # self.config.ants_probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz'))
+        # self.config.ants_regmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumMask.nii.gz'))
         self.inputs = ["T1","brain_mask"]
         self.outputs = ["subjects_dir","subject_id","custom_wm_mask","brain_mask","brain"]
 
