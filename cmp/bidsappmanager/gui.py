@@ -496,8 +496,8 @@ class CMP_BIDSAppWindow(HasTraits):
 
     # handler = Instance(project.CMP_BIDSAppWindowHandler)
 
-    fs_license = File(os.path.join(os.environ['FREESURFER_HOME'],'license.txt'))
-    fs_average = Directory(os.path.join(os.environ['FREESURFER_HOME'],'subjects','fsaverage'))
+    fs_license = File()
+    #fs_average = Directory(os.path.join(os.environ['FREESURFER_HOME'],'subjects','fsaverage'))
 
     list_of_subjects_to_be_processed = List(Str)
 
@@ -614,13 +614,20 @@ class CMP_BIDSAppWindow(HasTraits):
         self.dmri_config = dmri_config
         self.fmri_config = fmri_config
 
+        if 'FREESURFER_HOME' in os.environ:
+            self.fs_license = os.path.join(os.environ['FREESURFER_HOME'],'license.txt')
+        else:
+            print('Environment variable $FREESURFER_HOME not found')
+            self.fs_license = ''
+            print('Freesurfer license unset ({})'.format(self.fs_license))
+
         print(self.list_of_subjects_to_be_processed)
         print(self.bids_root)
         print(self.anat_config)
         print(self.dmri_config)
         print(self.fmri_config)
         print(self.fs_license)
-        print(self.fs_average)
+        #print(self.fs_average)
 
         #self.on_trait_change(self.update_run_anat_pipeline,'run_anat_pipeline')
         self.on_trait_change(self.update_run_dmri_pipeline,'run_dmri_pipeline')
@@ -633,7 +640,7 @@ class CMP_BIDSAppWindow(HasTraits):
         self.on_trait_change(self.update_checksettings, 'run_fmri_pipeline')
         self.on_trait_change(self.update_checksettings, 'fmri_config')
         self.on_trait_change(self.update_checksettings, 'fs_license')
-        self.on_trait_change(self.update_checksettings, 'fs_average')
+        #self.on_trait_change(self.update_checksettings, 'fs_average')
 
     def update_run_anat_pipeline(self,new):
         print('Update run anat: %s'%new)
