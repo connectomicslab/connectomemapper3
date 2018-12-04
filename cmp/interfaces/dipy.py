@@ -486,7 +486,7 @@ class SHORE(DipyDiffusionInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['model'] = op.abspath('shoremodel.pklz')
-        outputs['fod'] = op.abspath('shore_dodf.nii.gz')
+        outputs['fod'] = op.abspath('shore_fodf.nii.gz')
         outputs['GFA'] = op.abspath('shore_gfa.nii.gz')
         return outputs
 
