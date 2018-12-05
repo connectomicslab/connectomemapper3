@@ -37,7 +37,8 @@ package_data = {'cmp.bidsappmanager':
 		        'data/segmentation/ants_template_IXI/*.*',
                 'data/parcellation/nativefreesurfer/*/*.*',
                 'data/diffusion/gradient_tables/*.*',
-                'data/segmentation/thalamus2018/*.*']
+                'data/segmentation/thalamus2018/*.*',
+                'data/segmentation/freesurfer/*.*']
                 }
 
 ################################################################################
