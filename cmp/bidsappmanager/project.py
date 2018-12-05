@@ -71,13 +71,13 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
                 print(' old local dataset directory -> local dataset directory')
 
                 try:
-                    for line in cont:
+                    for line in cont.readlines():
                         if '/derivatives/' in line:
                             old_dir, path_end = line.split('/derivatives/')
                             if old_dir[0] == 'V':
                                 old_dir = old_dir[1:]
                             break
-                            
+
                     print('Old dir : {}'.format(old_dir))
 
                     new_cont = string.replace(cont,'{}'.format(old_dir),'{}'.format(local_dir))
