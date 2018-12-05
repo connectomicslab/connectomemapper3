@@ -61,6 +61,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
 
             # Change pickles: bids app dataset directory -> local dataset directory
             if (mode == 'local'):
+
                 print(' bids app dataset directory -> local dataset directory')
                 new_cont = string.replace(cont,'/bids_dataset','{}'.format(local_dir))
                 pref = fi.split(".")[0]
@@ -70,26 +71,25 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
             if (mode == 'newlocal'):
                 print(' old local dataset directory -> local dataset directory')
 
-                try:
-                    for line in cont.readlines():
-                        if '/derivatives/' in line:
-                            old_dir, path_end = line.split('/derivatives/')
-                            if old_dir[0] == 'V':
-                                old_dir = old_dir[1:]
-                            break
+                for line in pick.readlines():
+                    if '/derivatives/' in line:
+                        old_dir, path_end = line.split('/derivatives/')
+                        if old_dir[0] == 'V':
+                            old_dir = old_dir[1:]
+                        break
 
-                    print('Old dir : {}'.format(old_dir))
+                print('Old dir : {}'.format(old_dir))
 
-                    new_cont = string.replace(cont,'{}'.format(old_dir),'{}'.format(local_dir))
+                new_cont = string.replace(cont,''.format(old_dir),'{}'.format(local_dir))
 
-                    pref = fi.split(".")[0]
-                    with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
-                        f.write(new_cont)
-                except:
-                    print('Cont: {}'.format(cont))
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont)
+
 
             # Change pickles: local dataset directory -> bids app dataset directory
             elif (mode == 'bidsapp'):
+                cont = pick.read()
                 print(' local dataset directory -> bids app dataset directory')
                 new_cont = string.replace(cont,'{}'.format(local_dir),'/bids_dataset')
                 pref = fi.split(".")[0]
