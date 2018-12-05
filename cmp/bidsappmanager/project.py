@@ -67,6 +67,16 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                     f.write(new_cont)
 
+            if (mode == 'newlocal'):
+                print(' old local dataset directory -> local dataset directory')
+
+                old_dir, path_end = cont.split('/derivatives/')
+                new_cont = os.path.join(local_dir,'derivatives', path_end)
+
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont)
+
             # Change pickles: local dataset directory -> bids app dataset directory
             elif (mode == 'bidsapp'):
                 print(' local dataset directory -> bids app dataset directory')

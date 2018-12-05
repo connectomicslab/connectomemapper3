@@ -1039,6 +1039,9 @@ class CMP_QualityControlWindow(HasTraits):
         self.dmri_inputs_checked = dmri_inputs_checked
         self.fmri_inputs_checked = fmri_inputs_checked
 
+        print('Fix BIDS root directory to {}'.format(self.project_info.base_dir))
+        project.fix_dataset_directory_in_pickles(local_dir=self.project_info.base_dir,mode='newlocal')
+
         self.select_subject()
 
         #self.on_trait_change(self.update_run_anat_pipeline,'run_anat_pipeline')
