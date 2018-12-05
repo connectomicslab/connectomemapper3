@@ -87,7 +87,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
 
                 print('Old dir : {}'.format(old_dir))
 
-                if old_dir != '':
+                if (old_dir != '') and (old_dir != local_dir):
                     new_cont = string.replace(cont,''.format(old_dir),'{}'.format(local_dir))
 
                     pref = fi.split(".")[0]
