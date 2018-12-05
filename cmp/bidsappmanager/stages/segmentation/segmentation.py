@@ -99,9 +99,15 @@ class SegmentationStage(Stage):
             else:
                 fs_path = os.path.join(self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
             print "fs_path : %s" % fs_path
+
+            if 'FREESURFER_HOME' not in os.environ:
+                colorLUT_file = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'freesurfer', 'FreeSurferColorLUT.txt'))
+            else:
+                colorLUT_file = os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')
+            
             self.inspect_outputs_dict['brainmask/T1'] = ['tkmedit','-f',os.path.join(fs_path,'mri','brainmask.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux',os.path.join(fs_path,'mri','T1.mgz'),'-aux-surface',os.path.join(fs_path,'surf','rh.white')]
-            self.inspect_outputs_dict['norm/aseg'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
-            self.inspect_outputs_dict['norm/aseg/surf'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux-surface',os.path.join(fs_path,'surf','rh.white'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')]
+            self.inspect_outputs_dict['norm/aseg'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),colorLUT_file]
+            self.inspect_outputs_dict['norm/aseg/surf'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux-surface',os.path.join(fs_path,'surf','rh.white'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),colorLUT_file]
 
         elif self.config.seg_tool == "Custom segmentation":
             self.inspect_outputs_dict['brainmask'] = ['fslview',self.config.white_matter_mask]
