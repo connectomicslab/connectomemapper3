@@ -71,6 +71,8 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
             if (mode == 'newlocal'):
                 print(' old local dataset directory -> local dataset directory')
 
+                old_dir = ''
+
                 for line in pick.readlines():
                     if '/derivatives/' in line:
                         old_dir, path_end = line.split('/derivatives/')
@@ -80,11 +82,12 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
 
                 print('Old dir : {}'.format(old_dir))
 
-                new_cont = string.replace(cont,''.format(old_dir),'{}'.format(local_dir))
+                if old_dir != '':
+                    new_cont = string.replace(cont,''.format(old_dir),'{}'.format(local_dir))
 
-                pref = fi.split(".")[0]
-                with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont)
+                    pref = fi.split(".")[0]
+                    with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+                        f.write(new_cont)
 
 
             # Change pickles: local dataset directory -> bids app dataset directory
