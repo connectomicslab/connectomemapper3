@@ -1039,8 +1039,8 @@ class CMP_QualityControlWindow(HasTraits):
         self.dmri_inputs_checked = dmri_inputs_checked
         self.fmri_inputs_checked = fmri_inputs_checked
 
-        print('Fix BIDS root directory to {}'.format(self.project_info.base_directory))
-        project.fix_dataset_directory_in_pickles(local_dir=self.project_info.base_directory,mode='newlocal')
+        #print('Fix BIDS root directory to {}'.format(self.project_info.base_directory))
+        #project.fix_dataset_directory_in_pickles(local_dir=self.project_info.base_directory,mode='newlocal')
 
         self.select_subject()
 
