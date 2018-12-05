@@ -71,8 +71,16 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
                 print(' old local dataset directory -> local dataset directory')
 
                 try:
-                    old_dir, path_end = cont.split('/derivatives/')
-                    new_cont = os.path.join(local_dir,'derivatives', path_end)
+                    for line in cont:
+                        if '/derivatives/' in line:
+                            old_dir, path_end = line.split('/derivatives/')
+                            if old_dir[0] == 'V':
+                                old_dir = old_dir[1:]
+                            break
+                            
+                    print('Old dir : {}'.format(old_dir))
+
+                    new_cont = string.replace(cont,'{}'.format(old_dir),'{}'.format(local_dir))
 
                     pref = fi.split(".")[0]
                     with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
