@@ -73,13 +73,17 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
 
                 old_dir = ''
 
-                for line in pick.readlines():
+                newpick = gzip.open(os.path.join(root,fi))
+
+                line = newpick.readline()
+                while line is not None:
                     print('Line: {}'.format(line))
                     if '/derivatives/' in line:
                         old_dir, path_end = line.split('/derivatives/')
                         if old_dir[0] == 'V':
                             old_dir = old_dir[1:]
                         break
+                    line = newpick.readline()
 
                 print('Old dir : {}'.format(old_dir))
 
