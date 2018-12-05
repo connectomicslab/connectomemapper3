@@ -75,6 +75,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
 
                 for line in pick.readlines():
                     if '/derivatives/' in line:
+                        print(line)
                         old_dir, path_end = line.split('/derivatives/')
                         if old_dir[0] == 'V':
                             old_dir = old_dir[1:]
