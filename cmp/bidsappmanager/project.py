@@ -1590,12 +1590,14 @@ class ProjectHandlerV2(Handler):
                     if loaded_project.subject_session != '':
                         session = loaded_project.subject_session.split('-')[1]
                         diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, session=session, type='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
+                        print('DIFFUSION IMAGING MODELS : {}'.format(diffusion_imaging_models))
 
                         if len(diffusion_imaging_models)>0:
                             if len(diffusion_imaging_models)>1:
                                 loaded_project.dmri_bids_acqs = diffusion_imaging_models
                                 loaded_project.configure_traits(view='dmri_bids_acq_view')
                             else:
+                                loaded_project.dmri_bids_acqs = ['{}'.format(diffusion_imaging_models[0])]
                                 loaded_project.dmri_bids_acq = diffusion_imaging_models[0]
 
                             if ('dsi' in loaded_project.dmri_bids_acq) or ('DSI' in loaded_project.dmri_bids_acq):
