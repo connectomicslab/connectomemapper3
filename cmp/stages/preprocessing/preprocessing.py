@@ -87,10 +87,10 @@ class PreprocessingConfig(HasTraits):
     eddy_current_and_motion_correction = Bool(True)
     eddy_correction_algo = Enum('FSL eddy_correct','FSL eddy')
     eddy_correct_motion_correction = Bool(True)
-    start_vol = Int(0)
-    end_vol = Int()
-    max_vol = Int()
-    max_str = Str
+    # start_vol = Int(0)
+    # end_vol = Int()
+    # max_vol = Int()
+    # max_str = Str
     partial_volume_estimation = Bool(True)
     fast_use_priors = Bool(True)
 
@@ -101,12 +101,12 @@ class PreprocessingConfig(HasTraits):
     traits_view = View(
                     VGroup(
                         VGroup(
-                        HGroup(
-                            Item('start_vol',label='Vol'),
-                            Item('end_vol',label='to'),
-                            Item('max_str',style='readonly',show_label=False)
-                            ),
-                            label='Processed volumes'),
+                        # HGroup(
+                        #     Item('start_vol',label='Vol'),
+                        #     Item('end_vol',label='to'),
+                        #     Item('max_str',style='readonly',show_label=False)
+                        #     ),
+                        #     label='Processed volumes'),
                         VGroup(
                         HGroup(
                             Item('denoising'),
@@ -135,17 +135,17 @@ class PreprocessingConfig(HasTraits):
                         ),
                     width=0.5,height=0.5)
 
-    def _max_vol_changed(self,new):
-        self.max_str = '(max: %d)' % new
-        #self.end_vol = new
-
-    def _end_vol_changed(self,new):
-        if new > self.max_vol:
-            self.end_vol = self.max_vol
-
-    def _start_vol_changed(self,new):
-        if new < 0:
-            self.start_vol = 0
+    # def _max_vol_changed(self,new):
+    #     self.max_str = '(max: %d)' % new
+    #     #self.end_vol = new
+    #
+    # def _end_vol_changed(self,new):
+    #     if new > self.max_vol:
+    #         self.end_vol = self.max_vol
+    #
+    # def _start_vol_changed(self,new):
+    #     if new < 0:
+    #         self.start_vol = 0
 
 class splitBvecBvalInputSpec(BaseInterfaceInputSpec):
     bvecs = File(exists=True)
@@ -217,29 +217,29 @@ class PreprocessingStage(Stage):
 
 
         # For DSI acquisition: extract the hemisphere that contains the data
-        if self.config.start_vol > 0 or self.config.end_vol < self.config.max_vol:
-
-            split_vol = pe.Node(interface=splitDiffusion(),name='split_vol')
-            split_vol.inputs.start = self.config.start_vol
-            split_vol.inputs.end = self.config.end_vol
-
-            split_bvecbval = pe.Node(interface=splitBvecBval(),name='split_bvecsbvals')
-            split_bvecbval.inputs.start = self.config.start_vol
-            split_bvecbval.inputs.end = self.config.end_vol
-            split_bvecbval.inputs.orientation = 'h'
-            split_bvecbval.inputs.delimiter = ' '
-
-            flow.connect([
-                        (inputnode,split_vol,[('diffusion','in_file')]),
-                        (split_vol,processing_input,[('data','diffusion')]),
-                        (inputnode,split_bvecbval,[('bvecs','bvecs'),('bvals','bvals')]),
-                        (split_bvecbval,processing_input,[('bvecs_split','bvecs'),('bvals_split','bvals')])
-                        ])
-
-        else:
-            flow.connect([
-                        (inputnode,processing_input,[('diffusion','diffusion'),('bvecs','bvecs'),('bvals','bvals')]),
-                        ])
+        # if self.config.start_vol > 0 or self.config.end_vol < self.config.max_vol:
+        #
+        #     split_vol = pe.Node(interface=splitDiffusion(),name='split_vol')
+        #     split_vol.inputs.start = self.config.start_vol
+        #     split_vol.inputs.end = self.config.end_vol
+        #
+        #     split_bvecbval = pe.Node(interface=splitBvecBval(),name='split_bvecsbvals')
+        #     split_bvecbval.inputs.start = self.config.start_vol
+        #     split_bvecbval.inputs.end = self.config.end_vol
+        #     split_bvecbval.inputs.orientation = 'h'
+        #     split_bvecbval.inputs.delimiter = ' '
+        #
+        #     flow.connect([
+        #                 (inputnode,split_vol,[('diffusion','in_file')]),
+        #                 (split_vol,processing_input,[('data','diffusion')]),
+        #                 (inputnode,split_bvecbval,[('bvecs','bvecs'),('bvals','bvals')]),
+        #                 (split_bvecbval,processing_input,[('bvecs_split','bvecs'),('bvals_split','bvals')])
+        #                 ])
+        #
+        # else:
+        flow.connect([
+                    (inputnode,processing_input,[('diffusion','diffusion'),('bvecs','bvecs'),('bvals','bvals')]),
+                    ])
 
         flow.connect([
                     (inputnode,processing_input,[('T1','T1'),('aparc_aseg','aparc_aseg'),('aseg','aseg'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),

@@ -7,32 +7,32 @@
 """ CMTK Parcellation functions
 """
 
+# Common libraries import
 import os
+import sys
+from time import time, localtime, strftime
 import re
 import os.path as op
 import pkg_resources
 import subprocess
 import shutil
+import math
+
 import nibabel as ni
 import networkx as nx
 import numpy as np
-import math
-
-from scipy import ndimage
-
-import scipy.ndimage.morphology as nd
-import sys
-from time import time, localtime, strftime
-from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, BaseInterface, Directory, File, InputMultiPath, OutputMultiPath
-
-
-from nipype.utils.logger import logging
-iflogger = logging.getLogger('nipype.interface')
 
 try:
+    from scipy import ndimage
     import scipy.ndimage.morphology as nd
 except ImportError:
     raise Exception('Need scipy for binary erosion of white matter and CSF masks')
+
+# Nipype imports
+from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, BaseInterface, Directory, File, InputMultiPath, OutputMultiPath
+from nipype.utils.logger import logging
+iflogger = logging.getLogger('nipype.interface')
+
 
 def erode_mask(maskFile):
     """ Erodes the mask """
@@ -2142,139 +2142,10 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 	rh_sub = np.array([49,50,51,52,58,53,54])
 	brain_stem = np.array([16])
 
-	# Check existence of multiscale atlas fsaverage annot files
-	# for i in range(0, nscales):
-	# 	this_file = os.path.join(freesurfer_subj, 'fsaverage/label', rh_annot_files[i])
-    #     this_file = pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i]))
-    #     # try:
-    #     #     shutil.copy(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),this_file)
-    #     # except PermissionError:
-    #     shutil.os.system('sudo cp "{}" "{}"'.format(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),this_file))
-    #
-    #     if not os.path.isfile(this_file):
-    #         parser.error('"{0}" is required! Please, copy the annot files FROM \'connectome_atlas/misc/multiscale_parcellation/fsaverage/label\' TO your FreeSurfer \'$SUBJECTS_DIR/fsaverage/label\' folder'.format(this_file))
-    #         return
-    #
-    #     this_file = os.path.join(freesurfer_subj, 'fsaverage/label', lh_annot_files[i])
-    #     this_file = pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i]))
-    #     # try:
-    #     #     shutil.copy(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),this_file)
-    #     # except PermissionError:
-    #     shutil.os.system('sudo cp "{}" "{}"'.format(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),this_file))
-    #
-    #     if not os.path.isfile(this_file):
-	# 		parser.error('"{0}" is required! Please, copy the annot files FROM \'connectome_atlas/misc/multiscale_parcellation/fsaverage/label\' TO your FreeSurfer \'$SUBJECTS_DIR/fsaverage/label\' folder'.format(this_file))
-	# 		return
-
-
 	# Check existence of tmp folder in input subject folder
 	this_dir = os.path.join(subject_dir, 'tmp')
 	if not ( os.path.isdir(this_dir) ):
 		os.makedirs(this_dir)
-
-
-	# We need to add these instructions when running FreeSurfer commands from Python
-	# (if these instructions are not present, Python rises a 'Symbol not found: ___emutls_get_address' exception in macOS)
-	fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
-
-
-	# Redirect ouput if low verbose
-	FNULL = open(os.devnull, 'w')
-
-
-	# # Loop over parcellation scales
-	# if v:
-	# 	print('Generete MULTISCALE PARCELLATION for input subject')
-	# for i in range(0, nscales):
-	# 	if v:
-	# 		print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
-    #
-	# 	# 1. Resample fsaverage CorticalSurface onto SUBJECT_ID CorticalSurface and map annotation for current scale
-	# 	# Left hemisphere
-	# 	if v:
-	# 		print('     > resample fsaverage CorticalSurface to individual CorticalSurface')
-	# 	mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi lh --sval-annot %s --tval %s' % (
-	# 				subject_id,
-	# 				pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),
-	# 				os.path.join(subject_dir, 'label', lh_annot_files[i]))
-	# 	if v == 2:
-	# 		status = subprocess.call(mri_cmd, shell=True)
-	# 	else:
-	# 		status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-	# 	# Right hemisphere
-	# 	mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi rh --sval-annot %s --tval %s' % (
-	# 				subject_id,
-	# 				pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),
-	# 				os.path.join(subject_dir, 'label', rh_annot_files[i]))
-	# 	if v == 2:
-	# 		status = subprocess.call(mri_cmd, shell=True)
-	# 	else:
-	# 		status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-    #
-	# 	# 2. Generate Nifti volume from annotation
-	# 	#    Note: change here --wmparc-dmax (FS default 5mm) to dilate cortical regions toward the WM
-	# 	if v:
-	# 		print('     > generate Nifti volume from annotation')
-	# 	mri_cmd = fs_string + '; mri_aparc2aseg --s %s --annot %s --wmparc-dmax 0 --labelwm --hypo-as-wm --new-ribbon --o %s' % (
-	# 				subject_id,
-	# 				annot[i],
-	# 				os.path.join(subject_dir, 'tmp', aseg_output[i]))
-	# 	if v == 2:
-	# 		status = subprocess.call(mri_cmd, shell=True)
-	# 	else:
-	# 		status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-    #
-	# 	# 3. Update numerical IDs of cortical and subcortical regions
-	# 	# Load Nifti volume
-	# 	if v:
-	# 		print('     > relabel cortical and subcortical regions')
-	# 	this_nifti = ni.load(os.path.join(subject_dir, 'tmp', aseg_output[i]))
-	# 	vol = this_nifti.get_data()	# numpy.ndarray
-	# 	hdr = this_nifti.header
-	# 	# Initialize output
-	# 	hdr2 = hdr.copy()
-	# 	hdr2.set_data_dtype(np.uint16)
-	# 	# vol2 = np.zeros( this_nifti.shape, dtype=np.int16 )
-	# 	# # Relabelling Right hemisphere (2000+)
-	# 	# ii = np.where((vol > 2000) & (vol < 3000))
-	# 	# vol2[ii] = vol[ii] - 2000
-	# 	# nlabel = np.amax(vol2)	# keep track of the number of assigned labels
-	# 	# # Relabelling Subcortical Right hemisphere
-	# 	# # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
-	# 	# newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
-	# 	# for j in range(0, len(rh_sub)):
-	# 	# 	ii = np.where(vol == rh_sub[j])
-	# 	# 	vol2[ii] = newLabels[j]
-	# 	# nlabel = np.amax(vol2)
-	# 	# # Relabelling Left hemisphere (1000+)
-	# 	# ii = np.where((vol > 1000) & (vol < 2000))
-	# 	# vol2[ii] = vol[ii] - 1000 + nlabel
-	# 	# nlabel = np.amax(vol2)	# n cortical label in right hemisphere
-	# 	# # Relabelling Subcortical Right hemisphere
-	# 	# # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
-	# 	# newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
-	# 	# for j in range(0, len(lh_sub)):
-	# 	# 	ii = np.where(vol == lh_sub[j])
-	# 	# 	vol2[ii] = newLabels[j]
-	# 	# nlabel = np.amax(vol2)
-	# 	# # Relabelling Brain Stem
-	# 	# ii = np.where(vol == brain_stem)
-	# 	# vol2[ii] = nlabel + 1
-    #
-	# 	# 4. Save Nifti and mgz volumes
-	# 	if v:
-	# 		print('     > save output volumes')
-	# 	this_out = os.path.join(subject_dir, 'mri', aseg_output[i])
-	# 	img = ni.Nifti1Image(vol, this_nifti.affine, hdr2)
-	# 	ni.save(img, this_out)
-	# 	mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
-	# 				this_out,
-	# 				os.path.join(subject_dir, 'mri', aseg_output[i][0:-4]+'.mgz'))
-	# 	if v == 2:
-	# 		status = subprocess.call(mri_cmd, shell=True)
-	# 	else:
-	# 		status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-	# 	os.remove(os.path.join(subject_dir, 'tmp', aseg_output[i]))
 
     def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id):
     	# Multiscale parcellation - define annotation and segmentation variables
@@ -2388,18 +2259,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
                             )
         jobs.append(thread)
         thread.start()
-    #     #generate_single_parcellation(v,i,fs_string,subject_dir,subject_id,lh_annot_files,rh_annot_files,annot,aseg_output)
-    # import multiprocessing as mp
-    # pool = mp.Pool(processes=nscales)
-    # # results = pool.apply(generate_single_parcellation, args=(v,i,fs_string,subject_dir,subject_id,)) for i in range(0,nscales)]
-    #
-    # job_args = [(v,i,fs_string,subject_dir,subject_id,) for i in range(0,nscales)]
-    # pool.map(generate_single_parcellation,job_args)
-
-    # # Start the processes (i.e. calculate the random number lists)
-	# for j in jobs:
-	# 	j.start()
-    #
+    
 	# Ensure all of the processes have finished
 	for j in jobs:
 		j.join()
