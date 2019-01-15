@@ -2120,20 +2120,33 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
     print("Freesurfer subjects dir : %s"%freesurfer_subj)
     print("Freesurfer subject id : %s"%subject_id)
 
-    if not ( os.path.isdir(freesurfer_subj) and os.path.isdir(os.path.join(freesurfer_subj, 'fsaverage')) ):
-        parser.error('FreeSurfer subject directory is invalid. The folder does not exist or does not contain \'fsaverage\'')
+    if not ( os.access(freesurfer_subj,os.F_OK) ):
+        print('ERROR: FreeSurfer subjects directory ($SUBJECTS_DIR) does not exist')
     else:
         if v:
-            print('- FreeSurfer subject directory ($SUBJECTS_DIR):\n  {}\n'.format(freesurfer_subj))
+            print('- FreeSurfer subjects directory ($SUBJECTS_DIR):\n  {}\n'.format(freesurfer_subj))
 
-    subject_dir = os.path.join(freesurfer_subj, subject_id)
-    if not ( os.path.isdir(subject_dir) ):
-        parser.error('No input subject directory was found in FreeSurfer $SUBJECTS_DIR')
+    if not ( os.access(os.path.join(freesurfer_subj, 'fsaverage'),os.F_OK) ):
+        print('ERROR: FreeSurfer subjects directory ($SUBJECTS_DIR) DOES NOT contain \'fsaverage\'')
+        print('Copy fsaverage')
+
+        src = os.path.join(os.environ['FREESURFER_HOME'], 'subjects', 'fsaverage')
+        dst = os.path.join(os.path.join(subject_dir, os.pardir),'fsaverage')
+
+        if os.path.isdir(dst):
+            shutil.rmtree(dst,ignore_errors=True)
+
+        shutil.copytree(src, dst)
     else:
         if v:
-            print('- Input subject id:\n  {}\n'.format(subject_id))
-            print('- Input subject directory:\n  {}\n'.format(subject_dir))
+            print('-  FreeSurfer subjects directory ($SUBJECTS_DIR) DOES contain \'fsaverage\'\n')
 
+    if not ( os.access(subject_dir,os.F_OK) ):
+        print('ERROR: No input subject directory was found in FreeSurfer $SUBJECTS_DIR')
+    else:
+        if v:
+            print('- Freesurfer subject id:\n  {}\n'.format(subject_id))
+            print('- Freesurfer subject directory:\n  {}\n'.format(subject_dir))
 
 	# Number of scales in multiscale parcellation
 	nscales = 5
@@ -2259,7 +2272,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
                             )
         jobs.append(thread)
         thread.start()
-    
+
 	# Ensure all of the processes have finished
 	for j in jobs:
 		j.join()
