@@ -100,7 +100,7 @@ class PreprocessingConfig(HasTraits):
 
     traits_view = View(
                     VGroup(
-                        VGroup(
+                        # VGroup(
                         # HGroup(
                         #     Item('start_vol',label='Vol'),
                         #     Item('end_vol',label='to'),
