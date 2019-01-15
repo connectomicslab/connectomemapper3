@@ -28,10 +28,10 @@ class PreprocessingConfig(HasTraits):
     eddy_current_and_motion_correction = Bool(True)
     eddy_correction_algo = Enum('FSL eddy_correct','FSL eddy')
     eddy_correct_motion_correction = Bool(True)
-    start_vol = Int(0)
-    end_vol = Int()
-    max_vol = Int()
-    max_str = Str
+    # start_vol = Int(0)
+    # end_vol = Int()
+    # max_vol = Int()
+    # max_str = Str
     partial_volume_estimation = Bool(True)
     fast_use_priors = Bool(True)
 
@@ -42,12 +42,12 @@ class PreprocessingConfig(HasTraits):
     traits_view = View(
                     VGroup(
                         VGroup(
-                        HGroup(
-                            Item('start_vol',label='Vol'),
-                            Item('end_vol',label='to'),
-                            Item('max_str',style='readonly',show_label=False)
-                            ),
-                            label='Processed volumes'),
+                        # HGroup(
+                        #     Item('start_vol',label='Vol'),
+                        #     Item('end_vol',label='to'),
+                        #     Item('max_str',style='readonly',show_label=False)
+                        #     ),
+                        #     label='Processed volumes'),
                         VGroup(
                         HGroup(
                             Item('denoising'),
@@ -76,17 +76,17 @@ class PreprocessingConfig(HasTraits):
                         ),
                     width=0.5,height=0.5)
 
-    def _max_vol_changed(self,new):
-        self.max_str = '(max: %d)' % new
-        #self.end_vol = new
-
-    def _end_vol_changed(self,new):
-        if new > self.max_vol:
-            self.end_vol = self.max_vol
-
-    def _start_vol_changed(self,new):
-        if new < 0:
-            self.start_vol = 0
+    # def _max_vol_changed(self,new):
+    #     self.max_str = '(max: %d)' % new
+    #     #self.end_vol = new
+    #
+    # def _end_vol_changed(self,new):
+    #     if new > self.max_vol:
+    #         self.end_vol = self.max_vol
+    #
+    # def _start_vol_changed(self,new):
+    #     if new < 0:
+    #         self.start_vol = 0
 
 
 class PreprocessingStage(Stage):
