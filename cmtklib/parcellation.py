@@ -2116,9 +2116,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
     from networks. Iteratively create volume. """
 
     freesurfer_subj = os.path.abspath(subjects_dir)
-
-    print("Freesurfer subjects dir : %s"%freesurfer_subj)
-    print("Freesurfer subject id : %s"%subject_id)
+    subject_dir = os.path.join(freesurfer_subj,subject_id)
 
     if not ( os.access(freesurfer_subj,os.F_OK) ):
         print('ERROR: FreeSurfer subjects directory ($SUBJECTS_DIR) does not exist')
@@ -2127,7 +2125,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
             print('- FreeSurfer subjects directory ($SUBJECTS_DIR):\n  {}\n'.format(freesurfer_subj))
 
     if not ( os.access(os.path.join(freesurfer_subj, 'fsaverage'),os.F_OK) ):
-        print('WARNING: FreeSurfer subjects directory ($SUBJECTS_DIR) DOES NOT contain \'fsaverage\'')
+        print('-  FreeSurfer subjects directory ($SUBJECTS_DIR) DOES NOT contain \'fsaverage\'')
 
         src = os.path.join(os.environ['FREESURFER_HOME'], 'subjects', 'fsaverage')
         dst = os.path.join(freesurfer_subj,'fsaverage')
@@ -2135,7 +2133,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
         if os.path.isdir(dst):
             shutil.rmtree(dst,ignore_errors=True)
 
-        print('Copy fsaverage')
+        print('         -> Copy fsaverage')
         shutil.copytree(src, dst)
     else:
         if v:
