@@ -31,8 +31,8 @@ class ParcellationConfig(HasTraits):
     parcellation_scheme = Str('Lausanne2008')
     parcellation_scheme_editor = List(['NativeFreesurfer','Lausanne2008','Lausanne2018','Custom'])
     include_thalamic_nuclei_parcellation = Bool(True)
-    template_thalamus = File()
-    thalamic_nuclei_maps = File()
+    #template_thalamus = File()
+    #thalamic_nuclei_maps = File()
     segment_hippocampal_subfields = Bool(True)
     segment_brainstem = Bool(True)
     pre_custom = Str('Lausanne2008')
@@ -89,8 +89,8 @@ class ParcellationStage(Stage):
     def __init__(self,pipeline_mode):
         self.name = 'parcellation_stage'
         self.config = ParcellationConfig()
-        self.config.template_thalamus = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')))
-        self.config.thalamic_nuclei_maps = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')))
+        #self.config.template_thalamus = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')))
+        #self.config.thalamic_nuclei_maps = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')))
         self.config.pipeline_mode = pipeline_mode
         self.inputs = ["subjects_dir","subject_id","custom_wm_mask"]
         self.outputs = [#"aseg_file",
@@ -157,8 +157,8 @@ class ParcellationStage(Stage):
 
                 if self.config.include_thalamic_nuclei_parcellation:
                     parcThal = pe.Node(interface=ParcellateThalamus(),name="parcThal")
-                    parcThal.inputs.template_image = self.config.template_thalamus
-                    parcThal.inputs.thalamic_nuclei_maps = self.config.thalamic_nuclei_maps
+                    parcThal.inputs.template_image = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')))
+                    parcThal.inputs.thalamic_nuclei_maps = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')))
 
                     flow.connect([
                                 (inputnode,parcThal,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
