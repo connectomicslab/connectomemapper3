@@ -2127,15 +2127,15 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
             print('- FreeSurfer subjects directory ($SUBJECTS_DIR):\n  {}\n'.format(freesurfer_subj))
 
     if not ( os.access(os.path.join(freesurfer_subj, 'fsaverage'),os.F_OK) ):
-        print('ERROR: FreeSurfer subjects directory ($SUBJECTS_DIR) DOES NOT contain \'fsaverage\'')
-        print('Copy fsaverage')
+        print('WARNING: FreeSurfer subjects directory ($SUBJECTS_DIR) DOES NOT contain \'fsaverage\'')
 
         src = os.path.join(os.environ['FREESURFER_HOME'], 'subjects', 'fsaverage')
-        dst = os.path.join(os.path.join(subject_dir, os.pardir),'fsaverage')
+        dst = os.path.join(freesurfer_subj,'fsaverage')
 
         if os.path.isdir(dst):
             shutil.rmtree(dst,ignore_errors=True)
 
+        print('Copy fsaverage')
         shutil.copytree(src, dst)
     else:
         if v:
