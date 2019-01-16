@@ -2261,6 +2261,8 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
     if v:
         print('Generate MULTISCALE PARCELLATION for input subject')
 
+    fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
+
     import multiprocessing as mp
     jobs = []
     for i in range(0, nscales):
