@@ -2019,6 +2019,8 @@ def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id):
     annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
     aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
 
+    FNULL = open(os.devnull, 'w')
+    
     if v:
         print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
 
@@ -2164,6 +2166,8 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
     	lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
     	annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
     	aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
+
+        FNULL = open(os.devnull, 'w')
 
         if v:
             print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
