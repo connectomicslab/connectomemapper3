@@ -374,19 +374,20 @@ class SHORE(DipyDiffusionInterface):
     output_spec = SHOREOutputSpec
 
     def _run_interface(self, runtime):
-        from dipy.reconst.shore import ShoreModel
+        import nibabel as nib
+
+        import pickle as pickle
+        import gzip
+        import multiprocessing as mp
+
         from dipy.data import get_sphere, default_sphere
+        from dipy.io import read_bvals_bvecs
+        from dipy.core.gradients import gradient_table
+        from dipy.reconst.shore import ShoreModel
         from dipy.reconst.odf import gfa
         from dipy.reconst.csdeconv import odf_sh_to_sharp
         from dipy.reconst.shm import sh_to_sf, sf_to_sh
         from dipy.core.ndindex import ndindex
-        import nibabel as nib
-
-        # import marshal as pickle
-        import pickle as pickle
-        import gzip
-
-        import multiprocessing as mp
 
         img = nb.load(self.inputs.in_file)
         imref = nb.four_to_three(img)[0]
@@ -413,7 +414,9 @@ class SHORE(DipyDiffusionInterface):
 
         hdr = imref.header.copy()
 
-        gtab = self._get_gradient_table()
+        bvals, bvecs = read_bvals_bvecs(self.inputs.in_bval, self.inputs.in_bvec)
+        bvecs=np.array([-bvecs[:,0], bvecs[:,1], bvecs[:,2]]).transpose()
+        gtab = gradient_table(bvals, bvecs)
 
         # if isdefined(self.inputs.response):
         #     resp_file = np.loadtxt(self.inputs.response)
