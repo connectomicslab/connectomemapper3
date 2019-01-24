@@ -271,21 +271,21 @@ class DiffusionPipeline(Pipeline):
             #input_notification.configure_traits()
             print input_message
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
-            diffusion_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
-            n_vol = nib.load(diffusion_file).shape[3]
-            if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
-                self.stages['Preprocessing'].config.end_vol = n_vol-1
-            self.stages['Preprocessing'].config.max_vol = n_vol-1
+            # diffusion_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
+            # n_vol = nib.load(diffusion_file).shape[3]
+            # if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
+            #     self.stages['Preprocessing'].config.end_vol = n_vol-1
+            # self.stages['Preprocessing'].config.max_vol = n_vol-1
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
         else:
             print input_message
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
-            diffusion_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
-            n_vol = nib.load(diffusion_file).shape[3]
-            if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
-                self.stages['Preprocessing'].config.end_vol = n_vol-1
-            self.stages['Preprocessing'].config.max_vol = n_vol-1
+            # diffusion_file = os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz')
+            # n_vol = nib.load(diffusion_file).shape[3]
+            # if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
+            #     self.stages['Preprocessing'].config.end_vol = n_vol-1
+            # self.stages['Preprocessing'].config.max_vol = n_vol-1
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
 
@@ -447,11 +447,11 @@ class DiffusionPipeline(Pipeline):
             print input_message
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
 
-            if diffusion_available:
-                n_vol = nib.load(dwi_file).shape[3]
-                if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
-                    self.stages['Preprocessing'].config.end_vol = n_vol-1
-                self.stages['Preprocessing'].config.max_vol = n_vol-1
+            # if diffusion_available:
+            #     n_vol = nib.load(dwi_file).shape[3]
+            #     if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
+            #         self.stages['Preprocessing'].config.end_vol = n_vol-1
+            #     self.stages['Preprocessing'].config.max_vol = n_vol-1
 
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
@@ -459,11 +459,11 @@ class DiffusionPipeline(Pipeline):
             print input_message
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
 
-            if diffusion_available:
-                n_vol = nib.load(dwi_file).shape[3]
-                if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
-                    self.stages['Preprocessing'].config.end_vol = n_vol-1
-                self.stages['Preprocessing'].config.max_vol = n_vol-1
+            # if diffusion_available:
+            #     n_vol = nib.load(dwi_file).shape[3]
+            #     if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
+            #         self.stages['Preprocessing'].config.end_vol = n_vol-1
+            #     self.stages['Preprocessing'].config.max_vol = n_vol-1
 
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model

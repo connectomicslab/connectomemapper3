@@ -43,12 +43,13 @@ import gui
 #import pipelines.egg.eeg as EEG_pipeline
 
 def fix_dataset_directory_in_pickles(local_dir, mode='local'):
-    #mode can be local or bidsapp (local by default)
+    #mode can be local or newlocal or bidsapp (local by default)
 
+    #TODO: make fix more generalized by taking derivatives/output dir
     searchdir = os.path.join(local_dir,'derivatives/cmp')
 
     for root, dirs, files in os.walk(searchdir):
-        files = [ fi for fi in files if fi.endswith(".pklz") ]
+        files = [ fi for fi in files if( fi.endswith(".pklz") and not fi.endswith("_new.pklz")) ]
 
         print('----------------------------------------------------')
 
@@ -61,20 +62,21 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
 
             # Change pickles: bids app dataset directory -> local dataset directory
             if (mode == 'local'):
-
                 print(' bids app dataset directory -> local dataset directory')
                 new_cont = string.replace(cont,'/bids_dataset','{}'.format(local_dir))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                     f.write(new_cont)
 
-            if (mode == 'newlocal'):
+            elif (mode == 'newlocal'):
                 print(' old local dataset directory -> local dataset directory')
 
                 old_dir = ''
 
                 newpick = gzip.open(os.path.join(root,fi))
 
+                # Retrieve current BIDS directory written in .pklz files
+                # Suppose that the BIDS App output directory is directly in the root BIDS directory i.e /bids_dataset/derivatives
                 line = newpick.readline()
                 while line != '':
                     #print('Line: {}'.format(line))
@@ -88,23 +90,24 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
                 print('Old dir : {}'.format(old_dir))
                 print('Current dir : {}'.format(local_dir))
 
+                # Test if old_dir is valid (not empty) and different from the current BIDS root directory
+                # In that case, update the path in the .pklz file
                 if (old_dir != '') and (old_dir != local_dir):
-                    new_cont = string.replace(cont,''.format(old_dir),'{}'.format(local_dir))
+                    new_cont = string.replace(cont,'{}'.format(old_dir),'{}'.format(local_dir))
 
                     pref = fi.split(".")[0]
                     with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                         f.write(new_cont)
 
-
             # Change pickles: local dataset directory -> bids app dataset directory
             elif (mode == 'bidsapp'):
-                cont = pick.read()
                 print(' local dataset directory -> bids app dataset directory')
                 new_cont = string.replace(cont,'{}'.format(local_dir),'/bids_dataset')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                     f.write(new_cont)
     return True
+
 
 # def fix_dataset_directory_in_pickles(local_dir, subject, session='', mode='local'):
 #     #mode can be local or bidsapp (local by default)
