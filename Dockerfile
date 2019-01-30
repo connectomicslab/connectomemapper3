@@ -27,7 +27,7 @@ ADD . /app
 
 #Clone the master branch of connectomemapper 3 from BitBucket
 ARG password
-RUN git clone --progress --verbose -b master --single-branch https://sebastientourbier:$password@bitbucket.org/sinergiaconsortium/connectomemapper3.git connectomemapper3
+RUN git clone --progress --verbose -b dev --single-branch https://sebastientourbier:$password@bitbucket.org/sinergiaconsortium/connectomemapper3.git connectomemapper3
 
 # Set the working directory to /app/connectomemapper3 and install connectomemapper3
 WORKDIR /app/connectomemapper3
