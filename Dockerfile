@@ -10,6 +10,15 @@ MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 # Make port 80 available to the world outside this container
 # EXPOSE 80
 
+# WORKDIR /bids_dataset
+# WORKDIR /bids_dataset/derivatives
+# WORKDIR /bids_dataset/derivatives/freesurfer
+# WORKDIR /bids_dataset/derivatives/freesurfer/fsaverage
+# WORKDIR /opt/freesurfer/subjects/fsaverage
+# ADD . /bids_dataset/derivatives/freesurfer/fsaverage
+
+WORKDIR /app
+
 # Set the working directory to /app and copy contents of this repository
 WORKDIR /app
 ADD . /app
@@ -18,7 +27,7 @@ ADD . /app
 
 #Clone the master branch of connectomemapper 3 from BitBucket
 ARG password
-RUN git clone --progress --verbose -b dev --single-branch https://sebastientourbier:$password@bitbucket.org/sinergiaconsortium/connectomemapper3.git connectomemapper3
+RUN git clone --progress --verbose -b master --single-branch https://sebastientourbier:$password@bitbucket.org/sinergiaconsortium/connectomemapper3.git connectomemapper3
 
 # Set the working directory to /app/connectomemapper3 and install connectomemapper3
 WORKDIR /app/connectomemapper3
@@ -33,6 +42,8 @@ RUN echo '#! /bin/sh \n xvfb-run python "/app/run_connectomemapper3.py" "$@"' > 
 # Acquire script to be executed
 RUN chmod 775 /app/run_connectomemapper3.py
 RUN chmod 775 /app/run_connectomemapper3.sh
+
+WORKDIR /
 
 #COPY version /version
 ENTRYPOINT ["/app/run_connectomemapper3.sh"]

@@ -153,23 +153,32 @@ else:
 print("subjects to analyze : ")
 print(subjects_to_analyze)
 
-project = gui.CMP_Project_Info()
-project.base_directory = args.bids_dir
-project.subjects = ['sub-{}'.format(label) for label in subjects_to_analyze]
-
-print("project.subjects: ")
-print(project.subjects)
-
 #Derivatives directory creation if it does not exist
-cmp_derivatives_dir = os.path.join(args.bids_dir, "derivatives" , "cmp")
-if not os.path.isdir(cmp_derivatives_dir):
-    os.mkdir(cmp_derivatives_dir)
+derivatives_dir = os.path.abspath(args.output_dir)
+if not os.path.isdir(derivatives_dir):
+    os.mkdir(derivatives_dir)
+
+tools = ['cmp','freesurfer','nipype']
+
+for tool in tools:
+    tool_dir = os.path.join(args.output_dir, tool)
+    if not os.path.isdir(tool_dir):
+        os.mkdir(tool_dir)
 
 # running participant level
 if args.analysis_level == "participant":
 
     # find all T1s and skullstrip them
     for subject_label in subjects_to_analyze:
+
+        project = gui.CMP_Project_Info()
+        project.base_directory = args.bids_dir
+        project.output_directory = args.output_dir
+
+        project.subjects = ['sub-{}'.format(label) for label in subjects_to_analyze]
+
+        print("project.subjects: ")
+        print(project.subjects)
 
         project.subject = 'sub-{}'.format(subject_label)
 
@@ -184,9 +193,14 @@ if args.analysis_level == "participant":
                 project.subject_session = session
 
                 #Derivatives folder creation (Folder is first deleted if it already exists)
-                session_derivatives_dir = os.path.join(cmp_derivatives_dir, project.subject, project.subject_session)
-                if not os.path.isdir(session_derivatives_dir):
-                    os.makedirs(session_derivatives_dir)
+                for tool in tools:
+                    if tool == 'freesurfer':
+                        session_derivatives_dir = os.path.join(args.output_dir,tool, '{}_{}'.format(project.subject, project.subject_session))
+                    else:
+                        session_derivatives_dir = os.path.join(args.output_dir,tool, project.subject, project.subject_session)
+
+                    if not os.path.isdir(session_derivatives_dir):
+                        os.makedirs(session_derivatives_dir)
 
                 run_anat = False
                 run_dmri = False
@@ -214,6 +228,7 @@ if args.analysis_level == "participant":
 
                     cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
                     print cmd
+                    run(command=cmd)
                 else:
                     print "Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
 
@@ -222,9 +237,10 @@ if args.analysis_level == "participant":
             project.subject_session = ''
 
             #Derivatives folder creation (Folder is first deleted if it already exists)
-            subject_derivatives_dir = os.path.join(cmp_derivatives_dir, project.subject)
-            if not os.path.isdir(subject_derivatives_dir):
-                os.makedirs(subject_derivatives_dir)
+            for tool in tools:
+                subject_derivatives_dir = os.path.join(args.output_dir, tool, project.subject)
+                if not os.path.isdir(subject_derivatives_dir):
+                    os.makedirs(subject_derivatives_dir)
 
             run_anat = False
             run_dmri = False
@@ -252,12 +268,9 @@ if args.analysis_level == "participant":
 
                 cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
                 print cmd
-
+                run(command=cmd)
             else:
                 print "Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
-
-        run(command=cmd)
-
 
 # running group level; ultimately it will compute average connectivity matrices
 # elif args.analysis_level == "group":
