@@ -95,7 +95,7 @@ class DTIEstimateResponseSH(DipyDiffusionInterface):
         gtab = self._get_gradient_table()
 
         # Fit it
-        tenmodel = TensorModel(gtab)
+        tenmodel = TensorModel(gtab, fit_method='WLS')
         ten_fit = tenmodel.fit(data, msk)
 
         f = gzip.open(self._gen_filename('tenmodel', ext='.pklz'), 'wb')
@@ -347,6 +347,7 @@ class SHOREOutputSpec(TraitedSpec):
     model = File(desc='Python pickled object of the CSD model fitted.')
     fod = File(desc=('Spherical Harmonics Coefficients output file name'))
     GFA = File(desc=('Generalized Fractional Anisotropy output file name'))
+    MSD = File(desc=('Mean Square Displacement output file name'))
 
 
 class SHORE(DipyDiffusionInterface):
@@ -454,6 +455,7 @@ class SHORE(DipyDiffusionInterface):
         dimsODF[3]=int((lmax+1)*(lmax+2)/2)
         shODF=np.zeros(dimsODF)
         GFA=np.zeros(dimsODF[:3])
+        RTOP=np.zeros(dimsODF[:3])
         MSD=np.zeros(dimsODF[:3])
 
         if self.inputs.tracking_processing_tool == "mrtrix":
@@ -469,10 +471,12 @@ class SHORE(DipyDiffusionInterface):
             shorefit   = shore_model.fit(data[i])
             sliceODF   = shorefit.odf(sphere)
             sliceGMSD  = shorefit.msd()
+            sliceRTOP  = shorefit.rtop_signal()
             sliceGFA   = gfa(sliceODF)
             shODF[i]   = sf_to_sh(sliceODF,sphere,sh_order=lmax,basis_type=basis)
             GFA[i]     = np.nan_to_num(sliceGFA)
             MSD[i]     = np.nan_to_num(sliceGMSD)
+            RTOP[i]     = np.nan_to_num(sliceRTOP)
             IFLOGGER.info("Computation Time (slice %s): "%str(i) + str(time.time() - start_time) + " seconds")
 
         shFODF = odf_sh_to_sharp(shODF,sphere,basis='mrtrix',ratio=0.2, sh_order=lmax, lambda_=1.0, tau=0.1, r2_term=True)
@@ -481,6 +485,7 @@ class SHORE(DipyDiffusionInterface):
 
         nib.Nifti1Image(GFA,affine).to_filename(op.abspath('shore_gfa.nii.gz'))
         nib.Nifti1Image(MSD,affine).to_filename(op.abspath('shore_msd.nii.gz'))
+        nib.Nifti1Image(RTOP,affine).to_filename(op.abspath('shore_rtop_signal.nii.gz'))
         nib.Nifti1Image(shODF,affine).to_filename(op.abspath('shore_dodf.nii.gz'))
         nib.Nifti1Image(shFODF,affine).to_filename(op.abspath('shore_fodf.nii.gz'))
 
@@ -491,6 +496,8 @@ class SHORE(DipyDiffusionInterface):
         outputs['model'] = op.abspath('shoremodel.pklz')
         outputs['fod'] = op.abspath('shore_fodf.nii.gz')
         outputs['GFA'] = op.abspath('shore_gfa.nii.gz')
+        outputs['MSD'] = op.abspath('shore_msd.nii.gz')
+        outputs['RTOP'] = op.abspath('shore_rtop_signal.nii.gz')
         return outputs
 
 class TensorInformedEudXTractographyInputSpec(BaseInterfaceInputSpec):

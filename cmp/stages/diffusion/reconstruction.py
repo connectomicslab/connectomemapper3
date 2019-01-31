@@ -524,7 +524,7 @@ def create_dtk_recon_flow(config):
 def create_dipy_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","brain_mask_resampled","wm_mask_resampled","bvals","bvecs"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","MSD","fod","model","eigVec","RF","grad","bvecs","mapmri_maps"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","AD","MD","RD","fod","model","eigVec","RF","grad","bvecs","shore_maps","mapmri_maps"],mandatory_inputs=True),name="outputnode")
 
     #Flip gradient table
     flip_bvecs = pe.Node(interface=flipBvec(),name='flip_bvecs')
@@ -563,7 +563,10 @@ def create_dipy_recon_flow(config):
 
         flow.connect([
             (dipy_tensor,outputnode,[("response","RF")]),
-            (dipy_tensor,outputnode,[("fa_file","FA")])
+            (dipy_tensor,outputnode,[("fa_file","FA")]),
+            (dipy_tensor,outputnode,[("ad_file","AD")]),
+            (dipy_tensor,outputnode,[("md_file","MD")]),
+            (dipy_tensor,outputnode,[("rd_file","RD")])
             ])
 
         if not config.local_model:
@@ -634,6 +637,8 @@ def create_dipy_recon_flow(config):
         #dipy_SHORE.inputs.save_shm_coeff = True
         #dipy_SHORE.inputs.out_shm_coeff = 'diffusion_shore_shm_coeff.nii.gz'
 
+        shore_maps_merge = pe.Node(interface=util.Merge(3),name="merge_shore_maps")
+
         flow.connect([
                 (inputnode, dipy_SHORE,[('diffusion_resampled','in_file')]),
                 (inputnode, dipy_SHORE,[('bvals','in_bval')]),
@@ -646,6 +651,13 @@ def create_dipy_recon_flow(config):
                 (dipy_SHORE,outputnode,[('model','model')]),
                 (dipy_SHORE,outputnode,[('fod','fod')]),
                 (dipy_SHORE,outputnode,[('GFA','FA')])
+                ])
+
+        flow.connect([
+                (dipy_SHORE, shore_maps_merge, [('GFA','in1'),
+                                                ('MSD','in2'),
+                                                ('RTOP','in3')]),
+                (shore_maps_merge, outputnode,[('out','shore_maps')])
                 ])
 
 
@@ -665,19 +677,31 @@ def create_dipy_recon_flow(config):
         dipy_MAPMRI.inputs.small_delta = config.small_delta
         dipy_MAPMRI.inputs.big_delta = config.big_delta
 
-        maps_merge = pe.Node(interface=util.Merge(8),name="merge_additional_maps")
+        mapmri_maps_merge = pe.Node(interface=util.Merge(8),name="merge_mapmri_maps")
 
         flow.connect([
                 (inputnode, dipy_MAPMRI,[('diffusion_resampled','in_file')]),
                 (inputnode, dipy_MAPMRI,[('bvals','in_bval')]),
-                (flip_bvecs, dipy_MAPMRI,[('bvecs_flipped','in_bvec')]),
-                (dipy_MAPMRI, maps_merge, [('rtop_file','in1'),('rtap_file','in2'),('rtpp_file','in3'),('msd_file','in4'),('qiv_file','in5'),('ng_file','in6'),('ng_perp_file','in7'),('ng_para_file','in8')])
+                (flip_bvecs, dipy_MAPMRI,[('bvecs_flipped','in_bvec')])
+                ])
+
+        flow.connect([
+                (dipy_MAPMRI, mapmri_maps_merge, [('rtop_file','in1'),
+                                                  ('rtap_file','in2'),
+                                                  ('rtpp_file','in3'),
+                                                  ('msd_file','in4'),
+                                                  ('qiv_file','in5'),
+                                                  ('ng_file','in6'),
+                                                  ('ng_perp_file','in7'),
+                                                  ('ng_para_file','in8')]),
+                (mapmri_maps_merge, outputnode,[('out','mapmri_maps')])
                 ])
 
     return flow
 
 
 def create_mrtrix_recon_flow(config):
+    #TODO Add AD and RD maps
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled","grad"]),name="inputnode")
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","ADC","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")

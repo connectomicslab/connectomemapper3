@@ -146,6 +146,8 @@ class ProcessThread(threading.Thread):
 class Pipeline(HasTraits):
     # informations common to project_info
     base_directory = Directory
+    output_directory = Directory
+
     root = Property
     subject = 'sub-01'
     last_date_processed = Str
@@ -212,14 +214,20 @@ class Pipeline(HasTraits):
 
     def __init__(self, project_info):
         self.base_directory = project_info.base_directory
+
+        if project_info.output_directory is not None:
+            self.output_directory = project_info.output_directory
+        else:
+            self.output_directory = os.path.join(self.base_directory,"derivatives")
+
         self.subject = project_info.subject
         self.number_of_cores = project_info.number_of_cores
 
         for stage in self.stages.keys():
             if project_info.subject_session != '':
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,project_info.subject_session,'tmp',self.pipeline_name,self.stages[stage].name)
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'nipype',self.subject,project_info.subject_session,self.pipeline_name,self.stages[stage].name)
             else:
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp',self.pipeline_name,self.stages[stage].name)
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'nipype',self.subject, self.pipeline_name,self.stages[stage].name)
             # if self.stages[stage].name == 'segmentation_stage' or self.stages[stage].name == 'parcellation_stage':
             #     #self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject,self.stages[stage].name)
             #     self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype','common_stages',self.stages[stage].name)

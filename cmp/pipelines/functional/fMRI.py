@@ -132,7 +132,7 @@ class fMRIPipeline(Pipeline):
             self.global_conf.subject_session = ''
             self.subject_directory =  os.path.join(self.base_directory,self.subject)
 
-        self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
+        self.derivatives_directory =  os.path.join(self.output_directory)
 
     def _subject_changed(self,new):
         self.stages['Connectome'].config.subject = new
@@ -281,9 +281,9 @@ class fMRIPipeline(Pipeline):
 
         if fMRI_available:
             if self.global_conf.subject_session == '':
-                out_dir = os.path.join(self.derivatives_directory,'cmp',self.subject)
+                out_dir = os.path.join(self.output_directory,'cmp',self.subject)
             else:
-                out_dir = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session)
+                out_dir = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session)
 
             out_fmri_file = os.path.join(out_dir,'func',subject+'_task-rest_bold.nii.gz')
             shutil.copy(src=fmri_file,dst=out_fmri_file)
@@ -345,16 +345,18 @@ class fMRIPipeline(Pipeline):
         old_subject = self.subject
 
         if self.global_conf.subject_session == '':
-            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+            cmp_deriv_subject_directory = os.path.join(self.output_directory,"cmp",self.subject)
+            nipype_deriv_subject_directory = os.path.join(self.output_directory,"nipype",self.subject)
         else:
-            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session)
+            cmp_deriv_subject_directory = os.path.join(self.output_directory,"cmp",self.subject,self.global_conf.subject_session)
+            nipype_deriv_subject_directory = os.path.join(self.output_directory,"nipype",self.subject,self.global_conf.subject_session)
 
             self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
         # Initialization
-        if os.path.isfile(os.path.join(deriv_subject_directory,"func","pypeline.log")):
-            os.unlink(os.path.join(deriv_subject_directory,"func","pypeline.log"))
-        config.update_config({'logging': {'log_directory': os.path.join(deriv_subject_directory,"func"),
+        if os.path.isfile(os.path.join(nipype_deriv_subject_directory,"func","pypeline.log")):
+            os.unlink(os.path.join(nipype_deriv_subject_directory,"func","pypeline.log"))
+        config.update_config({'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory,"func"),
                                   'log_to_file': True},
                               'execution': {'remove_unnecessary_outputs': False,
                               'stop_on_first_crash': True,'stop_on_first_rerun': False,
@@ -366,7 +368,7 @@ class fMRIPipeline(Pipeline):
         iflogger.info("**** Processing ****")
         print self.anat_flow
 
-        flow = self.create_pipeline_flow(deriv_subject_directory=deriv_subject_directory)
+        flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory,nipype_deriv_subject_directory=nipype_deriv_subject_directory)
         flow.write_graph(graph2use='colored', format='svg', simple_form=False)
 
         # try:
@@ -408,7 +410,7 @@ class fMRIPipeline(Pipeline):
         #
         # return True,'Processing sucessful'
 
-    def create_pipeline_flow(self,deriv_subject_directory):
+    def create_pipeline_flow(self,cmp_deriv_subject_directory,nipype_deriv_subject_directory):
 
         subject_directory = self.subject_directory
 
@@ -416,7 +418,7 @@ class fMRIPipeline(Pipeline):
 
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
-        sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
+        sinker.inputs.base_directory = os.path.join(cmp_deriv_subject_directory)
 
         sinker.inputs.substitutions = [
                                         ('wm_mask_registered.nii.gz', self.subject+'_T1w_space-bold_class-WM.nii.gz'),
@@ -440,7 +442,7 @@ class fMRIPipeline(Pipeline):
 
         # Data import
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['fMRI','T1','T2','aseg','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5','roi_graphml_s1','roi_graphml_s2','roi_graphml_s3','roi_graphml_s4','roi_graphml_s5']), name='datasource')
-        datasource.inputs.base_directory = deriv_subject_directory
+        datasource.inputs.base_directory = cmp_deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(fMRI='fMRI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
@@ -456,7 +458,7 @@ class fMRIPipeline(Pipeline):
         self.clear_stages_outputs()
 
         # Create fMRI flow
-        fMRI_flow = pe.Workflow(name='fMRI_pipeline',base_dir=os.path.join(deriv_subject_directory,'tmp'))
+        fMRI_flow = pe.Workflow(name='fMRI_pipeline',base_dir=os.path.abspath(nipype_deriv_subject_directory))
         fMRI_inputnode = pe.Node(interface=util.IdentityInterface(fields=["fMRI","T1","T2","subjects_dir","subject_id","wm_mask_file","roi_volumes","roi_graphMLs","wm_eroded","brain_eroded","csf_eroded"]),name="inputnode")
         fMRI_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         fMRI_inputnode.inputs.atlas_info = self.atlas_info

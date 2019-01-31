@@ -146,7 +146,7 @@ class DiffusionPipeline(Pipeline):
             self.global_conf.subject_session = ''
             self.subject_directory =  os.path.join(self.base_directory,self.subject)
 
-        self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
+        self.derivatives_directory =  os.path.join(self.output_directory)
 
         self.stages['Connectome'].config.subject = self.subject
         self.stages['Connectome'].config.on_trait_change(self.update_vizualization_layout,'circular_layout')
@@ -588,13 +588,13 @@ class DiffusionPipeline(Pipeline):
 
                 #Copy diffusion data to derivatives / cmp  / subject / dwi
                 if self.global_conf.subject_session == '':
-                    out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',subject+'_dwi.nii.gz')
-                    out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',subject+'_dwi.bval')
-                    out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',subject+'_dwi.bvec')
+                    out_dwi_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',subject+'_dwi.nii.gz')
+                    out_bval_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',subject+'_dwi.bval')
+                    out_bvec_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',subject+'_dwi.bvec')
                 else:
-                    out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.nii.gz')
-                    out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.bval')
-                    out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.bvec')
+                    out_dwi_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.nii.gz')
+                    out_bval_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.bval')
+                    out_bvec_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.bvec')
 
                 if not os.path.isfile(out_dwi_file):
                     shutil.copy(src=dwi_file,dst=out_dwi_file)
@@ -657,24 +657,55 @@ class DiffusionPipeline(Pipeline):
 
         return valid_inputs
 
-    def create_pipeline_flow(self,deriv_subject_directory):
+    def create_pipeline_flow(self,cmp_deriv_subject_directory,nipype_deriv_subject_directory):
 
         subject_directory = self.subject_directory
+
+        acquisition_model = self.stages['Diffusion'].config.diffusion_imaging_model
+        recon_tool = self.stages['Diffusion'].config.recon_processing_tool
+
+        if acquisition_model == 'DSI':
+            recon_model = 'SHORE'
+        else:
+            if recon_tool == 'Dipy':
+                if self.stages['Diffusion'].config.dipy_recon_config.local_model:
+                    recon_model = 'CSD'
+                else:
+                    recon_model = 'DTI'
+                    recon_model_desc = 'WLS'
+            elif recon_tool == 'MRtrix':
+                if self.stages['Diffusion'].config.mrtrix_recon_config.local_model:
+                    recon_model = 'CSD'
+                else:
+                    recon_model = 'DTI'
+                    recon_model_desc = 'WLS'
+
+        tracking_model = self.stages['Diffusion'].config.diffusion_model
+
+        if tracking_model == 'Deterministic':
+            tracking_model = 'DET'
+        elif tracking_model == 'Probabilistic':
+            tracking_model = 'PROB'
 
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals','T1','aparc_aseg','aseg','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5','roi_graphml_s1','roi_graphml_s2','roi_graphml_s3','roi_graphml_s4','roi_graphml_s5']), name='datasource')
-        datasource.inputs.base_directory = deriv_subject_directory
+        datasource.inputs.base_directory = cmp_deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
         datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval',
-                                                T1='anat/'+self.subject+'_T1w_head.nii.gz',aseg='anat/'+self.subject+'_T1w_aseg.nii.gz',aparc_aseg='anat/'+self.subject+'_T1w_aparc+aseg.nii.gz',brain='anat/'+self.subject+'_T1w_brain.nii.gz',brain_mask='anat/'+self.subject+'_T1w_brainmask.nii.gz',
-                                                wm_mask_file='anat/'+self.subject+'_T1w_class-WM.nii.gz',wm_eroded='anat/'+self.subject+'_T1w_class-WM.nii.gz',
-                                                brain_eroded='anat/'+self.subject+'_T1w_brainmask.nii.gz',csf_eroded='anat/'+self.subject+'_T1w_class-CSF.nii.gz',
-                                                roi_volume_s1='anat/'+self.subject+'_T1w_parc_scale1.nii.gz',roi_volume_s2='anat/'+self.subject+'_T1w_parc_scale2.nii.gz',roi_volume_s3='anat/'+self.subject+'_T1w_parc_scale3.nii.gz',
-                                                roi_volume_s4='anat/'+self.subject+'_T1w_parc_scale4.nii.gz',roi_volume_s5='anat/'+self.subject+'_T1w_parc_scale5.nii.gz',roi_graphml_s1='anat/'+self.subject+'_T1w_parc_scale1.graphml',roi_graphml_s2='anat/'+self.subject+'_T1w_parc_scale2.graphml',roi_graphml_s3='anat/'+self.subject+'_T1w_parc_scale3.graphml',
-                                                roi_graphml_s4='anat/'+self.subject+'_T1w_parc_scale4.graphml',roi_graphml_s5='anat/'+self.subject+'_T1w_parc_scale5.graphml')
+                                                T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
+                                                aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
+                                                brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
+                                                wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
+                                                brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
+                                                roi_volume_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.nii.gz',roi_volume_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.nii.gz',
+                                                roi_volume_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.nii.gz',
+                                                roi_volume_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.nii.gz',roi_volume_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.nii.gz',
+                                                roi_graphml_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.graphml',roi_graphml_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.graphml',
+                                                roi_graphml_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.graphml',
+                                                roi_graphml_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.graphml')
         # datasource.inputs.field_template_args = dict(diffusion=[], bvecs=[], bvals=[],T1=[],brain=[],brain_mask=[],
         #                                         wm_mask_file=[],wm_eroded=[],brain_eroded=[],csf_eroded=[],
         #                                         roi_volumes=[['%s'%self.subject],[1,2,3,4,5]])
@@ -685,13 +716,13 @@ class DiffusionPipeline(Pipeline):
 
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
-        sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
+        sinker.inputs.base_directory = os.path.abspath(cmp_deriv_subject_directory)
 
         #Dataname substitutions in order to comply with BIDS derivatives specifications
         if self.stages['Diffusion'].config.tracking_processing_tool == 'Custom':
             sinker.inputs.substitutions = [ #('T1', self.subject+'_T1w_head'),
-                                            ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
-                                            ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
+                                            ('brain_mask.nii.gz', self.subject+'_desc-brain_mask.nii.gz'),
+                                            ('brain.nii.gz', self.subject+'_desc-brain_T1w.nii.gz'),
                                             #('wm_mask',self.subject+'_T1w_class-WM'),
                                             #('gm_mask',self.subject+'_T1w_class-GM'),
                                             #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
@@ -703,44 +734,50 @@ class DiffusionPipeline(Pipeline):
 
                                             #('*/_ROIs_resample*/fast__pve_0_out.nii.gz',self.subject+'_dwi_connectome'),
 
-                                            ('T1_warped', self.subject+'_T1w_space-DWI_head'),
-                                            ('anat_resampled_warped', self.subject+'_T1w_space-DWI_head'),
-                                            ('brain_warped',self.subject+'_T1w_space-DWI_brain'),
-                                            ('anat_masked_resampled_warped', self.subject+'_T1w_space-DWI_brain'),
-                                            ('brain_mask_registered_temp_crop',self.subject+'_T1w_space-DWI_brainmask'),
-                                            ('wm_mask_warped',self.subject+'_T1w_space-DWI_class-WM'),
-                                            ('wm_mask_resampled_warped',self.subject+'_T1w_space-DWI_class-WM'),
-                                            ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale1.nii.gz'),
-                                            ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale2.nii.gz'),
-                                            ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale3.nii.gz'),
-                                            ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale4.nii.gz'),
-                                            ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale5.nii.gz'),
-                                            ('fast__pve_0_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-CSF_pve.nii.gz'),
-                                            ('fast__pve_1_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-GM_pve.nii.gz'),
-                                            ('fast__pve_2_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-WM_pve.nii.gz'),
+                                            ('T1_warped', self.subject+'_space-DWI_desc-head_T1w'),
+                                            ('anat_resampled_warped', self.subject+'_space-DWI_desc-head_T1w'),
+                                            ('brain_warped',self.subject+'_space-DWI_desc-brain_T1w'),
+                                            ('anat_masked_resampled_warped', self.subject+'_space-DWI_desc-brain_T1w'),
+                                            ('brain_mask_registered_temp_crop',self.subject+'_space-DWI_desc-brain_mask'),
+                                            ('wm_mask_warped',self.subject+'_space-DWI_label-WM_dseg'),
+                                            ('wm_mask_resampled_warped',self.subject+'_space-DWI_label-WM_dseg'),
+                                            ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale1_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale2_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale3_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale4_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale5_atlas.nii.gz'),
+                                            ('fast__pve_0_out_warped.nii.gz',self.subject+'_space-DWI_label-CSF_probseg.nii.gz'),
+                                            ('fast__pve_1_out_warped.nii.gz',self.subject+'_space-DWI_label-GM_probseg.nii.gz'),
+                                            ('fast__pve_2_out_warped.nii.gz',self.subject+'_space-DWI_label-WM_probseg.nii.gz'),
 
-                                            ('connectome_'+self.subject+'_T1w_parc',self.subject+'_dwi_connectome'),
+                                            ('connectome_'+self.subject+'_T1w_parc_scale1',self.subject+'_label-L2018_desc-scale1_connectome'),
+                                            ('connectome_'+self.subject+'_T1w_parc_scale2',self.subject+'_label-L2018_desc-scale2_connectome'),
+                                            ('connectome_'+self.subject+'_T1w_parc_scale3',self.subject+'_label-L2018_desc-scale3_connectome'),
+                                            ('connectome_'+self.subject+'_T1w_parc_scale4',self.subject+'_label-L2018_desc-scale4_connectome'),
+                                            ('connectome_'+self.subject+'_T1w_parc_scale5',self.subject+'_label-L2018_desc-scale5_connectome'),
                                             ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
                                             ('dwi.bval',self.subject+'_dwi.bval'),
                                             # ('dwi.bvec',self.subject+'_dwi.bvec'),
-                                            ('diffusion_resampled_CSD.mif',self.subject+'_dwi_CSD.mif'),
-                                            ('diffusion_resampled_CSD_tracked',self.subject+'_dwi_tract'),
-                                            ('eddy_corrected.nii.gz.eddy_rotated_bvecs',self.subject+'_dwi_preproc.eddy_rotated_bvec'),
-                                            ('eddy_corrected.nii.gz',self.subject+'_dwi_eddycor.nii.gz'),
-                                            ('dwi_brain_mask',self.subject+'_dwi_brainmask'),
-                                            ('ADC',self.subject+'_dwi_ADC'),
-                                            ('FA',self.subject+'_dwi_FA'),
-                                            ('diffusion_preproc_resampled_fa',self.subject+'_dwi_FA'),
-                                            ('grad.txt',self.subject+'_dwi_grad.txt'),
-                                            ('target_epicorrected',self.subject+'_dwi_preproc'),
-                                            ('diffusion_preproc_resampled.nii.gz',self.subject+'_dwi_preproc.nii.gz'),
-                                            ('endpoints',self.subject+'_tract_endpoints'),
-                                            ('filtered_fiberslabel',self.subject+'_dwi_tract_fiberslabel_filt'),
-                                            ('final_fiberlabels_'+self.subject+'_T1w_parc',self.subject+'_dwi_tract_fiberlabels_filt'),
-                                            ('final_fiberslength_'+self.subject+'_T1w_parc',self.subject+'_dwi_tract_fiberslength_filt'),
+                                            ('diffusion_resampled_CSD.mif',self.subject+'_model-CSD_diffmodel.mif'),
+                                            #('diffusion_resampled_CSD_det_tracked',self.subject+'_desc-DET_tractogram'),
+                                            #('diffusion_resampled_CSD_prob_tracked',self.subject+'_desc-PROB_tractogram'),
+                                            ('eddy_corrected.nii.gz.eddy_rotated_bvecs',self.subject+'_desc-eddyrotated.bvec'),
+                                            ('eddy_corrected.nii.gz',self.subject+'_desc-eddycorrected_dwi.nii.gz'),
+                                            ('dwi_brain_mask',self.subject+'_desc-brain_mask'),
+                                            ('ADC',self.subject+'_model-DTI_MD'),
+                                            ('FA',self.subject+'_model-DTI_FA'),
+                                            ('diffusion_preproc_resampled_fa',self.subject+'_model-DTI_FA'),
+                                            ('grad.txt',self.subject+'_desc-grad_dwi.txt'),
+                                            ('target_epicorrected',self.subject+'_desc-preproc_dwi'),
+                                            ('diffusion_preproc_resampled.nii.gz',self.subject+'_desc-preproc_dwi.nii.gz'),
+                                            #('endpoints',self.subject+'_tract_endpoints'),
+                                            # ('filtered_fiberslabel',self.subject+'_desc-fiberslabel_filt'),
+                                            #('final_fiberlabels_'+self.subject+'_T1w_parc',self.subject+'_desc-filtered_fiberlabels'),
+                                            #('final_fiberslength_'+self.subject+'_T1w_parc',self.subject+'_desc-filtered_fiberslength'),
                                             ('streamline_final',self.subject+'_dwi_tract_filt'),
-                                            ('_trackvis0/converted',self.subject+'_dwi_tract'),#MRtrix tracts
-                                            ('diffusion_preproc_resampled_tracked',self.subject+'_dwi_tract') #Dipy tracts
+                                            ##('_trackvis0/converted',self.subject+'_dwi_tract'),#MRtrix tracts
+                                            ##('diffusion_preproc_resampled_tracked',self.subject+'_dwi_tract') #Dipy tracts
+                                            ##TODO: Add ODF (SHORE/CSD) / tensor?
                                           ]
 
         else:
@@ -808,7 +845,7 @@ class DiffusionPipeline(Pipeline):
 
         # Create diffusion flow
 
-        diffusion_flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
+        diffusion_flow = pe.Workflow(name='diffusion_pipeline', base_dir=os.path.abspath(nipype_deriv_subject_directory))
         diffusion_inputnode = pe.Node(interface=util.IdentityInterface(fields=['diffusion','bvecs','bvals','T1','aseg','aparc_aseg','brain','T2','brain_mask','wm_mask_file','roi_volumes','roi_graphMLs','subjects_dir','subject_id','parcellation_scheme']),name='inputnode')# ,'atlas_info'
         diffusion_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         diffusion_inputnode.inputs.atlas_info = self.atlas_info
@@ -838,16 +875,31 @@ class DiffusionPipeline(Pipeline):
             return out_roi_volumes
 
         diffusion_flow.connect([
-                      (datasource,merge_roi_volumes,[("roi_volume_s1","in1"),("roi_volume_s2","in2"),("roi_volume_s3","in3"),("roi_volume_s4","in4"),("roi_volume_s5","in5")])
+                      (datasource,merge_roi_volumes,[("roi_volume_s1","in1"),
+                                                     ("roi_volume_s2","in2"),
+                                                     ("roi_volume_s3","in3"),
+                                                     ("roi_volume_s4","in4"),
+                                                     ("roi_volume_s5","in5")])
                       ])
 
         diffusion_flow.connect([
-                      (datasource,merge_roi_graphmls,[("roi_graphml_s1","in1"),("roi_graphml_s2","in2"),("roi_graphml_s3","in3"),("roi_graphml_s4","in4"),("roi_graphml_s5","in5")])
+                      (datasource,merge_roi_graphmls,[("roi_graphml_s1","in1"),
+                                                      ("roi_graphml_s2","in2"),
+                                                      ("roi_graphml_s3","in3"),
+                                                      ("roi_graphml_s4","in4"),
+                                                      ("roi_graphml_s5","in5")])
                       ])
 
         diffusion_flow.connect([
-                      (datasource,diffusion_inputnode,[("diffusion","diffusion"),("bvecs","bvecs"),("bvals","bvals")]),
-                      (datasource,diffusion_inputnode,[("T1","T1"),("aseg","aseg"),("aparc_aseg","aparc_aseg"),("brain","brain"),("brain_mask","brain_mask"),("wm_mask_file","wm_mask_file")]), #,( "roi_volumes","roi_volumes")])
+                      (datasource,diffusion_inputnode,[("diffusion","diffusion"),
+                                                       ("bvecs","bvecs"),
+                                                       ("bvals","bvals")]),
+                      (datasource,diffusion_inputnode,[("T1","T1"),
+                                                       ("aseg","aseg"),
+                                                       ("aparc_aseg","aparc_aseg"),
+                                                       ("brain","brain"),
+                                                       ("brain_mask","brain_mask"),
+                                                       ("wm_mask_file","wm_mask_file")]), #,( "roi_volumes","roi_volumes")])
                       (merge_roi_volumes,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_volumes")]),
                       (merge_roi_graphmls,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_graphMLs")])
                                                 #    ("parcellation_scheme","parcellation_scheme"),
@@ -859,10 +911,14 @@ class DiffusionPipeline(Pipeline):
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
             diffusion_flow.connect([
-                                    (diffusion_inputnode,preproc_flow,[('diffusion','inputnode.diffusion'),('brain','inputnode.brain'),
-                                                                       ('aseg','inputnode.aseg'),('aparc_aseg','inputnode.aparc_aseg'),('brain_mask','inputnode.brain_mask'),
-                                                                        ('wm_mask_file','inputnode.wm_mask_file'),('roi_volumes','inputnode.roi_volumes'),
-                                                                        ('bvecs','inputnode.bvecs'),('bvals','inputnode.bvals'),('T1','inputnode.T1')]),
+                                    (diffusion_inputnode,preproc_flow,[('diffusion','inputnode.diffusion'),
+                                                                       ('brain','inputnode.brain'),
+                                                                       ('aseg','inputnode.aseg'),
+                                                                       ('aparc_aseg','inputnode.aparc_aseg'),
+                                                                       ('brain_mask','inputnode.brain_mask'),
+                                                                       ('wm_mask_file','inputnode.wm_mask_file'),
+                                                                       ('roi_volumes','inputnode.roi_volumes'),
+                                                                       ('bvecs','inputnode.bvecs'),('bvals','inputnode.bvals'),('T1','inputnode.T1')]),
                                     ])
 
         if self.stages['Registration'].enabled:
@@ -870,10 +926,19 @@ class DiffusionPipeline(Pipeline):
             diffusion_flow.connect([
                                     #(diffusion_inputnode,reg_flow,[('T2','inputnode.T2')]),
                                     #(diffusion_inputnode,reg_flow,[("bvals","inputnode.bvals")]),
-                                    (preproc_flow,reg_flow, [('outputnode.T1','inputnode.T1'),('outputnode.act_5TT','inputnode.act_5TT'),('outputnode.gmwmi','inputnode.gmwmi'),('outputnode.bvecs_rot','inputnode.bvecs'),('outputnode.bvals','inputnode.bvals'),('outputnode.wm_mask_file','inputnode.wm_mask'),
-                                                            ('outputnode.partial_volume_files','inputnode.partial_volume_files'),('outputnode.roi_volumes','inputnode.roi_volumes'),
-                                                            ("outputnode.brain","inputnode.brain"),("outputnode.brain_mask","inputnode.brain_mask"),("outputnode.brain_mask_full","inputnode.brain_mask_full"),
-                                                            ('outputnode.diffusion_preproc','inputnode.target'),('outputnode.dwi_brain_mask','inputnode.target_mask')]),
+                                    (preproc_flow,reg_flow, [('outputnode.T1','inputnode.T1'),
+                                                             ('outputnode.act_5TT','inputnode.act_5TT'),
+                                                             ('outputnode.gmwmi','inputnode.gmwmi'),
+                                                             ('outputnode.bvecs_rot','inputnode.bvecs'),
+                                                             ('outputnode.bvals','inputnode.bvals'),
+                                                             ('outputnode.wm_mask_file','inputnode.wm_mask'),
+                                                            ('outputnode.partial_volume_files','inputnode.partial_volume_files'),
+                                                            ('outputnode.roi_volumes','inputnode.roi_volumes'),
+                                                            ("outputnode.brain","inputnode.brain"),
+                                                            ("outputnode.brain_mask","inputnode.brain_mask"),
+                                                            ("outputnode.brain_mask_full","inputnode.brain_mask_full"),
+                                                            ('outputnode.diffusion_preproc','inputnode.target'),
+                                                            ('outputnode.dwi_brain_mask','inputnode.target_mask')]),
                                     (preproc_flow,sinker,[("outputnode.bvecs_rot","dwi.@bvecs_rot")]),
                                     (preproc_flow,sinker,[("outputnode.diffusion_preproc","dwi.@diffusion_preproc")]),
                                     (preproc_flow,sinker,[("outputnode.dwi_brain_mask","dwi.@diffusion_brainmask")]),
@@ -941,23 +1006,42 @@ class DiffusionPipeline(Pipeline):
             self.stages['Connectome'].config.subject = self.global_conf.subject
             con_flow = self.create_stage_flow("Connectome")
             diffusion_flow.connect([
-                        (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme'),('atlas_info','inputnode.atlas_info'),('roi_graphMLs','inputnode.roi_graphMLs')]),
-                        (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),('outputnode.gFA','inputnode.gFA'),('outputnode.ADC','inputnode.ADC'),
+                        (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme'),
+                                                        ('atlas_info','inputnode.atlas_info'),
+                                                        ('roi_graphMLs','inputnode.roi_graphMLs')]),
+                        (diff_flow,con_flow, [('outputnode.track_file','inputnode.track_file'),
+                                              ('outputnode.FA','inputnode.FA'),
+                                              ('outputnode.ADC','inputnode.ADC'),
+                                              ('outputnode.AD','inputnode.AD'),
+                                              ('outputnode.RD','inputnode.RD'),
                                               ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
-                                              ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
-                                              ('outputnode.P0','inputnode.P0'),('outputnode.mapmri_maps','inputnode.mapmri_maps')]),
+                                              ('outputnode.skewness','inputnode.skewness'),
+                                              ('outputnode.kurtosis','inputnode.kurtosis'),
+                                              ('outputnode.P0','inputnode.P0'),
+                                              ('outputnode.mapmri_maps','inputnode.mapmri_maps'),
+                                              ('outputnode.shore_maps','inputnode.shore_maps')]),
                         (con_flow,diffusion_outputnode, [('outputnode.connectivity_matrices','connectivity_matrices')]),
-                        (diff_flow,sinker,[('outputnode.track_file','dwi.@track_file'),('outputnode.fod_file','dwi.@fod_file'),('outputnode.gFA','dwi.@gFA'),
-                                            ('outputnode.ADC','dwi.@ADC'),
-                                            ('outputnode.skewness','dwi.@skewness'),('outputnode.kurtosis','dwi.@kurtosis'),
-                                            ('outputnode.P0','dwi.@P0')]),
-                        (con_flow,sinker,[('outputnode.endpoints_file','dwi.@endpoints_file'),('outputnode.endpoints_mm_file','dwi.@endpoints_mm_file'),
-                                              ('outputnode.final_fiberslength_files','dwi.@sfinal_fiberslength_files'),
-                                              ('outputnode.filtered_fiberslabel_files','dwi.@filtered_fiberslabel_files'),
-                                              ('outputnode.final_fiberlabels_files','dwi.@final_fiberlabels_files'),
-                                              ('outputnode.streamline_final_file','dwi.@streamline_final_file'),
-                                              ("outputnode.connectivity_matrices","dwi.@connectivity_matrices")
-                                              ])
+                        (diff_flow,sinker,[
+                        #                   ('outputnode.track_file','dwi.@track_file'),
+                                           ('outputnode.fod_file','dwi.@fod_file'),
+                                           ('outputnode.FA','dwi.@FA'),
+                                           ('outputnode.ADC','dwi.@ADC'),
+                                           ('outputnode.AD','dwi.@AD'),
+                                           ('outputnode.RD','dwi.@RD'),
+                                           ('outputnode.skewness','dwi.@skewness'),
+                                           ('outputnode.kurtosis','dwi.@kurtosis'),
+                                           ('outputnode.P0','dwi.@P0'),
+                                           ('outputnode.mapmri_maps','dwi.@mapmri_maps'),
+                                           ('outputnode.shore_maps','dwi.@shore_maps'),]),
+                         (con_flow,sinker,[
+                        #                 ('outputnode.endpoints_file','dwi.@endpoints_file'),
+                        #                 ('outputnode.endpoints_mm_file','dwi.@endpoints_mm_file'),
+                        #                 ('outputnode.final_fiberslength_files','dwi.@sfinal_fiberslength_files'),
+                        #                 ('outputnode.filtered_fiberslabel_files','dwi.@filtered_fiberslabel_files'),
+                        #                 ('outputnode.final_fiberlabels_files','dwi.@final_fiberlabels_files'),
+                                         ('outputnode.streamline_final_file','dwi.@streamline_final_file'),
+                                         ("outputnode.connectivity_matrices","dwi.@connectivity_matrices")
+                                        ])
                         ])
 
             # if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
@@ -976,16 +1060,18 @@ class DiffusionPipeline(Pipeline):
         old_subject = self.subject
 
         if self.global_conf.subject_session == '':
-            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+            cmp_deriv_subject_directory = os.path.join(self.output_directory,"cmp",self.subject)
+            nipype_deriv_subject_directory = os.path.join(self.output_directory,"nipype",self.subject)
         else:
-            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session)
+            cmp_deriv_subject_directory = os.path.join(self.output_directory,"cmp",self.subject,self.global_conf.subject_session)
+            nipype_deriv_subject_directory = os.path.join(self.output_directory,"nipype",self.subject,self.global_conf.subject_session)
 
             self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
         # Initialization
-        if os.path.isfile(os.path.join(deriv_subject_directory,"dwi","pypeline.log")):
-            os.unlink(os.path.join(deriv_subject_directory,"dwi","pypeline.log"))
-        config.update_config({'logging': {'log_directory': os.path.join(deriv_subject_directory,"dwi"),
+        if os.path.isfile(os.path.join(nipype_deriv_subject_directory,"dwi","pypeline.log")):
+            os.unlink(os.path.join(nipype_deriv_subject_directory,"dwi","pypeline.log"))
+        config.update_config({'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory,"dwi"),
                                   'log_to_file': True},
                               'execution': {'remove_unnecessary_outputs': False,
                               'stop_on_first_crash': True,'stop_on_first_rerun': False,
@@ -997,7 +1083,7 @@ class DiffusionPipeline(Pipeline):
         iflogger.info("**** Processing ****")
         print self.anat_flow
 
-        flow = self.create_pipeline_flow(deriv_subject_directory=deriv_subject_directory)
+        flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory, nipype_deriv_subject_directory=nipype_deriv_subject_directory)
         flow.write_graph(graph2use='colored', format='svg', simple_form=True)
         if(self.number_of_cores != 1):
             flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
