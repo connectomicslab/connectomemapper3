@@ -758,7 +758,6 @@ class DiffusionPipeline(Pipeline):
                                             ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
                                             ('dwi.bval',self.subject+'_dwi.bval'),
                                             # ('dwi.bvec',self.subject+'_dwi.bvec'),
-                                            ('diffusion_resampled_CSD.mif',self.subject+'_model-CSD_diffmodel.mif'),
                                             #('diffusion_resampled_CSD_det_tracked',self.subject+'_desc-DET_tractogram'),
                                             #('diffusion_resampled_CSD_prob_tracked',self.subject+'_desc-PROB_tractogram'),
                                             ('eddy_corrected.nii.gz.eddy_rotated_bvecs',self.subject+'_desc-eddyrotated.bvec'),
@@ -767,6 +766,14 @@ class DiffusionPipeline(Pipeline):
                                             ('ADC',self.subject+'_model-DTI_MD'),
                                             ('FA',self.subject+'_model-DTI_FA'),
                                             ('diffusion_preproc_resampled_fa',self.subject+'_model-DTI_FA'),
+                                            ('shore_gfa.nii.gz','{}_model-SHORE_GFA.nii.gz'.format(self.subject)),
+                                            ('shore_msd.nii.gz','{}_model-SHORE_MSD.nii.gz'.format(self.subject)),
+                                            ('shore_rtop_signal.nii.gz','{}_model-SHORE_RTOP.nii.gz'.format(self.subject)),
+                                            ('shore_fodf.nii.gz','{}_model-SHORE_FOD.nii.gz'.format(self.subject)),
+                                            ('diffusion_resampled_CSD.mif',self.subject+'_model-CSD_diffmodel.mif'),
+                                            ('diffusion_shm_coeff.nii.gz','{}_model-CSD_SHM.nii.gz'.format(self.subject)),#Dipy
+                                            ('shm_coeff.nii.gz','{}_model-CSD_SHM.nii.gz'.format(self.subject)),#MRtrix
+                                            ('dwi_tensor.nii.gz','{}_desc-WLS_model-DTI_diffmodel.nii.gz'.format(self.subject)),#MRtrix
                                             ('grad.txt',self.subject+'_desc-grad_dwi.txt'),
                                             ('target_epicorrected',self.subject+'_desc-preproc_dwi'),
                                             ('diffusion_preproc_resampled.nii.gz',self.subject+'_desc-preproc_dwi.nii.gz'),
@@ -774,16 +781,16 @@ class DiffusionPipeline(Pipeline):
                                             # ('filtered_fiberslabel',self.subject+'_desc-fiberslabel_filt'),
                                             #('final_fiberlabels_'+self.subject+'_T1w_parc',self.subject+'_desc-filtered_fiberlabels'),
                                             #('final_fiberslength_'+self.subject+'_T1w_parc',self.subject+'_desc-filtered_fiberslength'),
-                                            ('streamline_final',self.subject+'_dwi_tract_filt'),
+                                            ('streamline_final','{}_model-{}_desc-{}_tractogram'.format(self.subject,recon_model,tracking_model)),
                                             ##('_trackvis0/converted',self.subject+'_dwi_tract'),#MRtrix tracts
                                             ##('diffusion_preproc_resampled_tracked',self.subject+'_dwi_tract') #Dipy tracts
-                                            ##TODO: Add ODF (SHORE/CSD) / tensor?
+                                            ##TODO: Add fODF CSD / SHORE model /
                                           ]
 
         else:
             sinker.inputs.substitutions = [ #('T1', self.subject+'_T1w_head'),
-                                            ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
-                                            ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
+                                            ('brain_mask.nii.gz', self.subject+'_desc-brain_mask.nii.gz'),
+                                            ('brain.nii.gz', self.subject+'_desc-brain_T1w.nii.gz'),
                                             #('wm_mask',self.subject+'_T1w_class-WM'),
                                             #('gm_mask',self.subject+'_T1w_class-GM'),
                                             #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
@@ -795,51 +802,58 @@ class DiffusionPipeline(Pipeline):
 
                                             #('*/_ROIs_resample*/fast__pve_0_out.nii.gz',self.subject+'_dwi_connectome'),
 
-                                            ('T1_warped', self.subject+'_T1w_space-DWI_head'),
-                                            ('anat_resampled_warped', self.subject+'_T1w_space-DWI_head'),
-                                            ('brain_warped',self.subject+'_T1w_space-DWI_brain'),
-                                            ('anat_masked_resampled_warped', self.subject+'_T1w_space-DWI_brain'),
-                                            ('brain_mask_registered_temp_crop',self.subject+'_T1w_space-DWI_brainmask'),
-                                            ('wm_mask_warped',self.subject+'_T1w_space-DWI_class-WM'),
-                                            ('wm_mask_resampled_warped',self.subject+'_T1w_space-DWI_class-WM'),
-                                            (self.subject+'_T1w_parc_scale1_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale1.nii.gz'),
-                                            (self.subject+'_T1w_parc_scale2_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale2.nii.gz'),
-                                            (self.subject+'_T1w_parc_scale3_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale3.nii.gz'),
-                                            (self.subject+'_T1w_parc_scale4_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale4.nii.gz'),
-                                            (self.subject+'_T1w_parc_scale5_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale5.nii.gz'),
-                                            ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale1.nii.gz'),
-                                            ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale2.nii.gz'),
-                                            ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale3.nii.gz'),
-                                            ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale4.nii.gz'),
-                                            ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_T1w_space-DWI_parc_scale5.nii.gz'),
-                                            ('pve_0_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-CSF_probtissue.nii.gz'),
-                                            ('pve_1_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-GM_probtissue.nii.gz'),
-                                            ('pve_2_out_warped.nii.gz',self.subject+'_T1w_space-DWI_class-WM_probtissue.nii.gz'),
+                                            ('T1_warped', self.subject+'_space-DWI_desc-head_T1w'),
+                                            ('anat_resampled_warped', self.subject+'_space-DWI_desc-head_T1w'),
+                                            ('brain_warped',self.subject+'_space-DWI_desc-brain_T1w'),
+                                            ('anat_masked_resampled_warped', self.subject+'_space-DWI_desc-brain_T1w'),
+                                            ('brain_mask_registered_temp_crop',self.subject+'_space-DWI_desc-brain_mask'),
+                                            ('wm_mask_warped',self.subject+'_space-DWI_label-WM_dseg'),
+                                            ('wm_mask_resampled_warped',self.subject+'_space-DWI_label-WM_dseg'),
+                                            ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale1_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale2_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale3_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale4_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale5_atlas.nii.gz'),
+                                            ('fast__pve_0_out_warped.nii.gz',self.subject+'_space-DWI_label-CSF_probseg.nii.gz'),
+                                            ('fast__pve_1_out_warped.nii.gz',self.subject+'_space-DWI_label-GM_probseg.nii.gz'),
+                                            ('fast__pve_2_out_warped.nii.gz',self.subject+'_space-DWI_label-WM_probseg.nii.gz'),
 
-                                            ('connectome',self.subject+'_dwi_connectome'),
+                                            ('connectome_'+self.subject+'_T1w_parc_scale1',self.subject+'_label-L2018_desc-scale1_connectome'),
+                                            ('connectome_'+self.subject+'_T1w_parc_scale2',self.subject+'_label-L2018_desc-scale2_connectome'),
+                                            ('connectome_'+self.subject+'_T1w_parc_scale3',self.subject+'_label-L2018_desc-scale3_connectome'),
+                                            ('connectome_'+self.subject+'_T1w_parc_scale4',self.subject+'_label-L2018_desc-scale4_connectome'),
+                                            ('connectome_'+self.subject+'_T1w_parc_scale5',self.subject+'_label-L2018_desc-scale5_connectome'),
                                             ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
                                             ('dwi.bval',self.subject+'_dwi.bval'),
                                             # ('dwi.bvec',self.subject+'_dwi.bvec'),
-                                            ('diffusion_resampled_CSD.mif',self.subject+'_dwi_CSD.mif'),
-                                            ('diffusion_resampled_CSD_tracked',self.subject+'_dwi_tract'),
-                                            ('eddy_corrected.nii.gz.eddy_rotated_bvecs',self.subject+'_dwi_preproc.eddy_rotated_bvec'),
-                                            ('eddy_corrected.nii.gz',self.subject+'_dwi_eddycor.nii.gz'),
-                                            ('dwi_brain_mask',self.subject+'_dwi_brainmask'),
-                                            ('ADC',self.subject+'_dwi_ADC'),
-                                            ('FA',self.subject+'_dwi_FA'),
-                                            ('diffusion_preproc_resampled_fa',self.subject+'_dwi_FA'),
-                                            ('grad.txt',self.subject+'_dwi_grad.txt'),
-                                            ('target_epicorrected',self.subject+'_dwi_preproc'),
-                                            ('diffusion_preproc_resampled.nii.gz',self.subject+'_dwi_preproc.nii.gz'),
-                                            ('endpoints',self.subject+'_tract_endpoints'),
-                                            ('filtered_fiberslabel',self.subject+'_dwi_tract_fiberslabel_filt'),
-                                            ('final_fiberlabels',self.subject+'_dwi_tract_fiberlabels_filt'),
-                                            ('final_fiberslength',self.subject+'_dwi_tract_fiberslength_filt'),
-                                            ('streamline_final',self.subject+'_dwi_tract_filt'),
-                                            ('_trackvis0/converted',self.subject+'_dwi_tract'),#MRtrix tracts
-                                            ('converted.trk',self.subject+'_dwi_tract.trk'),#MRtrix tracts
-                                            ('diffusion_preproc_resampled_tracked',self.subject+'_dwi_tract') #Dipy tracts
-                                          ]
+                                            #('diffusion_resampled_CSD_det_tracked',self.subject+'_desc-DET_tractogram'),
+                                            #('diffusion_resampled_CSD_prob_tracked',self.subject+'_desc-PROB_tractogram'),
+                                            ('eddy_corrected.nii.gz.eddy_rotated_bvecs',self.subject+'_desc-eddyrotated.bvec'),
+                                            ('eddy_corrected.nii.gz',self.subject+'_desc-eddycorrected_dwi.nii.gz'),
+                                            ('dwi_brain_mask',self.subject+'_desc-brain_mask'),
+                                            ('ADC',self.subject+'_model-DTI_MD'),
+                                            ('FA',self.subject+'_model-DTI_FA'),
+                                            ('diffusion_preproc_resampled_fa',self.subject+'_model-DTI_FA'),
+                                            ('shore_gfa.nii.gz','{}_model-SHORE_GFA.nii.gz'.format(self.subject)),
+                                            ('shore_msd.nii.gz','{}_model-SHORE_MSD.nii.gz'.format(self.subject)),
+                                            ('shore_rtop_signal.nii.gz','{}_model-SHORE_RTOP.nii.gz'.format(self.subject)),
+                                            ('shore_fodf.nii.gz','{}_model-SHORE_FOD.nii.gz'.format(self.subject)),
+                                            ('diffusion_resampled_CSD.mif',self.subject+'_model-CSD_diffmodel.mif'),
+                                            ('diffusion_shm_coeff.nii.gz','{}_model-CSD_SHM.nii.gz'.format(self.subject)),#Dipy
+                                            ('shm_coeff.nii.gz','{}_model-CSD_SHM.nii.gz'.format(self.subject)),#MRtrix
+                                            ('dwi_tensor.nii.gz','{}_desc-WLS_model-DTI_diffmodel.nii.gz'.format(self.subject)),#MRtrix
+                                            ('grad.txt',self.subject+'_desc-grad_dwi.txt'),
+                                            ('target_epicorrected',self.subject+'_desc-preproc_dwi'),
+                                            ('diffusion_preproc_resampled.nii.gz',self.subject+'_desc-preproc_dwi.nii.gz'),
+                                            #('endpoints',self.subject+'_tract_endpoints'),
+                                            # ('filtered_fiberslabel',self.subject+'_desc-fiberslabel_filt'),
+                                            #('final_fiberlabels_'+self.subject+'_T1w_parc',self.subject+'_desc-filtered_fiberlabels'),
+                                            #('final_fiberslength_'+self.subject+'_T1w_parc',self.subject+'_desc-filtered_fiberslength'),
+                                            ('streamline_final','{}_model-{}_desc-{}_tractogram'.format(self.subject,recon_model,tracking_model)),
+                                            ##('_trackvis0/converted',self.subject+'_dwi_tract'),#MRtrix tracts
+                                            ##('diffusion_preproc_resampled_tracked',self.subject+'_dwi_tract') #Dipy tracts
+                                            ##TODO: Add fODF CSD / SHORE model /
+                                        ]
         # Clear previous outputs
         self.clear_stages_outputs()
 

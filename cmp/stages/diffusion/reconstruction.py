@@ -704,7 +704,7 @@ def create_mrtrix_recon_flow(config):
     #TODO Add AD and RD maps
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled","grad"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","ADC","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","ADC","tensor","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
 
     # Flip gradient table
     flip_table = pe.Node(interface=flipTable(),name='flip_table')
@@ -731,16 +731,19 @@ def create_mrtrix_recon_flow(config):
 
     # Tensor -> FA map
     mrtrix_tensor_metrics = pe.Node(interface=TensorMetrics(out_fa='FA.mif',out_adc='ADC.mif'),name='mrtrix_tensor_metrics')
+    convert_Tensor = pe.Node(interface=MRConvert(out_filename="dwi_tensor.nii.gz"),name='convert_tensor')
     convert_FA = pe.Node(interface=MRConvert(out_filename="FA.nii.gz"),name='convert_FA')
     convert_ADC = pe.Node(interface=MRConvert(out_filename="ADC.nii.gz"),name='convert_ADC')
 
     flow.connect([
-		(mrtrix_tensor,mrtrix_tensor_metrics,[('tensor','in_file')]),
-		(mrtrix_tensor_metrics,convert_FA,[('out_fa','in_file')]),
-        (mrtrix_tensor_metrics,convert_ADC,[('out_adc','in_file')]),
-        (convert_FA,outputnode,[("converted","FA")]),
-        (convert_ADC,outputnode,[("converted","ADC")])
-		])
+                (mrtrix_tensor,convert_Tensor,[('tensor','in_file')]),
+                (mrtrix_tensor,mrtrix_tensor_metrics,[('tensor','in_file')]),
+                (mrtrix_tensor_metrics,convert_FA,[('out_fa','in_file')]),
+                (mrtrix_tensor_metrics,convert_ADC,[('out_adc','in_file')]),
+                (convert_Tensor,outputnode,[("converted","tensor")]),
+                (convert_FA,outputnode,[("converted","FA")]),
+                (convert_ADC,outputnode,[("converted","ADC")])
+                ])
 
     # Tensor -> Eigenvectors
     mrtrix_eigVectors = pe.Node(interface=Tensor2Vector(),name="mrtrix_eigenvectors")
@@ -785,13 +788,18 @@ def create_mrtrix_recon_flow(config):
         mrtrix_CSD = pe.Node(interface=ConstrainedSphericalDeconvolution(),name="mrtrix_CSD")
         mrtrix_CSD.inputs.algorithm = 'csd'
         #mrtrix_CSD.inputs.normalise = config.normalize_to_B0
+
+        convert_CSD = pe.Node(interface=MRConvert(out_filename="spherical_harmonics_image.nii.gz"),name='convert_CSD')
+
         flow.connect([
 		    (inputnode,mrtrix_CSD,[('diffusion_resampled','in_file')]),
 		    (mrtrix_rf,mrtrix_CSD,[('response','response_file')]),
 		    (mrtrix_rf,outputnode,[('response','RF')]),
 		    (inputnode,mrtrix_CSD,[("wm_mask_resampled",'mask_image')]),
             (flip_table,mrtrix_CSD,[("table","encoding_file")]),
-		    (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
+            (mrtrix_CSD,convert_CSD,[('spherical_harmonics_image','in_file')]),
+            (convert_CSD,outputnode,[("converted","DWI")])
+		    # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
 		    ])
     else:
         flow.connect([
