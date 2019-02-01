@@ -148,7 +148,7 @@ class DiffusionPipeline(Pipeline):
 
         self.derivatives_directory =  os.path.abspath(project_info.output_directory)
         self.output_directory =  os.path.abspath(project_info.output_directory)
-        
+
         self.stages['Connectome'].config.subject = self.subject
         self.stages['Connectome'].config.on_trait_change(self.update_vizualization_layout,'circular_layout')
         self.stages['Connectome'].config.on_trait_change(self.update_vizualization_logscale,'log_visualization')
@@ -1084,9 +1084,9 @@ class DiffusionPipeline(Pipeline):
             self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
         # Initialization
-        if os.path.isfile(os.path.join(nipype_deriv_subject_directory,"dwi","pypeline.log")):
-            os.unlink(os.path.join(nipype_deriv_subject_directory,"dwi","pypeline.log"))
-        config.update_config({'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory,"dwi"),
+        if os.path.isfile(os.path.join(cmp_deriv_subject_directory,"dwi","pypeline.log")):
+            os.unlink(os.path.join(cmp_deriv_subject_directory,"dwi","pypeline.log"))
+        config.update_config({'logging': {'log_directory': os.path.join(cmp_deriv_subject_directory,"dwi"),
                                   'log_to_file': True},
                               'execution': {'remove_unnecessary_outputs': False,
                               'stop_on_first_crash': True,'stop_on_first_rerun': False,

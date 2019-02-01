@@ -355,9 +355,9 @@ class fMRIPipeline(Pipeline):
             self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
         # Initialization
-        if os.path.isfile(os.path.join(nipype_deriv_subject_directory,"func","pypeline.log")):
-            os.unlink(os.path.join(nipype_deriv_subject_directory,"func","pypeline.log"))
-        config.update_config({'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory,"func"),
+        if os.path.isfile(os.path.join(cmp_deriv_subject_directory,"func","pypeline.log")):
+            os.unlink(os.path.join(cmp_deriv_subject_directory,"func","pypeline.log"))
+        config.update_config({'logging': {'log_directory': os.path.join(cmp_deriv_subject_directory,"func"),
                                   'log_to_file': True},
                               'execution': {'remove_unnecessary_outputs': False,
                               'stop_on_first_crash': True,'stop_on_first_rerun': False,
