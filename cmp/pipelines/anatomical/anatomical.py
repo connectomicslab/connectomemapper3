@@ -140,7 +140,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.global_conf.subject_session = ''
             self.subject_directory =  os.path.join(self.base_directory,self.subject)
 
-        self.derivatives_directory =  os.path.join(self.output_directory)
+        self.derivatives_directory =  os.path.abspath(project_info.output_directory)
 
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
@@ -247,9 +247,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if t1_available:
             #Copy diffusion data to derivatives / cmp  / subject / dwi
             if self.global_conf.subject_session == '':
-                out_T1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
+                out_T1_file = os.path.join(self.output_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
             else:
-                out_T1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'anat',self.subject+'_'+self.global_conf.subject_session+'_T1w.nii.gz')
+                out_T1_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'anat',self.subject+'_'+self.global_conf.subject_session+'_T1w.nii.gz')
 
             if not os.path.isfile(out_T1_file):
                 shutil.copy(src=T1_file,dst=out_T1_file)

@@ -146,7 +146,7 @@ class DiffusionPipeline(Pipeline):
             self.global_conf.subject_session = ''
             self.subject_directory =  os.path.join(self.base_directory,self.subject)
 
-        self.derivatives_directory =  os.path.join(self.output_directory)
+        self.derivatives_directory =  os.path.abspath(project_info.output_directory)
 
         self.stages['Connectome'].config.subject = self.subject
         self.stages['Connectome'].config.on_trait_change(self.update_vizualization_layout,'circular_layout')
@@ -365,7 +365,7 @@ class DiffusionPipeline(Pipeline):
 
         if os.path.isfile(bvec_file): bvecs_available = True
 
-        mem = Memory(base_dir=os.path.join(self.derivatives_directory,'cmp',self.subject,'tmp','nipype'))
+        mem = Memory(base_dir=os.path.join(self.output_directory,'cmp',self.subject,'tmp','nipype'))
         swap_and_reorient = mem.cache(SwapAndReorient)
 
         if diffusion_available:
@@ -373,9 +373,9 @@ class DiffusionPipeline(Pipeline):
                 self.stages['Diffusion'].config.diffusion_imaging_model_choices = self.diffusion_imaging_model
 
                 #Copy diffusion data to derivatives / cmp  / subject / dwi
-                out_dwi_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.nii.gz')
-                out_bval_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bval')
-                out_bvec_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bvec')
+                out_dwi_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.nii.gz')
+                out_bval_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bval')
+                out_bvec_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',self.subject+'_dwi.bvec')
 
                 shutil.copy(src=dwi_file,dst=out_dwi_file)
                 shutil.copy(src=bvec_file,dst=out_bvec_file)
@@ -385,11 +385,11 @@ class DiffusionPipeline(Pipeline):
                     print "Swap and reorient T2"
                     swap_and_reorient(src_file=os.path.join(self.subject_directory,'anat',self.subject+'_T2w.nii.gz'),
                                       ref_file=os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz'),
-                                      out_file=os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T2w.nii.gz'))
+                                      out_file=os.path.join(self.output_directory,'cmp',self.subject,'anat',self.subject+'_T2w.nii.gz'))
                 if t1_available:
                     swap_and_reorient(src_file=os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz'),
                                       ref_file=os.path.join(self.subject_directory,'dwi',self.subject+'_dwi.nii.gz'),
-                                      out_file=os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz'))
+                                      out_file=os.path.join(self.output_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz'))
                     valid_inputs = True
                     input_message = 'Inputs check finished successfully.\nDiffusion and morphological data available.'
                 else:
