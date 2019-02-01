@@ -104,7 +104,7 @@ if __name__ == "__main__":
         #traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
         mw = cmp.gui.CMP_MainWindow()
         mw_res = mw.configure_traits()
-    elif (argc==5) or (argc==6): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical
+    elif (argc==6) or (argc==7): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical
 
         project = cmp.gui.CMP_Project_Info()
         project.base_directory = os.path.abspath(sys.argv[1])
@@ -141,7 +141,7 @@ if __name__ == "__main__":
             else:
                 sys.exit(1)
 
-    elif (argc==7) or (argc==8): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion
+    elif (argc==8) or (argc==9): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion
 
         project = cmp.gui.CMP_Project_Info()
         project.base_directory = os.path.abspath(sys.argv[1])
@@ -196,7 +196,7 @@ if __name__ == "__main__":
             print msg
             sys.exit(1)
 
-    elif (argc==9) or (argc==10): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion fmri_ini_file process_fmri
+    elif (argc==10) or (argc==11): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion fmri_ini_file process_fmri
 
         project = cmp.gui.CMP_Project_Info()
         project.base_directory = os.path.abspath(sys.argv[1])
