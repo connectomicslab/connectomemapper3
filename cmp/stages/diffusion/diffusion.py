@@ -287,7 +287,7 @@ class DiffusionStage(Stage):
                         (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (inputnode, recon_flow,[('brain_mask_registered','inputnode.brain_mask_resampled')]),
                         (recon_flow,outputnode,[("outputnode.FA","FA")]),
-                        (recon_flow,outputnode,[("outputnode.ADC","ADC")]),
+                        (recon_flow,outputnode,[("outputnode.MD","ADC")]),
                         (recon_flow,outputnode,[("outputnode.AD","AD")]),
                         (recon_flow,outputnode,[("outputnode.RD","RD")]),
                         (recon_flow,outputnode,[("outputnode.shore_maps","shore_maps")]),
