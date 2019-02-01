@@ -133,6 +133,7 @@ class fMRIPipeline(Pipeline):
             self.subject_directory =  os.path.join(self.base_directory,self.subject)
 
         self.derivatives_directory =  os.path.abspath(project_info.output_directory)
+        self.output_directory =  os.path.abspath(project_info.output_directory)
 
     def _subject_changed(self,new):
         self.stages['Connectome'].config.subject = new

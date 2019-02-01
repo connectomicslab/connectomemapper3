@@ -141,6 +141,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.subject_directory =  os.path.join(self.base_directory,self.subject)
 
         self.derivatives_directory =  os.path.abspath(project_info.output_directory)
+        self.output_directory =  os.path.abspath(project_info.output_directory)
 
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
