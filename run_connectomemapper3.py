@@ -15,6 +15,7 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 #Imports
 import argparse
 import os
+import shutil
 import subprocess
 import nibabel
 import numpy
@@ -33,22 +34,22 @@ def create_cmp_command(project,run_anat,run_dmri,run_fmri):
 
     if len(project.subject_sessions)>0:
         if run_fmri:
-            cmd = "connectomemapper3 %s %s %s %s %s %s %s %s %s"%(project.base_directory,project.subject,project.subject_session,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri,project.fmri_config_file,run_fmri)
+            cmd = "connectomemapper3 %s %s %s %s %s %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.subject_session,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri,project.fmri_config_file,run_fmri)
         else:
             if run_dmri:
-                cmd = "connectomemapper3 %s %s %s %s %s %s %s"%(project.base_directory,project.subject,project.subject_session,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri)
+                cmd = "connectomemapper3 %s %s %s %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.subject_session,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri)
             else:
                 if run_anat:
-                    cmd = "connectomemapper3 %s %s %s %s %s"%(project.base_directory,project.subject,project.subject_session,project.anat_config_file,run_anat)
+                    cmd = "connectomemapper3 %s %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.subject_session,project.anat_config_file,run_anat)
     else:
         if run_fmri:
-            cmd = "connectomemapper3 %s %s %s %s %s %s %s %s"%(project.base_directory,project.subject,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri,project.fmri_config_file,run_fmri)
+            cmd = "connectomemapper3 %s %s %s %s %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri,project.fmri_config_file,run_fmri)
         else:
             if run_dmri:
-                cmd = "connectomemapper3 %s %s %s %s %s %s"%(project.base_directory,project.subject,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri)
+                cmd = "connectomemapper3 %s %s %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri)
             else:
                 if run_anat:
-                    cmd = "connectomemapper3 %s %s %s %s"%(project.base_directory,project.subject,project.anat_config_file,run_anat)
+                    cmd = "connectomemapper3 %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.anat_config_file,run_anat)
 
     return cmd
 
@@ -91,18 +92,20 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type)
 
     return subject_conf_file
 
-def run(command, env={}):
+def run(command, env={}, log={}):
     merged_env = os.environ
     merged_env.update(env)
-    process = subprocess.Popen(command, stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT, shell=True,
+
+    with open(log_filename, 'w+') as log:
+        process = subprocess.Popen(command, stdout=log,
+                               stderr=log, shell=True,
                                env=merged_env)
-    while True:
-        line = process.stdout.readline()
-        line = str(line)[:-1]
-        print(line)
-        if line == '' and process.poll() != None:
-            break
+    # while True:
+    #     line = process.stdout.readline()
+    #     line = str(line)[:-1]
+    #     print(line)
+    #     if line == '' and process.poll() != None:
+    #         break
     if process.returncode != 0:
         raise Exception("Non zero return code: %d"%process.returncode)
 
@@ -164,6 +167,16 @@ for tool in tools:
     tool_dir = os.path.join(args.output_dir, tool)
     if not os.path.isdir(tool_dir):
         os.mkdir(tool_dir)
+
+# Make sure freesurfer is happy with the license
+print('> Copy FreeSurfer license (BIDS App) ')
+print('... src : {}'.format(os.path.join('/tmp','code','license.txt')))
+print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
+shutil.copyfile(src=os.path.join('/tmp','code','license.txt'),dst=os.path.join('/opt','freesurfer','license.txt'))
+
+# TODO: Implement log for subject(_session)
+# with open(log_filename, 'w+') as log:
+#     proc = Popen(cmd, stdout=log, stderr=log, cwd=os.path.join(self.bids_root,'derivatives'))
 
 # running participant level
 if args.analysis_level == "participant":
@@ -228,7 +241,7 @@ if args.analysis_level == "participant":
 
                     cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
                     print cmd
-                    run(command=cmd)
+                    run(command=cmd,env={},log=os.path.join(project.output_directory,'cmp','{}_{}_log.txt'.format(project.subject,project.subject_session)))
                 else:
                     print "Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
 
@@ -268,7 +281,7 @@ if args.analysis_level == "participant":
 
                 cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
                 print cmd
-                run(command=cmd)
+                run(command=cmd,env={},log=os.path.join(project.output_directory,'cmp','{}_log.txt'.format(project.subject)))
             else:
                 print "Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
 
