@@ -348,6 +348,7 @@ class SHOREOutputSpec(TraitedSpec):
     fod = File(desc=('Spherical Harmonics Coefficients output file name'))
     GFA = File(desc=('Generalized Fractional Anisotropy output file name'))
     MSD = File(desc=('Mean Square Displacement output file name'))
+    RTOP = File(desc=('Return To Origin Probability output file name'))
 
 
 class SHORE(DipyDiffusionInterface):
