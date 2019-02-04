@@ -1114,15 +1114,15 @@ class DiffusionPipeline(Pipeline):
         #         os.remove(os.path.join(self.base_directory,file_to_rm))
 
         # copy .ini and log file
-        outdir = deriv_subject_directory
-        if not os.path.exists(outdir):
-            os.makedirs(outdir)
-
-        try:
-            shutil.copy(self.config_file,outdir)
-        except shutil.Error:
-            print("Skipped copy of config file")
-        #shutil.copy(os.path.join(self.base_directory,"derivatives","cmp",self.subject,'pypeline.log'),outdir)
+        # outdir = os.path.join(cmp_deriv_subject_directory,'config')
+        # if not os.path.exists(outdir):
+        #     os.makedirs(outdir)
+        #
+        # try:
+        #     shutil.copy(self.config_file,outdir)
+        # except shutil.Error:
+        #     print("Skipped copy of config file")
+        # #shutil.copy(os.path.join(self.base_directory,"derivatives","cmp",self.subject,'pypeline.log'),outdir)
 
         iflogger.info("**** Processing finished ****")
 
