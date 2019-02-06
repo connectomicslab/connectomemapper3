@@ -15,7 +15,11 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 # Libraries imports
 import sys
 import os
+import glob
+import time
+import shutil
 import multiprocessing
+import subprocess
 from subprocess import Popen
 import pkg_resources
 
@@ -514,7 +518,7 @@ class CMP_BIDSAppWindow(HasTraits):
     settings_checked = Bool(False)
     docker_running = Bool(False)
 
-    bidsapp_tag = Enum('latest',['latest'])
+    bidsapp_tag = Enum('latest',['latest','dev'])
 
     # check = Action(name='Check settings!',action='check_settings',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))))
     # start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='settings_checked==True and docker_running==False',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))))
@@ -724,55 +728,102 @@ class CMP_BIDSAppWindow(HasTraits):
 
         return True
 
-    def start_bidsapp_participant_level_process(self, bidsapp_tag, participant_label):
+    def start_bidsapp_participant_level_process(self, bidsapp_tag, participant_labels):
         cmd = ['docker','run','-it','--rm',
-               '-v', '{}:/bids_dataset'.format(self.bids_root),
-               '-v', '{}/derivatives:/outputs'.format(self.bids_root),
+               ##'-v', '{}:/bids_dataset'.format(self.bids_root),
+               ##'-v', '{}/derivatives:/outputs'.format(self.bids_root),
                # '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(self.fs_average),
-               '-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
-               '-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)]
+               ##'-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
+               ##'-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)
+               '-v', '{}:/tmp'.format(self.bids_root),
+               ]
 
-        if self.run_dmri_pipeline:
-            cmd.append('-v')
-            cmd.append('{}:/code/ref_diffusion_config.ini'.format(self.dmri_config))
-
-        if self.run_fmri_pipeline:
-            cmd.append('-v')
-            cmd.append('{}:/code/ref_fMRI_config.ini'.format(self.fmri_config))
+        # if self.run_dmri_pipeline:
+        #     cmd.append('-v')
+        #     cmd.append('{}:/code/ref_diffusion_config.ini'.format(self.dmri_config))
+        #
+        # if self.run_fmri_pipeline:
+        #     cmd.append('-v')
+        #     cmd.append('{}:/code/ref_fMRI_config.ini'.format(self.fmri_config))
 
         cmd.append('-u')
         cmd.append('{}:{}'.format(os.geteuid(),os.getegid()))
 
         cmd.append('sebastientourbier/connectomemapper-bidsapp:{}'.format(bidsapp_tag))
-        cmd.append('/bids_dataset')
-        cmd.append('/outputs')
+        cmd.append('/tmp')
+        cmd.append('/tmp/derivatives')
         cmd.append('participant')
 
         cmd.append('--participant_label')
-        cmd.append('{}'.format(participant_label))
+        for label in participant_labels:
+            cmd.append('{}'.format(label))
 
         cmd.append('--anat_pipeline_config')
-        cmd.append('/code/ref_anatomical_config.ini')
+        cmd.append('/tmp/code/ref_anatomical_config.ini')
 
         if self.run_dmri_pipeline:
             cmd.append('--dwi_pipeline_config')
-            cmd.append('/code/ref_diffusion_config.ini')
+            cmd.append('/tmp/code/ref_diffusion_config.ini')
 
         if self.run_fmri_pipeline:
             cmd.append('--func_pipeline_config')
-            cmd.append('/code/ref_fMRI_config.ini')
+            cmd.append('/tmp/code/ref_fMRI_config.ini')
 
 
         print(cmd)
 
-        log_filename = os.path.join(self.bids_root,'derivatives','cmp','sub-{}_log-cmpbidsapp.txt'.format(participant_label))
+        log_filename = os.path.join(self.bids_root,'derivatives','cmp','main_log-cmpbidsapp.txt')
 
         if not os.path.exists(os.path.join(self.bids_root,'derivatives','cmp')):
             os.makedirs(os.path.join(self.bids_root,'derivatives','cmp'))
 
-        with open(log_filename, 'w+') as log:
-            proc = Popen(cmd, stdout=log, stderr=log)
-            #docker_process.communicate()
+        # with open(log_filename, 'w+') as log:
+        #     proc = Popen(cmd, stdout=log, stderr=log)
+        #     #docker_process.communicate()
+
+        proc = Popen(cmd)
+        # proc = Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+        return proc
+
+    def start_bidsapp_participant_level_process_with_datalad(self, bidsapp_tag, participant_labels):
+        cmd = ['datalad','containers-run',]
+
+        cmd.append('--container-name')
+        cmd.append('connectomemapper-bidsapp-{}'.format(bidsapp_tag))
+        cmd.append('/tmp')
+        cmd.append('/tmp/derivatives')
+        cmd.append('participant')
+
+        cmd.append('--participant_label')
+        for label in participant_labels:
+            cmd.append('{}'.format(label))
+
+        cmd.append('--anat_pipeline_config')
+        cmd.append('/tmp/code/ref_anatomical_config.ini')
+
+        if self.run_dmri_pipeline:
+            cmd.append('--dwi_pipeline_config')
+            cmd.append('/tmp/code/ref_diffusion_config.ini')
+
+        if self.run_fmri_pipeline:
+            cmd.append('--func_pipeline_config')
+            cmd.append('/tmp/code/ref_fMRI_config.ini')
+
+        print(cmd)
+
+        # log_filename = os.path.join(self.bids_root,'derivatives','cmp','main-datalad_log-cmpbidsapp.txt')
+
+        # if not os.path.exists(os.path.join(self.bids_root,'derivatives','cmp')):
+        #     os.makedirs(os.path.join(self.bids_root,'derivatives','cmp'))
+
+        # with open(log_filename, 'a+') as log:
+        #     proc = Popen(cmd, stdout=log, stderr=log, cwd=os.path.join(self.bids_root))
+        #     #docker_process.communicate()
+
+        proc = Popen(cmd, cwd=os.path.join(self.bids_root))
+
+        # proc = Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=os.path.join(self.bids_root,'derivatives'))
 
         return proc
 
@@ -781,22 +832,152 @@ class CMP_BIDSAppWindow(HasTraits):
             if proc.poll() is not None:
                 proclist.remove(proc)
 
+    def run(self, command, env={}, cwd=os.getcwd()):
+        merged_env = os.environ
+        merged_env.update(env)
+        process = Popen(command, stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT, shell=True,
+                                   env=merged_env, cwd=cwd)
+        while True:
+            line = process.stdout.readline()
+            line = str(line)[:-1]
+            print(line)
+            if line == '' and process.poll() != None:
+                break
+        if process.returncode != 0:
+            raise Exception("Non zero return code: %d"%process.returncode)
+
     def start_bids_app(self):
         print("Start BIDS App")
+
+        # Copy freesurfer license into dataset/code directory where the BIDS app
+        # is looking for.
+        print('> Copy FreeSurfer license (BIDS App Manager) ')
+        print('... src : {}'.format(self.fs_license))
+        print('... dst : {}'.format(os.path.join(self.bids_root,'code','license.txt')))
+        shutil.copyfile(src=self.fs_license,dst=os.path.join(self.bids_root,'code','license.txt'))
+
+        project.fix_dataset_directory_in_pickles(local_dir=self.bids_root,mode='bidsapp')
+
+        process_with_datalad = project.is_tool('datalad')
+        print("> Datalad mode enabled: {}".format(process_with_datalad))
+
+        # process_with_datalad = False
+
+        if process_with_datalad:
+            # Equivalent to:
+            #    >> datalad create derivatives
+            #    >> cd derivatives
+            #    >> datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}
+            if not os.path.isdir(os.path.join(self.bids_root,'.datalad')):
+                cmd = 'datalad create --force -D "Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{})"'.format(self.bidsapp_tag)
+                try:
+                    print('... cmd: {}'.format(cmd))
+                    self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+                except:
+                    print("    ERROR: Failed to create the datalad dataset")
+            else:
+                print("    INFO: A datalad dataset already exists!")
+
+            # log_filename = os.path.join(self.bids_root,'derivatives','cmp','main-datalad_log-cmpbidsapp.txt')
+            #
+            # if not os.path.exists(os.path.join(self.bids_root,'derivatives','cmp')):
+            #     os.makedirs(os.path.join(self.bids_root,'derivatives','cmp'))
+
+            #create an empty log file to be tracked by datalad
+            # f = open(log_filename,"w+")
+            # f.close()
+
+            datalad_container = os.path.join(self.bids_root,'.datalad','environments','connectomemapper-bidsapp-{}'.format(self.bidsapp_tag),'image')
+
+            if not os.path.isdir(datalad_container):
+                cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}".format(self.bidsapp_tag,self.bidsapp_tag)
+                try:
+                    print('... cmd: {}'.format(cmd))
+                    self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
+                except:
+                    print("   ERROR: Failed to link the container image to the datalad dataset")
+            else:
+                print("    INFO: Container already listed in the datalad dataset!")
+
+            cmd = 'datalad add -J {} .'.format(multiprocessing.cpu_count())
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+            except:
+                print("    ERROR: Failed to add existing files to datalad")
+
+            cmd = 'datalad save -m "Existing files tracked by datalad. Dataset ready for connectome mapping." --version-tag ready4analysis-{} .'.format(time.strftime("%Y%m%d-%H%M%S"))
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+            except:
+                print("    ERROR: Failed to commit to datalad dataset")
+
+            cmd = 'datalad rev-status'
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+            except:
+                print("    ERROR: Failed to run datalad rev-status")
 
         maxprocs = multiprocessing.cpu_count()
         processes = []
 
         self.docker_running = True
 
-        project.fix_dataset_directory_in_pickles(local_dir=self.bids_root,mode='bidsapp')
+        # for label in self.list_of_subjects_to_be_processed:
+        #     while len(processes) == maxprocs:
+        #         self.manage_bidsapp_procs(processes)
+        #
+        #     proc = self.start_bidsapp_participant_level_process(self.bidsapp_tag,label)
+        #     processes.append(proc)
+        #
+        # while len(processes) > 0:
+        #     self.manage_bidsapp_procs(processes)
 
-        for label in self.list_of_subjects_to_be_processed:
-            while len(processes) == maxprocs:
-                self.manage_bidsapp_procs(processes)
+        if process_with_datalad:
 
-            proc = self.start_bidsapp_participant_level_process(self.bidsapp_tag,label)
-            processes.append(proc)
+            proc = self.start_bidsapp_participant_level_process_with_datalad(self.bidsapp_tag,self.list_of_subjects_to_be_processed)
+
+            # Clean cache (issue related that the dataset directory is mounted into /tmp,
+            # which is used for caching by java/matlab/matplotlib/xvfb-run in the docker image)
+            for f in glob.glob(os.path.join(self.bids_root,'._java*')):
+                os.remove(f)
+
+            for d in glob.glob(os.path.join(self.bids_root,'MCR_*')):
+                shutil.rmtree(d)
+
+            for d in glob.glob(os.path.join(self.bids_root,'matplotlib_*')):
+                shutil.rmtree(d)
+
+            for d in glob.glob(os.path.join(self.bids_root,'xvfb-run.*')):
+                shutil.rmtree(d)
+
+            for d in glob.glob(os.path.join(self.bids_root,'.X11*')):
+                shutil.rmtree(d)
+
+            for f in glob.glob(os.path.join(self.bids_root,'.X99*')):
+                os.remove(d)
+
+            cmd = 'datalad add -J {} .'.format(multiprocessing.cpu_count())
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+            except:
+                print("    ERROR: Failed to add changes to datalad dataset")
+
+            cmd = 'datalad save -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{} .'.format(self.bidsapp_tag, time.strftime("%Y%m%d-%H%M%S"))
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+            except:
+                print("    ERROR: Failed to commit derivatives to datalad dataset")
+
+        else:
+            proc = self.start_bidsapp_participant_level_process(self.bidsapp_tag,self.list_of_subjects_to_be_processed)
+
+        processes.append(proc)
 
         while len(processes) > 0:
             self.manage_bidsapp_procs(processes)

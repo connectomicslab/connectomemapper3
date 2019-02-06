@@ -42,11 +42,18 @@ import gui
 #import CMP_MainWindow
 #import pipelines.egg.eeg as EEG_pipeline
 
+def is_tool(name):
+    """Check whether `name` is on PATH."""
+
+    from distutils.spawn import find_executable
+
+    return find_executable(name) is not None
+
 def fix_dataset_directory_in_pickles(local_dir, mode='local'):
     #mode can be local or newlocal or bidsapp (local by default)
 
     #TODO: make fix more generalized by taking derivatives/output dir
-    searchdir = os.path.join(local_dir,'derivatives/cmp')
+    searchdir = os.path.join(local_dir,'derivatives','nipype')
 
     for root, dirs, files in os.walk(searchdir):
         files = [ fi for fi in files if( fi.endswith(".pklz") and not fi.endswith("_new.pklz")) ]
@@ -58,12 +65,12 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
             pick = gzip.open(os.path.join(root,fi))
             cont = pick.read()
 
-            print("local_dir : {} , cont.find('/bids_dataset/derivatives'): {} (mode: {})".format(local_dir,cont.find('/bids_dataset/derivatives'),mode))
+            print("local_dir : {} , cont.find('/tmp/derivatives'): {} (mode: {})".format(local_dir,cont.find('/tmp/derivatives'),mode))
 
             # Change pickles: bids app dataset directory -> local dataset directory
             if (mode == 'local'):
                 print(' bids app dataset directory -> local dataset directory')
-                new_cont = string.replace(cont,'/bids_dataset','{}'.format(local_dir))
+                new_cont = string.replace(cont,'/tmp','{}'.format(local_dir))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                     f.write(new_cont)
@@ -102,7 +109,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
             # Change pickles: local dataset directory -> bids app dataset directory
             elif (mode == 'bidsapp'):
                 print(' local dataset directory -> bids app dataset directory')
-                new_cont = string.replace(cont,'{}'.format(local_dir),'/bids_dataset')
+                new_cont = string.replace(cont,'{}'.format(local_dir),'/tmp')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                     f.write(new_cont)
