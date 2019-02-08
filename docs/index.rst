@@ -94,3 +94,4 @@ Contents
    conf
    stages
    exampleresults
+   datalad
