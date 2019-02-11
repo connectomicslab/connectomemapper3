@@ -73,11 +73,11 @@ Get T1w and Diffusion images to be processed, written in a bash script for repro
 Write datalad get commands to get\_required\_files\_for\_analysis.sh
 
 ::
-
+    mkdir code
     echo "datalad get -J 4 sub-*/ses-*/anat/sub-*_T1w.nii.gz" > code/get_required_files_for_analysis.sh
-    echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.nii.gz" > code/get_required_files_for_analysis.sh
-    echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bvec" > code/get_required_files_for_analysis.sh
-    echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bval" > code/get_required_files_for_analysis.sh
+    echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.nii.gz" >> code/get_required_files_for_analysis.sh
+    echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bvec" >> code/get_required_files_for_analysis.sh
+    echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bval" >> code/get_required_files_for_analysis.sh
 
 Add all content in the code/ directory directly to git
 
@@ -163,8 +163,8 @@ get\_required\_files\_for\_analysis\_by\_bob.sh for reproducibility
 ::
 
     echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_mask.nii.gz" > code/get_required_files_for_analysis_by_bob.sh
-    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_class-*_dseg.nii.gz" > code/get_required_files_for_analysis_by_bob.sh
-    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_scale*_atlas.nii.gz" > code/get_required_files_for_analysis_by_bob.sh
+    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_class-*_dseg.nii.gz" >> code/get_required_files_for_analysis_by_bob.sh
+    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_scale*_atlas.nii.gz" >> code/get_required_files_for_analysis_by_bob.sh
 
 Add all content in the code/ directory directly to git
 
