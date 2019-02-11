@@ -791,6 +791,11 @@ class CMP_BIDSAppWindow(HasTraits):
 
         cmd.append('--container-name')
         cmd.append('connectomemapper-bidsapp-{}'.format(bidsapp_tag))
+
+        # for label in participant_labels:
+        #     cmd.append('--input')
+        #     cmd.append('{}'.format(label))
+
         cmd.append('/tmp')
         cmd.append('/tmp/derivatives')
         cmd.append('participant')
@@ -939,26 +944,6 @@ class CMP_BIDSAppWindow(HasTraits):
         if process_with_datalad:
 
             proc = self.start_bidsapp_participant_level_process_with_datalad(self.bidsapp_tag,self.list_of_subjects_to_be_processed)
-
-            # Clean cache (issue related that the dataset directory is mounted into /tmp,
-            # which is used for caching by java/matlab/matplotlib/xvfb-run in the docker image)
-            for f in glob.glob(os.path.join(self.bids_root,'._java*')):
-                os.remove(f)
-
-            for d in glob.glob(os.path.join(self.bids_root,'MCR_*')):
-                shutil.rmtree(d)
-
-            for d in glob.glob(os.path.join(self.bids_root,'matplotlib_*')):
-                shutil.rmtree(d)
-
-            for d in glob.glob(os.path.join(self.bids_root,'xvfb-run.*')):
-                shutil.rmtree(d)
-
-            for d in glob.glob(os.path.join(self.bids_root,'.X11*')):
-                shutil.rmtree(d)
-
-            for f in glob.glob(os.path.join(self.bids_root,'.X99*')):
-                os.remove(d)
 
             cmd = 'datalad add -J {} .'.format(multiprocessing.cpu_count())
             try:
