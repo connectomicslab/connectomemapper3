@@ -42,6 +42,46 @@ import gui
 #import CMP_MainWindow
 #import pipelines.egg.eeg as EEG_pipeline
 
+def clean_cache(bids_root):
+    print('> Clean docker image cache stored in /tmp')
+    # Clean cache (issue related that the dataset directory is mounted into /tmp,
+    # which is used for caching by java/matlab/matplotlib/xvfb-run in the docker image)
+
+    #Folder can be code/ derivatives/ sub-*/ .datalad/ .git/
+    #File can be README.txt CHANGES.txt participants.tsv project_description.json
+
+    for f in glob.glob(os.path.join(bids_root,'._java*')):
+        print('... DEL: {}'.format(f))
+        os.remove(f)
+
+    for f in glob.glob(os.path.join(bids_root,'mri_segstats.tmp*')):
+        print('... DEL: {}'.format(f))
+        os.remove(f)
+
+    for d in glob.glob(os.path.join(bids_root,'MCR_*')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
+    for d in glob.glob(os.path.join(bids_root,'matplotlib*')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
+    for d in glob.glob(os.path.join(bids_root,'xvfb-run.*')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
+    for d in glob.glob(os.path.join(bids_root,'.X11*')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
+    for d in glob.glob(os.path.join(bids_root,'.X11-unix')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
+    for f in glob.glob(os.path.join(bids_root,'.X99*')):
+        print('... DEL: {}'.format(f))
+        os.remove(d)
+
 def is_tool(name):
     """Check whether `name` is on PATH."""
 
@@ -1670,17 +1710,19 @@ class ProjectHandlerV2(Handler):
                                     break
                         else:
                             dwi_file = files[0]
-                    img = nib.load(dwi_file)
-                    print('#####################')
-                    print(dwi_file)
-                    print(img)
-                    print('#####################')
-                    print(img.shape)
-                    print('#####################')
 
-                    max_volume_idx = nib.load(dwi_file).shape[3] - 1
-                    self.dmri_pipeline.stages["Preprocessing"].end_vol = max_volume_idx
-                    self.dmri_pipeline.stages["Preprocessing"].max_vol = max_volume_idx
+                    # img = nib.load(dwi_file)
+                    # print('#####################')
+                    # print(dwi_file)
+                    # print(img)
+                    # print('#####################')
+                    # print(img.shape)
+                    # print('#####################')
+                    #
+                    # max_volume_idx = nib.load(dwi_file).shape[3] - 1
+                    # self.dmri_pipeline.stages["Preprocessing"].end_vol = max_volume_idx
+                    # self.dmri_pipeline.stages["Preprocessing"].max_vol = max_volume_idx
+
                     self.dmri_pipeline.diffusion_imaging_model  = loaded_project.diffusion_imaging_model
                     self.dmri_pipeline.global_conf.diffusion_imaging_model  = loaded_project.diffusion_imaging_model
                     self.dmri_pipeline.global_conf.dmri_bids_acq  = loaded_project.dmri_bids_acq

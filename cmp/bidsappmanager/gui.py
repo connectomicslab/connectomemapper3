@@ -520,6 +520,9 @@ class CMP_BIDSAppWindow(HasTraits):
 
     bidsapp_tag = Enum('latest',['latest','dev'])
 
+    data_provenance_tracking = Bool(False)
+    datalad_is_available = Bool(False)
+
     # check = Action(name='Check settings!',action='check_settings',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))))
     # start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='settings_checked==True and docker_running==False',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))))
 
@@ -565,6 +568,10 @@ class CMP_BIDSAppWindow(HasTraits):
                             Group(
                                 Item('bidsapp_tag', label='Release tag'),
                             label='BIDS App Version'),
+                            Group(
+                                Item('data_provenance_tracking', label='Use Datalad'),
+                            label='Data Provenance Tracking / Data Lineage',
+                            enabled_when='datalad_is_available'),
                             spring,
                             HGroup(spring,Item('check',style='custom',width=80,height=20,resizable=False,label='',show_label=False,
                                                 editor_args={
@@ -624,6 +631,8 @@ class CMP_BIDSAppWindow(HasTraits):
             print('Environment variable $FREESURFER_HOME not found')
             self.fs_license = ''
             print('Freesurfer license unset ({})'.format(self.fs_license))
+
+        self.datalad_is_available = project.is_tool('datalad')
 
         print(self.list_of_subjects_to_be_processed)
         print(self.bids_root)
@@ -789,6 +798,32 @@ class CMP_BIDSAppWindow(HasTraits):
     def start_bidsapp_participant_level_process_with_datalad(self, bidsapp_tag, participant_labels):
         cmd = ['datalad','containers-run',]
 
+        for label in participant_labels:
+            cmd.append('--input')
+            cmd.append('sub-{}/ses-*/anat/sub-*_T1w.*'.format(label))
+
+            cmd.append('--input')
+            cmd.append('derivatives/freesurfer/sub-{}*/*'.format(label))
+
+            if self.run_dmri_pipeline:
+                cmd.append('--input')
+                cmd.append('sub-{}/ses-*/dwi/sub-*_dwi.*'.format(label))
+
+            if self.run_fmri_pipeline:
+                cmd.append('--input')
+                cmd.append('sub-{}/ses-*/func/sub-*_bold.*'.format(label))
+
+        cmd.append('--input')
+        cmd.append('code/ref_anatomical_config.ini')
+
+        if self.run_dmri_pipeline:
+            cmd.append('--input')
+            cmd.append('code/ref_diffusion_config.ini'.format(label))
+
+        if self.run_fmri_pipeline:
+            cmd.append('--input')
+            cmd.append('code/ref_fMRI_config.ini'.format(label))
+
         cmd.append('--container-name')
         cmd.append('connectomemapper-bidsapp-{}'.format(bidsapp_tag))
 
@@ -864,12 +899,12 @@ class CMP_BIDSAppWindow(HasTraits):
 
         project.fix_dataset_directory_in_pickles(local_dir=self.bids_root,mode='bidsapp')
 
-        process_with_datalad = project.is_tool('datalad')
-        print("> Datalad mode enabled: {}".format(process_with_datalad))
 
-        # process_with_datalad = False
+        print("> Datalad available: {}".format(self.datalad_is_available))
 
-        if process_with_datalad:
+        # self.datalad_is_available = False
+
+        if self.datalad_is_available and self.data_provenance_tracking:
             # Equivalent to:
             #    >> datalad create derivatives
             #    >> cd derivatives
@@ -895,17 +930,30 @@ class CMP_BIDSAppWindow(HasTraits):
 
             datalad_container = os.path.join(self.bids_root,'.datalad','environments','connectomemapper-bidsapp-{}'.format(self.bidsapp_tag),'image')
 
-            # if not os.path.isdir(datalad_container):
-            cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{} --update".format(self.bidsapp_tag,self.bidsapp_tag)
-            try:
-                print('... cmd: {}'.format(cmd))
-                self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
-            except:
-                print("   ERROR: Failed to link the container image to the datalad dataset")
-            # else:
-            #     print("    INFO: Container already listed in the datalad dataset!")
+            if not os.path.isdir(datalad_container):
+                cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}".format(self.bidsapp_tag,self.bidsapp_tag)
+                try:
+                    print('... cmd: {}'.format(cmd))
+                    self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
+                except:
+                    print("   ERROR: Failed to link the container image to the datalad dataset")
+            else:
+                print("    INFO: Container already listed in the datalad dataset and will be updated!")
+                # TODO: remove existing for update
 
-            cmd = 'datalad add --nosave -J {}'.format(multiprocessing.cpu_count())
+
+            # Implementation with --upgrade available in latest version but not
+            # in stable version of datalad_container
+
+            # cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{} --update".format(self.bidsapp_tag,self.bidsapp_tag)
+            #
+            # try:
+            #     print('... cmd: {}'.format(cmd))
+            #     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
+            # except:
+            #     print("   ERROR: Failed to link the container image to the datalad dataset")
+
+            cmd = 'datalad add --nosave -J {} .'.format(multiprocessing.cpu_count())
             try:
                 print('... cmd: {}'.format(cmd))
                 self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
@@ -941,7 +989,7 @@ class CMP_BIDSAppWindow(HasTraits):
         # while len(processes) > 0:
         #     self.manage_bidsapp_procs(processes)
 
-        if process_with_datalad:
+        if self.datalad_is_available and self.data_provenance_tracking:
 
             proc = self.start_bidsapp_participant_level_process_with_datalad(self.bidsapp_tag,self.list_of_subjects_to_be_processed)
 
@@ -953,8 +1001,8 @@ class CMP_BIDSAppWindow(HasTraits):
         while len(processes) > 0:
             self.manage_bidsapp_procs(processes)
 
-        if process_with_datalad:
-            cmd = 'datalad add -nosave -J {}'.format(multiprocessing.cpu_count())
+        if self.datalad_is_available and self.data_provenance_tracking:
+            cmd = 'datalad add --nosave -J {} .'.format(multiprocessing.cpu_count())
             try:
                 print('... cmd: {}'.format(cmd))
                 self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
@@ -974,6 +1022,9 @@ class CMP_BIDSAppWindow(HasTraits):
                 self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except:
                 print("    ERROR: Failed to run datalad diff --revision HEAD~1")
+
+            # Clean remaining cache files generated in tmp/ of the docker image
+            project.clean_cache(self.bids_root)
 
         project.fix_dataset_directory_in_pickles(local_dir=self.bids_root,mode='local')
 

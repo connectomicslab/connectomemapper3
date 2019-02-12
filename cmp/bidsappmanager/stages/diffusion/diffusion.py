@@ -243,7 +243,7 @@ class DiffusionStage(Stage):
 
         # TODO: add Tensor image in case of DTI+Tensor modeling
         #MRtrix
-	    if self.config.recon_processing_tool == 'MRtrix':
+        if self.config.recon_processing_tool == 'MRtrix':
             metrics_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_tensor_metrics","result_mrtrix_tensor_metrics.pklz")
 
             if os.path.exists(metrics_results_path):
@@ -298,14 +298,14 @@ class DiffusionStage(Stage):
                             diff_results = pickle.load(gzip.open(diff_results_path))
                             streamline_res = diff_results.outputs.tracks
                             self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
-                else:
+            else:
 
-                    diff_results_path = os.path.join(self.stage_dir,"tracking","dipy_dtieudx_tracking","result_dipy_dtieudx_tracking.pklz")
+                diff_results_path = os.path.join(self.stage_dir,"tracking","dipy_dtieudx_tracking","result_dipy_dtieudx_tracking.pklz")
 
-                    if os.path.exists(diff_results_path):
-                        diff_results = pickle.load(gzip.open(diff_results_path))
-                        streamline_res = diff_results.outputs.tracks
-                        self.inspect_outputs_dict[self.config.tracking_processing_tool + ' Tensor-based EuDX streamline'] = ['trackvis',streamline_res]
+                if os.path.exists(diff_results_path):
+                    diff_results = pickle.load(gzip.open(diff_results_path))
+                    streamline_res = diff_results.outputs.tracks
+                    self.inspect_outputs_dict[self.config.tracking_processing_tool + ' Tensor-based EuDX streamline'] = ['trackvis',streamline_res]
 
         #MRtrix
     	if self.config.tracking_processing_tool == 'MRtrix':
@@ -319,15 +319,15 @@ class DiffusionStage(Stage):
                         print streamline_res
                         self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
 
-                else:
-                    #print('Git THEREEEEEEEEEEEE 22222222222222222222222222222222222222')
-                    diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
-                    print diff_results_path
-                    if os.path.exists(diff_results_path):
-                        diff_results = pickle.load(gzip.open(diff_results_path))
-                        streamline_res = diff_results.outputs.out_tracks
-                        print streamline_res
-                        self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
+            else:
+                #print('Git THEREEEEEEEEEEEE 22222222222222222222222222222222222222')
+                diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
+                print diff_results_path
+                if os.path.exists(diff_results_path):
+                    diff_results = pickle.load(gzip.open(diff_results_path))
+                    streamline_res = diff_results.outputs.out_tracks
+                    print streamline_res
+                    self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
 
             # if self.config.mrtrix_recon_config.local_model:
             #
