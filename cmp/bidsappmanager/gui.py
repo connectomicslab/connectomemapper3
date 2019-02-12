@@ -875,7 +875,7 @@ class CMP_BIDSAppWindow(HasTraits):
             #    >> cd derivatives
             #    >> datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}
             if not os.path.isdir(os.path.join(self.bids_root,'.datalad')):
-                cmd = 'datalad create --force -D "Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{})"'.format(self.bidsapp_tag)
+                cmd = 'datalad rev-create --force -D "Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{})"'.format(self.bidsapp_tag)
                 try:
                     print('... cmd: {}'.format(cmd))
                     self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
@@ -895,31 +895,31 @@ class CMP_BIDSAppWindow(HasTraits):
 
             datalad_container = os.path.join(self.bids_root,'.datalad','environments','connectomemapper-bidsapp-{}'.format(self.bidsapp_tag),'image')
 
-            if not os.path.isdir(datalad_container):
-                cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}".format(self.bidsapp_tag,self.bidsapp_tag)
-                try:
-                    print('... cmd: {}'.format(cmd))
-                    self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
-                except:
-                    print("   ERROR: Failed to link the container image to the datalad dataset")
-            else:
-                print("    INFO: Container already listed in the datalad dataset!")
+            # if not os.path.isdir(datalad_container):
+            cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{} --update".format(self.bidsapp_tag,self.bidsapp_tag)
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
+            except:
+                print("   ERROR: Failed to link the container image to the datalad dataset")
+            # else:
+            #     print("    INFO: Container already listed in the datalad dataset!")
 
-            cmd = 'datalad add -J {} .'.format(multiprocessing.cpu_count())
+            cmd = 'datalad add --nosave -J {}'.format(multiprocessing.cpu_count())
             try:
                 print('... cmd: {}'.format(cmd))
                 self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except:
                 print("    ERROR: Failed to add existing files to datalad")
 
-            cmd = 'datalad save -m "Existing files tracked by datalad. Dataset ready for connectome mapping." --version-tag ready4analysis-{} .'.format(time.strftime("%Y%m%d-%H%M%S"))
+            cmd = 'datalad save -m "Existing files tracked by datalad. Dataset ready for connectome mapping." --version-tag ready4analysis-{}'.format(time.strftime("%Y%m%d-%H%M%S"))
             try:
                 print('... cmd: {}'.format(cmd))
                 self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except:
                 print("    ERROR: Failed to commit to datalad dataset")
 
-            cmd = 'datalad rev-status'
+            cmd = 'datalad diff --revision HEAD~1'
             try:
                 print('... cmd: {}'.format(cmd))
                 self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
@@ -945,20 +945,6 @@ class CMP_BIDSAppWindow(HasTraits):
 
             proc = self.start_bidsapp_participant_level_process_with_datalad(self.bidsapp_tag,self.list_of_subjects_to_be_processed)
 
-            cmd = 'datalad add -J {} .'.format(multiprocessing.cpu_count())
-            try:
-                print('... cmd: {}'.format(cmd))
-                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except:
-                print("    ERROR: Failed to add changes to datalad dataset")
-
-            cmd = 'datalad save -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{} .'.format(self.bidsapp_tag, time.strftime("%Y%m%d-%H%M%S"))
-            try:
-                print('... cmd: {}'.format(cmd))
-                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except:
-                print("    ERROR: Failed to commit derivatives to datalad dataset")
-
         else:
             proc = self.start_bidsapp_participant_level_process(self.bidsapp_tag,self.list_of_subjects_to_be_processed)
 
@@ -966,6 +952,28 @@ class CMP_BIDSAppWindow(HasTraits):
 
         while len(processes) > 0:
             self.manage_bidsapp_procs(processes)
+
+        if process_with_datalad:
+            cmd = 'datalad add -nosave -J {}'.format(multiprocessing.cpu_count())
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+            except:
+                print("    ERROR: Failed to add changes to datalad dataset")
+
+            cmd = 'datalad save -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{}'.format(self.bidsapp_tag, time.strftime("%Y%m%d-%H%M%S"))
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+            except:
+                print("    ERROR: Failed to commit derivatives to datalad dataset")
+
+            cmd = 'datalad diff --revision HEAD~1'
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+            except:
+                print("    ERROR: Failed to run datalad diff --revision HEAD~1")
 
         project.fix_dataset_directory_in_pickles(local_dir=self.bids_root,mode='local')
 
