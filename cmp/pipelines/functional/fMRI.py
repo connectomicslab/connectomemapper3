@@ -422,22 +422,30 @@ class fMRIPipeline(Pipeline):
         sinker.inputs.base_directory = os.path.join(cmp_deriv_subject_directory)
 
         sinker.inputs.substitutions = [
-                                        ('wm_mask_registered.nii.gz', self.subject+'_T1w_space-bold_class-WM.nii.gz'),
-                                        ('eroded_wm_registered.nii.gz', self.subject+'_T1w_space-bold_class-WM_eroded.nii.gz'),
-                                        ('fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz', self.subject+'_task-rest_meanBOLD.nii.gz'),
-                                        ('fMRI_despike_st_mcf.nii.gz.par', self.subject+'_task-rest_bold_motion.par'),
-                                        ('FD.npy',self.subject+'_task-rest_bold_srubbing_FD.npy'),
-                                        ('DVARS.npy', self.subject+'_task-rest_bold_scrubbing_DVARS.npy'),
-                                        ('fMRI_bandpass.nii.gz',self.subject+'_task-rest_bold_bandpass.nii.gz'),
+                                        ('wm_mask_registered.nii.gz', self.subject+'_space-meanBOLD_label-WM_dseg.nii.gz'),
+                                        ('eroded_wm_registered.nii.gz', self.subject+'_space-meanBOLD_desc-eroded_label-WM_dseg.nii.gz'),
+                                        ('fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz', self.subject+'_meanBOLD.nii.gz'),
+                                        ('fMRI_despike_st_mcf.nii.gz.par', self.subject+'_motion.par'),
+                                        ('FD.npy',self.subject+'_desc-scrubbing_FD.npy'),
+                                        ('DVARS.npy', self.subject+'_desc-scrubbing_DVARS.npy'),
+                                        ('fMRI_bandpass.nii.gz',self.subject+'_desc-bandpass_task-rest_bold.nii.gz'),
 
-                                        (self.subject+'_T1w_parc_scale1_flirt.nii.gz',self.subject+'_T1w_space-meanBOLD_parc_scale1.nii.gz'),
-                                        (self.subject+'_T1w_parc_scale2_flirt.nii.gz',self.subject+'_T1w_space-meanBOLD_parc_scale2.nii.gz'),
-                                        (self.subject+'_T1w_parc_scale3_flirt.nii.gz',self.subject+'_T1w_space-meanBOLD_parc_scale3.nii.gz'),
-                                        (self.subject+'_T1w_parc_scale4_flirt.nii.gz',self.subject+'_T1w_space-meanBOLD_parc_scale4.nii.gz'),
-                                        (self.subject+'_T1w_parc_scale5_flirt.nii.gz',self.subject+'_T1w_space-meanBOLD_parc_scale5.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale1_flirt.nii.gz',self.subject+'_space-meanBOLD_label-L2018_desc-scale1_atlas.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale2_flirt.nii.gz',self.subject+'_space-meanBOLD_label-L2018_desc-scale2_atlas.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale3_flirt.nii.gz',self.subject+'_space-meanBOLD_label-L2018_desc-scale3_atlas.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale4_flirt.nii.gz',self.subject+'_space-meanBOLD_label-L2018_desc-scale4_atlas.nii.gz'),
+                                        (self.subject+'_T1w_parc_scale5_flirt.nii.gz',self.subject+'_space-meanBOLD_label-L2018_desc-scale5_atlas.nii.gz'),
 
-                                        ('connectome_scale',self.subject+'_bold_connectome_scale'),
-                                        ('averageTimeseries_scale',self.subject+'_bold_averageTimeseries_scale'),
+                                        ('connectome_scale1',self.subject+'_label-L2018_desc-scale1_connectome')),
+                                        ('connectome_scale2',self.subject+'_label-L2018_desc-scale2_connectome')),
+                                        ('connectome_scale3',self.subject+'_label-L2018_desc-scale3_connectome')),
+                                        ('connectome_scale4',self.subject+'_label-L2018_desc-scale4_connectome')),
+                                        ('connectome_scale5',self.subject+'_label-L2018_desc-scale5_connectome')),
+                                        ('averageTimeseries_scale1',self.subject+'_label-L2018_desc-scale1_bold_averageTimeseries'),
+                                        ('averageTimeseries_scale2',self.subject+'_label-L2018_desc-scale2_bold_averageTimeseries'),
+                                        ('averageTimeseries_scale3',self.subject+'_label-L2018_desc-scale3_bold_averageTimeseries'),
+                                        ('averageTimeseries_scale4',self.subject+'_label-L2018_desc-scale4_bold_averageTimeseries'),
+                                        ('averageTimeseries_scale5',self.subject+'_label-L2018_desc-scale5_bold_averageTimeseries'),
 
                                       ]
 
@@ -447,12 +455,26 @@ class fMRIPipeline(Pipeline):
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(fMRI='fMRI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
-        datasource.inputs.field_template = dict(fMRI='func/'+self.subject+'_task-rest_bold.nii.gz',T1='anat/'+self.subject+'_T1w_head.nii.gz',T2='anat/'+self.subject+'_T2w.nii.gz',aseg='anat/'+self.subject+'_T1w_aseg.nii.gz',brain='anat/'+self.subject+'_T1w_brain.nii.gz',brain_mask='anat/'+self.subject+'_T1w_brainmask.nii.gz',
-                                                wm_mask_file='anat/'+self.subject+'_T1w_class-WM.nii.gz',wm_eroded='anat/'+self.subject+'_T1w_class-WM.nii.gz',
-                                                brain_eroded='anat/'+self.subject+'_T1w_brainmask.nii.gz',csf_eroded='anat/'+self.subject+'_T1w_class-CSF.nii.gz',
-                                                roi_volume_s1='anat/'+self.subject+'_T1w_parc_scale1.nii.gz',roi_volume_s2='anat/'+self.subject+'_T1w_parc_scale2.nii.gz',roi_volume_s3='anat/'+self.subject+'_T1w_parc_scale3.nii.gz',
-                                                roi_volume_s4='anat/'+self.subject+'_T1w_parc_scale4.nii.gz',roi_volume_s5='anat/'+self.subject+'_T1w_parc_scale5.nii.gz',roi_graphml_s1='anat/'+self.subject+'_T1w_parc_scale1.graphml',roi_graphml_s2='anat/'+self.subject+'_T1w_parc_scale2.graphml',roi_graphml_s3='anat/'+self.subject+'_T1w_parc_scale3.graphml',
-                                                roi_graphml_s4='anat/'+self.subject+'_T1w_parc_scale4.graphml',roi_graphml_s5='anat/'+self.subject+'_T1w_parc_scale5.graphml')
+        datasource.inputs.field_template = dict(fMRI='func/'+self.subject+'_task-rest_bold.nii.gz',
+                                                T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',
+                                                T2='anat/'+self.subject+'_T2w.nii.gz',
+                                                aseg='anat/'+self.subject+'_desc-aseg_desg.nii.gz',
+                                                brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
+                                                brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
+                                                wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',
+                                                wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
+                                                brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',
+                                                csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
+                                                roi_volume_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.nii.gz',
+                                                roi_volume_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.nii.gz',
+                                                roi_volume_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.nii.gz',
+                                                roi_volume_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.nii.gz',
+                                                roi_volume_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.nii.gz',
+                                                roi_graphml_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.graphml',
+                                                roi_graphml_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.graphml',
+                                                roi_graphml_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.graphml',
+                                                roi_graphml_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.graphml',
+                                                roi_graphml_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.graphml')
         datasource.inputs.sort_filelist=False
 
         # Clear previous outputs
