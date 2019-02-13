@@ -91,7 +91,8 @@ Add the container image of the connectome mapper to the dataset
 ::
 
     datalad containers-add connectomemapper-bidsapp-{version-tag} \
-    --url dhub://sebastientourbier/connectomemapper-bidsapp:{version-tag}
+    --url dhub://sebastientourbier/connectomemapper-bidsapp:{version-tag} \
+    --update
 
 Save the state of the dataset prior to analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
