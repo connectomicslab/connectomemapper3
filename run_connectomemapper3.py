@@ -17,6 +17,7 @@ import argparse
 import os
 import shutil
 import subprocess
+import multiprocessing
 import nibabel
 import numpy
 from glob import glob
@@ -92,7 +93,53 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type)
 
     return subject_conf_file
 
-def run(command, env={}, log={}):
+def manage_processes(proclist):
+    for proc in proclist:
+        if proc.poll() is not None:
+            proclist.remove(proc)
+
+def clean_cache(bids_root):
+    print('> Clean docker image cache stored in /tmp')
+    # Clean cache (issue related that the dataset directory is mounted into /tmp,
+    # which is used for caching by java/matlab/matplotlib/xvfb-run in the docker image)
+
+    #Folder can be code/ derivatives/ sub-*/ .datalad/ .git/
+    #File can be README.txt CHANGES.txt participants.tsv project_description.json
+
+    for f in glob(os.path.join(bids_root,'._java*')):
+        print('... DEL: {}'.format(f))
+        os.remove(f)
+
+    for f in glob(os.path.join(bids_root,'mri_segstats.tmp*')):
+        print('... DEL: {}'.format(f))
+        os.remove(f)
+
+    for d in glob(os.path.join(bids_root,'MCR_*')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
+    for d in glob(os.path.join(bids_root,'matplotlib*')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
+    for d in glob(os.path.join(bids_root,'xvfb-run.*')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
+    for d in glob(os.path.join(bids_root,'.X11*')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
+    for d in glob(os.path.join(bids_root,'.X11-unix')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
+    for f in glob(os.path.join(bids_root,'.X99*')):
+        print('... DEL: {}'.format(f))
+        os.remove(d)
+
+
+def run(command, env={}, log_filename={}):
     merged_env = os.environ
     merged_env.update(env)
 
@@ -100,14 +147,16 @@ def run(command, env={}, log={}):
         process = subprocess.Popen(command, stdout=log,
                                stderr=log, shell=True,
                                env=merged_env)
+
+    return process
     # while True:
     #     line = process.stdout.readline()
     #     line = str(line)[:-1]
     #     print(line)
     #     if line == '' and process.poll() != None:
     #         break
-    if process.returncode != 0:
-        raise Exception("Non zero return code: %d"%process.returncode)
+    # if process.returncode != 0:
+    #     raise Exception("Non zero return code: %d"%process.returncode)
 
 parser = argparse.ArgumentParser(description='Example BIDS App entrypoint script.')
 parser.add_argument('bids_dir', help='The directory with the input dataset '
@@ -181,6 +230,9 @@ shutil.copyfile(src=os.path.join('/tmp','code','license.txt'),dst=os.path.join('
 # running participant level
 if args.analysis_level == "participant":
 
+    maxprocs = multiprocessing.cpu_count()
+    processes = []
+
     # find all T1s and skullstrip them
     for subject_label in subjects_to_analyze:
 
@@ -202,6 +254,10 @@ if args.analysis_level == "participant":
         if len(project.subject_sessions) > 0: #Session structure
 
             for session in project.subject_sessions:
+
+                while len(processes) == maxprocs:
+                    self.manage_processes(processes)
+
                 print('Process session {}'.format(session))
                 project.subject_session = session
 
@@ -241,11 +297,26 @@ if args.analysis_level == "participant":
 
                     cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
                     print cmd
-                    run(command=cmd,env={},log=os.path.join(project.output_directory,'cmp','{}_{}_log.txt'.format(project.subject,project.subject_session)))
+
+                    # for label in self.list_of_subjects_to_be_processed:
+                    #     while len(processes) == maxprocs:
+                    #         self.manage_bidsapp_procs(processes)
+                    #
+                    #     proc = self.start_bidsapp_participant_level_process(self.bidsapp_tag,label)
+                    #     processes.append(proc)
+                    #
+                    # while len(processes) > 0:
+                    #     self.manage_bidsapp_procs(processes)
+
+                    proc = run(command=cmd,env={},log_filename=os.path.join(project.output_directory,'cmp','{}_{}_log.txt'.format(project.subject,project.subject_session)))
+                    processes.append(proc)
                 else:
                     print "Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
 
         else: #No session structure
+            while len(processes) == maxprocs:
+                manage_processes(processes)
+
             project.subject_sessions = ['']
             project.subject_session = ''
 
@@ -281,9 +352,15 @@ if args.analysis_level == "participant":
 
                 cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
                 print cmd
-                run(command=cmd,env={},log=os.path.join(project.output_directory,'cmp','{}_log.txt'.format(project.subject)))
+                proc = run(command=cmd,env={},log_filename=os.path.join(project.output_directory,'cmp','{}_log.txt'.format(project.subject)))
+                processes.append(proc)
             else:
                 print "Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
+
+    while len(processes) > 0:
+        manage_processes(processes)
+
+    clean_cache(args.bids_dir)
 
 # running group level; ultimately it will compute average connectivity matrices
 # elif args.analysis_level == "group":

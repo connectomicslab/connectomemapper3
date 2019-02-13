@@ -36,7 +36,7 @@ ENV ANTSPATH=/opt/conda/bin
 #ENV PATH=$ANTSPATH:$PATH
 
 # Create entrypoint script that simulated a X server - required by traitsui
-RUN echo '#! /bin/sh \n chown "$(id -u):$(id -g)" /opt/freesurfer \n xvfb-run -a python "/app/run_connectomemapper3.py" "$@"' > /app/run_connectomemapper3.sh
+RUN echo '#! /bin/sh \n chown "$(id -u):$(id -g)" /opt/freesurfer \n xvfb-run -a python "/app/run_connectomemapper3.py" "$@" \n rm -R /tmp/.X99-lock /tmp/.X11-unix' > /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed
