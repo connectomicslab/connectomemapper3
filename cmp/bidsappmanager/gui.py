@@ -953,6 +953,30 @@ class CMP_BIDSAppWindow(HasTraits):
             # except:
             #     print("   ERROR: Failed to link the container image to the datalad dataset")
 
+            cmd = 'datalad get code/ref_anatomical_config.ini'
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+            except:
+                print("    ERROR: Failed to get anatomical pipeline config file")
+
+
+            if self.run_dmri_pipeline:
+                cmd = 'datalad get code/ref_diffusion_config.ini'
+                try:
+                    print('... cmd: {}'.format(cmd))
+                    self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+                except:
+                    print("    ERROR: Failed to get diffusion pipeline config file")
+
+            if self.run_fmri_pipeline:
+                cmd = 'datalad get code/ref_fMRI_config.ini'
+                try:
+                    print('... cmd: {}'.format(cmd))
+                    self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+                except:
+                    print("    ERROR: Failed to get fMRI pipeline config file")
+
             cmd = 'datalad add --nosave -J {} .'.format(multiprocessing.cpu_count())
             try:
                 print('... cmd: {}'.format(cmd))
@@ -1001,7 +1025,12 @@ class CMP_BIDSAppWindow(HasTraits):
         while len(processes) > 0:
             self.manage_bidsapp_procs(processes)
 
+        project.fix_dataset_directory_in_pickles(local_dir=self.bids_root,mode='local')
+
         if self.datalad_is_available and self.data_provenance_tracking:
+            # Clean remaining cache files generated in tmp/ of the docker image
+            project.clean_cache(self.bids_root)
+
             cmd = 'datalad add --nosave -J {} .'.format(multiprocessing.cpu_count())
             try:
                 print('... cmd: {}'.format(cmd))
@@ -1023,16 +1052,11 @@ class CMP_BIDSAppWindow(HasTraits):
             except:
                 print("    ERROR: Failed to run datalad diff --revision HEAD~1")
 
-            # Clean remaining cache files generated in tmp/ of the docker image
-            project.clean_cache(self.bids_root)
-
-        project.fix_dataset_directory_in_pickles(local_dir=self.bids_root,mode='local')
-
         print('Processing with BIDS App Finished')
 
         self.docker_running = False
 
-        # cmd = ['docke
+        # cmd = ['docke datetime.datetime.now().strftime("%Y%m%d_%H%M")
         return True
 
     # def stop_bids_app(self, ui_info):
