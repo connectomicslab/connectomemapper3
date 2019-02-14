@@ -31,9 +31,8 @@ from cmp.info import __version__
 from cmp.stages.diffusion.reconstruction import DTB_gfa
 
 def info():
-    print "\nconnectomemapper " + __version__
-    print """Copyright (C) 2009-2018, Ecole Polytechnique Fédérale de Lausanne (EPFL) and
-             Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+    print "\nConnectome Mapper " + __version__
+    print """Copyright (C) 2009-2018, Brain Communication Pathways Sinergia Consortium, Switzerland
              All rights reserved.\n"""
 
 def usage():

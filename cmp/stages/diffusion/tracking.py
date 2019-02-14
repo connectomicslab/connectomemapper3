@@ -48,7 +48,7 @@ from cmtklib.diffusion import filter_fibers
 import matplotlib.pyplot as plt
 
 from nipype import logging
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 class DTB_tracking_config(HasTraits):
     imaging_model = Str
@@ -143,6 +143,12 @@ class MRtrix_tracking_config(HasTraits):
             self.curvature = 0.0
         elif self.tracking_mode == "Probabilistic":
             self.curvature = 1.0
+
+    def _use_act_changed(self,new):
+        if new == False:
+            self.crop_at_gmwmi = False
+            self.seed_from_gmwmi = False
+            self.backtrack = False
 
     def _tracking_mode_changed(self,new):
         if new == "Deterministic" and not self.SD:
@@ -996,7 +1002,7 @@ def create_mrtrix_tracking_flow(config):
             mrtrix_tracking.inputs.crop_at_gmwmi = config.crop_at_gmwmi
         else:
             flow.connect([
-                (wm_erode, mrtrix_tracking,[('out_file','mask_file')]),
+                (inputnode, mrtrix_tracking,[('wm_mask_resampled','mask_file')]),
     		    ])
 
         if config.seed_from_gmwmi:

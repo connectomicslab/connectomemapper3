@@ -1,8 +1,8 @@
 
-Connectome Mapper 3
+Connectome Mapper 3 (UNDER DEVELOPMENT)
 =======================================================
 
-This neuroimage processing pipeline software is developed by the Hagmann's group at the University Hospital of Lausanne (CHUV) and the Signal Processing Laboratory (LTS5) of the Ecole Polytechnique Fédérale de Lausanne (EPFL) for use at the Center for BioMedical Imaging (CIBM) within the `FNSNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
+This neuroimage processing pipeline software is developed by the Hagmann's group at the University Hospital of Lausanne (CHUV) for use at the Center for BioMedical Imaging (CIBM) within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
 
 .. image:: http://bids.neuroimaging.io/openneuro_badge.svg
   :target: https://openneuro.org
@@ -44,6 +44,8 @@ This tool allows you to easily do the following:
 - Automate and parallelize processing steps, which provides a significant
   speed-up from typical linear, manual processing.
 
+Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which provide a frozen environment where versions of all external softwares and libraries are fixed.
+
 
 *********
 Acknowledgement
@@ -67,17 +69,17 @@ Acknowledgement
 Funding
 *********
 
-Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
+Work supported by the SNF Sinergia Grant 170873 (http://p3.snf.ch/Project-170873).
 
 *******************
 License information
 *******************
 
-This software is distributed under the open-source license Modified BSD. See `license <LICENSE>`_ for more details.
+This software is distributed under the open-source license Modified BSD. See :ref:`license <LICENSE>` for more details.
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (C) 2009-2018, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Hospital Center and University of Geneva (UNIGE-HUG), Switzerland.
+Copyright (C) 2009-2018, Brain Communication Pathways Sinergia Consortium, Switzerland.
 
 
 ********
@@ -85,10 +87,11 @@ Contents
 ********
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    installation
    download
    conf
    stages
    exampleresults
+   datalad

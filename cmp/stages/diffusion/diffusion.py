@@ -215,7 +215,7 @@ class DiffusionStage(Stage):
         self.name = 'diffusion_stage'
         self.config = DiffusionConfig()
         self.inputs = ["diffusion","partial_volumes","wm_mask_registered","brain_mask_registered","act_5tt_registered","gmwmi_registered","roi_volumes","grad","bvals","bvecs"]
-        self.outputs = ["diffusion_model","track_file","fod_file","gFA","ADC","skewness","kurtosis","P0","roi_volumes","mapmri_maps"]
+        self.outputs = ["diffusion_model","track_file","fod_file","FA","ADC","RD","AD","skewness","kurtosis","P0","roi_volumes","shore_maps","mapmri_maps"]
 
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -286,20 +286,28 @@ class DiffusionStage(Stage):
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
                         (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (inputnode, recon_flow,[('brain_mask_registered','inputnode.brain_mask_resampled')]),
-                        (recon_flow,outputnode,[("outputnode.FA","gFA")]),
+                        (recon_flow,outputnode,[("outputnode.FA","FA")]),
+                        (recon_flow,outputnode,[("outputnode.MD","ADC")]),
+                        (recon_flow,outputnode,[("outputnode.AD","AD")]),
+                        (recon_flow,outputnode,[("outputnode.RD","RD")]),
+                        (recon_flow,outputnode,[("outputnode.shore_maps","shore_maps")]),
                         (recon_flow,outputnode,[("outputnode.mapmri_maps","mapmri_maps")]),
                         ])
 
 
         elif self.config.recon_processing_tool == 'MRtrix':
+            #TODO modify nipype tensormetric interface to get AD and RD maps
             recon_flow = create_mrtrix_recon_flow(self.config.mrtrix_recon_config)
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (inputnode,recon_flow,[('grad','inputnode.grad')]),
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
 			            (inputnode, recon_flow,[('brain_mask_registered','inputnode.wm_mask_resampled')]),
-                        (recon_flow,outputnode,[("outputnode.FA","gFA")]),
+                        (recon_flow,outputnode,[("outputnode.FA","FA")]),
                         (recon_flow,outputnode,[("outputnode.ADC","ADC")]),
+                        (recon_flow,outputnode,[("outputnode.tensor","tensor")]),
+                        # (recon_flow,outputnode,[("outputnode.AD","AD")]),
+                        # (recon_flow,outputnode,[("outputnode.RD","RD")]),
                         ])
 
         elif self.config.recon_processing_tool == 'Camino':
@@ -308,7 +316,7 @@ class DiffusionStage(Stage):
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
                         (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                        (recon_flow,outputnode,[("outputnode.FA","gFA")])
+                        (recon_flow,outputnode,[("outputnode.FA","FA")])
                         ])
 
         elif self.config.recon_processing_tool == 'FSL':
@@ -558,35 +566,42 @@ class DiffusionStage(Stage):
         # TODO: add Tensor image in case of DTI+Tensor modeling
 
         #MRtrix
-        recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_make_tensor","result_mrtrix_make_tensor.pklz")
+        metrics_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_tensor_metrics","result_mrtrix_tensor_metrics.pklz")
 
-        if os.path.exists(recon_results_path):
-            recon_results = pickle.load(gzip.open(recon_results_path))
+        if os.path.exists(metrics_results_path):
+            metrics_results = pickle.load(gzip.open(metrics_results_path))
 
-            fa_res = recon_results.outputs.out_fa
+            fa_res = metrics_results.outputs.out_fa
             self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',fa_res]
 
-            adc_res = recon_results.outputs.out_adc
+            adc_res = metrics_results.outputs.out_adc
             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ADC image'] = ['mrview',adc_res]
 
-            if not self.config.mrtrix_recon_config.local_mode: # Tensor model (DTI)
 
-                tensor_res = recon_results.outputs.tensor
-                self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_tensor',tensor_res]
+        if not self.config.mrtrix_recon_config.local_model: # Tensor model (DTI)
+            recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_make_tensor","result_mrtrix_make_tensor.pklz")
 
-            else: # CSD model
+            if os.path.exists(recon_results_path):
+                recon_results = pickle.load(gzip.open(recon_results_path))
 
-                RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
-                if(os.path.exists(RF_path)):
-                    RF_results = pickle.load(gzip.open(RF_path))
-                    self.inspect_outputs_dict['MRTRIX Response function'] = ['shview','-response',RF_results.outputs.response]
+            tensor_res = recon_results.outputs.tensor
+            self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_tensor',tensor_res]
 
-                recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_CSD","result_mrtrix_CSD.pklz")
+        else: # CSD model
 
-                if os.path.exists(recon_results_path):
-                    recon_results = pickle.load(gzip.open(recon_results_path))
-                    shm_coeff_res = recon_results.outputs.spherical_harmonics_image
-                    self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_sh',shm_coeff_res]
+            RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
+            if(os.path.exists(RF_path)):
+                RF_results = pickle.load(gzip.open(RF_path))
+                self.inspect_outputs_dict['MRTRIX Response function'] = ['shview','-response',RF_results.outputs.response]
+
+            recon_results_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_CSD","result_mrtrix_CSD.pklz")
+
+            if os.path.exists(recon_results_path):
+                recon_results = pickle.load(gzip.open(recon_results_path))
+                shm_coeff_res = recon_results.outputs.spherical_harmonics_image
+                self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview',fa_res,'-odf.load_sh',shm_coeff_res]
+
+
 
         ## Tracking outputs
         # Dipy

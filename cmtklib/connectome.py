@@ -152,8 +152,10 @@ def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, 
 
         # add node information from parcellation
         gp = nx.read_graphml(parval['node_information_graphml'])
-        for u,d in gp.nodes_iter(data=True):
-            G.add_node(int(u), d)
+        for u,d in gp.nodes(data=True):
+            G.add_node(int(u))
+            for key in d:
+                G.node[int(u)][key] = d[key]
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
@@ -186,16 +188,19 @@ def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, 
                 if startROI != endROI: # Excludes loops (connections within the same ROI)
                     # Add edge to graph
                     if G.has_edge(startROI, endROI):
-                        G.edge[startROI][endROI]['n_tracks'] += ROImat[target]
+                        G[startROI][endROI]['n_tracks'] += ROImat[target]
                     else:
                         G.add_edge(startROI, endROI, n_tracks  = ROImat[target])
 
                     tot_tracks += ROImat[target]
 
-        for u,v,d in G.edges_iter(data=True):
+        for u,v,d in G.edges(data=True):
             G.remove_edge(u,v)
             di = { 'number_of_fibers' : (float(d['n_tracks']) / tot_tracks.astype(float))}
-            G.add_edge(u,v, di)
+            G.add_edge(u,v)
+            for key in di:
+                G[u][v][key] = di[key]
+
 
         # storing network
         if 'gPickle' in output_types:
@@ -228,17 +233,20 @@ def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, 
             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
         if 'graphml' in output_types:
             g2 = nx.Graph()
-            for u_gml,v_gml,d_gml in G.edges_iter(data=True):
-                g2.add_edge(u_gml,v_gml,d_gml)
+            for u_gml,v_gml,d_gml in G.edges(data=True):
+                g2.add_edge(u_gml,v_gml)
+                for key in d_gml:
+                    g2[u_gml][v_gml][key] = d_gml[key]
             for u_gml,d_gml in G.nodes(data=True):
-                g2.add_node(u_gml,{'dn_correspondence_id':d_gml['dn_correspondence_id'],
-                               'dn_fsname':d_gml['dn_fsname'],
-                               'dn_hemisphere':d_gml['dn_hemisphere'],
-                               'dn_name':d_gml['dn_name'],
-                               'dn_position_x':float(d_gml['dn_position'][0]),
-                               'dn_position_y':float(d_gml['dn_position'][1]),
-                               'dn_position_z':float(d_gml['dn_position'][2]),
-                               'dn_region':d_gml['dn_region']})
+                g2.add_node(u_gml)
+                g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+                g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
+                g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
+                g2.node[u_gml]['dn_name'] = d_gml['dn_name']
+                g2.node[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
+                g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
+                g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
+                g2.node[u_gml]['dn_region'] = d_gml['dn_region']
             nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
 def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'], atlas_info = {}):
@@ -273,8 +281,10 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
 
         # add node information from parcellation
         gp = nx.read_graphml(parval['node_information_graphml'])
-        for u,d in gp.nodes_iter(data=True):
-            G.add_node(int(u), d)
+        for u,d in gp.nodes(data=True):
+            G.add_node(int(u))
+            for key in d:
+                G.node[int(u)][key] = d[key]
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
@@ -327,7 +337,7 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
 
                 # Add edge to graph
                 if G.has_edge(startROI, endROI):
-                    G.edge[startROI][endROI]['n_tracks'] += 1
+                    G[startROI][endROI]['n_tracks'] += 1
                 else:
                     G.add_edge(startROI, endROI, n_tracks  = 1)
 
@@ -335,10 +345,12 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
 
         tot_tracks = graph_matrix.sum()
 
-        for u,v,d in G.edges_iter(data=True):
+        for u,v,d in G.edges(data=True):
             G.remove_edge(u,v)
             di = { 'number_of_fibers' : (float(d['n_tracks']) / tot_tracks.astype(float))}
-            G.add_edge(u,v, di)
+            G.add_edge(u,v)
+            for key in di:
+                G[u][v][key] = di[key]
 
         # storing network
         if 'gPickle' in output_types:
@@ -371,17 +383,20 @@ def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'],
             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
         if 'graphml' in output_types:
             g2 = nx.Graph()
-            for u_gml,v_gml,d_gml in G.edges_iter(data=True):
-                g2.add_edge(u_gml,v_gml,d_gml)
+            for u_gml,v_gml,d_gml in G.edges(data=True):
+                g2.add_edge(u_gml,v_gml)
+                for key in d_gml:
+                    g2[u_gml][v_gml][key] = d_gml[key]
             for u_gml,d_gml in G.nodes(data=True):
-                g2.add_node(u_gml,{'dn_correspondence_id':d_gml['dn_correspondence_id'],
-                               'dn_fsname':d_gml['dn_fsname'],
-                               'dn_hemisphere':d_gml['dn_hemisphere'],
-                               'dn_name':d_gml['dn_name'],
-                               'dn_position_x':float(d_gml['dn_position'][0]),
-                               'dn_position_y':float(d_gml['dn_position'][1]),
-                               'dn_position_z':float(d_gml['dn_position'][2]),
-                               'dn_region':d_gml['dn_region']})
+                g2.add_node(u_gml)
+                g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+                g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
+                g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
+                g2.node[u_gml]['dn_name'] = d_gml['dn_name']
+                g2.node[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
+                g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
+                g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
+                g2.node[u_gml]['dn_region'] = d_gml['dn_region']
             nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
 # class MRTrix3BaseInputSpec(CommandLineInputSpec):
@@ -686,8 +701,10 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         # add node information from parcellation
         gp = nx.read_graphml(parval['node_information_graphml'])
-        for u,d in gp.nodes_iter(data=True):
-            G.add_node(int(u), d)
+        for u,d in gp.nodes(data=True):
+            G.add_node(int(u))
+            for key in d:
+                G.node[int(u)][key] = d[key]
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
             if parcellation_scheme != "Lausanne2018":
@@ -695,15 +712,15 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_correspondence_id"]) )
                 print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_correspondence_id"]) ))
             else:
-                if int(u) == 53:
-                    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+                #if int(u) == 53:
+                #    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                 G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_multiscaleID"]) ) , axis = 1))
                 G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_multiscaleID"]) )
-                if int(u) == 53:
-                    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+                #if int(u) == 53:
+                #    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                 print "Add node %g - roi volume (2018): %g " % (int(u),np.sum( roiData== int(d["dn_multiscaleID"]) ))
-                if int(u) == 53:
-                    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+                #if int(u) == 53:
+                #    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
         dis = 0
 
@@ -807,7 +824,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
             # Add edge to graph
             if G.has_edge(startROI, endROI):
-                G.edge[startROI][endROI]['fiblist'].append(i)
+                G[startROI][endROI]['fiblist'].append(i)
             else:
                 G.add_edge(startROI, endROI, fiblist   = [i])
 
@@ -833,7 +850,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         total_fibers = 0
         total_volume = 0
         u_old = -1
-        for u,v,d in G.edges_iter(data=True):
+        for u,v,d in G.edges(data=True):
             total_fibers += len(d['fiblist'])
             if u != u_old:
                 print("Node %i"%int(u))
@@ -844,7 +861,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         # update edges
         # measures to add here
         # FIXME treat case of self-connection that gives di['fiber_length_mean'] = 0.0
-        for u,v,d in G.edges_iter(data=True):
+        for u,v,d in G.edges(data=True):
             G.remove_edge(u,v)
             di = { 'number_of_fibers' : len(d['fiblist']), }
 
@@ -864,8 +881,9 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
             # Compute density
             # density = (#fibers / mean_fibers_length) * (2 / (area_roi_u + area_roi_v))
-            print "G.node[int(u)]['roi_volume'] : %i / G.node[int(v)]['roi_volume'] : %i" % (G.node[int(u)]['roi_volume'],G.node[int(v)]['roi_volume'])
-            print "di['number_of_fibers'] : %i / di['fiber_length_mean'] : %i" % (di['number_of_fibers'],di['fiber_length_mean'])
+
+            #print "G.node[int(u)]['roi_volume'] : %i / G.node[int(v)]['roi_volume'] : %i" % (G.node[int(u)]['roi_volume'],G.node[int(v)]['roi_volume'])
+            #print "di['number_of_fibers'] : %i / di['fiber_length_mean'] : %i" % (di['number_of_fibers'],di['fiber_length_mean'])
 
             if di['fiber_length_mean'] > 0.0:
                 di['fiber_density'] = float( (float(di['number_of_fibers']) / float(di['fiber_length_mean'])) * float(2.0 / (G.node[int(u)]['roi_volume']+G.node[int(v)]['roi_volume'])) )
@@ -900,7 +918,9 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 del da
                 del val
 
-            G.add_edge(u,v, di)
+            G.add_edge(u,v)
+            for key in di:
+                G[u][v][key] = di[key]
 
         # storing network
         if 'gPickle' in output_types:
@@ -943,17 +963,20 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
         if 'graphml' in output_types:
             g2 = nx.Graph()
-            for u_gml,v_gml,d_gml in G.edges_iter(data=True):
-                g2.add_edge(u_gml,v_gml,d_gml)
+            for u_gml,v_gml,d_gml in G.edges(data=True):
+                g2.add_edge(u_gml,v_gml)
+                for key in d_gml:
+                    g2[u_gml][v_gml][key] = d_gml[key]
             for u_gml,d_gml in G.nodes(data=True):
-                g2.add_node(u_gml,{'dn_correspondence_id':d_gml['dn_correspondence_id'],
-                               'dn_fsname':d_gml['dn_fsname'],
-                               'dn_hemisphere':d_gml['dn_hemisphere'],
-                               'dn_name':d_gml['dn_name'],
-                               'dn_position_x':float(d_gml['dn_position'][0]),
-                               'dn_position_y':float(d_gml['dn_position'][1]),
-                               'dn_position_z':float(d_gml['dn_position'][2]),
-                               'dn_region':d_gml['dn_region']})
+                g2.add_node(u_gml)
+                g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+                g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
+                g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
+                g2.node[u_gml]['dn_name'] = d_gml['dn_name']
+                g2.node[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
+                g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
+                g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
+                g2.node[u_gml]['dn_region'] = d_gml['dn_region']
             nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
         print("Storing final fiber length array")

@@ -31,8 +31,8 @@ class ParcellationConfig(HasTraits):
     parcellation_scheme = Str('Lausanne2008')
     parcellation_scheme_editor = List(['NativeFreesurfer','Lausanne2008','Lausanne2018','Custom'])
     include_thalamic_nuclei_parcellation = Bool(True)
-    template_thalamus = File()
-    thalamic_nuclei_maps = File()
+    #template_thalamus = File()
+    #thalamic_nuclei_maps = File()
     segment_hippocampal_subfields = Bool(True)
     segment_brainstem = Bool(True)
     pre_custom = Str('Lausanne2008')
@@ -89,8 +89,8 @@ class ParcellationStage(Stage):
     def __init__(self,pipeline_mode):
         self.name = 'parcellation_stage'
         self.config = ParcellationConfig()
-        self.config.template_thalamus = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz'))
-        self.config.thalamic_nuclei_maps = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz'))
+        #self.config.template_thalamus = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')))
+        #self.config.thalamic_nuclei_maps = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')))
         self.config.pipeline_mode = pipeline_mode
         self.inputs = ["subjects_dir","subject_id","custom_wm_mask"]
         self.outputs = [#"aseg_file",
@@ -100,7 +100,7 @@ class ParcellationStage(Stage):
             "csf_eroded",
             "brain_eroded",
             "gm_mask_file",
-            "aseg",
+            "aseg","aparc_aseg",
     	       #"cc_unknown_file","ribbon_file","roi_files",
             "roi_volumes","roi_colorLUTs","roi_graphMLs","parcellation_scheme","atlas_info"]
 
@@ -157,8 +157,8 @@ class ParcellationStage(Stage):
 
                 if self.config.include_thalamic_nuclei_parcellation:
                     parcThal = pe.Node(interface=ParcellateThalamus(),name="parcThal")
-                    parcThal.inputs.template_image = self.config.template_thalamus
-                    parcThal.inputs.thalamic_nuclei_maps = self.config.thalamic_nuclei_maps
+                    parcThal.inputs.template_image = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')))
+                    parcThal.inputs.thalamic_nuclei_maps = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')))
 
                     flow.connect([
                                 (inputnode,parcThal,[("subjects_dir","subjects_dir"),(("subject_id",os.path.basename),"subject_id")]),
@@ -167,6 +167,7 @@ class ParcellationStage(Stage):
                                 ])
 
                 flow.connect([
+                            (parcCombiner,outputnode,[("aparc_aseg","aparc_aseg")]),
                             (parcCombiner,outputnode,[("output_rois","roi_volumes")]),
                             (parcCombiner,outputnode,[("colorLUT_files","roi_colorLUTs")]),
                             (parcCombiner,outputnode,[("graphML_files","roi_graphMLs")]),
@@ -181,6 +182,7 @@ class ParcellationStage(Stage):
                     #         ])
             else:
                 flow.connect([
+                            (parc_node,outputnode,[("aparc_aseg","aparc_aseg")]),
                             (parc_node,outputnode,[("roi_files_in_structural_space","roi_volumes")]),
                         ])
 

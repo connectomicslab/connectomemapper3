@@ -188,11 +188,15 @@ class ConnectomeStage(Stage):
     def __init__(self):
         self.name = 'connectome_stage'
         self.config = ConnectomeConfig()
-        self.inputs = ["roi_volumes_registered","roi_graphMLs","track_file",
-                  "parcellation_scheme","atlas_info","gFA","ADC","skewness","kurtosis","P0","mapmri_maps"]
+        self.inputs = ["roi_volumes_registered","roi_graphMLs",
+                       "track_file",
+                       "parcellation_scheme","atlas_info",
+                       "FA","ADC","AD","RD",
+                       "skewness","kurtosis","P0",
+                       "shore_maps","mapmri_maps"]
         self.outputs = ["endpoints_file","endpoints_mm_file","final_fiberslength_files",
-                   "filtered_fiberslabel_files","final_fiberlabels_files",
-                   "streamline_final_file","connectivity_matrices"]
+                        "filtered_fiberslabel_files","final_fiberlabels_files",
+                        "streamline_final_file","connectivity_matrices"]
 
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -202,16 +206,34 @@ class ConnectomeStage(Stage):
         cmtk_cmat.inputs.probtrackx = self.config.probtrackx
 
         # Additional maps
-        map_merge = pe.Node(interface=util.Merge(6),name="merge_additional_maps")
+        map_merge = pe.Node(interface=util.Merge(9),name="merge_additional_maps")
 
         flow.connect([
-                     (inputnode,map_merge, [('gFA','in1'),('ADC','in2'),('skewness','in3'),('kurtosis','in4'),('P0','in5'),('mapmri_maps','in6')]),
-                     (inputnode,cmtk_cmat, [('track_file','track_file'),('roi_graphMLs','roi_graphMLs'),('parcellation_scheme','parcellation_scheme'),('atlas_info','atlas_info'),('roi_volumes_registered','roi_volumes')]),
-                     (map_merge,cmtk_cmat, [('out','additional_maps')]),
-                     (cmtk_cmat,outputnode, [('endpoints_file','endpoints_file'),('endpoints_mm_file','endpoints_mm_file'),
-                             ('final_fiberslength_files','final_fiberslength_files'),('filtered_fiberslabel_files','filtered_fiberslabel_files'),
-                             ('final_fiberlabels_files','final_fiberlabels_files'),('streamline_final_file','streamline_final_file'),
-                             ('connectivity_matrices','connectivity_matrices')])
+                     (inputnode,map_merge, [('FA','in1'),
+                                            ('ADC','in2'),
+                                            ('AD','in3'),
+                                            ('RD','in4'),
+                                            ('skewness','in5'),
+                                            ('kurtosis','in6'),
+                                            ('P0','in7'),
+                                            ('shore_maps','in8'),
+                                            ('mapmri_maps','in9')]),
+                     (map_merge,cmtk_cmat, [('out','additional_maps')])
+                     ])
+
+        flow.connect([
+                     (inputnode,cmtk_cmat, [('track_file','track_file'),
+                                            ('roi_graphMLs','roi_graphMLs'),
+                                            ('parcellation_scheme','parcellation_scheme'),
+                                            ('atlas_info','atlas_info'),
+                                            ('roi_volumes_registered','roi_volumes')]),
+                     (cmtk_cmat,outputnode, [('endpoints_file','endpoints_file'),
+                                             ('endpoints_mm_file','endpoints_mm_file'),
+                                             ('final_fiberslength_files','final_fiberslength_files'),
+                                             ('filtered_fiberslabel_files','filtered_fiberslabel_files'),
+                                             ('final_fiberlabels_files','final_fiberlabels_files'),
+                                             ('streamline_final_file','streamline_final_file'),
+                                             ('connectivity_matrices','connectivity_matrices')])
                      ])
 
     def define_inspect_outputs(self):

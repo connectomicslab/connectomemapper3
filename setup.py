@@ -19,14 +19,17 @@ packages=["cmp","cmp.interfaces","cmp.stages",
           "cmp.pipelines.anatomical",
           "cmp.pipelines.diffusion",
           "cmp.pipelines.functional",
-          "cmtklib"]
+          "cmtklib",
+          "resources"]
 
 package_data = {'cmp':
-                ['cmp3_icon.png'
+                ['cmp3_icon.png',
                 'pipelines/anatomical/*.png',
                 'pipelines/diffusion/*.png',
-                'pipelines/functional/*.png'
-                ],
+                'pipelines/functional/*.png'],
+                'resources':
+                ['buttons/*.png',
+                 'icons/*png'],
                 'cmtklib':
                 ['data/parcellation/lausanne2008/*/*.*',
                  'data/parcellation/lausanne2018/*.*',
@@ -40,8 +43,8 @@ package_data = {'cmp':
                 'data/colortable_and_gcs/my_atlas_gcs/*.*',
                 'data/diffusion/odf_directions/*.*',
                 'data/diffusion/gradient_tables/*.*',
-                'data/segmentation/thalamus2018/*.*',
-                 ]}
+                'data/segmentation/thalamus2018/*.*']
+                }
 
 ################################################################################
 # For some commands, use setuptools

@@ -7,32 +7,32 @@
 """ CMTK Parcellation functions
 """
 
+# Common libraries import
 import os
+import sys
+from time import time, localtime, strftime
 import re
 import os.path as op
 import pkg_resources
 import subprocess
 import shutil
+import math
+
 import nibabel as ni
 import networkx as nx
 import numpy as np
-import math
-
-from scipy import ndimage
-
-import scipy.ndimage.morphology as nd
-import sys
-from time import time, localtime, strftime
-from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, BaseInterface, Directory, File, InputMultiPath, OutputMultiPath
-
-
-from nipype.utils.logger import logging
-iflogger = logging.getLogger('interface')
 
 try:
+    from scipy import ndimage
     import scipy.ndimage.morphology as nd
 except ImportError:
     raise Exception('Need scipy for binary erosion of white matter and CSF masks')
+
+# Nipype imports
+from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, BaseInterface, Directory, File, InputMultiPath, OutputMultiPath
+from nipype.utils.logger import logging
+iflogger = logging.getLogger('nipype.interface')
+
 
 def erode_mask(maskFile):
     """ Erodes the mask """
@@ -188,6 +188,7 @@ class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
     subject_id = traits.Str(desc='Freesurfer subject id')
 
 class CombineParcellationsOutputSpec(TraitedSpec):
+    aparc_aseg = File(exists=True)
     output_rois = OutputMultiPath(File(exists=True))
     colorLUT_files = OutputMultiPath(File(exists=True))
     graphML_files = OutputMultiPath(File(exists=True))
@@ -205,6 +206,10 @@ class CombineParcellations(BaseInterface):
 
     def _run_interface(self,runtime):
 
+        #Freesurfer subject dir
+        fs_dir = op.join(self.inputs.subjects_dir,self.inputs.subject_id)
+        print("Freesurfer subject directory: {}".format(fs_dir))
+
         # Freesurfer IDs for subcortical structures
         left_subcIds = np.array([10, 11, 12, 13, 26, 18, 17])
         left_subcIds_colors_r = np.array([0, 122, 236, 12, 255, 103, 220])
@@ -218,6 +223,18 @@ class CombineParcellations(BaseInterface):
         right_subcIds_colors_b = np.array([14, 220, 176, 255, 0, 255, 20])
         right_subcort_names = ["Right-Thalamus_Proper","Right-Caudate","Right-Putamen","Right-Pallidum","Right-Accumbens_area","Right-Amygdala","Right-Hippocampus"]
 
+        #Amygdala and hippocampus swapped between Lausanne2008 and Lausanne2018
+        left_subcIds_2008 = np.array([10, 11, 12, 13, 26, 17, 18])
+        left_subcIds_2008_colors_r = np.array([0, 122, 236, 12, 255, 220, 103])
+        left_subcIds_2008_colors_g = np.array([118, 186, 13, 48, 165, 216, 255])
+        left_subcIds_2008_colors_b = np.array([14, 220, 176, 255, 0, 20, 255])
+        left_subcort_2008_names = ["Left-Thalamus_Proper","Left-Caudate","Left-Putamen","Left-Pallidum","Left-Accumbens_area","Left-Hippocampus","Left-Amygdala"]
+
+        right_subcIds_2008 = np.array([49, 50, 51, 52, 58, 53, 54])
+        right_subcIds_2008_colors_r = np.array([0, 122, 236, 12, 255, 220, 103])
+        right_subcIds_2008_colors_g = np.array([118, 186, 13, 48, 165, 216, 255])
+        right_subcIds_2008_colCombineParcellationsors_b = np.array([14, 220, 176, 255, 0, 20, 255])
+        right_subcort_2008_names = ["Right-Thalamus_Proper","Right-Caudate","Right-Putamen","Right-Pallidum","Right-Accumbens_area","Right-Hippocampus","Right-Amygdala"]
 
         # Thalamic Nuclei
         left_thalNuclei  = np.array([1, 2, 3, 4, 5, 6, 7])
@@ -317,6 +334,22 @@ class CombineParcellations(BaseInterface):
         except TypeError:
             print('Brain stem image not provided')
 
+        if not (thalamus_nuclei_defined and brainstem_defined and (lh_subfield_defined and rh_subfield_defined)):
+            left_subc_labels = left_subcIds_2008
+            left_subcort_names = left_subcort_2008_names
+            right_subc_labels = right_subcIds_2008
+            right_subcort_names = right_subcort_2008_names
+
+        elif thalamus_nuclei_defined:
+            left_subc_labels = left_subcIds[1:]
+            left_subcort_names = left_subcort_names[1:]
+            right_subc_labels = right_subcIds[1:]
+            right_subcort_names = right_subcort_names[1:]
+
+        else:
+            left_subc_labels = left_subcIds
+            right_subc_labels = right_subcIds
+
         #Annot files for creating colorLUT and graphml files
         rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
     	lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
@@ -396,8 +429,8 @@ class CombineParcellations(BaseInterface):
             # Relabelling Right hemisphere
             It = np.zeros(I.shape,dtype=np.int16)
             ind = np.where((I >= 2000) & (I < 3000))
-            It[ind] = (I[ind] - 2001)
-            nlabel = It.max() + 1
+            It[ind] = (I[ind] - 2000)
+            nlabel = It.max()
 
             # nlabel = rh_annot[2].size()
 
@@ -415,9 +448,9 @@ class CombineParcellations(BaseInterface):
                 rh_annot_file = 'rh.lausanne2008.%s.annot'%scale
                 print("Load %s"%rh_annot_file)
                 rh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',rh_annot_file))
-                rgb_table = rh_annot[1][:,0:3]
-                roi_names = rh_annot[2]
-                roi_labels = rh_annot[0]
+                rgb_table = rh_annot[1][1:,0:3]
+                roi_names = rh_annot[2][1:]
+                #roi_labels = rh_annot[0][1:]
 
                 lines = []
                 for label, name in enumerate(roi_names):
@@ -432,16 +465,16 @@ class CombineParcellations(BaseInterface):
                             g = 0
                             b = 0
 
-                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label,name,r,g,b))
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(label+1,name,r,g,b))
 
-                    if self.inputs.create_graphml and label > 0:
-                        node_lines = ['{} \n'.format('    <node id="%i">'%label),
+                    if self.inputs.create_graphml:
+                        node_lines = ['{} \n'.format('    <node id="%i">'%(label+1)),
                                      '{} \n'.format('      <data key="d0">%s</data>'%("cortical")),
                                      '{} \n'.format('      <data key="d1">%s</data>'%(name)),
                                      '{} \n'.format('      <data key="d2">%s</data>'%("right")),
-                                     '{} \n'.format('      <data key="d3">%i</data>'%(label)),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(label+1)),
                                      '{} \n'.format('      <data key="d4">%s</data>'%(name)),
-                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(label+2001))),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(label+2000+1))),
                                      '{} \n'.format('    </node>')]
                         f_graphML.writelines(node_lines)
 
@@ -490,16 +523,17 @@ class CombineParcellations(BaseInterface):
             if self.inputs.create_colorLUT:
                 f_colorLUT.write("# Right Hemisphere. Subcortical Structures \n")
 
-            newLabels = np.arange(nlabel+1,nlabel+1+right_subcIds[1:].shape[0])
+            newLabels = np.arange(nlabel+1,nlabel+1+left_subc_labels.shape[0])
+
             i=0
-            for lab in right_subcIds[1:]:
+            for lab in right_subc_labels:
                 print("update right subcortical label (%i -> %i)"%(lab,newLabels[i]))
 
                 if self.inputs.create_colorLUT:
                     r = right_subcIds_colors_r[i]
                     g = right_subcIds_colors_g[i]
                     b = right_subcIds_colors_b[i]
-                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_subcort_names[i+1],r,g,b))
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),right_subcort_names[i],r,g,b))
 
                 if self.inputs.create_graphml:
                     node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
@@ -507,7 +541,7 @@ class CombineParcellations(BaseInterface):
                                  '{} \n'.format('      <data key="d1">%s</data>'%("subcortical")),
                                  '{} \n'.format('      <data key="d2">%s</data>'%("right")),
                                  '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[i]))),
-                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_subcort_names[i+1])),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_subcort_names[i])),
                                  '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
                                  '{} \n'.format('    </node>')]
                     f_graphML.writelines(node_lines)
@@ -548,7 +582,7 @@ class CombineParcellations(BaseInterface):
                                      '{} \n'.format('    </node>')]
                         f_graphML.writelines(node_lines)
 
-                    ind = np.where(Isublh == lab)
+                    ind = np.where(Isubrh == lab)
                     It[ind] = newLabels[i]
                     i += 1
                 nlabel = It.max()
@@ -556,65 +590,66 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_colorLUT:
                     f_colorLUT.write("\n")
 
-            # Relabelling Right VentralDC
-            newLabels = np.arange(nlabel+1,nlabel+2)
-            print("update right ventral DC label (%i -> %i)"%(right_ventral,newLabels[0]))
-            ind = np.where(I == right_ventral)
-            It[ind] = newLabels[0]
-            nlabel = It.max()
+            if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
+                # Relabelling Right VentralDC
+                newLabels = np.arange(nlabel+1,nlabel+2)
+                print("update right ventral DC label (%i -> %i)"%(right_ventral,newLabels[0]))
+                ind = np.where(I == right_ventral)
+                It[ind] = newLabels[0]
+                nlabel = It.max()
 
-            #ColorLUT (right ventral DC)
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Right Hemisphere. Ventral Diencephalon \n")
-                r = right_ventral_colors_r
-                g = right_ventral_colors_g
-                b = right_ventral_colors_b
-                f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),right_ventral_names[0],r,g,b))
-                f_colorLUT.write("\n")
+                #ColorLUT (right ventral DC)
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Right Hemisphere. Ventral Diencephalon \n")
+                    r = right_ventral_colors_r
+                    g = right_ventral_colors_g
+                    b = right_ventral_colors_b
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),right_ventral_names[0],r,g,b))
+                    f_colorLUT.write("\n")
 
-            if self.inputs.create_graphml:
-                node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                             '{} \n'.format('      <data key="d1">%s</data>'%("ventral-diencephalon")),
-                             '{} \n'.format('      <data key="d2">%s</data>'%("right")),
-                             '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d4">%s</data>'%(right_ventral_names[0])),
-                             '{} \n'.format('      <data key="d5">%i</data>'%(int(right_ventral))),
-                             '{} \n'.format('    </node>')]
-                f_graphML.writelines(node_lines)
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("ventral-diencephalon")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_ventral_names[0])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(right_ventral))),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
 
-            # Relabelling Right Hypothalamus
-            newLabels = np.arange(nlabel+1,nlabel+2)
-            print("update right hypothalamus label (%i -> %i)"%(right_ventral,newLabels[0]))
-            It[indrhypothal] = newLabels[0]
-            nlabel = It.max()
+            if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
+                # Relabelling Right Hypothalamus
+                newLabels = np.arange(nlabel+1,nlabel+2)
+                print("update right hypothalamus label (%i -> %i)"%(right_ventral,newLabels[0]))
+                It[indrhypothal] = newLabels[0]
+                nlabel = It.max()
 
-            #ColorLUT (right hypothalamus)
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Right Hemisphere. Hypothalamus \n")
-                r = hypothal_colors_r
-                g = hypothal_colors_g
-                b = hypothal_colors_b
-                f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),right_hypothal_names[0],r,g,b))
-                f_colorLUT.write("\n")
+                #ColorLUT (right hypothalamus)
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Right Hemisphere. Hypothalamus \n")
+                    r = hypothal_colors_r
+                    g = hypothal_colors_g
+                    b = hypothal_colors_b
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),right_hypothal_names[0],r,g,b))
+                    f_colorLUT.write("\n")
 
-            if self.inputs.create_graphml:
-                node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                             '{} \n'.format('      <data key="d1">%s</data>'%("hypothalamus")),
-                             '{} \n'.format('      <data key="d2">%s</data>'%("right")),
-                             '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d4">%s</data>'%(right_hypothal_names[0])),
-                             '{} \n'.format('      <data key="d5">%i</data>'%(-1)),
-                             '{} \n'.format('    </node>')]
-                f_graphML.writelines(node_lines)
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("hypothalamus")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("right")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(right_hypothal_names[0])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(-1)),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
 
             ## Processing Left Hemisphere
             # Relabelling Left hemisphere
             ind = np.where((I > 1000) & (I <2000))
             It[ind] = (I[ind] - 1000 + nlabel)
             old_nlabel = nlabel
-
             nlabel = It.max()
 
             #ColorLUT (cortical)
@@ -645,14 +680,7 @@ class CombineParcellations(BaseInterface):
                             g = 0
                             b = 0
 
-                        print('?????????????????????????????????????????????????????????????')
-                        print('?????????????????????????????????????????????????????????????')
-                        print('label : ',label)
-                        print('old_nlabel : ',old_nlabel)
-                        print('?????????????????????????????????????????????????????????????')
-                        print('?????????????????????????????????????????????????????????????')
-
-                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(label+old_nlabel-1),name,r,g,b))
+                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(label+old_nlabel+1),name,r,g,b))
 
                     if self.inputs.create_graphml:
                         node_lines = ['{} \n'.format('    <node id="%i">'%(int(label+old_nlabel+1))),
@@ -665,8 +693,8 @@ class CombineParcellations(BaseInterface):
                                      '{} \n'.format('    </node>')]
                         f_graphML.writelines(node_lines)
 
-
-                f_colorLUT.write("\n")
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("\n")
 
             # Relabelling Thalamic Nuclei
             if thalamus_nuclei_defined:
@@ -707,16 +735,17 @@ class CombineParcellations(BaseInterface):
             if self.inputs.create_colorLUT:
                 f_colorLUT.write("# Left Hemisphere. Subcortical Structures \n")
 
-            newLabels = np.arange(nlabel+1,nlabel+1+left_subcIds[1:].shape[0])
+            newLabels = np.arange(nlabel+1,nlabel+1+left_subc_labels.shape[0])
+
             i=0
-            for lab in left_subcIds[1:]:
+            for lab in left_subc_labels:
                 print("update left subcortical label (%i -> %i)"%(lab,newLabels[i]))
 
                 if self.inputs.create_colorLUT:
                     r = left_subcIds_colors_r[i]
                     g = left_subcIds_colors_g[i]
                     b = left_subcIds_colors_b[i]
-                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_subcort_names[i+1],r,g,b))
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]),left_subcort_names[i],r,g,b))
 
                 if self.inputs.create_graphml:
                     node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[i]))),
@@ -764,7 +793,7 @@ class CombineParcellations(BaseInterface):
                                      '{} \n'.format('    </node>')]
                         f_graphML.writelines(node_lines)
 
-                    ind = np.where(Isubrh == lab)
+                    ind = np.where(Isublh == lab)
                     It[ind] = newLabels[i]
                     i += 1
                 nlabel = It.max()
@@ -773,59 +802,61 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_colorLUT:
                     f_colorLUT.write("\n")
 
-            # Relabelling Left VentralDC
-            newLabels = np.arange(nlabel+1,nlabel+2)
-            print("update left ventral DC label (%i -> %i)"%(left_ventral,newLabels[0]))
-            ind = np.where(I == left_ventral)
-            It[ind] = newLabels[0]
-            nlabel = It.max()
-            newIds_LH_ventralDC = newLabels;
+            if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
+                # Relabelling Left VentralDC
+                newLabels = np.arange(nlabel+1,nlabel+2)
+                print("update left ventral DC label (%i -> %i)"%(left_ventral,newLabels[0]))
+                ind = np.where(I == left_ventral)
+                It[ind] = newLabels[0]
+                nlabel = It.max()
+                newIds_LH_ventralDC = newLabels;
 
-            #ColorLUT (left ventral DC)
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Left Hemisphere. Ventral Diencephalon \n")
-                r = left_ventral_colors_r
-                g = left_ventral_colors_g
-                b = left_ventral_colors_b
-                f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),left_ventral_names[0],r,g,b))
-                f_colorLUT.write("\n")
+                #ColorLUT (left ventral DC)
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Left Hemisphere. Ventral Diencephalon \n")
+                    r = left_ventral_colors_r
+                    g = left_ventral_colors_g
+                    b = left_ventral_colors_b
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),left_ventral_names[0],r,g,b))
+                    f_colorLUT.write("\n")
 
-            if self.inputs.create_graphml:
-                node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                             '{} \n'.format('      <data key="d1">%s</data>'%("ventral-diencephalon")),
-                             '{} \n'.format('      <data key="d2">%s</data>'%("left")),
-                             '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d4">%s</data>'%(left_ventral_names[0])),
-                             '{} \n'.format('      <data key="d5">%i</data>'%(int(left_ventral))),
-                             '{} \n'.format('    </node>')]
-                f_graphML.writelines(node_lines)
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("ventral-diencephalon")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(left_ventral_names[0])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(int(left_ventral))),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
 
-            # Relabelling Left Hypothalamus
-            newLabels = np.arange(nlabel+1,nlabel+2)
-            print("update leftt hypothalamus label (%i -> %i)"%(-1,newLabels[0]))
-            It[indlhypothal] = newLabels[0]
-            nlabel = It.max()
+            if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
+                # Relabelling Left Hypothalamus
+                newLabels = np.arange(nlabel+1,nlabel+2)
+                print("update left hypothalamus label (%i -> %i)"%(-1,newLabels[0]))
+                It[indlhypothal] = newLabels[0]
+                nlabel = It.max()
 
-            #ColorLUT (right hypothalamus)
-            if self.inputs.create_colorLUT:
-                f_colorLUT.write("# Left Hemisphere. Hypothalamus \n")
-                r = hypothal_colors_r
-                g = hypothal_colors_g
-                b = hypothal_colors_b
-                f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),left_hypothal_names[0],r,g,b))
-                f_colorLUT.write("\n")
+                #ColorLUT (right hypothalamus)
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Left Hemisphere. Hypothalamus \n")
+                    r = hypothal_colors_r
+                    g = hypothal_colors_g
+                    b = hypothal_colors_b
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),left_hypothal_names[0],r,g,b))
+                    f_colorLUT.write("\n")
 
-            if self.inputs.create_graphml:
-                node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
-                             '{} \n'.format('      <data key="d1">%s</data>'%("hypothalamus")),
-                             '{} \n'.format('      <data key="d2">%s</data>'%("left")),
-                             '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
-                             '{} \n'.format('      <data key="d4">%s</data>'%(left_hypothal_names[0])),
-                             '{} \n'.format('      <data key="d5">%i</data>'%(-1)),
-                             '{} \n'.format('    </node>')]
-                f_graphML.writelines(node_lines)
+                if self.inputs.create_graphml:
+                    node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+                                 '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                 '{} \n'.format('      <data key="d1">%s</data>'%("hypothalamus")),
+                                 '{} \n'.format('      <data key="d2">%s</data>'%("left")),
+                                 '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+                                 '{} \n'.format('      <data key="d4">%s</data>'%(left_hypothal_names[0])),
+                                 '{} \n'.format('      <data key="d5">%i</data>'%(-1)),
+                                 '{} \n'.format('    </node>')]
+                    f_graphML.writelines(node_lines)
 
             # Relabelling Brain Stem
             if brainstem_defined:
@@ -861,6 +892,36 @@ class CombineParcellations(BaseInterface):
 
                 if self.inputs.create_colorLUT:
                     f_colorLUT.write("\n")
+            else:
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("# Brain Stem \n")
+
+                newLabels = np.arange(nlabel+1,nlabel+2)
+                It[indrep] = newLabels[0]
+
+                print("update brainstem parcellation label (%i -> %i)"%(lab,newLabels[0]))
+
+                if self.inputs.create_colorLUT:
+                    r = 119
+                    g = 159
+                    b = 176
+                    f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]),'brainstem',r,g,b))
+
+                    if self.inputs.create_graphml:
+                        node_lines = ['{} \n'.format('    <node id="%i">'%(int(newLabels[0]))),
+                                     '{} \n'.format('      <data key="d0">%s</data>'%("subcortical")),
+                                     '{} \n'.format('      <data key="d1">%s</data>'%("brainstem")),
+                                     '{} \n'.format('      <data key="d2">%s</data>'%("central")),
+                                     '{} \n'.format('      <data key="d3">%i</data>'%(int(newLabels[0]))),
+                                     '{} \n'.format('      <data key="d4">%s</data>'%("brainstem")),
+                                     '{} \n'.format('      <data key="d5">%i</data>'%(int(lab))),
+                                     '{} \n'.format('    </node>')]
+                        f_graphML.writelines(node_lines)
+
+                nlabel = It.max()
+
+                if self.inputs.create_colorLUT:
+                    f_colorLUT.write("\n")
 
             # Fix negative values
             It[It<0] = 0
@@ -885,10 +946,131 @@ class CombineParcellations(BaseInterface):
                 f_graphML.writelines(bottom_lines)
                 f_graphML.close()
 
+        # Refine aparc+aseg.mgz with new subcortical and/or structures (if any)
+        if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
+            print("Correct Freesurfer generated aparc+aseg.mgz...")
+
+            orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
+            aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
+            tmp_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.mgz')
+            aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.native.nii.gz')
+
+            print("    Copy aparc+aseg to {}".format(tmp_aparcaseg_fs))
+            shutil.copyfile(aparcaseg_fs,tmp_aparcaseg_fs)
+
+            print("    Transform to native space")
+            cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (aparcaseg_fs,orig,aparcaseg_native)
+            process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+            proc_stdout = process.communicate()[0].strip()
+            iflogger.info(proc_stdout)
+
+            # mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
+            # subprocess.check_call(mri_cmd)
+
+            Iaparcaseg= ni.load(aparcaseg_native).get_data()
+
+            Iaparcaseg_new = Iaparcaseg.astype(np.int32)
+
+            # Thalamus (aparc+aseg labels: 10 and 49)
+            if thalamus_nuclei_defined :
+
+                ind = np.where(Iaparcaseg==10)
+                mask_aparc_lh = np.zeros(Iaparcaseg.shape)
+                mask_aparc_lh[ind] = 1
+
+                ind = np.where(Iaparcaseg==49)
+                mask_aparc_rh = np.zeros(Iaparcaseg.shape)
+                mask_aparc_rh[ind] = 1
+
+                mask_thal_lh = np.zeros(Iaparcaseg.shape)
+                for lab in left_thalNuclei:
+                    ind = np.where(Ithal==lab)
+                    mask_thal_lh[ind] = 1
+
+                # Identify voxels not included by thalamic Nuclei - should set to 2 (Gm) or 0
+                tmp = mask_aparc_lh - mask_thal_lh
+                ind = np.where(tmp>0)
+                Iaparcaseg_new[ind] = 2
+
+                # Identify voxels not included by freesurfer thalamic mask
+                tmp = mask_aparc_lh - mask_thal_lh
+                ind = np.where(tmp<0)
+                Iaparcaseg_new[ind] = 10
+
+                out_tmp = op.join(fs_dir, 'tmp', 'aparc-thal.lh.native.nii.gz')
+                print("    Save tmp image to {}".format(out_tmp))
+                img_tmp = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
+                ni.save(img_tmp, out_tmp)
+
+                mask_thal_rh = np.zeros(Iaparcaseg.shape)
+                for lab in right_thalNuclei:
+                    ind = np.where(Ithal==lab)
+                    mask_thal_rh[ind] = 1
+
+                # Identify voxels not included by thalamic Nuclei - should set to 41 (Gm) or 0
+                tmp = mask_aparc_rh - mask_thal_rh
+                ind = np.where(tmp>0)
+                Iaparcaseg_new[ind] = 41
+
+                # Identify voxels not included by freesurfer thalamic mask
+                tmp = mask_aparc_rh - mask_thal_rh
+                ind = np.where(tmp<0)
+                Iaparcaseg_new[ind] = 49
+
+                out_tmp = op.join(fs_dir, 'tmp', 'aparc-thal.rh.native.nii.gz')
+                print("    Save tmp image to {}".format(out_tmp))
+                img_tmp = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
+                ni.save(img_tmp, out_tmp)
+
+            # # Hippocampal subfields (aparc+aseg labels: 17 and 53)
+            # if (lh_subfield_defined and rh_subfield_defined):
+            #
+            #     ind = np.where(Iaparcaseg==17)
+            #     mask_aparc_lh = np.zeros(Iaparcaseg.shape)
+            #     mask_aparc_lh[ind] = 1
+            #
+            #     ind = np.where(Iaparcaseg==53)
+            #     mask_aparc_rh = np.zeros(Iaparcaseg.shape)
+            #     mask_aparc_rh[ind] = 1
+            #
+            #     for lab in hippo_subf:
+            #         ind = np.where(Isublh==lab)
+            #         mask_subf_lh = np.zeros(Iaparcaseg.shape)
+            #         mask_subf_lh[ind] = 1
+            #
+            #     for lab in hippo_subf:
+            #         ind = np.where(Isubrh==lab)
+            #         mask_subf_rh = np.zeros(Iaparcaseg.shape)
+            #         mask_subf_rh[ind] = 1
+
+
+            # Brainstem (aparc+aseg labels: 16)
+            if brainstem_defined:
+                ind = np.where(Iaparcaseg==16)
+                Iaparcaseg_new[ind] = 0
+                Iaparcaseg_new[indstem] = 16
+
+            # new_aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
+            new_aparcaseg_native = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
+            print("    Save relabeled image to {}".format(new_aparcaseg_native))
+            img = ni.Nifti1Image(Iaparcaseg_new, V.get_affine(), hdr2)
+            ni.save(img, new_aparcaseg_native)
+
+            # new_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.mgz')
+            # aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
+
+            # print("    Transform back to Freesurfer space and replace aparc+aseg.mgz file")
+            # mri_cmd = ['mri_convert', '-rl', aparcaseg_fs, '-rt', 'nearest', new_aparcaseg_native, '-nc', new_aparcaseg_fs]
+            # subprocess.check_call(mri_cmd)
+
+            #print("    Replace aparc+aseg.mgz file {} by {}".format(aparcaseg_fs,new_aparcaseg_fs))
+            #shutil.copyfile(new_aparcaseg_fs,aparcaseg_fs)
+
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
+        outputs['aparc_aseg'] = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
         outputs['output_rois'] = self._gen_outfilenames('ROIv_HR_th','_final.nii.gz')
         outputs['colorLUT_files'] = self._gen_outfilenames('ROIv_HR_th','_FreeSurferColorLUT.txt')
         outputs['graphML_files'] = self._gen_outfilenames('ROIv_HR_th','.graphml')
@@ -958,7 +1140,7 @@ class ParcellateThalamus(BaseInterface):
 
         # Register the template image image to the subject T1w image
         # cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
-        cmd = 'antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
+        cmd = 'antsRegistrationSyNQuick.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
 
         iflogger.info('Processing cmd: %s' % cmd)
 
@@ -1272,8 +1454,8 @@ class ParcellateOutputSpec(TraitedSpec):
     T1 = File(desc="T1 image file")
     brain = File(desc="Brain-masked T1 image file")
     brain_mask = File(desc="Brain mask file")
-    aseg = File(desc="ASeg image file")
-
+    aseg = File(desc="ASeg image file (in native space)")
+    aparc_aseg = File(desc="APArc+ASeg image file (in native space)")
 
 class Parcellate(BaseInterface):
     """Subdivides segmented ROI file into smaller subregions
@@ -1343,6 +1525,7 @@ class Parcellate(BaseInterface):
         outputs['brain_mask'] = op.abspath('brain_mask.nii.gz')
 
         outputs['aseg'] = op.abspath('aseg.nii.gz')
+        outputs['aparc_aseg'] = op.abspath('aparc+aseg.native.nii.gz')
 
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         outputs['gray_matter_mask_file'] = op.abspath('gmmask.nii.gz')
@@ -1507,6 +1690,17 @@ def create_T1_and_Brain(subject_id, subjects_dir):
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','aseg.mgz'),'-o',op.join(fs_dir,'mri','aseg.nii.gz')]
     subprocess.check_call(mri_cmd)
 
+    # Moving aparc+aseg.mgz back to its original space for ACT
+    mov = op.join(fs_dir,'mri','aparc+aseg.mgz')
+    targ = op.join(fs_dir,'mri','rawavg.mgz')
+    out = op.join(fs_dir,'tmp','aparc+aseg.native.nii.gz')
+
+    print("Create aparc+aseg.nii.gz in native space as %s"%out)
+    cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (mov,targ,out)
+    process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+    proc_stdout = process.communicate()[0].strip()
+    iflogger.info(proc_stdout)
+
     print("[DONE]")
 
 def create_annot_label(subject_id, subjects_dir):
@@ -1641,7 +1835,7 @@ def create_roi(subject_id, subjects_dir):
         # create a big 256^3 volume for storage of all ROIs
         rois = np.zeros( (256, 256, 256), dtype=np.int16 ) # numpy.ndarray
 
-        for brk, brv in pg.nodes_iter(data=True):   # slow loop
+        for brk, brv in pg.nodes(data=True):   # slow loop
 
             if brv['dn_hemisphere'] == 'left':
                 hemi = 'lh'
@@ -1825,6 +2019,8 @@ def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id):
     annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
     aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
 
+    FNULL = open(os.devnull, 'w')
+    
     if v:
         print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
 
@@ -1922,24 +2118,35 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
     from networks. Iteratively create volume. """
 
     freesurfer_subj = os.path.abspath(subjects_dir)
+    subject_dir = os.path.join(freesurfer_subj,subject_id)
 
-    print("Freesurfer subjects dir : %s"%freesurfer_subj)
-    print("Freesurfer subject id : %s"%subject_id)
-
-    if not ( os.path.isdir(freesurfer_subj) and os.path.isdir(os.path.join(freesurfer_subj, 'fsaverage')) ):
-        parser.error('FreeSurfer subject directory is invalid. The folder does not exist or does not contain \'fsaverage\'')
+    if not ( os.access(freesurfer_subj,os.F_OK) ):
+        print('ERROR: FreeSurfer subjects directory ($SUBJECTS_DIR) does not exist')
     else:
         if v:
-            print('- FreeSurfer subject directory ($SUBJECTS_DIR):\n  {}\n'.format(freesurfer_subj))
+            print('- FreeSurfer subjects directory ($SUBJECTS_DIR):\n  {}\n'.format(freesurfer_subj))
 
-    subject_dir = os.path.join(freesurfer_subj, subject_id)
-    if not ( os.path.isdir(subject_dir) ):
-        parser.error('No input subject directory was found in FreeSurfer $SUBJECTS_DIR')
+    if not ( os.access(os.path.join(freesurfer_subj, 'fsaverage'),os.F_OK) ):
+        print('-  FreeSurfer subjects directory ($SUBJECTS_DIR) DOES NOT contain \'fsaverage\'')
+
+        src = os.path.join(os.environ['FREESURFER_HOME'], 'subjects', 'fsaverage')
+        dst = os.path.join(freesurfer_subj,'fsaverage')
+
+        if os.path.isdir(dst):
+            shutil.rmtree(dst,ignore_errors=True)
+
+        print('         -> Copy fsaverage')
+        shutil.copytree(src, dst)
     else:
         if v:
-            print('- Input subject id:\n  {}\n'.format(subject_id))
-            print('- Input subject directory:\n  {}\n'.format(subject_dir))
+            print('-  FreeSurfer subjects directory ($SUBJECTS_DIR) DOES contain \'fsaverage\'\n')
 
+    if not ( os.access(subject_dir,os.F_OK) ):
+        print('ERROR: No input subject directory was found in FreeSurfer $SUBJECTS_DIR')
+    else:
+        if v:
+            print('- Freesurfer subject id:\n  {}\n'.format(subject_id))
+            print('- Freesurfer subject directory:\n  {}\n'.format(subject_dir))
 
 	# Number of scales in multiscale parcellation
 	nscales = 5
@@ -1948,139 +2155,10 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 	rh_sub = np.array([49,50,51,52,58,53,54])
 	brain_stem = np.array([16])
 
-	# Check existence of multiscale atlas fsaverage annot files
-	# for i in range(0, nscales):
-	# 	this_file = os.path.join(freesurfer_subj, 'fsaverage/label', rh_annot_files[i])
-    #     this_file = pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i]))
-    #     # try:
-    #     #     shutil.copy(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),this_file)
-    #     # except PermissionError:
-    #     shutil.os.system('sudo cp "{}" "{}"'.format(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),this_file))
-    #
-    #     if not os.path.isfile(this_file):
-    #         parser.error('"{0}" is required! Please, copy the annot files FROM \'connectome_atlas/misc/multiscale_parcellation/fsaverage/label\' TO your FreeSurfer \'$SUBJECTS_DIR/fsaverage/label\' folder'.format(this_file))
-    #         return
-    #
-    #     this_file = os.path.join(freesurfer_subj, 'fsaverage/label', lh_annot_files[i])
-    #     this_file = pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i]))
-    #     # try:
-    #     #     shutil.copy(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),this_file)
-    #     # except PermissionError:
-    #     shutil.os.system('sudo cp "{}" "{}"'.format(pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),this_file))
-    #
-    #     if not os.path.isfile(this_file):
-	# 		parser.error('"{0}" is required! Please, copy the annot files FROM \'connectome_atlas/misc/multiscale_parcellation/fsaverage/label\' TO your FreeSurfer \'$SUBJECTS_DIR/fsaverage/label\' folder'.format(this_file))
-	# 		return
-
-
 	# Check existence of tmp folder in input subject folder
 	this_dir = os.path.join(subject_dir, 'tmp')
 	if not ( os.path.isdir(this_dir) ):
 		os.makedirs(this_dir)
-
-
-	# We need to add these instructions when running FreeSurfer commands from Python
-	# (if these instructions are not present, Python rises a 'Symbol not found: ___emutls_get_address' exception in macOS)
-	fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
-
-
-	# Redirect ouput if low verbose
-	FNULL = open(os.devnull, 'w')
-
-
-	# # Loop over parcellation scales
-	# if v:
-	# 	print('Generete MULTISCALE PARCELLATION for input subject')
-	# for i in range(0, nscales):
-	# 	if v:
-	# 		print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
-    #
-	# 	# 1. Resample fsaverage CorticalSurface onto SUBJECT_ID CorticalSurface and map annotation for current scale
-	# 	# Left hemisphere
-	# 	if v:
-	# 		print('     > resample fsaverage CorticalSurface to individual CorticalSurface')
-	# 	mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi lh --sval-annot %s --tval %s' % (
-	# 				subject_id,
-	# 				pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),
-	# 				os.path.join(subject_dir, 'label', lh_annot_files[i]))
-	# 	if v == 2:
-	# 		status = subprocess.call(mri_cmd, shell=True)
-	# 	else:
-	# 		status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-	# 	# Right hemisphere
-	# 	mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi rh --sval-annot %s --tval %s' % (
-	# 				subject_id,
-	# 				pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),
-	# 				os.path.join(subject_dir, 'label', rh_annot_files[i]))
-	# 	if v == 2:
-	# 		status = subprocess.call(mri_cmd, shell=True)
-	# 	else:
-	# 		status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-    #
-	# 	# 2. Generate Nifti volume from annotation
-	# 	#    Note: change here --wmparc-dmax (FS default 5mm) to dilate cortical regions toward the WM
-	# 	if v:
-	# 		print('     > generate Nifti volume from annotation')
-	# 	mri_cmd = fs_string + '; mri_aparc2aseg --s %s --annot %s --wmparc-dmax 0 --labelwm --hypo-as-wm --new-ribbon --o %s' % (
-	# 				subject_id,
-	# 				annot[i],
-	# 				os.path.join(subject_dir, 'tmp', aseg_output[i]))
-	# 	if v == 2:
-	# 		status = subprocess.call(mri_cmd, shell=True)
-	# 	else:
-	# 		status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-    #
-	# 	# 3. Update numerical IDs of cortical and subcortical regions
-	# 	# Load Nifti volume
-	# 	if v:
-	# 		print('     > relabel cortical and subcortical regions')
-	# 	this_nifti = ni.load(os.path.join(subject_dir, 'tmp', aseg_output[i]))
-	# 	vol = this_nifti.get_data()	# numpy.ndarray
-	# 	hdr = this_nifti.header
-	# 	# Initialize output
-	# 	hdr2 = hdr.copy()
-	# 	hdr2.set_data_dtype(np.uint16)
-	# 	# vol2 = np.zeros( this_nifti.shape, dtype=np.int16 )
-	# 	# # Relabelling Right hemisphere (2000+)
-	# 	# ii = np.where((vol > 2000) & (vol < 3000))
-	# 	# vol2[ii] = vol[ii] - 2000
-	# 	# nlabel = np.amax(vol2)	# keep track of the number of assigned labels
-	# 	# # Relabelling Subcortical Right hemisphere
-	# 	# # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
-	# 	# newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
-	# 	# for j in range(0, len(rh_sub)):
-	# 	# 	ii = np.where(vol == rh_sub[j])
-	# 	# 	vol2[ii] = newLabels[j]
-	# 	# nlabel = np.amax(vol2)
-	# 	# # Relabelling Left hemisphere (1000+)
-	# 	# ii = np.where((vol > 1000) & (vol < 2000))
-	# 	# vol2[ii] = vol[ii] - 1000 + nlabel
-	# 	# nlabel = np.amax(vol2)	# n cortical label in right hemisphere
-	# 	# # Relabelling Subcortical Right hemisphere
-	# 	# # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
-	# 	# newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
-	# 	# for j in range(0, len(lh_sub)):
-	# 	# 	ii = np.where(vol == lh_sub[j])
-	# 	# 	vol2[ii] = newLabels[j]
-	# 	# nlabel = np.amax(vol2)
-	# 	# # Relabelling Brain Stem
-	# 	# ii = np.where(vol == brain_stem)
-	# 	# vol2[ii] = nlabel + 1
-    #
-	# 	# 4. Save Nifti and mgz volumes
-	# 	if v:
-	# 		print('     > save output volumes')
-	# 	this_out = os.path.join(subject_dir, 'mri', aseg_output[i])
-	# 	img = ni.Nifti1Image(vol, this_nifti.affine, hdr2)
-	# 	ni.save(img, this_out)
-	# 	mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
-	# 				this_out,
-	# 				os.path.join(subject_dir, 'mri', aseg_output[i][0:-4]+'.mgz'))
-	# 	if v == 2:
-	# 		status = subprocess.call(mri_cmd, shell=True)
-	# 	else:
-	# 		status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-	# 	os.remove(os.path.join(subject_dir, 'tmp', aseg_output[i]))
 
     def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id):
     	# Multiscale parcellation - define annotation and segmentation variables
@@ -2088,6 +2166,8 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
     	lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
     	annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
     	aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
+
+        FNULL = open(os.devnull, 'w')
 
         if v:
             print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
@@ -2185,6 +2265,8 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
     if v:
         print('Generate MULTISCALE PARCELLATION for input subject')
 
+    fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
+
     import multiprocessing as mp
     jobs = []
     for i in range(0, nscales):
@@ -2194,18 +2276,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
                             )
         jobs.append(thread)
         thread.start()
-    #     #generate_single_parcellation(v,i,fs_string,subject_dir,subject_id,lh_annot_files,rh_annot_files,annot,aseg_output)
-    # import multiprocessing as mp
-    # pool = mp.Pool(processes=nscales)
-    # # results = pool.apply(generate_single_parcellation, args=(v,i,fs_string,subject_dir,subject_id,)) for i in range(0,nscales)]
-    #
-    # job_args = [(v,i,fs_string,subject_dir,subject_id,) for i in range(0,nscales)]
-    # pool.map(generate_single_parcellation,job_args)
 
-    # # Start the processes (i.e. calculate the random number lists)
-	# for j in jobs:
-	# 	j.start()
-    #
 	# Ensure all of the processes have finished
 	for j in jobs:
 		j.join()
@@ -2363,7 +2434,7 @@ def create_wm_mask(subject_id, subjects_dir):
 
         pg = nx.read_graphml(parval['node_information_graphml'])
 
-        for brk, brv in pg.nodes_iter(data=True):
+        for brk, brv in pg.nodes(data=True):
 
             if brv['dn_region'] == 'cortical':
 
@@ -2561,7 +2632,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     #
     #     pg = nx.read_graphml(parval['node_information_graphml'])
     #
-    #     for brk, brv in pg.nodes_iter(data=True):
+    #     for brk, brv in pg.nodes(data=True):
     #
     #         if brv['dn_region'] == 'cortical':
     #
@@ -2605,15 +2676,16 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
         for p in get_parcellation('Lausanne2008').keys():
             ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
             ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
+        ds.append( (op.join(fs_dir, 'mri','aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz') )
     elif parcellation_scheme == 'Lausanne2018':
         for p in get_parcellation('Lausanne2018').keys():
             #ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
             ds.append( (op.join(fs_dir, 'mri','ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
+        ds.append( (op.join(fs_dir, 'mri','aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz') )
 #        try:
 #            os.makedirs(op.join('.', p))
 #        except:
 #            pass
-
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
 
     for d in ds:
@@ -2776,7 +2848,8 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
 
     # datasets to crop and move: (from, to)
     ds = [
-          (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz')
+          (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
+          (op.join(fs_dir, 'mri', 'aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz')
           ]
 
     for p in get_parcellation('NativeFreesurfer').keys():

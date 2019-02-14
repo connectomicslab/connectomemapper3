@@ -35,7 +35,7 @@ import nibabel as nib
 # from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
 from cmp.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, MRThreshold, ExtractFSLGrad, ExtractMRTrixGrad, Generate5tt, GenerateGMWMInterface
 import cmp.interfaces.fsl as cmp_fsl
-from cmp.interfaces.misc import ExtractPVEsFrom5TT
+from cmp.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
 
 from nipype.interfaces.mrtrix3.preprocess import ResponseSD
 
@@ -87,10 +87,10 @@ class PreprocessingConfig(HasTraits):
     eddy_current_and_motion_correction = Bool(True)
     eddy_correction_algo = Enum('FSL eddy_correct','FSL eddy')
     eddy_correct_motion_correction = Bool(True)
-    start_vol = Int(0)
-    end_vol = Int()
-    max_vol = Int()
-    max_str = Str
+    # start_vol = Int(0)
+    # end_vol = Int()
+    # max_vol = Int()
+    # max_str = Str
     partial_volume_estimation = Bool(True)
     fast_use_priors = Bool(True)
 
@@ -100,13 +100,13 @@ class PreprocessingConfig(HasTraits):
 
     traits_view = View(
                     VGroup(
-                        VGroup(
-                        HGroup(
-                            Item('start_vol',label='Vol'),
-                            Item('end_vol',label='to'),
-                            Item('max_str',style='readonly',show_label=False)
-                            ),
-                            label='Processed volumes'),
+                        # VGroup(
+                        # HGroup(
+                        #     Item('start_vol',label='Vol'),
+                        #     Item('end_vol',label='to'),
+                        #     Item('max_str',style='readonly',show_label=False)
+                        #     ),
+                        #     label='Processed volumes'),
                         VGroup(
                         HGroup(
                             Item('denoising'),
@@ -135,17 +135,17 @@ class PreprocessingConfig(HasTraits):
                         ),
                     width=0.5,height=0.5)
 
-    def _max_vol_changed(self,new):
-        self.max_str = '(max: %d)' % new
-        #self.end_vol = new
-
-    def _end_vol_changed(self,new):
-        if new > self.max_vol:
-            self.end_vol = self.max_vol
-
-    def _start_vol_changed(self,new):
-        if new < 0:
-            self.start_vol = 0
+    # def _max_vol_changed(self,new):
+    #     self.max_str = '(max: %d)' % new
+    #     #self.end_vol = new
+    #
+    # def _end_vol_changed(self,new):
+    #     if new > self.max_vol:
+    #         self.end_vol = self.max_vol
+    #
+    # def _start_vol_changed(self,new):
+    #     if new < 0:
+    #         self.start_vol = 0
 
 class splitBvecBvalInputSpec(BaseInterfaceInputSpec):
     bvecs = File(exists=True)
@@ -208,41 +208,41 @@ class PreprocessingStage(Stage):
     def __init__(self):
         self.name = 'preprocessing_stage'
         self.config = PreprocessingConfig()
-        self.inputs = ["diffusion","bvecs","bvals","T1","aseg","brain","brain_mask","wm_mask_file","roi_volumes"]
+        self.inputs = ["diffusion","bvecs","bvals","T1","aparc_aseg","aseg","brain","brain_mask","wm_mask_file","roi_volumes"]
         self.outputs = ["diffusion_preproc","bvecs_rot","bvals","dwi_brain_mask","T1","act_5TT","gmwmi","brain","brain_mask","brain_mask_full","wm_mask_file","partial_volume_files","roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         print inputnode
-        processing_input = pe.Node(interface=util.IdentityInterface(fields=['diffusion','aseg','bvecs','bvals','grad','acqp','index','T1','brain','brain_mask','wm_mask_file','roi_volumes']),name='processing_input')
+        processing_input = pe.Node(interface=util.IdentityInterface(fields=['diffusion','aparc_aseg','aseg','bvecs','bvals','grad','acqp','index','T1','brain','brain_mask','wm_mask_file','roi_volumes']),name='processing_input')
 
 
         # For DSI acquisition: extract the hemisphere that contains the data
-        if self.config.start_vol > 0 or self.config.end_vol < self.config.max_vol:
-
-            split_vol = pe.Node(interface=splitDiffusion(),name='split_vol')
-            split_vol.inputs.start = self.config.start_vol
-            split_vol.inputs.end = self.config.end_vol
-
-            split_bvecbval = pe.Node(interface=splitBvecBval(),name='split_bvecsbvals')
-            split_bvecbval.inputs.start = self.config.start_vol
-            split_bvecbval.inputs.end = self.config.end_vol
-            split_bvecbval.inputs.orientation = 'h'
-            split_bvecbval.inputs.delimiter = ' '
-
-            flow.connect([
-                        (inputnode,split_vol,[('diffusion','in_file')]),
-                        (split_vol,processing_input,[('data','diffusion')]),
-                        (inputnode,split_bvecbval,[('bvecs','bvecs'),('bvals','bvals')]),
-                        (split_bvecbval,processing_input,[('bvecs_split','bvecs'),('bvals_split','bvals')])
-                        ])
-
-        else:
-            flow.connect([
-                        (inputnode,processing_input,[('diffusion','diffusion'),('bvecs','bvecs'),('bvals','bvals')]),
-                        ])
+        # if self.config.start_vol > 0 or self.config.end_vol < self.config.max_vol:
+        #
+        #     split_vol = pe.Node(interface=splitDiffusion(),name='split_vol')
+        #     split_vol.inputs.start = self.config.start_vol
+        #     split_vol.inputs.end = self.config.end_vol
+        #
+        #     split_bvecbval = pe.Node(interface=splitBvecBval(),name='split_bvecsbvals')
+        #     split_bvecbval.inputs.start = self.config.start_vol
+        #     split_bvecbval.inputs.end = self.config.end_vol
+        #     split_bvecbval.inputs.orientation = 'h'
+        #     split_bvecbval.inputs.delimiter = ' '
+        #
+        #     flow.connect([
+        #                 (inputnode,split_vol,[('diffusion','in_file')]),
+        #                 (split_vol,processing_input,[('data','diffusion')]),
+        #                 (inputnode,split_bvecbval,[('bvecs','bvecs'),('bvals','bvals')]),
+        #                 (split_bvecbval,processing_input,[('bvecs_split','bvecs'),('bvals_split','bvals')])
+        #                 ])
+        #
+        # else:
+        flow.connect([
+                    (inputnode,processing_input,[('diffusion','diffusion'),('bvecs','bvecs'),('bvals','bvals')]),
+                    ])
 
         flow.connect([
-                    (inputnode,processing_input,[('T1','T1'),('aseg','aseg'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),
+                    (inputnode,processing_input,[('T1','T1'),('aparc_aseg','aparc_aseg'),('aseg','aseg'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),
                     (processing_input,outputnode,[('bvals','bvals')])
                     ])
 
@@ -777,7 +777,7 @@ class PreprocessingStage(Stage):
         mrtrix_5tt.inputs.algorithm = 'freesurfer'
 
         flow.connect([
-    		    (processing_input,mrtrix_5tt,[('aseg','in_file')]),
+    		    (processing_input,mrtrix_5tt,[('aparc_aseg','in_file')]),
                 (mrtrix_5tt,fs_mriconvert_5tt,[('out_file','in_file')]),
                 (fs_mriconvert_5tt,outputnode,[('out_file','act_5TT')]),
     		    ])
@@ -808,9 +808,14 @@ class PreprocessingStage(Stage):
 
         mrtrix_gmwmi = pe.Node(interface=GenerateGMWMInterface(out_file='gmwmi.nii.gz'),name='mrtrix_gmwmi')
 
+        update_gmwmi = pe.Node(interface=UpdateGMWMInterfaceSeeding(),name='update_gmwmi')
+        update_gmwmi.inputs.out_gmwmi_file = 'gmwmi_proc.nii.gz'
+
         flow.connect([
                 (mrtrix_5tt,mrtrix_gmwmi,[('out_file','in_file')]),
-                (mrtrix_gmwmi,fs_mriconvert_gmwmi,[('out_file','in_file')]),
+                (mrtrix_gmwmi,update_gmwmi,[('out_file','in_gmwmi_file')]),
+                (processing_input,update_gmwmi,[('roi_volumes','in_roi_volumes')]),
+                (update_gmwmi,fs_mriconvert_gmwmi,[('out_gmwmi_file','in_file')]),
                 (fs_mriconvert_gmwmi,outputnode,[('out_file','gmwmi')]),
     		    ])
 
