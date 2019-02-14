@@ -131,6 +131,7 @@ style_sheet = '''
 
 class CMP_Project_Info(HasTraits):
     base_directory = Directory
+    output_directory = Directory
 
     bids_layout = Instance(BIDSLayout)
     subjects = List([])

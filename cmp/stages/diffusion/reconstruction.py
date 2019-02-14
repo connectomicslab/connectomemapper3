@@ -524,7 +524,7 @@ def create_dtk_recon_flow(config):
 def create_dipy_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","brain_mask_resampled","wm_mask_resampled","bvals","bvecs"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","MSD","fod","model","eigVec","RF","grad","bvecs","mapmri_maps"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","AD","MD","RD","fod","model","eigVec","RF","grad","bvecs","shore_maps","mapmri_maps"],mandatory_inputs=True),name="outputnode")
 
     #Flip gradient table
     flip_bvecs = pe.Node(interface=flipBvec(),name='flip_bvecs')
@@ -563,7 +563,10 @@ def create_dipy_recon_flow(config):
 
         flow.connect([
             (dipy_tensor,outputnode,[("response","RF")]),
-            (dipy_tensor,outputnode,[("fa_file","FA")])
+            (dipy_tensor,outputnode,[("fa_file","FA")]),
+            (dipy_tensor,outputnode,[("ad_file","AD")]),
+            (dipy_tensor,outputnode,[("md_file","MD")]),
+            (dipy_tensor,outputnode,[("rd_file","RD")])
             ])
 
         if not config.local_model:
@@ -634,6 +637,8 @@ def create_dipy_recon_flow(config):
         #dipy_SHORE.inputs.save_shm_coeff = True
         #dipy_SHORE.inputs.out_shm_coeff = 'diffusion_shore_shm_coeff.nii.gz'
 
+        shore_maps_merge = pe.Node(interface=util.Merge(3),name="merge_shore_maps")
+
         flow.connect([
                 (inputnode, dipy_SHORE,[('diffusion_resampled','in_file')]),
                 (inputnode, dipy_SHORE,[('bvals','in_bval')]),
@@ -646,6 +651,13 @@ def create_dipy_recon_flow(config):
                 (dipy_SHORE,outputnode,[('model','model')]),
                 (dipy_SHORE,outputnode,[('fod','fod')]),
                 (dipy_SHORE,outputnode,[('GFA','FA')])
+                ])
+
+        flow.connect([
+                (dipy_SHORE, shore_maps_merge, [('GFA','in1'),
+                                                ('MSD','in2'),
+                                                ('RTOP','in3')]),
+                (shore_maps_merge, outputnode,[('out','shore_maps')])
                 ])
 
 
@@ -665,22 +677,34 @@ def create_dipy_recon_flow(config):
         dipy_MAPMRI.inputs.small_delta = config.small_delta
         dipy_MAPMRI.inputs.big_delta = config.big_delta
 
-        maps_merge = pe.Node(interface=util.Merge(8),name="merge_additional_maps")
+        mapmri_maps_merge = pe.Node(interface=util.Merge(8),name="merge_mapmri_maps")
 
         flow.connect([
                 (inputnode, dipy_MAPMRI,[('diffusion_resampled','in_file')]),
                 (inputnode, dipy_MAPMRI,[('bvals','in_bval')]),
-                (flip_bvecs, dipy_MAPMRI,[('bvecs_flipped','in_bvec')]),
-                (dipy_MAPMRI, maps_merge, [('rtop_file','in1'),('rtap_file','in2'),('rtpp_file','in3'),('msd_file','in4'),('qiv_file','in5'),('ng_file','in6'),('ng_perp_file','in7'),('ng_para_file','in8')])
+                (flip_bvecs, dipy_MAPMRI,[('bvecs_flipped','in_bvec')])
+                ])
+
+        flow.connect([
+                (dipy_MAPMRI, mapmri_maps_merge, [('rtop_file','in1'),
+                                                  ('rtap_file','in2'),
+                                                  ('rtpp_file','in3'),
+                                                  ('msd_file','in4'),
+                                                  ('qiv_file','in5'),
+                                                  ('ng_file','in6'),
+                                                  ('ng_perp_file','in7'),
+                                                  ('ng_para_file','in8')]),
+                (mapmri_maps_merge, outputnode,[('out','mapmri_maps')])
                 ])
 
     return flow
 
 
 def create_mrtrix_recon_flow(config):
+    #TODO Add AD and RD maps
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion","diffusion_resampled","wm_mask_resampled","grad"]),name="inputnode")
-    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","ADC","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["DWI","FA","ADC","tensor","eigVec","RF","grad"],mandatory_inputs=True),name="outputnode")
 
     # Flip gradient table
     flip_table = pe.Node(interface=flipTable(),name='flip_table')
@@ -707,16 +731,19 @@ def create_mrtrix_recon_flow(config):
 
     # Tensor -> FA map
     mrtrix_tensor_metrics = pe.Node(interface=TensorMetrics(out_fa='FA.mif',out_adc='ADC.mif'),name='mrtrix_tensor_metrics')
+    convert_Tensor = pe.Node(interface=MRConvert(out_filename="dwi_tensor.nii.gz"),name='convert_tensor')
     convert_FA = pe.Node(interface=MRConvert(out_filename="FA.nii.gz"),name='convert_FA')
     convert_ADC = pe.Node(interface=MRConvert(out_filename="ADC.nii.gz"),name='convert_ADC')
 
     flow.connect([
-		(mrtrix_tensor,mrtrix_tensor_metrics,[('tensor','in_file')]),
-		(mrtrix_tensor_metrics,convert_FA,[('out_fa','in_file')]),
-        (mrtrix_tensor_metrics,convert_ADC,[('out_adc','in_file')]),
-        (convert_FA,outputnode,[("converted","FA")]),
-        (convert_ADC,outputnode,[("converted","ADC")])
-		])
+                (mrtrix_tensor,convert_Tensor,[('tensor','in_file')]),
+                (mrtrix_tensor,mrtrix_tensor_metrics,[('tensor','in_file')]),
+                (mrtrix_tensor_metrics,convert_FA,[('out_fa','in_file')]),
+                (mrtrix_tensor_metrics,convert_ADC,[('out_adc','in_file')]),
+                (convert_Tensor,outputnode,[("converted","tensor")]),
+                (convert_FA,outputnode,[("converted","FA")]),
+                (convert_ADC,outputnode,[("converted","ADC")])
+                ])
 
     # Tensor -> Eigenvectors
     mrtrix_eigVectors = pe.Node(interface=Tensor2Vector(),name="mrtrix_eigenvectors")
@@ -761,13 +788,18 @@ def create_mrtrix_recon_flow(config):
         mrtrix_CSD = pe.Node(interface=ConstrainedSphericalDeconvolution(),name="mrtrix_CSD")
         mrtrix_CSD.inputs.algorithm = 'csd'
         #mrtrix_CSD.inputs.normalise = config.normalize_to_B0
+
+        convert_CSD = pe.Node(interface=MRConvert(out_filename="spherical_harmonics_image.nii.gz"),name='convert_CSD')
+
         flow.connect([
 		    (inputnode,mrtrix_CSD,[('diffusion_resampled','in_file')]),
 		    (mrtrix_rf,mrtrix_CSD,[('response','response_file')]),
 		    (mrtrix_rf,outputnode,[('response','RF')]),
 		    (inputnode,mrtrix_CSD,[("wm_mask_resampled",'mask_image')]),
             (flip_table,mrtrix_CSD,[("table","encoding_file")]),
-		    (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
+            (mrtrix_CSD,convert_CSD,[('spherical_harmonics_image','in_file')]),
+            (convert_CSD,outputnode,[("converted","DWI")])
+		    # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
 		    ])
     else:
         flow.connect([

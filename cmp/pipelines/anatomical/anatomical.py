@@ -140,7 +140,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.global_conf.subject_session = ''
             self.subject_directory =  os.path.join(self.base_directory,self.subject)
 
-        self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
+        self.derivatives_directory =  os.path.abspath(project_info.output_directory)
+        self.output_directory =  os.path.abspath(project_info.output_directory)
 
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
@@ -247,9 +248,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if t1_available:
             #Copy diffusion data to derivatives / cmp  / subject / dwi
             if self.global_conf.subject_session == '':
-                out_T1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
+                out_T1_file = os.path.join(self.output_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
             else:
-                out_T1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session,'anat',self.subject+'_'+self.global_conf.subject_session+'_T1w.nii.gz')
+                out_T1_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'anat',self.subject+'_'+self.global_conf.subject_session+'_T1w.nii.gz')
 
             if not os.path.isfile(out_T1_file):
                 shutil.copy(src=T1_file,dst=out_T1_file)
@@ -295,19 +296,19 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         subject = self.subject
 
         if self.global_conf.subject_session == '':
-            anat_deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,'anat')
+            anat_deriv_subject_directory = os.path.join(self.output_directory,"cmp",self.subject,'anat')
         else:
             if self.global_conf.subject_session not in subject:
-                anat_deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",subject,self.global_conf.subject_session,'anat')
+                anat_deriv_subject_directory = os.path.join(self.output_directory,"cmp",subject,self.global_conf.subject_session,'anat')
                 subject = "_".join((subject,self.global_conf.subject_session))
             else:
-                anat_deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",subject.split("_")[0],self.global_conf.subject_session,'anat')
+                anat_deriv_subject_directory = os.path.join(self.output_directory,"cmp",subject.split("_")[0],self.global_conf.subject_session,'anat')
 
-        T1_file = os.path.join(anat_deriv_subject_directory,subject+'_T1w_head.nii.gz')
-        brain_file = os.path.join(anat_deriv_subject_directory,subject+'_T1w_brain.nii.gz')
-        brainmask_file = os.path.join(anat_deriv_subject_directory,subject+'_T1w_brainmask.nii.gz')
-        wm_mask_file = os.path.join(anat_deriv_subject_directory,subject+'_T1w_class-WM.nii.gz')
-        roiv_files = glob.glob(anat_deriv_subject_directory+"/"+subject+"_T1w_parc_scale*.nii.gz")
+        T1_file = os.path.join(anat_deriv_subject_directory,subject+'_desc-head_T1w.nii.gz')
+        brain_file = os.path.join(anat_deriv_subject_directory,subject+'_desc-brain_T1w.nii.gz')
+        brainmask_file = os.path.join(anat_deriv_subject_directory,subject+'_desc-brain_mask.nii.gz')
+        wm_mask_file = os.path.join(anat_deriv_subject_directory,subject+'_label-WM_dseg.nii.gz')
+        roiv_files = glob.glob(anat_deriv_subject_directory+"/"+subject+"_label-L2018_desc-scale*_atlas.nii.gz")
 
         error_message = ''
 
@@ -357,13 +358,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         return valid_output,error_message
 
-    def create_pipeline_flow(self,deriv_subject_directory):
+    def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
         subject_directory = self.subject_directory
 
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1']), name='datasource')
-        datasource.inputs.base_directory = deriv_subject_directory
+        datasource.inputs.base_directory = cmp_deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
@@ -372,52 +373,45 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         datasource.inputs.sort_filelist=False
         #datasource.inputs.subject = self.subject
 
-
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="anatomical_sinker")
-        sinker.inputs.base_directory = os.path.join(deriv_subject_directory)
+        sinker.inputs.base_directory = os.path.abspath(cmp_deriv_subject_directory)
 
         #Dataname substitutions in order to comply with BIDS derivatives specifications
         if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-            sinker.inputs.substitutions = [ ('T1.nii.gz', self.subject+'_T1w_head.nii.gz'),
-                                            ('aseg.nii.gz', self.subject+'_T1w_aseg.nii.gz'),
-                                            ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
-                                            ('brainmask_eroded.nii.gz', self.subject+'_T1w_brainmask_eroded.nii.gz'),
-                                            ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
-                                            ('fsmask_1mm.nii.gz',self.subject+'_T1w_class-WM.nii.gz'),
-                                            ('gmmask.nii.gz',self.subject+'_T1w_class-GM.nii.gz'),
-                                            ('fsmask_1mm_eroded.nii.gz',self.subject+'_T1w_class-WM_eroded.nii.gz'),
-                                            ('csf_mask_eroded.nii.gz',self.subject+'_T1w_class-CSF_eroded.nii.gz'),
-                                            #('gm_mask',self.subject+'_T1w_class-GM'),
-                                            #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
-                                            ('aparc+aseg.native.nii.gz',self.subject+'_T1w_aparc+aseg.nii.gz'),
-                                            ('aparc+aseg.Lausanne2018.native.nii.gz',self.subject+'_T1w_aparc+aseg.nii.gz'),
-                                            ('T1w_class-GM.nii.gz',self.subject+'_T1w_class-GM.nii.gz'),
-                                            ('ROIv_HR_th_scale1.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
-                                            ('ROIv_HR_th_scale2.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
-                                            ('ROIv_HR_th_scale3.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
-                                            ('ROIv_HR_th_scale4.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
-                                            ('ROIv_HR_th_scale5.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
-                                            ('ROIv_HR_th_scale1_final.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
-                                            ('ROIv_HR_th_scale2_final.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
-                                            ('ROIv_HR_th_scale3_final.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
-                                            ('ROIv_HR_th_scale4_final.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
-                                            ('ROIv_HR_th_scale5_final.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
-                                            ('ROIv_HR_th_scale1.graphml',self.subject+'_T1w_parc_scale1.graphml'),
-                                            ('ROIv_HR_th_scale2.graphml',self.subject+'_T1w_parc_scale2.graphml'),
-                                            ('ROIv_HR_th_scale3.graphml',self.subject+'_T1w_parc_scale3.graphml'),
-                                            ('ROIv_HR_th_scale4.graphml',self.subject+'_T1w_parc_scale4.graphml'),
-                                            ('ROIv_HR_th_scale5.graphml',self.subject+'_T1w_parc_scale5.graphml'),
-                                            ('ROIv_HR_th_scale1_FreeSurferColorLUT.txt',self.subject+'_T1w_parc_scale1_FreeSurferColorLUT.txt'),
-                                            ('ROIv_HR_th_scale2_FreeSurferColorLUT.txt',self.subject+'_T1w_parc_scale2_FreeSurferColorLUT.txt'),
-                                            ('ROIv_HR_th_scale3_FreeSurferColorLUT.txt',self.subject+'_T1w_parc_scale3_FreeSurferColorLUT.txt'),
-                                            ('ROIv_HR_th_scale4_FreeSurferColorLUT.txt',self.subject+'_T1w_parc_scale4_FreeSurferColorLUT.txt'),
-                                            ('ROIv_HR_th_scale5_FreeSurferColorLUT.txt',self.subject+'_T1w_parc_scale5_FreeSurferColorLUT.txt'),
-                                            ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
-                                            ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
-                                            ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
-                                            ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
-                                            ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
+            sinker.inputs.substitutions = [ ('T1.nii.gz', self.subject+'_desc-head_T1w.nii.gz'),
+                                            ('brain.nii.gz', self.subject+'_desc-brain_T1w.nii.gz'),
+                                            ('brain_mask.nii.gz', self.subject+'_desc-brain_mask.nii.gz'),
+                                            ('aseg.nii.gz', self.subject+'_desc-aseg_dseg.nii.gz'),
+                                            ('fsmask_1mm.nii.gz',self.subject+'_label-WM_dseg.nii.gz'),
+                                            ('gmmask.nii.gz',self.subject+'_label-GM_dseg.nii.gz'),
+                                            ('aparc+aseg.native.nii.gz',self.subject+'_desc-aparcaseg_dseg.nii.gz'),
+                                            ('aparc+aseg.Lausanne2018.native.nii.gz',self.subject+'_desc-aparcaseg_dseg.nii.gz'),
+                                            ('ROIv_HR_th_scale1.nii.gz',self.subject+'_label-L2018_desc-scale1_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale2.nii.gz',self.subject+'_label-L2018_desc-scale2_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale3.nii.gz',self.subject+'_label-L2018_desc-scale3_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale4.nii.gz',self.subject+'_label-L2018_desc-scale4_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale5.nii.gz',self.subject+'_label-L2018_desc-scale5_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale1_final.nii.gz',self.subject+'_label-L2018_desc-scale1_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale2_final.nii.gz',self.subject+'_label-L2018_desc-scale2_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale3_final.nii.gz',self.subject+'_label-L2018_desc-scale3_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale4_final.nii.gz',self.subject+'_label-L2018_desc-scale4_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale5_final.nii.gz',self.subject+'_label-L2018_desc-scale5_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale1.graphml',self.subject+'_label-L2018_desc-scale1_atlas.graphml'),
+                                            ('ROIv_HR_th_scale2.graphml',self.subject+'_label-L2018_desc-scale2_atlas.graphml'),
+                                            ('ROIv_HR_th_scale3.graphml',self.subject+'_label-L2018_desc-scale3_atlas.graphml'),
+                                            ('ROIv_HR_th_scale4.graphml',self.subject+'_label-L2018_desc-scale4_atlas.graphml'),
+                                            ('ROIv_HR_th_scale5.graphml',self.subject+'_label-L2018_desc-scale5_atlas.graphml'),
+                                            ('ROIv_HR_th_scale1_FreeSurferColorLUT.txt',self.subject+'_label-L2018_desc-scale1_atlas_FreeSurferColorLUT.txt'),
+                                            ('ROIv_HR_th_scale2_FreeSurferColorLUT.txt',self.subject+'_label-L2018_desc-scale2_atlas_FreeSurferColorLUT.txt'),
+                                            ('ROIv_HR_th_scale3_FreeSurferColorLUT.txt',self.subject+'_label-L2018_desc-scale3_atlas_FreeSurferColorLUT.txt'),
+                                            ('ROIv_HR_th_scale4_FreeSurferColorLUT.txt',self.subject+'_label-L2018_desc-scale4_atlas_FreeSurferColorLUT.txt'),
+                                            ('ROIv_HR_th_scale5_FreeSurferColorLUT.txt',self.subject+'_label-L2018_desc-scale5_atlas_FreeSurferColorLUT.txt'),
+                                            ('ROIv_HR_th_scale33.nii.gz',self.subject+'_label-L2018_desc-scale1_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale60.nii.gz',self.subject+'_label-L2018_desc-scale2_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale125.nii.gz',self.subject+'_label-L2018_desc-scale3_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale250.nii.gz',self.subject+'_label-L2018_desc-scale4_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale500.nii.gz',self.subject+'_label-L2018_desc-scale5_atlas.nii.gz'),
                                           ]
         else:
             sinker.inputs.substitutions = [ (self.subject+'_T1w.nii.gz', self.subject+'_T1w_head.nii.gz'),
@@ -447,7 +441,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         # Create common_flow
 
-        anat_flow = pe.Workflow(name='anatomical_pipeline', base_dir=os.path.join(deriv_subject_directory,'tmp'))
+        anat_flow = pe.Workflow(name='anatomical_pipeline', base_dir=os.path.abspath(nipype_deriv_subject_directory))
         anat_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
         anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","aseg","aparc_aseg","brain","brain_mask","wm_mask_file", "gm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
             "roi_volumes","parcellation_scheme","atlas_info","roi_colorLUTs", "roi_graphMLs"]),name="outputnode")
@@ -462,9 +456,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
 
                 if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
-                    self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory,"derivatives",'freesurfer')
+                    self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.output_directory,'freesurfer')
                     print "Freesurfer_subjects_dir: %s" % self.stages['Segmentation'].config.freesurfer_subjects_dir
-                    self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject)
+                    self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.output_directory,'freesurfer',self.subject)
                     print "Freesurfer_subject_id: %s" % self.stages['Segmentation'].config.freesurfer_subject_id
 
             seg_flow = self.create_stage_flow("Segmentation")
@@ -559,16 +553,18 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         old_subject = self.subject
 
         if self.global_conf.subject_session == '':
-            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject)
+            cmp_deriv_subject_directory = os.path.join(self.output_directory,"cmp",self.subject)
+            nipype_deriv_subject_directory = os.path.join(self.output_directory,"nipype",self.subject)
         else:
-            deriv_subject_directory = os.path.join(self.base_directory,"derivatives","cmp",self.subject,self.global_conf.subject_session)
+            cmp_deriv_subject_directory = os.path.join(self.output_directory,"cmp",self.subject,self.global_conf.subject_session)
+            nipype_deriv_subject_directory = os.path.join(self.output_directory,"nipype",self.subject,self.global_conf.subject_session)
 
             self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
         # Initialization
-        if os.path.isfile(os.path.join(deriv_subject_directory,"anat","pypeline.log")):
-            os.unlink(os.path.join(deriv_subject_directory,"anat","pypeline.log"))
-        config.update_config({'logging': {'log_directory': os.path.join(deriv_subject_directory,"anat"),
+        if os.path.isfile(os.path.join(cmp_deriv_subject_directory,"anat","pypeline.log")):
+            os.unlink(os.path.join(cmp_deriv_subject_directory,"anat","pypeline.log"))
+        config.update_config({'logging': {'log_directory': os.path.join(cmp_deriv_subject_directory,"anat"),
                                   'log_to_file': True},
                               'execution': {'remove_unnecessary_outputs': False,
                               'stop_on_first_crash': True,'stop_on_first_rerun': False,
@@ -578,7 +574,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         iflogger = logging.getLogger('nipype.interface')
 
         iflogger.info("**** Processing ****")
-        anat_flow = self.create_pipeline_flow(deriv_subject_directory=deriv_subject_directory)
+        anat_flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory, nipype_deriv_subject_directory=nipype_deriv_subject_directory)
         anat_flow.write_graph(graph2use='colored', format='svg', simple_form=True)
 
         if(self.number_of_cores != 1):
@@ -595,14 +591,14 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         #         os.remove(os.path.join(self.base_directory,file_to_rm))
 
         # copy .ini and log file
-        outdir = deriv_subject_directory
-        if not os.path.exists(outdir):
-            os.makedirs(outdir)
-
-        try:
-            shutil.copy(self.config_file,outdir)
-        except shutil.Error:
-            print("Skipped copy of config file")
+        # outdir = os.path.join(cmp_deriv_subject_directory,'config')
+        # if not os.path.exists(outdir):
+        #     os.makedirs(outdir)
+        #
+        # try:
+        #     shutil.copy(self.config_file,outdir)
+        # except shutil.Error:
+        #     print("Skipped copy of config file")
 
         #shutil.copy(os.path.join(self.base_directory,"derivatives","cmp",self.subject,'pypeline.log'),outdir)
 

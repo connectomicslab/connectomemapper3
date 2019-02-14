@@ -1,5 +1,5 @@
 
-Connectome Mapper 3
+Connectome Mapper 3 (UNDER DEVELOPMENT)
 =======================================================
 
 This neuroimage processing pipeline software is developed by the Hagmann's group at the University Hospital of Lausanne (CHUV) for use at the Center for BioMedical Imaging (CIBM) within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
@@ -94,3 +94,4 @@ Contents
    conf
    stages
    exampleresults
+   datalad

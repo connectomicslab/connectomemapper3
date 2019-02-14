@@ -215,7 +215,7 @@ class DiffusionStage(Stage):
         self.name = 'diffusion_stage'
         self.config = DiffusionConfig()
         self.inputs = ["diffusion","partial_volumes","wm_mask_registered","brain_mask_registered","act_5tt_registered","gmwmi_registered","roi_volumes","grad","bvals","bvecs"]
-        self.outputs = ["diffusion_model","track_file","fod_file","gFA","ADC","skewness","kurtosis","P0","roi_volumes","mapmri_maps"]
+        self.outputs = ["diffusion_model","track_file","fod_file","FA","ADC","RD","AD","skewness","kurtosis","P0","roi_volumes","shore_maps","mapmri_maps"]
 
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -286,20 +286,28 @@ class DiffusionStage(Stage):
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
                         (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                         (inputnode, recon_flow,[('brain_mask_registered','inputnode.brain_mask_resampled')]),
-                        (recon_flow,outputnode,[("outputnode.FA","gFA")]),
+                        (recon_flow,outputnode,[("outputnode.FA","FA")]),
+                        (recon_flow,outputnode,[("outputnode.MD","ADC")]),
+                        (recon_flow,outputnode,[("outputnode.AD","AD")]),
+                        (recon_flow,outputnode,[("outputnode.RD","RD")]),
+                        (recon_flow,outputnode,[("outputnode.shore_maps","shore_maps")]),
                         (recon_flow,outputnode,[("outputnode.mapmri_maps","mapmri_maps")]),
                         ])
 
 
         elif self.config.recon_processing_tool == 'MRtrix':
+            #TODO modify nipype tensormetric interface to get AD and RD maps
             recon_flow = create_mrtrix_recon_flow(self.config.mrtrix_recon_config)
             flow.connect([
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (inputnode,recon_flow,[('grad','inputnode.grad')]),
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
 			            (inputnode, recon_flow,[('brain_mask_registered','inputnode.wm_mask_resampled')]),
-                        (recon_flow,outputnode,[("outputnode.FA","gFA")]),
+                        (recon_flow,outputnode,[("outputnode.FA","FA")]),
                         (recon_flow,outputnode,[("outputnode.ADC","ADC")]),
+                        (recon_flow,outputnode,[("outputnode.tensor","tensor")]),
+                        # (recon_flow,outputnode,[("outputnode.AD","AD")]),
+                        # (recon_flow,outputnode,[("outputnode.RD","RD")]),
                         ])
 
         elif self.config.recon_processing_tool == 'Camino':
@@ -308,7 +316,7 @@ class DiffusionStage(Stage):
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
                         (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
                         (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-                        (recon_flow,outputnode,[("outputnode.FA","gFA")])
+                        (recon_flow,outputnode,[("outputnode.FA","FA")])
                         ])
 
         elif self.config.recon_processing_tool == 'FSL':

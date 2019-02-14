@@ -40,7 +40,7 @@ import gui
 def fix_dataset_directory_in_pickles(local_dir, mode='local'):
     #mode can be local or bidsapp (local by default)
 
-    searchdir = os.path.join(local_dir,'derivatives/cmp')
+    searchdir = os.path.join(local_dir,'derivatives','nipype')
 
     for root, dirs, files in os.walk(searchdir):
         files = [ fi for fi in files if fi.endswith(".pklz") ]
@@ -70,7 +70,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
 
 def remove_aborded_interface_pickles(local_dir):
 
-    searchdir = os.path.join(local_dir,'derivatives/cmp')
+    searchdir = os.path.join(local_dir,'derivatives','nipype')
 
     for root, dirs, files in os.walk(searchdir):
         files = [ fi for fi in files if fi.endswith(".pklz") ]
@@ -339,19 +339,20 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
     if session == None or session == '':
         paths.append(os.path.join(derivatives_directory,'freesurfer',subject))
         paths.append(os.path.join(derivatives_directory,'cmp',subject))
+        paths.append(os.path.join(derivatives_directory,'nipype',subject))
 
         for in_f in input_folders:
             paths.append(os.path.join(derivatives_directory,'cmp',subject,in_f))
+            # paths.append(os.path.join(derivatives_directory,'nipype',subject,in_f))
 
-        paths.append(os.path.join(derivatives_directory,'cmp',subject,'tmp'))
     else:
         paths.append(os.path.join(derivatives_directory,'freesurfer','%s_%s'%(subject,session)))
         paths.append(os.path.join(derivatives_directory,'cmp',subject,session))
+        paths.append(os.path.join(derivatives_directory,'nipype',subject,session))
 
         for in_f in input_folders:
             paths.append(os.path.join(derivatives_directory,'cmp',subject,session,in_f))
-
-        paths.append(os.path.join(derivatives_directory,'cmp',subject,session,'tmp'))
+            # paths.append(os.path.join(derivatives_directory,'nipype',subject,session,in_f))
 
     for full_p in paths:
         if not os.path.exists(full_p):
@@ -365,7 +366,7 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
 def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
     dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
 
-    derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
+    derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if len(project_info.subject_sessions)>0:
         refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders, session=project_info.subject_session)
@@ -388,7 +389,6 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
                 project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_%s_diffusion_config.ini' % (project_info.subject,project_info.subject_session))
             else:
                 project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
-
 
             if os.path.exists(project_info.dmri_config_file):
                 warn_res = project_info.configure_traits(view='dmri_warning_view')
@@ -419,7 +419,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
 def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
     fmri_pipeline = FMRI_pipeline.fMRIPipeline(project_info)
 
-    derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
+    derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if len(project_info.subject_sessions)>0:
         refresh_folder(derivatives_directory, project_info.subject, fmri_pipeline.input_folders, session=project_info.subject_session)
@@ -475,7 +475,7 @@ def init_anat_project(project_info, is_new_project):
 
     print anat_pipeline
 
-    derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
+    derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if (project_info.subject_session != '') and (project_info.subject_session != None) :
         print('Refresh folder WITH session')
@@ -549,8 +549,8 @@ def init_anat_project(project_info, is_new_project):
 
 def update_anat_last_processed(project_info, pipeline):
     # last date
-    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject)):
-        out_dirs = os.listdir(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject))
+    if os.path.exists(os.path.join(project_info.output_directory,'nipype',project_info.subject)):
+        out_dirs = os.listdir(os.path.join(project_info.output_directory,'nipype',project_info.subject))
         # for out in out_dirs:
         #     if (project_info.last_date_processed == "Not yet processed" or
         #         out > project_info.last_date_processed):
@@ -563,9 +563,9 @@ def update_anat_last_processed(project_info, pipeline):
             project_info.anat_last_date_processed = pipeline.now
 
     # last stage
-    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','anatomical_pipeline')):
+    if os.path.exists(os.path.join(project_info.output_directory,'nipype',project_info.subject,'anatomical_pipeline')):
         stage_dirs = []
-        for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','anatomical_pipeline')):
+        for root, dirnames, _ in os.walk(os.path.join(project_info.output_directory,'nipype',project_info.subject,'anatomical_pipeline')):
             for dirname in fnmatch.filter(dirnames, '*_stage'):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
@@ -580,8 +580,8 @@ def update_anat_last_processed(project_info, pipeline):
 
 def update_dmri_last_processed(project_info, pipeline):
     # last date
-    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject)):
-        out_dirs = os.listdir(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject))
+    if os.path.exists(os.path.join(project_info.output_directory,'nipype',project_info.subject)):
+        out_dirs = os.listdir(os.path.join(project_info.output_directory,'nipype',project_info.subject))
         # for out in out_dirs:
         #     if (project_info.last_date_processed == "Not yet processed" or
         #         out > project_info.last_date_processed):
@@ -594,9 +594,9 @@ def update_dmri_last_processed(project_info, pipeline):
             project_info.dmri_last_date_processed = pipeline.now
 
     # last stage
-    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','diffusion_pipeline')):
+    if os.path.exists(os.path.join(project_info.output_directory,'nipype',project_info.subject,'diffusion_pipeline')):
         stage_dirs = []
-        for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','diffusion_pipeline')):
+        for root, dirnames, _ in os.walk(os.path.join(project_info.output_directory,'nipype',project_info.subject,'diffusion_pipeline')):
             for dirname in fnmatch.filter(dirnames, '*_stage'):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
@@ -606,8 +606,8 @@ def update_dmri_last_processed(project_info, pipeline):
 
 def update_fmri_last_processed(project_info, pipeline):
     # last date
-    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject)):
-        out_dirs = os.listdir(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject))
+    if os.path.exists(os.path.join(project_info.output_directory,'nipype',project_info.subject)):
+        out_dirs = os.listdir(os.path.join(project_info.output_directory,'nipype',project_info.subject))
         # for out in out_dirs:
         #     if (project_info.last_date_processed == "Not yet processed" or
         #         out > project_info.last_date_processed):
@@ -620,9 +620,9 @@ def update_fmri_last_processed(project_info, pipeline):
             project_info.fmri_last_date_processed = pipeline.now
 
     # last stage
-    if os.path.exists(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','fMRI_pipeline')):
+    if os.path.exists(os.path.join(project_info.output_directory,'nipype',project_info.subject,'fMRI_pipeline')):
         stage_dirs = []
-        for root, dirnames, _ in os.walk(os.path.join(project_info.base_directory,'derivatives','cmp',project_info.subject,'tmp','fMRI_pipeline')):
+        for root, dirnames, _ in os.walk(os.path.join(project_info.output_directory,'nipype',project_info.subject, 'fMRI_pipeline')):
             for dirname in fnmatch.filter(dirnames, '*_stage'):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
@@ -652,6 +652,7 @@ class ProjectHandler(Handler):
         ui_info.ui.context["object"].handler = self
 
         if np_res and os.path.exists(new_project.base_directory):
+            new_project.output_directory = os.path.join(new_project.output_directory)
             try:
                 bids_layout = BIDSLayout(new_project.base_directory)
                 new_project.bids_layout = bids_layout
@@ -767,6 +768,9 @@ class ProjectHandler(Handler):
         is_bids = False
 
         print "Base dir: %s" % loaded_project.base_directory
+
+        loaded_project.output_directory = os.path.join(loaded_project.output_directory)
+
         try:
             bids_layout = BIDSLayout(loaded_project.base_directory)
             loaded_project.bids_layout = bids_layout
@@ -803,8 +807,8 @@ class ProjectHandler(Handler):
 
         if np_res and os.path.exists(loaded_project.base_directory) and is_bids:
             # # Retrocompatibility with v2.1.0 where only one config.ini file was created
-            # if os.path.exists(os.path.join(loaded_project.base_directory,'derivatives','config.ini')):
-            #     loaded_project.config_file = os.path.join(loaded_project.base_directory,'derivatives','config.ini')
+            # if os.path.exists(os.path.join(loaded_project.output_directory,'config.ini')):
+            #     loaded_project.config_file = os.path.join(loaded_project.output_directory,'config.ini')
             # # Load new format: <process_type>_config.ini
             # else:
 
@@ -824,20 +828,20 @@ class ProjectHandler(Handler):
                 subj_sessions = bids_layout.get(target='session', return_type='id', subject=subj)
                 if len(subj_sessions) > 0:
                     for subj_session in subj_sessions:
-                        config_file = os.path.join(loaded_project.base_directory,'derivatives',"sub-%s_ses-%s_anatomical_config.ini" % (subj, subj_session))
+                        config_file = os.path.join(loaded_project.output_directory,"sub-%s_ses-%s_anatomical_config.ini" % (subj, subj_session))
                         if os.path.isfile(config_file):
                             loaded_project.anat_available_config.append( "sub-%s_ses-%s" % (subj, subj_session) )
                 else:
-                    config_file = os.path.join(loaded_project.base_directory,'derivatives',"sub-%s_anatomical_config.ini" % (subj))
+                    config_file = os.path.join(loaded_project.output_directory,"sub-%s_anatomical_config.ini" % (subj))
                     if os.path.isfile(config_file):
                         loaded_project.anat_available_config.append( "sub-%s" % (subj) )
                         print "no session"
 
             # if len(sessions) > 0:
-            #     print ["_".join((os.path.basename(s)[:-11].split("_")[0],os.path.basename(s)[:-11].split("_")[1])) for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
-            #     loaded_project.anat_available_config = ["_".join((os.path.basename(s)[:-11].split("_")[0],os.path.basename(s)[:-11].split("_")[1])) for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
+            #     print ["_".join((os.path.basename(s)[:-11].split("_")[0],os.path.basename(s)[:-11].split("_")[1])) for s in glob.glob(os.path.join(loaded_project.output_directory,'*_anatomical_config.ini'))]
+            #     loaded_project.anat_available_config = ["_".join((os.path.basename(s)[:-11].split("_")[0],os.path.basename(s)[:-11].split("_")[1])) for s in glob.glob(os.path.join(loaded_project.output_directory,'*_anatomical_config.ini'))]
             # else:
-            #     loaded_project.anat_available_config = [os.path.basename(s)[:-11].split("_")[0] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','*_anatomical_config.ini'))]
+            #     loaded_project.anat_available_config = [os.path.basename(s)[:-11].split("_")[0] for s in glob.glob(os.path.join(loaded_project.output_directory,'*_anatomical_config.ini'))]
 
             print "loaded_project.anat_available_config : "
             print loaded_project.anat_available_config
@@ -856,7 +860,7 @@ class ProjectHandler(Handler):
             print loaded_project.anat_config_to_load
 
             print "Anatomical config to load: %s"%loaded_project.anat_config_to_load
-            loaded_project.anat_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_anatomical_config.ini' % loaded_project.anat_config_to_load)
+            loaded_project.anat_config_file = os.path.join(loaded_project.output_directory,'%s_anatomical_config.ini' % loaded_project.anat_config_to_load)
             print "Anatomical config file: %s"%loaded_project.anat_config_file
 
             loaded_project.subject = get_anat_process_detail(loaded_project,'Global','subject')
@@ -904,17 +908,17 @@ class ProjectHandler(Handler):
 
             if len(subj_sessions) > 0:
                 for subj_session in subj_sessions:
-                    config_file = os.path.join(loaded_project.base_directory,'derivatives',"%s_ses-%s_diffusion_config.ini" % (loaded_project.subject, subj_session))
+                    config_file = os.path.join(loaded_project.output_directory,"%s_ses-%s_diffusion_config.ini" % (loaded_project.subject, subj_session))
                     print "config_file: %s " % config_file
                     if os.path.isfile(config_file) and subj_session == loaded_project.subject_session.split("-")[1]:
                         loaded_project.dmri_available_config.append( "%s_ses-%s" % (loaded_project.subject, subj_session) )
             else:
-                config_file = os.path.join(loaded_project.base_directory,'derivatives',"sub-%s_diffusion_config.ini" % (loaded_project.subject))
+                config_file = os.path.join(loaded_project.output_directory,"sub-%s_diffusion_config.ini" % (loaded_project.subject))
                 if os.path.isfile(config_file):
                     loaded_project.dmri_available_config.append( "%s" % (loaded_project.subject) )
                     print "no session"
 
-            # loaded_project.dmri_available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','%s_diffusion_config.ini'%loaded_project.subject))]
+            # loaded_project.dmri_available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.output_directory,'%s_diffusion_config.ini'%loaded_project.subject))]
 
             print "loaded_project.dmri_available_config:"
             print loaded_project.dmri_available_config
@@ -931,7 +935,7 @@ class ProjectHandler(Handler):
                 loaded_project.dmri_config_to_load = loaded_project.dmri_available_config[0]
 
             print "Diffusion config to load: %s"%loaded_project.dmri_config_to_load
-            loaded_project.dmri_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_diffusion_config.ini' % loaded_project.dmri_config_to_load)
+            loaded_project.dmri_config_file = os.path.join(loaded_project.output_directory,'%s_diffusion_config.ini' % loaded_project.dmri_config_to_load)
             print "Diffusion config file: %s"%loaded_project.dmri_config_file
 
             if os.path.isfile(loaded_project.dmri_config_file):
@@ -983,17 +987,17 @@ class ProjectHandler(Handler):
 
             if len(subj_sessions) > 0:
                 for subj_session in subj_sessions:
-                    config_file = os.path.join(loaded_project.base_directory,'derivatives',"%s_ses-%s_fMRI_config.ini" % (loaded_project.subject, subj_session))
+                    config_file = os.path.join(loaded_project.output_directory,"%s_ses-%s_fMRI_config.ini" % (loaded_project.subject, subj_session))
                     print "config_file: %s " % config_file
                     if os.path.isfile(config_file) and subj_session == loaded_project.subject_session.split("-")[1]:
                         loaded_project.fmri_available_config.append( "%s_ses-%s" % (loaded_project.subject, subj_session) )
             else:
-                config_file = os.path.join(loaded_project.base_directory,'derivatives',"sub-%s_fMRI_config.ini" % (loaded_project.subject))
+                config_file = os.path.join(loaded_project.output_directory,"sub-%s_fMRI_config.ini" % (loaded_project.subject))
                 if os.path.isfile(config_file):
                     loaded_project.fmri_available_config.append( "sub-%s" % (loaded_project.subject) )
                     print "no session"
 
-            # loaded_project.fmri_available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.base_directory,'derivatives','%s_fMRI_config.ini'%loaded_project.subject))]
+            # loaded_project.fmri_available_config = [os.path.basename(s)[:-11] for s in glob.glob(os.path.join(loaded_project.output_directory,'%s_fMRI_config.ini'%loaded_project.subject))]
 
             print "loaded_project.fmri_available_config:"
             print loaded_project.fmri_available_config
@@ -1010,7 +1014,7 @@ class ProjectHandler(Handler):
                 loaded_project.fmri_config_to_load = loaded_project.fmri_available_config[0]
 
             print "fMRI config to load: %s"%loaded_project.fmri_config_to_load
-            loaded_project.fmri_config_file = os.path.join(loaded_project.base_directory,'derivatives','%s_fMRI_config.ini' % loaded_project.fmri_config_to_load)
+            loaded_project.fmri_config_file = os.path.join(loaded_project.output_directory,'%s_fMRI_config.ini' % loaded_project.fmri_config_to_load)
             print "fMRI config file: %s"%loaded_project.fmri_config_file
 
             if os.path.isfile(loaded_project.fmri_config_file):
@@ -1075,13 +1079,13 @@ class ProjectHandler(Handler):
         if len(updated_project.subject_sessions) > 0:
             self.anat_pipeline.global_conf.subject_session = updated_project.subject_session
             self.anat_pipeline.subject_directory =  os.path.join(updated_project.base_directory,updated_project.subject,updated_project.subject_session)
-            updated_project.anat_config_file = os.path.join(updated_project.base_directory,'derivatives','%s_%s_anatomical_config.ini' % (updated_project.subject,updated_project.subject_session))
+            updated_project.anat_config_file = os.path.join(updated_project.output_directory,'%s_%s_anatomical_config.ini' % (updated_project.subject,updated_project.subject_session))
         else:
             self.anat_pipeline.global_conf.subject_session = ''
             self.anat_pipeline.subject_directory =  os.path.join(updated_project.base_directory,updated_project.subject)
-            updated_project.anat_config_file = os.path.join(updated_project.base_directory,'derivatives','%s_anatomical_config.ini' % (updated_project.subject))
+            updated_project.anat_config_file = os.path.join(updated_project.output_directory,'%s_anatomical_config.ini' % (updated_project.subject))
 
-        self.anat_pipeline.derivatives_directory =  os.path.join(updated_project.base_directory,'derivatives')
+        self.anat_pipeline.derivatives_directory =  os.path.join(updated_project.output_directory)
 
         if os.path.isfile(updated_project.anat_config_file):
             print "Existing anatomical config file for subject %s: %s" % ( updated_project.subject,updated_project.anat_config_file)
@@ -1146,13 +1150,13 @@ class ProjectHandler(Handler):
         if len(updated_project.subject_sessions) > 0:
             self.dmri_pipeline.global_conf.subject_session = updated_project.subject_session
             self.dmri_pipeline.subject_directory =  os.path.join(updated_project.base_directory,updated_project.subject,updated_project.subject_session)
-            updated_project.dmri_config_file = os.path.join(updated_project.base_directory,'derivatives','%s_%s_diffusion_config.ini' % (updated_project.subject,updated_project.subject_session))
+            updated_project.dmri_config_file = os.path.join(updated_project.output_directory,'%s_%s_diffusion_config.ini' % (updated_project.subject,updated_project.subject_session))
         else:
             self.dmri_pipeline.global_conf.subject_session = ''
             self.dmri_pipeline.subject_directory =  os.path.join(updated_project.base_directory,updated_project.subject)
-            updated_project.dmri_config_file = os.path.join(updated_project.base_directory,'derivatives','%s_diffusion_config.ini' % (updated_project.subject))
+            updated_project.dmri_config_file = os.path.join(updated_project.output_directory,'%s_diffusion_config.ini' % (updated_project.subject))
 
-        self.dmri_pipeline.derivatives_directory =  os.path.join(updated_project.base_directory,'derivatives')
+        self.dmri_pipeline.derivatives_directory =  os.path.join(updated_project.output_directory)
 
         if os.path.isfile(updated_project.dmri_config_file):
             print "Load existing diffusion config file"
@@ -1219,13 +1223,13 @@ class ProjectHandler(Handler):
         if len(updated_project.subject_sessions) > 0:
             self.fmri_pipeline.global_conf.subject_session = updated_project.subject_session
             self.fmri_pipeline.subject_directory =  os.path.join(updated_project.base_directory,ui_info.project_info.subject,updated_project.subject_session)
-            updated_project.fmri_config_file = os.path.join(updated_project.base_directory,'derivatives','%s_%s_fMRI_config.ini' % (updated_project.subject,updated_project.subject_session))
+            updated_project.fmri_config_file = os.path.join(updated_project.output_directory,'%s_%s_fMRI_config.ini' % (updated_project.subject,updated_project.subject_session))
         else:
             self.fmri_pipeline.global_conf.subject_session = ''
             self.fmri_pipeline.subject_directory =  os.path.join(updated_project.base_directory,ui_info.project_info.subject)
-            updated_project.fmri_config_file = os.path.join(updated_project.base_directory,'derivatives','%s_fMRI_config.ini' % (updated_project.subject))
+            updated_project.fmri_config_file = os.path.join(updated_project.output_directory,'%s_fMRI_config.ini' % (updated_project.subject))
 
-        self.fmri_pipeline.derivatives_directory =  os.path.join(updated_project.base_directory,'derivatives')
+        self.fmri_pipeline.derivatives_directory =  os.path.join(updated_project.output_directory)
 
         print("fMRI config file loaded/created : %s"%updated_project.fmri_config_file)
 
@@ -1286,9 +1290,9 @@ class ProjectHandler(Handler):
     #
     #     self.anat_inputs_checked = False
     #
-    #     changed_project.anat_config_file = os.path.join(changed_project.base_directory,'derivatives','%s_anatomical_config.ini' % (changed_project.subject))
-    #     changed_project.dmri_config_file = os.path.join(changed_project.base_directory,'derivatives','%s_diffusion_config.ini' % (changed_project.subject))
-    #     changed_project.fmri_config_file = os.path.join(changed_project.base_directory,'derivatives','%s_fmri_config.ini' % (changed_project.subject))
+    #     changed_project.anat_config_file = os.path.join(changed_project.output_directory,'%s_anatomical_config.ini' % (changed_project.subject))
+    #     changed_project.dmri_config_file = os.path.join(changed_project.output_directory,'%s_diffusion_config.ini' % (changed_project.subject))
+    #     changed_project.fmri_config_file = os.path.join(changed_project.output_directory,'%s_fmri_config.ini' % (changed_project.subject))
     #
     #     if os.path.isfile(changed_project.anat_config_file):
     #         print "Existing anatomical config file for subject %s: %s" % ( changed_project.subject,changed_project.anat_config_file)
@@ -1361,8 +1365,8 @@ class ProjectHandler(Handler):
         self.anat_inputs_checked = False
         #self.dmri_inputs_checked = False
 
-        changed_project.anat_config_file = os.path.join(changed_project.base_directory,'derivatives','%s_anatomical_config.ini' % (changed_project.subject))
-        changed_project.dmri_config_file = os.path.join(changed_project.base_directory,'derivatives','%s_diffusion_config.ini' % (changed_project.subject))
+        changed_project.anat_config_file = os.path.join(changed_project.output_directory,'%s_anatomical_config.ini' % (changed_project.subject))
+        changed_project.dmri_config_file = os.path.join(changed_project.output_directory,'%s_diffusion_config.ini' % (changed_project.subject))
 
         if os.path.isfile(changed_project.anat_config_file): # and os.path.isfile(changed_project.dmri_config_file): # If existing config file / connectome data, load subject project
 
