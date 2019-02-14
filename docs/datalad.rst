@@ -73,19 +73,11 @@ Get T1w and Diffusion images to be processed, written in a bash script for repro
 Write datalad get commands to get\_required\_files\_for\_analysis.sh
 
 ::
-<<<<<<< HEAD
-
-    echo "datalad get -J 4 sub-*/ses-*/anat/sub-*_T1w.nii.gz" > code/get_required_files_for_analysis.sh
-    echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.nii.gz" > code/get_required_files_for_analysis.sh
-    echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bvec" > code/get_required_files_for_analysis.sh
-    echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bval" > code/get_required_files_for_analysis.sh
-=======
     mkdir code
     echo "datalad get -J 4 sub-*/ses-*/anat/sub-*_T1w.nii.gz" > code/get_required_files_for_analysis.sh
     echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.nii.gz" >> code/get_required_files_for_analysis.sh
     echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bvec" >> code/get_required_files_for_analysis.sh
     echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bval" >> code/get_required_files_for_analysis.sh
->>>>>>> feature-tracking-using-dipy-pft-algorithm
 
 Add all content in the code/ directory directly to git
 
@@ -99,12 +91,8 @@ Add the container image of the connectome mapper to the dataset
 ::
 
     datalad containers-add connectomemapper-bidsapp-{version-tag} \
-<<<<<<< HEAD
-    --url dhub://sebastientourbier/connectomemapper-bidsapp:{version-tag}
-=======
     --url dhub://sebastientourbier/connectomemapper-bidsapp:{version-tag} \
     --update
->>>>>>> feature-tracking-using-dipy-pft-algorithm
 
 Save the state of the dataset prior to analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -176,13 +164,8 @@ get\_required\_files\_for\_analysis\_by\_bob.sh for reproducibility
 ::
 
     echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_mask.nii.gz" > code/get_required_files_for_analysis_by_bob.sh
-<<<<<<< HEAD
-    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_class-*_dseg.nii.gz" > code/get_required_files_for_analysis_by_bob.sh
-    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_scale*_atlas.nii.gz" > code/get_required_files_for_analysis_by_bob.sh
-=======
     echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_class-*_dseg.nii.gz" >> code/get_required_files_for_analysis_by_bob.sh
     echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_scale*_atlas.nii.gz" >> code/get_required_files_for_analysis_by_bob.sh
->>>>>>> feature-tracking-using-dipy-pft-algorithm
 
 Add all content in the code/ directory directly to git
 
