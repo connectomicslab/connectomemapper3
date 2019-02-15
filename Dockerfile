@@ -1,8 +1,6 @@
 # Use an official Python runtime as a parent image
 FROM sebastientourbier/connectomemapper-ubuntu16.04:latest
 
-MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
-
 ##
 # Install any needed packages specified in requirements.txt
 # RUN pip install --trusted-host pypi.python.org -r requirements.txt
