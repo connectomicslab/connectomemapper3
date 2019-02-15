@@ -136,7 +136,7 @@ With DataLad with don’t have to keep those inputs around – without losing th
 
     datalad uninstall sub-*/*
 
-Local collaboration with Bob for Functional Analysis based on Electrical Source Imaging
+Local collaboration with Bob for Electrical Source Imaging
 ---------------------------------------------------------------------------------------
 
 Processed dataset installation on Bob's workstation
