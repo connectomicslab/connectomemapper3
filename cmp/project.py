@@ -19,6 +19,8 @@ import glob
 import string
 import fnmatch
 
+import multiprocessing
+
 import ConfigParser
 
 from bids.grabbids import BIDSLayout

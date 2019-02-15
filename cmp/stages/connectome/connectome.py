@@ -33,8 +33,8 @@ class ConnectomeConfig(HasTraits):
     #modality = List(['Deterministic','Probabilistic'])
     probtrackx = Bool(False)
     compute_curvature = Bool(False)
-    output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
-    connectivity_metrics = List(['Fiber number','Fiber length','Fiber density','Fiber proportion','Normalized fiber density','ADC','gFA'], editor=CheckListEditor(values=['Fiber number','Fiber length','Fiber density','Fiber proportion','Normalized fiber density','ADC','gFA'],cols=4))
+    output_types = List(['gPickle','mat','cff','graphml'])
+    connectivity_metrics = List(['Fiber number','Fiber length','Fiber density','Fiber proportion','Normalized fiber density','ADC','gFA'])
     log_visualization = Bool(True)
     circular_layout = Bool(False)
     subject = Str

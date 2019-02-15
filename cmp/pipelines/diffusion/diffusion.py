@@ -30,7 +30,7 @@ from cmp.pipelines.anatomical.anatomical import AnatomicalPipeline
 from cmp.stages.preprocessing.preprocessing import PreprocessingStage
 from cmp.stages.diffusion.diffusion import DiffusionStage
 from cmp.stages.registration.registration import RegistrationStage
-from cmp.stages.connectome.connectome import ConnectomeStage, MRTrixConnectomeStage
+from cmp.stages.connectome.connectome import ConnectomeStage
 
 from bids.grabbids import BIDSLayout
 
@@ -77,7 +77,7 @@ class DiffusionPipeline(Pipeline):
             'Registration':RegistrationStage(pipeline_mode = "Diffusion"),
             'Diffusion':DiffusionStage(),
             'Connectome':ConnectomeStage()}
-        # 'MRTrixConnectome':MRTrixConnectomeStage()
+        
         Pipeline.__init__(self, project_info)
 
         self.diffusion_imaging_model = project_info.diffusion_imaging_model

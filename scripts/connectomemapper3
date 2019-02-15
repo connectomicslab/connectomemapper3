@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     argc = len(sys.argv)
 
-    elif (argc==6) or (argc==7): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical
+    if (argc==6) or (argc==7): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical
 
         project = cmp.project.CMP_Project_Info()
         project.base_directory = os.path.abspath(sys.argv[1])

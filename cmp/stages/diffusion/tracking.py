@@ -44,7 +44,7 @@ import numpy as np
 
 from cmtklib.diffusion import filter_fibers
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from nipype import logging
 iflogger = logging.getLogger('nipype.interface')

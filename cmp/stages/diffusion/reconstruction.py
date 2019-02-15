@@ -43,7 +43,7 @@ iflogger = logging.getLogger('nipype.interface')
 class Dipy_recon_config(HasTraits):
     imaging_model = Str
     # flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
-    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
+    flip_table_axis = List(['x','y','z'])
     # gradient_table = File
     local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
     local_model = Bool(True)
@@ -92,7 +92,7 @@ class Dipy_recon_config(HasTraits):
 
 class MRtrix_recon_config(HasTraits):
     # gradient_table = File
-    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
+    flip_table_axis = List(['x','y','z'])
     local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
     local_model = Bool(True)
     lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])

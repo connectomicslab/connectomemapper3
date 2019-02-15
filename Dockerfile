@@ -23,11 +23,11 @@ ADD . /app/connectomemapper3
 
 RUN python setup.py install
 ENV ANTSPATH=/opt/conda/bin
-#ENV PATH=$ANTSPATH:$PATH
+ENV PATH=$ANTSPATH:$PATH
 
 # Create entrypoint script that simulated a X server - required by traitsui
 # try to change freesurfer home permission to copy the license
-RUN echo '#! /bin/sh \n chown "$(id -u):$(id -g)" /opt/freesurfer \n xvfb-run -a python "/app/connectomemapper3/run.py" "$@" \n rm -R /tmp/.X99-lock /tmp/.X11-unix' > /app/run_connectomemapper3.sh
+RUN echo '#! /bin/sh \n echo $PATH \n chown "$(id -u):$(id -g)" /opt/freesurfer \n xvfb-run -a python "/app/connectomemapper3/run.py" "$@" \n rm -R /tmp/.X99-lock /tmp/.X11-unix' > /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed
@@ -36,6 +36,7 @@ RUN chmod 775 /app/run_connectomemapper3.sh
 RUN chmod 777 /opt/freesurfer
 
 #COPY version /version
+#WORKDIR /opt/conda/bin
 ENTRYPOINT ["/app/run_connectomemapper3.sh"]
 
 ARG BUILD_DATE

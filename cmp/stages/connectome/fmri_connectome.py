@@ -34,7 +34,7 @@ class ConnectomeConfig(HasTraits):
     apply_scrubbing = Bool(False)
     FD_thr = Float(0.2)
     DVARS_thr = Float(4.0)
-    output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
+    output_types = List(['gPickle','mat','cff','graphml'])
 
     subject = Str()
 
