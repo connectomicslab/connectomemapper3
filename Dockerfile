@@ -23,7 +23,7 @@ ADD . /app/connectomemapper3
 
 #RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
 
-RUN python setup_core.py install
+RUN python setup.py install
 ENV ANTSPATH=/opt/conda/bin
 #ENV PATH=$ANTSPATH:$PATH
 
