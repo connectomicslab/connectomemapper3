@@ -1,5 +1,0 @@
-/home/localadmin/Softwares/cmp/src/DTB/bin/./181_vecs.dat
-/home/localadmin/Softwares/cmp/src/DTB/bin/./DTB_gfa
-/home/localadmin/Softwares/cmp/src/DTB/bin/./DTB_P0
-/home/localadmin/Softwares/cmp/src/DTB/bin/./DTB_dtk2dir
-/home/localadmin/Softwares/cmp/src/DTB/bin/./DTB_streamline

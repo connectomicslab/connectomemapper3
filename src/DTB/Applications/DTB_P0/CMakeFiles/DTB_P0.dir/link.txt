@@ -1,1 +1,0 @@
-/usr/bin/g++-5      CMakeFiles/DTB_P0.dir/main.cxx.o  -o DTB_P0 -rdynamic -Wl,-Bstatic -lblitz -Wl,-Bdynamic -lniftiio -lboost_program_options 
