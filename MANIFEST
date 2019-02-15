@@ -117,10 +117,6 @@ resources/buttons/configurator.png
 resources/buttons/qualitycontrol.png
 resources/icons/cmp.png
 scripts/181_vecs.dat
-scripts/DTB_P0
-scripts/DTB_dtk2dir
-scripts/DTB_gfa
-scripts/DTB_streamline
 scripts/cmpbidsappmanager
 scripts/connectomemapper3
 scripts/runGource.sh
