@@ -1,11 +1,10 @@
-# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
-# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+# Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
 
 """ The Diffusion Toolkit module provides functions for interfacing with Diffusion Toolkit functions missing in nipype or modified
-""" 
+"""
 
 import re
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
@@ -90,7 +89,7 @@ class DiffUnpackInputSpec(CommandLineInputSpec):
     input_dicom = File(exists=True,mandatory=True,desc='input dicom file',argstr='%s',position=1)
     out_prefix = traits.Str('output',desc='Output file prefix',argstr='%s',usedefault=True,position=2)
     output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type', usedefault=True)
-    split = traits.Bool(desc="""instead of saving everything in one big multi-timepoint 4D image, 
+    split = traits.Bool(desc="""instead of saving everything in one big multi-timepoint 4D image,
           split it into seperate files, one timepoint per file""", argstr='-split')
 
 class DiffUnpackOutputSpec(TraitedSpec):
@@ -104,7 +103,7 @@ class DiffUnpack(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        
+
         outputs['converted_files'] = glob.glob(os.path.abspath(self.inputs.out_prefix+'*'))
         return outputs
 
@@ -114,12 +113,12 @@ class DTIReconInputSpec(CommandLineInputSpec):
     out_prefix = traits.Str("dti", desc='Output file prefix', argstr='%s', usedefault=True,position=2)
     output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type', usedefault=True)
     gradient_matrix = File(desc="""specify gradient matrix to use. required.""", argstr='-gm %s', exists=True, mandatory=True, position=3)
-    multiple_b_values = traits.Bool(desc="""if 'MultiBvalue' is 'true' 
-          or 1, it will either use the bvalues specified as the 4th component 
+    multiple_b_values = traits.Bool(desc="""if 'MultiBvalue' is 'true'
+          or 1, it will either use the bvalues specified as the 4th component
           of each gradient vector, or use max b value scaled by the magnitude
           of the vector.""", argstr='%d', position=4)
     b_value = traits.Int(desc="""set b value or maximum b value for multi-bvalue data. default is 1000""", argstr='-b %d')
-    number_of_b0 = traits.Int(desc="""number of repeated b0 images on top. default is 1. the program 
+    number_of_b0 = traits.Int(desc="""number of repeated b0 images on top. default is 1. the program
           assumes b0 images are on top""", argstr='-b0 %d')
     n_averages = traits.Int(desc='Number of averages', argstr='-nex %s')
     image_orientation_vectors = traits.List(traits.Float(), minlen=6, maxlen=6, desc="""specify image orientation vectors. if just one argument given,

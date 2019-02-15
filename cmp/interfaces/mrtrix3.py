@@ -1,5 +1,4 @@
-# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
-# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+# Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
@@ -12,6 +11,45 @@ import nipype.interfaces.utility as util
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File, Directory, InputMultiPath, isdefined
 from nipype.utils.filemanip import split_filename, fname_presuffix
 import os, os.path as op
+
+
+# class MRTrixInfoInputSpec(CommandLineInputSpec):
+#     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+#         desc='Input images to be read')
+#     _xor_inputs = ('out_grad_mrtrix','out_grad_fsl')
+#     out_grad_mrtrix = File(argstr='-export_grad_mrtrix %s',desc='export the DWI gradient table to file in MRtrix format',xor=_xor_inputs)
+#     out_grad_fsl =  traits.Tuple(File(),File(), argstr='-export_grad_fsl %s %s', desc='export the DWI gradient table to files in FSL (bvecs / bvals) format', xor=_xor_inputs)
+
+# class MRTrixInfoOutputSpec(TraitedSpec):
+#     out_grad_mrtrix = traits.Tuple(File(exists=True),File(exists=True), desc='Outputs [bvecs, bvals] DW gradient scheme (FSL format) if set')
+#     out_grad_fsl = File(exits=True,desc='Output MRtrix gradient text file if set')
+
+# class MRTrixInfo(CommandLine):
+#     """
+#     Prints out relevant header information found in the image specified.
+
+#     Example
+#     -------
+
+#     >>> import nipype.interfaces.mrtrix as mrt
+#     >>> MRinfo = mrt.MRTrixInfo()
+#     >>> MRinfo.inputs.in_file = 'dwi.mif'
+#     >>> MRinfo.run()                                    # doctest: +SKIP
+#     """
+
+#     _cmd = 'mrinfo'
+#     input_spec=MRTrixInfoInputSpec
+#     output_spec=MRTrixInfoOutputSpec
+
+#     def _list_outputs(self):
+#         outputs = self.output_spec().get()
+#         outputs['out_grad_mrtrix'] = op.abspath(self.inputs.out_grad_mrtrix)
+#         if isdefined(self.inputs.out_grad_mrtrix):
+#             outputs['out_grad_mrtrix'] = op.abspath(self.inputs.out_grad_mrtrix)
+#         if isdefined(self.inputs.out_grad_fsl):
+#             outputs['out_grad_fsl'] = (op.abspath(self.inputs.out_grad_fsl[0]),op.abspath(self.inputs.out_grad_mrtrix[1]))
+#         return outputs
+
 
 
 class MRtrix_mul_InputSpec(CommandLineInputSpec):

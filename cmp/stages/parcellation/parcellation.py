@@ -9,7 +9,6 @@
 
 # General imports
 from traits.api import *
-from traitsui.api import *
 import pkg_resources
 import os
 import pickle
@@ -43,26 +42,6 @@ class ParcellationConfig(HasTraits):
     brain_file = File(exists=True)
     graphml_file = File(exists=True)
     atlas_info = Dict()
-    traits_view = View(Item('parcellation_scheme',editor=EnumEditor(name='parcellation_scheme_editor')),
-                       Group(
-                             'number_of_regions',
-                             'atlas_nifti_file',
-                             'graphml_file',
-                             Group(
-                                   "csf_file","brain_file",
-                                   show_border=True,
-                                   label="Files for nuisance regression (optional)",
-                                   visible_when="pipeline_mode=='fMRI'"
-                                   ),
-                             visible_when='parcellation_scheme=="Custom"'
-                             ),
-                       Group(
-                             'segment_hippocampal_subfields',
-                             'segment_brainstem',
-                             'include_thalamic_nuclei_parcellation',
-                             visible_when='parcellation_scheme=="Lausanne2018"'
-                             )
-                       )
 
     def update_atlas_info(self):
         atlas_name = os.path.basename(self.atlas_nifti_file)

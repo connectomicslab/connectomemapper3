@@ -8,7 +8,6 @@
 """
 
 from traits.api import *
-from traitsui.api import *
 
 from nipype.interfaces.base import traits, BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, CommandLine, InputMultiPath, OutputMultiPath, TraitedSpec, Interface, InterfaceResult, isdefined
 import nipype.interfaces.utility as util
@@ -39,43 +38,6 @@ from cmp.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
 
 from nipype.interfaces.mrtrix3.preprocess import ResponseSD
 
-# class MRTrixInfoInputSpec(CommandLineInputSpec):
-#     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-#         desc='Input images to be read')
-#     _xor_inputs = ('out_grad_mrtrix','out_grad_fsl')
-#     out_grad_mrtrix = File(argstr='-export_grad_mrtrix %s',desc='export the DWI gradient table to file in MRtrix format',xor=_xor_inputs)
-#     out_grad_fsl =  traits.Tuple(File(),File(), argstr='-export_grad_fsl %s %s', desc='export the DWI gradient table to files in FSL (bvecs / bvals) format', xor=_xor_inputs)
-
-# class MRTrixInfoOutputSpec(TraitedSpec):
-#     out_grad_mrtrix = traits.Tuple(File(exists=True),File(exists=True), desc='Outputs [bvecs, bvals] DW gradient scheme (FSL format) if set')
-#     out_grad_fsl = File(exits=True,desc='Output MRtrix gradient text file if set')
-
-# class MRTrixInfo(CommandLine):
-#     """
-#     Prints out relevant header information found in the image specified.
-
-#     Example
-#     -------
-
-#     >>> import nipype.interfaces.mrtrix as mrt
-#     >>> MRinfo = mrt.MRTrixInfo()
-#     >>> MRinfo.inputs.in_file = 'dwi.mif'
-#     >>> MRinfo.run()                                    # doctest: +SKIP
-#     """
-
-#     _cmd = 'mrinfo'
-#     input_spec=MRTrixInfoInputSpec
-#     output_spec=MRTrixInfoOutputSpec
-
-#     def _list_outputs(self):
-#         outputs = self.output_spec().get()
-#         outputs['out_grad_mrtrix'] = op.abspath(self.inputs.out_grad_mrtrix)
-#         if isdefined(self.inputs.out_grad_mrtrix):
-#             outputs['out_grad_mrtrix'] = op.abspath(self.inputs.out_grad_mrtrix)
-#         if isdefined(self.inputs.out_grad_fsl):
-#             outputs['out_grad_fsl'] = (op.abspath(self.inputs.out_grad_fsl[0]),op.abspath(self.inputs.out_grad_mrtrix[1]))
-#         return outputs
-
 class PreprocessingConfig(HasTraits):
     total_readout = Float(0.0)
     description = Str('description')
@@ -97,55 +59,6 @@ class PreprocessingConfig(HasTraits):
     # DWI resampling selection
     resampling = Tuple(1,1,1)
     interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
-
-    traits_view = View(
-                    VGroup(
-                        # VGroup(
-                        # HGroup(
-                        #     Item('start_vol',label='Vol'),
-                        #     Item('end_vol',label='to'),
-                        #     Item('max_str',style='readonly',show_label=False)
-                        #     ),
-                        #     label='Processed volumes'),
-                        VGroup(
-                        HGroup(
-                            Item('denoising'),
-                            Item('denoising_algo',label='Tool:',visible_when='denoising==True'),
-                            Item('dipy_noise_model',label='Noise model (Dipy):',visible_when='denoising_algo=="Dipy (NLM)"')
-                            ),
-                        HGroup(
-                            Item('bias_field_correction'),
-                            Item('bias_field_algo',label='Tool:',visible_when='bias_field_correction==True')
-                            ),
-                        VGroup(
-                        HGroup(
-                            Item('eddy_current_and_motion_correction'),
-                            Item('eddy_correction_algo',visible_when='eddy_current_and_motion_correction==True'),
-                            ),
-                            Item('eddy_correct_motion_correction',label='Motion correction',visible_when='eddy_current_and_motion_correction==True and eddy_correction_algo=="FSL eddy_correct"'),
-                            Item('total_readout',label='Total readout time (s):',visible_when='eddy_current_and_motion_correction==True and eddy_correction_algo=="FSL eddy"')
-                        ),
-                        label='Preprocessing steps'),
-                        VGroup(
-                        VGroup(
-                            Item('resampling',label='Voxel size (x,y,z)',editor=TupleEditor(cols=3)),
-                            'interpolation'
-                            ),
-                        label='Final resampling')
-                        ),
-                    width=0.5,height=0.5)
-
-    # def _max_vol_changed(self,new):
-    #     self.max_str = '(max: %d)' % new
-    #     #self.end_vol = new
-    #
-    # def _end_vol_changed(self,new):
-    #     if new > self.max_vol:
-    #         self.end_vol = self.max_vol
-    #
-    # def _start_vol_changed(self,new):
-    #     if new < 0:
-    #         self.start_vol = 0
 
 class splitBvecBvalInputSpec(BaseInterfaceInputSpec):
     bvecs = File(exists=True)
@@ -215,7 +128,6 @@ class PreprocessingStage(Stage):
         print inputnode
         processing_input = pe.Node(interface=util.IdentityInterface(fields=['diffusion','aparc_aseg','aseg','bvecs','bvals','grad','acqp','index','T1','brain','brain_mask','wm_mask_file','roi_volumes']),name='processing_input')
 
-
         # For DSI acquisition: extract the hemisphere that contains the data
         # if self.config.start_vol > 0 or self.config.end_vol < self.config.max_vol:
         #
@@ -237,6 +149,7 @@ class PreprocessingStage(Stage):
         #                 ])
         #
         # else:
+
         flow.connect([
                     (inputnode,processing_input,[('diffusion','diffusion'),('bvecs','bvecs'),('bvals','bvals')]),
                     ])
@@ -245,34 +158,6 @@ class PreprocessingStage(Stage):
                     (inputnode,processing_input,[('T1','T1'),('aparc_aseg','aparc_aseg'),('aseg','aseg'),('brain','brain'),('brain_mask','brain_mask'),('wm_mask_file','wm_mask_file'),('roi_volumes','roi_volumes')]),
                     (processing_input,outputnode,[('bvals','bvals')])
                     ])
-
-        print inputnode.inputs
-        #TODO: Add denoising (DWdenoise)/ bias field correction (FSL FIRST)/ New registration: FSL FLIRT and FNIRT (if no top up), SPM rigid coregistration (if topup)
-        # if self.config.denoising:
-        #     dwi_denoise = pe.Node(interface=mrt.DWIDenoise() , name='dwi_denoise')
-        #     flow.connect([
-        #                 (processing_input,dwi_denoise,[("diffusion","in_file")])
-        #                 ])
-
-        # Flip gradient table
-        # flip_table = pe.Node(interface=flipTable(),name='flip_table')
-        # flip_table.inputs.table = self.config.gradient_table
-        # flip_table.inputs.flipping_axis = self.config.flip_table_axis
-        # flip_table.inputs.delimiter = ' '
-        # flip_table.inputs.header_lines = 0
-        # flip_table.inputs.orientation = 'v'
-        # flow.connect([
-        #         (flip_table,processing_input,[("table","grad")]),
-        #         ])
-
-        #Computes brain mask using FSL BET
-        # Swap dimensions so stuff looks nice in the report
-        #flipbrain2fsl = pe.Node(interface=fsl.SwapDimensions(new_dims=("RL","PA","IS")),name="flipbrain2fsl")
-        #bet = pe.Node(interface=fsl.BET(out_file='brain.nii.gz'), name='bet')
-        #bet.inputs.mask = True
-        #bet.inputs.frac = 0.5
-
-        #flipbrain2mrtrix
 
         #Conversion to MRTrix image format ".mif", grad_fsl=(inputnode.inputs.bvecs,inputnode.inputs.bvals)
         mr_convert = pe.Node(interface=MRConvert(stride=[1,2,+3,+4]), name='mr_convert')
@@ -1019,51 +904,6 @@ class ConcatOutputsAsTuple(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["out_tuple"] = (self.inputs.input1,self.inputs.input2)
-        return outputs
-
-
-class flipTableInputSpec(BaseInterfaceInputSpec):
-    table = File(exists=True)
-    flipping_axis = List()
-    delimiter = Str()
-    header_lines = Int(0)
-    orientation = Enum(['v','h'])
-
-class flipTableOutputSpec(TraitedSpec):
-    table = File(exists=True)
-
-class flipTable(BaseInterface):
-    input_spec = flipTableInputSpec
-    output_spec = flipTableOutputSpec
-
-    def _run_interface(self,runtime):
-        axis_dict = {'x':0, 'y':1, 'z':2}
-        import numpy as np
-        f = open(self.inputs.table,'r')
-        header = ''
-        for h in range(self.inputs.header_lines):
-            header += f.readline()
-        if self.inputs.delimiter == ' ':
-            table = np.loadtxt(f)
-        else:
-            table = np.loadtxt(f, delimiter=self.inputs.delimiter)
-        f.close()
-        if self.inputs.orientation == 'v':
-            for i in self.inputs.flipping_axis:
-                table[:,axis_dict[i]] = -table[:,axis_dict[i]]
-        elif self.inputs.orientation == 'h':
-            for i in self.inputs.flipping_axis:
-                table[axis_dict[i],:] = -table[axis_dict[i],:]
-        out_f = file(os.path.abspath('flipped_table.txt'),'a')
-        if self.inputs.header_lines > 0:
-            out_f.write(header)
-        np.savetxt(out_f,table,delimiter=self.inputs.delimiter)
-        out_f.close()
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["table"] = os.path.abspath('flipped_table.txt')
         return outputs
 
 class ApplymultipleMRConvertInputSpec(BaseInterfaceInputSpec):

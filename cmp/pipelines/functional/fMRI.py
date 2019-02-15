@@ -10,32 +10,15 @@
 import os
 import datetime
 
-# try:
-#     from traitsui.api import *
-#     from traits.api import *
-#     from traitsui.wx.themed_button_editor import ThemedButtonEditor
-# except ImportError:
-#     from enthought.traits.api import *
-#     from enthought.traits.ui.api import *
-#     from  enthought.traits.ui.wx.themed_button_editor import ThemedButtonEditor
-
-from traits.api import *
-from traitsui.api import *
-from traitsui.qt4.extra.qt_view import QtView
-from pyface.ui.qt4.image_resource import ImageResource
-
-import apptools.io.api as io
-
-from pyface.qt.QtCore import *
-from pyface.qt.QtGui import *
-
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
 from nipype.interfaces.utility import Merge
 from nipype import config, logging
 from nipype.caching import Memory
-from pyface.api import ImageResource
 import shutil
+
+from traits.api import *
+import apptools.io.api as io
 
 import nibabel as nib
 
@@ -59,12 +42,6 @@ class Check_Input_Notification(HasTraits):
     imaging_model_options = List(['fMRI'])
     imaging_model = Str
 
-    traits_view = View(Item('message',style='readonly',show_label=False),
-                       Item('imaging_model',editor=EnumEditor(name='imaging_model_options'),visible_when='len(imaging_model_options)>1'),
-                       kind='modal',
-                       buttons=['OK'],
-                       title="Check inputs")
-
 class fMRIPipeline(Pipeline):
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("fMRI_pipeline")
@@ -79,32 +56,10 @@ class fMRIPipeline(Pipeline):
 
     global_conf = Global_Configuration()
 
-    preprocessing = Button('Preprocessing')
-    functionalMRI = Button('FunctionalMRI')
-    registration = Button('Registration')
-    connectome = Button('Connectome')
-
     config_file = Str
 
     subjects_dir = Str
     subject_id = Str
-
-    # pipeline_group = VGroup(
-    #                     HGroup(spring,Item('preprocessing',editor=ToolkitEditorFactory(image=ImageResource('preprocessing'))),spring,show_labels=False),
-    #                     HGroup(spring,Item('registration',editor=ToolkitEditorFactory(image=ImageResource('registration'))),spring,show_labels=False),
-    #                     HGroup(spring,Item('functionalMRI',editor=ToolkitEditorFactory(image=ImageResource('functionalMRI'))),spring,show_labels=False),
-    #                     HGroup(spring,Item('connectome',editor=ToolkitEditorFactory(image=ImageResource('connectome'))),spring,show_labels=False),
-    #                     springy=True
-    #                     )
-
-    pipeline_group = VGroup(
-                        HGroup(spring,UItem('preprocessing',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False,label=""),
-                        HGroup(spring,UItem('registration',style='custom',width=500,height=110,resizable=True,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False,label=""),
-                        HGroup(spring,UItem('functionalMRI',style='custom',width=450,height=240,resizable=True,editor_args={'image':ImageResource('functionalMRI'),'label':""}),spring,show_labels=False,label=""),
-                        HGroup(spring,UItem('connectome',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False,label=""),
-                        spring,
-                        springy=True
-                    )
 
     def __init__(self,project_info):
         self.stages = {'Preprocessing':PreprocessingStage(),
@@ -160,20 +115,6 @@ class fMRIPipeline(Pipeline):
     def update_scrubbing(self):
         self.stages['FunctionalMRI'].config.scrubbing = self.stages['Connectome'].config.apply_scrubbing
 
-    def _preprocessing_fired(self, info):
-        print "preproc fired"
-        self.stages['Preprocessing'].configure_traits()
-
-    def _functionalMRI_fired(self, info):
-        print "func fired"
-        self.stages['FunctionalMRI'].configure_traits()
-
-    def _registration_fired(self, info):
-        self.stages['Registration'].configure_traits()
-
-    def _connectome_fired(self, info):
-        self.stages['Connectome'].configure_traits()
-
     def define_custom_mapping(self, custom_last_stage):
         # start by disabling all stages
         for stage in self.ordered_stage_list:
@@ -210,7 +151,7 @@ class fMRIPipeline(Pipeline):
                 fmri_file = files[0].filename
                 print fmri_file
             else:
-                error(message="BOLD image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                print("BOLD image not found for subject %s."%(subjid))
                 return
 
             files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz')
@@ -218,7 +159,7 @@ class fMRIPipeline(Pipeline):
                 t1_file = files[0].filename
                 print t1_file
             else:
-                error(message="T1w image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                print("T1w image not found for subject %s."%(subjid))
                 return
 
             files = layout.get(subject=subjid,type='T2w',extensions='.nii.gz')
@@ -226,7 +167,7 @@ class fMRIPipeline(Pipeline):
                 t2_file = files[0].filename
                 print t2_file
             else:
-                error(message="T2w image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                print("T2w image not found for subject %s."%(subjid))
 
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
@@ -236,7 +177,7 @@ class fMRIPipeline(Pipeline):
                 fmri_file = files[0].filename
                 print fmri_file
             else:
-                error(message="BOLD image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                print("BOLD image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                 return
 
             files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz',session=sessid)
@@ -244,7 +185,7 @@ class fMRIPipeline(Pipeline):
                 t1_file = files[0].filename
                 print t1_file
             else:
-                error(message="T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                print("T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                 return
 
             files = layout.get(subject=subjid,type='T2w',extensions='.nii.gz',session=sessid)
@@ -252,28 +193,28 @@ class fMRIPipeline(Pipeline):
                 t2_file = files[0].filename
                 print t2_file
             else:
-                error(message="T2w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                print("T2w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
 
-        print "Looking for...."
-        print "fmri_file : %s" % fmri_file
-        print "t1_file : %s" % t1_file
-        print "t2_file : %s" % t2_file
+        print("Looking for....")
+        print("fmri_file : %s" % fmri_file)
+        print("t1_file : %s" % t1_file)
+        print("t2_file : %s" % t2_file)
 
         # mods = layout.get_modalities()
         types = layout.get_types()
-        print "Available modalities :"
+        print("Available modalities :")
         for typ in types:
-            print "-%s" % typ
+            print("-%s" % typ)
 
         for typ in types:
             if typ == 'T1w' and os.path.isfile(t1_file):
-                print "%s available" % typ
+                print("%s available" % typ)
                 t1_available = True
             if typ == 'T2w' and os.path.isfile(t2_file):
-                print "%s available" % typ
+                print("%s available" % typ)
                 t2_available = True
             if typ == 'bold' and os.path.isfile(fmri_file):
-                print "%s available" % typ
+                print("%s available" % typ)
                 fMRI_available = True
 
         print('fMRI :',fMRI_available)
@@ -306,7 +247,7 @@ class fMRIPipeline(Pipeline):
         else:
             input_message = 'Error during inputs check. No fMRI or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
 
-        print input_message
+        print(input_message)
 
         # if gui:
         #     # input_notification = Check_Input_Notification(message=input_message, imaging_model='fMRI')
@@ -580,223 +521,3 @@ class fMRIPipeline(Pipeline):
                 fMRI_flow.connect([(fMRI_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
 
         return fMRI_flow
-
-
-    def old_check_input(self, gui=True):
-        print '**** Check Inputs ****'
-        fMRI_available = False
-        t1_available = False
-        t2_available = False
-        valid_inputs = False
-
-        mem = Memory(base_dir=os.path.join(self.base_directory,'NIPYPE'))
-        swap_and_reorient = mem.cache(SwapAndReorient)
-
-        # Check for (and if existing, convert) functional data
-        input_dir = os.path.join(self.base_directory,'RAWDATA','fMRI')
-        if len(os.listdir(input_dir)) > 0:
-            if convert_rawdata(self.base_directory, input_dir, 'fMRI'):
-                fMRI_available = True
-
-        # Check for (and if existing, convert)  T1
-        input_dir = os.path.join(self.base_directory,'RAWDATA','T1')
-        if len(os.listdir(input_dir)) > 0:
-            if convert_rawdata(self.base_directory, input_dir, 'T1_orig'):
-                t1_available = True
-
-        # Check for (and if existing, convert)  T2
-        input_dir = os.path.join(self.base_directory,'RAWDATA','T2')
-        if len(os.listdir(input_dir)) > 0:
-            if convert_rawdata(self.base_directory, input_dir, 'T2_orig'):
-                t2_available = True
-
-        if fMRI_available:
-            if t2_available:
-                swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T2_orig.nii.gz'),
-                                  ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
-                                  out_file=os.path.join(self.base_directory,'NIFTI','T2.nii.gz'))
-            if t1_available:
-                swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T1_orig.nii.gz'),
-                                  ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
-                                  out_file=os.path.join(self.base_directory,'NIFTI','T1.nii.gz'))
-                valid_inputs = True
-                input_message = 'Inputs check finished successfully.\nfMRI and morphological data available.'
-            else:
-                input_message = 'Error during inputs check.\nMorphological data (T1) not available.'
-        elif t1_available:
-            input_message = 'Error during inputs check. \nfMRI data not available (fMRI).'
-        else:
-            input_message = 'Error during inputs check. No fMRI or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
-
-        if gui:
-            input_notification = Check_Input_Notification(message=input_message, imaging_model='fMRI')
-            input_notification.configure_traits()
-            self.global_conf.imaging_model = input_notification.imaging_model
-            self.stages['Registration'].config.imaging_model = input_notification.imaging_model
-        else:
-            print input_message
-            self.global_conf.imaging_model = 'fMRI'
-            self.stages['Registration'].config.imaging_model = 'fMRI'
-
-        if t2_available:
-            self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)','Nonlinear (FSL)']
-
-        self.fill_stages_outputs()
-
-        return valid_inputs
-
-    def old_check_config(self):
-        common_check = Pipeline.check_config(self)
-        if common_check == '':
-            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['FunctionalMRI'].config.global_nuisance and not os.path.exists(self.stages['Parcellation'].config.brain_file):
-                return('\n\tGlobal signal regression selected but no existing brain mask provided.\t\n\tPlease provide a brain mask in the parcellation configuration window,\n\tor disable the global signal regression in the functional configuration window.\t\n')
-            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['FunctionalMRI'].config.csf and not os.path.exists(self.stages['Parcellation'].config.csf_file):
-                return('\n\tCSF signal regression selected but no existing csf mask provided.\t\n\tPlease provide a csf mask in the parcellation configuration window,\n\tor disable the csf signal regression in the functional configuration window.\t\n')
-            if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation' and self.stages['FunctionalMRI'].config.wm and not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
-                return('\n\tWM signal regression selected but no existing wm mask provided.\t\n\tPlease provide a wm mask in the segmentation configuration window,\n\tor disable the wm signal regression in the functional configuration window.\t\n')
-            if self.stages['FunctionalMRI'].config.motion == True and self.stages['Preprocessing'].config.motion_correction == False:
-                return('\n\tMotion signal regression selected but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configuration window,\n\tor disable the motion signal regression in the functional configuration window.\t\n')
-            if self.stages['Connectome'].config.apply_scrubbing == True and self.stages['Preprocessing'].config.motion_correction == False:
-                return('\n\tScrubbing applied but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configutation window,\n\tor disable scrubbing in the connectome configuration window.\t\n')
-            return ''
-        return common_check
-
-    def old_process(self):
-        # Process time
-        now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-
-        # Initialization
-        if os.path.exists(os.path.join(self.base_directory,"LOG","pypeline.log")):
-            os.unlink(os.path.join(self.base_directory,"LOG","pypeline.log"))
-        config.update_config({'logging': {'log_directory': os.path.join(self.base_directory,"LOG"),
-                                  'log_to_file': True},
-                              'execution': {'remove_unnecessary_outputs': False}
-                              })
-        logging.update_logging(config)
-        iflogger = logging.getLogger('nipype.interface')
-
-        # Data import
-        datasource = pe.Node(interface=nio.DataGrabber(outfields = ['fMRI','T1','T2']), name='datasource')
-        datasource.inputs.base_directory = os.path.join(self.base_directory,'NIFTI')
-        datasource.inputs.template = '*'
-        datasource.inputs.raise_on_empty = False
-        datasource.inputs.field_template = dict(fMRI='fMRI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
-        datasource.inputs.sort_filelist=False
-
-        # Data sinker for output
-        sinker = pe.Node(nio.DataSink(), name="fMRI_sinker")
-        sinker.inputs.base_directory = os.path.join(self.base_directory, "RESULTS")
-
-        # Clear previous outputs
-        self.clear_stages_outputs()
-
-        # Create common_flow
-        common_flow = self.create_common_flow()
-
-        # Create fMRI flow
-
-        fMRI_flow = pe.Workflow(name='fMRI_pipeline')
-        fMRI_inputnode = pe.Node(interface=util.IdentityInterface(fields=["fMRI","T1","T2","subjects_dir","subject_id","wm_mask_file","roi_volumes","wm_eroded","brain_eroded","csf_eroded","parcellation_scheme","atlas_info"]),name="inputnode")
-        fMRI_outputnode = pe.Node(interface=util.IdentityInterface(fields=["connectivity_matrices"]),name="outputnode")
-        fMRI_flow.add_nodes([fMRI_inputnode,fMRI_outputnode])
-
-        if self.stages['Preprocessing'].enabled:
-            preproc_flow = self.create_stage_flow("Preprocessing")
-            fMRI_flow.connect([
-                (fMRI_inputnode,preproc_flow,[("fMRI","inputnode.functional")]),
-                ])
-
-        if self.stages['Registration'].enabled:
-            reg_flow = self.create_stage_flow("Registration")
-            fMRI_flow.connect([
-                          (fMRI_inputnode,reg_flow,[('T1','inputnode.T1')]),(fMRI_inputnode,reg_flow,[('T2','inputnode.T2')]),
-                          (preproc_flow,reg_flow, [('outputnode.mean_vol','inputnode.target')]),
-                          (fMRI_inputnode,reg_flow, [('wm_mask_file','inputnode.wm_mask'),('roi_volumes','inputnode.roi_volumes'),
-                                                ('wm_eroded','inputnode.eroded_wm')])
-                          ])
-            if self.stages['FunctionalMRI'].config.global_nuisance:
-                fMRI_flow.connect([
-                              (fMRI_inputnode,reg_flow,[('brain_eroded','inputnode.eroded_brain')])
-                            ])
-            if self.stages['FunctionalMRI'].config.csf:
-                fMRI_flow.connect([
-                              (fMRI_inputnode,reg_flow,[('csf_eroded','inputnode.eroded_csf')])
-                            ])
-            if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
-                fMRI_flow.connect([
-                          (fMRI_inputnode,reg_flow, [('subjects_dir','inputnode.subjects_dir'),
-                                                ('subject_id','inputnode.subject_id')]),
-                          ])
-
-        if self.stages['FunctionalMRI'].enabled:
-            func_flow = self.create_stage_flow("FunctionalMRI")
-            fMRI_flow.connect([
-                        (preproc_flow,func_flow, [('outputnode.functional_preproc','inputnode.preproc_file')]),
-                        (reg_flow,func_flow, [('outputnode.wm_mask_registered','inputnode.registered_wm'),('outputnode.roi_volumes_registered','inputnode.registered_roi_volumes'),
-                                              ('outputnode.eroded_wm_registered','inputnode.eroded_wm'),('outputnode.eroded_csf_registered','inputnode.eroded_csf'),
-                                              ('outputnode.eroded_brain_registered','inputnode.eroded_brain')])
-                        ])
-            if self.stages['FunctionalMRI'].config.scrubbing or self.stages['FunctionalMRI'].config.motion:
-                fMRI_flow.connect([
-                                   (preproc_flow,func_flow,[("outputnode.par_file","inputnode.motion_par_file")])
-                                ])
-
-        if self.stages['Connectome'].enabled:
-            con_flow = self.create_stage_flow("Connectome")
-            fMRI_flow.connect([
-		                (fMRI_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
-		                (func_flow,con_flow, [('outputnode.func_file','inputnode.func_file'),("outputnode.FD","inputnode.FD"),
-                                              ("outputnode.DVARS","inputnode.DVARS")]),
-                        (reg_flow,con_flow,[("outputnode.roi_volumes_registered","inputnode.roi_volumes_registered")]),
-                        (con_flow,fMRI_outputnode,[("outputnode.connectivity_matrices","connectivity_matrices")])
-		                ])
-
-            if self.parcellation_scheme == "Custom":
-                fMRI_flow.connect([(fMRI_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
-
-        # Create NIPYPE flow
-
-        flow = pe.Workflow(name='nipype', base_dir=os.path.join(self.base_directory))
-
-        flow.connect([
-                      (datasource,common_flow,[("T1","inputnode.T1")]),
-                      (datasource,fMRI_flow,[("fMRI","inputnode.fMRI"),("T1","inputnode.T1"),("T2","inputnode.T2")]),
-                      (common_flow,fMRI_flow,[("outputnode.subjects_dir","inputnode.subjects_dir"),
-                                              ("outputnode.subject_id","inputnode.subject_id"),
-                                              ("outputnode.wm_mask_file","inputnode.wm_mask_file"),
-                                              ("outputnode.roi_volumes","inputnode.roi_volumes"),
-                                              ("outputnode.wm_eroded","inputnode.wm_eroded"),
-                                              ("outputnode.brain_eroded","inputnode.brain_eroded"),
-                                              ("outputnode.csf_eroded","inputnode.csf_eroded"),
-                                              ("outputnode.parcellation_scheme","inputnode.parcellation_scheme"),
-                                              ("outputnode.atlas_info","inputnode.atlas_info")]),
-                      (fMRI_flow,sinker,[("outputnode.connectivity_matrices","fMRI.%s.connectivity_matrices"%now)])
-                    ])
-
-        # Process pipeline
-
-        iflogger.info("**** Processing ****")
-
-        if(self.number_of_cores != 1):
-            flow.run(plugin='MultiProc', plugin_args={'n_procs' : self.number_of_cores})
-        else:
-            flow.run()
-        print('out of run')
-        self.fill_stages_outputs()
-        print('after filling stages outputs')
-        # Clean undesired folders/files
-        #rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
-        #for file_to_rm in rm_file_list:
-        #    if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
-        #        os.remove(os.path.join(self.base_directory,file_to_rm))
-
-        # copy .ini and log file
-        outdir = os.path.join(self.base_directory,"RESULTS",'fMRI',now)
-        if not os.path.exists(outdir):
-            os.makedirs(outdir)
-        shutil.copy(self.config_file,outdir)
-        shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
-
-        iflogger.info("**** Processing finished ****")
-
-        return True,'Processing sucessful'

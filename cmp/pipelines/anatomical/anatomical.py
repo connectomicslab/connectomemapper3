@@ -34,14 +34,7 @@ from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, Ba
 from nipype.utils.filemanip import split_filename
 
 from traits.api import *
-from traitsui.api import *
-from traitsui.qt4.extra.qt_view import QtView
-from pyface.ui.qt4.image_resource import ImageResource
-
 import apptools.io.api as io
-
-from pyface.qt.QtCore import *
-from pyface.qt.QtGui import *
 
 from bids.grabbids import BIDSLayout
 
@@ -64,12 +57,6 @@ class Check_Input_Notification(HasTraits):
     diffusion_imaging_model = Str
     diffusion_imaging_model_message = Str('\nMultiple diffusion inputs available. Please select desired diffusion modality.')
 
-    traits_view = View(Item('message',style='readonly',show_label=False),
-                       Item('diffusion_imaging_model_message',visible_when='len(diffusion_imaging_model_options)>1',style='readonly',show_label=False),
-                       Item('diffusion_imaging_model',editor=EnumEditor(name='diffusion_imaging_model_options'),visible_when='len(diffusion_imaging_model_options)>1'),
-                       kind='modal',
-                       buttons=['OK'],
-                       title="Check inputs")
 
 class AnatomicalPipeline(cmp_common.Pipeline):
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
@@ -89,31 +76,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
     global_conf = Global_Configuration()
 
-    segmentation = Button()
-    #segmentation.setIcon(QIcon(QPixmap("segmentation.png")))
-
-    parcellation = Button()
-
-    #parcellation.setIcon(QIcon(QPixmap("parcellation.png")))
-
-    #custom_run = Button('Custom...')
-    #run = Button('Run...')
-
     config_file = Str
 
     flow = Instance(pe.Workflow)
-
-    pipeline_group = VGroup(
-                        HGroup(spring,UItem('segmentation',style='custom',width=450,height=170,resizable=True,editor_args={'image':ImageResource('segmentation'),'label':""}),spring,show_labels=False,label=""),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
-                        HGroup(spring,UItem('parcellation',style='custom',width=450,height=200,resizable=True,editor_args={'image':ImageResource('parcellation'),'label':""}),spring,show_labels=False,label=""),
-                        # HGroup(spring,Item('segmentation',style='custom',width=550,height=170,editor_args={'image':ImageResource('segmentation',search_path=['./']),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
-                        # HGroup(spring,Item('parcellation',style='custom',width=550,height=200,editor_args={'image':ImageResource('parcellation',search_path=['./']),'label':""}),spring,show_labels=False),
-                        # HGroup(spring,Item('segmentation',style='custom',editor_args={'image':ImageResource('segmentation',search_path=['./']),'label':""}),spring,show_labels=False),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
-                        # HGroup(spring,Item('parcellation',style='custom',editor_args={'image':ImageResource('parcellation',search_path=['./']),'label':""}),spring,show_labels=False),
-                        spring,
-    #                    HGroup(spring,Item('run',width=50,show_label=False),spring,Item('custom_run',width=50,show_label=False),spring),
-                        springy=True
-                        )
 
     def __init__(self,project_info):
         self.stages = {'Segmentation':SegmentationStage(),
@@ -174,12 +139,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
 
-    def _segmentation_fired(self, info):
-        self.stages['Segmentation'].configure_traits()
-
-    def _parcellation_fired(self, info):
-        self.stages['Parcellation'].configure_traits()
-
     def define_custom_mapping(self, custom_last_stage):
         # start by disabling all stages
         for stage in self.ordered_stage_list:
@@ -190,24 +149,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.stages[stage].enabled = True
             if stage == custom_last_stage:
                 break
-
-    # def _custom_run_fired(self, ui_info):
-    #     if self.custom_last_stage == '':
-    #         ui_info.ui.context["object"].project_info.anat_custom_last_stage = self.ordered_stage_list[0]
-    #     ui_info.ui.context["object"].project_info.anat_stage_names = self.ordered_stage_list
-    #     cus_res = ui_info.ui.context["object"].project_info.configure_traits(view='anat_custom_map_view')
-    #     if cus_res:
-    #         self.define_custom_mapping(ui_info.ui.context["object"].project_info.anat_custom_last_stage)
-    #
-    # def _run_fired(self, ui_info):
-    #     ui_info.ui.context["object"].project_info.config_error_msg = self.check_config()
-    #     if ui_info.ui.context["object"].project_info.config_error_msg != '':
-    #         ui_info.ui.context["object"].project_info.configure_traits(view='config_error_view')
-    #     else:
-    #         # save_config(self.pipeline, ui_info.ui.context["object"].project_info.config_file)
-    #         self.launch_process()
-    #         self.launch_progress_window()
-    #         # update_last_processed(ui_info.ui.context["object"].project_info, self.pipeline)
 
     def check_input(self, layout, gui=True):
         print '**** Check Inputs  ****'
@@ -225,7 +166,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 T1_file = files[0].filename
                 print T1_file
             else:
-                error(message="T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                 return
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
@@ -234,7 +174,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 T1_file = files[0].filename
                 print T1_file
             else:
-                error(message="T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                 return
 
         print "Looking in %s for...." % self.base_directory
@@ -273,8 +212,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if(t1_available):
             valid_inputs = True
         else:
-            print "Missing required inputs."
-            error(message="Missing required inputs. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+            print "Missing required inputs. Please see documentation for more details."
 
         for stage in self.stages.values():
             if stage.enabled:
@@ -317,28 +255,24 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % T1_file
             print error_message
-            error(message=error_message, title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
 
         if os.path.isfile(brain_file):
             brain_available = True
         else:
             error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % brain_file
             print error_message
-            error(message=error_message, title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
 
         if os.path.isfile(brainmask_file):
             brainmask_available = True
         else:
             error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % brainmask_file
             print error_message
-            error(message=error_message, title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
 
         if os.path.isfile(wm_mask_file):
             wm_available = True
         else:
             error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % wm_mask_file
             print error_message
-            error(message=error_message, title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
 
         cnt1=0
         cnt2=0
@@ -350,7 +284,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             error_message = "Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline" % (cnt1-cnt2,cnt1)
             print error_message
-            error(message=error_message, title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
 
         if t1_available == True and brain_available == True and brainmask_available == True and wm_available == True and roivs_available == True:
             print "valid deriv/anat output"
@@ -605,281 +538,3 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         iflogger.info("**** Processing finished ****")
 
         return True,'Processing successful'
-
-
-class Pipeline(HasTraits):
-    # informations common to project_info
-    base_directory = Directory
-    root = Property
-    subject = 'sub-01'
-    last_date_processed = Str
-    last_stage_processed = Str
-
-    # num core settings
-    number_of_cores = Enum(1,range(1,multiprocessing.cpu_count()+1))
-
-    traits_view = View(
-                        Group(
-                            VGroup(
-                                VGroup(
-                                    HGroup(
-                                        # '20',Item('base_directory',width=-0.3,height=-0.2, style='custom',show_label=False,resizable=True),
-                                        '20',Item('base_directory',width=-0.3,style='readonly',show_label=False,resizable=True),
-                                        ),
-                                    # HGroup(
-                                    #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)
-                                    #     ),
-                                label='BIDS base directory',
-                                ),
-                                spring,
-                                Group(
-                                    Item('subject',style='readonly',show_label=False,resizable=True),
-                                    label='Subject',
-                                ),
-                                spring,
-                                Group(
-                                    Item('pipeline_name',style='readonly',resizable=True),
-                                    Item('last_date_processed',style='readonly',resizable=True),
-                                    Item('last_stage_processed',style='readonly',resizable=True),
-                                    label='Last processing'
-                                ),
-                                spring,
-                                Group(
-                                    Item('number_of_cores',resizable=True),
-                                    label='Processing configuration'
-                                ),
-                                '700',
-                                spring,
-                            label='Data',
-                            springy=True),
-                            HGroup(
-                                Include('pipeline_group'),
-                                label='Diffusion pipeline',
-                                springy=True
-                            ),
-                        orientation='horizontal', layout='tabbed', springy=True)
-                    ,kind = 'livemodal')
-     #-- Traits Default Value Methods -----------------------------------------
-
-    # def _base_directory_default(self):
-    #     return getcwd()
-
-    #-- Property Implementations ---------------------------------------------
-
-    @property_depends_on('base_directory')
-    def _get_root(self):
-        return File(path=self.base_directory)
-
-    def __init__(self, project_info):
-        self.base_directory = project_info.base_directory
-        self.subject = project_info.subject
-        self.last_date_processed = project_info.last_date_processed
-        for stage in self.stages.keys():
-            if len(project_info.subject_sessions) > 0:
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject, project_info.subject_session, 'tmp',self.pipeline_name,self.stages[stage].name)
-            else:
-                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp',self.pipeline_name,self.stages[stage].name)
-
-    def check_config(self):
-        if self.stages['Segmentation'].config.seg_tool ==  'Custom segmentation':
-            if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
-                return('\nCustom segmentation selected but no WM mask provided.\nPlease provide an existing WM mask file in the Segmentation configuration window.\n')
-            if not os.path.exists(self.stages['Parcellation'].config.atlas_nifti_file):
-                return('\n\tCustom segmentation selected but no atlas provided.\nPlease specify an existing atlas file in the Parcellation configuration window.\t\n')
-            if not os.path.exists(self.stages['Parcellation'].config.graphml_file):
-                return('\n\tCustom segmentation selected but no graphml info provided.\nPlease specify an existing graphml file in the Parcellation configuration window.\t\n')
-        # if self.stages['MRTrixConnectome'].config.output_types == []:
-        #     return('\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
-        if self.stages['Connectome'].config.output_types == []:
-            return('\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
-        return ''
-
-    def create_stage_flow(self, stage_name):
-        stage = self.stages[stage_name]
-        flow = pe.Workflow(name=stage.name)
-        inputnode = pe.Node(interface=util.IdentityInterface(fields=stage.inputs),name="inputnode")
-        outputnode = pe.Node(interface=util.IdentityInterface(fields=stage.outputs),name="outputnode")
-        flow.add_nodes([inputnode,outputnode])
-        stage.create_workflow(flow,inputnode,outputnode)
-        return flow
-
-    def create_common_flow(self):
-        common_flow = pe.Workflow(name='common_stages')
-        common_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
-        common_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","brain","brain_mask","wm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
-            "roi_volumes","parcellation_scheme","atlas_info"]),name="outputnode")
-        common_flow.add_nodes([common_inputnode,common_outputnode])
-
-        if self.stages['Segmentation'].enabled:
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-
-                if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
-                    self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.base_directory,"derivatives",'freesurfer')
-                    print "Freesurfer_subjects_dir: %s" % self.stages['Segmentation'].config.freesurfer_subjects_dir
-                    self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.base_directory,"derivatives",'freesurfer',self.subject)
-                    print "Freesurfer_subject_id: %s" % self.stages['Segmentation'].config.freesurfer_subject_id
-
-            seg_flow = self.create_stage_flow("Segmentation")
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                common_flow.connect([(common_inputnode,seg_flow, [('T1','inputnode.T1')])])
-
-            common_flow.connect([
-                                 (seg_flow,common_outputnode,[("outputnode.subjects_dir","subjects_dir"),
-                                                              ("outputnode.subject_id","subject_id")])
-                                ])
-
-        if self.stages['Parcellation'].enabled:
-            parc_flow = self.create_stage_flow("Parcellation")
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
-                common_flow.connect([(seg_flow,parc_flow, [('outputnode.subjects_dir','inputnode.subjects_dir'),
-                                                           ('outputnode.subject_id','inputnode.subject_id')]),
-                                     ])
-            else:
-                common_flow.connect([
-                                     (seg_flow,parc_flow,[("outputnode.custom_wm_mask","inputnode.custom_wm_mask")])
-                                     ])
-            common_flow.connect([
-                                 (parc_flow,common_outputnode,[("outputnode.wm_mask_file","wm_mask_file"),
-                                                               ("outputnode.parcellation_scheme","parcellation_scheme"),
-                                                               ("outputnode.atlas_info","atlas_info"),
-                                                               ("outputnode.roi_volumes","roi_volumes"),
-                                                               ("outputnode.wm_eroded","wm_eroded"),
-                                                               ("outputnode.csf_eroded","csf_eroded"),
-                                                               ("outputnode.brain_eroded","brain_eroded"),
-                                                               ("outputnode.T1","T1"),
-                                                               ("outputnode.brain_mask","brain_mask"),
-                                                               ("outputnode.brain","brain"),
-                                                               ])
-                                 ])
-
-        return common_flow
-
-    def fill_stages_outputs(self):
-        for stage in self.stages.values():
-            if stage.enabled:
-                stage.define_inspect_outputs()
-
-    def clear_stages_outputs(self):
-        for stage in self.stages.values():
-            if stage.enabled:
-                stage.inspect_outputs_dict = {}
-                stage.inspect_outputs = ['Outputs not available']
-                # Remove result_*.pklz files to clear them from visualisation drop down list
-                #stage_results = [os.path.join(dirpath, f)
-                #                 for dirpath, dirnames, files in os.walk(stage.stage_dir)
-                #                 for f in fnmatch.filter(files, 'result_*.pklz')]
-                #for stage_res in stage_results:
-                #    os.remove(stage_res)
-
-    def launch_progress_window(self):
-        pw = ProgressWindow()
-        pt = ProgressThread()
-        pt.pw = pw
-        pt.stages = self.stages
-        pt.stage_names = self.ordered_stage_list
-        pt.start()
-        pw.configure_traits()
-
-    def launch_process(self):
-        pt = ProcessThread()
-        pt.pipeline = self
-        pt.start()
-
-
-def convert_rawdata(base_directory, input_dir, out_prefix):
-    os.environ['UNPACK_MGH_DTI'] = '0'
-    file_list = os.listdir(input_dir)
-
-    # If RAWDATA folder contains one (and only one) gunzipped nifti file -> copy it
-    first_file = os.path.join(input_dir, file_list[0])
-    if len(file_list) == 1 and first_file.endswith('nii.gz'):
-        copyfile(first_file, os.path.join(base_directory, 'NIFTI', out_prefix+'.nii.gz'), False, False, 'content') # intelligent copy looking at input's content
-    else:
-        mem = Memory(base_dir=os.path.join(base_directory,'NIPYPE'))
-        mri_convert = mem.cache(fs.MRIConvert)
-        #mri_convert = mem.cache(fs.MRIConvert)
-        #res = mri_convert(in_file=first_file, out_file=os.path.join(base_directory, 'NIFTI', out_prefix + '.nii.gz'))
-        #mr_convert = mem.cache(mrt.MRConvert)
-        #res = mr_convert(in_dir=str(input_dir), out_filename=os.path.join(base_directory, 'NIFTI', out_prefix + '.nii.gz'))
-        dcm2niix = mem.cache(Dcm2niix)
-        res = dcm2niix(source_dir=str(input_dir), output_dir=os.path.join(base_directory, 'NIFTI'), out_filename=out_prefix)
-        if len(res.outputs.get()) == 0:
-            return False
-        if len(res.outputs.get()) == 0:
-            return False
-
-    return True
-
-class SwapAndReorientInputSpec(BaseInterfaceInputSpec):
-    src_file = File(desc='Source file to be reoriented.',exists=True,mandatory=True)
-    ref_file = File(desc='Reference file, which orientation will be applied to src_file.',exists=True,mandatory=True)
-    out_file = File(genfile=True, desc='Name of the reoriented file.')
-
-class SwapAndReorientOutputSpec(TraitedSpec):
-    out_file = File(desc='Reoriented file.')
-
-class SwapAndReorient(BaseInterface):
-    input_spec = SwapAndReorientInputSpec
-    output_spec = SwapAndReorientOutputSpec
-
-    def _gen_outfilename(self):
-        out_file = self.inputs.out_file
-        path,base,ext = split_filename(self.inputs.src_file)
-        if not isdefined(self.inputs.out_file):
-            out_file = os.path.join(path,base+'_reo'+ext)
-
-        json_file = os.path.join(path,base+'.json')
-        if os.path.isfile(json_file):
-            path,base,ext = split_filename(self.inputs.out_file)
-            out_json_file = os.path.join(path,base+'.json')
-            shutil.copy(json_file,out_json_file)
-
-        return os.path.abspath(out_file)
-
-    def _run_interface(self, runtime):
-        out_file = self._gen_outfilename()
-        src_file = self.inputs.src_file
-        ref_file = self.inputs.ref_file
-
-        # Collect orientation infos
-
-        # "orientation" => 3 letter acronym defining orientation
-        src_orient = fs.utils.ImageInfo(in_file=src_file).run().outputs.orientation
-        ref_orient = fs.utils.ImageInfo(in_file=ref_file).run().outputs.orientation
-        # "convention" => RADIOLOGICAL/NEUROLOGICAL
-        src_conv = cmp_fsl.Orient(in_file=src_file, get_orient=True).run().outputs.orient
-        ref_conv = cmp_fsl.Orient(in_file=ref_file, get_orient=True).run().outputs.orient
-
-        if src_orient == ref_orient:
-            # no reorientation needed
-            print "No reorientation needed for anatomical image; Copy only!"
-            copyfile(src_file,out_file,False, False, 'content')
-            return runtime
-        else:
-            if src_conv != ref_conv:
-                # if needed, match convention (radiological/neurological) to reference
-                tmpsrc = os.path.join(os.path.dirname(src_file), 'tmp_' + os.path.basename(src_file))
-
-                fsl.SwapDimensions(in_file=src_file, new_dims=('-x','y','z'), out_file=tmpsrc).run()
-
-                cmp_fsl.Orient(in_file=tmpsrc, swap_orient=True).run()
-            else:
-                # If conventions match, just use the original source
-                tmpsrc = src_file
-
-        tmp2 = os.path.join(os.path.dirname(src_file), 'tmp.nii.gz')
-        map_orient = {'L':'RL','R':'LR','A':'PA','P':'AP','S':'IS','I':'SI'}
-        fsl.SwapDimensions(in_file=tmpsrc, new_dims=(map_orient[ref_orient[0]],map_orient[ref_orient[1]],map_orient[ref_orient[2]]), out_file=tmp2).run()
-
-        shutil.move(tmp2, out_file)
-
-        # Only remove the temporary file if the conventions did not match.  Otherwise,
-        # we end up removing the output.
-        if tmpsrc != src_file:
-            os.remove(tmpsrc)
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self._gen_outfilename()
-        return outputs

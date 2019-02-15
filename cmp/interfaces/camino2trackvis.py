@@ -1,11 +1,10 @@
-# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
-# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+# Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
 
 """ Provides interfaces for functions provided by Camino-Tackvis missing in nipype or modified
-""" 
+"""
 
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from nipype.utils.filemanip import split_filename
@@ -39,10 +38,10 @@ class Camino2TrackvisInputSpec(CommandLineInputSpec):
         Whichever is specified in each position will  \
         be the direction of increasing order.  \
         Read coordinate system from a NIfTI file.')
-    
+
     nifti_file = File(argstr='--nifti %s', exists=True,
     mandatory=False, position=7, desc='Read coordinate system from a NIfTI file.')
-    
+
     phys_coords = traits.Bool(argstr='--phys-coords', mandatory=False, position = 8, desc='Treat the input tract points as physical coordinates (relevant for the updated camino track command).')
 
 class Camino2TrackvisOutputSpec(TraitedSpec):

@@ -9,7 +9,6 @@
 
 # Global imports
 from traits.api import *
-from traitsui.api import *
 import glob
 import os
 import pickle
@@ -36,9 +35,6 @@ class ConnectomeConfig(HasTraits):
     FD_thr = Float(0.2)
     DVARS_thr = Float(4.0)
     output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
-
-    traits_view = View(VGroup('apply_scrubbing',VGroup(Item('FD_thr',label='FD threshold'),Item('DVARS_thr',label='DVARS threshold'),visible_when="apply_scrubbing==True")),
-                       Item('output_types',style='custom'))
 
     subject = Str()
 
@@ -113,7 +109,7 @@ class rsfmri_conmat(BaseInterface):
         else:
             print("get resolutions from atlas_info: ")
             resolutions = self.inputs.atlas_info
-            print resolutions
+            print(resolutions)
 
         index = np.linspace(0,tp-1,tp).astype('int')
 
@@ -144,7 +140,7 @@ class rsfmri_conmat(BaseInterface):
             for vol in self.inputs.roi_volumes:
                 if parkey in vol:
                     roi_fname = vol
-                    print roi_fname
+                    print(roi_fname)
 
             roi = nib.load(roi_fname)
             mask = roi.get_data()

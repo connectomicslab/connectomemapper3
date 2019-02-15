@@ -1,19 +1,154 @@
+# Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland
+# All rights reserved.
+#
+#  This software is distributed under the open-source license Modified BSD.
+
 import os
 import glob
 import numpy as np
 
-# try:
-#     from traitsui.api import *
-#     from traits.api import *
-#
-# except ImportError:
-#     from enthought.traits.api import *
-#     from enthought.traits.ui.api import *
+from traits.api import *
 
 from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec,\
     TraitedSpec, File, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 
 import nibabel as nib
+
+
+class match_orientationInputSpec(BaseInterfaceInputSpec):
+    trackvis_file = File(exists=True, mandatory=True,desc="Trackvis file outputed by gibbs miniapp, with the LPS orientation set as default")
+    ref_image_file = File(exists=True, mandatory=True, desc="File used as input for the gibbs tracking (wm mask)")
+
+class match_orientationOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Trackvis file with orientation matching gibbs input')
+
+class match_orientations(BaseInterface):
+
+    input_spec = match_orientationInputSpec
+    output_spec = match_orientationOutputSpec
+
+    def _run_interface(self, runtime):
+        #filename = os.path.basename(self.inputs.trackvis_file)
+
+        _, name , _ = split_filename(self.inputs.trackvis_file)
+        filename = name + '_orcor.trk'
+
+        dx, dy, dz = get_data_dims(self.inputs.ref_image_file)
+        vx, vy, vz = get_vox_dims(self.inputs.ref_image_file)
+        image_file = nib.load(self.inputs.ref_image_file)
+        affine = image_file.get_affine()
+        import numpy as np
+        #Reads MITK tracks
+        fib, hdr = nib.trackvis.read(self.inputs.trackvis_file)
+        trk_header = nib.trackvis.empty_header()
+        trk_header['dim'] = [dx,dy,dz]
+        trk_header['voxel_size'] = [vx,vy,vz]
+        trk_header['origin'] = [0 ,0 ,0]
+        axcode = nib.orientations.aff2axcodes(affine)
+        if axcode[0] != str(hdr['voxel_order'])[0]:
+            flip_x = -1
+        else:
+            flip_x = 1
+        if axcode[1] != str(hdr['voxel_order'])[1]:
+            flip_y = -1
+        else:
+            flip_y = 1
+        if axcode[2] != str(hdr['voxel_order'])[2]:
+            flip_z = -1
+        else:
+            flip_z = 1
+        trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
+        new_fib = []
+        for i in range(len(fib)):
+            temp_fib = fib[i][0].copy()
+            for j in range(len(fib[i][0])):
+                temp_fib[j] = [flip_x*(fib[i][0][j][0]-hdr['origin'][0])+vx/2,flip_y*(fib[i][0][j][1]-hdr['origin'][1])+vy/2, flip_z*(fib[i][0][j][2]-hdr['origin'][2])+vz/2]
+            new_fib.append((temp_fib,None,None))
+        nib.trackvis.write(os.path.abspath(filename), new_fib, trk_header, points_space = 'voxmm')
+        iflogger.info('file written to %s' % os.path.abspath(filename))
+        return runtime
+
+    def _list_outputs(self):
+        #filename = os.path.basename(self.inputs.trackvis_file)
+        _, name , _ = split_filename(self.inputs.trackvis_file)
+        filename = name + '_orcor.trk'
+
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(filename)
+        return outputs
+
+
+
+class extractHeaderVoxel2WorldMatrixInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True,mandatory=True,desc='Input image file')
+class extractHeaderVoxel2WorldMatrixOutputSpec(TraitedSpec):
+    out_matrix = File(exists=true,desc='Output voxel to world affine transform file')
+
+class extractHeaderVoxel2WorldMatrix(BaseInterface):
+    input_spec = extractHeaderVoxel2WorldMatrixInputSpec
+    output_spec = extractHeaderVoxel2WorldMatrixOutputSpec
+
+    def _run_interface(self,runtime):
+        im = nib.load(self.inputs.in_file)
+        transform = np.array(im.get_affine())
+
+        out_f = file(os.path.abspath('voxel2world.txt'),'a')
+        np.savetxt(out_f,transform,delimiter=' ',fmt="%6.6g")
+        out_f.close()
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_matrix"] = os.path.abspath('voxel2world.txt')
+        return outputs
+
+
+
+class flipTableInputSpec(BaseInterfaceInputSpec):
+    table = File(exists=True)
+    flipping_axis = List()
+    delimiter = Str()
+    header_lines = Int(0)
+    orientation = Enum(['v','h'])
+
+class flipTableOutputSpec(TraitedSpec):
+    table = File(exists=True)
+
+class flipTable(BaseInterface):
+    input_spec = flipTableInputSpec
+    output_spec = flipTableOutputSpec
+
+    def _run_interface(self,runtime):
+        axis_dict = {'x':0, 'y':1, 'z':2}
+        import numpy as np
+        f = open(self.inputs.table,'r')
+        header = ''
+        for h in range(self.inputs.header_lines):
+            header += f.readline()
+        if self.inputs.delimiter == ' ':
+            table = np.loadtxt(f)
+        else:
+            table = np.loadtxt(f, delimiter=self.inputs.delimiter)
+        f.close()
+        if self.inputs.orientation == 'v':
+            for i in self.inputs.flipping_axis:
+                table[:,axis_dict[i]] = -table[:,axis_dict[i]]
+        elif self.inputs.orientation == 'h':
+            for i in self.inputs.flipping_axis:
+                table[axis_dict[i],:] = -table[axis_dict[i],:]
+        out_f = file(os.path.abspath('flipped_table.txt'),'a')
+        if self.inputs.header_lines > 0:
+            out_f.write(header)
+        np.savetxt(out_f,table,delimiter=self.inputs.delimiter)
+        out_f.close()
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["table"] = os.path.abspath('flipped_table.txt')
+        return outputs
+
 
 class ExtractPVEsFrom5TTInputSpec(BaseInterfaceInputSpec):
     in_5tt = File(desc="Input 5TT (4D) image",exists=True,mandatory=True)
@@ -367,4 +502,199 @@ class UpdateGMWMInterfaceSeeding(BaseInterface):
 
         outputs['out_gmwmi_file'] = os.path.abspath(self.inputs.out_gmwmi_file)
 
+        return outputs
+
+
+class getCRS2XYZtkRegTransformInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=1, desc="File used as input for getting CRS to XYZtkReg transform (DWI data)")
+    crs2ras_tkr = traits.Bool(argstr='--crs2ras-tk', mandatory=True, position=2, desc='return the crs2ras-tkr transform to output console')
+
+class getCRS2XYZtkRegTransformOutputSpec(TraitedSpec):
+    pass
+
+class getCRS2XYZtkRegTransform(CommandLine):
+
+    _cmd = 'mri_info'
+    input_spec = getCRS2XYZtkRegTransformInputSpec
+    output_spec = getCRS2XYZtkRegTransformOutputSpec
+
+    def _run_interface(self, runtime):
+        runtime = super(getCRS2XYZtkRegTransform, self)._run_interface(runtime)
+        print 'CMD: ',runtime.cmdline
+        print runtime.stdout
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_transform'] = os.path.abspath(self._gen_outfilename())
+
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + '_crs2ras_tk_transform.txt'
+
+
+class transform_trk_CRS2XYZtkRegInputSpec(CommandLineInputSpec):
+    trackvis_file = File(exists=True, mandatory=True,desc="Trackvis file output from MRtricToTrackvis converter, with the LAS orientation set as default")
+    ref_image_file = File(exists=True, mandatory=True, desc="File used as input for getting CRS to XYZtkReg transform (DWI data)")
+
+class transform_trk_CRS2XYZtkRegOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Trackvis file in the same space than Freesurfer data')
+    out_transform = File(exists=True, desc='CRS to XYZtkReg transform file')
+
+class transform_trk_CRS2XYZtkReg(BaseInterface):
+    input_spec = transform_trk_CRS2XYZtkRegInputSpec
+    output_spec = transform_trk_CRS2XYZtkRegOutputSpec
+
+    def _run_interface(self, runtime):
+        _, name , _ = split_filename(self.inputs.trackvis_file)
+        transform_filename = 'CRS2XYZtkReg.txt'
+        out_trackvis_filename = name + '_tkreg.trk'
+
+        #Load original Trackvis file
+        fib, hdr = nib.trackvis.read(self.inputs.trackvis_file)
+
+        #Load reference image file
+        ref_image = nib.load(self.inputs.ref_image_file)
+
+        CRS2XYZtkRegtransform = pe.Node(interface=getCRS2XYZtkRegTransform(crs2ras_tkr=True),name='CRS2XYZtkRegtransform')
+        CRS2XYZtkRegtransform.inputs.in_file = self.inputs.ref_image_file
+
+        CRS2XYZtkRegtransform.run()
+
+        #print "STDOUT:",runtime.stdout
+        #Run "mrinfo path-to-ref_image_file --crs2ras-tkr" command to get 'CRS' to 'XYZtkReg' transform
+        #cmd = 'mrinfo  --crs2ras-tkr' + ' ' + self.inputs.ref_image_file
+        #cmd = ['mrinfo',self.inputs.ref_image_file,'--crs2ras-tkr']
+
+        #transform_file = open(transform_filename,'w')
+        #mrinfo_process = subprocess.call(cmd,stdout=transform_file,shell=True)
+
+        nib.trackvis.write(out_trackvis_filename,fib,hdr)
+
+        return runtime
+
+    def _list_outputs(self):
+        #filename = os.path.basename(self.inputs.trackvis_file)
+        _, name , _ = split_filename(self.inputs.trackvis_file)
+        transform_filename = 'CRS2XYZtkReg.txt'
+        out_trackvis_filename = name + '_tkreg.trk'
+
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(out_trackvis_filename)
+        outputs['out_transform'] = os.path.abspath(transform_filename)
+        return outputs
+
+
+class make_seedsInputSpec(BaseInterfaceInputSpec):
+    ROI_files = InputMultiPath(File(exists=True),desc='ROI files registered to diffusion space')
+    WM_file = File(mandatory=True,desc='WM mask file registered to diffusion space')
+    #DWI = File(mandatory=True,desc='Diffusion data file for probabilistic tractography')
+
+
+class make_seedsOutputSpec(TraitedSpec):
+    seed_files = OutputMultiPath(File(exists=True),desc='Seed files for probabilistic tractography')
+
+class make_seeds(BaseInterface):
+    """ - Creates seeding ROIs by intersecting dilated ROIs with WM mask
+    """
+    input_spec = make_seedsInputSpec
+    output_spec = make_seedsOutputSpec
+    ROI_idx = []
+    base_name = ''
+    def _run_interface(self,runtime):
+        iflogger.info("Computing seed files for probabilistic tractography\n===================================================")
+        # Load ROI file
+        txt_file = open(self.base_name+'_seeds.txt','w')
+
+        print self.inputs.ROI_files
+
+        for ROI_file in self.inputs.ROI_files:
+            ROI_vol = nib.load(ROI_file)
+            ROI_data = ROI_vol.get_data()
+            ROI_affine = ROI_vol.get_affine()
+            # Load WM mask
+            WM_vol = nib.load(self.inputs.WM_file)
+            WM_data = WM_vol.get_data()
+            # Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
+            iflogger.info("ROI dilation...")
+            tmp_data = np.unique(ROI_data[ROI_data!=0]).astype(int)
+            print tmp_data.shape
+            self.ROI_idx = np.unique(tmp_data).astype(int)
+            bins=np.arange(83)
+            counts = np.histogram(self.ROI_idx,bins=bins)
+            print counts
+            print self.ROI_idx.shape
+            print self.ROI_idx
+            # Take overlap between dilated ROIs and WM to define seeding regions
+            border = (np.multiply(ROI_data,WM_data)).astype(int)
+            # Save one nifti file per seeding ROI
+            temp = border.copy()
+            # print border.max
+            _,self.base_name,_ = split_filename(ROI_file)
+            for i in self.ROI_idx:
+                temp[border == i] = 1
+                temp[border != i] = 0
+                new_image = nib.Nifti1Image(temp,ROI_affine)
+                save_as = os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz')
+                txt_file.write(str(self.base_name+'_seed_'+str(i)+'.nii.gz'+'\n'))
+                nib.save(new_image,save_as)
+        txt_file.close()
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["seed_files"] = self.gen_outputfilelist()
+        return outputs
+
+    def gen_outputfilelist(self):
+        output_list = []
+        for i in self.ROI_idx:
+            output_list.append(os.path.abspath(self.base_name+'_seed_'+str(i)+'.nii.gz'))
+        return output_list
+
+
+class make_mrtrix_seeds(BaseInterface):
+    """ - Creates seeding ROIs by intersecting dilated ROIs with WM mask
+    """
+    input_spec = make_seedsInputSpec
+    output_spec = make_seedsOutputSpec
+    ROI_idx = []
+    base_name = ''
+    def _run_interface(self,runtime):
+        iflogger.info("Computing seed files for probabilistic tractography\n===================================================")
+        # Load ROI file
+
+        print self.inputs.ROI_files
+
+        for ROI_file in self.inputs.ROI_files:
+            ROI_vol = nib.load(ROI_file)
+            ROI_data = ROI_vol.get_data()
+            ROI_affine = ROI_vol.get_affine()
+            # Load WM mask
+            WM_vol = nib.load(self.inputs.WM_file)
+            WM_data = WM_vol.get_data()
+            # Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
+            iflogger.info("ROI dilation...")
+            tmp_data = np.unique(ROI_data[ROI_data!=0]).astype(int)
+            print tmp_data.shape
+            self.ROI_idx = np.unique(tmp_data).astype(int)
+            bins=np.arange(83)
+            counts = np.histogram(self.ROI_idx,bins=bins)
+            print counts
+            print self.ROI_idx.shape
+            print self.ROI_idx
+            # Take overlap between dilated ROIs and WM to define seeding regions
+            border = (np.multiply(ROI_data,WM_data)).astype(int)
+            # Save one nifti file per seeding ROI
+            _,self.base_name,_ = split_filename(ROI_file)
+
+            new_image = nib.Nifti1Image(border,ROI_affine)
+            save_as = os.path.abspath(self.base_name+'_seeds.nii.gz')
+            nib.save(new_image,save_as)
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["seed_files"] = os.path.abspath(self.base_name+'_seeds.nii.gz')
         return outputs

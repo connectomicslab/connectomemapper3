@@ -10,7 +10,6 @@
 # General imports
 import os
 from traits.api import *
-from traitsui.api import *
 import pickle
 import gzip
 import shutil
@@ -50,26 +49,6 @@ class SegmentationConfig(HasTraits):
     freesurfer_args = Str
 
     white_matter_mask = File(exist=True)
-
-    traits_view = View(Item('seg_tool',label="Segmentation tool"),
-                       Group(
-                        HGroup('make_isotropic',Item('isotropic_vox_size',label="Voxel size (mm)",visible_when='make_isotropic')),
-                        Item('isotropic_interpolation',label='Interpolation',visible_when='make_isotropic'),
-                        'brain_mask_extraction_tool',
-                        Item('ants_templatefile',label='Template',visible_when='brain_mask_extraction_tool == "ANTs"'),
-                        Item('ants_probmaskfile',label='Probability mask',visible_when='brain_mask_extraction_tool == "ANTs"'),
-                        Item('ants_regmaskfile',label='Extraction mask',visible_when='brain_mask_extraction_tool == "ANTs"'),
-                        Item('brain_mask_path',label='Brain mask path',visible_when='brain_mask_extraction_tool == "Custom"'),
-                        'freesurfer_args',
-                        'use_existing_freesurfer_data',
-                        Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
-                        Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True'),
-                        visible_when="seg_tool=='Freesurfer'"),
-                       Group(
-                        'white_matter_mask',
-                        Item('brain_mask_path',label='Brain mask'),
-                        visible_when='seg_tool=="Custom segmentation"')
-                        )
 
     def _freesurfer_subjects_dir_changed(self, old, new):
         dirnames = [name for name in os.listdir(self.freesurfer_subjects_dir) if

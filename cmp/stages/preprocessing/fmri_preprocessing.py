@@ -8,7 +8,6 @@
 """
 
 from traits.api import *
-from traitsui.api import *
 
 import nipype.interfaces.utility as util
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
@@ -63,8 +62,6 @@ class PreprocessingConfig(HasTraits):
     slice_timing = Enum("none", ["bottom-top interleaved", "bottom-top interleaved", "top-bottom interleaved", "bottom-top", "top-bottom"])
     repetition_time = Float(1.92)
     motion_correction = Bool(True)
-
-    traits_view = View('discard_n_volumes','despiking','slice_timing',Item('repetition_time',visible_when='slice_timing!="none"'),'motion_correction')
 
 
 class PreprocessingStage(Stage):

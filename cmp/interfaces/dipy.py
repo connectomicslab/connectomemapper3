@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+# Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland
+# All rights reserved.
+#
+#  This software is distributed under the open-source license Modified BSD.
 """
 Interfaces to the algorithms in dipy
 

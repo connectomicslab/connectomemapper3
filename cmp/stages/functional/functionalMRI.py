@@ -9,7 +9,6 @@
 
 # General imports
 from traits.api import *
-from traitsui.api import *
 import gzip
 import pickle
 import os
@@ -50,26 +49,6 @@ class FunctionalMRIConfig(HasTraits):
     highpass_filter = Float(0.1)
 
     scrubbing = Bool(True)
-
-    traits_view = View( #Item('smoothing'),
-                        #Item('discard_n_volumes'),
-                        HGroup(
-                            Item('detrending'),Item('detrending_mode',visible_when='detrending'),
-                            label='Detrending',show_border=True
-                            ),
-                        HGroup(
-                            Item('global_nuisance',label="Global"),
-                            Item('csf'),
-                            Item('wm'),
-                            Item('motion'),
-                            label='Nuisance factors',show_border=True
-                            ),
-                        HGroup(
-                            Item('lowpass_filter',label='Low cutoff (volumes)'),
-                            Item('highpass_filter',label='High cutoff (volumes)'),
-                            label="Bandpass filtering",show_border=True
-                            )
-                       )
 
 class discard_tp_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True,mandatory=True)

@@ -1,5 +1,4 @@
-# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
-# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+# Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
@@ -7,12 +6,10 @@
 """ The ANTs module provides functions for interfacing with ANTs registration toolbox missing in nipype or modified
 """
 try:
-    from traitsui.api import *
     from traits.api import *
 
 except ImportError:
     from enthought.traits.api import *
-    from enthought.traits.ui.api import *
 
 import os
 import glob

@@ -1,11 +1,10 @@
-# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
-# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+# Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
 
 """ The Camino module provides functions for interfacing with Camino functions missing in nipype or modified
-""" 
+"""
 
 from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
                                     TraitedSpec, File, StdOutCommandLine,
@@ -53,7 +52,7 @@ class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
 
     scheme_file = File(argstr='-schemefile %s', mandatory=True, position=2,
         desc='The scheme file of the images to be processed using this LUT.')
-    
+
     cross = traits.Float(argstr='-cross %d', desc='The angle in degrees between the principal directions of the two tensors.')
 
 class DTLUTGenOutputSpec(TraitedSpec):
@@ -108,7 +107,7 @@ class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
         'For tensor data, one lut must be specified for each type of inversion used in the image (one-tensor, two-tensor, three-tensor).'\
         'For pds, the number of LUTs must match -numpds (it is acceptable to use the same LUT several times - see example, above).'\
         'These LUTs may be generated with dtlutgen.')
-    
+
     #lut_str = traits.Str()
 
     pdf = traits.Enum('watson', 'bingham', 'acg',
@@ -166,7 +165,7 @@ class Voxel2ImageInputSpec(StdOutCommandLineInputSpec):
                     desc='image in camino format')
     header_file = File(exists=True, mandatory=True, argstr='-header %s', position=2, desc="file with desired format")
     components = traits.Int(argstr='-components %d',mandatory=False,desc="Number of components in inputfile")
-    gzip = traits.Bool(argstr="-gzip",mandatory=False,desc="Compress output image") 
+    gzip = traits.Bool(argstr="-gzip",mandatory=False,desc="Compress output image")
     out_type = traits.Enum("float", "char", "short", "int", "long", "double", argstr='-outputdatatype %s',
                            desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
     output_root = traits.Str(argstr="-outputroot %s", position=-1, default_value='converted', usedefault=True)

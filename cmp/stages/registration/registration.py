@@ -7,16 +7,12 @@
 """ CMP registration stage
 """
 try:
-    from traitsui.api import *
     from traits.api import *
-
 except ImportError:
     from enthought.traits.api import *
-    from enthought.traits.ui.api import *
 
 # General imports
 # from traits.api import *
-# from traitsui.api import *
 import os
 import pickle
 import gzip
@@ -96,63 +92,6 @@ class RegistrationConfig(HasTraits):
     apply_to_eroded_wm = Bool(True)
     apply_to_eroded_csf = Bool(True)
     apply_to_eroded_brain = Bool(False)
-
-    traits_view = View(
-                        Item('registration_mode',editor=EnumEditor(name='registration_mode_trait')),
-                        Group(Item('uses_qform'),
-                              Item('dof'),
-                              Item('fsl_cost',label="FLIRT metric"),
-                              Item('no_search'),
-                              Item('flirt_args'),
-                            label='FSL registration settings', show_border=True,visible_when='registration_mode=="FSL"'),
-                        Group(Item('uses_qform'),
-                              Item('dof'),
-                              Item('fsl_cost',label="FLIRT metric"),
-                              Item('no_search'),
-                              Item('flirt_args'),
-                            label='FSL registration settings', show_border=True,visible_when='registration_mode=="Linear (FSL))"'),
-                        Group(
-                            Group(
-                                HGroup(
-                                    Item('ants_interpolation',label="Interpolation"),
-                                    Item('ants_bspline_interpolation_parameters', label="Parameters", visible_when='ants_interpolation=="BSpline"'),
-                                    Item('ants_gauss_interpolation_parameters', label="Parameters", visible_when='ants_interpolation=="Gaussian"'),
-                                    Item('ants_multilab_interpolation_parameters', label="Parameters", visible_when='ants_interpolation=="MultiLabel"')
-                                ),
-                                HGroup(
-                                    Item('ants_lower_quantile',label='winsorize lower quantile'),
-                                    Item('ants_upper_quantile',label='winsorize upper quantile')
-                                ),
-                                HGroup(
-                                    Item('ants_convergence_thresh',label='Convergence threshold'),
-                                    Item('ants_convergence_winsize',label='Convergence window size')
-                                ),
-                                label="General",show_border=False
-                                ),
-                            Group(
-                                Item('ants_linear_cost', label="Metric"),
-                                Item('ants_linear_gradient_step', label="Gradient step size"),
-                                HGroup(
-                                    Item('ants_linear_sampling_strategy', label="Sampling strategy"),
-                                    Item('ants_linear_sampling_perc', label="Sampling percentage", visible_when='ants_linear_sampling_strategy!="None"' )
-                                    ),
-                                Item('ants_linear_gradient_step', label="Gradient step size"),
-                                label="Rigid + Affine",show_border=False
-                                ),
-                            Item('ants_perform_syn',label='Symmetric diffeomorphic SyN registration'),
-                            Group(
-                                Item('ants_nonlinear_cost', label="Metric"),
-                                Item('ants_nonlinear_gradient_step', label="Gradient step size"),
-                                Item('ants_nonlinear_update_field_variance', label="Update field variance in voxel space"),
-                                Item('ants_nonlinear_total_field_variance', label="Total field variance in voxel space"),
-                                label="SyN (symmetric diffeomorphic registration)",show_border=False, visible_when='ants_perform_syn'
-                                ),
-                            label='ANTs registration settings',show_border=True,visible_when='registration_mode=="ANTs"'
-                            ),
-                        Group('init','contrast_type',
-                              label='BBregister registration settings', show_border=True,visible_when='registration_mode=="BBregister (FS)"'),
-                       kind='live',
-                       )
 
 
 class Tkregister2InputSpec(CommandLineInputSpec):
@@ -343,7 +282,6 @@ class RegistrationStage(Stage):
             concatnode = pe.Node(interface=util.Merge(2),name='concatnode')
 
             def convertList2Tuple(lists):
-                print "******************************************",tuple(lists)
                 return tuple(lists)
 
             flow.connect([
