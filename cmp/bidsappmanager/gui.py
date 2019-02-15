@@ -36,6 +36,7 @@ from pyface.api import ImageResource
 from bids.grabbids import BIDSLayout
 
 # CMP imports
+from cmp.info import __version__
 import cmp.bidsappmanager.project as project
 
 global modal_width
@@ -1650,7 +1651,7 @@ class CMP_MainWindowV2(HasTraits):
                         HGroup(
                         Include('manager_group'),
                         ),
-                        title='Connectome Mapper 3 BIDS App Manager',
+                        title='Connectome Mapper {} - BIDS App Manager'.format(__version__),
                         menubar=MenuBar(
                                      Menu(
                                          ActionGroup(
