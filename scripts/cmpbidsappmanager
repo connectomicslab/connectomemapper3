@@ -25,7 +25,7 @@ from cmp.info import __version__
 
 def info():
     print("\nConnectome Mapper {} - BIDS App Manager ".format(__version__))
-    print("Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland\n All rights reserved.\n")
+    print("""Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland. All rights reserved.\n""")
 def usage():
     print("Usage : cmpbidsappmanager ")
 
