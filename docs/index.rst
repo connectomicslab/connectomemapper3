@@ -63,8 +63,6 @@ Acknowledgement
 
 		`Link to manuscript <http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0048121>`_
 
-	* If you use the Connectome Mapper 3 in your research, please acknowledge this work by mentioning explicitly the name of this software (connectomemapper3) and the version, along with a link to the BitBucket repository or the Zenodo reference.
-
 *********
 Funding
 *********
@@ -79,7 +77,7 @@ This software is distributed under the open-source license Modified BSD. See :re
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (C) 2009-2018, Brain Communication Pathways Sinergia Consortium, Switzerland.
+Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland.
 
 
 ********

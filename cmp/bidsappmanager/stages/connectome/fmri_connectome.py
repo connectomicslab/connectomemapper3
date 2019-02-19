@@ -22,7 +22,7 @@ import subprocess
 from cmp.stages.connectome.fmri_connectome import ConnectomeConfig, ConnectomeStage
 
 class ConnectomeConfigUI(ConnectomeConfig):
-
+    
     output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
 
     traits_view = View(VGroup('apply_scrubbing',VGroup(Item('FD_thr',label='FD threshold'),Item('DVARS_thr',label='DVARS threshold'),visible_when="apply_scrubbing==True")),

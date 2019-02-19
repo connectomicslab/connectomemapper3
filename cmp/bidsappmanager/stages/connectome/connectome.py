@@ -23,6 +23,9 @@ from cmp.stages.connectome.connectome import ConnectomeConfig, ConnectomeStage
 
 class ConnectomeConfigUI(ConnectomeConfig):
 
+    output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle','mat','cff','graphml'],cols=4))
+    connectivity_metrics = List(['Fiber number','Fiber length','Fiber density','Fiber proportion','Normalized fiber density','ADC','gFA'], editor=CheckListEditor(values=['Fiber number','Fiber length','Fiber density','Fiber proportion','Normalized fiber density','ADC','gFA'],cols=4))
+    
     traits_view = View(Item('output_types',style='custom'),
                         Group(
                             Item('connectivity_metrics',label='Metrics',style='custom'),

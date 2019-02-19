@@ -20,6 +20,8 @@ from cmp.stages.diffusion.reconstruction import Dipy_recon_config, MRtrix_recon_
 
 class Dipy_recon_configUI(Dipy_recon_config):
 
+    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
+
     traits_view = View(#Item('gradient_table',label='Gradient table (x,y,z,b):'),
                        Item('flip_table_axis',style='custom',label='Flip bvecs:'),
                        #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
@@ -63,6 +65,8 @@ class Dipy_recon_configUI(Dipy_recon_config):
 
 
 class MRtrix_recon_configUI(MRtrix_recon_config):
+
+    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
 
     traits_view = View(#Item('gradient_table',label='Gradient table (x,y,z,b):'),
                        Item('flip_table_axis',style='custom',label='Flip gradient table:'),
