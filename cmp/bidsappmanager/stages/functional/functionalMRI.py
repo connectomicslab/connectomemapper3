@@ -15,26 +15,14 @@ import pickle
 from traits.api import *
 from traitsui.api import *
 
+import subprocess
+
 # Own imports
-from cmp.bidsappmanager.stages.common import Stage
+#from cmp.bidsappmanager.stages.common import Stage
 
+from cmp.stages.functional.functionalMRI import FunctionalMRIConfig, FunctionalMRIStage
 
-class FunctionalMRIConfig(HasTraits):
-    smoothing = Float(0.0)
-    discard_n_volumes = Int(5)
-    # Nuisance factors
-    global_nuisance = Bool(False)
-    csf = Bool(True)
-    wm = Bool(True)
-    motion = Bool(True)
-
-    detrending = Bool(True)
-    detrending_mode = Enum("linear","quadratic")
-
-    lowpass_filter = Float(0.01)
-    highpass_filter = Float(0.1)
-
-    scrubbing = Bool(True)
+class FunctionalMRIConfigUI(FunctionalMRIConfig):
 
     traits_view = View( #Item('smoothing'),
                         #Item('discard_n_volumes'),
@@ -56,47 +44,34 @@ class FunctionalMRIConfig(HasTraits):
                             )
                        )
 
-class FunctionalMRIStage(Stage):
+class FunctionalMRIStageUI(FunctionalMRIStage):
+
+    inspect_output_button = Button('View')
+
+    inspect_outputs_view = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('inspect_outputs_enum',show_label=False),
+                                Item('inspect_output_button',enabled_when='inspect_outputs_enum!="Outputs not available"',show_label=False),
+                                label = 'View outputs', show_border=True
+                                )
+                            ),
+                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
+
+    config_view = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('config',style='custom',show_label=False),
+                                label = 'Configuration', show_border=True
+                                ),
+                            ),
+                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
 
     def __init__(self):
-        self.name = 'functional_stage'
-        self.config = FunctionalMRIConfig()
-        self.inputs = ["preproc_file","motion_par_file","registered_roi_volumes","registered_wm","eroded_wm","eroded_csf","eroded_brain"]
-        self.outputs = ["func_file","FD","DVARS"]
+        FunctionalMRIStage.__init__(self)
+        self.config = FunctionalMRIConfigUI()
 
-    def define_inspect_outputs(self):
-        if self.config.smoothing > 0.0:
-            res_path = os.path.join(self.stage_dir,"smoothing","result_smoothing.pklz")
-            if(os.path.exists(res_path)):
-                results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Smoothed image'] = ['fslview',results.outputs.out_file]
-        if self.config.wm or self.config.global_nuisance or self.config.csf or self.config.motion:
-            res_path = os.path.join(self.stage_dir,"nuisance_regression","result_nuisance_regression.pklz")
-            if(os.path.exists(res_path)):
-                results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Regression output'] = ['fslview',results.outputs.out_file]
-        if self.config.detrending:
-            res_path = os.path.join(self.stage_dir,"detrending","result_detrending.pklz")
-            if(os.path.exists(res_path)):
-                results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Detrending output'] = ['fslview',results.outputs.out_file]
-        if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
-            res_path = os.path.join(self.stage_dir,"converter","result_converter.pklz")
-            if(os.path.exists(res_path)):
-                results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Filter output'] = ['fslview',results.outputs.out_file]
-
-        self.inspect_outputs = self.inspect_outputs_dict.keys()
-
-
-    def has_run(self):
-        if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
-            return os.path.exists(os.path.join(self.stage_dir,"temporal_filter","result_temporal_filter.pklz"))
-        elif self.config.detrending:
-            return os.path.exists(os.path.join(self.stage_dir,"detrending","result_detrending.pklz"))
-        elif self.config.wm or self.config.global_nuisance or self.config.csf or self.config.motion:
-            return os.path.exists(os.path.join(self.stage_dir,"nuisance_regression","result_nuisance_regression.pklz"))
-        elif self.config.smoothing > 0.0:
-            return os.path.exists(os.path.join(self.stage_dir,"smoothing","result_smoothing.pklz"))
-        else:
-            return True
+    def _inspect_output_button_fired(self,info):
+        subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

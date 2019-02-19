@@ -77,7 +77,7 @@ class DiffusionPipeline(Pipeline):
             'Registration':RegistrationStage(pipeline_mode = "Diffusion"),
             'Diffusion':DiffusionStage(),
             'Connectome':ConnectomeStage()}
-        
+
         Pipeline.__init__(self, project_info)
 
         self.diffusion_imaging_model = project_info.diffusion_imaging_model

@@ -17,6 +17,9 @@ import subprocess
 #BIDS import
 from bids.grabbids import BIDSLayout
 
+from traits.etsconfig.api import ETSConfig
+print("Graphical Backend : {}".format(ETSConfig.toolkit))
+
 #CMP imports
 from cmp.bidsappmanager import gui
 

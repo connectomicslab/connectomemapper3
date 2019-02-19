@@ -1084,18 +1084,6 @@ class RegistrationStage(Stage):
             reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
             warpedROIVs_results_path = os.path.join(self.stage_dir,"apply_registration_roivs","result_apply_registration_roivs.pklz")
 
-        # print "target:",target_path
-        # print "fnirt_results_path:",fnirt_results_path
-        # print "warpedDWI_results_path:",warpedDWI_results_path
-        # print "warpedFA_results_path:",warpedFA_results_path
-        # print "warpedROIs_results_path:",warpedROIs_results_path
-        # print "reg_results_path:",reg_results_path
-
-        # if self.config.registration_mode != 'Nonlinear (FSL)':
-        #     reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
-        # elif self.config.registration_mode == 'Nonlinear (FSL)':
-        #     reg_results_path = os.path.join(self.stage_dir,"nonlinear_registration","result_nonlinear_registration.pklz")
-
         if self.config.pipeline == "Diffusion":
                 if(os.path.exists(target_path) and os.path.exists(reg_results_path) and os.path.exists(warpedROIVs_results_path) and os.path.exists(warped5TT_results_path) and os.path.exists(warpedPVEs_results_path) and os.path.exists(warpedWM_results_path) and os.path.exists(warpedT1_results_path)):
 

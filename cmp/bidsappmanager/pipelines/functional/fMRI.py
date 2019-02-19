@@ -25,23 +25,20 @@ import shutil
 
 from bids.grabbids import BIDSLayout
 
-from cmp.bidsappmanager.pipelines.common import *
-from cmp.bidsappmanager.pipelines.anatomical.anatomical import AnatomicalPipeline
-from cmp.bidsappmanager.stages.preprocessing.fmri_preprocessing import PreprocessingStage
-from cmp.bidsappmanager.stages.segmentation.segmentation import SegmentationStage
-from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStage
-from cmp.bidsappmanager.stages.registration.registration import RegistrationStage
-from cmp.bidsappmanager.stages.functional.functionalMRI import FunctionalMRIStage
-from cmp.bidsappmanager.stages.connectome.fmri_connectome import ConnectomeStage
+#from cmp.bidsappmanager.pipelines.common import *
+from cmp.bidsappmanager.pipelines.anatomical.anatomical import AnatomicalPipelineUI
+from cmp.bidsappmanager.stages.preprocessing.fmri_preprocessing import PreprocessingStageUI
+from cmp.bidsappmanager.stages.segmentation.segmentation import SegmentationStageUI
+from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStageUI
+from cmp.bidsappmanager.stages.registration.registration import RegistrationStageUI
+from cmp.bidsappmanager.stages.functional.functionalMRI import FunctionalMRIStageUI
+from cmp.bidsappmanager.stages.connectome.fmri_connectome import ConnectomeStageUI
 
-class Global_Configuration(HasTraits):
-    process_type = Str('fMRI')
-    imaging_model = Str
+from cmp.pipelines.common import Pipeline
+from cmp.pipelines.functional.fMRI import Global_Configuration, Check_Input_Notification, fMRIPipeline
 
-class Check_Input_Notification(HasTraits):
-    message = Str
-    imaging_model_options = List(['fMRI'])
-    imaging_model = Str
+
+class Check_Input_NotificationUI(Check_Input_Notification):
 
     traits_view = View(Item('message',style='readonly',show_label=False),
                        Item('imaging_model',editor=EnumEditor(name='imaging_model_options'),visible_when='len(imaging_model_options)>1'),
@@ -49,19 +46,7 @@ class Check_Input_Notification(HasTraits):
                        buttons=['OK'],
                        title="Check inputs")
 
-class fMRIPipeline(Pipeline):
-    now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-    pipeline_name = Str("fMRI_pipeline")
-    input_folders = ['anat','func']
-    seg_tool = Str
-
-    subject = Str
-    subject_directory = Directory
-    derivatives_directory = Directory
-
-    ordered_stage_list = ['Preprocessing','Registration','FunctionalMRI','Connectome']
-
-    global_conf = Global_Configuration()
+class fMRIPipelineUI(fMRIPipeline):
 
     view_mode = Enum('config_view',['config_view','inspect_outputs_view'])
 
@@ -69,11 +54,6 @@ class fMRIPipeline(Pipeline):
     functionalMRI = Button('FunctionalMRI')
     registration = Button('Registration')
     connectome = Button('Connectome')
-
-    config_file = Str
-
-    subjects_dir = Str
-    subject_id = Str
 
     pipeline_group = VGroup(
                         HGroup(spring,UItem('preprocessing',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False,label=""),
@@ -84,58 +64,23 @@ class fMRIPipeline(Pipeline):
                         springy=True
                     )
 
+    traits_view = QtView(Include('pipeline_group'))
+
     def __init__(self,project_info):
-        self.stages = {'Preprocessing':PreprocessingStage(),
-            'Registration':RegistrationStage(pipeline_mode = "fMRI"),
-            'FunctionalMRI':FunctionalMRIStage(),
-            'Connectome':ConnectomeStage()}
-        Pipeline.__init__(self, project_info)
-        self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements,'global_nuisance')
-        self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements,'csf')
-        self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements,'wm')
-        self.stages['Connectome'].config.on_trait_change(self.update_scrubbing,'apply_scrubbing')
 
-        self.subject = project_info.subject
+        fMRIPipeline.__init__(self, project_info)
 
-        self.subjects_dir = project_info.freesurfer_subjects_dir
-        self.subject_id = project_info.freesurfer_subject_id
+        self.stages = {'Preprocessing':PreprocessingStageUI(),
+            'Registration':RegistrationStageUI(pipeline_mode = "fMRI"),
+            'FunctionalMRI':FunctionalMRIStageUI(),
+            'Connectome':ConnectomeStageUI()}
 
-        self.global_conf.subjects = project_info.subjects
-        self.global_conf.subject = self.subject
-
-        if len(project_info.subject_sessions) > 0:
-            self.global_conf.subject_session = project_info.subject_session
-            self.subject_directory =  os.path.join(self.base_directory,self.subject,project_info.subject_session)
-        else:
-            self.global_conf.subject_session = ''
-            self.subject_directory =  os.path.join(self.base_directory,self.subject)
-
-        self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
-
-    def _subject_changed(self,new):
-        self.stages['Connectome'].config.subject = new
-
-    def update_registration(self):
-        if self.seg_tool == "Custom segmentation" :
-            if self.stages['Registration'].config.registration_mode == 'BBregister (FS)':
-                self.stages['Registration'].config.registration_mode = 'Linear (FSL)'
-            if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
-                self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','Nonlinear (FSL)']
+        for stage in self.stages.keys():
+            if project_info.subject_session != '':
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'nipype',self.subject,project_info.subject_session,self.pipeline_name,self.stages[stage].name)
             else:
-                self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)']
-        else:
-            if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
-                self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)','Nonlinear (FSL)']
-            else:
-                self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)','BBregister (FS)']
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'nipype',self.subject, self.pipeline_name,self.stages[stage].name)
 
-    def update_nuisance_requirements(self):
-        self.stages['Registration'].config.apply_to_eroded_brain = self.stages['FunctionalMRI'].config.global_nuisance
-        self.stages['Registration'].config.apply_to_eroded_csf = self.stages['FunctionalMRI'].config.csf
-        self.stages['Registration'].config.apply_to_eroded_wm = self.stages['FunctionalMRI'].config.wm
-
-    def update_scrubbing(self):
-        self.stages['FunctionalMRI'].config.scrubbing = self.stages['Connectome'].config.apply_scrubbing
 
     def _preprocessing_fired(self, info):
         print "preproc fired"
@@ -298,10 +243,3 @@ class fMRIPipeline(Pipeline):
         self.fill_stages_outputs()
 
         return valid_inputs
-
-    def check_config(self):
-        if self.stages['FunctionalMRI'].config.motion == True and self.stages['Preprocessing'].config.motion_correction == False:
-            return('\n\tMotion signal regression selected but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configuration window,\n\tor disable the motion signal regression in the functional configuration window.\t\n')
-        if self.stages['Connectome'].config.apply_scrubbing == True and self.stages['Preprocessing'].config.motion_correction == False:
-            return('\n\tScrubbing applied but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configutation window,\n\tor disable scrubbing in the connectome configuration window.\t\n')
-        return ''

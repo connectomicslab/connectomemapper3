@@ -14,30 +14,13 @@ import gzip
 from traits.api import *
 from traitsui.api import *
 
-from cmp.bidsappmanager.stages.common import Stage
+import subprocess
 
+#from cmp.bidsappmanager.stages.common import Stage
 
-class PreprocessingConfig(HasTraits):
-    total_readout = Float(0.0)
-    description = Str('description')
-    denoising = Bool(False)
-    denoising_algo =  Enum('MRtrix (MP-PCA)',['MRtrix (MP-PCA)','Dipy (NLM)'])
-    dipy_noise_model = Enum('Rician',['Rician','Gaussian'])
-    bias_field_correction = Bool(False)
-    bias_field_algo = Enum('ANTS N4',['ANTS N4','FSL FAST'])
-    eddy_current_and_motion_correction = Bool(True)
-    eddy_correction_algo = Enum('FSL eddy_correct','FSL eddy')
-    eddy_correct_motion_correction = Bool(True)
-    # start_vol = Int(0)
-    # end_vol = Int()
-    # max_vol = Int()
-    # max_str = Str
-    partial_volume_estimation = Bool(True)
-    fast_use_priors = Bool(True)
+from cmp.stages.preprocessing.preprocessing import PreprocessingConfig, PreprocessingStage
 
-    # DWI resampling selection
-    resampling = Tuple(1,1,1)
-    interpolation = Enum(['interpolate','weighted','nearest','sinc','cubic'])
+class PreprocessingConfigUI(PreprocessingConfig):
 
     traits_view = View(
                     VGroup(
@@ -89,55 +72,35 @@ class PreprocessingConfig(HasTraits):
     #         self.start_vol = 0
 
 
-class PreprocessingStage(Stage):
+class PreprocessingStageUI(PreprocessingStage):
+
+    inspect_output_button = Button('View')
+
+    inspect_outputs_view = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('inspect_outputs_enum',show_label=False),
+                                Item('inspect_output_button',enabled_when='inspect_outputs_enum!="Outputs not available"',show_label=False),
+                                label = 'View outputs', show_border=True
+                                )
+                            ),
+                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
+
+    config_view = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('config',style='custom',show_label=False),
+                                label = 'Configuration', show_border=True
+                                ),
+                            ),
+                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
+
     # General and UI members
     def __init__(self):
-        self.name = 'preprocessing_stage'
-        self.config = PreprocessingConfig()
-        self.inputs = ["diffusion","bvecs","bvals","T1","aseg","brain","brain_mask","wm_mask_file","roi_volumes"]
-        self.outputs = ["diffusion_preproc","bvecs_rot","bvals","dwi_brain_mask","T1","act_5TT","gmwmi","brain","brain_mask","brain_mask_full","wm_mask_file","partial_volume_files","roi_volumes"]
+        PreprocessingStage.__init__(self)
+        self.config = PreprocessingConfigUI()
 
-    def define_inspect_outputs(self):
-        print "stage_dir : %s" % self.stage_dir
-        if self.config.denoising:
-            denoising_results_path = os.path.join(self.stage_dir,"dwi_denoise","result_dwi_denoise.pklz")
-            if(os.path.exists(denoising_results_path)):
-                dwi_denoise_results = pickle.load(gzip.open(denoising_results_path))
-                print dwi_denoise_results.outputs.out_file
-                self.inspect_outputs_dict['DWI denoised image'] = ['mrview',dwi_denoise_results.outputs.out_file]
-                if self.config.denoising_algo == "MRtrix (MP-PCA)":
-                    print dwi_denoise_results.outputs.out_noisemap
-                    self.inspect_outputs_dict['Noise map'] = ['mrview',dwi_denoise_results.outputs.out_noisemap]
-
-        if self.config.bias_field_correction:
-            bias_field_correction_results_path = os.path.join(self.stage_dir,"dwi_biascorrect","result_dwi_biascorrect.pklz")
-            if(os.path.exists(bias_field_correction_results_path)):
-                dwi_biascorrect_results = pickle.load(gzip.open(bias_field_correction_results_path))
-                print dwi_biascorrect_results.outputs.out_file
-                print dwi_biascorrect_results.outputs.out_bias
-                self.inspect_outputs_dict['Bias field corrected image'] = ['mrview',dwi_biascorrect_results.outputs.out_file]
-                self.inspect_outputs_dict['Bias field'] = ['mrview',dwi_biascorrect_results.outputs.out_bias]
-
-        if self.config.eddy_current_and_motion_correction:
-            if self.config.eddy_correction_algo == 'FSL eddy_correct':
-                eddy_results_path = os.path.join(self.stage_dir,"eddy_correct","result_eddy_correct.pklz")
-                if(os.path.exists(eddy_results_path)):
-                    eddy_results = pickle.load(gzip.open(eddy_results_path))
-                    self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview',eddy_results.outputs.eddy_corrected]
-            else:
-                eddy_results_path = os.path.join(self.stage_dir,"eddy","result_eddy.pklz")
-                if(os.path.exists(eddy_results_path)):
-                    eddy_results = pickle.load(gzip.open(eddy_results_path))
-                    self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview',eddy_results.outputs.eddy_corrected]
-
-        self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
-
-
-    def has_run(self):
-        if not self.config.eddy_current_and_motion_correction:
-            if not self.config.denoising and not self.config.bias_field_correction:
-                return True
-            else:
-                return os.path.exists(os.path.join(self.stage_dir,"mr_convert_b","result_mr_convert_b.pklz"))
-        else:
-            return os.path.exists(os.path.join(self.stage_dir,"eddy","result_eddy.pklz"))
+    def _inspect_output_button_fired(self,info):
+        subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

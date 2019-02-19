@@ -24,21 +24,15 @@ from pyface.qt.QtGui import *
 from bids.grabbids import BIDSLayout
 
 # Own import
-import cmp.bidsappmanager.pipelines.common as cmp_common
-from cmp.bidsappmanager.stages.segmentation.segmentation import SegmentationStage
-from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStage
+#import cmp.bidsappmanager.pipelines.common as cmp_common
 
-class Global_Configuration(HasTraits):
-    process_type = Str('anatomical')
-    subjects = List(trait=Str)
-    subject = Str
-    subject_session = Str
+from cmp.bidsappmanager.stages.segmentation.segmentation import SegmentationStageUI
+from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStageUI
 
-class Check_Input_Notification(HasTraits):
-    message = Str
-    diffusion_imaging_model_options = List(['DSI','DTI','HARDI'])
-    diffusion_imaging_model = Str
-    diffusion_imaging_model_message = Str('\nMultiple diffusion inputs available. Please select desired diffusion modality.')
+from cmp.pipelines.common import Pipeline
+from cmp.pipelines.anatomical.anatomical import Global_Configuration, Check_Input_Notification, AnatomicalPipeline
+
+class Check_Input_NotificationUI(Check_Input_Notification):
 
     traits_view = View(Item('message',style='readonly',show_label=False),
                        Item('diffusion_imaging_model_message',visible_when='len(diffusion_imaging_model_options)>1',style='readonly',show_label=False),
@@ -47,22 +41,7 @@ class Check_Input_Notification(HasTraits):
                        buttons=['OK'],
                        title="Check inputs")
 
-class AnatomicalPipeline(cmp_common.Pipeline):
-    now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-    pipeline_name = Str("anatomical_pipeline")
-    input_folders = ['anat']
-    process_type = Str
-    diffusion_imaging_model = Str
-    parcellation_scheme = Str('Lausanne2008')
-    atlas_info = Dict()
-
-    #subject = Str
-    subject_directory = Directory
-    derivatives_directory = Directory
-    ordered_stage_list = ['Segmentation','Parcellation']# ,'MRTrixConnectome']
-    custom_last_stage = Enum('Parcellation',['Segmentation','Parcellation'])
-
-    global_conf = Global_Configuration()
+class AnatomicalPipelineUI(AnatomicalPipeline):
 
     segmentation = Button()
     #segmentation.setIcon(QIcon(QPixmap("segmentation.png")))
@@ -76,8 +55,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     #custom_run = Button('Custom...')
     #run = Button('Run...')
 
-    config_file = Str
-
     pipeline_group = VGroup(
                         HGroup(spring,UItem('segmentation',style='custom',width=450,height=170,resizable=True,editor_args={'image':ImageResource('segmentation'),'label':""}),spring,show_labels=False,label=""),#Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
                         HGroup(spring,UItem('parcellation',style='custom',width=450,height=200,resizable=True,editor_args={'image':ImageResource('parcellation'),'label':""}),spring,show_labels=False,label=""),
@@ -85,58 +62,22 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                         springy=True
                         )
 
+    traits_view = QtView(Include('pipeline_group'))
+
     def __init__(self,project_info):
-        self.stages = {'Segmentation':SegmentationStage(),
-            'Parcellation':ParcellationStage(pipeline_mode = "Diffusion")}
 
-        cmp_common.Pipeline.__init__(self, project_info)
-        #super(Pipeline, self).__init__(project_info)
+        AnatomicalPipeline.__init__(self,project_info)
 
-        self.subject = project_info.subject
-        self.last_date_processed = project_info.anat_last_date_processed
+        self.stages = {
+            'Segmentation':SegmentationStageUI(),
+            'Parcellation':ParcellationStageUI(pipeline_mode="Diffusion")}
 
-        self.global_conf.subjects = project_info.subjects
-        self.global_conf.subject = self.subject
+        for stage in self.stages.keys():
+            if project_info.subject_session != '':
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'nipype',self.subject,project_info.subject_session,self.pipeline_name,self.stages[stage].name)
+            else:
+                self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'nipype',self.subject, self.pipeline_name,self.stages[stage].name)
 
-        if len(project_info.subject_sessions) > 0:
-            self.global_conf.subject_session = project_info.subject_session
-            self.subject_directory =  os.path.join(self.base_directory,self.subject,self.global_conf.subject_session)
-        else:
-            self.global_conf.subject_session = ''
-            self.subject_directory =  os.path.join(self.base_directory,self.subject)
-
-        self.derivatives_directory =  os.path.join(self.base_directory,'derivatives')
-
-        self.stages['Segmentation'].config.on_trait_change(self.update_parcellation,'seg_tool')
-        self.stages['Parcellation'].config.on_trait_change(self.update_segmentation,'parcellation_scheme')
-
-        self.stages['Parcellation'].config.on_trait_change(self.update_parcellation_scheme,'parcellation_scheme')
-
-    def check_config(self):
-        if self.stages['Segmentation'].config.seg_tool ==  'Custom segmentation':
-            if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
-                return('\nCustom segmentation selected but no WM mask provided.\nPlease provide an existing WM mask file in the Segmentation configuration window.\n')
-            if not os.path.exists(self.stages['Parcellation'].config.atlas_nifti_file):
-                return('\n\tCustom segmentation selected but no atlas provided.\nPlease specify an existing atlas file in the Parcellation configuration window.\t\n')
-            if not os.path.exists(self.stages['Parcellation'].config.graphml_file):
-                return('\n\tCustom segmentation selected but no graphml info provided.\nPlease specify an existing graphml file in the Parcellation configuration window.\t\n')
-        return ''
-
-    def update_parcellation_scheme(self):
-        self.parcellation_scheme = self.stages['Parcellation'].config.parcellation_scheme
-        self.atlas_info = self.stages['Parcellation'].config.atlas_info
-
-    def update_parcellation(self):
-        if self.stages['Segmentation'].config.seg_tool == "Custom segmentation" :
-            self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
-        else:
-            self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.pre_custom
-
-    def update_segmentation(self):
-        if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
-            self.stages['Segmentation'].config.seg_tool = "Custom segmentation"
-        else:
-            self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
 
     def _segmentation_fired(self, info):
         self.stages['Segmentation'].configure_traits(view=self.view_mode)

@@ -16,29 +16,14 @@ import pkg_resources
 from traits.api import *
 from traitsui.api import *
 
+import subprocess
+
 # Own imports
-from cmp.bidsappmanager.stages.common import Stage
+#from cmp.bidsappmanager.stages.common import Stage
 
-class SegmentationConfig(HasTraits):
-    seg_tool = Enum(["Freesurfer","Custom segmentation"])
-    make_isotropic = Bool(False)
-    isotropic_vox_size = Float(1.2, desc='specify the size (mm)')
-    isotropic_interpolation = Enum('cubic', 'weighted', 'nearest', 'sinc', 'interpolate',
-                                desc='<interpolate|weighted|nearest|sinc|cubic> (default is cubic)')
-    brain_mask_extraction_tool = Enum("Freesurfer",["Freesurfer","BET","ANTs","Custom"])
-    ants_templatefile = File(desc="Anatomical template")
-    ants_probmaskfile = File(desc="Brain probability mask")
-    ants_regmaskfile = File(desc="Mask (defined in the template space) used during registration for brain extraction.To limit the metric computation to a specific region.")
+from cmp.stages.segmentation.segmentation import SegmentationConfig, SegmentationStage
 
-    use_fsl_brain_mask = Bool(False)
-    brain_mask_path = File
-    use_existing_freesurfer_data = Bool(False)
-    freesurfer_subjects_dir = Directory
-    freesurfer_subject_id_trait = List
-    freesurfer_subject_id = Str
-    freesurfer_args = Str
-
-    white_matter_mask = File(exist=True)
+class SegmentationConfigUI(SegmentationConfig):
 
     traits_view = View(Item('seg_tool',label="Segmentation tool"),
                        Group(
@@ -60,62 +45,36 @@ class SegmentationConfig(HasTraits):
                         visible_when='seg_tool=="Custom segmentation"')
                         )
 
-    def _freesurfer_subjects_dir_changed(self, old, new):
-        dirnames = [name for name in os.listdir(self.freesurfer_subjects_dir) if
-             os.path.isdir(os.path.join(self.freesurfer_subjects_dir, name))]
-        self.freesurfer_subject_id_trait = dirnames
 
-    def _use_existing_freesurfer_data_changed(self,new):
-        if new == True:
-            self.custom_segmentation = False
+class SegmentationStageUI(SegmentationStage):
 
+    inspect_output_button = Button('View')
 
-class SegmentationStage(Stage):
+    inspect_outputs_view = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('inspect_outputs_enum',show_label=False),
+                                Item('inspect_output_button',enabled_when='inspect_outputs_enum!="Outputs not available"',show_label=False),
+                                label = 'View outputs', show_border=True
+                                )
+                            ),
+                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
+
+    config_view = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('config',style='custom',show_label=False),
+                                label = 'Configuration', show_border=True
+                                ),
+                            ),
+                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
+
     # General and UI members
     def __init__(self):
-        self.name = 'segmentation_stage'
-        self.config = SegmentationConfig()
+        SegmentationStage.__init__(self)
+        self.config = SegmentationConfigUI()
 
-
-        self.config.ants_templatefile = os.path.join('app','connectomemapper3','cmtklib','data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz')
-        self.config.ants_probmaskfile = os.path.join('app','connectomemapper3','cmtklib','data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz')
-        self.config.ants_regmaskfile = os.path.join('app','connectomemapper3','cmtklib','data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumMask.nii.gz')
-        # FIXME
-        # self.config.ants_templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz'))
-        # self.config.ants_probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz'))
-        # self.config.ants_regmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumMask.nii.gz'))
-        self.inputs = ["T1","brain_mask"]
-        self.outputs = ["subjects_dir","subject_id","custom_wm_mask","brain_mask","brain"]
-
-    def define_inspect_outputs(self):
-        print "stage_dir : %s" % self.stage_dir
-        if self.config.seg_tool == "Freesurfer":
-            fs_path = ''
-            if self.config.use_existing_freesurfer_data == False:
-                reconall_results_path = os.path.join(self.stage_dir,"reconall","result_reconall.pklz")
-                fs_path = self.config.freesurfer_subject_id
-                if(os.path.exists(reconall_results_path)):
-                    reconall_results = pickle.load(gzip.open(reconall_results_path))
-            else:
-                fs_path = os.path.join(self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
-            print "fs_path : %s" % fs_path
-
-            if 'FREESURFER_HOME' not in os.environ:
-                colorLUT_file = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'freesurfer', 'FreeSurferColorLUT.txt'))
-            else:
-                colorLUT_file = os.path.join(os.environ['FREESURFER_HOME'],'FreeSurferColorLUT.txt')
-            
-            self.inspect_outputs_dict['brainmask/T1'] = ['tkmedit','-f',os.path.join(fs_path,'mri','brainmask.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux',os.path.join(fs_path,'mri','T1.mgz'),'-aux-surface',os.path.join(fs_path,'surf','rh.white')]
-            self.inspect_outputs_dict['norm/aseg'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),colorLUT_file]
-            self.inspect_outputs_dict['norm/aseg/surf'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux-surface',os.path.join(fs_path,'surf','rh.white'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),colorLUT_file]
-
-        elif self.config.seg_tool == "Custom segmentation":
-            self.inspect_outputs_dict['brainmask'] = ['fslview',self.config.white_matter_mask]
-
-        self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
-
-    def has_run(self):
-        if self.config.use_existing_freesurfer_data or self.config.seg_tool == "Custom segmentation":
-            return True
-        else:
-            return os.path.exists(os.path.join(self.stage_dir,"reconall","result_reconall.pklz"))
+    def _inspect_output_button_fired(self,info):
+        subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

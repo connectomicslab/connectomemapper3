@@ -14,62 +14,46 @@ import gzip
 from traits.api import *
 from traitsui.api import *
 
-from cmp.bidsappmanager.stages.common import Stage
+import subprocess
 
+#from cmp.bidsappmanager.stages.common import Stage
 
-class PreprocessingConfig(HasTraits):
-    discard_n_volumes = Int('5')
-    despiking = Bool(True)
-    slice_timing = Enum("none", ["bottom-top interleaved", "bottom-top interleaved", "top-bottom interleaved", "bottom-top", "top-bottom"])
-    repetition_time = Float(1.92)
-    motion_correction = Bool(True)
+from cmp.stages.preprocessing.fmri_preprocessing import PreprocessingConfig, PreprocessingStage
+
+class PreprocessingConfigUI(PreprocessingConfig):
 
     traits_view = View('discard_n_volumes','despiking','slice_timing',Item('repetition_time',visible_when='slice_timing!="none"'),'motion_correction')
 
 
-class PreprocessingStage(Stage):
+class PreprocessingStageUI(PreprocessingStage):
+
+    inspect_output_button = Button('View')
+
+    inspect_outputs_view = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('inspect_outputs_enum',show_label=False),
+                                Item('inspect_output_button',enabled_when='inspect_outputs_enum!="Outputs not available"',show_label=False),
+                                label = 'View outputs', show_border=True
+                                )
+                            ),
+                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
+
+    config_view = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('config',style='custom',show_label=False),
+                                label = 'Configuration', show_border=True
+                                ),
+                            ),
+                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
+
     # General and UI members
     def __init__(self):
-        self.name = 'preprocessing_stage'
-        self.config = PreprocessingConfig()
-        self.inputs = ["functional"]
-        self.outputs = ["functional_preproc","par_file","mean_vol"]
+        PreprocessingStage.__init__(self)
+        self.config = PreprocessingConfigUI()
 
-
-    def define_inspect_outputs(self):
-        if self.config.despiking:
-            despike_path = os.path.join(self.stage_dir,"converter","result_converter.pklz")
-            if(os.path.exists(despike_path)):
-                despike_results = pickle.load(gzip.open(despike_path))
-                self.inspect_outputs_dict['Spike corrected image'] = ['fslview',despike_results.outputs.out_file]
-
-        if self.config.slice_timing:
-            slc_timing_path = os.path.join(self.stage_dir,"slice_timing","result_slice_timing.pklz")
-            if(os.path.exists(slc_timing_path)):
-                slice_results = pickle.load(gzip.open(slc_timing_path))
-                self.inspect_outputs_dict['Slice time corrected image'] = ['fslview',slice_results.outputs.slice_time_corrected_file]
-                self.inspect_outputs = self.inspect_outputs_dict.keys()
-            if self.config.motion_correction:
-                motion_results_path = os.path.join(self.stage_dir,"motion_correction","result_motion_correction.pklz")
-                if(os.path.exists(motion_results_path)):
-                    motion_results = pickle.load(gzip.open(motion_results_path))
-                    self.inspect_outputs_dict['Slice time and motion corrected image'] = ['fslview',motion_results.outputs.out_file]
-                    self.inspect_outputs = self.inspect_outputs_dict.keys()
-
-        elif self.config.motion_correction:
-            motion_results_path = os.path.join(self.stage_dir,"motion_correction","result_motion_correction.pklz")
-            if(os.path.exists(motion_results_path)):
-                motion_results = pickle.load(gzip.open(motion_results_path))
-                self.inspect_outputs_dict['Motion corrected image'] = ['fslview',motion_results.outputs.out_file]
-                self.inspect_outputs = self.inspect_outputs_dict.keys()
-
-
-    def has_run(self):
-        if self.config.motion_correction:
-            return os.path.exists(os.path.join(self.stage_dir,"motion_correction","result_motion_correction.pklz"))
-        elif self.config.slice_timing:
-            return os.path.exists(os.path.join(self.stage_dir,"slice_timing","result_slice_timing.pklz"))
-        elif self.config.despiking:
-            return os.path.exists(os.path.join(self.stage_dir,"converter","result_converter.pklz"))
-        else:
-            return True
+    def _inspect_output_button_fired(self,info):
+        subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

@@ -489,7 +489,7 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
                 print("Created directory %s" % full_p)
 
 def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
-    dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
+    dmri_pipeline = Diffusion_pipeline.DiffusionPipelineUI(project_info)
 
     derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
 
@@ -544,7 +544,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
     return dmri_inputs_checked, dmri_pipeline
 
 def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
-    fmri_pipeline = FMRI_pipeline.fMRIPipeline(project_info)
+    fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(project_info)
 
     derivatives_directory = os.path.join(project_info.base_directory,'derivatives')
 
@@ -603,7 +603,7 @@ def init_anat_project(project_info, is_new_project):
     print(project_info.subject)
     print(project_info.subject_session)
 
-    anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
+    anat_pipeline = Anatomical_pipeline.AnatomicalPipelineUI(project_info)
     #dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info,anat_pipeline.flow)
     #fmri_pipeline = FMRI_pipeline.fMRIPipeline
     #egg_pipeline = None
@@ -1475,6 +1475,7 @@ class ProjectHandlerV2(Handler):
 
         loaded_project = gui.CMP_Project_Info()
         np_res = loaded_project.configure_traits(view='open_view')
+        loaded_project.output_directory = os.path.join(loaded_project.base_directory,'derivatives')
 
         is_bids = False
 
@@ -1583,7 +1584,7 @@ class ProjectHandlerV2(Handler):
 
         if anat_inputs_checked:
 
-            self.anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(loaded_project)
+            self.anat_pipeline = Anatomical_pipeline.AnatomicalPipelineUI(loaded_project)
             self.anat_pipeline.number_of_cores = loaded_project.number_of_cores
 
             code_directory = os.path.join(loaded_project.base_directory,'code')
@@ -1623,7 +1624,7 @@ class ProjectHandlerV2(Handler):
             self.project_loaded = True
 
             if dmri_inputs_checked:
-                self.dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(loaded_project)
+                self.dmri_pipeline = Diffusion_pipeline.DiffusionPipelineUI(loaded_project)
                 self.dmri_pipeline.number_of_cores  = loaded_project.number_of_cores
                 self.dmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
 
@@ -1743,7 +1744,7 @@ class ProjectHandlerV2(Handler):
                 self.project_loaded = True
 
                 if fmri_inputs_checked: #and self.fmri_pipeline != None:
-                    self.fmri_pipeline = FMRI_pipeline.fMRIPipeline(loaded_project)
+                    self.fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(loaded_project)
                     self.fmri_pipeline.number_of_cores  = loaded_project.number_of_cores
                     self.fmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
 
