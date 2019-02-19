@@ -8,6 +8,9 @@ atom-config.txt
 docs
 docs/*
 
+debian
+debian/*
+
 dist
 dist/*
 

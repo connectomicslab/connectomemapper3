@@ -5,6 +5,12 @@
 *.mp4
 atom-config.txt
 
+debian
+debian/*
+
+dist
+dist/*
+
 build
 build/*
 
