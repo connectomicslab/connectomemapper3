@@ -279,7 +279,7 @@ class DiffusionStage(Stage):
 
         if self.config.tracking_processing_tool == 'Dipy':
             track_flow = create_dipy_tracking_flow(self.config.dipy_tracking_config)
-            print "Dipy tracking"
+            # print "Dipy tracking"
 
             if self.config.diffusion_imaging_model != 'DSI':
                 flow.connect([
@@ -317,7 +317,7 @@ class DiffusionStage(Stage):
 
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'MRtrix':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
-            print "MRtrix tracking"
+            # print "MRtrix tracking"
 
             flow.connect([
                         (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
@@ -346,7 +346,7 @@ class DiffusionStage(Stage):
 
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'Dipy':
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
-            print "MRtrix tracking"
+            # print "MRtrix tracking"
 
             if self.config.diffusion_imaging_model != 'DSI':
                 flow.connect([
@@ -426,12 +426,12 @@ class DiffusionStage(Stage):
             custom_node = pe.Node(interface=util.IdentityInterface(fields=["custom_track_file"]),name="read_custom_track")
             custom_node.inputs.custom_track_file = self.config.custom_track_file
             if nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TrkFile:
-                print "load TRK tractography file"
+                print("> load TRK tractography file")
                 flow.connect([
                             (custom_node,outputnode,[("custom_track_file","track_file")])
                             ])
             elif nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TckFile:
-                print "load TCK tractography file and convert to TRK format"
+                print("> load TCK tractography file and convert to TRK format")
                 converter = pe.Node(interface=Tck2Trk(),name="trackvis")
                 converter.inputs.out_tracks = 'converted.trk'
 
@@ -441,10 +441,10 @@ class DiffusionStage(Stage):
                     (converter,outputnode,[('out_tracks','track_file')])
                     ])
             else:
-                print "Invalid tractography input format. Valid formats are .tck (MRtrix) and .trk (DTK/Trackvis)"
+                print("Invalid tractography input format. Valid formats are .tck (MRtrix) and .trk (DTK/Trackvis)")
 
     def define_inspect_outputs(self):
-        print "stage_dir : %s" % self.stage_dir
+        # print "stage_dir : %s" % self.stage_dir
 
         self.inspect_outputs_dict = {}
 
@@ -565,11 +565,11 @@ class DiffusionStage(Stage):
             else:
                 #print('Git THEREEEEEEEEEEEE 22222222222222222222222222222222222222')
                 diff_results_path = os.path.join(self.stage_dir,"tracking","trackvis","result_trackvis.pklz")
-                print diff_results_path
+                # print diff_results_path
                 if os.path.exists(diff_results_path):
                     diff_results = pickle.load(gzip.open(diff_results_path))
                     streamline_res = diff_results.outputs.out_tracks
-                    print streamline_res
+                    # print streamline_res
                     self.inspect_outputs_dict[self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis',streamline_res]
 
             # if self.config.mrtrix_recon_config.local_model:

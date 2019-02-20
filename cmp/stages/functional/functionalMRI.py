@@ -187,59 +187,59 @@ class nuisance_regression(BaseInterface):
         # build regressors matrix
         if self.inputs.global_nuisance:
             X = np.hstack(global_values.reshape(tp,1))
-            print('Detrend global average signal')
+            print('> Detrend global average signal')
             if self.inputs.csf_nuisance:
                 X = np.hstack((X.reshape(tp,1),csf_values.reshape(tp,1)))
-                print('Detrend CSF average signal')
+                print('... Detrend CSF average signal')
                 if self.inputs.wm_nuisance:
                     X = np.hstack((X,wm_values.reshape(tp,1)))
-                    print('Detrend WM average signal')
+                    print('... ... Detrend WM average signal')
                     if self.inputs.motion_nuisance:
-                        print('pre-Detrend motion average signals')
+                        print('... ... ... pre-Detrend motion average signals')
                         X = np.hstack((X,move))
-                        print('Detrend motion average signals')
+                        print('... ... ... Detrend motion average signals')
                 elif self.inputs.motion_nuisance:
                     X = np.hstack((X,move))
-                    print('Detrend motion average signals')
+                    print('... ... Detrend motion average signals')
             elif self.inputs.wm_nuisance:
                 X = np.hstack((X.reshape(tp,1),wm_values.reshape(tp,1)))
-                print('Detrend WM average signal')
+                print('... Detrend WM average signal')
                 if self.inputs.motion_nuisance:
                     X = np.hstack((X,move))
-                    print('Detrend motion average signals')
+                    print('... ... Detrend motion average signals')
             elif self.inputs.motion_nuisance:
                 X = np.hstack((X.reshape(tp,1),move))
-                print('Detrend motion average signals')
+                print('... Detrend motion average signals')
         elif self.inputs.csf_nuisance:
             X = np.hstack((csf_values.reshape(tp,1)))
-            print('Detrend CSF average signal')
+            print('> Detrend CSF average signal')
             if self.inputs.wm_nuisance:
                 X = np.hstack((X.reshape(tp,1),wm_values.reshape(tp,1)))
-                print('Detrend WM average signal')
+                print('... Detrend WM average signal')
                 if self.inputs.motion_nuisance:
                     X = np.hstack((X,move))
-                    print('Detrend motion average signals')
+                    print('... ... Detrend motion average signals')
             elif self.inputs.motion_nuisance:
                 X = np.hstack((X.reshape(tp,1),move))
-                print('Detrend motion average signals')
+                print('... Detrend motion average signals')
         elif self.inputs.wm_nuisance:
             X = np.hstack((wm_values.reshape(tp,1)))
-            print('Detrend WM average signal')
+            print('> Detrend WM average signal')
             if self.inputs.motion_nuisance:
-                print('pre-Detrend motion average signals')
-                print('move shape :',move.shape)
-                print('X shape :',X.shape)
+                print('... pre-Detrend motion average signals')
+                # print('... move shape :',move.shape)
+                # print('... X shape :',X.shape)
                 Y = X.reshape(tp,1)
-                print('Y shape :',Y.shape)
+                # print('... Y shape :',Y.shape)
                 X = np.hstack((Y,move))
-                print('Detrend motion average signals')
+                print('... Detrend motion average signals')
         elif self.inputs.motion_nuisance:
             X = move
-            print('Detrend motion average signals')
+            print('> Detrend motion average signals')
 
         X = sm.add_constant(X)
-        print('Shape X GLM')
-        print(X.shape)
+        # print('Shape X GLM')
+        # print(X.shape)
 
         # loop throughout all GM voxels
         for index,value in np.ndenumerate( gm ):
@@ -310,7 +310,7 @@ class Detrending(BaseInterface):
         nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
 
         if self.inputs.mode == 'quadratic':
-            print("quadratic detrending")
+            print("Quadratic detrending")
             print("=================")
 
             # GLM: regress out nuisance covariates

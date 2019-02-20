@@ -137,7 +137,7 @@ class DiffusionPipeline(Pipeline):
             self.stages[stage].enabled = False
         # enable until selected one
         for stage in self.ordered_stage_list:
-            print 'Enable stage : %s' % stage
+            print('Enable stage : %s' % stage)
             self.stages[stage].enabled = True
             if stage == custom_last_stage:
                 break
@@ -148,7 +148,7 @@ class DiffusionPipeline(Pipeline):
         # print new
 
     def check_input(self, layout, gui=True):
-        print '**** Check Inputs  ****'
+        print('**** Check Inputs  ****')
         diffusion_available = False
         bvecs_available = False
         bvals_available = False
@@ -167,7 +167,7 @@ class DiffusionPipeline(Pipeline):
 
         try:
             layout = BIDSLayout(self.base_directory)
-            print "Valid BIDS dataset with %s subjects" % len(layout.get_subjects())
+            # print("INFO : Valid BIDS dataset with %s subjects" % len(layout.get_subjects()))
             for subj in layout.get_subjects():
                 self.global_conf.subjects.append('sub-'+str(subj))
             # self.global_conf.subjects = ['sub-'+str(subj) for subj in layout.get_subjects()]
@@ -189,9 +189,9 @@ class DiffusionPipeline(Pipeline):
                                 break
                     else:#TODO: Better parsing of multiple runs
                         dwi_file = files[0].filename
-                        print(dwi_file)
+                        # print(dwi_file)
                 else:
-                    print("ERROR: Diffusion image not found for subject %s."%(subjid))
+                    print("ERROR : Diffusion image not found for subject %s."%(subjid))
                     return
 
                 files = layout.get(subject=subjid,type='dwi',extensions='.bval')
@@ -203,9 +203,9 @@ class DiffusionPipeline(Pipeline):
                                 break
                     else:#TODO: Better parsing of multiple runs
                         bval_file = files[0].filename
-                        print(bval_file)
+                        # print(bval_file)
                 else:
-                    print("Diffusion bval image not found for subject %s."%(subjid))
+                    print("ERROR : Diffusion bval image not found for subject %s."%(subjid))
                     return
 
                 files = layout.get(subject=subjid,type='dwi',extensions='.bvec')
@@ -217,9 +217,9 @@ class DiffusionPipeline(Pipeline):
                                 break
                     else:#TODO: Better parsing of multiple runs
                         bvec_file = files[0].filename
-                        print(bvec_file)
+                        # print(bvec_file)
                 else:
-                    print("Diffusion bvec image not found for subject %s."%(subjid))
+                    print("ERROR : Diffusion bvec image not found for subject %s."%(subjid))
                     return
             else:
                 sessid = self.global_conf.subject_session.split("-")[1]
@@ -233,9 +233,9 @@ class DiffusionPipeline(Pipeline):
                                 break
                     else:#TODO: Better parsing of multiple runs
                         dwi_file = files[0].filename
-                        print(dwi_file)
+                        # print(dwi_file)
                 else:
-                    print("Diffusion image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
+                    print("ERROR : Diffusion image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                     return
 
                 files = layout.get(subject=subjid,type='dwi',extensions='.bval',session=sessid)
@@ -247,9 +247,9 @@ class DiffusionPipeline(Pipeline):
                                 break
                     else:#TODO: Better parsing of multiple runs
                         bval_file = files[0].filename
-                        print bval_file
+                        # print bval_file
                 else:
-                    print("Diffusion bval image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
+                    print("ERROR : Diffusion bval image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                     return
 
                 files = layout.get(subject=subjid,type='dwi',extensions='.bvec',session=sessid)
@@ -261,19 +261,19 @@ class DiffusionPipeline(Pipeline):
                                 break
                     else:#TODO: Better parsing of multiple runs
                         bvec_file = files[0].filename
-                        print bvec_file
+                        # print bvec_file
                 else:
-                    print("Diffusion bvec image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
+                    print("ERROR : Diffusion bvec image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                     return
 
-            print("Looking for....")
-            print("dwi_file : %s" % dwi_file)
-            print("bvecs_file : %s" % bvec_file)
-            print("bvals_file : %s" % bval_file)
+            print("> Looking for....")
+            print("... dwi_file : %s" % dwi_file)
+            print("... bvecs_file : %s" % bvec_file)
+            print("... bvals_file : %s" % bval_file)
 
             for typ in types:
                 if typ == 'dwi' and os.path.isfile(dwi_file):
-                    print("%s available" % typ)
+                    # print("%s available" % typ)
                     diffusion_available = True
 
         except:
@@ -320,7 +320,7 @@ class DiffusionPipeline(Pipeline):
         if gui:
             #input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
             #input_notification.configure_traits()
-            print input_message
+            print(input_message)
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
 
             # if diffusion_available:
@@ -332,7 +332,7 @@ class DiffusionPipeline(Pipeline):
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
         else:
-            print input_message
+            print(input_message)
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
 
             # if diffusion_available:
@@ -348,12 +348,12 @@ class DiffusionPipeline(Pipeline):
         if(diffusion_available):
             valid_inputs = True
         else:
-            print("Missing required inputs.Please see documentation for more details.")
+            print("ERROR : Missing required inputs.Please see documentation for more details.")
 
-        for stage in self.stages.values():
-            if stage.enabled:
-                print stage.name
-                print stage.stage_dir
+        # for stage in self.stages.values():
+        #     if stage.enabled:
+        #         print stage.name
+        #         print stage.stage_dir
 
         self.fill_stages_outputs()
 
@@ -642,7 +642,7 @@ class DiffusionPipeline(Pipeline):
                                                 #    ("atlas_info","atlas_info")]),
                       ])
 
-        print diffusion_inputnode.outputs
+        # print diffusion_inputnode.outputs
 
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
@@ -817,7 +817,7 @@ class DiffusionPipeline(Pipeline):
         iflogger = logging.getLogger('nipype.interface')
 
         iflogger.info("**** Processing ****")
-        print self.anat_flow
+        # print self.anat_flow
 
         flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory, nipype_deriv_subject_directory=nipype_deriv_subject_directory)
         flow.write_graph(graph2use='colored', format='svg', simple_form=True)

@@ -145,13 +145,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.stages[stage].enabled = False
         # enable until selected one
         for stage in self.ordered_stage_list:
-            print 'Enable stage : %s' % stage
+            print('Enable stage : %s' % stage)
             self.stages[stage].enabled = True
             if stage == custom_last_stage:
                 break
 
     def check_input(self, layout, gui=True):
-        print '**** Check Inputs  ****'
+        print('**** Check Inputs  ****')
         t1_available = False
         valid_inputs = False
 
@@ -164,7 +164,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz')
             if len(files) > 0:
                 T1_file = files[0].filename
-                print T1_file
+                # print T1_file
             else:
                 return
         else:
@@ -172,16 +172,16 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
                 T1_file = files[0].filename
-                print T1_file
+                # print T1_file
             else:
                 return
 
-        print "Looking in %s for...." % self.base_directory
-        print "T1_file : %s" % T1_file
+        print("> Looking in %s for...." % self.base_directory)
+        print("... t1_file : %s" % T1_file)
 
         for typ in types:
             if typ == 'T1w' and os.path.isfile(T1_file):
-                print "%s available" % typ
+                # print("%s available" % typ)
                 t1_available = True
 
         if t1_available:
@@ -204,20 +204,20 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if gui:
             #input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
             #input_notification.configure_traits()
-            print input_message
+            print(input_message)
 
         else:
-            print input_message
+            print(input_message)
 
         if(t1_available):
             valid_inputs = True
         else:
-            print "Missing required inputs. Please see documentation for more details."
+            print("ERROR : Missing required inputs. Please see documentation for more details.")
 
-        for stage in self.stages.values():
-            if stage.enabled:
-                print stage.name
-                print stage.stage_dir
+        # for stage in self.stages.values():
+        #     if stage.enabled:
+        #         print stage.name
+        #         print stage.stage_dir
 
         self.fill_stages_outputs()
 
@@ -253,20 +253,20 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if os.path.isfile(T1_file):
             t1_available = True
         else:
-            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % T1_file
-            print error_message
+            error_message = "ERROR : Missing anatomical output file %s . Please re-run the anatomical pipeline" % T1_file
+            print(error_message)
 
         if os.path.isfile(brain_file):
             brain_available = True
         else:
-            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % brain_file
-            print error_message
+            error_message = "ERROR : Missing anatomical output file %s . Please re-run the anatomical pipeline" % brain_file
+            print(error_message)
 
         if os.path.isfile(brainmask_file):
             brainmask_available = True
         else:
-            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % brainmask_file
-            print error_message
+            error_message = "ERROR : Missing anatomical output file %s . Please re-run the anatomical pipeline" % brainmask_file
+            print(error_message)
 
         if os.path.isfile(wm_mask_file):
             wm_available = True
@@ -282,11 +282,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if cnt1 == cnt2:
             roivs_available = True
         else:
-            error_message = "Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline" % (cnt1-cnt2,cnt1)
-            print error_message
+            error_message = "ERROR : Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline" % (cnt1-cnt2,cnt1)
+            print(error_message)
 
         if t1_available == True and brain_available == True and brainmask_available == True and wm_available == True and roivs_available == True:
-            print "valid deriv/anat output"
+            print("INFO : Valid derivatives for anatomical pipeline")
             valid_output = True
 
         return valid_output,error_message
@@ -390,9 +390,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
                 if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
                     self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.output_directory,'freesurfer')
-                    print "Freesurfer_subjects_dir: %s" % self.stages['Segmentation'].config.freesurfer_subjects_dir
+                    print("Freesurfer_subjects_dir: %s" % self.stages['Segmentation'].config.freesurfer_subjects_dir)
                     self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.output_directory,'freesurfer',self.subject)
-                    print "Freesurfer_subject_id: %s" % self.stages['Segmentation'].config.freesurfer_subject_id
+                    print("Freesurfer_subject_id: %s" % self.stages['Segmentation'].config.freesurfer_subject_id)
 
             seg_flow = self.create_stage_flow("Segmentation")
 

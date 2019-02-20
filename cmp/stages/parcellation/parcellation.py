@@ -47,8 +47,6 @@ class ParcellationConfig(HasTraits):
         atlas_name = os.path.basename(self.atlas_nifti_file)
         atlas_name = os.path.splitext(os.path.splitext(atlas_name)[0])[0].encode('ascii')
         self.atlas_info = {atlas_name : {'number_of_regions':self.number_of_regions,'node_information_graphml':self.graphml_file}}
-        print "Update atlas information"
-        print self.atlas_info
 
     def _atlas_nifti_file_changed(self,new):
         self.update_atlas_info()
@@ -221,35 +219,35 @@ class ParcellationStage(Stage):
                                 ])
 
     def define_inspect_outputs(self):
-        print "stage_dir : %s" % self.stage_dir
-        print "parcellation scheme : %s" % self.config.parcellation_scheme
-        print "atlas info : "
-        print self.config.atlas_info
+        # print "stage_dir : %s" % self.stage_dir
+        # print "parcellation scheme : %s" % self.config.parcellation_scheme
+        # print "atlas info : "
+        # print self.config.atlas_info
 
         if self.config.parcellation_scheme != "Custom":
             parc_results_path = os.path.join(self.stage_dir,"%s_parcellation" % self.config.parcellation_scheme,"result_%s_parcellation.pklz" % self.config.parcellation_scheme)
-            print "parc_results_path : %s" % parc_results_path
+            # print "parc_results_path : %s" % parc_results_path
             if(os.path.exists(parc_results_path)):
                 parc_results = pickle.load(gzip.open(parc_results_path))
-                print parc_results
+                # print parc_results
                 #print parc_results.outputs.roi_files_in_structural_space
                 white_matter_file = parc_results.outputs.white_matter_mask_file
                 if isinstance(parc_results.outputs.roi_files_in_structural_space, (str,unicode)):
-                    print "str: %s" % parc_results.outputs.roi_files_in_structural_space
+                    # print "str: %s" % parc_results.outputs.roi_files_in_structural_space
                     lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))
                     roi_v = parc_results.outputs.roi_files_in_structural_space
-                    print "roi_v : %s" % os.path.basename(roi_v)
+                    # print "roi_v : %s" % os.path.basename(roi_v)
                     self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview','-v',
                                                                            white_matter_file+':colormap=GEColor',
                                                                            roi_v+":colormap=lut:lut="+lut_file]
                 elif isinstance(parc_results.outputs.roi_files_in_structural_space, TraitListObject):
-                    print parc_results.outputs.roi_files_in_structural_space
+                    # print parc_results.outputs.roi_files_in_structural_space
                     if self.config.parcellation_scheme == 'Lausanne2008':
                         resolution = {'1':'resolution83','2':'resolution150','3':'resolution258','4':'resolution500','5':'resolution1015'}
                         for roi_v in parc_results.outputs.roi_files_in_structural_space:
                             roi_basename = os.path.basename(roi_v)
                             scale = roi_basename[16:-7]
-                            print scale
+                            # print scale
                             lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008',resolution[scale],resolution[scale] + '_LUT.txt'))
                             self.inspect_outputs_dict[roi_basename] = ['freeview','-v',
                                                                                white_matter_file+':colormap=GEColor',

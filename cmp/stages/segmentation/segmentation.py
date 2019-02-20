@@ -60,7 +60,7 @@ class SegmentationConfig(HasTraits):
             self.custom_segmentation = False
 
 def extract_base_directory(file):
-    print "Extract reconall base dir : %s" % file[:-17]
+    # print "Extract reconall base dir : %s" % file[:-17]
     return file[:-17]
 
 
@@ -89,7 +89,7 @@ class SegmentationStage(Stage):
                 orig_dir = os.path.join(self.config.freesurfer_subject_id,"mri","orig")
                 if not os.path.exists(orig_dir):
                     os.makedirs(orig_dir)
-                    print "Folder not existing; %s created!" % orig_dir
+                    print "INFO : Folder not existing; %s created!" % orig_dir
                 rename.inputs.format_string = os.path.join(orig_dir,"001.mgz")
 
                 if self.config.brain_mask_extraction_tool == "Freesurfer":
@@ -105,7 +105,7 @@ class SegmentationStage(Stage):
                     # fs_reconall.inputs.brainstem = self.config.segment_brainstem
 
                     def isavailable(file):
-                        print "T1 is available"
+                        # print "T1 is available"
                         return file
 
                     flow.connect([
@@ -126,7 +126,7 @@ class SegmentationStage(Stage):
                     fs_autorecon1.inputs.subjects_dir = self.config.freesurfer_subjects_dir
 
                     def isavailable(file):
-                        print "Is available"
+                        # print "Is available"
                         return file
 
                     flow.connect([
@@ -194,7 +194,7 @@ class SegmentationStage(Stage):
                     #             ])
 
                     def get_freesurfer_subject_id(file):
-                        print "Extract reconall base dir : %s" % file[:-18]
+                        # print "Extract reconall base dir : %s" % file[:-18]
                         return file[:-18]
 
                     fs_reconall23 = pe.Node(interface=fs.ReconAll(flags='-no-isrunning'),name="reconall23")
@@ -232,7 +232,7 @@ class SegmentationStage(Stage):
             outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
 
     def define_inspect_outputs(self):
-        print "stage_dir : %s" % self.stage_dir
+        # print "stage_dir : %s" % self.stage_dir
         if self.config.seg_tool == "Freesurfer":
             fs_path = ''
             if self.config.use_existing_freesurfer_data == False:
@@ -242,7 +242,7 @@ class SegmentationStage(Stage):
                     reconall_results = pickle.load(gzip.open(reconall_results_path))
             else:
                 fs_path = os.path.join(self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
-            print "fs_path : %s" % fs_path
+            # print "fs_path : %s" % fs_path
 
             if 'FREESURFER_HOME' not in os.environ:
                 colorLUT_file = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'freesurfer', 'FreeSurferColorLUT.txt'))

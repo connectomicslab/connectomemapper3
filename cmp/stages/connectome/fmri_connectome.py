@@ -224,13 +224,9 @@ class rsfmri_conmat(BaseInterface):
                 print(log_scrubbing)
                 np.save( os.path.abspath( 'tp_after_scrubbing.npy'), index )
                 sio.savemat( os.path.abspath('tp_after_scrubbing.mat'), {'index':index} )
-                print('cfmri-5-scr')
                 ts_after_scrubbing = ts[:,index]
-                print('cfmri-6-scr')
                 np.save( os.path.abspath('averageTimeseries_%s_after_scrubbing.npy' % parkey), ts_after_scrubbing )
-                print('cfmri-7-scr')
                 sio.savemat( os.path.abspath('averageTimeseries_%s_after_scrubbing.mat' % parkey), {'ts':ts_after_scrubbing} )
-                print('cfmri-8-scr')
                 ts = ts_after_scrubbing
                 print('ts.shape : ',ts.shape)
 
@@ -245,8 +241,7 @@ class rsfmri_conmat(BaseInterface):
                         G.add_edge(ROI_idx[i],ROI_idx[j],corr = value)
                     	# fmat[i,j] = value
                 		# fmat[j,i] = value
-                print('cfmri-8-scr')
-        		# np.save( op.join(gconf.get_timeseries(), 'fconnectome_%s_after_scrubbing.npy' % s), fmat )
+                # np.save( op.join(gconf.get_timeseries(), 'fconnectome_%s_after_scrubbing.npy' % s), fmat )
         		# sio.savemat( op.join(gconf.get_timeseries(), 'fconnectome_%s_after_scrubbing.mat' % s), {'fmat':fmat} )
             else:
                 nnodes = ts.shape[0]
@@ -364,20 +359,20 @@ class ConnectomeStage(Stage):
 
     def define_inspect_outputs(self):
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
-        print('con_results_path : ',con_results_path)
+        # print('con_results_path : ',con_results_path)
         if(os.path.exists(con_results_path)):
 
             con_results = pickle.load(gzip.open(con_results_path))
-            print(con_results)
+            # print(con_results)
 
             if isinstance(con_results.outputs.connectivity_matrices, basestring):
                 mat = con_results.outputs.connectivity_matrices
-                print(mat)
+                # print(mat)
                 if 'gpickle' in mat:
                     self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%os.path.basename(mat)] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]
             else:
                 for mat in con_results.outputs.connectivity_matrices:
-                    print(mat)
+                    # print(mat)
                     if 'gpickle' in mat:
                         con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
                         self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%con_name] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]

@@ -212,13 +212,13 @@ class ConnectomeStage(Stage):
 
     def define_inspect_outputs(self):
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
-        print "Stage dir: %s" % self.stage_dir
+        # print "Stage dir: %s" % self.stage_dir
         if(os.path.exists(con_results_path)):
-            print "con_results_path : %s" % con_results_path
+            # print "con_results_path : %s" % con_results_path
             con_results = pickle.load(gzip.open(con_results_path))
             self.inspect_outputs_dict['streamline_final'] = ['trackvis',con_results.outputs.streamline_final_file]
             mat = con_results.outputs.connectivity_matrices
-            print "Conn. matrix : %s" % mat
+            # print "Conn. matrix : %s" % mat
 
             map_scale = "default"
             if self.config.log_visualization:
@@ -230,12 +230,12 @@ class ConnectomeStage(Stage):
                 layout='matrix'
 
             if isinstance(mat, basestring):
-                print "is str"
+                # print "is str"
                 if 'gpickle' in mat:
                     # 'Fiber number','Fiber length','Fiber density','ADC','gFA'
                     con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
-                    print "con_name:"
-                    print con_name
+                    # print "con_name:"
+                    # print con_name
                     if any('Fiber number' in m for m in self.config.connectivity_metrics):
                         self.inspect_outputs_dict[con_name+' - number of fibers'] = ["showmatrix_gpickle",layout,mat, "number_of_fibers", "False", self.config.subject+' - '+con_name+' - number of fibers', map_scale]
                     if any('Fiber length' in m for m in self.config.connectivity_metrics):
@@ -257,9 +257,9 @@ class ConnectomeStage(Stage):
                         self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",layout,mat, "ADC_median", "False", self.config.subject+' - '+con_name+' - ADC median']
                         self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",layout,mat, "ADC_std", "False", self.config.subject+' - '+con_name+' - ADC std']
             else:
-                print "is list"
+                # print "is list"
                 for mat in con_results.outputs.connectivity_matrices:
-                    print "mat : %s" % mat
+                    # print "mat : %s" % mat
                     if 'gpickle' in mat:
                         con_name = " ".join(os.path.basename(mat).split(".")[0].split("_"))
                         if any('Fiber number' in m for m in self.config.connectivity_metrics):

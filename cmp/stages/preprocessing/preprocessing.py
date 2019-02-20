@@ -125,7 +125,7 @@ class PreprocessingStage(Stage):
         self.outputs = ["diffusion_preproc","bvecs_rot","bvals","dwi_brain_mask","T1","act_5TT","gmwmi","brain","brain_mask","brain_mask_full","wm_mask_file","partial_volume_files","roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        print inputnode
+        # print inputnode
         processing_input = pe.Node(interface=util.IdentityInterface(fields=['diffusion','aparc_aseg','aseg','bvecs','bvals','grad','acqp','index','T1','brain','brain_mask','wm_mask_file','roi_volumes']),name='processing_input')
 
         # For DSI acquisition: extract the hemisphere that contains the data
@@ -167,7 +167,7 @@ class PreprocessingStage(Stage):
         concatnode = pe.Node(interface=util.Merge(2),name='concatnode')
 
         def convertList2Tuple(lists):
-            print "******************************************",tuple(lists)
+            # print "******************************************",tuple(lists)
             return tuple(lists)
 
         flow.connect([
@@ -705,23 +705,23 @@ class PreprocessingStage(Stage):
     		    ])
 
     def define_inspect_outputs(self):
-        print "stage_dir : %s" % self.stage_dir
+        # print "stage_dir : %s" % self.stage_dir
         if self.config.denoising:
             denoising_results_path = os.path.join(self.stage_dir,"dwi_denoise","result_dwi_denoise.pklz")
             if(os.path.exists(denoising_results_path)):
                 dwi_denoise_results = pickle.load(gzip.open(denoising_results_path))
-                print dwi_denoise_results.outputs.out_file
+                # print dwi_denoise_results.outputs.out_file
                 self.inspect_outputs_dict['DWI denoised image'] = ['mrview',dwi_denoise_results.outputs.out_file]
                 if self.config.denoising_algo == "MRtrix (MP-PCA)":
-                    print dwi_denoise_results.outputs.out_noisemap
+                    # print dwi_denoise_results.outputs.out_noisemap
                     self.inspect_outputs_dict['Noise map'] = ['mrview',dwi_denoise_results.outputs.out_noisemap]
 
         if self.config.bias_field_correction:
             bias_field_correction_results_path = os.path.join(self.stage_dir,"dwi_biascorrect","result_dwi_biascorrect.pklz")
             if(os.path.exists(bias_field_correction_results_path)):
                 dwi_biascorrect_results = pickle.load(gzip.open(bias_field_correction_results_path))
-                print dwi_biascorrect_results.outputs.out_file
-                print dwi_biascorrect_results.outputs.out_bias
+                # print dwi_biascorrect_results.outputs.out_file
+                # print dwi_biascorrect_results.outputs.out_bias
                 self.inspect_outputs_dict['Bias field corrected image'] = ['mrview',dwi_biascorrect_results.outputs.out_file]
                 self.inspect_outputs_dict['Bias field'] = ['mrview',dwi_biascorrect_results.outputs.out_bias]
 

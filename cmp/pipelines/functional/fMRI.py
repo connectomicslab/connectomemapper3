@@ -121,13 +121,13 @@ class fMRIPipeline(Pipeline):
             self.stages[stage].enabled = False
         # enable until selected one
         for stage in self.ordered_stage_list:
-            print 'Enable stage : %s' % stage
+            print('Enable stage : %s' % stage)
             self.stages[stage].enabled = True
             if stage == custom_last_stage:
                 break
 
     def check_input(self, layout, gui=True):
-        print '**** Check Inputs ****'
+        print('**** Check Inputs ****')
         fMRI_available = False
         t1_available = False
         t2_available = False
@@ -149,25 +149,25 @@ class fMRIPipeline(Pipeline):
             files = layout.get(subject=subjid,type='bold',extensions='.nii.gz')
             if len(files) > 0:
                 fmri_file = files[0].filename
-                print fmri_file
+                # print fmri_file
             else:
-                print("BOLD image not found for subject %s."%(subjid))
+                print("ERROR : BOLD image not found for subject %s."%(subjid))
                 return
 
             files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz')
             if len(files) > 0:
                 t1_file = files[0].filename
-                print t1_file
+                # print t1_file
             else:
-                print("T1w image not found for subject %s."%(subjid))
+                print("ERROR : T1w image not found for subject %s."%(subjid))
                 return
 
             files = layout.get(subject=subjid,type='T2w',extensions='.nii.gz')
             if len(files) > 0:
                 t2_file = files[0].filename
-                print t2_file
+                # print t2_file
             else:
-                print("T2w image not found for subject %s."%(subjid))
+                print("ERROR : T2w image not found for subject %s."%(subjid))
 
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
@@ -175,51 +175,51 @@ class fMRIPipeline(Pipeline):
             files = layout.get(subject=subjid,type='bold',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
                 fmri_file = files[0].filename
-                print fmri_file
+                # print fmri_file
             else:
-                print("BOLD image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
+                print("ERROR : BOLD image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                 return
 
             files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
                 t1_file = files[0].filename
-                print t1_file
+                # print t1_file
             else:
-                print("T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
+                print("ERROR : T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                 return
 
             files = layout.get(subject=subjid,type='T2w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
                 t2_file = files[0].filename
-                print t2_file
+                # print t2_file
             else:
-                print("T2w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
+                print("ERROR : T2w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
 
-        print("Looking for....")
-        print("fmri_file : %s" % fmri_file)
-        print("t1_file : %s" % t1_file)
-        print("t2_file : %s" % t2_file)
+        print("> Looking for....")
+        print("... fmri_file : %s" % fmri_file)
+        print("... t1_file : %s" % t1_file)
+        print("... t2_file : %s" % t2_file)
 
         # mods = layout.get_modalities()
         types = layout.get_types()
-        print("Available modalities :")
-        for typ in types:
-            print("-%s" % typ)
+        # print("Available modalities :")
+        # for typ in types:
+        #     print("-%s" % typ)
 
         for typ in types:
             if typ == 'T1w' and os.path.isfile(t1_file):
-                print("%s available" % typ)
+                # print("%s available" % typ)
                 t1_available = True
             if typ == 'T2w' and os.path.isfile(t2_file):
-                print("%s available" % typ)
+                # print("%s available" % typ)
                 t2_available = True
             if typ == 'bold' and os.path.isfile(fmri_file):
-                print("%s available" % typ)
+                # print("%s available" % typ)
                 fMRI_available = True
 
-        print('fMRI :',fMRI_available)
-        print('t1 :',t1_available)
-        print('t2 :',t2_available)
+        # print('fMRI :',fMRI_available)
+        # print('t1 :',t1_available)
+        # print('t2 :',t2_available)
 
         if fMRI_available:
             if self.global_conf.subject_session == '':

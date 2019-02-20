@@ -480,7 +480,7 @@ class RegistrationStage(Stage):
             concatnode = pe.Node(interface=util.Merge(2),name='concatnode')
 
             def convertList2Tuple(lists):
-                print "******************************************",tuple(lists)
+                # print "******************************************",tuple(lists)
                 return tuple(lists)
 
             flow.connect([
@@ -1064,7 +1064,7 @@ class RegistrationStage(Stage):
 
 
     def define_inspect_outputs(self):
-        print "stage_dir : %s" % self.stage_dir
+        # print "stage_dir : %s" % self.stage_dir
         if self.config.pipeline == "Diffusion":
             target_path = os.path.join(self.stage_dir,"target_resample","result_target_resample.pklz")
             reg_results_path = os.path.join(self.stage_dir,"linear_registration","result_linear_registration.pklz")
@@ -1117,20 +1117,20 @@ class RegistrationStage(Stage):
 
                     elif self.config.registration_mode == 'ANTs':
 
-                            print("reg_results.inputs['fixed_image']: %s"%reg_results.inputs['fixed_image'][0])
-                            print("reg_results.outputs.warped_image: %s"%reg_results.outputs.warped_image)
+                            # print("reg_results.inputs['fixed_image']: %s"%reg_results.inputs['fixed_image'][0])
+                            # print("reg_results.outputs.warped_image: %s"%reg_results.outputs.warped_image)
 
-                            print("T1_results.outputs.output_image: %s"%T1_results.outputs.output_image)
+                            # print("T1_results.outputs.output_image: %s"%T1_results.outputs.output_image)
                             self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['fixed_image'][0],reg_results.outputs.warped_image,'-l',"Copper",'-t','0.5']
 
                             if self.config.ants_perform_syn:
                                 if(os.path.exists(syn_results_path)):
                                     syn_results = pickle.load(gzip.open(syn_results_path))
-                                    print("syn_results.inputs['fixed_image']: %s"%syn_results.inputs['fixed_image'][0])
+                                    # print("syn_results.inputs['fixed_image']: %s"%syn_results.inputs['fixed_image'][0])
                                     self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',syn_results.inputs['fixed_image'][0],T1_results.outputs.output_image,'-l',"Copper",'-t','0.5']
                                     #self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
-                            print("rois_results.outputs.output_images: %s"%rois_results.outputs.output_images)
-                            print("pves_results.outputs.output_images: %s"%pves_results.outputs.output_images)
+                            # print("rois_results.outputs.output_images: %s"%rois_results.outputs.output_images)
+                            # print("pves_results.outputs.output_images: %s"%pves_results.outputs.output_images)
 
                             self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fslview',reg_results.inputs['fixed_image'][0],mrtrix_5tt_results.outputs.output_image,'-l',"Copper",'-t','0.5']
 
