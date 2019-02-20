@@ -1,0 +1,38 @@
+{
+    "license": "BSD-3-Clause",
+    "keywords": [
+      "neuroimaging",
+      "workflow",
+      "pipeline",
+      "parcellation",
+      "connectome",
+      "MRI",
+      "BIDS",
+      "BIDS-App"
+    ],
+    "publication_date": "2019-01-10",
+    "creators": [
+      {
+        "name": "Tourbier, Sebastien",
+        "affiliation": "Department of Radiology, Lausanne University Hospital (CHUV), Switzerland",
+        "orcid": "0000-0002-4441-899X"
+      },
+      {
+        "name": "Aleman-Gomez, Yasser",
+        "affiliation": "Department of Radiology, Lausanne University Hospital (CHUV), Switzerland",
+        "orcid": "0000-0001-8305-225X"
+      },
+      {
+        "name": "Griffa, Alessandra",
+        "affiliation": "Complex Traits Genetics, CNCR, VU Amsterdam, The Netherlands",
+        "orcid": "0000-0003-1923-1653"
+      },
+      {
+        "name": "Hagmann, Patric",
+        "affiliation": "Department of Radiology, Lausanne University Hospital (CHUV), Switzerland",
+        "orcid": "0000-0002-2854-6561"
+      }
+    ],
+    "access_right": "open",
+    "upload_type": "software"
+}
