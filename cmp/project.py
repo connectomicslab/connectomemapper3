@@ -100,7 +100,7 @@ class CMP_Project_Info(HasTraits):
     number_of_cores = Enum(1,range(1,multiprocessing.cpu_count()+1))
 
 
-def fix_dataset_directory_in_pickles(local_dir, mode='local'):
+def fix_dataset_directory_in_pickles(local_dir, mode='local',debug=False):
     #mode can be local or bidsapp (local by default)
 
     searchdir = os.path.join(local_dir,'derivatives','nipype')
@@ -108,10 +108,12 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
     for root, dirs, files in os.walk(searchdir):
         files = [ fi for fi in files if fi.endswith(".pklz") ]
 
-        print('----------------------------------------------------')
+        if debug:
+            print('----------------------------------------------------')
 
         for fi in files:
-            print("Processing file {} {} {}".format(root,dirs,fi))
+            if debug:
+                print("Processing file {} {} {}".format(root,dirs,fi))
             pick = gzip.open(os.path.join(root,fi))
             cont = pick.read()
 
@@ -131,17 +133,19 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
     return True
 
 
-def remove_aborded_interface_pickles(local_dir):
+def remove_aborded_interface_pickles(local_dir, debug=False):
 
     searchdir = os.path.join(local_dir,'derivatives','nipype')
 
     for root, dirs, files in os.walk(searchdir):
         files = [ fi for fi in files if fi.endswith(".pklz") ]
 
-        print('----------------------------------------------------')
+        if debug:
+            print('----------------------------------------------------')
 
         for fi in files:
-            print("Processing file {} {} {}".format(root,dirs,fi))
+            if debug:
+                print("Processing file {} {} {}".format(root,dirs,fi))
             try:
                 cont = pickle.load(gzip.open(os.path.join(root,fi)))
             except Exception as e:
@@ -422,11 +426,11 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
             try:
                 os.makedirs(full_p)
             except os.error:
-                print "%s was already existing" % full_p
+                print("%s was already existing" % full_p)
             finally:
-                print "Created directory %s" % full_p
+                print("Created directory %s" % full_p)
 
-def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
+def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
     dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
 
     derivatives_directory = os.path.abspath(project_info.output_directory)
@@ -439,14 +443,14 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
     dmri_inputs_checked = dmri_pipeline.check_input(layout=bids_layout,gui=gui)
     if dmri_inputs_checked:
         if is_new_project and dmri_pipeline!= None: #and dmri_pipeline!= None:
-            print "Initialize dmri project"
+            print("> Initialize dmri project")
             if not os.path.exists(derivatives_directory):
                 try:
                     os.makedirs(derivatives_directory)
                 except os.error:
-                    print "%s was already existing" % derivatives_directory
+                    print("... Info : %s was already existing" % derivatives_directory)
                 finally:
-                    print "Created directory %s" % derivatives_directory
+                    print("... Info : Created directory %s" % derivatives_directory)
 
             if (project_info.subject_session != '') and (project_info.subject_session != None) :
                 project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_%s_diffusion_config.ini' % (project_info.subject,project_info.subject_session))
@@ -456,30 +460,30 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
             if os.path.exists(project_info.dmri_config_file):
                 warn_res = project_info.configure_traits(view='dmri_warning_view')
                 if warn_res:
-                    print "Read diffusion config file (%s)" % project_info.dmri_config_file
+                    print("... Read : Diffusion config file (%s)" % project_info.dmri_config_file)
                     dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
                 else:
                     return None
             else:
-                print "Create diffusion config file (%s)" % project_info.dmri_config_file
+                print("... Create : Diffusion config file (%s)" % project_info.dmri_config_file)
                 dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
         else:
-            print "int_project dmri_pipeline.global_config.subjects : "
-            print dmri_pipeline.global_conf.subjects
+            if debug:
+                print("int_project dmri_pipeline.global_config.subjects : ")
+                print(dmri_pipeline.global_conf.subjects)
 
             dmri_conf_loaded = dmri_load_config(dmri_pipeline, project_info.dmri_config_file)
 
             if not dmri_conf_loaded:
                 return None
 
-        print dmri_pipeline
         dmri_pipeline.config_file = project_info.dmri_config_file
     else:
-        print "Missing diffusion inputs"
+        print("INFO: Missing diffusion inputs")
 
     return dmri_inputs_checked, dmri_pipeline
 
-def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
+def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
     fmri_pipeline = FMRI_pipeline.fMRIPipeline(project_info)
 
     derivatives_directory = os.path.abspath(project_info.output_directory)
@@ -489,17 +493,17 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
     else:
         refresh_folder(derivatives_directory, project_info.subject, fmri_pipeline.input_folders)
 
-    fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout,gui=gui)
+    fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout,gui=gui,debug=False)
     if fmri_inputs_checked:
         if is_new_project and fmri_pipeline!= None: #and fmri_pipeline!= None:
-            print "Initialize fmri project"
+            print("> Initialize fmri project")
             if not os.path.exists(derivatives_directory):
                 try:
                     os.makedirs(derivatives_directory)
                 except os.error:
-                    print "%s was already existing" % derivatives_directory
+                    print("... Info : %s was already existing" % derivatives_directory)
                 finally:
-                    print "Created directory %s" % derivatives_directory
+                    print("... Info : Created directory %s" % derivatives_directory)
 
             if (project_info.subject_session != '') and (project_info.subject_session != None) :
                 project_info.fmri_config_file = os.path.join(derivatives_directory,'%s_%s_fMRI_config.ini' % (project_info.subject,project_info.subject_session))
@@ -510,67 +514,57 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
             if os.path.exists(project_info.fmri_config_file):
                 warn_res = project_info.configure_traits(view='fmri_warning_view')
                 if warn_res:
-                    print "Read fMRI config file (%s)" % project_info.fmri_config_file
+                    print("... Read : fMRI config file (%s)" % project_info.fmri_config_file)
                     fmri_load_config(fmri_pipeline, project_info.fmri_config_file)
                 else:
                     return None
             else:
-                print "Create fMRI config file (%s)" % project_info.fmri_config_file
+                print("... Create : fMRI config file (%s)" % project_info.fmri_config_file)
                 fmri_save_config(fmri_pipeline, project_info.fmri_config_file)
         else:
-            print "int_project fmri_pipeline.global_config.subjects : "
-            print fmri_pipeline.global_conf.subjects
+            if debug:
+                print("int_project fmri_pipeline.global_config.subjects : ")
+                print(fmri_pipeline.global_conf.subjects)
 
             fmri_conf_loaded = fmri_load_config(fmri_pipeline, project_info.fmri_config_file)
 
             if not fmri_conf_loaded:
                 return None
 
-        print fmri_pipeline
         fmri_pipeline.config_file = project_info.fmri_config_file
     else:
-        print "Missing fmri inputs"
+        print("INFO : Missing fmri inputs")
 
     return fmri_inputs_checked, fmri_pipeline
 
-def init_anat_project(project_info, is_new_project):
+def init_anat_project(project_info, is_new_project, debug=False):
     anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
-
-    print anat_pipeline
 
     derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if (project_info.subject_session != '') and (project_info.subject_session != None) :
-        print('Refresh folder WITH session')
+        if debug:
+            print('Refresh folder WITH session')
         refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders, session=project_info.subject_session)
     else:
-        print('Refresh folder WITHOUT session')
+        if debug:
+            print('Refresh folder WITHOUT session')
         refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders)
 
-
-    #dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info,anat_pipeline.flow)
-    #fmri_pipeline = FMRI_pipeline.fMRIPipeline
-    #egg_pipeline = None
-
-    # if project_info.process_type == 'diffusion':
-    #     pipeline = diffusion_pipeline.DiffusionPipeline(project_info)
-    # elif project_info.process_type == 'fMRI':
-    #     pipeline = fMRI_pipeline.fMRIPipeline(project_info)
-
     if is_new_project and anat_pipeline!= None: #and dmri_pipeline!= None:
+        print("> Initialize anatomical project")
         if not os.path.exists(derivatives_directory):
             try:
                 os.makedirs(derivatives_directory)
             except os.error:
-                print "%s was already existing" % derivatives_directory
+                print("... Info: %s was already existing" % derivatives_directory)
             finally:
-                print "Created directory %s" % derivatives_directory
+                print("... Info : Created directory %s" % derivatives_directory)
 
         if (project_info.subject_session != '') and (project_info.subject_session != None) :
             project_info.anat_config_file = os.path.join(derivatives_directory,'%s_%s_anatomical_config.ini' % (project_info.subject,project_info.subject_session))
         else:
             project_info.anat_config_file = os.path.join(derivatives_directory,'%s_anatomical_config.ini' % (project_info.subject))
-        #project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
 
         if os.path.exists(project_info.anat_config_file):
             warn_res = project_info.configure_traits(view='anat_warning_view')
@@ -581,34 +575,19 @@ def init_anat_project(project_info, is_new_project):
         else:
             anat_save_config(anat_pipeline, project_info.anat_config_file)
 
-        # if os.path.exists(project_info.dmri_config_file):
-        #     warn_res = project_info.configure_traits(view='warning_view')
-        #     if warn_res:
-        #         save_config(dmri_pipeline, project_info.dmri_config_file)
-        #     else:
-        #         return None
-        # else:
-        #     save_config(dmri_pipeline, project_info.dmri_config_file)
     else:
-        print "int_project anat_pipeline.global_config.subjects : "
-        print anat_pipeline.global_conf.subjects
+        if debug:
+            print("int_project anat_pipeline.global_config.subjects : ")
+            print(anat_pipeline.global_conf.subjects)
 
         anat_conf_loaded = anat_load_config(anat_pipeline, project_info.anat_config_file)
-        #dmri_conf_loaded = load_config(dmri_pipeline, project_info.dmri_config_file)
 
         if not anat_conf_loaded:
             return None
 
-        #if not dmri_conf_loaded:
-        #    return None
-
-    print anat_pipeline
-    #print dmri_pipeline
-
-    #refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
     anat_pipeline.config_file = project_info.anat_config_file
-    #dmri_pipeline.config_file = project_info.dmri_config_file
-    return anat_pipeline#, dmri_pipeline
+
+    return anat_pipeline
 
 def update_anat_last_processed(project_info, pipeline):
     # last date
