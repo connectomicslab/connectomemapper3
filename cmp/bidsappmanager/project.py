@@ -89,7 +89,7 @@ def is_tool(name):
 
     return find_executable(name) is not None
 
-def fix_dataset_directory_in_pickles(local_dir, mode='local'):
+def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
     #mode can be local or newlocal or bidsapp (local by default)
 
     #TODO: make fix more generalized by taking derivatives/output dir
@@ -98,25 +98,31 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
     for root, dirs, files in os.walk(searchdir):
         files = [ fi for fi in files if( fi.endswith(".pklz") and not fi.endswith("_new.pklz")) ]
 
-        print('----------------------------------------------------')
+        if debug:
+            print('----------------------------------------------------')
 
         for fi in files:
-            print("Processing file {} {} {} (mode: {})".format(root,dirs,fi,mode))
+            if debug:
+                print("Processing file {} {} {} (mode: {})".format(root,dirs,fi,mode))
+
             pick = gzip.open(os.path.join(root,fi))
             cont = pick.read()
 
-            print("local_dir : {} , cont.find('/tmp/derivatives'): {} (mode: {})".format(local_dir,cont.find('/tmp/derivatives'),mode))
+            if debug:
+                print("local_dir : {} , cont.find('/tmp/derivatives'): {} (mode: {})".format(local_dir,cont.find('/tmp/derivatives'),mode))
 
             # Change pickles: bids app dataset directory -> local dataset directory
             if (mode == 'local'):
-                print(' bids app dataset directory -> local dataset directory')
+                if debug:
+                    print(' bids app dataset directory -> local dataset directory')
                 new_cont = string.replace(cont,'/tmp','{}'.format(local_dir))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                     f.write(new_cont)
 
             elif (mode == 'newlocal'):
-                print(' old local dataset directory -> local dataset directory')
+                if debug:
+                    print(' old local dataset directory -> local dataset directory')
 
                 old_dir = ''
 
@@ -134,8 +140,9 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
                         break
                     line = newpick.readline()
 
-                print('Old dir : {}'.format(old_dir))
-                print('Current dir : {}'.format(local_dir))
+                if debug:
+                    print('Old dir : {}'.format(old_dir))
+                    print('Current dir : {}'.format(local_dir))
 
                 # Test if old_dir is valid (not empty) and different from the current BIDS root directory
                 # In that case, update the path in the .pklz file
@@ -148,7 +155,8 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
 
             # Change pickles: local dataset directory -> bids app dataset directory
             elif (mode == 'bidsapp'):
-                print(' local dataset directory -> bids app dataset directory')
+                if debug:
+                    print(' local dataset directory -> bids app dataset directory')
                 new_cont = string.replace(cont,'{}'.format(local_dir),'/tmp')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
@@ -190,17 +198,19 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local'):
 #     return True
 
 
-def remove_aborded_interface_pickles(local_dir):
+def remove_aborded_interface_pickles(local_dir, debug=False):
 
     searchdir = os.path.join(local_dir,'derivatives/cmp')
 
     for root, dirs, files in os.walk(searchdir):
         files = [ fi for fi in files if fi.endswith(".pklz") ]
 
-        print('----------------------------------------------------')
+        if debug:
+            print('----------------------------------------------------')
 
         for fi in files:
-            print("Processing file {} {} {}".format(root,dirs,fi))
+            if debug:
+                print("Processing file {} {} {}".format(root,dirs,fi))
             try:
                 cont = pickle.load(gzip.open(os.path.join(root,fi)))
             except Exception as e:
@@ -209,7 +219,7 @@ def remove_aborded_interface_pickles(local_dir):
                 os.remove(os.path.join(root,fi))
 
 
-def remove_aborded_interface_pickles(local_dir, subject, session=''):
+def remove_aborded_interface_pickles(local_dir, subject, session='', debug=False):
 
     if session == '':
         searchdir = os.path.join(local_dir,'derivatives/cmp',subject,'tmp')
@@ -219,10 +229,12 @@ def remove_aborded_interface_pickles(local_dir, subject, session=''):
     for root, dirs, files in os.walk(searchdir):
         files = [ fi for fi in files if fi.endswith(".pklz") ]
 
-        print('----------------------------------------------------')
+        if debug:
+            print('----------------------------------------------------')
 
         for fi in files:
-            print("Processing file {} {} {}".format(root,dirs,fi))
+            if debug:
+                print("Processing file {} {} {}".format(root,dirs,fi))
             try:
                 cont = pickle.load(gzip.open(os.path.join(root,fi)))
             except Exception as e:
@@ -1470,8 +1482,8 @@ class ProjectHandlerV2(Handler):
     fmri_inputs_checked = Bool(False)
     fmri_processed = Bool(False)
 
-    def load_dataset(self, ui_info):
-        print('Load dataset')
+    def load_dataset(self, ui_info, debug=False):
+        # print('Load dataset')
 
         loaded_project = gui.CMP_Project_Info()
         np_res = loaded_project.configure_traits(view='open_view')
@@ -1484,7 +1496,7 @@ class ProjectHandlerV2(Handler):
         diffusion_available = False
         fmri_available = False
 
-        print "Base dir: %s" % loaded_project.base_directory
+        print "Local BIDS dataset: %s" % loaded_project.base_directory
         try:
             bids_layout = BIDSLayout(loaded_project.base_directory)
             loaded_project.bids_layout = bids_layout
@@ -1492,7 +1504,8 @@ class ProjectHandlerV2(Handler):
 
             loaded_project.subjects = []
             for subj in bids_layout.get_subjects():
-                print "sub: %s" % subj
+                if debug:
+                    print "sub: %s" % subj
                 if 'sub-'+str(subj) not in loaded_project.subjects:
                     loaded_project.subjects.append('sub-'+str(subj))
             # loaded_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
@@ -1503,15 +1516,17 @@ class ProjectHandlerV2(Handler):
             loaded_project.number_of_subjects = len(loaded_project.subjects)
 
             loaded_project.subject=loaded_project.subjects[0]
-            print(loaded_project.subject)
+            if debug:
+                print(loaded_project.subject)
 
             subject = loaded_project.subject.split('-')[1]
 
 
             sessions = bids_layout.get(target='session', return_type='id', subject=subject)
 
-            print "Sessions: "
-            print sessions
+            if debug:
+                print "Sessions: "
+                print sessions
 
             if len(sessions) > 0:
                 loaded_project.subject_sessions = ['ses-{}'.format(sessions[0])]
@@ -1522,22 +1537,26 @@ class ProjectHandlerV2(Handler):
 
             query_files = [f.filename for f in bids_layout.get(subject=subject, type='T1w', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
-                print("T1w available: {}".format(query_files))
+                if debug:
+                    print("T1w available: {}".format(query_files))
                 t1_available = True
 
             query_files = [f.filename for f in bids_layout.get(subject=subject, type='T2w', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
-                print("T2w available: {}".format(query_files))
+                if debug:
+                    print("T2w available: {}".format(query_files))
                 t2_available = True
 
             query_files = [f.filename for f in bids_layout.get(subject=subject, type='dwi', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
-                print("DWI available: {}".format(query_files))
+                if debug:
+                    print("DWI available: {}".format(query_files))
                 diffusion_available = True
 
             query_files = [f.filename for f in bids_layout.get(subject=subject, type='bold', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
-                print("BOLD available: {}".format(query_files))
+                if debug:
+                    print("BOLD available: {}".format(query_files))
                 fmri_available = True
 
             # types = bids_layout.get_types()
@@ -1641,7 +1660,8 @@ class ProjectHandlerV2(Handler):
                     if loaded_project.subject_session != '':
                         session = loaded_project.subject_session.split('-')[1]
                         diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, session=session, type='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
-                        print('DIFFUSION IMAGING MODELS : {}'.format(diffusion_imaging_models))
+                        if debug:
+                            print('DIFFUSION IMAGING MODELS : {}'.format(diffusion_imaging_models))
 
                         if len(diffusion_imaging_models)>0:
                             if len(diffusion_imaging_models)>1:
@@ -1666,11 +1686,12 @@ class ProjectHandlerV2(Handler):
 
                         files = [f.filename for f in bids_layout.get(subject=subject, session=session, type='dwi', extensions=['nii', 'nii.gz'])]
 
-                        print('****************************************')
-                        print()
-                        print('****************************************')
-                        print(files)
-                        print('****************************************')
+                        if debug:
+                            print('****************************************')
+                            print()
+                            print('****************************************')
+                            print(files)
+                            print('****************************************')
 
                         if (loaded_project.dmri_bids_acq != ''):
                             for file in files:

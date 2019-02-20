@@ -635,12 +635,12 @@ class CMP_BIDSAppWindow(HasTraits):
 
         self.datalad_is_available = project.is_tool('datalad')
 
-        print(self.list_of_subjects_to_be_processed)
-        print(self.bids_root)
-        print(self.anat_config)
-        print(self.dmri_config)
-        print(self.fmri_config)
-        print(self.fs_license)
+        # print(self.list_of_subjects_to_be_processed)
+        # print(self.bids_root)
+        # print(self.anat_config)
+        # print(self.dmri_config)
+        # print(self.fmri_config)
+        # print(self.fs_license)
         #print(self.fs_average)
 
         #self.on_trait_change(self.update_run_anat_pipeline,'run_anat_pipeline')
@@ -657,24 +657,24 @@ class CMP_BIDSAppWindow(HasTraits):
         #self.on_trait_change(self.update_checksettings, 'fs_average')
 
     def update_run_anat_pipeline(self,new):
-        print('Update run anat: %s'%new)
-        print('Update run anat: %s'%self.run_anat_pipeline)
+        # print('Update run anat: %s'%new)
+        # print('Update run anat: %s'%self.run_anat_pipeline)
         if new == False:
             print('At least anatomical pipeline should be run!')
             self.run_anat_pipeline = True
 
     def update_run_dmri_pipeline(self,new):
-        print('Update run diffusion: %s'%new)
-        print('Update run diffusion: %s'%self.run_dmri_pipeline)
+        # print('Update run diffusion: %s'%new)
+        # print('Update run diffusion: %s'%self.run_dmri_pipeline)
         self.run_anat_pipeline = True
 
     def update_run_fmri_pipeline(self,new):
-        print('Update run fmri: %s'%new)
-        print('Update run fmri: %s'%self.run_fmri_pipeline)
+        # print('Update run fmri: %s'%new)
+        # print('Update run fmri: %s'%self.run_fmri_pipeline)
         self.run_anat_pipeline = True
 
     def update_checksettings(self,new):
-        print("RESET Check BIDS App Settings")
+        # print("RESET Check BIDS App Settings")
         self.settings_checked = False
 
     def _update_selection_fired(self):
@@ -735,6 +735,7 @@ class CMP_BIDSAppWindow(HasTraits):
 
         print("Valid inputs for BIDS App : {}".format(self.settings_checked))
         print("BIDS App Version Tag: {}".format(self.bidsapp_tag))
+        print("Data provenance tracking (datalad) : {}".format(self.data_provenance_tracking))
 
         return True
 
@@ -780,7 +781,7 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('/tmp/code/ref_fMRI_config.ini')
 
 
-        print(cmd)
+        print('... Docker cmd : {}'.format(cmd))
 
         log_filename = os.path.join(self.bids_root,'derivatives','cmp','main_log-cmpbidsapp.txt')
 
@@ -851,7 +852,8 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('--func_pipeline_config')
             cmd.append('/tmp/code/ref_fMRI_config.ini')
 
-        print(cmd)
+        print('... Datalad cmd : {}'.format(cmd))
+
 
         # log_filename = os.path.join(self.bids_root,'derivatives','cmp','main-datalad_log-cmpbidsapp.txt')
 
@@ -1525,7 +1527,7 @@ class CMP_MainWindow(HasTraits):
 
     def update_subject_anat_pipeline(self,new):
         try:
-            print "update subject anat"
+            # print "update subject anat"
             bids_layout = BIDSLayout(self.project_info.base_directory)
             self.project_info.subject_sessions = ["ses-%s"%s for s in bids_layout.get(target='session', return_type='id', subject=self.project_info.subject.split('-')[1])]
             if len(self.project_info.subject_sessions)>0:
@@ -1539,7 +1541,7 @@ class CMP_MainWindow(HasTraits):
 
     def update_subject_dmri_pipeline(self,new):
         try:
-            print "update subject dmri"
+            # print "update subject dmri"
             bids_layout = BIDSLayout(self.project_info.base_directory)
             self.project_info.subject_sessions = ["ses-%s"%s for s in bids_layout.get(target='session', return_type='id', subject=self.project_info.subject.split('-')[1])]
             if len(self.project_info.subject_sessions)>0:
@@ -1553,7 +1555,7 @@ class CMP_MainWindow(HasTraits):
 
     def update_subject_fmri_pipeline(self,new):
         try:
-            print "update subject fmri"
+            # print "update subject fmri"
             bids_layout = BIDSLayout(self.project_info.base_directory)
             self.project_info.subject_sessions = ["ses-%s"%s for s in bids_layout.get(target='session', return_type='id', subject=self.project_info.subject.split('-')[1])]
             if len(self.project_info.subject_sessions)>0:
@@ -1567,7 +1569,7 @@ class CMP_MainWindow(HasTraits):
 
     def update_session_anat_pipeline(self,new):
         try:
-            print "update subject session anat"
+            # print "update subject session anat"
             self = self.handler.update_subject_anat_pipeline(self)
         except AttributeError:
             print "AttributeError: update subject anat"
@@ -1575,7 +1577,7 @@ class CMP_MainWindow(HasTraits):
 
     def update_session_dmri_pipeline(self,new):
         try:
-            print "update subject session dmri"
+            # print "update subject session dmri"
             self = self.handler.update_subject_dmri_pipeline(self)
         except AttributeError:
             print "AttributeError: update subject dmri"
@@ -1583,15 +1585,15 @@ class CMP_MainWindow(HasTraits):
 
     def update_session_fmri_pipeline(self,new):
         try:
-            print "update subject session fmri"
+            # print "update subject session fmri"
             self = self.handler.update_subject_fmri_pipeline(self)
         except AttributeError:
             print "AttributeError: update subject fmri"
             return
 
     def show_bidsapp_interface(self):
-        print("list_of_subjects_to_be_processed:")
-        print(self.project_info.subjects)
+        # print("list_of_subjects_to_be_processed:")
+        # print(self.project_info.subjects)
 
         bids_layout = BIDSLayout(self.project_info.base_directory)
         subjects = bids_layout.get_subjects()
@@ -1689,8 +1691,8 @@ class CMP_MainWindowV2(HasTraits):
     def _bidsapp_fired(self):
         """ Callback of the "bidsapp" button. This displays the BIDS APP GUI.
         """
-        print("list_of_subjects_to_be_processed:")
-        print(self.project_info.subjects)
+        # print("list_of_subjects_to_be_processed:")
+        # print(self.project_info.subjects)
 
         bids_layout = BIDSLayout(self.project_info.base_directory)
         subjects = bids_layout.get_subjects()
@@ -1781,8 +1783,8 @@ class CMP_MainWindowV2(HasTraits):
 
 
     def show_bidsapp_interface(self):
-        print("list_of_subjects_to_be_processed:")
-        print(self.project_info.subjects)
+        # print("list_of_subjects_to_be_processed:")
+        # print(self.project_info.subjects)
 
         bids_layout = BIDSLayout(self.project_info.base_directory)
         subjects = bids_layout.get_subjects()

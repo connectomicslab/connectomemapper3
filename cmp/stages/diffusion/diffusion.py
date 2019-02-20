@@ -110,7 +110,7 @@ class DiffusionConfig(HasTraits):
                 self.diffusion_model_editor = ['Deterministic','Probabilistic']
 
     def _recon_processing_tool_changed(self, new):
-        print("recon_processing_tool_changed : %s"%new)
+        # print("recon_processing_tool_changed : %s"%new)
         #
         if new == 'Dipy' and self.diffusion_imaging_model != 'DSI':
             tracking_processing_tool = self.tracking_processing_tool
@@ -128,7 +128,7 @@ class DiffusionConfig(HasTraits):
             self.tracking_processing_tool_editor = ['Custom']
 
     def _tracking_processing_tool_changed(self, new):
-        print("tracking_processing_tool changed: %s"%new)
+        # print("tracking_processing_tool changed: %s"%new)
         if new == 'Dipy' and self.recon_processing_tool == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = 'Dipy'
         elif new == 'MRtrix' and self.recon_processing_tool == 'Dipy':

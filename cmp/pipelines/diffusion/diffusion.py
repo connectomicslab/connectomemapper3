@@ -121,7 +121,7 @@ class DiffusionPipeline(Pipeline):
         self.stages['Connectome'].config.subject = new
 
     def _diffusion_imaging_model_changed(self,new):
-        print "diffusion model changed"
+        # print "diffusion model changed"
         self.stages['Diffusion'].config.diffusion_imaging_model = new
 
     def check_config(self):
@@ -143,8 +143,9 @@ class DiffusionPipeline(Pipeline):
                 break
 
     def _atlas_info_changed(self, new):
-        print "Atlas info changed : "
-        print new
+        pass
+        # print "Atlas info changed : "
+        # print new
 
     def check_input(self, layout, gui=True):
         print '**** Check Inputs  ****'
