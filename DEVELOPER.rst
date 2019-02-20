@@ -2,10 +2,9 @@
 Connectome Mapper Developer Notes
 =================================
 
-:Authors: Adrien Birbaumer
-:Version: $Revision: 1 $
-:Copyright: Copyright (C) 2009-2015, Ecole Polytechnique Fédérale de Lausanne 
-            (EPFL) and Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland. 
+:Authors: Sebastien Tourbier and Adrien Birbaumer
+:Version: $Revision: 2 $
+:Copyright: Copyright (C) 2009-2019, Brain Communication Pathways Sinergia Consortium, Switzerland.
             This software is distributed under the open-source license Modified BSD.
 
 .. contents::
@@ -13,11 +12,17 @@ Connectome Mapper Developer Notes
 Philosophy
 ----------
 
-The development philosophy for this new version of the Connectome Mapper is to
-keep the code of the processing as much as possible outside of the actual
-main Connectome Mapper code, through the use of existing Nipype interfaces and
-an external library (dubbed cmtklib). Further development, typically additions
-of other tools and configuration options should go in this direction.
+The development philosophy for this new version of the Connectome Mapper is to:
+
+I. Keep the code of the processing as much as possible outside of the actual
+main Connectome Mapper code, through the use and extension of existing Nipype interfaces and
+an external library (dubbed cmtklib).
+
+II. Enhance portability by freezing the computing environment with all software dependencies installed, through the adoption of the BIDS App framework relying on light software container technologies.
+
+III. Enhance inter-operability by working with datasets structured following the Brain Imaging Data Structure structured dataset.
+
+Further development, typically additions of other tools and configuration options should go in this direction.
 
 Enhancements
 ------------
