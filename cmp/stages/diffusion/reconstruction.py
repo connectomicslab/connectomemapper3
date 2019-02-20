@@ -236,7 +236,7 @@ def create_dipy_recon_flow(config):
                 (inputnode,dipy_SHORE,[("brain_mask_resampled",'in_mask')]),
                 #(dipy_tensor, dipy_CSD,[('response','response')]),
                 (dipy_SHORE,outputnode,[('model','model')]),
-                (dipy_SHORE,outputnode,[('fod','fod')]),
+                (dipy_SHORE,outputnode,[('fodf','fod')]),
                 (dipy_SHORE,outputnode,[('GFA','FA')])
                 ])
 

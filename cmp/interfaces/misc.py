@@ -9,6 +9,8 @@ import numpy as np
 
 from traits.api import *
 
+from nipype.utils.filemanip import split_filename
+
 from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec,\
     TraitedSpec, File, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 
@@ -65,7 +67,7 @@ class match_orientations(BaseInterface):
                 temp_fib[j] = [flip_x*(fib[i][0][j][0]-hdr['origin'][0])+vx/2,flip_y*(fib[i][0][j][1]-hdr['origin'][1])+vy/2, flip_z*(fib[i][0][j][2]-hdr['origin'][2])+vz/2]
             new_fib.append((temp_fib,None,None))
         nib.trackvis.write(os.path.abspath(filename), new_fib, trk_header, points_space = 'voxmm')
-        iflogger.info('file written to %s' % os.path.abspath(filename))
+        print('file written to %s' % os.path.abspath(filename))
         return runtime
 
     def _list_outputs(self):
@@ -603,7 +605,7 @@ class make_seeds(BaseInterface):
     ROI_idx = []
     base_name = ''
     def _run_interface(self,runtime):
-        iflogger.info("Computing seed files for probabilistic tractography\n===================================================")
+        print("Computing seed files for probabilistic tractography\n===================================================")
         # Load ROI file
         txt_file = open(self.base_name+'_seeds.txt','w')
 
@@ -617,7 +619,7 @@ class make_seeds(BaseInterface):
             WM_vol = nib.load(self.inputs.WM_file)
             WM_data = WM_vol.get_data()
             # Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
-            iflogger.info("ROI dilation...")
+            print("ROI dilation...")
             tmp_data = np.unique(ROI_data[ROI_data!=0]).astype(int)
             print tmp_data.shape
             self.ROI_idx = np.unique(tmp_data).astype(int)
@@ -662,7 +664,7 @@ class make_mrtrix_seeds(BaseInterface):
     ROI_idx = []
     base_name = ''
     def _run_interface(self,runtime):
-        iflogger.info("Computing seed files for probabilistic tractography\n===================================================")
+        print("Computing seed files for probabilistic tractography\n===================================================")
         # Load ROI file
 
         print self.inputs.ROI_files
@@ -675,7 +677,7 @@ class make_mrtrix_seeds(BaseInterface):
             WM_vol = nib.load(self.inputs.WM_file)
             WM_data = WM_vol.get_data()
             # Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
-            iflogger.info("ROI dilation...")
+            print("ROI dilation...")
             tmp_data = np.unique(ROI_data[ROI_data!=0]).astype(int)
             print tmp_data.shape
             self.ROI_idx = np.unique(tmp_data).astype(int)

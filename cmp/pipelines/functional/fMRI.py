@@ -308,7 +308,6 @@ class fMRIPipeline(Pipeline):
         iflogger = logging.getLogger('nipype.interface')
 
         iflogger.info("**** Processing ****")
-        print self.anat_flow
 
         flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory,nipype_deriv_subject_directory=nipype_deriv_subject_directory)
         flow.write_graph(graph2use='colored', format='svg', simple_form=False)

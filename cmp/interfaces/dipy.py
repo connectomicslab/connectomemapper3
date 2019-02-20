@@ -349,7 +349,8 @@ class SHOREInputSpec(DipyBaseInterfaceInputSpec):
 
 class SHOREOutputSpec(TraitedSpec):
     model = File(desc='Python pickled object of the CSD model fitted.')
-    fod = File(desc=('Spherical Harmonics Coefficients output file name'))
+    fodf = File(desc=('Fiber Orientation Distribution Function output file name'))
+    dodf = File(desc=('Fiber Orientation Distribution Function output file name'))
     GFA = File(desc=('Generalized Fractional Anisotropy output file name'))
     MSD = File(desc=('Mean Square Displacement output file name'))
     RTOP = File(desc=('Return To Origin Probability output file name'))
@@ -484,7 +485,7 @@ class SHORE(DipyDiffusionInterface):
             RTOP[i]     = np.nan_to_num(sliceRTOP)
             IFLOGGER.info("Computation Time (slice %s): "%str(i) + str(time.time() - start_time) + " seconds")
 
-        shFODF = odf_sh_to_sharp(shODF,sphere,basis='mrtrix',ratio=0.2, sh_order=lmax, lambda_=1.0, tau=0.1, r2_term=True)
+        shFODF = odf_sh_to_sharp(shODF,sphere,basis=basis,ratio=0.2, sh_order=lmax, lambda_=1.0, tau=0.1, r2_term=True)
 
         IFLOGGER.info('Save Spherical Harmonics / MSD / GFA images')
 
@@ -499,7 +500,8 @@ class SHORE(DipyDiffusionInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['model'] = op.abspath('shoremodel.pklz')
-        outputs['fod'] = op.abspath('shore_fodf.nii.gz')
+        outputs['fodf'] = op.abspath('shore_fodf.nii.gz')
+        outputs['dodf'] = op.abspath('shore_dodf.nii.gz')
         outputs['GFA'] = op.abspath('shore_gfa.nii.gz')
         outputs['MSD'] = op.abspath('shore_msd.nii.gz')
         outputs['RTOP'] = op.abspath('shore_rtop_signal.nii.gz')

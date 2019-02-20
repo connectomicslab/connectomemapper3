@@ -61,13 +61,13 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type)
 
     subject_derivatives_dir = os.path.join(project.base_directory,"derivatives")
 
-    print('project.subject_session: {}'.format(project.subject_session))
+    # print('project.subject_session: {}'.format(project.subject_session))
 
     if project.subject_session != '': #Session structure
-        print('With session : {}'.format(project.subject_session))
+        # print('With session : {}'.format(project.subject_session))
         subject_conf_file = os.path.join(subject_derivatives_dir,"{}_{}_{}_config.ini".format(project.subject,project.subject_session,pipeline_type))
     else:
-        print('With NO session ')
+        # print('With NO session ')
         subject_conf_file = os.path.join(subject_derivatives_dir,"{}_{}_config.ini".format(project.subject,pipeline_type))
 
     if os.path.isfile(subject_conf_file):
@@ -186,7 +186,7 @@ parser.add_argument('-v', '--version', action='version',
 
 args = parser.parse_args()
 
-print('BIDS dataset: {}'.format(args.bids_dir))
+print('> BIDS dataset: {}'.format(args.bids_dir))
 
 # if not args.skip_bids_validator:
 #     run('bids-validator %s'%args.bids_dir)
@@ -200,8 +200,7 @@ else:
     subject_dirs = glob(os.path.join(args.bids_dir, "sub-*"))
     subjects_to_analyze = [subject_dir.split("-")[-1] for subject_dir in subject_dirs]
 
-print("subjects to analyze : ")
-print(subjects_to_analyze)
+print("> Subjects to analyze : {}".format(subjects_to_analyze))
 
 #Derivatives directory creation if it does not exist
 derivatives_dir = os.path.abspath(args.output_dir)
@@ -239,10 +238,6 @@ if args.analysis_level == "participant":
         project.output_directory = args.output_dir
 
         project.subjects = ['sub-{}'.format(label) for label in subjects_to_analyze]
-
-        print("project.subjects: ")
-        print(project.subjects)
-
         project.subject = 'sub-{}'.format(subject_label)
 
         # Check if multiple session (sub-XX/ses-YY/anat/... structure or sub-XX/anat.. structure?)
@@ -256,7 +251,7 @@ if args.analysis_level == "participant":
                 while len(processes) == maxprocs:
                     self.manage_processes(processes)
 
-                print('Process session {}'.format(session))
+                print('> Process subject {} session {}'.format(project.subject,session))
                 project.subject_session = session
 
                 #Derivatives folder creation (Folder is first deleted if it already exists)
@@ -276,25 +271,28 @@ if args.analysis_level == "participant":
                 if args.anat_pipeline_config is not None:
                     project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical')
                     run_anat = True
+                    print("... Anatomical config created : {}".format(project.anat_config_file))
                 if args.dwi_pipeline_config is not None:
                     project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion')
                     run_dmri = True
+                    print("... Diffusion config created : {}".format(project.dmri_config_file))
                 if args.func_pipeline_config is not None:
                     project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI')
                     run_fmri = True
+                    print("... fMRI config created : {}".format(project.fmri_config_file))
 
                 if args.anat_pipeline_config is not None:
-                    print("Running pipelines : ")
-                    print("- anatomical MRI (segmentation and parcellation)")
+                    print("... Running pipelines : ")
+                    print("        - Anatomical MRI (segmentation and parcellation)")
 
                     if args.dwi_pipeline_config is not None:
-                        print("- diffusion MRI (structural connectivity matrices)")
+                        print("        - Diffusion MRI (structural connectivity matrices)")
 
                     if args.func_pipeline_config is not None:
-                        print("- fMRI (functional connectivity matrices)")
+                        print("        - fMRI (functional connectivity matrices)")
 
                     cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
-                    print cmd
+                    print("... cmd : {}".format(cmd))
 
                     # for label in self.list_of_subjects_to_be_processed:
                     #     while len(processes) == maxprocs:
@@ -309,9 +307,12 @@ if args.analysis_level == "participant":
                     proc = run(command=cmd,env={},log_filename=os.path.join(project.output_directory,'cmp','{}_{}_log.txt'.format(project.subject,project.subject_session)))
                     processes.append(proc)
                 else:
-                    print "Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
+                    print "... Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
 
         else: #No session structure
+
+            print('> Process subject {}'.format(project.subject))
+
             while len(processes) == maxprocs:
                 manage_processes(processes)
 
@@ -331,29 +332,33 @@ if args.analysis_level == "participant":
             if args.anat_pipeline_config is not None:
                 project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical')
                 run_anat = True
+                print("... Anatomical config created : {}".format(project.anat_config_file))
             if args.dwi_pipeline_config is not None:
                 project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion')
                 run_dmri = True
+                print("... Diffusion config created : {}".format(project.dmri_config_file))
             if args.func_pipeline_config is not None:
                 project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI')
                 run_fmri = True
+                print("... fMRI config created : {}".format(project.fmri_config_file))
 
             if args.anat_pipeline_config is not None:
-                print("Running pipelines : ")
-                print("- anatomical MRI (segmentation and parcellation)")
+                print("... Running pipelines : ")
+                print("        - Anatomical MRI (segmentation and parcellation)")
 
                 if args.dwi_pipeline_config is not None:
-                    print("- diffusion MRI (structural connectivity matrices)")
+                    print("        - Diffusion MRI (structural connectivity matrices)")
 
                     if args.func_pipeline_config is not None:
-                        print("- fMRI (functional connectivity matrices)")
+                        print("        - fMRI (functional connectivity matrices)")
 
                 cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
-                print cmd
+                print("... cmd : {}".format(cmd))
+
                 proc = run(command=cmd,env={},log_filename=os.path.join(project.output_directory,'cmp','{}_log.txt'.format(project.subject)))
                 processes.append(proc)
             else:
-                print "Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
+                print "... Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
 
     while len(processes) > 0:
         manage_processes(processes)

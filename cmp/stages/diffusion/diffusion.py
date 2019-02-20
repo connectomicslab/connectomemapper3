@@ -185,6 +185,48 @@ class DiffusionStage(Stage):
 
     def create_workflow(self, flow, inputnode, outputnode):
 
+        if self.config.dilate_rois:
+
+            dilate_rois = pe.MapNode(interface=fsl.DilateImage(),iterfield=['in_file'],name='dilate_rois')
+            dilate_rois.inputs.operation = 'modal'
+
+            if self.config.dilation_kernel == 'Box':
+                kernel_size = 2*self.config.dilation_radius + 1
+                dilate_rois.inputs.kernel_shape = 'boxv'
+                dilate_rois.inputs.kernel_size = kernel_size
+            else:
+                extract_sizes = pe.Node(interface=ExtractImageVoxelSizes(),name='extract_sizes')
+                flow.connect([
+                            (inputnode,extract_sizes,[("diffusion","in_file")])
+                            ])
+                extract_sizes.run()
+                print "Voxel sizes : ",extract_sizes.outputs.voxel_sizes
+
+                min_size = 100
+                for voxel_size in extract_sizes.outputs.voxel_sizes:
+                    if voxel_size < min_size:
+                        min_size = voxel_size
+
+                print("voxel size (min): %g"%min_size)
+                if self.confi.dilation_kernel == 'Gauss':
+                    kernel_size = 2*extract_sizes.outputs.voxel_sizes + 1
+                    sigma = kernel_size / 2.355 # FWHM criteria, i.e. sigma = FWHM / 2(sqrt(2ln(2)))
+                    dilate_rois.inputs.kernel_shape = 'gauss'
+                    dilate_rois.inputs.kernel_size = sigma
+                elif self.config.dilation_kernel == 'Sphere':
+                    radius =  0.5*min_size + self.config.dilation_radius * min_size
+                    dilate_rois.inputs.kernel_shape = 'sphere'
+                    dilate_rois.inputs.kernel_size = radius
+
+            flow.connect([
+                        (inputnode,dilate_rois,[("roi_volumes","in_file")]),
+                        (dilate_rois,outputnode,[("out_file","roi_volumes")])
+                        ])
+        else:
+            flow.connect([
+                        (inputnode,outputnode,[("roi_volumes","roi_volumes")])
+                        ])
+
         if self.config.recon_processing_tool == 'Dipy':
             recon_flow = create_dipy_recon_flow(self.config.dipy_recon_config)
 
@@ -235,7 +277,7 @@ class DiffusionStage(Stage):
         #                 (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')])
         #                 ])
 
-        elif self.config.tracking_processing_tool == 'Dipy':
+        if self.config.tracking_processing_tool == 'Dipy':
             track_flow = create_dipy_tracking_flow(self.config.dipy_tracking_config)
             print "Dipy tracking"
 
@@ -308,14 +350,16 @@ class DiffusionStage(Stage):
 
             if self.config.diffusion_imaging_model != 'DSI':
                 flow.connect([
-                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),('grad','inputnode.grad')]),
+                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),
+                                                    ('grad','inputnode.grad')]),
                             (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
                             (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI')]),
     			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                             ])
             else:
                 flow.connect([
-                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),('grad','inputnode.grad')]),
+                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled'),
+                                                    ('grad','inputnode.grad')]),
                             (recon_flow, outputnode,[('outputnode.fod','fod_file')]),
                             (recon_flow, track_flow,[('outputnode.fod','inputnode.DWI')]),
     			             #(recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
