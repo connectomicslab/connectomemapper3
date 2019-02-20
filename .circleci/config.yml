@@ -237,7 +237,7 @@ jobs:
               docker push sebastientourbier/connectomemapper-bidsapp:unstable
               if [[ -n "$CIRCLE_TAG" ]]; then
                 docker push sebastientourbier/connectomemapper-bidsapp:latest
-                docker tag sebastientourbier/connectomemapper-bidsapp sebastientourbier/multiscalebrainparcellator:$CIRCLE_TAG
+                docker tag sebastientourbier/connectomemapper-bidsapp sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
                 docker push sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
               fi
             fi
