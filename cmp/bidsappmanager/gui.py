@@ -1264,13 +1264,13 @@ class CMP_QualityControlWindow(HasTraits):
 
     error_msg = Str('')
     error_view = View(
-                            Group(
-                                Item('error_msg', style='readonly',show_label=False),
-                                ),
-                            title='Error',
-                            kind = 'modal',
-                            #style_sheet=style_sheet,
-                            buttons=['OK'])
+                    Group(
+                        Item('error_msg', style='readonly',show_label=False),
+                        ),
+                    title='Error',
+                    kind = 'modal',
+                    #style_sheet=style_sheet,
+                    buttons=['OK'])
 
     def __init__(self, project_info=None, anat_inputs_checked=False, dmri_inputs_checked=False, fmri_inputs_checked=False):
 
@@ -1283,17 +1283,26 @@ class CMP_QualityControlWindow(HasTraits):
         print('Fix BIDS root directory to {}'.format(self.project_info.base_directory))
         project.fix_dataset_directory_in_pickles(local_dir=self.project_info.base_directory,mode='newlocal')
 
-        self.select_subject()
+        aborded = self.select_subject()
+
+        if aborded:
+            raise Exception('ABORDED: The quality control window will not be displayed. Selection of subject/session was cancelled at initialization.')
 
         #self.on_trait_change(self.update_run_anat_pipeline,'run_anat_pipeline')
 
     def select_subject(self):
         valid_selected_subject = False
+        select = True
+        aborded = False
 
-        while not valid_selected_subject:
+        while not valid_selected_subject and not aborded:
 
             #Select subject from BIDS dataset
-            self.project_info.configure_traits(view='subject_view')
+            np_res = self.project_info.configure_traits(view='subject_view')
+
+            if not np_res:
+                aborded = True
+                break
 
             print("Selected subject: {}".format(self.project_info.subject))
 
@@ -1313,6 +1322,10 @@ class CMP_QualityControlWindow(HasTraits):
                     self.project_info.subject_sessions.append('ses-'+str(ses))
 
                 np_res = self.project_info.configure_traits(view='subject_session_view')
+
+                if not np_res:
+                    aborded = True
+                    break
 
                 self.project_info.anat_config_file = os.path.join(self.project_info.base_directory,'derivatives','{}_{}_anatomical_config.ini'.format(self.project_info.subject,self.project_info.subject_session))
                 if os.access(self.project_info.anat_config_file,os.F_OK):
@@ -1415,7 +1428,12 @@ class CMP_QualityControlWindow(HasTraits):
                 valid_selected_subject = True
             else:
                 self.error_msg = "No output available! Please select another subject (and session if any)!"
-                self.configure_traits(view='error_view')
+
+                select = error(message=self.error_msg, title='Error', buttons=['OK', 'Cancel'])
+                aborded = not select
+                # self.configure_traits(view='error_view')
+
+        return aborded
 
     def update_diffusion_imaging_model(self,new):
         self.dmri_pipeline.diffusion_imaging_model = new
@@ -1751,13 +1769,16 @@ class CMP_MainWindowV2(HasTraits):
         print(self.project_info.dmri_available)
         print(self.project_info.fmri_available)
 
-        self.quality_control_ui = CMP_QualityControlWindow(project_info = self.project_info,
+        try:
+            self.quality_control_ui = CMP_QualityControlWindow(project_info = self.project_info,
                                                     anat_inputs_checked=self.project_info.t1_available,
                                                     dmri_inputs_checked=self.project_info.dmri_available,
                                                     fmri_inputs_checked=self.project_info.fmri_available
                                                     )
+            self.quality_control_ui.configure_traits()
+        except Exception as e:
+            print(e)
 
-        self.quality_control_ui.configure_traits()
 
     def show_bidsapp_interface(self):
         print("list_of_subjects_to_be_processed:")
