@@ -519,7 +519,7 @@ class CMP_BIDSAppWindow(HasTraits):
     settings_checked = Bool(False)
     docker_running = Bool(False)
 
-    bidsapp_tag = Enum('latest',['latest','dev'])
+    bidsapp_tag = Enum('{}'.format(__version__),['latest','{}'.format(__version__)])
 
     data_provenance_tracking = Bool(False)
     datalad_is_available = Bool(False)

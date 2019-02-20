@@ -11,7 +11,7 @@ from info import __release_date__
 
 def get():
     import argparse
-    p = = argparse.ArgumentParser(description='Example BIDS App entrypoint script.')
+    p = argparse.ArgumentParser(description='Example BIDS App entrypoint script.')
     p.add_argument('bids_dir', help='The directory with the input dataset '
                         'formatted according to the BIDS standard.')
     p.add_argument('output_dir', help='The directory where the output files '
