@@ -827,7 +827,7 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('code/ref_fMRI_config.ini'.format(label))
 
         cmd.append('--container-name')
-        cmd.append('connectomemapper-bidsapp-{}'.format(bidsapp_tag))
+        cmd.append('connectomemapper-bidsapp-{}'.format("-".join(bidsapp_tag.split("."))))
 
         # for label in participant_labels:
         #     cmd.append('--input')
@@ -931,19 +931,18 @@ class CMP_BIDSAppWindow(HasTraits):
             # f = open(log_filename,"w+")
             # f.close()
 
-            datalad_container = os.path.join(self.bids_root,'.datalad','environments','connectomemapper-bidsapp-{}'.format(self.bidsapp_tag),'image')
+            datalad_container = os.path.join(self.bids_root,'.datalad','environments','connectomemapper-bidsapp-{}'.format("-".join(self.bidsapp_tag.split("."))),'image')
 
-            if not os.path.isdir(datalad_container):
-                cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}".format(self.bidsapp_tag,self.bidsapp_tag)
-                try:
-                    print('... cmd: {}'.format(cmd))
-                    self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
-                except:
-                    print("   ERROR: Failed to link the container image to the datalad dataset")
-            else:
+            if os.path.isdir(datalad_container):
                 print("    INFO: Container already listed in the datalad dataset and will be updated!")
-                # TODO: remove existing for update
+                shutil.rmtree(datalad_container)
 
+            cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}".format("-".join(self.bidsapp_tag.split(".")),self.bidsapp_tag)
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
+            except:
+                print("   ERROR: Failed to link the container image to the datalad dataset")
 
             # Implementation with --upgrade available in latest version but not
             # in stable version of datalad_container
