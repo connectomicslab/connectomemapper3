@@ -4,10 +4,10 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Connectome Mapper Controler for handling GUI and non GUI general events
+""" Connectome Mapper Controler for handling non GUI general events
 """
 import warnings
-warnings.filterwarnings("ignore", message="No valid root directory found for domain 'derivatives'.")
+warnings.filterwarnings("ignore", message="UserWarning: No valid root directory found for domain 'derivatives'. Falling back on the Layout's root directory. If this isn't the intended behavior, make sure the config file for this domain includes a 'root' key.")
 
 # Global imports
 import ast

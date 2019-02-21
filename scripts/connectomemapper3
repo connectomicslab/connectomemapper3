@@ -14,8 +14,12 @@ from bids.grabbids import BIDSLayout
 import cmp.project
 from cmp.info import __version__
 
+import warnings
+warnings.filterwarnings("ignore", message="UserWarning: No valid root directory found for domain 'derivatives'. Falling back on the Layout's root directory. If this isn't the intended behavior, make sure the config file for this domain includes a 'root' key.")
+
+
 def info():
-    print("\nConnectome Mapper " + __version__)
+    print("\nConnectome Mapper {}".format(__version__))
     print("""Copyright (C) 2009-2018, Brain Communication Pathways Sinergia Consortium, Switzerland
           All rights reserved.\n""")
 
@@ -96,16 +100,16 @@ if __name__ == "__main__":
         try:
             bids_layout = BIDSLayout(project.base_directory)
         except:
-            print "Exception"
+            print("Exception : Raised at BIDSLayout")
             sys.exit(1)
 
         if "ses-" in sys.argv[4]:
             offset = 1
             project.subject_sessions = ['%s' % sys.argv[4]]
             project.subject_session = '%s' % sys.argv[4]
-            print "session"
+            print("INFO : Detected session(s)")
         else:
-            print "No session"
+            print("INFO : No detected session")
             offset = 0
             project.subject_sessions = ['']
             project.subject_session = ''
@@ -152,13 +156,13 @@ if __name__ == "__main__":
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             if anat_valid_inputs and sys.argv[offset+5]=='True':
-                print "Process anatomical pipeline"
+                print(">> Process anatomical pipeline")
                 anat_pipeline.process()
             elif anat_valid_inputs and sys.argv[offset+5]=='False':
-                print "Collecting precomputed anatomical pipeline"
+                print(">> Collecting precomputed anatomical pipeline")
                 pass
             else:
-                print "Invalid inputs"
+                print("ERROR : Invalid inputs")
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
@@ -168,7 +172,7 @@ if __name__ == "__main__":
             if dmri_pipeline != None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                print sys.argv[offset+7]
+                #print sys.argv[offset+7]
                 if dmri_valid_inputs and sys.argv[offset+7]=='True':
                     dmri_pipeline.process()
                 else:
@@ -188,8 +192,8 @@ if __name__ == "__main__":
         try:
             bids_layout = BIDSLayout(project.base_directory)
         except:
-            print("Exception {}".format(project.base_directory))
-            print("Exception {}".format(bids_layout))
+            print("Exception : {}".format(project.base_directory))
+            print("Exception : {}".format(bids_layout))
             sys.exit(1)
 
         if "ses-" in sys.argv[4]:
@@ -210,13 +214,13 @@ if __name__ == "__main__":
             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
 
             if anat_valid_inputs and sys.argv[offset+5]=='True':
-                print "Process anatomical pipeline"
+                print(">> Process anatomical pipeline")
                 anat_pipeline.process()
             elif anat_valid_inputs and sys.argv[offset+5]=='False':
-                print "Collecting precomputed anatomical pipeline"
+                print(">> Collecting precomputed anatomical pipeline")
                 pass
             else:
-                print "Invalid inputs"
+                print("ERROR : Invalid inputs")
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
@@ -226,25 +230,25 @@ if __name__ == "__main__":
             if dmri_pipeline != None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                print sys.argv[offset+7]
+                # print sys.argv[offset+7]
                 if dmri_valid_inputs and sys.argv[offset+7]=='True':
-                    print "Process diffusion pipeline"
+                    print(">> Process diffusion pipeline")
                     dmri_pipeline.process()
                 else:
-                    print "WARNING: Diffusion pipeline set to not be executed"
+                    print("WARNING: Diffusion pipeline set to not be executed")
 
             fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
             if fmri_pipeline != None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                print sys.argv[offset+9]
+                # print sys.argv[offset+9]
                 if fmri_valid_inputs and sys.argv[offset+9]=='True':
-                    print "Process fmri pipeline"
+                    print(">> Process fmri pipeline")
                     fmri_pipeline.process()
                 else:
-                    print "WARNING: Diffusion pipeline set to not be executed"
+                    print("WARNING: Diffusion pipeline set to not be executed")
         else:
-            print msg
+            print(msg)
             sys.exit(1)
 
     else:

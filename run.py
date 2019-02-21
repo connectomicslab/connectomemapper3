@@ -121,17 +121,17 @@ def clean_cache(bids_root):
         print('... DEL: {}'.format(d))
         shutil.rmtree(d)
 
-    for d in glob(os.path.join(bids_root,'xvfb-run.*')):
-        print('... DEL: {}'.format(d))
-        shutil.rmtree(d)
-
-    for d in glob(os.path.join(bids_root,'.X11*')):
-        print('... DEL: {}'.format(d))
-        shutil.rmtree(d)
-
-    for d in glob(os.path.join(bids_root,'.X11-unix')):
-        print('... DEL: {}'.format(d))
-        shutil.rmtree(d)
+    # for d in glob(os.path.join(bids_root,'xvfb-run.*')):
+    #     print('... DEL: {}'.format(d))
+    #     shutil.rmtree(d)
+    #
+    # for d in glob(os.path.join(bids_root,'.X11*')):
+    #     print('... DEL: {}'.format(d))
+    #     shutil.rmtree(d)
+    #
+    # for d in glob(os.path.join(bids_root,'.X11-unix')):
+    #     print('... DEL: {}'.format(d))
+    #     shutil.rmtree(d)
 
     for f in glob(os.path.join(bids_root,'.X99*')):
         print('... DEL: {}'.format(f))

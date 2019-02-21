@@ -464,9 +464,14 @@ class DiffusionStage(Stage):
                     if self.config.diffusion_imaging_model == 'DSI':
                         gfa_res = recon_results.outputs.GFA
                         self.inspect_outputs_dict[self.config.recon_processing_tool + ' gFA image'] = ['mrview',gfa_res]
-                        shm_coeff_res = recon_results.outputs.fod
-                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH (SHORE) image'] = ['mrview',gfa_res,'-odf.load_sh',shm_coeff_res]
-
+                        msd_res = recon_results.outputs.MSD
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' MSD image'] = ['mrview',msd_res]
+                        rtop_res = recon_results.outputs.RTOP
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' RTOP image'] = ['mrview',rtop_res]
+                        dodf_res = recon_results.outputs.dodf
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' Diffusion ODF (SHORE) image'] = ['mrview',gfa_res,'-odf.load_sh',dodf_res]
+                        shm_coeff_res = recon_results.outputs.fodf
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' Fiber ODF (SHORE) image'] = ['mrview',gfa_res,'-odf.load_sh',shm_coeff_res]
                     else:
                         recon_tensor_results_path = os.path.join(self.stage_dir,"reconstruction","dipy_tensor","result_dipy_tensor.pklz")
 
@@ -477,10 +482,10 @@ class DiffusionStage(Stage):
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',fa_res]
 
                             shm_coeff_res = recon_results.outputs.out_shm_coeff
-                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH (CSD) image'] = ['mrview',fa_res,'-odf.load_sh',shm_coeff_res]
+                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = ['mrview',fa_res,'-odf.load_sh',shm_coeff_res]
                         else:
                             shm_coeff_res = recon_results.outputs.out_shm_coeff
-                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH (CSD) image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
+                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = ['mrview',shm_coeff_res,'-odf.load_sh',shm_coeff_res]
 
 
 
