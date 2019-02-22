@@ -107,19 +107,31 @@ def clean_cache(bids_root):
 
     for f in glob(os.path.join(bids_root,'._java*')):
         print('... DEL: {}'.format(f))
-        os.remove(f)
+        try:
+            os.remove(f)
+        except:
+            pass
 
     for f in glob(os.path.join(bids_root,'mri_segstats.tmp*')):
         print('... DEL: {}'.format(f))
-        os.remove(f)
+        try:
+            os.remove(f)
+        except:
+            pass
 
     for d in glob(os.path.join(bids_root,'MCR_*')):
         print('... DEL: {}'.format(d))
-        shutil.rmtree(d)
+        try:
+            shutil.rmtree(d)
+        except:
+            pass
 
     for d in glob(os.path.join(bids_root,'matplotlib*')):
         print('... DEL: {}'.format(d))
-        shutil.rmtree(d)
+        try:
+            shutil.rmtree(d)
+        except:
+            pass
 
     # for d in glob(os.path.join(bids_root,'xvfb-run.*')):
     #     print('... DEL: {}'.format(d))
@@ -135,7 +147,10 @@ def clean_cache(bids_root):
 
     for f in glob(os.path.join(bids_root,'.X99*')):
         print('... DEL: {}'.format(f))
-        os.remove(d)
+        try:
+            os.remove(f)
+        except:
+            pass
 
 
 def run(command, env={}, log_filename={}):
