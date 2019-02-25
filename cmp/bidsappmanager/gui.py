@@ -826,11 +826,11 @@ class CMP_BIDSAppWindow(HasTraits):
 
         if self.run_dmri_pipeline:
             cmd.append('--input')
-            cmd.append('code/ref_diffusion_config.ini'.format(label))
+            cmd.append('code/ref_diffusion_config.ini')
 
         if self.run_fmri_pipeline:
             cmd.append('--input')
-            cmd.append('code/ref_fMRI_config.ini'.format(label))
+            cmd.append('code/ref_fMRI_config.ini')
 
         cmd.append('--output')
         cmd.append('derivatives')
@@ -970,6 +970,15 @@ class CMP_BIDSAppWindow(HasTraits):
             #     print("   ERROR: Failed to link the container image to the datalad dataset")
 
             datalad_get_list = []
+
+            datalad_get_list.append('code/ref_anatomical_config.ini')
+
+            if self.run_dmri_pipeline:
+                datalad_get_list.append('code/ref_diffusion_config.ini')
+
+            if self.run_dmri_pipeline:
+                datalad_get_list.append('code/ref_fMRI_config.ini')
+
             if session_structure:
                 for label in self.list_of_subjects_to_be_processed:
                     datalad_get_list.append('sub-{}/ses-*/anat/sub-{}*_T1w.*'.format(label,label))
@@ -992,31 +1001,8 @@ class CMP_BIDSAppWindow(HasTraits):
                 print('... cmd: {}'.format(cmd))
                 self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except:
-                print("    ERROR: Failed to get anatomical pipeline config file")
+                print("    ERROR: Failed to get files (cmd: datalad get {})".format(" ".join(datalad_get_list)))
 
-            # cmd = 'datalad get code/ref_anatomical_config.ini'
-            # try:
-            #     print('... cmd: {}'.format(cmd))
-            #     self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            # except:
-            #     print("    ERROR: Failed to get anatomical pipeline config file")
-            #
-            #
-            # if self.run_dmri_pipeline:
-            #     cmd = 'datalad get code/ref_diffusion_config.ini'
-            #     try:
-            #         print('... cmd: {}'.format(cmd))
-            #         self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            #     except:
-            #         print("    ERROR: Failed to get diffusion pipeline config file")
-            #
-            # if self.run_fmri_pipeline:
-            #     cmd = 'datalad get code/ref_fMRI_config.ini'
-            #     try:
-            #         print('... cmd: {}'.format(cmd))
-            #         self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            #     except:
-            #         print("    ERROR: Failed to get fMRI pipeline config file")
 
             cmd = 'datalad add --nosave -J {} .'.format(multiprocessing.cpu_count())
             try:

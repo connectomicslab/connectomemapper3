@@ -38,6 +38,7 @@ from cmp.bidsappmanager.pipelines.diffusion import diffusion as Diffusion_pipeli
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as Anatomical_pipeline
 
 import gui
+import core
 
 #import CMP_MainWindow
 #import pipelines.egg.eeg as EEG_pipeline
@@ -304,8 +305,15 @@ def anat_save_config(pipeline, config_path):
         config.write(configfile)
 
 def anat_load_config(pipeline, config_path):
+    print('>> Load anatomical config file : {}'.format(config_path))
     config = ConfigParser.ConfigParser()
-    config.read(config_path)
+
+    datalad_is_available = is_tool('datalad')
+    try:
+        config.read(config_path)
+    except ConfigParser.MissingSectionHeaderError:
+        print('... error : file is a datalad git annex but it has not been retrieved yet. Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)')
+
     global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
     for key in global_keys:
         if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
@@ -369,8 +377,15 @@ def dmri_save_config(pipeline, config_path):
         config.write(configfile)
 
 def dmri_load_config(pipeline, config_path):
+    print('>> Load diffusion config file : {}'.format(config_path))
     config = ConfigParser.ConfigParser()
-    config.read(config_path)
+
+    datalad_is_available = is_tool('datalad')
+    try:
+        config.read(config_path)
+    except ConfigParser.MissingSectionHeaderError:
+        print('... error : file is a datalad git annex but it has not been retrieved yet. Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)')
+
     global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
     for key in global_keys:
         if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions" and key != 'modalities':
@@ -432,8 +447,15 @@ def fmri_save_config(pipeline, config_path):
         config.write(configfile)
 
 def fmri_load_config(pipeline, config_path):
+    print('>> Load anatomical config file : {}'.format(config_path))
     config = ConfigParser.ConfigParser()
-    config.read(config_path)
+
+    datalad_is_available = is_tool('datalad')
+    try:
+        config.read(config_path)
+    except ConfigParser.MissingSectionHeaderError:
+        print('... error : file is a datalad git annex but it has not been retrieved yet. Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)')
+
     global_keys = [prop for prop in pipeline.global_conf.traits().keys() if not 'trait' in prop] # possibly dangerous..?
     for key in global_keys:
         if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
@@ -1601,6 +1623,8 @@ class ProjectHandlerV2(Handler):
         self.dmri_inputs_checked = dmri_inputs_checked
         self.fmri_inputs_checked = fmri_inputs_checked
 
+        datalad_is_available = is_tool('datalad')
+
         if anat_inputs_checked:
 
             self.anat_pipeline = Anatomical_pipeline.AnatomicalPipelineUI(loaded_project)
@@ -1621,11 +1645,20 @@ class ProjectHandlerV2(Handler):
                         print "Created directory %s" % code_directory
 
                 anat_save_config(self.anat_pipeline, loaded_project.anat_config_file)
-                print("Created reference anatomical config file :  %s"%loaded_project.anat_config_file)
+                print(">> Created reference anatomical config file :  %s"%loaded_project.anat_config_file)
 
             else:
+                print(">> Loaded reference anatomical config file :  %s"%loaded_project.anat_config_file)
+                if datalad_is_available:
+                    print('... Datalad get anatomical config file : {}'.format(loaded_project.anat_config_file))
+                    cmd = 'datalad run -m "Get reference anatomical config file" bash -c "datalad get code/ref_anatomical_config.ini"'
+                    try:
+                        print('... cmd: {}'.format(cmd))
+                        core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
+                    except:
+                        print("    ERROR: Failed to get file")
+
                 anat_conf_loaded = anat_load_config(self.anat_pipeline, loaded_project.anat_config_file)
-                print("Loaded reference anatomical config file :  %s"%loaded_project.anat_config_file)
 
             self.anat_pipeline.config_file = loaded_project.anat_config_file
 
@@ -1750,9 +1783,19 @@ class ProjectHandlerV2(Handler):
                     self.dmri_pipeline.global_conf.dmri_bids_acq  = loaded_project.dmri_bids_acq
                     self.dmri_pipeline.stages["Diffusion"].diffusion_imaging_model  = loaded_project.diffusion_imaging_model
                     dmri_save_config(self.dmri_pipeline, dmri_config_file)
-                    print("Created reference diffusion config file :  %s"%loaded_project.dmri_config_file)
+                    print(">> Created reference diffusion config file :  %s"%loaded_project.dmri_config_file)
                 else:
-                    print("Loaded reference diffusion config file :  %s"%loaded_project.dmri_config_file)
+                    print(">> Loaded reference diffusion config file :  %s"%loaded_project.dmri_config_file)
+
+                    if datalad_is_available:
+                        print('... Datalad get reference diffusion config file : {}'.format(loaded_project.anat_config_file))
+                        cmd = 'datalad run -m "Get reference anatomical config file" bash -c "datalad get code/ref_diffusion_config.ini"'
+                        try:
+                            print('... cmd: {}'.format(cmd))
+                            core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
+                        except:
+                            print("    ERROR: Failed to get file")
+
                     dmri_conf_loaded = dmri_load_config(self.dmri_pipeline, loaded_project.dmri_config_file)
                     # TODO: check if diffusion imaging model (DSI/DTI/HARDI) is correct/valid.
 
@@ -1781,6 +1824,16 @@ class ProjectHandlerV2(Handler):
                         print("Created reference fMRI config file :  %s"%loaded_project.fmri_config_file)
                     else:
                         print("Loaded reference fMRI config file :  %s"%loaded_project.fmri_config_file)
+
+                        if datalad_is_available:
+                            print('... Datalad get reference fMRI config file : {}'.format(loaded_project.anat_config_file))
+                            cmd = 'datalad run -m "Get reference fMRI config file" bash -c "datalad get code/ref_fMRI_config.ini"'
+                            try:
+                                print('... cmd: {}'.format(cmd))
+                                core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
+                            except:
+                                print("    ERROR: Failed to get file")
+
                         fmri_conf_loaded = fmri_load_config(self.fmri_pipeline, loaded_project.fmri_config_file)
 
                     ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
