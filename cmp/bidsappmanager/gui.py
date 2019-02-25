@@ -33,7 +33,7 @@ from traitsui.tabular_adapter import TabularAdapter
 from traitsui.qt4.extra.qt_view import QtView
 from pyface.api import ImageResource
 
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 
 # CMP imports
 from cmp.info import __version__

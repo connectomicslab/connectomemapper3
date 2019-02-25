@@ -23,7 +23,7 @@ import multiprocessing
 
 import ConfigParser
 
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 
 # Own imports
 #import pipelines.diffusion.diffusion as Diffusion_pipeline

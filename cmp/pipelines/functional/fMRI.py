@@ -22,7 +22,7 @@ import apptools.io.api as io
 
 import nibabel as nib
 
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 
 from cmp.pipelines.common import *
 from cmp.pipelines.anatomical.anatomical import AnatomicalPipeline

@@ -4,18 +4,14 @@
 import sys
 import os
 
-#import wx
-##from PySide2 import QtCore, QtGui
-
+#Setup Qt5 backend for traitsui
+os.environ['ETS_TOOLKIT'] = 'qt4'
+os.environ['QT_API'] = 'pyqt5'
 
 import subprocess
 
-
-#Traits/traituiQt4
-##import traitsui.qt4
-
 #BIDS import
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 
 from traits.etsconfig.api import ETSConfig
 print("Graphical Backend : {}".format(ETSConfig.toolkit))

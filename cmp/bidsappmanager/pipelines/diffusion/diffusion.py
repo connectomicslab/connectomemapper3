@@ -32,7 +32,7 @@ from cmp.bidsappmanager.stages.diffusion.diffusion import DiffusionStageUI
 from cmp.bidsappmanager.stages.registration.registration import RegistrationStageUI
 from cmp.bidsappmanager.stages.connectome.connectome import ConnectomeStageUI
 
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 
 from cmp.pipelines.common import Pipeline
 from cmp.pipelines.diffusion.diffusion import Global_Configuration, Check_Input_Notification, DiffusionPipeline

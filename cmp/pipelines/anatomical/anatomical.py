@@ -36,7 +36,7 @@ from nipype.utils.filemanip import split_filename
 from traits.api import *
 import apptools.io.api as io
 
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 
 # Own import
 import cmp.interfaces.fsl as cmp_fsl

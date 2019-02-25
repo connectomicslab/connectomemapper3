@@ -28,7 +28,7 @@ import gzip
 import ConfigParser
 from pyface.api import FileDialog, OK
 
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 import nibabel as nib
 
 # Own imports

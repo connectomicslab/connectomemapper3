@@ -32,7 +32,7 @@ from cmp.stages.diffusion.diffusion import DiffusionStage
 from cmp.stages.registration.registration import RegistrationStage
 from cmp.stages.connectome.connectome import ConnectomeStage
 
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 
 class Global_Configuration(HasTraits):
     process_type = Str('diffusion')

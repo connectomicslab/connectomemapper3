@@ -23,7 +23,7 @@ from pyface.api import ImageResource
 
 import shutil
 
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 
 #from cmp.bidsappmanager.pipelines.common import *
 from cmp.bidsappmanager.pipelines.anatomical.anatomical import AnatomicalPipelineUI

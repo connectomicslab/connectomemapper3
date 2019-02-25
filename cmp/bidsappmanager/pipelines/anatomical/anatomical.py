@@ -21,7 +21,7 @@ from pyface.ui.qt4.image_resource import ImageResource
 from pyface.qt.QtCore import *
 from pyface.qt.QtGui import *
 
-from bids.grabbids import BIDSLayout
+from bids import BIDSLayout
 
 # Own import
 #import cmp.bidsappmanager.pipelines.common as cmp_common
