@@ -522,6 +522,7 @@ class CMP_BIDSAppWindow(HasTraits):
     bidsapp_tag = Enum('{}'.format(__version__),['latest','{}'.format(__version__)])
 
     data_provenance_tracking = Bool(False)
+    datalad_update_environment = Bool(True)
     datalad_is_available = Bool(False)
 
     # check = Action(name='Check settings!',action='check_settings',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))))
@@ -571,6 +572,7 @@ class CMP_BIDSAppWindow(HasTraits):
                             label='BIDS App Version'),
                             Group(
                                 Item('data_provenance_tracking', label='Use Datalad'),
+                                Item('datalad_update_environment', visible_when='data_provenance_tracking', label='Update the computing environment (if existing)'),
                             label='Data Provenance Tracking / Data Lineage',
                             enabled_when='datalad_is_available'),
                             spring,
@@ -736,6 +738,7 @@ class CMP_BIDSAppWindow(HasTraits):
         print("Valid inputs for BIDS App : {}".format(self.settings_checked))
         print("BIDS App Version Tag: {}".format(self.bidsapp_tag))
         print("Data provenance tracking (datalad) : {}".format(self.data_provenance_tracking))
+        print("Update computing environment (datalad) : {}".format(self.datalad_update_environment))
 
         return True
 
@@ -839,7 +842,7 @@ class CMP_BIDSAppWindow(HasTraits):
         #     cmd.append('{}'.format(label))
 
         cmd.append('/tmp')
-        cmd.append('/tmp/{outputs[0]}')
+        cmd.append('/tmp/{{outputs[0]}}')
         cmd.append('participant')
 
         cmd.append('--participant_label')
@@ -849,16 +852,16 @@ class CMP_BIDSAppWindow(HasTraits):
         # Counter to track position of config file as --input
         i = 0
         cmd.append('--anat_pipeline_config')
-        cmd.append('{inputs[{}]}'.format(i))
+        cmd.append('{{inputs[{}]}}'.format(i))
         i += 1
         if self.run_dmri_pipeline:
             cmd.append('--dwi_pipeline_config')
-            cmd.append('{inputs[{}]}'.format(i))
+            cmd.append('{{inputs[{}]}}'.format(i))
             i += 1
 
         if self.run_fmri_pipeline:
             cmd.append('--func_pipeline_config')
-            cmd.append('{inputs[{}]}'.format(i))
+            cmd.append('{{inputs[{}]}}'.format(i))
 
         print('... Datalad cmd : {}'.format(cmd))
 
@@ -918,9 +921,13 @@ class CMP_BIDSAppWindow(HasTraits):
         if self.datalad_is_available and self.data_provenance_tracking:
             # Detect structure subject/session
             session_structure = False
-            res = glob.glob('sub-*/*/anat')
+            res = glob.glob(os.path.join(self.bids_root,'sub-*/*/anat'))
+            # print(res)
             if len(res) > 0:
                 session_structure = True
+                print('    INFO : Subject/Session structure detected!')
+            else:
+                print('    INFO : Subject structure detected!')
 
             # Equivalent to:
             #    >> datalad create derivatives
@@ -946,17 +953,26 @@ class CMP_BIDSAppWindow(HasTraits):
             # f.close()
 
             datalad_container = os.path.join(self.bids_root,'.datalad','environments','connectomemapper-bidsapp-{}'.format("-".join(self.bidsapp_tag.split("."))),'image')
-
+            add_container = True
             if os.path.isdir(datalad_container):
-                print("    INFO: Container already listed in the datalad dataset and will be updated!")
-                shutil.rmtree(datalad_container)
+                if self.datalad_update_environment:
+                    print("    INFO: Container already listed in the datalad dataset and will be updated!")
+                    shutil.rmtree(datalad_container)
+                    add_container = True
+                else:
+                    add_container = False
+                    print("    INFO: Container already listed in the datalad dataset and will NOT be updated!")
+            else:
+                add_container = True
+                print("    INFO: Add a new computing environment (container image) to the datalad dataset!")
 
-            cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}".format("-".join(self.bidsapp_tag.split(".")),self.bidsapp_tag)
-            try:
-                print('... cmd: {}'.format(cmd))
-                self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
-            except:
-                print("   ERROR: Failed to link the container image to the datalad dataset")
+            if add_container:
+                cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}".format("-".join(self.bidsapp_tag.split(".")),self.bidsapp_tag)
+                try:
+                    print('... cmd: {}'.format(cmd))
+                    self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
+                except:
+                    print("   ERROR: Failed to link the container image to the datalad dataset")
 
             # Implementation with --upgrade available in latest version but not
             # in stable version of datalad_container
@@ -982,7 +998,7 @@ class CMP_BIDSAppWindow(HasTraits):
             if session_structure:
                 for label in self.list_of_subjects_to_be_processed:
                     datalad_get_list.append('sub-{}/ses-*/anat/sub-{}*_T1w.*'.format(label,label))
-                    datalad_get_list.append('derivatives/freesurfer/sub-{}*/*')
+                    datalad_get_list.append('derivatives/freesurfer/sub-{}*/*'.format(label))
                     if self.run_dmri_pipeline:
                         datalad_get_list.append('sub-{}/ses-*/dwi/sub-{}*_dwi.*'.format(label,label))
                     if self.run_fmri_pipeline:
@@ -990,7 +1006,7 @@ class CMP_BIDSAppWindow(HasTraits):
             else:
                 for label in self.list_of_subjects_to_be_processed:
                     datalad_get_list.append('sub-{}/anat/sub-{}*_T1w.*'.format(label,label))
-                    datalad_get_list.append('derivatives/freesurfer/sub-{}/*')
+                    datalad_get_list.append('derivatives/freesurfer/sub-{}/*'.format(label))
                     if self.run_dmri_pipeline:
                         datalad_get_list.append('sub-{}/dwi/sub-{}*_dwi.*'.format(label,label))
                     if self.run_fmri_pipeline:
