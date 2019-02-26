@@ -1504,8 +1504,9 @@ class ProjectHandlerV2(Handler):
     fmri_inputs_checked = Bool(False)
     fmri_processed = Bool(False)
 
-    def load_dataset(self, ui_info, debug=False):
+    def load_dataset(self, ui_info, debug=True):
         # print('Load dataset')
+        debug = True
 
         loaded_project = gui.CMP_Project_Info()
         np_res = loaded_project.configure_traits(view='open_view')
@@ -1518,23 +1519,25 @@ class ProjectHandlerV2(Handler):
         diffusion_available = False
         fmri_available = False
 
-        print "Local BIDS dataset: %s" % loaded_project.base_directory
+        # print("Local BIDS dataset: %s" % loaded_project.base_directory)
         try:
             bids_layout = BIDSLayout(loaded_project.base_directory)
+            print(bids_layout)
+
             loaded_project.bids_layout = bids_layout
             is_bids = True
 
             loaded_project.subjects = []
             for subj in bids_layout.get_subjects():
                 if debug:
-                    print "sub: %s" % subj
+                    print("sub: %s" % subj)
                 if 'sub-'+str(subj) not in loaded_project.subjects:
                     loaded_project.subjects.append('sub-'+str(subj))
             # loaded_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
             loaded_project.subjects.sort()
 
-            print "Available subjects : "
-            print loaded_project.subjects
+            print("Available subjects : ")
+            print(loaded_project.subjects)
             loaded_project.number_of_subjects = len(loaded_project.subjects)
 
             loaded_project.subject=loaded_project.subjects[0]
@@ -1547,8 +1550,8 @@ class ProjectHandlerV2(Handler):
             sessions = bids_layout.get(target='session', return_type='id', subject=subject)
 
             if debug:
-                print "Sessions: "
-                print sessions
+                print("Sessions: ")
+                print(sessions)
 
             if len(sessions) > 0:
                 loaded_project.subject_sessions = ['ses-{}'.format(sessions[0])]
@@ -1557,25 +1560,25 @@ class ProjectHandlerV2(Handler):
                 loaded_project.subject_sessions = ['']
                 loaded_project.subject_session = ''
 
-            query_files = [f.filename for f in bids_layout.get(subject=subject, type='T1w', extensions=['nii', 'nii.gz'])]
+            query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='T1w', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
                 if debug:
                     print("T1w available: {}".format(query_files))
                 t1_available = True
 
-            query_files = [f.filename for f in bids_layout.get(subject=subject, type='T2w', extensions=['nii', 'nii.gz'])]
+            query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='T2w', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
                 if debug:
                     print("T2w available: {}".format(query_files))
                 t2_available = True
 
-            query_files = [f.filename for f in bids_layout.get(subject=subject, type='dwi', extensions=['nii', 'nii.gz'])]
+            query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='dwi', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
                 if debug:
                     print("DWI available: {}".format(query_files))
                 diffusion_available = True
 
-            query_files = [f.filename for f in bids_layout.get(subject=subject, type='bold', extensions=['nii', 'nii.gz'])]
+            query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='bold', extensions=['nii', 'nii.gz'])]
             if len(query_files) > 0:
                 if debug:
                     print("BOLD available: {}".format(query_files))
@@ -1692,7 +1695,7 @@ class ProjectHandlerV2(Handler):
                     #Look for diffusion acquisition model information from filename (acq-*)
                     if loaded_project.subject_session != '':
                         session = loaded_project.subject_session.split('-')[1]
-                        diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, session=session, type='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
+                        diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, session=session, suffix='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
                         if debug:
                             print('DIFFUSION IMAGING MODELS : {}'.format(diffusion_imaging_models))
 
@@ -1717,7 +1720,7 @@ class ProjectHandlerV2(Handler):
                             loaded_project.dmri_bids_acq = ''
                             loaded_project.configure_traits(view='diffusion_imaging_model_select_view')
 
-                        files = [f.filename for f in bids_layout.get(subject=subject, session=session, type='dwi', extensions=['nii', 'nii.gz'])]
+                        files = [f.filename for f in bids_layout.get(subject=subject, session=session, suffix='dwi', extensions=['nii', 'nii.gz'])]
 
                         if debug:
                             print('****************************************')
@@ -1734,7 +1737,7 @@ class ProjectHandlerV2(Handler):
                         else:
                             dwi_file = files[0]
                     else:
-                        diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, type='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
+                        diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, suffix='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
 
                         if len(diffusion_imaging_models)>0:
                             if len(diffusion_imaging_models)>1:
@@ -1756,7 +1759,7 @@ class ProjectHandlerV2(Handler):
                             loaded_project.dmri_bids_acq = ''
                             loaded_project.configure_traits(view='diffusion_imaging_model_select_view')
 
-                        files = [f.filename for f in bids_layout.get(subject=subject, type='dwi', extensions=['nii', 'nii.gz'])]
+                        files = [f.filename for f in bids_layout.get(subject=subject, suffix='dwi', extensions=['nii', 'nii.gz'])]
 
                         if (loaded_project.dmri_bids_acq != ''):
                             for file in files:

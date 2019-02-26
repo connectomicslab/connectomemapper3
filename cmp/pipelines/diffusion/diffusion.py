@@ -180,7 +180,7 @@ class DiffusionPipeline(Pipeline):
 
             if self.global_conf.subject_session == '':
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.nii.gz')
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.nii.gz')
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
@@ -194,7 +194,7 @@ class DiffusionPipeline(Pipeline):
                     print("ERROR : Diffusion image not found for subject %s."%(subjid))
                     return
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.bval')
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.bval')
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
@@ -208,7 +208,7 @@ class DiffusionPipeline(Pipeline):
                     print("ERROR : Diffusion bval image not found for subject %s."%(subjid))
                     return
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.bvec')
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.bvec')
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
@@ -224,7 +224,7 @@ class DiffusionPipeline(Pipeline):
             else:
                 sessid = self.global_conf.subject_session.split("-")[1]
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.nii.gz',session=sessid)
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.nii.gz',session=sessid)
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
@@ -238,7 +238,7 @@ class DiffusionPipeline(Pipeline):
                     print("ERROR : Diffusion image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                     return
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.bval',session=sessid)
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.bval',session=sessid)
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
@@ -252,7 +252,7 @@ class DiffusionPipeline(Pipeline):
                     print("ERROR : Diffusion bval image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                     return
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.bvec',session=sessid)
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.bvec',session=sessid)
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:

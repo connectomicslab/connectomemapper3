@@ -136,7 +136,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
             if self.global_conf.subject_session == '':
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.nii.gz')
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.nii.gz')
                 if len(files) > 0:
                     dwi_file = files[0].filename
                     print dwi_file
@@ -144,7 +144,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     error(message="Diffusion image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.bval')
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.bval')
                 if len(files) > 0:
                     bval_file = files[0].filename
                     print bval_file
@@ -152,7 +152,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     error(message="Diffusion bval image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.bvec')
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.bvec')
                 if len(files) > 0:
                     bvec_file = files[0].filename
                     print bvec_file
@@ -162,7 +162,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
             else:
                 sessid = self.global_conf.subject_session.split("-")[1]
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.nii.gz',session=sessid)
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.nii.gz',session=sessid)
                 if len(files) > 0:
                     dwi_file = files[0].filename
                     print dwi_file
@@ -170,7 +170,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     error(message="Diffusion image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.bval',session=sessid)
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.bval',session=sessid)
                 if len(files) > 0:
                     bval_file = files[0].filename
                     print bval_file
@@ -178,7 +178,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     error(message="Diffusion bval image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                     return
 
-                files = layout.get(subject=subjid,type='dwi',extensions='.bvec',session=sessid)
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.bvec',session=sessid)
                 if len(files) > 0:
                     bvec_file = files[0].filename
                     print bvec_file

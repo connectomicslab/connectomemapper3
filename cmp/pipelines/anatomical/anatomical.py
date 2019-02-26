@@ -161,7 +161,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         if self.global_conf.subject_session == '':
             T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
-            files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz')
+            files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz')
             if len(files) > 0:
                 T1_file = files[0].filename
                 # print T1_file
@@ -169,7 +169,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 return
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
-            files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz',session=sessid)
+            files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
                 T1_file = files[0].filename
                 # print T1_file

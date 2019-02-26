@@ -97,7 +97,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         else:
             subjid = self.subject.split("-")[1]
             sessid = self.global_conf.subject_session.split("-")[1]
-            files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz',session=sessid)
+            files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
                 T1_file = files[0].filename
                 print T1_file

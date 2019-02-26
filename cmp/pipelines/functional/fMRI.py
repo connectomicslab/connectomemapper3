@@ -146,7 +146,7 @@ class fMRIPipeline(Pipeline):
 
         if self.global_conf.subject_session == '':
 
-            files = layout.get(subject=subjid,type='bold',extensions='.nii.gz')
+            files = layout.get(subject=subjid,suffix='bold',extensions='.nii.gz')
             if len(files) > 0:
                 fmri_file = files[0].filename
                 # print fmri_file
@@ -154,7 +154,7 @@ class fMRIPipeline(Pipeline):
                 print("ERROR : BOLD image not found for subject %s."%(subjid))
                 return
 
-            files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz')
+            files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz')
             if len(files) > 0:
                 t1_file = files[0].filename
                 # print t1_file
@@ -162,7 +162,7 @@ class fMRIPipeline(Pipeline):
                 print("ERROR : T1w image not found for subject %s."%(subjid))
                 return
 
-            files = layout.get(subject=subjid,type='T2w',extensions='.nii.gz')
+            files = layout.get(subject=subjid,suffix='T2w',extensions='.nii.gz')
             if len(files) > 0:
                 t2_file = files[0].filename
                 # print t2_file
@@ -172,7 +172,7 @@ class fMRIPipeline(Pipeline):
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
 
-            files = layout.get(subject=subjid,type='bold',extensions='.nii.gz',session=sessid)
+            files = layout.get(subject=subjid,suffix='bold',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
                 fmri_file = files[0].filename
                 # print fmri_file
@@ -180,7 +180,7 @@ class fMRIPipeline(Pipeline):
                 print("ERROR : BOLD image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                 return
 
-            files = layout.get(subject=subjid,type='T1w',extensions='.nii.gz',session=sessid)
+            files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
                 t1_file = files[0].filename
                 # print t1_file
@@ -188,7 +188,7 @@ class fMRIPipeline(Pipeline):
                 print("ERROR : T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                 return
 
-            files = layout.get(subject=subjid,type='T2w',extensions='.nii.gz',session=sessid)
+            files = layout.get(subject=subjid,suffix='T2w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
                 t2_file = files[0].filename
                 # print t2_file
