@@ -8,7 +8,7 @@ MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 
 ## Install miniconda2 and CMP dependencies
 
-RUN apt-get update && apt-get -qq -y install npm curl bzip2 xvfb && \
+RUN apt-get update && apt-get -qq -y install npm curl bzip2 xvfb liblzma-dev && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
@@ -18,49 +18,60 @@ RUN apt-get update && apt-get -qq -y install npm curl bzip2 xvfb && \
 
 ENV PATH /opt/conda/bin:$PATH
 
-RUN conda install -y python=2.7.15 && \
-    conda update conda && \
+RUN conda update conda && \
     conda clean --all --yes
 
-## FIXME: (fix nodes_iter() to nodes() for networkx2 support)
+# RUN conda install -y python=2.7.15 && \
+#     conda update conda && \
+#     conda clean --all --yes
+#
+# ## FIXME: (fix nodes_iter() to nodes() for networkx2 support)
+#
+# RUN conda config --add channels conda-forge
+# RUN conda config --add channels aramislab
+#
+# RUN conda install -y ipython jupyter matplotlib
+#
+# RUN conda install -c aramislab -y ants=2.2.0
+# RUN conda install -y networkx=2.2
+#
+# # RUN conda install -y pyqt=5.6.0
+# RUN conda install -y pyqt=4
+#
+# RUN conda install -y scipy=1.1.0
+# RUN conda install -y sphinx=1.5.1
+# RUN conda install -y traits=4.6.0
+# RUN conda install -y dateutil=2.4.1
+# RUN conda install -y certifi=2018.4.16
+# RUN conda install -y pandas=0.23.4
+# RUN conda install -y patsy=0.4.1
+# RUN conda install -y statsmodels=0.8.0
+# RUN conda install -y nose=1.3.7
+# RUN conda install -y pydot=1.2.3
+# RUN conda install -y traitsui=5.1.0
+# RUN conda install -y numpy=1.14
+# RUN conda install -y nipype=1.1.3
+# RUN conda install -c anaconda -y configparser=3.5.0
+# RUN conda install -y dipy=0.14.0
+# RUN conda install -y nibabel=2.3.0
+# RUN conda install -y mne=0.15
+# RUN conda install -y obspy=1.1.0
+# RUN conda install -y graphviz=2.38.0
+# RUN conda install -c aramislab -y pybids
+# RUN conda install -c anaconda -y configparser=3.5.0
+#RUN conda install -c conda-forge python-dateutil=2.5.3
 
-RUN conda config --add channels conda-forge
-RUN conda config --add channels aramislab
+ADD environment.yml /tmp/environment.yml
+RUN conda env create -f /tmp/environment.yml
 
-RUN conda install -y ipython jupyter matplotlib
+# Pull the environment name out of the environment.yml
+RUN echo "source activate $(head -1 /tmp/environment.yml | cut -d' ' -f2)" > ~/.bashrc
+ENV PATH "/opt/conda/envs/$(head -1 /tmp/environment.yml | cut -d' ' -f2)"/bin:$PATH
 
-RUN conda install -c aramislab -y ants=2.2.0
-RUN conda install -y networkx=2.2
-
-# RUN conda install -y pyqt=5.6.0
-RUN conda install -y pyqt=4
-
-RUN conda install -y scipy=1.1.0
-RUN conda install -y sphinx=1.5.1
-RUN conda install -y traits=4.6.0
-RUN conda install -y dateutil=2.4.1
-RUN conda install -y certifi=2018.4.16
-RUN conda install -y pandas=0.23.4
-RUN conda install -y patsy=0.4.1
-RUN conda install -y statsmodels=0.8.0
-RUN conda install -y nose=1.3.7
-RUN conda install -y pydot=1.2.3
-RUN conda install -y traitsui=5.1.0
-RUN conda install -y numpy=1.14
-RUN conda install -y nipype=1.1.3
-RUN conda install -c anaconda -y configparser=3.5.0
-RUN conda install -y dipy=0.14.0
-RUN conda install -y nibabel=2.3.0
-RUN conda install -y mne=0.15
-RUN conda install -y obspy=1.1.0
-RUN conda install -y graphviz=2.38.0
-RUN conda install -c aramislab -y pybids
-RUN conda install -c anaconda -y configparser=3.5.0
-RUN conda install -c conda-forge python-dateutil=2.5.3
 RUN conda clean --all --yes
 
 #Make ANTs happy
-ENV ANTSPATH=/opt/conda/bin
+ENV ANTSPATH="/opt/conda/envs/$(head -1 /tmp/environment.yml | cut -d' ' -f2)"/bin
 ## Install Neurodebian
 #RUN apt-get install neurodebian && \
 #    apt-get update
@@ -166,7 +177,7 @@ ENV PATH=/opt/mrtrix3/bin:$PATH
 ENV PYTHONPATH=/opt/mrtrix3/lib:$PYTHONPATH
 
 #BIDS validator
-RUN npm install -g bids-validator
+#RUN npm install -g bids-validator
 
 ENV LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
 # Cleanup
@@ -178,3 +189,19 @@ ENV LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_PA
 
 #ENV BIN_DIR "/usr/local/bin"
 #ENV DISPLAY :0
+
+# ARG BUILD_DATE
+# ARG VCS_REF
+# ARG VERSION
+#
+# #Metadata
+# LABEL org.label-schema.build-date=$BUILD_DATE
+# LABEL org.label-schema.name="Connectome Mapper Ubuntu 16.04"
+# LABEL org.label-schema.description="Computing environment of the Connectome Mapper BIDS App based on Ubuntu 16.04."
+# LABEL org.label-schema.url="https://connectome-mapper-3.readthedocs.io"
+# LABEL org.label-schema.vcs-ref=$VCS_REF
+# LABEL org.label-schema.vcs-url="https://bitbucket.org/sinergiaconsortium/connectomemapper-ubuntu16.04"
+# LABEL org.label-schema.version=$VERSION
+# LABEL org.label-schema.maintainer="Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>"
+# LABEL org.label-schema.vendor="Connectomics Lab, Centre Hospitalier Universitaire Vaudois (CHUV), Lausanne, Switzerland"
+# LABEL org.label-schema.schema-version="1.0"
