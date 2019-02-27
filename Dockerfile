@@ -31,7 +31,7 @@ ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin
 ENV PATH $ANTSPATH:$PATH
 RUN export
 
-# Create entrypoint script that simulated a X server - required by traitsui
+# Create entrypoint script that simulated a X server - required by traitsui?
 # try to change freesurfer home permission to copy the license
 RUN echo '#! /bin/bash \n chown "$(id -u):$(id -g)" /opt/freesurfer \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
 

@@ -80,7 +80,7 @@ def main(**extra_args):
           author= 'CHUV-EPFL',
           author_email='info@connectomics.org',
           url='http://www.connectomics.org/',
-          scripts = glob('scripts/*'),
+          scripts = glob('scripts/bidsappmanager/*'),
           license='Modified BSD License',
           packages = packages,
         classifiers = [c.strip() for c in """\

@@ -28,10 +28,7 @@ from cmp.stages.common import Stage
 # Imports for processing
 import nibabel as nib
 import numpy as np
-import scipy.io as sio
-import statsmodels.api as sm
-from scipy import signal
-from obspy.signal.detrend import polynomial
+
 
 class FunctionalMRIConfig(HasTraits):
     smoothing = Float(0.0)
@@ -110,6 +107,7 @@ class nuisance_regression(BaseInterface):
     output_spec = nuisance_OutputSpec
 
     def _run_interface(self,runtime):
+        import scipy.io as sio
         #regress out nuisance signals (WM, CSF, movements) through GLM
 
         # Output from previous preprocessing step
@@ -237,6 +235,7 @@ class nuisance_regression(BaseInterface):
             X = move
             print('> Detrend motion average signals')
 
+        import statsmodels.api as sm
         X = sm.add_constant(X)
         # print('Shape X GLM')
         # print(X.shape)
@@ -299,6 +298,8 @@ class Detrending(BaseInterface):
         new_data_det = data.copy()
         gm = nib.load(self.inputs.gm_file[0]).get_data().astype( np.uint32 )
 
+        from scipy import signal
+
         for index,value in np.ndenumerate( gm ):
             if value == 0:
                 continue
@@ -312,6 +313,7 @@ class Detrending(BaseInterface):
         if self.inputs.mode == 'quadratic':
             print("Quadratic detrending")
             print("=================")
+            from obspy.signal.detrend import polynomial
 
             # GLM: regress out nuisance covariates
             new_data_det2 = new_data_det.copy()

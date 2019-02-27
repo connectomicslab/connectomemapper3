@@ -36,5 +36,5 @@ def get():
     # p.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation',
     #                    action='store_true')
     p.add_argument('-v', '--version', action='version',
-                        version='BIDS-App example version {}'.format(__version__))
+                        version='BIDS-App Connectome Mapper version {}'.format(__version__))
     return p

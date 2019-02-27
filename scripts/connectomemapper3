@@ -96,7 +96,7 @@ if __name__ == "__main__":
         project.output_directory = os.path.abspath(sys.argv[2])
         project.subjects = ['%s' % sys.argv[3]]
         project.subject = '%s' % sys.argv[3]
-
+        
         try:
             bids_layout = BIDSLayout(project.base_directory)
         except:
