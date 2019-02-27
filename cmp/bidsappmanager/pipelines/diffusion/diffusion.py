@@ -276,6 +276,6 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 print stage.name
                 print stage.stage_dir
 
-        self.fill_stages_outputs()
+        #self.fill_stages_outputs()
 
         return valid_inputs

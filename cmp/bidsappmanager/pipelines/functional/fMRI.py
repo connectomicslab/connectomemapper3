@@ -240,6 +240,6 @@ class fMRIPipelineUI(fMRIPipeline):
         else:
             self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
 
-        self.fill_stages_outputs()
+        #self.fill_stages_outputs()
 
         return valid_inputs

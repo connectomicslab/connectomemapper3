@@ -265,7 +265,7 @@ class fMRIPipeline(Pipeline):
         else:
             self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
 
-        self.fill_stages_outputs()
+        #self.fill_stages_outputs()
 
         return valid_inputs
 
@@ -318,7 +318,7 @@ class fMRIPipeline(Pipeline):
         else:
             flow.run()
 
-        self.fill_stages_outputs()
+        #self.fill_stages_outputs()
 
         iflogger.info("**** Processing finished ****")
 

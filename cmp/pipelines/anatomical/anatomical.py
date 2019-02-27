@@ -221,7 +221,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         #         print stage.name
         #         print stage.stage_dir
 
-        self.fill_stages_outputs()
+        #self.fill_stages_outputs()
 
         return valid_inputs
 
@@ -517,7 +517,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             anat_flow.run()
 
-        self.fill_stages_outputs()
+        #self.fill_stages_outputs()
 
         # Clean undesired folders/files
         # rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']

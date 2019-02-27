@@ -1,4 +1,4 @@
-name: py27-env
+name: py27-test
 
 channels:
 - conda-forge

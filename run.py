@@ -126,12 +126,12 @@ def clean_cache(bids_root):
         except:
             pass
 
-    for d in glob(os.path.join(bids_root,'matplotlib*')):
-        print('... DEL: {}'.format(d))
-        try:
-            shutil.rmtree(d)
-        except:
-            pass
+    # for d in glob(os.path.join(bids_root,'matplotlib*')):
+    #     print('... DEL: {}'.format(d))
+    #     try:
+    #         shutil.rmtree(d)
+    #     except:
+    #         pass
 
     # for d in glob(os.path.join(bids_root,'xvfb-run.*')):
     #     print('... DEL: {}'.format(d))
