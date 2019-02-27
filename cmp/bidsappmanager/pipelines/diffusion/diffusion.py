@@ -129,7 +129,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
             # self.global_conf.subjects = ['sub-'+str(subj) for subj in layout.get_subjects()]
             self.global_conf.modalities = [str(mod) for mod in layout.get_modalities()]
             # mods = layout.get_modalities()
-            types = layout.get_types()
+            types = layout.get_modalities()
             # print "Available modalities :"
             # for mod in mods:
             #     print "-%s" % mod

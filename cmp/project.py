@@ -27,9 +27,9 @@ from bids import BIDSLayout
 
 # Own imports
 #import pipelines.diffusion.diffusion as Diffusion_pipeline
-from pipelines.functional import fMRI as FMRI_pipeline
-from pipelines.diffusion import diffusion as Diffusion_pipeline
-from pipelines.anatomical import anatomical as Anatomical_pipeline
+from cmp.pipelines.functional import fMRI as FMRI_pipeline
+from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
+from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 
 ##from cmp.configurator.project import fix_dataset_directory_in_pickles, remove_aborded_interface_pickles
 

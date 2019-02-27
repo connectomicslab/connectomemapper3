@@ -19,15 +19,18 @@ FROM sebastientourbier/connectomemapper-ubuntu16.04:latest
 WORKDIR /app/connectomemapper3
 ADD . /app/connectomemapper3
 
-#RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
+RUN export
 
-RUN python setup.py install
+#RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
+RUN /bin/bash -c ". activate py27-test && \
+    python setup.py install"
+
 # ENV ANTSPATH=/opt/conda/bin
 # ENV PATH=$ANTSPATH:$PATH
 
 # Create entrypoint script that simulated a X server - required by traitsui
 # try to change freesurfer home permission to copy the license
-RUN echo '#! /bin/sh \n chown "$(id -u):$(id -g)" /opt/freesurfer \n xvfb-run -a python "/app/connectomemapper3/run.py" "$@" \n rm -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
+RUN echo '#! /bin/bash \n chown "$(id -u):$(id -g)" /opt/freesurfer \n . activate py27-test \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed

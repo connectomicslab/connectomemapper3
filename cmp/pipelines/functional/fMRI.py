@@ -201,21 +201,20 @@ class fMRIPipeline(Pipeline):
         print("... t2_file : %s" % t2_file)
 
         # mods = layout.get_modalities()
-        types = layout.get_types()
+        #types = layout.get_modalities()
         # print("Available modalities :")
         # for typ in types:
         #     print("-%s" % typ)
 
-        for typ in types:
-            if typ == 'T1w' and os.path.isfile(t1_file):
-                # print("%s available" % typ)
-                t1_available = True
-            if typ == 'T2w' and os.path.isfile(t2_file):
-                # print("%s available" % typ)
-                t2_available = True
-            if typ == 'bold' and os.path.isfile(fmri_file):
-                # print("%s available" % typ)
-                fMRI_available = True
+        if os.path.isfile(t1_file):
+            # print("%s available" % typ)
+            t1_available = True
+        if os.path.isfile(t2_file):
+            # print("%s available" % typ)
+            t2_available = True
+        if os.path.isfile(fmri_file):
+            # print("%s available" % typ)
+            fMRI_available = True
 
         # print('fMRI :',fMRI_available)
         # print('t1 :',t1_available)

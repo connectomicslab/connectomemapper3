@@ -10,8 +10,6 @@
 import os
 import shutil
 import datetime
-from cmp.pipelines.common import *
-
 
 from traits.api import *
 
@@ -20,7 +18,6 @@ import nipype.interfaces.io as nio
 from nipype.interfaces.utility import Merge
 from nipype import config, logging
 from nipype.caching import Memory
-from pyface.api import ImageResource
 
 import nibabel as nib
 
@@ -173,7 +170,7 @@ class DiffusionPipeline(Pipeline):
             # self.global_conf.subjects = ['sub-'+str(subj) for subj in layout.get_subjects()]
             self.global_conf.modalities = [str(mod) for mod in layout.get_modalities()]
             # mods = layout.get_modalities()
-            types = layout.get_types()
+            #types = layout.get_modalities()
             # print "Available modalities :"
             # for mod in mods:
             #     print "-%s" % mod
@@ -184,11 +181,11 @@ class DiffusionPipeline(Pipeline):
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
-                            if self.global_conf.dmri_bids_acq in file:
-                                dwi_file = file
+                            if self.global_conf.dmri_bids_acq in file.filename:
+                                dwi_file = os.path.join(file.dirname,file.filename)
                                 break
                     else:#TODO: Better parsing of multiple runs
-                        dwi_file = files[0].filename
+                        dwi_file = os.path.join(files[0].dirname,files[0].filename)
                         # print(dwi_file)
                 else:
                     print("ERROR : Diffusion image not found for subject %s."%(subjid))
@@ -198,11 +195,11 @@ class DiffusionPipeline(Pipeline):
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
-                            if self.global_conf.dmri_bids_acq in file:
-                                bval_file = file
+                            if self.global_conf.dmri_bids_acq in file.filename:
+                                bval_file = os.path.join(file.dirname,file.filename)
                                 break
                     else:#TODO: Better parsing of multiple runs
-                        bval_file = files[0].filename
+                        bval_file = os.path.join(files[0].dirname,files[0].filename)
                         # print(bval_file)
                 else:
                     print("ERROR : Diffusion bval image not found for subject %s."%(subjid))
@@ -212,11 +209,11 @@ class DiffusionPipeline(Pipeline):
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
-                            if self.global_conf.dmri_bids_acq in file:
-                                bvec_file = file
+                            if self.global_conf.dmri_bids_acq in file.filename:
+                                bvec_file = os.path.join(file.dirname,file.filename)
                                 break
                     else:#TODO: Better parsing of multiple runs
-                        bvec_file = files[0].filename
+                        bvec_file = os.path.join(files[0].dirname,files[0].filename)
                         # print(bvec_file)
                 else:
                     print("ERROR : Diffusion bvec image not found for subject %s."%(subjid))
@@ -228,11 +225,11 @@ class DiffusionPipeline(Pipeline):
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
-                            if self.global_conf.dmri_bids_acq in file:
-                                dwi_file = file
+                            if self.global_conf.dmri_bids_acq in file.filename:
+                                dwi_file = os.path.join(file.dirname,file.filename)
                                 break
                     else:#TODO: Better parsing of multiple runs
-                        dwi_file = files[0].filename
+                        dwi_file = os.path.join(files[0].dirname,files[0].filename)
                         # print(dwi_file)
                 else:
                     print("ERROR : Diffusion image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
@@ -242,11 +239,11 @@ class DiffusionPipeline(Pipeline):
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
-                            if self.global_conf.dmri_bids_acq in file:
-                                bval_file = file
+                            if self.global_conf.dmri_bids_acq in file.filename:
+                                bval_file = os.path.join(file.dirname,file.filename)
                                 break
                     else:#TODO: Better parsing of multiple runs
-                        bval_file = files[0].filename
+                        bval_file = os.path.join(files[0].dirname,files[0].filename)
                         # print bval_file
                 else:
                     print("ERROR : Diffusion bval image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
@@ -256,11 +253,11 @@ class DiffusionPipeline(Pipeline):
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
-                            if self.global_conf.dmri_bids_acq in file:
-                                bvec_file = file
+                            if self.global_conf.dmri_bids_acq in file.filename:
+                                bvec_file = os.path.join(file.dirname,file.filename)
                                 break
                     else:#TODO: Better parsing of multiple runs
-                        bvec_file = files[0].filename
+                        bvec_file = os.path.join(files[0].dirname,files[0].filename)
                         # print bvec_file
                 else:
                     print("ERROR : Diffusion bvec image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
@@ -271,10 +268,9 @@ class DiffusionPipeline(Pipeline):
             print("... bvecs_file : %s" % bvec_file)
             print("... bvals_file : %s" % bval_file)
 
-            for typ in types:
-                if typ == 'dwi' and os.path.isfile(dwi_file):
-                    # print("%s available" % typ)
-                    diffusion_available = True
+            if os.path.isfile(dwi_file):
+                # print("%s available" % typ)
+                diffusion_available = True
 
         except:
             print("Invalid BIDS dataset. Please see documentation for more details.")

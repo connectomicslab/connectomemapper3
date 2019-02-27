@@ -172,7 +172,7 @@ class fMRIPipelineUI(fMRIPipeline):
         print "t2_file : %s" % t2_file
 
         # mods = layout.get_modalities()
-        types = layout.get_types()
+        types = layout.get_modalities()
         print "Available modalities :"
         for typ in types:
             print "-%s" % typ

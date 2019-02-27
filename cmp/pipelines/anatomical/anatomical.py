@@ -155,7 +155,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         t1_available = False
         valid_inputs = False
 
-        types = layout.get_types()
+        types = layout.get_modalities()
 
         subjid = self.subject.split("-")[1]
 
@@ -163,26 +163,25 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
             files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz')
             if len(files) > 0:
-                T1_file = files[0].filename
-                # print T1_file
+                T1_file = os.path.join(files[0].dirname,files[0].filename)
+                print T1_file
             else:
                 return
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
-                T1_file = files[0].filename
-                # print T1_file
+                T1_file = os.path.join(files[0].dirname,files[0].filename)
+                print T1_file
             else:
                 return
 
         print("> Looking in %s for...." % self.base_directory)
         print("... t1_file : %s" % T1_file)
 
-        for typ in types:
-            if typ == 'T1w' and os.path.isfile(T1_file):
-                # print("%s available" % typ)
-                t1_available = True
+        if os.path.isfile(T1_file):
+            # print("%s available" % typ)
+            t1_available = True
 
         if t1_available:
             #Copy diffusion data to derivatives / cmp  / subject / dwi
@@ -197,7 +196,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             valid_inputs = True
             input_message = 'Inputs check finished successfully. \nOnly anatomical data (T1) available.'
         else:
-            input_message = 'Error during inputs check. No anatomical data available in folder '+os.path.join(self.base_directory,self.subject)+'/anat/!'
+            if self.global_conf.subject_session == '':
+                input_message = 'Error during inputs check. No anatomical data available in folder '+os.path.join(self.base_directory,self.subject)+'/anat/!'
+            else:
+                input_message = 'Error during inputs check. No anatomical data available in folder '+os.path.join(self.base_directory,self.subject,self.global_conf.subject_session)+'/anat/!'
 
         #diffusion_imaging_model = diffusion_imaging_model[0]
 

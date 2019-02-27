@@ -90,7 +90,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         t1_available = False
         valid_inputs = False
 
-        types = layout.get_types()
+        types = layout.get_modalities()
 
         if self.global_conf.subject_session == '':
             T1_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.nii.gz')
