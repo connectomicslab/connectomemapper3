@@ -26,3 +26,4 @@ dependencies:
     - datalad_neuroimaging==0.2.0
     - apptools==4.4.0
     - statsmodels==0.9.0
+    - scipy==1.2.1

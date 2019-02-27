@@ -61,21 +61,6 @@ RUN conda update conda && \
 # RUN conda install -c anaconda -y configparser=3.5.0
 #RUN conda install -c conda-forge python-dateutil=2.5.3
 
-ADD environment.yml /tmp/environment.yml
-RUN conda env create -f /tmp/environment.yml
-
-# Pull the environment name out of the environment.yml
-RUN echo "source activate $(head -1 /tmp/environment.yml | cut -d' ' -f2)" > ~/.bashrc
-ENV PATH "/opt/conda/envs/$(head -1 /tmp/environment.yml | cut -d' ' -f2)"/bin:$PATH
-
-RUN conda clean --all --yes
-
-#Make ANTs happy
-ENV ANTSPATH="/opt/conda/envs/$(head -1 /tmp/environment.yml | cut -d' ' -f2)"/bin
-## Install Neurodebian
-#RUN apt-get install neurodebian && \
-#    apt-get update
-
 # Installing freesurfer
 RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
     --exclude='freesurfer/trctrain' \
@@ -123,6 +108,12 @@ ENV PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
 ## Install FSL from Neurodebian
 #RUN apt-get install fsl-complete
 
+# Installing Neurodebian packages (FSL, AFNI)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends fsl-core=5.0.9-5~nd16.04+1 fsl-mni152-templates=5.0.7-2 fsl-5.0-eddy-nonfree
+
+RUN apt-get install -y --no-install-recommends afni=16.2.07~dfsg.1-5~nd16.04+1
+
 # Mark a package as being manually installed, which will
 # prevent the package from being automatically removed if no other packages
 # depend on it
@@ -131,12 +122,6 @@ RUN apt-mark manual fsl-5.0-core
 #RUN apt-mark manual fsl-mni152-templates
 RUN apt-mark manual afni
 RUN apt-mark manual ants
-
-# Installing Neurodebian packages (FSL, AFNI)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends fsl-core=5.0.9-4~nd16.04+1 fsl-mni152-templates=5.0.7-2 fsl-5.0-eddy-nonfree
-
-RUN apt-get install -y --no-install-recommends afni=16.2.07~dfsg.1-5~nd16.04+1
 
 #Make FSL/AFNI happy
 ENV FSLDIR=/usr/share/fsl/5.0 \
@@ -157,6 +142,17 @@ ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
 #ENV ANTSPATH=/usr/lib/ants
 #ENV PATH=$ANTSPATH:$PATH
 
+# Pull the environment name out of the environment.yml
+ADD environment.yml /app/environment.yml
+RUN conda env create -f /app/environment.yml
+
+RUN conda clean --all --yes
+
+#Make ANTs happy
+ENV CONDA_ENV py27-test
+ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin
+ENV PATH $ANTSPATH:$PATH
+
 ## Install MRTRIX
 
 # Additional dependencies for MRtrix3 compilation
@@ -175,6 +171,10 @@ RUN git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
 # Setup environment variables for MRtrix3
 ENV PATH=/opt/mrtrix3/bin:$PATH
 ENV PYTHONPATH=/opt/mrtrix3/lib:$PYTHONPATH
+
+## Install Neurodebian
+#RUN apt-get install neurodebian && \
+#    apt-get update
 
 #BIDS validator
 #RUN npm install -g bids-validator
