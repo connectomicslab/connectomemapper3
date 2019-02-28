@@ -40,7 +40,7 @@ from cmp.info import __version__
 import cmp.bidsappmanager.project as project
 
 global modal_width
-modal_width = 300
+modal_width = 400
 
 global style_sheet
 style_sheet = '''

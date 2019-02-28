@@ -1652,14 +1652,14 @@ class ProjectHandlerV2(Handler):
 
             else:
                 print(">> Loaded reference anatomical config file :  %s"%loaded_project.anat_config_file)
-                if datalad_is_available:
-                    print('... Datalad get anatomical config file : {}'.format(loaded_project.anat_config_file))
-                    cmd = 'datalad run -m "Get reference anatomical config file" bash -c "datalad get code/ref_anatomical_config.ini"'
-                    try:
-                        print('... cmd: {}'.format(cmd))
-                        core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
-                    except:
-                        print("    ERROR: Failed to get file")
+                # if datalad_is_available:
+                #     print('... Datalad get anatomical config file : {}'.format(loaded_project.anat_config_file))
+                #     cmd = 'datalad run -m "Get reference anatomical config file" bash -c "datalad get code/ref_anatomical_config.ini"'
+                #     try:
+                #         print('... cmd: {}'.format(cmd))
+                #         core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
+                #     except:
+                #         print("    ERROR: Failed to get file")
 
                 anat_conf_loaded = anat_load_config(self.anat_pipeline, loaded_project.anat_config_file)
 
@@ -1790,14 +1790,14 @@ class ProjectHandlerV2(Handler):
                 else:
                     print(">> Loaded reference diffusion config file :  %s"%loaded_project.dmri_config_file)
 
-                    if datalad_is_available:
-                        print('... Datalad get reference diffusion config file : {}'.format(loaded_project.anat_config_file))
-                        cmd = 'datalad run -m "Get reference anatomical config file" bash -c "datalad get code/ref_diffusion_config.ini"'
-                        try:
-                            print('... cmd: {}'.format(cmd))
-                            core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
-                        except:
-                            print("    ERROR: Failed to get file")
+                    # if datalad_is_available:
+                    #     print('... Datalad get reference diffusion config file : {}'.format(loaded_project.anat_config_file))
+                    #     cmd = 'datalad run -m "Get reference anatomical config file" bash -c "datalad get code/ref_diffusion_config.ini"'
+                    #     try:
+                    #         print('... cmd: {}'.format(cmd))
+                    #         core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
+                    #     except:
+                    #         print("    ERROR: Failed to get file")
 
                     dmri_conf_loaded = dmri_load_config(self.dmri_pipeline, loaded_project.dmri_config_file)
                     # TODO: check if diffusion imaging model (DSI/DTI/HARDI) is correct/valid.
@@ -1828,14 +1828,14 @@ class ProjectHandlerV2(Handler):
                     else:
                         print("Loaded reference fMRI config file :  %s"%loaded_project.fmri_config_file)
 
-                        if datalad_is_available:
-                            print('... Datalad get reference fMRI config file : {}'.format(loaded_project.anat_config_file))
-                            cmd = 'datalad run -m "Get reference fMRI config file" bash -c "datalad get code/ref_fMRI_config.ini"'
-                            try:
-                                print('... cmd: {}'.format(cmd))
-                                core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
-                            except:
-                                print("    ERROR: Failed to get file")
+                        # if datalad_is_available:
+                        #     print('... Datalad get reference fMRI config file : {}'.format(loaded_project.anat_config_file))
+                        #     cmd = 'datalad run -m "Get reference fMRI config file" bash -c "datalad get code/ref_fMRI_config.ini"'
+                        #     try:
+                        #         print('... cmd: {}'.format(cmd))
+                        #         core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
+                        #     except:
+                        #         print("    ERROR: Failed to get file")
 
                         fmri_conf_loaded = fmri_load_config(self.fmri_pipeline, loaded_project.fmri_config_file)
 

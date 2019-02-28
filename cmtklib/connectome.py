@@ -895,23 +895,26 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             # and end roi and not going out of the volume
             idx_valid = np.where( (fiberlabels[:,0] == int(u)) & (fiberlabels[:,1] == int(v)) )[0]
 
-            print "mmapdata size : %g " % len(mmapdata.items())
+            print("mmapdata size : %g " % len(mmapdata.items()))
             for k,vv in mmapdata.items():
                 val = []
 
-                print "Processing %s map..." % k
+                print("Processing %s map..." % k)
+                print(vv[1])
                 for i in idx_valid:
                     # retrieve indices
                     try:
+                        print(h[i])
                         idx2 = (h[i]/ vv[1] ).astype( np.uint32 )
                         #print "idx2 : ",idx2
                         val.append( vv[0][idx2[:,0],idx2[:,1],idx2[:,2]] )
                     except IndexError, e:
-                        print "Index error occured when trying extract scalar values for measure", k
-                        print "--> Discard fiber with index", i, "Exception: ", e
-                        print "----"
+                        print("Index error occured when trying extract scalar values for measure", k)
+                        print("--> Discard fiber with index", i, "Exception: ", e)
+                        print("----")
 
                 da = np.concatenate( val )
+                da
                 di[k + '_mean'] = float(da.mean())
                 di[k + '_std'] = float(da.std())
                 di[k + '_median'] = float(np.median(da))
