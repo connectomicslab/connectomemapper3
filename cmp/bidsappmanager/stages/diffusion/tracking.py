@@ -38,7 +38,7 @@ class MRtrix_tracking_configUI(MRtrix_tracking_config):
                         VGroup(
                             Item('use_act',label='Use ACT based on Freesurfer parcellation'),
                             Item('crop_at_gmwmi',visible_when='use_act'),
-                            Item('backtrack',visible_when='use_act'),
+                            Item('backtrack',visible_when='use_act',enabled_when='tracking_mode=="Probabilistic"'),
                             Item('seed_from_gmwmi',visible_when='use_act'),
                             label='Anatomically-Constrained Tractography (ACT)'
                             )

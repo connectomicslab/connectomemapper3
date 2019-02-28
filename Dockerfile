@@ -42,7 +42,7 @@ RUN chmod 775 /app/run_connectomemapper3.sh
 RUN chmod 777 /opt/freesurfer
 
 #COPY version /version
-#WORKDIR /opt/conda/bin
+WORKDIR /tmp
 ENTRYPOINT ["/app/run_connectomemapper3.sh"]
 
 ARG BUILD_DATE

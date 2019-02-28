@@ -425,7 +425,7 @@ class PreprocessingStage(Stage):
                     (fs_mriconvert_wm_mask,outputnode,[('out_file','wm_mask_file')])
                     ])
 
-        fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='niigz',resample_type='nearest'),name="ROIs_resample",iterfield=['in_file'])
+        fs_mriconvert_ROIs = pe.MapNode(interface=fs.MRIConvert(out_type='niigz',resample_type='nearest'),iterfield=['in_file'],name="ROIs_resample")
         fs_mriconvert_ROIs.inputs.vox_size = self.config.resampling
         flow.connect([
                     (mr_convert_roi_volumes,fs_mriconvert_ROIs,[('converted_files','in_file')]),
@@ -678,7 +678,7 @@ class PreprocessingStage(Stage):
                     (processing_input,pve_extractor_from_5tt,[('T1','ref_image')]),
                     ])
 
-        fs_mriconvert_PVEs = pe.MapNode(interface=fs.MRIConvert(out_type='niigz'),name="PVEs_resample",iterfield=['in_file'])
+        fs_mriconvert_PVEs = pe.MapNode(interface=fs.MRIConvert(out_type='niigz'),iterfield=['in_file'],name="PVEs_resample")
         fs_mriconvert_PVEs.inputs.vox_size = self.config.resampling
         fs_mriconvert_PVEs.inputs.resample_type = self.config.interpolation
         flow.connect([
