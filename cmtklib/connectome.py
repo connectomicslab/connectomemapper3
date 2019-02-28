@@ -580,20 +580,23 @@ def mrtrixcmat(intck, fod_file, roi_volumes, parcellation_scheme, compute_curvat
 def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvature=True, additional_maps={}, output_types=['gPickle'], atlas_info = {}):
     """ Create the connection matrix for each resolution using fibers and ROIs. """
 
+    print("========================")
+    print("> Creation of connectome maps")
+
     # create the endpoints for each fibers
     en_fname  = 'endpoints.npy'
     en_fnamemm  = 'endpointsmm.npy'
     #ep_fname  = 'lengths.npy'
     curv_fname  = 'meancurvature.npy'
     #intrk = op.join(gconf.get_cmp_fibers(), 'streamline_filtered.trk')
-    print('Opening file :' + intrk)
+    print('... tractogram :' + intrk)
     fib, hdr    = nibabel.trackvis.read(intrk, False)
 
     #print "Header trackvis : ",hdr
     #print "Header trackvis id_string : ",hdr['id_string']
     #print "Fibers trackvis : ",fib
 
-    print('Parcellation_scheme : %s' % parcellation_scheme)
+    print('... parcellation : %s' % parcellation_scheme)
 
     if parcellation_scheme != "Custom":
         if parcellation_scheme != "Lausanne2018":
@@ -676,10 +679,10 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         #print("Open the corresponding ROI")
         for vol in roi_volumes:
-            print parkey
+            #print parkey
             if parkey in vol:
                 roi_fname = vol
-                print roi_fname
+                #print roi_fname
         #roi_fname = roi_volumes[r]
         #r += 1
         roi       = nibabel.load(roi_fname)
@@ -697,20 +700,21 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         origin = np.matrix(roi.affine[:3,3]).T
 
         # Create the matrix
+        print(">> Create the connection matrix (%s rois)" % parval['number_of_regions'])
+
         nROIs = parval['number_of_regions']
-        print("Create the connection matrix (%s rois)" % nROIs)
         G     = nx.Graph()
 
         # add node information from parcellation
         gp = nx.read_graphml(parval['node_information_graphml'])
-        n = len(gp)
+        n_nodes = len(gp)
         pc=-1
-        i=-1
+        cnt=-1
         for u,d in gp.nodes(data=True):
 
             # Percent counter
-            i+=1
-            pcN = int(round( float(100*i)/len(gp) ))
+            cnt+=1
+            pcN = int(round( float(100*cnt)/n_nodes ))
             if pcN > pc and pcN%10 == 0:
                 pc = pcN
                 print('%4.0f%%' % (pc))
@@ -744,11 +748,9 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         t = [c[0] for c in fib]
         h = np.array(t, dtype = np.object )
 
-
-
         mmap = additional_maps
         mmapdata = {}
-        print('> Maps to be processed :')
+        print('>> Maps to be processed :')
         for k,v in mmap.items():
             print("     - %s map" % k)
             da = nibabel.load(v)
@@ -756,56 +758,29 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         # print("mmapdata size : %g " % len(mmapdata.items()))
 
-        def voxmm2vox(x,y,z,affine_vox_to_world,origin):
-            return np.rint( np.linalg.solve(affine_vox_to_world, (np.matrix([x,y,z]).T-origin) ) )
-
-        def voxmm2vox2(x,y,z,affine_world_to_vox,origin):
-            return np.rint( affine_world_to_vox * (np.matrix([x,y,z]).T) - origin )
-
-        def voxmm2ras(x,y,z,affine_vox_to_world,origin):
-            return np.rint( affine_vox_to_world * np.matrix([x,y,z]).T + origin)
-
-        def voxmm2vox(x,y,z,voxelSize,origin):
-           return np.rint( np.divide((np.matrix([x,y,z]).T-np.matrix(origin).T),np.matrix(voxelSize).T) )
-
         print("************************")
 
-        print("Create the connection matrix (%s fibers)" % n)
+        print(">> Create the connection matrix (%s fibers)" % n)
         pc = -1
         for i in range(n):  # n: number of fibers
 
             # Percent counter
             pcN = int(round( float(100*i)/n ))
-            if pcN > pc and pcN%1 == 0:
+            if pcN > pc and pcN%10 == 0:
                 pc = pcN
                 print('%4.0f%%' % (pc))
 
             # ROI start => ROI end
             try:
-                # startvox = voxmm2vox2(endpointsmm[i, 0, 0], endpointsmm[i, 0, 1], endpointsmm[i, 0, 2], affine_vox_to_world, origin)
-                # print "Start vox :",startvox
-                # startROI = int(roiData[startvox[0], startvox[1], startvox[2]]) # endpoints from create_endpoints_array
-
-                # endvox = voxmm2vox2(endpointsmm[i, 1, 0], endpointsmm[i, 1, 1], endpointsmm[i, 1, 2], affine_vox_to_world, origin)
-                # print "End vox :",endvox
-                # endROI   = int(roiData[endvox[0], endvox[1], endvox[2]])
-                #print "origin: ",origin[0],",",origin[1],",",origin[2]
-
                 startvox = np.zeros((3,1)).astype(int)
                 startvox[0]=np.int(endpoints[i, 0, 0])
                 startvox[1]=np.int(endpoints[i, 0, 1])
                 startvox[2]=np.int(endpoints[i, 0, 2])
-                # startvox[0]=np.int(-(endpoints[i, 0, 0]+origin[0]))
-                # startvox[1]=np.int(-(endpoints[i, 0, 1]+origin[1]))
-                # startvox[2]=np.int(-endpoints[i, 0, 2]+origin[2])
 
                 endvox = np.zeros((3,1)).astype(int)
                 endvox[0]=np.int(endpoints[i, 1, 0])
                 endvox[1]=np.int(endpoints[i, 1, 1])
                 endvox[2]=np.int(endpoints[i, 1, 2])
-                # endvox[0]=np.int(-(endpoints[i, 1, 0]+origin[0]))
-                # endvox[1]=np.int(-(endpoints[i, 1, 1]+origin[1]))
-                # endvox[2]=np.int(-endpoints[i, 1, 2]+origin[2])
 
                 ##print "start point : ",startvox
                 ##print "end point : ",endvox
@@ -814,10 +789,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 startROI = int(roiData[startvox[0],startvox[1],startvox[2]]) # endpoints from create_endpoints_array
                 endROI   = int(roiData[endvox[0],endvox[1],endvox[2]])
 
-
-
             except IndexError:
-                print("An index error occured for fiber %s. This means that the fiber start or endpoint is outside the volume. Continue." % i)
+                print("... ERROR: An index error occured for fiber %s. This means that the fiber start or endpoint is outside the volume. Continue." % i)
                 continue
 
             # Filter
@@ -852,8 +825,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             else:
                 G.add_edge(startROI, endROI, fiblist   = [i])
 
-        print("Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis*100.0/n, n) )
-        print("Valid fibers: %i (%f percent)" % (n-dis, 100 - dis*100.0/n) )
+        print("... INFO - Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis*100.0/n, n) )
+        print("... INFO - Valid fibers: %i (%f percent)" % (n-dis, 100 - dis*100.0/n) )
 
         #print "roi : ",roi
         #print "roiData size : ",roiData.size
@@ -932,9 +905,9 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                         #print "idx2 : ",idx2
                         val.append( vv[0][idx2[:,0],idx2[:,1],idx2[:,2]] )
                     except IndexError, e:
-                        print("Index error occured when trying extract scalar values for measure", k)
-                        print("--> Discard fiber with index", i, "Exception: ", e)
-                        print("----")
+                        print("... ERROR - Index error occured when trying extract scalar values for measure", k)
+                        print("... ERROR - Discard fiber with index", i, "Exception: ", e)
+
 
                 da = np.concatenate( val )
                 # print(np.median(da))
@@ -950,7 +923,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         print("************************")
 
-        print("> Save connectivity matrices as :")
+        print(">> Save connectome maps as :")
         # storing network
         if 'gPickle' in output_types:
             print('  - connectome_%s.gpickle' % parkey)
@@ -1023,7 +996,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         np.save(fiberlabels_noorphans_fname, final_fiberlabels_array)
 
         if not streamline_wrote:
-            print("Filtering tractography - keeping only no orphan fibers")
+            print("> Filtering tractography - keeping only no orphan fibers")
             finalfibers_fname = 'streamline_final.trk'
             save_fibers(hdr, fib, finalfibers_fname, final_fibers_idx)
 
