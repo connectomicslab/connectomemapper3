@@ -597,19 +597,19 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
     if parcellation_scheme != "Custom":
         if parcellation_scheme != "Lausanne2018":
-            print "get resolutions from parcellation_scheme"
+            # print "get resolutions from parcellation_scheme"
             resolutions = get_parcellation(parcellation_scheme)
         else:
             resolutions = get_parcellation(parcellation_scheme)
             for parkey, parval in resolutions.items():
                 for vol, graphml in zip(roi_volumes,roi_graphmls):
-                    print parkey
+                    # print parkey
                     if parkey in vol:
                         roi_fname = vol
-                        print roi_fname
+                        # print roi_fname
                     if parkey in graphml:
                         roi_graphml_fname = graphml
-                        print roi_graphml_fname
+                        # print roi_graphml_fname
                 #roi_fname = roi_volumes[r]
                 #r += 1
                 roi       = nibabel.load(roi_fname)
@@ -618,14 +618,14 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 resolutions[parkey]['node_information_graphml'] = op.abspath(roi_graphml_fname)
 
             del roi, roiData
-            print("##################################################")
-            print("Atlas info (Lausanne2018) :")
-            print(resolutions)
-            print("##################################################")
+            # print("##################################################")
+            # print("Atlas info (Lausanne2018) :")
+            # print(resolutions)
+            # print("##################################################")
     else:
-        print "get resolutions from atlas_info: "
+        # print "get resolutions from atlas_info: "
         resolutions = atlas_info
-        print resolutions
+        # print resolutions
 
     #print "resolutions : %s" % resolutions
 
@@ -663,7 +663,9 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         #print("Resolution = "+parkey)
 
-        print roi_volumes
+        print("------------------------")
+        print("Resolution = "+parkey)
+        print("------------------------")
 
         # create empty fiber label array
         fiberlabels = np.zeros( (n, 2) )
@@ -701,7 +703,18 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         # add node information from parcellation
         gp = nx.read_graphml(parval['node_information_graphml'])
+        n = len(gp)
+        pc=-1
+        i=-1
         for u,d in gp.nodes(data=True):
+
+            # Percent counter
+            i+=1
+            pcN = int(round( float(100*i)/len(gp) ))
+            if pcN > pc and pcN%10 == 0:
+                pc = pcN
+                print('%4.0f%%' % (pc))
+
             G.add_node(int(u))
             for key in d:
                 G.node[int(u)][key] = d[key]
@@ -710,7 +723,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             if parcellation_scheme != "Lausanne2018":
                 G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
                 G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_correspondence_id"]) )
-                print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_correspondence_id"]) ))
+                # print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_correspondence_id"]) ))
             else:
                 #if int(u) == 53:
                 #    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
@@ -718,9 +731,12 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_multiscaleID"]) )
                 #if int(u) == 53:
                 #    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-                print "Add node %g - roi volume (2018): %g " % (int(u),np.sum( roiData== int(d["dn_multiscaleID"]) ))
+                # print "Add node %g - roi volume (2018): %g " % (int(u),np.sum( roiData== int(d["dn_multiscaleID"]) ))
                 #if int(u) == 53:
                 #    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+
+
+        print("************************")
 
         dis = 0
 
@@ -728,11 +744,17 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         t = [c[0] for c in fib]
         h = np.array(t, dtype = np.object )
 
+
+
         mmap = additional_maps
         mmapdata = {}
+        print('> Maps to be processed :')
         for k,v in mmap.items():
+            print("     - %s map" % k)
             da = nibabel.load(v)
             mmapdata[k] = (np.nan_to_num(da.get_data()), da.get_header().get_zooms() )
+
+        # print("mmapdata size : %g " % len(mmapdata.items()))
 
         def voxmm2vox(x,y,z,affine_vox_to_world,origin):
             return np.rint( np.linalg.solve(affine_vox_to_world, (np.matrix([x,y,z]).T-origin) ) )
@@ -745,6 +767,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         def voxmm2vox(x,y,z,voxelSize,origin):
            return np.rint( np.divide((np.matrix([x,y,z]).T-np.matrix(origin).T),np.matrix(voxelSize).T) )
+
+        print("************************")
 
         print("Create the connection matrix (%s fibers)" % n)
         pc = -1
@@ -853,8 +877,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         for u,v,d in G.edges(data=True):
             total_fibers += len(d['fiblist'])
             if u != u_old:
-                print("Node %i"%int(u))
-                print(G.node[int(u)])
+                # print("Node %i"%int(u))
+                # print(G.node[int(u)])
                 total_volume += G.node[int(u)]['roi_volume']
             u_old = u
 
@@ -895,16 +919,15 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             # and end roi and not going out of the volume
             idx_valid = np.where( (fiberlabels[:,0] == int(u)) & (fiberlabels[:,1] == int(v)) )[0]
 
-            print("mmapdata size : %g " % len(mmapdata.items()))
             for k,vv in mmapdata.items():
                 val = []
 
-                print("Processing %s map..." % k)
-                print(vv[1])
+                # print("Processing %s map..." % k)
+                #print(vv[1])
                 for i in idx_valid:
                     # retrieve indices
                     try:
-                        print(h[i])
+                        #print(h[i])
                         idx2 = (h[i]/ vv[1] ).astype( np.uint32 )
                         #print "idx2 : ",idx2
                         val.append( vv[0][idx2[:,0],idx2[:,1],idx2[:,2]] )
@@ -914,10 +937,10 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                         print("----")
 
                 da = np.concatenate( val )
-                da
-                di[k + '_mean'] = float(da.mean())
-                di[k + '_std'] = float(da.std())
-                di[k + '_median'] = float(np.median(da))
+                # print(np.median(da))
+                di[k + '_mean'] = da.mean().astype(np.float)
+                di[k + '_std'] = da.std().astype(np.float)
+                di[k + '_median'] = np.median(da).astype(np.float)
                 del da
                 del val
 
@@ -925,8 +948,12 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             for key in di:
                 G[u][v][key] = di[key]
 
+        print("************************")
+
+        print("> Save connectivity matrices as :")
         # storing network
         if 'gPickle' in output_types:
+            print('  - connectome_%s.gpickle' % parkey)
             nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
         if 'mat' in output_types:
             # edges
@@ -941,10 +968,10 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             size_nodes = parval['number_of_regions']
             node_keys = G.nodes(data=True)[0][1].keys()
 
-            print "size_nodes : "
-            print size_nodes
-
-            print "Number of nodes : %i" % len(G)
+            # print "size_nodes : "
+            # print size_nodes
+            #
+            # print "Number of nodes : %i" % len(G)
 
             node_struct = {}
             for node_key in node_keys:
@@ -962,7 +989,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
                     node_n += 1
                 node_struct[node_key] = node_arr
-
+            print('  - connectome_%s.mat' % parkey)
             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
         if 'graphml' in output_types:
             g2 = nx.Graph()
@@ -980,17 +1007,18 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
                 g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
                 g2.node[u_gml]['dn_region'] = d_gml['dn_region']
+                print('  - connectome_%s.graphml' % parkey)
             nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
-        print("Storing final fiber length array")
+        # print("Storing final fiber length array")
         fiberlabels_fname  = 'final_fiberslength_%s.npy' % str(parkey)
         np.save(fiberlabels_fname, final_fiberlength_array)
 
-        print("Storing all fiber labels (with orphans)")
+        # print("Storing all fiber labels (with orphans)")
         fiberlabels_fname  = 'filtered_fiberslabel_%s.npy' % str(parkey)
         np.save(fiberlabels_fname, np.array(fiberlabels, dtype = np.int32), )
 
-        print("Storing final fiber labels (no orphans)")
+        # print("Storing final fiber labels (no orphans)")
         fiberlabels_noorphans_fname  = 'final_fiberlabels_%s.npy' % str(parkey)
         np.save(fiberlabels_noorphans_fname, final_fiberlabels_array)
 
