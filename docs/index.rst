@@ -79,4 +79,5 @@ Contents
    exampleresults
    outputs
    citing
+   contributing
    datalad

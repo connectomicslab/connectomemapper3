@@ -2,9 +2,9 @@
 Connectome Mapper Developer Notes
 =================================
 
-:Authors: Sebastien Tourbier and Adrien Birbaumer
+:Authors: Adrien Birbaumer and Sebastien Tourbier
 :Version: $Revision: 2 $
-:Copyright: Copyright (C) 2009-2019, Brain Communication Pathways Sinergia Consortium, Switzerland.
+:Copyright: Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland.
             This software is distributed under the open-source license Modified BSD.
 
 .. contents::
