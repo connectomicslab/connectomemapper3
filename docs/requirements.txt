@@ -1,0 +1,4 @@
+sphinx-argparse==0.2.5
+traits==4.6.0
+grabbit==0.2.3
+pybids==0.6.5
