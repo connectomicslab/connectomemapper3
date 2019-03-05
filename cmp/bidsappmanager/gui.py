@@ -1442,7 +1442,7 @@ class CMP_QualityControlWindow(HasTraits):
                 self.anat_pipeline.view_mode = 'inspect_outputs_view'
                 for stage in self.anat_pipeline.stages.values():
                     stage.define_inspect_outputs()
-                    print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
+                    # print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
                     if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         self.output_anat_available = True
 
@@ -1450,7 +1450,7 @@ class CMP_QualityControlWindow(HasTraits):
                 self.dmri_pipeline.view_mode = 'inspect_outputs_view'
                 for stage in self.dmri_pipeline.stages.values():
                     stage.define_inspect_outputs()
-                    print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
+                    # print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
                     if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         self.output_dmri_available = True
 
@@ -1458,7 +1458,7 @@ class CMP_QualityControlWindow(HasTraits):
                 self.fmri_pipeline.view_mode = 'inspect_outputs_view'
                 for stage in self.fmri_pipeline.stages.values():
                     stage.define_inspect_outputs()
-                    print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
+                    # print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
                     if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         self.output_fmri_available = True
 
@@ -1769,13 +1769,13 @@ class CMP_MainWindowV2(HasTraits):
             if os.path.isfile(self.project_info.fmri_config_file):
                 print("fMRI config file : %s"%self.project_info.fmri_config_file)
 
-        print(self.anat_pipeline)
-        print(self.dmri_pipeline)
-        print(self.fmri_pipeline)
-
-        print(self.project_info.t1_available)
-        print(self.project_info.dmri_available)
-        print(self.project_info.fmri_available)
+        # print(self.anat_pipeline)
+        # print(self.dmri_pipeline)
+        # print(self.fmri_pipeline)
+        #
+        # print(self.project_info.t1_available)
+        # print(self.project_info.dmri_available)
+        # print(self.project_info.fmri_available)
 
         self.configurator_ui = CMP_ConfiguratorWindow(project_info = self.project_info,
                                                     anat_pipeline=self.anat_pipeline,
@@ -1803,13 +1803,13 @@ class CMP_MainWindowV2(HasTraits):
             if os.path.isfile(self.project_info.fmri_config_file):
                 print("fMRI config file : %s"%self.project_info.fmri_config_file)
 
-        print(self.anat_pipeline)
-        print(self.dmri_pipeline)
-        print(self.fmri_pipeline)
-
-        print(self.project_info.t1_available)
-        print(self.project_info.dmri_available)
-        print(self.project_info.fmri_available)
+        # print(self.anat_pipeline)
+        # print(self.dmri_pipeline)
+        # print(self.fmri_pipeline)
+        #
+        # print(self.project_info.t1_available)
+        # print(self.project_info.dmri_available)
+        # print(self.project_info.fmri_available)
 
         try:
             self.quality_control_ui = CMP_QualityControlWindow(project_info = self.project_info,

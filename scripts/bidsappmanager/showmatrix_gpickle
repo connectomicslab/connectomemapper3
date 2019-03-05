@@ -10,7 +10,7 @@ try:
     import matplotlib.colors as colors
     # import matplotlib
     #matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
-    from matplotlib.pyplot import title, imshow, show, cm, figure, pcolor, colorbar, savefig
+    from matplotlib.pyplot import title, imshow, show, cm, figure, pcolor, colorbar, savefig, hist, plot
 except ImportError:
     print("matplotlib not available. Can not plot matrix")
 
@@ -318,9 +318,9 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
     # scale connectivity for colormap (vmin<=>0, vmax<=>1)
     con_val_scaled = (con - vmin) / vrange
 
-    print "con_val_scaled.shape"
+    print("con_val_scaled.shape")
     con_val_scaled = np.squeeze(con_val_scaled.transpose())
-    print con_val_scaled.shape
+    print(con_val_scaled.shape)
 
     # Finally, we draw the connections
     for pos, (i, j) in enumerate(zip(indices[0], indices[1])):
@@ -404,21 +404,25 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
 
 if __name__ == "__main__":
     if len(sys.argv) == 5 and os.path.exists(sys.argv[2]):
-        print "read %s" % sys.argv[2]
+        print("read %s" % sys.argv[2])
         a=nx.read_gpickle(sys.argv[2])
         bb=nx.to_numpy_matrix(a,weight=sys.argv[3],dtype=np.float64)
 
         if sys.argv[4]=='True':
-            print "set to 1"
+            print("set to 1")
             c=np.zeros(bb.shape)
             c[bb>0] = 1
             b = c
         else:
             b = bb
 
+        print('Min: %d , Max: %d' % (b.min(),b.max()))
+
         if sys.argv[1] == 'matrix':
             figure()
             imshow(b, interpolation='nearest', cmap=cm.inferno, vmin = b.min(), vmax=b.max())
+            figure()
+            hist(b)
             show()
         elif sys.argv[1] == 'circular':
             node_names = []
@@ -433,7 +437,6 @@ if __name__ == "__main__":
 
     elif len(sys.argv) == 6 and os.path.exists(sys.argv[2]):
 
-        print "read %s" % sys.argv[2]
         a=nx.read_gpickle(sys.argv[2])
         bb=nx.to_numpy_matrix(a,weight=sys.argv[3],dtype=np.float64)
 
@@ -445,6 +448,8 @@ if __name__ == "__main__":
         else:
             b = bb
 
+        print('Min: %d , Max: %d' % (b.min(),b.max()))
+
         if sys.argv[1] == 'matrix':
             figure()
             if sys.argv[3] == 'number_of_fibers':
@@ -452,6 +457,8 @@ if __name__ == "__main__":
             else:
                 title("%s"%(sys.argv[5]))
             imshow(b, interpolation='nearest',cmap=cm.inferno, vmin = b.min(), vmax=b.max())
+            # figure()
+            # plot(b[:])
             show()
         elif sys.argv[1] == 'circular':
             node_names = []
@@ -477,6 +484,8 @@ if __name__ == "__main__":
             b = c
         else:
             b = bb
+
+        print('Min: %d , Max: %d' % (b.min(),b.max()))
 
         if sys.argv[1] == 'matrix':
             figure()

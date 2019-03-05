@@ -138,7 +138,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
                 files = layout.get(subject=subjid,suffix='dwi',extensions='.nii.gz')
                 if len(files) > 0:
-                    dwi_file = files[0].filename
+                    dwi_file =  os.path.join(files[0].dirname,files[0].filename)
                     print dwi_file
                 else:
                     error(message="Diffusion image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
@@ -146,7 +146,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
                 files = layout.get(subject=subjid,suffix='dwi',extensions='.bval')
                 if len(files) > 0:
-                    bval_file = files[0].filename
+                    bval_file = os.path.join(files[0].dirname,files[0].filename)
                     print bval_file
                 else:
                     error(message="Diffusion bval image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
@@ -154,7 +154,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
                 files = layout.get(subject=subjid,suffix='dwi',extensions='.bvec')
                 if len(files) > 0:
-                    bvec_file = files[0].filename
+                    bvec_file = os.path.join(files[0].dirname,files[0].filename)
                     print bvec_file
                 else:
                     error(message="Diffusion bvec image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
@@ -164,7 +164,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
                 files = layout.get(subject=subjid,suffix='dwi',extensions='.nii.gz',session=sessid)
                 if len(files) > 0:
-                    dwi_file = files[0].filename
+                    dwi_file = os.path.join(files[0].dirname,files[0].filename)
                     print dwi_file
                 else:
                     error(message="Diffusion image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
@@ -172,7 +172,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
                 files = layout.get(subject=subjid,suffix='dwi',extensions='.bval',session=sessid)
                 if len(files) > 0:
-                    bval_file = files[0].filename
+                    bval_file = os.path.join(files[0].dirname,files[0].filename)
                     print bval_file
                 else:
                     error(message="Diffusion bval image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
@@ -180,7 +180,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
                 files = layout.get(subject=subjid,suffix='dwi',extensions='.bvec',session=sessid)
                 if len(files) > 0:
-                    bvec_file = files[0].filename
+                    bvec_file = os.path.join(files[0].dirname,files[0].filename)
                     print bvec_file
                 else:
                     error(message="Diffusion bvec image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
@@ -191,10 +191,9 @@ class DiffusionPipelineUI(DiffusionPipeline):
             print "bvecs_file : %s" % bvec_file
             print "bvals_file : %s" % bval_file
 
-            for typ in types:
-                if typ == 'dwi' and os.path.isfile(dwi_file):
-                    print "%s available" % typ
-                    diffusion_available = True
+            if os.path.isfile(dwi_file):
+                print "DWI available"
+                diffusion_available = True
 
         except:
             error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
@@ -271,10 +270,10 @@ class DiffusionPipelineUI(DiffusionPipeline):
             print "Missing required inputs."
             error(message="Missing diffusion inputs. Please see documentation for more details.", title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
 
-        for stage in self.stages.values():
-            if stage.enabled:
-                print stage.name
-                print stage.stage_dir
+        # for stage in self.stages.values():
+        #     if stage.enabled:
+        #         print stage.name
+        #         print stage.stage_dir
 
         #self.fill_stages_outputs()
 

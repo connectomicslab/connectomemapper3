@@ -212,11 +212,14 @@ class ConnectomeStage(Stage):
 
     def define_inspect_outputs(self):
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
+
         # print "Stage dir: %s" % self.stage_dir
         if(os.path.exists(con_results_path)):
             # print "con_results_path : %s" % con_results_path
             con_results = pickle.load(gzip.open(con_results_path))
-            self.inspect_outputs_dict['streamline_final'] = ['trackvis',con_results.outputs.streamline_final_file]
+            #print(con_results.inputs)
+
+            self.inspect_outputs_dict['Final tractogram'] = ['trackvis',con_results.outputs.streamline_final_file]
             mat = con_results.outputs.connectivity_matrices
             # print "Conn. matrix : %s" % mat
 
@@ -248,14 +251,28 @@ class ConnectomeStage(Stage):
                         self.inspect_outputs_dict[con_name+' - fiber proportion'] = ["showmatrix_gpickle",layout,mat, "fiber_proportion", "False", self.config.subject+' - '+con_name+' - fiber proportion', map_scale]
                     if any('Normalized fiber density' in m for m in self.config.connectivity_metrics):
                         self.inspect_outputs_dict[con_name+' - normalized fiber density'] = ["showmatrix_gpickle",layout,mat, "normalized_fiber_density", "False", self.config.subject+' - '+con_name+' - normalized fiber density', map_scale]
-                    if any('gFA' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA mean']
-                        self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",layout,mat, "FA_median", "False",self.config.subject+' - '+con_name+' - gFA median']
-                        self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",layout,mat, "FA_std", "False", self.config.subject+' - '+con_name+' - gFA std']
-                    if any('ADC' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - ADC mean'] = ["showmatrix_gpickle",layout,mat, "ADC_mean", "False", self.config.subject+' - '+con_name+' - ADC mean']
-                        self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",layout,mat, "ADC_median", "False", self.config.subject+' - '+con_name+' - ADC median']
-                        self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",layout,mat, "ADC_std", "False", self.config.subject+' - '+con_name+' - ADC std']
+
+                    if len(con_results.inputs['additional_maps']) > 0:
+                        self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_mean", "False", self.config.subject+' - '+con_name+' - SHORE gFA mean']
+                        self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_median", "False", self.config.subject+' - '+con_name+' - SHORE gFA median']
+                        self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_std", "False", self.config.subject+' - '+con_name+' - SHORE gFA std']
+
+                        self.inspect_outputs_dict[con_name+' - MSD mean'] = ["showmatrix_gpickle",layout,mat, "shore_msd_mean", "False", self.config.subject+' - '+con_name+' - SHORE MSD mean']
+                        self.inspect_outputs_dict[con_name+' - MSD median'] = ["showmatrix_gpickle",layout,mat, "shore_msd_median", "False", self.config.subject+' - '+con_name+' - SHORE MSD median']
+                        self.inspect_outputs_dict[con_name+' - MSD std'] = ["showmatrix_gpickle",layout,mat, "shore_msd_std", "False", self.config.subject+' - '+con_name+' - SHORE MSD std']
+
+                        self.inspect_outputs_dict[con_name+' - RTOP mean'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_mean", "False", self.config.subject+' - '+con_name+' - SHORE RTOP mean']
+                        self.inspect_outputs_dict[con_name+' - RTOP median'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_median", "False", self.config.subject+' - '+con_name+' - SHORE RTOP median']
+                        self.inspect_outputs_dict[con_name+' - RTOP std'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_std", "False", self.config.subject+' - '+con_name+' - SHORE RTOP std']
+                    else:
+                        if any('gFA' in m for m in self.config.connectivity_metrics):
+                            self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA mean']
+                            self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",layout,mat, "FA_median", "False",self.config.subject+' - '+con_name+' - gFA median']
+                            self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",layout,mat, "FA_std", "False", self.config.subject+' - '+con_name+' - gFA std']
+                        if any('ADC' in m for m in self.config.connectivity_metrics):
+                            self.inspect_outputs_dict[con_name+' - ADC mean'] = ["showmatrix_gpickle",layout,mat, "ADC_mean", "False", self.config.subject+' - '+con_name+' - ADC mean']
+                            self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",layout,mat, "ADC_median", "False", self.config.subject+' - '+con_name+' - ADC median']
+                            self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",layout,mat, "ADC_std", "False", self.config.subject+' - '+con_name+' - ADC std']
             else:
                 # print "is list"
                 for mat in con_results.outputs.connectivity_matrices:
@@ -274,14 +291,28 @@ class ConnectomeStage(Stage):
                             self.inspect_outputs_dict[con_name+' - fiber proportion'] = ["showmatrix_gpickle",layout,mat, "fiber_proportion", "False", self.config.subject+' - '+con_name+' - fiber proportion', map_scale]
                         if any('Normalized fiber density' in m for m in self.config.connectivity_metrics):
                             self.inspect_outputs_dict[con_name+' - normalized fiber density'] = ["showmatrix_gpickle",layout,mat, "normalized_fiber_density", "False", self.config.subject+' - '+con_name+' - normalized fiber density', map_scale]
-                        if any('gFA' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA mean']
-                            self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",layout,mat, "FA_std", "False", self.config.subject+' - '+con_name+' - gFA std']
-                            self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA median']
-                        if any('ADC' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - ADC mean'] = ["showmatrix_gpickle",layout,mat, "ADC_mean", "False", self.config.subject+' - '+con_name+' - ADC mean']
-                            self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",layout,mat, "ADC_std", "False", self.config.subject+' - '+con_name+' - ADC std']
-                            self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",layout,mat, "ADC_median", "False", self.config.subject+' - '+con_name+' - ADC median']
+
+                        if len(con_results.inputs['additional_maps']) > 0:
+                            self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_mean", "False", self.config.subject+' - '+con_name+' - SHORE gFA mean']
+                            self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_median", "False", self.config.subject+' - '+con_name+' - SHORE gFA median']
+                            self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_std", "False", self.config.subject+' - '+con_name+' - SHORE gFA std']
+
+                            self.inspect_outputs_dict[con_name+' - MSD mean'] = ["showmatrix_gpickle",layout,mat, "shore_msd_mean", "False", self.config.subject+' - '+con_name+' - SHORE MSD mean']
+                            self.inspect_outputs_dict[con_name+' - MSD median'] = ["showmatrix_gpickle",layout,mat, "shore_msd_median", "False", self.config.subject+' - '+con_name+' - SHORE MSD median']
+                            self.inspect_outputs_dict[con_name+' - MSD std'] = ["showmatrix_gpickle",layout,mat, "shore_msd_std", "False", self.config.subject+' - '+con_name+' - SHORE MSD std']
+
+                            self.inspect_outputs_dict[con_name+' - RTOP mean'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_mean", "False", self.config.subject+' - '+con_name+' - SHORE RTOP mean']
+                            self.inspect_outputs_dict[con_name+' - RTOP median'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_median", "False", self.config.subject+' - '+con_name+' - SHORE RTOP median']
+                            self.inspect_outputs_dict[con_name+' - RTOP std'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_std", "False", self.config.subject+' - '+con_name+' - SHORE RTOP std']
+                        else:
+                            if any('gFA' in m for m in self.config.connectivity_metrics):
+                                self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA mean']
+                                self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",layout,mat, "FA_std", "False", self.config.subject+' - '+con_name+' - gFA std']
+                                self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA median']
+                            if any('ADC' in m for m in self.config.connectivity_metrics):
+                                self.inspect_outputs_dict[con_name+' - ADC mean'] = ["showmatrix_gpickle",layout,mat, "ADC_mean", "False", self.config.subject+' - '+con_name+' - ADC mean']
+                                self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",layout,mat, "ADC_std", "False", self.config.subject+' - '+con_name+' - ADC std']
+                                self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",layout,mat, "ADC_median", "False", self.config.subject+' - '+con_name+' - ADC median']
 
             self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
             #print self.inspect_outputs

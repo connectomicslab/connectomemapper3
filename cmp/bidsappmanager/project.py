@@ -561,16 +561,16 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
                 print("Create diffusion config file (%s)" % project_info.dmri_config_file)
                 dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
         else:
-            print("int_project dmri_pipeline.global_config.subjects : ")
-            print(dmri_pipeline.global_conf.subjects)
+            # print("int_project dmri_pipeline.global_config.subjects : ")
+            # print(dmri_pipeline.global_conf.subjects)
 
             dmri_conf_loaded = dmri_load_config(dmri_pipeline, project_info.dmri_config_file)
 
             if not dmri_conf_loaded:
                 return None
 
-        print(dmri_pipeline)
-        print(dmri_pipeline.global_conf.dmri_bids_acq)
+        # print(dmri_pipeline)
+        # print(dmri_pipeline.global_conf.dmri_bids_acq)
         dmri_pipeline.config_file = project_info.dmri_config_file
     else:
         print("Missing diffusion inputs")
@@ -616,15 +616,15 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
                 print("Create fMRI config file (%s)" % project_info.fmri_config_file)
                 fmri_save_config(fmri_pipeline, project_info.fmri_config_file)
         else:
-            print("int_project fmri_pipeline.global_config.subjects : ")
-            print(fmri_pipeline.global_conf.subjects)
+            # print("int_project fmri_pipeline.global_config.subjects : ")
+            # print(fmri_pipeline.global_conf.subjects)
 
             fmri_conf_loaded = fmri_load_config(fmri_pipeline, project_info.fmri_config_file)
 
             if not fmri_conf_loaded:
                 return None
 
-        print(fmri_pipeline)
+        # print(fmri_pipeline)
         fmri_pipeline.config_file = project_info.fmri_config_file
     else:
         print("Missing fmri inputs")
@@ -632,10 +632,10 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
     return fmri_inputs_checked, fmri_pipeline
 
 def init_anat_project(project_info, is_new_project):
-    print('Init anat pipeline project_info :')
-    print(project_info.base_directory)
-    print(project_info.subject)
-    print(project_info.subject_session)
+    # print('Init anat pipeline project_info :')
+    # print(project_info.base_directory)
+    # print(project_info.subject)
+    # print(project_info.subject_session)
 
     anat_pipeline = Anatomical_pipeline.AnatomicalPipelineUI(project_info)
     #dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info,anat_pipeline.flow)
@@ -682,8 +682,8 @@ def init_anat_project(project_info, is_new_project):
         # else:
         #     save_config(dmri_pipeline, project_info.dmri_config_file)
     else:
-        print("int_project anat_pipeline.global_config.subjects : ")
-        print(anat_pipeline.global_conf.subjects)
+        # print("int_project anat_pipeline.global_config.subjects : ")
+        # print(anat_pipeline.global_conf.subjects)
 
         anat_conf_loaded = anat_load_config(anat_pipeline, project_info.anat_config_file)
         #dmri_conf_loaded = load_config(dmri_pipeline, project_info.dmri_config_file)
@@ -694,7 +694,7 @@ def init_anat_project(project_info, is_new_project):
         #if not dmri_conf_loaded:
         #    return None
 
-    print(anat_pipeline)
+    #print(anat_pipeline)
     #print dmri_pipeline
     if (project_info.subject_session != '') and (project_info.subject_session != None) :
         refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders, session=project_info.subject_session)
@@ -1504,9 +1504,8 @@ class ProjectHandlerV2(Handler):
     fmri_inputs_checked = Bool(False)
     fmri_processed = Bool(False)
 
-    def load_dataset(self, ui_info, debug=True):
+    def load_dataset(self, ui_info, debug=False):
         # print('Load dataset')
-        debug = True
 
         loaded_project = gui.CMP_Project_Info()
         np_res = loaded_project.configure_traits(view='open_view')

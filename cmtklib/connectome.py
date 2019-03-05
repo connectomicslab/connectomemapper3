@@ -700,7 +700,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         origin = np.matrix(roi.affine[:3,3]).T
 
         # Create the matrix
-        print(">> Create the connection matrix (%s rois)" % parval['number_of_regions'])
+        print("  >> Create the connection matrix (%s rois)" % parval['number_of_regions'])
 
         nROIs = parval['number_of_regions']
         G     = nx.Graph()
@@ -740,7 +740,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 #    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
 
-        print("************************")
+        print("  ************************")
 
         dis = 0
 
@@ -750,7 +750,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         mmap = additional_maps
         mmapdata = {}
-        print('>> Maps to be processed :')
+        print('  >> Maps to be processed :')
         for k,v in mmap.items():
             print("     - %s map" % k)
             da = nibabel.load(v)
@@ -758,9 +758,9 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         # print("mmapdata size : %g " % len(mmapdata.items()))
 
-        print("************************")
+        print("  ************************")
 
-        print(">> Create the connection matrix (%s fibers)" % n)
+        print("  >> Processing fibers and computing metrics (%s fibers)" % n)
         pc = -1
         for i in range(n):  # n: number of fibers
 
@@ -825,8 +825,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             else:
                 G.add_edge(startROI, endROI, fiblist   = [i])
 
-        print("... INFO - Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis*100.0/n, n) )
-        print("... INFO - Valid fibers: %i (%f percent)" % (n-dis, 100 - dis*100.0/n) )
+        print("  ... INFO - Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis*100.0/n, n) )
+        print("  ... INFO - Valid fibers: %i (%f percent)" % (n-dis, 100 - dis*100.0/n) )
 
         #print "roi : ",roi
         #print "roiData size : ",roiData.size
@@ -905,8 +905,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                         #print "idx2 : ",idx2
                         val.append( vv[0][idx2[:,0],idx2[:,1],idx2[:,2]] )
                     except IndexError, e:
-                        print("... ERROR - Index error occured when trying extract scalar values for measure", k)
-                        print("... ERROR - Discard fiber with index", i, "Exception: ", e)
+                        print("  ... ERROR - Index error occured when trying extract scalar values for measure", k)
+                        print("  ... ERROR - Discard fiber with index", i, "Exception: ", e)
 
 
                 da = np.concatenate( val )
@@ -921,12 +921,12 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             for key in di:
                 G[u][v][key] = di[key]
 
-        print("************************")
+        print("  ************************")
 
-        print(">> Save connectome maps as :")
+        print("  >> Save connectome maps as :")
         # storing network
         if 'gPickle' in output_types:
-            print('  - connectome_%s.gpickle' % parkey)
+            print('    - connectome_%s.gpickle' % parkey)
             nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
         if 'mat' in output_types:
             # edges
@@ -962,7 +962,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
                     node_n += 1
                 node_struct[node_key] = node_arr
-            print('  - connectome_%s.mat' % parkey)
+            print('    - connectome_%s.mat' % parkey)
             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc':edge_struct,'nodes':node_struct})
         if 'graphml' in output_types:
             g2 = nx.Graph()
@@ -980,7 +980,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
                 g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
                 g2.node[u_gml]['dn_region'] = d_gml['dn_region']
-                print('  - connectome_%s.graphml' % parkey)
+                print('    - connectome_%s.graphml' % parkey)
             nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
         # print("Storing final fiber length array")
@@ -996,7 +996,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         np.save(fiberlabels_noorphans_fname, final_fiberlabels_array)
 
         if not streamline_wrote:
-            print("> Filtering tractography - keeping only no orphan fibers")
+            print("  > Filtering tractography - keeping only no orphan fibers")
             finalfibers_fname = 'streamline_final.trk'
             save_fibers(hdr, fib, finalfibers_fname, final_fibers_idx)
 
