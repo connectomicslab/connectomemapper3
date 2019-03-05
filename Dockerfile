@@ -110,18 +110,19 @@ ENV PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
 
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends fsl-core=5.0.9-5~nd16.04+1 fsl-mni152-templates=5.0.7-2 fsl-5.0-eddy-nonfree
-
-RUN apt-get install -y --no-install-recommends afni=16.2.07~dfsg.1-5~nd16.04+1
+    apt-get install -y --no-install-recommends fsl-core=5.0.9-5~nd16.04+1 \
+                                               fsl-mni152-templates=5.0.7-2 \
+                                               fsl-5.0-eddy-nonfree \
+                                               afni=16.2.07~dfsg.1-5~nd16.04+1
 
 # Mark a package as being manually installed, which will
 # prevent the package from being automatically removed if no other packages
 # depend on it
-RUN apt-mark manual fsl-core
-RUN apt-mark manual fsl-5.0-core
+#RUN apt-mark manual fsl-core
+#RUN apt-mark manual fsl-5.0-core
 #RUN apt-mark manual fsl-mni152-templates
-RUN apt-mark manual afni
-RUN apt-mark manual ants
+#RUN apt-mark manual afni
+#RUN apt-mark manual ants
 
 #Make FSL/AFNI happy
 ENV FSLDIR=/usr/share/fsl/5.0 \
@@ -149,24 +150,25 @@ RUN conda env create -f /app/environment.yml
 RUN conda clean --all --yes
 
 #Make ANTs happy
-ENV CONDA_ENV py27-test
+ENV CONDA_ENV py27cmp
 ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin
 ENV PATH $ANTSPATH:$PATH
 
 ## Install MRTRIX
 
 # Additional dependencies for MRtrix3 compilation
-RUN apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
-    libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev
 # Get the latest version of MRtrix3
 # MRtrix3 setup
 WORKDIR /opt
-RUN git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
+RUN apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
+    libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev && \
+    git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
     cd mrtrix3 && \
     git checkout 3.0_RC3 && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
-    git describe --tags > /mrtrix3_version
+    git describe --tags > /mrtrix3_version && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Setup environment variables for MRtrix3
 ENV PATH=/opt/mrtrix3/bin:$PATH
