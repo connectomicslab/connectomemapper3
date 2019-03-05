@@ -7,7 +7,7 @@ import sys
 from glob import glob
 if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 
-packages=["cmp","cmp.interfaces","cmp.stages",
+packages=["cmp","cmp.stages",
           "cmp.stages.preprocessing",
           "cmp.stages.segmentation",
           "cmp.stages.parcellation",
@@ -19,7 +19,7 @@ packages=["cmp","cmp.interfaces","cmp.stages",
           "cmp.pipelines.anatomical",
           "cmp.pipelines.diffusion",
           "cmp.pipelines.functional",
-          "cmtklib",
+          "cmtklib","cmtklib.interfaces",
           "resources"]
 
 package_data = {'cmp':

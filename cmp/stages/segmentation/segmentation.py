@@ -27,7 +27,7 @@ import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
-from cmp.interfaces.freesurfer import copyBrainMaskToFreesurfer, copyFileToFreesurfer
+from cmtklib.interfaces.freesurfer import copyBrainMaskToFreesurfer, copyFileToFreesurfer
 
 class SegmentationConfig(HasTraits):
     seg_tool = Enum(["Freesurfer","Custom segmentation"])

@@ -27,12 +27,12 @@ from nipype.interfaces.base import CommandLine, CommandLineInputSpec,\
     traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec
 import nipype.interfaces.base as nibase
 
-from cmp.interfaces.mrtrix3 import Erode, MRtrix_mul, MRThreshold, MRConvert, EstimateResponseForSH, ConstrainedSphericalDeconvolution, DWI2Tensor, Tensor2Vector
+from cmtklib.interfaces.mrtrix3 import Erode, MRtrix_mul, MRThreshold, MRConvert, EstimateResponseForSH, ConstrainedSphericalDeconvolution, DWI2Tensor, Tensor2Vector
 from nipype.interfaces.mrtrix3.reconst import FitTensor, EstimateFOD
 from nipype.interfaces.mrtrix3.utils import TensorMetrics
 # from nipype.interfaces.mrtrix3.preprocess import ResponseSD
-from cmp.interfaces.misc import flipBvec, flipTable
-from cmp.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE
+from cmtklib.interfaces.misc import flipBvec, flipTable
+from cmtklib.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE
 # from nipype.interfaces.dipy import CSD
 
 from nipype import logging
@@ -254,7 +254,7 @@ def create_dipy_recon_flow(config):
 
 
     if config.mapmri:
-        from cmp.interfaces.dipy import MAPMRI
+        from cmtklib.interfaces.dipy import MAPMRI
         dipy_MAPMRI = pe.Node(interface=MAPMRI(),name='dipy_mapmri')
 
         dipy_MAPMRI.inputs.laplacian_regularization = config.laplacian_regularization

@@ -65,7 +65,7 @@ class DTIEstimateResponseSH(DipyDiffusionInterface):
     Example
     -------
 
-    >>> from cmp.interfaces import dipy as ndp
+    >>> from cmtklib.interfaces import dipy as ndp
     >>> dti = ndp.EstimateResponseSH()
     >>> dti.inputs.in_file = '4d_dwi.nii'
     >>> dti.inputs.in_bval = 'bvals'
@@ -370,7 +370,7 @@ class SHORE(DipyDiffusionInterface):
     Example
     -------
 
-    >>> from cmp.interfaces.dipy import SHORE
+    >>> from cmtklib.interfaces.dipy import SHORE
     >>> asm = SHORE(radial_order=radial_order,zeta=zeta, lambdaN=lambdaN, lambdaL=lambdaL)
     >>> asm.inputs.in_file = '4d_dwi.nii'
     >>> asm.inputs.in_bval = 'bvals'
@@ -1069,7 +1069,7 @@ class MAPMRI(DipyDiffusionInterface):
     Example
     -------
 
-    >>> from cmp.interfaces.dipy import MAPMRI
+    >>> from cmtklib.interfaces.dipy import MAPMRI
     >>> mapmri = MAPMRI()
     >>> mapmri.inputs.in_file = '4d_dwi.nii'
     >>> mapmri.inputs.in_bval = 'bvals'

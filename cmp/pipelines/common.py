@@ -27,7 +27,7 @@ from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, Ba
 from nipype.utils.filemanip import split_filename
 
 # Own import
-import cmp.interfaces.fsl as cmp_fsl
+import cmtklib.interfaces.fsl as cmp_fsl
 
 from traits.api import *
 

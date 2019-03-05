@@ -8,8 +8,8 @@ from glob import glob
 if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 
 packages=["cmtklib",
+          "cmtklib.interfaces",
           "cmp",
-          "cmp.interfaces",
           "cmp.stages",
           "cmp.stages.preprocessing",
           "cmp.stages.segmentation",
@@ -95,7 +95,7 @@ def main(**extra_args):
           maintainer = 'CIBM-CHUV Diffusion Group',
           maintainer_email = 'info@connectomics.org',
           package_data = package_data,
-          requires=["numpy (>=1.2)", "nibabel (>=1.1.0)", "pybids (>=0.6.4)"],
+          requires=["numpy (>=1.2)", "nibabel (>=1.1.0)", "pybids (>=0.7.0)"],
           **extra_args
          )
 

@@ -3,7 +3,7 @@ import os
 from os import path as op
 
 def test_ExtractPVEsFrom5TT(subject, session, in_5tt_image, ref_image, base_dir):
-    from cmp.interfaces.misc import ExtractPVEsFrom5TT
+    from cmtklib.interfaces.misc import ExtractPVEsFrom5TT
     from nipype import Node
 
     pve_extracter = Node(interface=ExtractPVEsFrom5TT(),name='pve_extracter',base_dir=base_dir)

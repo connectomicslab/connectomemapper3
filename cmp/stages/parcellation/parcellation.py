@@ -190,7 +190,7 @@ class ParcellationStage(Stage):
                         (temp_node,outputnode,[("atlas_info","atlas_info")]),
                         (inputnode,outputnode,[("custom_wm_mask","wm_mask_file")])
                         ])
-            import cmp.interfaces.fsl as fsl
+            import cmtklib.interfaces.fsl as fsl
             threshold_roi = pe.Node(interface=fsl.BinaryThreshold(thresh=0.0,binarize=True,out_file='T1w_class-GM.nii.gz'),name='threshold_roi_bin')
 
             def get_first(roi_volumes):

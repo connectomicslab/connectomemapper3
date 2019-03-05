@@ -31,11 +31,11 @@ import nipype.interfaces.mrtrix as mrtrix
 import nipype.interfaces.dipy as dipy
 
 #  import nipype.interfaces.camino2trackvis as camino2trackvis
-# import cmp.interfaces.camino2trackvis as camino2trackvis
-from cmp.interfaces.mrtrix3 import Erode, StreamlineTrack
-from cmp.interfaces.fsl import mapped_ProbTrackX
-from cmp.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
-from cmp.interfaces.misc import Tck2Trk, extractHeaderVoxel2WorldMatrix, match_orientations, make_seeds, make_mrtrix_seeds, getCRS2XYZtkRegTransform, transform_trk_CRS2XYZtkReg
+# import cmtklib.interfaces.camino2trackvis as camino2trackvis
+from cmtklib.interfaces.mrtrix3 import Erode, StreamlineTrack
+from cmtklib.interfaces.fsl import mapped_ProbTrackX
+from cmtklib.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
+from cmtklib.interfaces.misc import Tck2Trk, extractHeaderVoxel2WorldMatrix, match_orientations, make_seeds, make_mrtrix_seeds, getCRS2XYZtkRegTransform, transform_trk_CRS2XYZtkReg
 
 from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
 

@@ -866,7 +866,7 @@ class GenerateGMWMInterface(CommandLine):
 
     Example
     -------
-    >>> import cmp.interfaces.mrtrix3 as cmp_mrt
+    >>> import cmtklib.interfaces.mrtrix3 as cmp_mrt
     >>> genWMGMI = cmp_mrt.Generate5tt()
     >>> genWMGMI.inputs.in_file = '5tt.mif'
     >>> genWMGMI.inputs.out_file = 'gmwmi.mif'

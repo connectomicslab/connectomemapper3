@@ -39,7 +39,7 @@ import apptools.io.api as io
 from bids import BIDSLayout
 
 # Own import
-import cmp.interfaces.fsl as cmp_fsl
+import cmtklib.interfaces.fsl as cmp_fsl
 
 import cmp.pipelines.common as cmp_common
 from cmp.stages.segmentation.segmentation import SegmentationStage

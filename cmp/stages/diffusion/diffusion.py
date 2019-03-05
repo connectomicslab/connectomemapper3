@@ -24,7 +24,7 @@ import nibabel as nib
 from cmp.stages.common import Stage
 from reconstruction import *
 from tracking import *
-from cmp.interfaces.misc import ExtractImageVoxelSizes, Tck2Trk
+from cmtklib.interfaces.misc import ExtractImageVoxelSizes, Tck2Trk
 
 
 class DiffusionConfig(HasTraits):

@@ -32,9 +32,9 @@ import nipype.interfaces.dipy as dipy
 import nibabel as nib
 
 # from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
-from cmp.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, MRThreshold, ExtractFSLGrad, ExtractMRTrixGrad, Generate5tt, GenerateGMWMInterface
-import cmp.interfaces.fsl as cmp_fsl
-from cmp.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
+from cmtklib.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, MRThreshold, ExtractFSLGrad, ExtractMRTrixGrad, Generate5tt, GenerateGMWMInterface
+import cmtklib.interfaces.fsl as cmp_fsl
+from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
 
 from nipype.interfaces.mrtrix3.preprocess import ResponseSD
 

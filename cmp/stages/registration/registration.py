@@ -37,11 +37,11 @@ import nibabel as nib
 from cmp.stages.common import Stage
 
 # from cmp.pipelines.common import MRThreshold, MRCrop, ExtractMRTrixGrad, FSLCreateHD
-from cmp.interfaces.mrtrix3 import DWI2Tensor, MRConvert, MRTransform, MRThreshold, MRCrop, ExtractMRTrixGrad
-from cmp.interfaces.fsl import FSLCreateHD
-import cmp.interfaces.freesurfer as cmp_fs
-import cmp.interfaces.fsl as cmp_fsl
-from cmp.interfaces.ants import MultipleANTsApplyTransforms
+from cmtklib.interfaces.mrtrix3 import DWI2Tensor, MRConvert, MRTransform, MRThreshold, MRCrop, ExtractMRTrixGrad
+from cmtklib.interfaces.fsl import FSLCreateHD
+import cmtklib.interfaces.freesurfer as cmp_fs
+import cmtklib.interfaces.fsl as cmp_fsl
+from cmtklib.interfaces.ants import MultipleANTsApplyTransforms
 
 from nipype.interfaces.mrtrix3.reconst import FitTensor
 from nipype.interfaces.mrtrix3.utils import TensorMetrics
