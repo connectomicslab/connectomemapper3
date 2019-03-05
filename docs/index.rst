@@ -4,20 +4,19 @@ Connectome Mapper 3 (UNDER DEVELOPMENT)
 
 This neuroimage processing pipeline software is developed by the Hagmann's group at the University Hospital of Lausanne (CHUV) for use at the Center for BioMedical Imaging (CIBM) within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
 
+..
+
 .. image:: http://bids.neuroimaging.io/openneuro_badge.svg
   :target: https://openneuro.org
   :alt: Available in OpenNeuro!
 
-.. image:: https://circleci.com/gh/poldracklab/fmriprep/tree/master.svg?style=shield
-  :target: https://circleci.com/gh/poldracklab/fmriprep/tree/master
+.. image:: https://circleci.com/gh/sebastientourbier/multiscalebrainparcellator/tree/master.svg?style=shield
+  :target: https://circleci.com/gh/sebastientourbier/multiscalebrainparcellator/tree/master
+  :alt: Continuous Integration Status
 
-.. image:: https://readthedocs.org/projects/fmriprep/badge/?version=latest
-  :target: http://fmriprep.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest
+  :target: https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
-
-.. image:: https://img.shields.io/pypi/v/fmriprep.svg
-  :target: https://pypi.python.org/pypi/fmriprep/
-  :alt: Latest Version
 
 
 *********

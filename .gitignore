@@ -17,4 +17,4 @@ _build
 
 scripts/runGource.sh
 
-.ipynb_checkpoints
+*.ipynb_checkpoints

@@ -173,17 +173,17 @@ jobs:
             fi
       - run:
           name: Run anatomical workflow on ds005
-          no_output_timeout: 3h
+          no_output_timeout: 4h
           command: |
             mkdir -p /tmp/ds005/work /tmp/ds005/derivatives
             rm -R /tmp/ds005/derivatives/cmp/sub-01/tmp/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation
             docker run -it --rm \
                 -v /tmp/data/ds005:/tmp \
+                -v /home/circleci/src/connectomemapper-bidsapp/config:/tmp/code \
                 -v $FS_LICENSE:/opt/freesurfer/license.txt \
                 sebastientourbier/connectomemapper-bidsapp:latest \
                 /tmp /tmp/derivatives participant --participant_label 01 \
-                --anat_pipeline_config /tmp/code/ref_anatomical_config.ini \
-                --dwi_pipeline_config /tmp/code/ref_diffusion_config.ini
+                --anat_pipeline_config /tmp/code/ref_anatomical_config.ini
 
       - save_cache:
          key: ds005-anat-v12-{{ .Branch }}-{{ epoch }}
@@ -191,7 +191,7 @@ jobs:
             - /tmp/ds005/work
             - /tmp/ds005/derivatives/cmp
       - run:
-          name: Checking outputs of MultiScaleBrainParcellator run
+          name: Checking outputs of Connectome Mapper run (anatomical pipeline only)
           command: |
             mkdir -p /tmp/ds005/test
             find /tmp/ds005/derivatives/cmp -path */figures -prune -o -name "*" -print | sed s+/tmp/ds005/derivatives/++ | sort > /tmp/ds005/test/outputs.out

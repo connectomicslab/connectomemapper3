@@ -1,4 +1,4 @@
-name: py27-test
+name: py27cmp
 
 channels:
 - conda-forge
