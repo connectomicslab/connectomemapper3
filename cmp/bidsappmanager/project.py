@@ -1511,6 +1511,43 @@ class ProjectHandlerV2(Handler):
         np_res = loaded_project.configure_traits(view='open_view')
         loaded_project.output_directory = os.path.join(loaded_project.base_directory,'derivatives')
 
+        if loaded_project.creation_mode == "Install Datalad BIDS dataset":
+            datalad_is_available = is_tool('datalad')
+
+            if datalad_is_available:
+                print('>>> Datalad dataset installation...')
+                if loaded_project.install_datalad_dataset_via_ssh:
+                    os.environ['REMOTEUSERPWD'] = loaded_project.ssh_pwd
+                    cmd = 'datalad install -D "Dataset {} (remote:{}) installed on {}" -s ssh://{}:$REMOTEUSERPWD@{}:{} {}'.format(loaded_project.datalad_dataset_path,
+                                                                                                                       loaded_project.ssh_remote,
+                                                                                                                       loaded_project.base_directory,
+                                                                                                                       loaded_project.ssh_user,
+                                                                                                                       loaded_project.ssh_remote,
+                                                                                                                       loaded_project.datalad_dataset_path,
+                                                                                                                       loaded_project.base_directory)
+                    try:
+                        print('... cmd: {}'.format(cmd))
+                        core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
+                        del os.environ['REMOTEUSERPWD']
+                    except:
+                        print("    ERROR: Failed to install datalad dataset via ssh")
+                        del os.environ['REMOTEUSERPWD']
+                else:
+                    cmd = 'datalad install -D "Dataset {} installed on {}" -s {} {}'.format(loaded_project.datalad_dataset_path,
+                                                                                            loaded_project.base_directory,
+                                                                                            loaded_project.datalad_dataset_path,
+                                                                                            loaded_project.base_directory)
+                    try:
+                        print('... cmd: {}'.format(cmd))
+                        core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
+                    except:
+                        print("    ERROR: Failed to install datalad dataset via ssh")
+            else:
+                print('    ERROR: Datalad is not installed!')
+
+            #Install dataset via datalad
+            #datalad install -s ssh://tourbier@155.105.77.64:/home/tourbier/Data/ds-newtest /media/localadmin/HagmannHDD/Seb/ds-newtest5
+            #
         is_bids = False
 
         t1_available = False
@@ -1624,8 +1661,6 @@ class ProjectHandlerV2(Handler):
         self.anat_inputs_checked = anat_inputs_checked
         self.dmri_inputs_checked = dmri_inputs_checked
         self.fmri_inputs_checked = fmri_inputs_checked
-
-        datalad_is_available = is_tool('datalad')
 
         if anat_inputs_checked:
 

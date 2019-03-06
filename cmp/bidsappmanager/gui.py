@@ -150,7 +150,14 @@ style_sheet = '''
 # }
 
 class CMP_Project_Info(HasTraits):
+
+    creation_mode = Enum('Load BIDS dataset','Install Datalad BIDS dataset')
     base_directory = Directory
+    install_datalad_dataset_via_ssh = Bool(True)
+    ssh_user = String('remote_username')
+    ssh_pwd = Password()
+    ssh_remote = String('IP address/ Machine name')
+    datalad_dataset_path = Directory('/shared/path/to/existing/datalad/dataset')
 
     bids_layout = Instance(BIDSLayout)
     subjects = List([])
@@ -286,8 +293,21 @@ class CMP_Project_Info(HasTraits):
     traits_view = QtView(Include('dataset_view'))
 
     create_view = View( #Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
+                        Item('creation_mode',style='custom'),
                         Group(
-                            Item('base_directory',label='BIDS Dataset'),
+                            Group(
+                                Item('base_directory',label='BIDS Dataset'),
+                            visible_when='creation_mode=="Load BIDS dataset"'),
+                            Group(
+                                Item('install_datalad_dataset_via_ssh'),
+                            visible_when='creation_mode=="Install Datalad/BIDS dataset"'),
+                            Group(
+                                Item('ssh_remote',label='Remote ssh server',visible_when='install_datalad_dataset_via_ssh'),
+                                Item('ssh_user',label='Remote username',visible_when='install_datalad_dataset_via_ssh'),
+                                Item('ssh_pwd',label='Remote password',visible_when='install_datalad_dataset_via_ssh'),
+                                Item('datalad_dataset_path',label='Datalad/BIDS Dataset Path/URL to be installed'),
+                                Item('base_directory',label='Installation directory'),
+                            visible_when='creation_mode=="Install Datalad/BIDS dataset"'),
                             ),
                         kind='livemodal',
                         title='Data creation: BIDS dataset selection',
@@ -387,15 +407,25 @@ class CMP_Project_Info(HasTraits):
                             #style_sheet=style_sheet,
                             buttons=['OK','Cancel'])
 
-    open_view = View(
-                    Group(
-                        Item('base_directory',label='BIDS Dataset'),
-                        ),
-                    title='Data loading: BIDS dataset selection',
-                    kind='modal',
-                    width=modal_width,
-                    #style_sheet=style_sheet,
-                    buttons=['OK','Cancel'])
+    open_view =View( #Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
+                        Item('creation_mode',label='Mode'),
+                        Group(
+                            Item('install_datalad_dataset_via_ssh'),
+                            Item('ssh_remote',label='Remote ssh server',visible_when='install_datalad_dataset_via_ssh'),
+                            Item('ssh_user',label='Remote username',visible_when='install_datalad_dataset_via_ssh'),
+                            Item('ssh_pwd',label='Remote password',visible_when='install_datalad_dataset_via_ssh'),
+                            Item('datalad_dataset_path',label='Datalad/BIDS Dataset Path/URL to be installed'),
+                            Item('base_directory',label='Installation directory'),
+                            visible_when='creation_mode=="Install Datalad BIDS dataset"'),
+                        Group(
+                            Item('base_directory',label='BIDS Dataset'),
+                            visible_when='creation_mode=="Load BIDS dataset"'),
+                        kind='livemodal',
+                        title='BIDS Dataset Creation/Loading',
+                        #style_sheet=style_sheet,
+                        width=600,
+                        height=250,
+                        buttons=['OK','Cancel'])
 
     anat_select_config_to_load = View(
                                   Group(
