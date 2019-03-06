@@ -10,6 +10,7 @@ dependencies:
 - numpy=1.15.4
 - matplotlib=2.2.3
 - traitsui=6.0.0
+- git-annex=7.20190219
 
 - pip:
     - nipype==1.1.8
@@ -18,7 +19,9 @@ dependencies:
     - obspy==1.1.1
     - nose==1.3.7
     - python-xmp-toolkit==2.0.1
-    - datalad==0.11.3
+    - Pillow==5.4.1
+    - beautifulsoup4==4.7.1
+    - datalad[full]==0.11.3
     - datalad-revolution==0.6.0
     - datalad-container==0.2.1
     - datalad_neuroimaging==0.2.0
