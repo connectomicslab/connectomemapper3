@@ -176,7 +176,6 @@ jobs:
           no_output_timeout: 4h
           command: |
             mkdir -p /tmp/ds005/work /tmp/ds005/derivatives
-            rm -R /tmp/ds005/derivatives/cmp/sub-01/tmp/anatomical_pipeline/parcellation_stage/Lausanne2018_parcellation
             docker run -it --rm \
                 -v /tmp/data/ds005:/tmp \
                 -v /home/circleci/src/connectomemapper-bidsapp/config:/tmp/code \
