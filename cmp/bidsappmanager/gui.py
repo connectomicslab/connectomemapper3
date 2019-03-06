@@ -842,7 +842,7 @@ class CMP_BIDSAppWindow(HasTraits):
         #     cmd.append('{}'.format(label))
 
         cmd.append('/tmp')
-        cmd.append('/tmp/{{outputs[0]}}')
+        cmd.append('/tmp/derivatives')
         cmd.append('participant')
 
         cmd.append('--participant_label')
@@ -1011,6 +1011,14 @@ class CMP_BIDSAppWindow(HasTraits):
                         datalad_get_list.append('sub-{}/dwi/sub-{}*_dwi.*'.format(label,label))
                     if self.run_fmri_pipeline:
                         datalad_get_list.append('sub-{}/func/sub-{}*_bold.*'.format(label,label))
+
+            cmd = 'datalad add -J {} -m "Existing files tracked by datalad. Dataset ready for getting files via datalad run." .'.format(multiprocessing.cpu_count())
+            try:
+                print('... cmd: {}'.format(cmd))
+                self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
+            except:
+                print("    ERROR: Failed to add existing files to datalad")
+
 
             cmd = 'datalad run -m "Get files for sub-{}" bash -c "datalad get {}"'.format(self.list_of_subjects_to_be_processed," ".join(datalad_get_list))
             try:

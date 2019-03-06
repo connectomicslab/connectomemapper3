@@ -3,8 +3,8 @@
 Contributing to Connectome Mapper
 =================================
 
-:Authors: Adrien Birbaumer and Sebastien Tourbier
-:Version: $Revision: 2 $
+:Authors: Sebastien Tourbier, Adrien Birbaumer 
+:Version: Revision: 2
 :Copyright: Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland.
             This software is distributed under the open-source license Modified BSD.
 
@@ -23,7 +23,7 @@ II. Separation between the code of the graphical interface and the actual main C
 
 III. Enhance portability by freezing the computing environment with all software dependencies installed, through the adoption of the BIDS App framework relying on light software container technologies.
 
-IV. Enhance inter-operability by working with datasets structured following the Brain Imaging Data Structure structured dataset.
+IV. Enhance interoperability by working with datasets structured following the Brain Imaging Data Structure structured dataset.
 
 Further development, typically additions of other tools and configuration options should go in this direction.
 
@@ -33,8 +33,9 @@ Enhancements
 Possible enhancements are probably to be included in the following list:
 
 I. Adding of a configuration option to an existing stage
-II. Adding of a new stage
-III. Adding of a new pipeline
+II. Adding a new interface to cmtklib
+III. Adding of a new stage
+IV. Adding of a new pipeline
 
 The adding of newer configuration options to existing stages should be self-
 understandable. If the addition is large enough to be considered a "sub-module"
