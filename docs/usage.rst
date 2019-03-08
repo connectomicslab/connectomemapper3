@@ -1,11 +1,11 @@
 *********************
-Usage
+BIDS App: User's Guide
 *********************
 
-Execution and the BIDS format
+Introduction
 =============================
 
-The ``Connectome Mapper 3`` workflow takes as principal input the path of the dataset
+The ``Connectome Mapper 3`` BIDS App takes as principal input the path of the dataset
 that is to be processed.
 The input dataset is required to be in valid :abbr:`BIDS (Brain Imaging Data
 Structure)` format, and it must include at least one T1w or MPRAGE structural image.
@@ -16,7 +16,7 @@ Commandline Arguments
 =============================
 
 The command to run ``Connectome Mapper 3`` follow the `BIDS-Apps
-<https://github.com/BIDS-Apps>`_ definition with additional options specific to this pipeline.
+<https://github.com/BIDS-Apps>`_ definition with additional options for loading pipeline configuration files.
 
 .. argparse::
 		:ref: cmp.parser.get
@@ -27,15 +27,15 @@ Participant Level Analysis
 ======================
 To run the docker image in participant level mode (for one participant) ::
 
-  docker run -it --rm \
-  -v /home/localadmin/data/ds001:/tmp \
-  -v /media/localadmin/data/ds001/derivatives:/tmp/derivatives \
-  -v /usr/local/freesurfer/license.txt:/tmp/code/license.txt \
-  sebastientourbier/connectomemapper3:latest \
-  /tmp /tmp/derivatives participant --participant_label 01 \
-	--anat_pipeline_config /tmp/code/ref_anatomical_config.ini \
-  (--dwi_pipeline_config /tmp/code/ref_diffusion_config.ini \)
-  (--func_pipeline_config /tmp/code/ref_fMRI_config.ini \)
+    docker run -it --rm \
+            -v /home/localadmin/data/ds001:/tmp \
+            -v /media/localadmin/data/ds001/derivatives:/tmp/derivatives \
+            -v /usr/local/freesurfer/license.txt:/tmp/code/license.txt \
+            sebastientourbier/connectomemapper3:latest \
+            /tmp /tmp/derivatives participant --participant_label 01 \
+          	--anat_pipeline_config /tmp/code/ref_anatomical_config.ini \
+            (--dwi_pipeline_config /tmp/code/ref_diffusion_config.ini \)
+            (--func_pipeline_config /tmp/code/ref_fMRI_config.ini \)
 
 
 .. note:: The local directory of the input BIDS dataset (here: ``/home/localadmin/data/ds001``) and the output directory (here: ``/media/localadmin/data/ds001/derivatives``) used to process have to be mapped to the folders ``/tmp`` and ``/tmp/derivatives`` respectively using the ``-v`` docker run option.

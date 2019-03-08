@@ -107,7 +107,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * Go to the folder in which you would like to clone the source code repository::
 
-  $ cd <INSTALL DIRECTORY>
+  $ cd <INSTALLATION DIRECTORY>
 
 * Clone the source code repository::
 
@@ -121,10 +121,16 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
   $ source activate py27cmp
 
+  or
+
+  $ conda activate py27cmp
+
 * Install the Connectome Mapper BIDS App Manager from the Bash Shell using following commands::
 
 	(py27cmp)$ cd connectomemapper3/
 	(py27cmp)$ python setup_gui.py install
+
+* You are ready to use the Connectome Mapper 3 BIDS App Manager
 
 Help/Questions
 --------------
