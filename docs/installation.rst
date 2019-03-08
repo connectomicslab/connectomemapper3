@@ -111,7 +111,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * Clone the source code repository::
 
-  $ git clone https://sebastientourbier@bitbucket.org/sinergiaconsortium/connectomemapper3.git connectomemapper3
+  $ git clone git@bitbucket.org:sinergiaconsortium/connectomemapper3.git connectomemapper3
 
 * Create a miniconda2 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
 
