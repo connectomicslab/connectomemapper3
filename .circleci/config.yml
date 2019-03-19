@@ -50,9 +50,9 @@ jobs:
             # Build docker image
             e=1 && for i in {1..5}; do
               docker build \
-                --cache-from=sebastientourbier/connectomemapper-bidsapp \
+                --cache-from=sebastientourbier/connectomemapper3 \
                 --rm=false \
-                -t sebastientourbier/connectomemapper-bidsapp:latest \
+                -t sebastientourbier/connectomemapper3:latest \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
                 --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
@@ -63,13 +63,13 @@ jobs:
           no_output_timeout: 40m
           command: |
             mkdir -p /tmp/cache
-            docker save sebastientourbier/connectomemapper-ubuntu16.04:latest sebastientourbier/connectomemapper-bidsapp:latest \
+            docker save sebastientourbier/connectomemapper-ubuntu16.04:latest sebastientourbier/connectomemapper3:latest \
             | pigz -8 -p 3 > /tmp/cache/docker.tar.gz
       - persist_to_workspace:
           root: /tmp
           paths:
             - cache/docker.tar.gz
-            - src/connectomemapper-bidsapp
+            - src/connectomemapper3
 
   get_data:
     machine:
@@ -143,11 +143,11 @@ jobs:
       - FS_LICENSE: /tmp/fslicense/license.txt
     steps:
       - checkout:
-          path: /home/circleci/src/connectomemapper-bidsapp
+          path: /home/circleci/src/connectomemapper3
       - run:
           name: Check whether build should be skipped
           command: |
-            cd /home/circleci/src/connectomemapper-bidsapp
+            cd /home/circleci/src/connectomemapper3
             if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds005\]' )" != "" ]]; then
               echo "Skipping ds000005 build"
               circleci step halt
@@ -178,9 +178,9 @@ jobs:
             mkdir -p /tmp/ds005/work /tmp/ds005/derivatives
             docker run -it --rm \
                 -v /tmp/data/ds005:/tmp \
-                -v /home/circleci/src/connectomemapper-bidsapp/config:/tmp/code \
+                -v /home/circleci/src/connectomemapper3/config:/tmp/code \
                 -v $FS_LICENSE:/opt/freesurfer/license.txt \
-                sebastientourbier/connectomemapper-bidsapp:latest \
+                sebastientourbier/connectomemapper3:latest \
                 /tmp /tmp/derivatives participant --participant_label 01 \
                 --anat_pipeline_config /tmp/code/ref_anatomical_config.ini
 
@@ -207,11 +207,54 @@ jobs:
       - store_artifacts:
           path: /tmp/ds005/derivatives/cmp
 
+  build_docs:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /home/circleci/out/docs
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: Check whether build should be skipped
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?docs\]' )" != "" ]]; then
+              echo "Skipping documentation build job"
+              circleci step halt
+            fi
+
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f /tmp/cache/docker.tar.gz ]; then
+              sudo apt update && sudo apt -y install pigz
+              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+              docker images
+            fi
+      - run:
+          name: Build Connectome Mapper 3 documentation
+          no_output_timeout: 2h
+          command: |
+            docker run -ti --rm=false -v $PWD:/_build_html \
+              --entrypoint=sphinx-build sebastientourbier/connectomemapper3:latest \
+              -T -E -b html -d _build/doctrees-readthedocs -W -D \
+              language=en /root/src/connectomemapper3/docs/ /_build_html 2>&1 \
+              | tee $PWD/builddocs.log
+            cat $PWD/builddocs.log
+            grep -qv "ERROR" $PWD/builddocs.log
+      - store_artifacts:
+          path: /home/circleci/out/docs
+
   deploy_docker:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: circleci/classic:201711-01
-    working_directory: /tmp/src/connectomemapper-bidsapp
+    working_directory: /tmp/src/connectomemapper3
     steps:
       - attach_workspace:
           at: /tmp
@@ -232,12 +275,12 @@ jobs:
           command: |
             if [[ -n "$DOCKER_PASS" ]]; then
               docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker tag sebastientourbier/connectomemapper-bidsapp sebastientourbier/connectomemapper-bidsapp:unstable
-              docker push sebastientourbier/connectomemapper-bidsapp:unstable
+              docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper3:unstable
+              docker push sebastientourbier/connectomemapper3:unstable
               if [[ -n "$CIRCLE_TAG" ]]; then
-                docker push sebastientourbier/connectomemapper-bidsapp:latest
-                docker tag sebastientourbier/connectomemapper-bidsapp sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
-                docker push sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
+                docker push sebastientourbier/connectomemapper3:latest
+                docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper3:$CIRCLE_TAG
+                docker push sebastientourbier/connectomemapper3:$CIRCLE_TAG
               fi
             fi
 
