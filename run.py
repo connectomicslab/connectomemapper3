@@ -23,7 +23,7 @@ import numpy
 from glob import glob
 
 #Own imports
-import cmp.project as project
+from cmp.project import CMP_Project_Info
 from cmp.info import __version__
 from cmp import parser
 
@@ -222,7 +222,7 @@ if args.analysis_level == "participant":
     # find all T1s and skullstrip them
     for subject_label in subjects_to_analyze:
 
-        project = project.CMP_Project_Info()
+        project = CMP_Project_Info()
         project.base_directory = args.bids_dir
         project.output_directory = args.output_dir
 

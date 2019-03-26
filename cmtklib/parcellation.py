@@ -188,7 +188,7 @@ class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
     subject_id = traits.Str(desc='Freesurfer subject id')
 
 class CombineParcellationsOutputSpec(TraitedSpec):
-    aparc_aseg = File(exists=True)
+    aparc_aseg = File()
     output_rois = OutputMultiPath(File(exists=True))
     colorLUT_files = OutputMultiPath(File(exists=True))
     graphML_files = OutputMultiPath(File(exists=True))
@@ -946,28 +946,30 @@ class CombineParcellations(BaseInterface):
                 f_graphML.writelines(bottom_lines)
                 f_graphML.close()
 
+        # Transform aparc+aseg.mgz to native space
+        print("Correct Freesurfer generated aparc+aseg.mgz...")
+
+        orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
+        aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
+        tmp_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.mgz')
+        aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.native.nii.gz')
+
+        print("    Copy aparc+aseg to {}".format(tmp_aparcaseg_fs))
+        shutil.copyfile(aparcaseg_fs,tmp_aparcaseg_fs)
+
+        print("    Transform to native space")
+        cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (aparcaseg_fs,orig,aparcaseg_native)
+        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+        iflogger.info(proc_stdout)
+
+        # mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
+        # subprocess.check_call(mri_cmd)
+
+        Iaparcaseg= ni.load(aparcaseg_native).get_data()
+
         # Refine aparc+aseg.mgz with new subcortical and/or structures (if any)
         if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
-            print("Correct Freesurfer generated aparc+aseg.mgz...")
-
-            orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
-            aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
-            tmp_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.mgz')
-            aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.native.nii.gz')
-
-            print("    Copy aparc+aseg to {}".format(tmp_aparcaseg_fs))
-            shutil.copyfile(aparcaseg_fs,tmp_aparcaseg_fs)
-
-            print("    Transform to native space")
-            cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (aparcaseg_fs,orig,aparcaseg_native)
-            process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-            proc_stdout = process.communicate()[0].strip()
-            iflogger.info(proc_stdout)
-
-            # mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
-            # subprocess.check_call(mri_cmd)
-
-            Iaparcaseg= ni.load(aparcaseg_native).get_data()
 
             Iaparcaseg_new = Iaparcaseg.astype(np.int32)
 
@@ -1053,8 +1055,12 @@ class CombineParcellations(BaseInterface):
             # new_aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
             new_aparcaseg_native = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
             print("    Save relabeled image to {}".format(new_aparcaseg_native))
-            img = ni.Nifti1Image(Iaparcaseg_new, V.get_affine(), hdr2)
             ni.save(img, new_aparcaseg_native)
+        else:
+            aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.native.nii.gz')
+            new_aparcaseg_native = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
+            print("    Copy original aparc+aseg to {}".format(new_aparcaseg_native))
+            shutil.copyfile(aparcaseg_native,new_aparcaseg_native)
 
             # new_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.mgz')
             # aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
@@ -1065,6 +1071,8 @@ class CombineParcellations(BaseInterface):
 
             #print("    Replace aparc+aseg.mgz file {} by {}".format(aparcaseg_fs,new_aparcaseg_fs))
             #shutil.copyfile(new_aparcaseg_fs,aparcaseg_fs)
+
+        #TODO : correct ribbon?
 
         return runtime
 
@@ -2156,7 +2164,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 	brain_stem = np.array([16])
 
     # # load aseg volume
-    aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
+    aseg = ni.load(op.join(subject_dir, 'mri', 'aseg.nii.gz'))
     asegd = aseg.get_data()	# numpy.ndarray
 
     # identify cortical voxels, right (3) and left (42) hemispheres
@@ -2333,7 +2341,8 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
     rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
     lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
     annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
-    aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
+    rois_output = ['ROI_scale1.nii.gz', 'ROI_scale2.nii.gz', 'ROI_scale3.nii.gz', 'ROI_scale4.nii.gz', 'ROI_scale5.nii.gz']
+    roivs_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
 
     FNULL = open(os.devnull, 'w')
 
@@ -2371,7 +2380,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
         mri_cmd = fs_string + '; mri_aparc2aseg --s %s --annot %s --wmparc-dmax 0 --labelwm --hypo-as-wm --new-ribbon --o %s' % (
                     subject_id,
                     annot[i],
-                    os.path.join(subject_dir, 'tmp', aseg_output[i]))
+                    os.path.join(subject_dir, 'tmp', rois_output[i]))
         if v == 2:
             status = subprocess.call(mri_cmd, shell=True)
         else:
@@ -2381,7 +2390,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
         # Load Nifti volume
         if v:
             print('     > relabel cortical and subcortical regions for consistency between resolutions')
-        this_nifti = ni.load(os.path.join(subject_dir, 'tmp', aseg_output[i]))
+        this_nifti = ni.load(os.path.join(subject_dir, 'tmp', rois_output[i]))
         vol = this_nifti.get_data()	# numpy.ndarray
         hdr = this_nifti.header
         # Initialize output
@@ -2399,7 +2408,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
             zzMax = idxMax[2]
         # correct cortical surfaces using as reference the roisMax volume (for consistency between resolutions)
         else:
-            print("     ... adapt cortical surfaces")
+            print("     > adapt cortical surfaces")
             #adaptstart = time()
             idxRois = np.where(vol > 0)
             xxRois = idxRois[0]
@@ -2425,12 +2434,12 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
             #print("Cortical ROIs adaptation took %s seconds to process." % (time()-adaptstart))
 
         # 4. Dilate cortical regions
-        print("Dilating cortical regions...")
+        if v:
+            print("     > dilating cortical regions")
         #dilatestart = time()
         # loop throughout all the voxels belonging to the aseg GM volume
-        newvol = vol.copy()
         for j in range(xx.size):
-            if newvol[xx[j],yy[j],zz[j]] == 0:
+            if newrois[xx[j],yy[j],zz[j]] == 0:
                 local = extract(vol, shape, position=(xx[j],yy[j],zz[j]), fill=0)
                 mask = local.copy()
                 mask[np.nonzero(local>0)] = 1
@@ -2440,23 +2449,23 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
                 if value.size > 1:
                     counts = np.bincount(value)
                     value = np.argmax(counts)
-                newvol[xx[j],yy[j],zz[j]] = value
+                newrois[xx[j],yy[j],zz[j]] = value
 
         # 5. Save Nifti and mgz volumes
         if v:
             print('     > save output volumes')
-        this_out = os.path.join(subject_dir, 'mri', aseg_output[i])
-        img = ni.Nifti1Image(newvol, this_nifti.affine, hdr2)
+        this_out = os.path.join(subject_dir, 'mri', roivs_output[i])
+        img = ni.Nifti1Image(newrois, this_nifti.affine, hdr2)
         ni.save(img, this_out)
 
         mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
                     this_out,
-                    os.path.join(subject_dir, 'mri', aseg_output[i][0:-4]+'.mgz'))
+                    os.path.join(subject_dir, 'mri', roivs_output[i][0:-4]+'.mgz'))
         if v == 2:
             status = subprocess.call(mri_cmd, shell=True)
         else:
             status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-        os.remove(os.path.join(subject_dir, 'tmp', aseg_output[i]))
+        #os.remove(os.path.join(subject_dir, 'tmp', rois_output[i]))
 
 
     mri_cmd = ['mri_convert','-i',op.join(subject_dir,'mri','ribbon.mgz'),'-o',op.join(subject_dir,'mri','ribbon.nii.gz')]
@@ -2640,13 +2649,10 @@ def create_wm_mask(subject_id, subjects_dir):
         roi = ni.load(op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % parkey))
         roid = roi.get_data()
 
-        pg = nx.read_graphml(parval['node_information_graphml'])
-
-        for brk, brv in pg.nodes(data=True):
-
-            if brv['dn_region'] == 'cortical':
-                idx = np.where(roid == int(brv['dn_multiscaleID']))
-                gmmask[idx] = 1
+        valstem = roid.max()
+        #Remove the brainstem which is supposed to be the label with max value
+        idx = np.where((roid > 0) & (roid < valstem))
+        gmmask[idx] = 1
 
     # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
@@ -2824,18 +2830,15 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     gmmask = np.zeros( asegd.shape )
     print("Create gray matter mask")
     for parkey, parval in get_parcellation('Lausanne2018').items():
-        print("  > Processing %s ..." % ('ROI_%s.nii.gz' % parkey) )
+        print("  > Processing %s ..." % ('ROIv_%s.nii.gz' % parkey) )
 
         roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % parkey))
         roid = roi.get_data()
 
-        pg = nx.read_graphml(parval['node_information_graphml'])
-
-        for brk, brv in pg.nodes(data=True):
-
-            if brv['dn_region'] == 'cortical':
-                idx = np.where(roid == int(brv['dn_multiscaleID']))
-                gmmask[idx] = 1
+        valstem = roid.max()
+        #Extract voxels inside cortical gray matter with respect to Freesurfer-like labels
+        idx = np.where((roid > 1000) & (roid < 2000) | (roid > 2000) & (roid < 3000))
+        gmmask[idx] = 1
 
 
     # XXX: subtracting wmmask from ROI. necessary?
