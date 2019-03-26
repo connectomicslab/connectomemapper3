@@ -2183,14 +2183,161 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 	if not ( os.path.isdir(this_dir) ):
 		os.makedirs(this_dir)
 
-    def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id):
-    	# Multiscale parcellation - define annotation and segmentation variables
-    	rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
-    	lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
-    	annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
-    	aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
+    # def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id):
+    # 	# Multiscale parcellation - define annotation and segmentation variables
+    # 	rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
+    # 	lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
+    # 	annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
+    # 	aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
+    #
+    #     FNULL = open(os.devnull, 'w')
+    #
+    #     if v:
+    #         print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
+    #
+    #     # 1. Resample fsaverage CorticalSurface onto SUBJECT_ID CorticalSurface and map annotation for current scale
+    #     # Left hemisphere
+    #     if v:
+    #         print('     > resample fsaverage CorticalSurface to individual CorticalSurface')
+    #     mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi lh --sval-annot %s --tval %s' % (
+    #                 subject_id,
+    #                 pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),
+    #                 os.path.join(subject_dir, 'label', lh_annot_files[i]))
+    #     if v == 2:
+    #         status = subprocess.call(mri_cmd, shell=True)
+    #     else:
+    #         status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+    #     # Right hemisphere
+    #     mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi rh --sval-annot %s --tval %s' % (
+    #                 subject_id,
+    #                 pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),
+    #                 os.path.join(subject_dir, 'label', rh_annot_files[i]))
+    #     if v == 2:
+    #         status = subprocess.call(mri_cmd, shell=True)
+    #     else:
+    #         status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+    #
+    #     # 2. Generate Nifti volume from annotation
+    #     #    Note: change here --wmparc-dmax (FS default 5mm) to dilate cortical regions toward the WM
+    #     if v:
+    #         print('     > generate Nifti volume from annotation')
+    #     mri_cmd = fs_string + '; mri_aparc2aseg --s %s --annot %s --wmparc-dmax 0 --labelwm --hypo-as-wm --new-ribbon --o %s' % (
+    #                 subject_id,
+    #                 annot[i],
+    #                 os.path.join(subject_dir, 'tmp', aseg_output[i]))
+    #     if v == 2:
+    #         status = subprocess.call(mri_cmd, shell=True)
+    #     else:
+    #         status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+    #
+    #     # 3. Update numerical IDs of cortical and subcortical regions
+    #     # Load Nifti volume
+    #     if v:
+    #         print('     > relabel cortical and subcortical regions')
+    #     this_nifti = ni.load(os.path.join(subject_dir, 'tmp', aseg_output[i]))
+    #     vol = this_nifti.get_data()	# numpy.ndarray
+    #     hdr = this_nifti.header
+    #     # Initialize output
+    #     hdr2 = hdr.copy()
+    #     hdr2.set_data_dtype(np.uint16)
+    #     # vol2 = np.zeros( this_nifti.shape, dtype=np.int16 )
+    #     # # Relabelling Right hemisphere (2000+)
+    #     # ii = np.where((vol > 2000) & (vol < 3000))
+    #     # vol2[ii] = vol[ii] - 2000
+    #     # nlabel = np.amax(vol2)	# keep track of the number of assigned labels
+    #     # # Relabelling Subcortical Right hemisphere
+    #     # # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
+    #     # newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
+    #     # for j in range(0, len(rh_sub)):
+    #     # 	ii = np.where(vol == rh_sub[j])
+    #     # 	vol2[ii] = newLabels[j]
+    #     # nlabel = np.amax(vol2)
+    #     # # Relabelling Left hemisphere (1000+)
+    #     # ii = np.where((vol > 1000) & (vol < 2000))
+    #     # vol2[ii] = vol[ii] - 1000 + nlabel
+    #     # nlabel = np.amax(vol2)	# n cortical label in right hemisphere
+    #     # # Relabelling Subcortical Right hemisphere
+    #     # # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
+    #     # newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
+    #     # for j in range(0, len(lh_sub)):
+    #     # 	ii = np.where(vol == lh_sub[j])
+    #     # 	vol2[ii] = newLabels[j]
+    #     # nlabel = np.amax(vol2)
+    #     # # Relabelling Brain Stem
+    #     # ii = np.where(vol == brain_stem)
+    #     # vol2[ii] = nlabel + 1
+    #
+    #     # 4. Dilate cortical regions
+    #     print("Dilating cortical regions...")
+    #     #dilatestart = time()
+    #     # loop throughout all the voxels belonging to the aseg GM volume
+    #     newvol = vol.copy()
+    #     for j in range(xx.size):
+    #         if newvol[xx[j],yy[j],zz[j]] == 0:
+    #             local = extract(vol, shape, position=(xx[j],yy[j],zz[j]), fill=0)
+    #             mask = local.copy()
+    #             mask[np.nonzero(local>0)] = 1
+    #             thisdist = np.multiply(dist,mask)
+    #             thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
+    #             value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
+    #             if value.size > 1:
+    #                 counts = np.bincount(value)
+    #                 value = np.argmax(counts)
+    #             newvol[xx[j],yy[j],zz[j]] = value
+    #
+    #     # 5. Save Nifti and mgz volumes
+    #     if v:
+    #         print('     > save output volumes')
+    #     this_out = os.path.join(subject_dir, 'mri', aseg_output[i])
+    #     img = ni.Nifti1Image(newvol, this_nifti.affine, hdr2)
+    #     ni.save(img, this_out)
+    #
+    #     mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
+    #                 this_out,
+    #                 os.path.join(subject_dir, 'mri', aseg_output[i][0:-4]+'.mgz'))
+    #     if v == 2:
+    #         status = subprocess.call(mri_cmd, shell=True)
+    #     else:
+    #         status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+    #     os.remove(os.path.join(subject_dir, 'tmp', aseg_output[i]))
+    #
+    #     return 1
+    #
+    # # Loop over parcellation scales
+    # if v:
+    #     print('Generate MULTISCALE PARCELLATION for input subject')
+    #
+    # fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
+    #
+    # import multiprocessing as mp
+    # jobs = []
+    # for i in range(0, nscales):
+    #     thread = mp.Process(
+    #                         target=generate_single_parcellation,
+    #                         args=(v,i,fs_string,subject_dir,subject_id,)
+    #                         )
+    #     jobs.append(thread)
+    #     thread.start()
+    #
+	# # Ensure all of the processes have finished
+	# for j in jobs:
+	# 	j.join()
 
-        FNULL = open(os.devnull, 'w')
+    # Loop over parcellation scales
+    if v:
+        print('Generate MULTISCALE PARCELLATION for input subject')
+
+    fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
+
+    # Multiscale parcellation - define annotation and segmentation variables
+    rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
+    lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
+    annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
+    aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
+
+    FNULL = open(os.devnull, 'w')
+
+    for i in reversed(range(0, nscales)):
 
         if v:
             print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
@@ -2233,39 +2380,49 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
         # 3. Update numerical IDs of cortical and subcortical regions
         # Load Nifti volume
         if v:
-            print('     > relabel cortical and subcortical regions')
+            print('     > relabel cortical and subcortical regions for consistency between resolutions')
         this_nifti = ni.load(os.path.join(subject_dir, 'tmp', aseg_output[i]))
         vol = this_nifti.get_data()	# numpy.ndarray
         hdr = this_nifti.header
         # Initialize output
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.uint16)
-        # vol2 = np.zeros( this_nifti.shape, dtype=np.int16 )
-        # # Relabelling Right hemisphere (2000+)
-        # ii = np.where((vol > 2000) & (vol < 3000))
-        # vol2[ii] = vol[ii] - 2000
-        # nlabel = np.amax(vol2)	# keep track of the number of assigned labels
-        # # Relabelling Subcortical Right hemisphere
-        # # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
-        # newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
-        # for j in range(0, len(rh_sub)):
-        # 	ii = np.where(vol == rh_sub[j])
-        # 	vol2[ii] = newLabels[j]
-        # nlabel = np.amax(vol2)
-        # # Relabelling Left hemisphere (1000+)
-        # ii = np.where((vol > 1000) & (vol < 2000))
-        # vol2[ii] = vol[ii] - 1000 + nlabel
-        # nlabel = np.amax(vol2)	# n cortical label in right hemisphere
-        # # Relabelling Subcortical Right hemisphere
-        # # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
-        # newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
-        # for j in range(0, len(lh_sub)):
-        # 	ii = np.where(vol == lh_sub[j])
-        # 	vol2[ii] = newLabels[j]
-        # nlabel = np.amax(vol2)
-        # # Relabelling Brain Stem
-        # ii = np.where(vol == brain_stem)
-        # vol2[ii] = nlabel + 1
+
+        newrois = vol.copy()
+        # store scale5 volume for correction on multi-resolution consistency
+        if i == (nscales-1):
+            print("     ... storing ROIs volume maximal resolution")
+            roisMax = vol.copy()
+            idxMax = np.where(roisMax > 0)
+            xxMax = idxMax[0]
+            yyMax = idxMax[1]
+            zzMax = idxMax[2]
+        # correct cortical surfaces using as reference the roisMax volume (for consistency between resolutions)
+        else:
+            print("     ... adapt cortical surfaces")
+            #adaptstart = time()
+            idxRois = np.where(vol > 0)
+            xxRois = idxRois[0]
+            yyRois = idxRois[1]
+            zzRois = idxRois[2]
+            # correct voxels labeled in current resolution, but not labeled in highest resolution
+            for j in range(xxRois.size):
+                if ( roisMax[xxRois[j],yyRois[j],zzRois[j]]==0 ):
+                    newrois[xxRois[j],yyRois[j],zzRois[j]] = 0;
+            # correct voxels not labeled in current resolution, but labeled in highest resolution
+            for j in range(xxMax.size):
+                if ( newrois[xxMax[j],yyMax[j],zzMax[j]]==0 ):
+                    local = extract(rois, shape, position=(xxMax[j],yyMax[j],zzMax[j]), fill=0)
+                    mask = local.copy()
+                    mask[np.nonzero(local>0)] = 1
+                    thisdist = np.multiply(dist,mask)
+                    thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
+                    value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
+                    if value.size > 1:
+                        counts = np.bincount(value)
+                        value = np.argmax(counts)
+                    newrois[xxMax[j],yyMax[j],zzMax[j]] = value
+            #print("Cortical ROIs adaptation took %s seconds to process." % (time()-adaptstart))
 
         # 4. Dilate cortical regions
         print("Dilating cortical regions...")
@@ -2301,27 +2458,6 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
             status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
         os.remove(os.path.join(subject_dir, 'tmp', aseg_output[i]))
 
-        return 1
-
-    # Loop over parcellation scales
-    if v:
-        print('Generate MULTISCALE PARCELLATION for input subject')
-
-    fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
-
-    import multiprocessing as mp
-    jobs = []
-    for i in range(0, nscales):
-        thread = mp.Process(
-                            target=generate_single_parcellation,
-                            args=(v,i,fs_string,subject_dir,subject_id,)
-                            )
-        jobs.append(thread)
-        thread.start()
-
-	# Ensure all of the processes have finished
-	for j in jobs:
-		j.join()
 
     mri_cmd = ['mri_convert','-i',op.join(subject_dir,'mri','ribbon.mgz'),'-o',op.join(subject_dir,'mri','ribbon.nii.gz')]
     subprocess.check_call(mri_cmd)
