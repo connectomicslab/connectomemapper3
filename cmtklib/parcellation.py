@@ -1542,7 +1542,12 @@ class Parcellate(BaseInterface):
         #outputs['aseg_file'] = op.abspath('aseg.nii.gz')
 
         #outputs['roi_files'] = self._gen_outfilenames('ROI_HR_th')
-        outputs['roi_files_in_structural_space'] = self._gen_outfilenames('ROIv_HR_th')
+        if self.inputs.parcellation_scheme == "Lausanne2018":
+            outputs['roi_files_in_structural_space'] = self._gen_outfilenames('ROIv_Lausanne2018')
+        elif self.inputs.parcellation_scheme == "Lausanne2008":
+            outputs['roi_files_in_structural_space'] = self._gen_outfilenames('ROIv_Lausanne2008')
+        else:
+            outputs['roi_files_in_structural_space'] = self._gen_outfilenames('ROIv_HR_th')
 
         if self.inputs.erode_masks:
             outputs['wm_eroded'] = op.abspath('wm_eroded.nii.gz')
@@ -2341,8 +2346,8 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
     rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
     lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
     annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
-    rois_output = ['ROI_scale1.nii.gz', 'ROI_scale2.nii.gz', 'ROI_scale3.nii.gz', 'ROI_scale4.nii.gz', 'ROI_scale5.nii.gz']
-    roivs_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
+    rois_output = ['ROI_scale1_Lausanne2018.nii.gz', 'ROI_scale2_Lausanne2018.nii.gz', 'ROI_scale3_Lausanne2018.nii.gz', 'ROI_scale4_Lausanne2018.nii.gz', 'ROI_scale5_Lausanne2018.nii.gz']
+    roivs_output = ['ROIv_scale1_Lausanne2018.nii.gz', 'ROIv_scale2_Lausanne2018.nii.gz', 'ROIv_scale3_Lausanne2018.nii.gz', 'ROIv_scale4_Lausanne2018.nii.gz', 'ROIv_scale5_Lausanne2018.nii.gz']
 
     FNULL = open(os.devnull, 'w')
 
@@ -2432,6 +2437,11 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
                         value = np.argmax(counts)
                     newrois[xxMax[j],yyMax[j],zzMax[j]] = value
             #print("Cortical ROIs adaptation took %s seconds to process." % (time()-adaptstart))
+        if v:
+            print('     ... save output volumes')
+        this_out = os.path.join(subject_dir, 'mri', rois_output[i])
+        img = ni.Nifti1Image(newrois, this_nifti.affine, hdr2)
+        ni.save(img, this_out)
 
         # 4. Dilate cortical regions
         if v:
@@ -2453,7 +2463,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 
         # 5. Save Nifti and mgz volumes
         if v:
-            print('     > save output volumes')
+            print('     ... save output volumes ')
         this_out = os.path.join(subject_dir, 'mri', roivs_output[i])
         img = ni.Nifti1Image(newrois, this_nifti.affine, hdr2)
         ni.save(img, this_out)
@@ -2830,9 +2840,9 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     gmmask = np.zeros( asegd.shape )
     print("Create gray matter mask")
     for parkey, parval in get_parcellation('Lausanne2018').items():
-        print("  > Processing %s ..." % ('ROIv_%s.nii.gz' % parkey) )
+        print("  > Processing %s ..." % ('ROIv_%s_Lausanne2018.nii.gz' % parkey) )
 
-        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % parkey))
+        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s_Lausanne2018.nii.gz' % parkey))
         roid = roi.get_data()
 
         valstem = roid.max()
@@ -2903,13 +2913,14 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
     if parcellation_scheme == 'Lausanne2008':
         ds.append( (op.join(fs_dir, 'label', 'cc_unknown.nii.gz'), 'cc_unknown.nii.gz') )
         for p in get_parcellation('Lausanne2008').keys():
-            ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
-            ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
+            ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_Lausanne2008_%s.nii.gz' % p) )
+            ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_Lausanne2008_%s.nii.gz' % p) )
         ds.append( (op.join(fs_dir, 'mri','aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz') )
     elif parcellation_scheme == 'Lausanne2018':
         for p in get_parcellation('Lausanne2018').keys():
             #ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
-            ds.append( (op.join(fs_dir, 'mri','ROIv_%s.nii.gz' % p), 'ROIv_HR_th_%s.nii.gz' % p) )
+            ds.append( (op.join(fs_dir, 'mri','ROI_%s_Lausanne2018.nii.gz' % p), 'ROI_Lausanne2018_%s.nii.gz' % p) )
+            ds.append( (op.join(fs_dir, 'mri','ROIv_%s_Lausanne2018.nii.gz' % p), 'ROIv_Lausanne2018_%s.nii.gz' % p) )
         ds.append( (op.join(fs_dir, 'mri','aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz') )
 #        try:
 #            os.makedirs(op.join('.', p))
