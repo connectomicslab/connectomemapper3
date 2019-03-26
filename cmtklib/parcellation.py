@@ -2156,15 +2156,27 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 	brain_stem = np.array([16])
 
     # # load aseg volume
-    # aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
-    # asegd = aseg.get_data()	# numpy.ndarray
-    #
-    # # identify cortical voxels, right (3) and left (42) hemispheres
-    # idxr = np.where(asegd == 3)
-    # idxl = np.where(asegd == 42)
-    # xx = np.concatenate((idxr[0],idxl[0]))
-    # yy = np.concatenate((idxr[1],idxl[1]))
-    # zz = np.concatenate((idxr[2],idxl[2]))
+    aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
+    asegd = aseg.get_data()	# numpy.ndarray
+
+    # identify cortical voxels, right (3) and left (42) hemispheres
+    idxr = np.where(asegd == 3)
+    idxl = np.where(asegd == 42)
+    xx = np.concatenate((idxr[0],idxl[0]))
+    yy = np.concatenate((idxr[1],idxl[1]))
+    zz = np.concatenate((idxr[2],idxl[2]))
+
+    # initialize variables necessary for cortical ROIs dilation
+    # dimensions of the neighbourhood for rois labels assignment (choose odd dimensions!)
+    shape = (25,25,25)
+    center = np.array(shape) // 2
+    # dist: distances from the center of the neighbourhood
+    dist = np.zeros(shape, dtype='float32')
+    for x in range(shape[0]):
+        for y in range(shape[1]):
+            for z in range(shape[2]):
+                distxyz = center - [x,y,z]
+                dist[x,y,z] = math.sqrt(np.sum(np.multiply(distxyz,distxyz)))
 
 	# Check existence of tmp folder in input subject folder
 	this_dir = os.path.join(subject_dir, 'tmp')
@@ -2255,12 +2267,31 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
         # ii = np.where(vol == brain_stem)
         # vol2[ii] = nlabel + 1
 
-        # 4. Save Nifti and mgz volumes
+        # 4. Dilate cortical regions
+        print("Dilating cortical regions...")
+        #dilatestart = time()
+        # loop throughout all the voxels belonging to the aseg GM volume
+        newvol = vol.copy()
+        for j in range(xx.size):
+            if newvol[xx[j],yy[j],zz[j]] == 0:
+                local = extract(vol, shape, position=(xx[j],yy[j],zz[j]), fill=0)
+                mask = local.copy()
+                mask[np.nonzero(local>0)] = 1
+                thisdist = np.multiply(dist,mask)
+                thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
+                value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
+                if value.size > 1:
+                    counts = np.bincount(value)
+                    value = np.argmax(counts)
+                newvol[xx[j],yy[j],zz[j]] = value
+
+        # 5. Save Nifti and mgz volumes
         if v:
             print('     > save output volumes')
         this_out = os.path.join(subject_dir, 'mri', aseg_output[i])
-        img = ni.Nifti1Image(vol, this_nifti.affine, hdr2)
+        img = ni.Nifti1Image(newvol, this_nifti.affine, hdr2)
         ni.save(img, this_out)
+
         mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
                     this_out,
                     os.path.join(subject_dir, 'mri', aseg_output[i][0:-4]+'.mgz'))
@@ -2312,10 +2343,19 @@ def create_wm_mask(subject_id, subjects_dir):
 
     # these data is stored and could be extracted from fs_dir/stats/aseg.txt
 
+    #FIXME understand when ribbon file has default value or has "aseg" value
     # extract right and left white matter
-    idx_lh = np.where(fsmaskd == 120)
-    idx_rh = np.where(fsmaskd == 20)
+    print("Extract right and left wm")
+    #Ribbon labels by default
+    if fsmaskd.max() == 120:
+        idx_lh = np.where(fsmaskd == 120)
+        idx_rh = np.where(fsmaskd == 20)
+    #Ribbon label w.r.t aseg label
+    else:
+        idx_lh = np.where(fsmaskd == 41)
+        idx_rh = np.where(fsmaskd == 2)
 
+    # extract right and left
     wmmask[idx_lh] = 1
     wmmask[idx_rh] = 1
 
@@ -2459,9 +2499,9 @@ def create_wm_mask(subject_id, subjects_dir):
     gmmask = np.zeros( asegd.shape )
     print("Create gray matter mask")
     for parkey, parval in get_parcellation('Lausanne2008').items():
-        print("  > Processing %s ..." % ('ROI_%s.nii.gz' % parkey) )
+        print("  > Processing %s ..." % ('ROIv_%s.nii.gz' % parkey) )
 
-        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % parkey))
+        roi = ni.load(op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % parkey))
         roid = roi.get_data()
 
         pg = nx.read_graphml(parval['node_information_graphml'])
