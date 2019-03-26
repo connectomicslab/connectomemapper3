@@ -2020,7 +2020,7 @@ def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id):
     aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
 
     FNULL = open(os.devnull, 'w')
-    
+
     if v:
         print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
 
@@ -2154,6 +2154,17 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
 	lh_sub = np.array([10,11,12,13,26,17,18])
 	rh_sub = np.array([49,50,51,52,58,53,54])
 	brain_stem = np.array([16])
+
+    # # load aseg volume
+    # aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
+    # asegd = aseg.get_data()	# numpy.ndarray
+    #
+    # # identify cortical voxels, right (3) and left (42) hemispheres
+    # idxr = np.where(asegd == 3)
+    # idxl = np.where(asegd == 42)
+    # xx = np.concatenate((idxr[0],idxl[0]))
+    # yy = np.concatenate((idxr[1],idxl[1]))
+    # zz = np.concatenate((idxr[2],idxl[2]))
 
 	# Check existence of tmp folder in input subject folder
 	this_dir = os.path.join(subject_dir, 'tmp')
@@ -2443,11 +2454,35 @@ def create_wm_mask(subject_id, subjects_dir):
                 idx = np.where(roid == int(brv['dn_correspondence_id']))
                 wmmask[idx] = 0
 
+    # Extract cortical gray matter mask
+    # remove remaining structure, e.g. brainstem
+    gmmask = np.zeros( asegd.shape )
+    print("Create gray matter mask")
+    for parkey, parval in get_parcellation('Lausanne2008').items():
+        print("  > Processing %s ..." % ('ROI_%s.nii.gz' % parkey) )
+
+        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % parkey))
+        roid = roi.get_data()
+
+        pg = nx.read_graphml(parval['node_information_graphml'])
+
+        for brk, brv in pg.nodes(data=True):
+
+            if brv['dn_region'] == 'cortical':
+                idx = np.where(roid == int(brv['dn_multiscaleID']))
+                gmmask[idx] = 1
+
     # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
     img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
     print("Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
+
+    # output white matter mask. crop and move it afterwards
+    gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
+    img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header() )
+    print("Save gray matter mask: %s" % gm_out)
+    ni.save(img, gm_out)
 
     # Convert whole brain mask
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
@@ -2611,6 +2646,21 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     # Extract cortical gray matter mask
     # remove remaining structure, e.g. brainstem
     gmmask = np.zeros( asegd.shape )
+    print("Create gray matter mask")
+    for parkey, parval in get_parcellation('Lausanne2018').items():
+        print("  > Processing %s ..." % ('ROI_%s.nii.gz' % parkey) )
+
+        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % parkey))
+        roid = roi.get_data()
+
+        pg = nx.read_graphml(parval['node_information_graphml'])
+
+        for brk, brv in pg.nodes(data=True):
+
+            if brv['dn_region'] == 'cortical':
+                idx = np.where(roid == int(brv['dn_multiscaleID']))
+                gmmask[idx] = 1
+
 
     # XXX: subtracting wmmask from ROI. necessary?
     # for parkey, parval in get_parcellation('Lausanne2018').items():
