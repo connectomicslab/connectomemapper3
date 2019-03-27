@@ -2952,7 +2952,7 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
         for p in get_parcellation('Lausanne2008').keys():
             ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_Lausanne2008_%s.nii.gz' % p) )
             ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_Lausanne2008_%s.nii.gz' % p) )
-        ds.append( (op.join(fs_dir, 'label', 'T1w-class-GM.nii.gz'), 'T1w-class-GM.nii.gz') )
+        ds.append( (op.join(fs_dir, 'label', 'T1w_class-GM.nii.gz'), 'T1w-class-GM.nii.gz') )
         ds.append( (op.join(fs_dir, 'mri','aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz') )
     elif parcellation_scheme == 'Lausanne2018':
         for p in get_parcellation('Lausanne2018').keys():
