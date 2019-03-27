@@ -189,6 +189,7 @@ class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
 
 class CombineParcellationsOutputSpec(TraitedSpec):
     aparc_aseg = File()
+    gray_matter_mask_file = File(exists=True)
     output_rois = OutputMultiPath(File(exists=True))
     colorLUT_files = OutputMultiPath(File(exists=True))
     graphML_files = OutputMultiPath(File(exists=True))
@@ -858,6 +859,15 @@ class CombineParcellations(BaseInterface):
                                  '{} \n'.format('    </node>')]
                     f_graphML.writelines(node_lines)
 
+            outprefixName = roi.split(".")[0]
+            outprefixName = outprefixName.split("/")[-1:][0]
+            for elem in outprefixName.split("_"):
+                if "scale" in elem:
+                    scale = elem
+
+            if scale == 'scale1':
+                gmMask = It.copy()
+
             # Relabelling Brain Stem
             if brainstem_defined:
                 if self.inputs.create_colorLUT:
@@ -887,6 +897,8 @@ class CombineParcellations(BaseInterface):
 
                     ind = np.where(Istem == lab)
                     It[ind] = newLabels[i]
+                    if scale == 'scale1':
+                        gmMask[ind] = 0
                     i += 1
                 nlabel = It.max()
 
@@ -898,6 +910,9 @@ class CombineParcellations(BaseInterface):
 
                 newLabels = np.arange(nlabel+1,nlabel+2)
                 It[indrep] = newLabels[0]
+
+                if scale == 'scale1':
+                    gmMask[indrep] = 0
 
                 print("update brainstem parcellation label (%i -> %i)"%(lab,newLabels[0]))
 
@@ -923,6 +938,19 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_colorLUT:
                     f_colorLUT.write("\n")
 
+
+            hdr = V.get_header()
+            hdr2 = hdr.copy()
+            hdr2.set_data_dtype(np.int16)
+
+            # Threshold roi scale 1 with unlabeled BrainStem
+            if scale == 'scale1':
+                gmMask[gmMask>0] = 1
+                gmMask_fn = op.abspath('T1w_class-GM.nii.gz'.format(outprefixName))
+                print("Save graymatter mask to %s" % gmMask_fn)
+                img = ni.Nifti1Image(gmMask, V.get_affine(), hdr2)
+                ni.save(img, gmMask_fn)
+
             # Fix negative values
             It[It<0] = 0
 
@@ -930,9 +958,6 @@ class CombineParcellations(BaseInterface):
             outprefixName = roi.split(".")[0]
             outprefixName = outprefixName.split("/")[-1:][0]
             output_roi = op.abspath('{}_final.nii.gz'.format(outprefixName))
-            hdr = V.get_header()
-            hdr2 = hdr.copy()
-            hdr2.set_data_dtype(np.int16)
             print("Save output image to %s" % output_roi)
             img = ni.Nifti1Image(It, V.get_affine(), hdr2)
             ni.save(img, output_roi)
@@ -1078,10 +1103,11 @@ class CombineParcellations(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
+        outputs['gray_matter_mask_file'] = op.abspath('T1w_class-GM.nii.gz')
         outputs['aparc_aseg'] = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
-        outputs['output_rois'] = self._gen_outfilenames('ROIv_HR_th','_final.nii.gz')
-        outputs['colorLUT_files'] = self._gen_outfilenames('ROIv_HR_th','_FreeSurferColorLUT.txt')
-        outputs['graphML_files'] = self._gen_outfilenames('ROIv_HR_th','.graphml')
+        outputs['output_rois'] = self._gen_outfilenames('ROIv_Lausanne2018','_final.nii.gz')
+        outputs['colorLUT_files'] = self._gen_outfilenames('ROIv_Lausanne2018','_FreeSurferColorLUT.txt')
+        outputs['graphML_files'] = self._gen_outfilenames('ROIv_Lausanne2018','.graphml')
         return outputs
 
     def _gen_outfilenames(self, basename, posfix):
@@ -1536,7 +1562,7 @@ class Parcellate(BaseInterface):
         outputs['aparc_aseg'] = op.abspath('aparc+aseg.native.nii.gz')
 
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
-        outputs['gray_matter_mask_file'] = op.abspath('gmmask.nii.gz')
+        outputs['gray_matter_mask_file'] = op.abspath('T1w_class-GM.nii.gz')
         #outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
         outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
         #outputs['aseg_file'] = op.abspath('aseg.nii.gz')
@@ -1955,6 +1981,17 @@ def create_roi(subject_id, subjects_dir):
                     value = np.argmax(counts)
                 newrois[xx[j],yy[j],zz[j]] = value
         #print("Cortical ROIs dilation took %s seconds to process." % (time()-dilatestart))
+
+        # Create Gray Matter mask
+        if parkey == 'scale1':
+            print("Creating gray matter mask from {}...".format(parkey))
+            gmMask = newrois.copy()
+            gmMask[newrois==83]=0
+            gmMask[gmMask>0]=1
+            out_mask = op.join(fs_dir, 'label', 'T1w_class-GM.nii.gz')
+            print("Save gray matter mask to %s" % out_mask)
+            img = ni.Nifti1Image(gmMask, aseg.get_affine(), hdr2)
+            ni.save(img, out_mask)
 
         # store volume eg in ROIv_scale33.nii.gz
         out_roi = op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % parkey)
@@ -2915,6 +2952,7 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
         for p in get_parcellation('Lausanne2008').keys():
             ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_Lausanne2008_%s.nii.gz' % p) )
             ds.append( (op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % p), 'ROIv_Lausanne2008_%s.nii.gz' % p) )
+        ds.append( (op.join(fs_dir, 'label', 'T1w-class-GM.nii.gz'), 'T1w-class-GM.nii.gz') )
         ds.append( (op.join(fs_dir, 'mri','aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz') )
     elif parcellation_scheme == 'Lausanne2018':
         for p in get_parcellation('Lausanne2018').keys():

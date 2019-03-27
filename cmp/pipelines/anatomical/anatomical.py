@@ -320,6 +320,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                             ('aseg.nii.gz', self.subject+'_desc-aseg_dseg.nii.gz'),
                                             ('fsmask_1mm.nii.gz',self.subject+'_label-WM_dseg.nii.gz'),
                                             ('gmmask.nii.gz',self.subject+'_label-GM_dseg.nii.gz'),
+                                            ('T1w_class-GM.nii.gz',self.subject+'_label-GM_dseg.nii.gz'),
                                             ('aparc+aseg.native.nii.gz',self.subject+'_desc-aparcaseg_dseg.nii.gz'),
                                             ('aparc+aseg.Lausanne2018.native.nii.gz',self.subject+'_desc-aparcaseg_dseg.nii.gz'),
                                             ('ROIv_Lausanne2008_scale1.nii.gz',self.subject+'_label-L2008_desc-scale1_atlas.nii.gz'),
