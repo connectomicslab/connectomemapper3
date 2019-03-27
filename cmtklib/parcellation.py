@@ -2874,18 +2874,18 @@ def create_wm_mask_v2(subject_id, subjects_dir):
 
     # Extract cortical gray matter mask
     # remove remaining structure, e.g. brainstem
-    gmmask = np.zeros( asegd.shape )
-    print("Create gray matter mask")
-    for parkey, parval in get_parcellation('Lausanne2018').items():
-        print("  > Processing %s ..." % ('ROIv_%s_Lausanne2018.nii.gz' % parkey) )
-
-        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s_Lausanne2018.nii.gz' % parkey))
-        roid = roi.get_data()
-
-        valstem = roid.max()
-        #Extract voxels inside cortical gray matter with respect to Freesurfer-like labels
-        idx = np.where((roid > 1000) & (roid < 2000) | (roid > 2000) & (roid < 3000))
-        gmmask[idx] = 1
+    # gmmask = np.zeros( asegd.shape )
+    # print("Create gray matter mask")
+    # for parkey, parval in get_parcellation('Lausanne2018').items():
+    #     print("  > Processing %s ..." % ('ROIv_%s_Lausanne2018.nii.gz' % parkey) )
+    #
+    #     roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s_Lausanne2018.nii.gz' % parkey))
+    #     roid = roi.get_data()
+    #
+    #     valstem = roid.max()
+    #     #Extract voxels inside cortical gray matter with respect to Freesurfer-like labels
+    #     idx = np.where((roid > 1000) & (roid < 2000) | (roid > 2000) & (roid < 3000))
+    #     gmmask[idx] = 1
 
 
     # XXX: subtracting wmmask from ROI. necessary?
@@ -2924,10 +2924,10 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     print("Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
 
-    gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
-    img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header() )
-    print("Save gray matter mask: %s" % gm_out)
-    ni.save(img, gm_out)
+    # gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
+    # img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header() )
+    # print("Save gray matter mask: %s" % gm_out)
+    # ni.save(img, gm_out)
 
     # Convert whole brain mask
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
