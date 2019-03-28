@@ -106,14 +106,14 @@ jobs:
       - run:
           name: Store FreeSurfer license file
           command: |
-            mkdir -p /tmp/fslicense
-            cd /tmp/fslicense
-            echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/fslicense/license.txt
+            mkdir -p /tmp/code
+            cd /tmp/code
+            echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/code/license.txt
       - persist_to_workspace:
           root: /tmp
           paths:
             - data
-            - fslicense
+            - code
             - ds005/derivatives/freesurfer
       - save_cache:
          key: data-{{ epoch }}
@@ -140,7 +140,7 @@ jobs:
       image: circleci/classic:201711-01
     working_directory: /tmp/ds005
     environment:
-      - FS_LICENSE: /tmp/fslicense/license.txt
+      - FS_LICENSE: /tmp/code/license.txt
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
@@ -178,11 +178,10 @@ jobs:
             mkdir -p /tmp/ds005/work /tmp/ds005/derivatives
             docker run -it --rm \
                 -v /tmp/data/ds005:/tmp \
-                -v /home/circleci/src/connectomemapper3/config:/tmp/code \
-                -v $FS_LICENSE:/opt/freesurfer/license.txt \
+                -v /home/circleci/src/connectomemapper3/config:/tmp/config \
                 sebastientourbier/connectomemapper3:latest \
                 /tmp /tmp/derivatives participant --participant_label 01 \
-                --anat_pipeline_config /tmp/code/ref_anatomical_config.ini
+                --anat_pipeline_config /tmp/config/ref_anatomical_config.ini
 
       - save_cache:
          key: ds005-anat-v12-{{ .Branch }}-{{ epoch }}

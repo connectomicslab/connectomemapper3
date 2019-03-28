@@ -392,7 +392,9 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
-        datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval',
+
+        if self.parcellation_scheme == 'Lausanne2018':
+            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval',
                                                 T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
                                                 aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
                                                 brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
@@ -404,6 +406,16 @@ class DiffusionPipeline(Pipeline):
                                                 roi_graphml_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.graphml',roi_graphml_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.graphml',
                                                 roi_graphml_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.graphml',
                                                 roi_graphml_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.graphml')
+        else:# Lausanne2008 and Freesurfer (to be tested)
+            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval',
+                                                T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
+                                                aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
+                                                brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
+                                                wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
+                                                brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
+                                                roi_volume_s1='anat/'+self.subject+'_label-L2008_desc-scale1_atlas.nii.gz',roi_volume_s2='anat/'+self.subject+'_label-L2008_desc-scale2_atlas.nii.gz',
+                                                roi_volume_s3='anat/'+self.subject+'_label-L2008_desc-scale3_atlas.nii.gz',
+                                                roi_volume_s4='anat/'+self.subject+'_label-L2008_desc-scale4_atlas.nii.gz',roi_volume_s5='anat/'+self.subject+'_label-L2008_desc-scale5_atlas.nii.gz')
         # datasource.inputs.field_template_args = dict(diffusion=[], bvecs=[], bvals=[],T1=[],brain=[],brain_mask=[],
         #                                         wm_mask_file=[],wm_eroded=[],brain_eroded=[],csf_eroded=[],
         #                                         roi_volumes=[['%s'%self.subject],[1,2,3,4,5]])
