@@ -178,11 +178,50 @@ class ParcellationStage(Stage):
                     #             (parcCombiner,create_atlas_info,[("graphML_files","roi_graphMLs")]),
                     #             (create_atlas_info,outputnode,[("atlas_info","atlas_info")]),
                     #         ])
-            else:
+            elif self.config.parcellation_scheme == 'Lausanne2008':
+
+                def get_atlas_LUTs(paths):
+                    colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution83','resolution83_LUT.txt'))),
+                                 os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution150','resolution150_LUT.txt'))),
+                                 os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution258','resolution258_LUT.txt'))),
+                                 os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution500','resolution500_LUT.txt'))),
+                                 os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution1015','resolution1015_LUT.txt')))
+                                 ]
+                    return colorLUTs
+
+                def get_atlas_graphMLs(paths):
+                    graphMLs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution83','resolution83.graphml'))),
+                                 os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution150','resolution150.graphml'))),
+                                 os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution258','resolution258.graphml'))),
+                                 os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution500','resolution500.graphml'))),
+                                 os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution1015','resolution1015.graphml')))
+                                 ]
+                    return graphMLs
+
                 flow.connect([
                             (parc_node,outputnode,[("gray_matter_mask_file","gm_mask_file")]),
                             (parc_node,outputnode,[("aparc_aseg","aparc_aseg")]),
                             (parc_node,outputnode,[("roi_files_in_structural_space","roi_volumes")]),
+                            (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_LUTs),"roi_colorLUTs")]),
+                            (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_graphMLs),"roi_graphMLs")]),
+                        ])
+            else:
+                def get_atlas_LUTs(paths):
+                    colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))),
+                                 ]
+                    return colorLUTs
+
+                def get_atlas_graphMLs(paths):
+                    graphMLs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','resolution83.graphml'))),
+                                 ]
+                    return graphMLs
+
+                flow.connect([
+                            (parc_node,outputnode,[("gray_matter_mask_file","gm_mask_file")]),
+                            (parc_node,outputnode,[("aparc_aseg","aparc_aseg")]),
+                            (parc_node,outputnode,[("roi_files_in_structural_space","roi_volumes")]),
+                            (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_LUTs),"roi_colorLUTs")]),
+                            (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_graphMLs),"roi_graphMLs")]),
                         ])
 
 
