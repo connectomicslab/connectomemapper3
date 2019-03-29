@@ -2062,7 +2062,7 @@ def define_atlas_variables():
 
     return paths, comp, pardic, parkeys
 
-def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id):
+def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id,w):
     # Multiscale parcellation - define annotation and segmentation variables
     rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
     lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
@@ -2100,7 +2100,7 @@ def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id):
     #    Note: change here --wmparc-dmax (FS default 5mm) to dilate cortical regions toward the WM
     if v:
         print('     > generate Nifti volume from annotation')
-    mri_cmd = fs_string + '; mri_aparc2aseg --s %s --annot %s --wmparc-dmax 0 --labelwm --hypo-as-wm --new-ribbon --o %s' % (
+    mri_cmd = fs_string + '; mri_aparc2aseg --s %s --annot %s --wmparc-dmax 10 --labelwm --hypo-as-wm --new-ribbon --o %s' % (
                 subject_id,
                 annot[i],
                 os.path.join(subject_dir, 'tmp', aseg_output[i]))

@@ -198,48 +198,59 @@ class ParcellationStage(Stage):
                 #                  ]
                 #     return graphMLs
 
-                outputnode.roi_colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution83','resolution83_LUT.txt'))),
+                parc_files = pe.Node(interface=util.IdentityInterface(fields=["roi_colorLUTs", "roi_graphMLs"]),name="parcellation_files")
+                parc_files.inputs.roi_colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution83','resolution83_LUT.txt'))),
                              os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution150','resolution150_LUT.txt'))),
                              os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution258','resolution258_LUT.txt'))),
                              os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution500','resolution500_LUT.txt'))),
                              os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution1015','resolution1015_LUT.txt')))
                              ]
-
-                outnode.roi_graphMLs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution83','resolution83.graphml'))),
+                parc_files.inputs.roi_graphMLs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution83','resolution83.graphml'))),
                              os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution150','resolution150.graphml'))),
                              os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution258','resolution258.graphml'))),
                              os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution500','resolution500.graphml'))),
                              os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','Lausanne2008','resolution1015','resolution1015.graphml')))
                              ]
 
+
+                # print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+                # print("^^^^ Lausanne2008 color LUT / graphML ^^^^")
+                # print(outputnode.outputs.roi_colorLUTs)
+                # print(outputnode.outputs.roi_graphMLs)
+                # print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+
                 flow.connect([
                             (parc_node,outputnode,[("gray_matter_mask_file","gm_mask_file")]),
                             (parc_node,outputnode,[("aparc_aseg","aparc_aseg")]),
                             (parc_node,outputnode,[("roi_files_in_structural_space","roi_volumes")]),
+                            (parc_files,outputnode,[("roi_colorLUTs","roi_colorLUTs")]),
+                            (parc_files,outputnode,[("roi_graphMLs","roi_graphMLs")]),
                             # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_LUTs),"roi_colorLUTs")]),
                             # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_graphMLs),"roi_graphMLs")]),
                         ])
             else:
-                def get_atlas_LUTs(paths):
-                    colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))),
-                                 ]
-                    return colorLUTs
+                # def get_atlas_LUTs(paths):
+                #     colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))),
+                #                  ]
+                #     return colorLUTs
+                #
+                # def get_atlas_graphMLs(paths):
+                #     graphMLs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','resolution83.graphml'))),
+                #                  ]
+                #     return graphMLs
 
-                def get_atlas_graphMLs(paths):
-                    graphMLs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','resolution83.graphml'))),
-                                 ]
-                    return graphMLs
-
-                outputnode.roi_colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))),
-                                            ]
-
-                outputnode.graphMLs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','resolution83.graphml'))),
-                                       ]
+                parc_files = pe.Node(interface=util.IdentityInterface(fields=["roi_colorLUTs", "roi_graphMLs"]),name="parcellation_files")
+                parc_files.inputs.roi_colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))),
+                                                    ]
+                parc_files.inputs.roi_graphMLs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','resolution83.graphml'))),
+                                                    ]
 
                 flow.connect([
                             (parc_node,outputnode,[("gray_matter_mask_file","gm_mask_file")]),
                             (parc_node,outputnode,[("aparc_aseg","aparc_aseg")]),
                             (parc_node,outputnode,[("roi_files_in_structural_space","roi_volumes")]),
+                            (parc_files,outputnode,[("roi_colorLUTs","roi_colorLUTs")]),
+                            (parc_files,outputnode,[("roi_graphMLs","roi_graphMLs")]),
                             # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_LUTs),"roi_colorLUTs")]),
                             # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_graphMLs),"roi_graphMLs")]),
                         ])
