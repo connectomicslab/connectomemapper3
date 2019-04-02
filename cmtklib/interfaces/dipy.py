@@ -807,7 +807,7 @@ class DirectionGetterTractography(DipyBaseInterface):
         trkhdr['voxel_order'] = 'ras'
         trackvis_affine = utils.affine_for_trackvis(trkhdr['voxel_size'])
 
-        sphere = get_sphere('repulsion724')
+        sphere = get_sphere('symmetric724')
 
         def clipMask(mask):
             """This is a hack until we fix the behaviour of the tracking objects
@@ -817,7 +817,7 @@ class DirectionGetterTractography(DipyBaseInterface):
             for i in range(len(index)):
                 idx = index[:]
                 idx[i] = [0, -1]
-                out[idx] = 0.
+                out[tuple(idx)] = 0.
             return out
 
         if isdefined(self.inputs.tracking_mask):
@@ -886,6 +886,8 @@ class DirectionGetterTractography(DipyBaseInterface):
             voxel_size = np.average(img_pve_wm.header['pixdim'][1:4])
             step_size = self.inputs.step_size
 
+            IFLOGGER.info('Building CMC Tissue Classifier')
+
             cmc_classifier = CmcTissueClassifier.from_pve(img_pve_wm.get_data(),
                                                           img_pve_gm.get_data(),
                                                           img_pve_csf.get_data(),
@@ -930,7 +932,7 @@ class DirectionGetterTractography(DipyBaseInterface):
                            data=data,
                            sphere=sphere,
                            relative_peak_threshold=.2,
-                           min_separation_angle=25,
+                           min_separation_angle=self.inputs.max_angle,
                            mask=tmsk,
                            return_sh=True,
                            #sh_basis_type=args.basis,
@@ -965,6 +967,7 @@ class DirectionGetterTractography(DipyBaseInterface):
             save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
 
         else:
+            IFLOGGER.info('Performing PFT tractography')
             # Particle Filtering Tractography
             pft_streamline_generator = ParticleFilteringTracking(dg,
                                                                  cmc_classifier,
@@ -972,7 +975,7 @@ class DirectionGetterTractography(DipyBaseInterface):
                                                                  affine,
                                                                  max_cross=1,
                                                                  step_size=step_size,
-                                                                 maxlen=1000,
+                                                                 maxlen=200,
                                                                  pft_back_tracking_dist=2,
                                                                  pft_front_tracking_dist=1,
                                                                  particle_count=15,
@@ -982,6 +985,7 @@ class DirectionGetterTractography(DipyBaseInterface):
             from dipy.tracking.streamline import Streamlines
             streamlines = Streamlines(pft_streamline_generator)
 
+            IFLOGGER.info('Saving tracks')
             save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
 
         # IFLOGGER.info('Loading CSD model and fitting')
