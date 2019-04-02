@@ -348,7 +348,9 @@ class ParcellationStage(Stage):
                         resolution = {'1':'resolution83','2':'resolution150','3':'resolution258','4':'resolution500','5':'resolution1015'}
                         for roi_v in parc_results.outputs.roi_files_in_structural_space:
                             roi_basename = os.path.basename(roi_v)
-                            scale = roi_basename[16:-7]
+                            print(roi_basename)
+                            scale = roi_basename[23:-7]
+                            print(scale)
                             # print scale
                             lut_file = pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008',resolution[scale],resolution[scale] + '_LUT.txt'))
                             self.inspect_outputs_dict[roi_basename] = ['freeview','-v',

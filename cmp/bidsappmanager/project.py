@@ -1559,7 +1559,7 @@ class ProjectHandlerV2(Handler):
         try:
             bids_layout = BIDSLayout(loaded_project.base_directory)
             print(bids_layout)
-
+            
             loaded_project.bids_layout = bids_layout
             is_bids = True
 

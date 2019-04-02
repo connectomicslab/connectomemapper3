@@ -1423,6 +1423,7 @@ class CMP_QualityControlWindow(HasTraits):
 
                 self.project_info.anat_config_file = os.path.join(self.project_info.base_directory,'derivatives','{}_{}_anatomical_config.ini'.format(self.project_info.subject,self.project_info.subject_session))
                 if os.access(self.project_info.anat_config_file,os.F_OK):
+                    print("> Initialize anatomical pipeline")
                     self.anat_pipeline = project.init_anat_project(self.project_info,False)
                 else:
                     self.anat_pipeline = None
@@ -1430,6 +1431,7 @@ class CMP_QualityControlWindow(HasTraits):
                 if self.dmri_inputs_checked:
                     self.project_info.dmri_config_file = os.path.join(self.project_info.base_directory,'derivatives','{}_{}_diffusion_config.ini'.format(self.project_info.subject,self.project_info.subject_session))
                     if os.access(self.project_info.dmri_config_file,os.F_OK):
+                        print("> Initialize diffusion pipeline")
                         dmri_valid_inputs, self.dmri_pipeline = project.init_dmri_project(self.project_info,bids_layout,False)
                     else:
                         self.dmri_pipeline = None
@@ -1440,6 +1442,7 @@ class CMP_QualityControlWindow(HasTraits):
                 if self.fmri_inputs_checked:
                     self.project_info.fmri_config_file = os.path.join(self.project_info.base_directory,'derivatives','{}_{}_fMRI_config.ini'.format(self.project_info.subject,self.project_info.subject_session))
                     if os.access(self.project_info.fmri_config_file,os.F_OK):
+                        print("> Initialize fMRI pipeline")
                         fmri_valid_inputs, self.fmri_pipeline = project.init_fmri_project(self.project_info,bids_layout,False)
                     else:
                         self.fmri_pipeline = None
@@ -1490,25 +1493,33 @@ class CMP_QualityControlWindow(HasTraits):
                 if self.anat_pipeline != None:
                     self.anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.project_info.base_directory,'derivatives','freesurfer','{}'.format(self.project_info.subject))
 
+            print("[PIPELINE INIT DONE]")
+
             if self.anat_pipeline != None:
+                print("> Anatomical pipeline output inspection")
                 self.anat_pipeline.view_mode = 'inspect_outputs_view'
                 for stage in self.anat_pipeline.stages.values():
+                    print("  ... Inspect stage {}".format(stage))
                     stage.define_inspect_outputs()
                     # print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
                     if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         self.output_anat_available = True
 
             if self.dmri_pipeline != None:
+                print("> Diffusion pipeline output inspection")
                 self.dmri_pipeline.view_mode = 'inspect_outputs_view'
                 for stage in self.dmri_pipeline.stages.values():
+                    print("  ... Inspect stage {}".format(stage))
                     stage.define_inspect_outputs()
                     # print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
                     if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         self.output_dmri_available = True
 
             if self.fmri_pipeline != None:
+                print("> fMRI pipeline output inspection")
                 self.fmri_pipeline.view_mode = 'inspect_outputs_view'
                 for stage in self.fmri_pipeline.stages.values():
+                    print("  ... Inspect stage {}".format(stage))
                     stage.define_inspect_outputs()
                     # print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
                     if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
