@@ -710,6 +710,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         n_nodes = len(gp)
         pc=-1
         cnt=-1
+
+        thalamic_labels = []
         for u,d in gp.nodes(data=True):
 
             # Percent counter
@@ -728,6 +730,9 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 G.node[int(u)]['dn_position'] = tuple(np.mean( np.where(roiData== int(d["dn_correspondence_id"]) ) , axis = 1))
                 G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_correspondence_id"]) )
                 # print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_correspondence_id"]) ))
+                # Store parcellation labels corresponding to thalamic nuclei
+                if gp.node[int(u)]['dn_fsname'] == 'thalamus':
+                    thalamic_labels.append(int(u))
             else:
                 #if int(u) == 53:
                 #    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
@@ -739,7 +744,10 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 #if int(u) == 53:
                 #    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
-
+        thalamic_labels = np.array(thalamic_labels)
+        print("  ************************")
+        print('  >> Labels of thalamic nuclei :')
+        print('  {}'.format(thalamic_labels))
         print("  ************************")
 
         dis = 0
@@ -806,13 +814,20 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 #                print("This needs bugfixing!")
                 continue
 
-            # Update fiber label
-            # switch the rois in order to enforce startROI < endROI
+            # Switch the rois in order to enforce startROI < endROI
             if endROI < startROI:
                 tmp = startROI
                 startROI = endROI
                 endROI = tmp
 
+            # TODO: Refine fibers ending in thalamus
+            #if (startROI in thalamic_labels) or (endROI in thalamic_labels):
+                #Extract all thalamic nuclei the fiber is passing through
+
+                #Refine start/endROI connecting to the most probable nucleus
+
+
+            # Update fiber label
             fiberlabels[i,0] = startROI
             fiberlabels[i,1] = endROI
 

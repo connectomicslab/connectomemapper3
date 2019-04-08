@@ -987,16 +987,17 @@ class DirectionGetterTractography(DipyBaseInterface):
             #
             save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
 
+            import nibabel
+            from nibabel.streamlines import Field, Tractogram
+            from nibabel.orientations import aff2axcodes
+
+            print('-> Load nifti and copy header 1')
+
             trkhdr = nb.trackvis.empty_header()
             trkhdr['dim'] = imref.get_data().shape
             trkhdr['voxel_size'] = imref.header.get_zooms()[:3]
             trkhdr['voxel_order'] = "".join(aff2axcodes(imref.affine))
             trkhdr['vox_to_ras'] = imref.affine.copy() #utils.affine_for_trackvis(trkhdr['voxel_size'])
-
-            import nibabel
-            from nibabel.streamlines import Field, Tractogram
-            from nibabel.orientations import aff2axcodes
-            print('-> Load nifti and copy header')
 
             np.save(self._gen_filename('streamlines', ext='.npy'),streamlines)
 
