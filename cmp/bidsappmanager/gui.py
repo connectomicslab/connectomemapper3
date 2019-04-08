@@ -155,7 +155,7 @@ class CMP_Project_Info(HasTraits):
     base_directory = Directory
     install_datalad_dataset_via_ssh = Bool(True)
     ssh_user = String('remote_username')
-    ssh_pwd = Password()
+    ssh_pwd = Password('')
     ssh_remote = String('IP address/ Machine name')
     datalad_dataset_path = Directory('/shared/path/to/existing/datalad/dataset')
 

@@ -464,6 +464,7 @@ class SHORE(DipyDiffusionInterface):
         RTOP=np.zeros(dimsODF[:3])
         MSD=np.zeros(dimsODF[:3])
 
+        # Dipy 0.16 - basis : {None, ‘tournier07’, ‘descoteaux07’}
         if self.inputs.tracking_processing_tool == "mrtrix":
             basis = 'mrtrix'
         else:
@@ -755,8 +756,11 @@ class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
 
 class DirectionGetterTractographyOutputSpec(TraitedSpec):
     tracks = File(desc='TrackVis file containing extracted streamlines')
+    tracks2 = File(desc='TrackVis file containing extracted streamlines')
+    tracks3 = File(desc='TrackVis file containing extracted streamlines')
     out_seeds = File(desc=('file containing the (N,3) *voxel* coordinates used'
                            ' in seeding.'))
+    streamlines = File(desc='Numpy array of streamlines')
 
 
 class DirectionGetterTractography(DipyBaseInterface):
@@ -800,12 +804,6 @@ class DirectionGetterTractography(DipyBaseInterface):
         hdr = imref.header.copy()
         hdr.set_data_dtype(np.float32)
         hdr['data_type'] = 16
-
-        trkhdr = nb.trackvis.empty_header()
-        trkhdr['dim'] = imref.get_data().shape
-        trkhdr['voxel_size'] = imref.get_header().get_zooms()[:3]
-        trkhdr['voxel_order'] = 'ras'
-        trackvis_affine = utils.affine_for_trackvis(trkhdr['voxel_size'])
 
         sphere = get_sphere('symmetric724')
 
@@ -854,7 +852,7 @@ class DirectionGetterTractography(DipyBaseInterface):
                 if self.inputs.save_seeds:
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
 
-            tseeds = utils.seeds_from_mask(seedmsk, density=2, affine=affine)
+            tseeds = utils.seeds_from_mask(seedmsk, density=1, affine=affine)#FIXME: density should be customizable
 
         IFLOGGER.info('Loading and masking FA')
         img_fa = nb.load(self.inputs.in_fa)
@@ -986,7 +984,33 @@ class DirectionGetterTractography(DipyBaseInterface):
             streamlines = Streamlines(pft_streamline_generator)
 
             IFLOGGER.info('Saving tracks')
+            #
             save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
+
+            trkhdr = nb.trackvis.empty_header()
+            trkhdr['dim'] = imref.get_data().shape
+            trkhdr['voxel_size'] = imref.header.get_zooms()[:3]
+            trkhdr['voxel_order'] = "".join(aff2axcodes(imref.affine))
+            trkhdr['vox_to_ras'] = imref.affine.copy() #utils.affine_for_trackvis(trkhdr['voxel_size'])
+
+            import nibabel
+            from nibabel.streamlines import Field, Tractogram
+            from nibabel.orientations import aff2axcodes
+            print('-> Load nifti and copy header')
+
+            np.save(self._gen_filename('streamlines', ext='.npy'),streamlines)
+
+            header = {}
+            header[Field.ORIGIN] = imref.affine.copy()[:3,3]
+            header[Field.VOXEL_TO_RASMM] = imref.affine.copy()
+            header[Field.VOXEL_SIZES] = imref.header.get_zooms()[:3]
+            header[Field.DIMENSIONS] = imref.shape[:3]
+            header[Field.VOXEL_ORDER] = "".join(aff2axcodes(imref.affine))
+
+            tractogram = Tractogram(streamlines=streamlines, affine_to_rasmm=imref.affine.copy())
+            nb.streamlines.save(tractogram, self._gen_filename('tracked_nib1', ext='.trk'), header=header)
+
+            nb.trackvis.write(self._gen_filename('tracked_nib2', ext='.trk'), streamlines, trkhdr)
 
         # IFLOGGER.info('Loading CSD model and fitting')
         # f = gzip.open(self.inputs.in_model, 'rb')
@@ -1011,7 +1035,10 @@ class DirectionGetterTractography(DipyBaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
+        outputs['streamlines'] = self._gen_filename('streamlines', ext='.npy')
         outputs['tracks'] = self._gen_filename('tracked', ext='.trk')
+        outputs['tracks2'] = self._gen_filename('tracked_nib1', ext='.trk')
+        outputs['tracks3'] = self._gen_filename('tracked_nib2', ext='.trk')
         if self.inputs.save_seeds:
             outputs['out_seeds'] = self._gen_filename('seeds', ext='.txt')
 

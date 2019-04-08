@@ -1517,8 +1517,17 @@ class ProjectHandlerV2(Handler):
             if datalad_is_available:
                 print('>>> Datalad dataset installation...')
                 if loaded_project.install_datalad_dataset_via_ssh:
-                    os.environ['REMOTEUSERPWD'] = loaded_project.ssh_pwd
-                    cmd = 'datalad install -D "Dataset {} (remote:{}) installed on {}" -s ssh://{}:$REMOTEUSERPWD@{}:{} {}'.format(loaded_project.datalad_dataset_path,
+                    if loaded_project.ssh_pwd != '':
+                        os.environ['REMOTEUSERPWD'] = loaded_project.ssh_pwd
+                        cmd = 'datalad install -D "Dataset {} (remote:{}) installed on {}" -s ssh://{}:$REMOTEUSERPWD@{}:{} {}'.format(loaded_project.datalad_dataset_path,
+                                                                                                                       loaded_project.ssh_remote,
+                                                                                                                       loaded_project.base_directory,
+                                                                                                                       loaded_project.ssh_user,
+                                                                                                                       loaded_project.ssh_remote,
+                                                                                                                       loaded_project.datalad_dataset_path,
+                                                                                                                       loaded_project.base_directory)
+                    else:
+                        cmd = 'datalad install -D "Dataset {} (remote:{}) installed on {}" -s ssh://{}@{}:{} {}'.format(loaded_project.datalad_dataset_path,
                                                                                                                        loaded_project.ssh_remote,
                                                                                                                        loaded_project.base_directory,
                                                                                                                        loaded_project.ssh_user,
@@ -1559,7 +1568,7 @@ class ProjectHandlerV2(Handler):
         try:
             bids_layout = BIDSLayout(loaded_project.base_directory)
             print(bids_layout)
-            
+
             loaded_project.bids_layout = bids_layout
             is_bids = True
 
