@@ -985,7 +985,7 @@ class DirectionGetterTractography(DipyBaseInterface):
 
             IFLOGGER.info('Saving tracks')
             #
-            save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
+            save_trk(self._gen_filename('tracked_old', ext='.trk'), streamlines, affine, fa.shape)
 
             import nibabel
             from nibabel.streamlines import Field, Tractogram
@@ -1008,10 +1008,15 @@ class DirectionGetterTractography(DipyBaseInterface):
             header[Field.DIMENSIONS] = imref.shape[:3]
             header[Field.VOXEL_ORDER] = "".join(aff2axcodes(imref.affine))
 
-            tractogram = Tractogram(streamlines=streamlines, affine_to_rasmm=imref.affine.copy())
-            nb.streamlines.save(tractogram, self._gen_filename('tracked_nib1', ext='.trk'), header=header)
+            # Remove origin from streamlines (TODO: understand why needed)
+            for i, streamline in enumerate(streamlines):
+                for j, voxel in enumerate(streamline):
+                   streamlines[i][j] = streamlines[i][j] - imref.affine.copy()[:3,3]
 
-            nb.trackvis.write(self._gen_filename('tracked_nib2', ext='.trk'), streamlines, trkhdr)
+            tractogram = Tractogram(streamlines=streamlines, affine_to_rasmm=imref.affine.copy())
+            nb.streamlines.save(tractogram, self._gen_filename('tracked', ext='.trk'), header=header)
+
+            #nb.trackvis.write(self._gen_filename('tracked_nib2', ext='.trk'), streamlines, trkhdr)
 
         # IFLOGGER.info('Loading CSD model and fitting')
         # f = gzip.open(self.inputs.in_model, 'rb')
@@ -1038,7 +1043,7 @@ class DirectionGetterTractography(DipyBaseInterface):
         outputs = self._outputs().get()
         outputs['streamlines'] = self._gen_filename('streamlines', ext='.npy')
         outputs['tracks'] = self._gen_filename('tracked', ext='.trk')
-        outputs['tracks2'] = self._gen_filename('tracked_nib1', ext='.trk')
+        outputs['tracks2'] = self._gen_filename('tracked_old', ext='.trk')
         outputs['tracks3'] = self._gen_filename('tracked_nib2', ext='.trk')
         if self.inputs.save_seeds:
             outputs['out_seeds'] = self._gen_filename('seeds', ext='.txt')
