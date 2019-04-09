@@ -95,32 +95,28 @@ jobs:
       - run:
           name: Get FreeSurfer derivatives for ds000005
           command: |
-            if [[ ! -d /tmp/ds005/derivatives/freesurfer ]]; then
-              mkdir -p /tmp/ds005/derivatives
+            if [[ ! -d /tmp/data/ds005/derivatives/freesurfer ]]; then
+              mkdir -p /tmp/data/ds005/derivatives
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
                 -O ds005_derivatives_freesurfer.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/58fe59eb594d900250960180"
-              tar xvzf ds005_derivatives_freesurfer.tar.gz -C /tmp/ds005/derivatives
+              tar xvzf ds005_derivatives_freesurfer.tar.gz -C /tmp/data/ds005/derivatives
             else
               echo "FreeSurfer derivatives of ds000005 were cached"
             fi
       - run:
           name: Store FreeSurfer license file
           command: |
-            mkdir -p /tmp/code
-            cd /tmp/code
-            echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/code/license.txt
+            mkdir -p /tmp/data/ds005/code
+            cd /tmp/data/ds005/code
+            echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds005/code/license.txt
       - persist_to_workspace:
           root: /tmp
           paths:
             - data
-            - code
-            - ds005/derivatives/freesurfer
       - save_cache:
          key: data-{{ epoch }}
          paths:
-            - /tmp/code
             - /tmp/data
-            - /tmp/ds005/derivatives/freesurfer
 
   # update_cache:
   #   machine:
@@ -139,9 +135,9 @@ jobs:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: circleci/classic:201711-01
-    working_directory: /tmp/ds005
+    working_directory: /tmp/data/ds005
     environment:
-      - FS_LICENSE: /tmp/code/license.txt
+      - FS_LICENSE: /tmp/data/ds005/code/license.txt
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
@@ -176,7 +172,6 @@ jobs:
           name: Run anatomical workflow on ds005
           no_output_timeout: 4h
           command: |
-            mkdir -p /tmp/ds005/work /tmp/ds005/derivatives
             docker run -it --rm \
                 -v /tmp/data/ds005:/tmp \
                 -v /home/circleci/src/connectomemapper3/config:/tmp/config \
@@ -187,25 +182,24 @@ jobs:
       - save_cache:
          key: ds005-anat-v12-{{ .Branch }}-{{ epoch }}
          paths:
-            - /tmp/ds005/work
-            - /tmp/ds005/derivatives/cmp
+            - /tmp/data/ds005/derivatives/cmp
       - run:
           name: Checking outputs of Connectome Mapper run (anatomical pipeline only)
           command: |
-            mkdir -p /tmp/ds005/test
-            find /tmp/ds005/derivatives/cmp -path */figures -prune -o -name "*" -print | sed s+/tmp/ds005/derivatives/++ | sort > /tmp/ds005/test/outputs.out
+            mkdir -p /tmp/data/ds005/test
+            find /tmp/data/ds005/derivatives/cmp -path */figures -prune -o -name "*" -print | sed s+/tmp/data/ds005/derivatives/++ | sort > /tmp/data/ds005/test/outputs.out
             exit $?
       - run:
           name: Clean working directory
           when: always
           command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/ds005
-            find /tmp/ds005/work -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
+            sudo chown $(id -un):$(id -gn) -R /tmp/data/ds005
+            find /tmp/data/ds005/work -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
       - store_artifacts:
-          path: /tmp/ds005/test
+          path: /tmp/data/ds005/test
       - store_artifacts:
-          path: /tmp/ds005/derivatives/cmp
+          path: /tmp/data/ds005/derivatives/cmp
 
   build_docs:
     machine:
