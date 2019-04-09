@@ -994,7 +994,7 @@ class DirectionGetterTractography(DipyBaseInterface):
             print('-> Load nifti and copy header 1')
 
             trkhdr = nb.trackvis.empty_header()
-            trkhdr['dim'] = imref.get_data().shape
+            trkhdr['dim'] = imref.shape[:3]
             trkhdr['voxel_size'] = imref.header.get_zooms()[:3]
             trkhdr['voxel_order'] = "".join(aff2axcodes(imref.affine))
             trkhdr['vox_to_ras'] = imref.affine.copy() #utils.affine_for_trackvis(trkhdr['voxel_size'])

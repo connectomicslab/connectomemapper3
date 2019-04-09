@@ -118,6 +118,7 @@ jobs:
       - save_cache:
          key: data-{{ epoch }}
          paths:
+            - /tmp/code
             - /tmp/data
             - /tmp/ds005/derivatives/freesurfer
 
