@@ -189,13 +189,13 @@ jobs:
             mkdir -p /tmp/data/ds005/test
             find /tmp/data/ds005/derivatives/cmp -path */figures -prune -o -name "*" -print | sed s+/tmp/data/ds005/derivatives/++ | sort > /tmp/data/ds005/test/outputs.out
             exit $?
-      - run:
-          name: Clean working directory
-          when: always
-          command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/data/ds005
-            find /tmp/data/ds005/work -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
-                -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
+      # - run:
+      #     name: Clean working directory
+      #     when: always
+      #     command: |
+      #       sudo chown $(id -un):$(id -gn) -R /tmp/data/ds005
+      #       find /tmp/data/ds005/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
+      #           -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
       - store_artifacts:
           path: /tmp/data/ds005/test
       - store_artifacts:

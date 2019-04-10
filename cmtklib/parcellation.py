@@ -2944,7 +2944,7 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
           (op.join(fs_dir, 'mri', 'aseg.nii.gz'), 'aseg.nii.gz'),
           (op.join(fs_dir, 'mri', 'ribbon.nii.gz'), 'ribbon.nii.gz'),
           (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
-          (op.join(fs_dir, 'mri', 'gmmask.nii.gz'), 'gmmask.nii.gz'),
+          # (op.join(fs_dir, 'mri', 'gmmask.nii.gz'), 'gmmask.nii.gz'),
           ]
     if parcellation_scheme == 'Lausanne2008':
         ds.append( (op.join(fs_dir, 'label', 'cc_unknown.nii.gz'), 'cc_unknown.nii.gz') )
