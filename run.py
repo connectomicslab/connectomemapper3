@@ -15,6 +15,7 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 #Imports
 import argparse
 import os
+import sys
 import shutil
 import subprocess
 import multiprocessing
@@ -205,9 +206,19 @@ for tool in tools:
 
 # Make sure freesurfer is happy with the license
 print('> Copy FreeSurfer license (BIDS App) ')
-print('... src : {}'.format(os.path.join('/tmp','code','license.txt')))
-print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
-shutil.copyfile(src=os.path.join('/tmp','code','license.txt'),dst=os.path.join('/opt','freesurfer','license.txt'))
+
+
+if os.access(os.path.join('/tmp','code','license.txt'),os.F_OK):
+    print('... src : {}'.format(os.path.join('/tmp','code','license.txt')))
+    print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
+    shutil.copyfile(src=os.path.join('/tmp','code','license.txt'),dst=os.path.join('/opt','freesurfer','license.txt'))
+elif args.fs_license:
+    print('... src : {}'.format(os.path.abspath(fs_license)))
+    print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
+    shutil.copyfile(src=os.path.abspath(fs_license),dst=os.path.join('/opt','freesurfer','license.txt'))
+else:
+    print("ERROR: Missing or unset Freesurfer license")
+    sys.exit(1)
 
 # TODO: Implement log for subject(_session)
 # with open(log_filename, 'w+') as log:

@@ -731,8 +731,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 G.node[int(u)]['roi_volume'] = np.sum( roiData== int(d["dn_correspondence_id"]) )
                 # print "Add node %g - roi volume : %g " % (int(u),np.sum( roiData== int(d["dn_correspondence_id"]) ))
                 # Store parcellation labels corresponding to thalamic nuclei
-                if gp.node[int(u)]['dn_fsname'] == 'thalamus':
-                    thalamic_labels.append(int(u))
+                # if gp.node[int(u)]['dn_fsname'] == 'thalamus':
+                #     thalamic_labels.append(int(u))
             else:
                 #if int(u) == 53:
                 #    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")

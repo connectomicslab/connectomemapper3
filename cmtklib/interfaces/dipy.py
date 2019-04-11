@@ -985,7 +985,7 @@ class DirectionGetterTractography(DipyBaseInterface):
 
             IFLOGGER.info('Saving tracks')
             #
-            save_trk(self._gen_filename('tracked_old', ext='.trk'), streamlines, affine, fa.shape)
+            #save_trk(self._gen_filename('tracked_old', ext='.trk'), streamlines, affine, fa.shape)
 
             import nibabel
             from nibabel.streamlines import Field, Tractogram
