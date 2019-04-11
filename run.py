@@ -213,9 +213,10 @@ if os.access(os.path.join('/tmp','code','license.txt'),os.F_OK):
     print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
     shutil.copyfile(src=os.path.join('/tmp','code','license.txt'),dst=os.path.join('/opt','freesurfer','license.txt'))
 elif args.fs_license:
-    print('... src : {}'.format(os.path.abspath(fs_license)))
+    os.environ['FS_LICENSE'] = os.path.abspath(args.fs_license)
+    print('... src : {}'.format(os.environ['FS_LICENSE']))
     print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
-    shutil.copyfile(src=os.path.abspath(fs_license),dst=os.path.join('/opt','freesurfer','license.txt'))
+    shutil.copyfile(src=os.environ['FS_LICENSE'],dst=os.path.join('/opt','freesurfer','license.txt'))
 else:
     print("ERROR: Missing or unset Freesurfer license")
     sys.exit(1)
