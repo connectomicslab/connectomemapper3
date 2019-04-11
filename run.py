@@ -209,16 +209,19 @@ print('> Copy FreeSurfer license (BIDS App) ')
 
 
 if os.access(os.path.join('/tmp','code','license.txt'),os.F_OK):
-    print('... src : {}'.format(os.path.join('/tmp','code','license.txt')))
-    print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
-    shutil.copyfile(src=os.path.join('/tmp','code','license.txt'),dst=os.path.join('/opt','freesurfer','license.txt'))
+    os.environ['FS_LICENSE'] = os.path.join('/tmp','code','license.txt')
+    # Not anymore needed as we are using the environment variable
+    # print('... src : {}'.format(os.path.join('/tmp','code','license.txt')))
+    # print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
+    # shutil.copyfile(src=os.path.join('/tmp','code','license.txt'),dst=os.path.join('/opt','freesurfer','license.txt'))
 elif args.fs_license:
     os.environ['FS_LICENSE'] = os.path.abspath(args.fs_license)
-    print('... src : {}'.format(os.environ['FS_LICENSE']))
-    print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
-    shutil.copyfile(src=os.environ['FS_LICENSE'],dst=os.path.join('/opt','freesurfer','license.txt'))
+    # Not anymore needed as we are using the environment variable
+    # print('... src : {}'.format(os.environ['FS_LICENSE']))
+    # print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
+    # shutil.copyfile(src=os.environ['FS_LICENSE'],dst=os.path.join('/opt','freesurfer','license.txt'))
 else:
-    print("ERROR: Missing or unset Freesurfer license")
+    print("ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
     sys.exit(1)
 
 # TODO: Implement log for subject(_session)

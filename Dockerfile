@@ -1,6 +1,7 @@
 # Use an official Python runtime as a parent image
 FROM sebastientourbier/connectomemapper-ubuntu16.04:latest
 
+RUN apt-get install software-properties-common && add-apt-repository universe && apt-get update && apt-get -qq -y install exfat-fuse exfat-utils
 ##
 # Install any needed packages specified in requirements.txt
 # RUN pip install --trusted-host pypi.python.org -r requirements.txt
