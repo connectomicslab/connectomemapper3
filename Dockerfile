@@ -6,9 +6,9 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 
 MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 
-## Install miniconda2 and CMP dependencies
+## Install miniconda2 and CMP dependencies including exfat libraries for exfat-formatted hard-drives (only MAC?)
 
-RUN apt-get update && apt-get -qq -y install npm curl bzip2 xvfb liblzma-dev && \
+RUN apt-get update && apt-get -qq -y install npm curl bzip2 xvfb liblzma-dev exfat-fuse exfat-utils && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
