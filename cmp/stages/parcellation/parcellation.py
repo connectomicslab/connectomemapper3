@@ -321,8 +321,8 @@ class ParcellationStage(Stage):
                                 ])
 
     def define_inspect_outputs(self):
-        # print "stage_dir : %s" % self.stage_dir
-        # print "parcellation scheme : %s" % self.config.parcellation_scheme
+        print "stage_dir : %s" % self.stage_dir
+        print "parcellation scheme : %s" % self.config.parcellation_scheme
         # print "atlas info : "
         # print self.config.atlas_info
 
