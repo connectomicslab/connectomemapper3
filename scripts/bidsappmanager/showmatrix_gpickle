@@ -149,6 +149,7 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
     axes : instance of matplotlib.axes.PolarAxesSubplot
         The subplot handle.
     """
+    from matplotlib import cm
     import matplotlib.pyplot as plt
     import matplotlib.path as m_path
     import matplotlib.patches as m_patches
@@ -177,9 +178,9 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
         if len(node_colors) < n_nodes:
             node_colors = cycle(node_colors)
     else:
-        # assign colors using colormap
-        node_colors = [plt.cm.spectral(i / float(n_nodes))
-                       for i in range(n_nodes)]
+        # assign colors using colormap (plt.cmp.spectral -> plt.spectral)
+        cmap = cm.get_cmap('hsv',n_nodes) # 'Spectral'
+        node_colors = [cmap(i / float(n_nodes)) for i in range(n_nodes)]
 
     # handle 1D and 2D connectivity information
     con_t = con.T
