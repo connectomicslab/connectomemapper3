@@ -1125,7 +1125,7 @@ class ParcellateThalamusInputSpec(BaseInterfaceInputSpec):
     thalamic_nuclei_maps = File(mandatory=True, desc='Probability maps of thalamic nuclei (4D image) in template space')
     subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
     subject_id = traits.String(mandatory=True, desc='Subject ID')
-    ants_precision_type = Enum(['double','float'])
+    ants_precision_type = traits.Enum(['double','float'])
 
 class ParcellateThalamusOutputSpec(TraitedSpec):
     warped_image = File(desc='Template registered to T1w image (native)')

@@ -44,6 +44,7 @@ class ParcellationConfigUI(ParcellationConfig):
                              'segment_hippocampal_subfields',
                              'segment_brainstem',
                              'include_thalamic_nuclei_parcellation',
+                             Item('ants_precision_type',label='ANTs precision type'visible_when='include_thalamic_nuclei_parcellation'),
                              visible_when='parcellation_scheme=="Lausanne2018"'
                              )
                        )
