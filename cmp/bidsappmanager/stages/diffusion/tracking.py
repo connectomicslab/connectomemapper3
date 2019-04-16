@@ -17,10 +17,11 @@ class Dipy_tracking_configUI(Dipy_tracking_config):
     traits_view = View( Item('number_of_seeds',label="Number of seeds"),
                         Item('step_size',label="Step size)"),
                         Item('max_angle',label="Max angle (degree)"),
-                        HGroup(
+                        VGroup(
                             Item('use_act',label="Anatomically-Constrained Tractography using FAST"),
-                            Item('fast_number_of_classes', label='Number of tissue classes (FAST)')
-                            ),
+                            Item('seed_from_gmwmi',visible_when='use_act'),
+                            #Item('fast_number_of_classes', label='Number of tissue classes (FAST)')
+                            label='Particle Filtering Tractography (PFT)'),
                         Item('fa_thresh',label="FA threshold (classifier)",visible_when='use_act == False')
                         )
 

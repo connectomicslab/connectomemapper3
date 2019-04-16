@@ -54,6 +54,9 @@ class RegistrationConfigUI(RegistrationConfig):
                                     Item('ants_convergence_thresh',label='Convergence threshold'),
                                     Item('ants_convergence_winsize',label='Convergence window size')
                                 ),
+                                HGroup(
+                                    Item('use_float_precision',label='Use float precision to save memory'),
+                                ),
                                 label="General",show_border=False
                                 ),
                             Group(

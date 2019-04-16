@@ -60,7 +60,9 @@ class Dipy_tracking_config(HasTraits):
     sh_order = Int(8)
 
     use_act = traits.Bool(False, desc='Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier')
-    fast_number_of_classes = Int(3)
+    seed_from_gmwmi = traits.Bool(False, desc="Seed from Grey Matter / White Matter interface (requires Anatomically-Constrained Tractography (ACT))")
+
+    #fast_number_of_classes = Int(3)
 
     def _SD_changed(self,new):
         if self.tracking_mode == "Deterministic" and not new:
@@ -129,7 +131,7 @@ class MRtrix_tracking_config(HasTraits):
 def create_dipy_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','fod_file','FA','T1','partial_volumes','wm_mask_resampled','gm_registered','bvals','bvecs','model']),name='inputnode')
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','fod_file','FA','T1','partial_volumes','gmwmi_file','wm_mask_resampled','gm_registered','bvals','bvecs','model']),name='inputnode')
     # outputnode
 
     #CRS2XYZtkReg = subprocess.check_output
@@ -190,7 +192,8 @@ def create_dipy_tracking_flow(config):
             dipy_tracking.inputs.max_angle = config.max_angle
             dipy_tracking.inputs.step_size = config.step_size
             dipy_tracking.inputs.use_act = config.use_act
-            dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
+
+            #dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
 
             if config.imaging_model == 'DSI':
                 dipy_tracking.inputs.recon_model = 'SHORE'
@@ -215,7 +218,6 @@ def create_dipy_tracking_flow(config):
 
             flow.connect([
                 #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
-                (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
                 (inputnode,dipy_tracking,[('DWI','in_file')]),
                 (inputnode,dipy_tracking,[('partial_volumes','in_partial_volume_files')]),
                 (inputnode,dipy_tracking,[('model','in_model')]),
@@ -223,6 +225,16 @@ def create_dipy_tracking_flow(config):
                 (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
                 (dipy_tracking,outputnode,[('tracks','track_file')])
                 ])
+
+            if config.seed_from_gmwmi:
+                flow.connect([
+                            (inputnode,dipy_tracking,[('gmwmi_file','seed_mask')]),
+                            ])
+            else:
+                flow.connect([
+                            (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+                            ])
+
 
         elif config.tracking_mode == 'Probabilistic':
 
@@ -240,7 +252,7 @@ def create_dipy_tracking_flow(config):
             dipy_tracking.inputs.max_angle = config.max_angle
             dipy_tracking.inputs.step_size = config.step_size
             dipy_tracking.inputs.use_act = config.use_act
-            dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
+            #dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
 
             if config.imaging_model == 'DSI':
                 dipy_tracking.inputs.recon_model = 'SHORE'
@@ -260,7 +272,6 @@ def create_dipy_tracking_flow(config):
 
             flow.connect([
                 #(dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
-                (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
                 (inputnode,dipy_tracking,[('DWI','in_file')]),
                 (inputnode,dipy_tracking,[('partial_volumes','in_partial_volume_files')]),
                 (inputnode,dipy_tracking,[('model','in_model')]),
@@ -268,6 +279,15 @@ def create_dipy_tracking_flow(config):
                 (inputnode,dipy_tracking,[('wm_mask_resampled','tracking_mask')]),
                 (dipy_tracking,outputnode,[('tracks','track_file')])
                 ])
+
+            if config.seed_from_gmwmi:
+                flow.connect([
+                            (inputnode,dipy_tracking,[('gmwmi_file','seed_mask')]),
+                            ])
+            else:
+                flow.connect([
+                            (inputnode,dipy_tracking,[('wm_mask_resampled','seed_mask')]),
+                            ])
 
     return flow
 

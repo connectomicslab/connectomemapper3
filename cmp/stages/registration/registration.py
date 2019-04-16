@@ -56,6 +56,9 @@ class RegistrationConfig(HasTraits):
     registration_mode_trait = List(['FSL','ANTs']) #,'BBregister (FS)'])
     diffusion_imaging_model = Str
 
+    use_float_precision = Bool(False)
+
+
     # ANTS
     ants_interpolation = Enum('Linear',['Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc','HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline', 'MultiLabel', 'Gaussian'])
     ants_bspline_interpolation_parameters = Tuple(Int(3))
@@ -585,6 +588,8 @@ class RegistrationStage(Stage):
                 affine_registration.inputs.write_composite_transform=True
             affine_registration.inputs.verbose = True
 
+            affine_registration.inputs.float = self.config.use_float_precision
+
             flow.connect([
                         (b0_masking, affine_registration, [('out_file','fixed_image')]),
                         (inputnode, affine_registration, [('brain','moving_image')]),
@@ -633,6 +638,8 @@ class RegistrationStage(Stage):
                 SyN_registration.inputs.transform_parameters=[(self.config.ants_nonlinear_gradient_step, self.config.ants_nonlinear_update_field_variance, self.config.ants_nonlinear_total_field_variance)]#[(0.1, 3.0, 0.0)]
                 SyN_registration.inputs.use_histogram_matching=True
                 SyN_registration.inputs.verbose = True
+
+                SyN_registration.inputs.float = self.config.use_float_precision
 
                 # SyN_registration = pe.Node(interface=ants.Registration(),name='SyN_registration')
                 # SyN_registration.inputs.collapse_output_transforms=True

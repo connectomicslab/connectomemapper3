@@ -250,6 +250,8 @@ if args.analysis_level == "participant":
 
         if len(project.subject_sessions) > 0: #Session structure
 
+            print("> Sessions to analyze : {}".format(project.subject_sessions))
+
             for session in project.subject_sessions:
 
                 while len(processes) == maxprocs:

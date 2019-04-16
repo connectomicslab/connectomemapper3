@@ -290,6 +290,7 @@ class DiffusionStage(Stage):
                             (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
                             (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
                             (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
+                            (inputnode,track_flow,[('gmwmi_registered','inputnode.gmwmi_file')]),
                             # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
                             (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
                             (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
@@ -305,6 +306,7 @@ class DiffusionStage(Stage):
                             (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
                             (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
                             (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
+                            (inputnode,track_flow,[('gmwmi_registered','inputnode.gmwmi_file')]),
                             # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
                             (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
                             (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])

@@ -1125,6 +1125,7 @@ class ParcellateThalamusInputSpec(BaseInterfaceInputSpec):
     thalamic_nuclei_maps = File(mandatory=True, desc='Probability maps of thalamic nuclei (4D image) in template space')
     subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
     subject_id = traits.String(mandatory=True, desc='Subject ID')
+    ants_precision_type = Enum(['double','float'])
 
 class ParcellateThalamusOutputSpec(TraitedSpec):
     warped_image = File(desc='Template registered to T1w image (native)')
@@ -1174,7 +1175,13 @@ class ParcellateThalamus(BaseInterface):
 
         # Register the template image image to the subject T1w image
         # cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
-        cmd = 'antsRegistrationSyNQuick.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
+
+
+        cmd = 'antsRegistrationSyNQuick.sh -p {} -d 3 -f {} -m {} -t s -n {} -o {}'.format(self.inputs.ants_precision_type,
+                                                                                           self.inputs.T1w_image,
+                                                                                           self.inputs.template_image,
+                                                                                           12,
+                                                                                           outprefixName)
 
         iflogger.info('Processing cmd: %s' % cmd)
 

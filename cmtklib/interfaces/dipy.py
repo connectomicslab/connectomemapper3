@@ -729,7 +729,7 @@ class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
     recon_model = traits.Enum(["CSD","SHORE"], usedefault=True, desc=('Use either fODFs from CSD (default) or SHORE models'))
     recon_order = traits.Int(8)
     use_act = traits.Bool(False, desc=('Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier'))
-    fast_number_of_classes = traits.Int(3, desc=('Number of tissue classes used by FAST for Anatomically-Constrained Tractography (ACT)'))
+    #fast_number_of_classes = traits.Int(3, desc=('Number of tissue classes used by FAST for Anatomically-Constrained Tractography (ACT)'))
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     fod_file = File(exists=True, desc=('input fod file (if SHORE)'))
     in_fa = File(exists=True, mandatory=True, desc=('input FA'))
@@ -766,7 +766,7 @@ class DirectionGetterTractographyOutputSpec(TraitedSpec):
 class DirectionGetterTractography(DipyBaseInterface):
 
     """
-    Streamline tractography using Deterrministic Maximum Direction Getter
+    Streamline tractography using Deterministic Maximum Direction Getter
 
     Example
     -------
