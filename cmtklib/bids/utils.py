@@ -8,14 +8,13 @@
 
 import os
 import json
-from pathlib import Path
 
 def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
 
     from cmp.info import __version__, __url__, DOWNLOAD_URL
 
-    bids_dir = Path(bids_dir)
-    deriv_dir = Path(deriv_dir)
+    bids_dir = os.path.abspath(bids_dir)
+    deriv_dir = os.path.abspath(deriv_dir)
 
     if pipeline_name == 'cmp':
         desc = {
@@ -75,7 +74,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
 
     # Keys deriving from source dataset
     orig_desc = {}
-    fname = bids_dir / 'dataset_description.json'
+    fname = os.path.join(bids_dir, 'dataset_description.json')
     if fname.exists():
         with fname.open() as fobj:
             orig_desc = json.load(fobj)
@@ -86,7 +85,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
     if 'License' in orig_desc:
         desc['License'] = orig_desc['License']
 
-    with (deriv_dir / pipeline_name / 'dataset_description.json').open('w') as fobj:
+    with (os.path.join(deriv_dir, pipeline_name, 'dataset_description.json')).open('w') as fobj:
         json.dump(desc, fobj, indent=4)
 
 
