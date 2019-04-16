@@ -31,6 +31,8 @@ from cmp.pipelines.functional import fMRI as FMRI_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 
+from cmtklib.bids.utils import write_derivative_description
+
 ##from cmp.configurator.project import fix_dataset_directory_in_pickles, remove_aborded_interface_pickles
 
 #import CMP_MainWindow
@@ -400,7 +402,7 @@ def fmri_load_config(pipeline, config_path):
 
 ## Creates (if needed) the folder hierarchy
 #
-def refresh_folder(derivatives_directory, subject, input_folders, session=None):
+def refresh_folder(bids_directory, derivatives_directory, subject, input_folders, session=None):
     paths = []
 
     if session == None or session == '':
@@ -430,15 +432,21 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
             finally:
                 print("Created directory %s" % full_p)
 
+    write_derivative_description(bids_directory, derivatives_directory, 'cmp')
+    write_derivative_description(bids_directory, derivatives_directory, 'freesurfer')
+    write_derivative_description(bids_directory, derivatives_directory, 'nipype')
+
 def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
     dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
+
+    bids_directory = os.path.abspath(project_info.base_directory)
 
     derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if len(project_info.subject_sessions)>0:
-        refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders, session=project_info.subject_session)
+        refresh_folder(bids_directory, derivatives_directory, project_info.subject, dmri_pipeline.input_folders, session=project_info.subject_session)
     else:
-        refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
+        refresh_folder(bids_directory, derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
 
     dmri_inputs_checked = dmri_pipeline.check_input(layout=bids_layout,gui=gui)
     if dmri_inputs_checked:
@@ -486,12 +494,13 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
     fmri_pipeline = FMRI_pipeline.fMRIPipeline(project_info)
 
+    bids_directory = os.path.abspath(project_info.base_directory)
     derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if len(project_info.subject_sessions)>0:
-        refresh_folder(derivatives_directory, project_info.subject, fmri_pipeline.input_folders, session=project_info.subject_session)
+        refresh_folder(bids_directory, derivatives_directory, project_info.subject, fmri_pipeline.input_folders, session=project_info.subject_session)
     else:
-        refresh_folder(derivatives_directory, project_info.subject, fmri_pipeline.input_folders)
+        refresh_folder(bids_directory, derivatives_directory, project_info.subject, fmri_pipeline.input_folders)
 
     fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout,gui=gui,debug=False)
     if fmri_inputs_checked:
@@ -540,16 +549,17 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 def init_anat_project(project_info, is_new_project, debug=False):
     anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
 
+    bids_directory = os.path.abspath(project_info.base_directory)
     derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if (project_info.subject_session != '') and (project_info.subject_session != None) :
         if debug:
             print('Refresh folder WITH session')
-        refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders, session=project_info.subject_session)
+        refresh_folder(bids_directory, derivatives_directory, project_info.subject, anat_pipeline.input_folders, session=project_info.subject_session)
     else:
         if debug:
             print('Refresh folder WITHOUT session')
-        refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders)
+        refresh_folder(bids_directory, derivatives_directory, project_info.subject, anat_pipeline.input_folders)
 
     if is_new_project and anat_pipeline!= None: #and dmri_pipeline!= None:
         print("> Initialize anatomical project")

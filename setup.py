@@ -19,7 +19,8 @@ packages=["cmp","cmp.stages",
           "cmp.pipelines.anatomical",
           "cmp.pipelines.diffusion",
           "cmp.pipelines.functional",
-          "cmtklib","cmtklib.interfaces",
+          "cmtklib","cmtklib.bids",
+          "cmtklib.interfaces",
           "resources"]
 
 package_data = {'cmp':
