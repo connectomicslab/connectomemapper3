@@ -1738,7 +1738,7 @@ class ProjectHandlerV2(Handler):
                     #Look for diffusion acquisition model information from filename (acq-*)
                     if loaded_project.subject_session != '':
                         session = loaded_project.subject_session.split('-')[1]
-                        diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, session=session, suffix='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
+                        diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, session=session, suffix='dwi', target='acquisition', return_type='id', extensions=['nii', 'nii.gz'])]
                         if debug:
                             print('DIFFUSION IMAGING MODELS : {}'.format(diffusion_imaging_models))
 
@@ -1780,7 +1780,7 @@ class ProjectHandlerV2(Handler):
                         else:
                             dwi_file = files[0]
                     else:
-                        diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, suffix='dwi', target='acq', return_type='id', extensions=['nii', 'nii.gz'])]
+                        diffusion_imaging_models = [i for i in bids_layout.get(subject=subject, suffix='dwi', target='acquisition', return_type='id', extensions=['nii', 'nii.gz'])]
 
                         if len(diffusion_imaging_models)>0:
                             if len(diffusion_imaging_models)>1:

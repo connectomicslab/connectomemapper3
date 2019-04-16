@@ -283,14 +283,12 @@ class DiffusionStage(Stage):
 
             if self.config.diffusion_imaging_model != 'DSI':
                 flow.connect([
-                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                             (recon_flow, outputnode,[('outputnode.DWI','fod_file')]),
                             (recon_flow, track_flow,[('outputnode.model','inputnode.model')]),
                             (inputnode,track_flow,[('bvals','inputnode.bvals')]),
                             (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
                             (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
                             (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
-                            (inputnode,track_flow,[('gmwmi_registered','inputnode.gmwmi_file')]),
                             # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
                             (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
                             (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
@@ -298,7 +296,6 @@ class DiffusionStage(Stage):
                             ])
             else:
                 flow.connect([
-                            (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                             (recon_flow, outputnode,[('outputnode.fod','fod_file')]),
                             (recon_flow,track_flow,[('outputnode.fod','inputnode.fod_file')]),
                             (recon_flow, track_flow,[('outputnode.model','inputnode.model')]),
@@ -306,11 +303,19 @@ class DiffusionStage(Stage):
                             (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
                             (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
                             (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
-                            (inputnode,track_flow,[('gmwmi_registered','inputnode.gmwmi_file')]),
                             # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
                             (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
                             (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
                             # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
+                            ])
+
+            if self.config.dipy_tracking_config.use_act and self.config.dipy_tracking_config.seed_from_gmwmi:
+                flow.connect([
+                            (inputnode,track_flow,[('gmwmi_registered','inputnode.wm_mask_resampled')]),
+                            ])
+            else:
+                flow.connect([
+                            (inputnode,track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                             ])
 
             flow.connect([

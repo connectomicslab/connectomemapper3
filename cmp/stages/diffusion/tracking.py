@@ -84,6 +84,10 @@ class Dipy_tracking_config(HasTraits):
         if new <= 0.000001:
             self.curvature = 0.0
 
+    def _use_act_changed(self,new):
+        if new == False:
+            self.seed_from_gmwmi = False
+
 class MRtrix_tracking_config(HasTraits):
     tracking_mode = Str
     SD = Bool
@@ -94,7 +98,7 @@ class MRtrix_tracking_config(HasTraits):
     min_length = Float(5)
     max_length = Float(500)
     angle = Float(45)
-    cutoff_value = Float(1)
+    cutoff_value = Float(0.05)
 
     use_act = traits.Bool(True, desc="Anatomically-Constrained Tractography (ACT) based on Freesurfer parcellation")
     seed_from_gmwmi = traits.Bool(False, desc="Seed from Grey Matter / White Matter interface (requires Anatomically-Constrained Tractography (ACT))")
@@ -131,7 +135,7 @@ class MRtrix_tracking_config(HasTraits):
 def create_dipy_tracking_flow(config):
     flow = pe.Workflow(name="tracking")
     # inputnode
-    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','fod_file','FA','T1','partial_volumes','gmwmi_file','wm_mask_resampled','gm_registered','bvals','bvecs','model']),name='inputnode')
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['DWI','fod_file','FA','T1','partial_volumes','wm_mask_resampled','gm_registered','bvals','bvecs','model']),name='inputnode')
     # outputnode
 
     #CRS2XYZtkReg = subprocess.check_output
