@@ -65,7 +65,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
     # Keys that can only be set by environment
     if 'CMP_DOCKER_TAG' in os.environ:
         desc['DockerHubContainerTag'] = os.environ['CMP_DOCKER_TAG']
-    if 'CMè_SINGULARITY_URL' in os.environ:
+    if 'CMP_SINGULARITY_URL' in os.environ:
         singularity_url = os.environ['CMP_SINGULARITY_URL']
         desc['SingularityContainerURL'] = singularity_url
 
