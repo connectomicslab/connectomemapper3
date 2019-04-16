@@ -50,7 +50,7 @@ RUN chmod 777 /opt/freesurfer
 ENV FS_LICENSE /tmp/code/license.txt
 
 #COPY version /version
-WORKDIR /tmp
+WORKDIR /tmp/derivatives
 ENTRYPOINT ["/app/run_connectomemapper3.sh"]
 
 ARG BUILD_DATE
