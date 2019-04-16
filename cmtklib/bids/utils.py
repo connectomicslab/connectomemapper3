@@ -75,8 +75,8 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
     # Keys deriving from source dataset
     orig_desc = {}
     fname = os.path.join(bids_dir, 'dataset_description.json')
-    if fname.exists():
-        with fname.open() as fobj:
+    if os.access(fname,os.R_OK):
+        with open(fname,'r') as fobj:
             orig_desc = json.load(fobj)
 
     if 'DatasetDOI' in orig_desc:
@@ -85,7 +85,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
     if 'License' in orig_desc:
         desc['License'] = orig_desc['License']
 
-    with (os.path.join(deriv_dir, pipeline_name, 'dataset_description.json')).open('w') as fobj:
+    with open(os.path.join(deriv_dir, pipeline_name, 'dataset_description.json'),'w') as fobj:
         json.dump(desc, fobj, indent=4)
 
 
