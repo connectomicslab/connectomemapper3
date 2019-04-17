@@ -14,8 +14,8 @@ from cmp.stages.diffusion.tracking import Dipy_tracking_config, MRtrix_tracking_
 
 class Dipy_tracking_configUI(Dipy_tracking_config):
 
-    traits_view = View( Item('number_of_seeds',label="Number of seeds"),
-                        Item('step_size',label="Step size)"),
+    traits_view = View( Item('seed_density',label="Seed density"),
+                        Item('step_size',label="Step size"),
                         Item('max_angle',label="Max angle (degree)"),
                         VGroup(
                             Item('use_act',label="Anatomically-Constrained Tractography using FAST"),

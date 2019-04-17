@@ -729,6 +729,8 @@ class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
     recon_model = traits.Enum(["CSD","SHORE"], usedefault=True, desc=('Use either fODFs from CSD (default) or SHORE models'))
     recon_order = traits.Int(8)
     use_act = traits.Bool(False, desc=('Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier'))
+    seed_from_gmwmi = traits.Bool(False, desc=('Seed from the Gray Matter / White Matter interface'))
+    gmwmi_file = File(exists=True, desc=('input Gray Matter / White Matter interface image'))
     #fast_number_of_classes = traits.Int(3, desc=('Number of tissue classes used by FAST for Anatomically-Constrained Tractography (ACT)'))
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     fod_file = File(exists=True, desc=('input fod file (if SHORE)'))
@@ -739,6 +741,8 @@ class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
     tracking_mask = File(exists=True, mandatory=True,
                          desc=('input mask within which perform tracking'))
     seed_mask = InputMultiPath(File(exists=True), mandatory=True, desc='ROI files registered to diffusion space')
+    seed_density = traits.Float(1, usedefault=True,
+                              desc=('Density of seeds'))
     fa_thresh = traits.Float(0.2, mandatory=True, usedefault=True,
                               desc=('FA threshold to build the tissue classifier'))
     max_angle = traits.Float(25.0, mandatory=True, usedefault=True,
@@ -818,51 +822,6 @@ class DirectionGetterTractography(DipyBaseInterface):
                 out[tuple(idx)] = 0.
             return out
 
-        if isdefined(self.inputs.tracking_mask):
-            IFLOGGER.info('Loading Tracking Mask')
-            tmsk = clipMask(nb.load(self.inputs.tracking_mask).get_data())
-            tmsk[tmsk > 0] = 1
-            tmsk[tmsk < 0] = 0
-        else:
-            tmsk = np.ones(imref.shape)
-
-        seeds = self.inputs.num_seeds
-
-        if isdefined(self.inputs.seed_mask[0]):
-            IFLOGGER.info('Loading Seed Mask')
-            seedmsk = clipMask(nb.load(self.inputs.seed_mask[0]).get_data())
-            assert(seedmsk.shape == data.shape[:3])
-            seedmsk[seedmsk > 0] = 1
-            seedmsk[seedmsk < 1] = 0
-            seedps = np.array(np.where(seedmsk == 1), dtype=np.float32).T
-            vseeds = seedps.shape[0]
-            nsperv = (seeds // vseeds) + 1
-            IFLOGGER.info(('Seed mask is provided (%d voxels inside '
-                           'mask), computing seeds (%d seeds/voxel).') %
-                          (vseeds, nsperv))
-            if nsperv > 1:
-                IFLOGGER.info(('Needed %d seeds per selected voxel '
-                               '(total %d).') % (nsperv, vseeds))
-                seedps = np.vstack(np.array([seedps] * nsperv))
-                voxcoord = seedps + np.random.uniform(-1, 1, size=seedps.shape)
-                nseeds = voxcoord.shape[0]
-                seeds = affine.dot(np.vstack((voxcoord.T,
-                                              np.ones((1, nseeds)))))[:3, :].T
-
-                if self.inputs.save_seeds:
-                    np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
-
-            tseeds = utils.seeds_from_mask(seedmsk, density=1, affine=affine)#FIXME: density should be customizable
-
-        IFLOGGER.info('Loading and masking FA')
-        img_fa = nb.load(self.inputs.in_fa)
-        fa = img_fa.get_data().astype(np.float32)
-        fa = fa * tmsk
-
-        IFLOGGER.info('Saving masked FA')
-        hdr.set_data_shape(fa.shape)
-        nb.Nifti1Image(fa.astype(np.float32), affine, hdr).to_filename(self._gen_filename('fa_masked'))
-
         if self.inputs.use_act:
             # from nipype.interfaces import fsl
             # # Run FAST for partial volume estimation (WM;GM;CSF)
@@ -915,9 +874,72 @@ class DirectionGetterTractography(DipyBaseInterface):
             # IFLOGGER.info('Building ACT Tissue Classifier')
             # classifier = ActTissueClassifier(include_map,exclude_map)
         else:
+            if isdefined(self.inputs.tracking_mask):
+                IFLOGGER.info('Loading Tracking Mask')
+                tmsk = clipMask(nb.load(self.inputs.tracking_mask).get_data())
+                tmsk[tmsk > 0] = 1
+                tmsk[tmsk < 0] = 0
+            else:
+                tmsk = np.ones(imref.shape)
+
+            IFLOGGER.info('Loading and masking FA')
+            img_fa = nb.load(self.inputs.in_fa)
+            fa = img_fa.get_data().astype(np.float32)
+            fa = fa * tmsk
+
+            IFLOGGER.info('Saving masked FA')
+            hdr.set_data_shape(fa.shape)
+            nb.Nifti1Image(fa.astype(np.float32), affine, hdr).to_filename(self._gen_filename('fa_masked'))
+
             IFLOGGER.info('Building Binary Tissue Classifier')
             # classifier = ThresholdTissueClassifier(fa,self.inputs.fa_thresh)
             classifier = BinaryTissueClassifier(tmsk)
+
+        seeds = self.inputs.num_seeds
+
+        if isdefined(self.inputs.seed_mask[0]) or (self.inputs.seed_from_gmwmi and isdefined(self.inputs.gmwmi_file)):
+
+            #Handle GMWM interface or seed mask
+            if self.inputs.seed_from_gmwmi and isdefined(self.inputs.gmwmi_file):
+                IFLOGGER.info('Loading Seed Mask from {}'.format(self.inputs.gmwmi_file))
+                seedmsk = nb.load(self.inputs.gmwmi_file).get_data()
+                seedmsk = np.squeeze(seedmsk)
+            else:
+                IFLOGGER.info('Loading Seed Mask from {}'.format(self.inputs.seed_mask[0]))
+                seedmsk = nb.load(self.inputs.seed_mask[0]).get_data()
+
+            assert(seedmsk.shape == data.shape[:3])
+            seedmsk = clipMask(seedmsk)
+
+            print('seedmsk min: {}'.format(seedmsk.min()))
+            print('seedmsk max: {}'.format(seedmsk.max()))
+
+            seedmsk[seedmsk > 0] = 1
+            seedmsk[seedmsk < 1] = 0
+
+            IFLOGGER.info('Saving seed mask')
+            hdr.set_data_shape(seedmsk.shape)
+            nb.Nifti1Image(seedmsk.astype(np.float32), affine, hdr).to_filename(self._gen_filename('desc-seed_mask'))
+
+            seedps = np.array(np.where(seedmsk == 1), dtype=np.float32).T
+            vseeds = seedps.shape[0]
+            nsperv = (seeds // vseeds) + 1
+            IFLOGGER.info(('Seed mask is provided (%d voxels inside '
+                           'mask), computing seeds (%d seeds/voxel).') %
+                          (vseeds, nsperv))
+            if nsperv > 1:
+                IFLOGGER.info(('Needed %d seeds per selected voxel '
+                               '(total %d).') % (nsperv, vseeds))
+                seedps = np.vstack(np.array([seedps] * nsperv))
+                voxcoord = seedps + np.random.uniform(-1, 1, size=seedps.shape)
+                nseeds = voxcoord.shape[0]
+                seeds = affine.dot(np.vstack((voxcoord.T,
+                                              np.ones((1, nseeds)))))[:3, :].T
+
+                if self.inputs.save_seeds:
+                    np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
+
+            tseeds = utils.seeds_from_mask(seedmsk, density=self.inputs.seed_density, affine=affine)#FIXME: density should be customizable
 
         if self.inputs.recon_model == 'CSD':
             IFLOGGER.info('Loading CSD model')

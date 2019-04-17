@@ -289,6 +289,7 @@ class DiffusionStage(Stage):
                             (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
                             (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
                             (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
+                            (inputnode,track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                             # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
                             (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
                             (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
@@ -303,6 +304,7 @@ class DiffusionStage(Stage):
                             (recon_flow,track_flow,[('outputnode.bvecs','inputnode.bvecs')]),
                             (inputnode,track_flow,[('diffusion','inputnode.DWI')]), # Diffusion resampled
                             (inputnode,track_flow,[('partial_volumes','inputnode.partial_volumes')]),
+                            (inputnode,track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
                             # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
                             (recon_flow,track_flow,[("outputnode.FA","inputnode.FA")]),
                             (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')])
@@ -311,11 +313,7 @@ class DiffusionStage(Stage):
 
             if self.config.dipy_tracking_config.use_act and self.config.dipy_tracking_config.seed_from_gmwmi:
                 flow.connect([
-                            (inputnode,track_flow,[('gmwmi_registered','inputnode.wm_mask_resampled')]),
-                            ])
-            else:
-                flow.connect([
-                            (inputnode,track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
+                            (inputnode,track_flow,[('gmwmi_registered','inputnode.gmwmi_file')]),
                             ])
 
             flow.connect([
