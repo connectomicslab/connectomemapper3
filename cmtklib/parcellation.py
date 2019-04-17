@@ -1176,8 +1176,12 @@ class ParcellateThalamus(BaseInterface):
         # Register the template image image to the subject T1w image
         # cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
 
+        if self.inputs.ants_precision_type == 'float':
+            precision_type = 'f'
+        else:
+            precision_type = 'd'
 
-        cmd = 'antsRegistrationSyNQuick.sh -p {} -d 3 -f {} -m {} -t s -n {} -o {}'.format(self.inputs.ants_precision_type,
+        cmd = 'antsRegistrationSyNQuick.sh -p {} -d 3 -f {} -m {} -t s -n {} -o {}'.format(precision_type,
                                                                                            self.inputs.T1w_image,
                                                                                            self.inputs.template_image,
                                                                                            12,
