@@ -1,14 +1,14 @@
 # Use Ubuntu 16.04 LTS
-FROM ubuntu:16.04
+FROM ubuntu:xenial-20181218
 
 # Pre-cache neurodebian key
 COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 
 MAINTAINER Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
 
-## Install miniconda2 and CMP dependencies including exfat libraries for exfat-formatted hard-drives (only MAC?)
+## Install miniconda2 and CMP dependencies including exfat libraries for exfat-formatted hard-drives (only MAC?) : exfat-fuse exfat-utils
 
-RUN apt-get update && apt-get -qq -y install npm curl bzip2 xvfb liblzma-dev exfat-fuse exfat-utils && \
+RUN apt-get update && apt-get -qq -y install libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
@@ -75,15 +75,28 @@ RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/frees
     --exclude='freesurfer/lib/cuda' \
     --exclude='freesurfer/lib/qt'
 
-# Installing the Matlab R2012b (v8.0) runtime
-# Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
-#RUN curl "https://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" -o "/opt/freesurfer/runtime.tar.gz"
-#RUN tar xvf /opt/freesurfer/runtime.tar.gz
-#RUN rm /opt/freesurfer/runtime.tar.gz
 WORKDIR /opt/freesurfer
+
+# Installing the Matlab R2012b (v8.0) runtime // http://ssd.mathworks.com/supportfiles/MCR_Runtime/R2012b/MCR_R2012b_glnxa64_installer.zip
+# Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
 RUN curl "http://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" -o "runtime2012b.tar.gz"
 RUN tar xvf runtime2012b.tar.gz
 RUN rm runtime2012b.tar.gz
+#RUN mv /opt/freesurfer/MCRv80/sys/os/glnxa64/libstdc++.so.6 /opt/freesurfer/MCRv80/sys/os/glnxa64/libstdc++.so.6.old
+#RUN mv /opt/freesurfer/MCRv80/sys/os/glnxa64/libstdc++.so.6.0.13 /opt/freesurfer/MCRv80/sys/os/glnxa64/libstdc++.so.6.0.13.old
+
+# RUN curl "http://ssd.mathworks.com/supportfiles/MCR_Runtime/R2012b/MCR_R2012b_glnxa64_installer.zip" -o "MCR_R2012b_glnxa64_installer.zip"
+# RUN tar xvf MCR_R2012b_glnxa64_installer.zip
+# RUN rm MCR_R2012b_glnxa64_installer.zip
+# RUN cd MCR_R2012b_glnxa64_installer && ./install -mode silent -agreeToLicense yes -destinationFolder /opt/freesurfer/MCRv80 -outputFile /opt/freesurfer/mcrv80_installation.log
+# RUN cd .. && rm -r MCR_R2012b_glnxa64_installer
+
+# Installing the Matlab R2014b (v8.4) runtime
+# Required by the brainstem and hippocampal subfield modules in FreeSurfer > 6.0.1
+# RUN curl "https://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2014bLinux.tar.gz" -o "runtime2014b.tar.gz"
+# RUN tar xvf runtime2014b.tar.gz
+# RUN rm runtime2014b.tar.gz
+
 # Make FreeSurfer happy
 ENV FSL_DIR=/usr/share/fsl/5.0 \
     OS=Linux \
@@ -167,8 +180,9 @@ RUN apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-o
     git checkout 3.0_RC3 && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
-    git describe --tags > /mrtrix3_version && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    git describe --tags > /mrtrix3_version
+    #&& \
+    #apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Setup environment variables for MRtrix3
 ENV PATH=/opt/mrtrix3/bin:$PATH
@@ -192,18 +206,18 @@ ENV LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_PA
 #ENV BIN_DIR "/usr/local/bin"
 #ENV DISPLAY :0
 
-# ARG BUILD_DATE
-# ARG VCS_REF
-# ARG VERSION
-#
-# #Metadata
-# LABEL org.label-schema.build-date=$BUILD_DATE
-# LABEL org.label-schema.name="Connectome Mapper Ubuntu 16.04"
-# LABEL org.label-schema.description="Computing environment of the Connectome Mapper BIDS App based on Ubuntu 16.04."
-# LABEL org.label-schema.url="https://connectome-mapper-3.readthedocs.io"
-# LABEL org.label-schema.vcs-ref=$VCS_REF
-# LABEL org.label-schema.vcs-url="https://bitbucket.org/sinergiaconsortium/connectomemapper-ubuntu16.04"
-# LABEL org.label-schema.version=$VERSION
-# LABEL org.label-schema.maintainer="Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>"
-# LABEL org.label-schema.vendor="Connectomics Lab, Centre Hospitalier Universitaire Vaudois (CHUV), Lausanne, Switzerland"
-# LABEL org.label-schema.schema-version="1.0"
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+
+#Metadata
+LABEL org.label-schema.build-date=$BUILD_DATE
+LABEL org.label-schema.name="Connectome Mapper Ubuntu 16.04"
+LABEL org.label-schema.description="Computing environment of the Connectome Mapper BIDS App based on Ubuntu 16.04."
+LABEL org.label-schema.url="https://connectome-mapper-3.readthedocs.io"
+LABEL org.label-schema.vcs-ref=$VCS_REF
+LABEL org.label-schema.vcs-url="https://bitbucket.org/sinergiaconsortium/connectomemapper3"
+LABEL org.label-schema.version=$VERSION
+LABEL org.label-schema.maintainer="Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>"
+LABEL org.label-schema.vendor="Connectomics Lab, Centre Hospitalier Universitaire Vaudois (CHUV), Lausanne, Switzerland"
+LABEL org.label-schema.schema-version="1.0"
