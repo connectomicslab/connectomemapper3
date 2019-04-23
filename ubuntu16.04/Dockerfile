@@ -2,7 +2,7 @@
 FROM ubuntu:xenial-20181218
 
 # Pre-cache neurodebian key
-COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
+COPY files/neurodebian.gpg /root/.neurodebian.gpg
 
 ## Install miniconda2 and CMP dependencies including exfat libraries for exfat-formatted hard-drives (only MAC?) : exfat-fuse exfat-utils
 
