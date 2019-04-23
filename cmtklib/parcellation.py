@@ -89,15 +89,12 @@ class ParcellateHippocampalSubfields(BaseInterface):
         fs_string = 'export SUBJECTS_DIR=' + self.inputs.subjects_dir
         iflogger.info('- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
 
-        old_ld_library_path = os.environ['LD_LIBRARY_PATH']
-        os.environ['LD_LIBRARY_PATH']=''
-        reconall_cmd = fs_string + '; export LD_LIBRARY_PATH= ; recon-all -no-isrunning -s "%s" -hippocampal-subfields-T1 ' % (self.inputs.subject_id)
+        reconall_cmd = fs_string + '; recon-all -no-isrunning -s "%s" -hippocampal-subfields-T1 ' % (self.inputs.subject_id)
         #reconall_cmd = [fs_string , ";" , "recon-all" , "-no-isrunning" , "-s" , "%s"% (self.inputs.subject_id) , "-hippocampal-subfields-T1" ]
 
         iflogger.info('Processing cmd: %s' % reconall_cmd)
 
-        process = subprocess.Popen(reconall_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, env=os.environ)
-        os.environ['LD_LIBRARY_PATH'] = old_ld_library_path
+        process = subprocess.Popen(reconall_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
         #subprocess.check_call(reconall_cmd)
 
@@ -152,15 +149,12 @@ class ParcellateBrainstemStructures(BaseInterface):
         fs_string = 'export SUBJECTS_DIR=' + self.inputs.subjects_dir
         iflogger.info('- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
 
-        old_ld_library_path = os.environ['LD_LIBRARY_PATH']
-        os.environ['LD_LIBRARY_PATH'] = ''
-        reconall_cmd = fs_string + '; export LD_LIBRARY_PATH= ; recon-all -no-isrunning -s "%s" -brainstem-structures ' % (self.inputs.subject_id)
+        reconall_cmd = fs_string + '; recon-all -no-isrunning -s "%s" -brainstem-structures ' % (self.inputs.subject_id)
         #reconall_cmd = [fs_string , ";" , "recon-all" , "-no-isrunning" , "-s" , "%s"% (self.inputs.subject_id) , "-hippocampal-subfields-T1" ]
-        os.environ['LD_LIBRARY_PATH'] = old_ld_library_path
 
         iflogger.info('Processing cmd: %s' % reconall_cmd)
 
-        process = subprocess.Popen(reconall_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, env=os.environ)
+        process = subprocess.Popen(reconall_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
         iflogger.info(proc_stdout)
 
