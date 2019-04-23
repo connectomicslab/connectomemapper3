@@ -16,7 +16,7 @@ This software is distributed under the open-source license Modified BSD. See [li
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (C) 2009-2018, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Hospital Center and University of Geneva (UNIGE-HUG), Switzerland.
+Copyright (C) 2009-2019, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Hospital Center and University of Geneva (UNIGE-HUG), Switzerland.
 
 ### Usage
 This App has the following command line arguments:
@@ -80,22 +80,30 @@ To run it in participant level mode (for one participant):
         --func_pipeline_config /code/ref_fMRI_config.ini -->
 
 ### Credits
-* Jean-Philippe Thiran
-* Reto Meuli
-* Patric Hagmann (pahagman)
-* Xavier Gigandet
-* Leila Cammoun
-* Alessandro Daducci (daducci)
-* Alia Lemkaddem (allem)
-* Stephan Gerhard (unidesigner)
-* Christophe Chênes (Cwis)
-* Alessandra Griffa (agriffa)
-* Oscar Esteban (oesteban)
+
 * Adrien Birbaumer
-* David Romascano
 * Sebastien Tourbier (sebastientourbier)
+* Yasser Aleman-Gomez ()
+* Alessandra Griffa (agriffa)
+* Patric Hagmann (pahagman)
+* Meritxell Bach Cuadra
+* Reto Meuli
+
 
 ### Contributors
+
+Collaboration Signal Processing Laboratory (LTS5) EPFL Lausanne
+
+* Jean-Philippe Thiran
+* Xavier Gigandet
+* Leila Cammoun
+* Alia Lemkaddem (allem)
+* Alessandro Daducci (daducci)
+* Stephan Gerhard (unidesigner)
+* Christophe Chênes (Cwis)
+* Oscar Esteban (oesteban)
+* David Romascano
+
 Collaboration Children's Hospital Boston
 
 * Ellen Grant
