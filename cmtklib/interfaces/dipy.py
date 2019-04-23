@@ -977,14 +977,18 @@ class DirectionGetterTractography(DipyBaseInterface):
             else:
                 dg = ProbabilisticDirectionGetter.from_shcoeff(sh, max_angle=self.inputs.max_angle, sphere=sphere)
 
+        from dipy.tracking.streamline import Streamlines
+
         if not self.inputs.use_act:
 
             IFLOGGER.info(('Performing %s tractography') % (self.inputs.algo))
 
-            streamlines = LocalTracking(dg, classifier, tseeds, affine, step_size=self.inputs.step_size, max_cross=1)
-
-            IFLOGGER.info('Saving tracks')
-            save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
+            streamline_generator = LocalTracking(dg, classifier, tseeds, affine, step_size=self.inputs.step_size, max_cross=1)
+            streamlines = Streamlines(streamline_generator)
+            
+            # IFLOGGER.info('Saving tracks')
+            # streamlines = LocalTracking(dg, classifier, tseeds, affine, step_size=self.inputs.step_size, max_cross=1)
+            # save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
 
         else:
             IFLOGGER.info('Performing PFT tractography')
@@ -1002,41 +1006,40 @@ class DirectionGetterTractography(DipyBaseInterface):
                                                                  return_all=False)
 
             #streamlines = list(pft_streamline_generator)
-            from dipy.tracking.streamline import Streamlines
+
             streamlines = Streamlines(pft_streamline_generator)
-
-            IFLOGGER.info('Saving tracks')
-            #
-            #save_trk(self._gen_filename('tracked_old', ext='.trk'), streamlines, affine, fa.shape)
-
-            import nibabel
-            from nibabel.streamlines import Field, Tractogram
-            from nibabel.orientations import aff2axcodes
-
-            print('-> Load nifti and copy header 1')
-
-            trkhdr = nb.trackvis.empty_header()
-            trkhdr['dim'] = imref.shape[:3]
-            trkhdr['voxel_size'] = imref.header.get_zooms()[:3]
-            trkhdr['voxel_order'] = "".join(aff2axcodes(imref.affine))
-            trkhdr['vox_to_ras'] = imref.affine.copy() #utils.affine_for_trackvis(trkhdr['voxel_size'])
-
             np.save(self._gen_filename('streamlines', ext='.npy'),streamlines)
 
-            header = {}
-            header[Field.ORIGIN] = imref.affine.copy()[:3,3]
-            header[Field.VOXEL_TO_RASMM] = imref.affine.copy()
-            header[Field.VOXEL_SIZES] = imref.header.get_zooms()[:3]
-            header[Field.DIMENSIONS] = imref.shape[:3]
-            header[Field.VOXEL_ORDER] = "".join(aff2axcodes(imref.affine))
+        IFLOGGER.info('Saving tracks')
+        #
+        #save_trk(self._gen_filename('tracked_old', ext='.trk'), streamlines, affine, fa.shape)
 
-            # Remove origin from streamlines (TODO: understand why needed)
-            for i, streamline in enumerate(streamlines):
-                for j, voxel in enumerate(streamline):
-                   streamlines[i][j] = streamlines[i][j] - imref.affine.copy()[:3,3]
+        import nibabel
+        from nibabel.streamlines import Field, Tractogram
+        from nibabel.orientations import aff2axcodes
 
-            tractogram = Tractogram(streamlines=streamlines, affine_to_rasmm=imref.affine.copy())
-            nb.streamlines.save(tractogram, self._gen_filename('tracked', ext='.trk'), header=header)
+        print('-> Load nifti and copy header 1')
+
+        trkhdr = nb.trackvis.empty_header()
+        trkhdr['dim'] = imref.shape[:3]
+        trkhdr['voxel_size'] = imref.header.get_zooms()[:3]
+        trkhdr['voxel_order'] = "".join(aff2axcodes(imref.affine))
+        trkhdr['vox_to_ras'] = imref.affine.copy() #utils.affine_for_trackvis(trkhdr['voxel_size'])
+
+        header = {}
+        header[Field.ORIGIN] = imref.affine.copy()[:3,3]
+        header[Field.VOXEL_TO_RASMM] = imref.affine.copy()
+        header[Field.VOXEL_SIZES] = imref.header.get_zooms()[:3]
+        header[Field.DIMENSIONS] = imref.shape[:3]
+        header[Field.VOXEL_ORDER] = "".join(aff2axcodes(imref.affine))
+
+        # Remove origin from streamlines (TODO: understand why needed)
+        for i, streamline in enumerate(streamlines):
+            for j, voxel in enumerate(streamline):
+               streamlines[i][j] = streamlines[i][j] - imref.affine.copy()[:3,3]
+
+        tractogram = Tractogram(streamlines=streamlines, affine_to_rasmm=imref.affine.copy())
+        nb.streamlines.save(tractogram, self._gen_filename('tracked', ext='.trk'), header=header)
 
             #nb.trackvis.write(self._gen_filename('tracked_nib2', ext='.trk'), streamlines, trkhdr)
 

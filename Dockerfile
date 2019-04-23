@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM sebastientourbier/connectomemapper-ubuntu16.04:latest
+FROM sebastientourbier/connectomemapper-ubuntu16.04:xenial-20181218
 
 ##
 # Install any needed packages specified in requirements.txt
@@ -38,7 +38,11 @@ RUN export
 #Previous for Docker
 #RUN echo '#! /bin/bash \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
 
-#Current for singularity
+RUN mv /opt/freesurfer/MCRv80/sys/os/glnxa64/libstdc++.so.6.old /opt/freesurfer/MCRv80/sys/os/glnxa64/libstdc++.so.6
+RUN mv /opt/freesurfer/MCRv80/sys/os/glnxa64/libstdc++.so.6.0.13.old /opt/freesurfer/MCRv80/sys/os/glnxa64/libstdc++.so.6.0.13
+
+#Current for singularity chown "$(id -u):$(id -g)" /opt/freesurfer/MCRv80 \n
+RUN chmod 777 -R /opt/freesurfer/MCRv80
 RUN echo '#! /bin/bash \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
@@ -48,6 +52,8 @@ RUN chmod 775 /app/run_connectomemapper3.sh
 RUN chmod 777 /opt/freesurfer
 
 ENV FS_LICENSE /tmp/code/license.txt
+
+#ENV DYLD_LIBRARY_PATH ''
 
 #COPY version /version
 WORKDIR /tmp/derivatives
@@ -68,4 +74,4 @@ LABEL org.label-schema.version=$VERSION
 LABEL org.label-schema.maintainer="Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>"
 LABEL org.label-schema.vendor="Connectomics Lab, Centre Hospitalier Universitaire Vaudois (CHUV), Lausanne, Switzerland"
 LABEL org.label-schema.schema-version="1.0"
-LABEL org.label-schema.docker.cmd="docker run -v ~/data/bids_dataset:/tmp"
+LABEL org.label-schema.docker.cmd="docker run -v ~/data/bids_dataset:/tmp -t sebastientourbier/connectomemapper-bidsapp:${VERSION} /tmp /tmp/derivatives participant [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]] [--anat_pipeline_config ANAT_PIPELINE_CONFIG] [--dwi_pipeline_config DWI_PIPELINE_CONFIG] [--func_pipeline_config FUNC_PIPELINE_CONFIG]"
