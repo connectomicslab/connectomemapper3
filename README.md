@@ -81,12 +81,12 @@ To run it in participant level mode (for one participant):
 
 ### Credits
 
-* Adrien Birbaumer
 * Sebastien Tourbier (sebastientourbier)
-* Yasser Aleman-Gomez ()
+* Yasser Aleman-Gomez (yasseraleman)
 * Alessandra Griffa (agriffa)
+* Adrien Birbaumer (abirba)
 * Patric Hagmann (pahagman)
-* Meritxell Bach Cuadra
+* Meritxell Bach Cuadra 
 * Reto Meuli
 
 
@@ -99,10 +99,11 @@ Collaboration Signal Processing Laboratory (LTS5) EPFL Lausanne
 * Leila Cammoun
 * Alia Lemkaddem (allem)
 * Alessandro Daducci (daducci)
+* David Romascano (davidrs06)
 * Stephan Gerhard (unidesigner)
 * Christophe Chênes (Cwis)
 * Oscar Esteban (oesteban)
-* David Romascano
+
 
 Collaboration Children's Hospital Boston
 
