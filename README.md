@@ -3,7 +3,7 @@
 This BIDS app implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper (CMP) 3,
 from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
-![Image not found](http://www.connectomics.org/mapper/_images/flowchart.jpg)
+![Image not found](https://connectome-mapper-3.readthedocs.io/en/latest/_images/flowchart.jpg)
 
 The Connectome Mapper 3 is part of the Connectome Mapping Toolkit (CMTK).
 
