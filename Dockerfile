@@ -1,5 +1,7 @@
-# Use an official Python runtime as a parent image
-FROM sebastientourbier/connectomemapper-ubuntu16.04:xenial-20181218
+# Use an initial image, where all Connectome Mapper 3 dependencies are installed, as a parent image
+
+ARG VERSION
+FROM sebastientourbier/connectomemapper-ubuntu16.04:$VERSION
 
 ##
 # Install any needed packages specified in requirements.txt
@@ -55,7 +57,6 @@ ENTRYPOINT ["/app/run_connectomemapper3.sh"]
 
 ARG BUILD_DATE
 ARG VCS_REF
-ARG VERSION
 
 #Metadata
 LABEL org.label-schema.build-date=$BUILD_DATE

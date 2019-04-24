@@ -158,10 +158,6 @@ ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
 ADD environment.yml /app/environment.yml
 RUN conda env create -f /app/environment.yml
 
-#RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
-RUN /bin/bash -c ". activate $CONDA_ENV && \
-    python setup.py install"
-
 # ENV ANTSPATH=/opt/conda/bin
 # ENV PATH=$ANTSPATH:$PATH
 ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin

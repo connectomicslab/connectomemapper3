@@ -10,6 +10,7 @@ dependencies:
 - pip=19.0.3
 - numpy=1.15.4
 - matplotlib=2.2.3
+- graphviz=2.40.1
 - nipype=1.1.8
 - git-annex=7.20190219
 
@@ -23,3 +24,4 @@ dependencies:
     - datalad_neuroimaging==0.2.0
     - apptools==4.4.0
     - statsmodels==0.9.0
+    - networkx==2.2
