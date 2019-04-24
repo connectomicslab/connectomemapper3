@@ -1,7 +1,7 @@
 # Use an initial image, where all Connectome Mapper 3 dependencies are installed, as a parent image
 
-ARG VERSION
-FROM sebastientourbier/connectomemapper-ubuntu16.04:$VERSION
+ARG MAIN_DOCKER
+FROM $MAIN_DOCKER
 
 ##
 # Install any needed packages specified in requirements.txt
@@ -55,6 +55,7 @@ ENV FS_LICENSE /tmp/code/license.txt
 WORKDIR /tmp/derivatives
 ENTRYPOINT ["/app/run_connectomemapper3.sh"]
 
+ARG VERSION
 ARG BUILD_DATE
 ARG VCS_REF
 

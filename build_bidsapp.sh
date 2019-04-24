@@ -8,4 +8,11 @@ echo $VERSION
 VCS_REF=$(git rev-parse --verify HEAD)
 echo $VCS_REF
 
-docker build --no-cache --rm --build-arg BUILD_DATE=$CMP_BUILD_DATE --build-arg VERSION=$VERSION --build-arg VCS_REF=$VCS_REF -t sebastientourbier/connectomemapper-bidsapp:${VERSION} .
+MAIN_DOCKER=sebastientourbier/connectomemapper-ubuntu16.04:$VERSION
+echo $MAIN_DOCKER
+
+docker build --no-cache --rm --build-arg BUILD_DATE=$CMP_BUILD_DATE \
+                             --build-arg VERSION=$VERSION \
+                             --build-arg VCS_REF=$VCS_REF \
+                             --build-arg MAIN_DOCKER=$MAIN_DOCKER \
+                             -t sebastientourbier/connectomemapper-bidsapp:${VERSION} .
