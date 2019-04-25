@@ -61,7 +61,7 @@ def readLineByLine(filename):
 
 def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type):
 
-    subject_derivatives_dir = os.path.join(project.base_directory,"derivatives")
+    subject_derivatives_dir = os.path.join(project.output_directory)
 
     # print('project.subject_session: {}'.format(project.subject_session))
 

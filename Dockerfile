@@ -21,7 +21,7 @@ FROM $MAIN_DOCKER
 WORKDIR /app/connectomemapper3
 ADD . /app/connectomemapper3
 
-ENV CONDA_ENV py27cmp
+ENV CONDA_ENV py27cmp-core
 
 #RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
 RUN /bin/bash -c ". activate $CONDA_ENV && \

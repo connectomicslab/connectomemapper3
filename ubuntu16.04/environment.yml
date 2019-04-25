@@ -1,13 +1,15 @@
-name: py27cmp
+name: py27cmp-core
 
 channels:
-- aramislab
+- anaconda
 - conda-forge
+- aramislab
 - defaults
 
 dependencies:
 - python=2.7.15
 - pip=19.0.3
+- ants=2.2.0
 - numpy=1.15.4
 - matplotlib=2.2.3
 - graphviz=2.40.1
@@ -15,6 +17,7 @@ dependencies:
 - git-annex=7.20190219
 
 - pip:
+    - duecredit==0.7.0
     - dipy==0.15.0
     - mne==0.17.1
     - obspy==1.1.1

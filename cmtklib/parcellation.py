@@ -86,9 +86,19 @@ class ParcellateHippocampalSubfields(BaseInterface):
         iflogger.info("Parcellation of hippocampal subfields (FreeSurfer)")
         iflogger.info("=============================================")
 
+        lh_hipposubfields_mgz = os.path.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','lh.hippoSfLabels-T1.v10.mgz')
+        if os.access(lh_hipposubfields_mgz, os.F_OK):
+            iflogger.info('Warning: file {} is existing and being removed'.format(lh_hipposubfields_mgz))
+            os.remove(lh_hipposubfields_mgz)
+
+        rh_hipposubfields_mgz = os.path.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','rh.hippoSfLabels-T1.v10.mgz')
+        if os.access(rh_hipposubfields_mgz, os.F_OK):
+            iflogger.info('Warning: file {} is existing and being removed'.format(rh_hipposubfields_mgz))
+            os.remove(rh_hipposubfields_mgz)
+
         fs_string = 'export SUBJECTS_DIR=' + self.inputs.subjects_dir
         iflogger.info('- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
-
+        
         reconall_cmd = fs_string + '; recon-all -no-isrunning -s "%s" -hippocampal-subfields-T1 ' % (self.inputs.subject_id)
         #reconall_cmd = [fs_string , ";" , "recon-all" , "-no-isrunning" , "-s" , "%s"% (self.inputs.subject_id) , "-hippocampal-subfields-T1" ]
 
