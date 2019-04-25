@@ -76,6 +76,10 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type)
         print "WARNING: rewriting config file {}".format(subject_conf_file)
         os.remove(subject_conf_file)
 
+    #Change relative path to absolute path if needed (required when using singularity)
+    if not os.path.isabs(ref_conf_file):
+        ref_conf_file = os.path.abspath(ref_conf_file)
+
     #Copy and edit appropriate fields/lines
     f = open(subject_conf_file,'w')
     for line in readLineByLine(ref_conf_file):
