@@ -52,7 +52,8 @@ jobs:
               docker build \
                 --cache-from=sebastientourbier/connectomemapper3 \
                 --rm=false \
-                -t sebastientourbier/connectomemapper3:latest \
+                -t sebastientourbier/connectomemapper3:${THISVERSION} \
+                --build-arg MAIN_DOCKER="sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION}"
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
                 --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
@@ -62,8 +63,10 @@ jobs:
           name: Save Docker Images
           no_output_timeout: 40m
           command: |
+            # Get version, update files.
+            THISVERSION=$( python get_version.py )
             mkdir -p /tmp/cache
-            docker save sebastientourbier/connectomemapper-ubuntu16.04:latest sebastientourbier/connectomemapper3:latest \
+            docker save sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} sebastientourbier/connectomemapper3:${THISVERSION} \
             | pigz -8 -p 3 > /tmp/cache/docker.tar.gz
       - persist_to_workspace:
           root: /tmp
