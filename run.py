@@ -199,14 +199,14 @@ print("> Subjects to analyze : {}".format(subjects_to_analyze))
 #Derivatives directory creation if it does not exist
 derivatives_dir = os.path.abspath(args.output_dir)
 if not os.path.isdir(derivatives_dir):
-    os.mkdir(derivatives_dir)
+    os.makedirs(derivatives_dir)
 
 tools = ['cmp','freesurfer','nipype']
 
 for tool in tools:
     tool_dir = os.path.join(args.output_dir, tool)
     if not os.path.isdir(tool_dir):
-        os.mkdir(tool_dir)
+        os.makedirs(tool_dir)
 
 # Make sure freesurfer is happy with the license
 print('> Copy FreeSurfer license (BIDS App) ')
