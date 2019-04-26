@@ -86,7 +86,7 @@ To run it in participant level mode (for one participant):
 * Alessandra Griffa (agriffa)
 * Adrien Birbaumer (abirba)
 * Patric Hagmann (pahagman)
-* Meritxell Bach Cuadra 
+* Meritxell Bach Cuadra (meribach)
 * Reto Meuli
 
 
