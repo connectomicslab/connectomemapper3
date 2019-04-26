@@ -11,8 +11,8 @@ This neuroimage processing pipeline software is developed by the Hagmann's group
   :alt: Available in OpenNeuro!
 
 
-.. image:: https://circleci.com/gh/sebastientourbier/multiscalebrainparcellator/tree/master.svg?style=shield
-  :target: https://circleci.com/gh/sebastientourbier/multiscalebrainparcellator/tree/master
+.. image:: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=svg
+  :target: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master
   :alt: Continuous Integration Status
 
 .. image:: https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest

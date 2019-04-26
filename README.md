@@ -1,4 +1,6 @@
 ## Connectome Mapper 3 BIDS App (UNDER DEVELOPMENT)
+[![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=flat)](https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master)
+
 ### Description
 This BIDS app implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper (CMP) 3,
 from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
