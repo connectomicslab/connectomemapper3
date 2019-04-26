@@ -11,6 +11,7 @@ dependencies:
 - pip=19.0.3
 - numpy=1.15.4
 - matplotlib=2.2.3
+- traits=5.1
 - traitsui=6.0.0
 - graphviz=2.40.1
 - nipype=1.1.8
