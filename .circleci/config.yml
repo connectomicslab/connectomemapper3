@@ -175,10 +175,13 @@ jobs:
           name: Run anatomical workflow on ds005
           no_output_timeout: 4h
           command: |
+            # Get version, update files.
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
+            echo "THISVERSION : ${THISVERSION}"
             docker run -it --rm \
                 -v /tmp/data/ds005:/tmp \
                 -v /home/circleci/src/connectomemapper3/config:/tmp/config \
-                sebastientourbier/connectomemapper3:latest \
+                sebastientourbier/connectomemapper3:${THISVERSION} \
                 /tmp /tmp/derivatives participant --participant_label 01 \
                 --anat_pipeline_config /tmp/config/ref_anatomical_config.ini
 
