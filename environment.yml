@@ -18,7 +18,7 @@ dependencies:
 - git-annex=7.20190219
 
 - pip:
-	- duecredit==0.7.0
+    - duecredit==0.7.0
     - dipy==0.15.0
     - mne==0.17.1
     - obspy==1.1.1
