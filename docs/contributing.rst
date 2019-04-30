@@ -1,4 +1,5 @@
 .. _contributing:
+
 =================================
 Contributing to Connectome Mapper
 =================================

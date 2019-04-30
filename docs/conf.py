@@ -18,6 +18,8 @@ from info import __minor_version__
 from info import __version__
 from info import __release_date__
 
+import time
+
 from recommonmark.parser import CommonMarkParser
 
 # Use Markdown and reStructuredText in the same Sphinx project
@@ -38,7 +40,8 @@ source_suffix = ['.rst', '.md']
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc',
+extensions = ['sphinx.ext.autosectionlabel',
+              'sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
               'sphinxarg.ext']
@@ -47,7 +50,7 @@ extensions = ['sphinx.ext.autodoc',
 templates_path = ['_templates']
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -57,7 +60,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'The Connectome Mapper'
-copyright = u'2018, Brain Communication Pathways Sinergia Consortium'
+copyright = u'2018-{}, Brain Communication Pathways Sinergia Consortium & Contributors'.format(time.strftime("%Y"))
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -81,6 +84,7 @@ release = __version__
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = ['_build']
+default_role = 'obj'
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -105,15 +109,19 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output ---------------------------------------------------
 
+gettext_compact = False
+
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = 'sphinx_rtd_theme'#'sphinxdoc'
+#html_theme = 'alabaster'#'sphinxdoc'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    'logo_only': True
+    'logo_only': True, # should be commented if html_theme = 'alabaster'
+    'display_version': False
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -185,6 +193,9 @@ html_use_index = True
 htmlhelp_basename = 'CMP3doc'
 
 html_context = {'release_date': __release_date__}
+
+# Activate autosectionlabel plugin
+autosectionlabel_prefix_document = True
 
 # -- Options for LaTeX output --------------------------------------------------
 

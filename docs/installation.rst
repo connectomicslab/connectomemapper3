@@ -1,6 +1,6 @@
-************************
+***********************************
 Installation Instruction for Users
-************************
+***********************************
 
 .. warning:: This software is for research purposes only and shall not be used for
              any clinical use. This software has not been reviewed or approved by
@@ -85,10 +85,10 @@ You should see the docker image "connectomemapper-bidsapp" with tag "3.0.0-beta"
 
 
 The Connectome Mapper 3 BIDSApp Manager (GUI)
-===============================
+==============================================
 
 Prerequisites
--------------
+---------------
 
 * Installed miniconda2 (Python 2.7) from the web page::
 

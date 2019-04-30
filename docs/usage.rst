@@ -1,6 +1,6 @@
-*********************
+***********************
 BIDS App: User's Guide
-*********************
+***********************
 
 Introduction
 =============================
@@ -25,7 +25,7 @@ The command to run ``Connectome Mapper 3`` follow the `BIDS-Apps
 
 
 Participant Level Analysis
-======================
+===========================
 To run the docker image in participant level mode (for one participant) ::
 
     docker run -it --rm \
@@ -72,4 +72,4 @@ settings and commands. Datalad also performs version control over your data.
 Eager to contribute?
 ===============================================
 
-See contributing_ for more details.
+See `contributing <contributing.html>`_ for more details.

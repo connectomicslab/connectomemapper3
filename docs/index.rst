@@ -47,6 +47,37 @@ This tool allows you to easily do the following:
 Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which provide a frozen environment where versions of all external softwares and libraries are fixed.
 
 
+.. _getting_started:
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Getting started
+
+   installation
+
+.. _user-docs:
+
+.. toctree::
+   :maxdepth: 2
+   :caption: User Documentation
+
+   usage
+   conf
+   stages
+   exampleresults
+   outputs
+   datalad
+
+.. _about-docs:
+
+.. toctree::
+   :maxdepth: 1
+   :caption: About Connectome Mapper
+
+   LICENSE
+   citing
+   contributing
+
 *********
 Funding
 *********
@@ -60,24 +91,3 @@ License information
 This software is distributed under the open-source license Modified BSD. See :ref:`license <LICENSE>` for more details.
 
 All trademarks referenced herein are property of their respective holders.
-
-Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland.
-
-
-********
-Contents
-********
-
-.. toctree::
-   :maxdepth: 1
-
-   index
-   installation
-   usage
-   conf
-   stages
-   exampleresults
-   outputs
-   citing
-   contributing
-   datalad

@@ -1,6 +1,8 @@
-====================
+.. _download:
+
+======================================
 Download Instruction for Contributors
-====================
+======================================
 
 By downloading Connectome Mapper 3, you agree to the terms and conditions of the following Modified BSD license.
 
@@ -36,7 +38,7 @@ By downloading Connectome Mapper 3, you agree to the terms and conditions of the
 
 
 Source code
-----------------------------------------------------------------------
+------------
 
 .. raw:: html
 

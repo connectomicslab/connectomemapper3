@@ -1,6 +1,6 @@
-************************
+******************************
 BIDS App Manager: User's Guide
-************************
+******************************
 
 Introduction
 =============================
@@ -8,7 +8,7 @@ Introduction
 TBC
 
 Step 1: open a terminal, activate the conda environment
-=============================
+==========================================================
 
     $ source activate py27cmp
 
@@ -17,7 +17,7 @@ Step 1: open a terminal, activate the conda environment
     $ conda activate py27cmp
 
 Step 2: start the Connectome Mapper 3 BIDS App Manager
-=============================
+==========================================================
 
     $ cmpbidsappmanager
 
@@ -36,18 +36,16 @@ Select the mode "Install a Datalad/BIDS dataset".
 
 If ssh connection is used, make sure to enable the  "install via ssh" and to provide all connection details (IP address / Remote host name, remote user, remote password)
 
-.. note:: The input dataset MUST be a valid :abbr:`BIDS (Brain Imaging Data
-Structure)` structured dataset and must include at least one T1w or MPRAGE structural image.
-We highly recommend that you validate your dataset with the free, online
-`BIDS Validator <http://bids-standard.github.io/bids-validator/>`_.
+.. note:: The input dataset MUST be a valid :abbr:`BIDS (Brain Imaging Data Structure)` structured dataset and must include at least one T1w or MPRAGE structural image. We highly recommend that you validate your dataset with the free, online `BIDS Validator <http://bids-standard.github.io/bids-validator/>`_.
+
 
 Step 4: configure the processing stages of the different processing pipelines
-=============================
+==============================================================================
 
 TBC
 
 Step 5: configure and run the Connectome Mapper 3 BIDS App
-=============================
+==========================================================
 
 TBC
 
