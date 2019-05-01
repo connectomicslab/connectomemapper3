@@ -52,6 +52,8 @@ class DiffusionConfigUI(DiffusionConfig):
                         Group(
                             Item('custom_track_file', style='simple'),
                             visible_when='tracking_processing_tool=="Custom"'),
+                        height=750,
+                        width=500
                        )
 
     def __init__(self):
@@ -92,7 +94,7 @@ class DiffusionStageUI(DiffusionStage):
                                 label = 'View outputs', show_border=True
                                 )
                             ),
-                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, height=900, width=500, kind='livemodal', title='Inspect stage outputs', buttons=['OK','Cancel']
                         )
 
     config_view = View(Group(
@@ -102,7 +104,7 @@ class DiffusionStageUI(DiffusionStage):
                                 label = 'Configuration', show_border=True
                                 ),
                             ),
-                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, height=900, width=500, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     def __init__(self):

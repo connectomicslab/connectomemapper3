@@ -84,7 +84,7 @@ class PreprocessingStageUI(PreprocessingStage):
                                 label = 'View outputs', show_border=True
                                 )
                             ),
-                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK','Cancel']
                         )
 
     config_view = View(Group(
@@ -94,7 +94,7 @@ class PreprocessingStageUI(PreprocessingStage):
                                 label = 'Configuration', show_border=True
                                 ),
                             ),
-                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, height=350, width=650, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     # General and UI members

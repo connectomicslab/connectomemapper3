@@ -780,6 +780,7 @@ class CMP_BIDSAppWindow(HasTraits):
                ##'-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
                ##'-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)
                '-v', '{}:/tmp'.format(self.bids_root),
+               #'-v', '{}:/tmp/derivatives'.format(os.path.join(self.bids_root,'derivatives')),
                ]
 
         # if self.run_dmri_pipeline:
@@ -814,7 +815,7 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('/tmp/code/ref_fMRI_config.ini')
 
 
-        print('... Docker cmd : {}'.format(cmd))
+        print('... Docker cmd 2 : {}'.format(cmd))
 
         log_filename = os.path.join(self.bids_root,'derivatives','cmp','main_log-cmpbidsapp.txt')
 

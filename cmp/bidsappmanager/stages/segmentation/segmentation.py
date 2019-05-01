@@ -35,9 +35,9 @@ class SegmentationConfigUI(SegmentationConfig):
                         Item('ants_regmaskfile',label='Extraction mask',visible_when='brain_mask_extraction_tool == "ANTs"'),
                         Item('brain_mask_path',label='Brain mask path',visible_when='brain_mask_extraction_tool == "Custom"'),
                         'freesurfer_args',
-                        'use_existing_freesurfer_data',
-                        Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
-                        Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True'),
+                        #'use_existing_freesurfer_data',
+                        #Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data == True'),
+                        #Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data == True'),
                         visible_when="seg_tool=='Freesurfer'"),
                        Group(
                         'white_matter_mask',
@@ -58,7 +58,7 @@ class SegmentationStageUI(SegmentationStage):
                                 label = 'View outputs', show_border=True
                                 )
                             ),
-                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK','Cancel']
                         )
 
     config_view = View(Group(
@@ -68,7 +68,7 @@ class SegmentationStageUI(SegmentationStage):
                                 label = 'Configuration', show_border=True
                                 ),
                             ),
-                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, height=400, width=450, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     # General and UI members

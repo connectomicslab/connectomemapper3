@@ -97,7 +97,7 @@ class RegistrationStageUI(RegistrationStage):
                                 label = 'View outputs', show_border=True
                                 )
                             ),
-                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK','Cancel']
                         )
 
     config_view = View(Group(
@@ -107,7 +107,7 @@ class RegistrationStageUI(RegistrationStage):
                                 label = 'Configuration', show_border=True
                                 ),
                             ),
-                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, height=650, width=650, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     def __init__(self,pipeline_mode):

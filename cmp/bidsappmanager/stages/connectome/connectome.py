@@ -58,7 +58,7 @@ class ConnectomeStageUI(ConnectomeStage):
                                 label = 'View outputs', show_border=True
                                 )
                             ),
-                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK','Cancel']
                         )
 
     config_view = View(Group(
@@ -68,7 +68,7 @@ class ConnectomeStageUI(ConnectomeStage):
                                 label = 'Configuration', show_border=True
                                 ),
                             ),
-                            scrollable=True, resizable=True, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, height=270, width=670, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     def __init__(self):

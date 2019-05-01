@@ -76,8 +76,12 @@ class Dipy_tracking_config(HasTraits):
     def _tracking_mode_changed(self,new):
         if new == "Deterministic" and not self.SD:
             self.curvature = 2.0
+            self.use_act = False
+            self.seed_from_gmwmi = False
         elif new == "Deterministic" and self.SD:
             self.curvature = 0.0
+            self.use_act = False
+            self.seed_from_gmwmi = False
         elif new == "Probabilistic":
             self.curvature = 1.0
 

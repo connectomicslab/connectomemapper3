@@ -51,6 +51,13 @@ RUN chmod 777 /opt/freesurfer
 
 ENV FS_LICENSE /tmp/code/license.txt
 
+#Temporary tmp folder
+RUN /bin/bash -c "mkdir -p /var/tmp"
+ENV TMPDIR /var/tmp
+ENV TMP /var/tmp
+ENV TEMP /var/tmp
+
+
 #COPY version /version
 WORKDIR /tmp/derivatives
 ENTRYPOINT ["/app/run_connectomemapper3.sh"]
