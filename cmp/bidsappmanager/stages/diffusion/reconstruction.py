@@ -48,7 +48,7 @@ class Dipy_recon_configUI(Dipy_recon_config):
                             label='Parameters of SHORE reconstruction model',
                             visible_when='imaging_model == "DSI"'
                             ),
-                       Item('mapmri'),
+                       Item('mapmri',visible_when='imaging_model != "DTI"'),
                        Group(
                             VGroup(
                                 Item('radial_order'),

@@ -45,9 +45,15 @@ DSI Tractography results are displayed with TrackVis.
 Connection Matrix Creation
 --------------------------
 
-Generated connection matrix are displayed with Chaco.
+Generated connection matrix can be displayed using a:
+1. matrix layout with pyplot
 
 .. image:: images/ex_connectionmatrix.png
+	:width: 600
+
+2. circular layout with pyplot and MNE
+
+.. image:: images/ex_connectioncircular.png
 	:width: 600
 
 ..

@@ -174,7 +174,7 @@ class CMP_Project_Info(HasTraits):
     fmri_warning_msg = Str('\nWarning: selected directory is already configured for resting-state data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
 
     #process_type = Enum('diffusion',['diffusion','fMRI'])
-    diffusion_imaging_model = Enum('DTI',['DSI','DTI','HARDI'])
+    diffusion_imaging_model = Enum('DTI',['DSI','DTI','multi-shell'])
     dmri_bids_acqs = List()
     dmri_bids_acq = Enum(values='dmri_bids_acqs')
 

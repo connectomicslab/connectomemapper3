@@ -2,7 +2,7 @@
 Connectome Mapper 3 (UNDER DEVELOPMENT)
 =======================================================
 
-This neuroimage processing pipeline software is developed by the Hagmann's group at the University Hospital of Lausanne (CHUV) for use at the Center for BioMedical Imaging (CIBM) within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
+This neuroimage processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
 
 ..
 
@@ -31,7 +31,7 @@ About
 ``Connectome Mapper 3``, part of the Connectome Mapping Toolkit (CMTK), implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
 The ``Connectome Mapper 3`` pipelines uses a combination of tools from well-known software
-packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy_ and AFNI_.
+packages, including `FSL <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki>`_, `FreeSurfer <https://surfer.nmr.mgh.harvard.edu/>`_, `ANTs <http://stnava.github.io/ANTs/>`_, `MRtrix3 <http://www.mrtrix.org/>`_, `Dipy <https://nipy.org/dipy/>`_ and `AFNI <https://afni.nimh.nih.gov/>`_.
 These pipelines were designed to provide the best software implementation for each
 state of processing, and will be updated as newer and better neuroimaging
 software become available.

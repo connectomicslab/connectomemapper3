@@ -2,15 +2,29 @@
 Stage configuration
 *******************
 
-Each stage has a configuration and a "View outputs" panel. The configuration panel allows to set the stage parameters. The "View outputs" panel displays a set of outputs that can be visually checked once the stage processing has finished. The outputs depend on the chosen parameters.
+
+Pipeline stages can be configured via the Configurator Window where each pipeline has a tab panel. 
+
+.. image:: images/configurator_window.png
+	:align: center
+
+The outputs depend on the chosen parameters.
 	
 Preprocessing
 -------------
 
-Preprocessing includes motion and eddy current correction for diffusion data.
+Preprocessing includes denoising, bias field correction, motion and eddy current correction for diffusion data.
 
 .. image:: images/preprocessing.png
 	:align: center
+
+*Denoising*
+
+	Remove noise from diffusion images using (1) MRtrix3 MP-PCA method or (2) Dipy Non-Local Mean (NLM) denoising with Gaussian or Rician noise models
+
+*Bias field correction*
+
+	Remove intensity inhomogeneities due to the magnetic resonnace bias field using (1) MRtrix3 N4 bias field correction or (2) the bias field correction provided by FSL FAST.
 
 *Motion correction*
 
@@ -21,13 +35,12 @@ Preprocessing includes motion and eddy current correction for diffusion data.
 *Eddy current correction*
 
 	Corrects for eddy current distortions using FSL's Eddy correct tool.
-	
-*View outputs*
 
-	* Motion corrected image
-	* Eddy current corrected image
-	* Motion and eddy current corrected image
+*Resampling*
+
+	Resample morphological and diffusion data to F0 x F1 x F2 mm^3
 	
+
 Segmentation
 ------------
 
@@ -48,16 +61,11 @@ Performs tissue segmentation using Freesurfer or custom segmentation.
 
 	* *White matter mask:* select the file containing your white matter binary mask
 	
-*View outputs*
-
-	* Brain mask
-	* Segmentation labels overlaid on T1 (Freesurfer)
-	* Segmentation and surfaces overlaid on T1 (Freesurfer)
 	
 Parcellation
 ------------
 
-Generates the Native Freesurfer or Lausanne2008 parcellation from Freesurfer data, or takes a custom parcellation atlas.
+Generates the Native Freesurfer or Lausanne2008/Lausanne2018 parcellation from Freesurfer data, or takes a custom parcellation atlas.
 	
 *Parcellation scheme*
 
@@ -70,16 +78,16 @@ Generates the Native Freesurfer or Lausanne2008 parcellation from Freesurfer dat
 		:align: center
 	
 	* *Lausanne2008:* Multi-resolution atlas
+
+	.. image:: images/parcellation_lausanne2018.png
+		:align: center
+	
+	* *Lausanne2018:* Lausanne 2008 atlas extended with 7 thalamic nuclei, 12 hippocampal subfields, and 4 brainstem sub-structure per hemisphere
 	
 	.. image:: images/parcellation_custom.png
 		:align: center
 	
 	* *Custom:* Custom atlas. Specify the atlas name, the number of regions, the nifti file and a corresponding graphml file. The Graphml file must contain at least a "dn_correspondence_id" field for each node. This field should contain the region's label in the nifti file.
-	
-*View outputs*
-
-	* *Freesurfer and Lausanne2008:* Parcellation(s) overlaid with brain mask
-	* *Custom:* Custom atlas
 	
 Registration
 ------------
@@ -96,85 +104,126 @@ Registration
 	
 	* BBregister (FS): perform linear registration using Freesurfer BBregister tool.
 	
-	.. image:: images/registration_fnirt.png
+	.. image:: images/registration_ants.png
 		:align: center
 		
-	* Non-linear (FSL): perform non-linear registration from T1 to b0 (only available if T2 scans are found).
-	
-*View outputs*
+	* Non-linear (ANTS): perform symmetric diffeomorphic SyN registration from T1 to b0 
 
-	* T1 volume registered to b0 space overlayed with the b0 volume.
-	
-Diffusion and tractography
---------------------------
+Diffusion reconstruction and tractography
+------------------------------------------
 
-Performs deterministic, probabilistic or global tractography based on several tools.
+Performs diffusion reconstruction and local deterministic or probabilistic tractography based on several tools. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
 
-.. note:: There is currently an issue with window resizing when changing processing tools. Close the window and reopen it when you change the processing tool.
-	
-*Resampling*
+	.. image:: images/diffusion_config_window.png
+				:align: center
+	*Diffusion stage configuration window*
 
-	Resample diffusion data to F0 x F1 x F2 mm^3
 
-*Processing tool*
+*Reconstruction tool*
 
-	.. image:: images/diffusion_dtk.png
-		:align: center
-
-	**DTK**: performs tensor reconstruction and deterministic fiber tracking. The algorithm ensures that fibers terminate in the grey matter (no ROI dilation required).
 		
-	**MRtrix**: performs tensor and CSD reconstruction as well as deterministic and probabilistic fiber tracking. ROI dilation is required to map brain connections as the tracking only operates in the white matter.
+	**Dipy**: performs SHORE, tensor, CSD and MAP-MRI reconstruction.
+
+		* SHORE:
 		
-		* Deterministic:
+			.. image:: images/diffusion_dipy_shore.png
+				:align: center
+				
+			SHORE performed only on DSI data
+
+		* Tensor:
+		
+			.. image:: images/diffusion_dipy_tensor.png
+				:align: center
+				
+			Tensor performed only on DTI data
+
+		* CSD:
+		
+			.. image:: images/diffusion_dipy_csd.png
+				:align: center
+				
+			CSD performed on DTI and multi-shell data
+
+		* MAP_MRI:
+		
+			.. image:: images/diffusion_dipy_mapmri.png
+				:align: center
+				
+			MAP-MRI performed only on multi-shell data
+
+
+	**MRtrix**: performs CSD reconstruction.
+
+		* CSD:
+		
+			.. image:: images/diffusion_mrtrix_csd.png
+				:align: center
+				
+			CSD performed on DTI and multi-shell data
+	
+
+*Tractography tool*
+
+	**Dipy**: performs deterministic and probabilistic fiber tracking as well as particle filtering tractography. 
+		
+		* Deterministic tractography:
+		
+			.. image:: images/diffusion_dipy_deterministic.png
+				:align: center
+				
+			Deterministic tractography (SD_STREAM) performed on single tensor or CSD reconstruction
+
+		* Probabilistic tractography:
+		
+			.. image:: images/diffusion_dipy_probabilistic.png
+				:align: center
+				
+			Probabilistic tractography (iFOD2) performed on SHORE or CSD reconstruction
+
+		* Probabilistic particle filtering tractography (PFT):
+		
+			.. image:: images/diffusion_dipy_probabilistic_PFT.png
+				:align: center
+				
+			Probabilistic PFT tracking performed on SHORE or CSD reconstruction. Seeding from the gray matter / white matter interface is possible.
+
+		
+	**MRtrix**: performs deterministic and probabilistic fiber tracking as well as anatomically-constrained tractography. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
+		
+		* Deterministic tractography:
 		
 			.. image:: images/diffusion_mrtrix_deterministic.png
 				:align: center
 				
-			Deterministic tracking performed on single tensor or CSD reconstruction
+			Deterministic tractography (SD_STREAM) performed on single tensor or CSD reconstruction
+
+		* Deterministic anatomically-constrained tractography (ACT):
 		
-		* Probabilistic:
+			.. image:: images/diffusion_mrtrix_deterministic_ACT.png
+				:align: center
+				
+			Deterministic ACT tracking performed on single tensor or CSD reconstruction. Seeding from the gray matter / white matter interface is possible. Backtrack option is not available in deterministic tracking.
+
+		* Probabilistic tractography:
 		
 			.. image:: images/diffusion_mrtrix_probabilistic.png
 				:align: center
-		
-			Probabilistic tracking is currently only available from CSD reconstruction. Seed regions are defined as the intersection between dilated ROIs and the white matter mask.
-			
-	**Camino**: performs multi model reconstruction and also deterministic and probabilistic fiber tracking. ROI dilation required as for MRtrix processing.
-	
-		* Deterministic:
-		
-			.. image:: images/diffusion_camino_deterministic.png
-				:align: center
 				
-			Deterministic tracking can be performed on single or multi-tensor reconstructions. Reconstructions using Ball-stick or Restore algorithms are also available.
-		
-		* Probabilistic:
-		
-			.. image:: images/diffusion_camino_probabilistic.png
-				:align: center
-		
-			For now, probabilistic tracking with Camino only includes the "pico" tracking algorithm. Make sure that the trace units match your b-values in the gradient table.
-		
-	**FSL**: performs probabilistic tracking
-	
-		.. image:: images/diffusion_fsl.png
-			:align: center
-				
-	**Gibbs**: performs global tractography based on FSL tensor or MRtrix CSD reconstruction
-	
-		.. image:: images/diffusion_gibbs.png
-			:align: center	
-		
-	
-*View outputs*
+			Probabilistic tractography (iFOD2) performed on SHORE or CSD reconstruction
 
-	* Fiber tracks (when deterministic of global tractography is performed)
-	* Response function (Mrtrix CSD)
+		* Probabilistic anatomically-constrained tractography (ACT):
+		
+			.. image:: images/diffusion_mrtrix_probabilistic_ACT.png
+				:align: center
+				
+			Probabilistic ACT tracking performed on SHORE or CSD reconstruction. Seeding from the gray matter / white matter interface is possible.
+			
 	
 Connectome
 ----------
 
-Computes fiber length connectivity matrices. If DTI or HARDI data is processed, FA additional map is computed. In case of DSI, additional maps include GFA, Skewness, Kurtosis and P0.
+Computes fiber length connectivity matrices. If DTI data is processed, FA additional map is computed. In case of DSI, additional maps include GFA and RTOP. In case of MAP-MRI, additional maps are RTPP, RTOP, ...
 
 .. image:: images/connectome.png
 	:align: center
@@ -183,15 +232,12 @@ Computes fiber length connectivity matrices. If DTI or HARDI data is processed, 
 
 	Select in which formats the connectivity matrices should be saved.
 	
-*View outputs*
-
-	Connectivity matrices in gpickle format: extracts and displays mean fiber length matrices
 
 ******
 Nipype 
 ******
 
-The Connectome Mapper processing relies on nipype. For each stage, a processing folder is created in $Base_directory/NIPYPE/diffusion_pipeline/<stage_name>.
+The Connectome Mapper processing relies on nipype. For each stage, a processing folder is created in $Base_directory/derivatives/nipype/sub-<participant_label>/<pipeline_name>/<stage_name>.
 
 All intermediate steps for the processing are saved in the corresponding stage folders.
 	

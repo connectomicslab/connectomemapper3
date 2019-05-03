@@ -81,7 +81,16 @@ class Dipy_recon_config(HasTraits):
     shore_constrain_e0 = traits.Bool(False, usedefault=True,desc=('Constrain the optimization such that E(0) = 1.'))
     shore_positive_constraint = traits.Bool(False, usedefault=True,desc=('Constrain the propagator to be positive.'))
 
-    def _recon_mode_changed(self,new):
+    def _imaging_model_changed(self,new):
+        if new == 'DSI':
+            pass
+        elif new == 'DTI':
+            self.local_model_editor = {False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'}
+        elif new == 'multi-shell':
+            self.local_model_editor = {True:'Constrained Spherical Deconvolution'}
+            self.local_model = True
+
+    def _recon_mode_changed(self,new):     
         if new == 'Probabilistic' and self.imaging_model != 'DSI':
             self.local_model_editor = {True:'Constrained Spherical Deconvolution'}
             self.local_model = True
@@ -99,6 +108,13 @@ class MRtrix_recon_config(HasTraits):
     normalize_to_B0 = Bool(False)
     single_fib_thr = Float(0.7,min=0,max=1)
     recon_mode = Str
+
+    def _imaging_model_changed(self,new):
+        if new == 'DTI':
+            self.local_model_editor = {False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'}
+        elif new == 'multi-shell':
+            self.local_model_editor = {True:'Constrained Spherical Deconvolution'}
+            self.local_model = True
 
     def _recon_mode_changed(self,new):
         if new == 'Probabilistic':

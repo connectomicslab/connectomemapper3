@@ -5,54 +5,88 @@ Project configuration
 Sample dataset
 ==============
 
-To get you started, we provide two Diffusion Spectrum Imaging sample datasets. They already contain the correct
-folder structure described below. You can find the two `raw datasets online <http://cmtk.org/datasets/rawdata/>`_::
+To get you started, we provide one sample dataset structured following the `Brain Imaging Data Structure standard <https://bids-specification.readthedocs.io/en/stable/>`. The dataset structure is as follow::
+		
+		├── myproject  <------ Your selected folder (base directory)
+		│   ├── sub-001
+		│   │       ├── anat
+		│   │       |    ├── sub-001_T1w.nii.gz
+		│   │       |    ├── sub-001_T1w.json
+		│   │       ├── dwi
+		│   │       |    ├── sub-001_acq-DSI_dwi.nii.gz
+		│   │       |    ├── sub-001_acq-DSI_dwi.json
+		│   │       |    ├── sub-001_acq-DTI_dwi.nii.gz
+		│   │       |    ├── sub-001_acq-DTI_dwi.json
+		│   │       |    ├── sub-001_acq-multishell_dwi.nii.gz
+		│   │       |    ├── sub-001_acq-multishell_dwi.json
+		│   │       ├── func
+		│   │       |    ├── sub-001_task-rest_bold.nii.gz
+		│   │       |    ├── sub-001_task-rest_bold.json 
 
-	project01_dsi
-    	*connectome_0001* with timepoint *tp1* and DSI, T1 and T2 raw data
-
-	project02_dsi
-    	*connectome_0002* with timepoint *tp1* and DSI, T1 raw data
-
-If you produce any connectome dataset that you want to share with the community, we provide a curated
-`cffdata repository on GitHub <http://github.com/LTS5/cffdata>`_.
 
 
-Run the Connectome Mapper
-=========================
+You can find the `raw dataset online <http://cmtk.org/datasets/rawdata/>`_
 
-Now, you are ready to start the Connectome Mapper from the Bash Shell::
 
-    connectomemapper
+..	test_dsi
+..    	*sub-001* with timepoint *tp1* and DSI, T1 raw data
+
+.. If you produce any connectome dataset that you want to share with the community, we provide a curated
+.. `cffdata repository on GitHub <http://github.com/LTS5/cffdata>`_.
+
+
+Run the Connectome Mapper Graphical User Interface
+==================================================
+
+Now, you are ready to start the Graphical User Interface of Connectome Mapper from a Bash Shell::
+
+    $ conda activate py27cmp-gui
+    (py27cmp-gui)$ cmpbidsappmanager
 
 
 Project configuration (folder structure)
 ========================================
 
-Running the Connectome Mapper opens the main window as well as a menu toolbar on the top of the screen. The only enabled buttons are in the toolbar: the "New Connectome Data..." and "Load Connectome Data..." in the File menu.
+Running the Connectome Mapper opens the main window as well as a menu toolbar on the top of the screen. The only enabled button is in the toolbar: the "Load BIDS Dataset..." in the File menu.
 
-* If you have already configured a processing pipeline before, you can load the configuration by selecting the base directory using the "Load Connectome Data..." button.
-  Otherwise, click "New Connectome Data..." and select the base directory for the project (i.e. the project that will contain all the processing steps and results for one subject). If you have several subject, we recommend to divide your project data into subject folders and timepoints. Selecting a folder will create the following folder structure::
+* Click the "Load BIDS Dataset..." button. and select the base directory of the bids dataset 
+  Selecting a folder will create the following folder structure::
 
-		├── myproject
-		│   ├── subject001
-		│   │   └── tp1 <------ Your selected folder (base directory)
-		│   │       ├── LOG
-		│   │       ├── NIFTI
-		│   │       ├── NIPYPE
-		│   │       ├── RAWDATA
-		│   │       │   ├── DSI
-		│   │       │   ├── DTI
-		│   │       │   ├── HARDI
-		│   │       │   ├── T1
-		│   │       │   └── T2
-		│   │       ├── RESULTS
-		│   │       └── STATS
-		
+		├── myproject  <------ Your selected folder (base directory)
+		│   ├── sub-001
+		│   │       ├── anat
+		│   │       |    ├── sub-001_T1w.nii.gz
+		│   │       |    ├── sub-001_T1w.json
+		│   │       ├── dwi
+		│   │       |    ├── sub-001_acq-DSI_dwi.nii.gz
+		│   │       |    ├── sub-001_acq-DSI_dwi.json
+		│   │       |    ├── sub-001_acq-DTI_dwi.nii.gz
+		│   │       |    ├── sub-001_acq-DTI_dwi.json
+		│   │       |    ├── sub-001_acq-multishell_dwi.nii.gz
+		│   │       |    ├── sub-001_acq-multishell_dwi.json
+		│   │       ├── func
+		│   │       |    ├── sub-001_task-rest_bold.nii.gz
+		│   │       |    ├── sub-001_task-rest_bold.json
+		│   ├── derivatives
+		│   │   ├── cmp
+		│   │   |    ├── sub-001
+	  	|	│   │    |    ├── anat
+	  	|	│   │    |    ├── dwi
+	  	|	│   │    |    ├── func
+	  	|	│   │    |    ├── connectivity
+		│   │   ├── freesurfer
+		│   │   |    ├── sub-001
+	  	|	│   │    |    ├── mri
+ 	 	|	│   │    |    ├── surf
+	  	|	│   │    |    ├── ...
+		│   │   ├── nipype
+		│   │   |    ├── anatomical_pipeline
+		│   │   |    ├── diffusion_pipeline
+		│   │   |    ├── functional_pipeline
+
   You can also create the folder structure manually before selecting the base directory (existing folders won't be overwritten).
 
-* Copy the diffusion (DSI, DTI, QBALL/HARDI) and morphological (T1, T2) images (DICOM series or single .nii.gz files) in the corresponding RAWDATA folders.
-  The T2 images are optional but they improve the registration of the data. 
+* Copy the diffusion (DSI, DTI, Multi-Shell) and morphological T1 images (.nii.gz + .json files as specified by BIDS) in the corresponding folders.  
 
 * Now you can click on "Check input data" button in the main window.
 

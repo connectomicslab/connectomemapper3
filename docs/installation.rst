@@ -66,16 +66,18 @@ Prerequisites
 
 .. _manual-install-cmpbidsapp:
 
-Manual installation
+Installation
 ---------------------------------------
 
 Installation of the Connectome Mapper 3 has been facilitated through the distribution of a BIDSApp relying on the Docker software container technology.
 
 * Open a terminal
 
-* Get the latest release of the BIDS App::
+* Get the latest release (|release|) of the BIDS App:
 
-  $ docker pull sebastientourbier/connectomemapper-bidsapp:3.0.0-beta
+.. parsed-literal::
+
+  $ docker pull sebastientourbier/connectomemapper-bidsapp:|release|
 
 * To display all docker images available::
 
@@ -99,7 +101,7 @@ Prerequisites
 
 .. _manual-install-cmpbidsappmanager:
 
-Manual installation
+Installation
 ---------------------------------------
 The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager) consists of a clone of the source code repository, the creation of conda environment with all python dependencies installed, and eventually the installation of the CMPBIDSAPPManager itself, as follows:
 
@@ -111,7 +113,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * Clone the source code repository::
 
-  $ git clone git@bitbucket.org:sinergiaconsortium/connectomemapper3.git connectomemapper3
+  $ git clone https://github.com/connectomicslab/connectomemapper3.git connectomemapper3
 
 * Create a miniconda2 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
 
@@ -119,11 +121,11 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * Activate the conda environment::
 
-  $ source activate py27cmp
+  $ source activate py27cmp-gui
 
   or
 
-  $ conda activate py27cmp
+  $ conda activate py27cmp-gui
 
 * Install the Connectome Mapper BIDS App Manager from the Bash Shell using following commands::
 
@@ -135,4 +137,4 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 Help/Questions
 --------------
 
-If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_. Code bugs can be reported by creating a "New Issue" on the `source code repository <https://github.com/LTS5/cmp/issues>`_.
+If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_. Code bugs can be reported by creating a "New Issue" on the `source code repository <https://github.com/connectomicslab/connectomemapper3/issues>`_.

@@ -64,11 +64,10 @@ class DiffusionPipelineUI(DiffusionPipeline):
     #connectome.setIcon(QIcon(QPixmap("connectome.png")))
 
     pipeline_group = VGroup(
-                        HGroup(spring,UItem('preprocessing',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False,label=""),
-                        HGroup(spring,UItem('registration',style='custom',width=500,height=110,resizable=True,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False,label=""),
-                        HGroup(spring,UItem('diffusion',style='custom',width=450,height=240,resizable=True,editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False,label=""),
-                        HGroup(spring,UItem('connectome',style='custom',width=450,height=130,resizable=True,editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False,label=""),
-                        spring,
+                        HGroup(spring,UItem('preprocessing',style='custom',width=444,height=196,editor_args={'image':ImageResource('preprocessing'),'label':""}),spring,show_labels=False,label=""),
+                        HGroup(spring,UItem('registration',style='custom',width=444,height=196,editor_args={'image':ImageResource('registration'),'label':""}),spring,show_labels=False,label=""),
+                        HGroup(spring,UItem('diffusion',style='custom',width=460,height=374,editor_args={'image':ImageResource('diffusion'),'label':""}),spring,show_labels=False,label=""),
+                        HGroup(spring,UItem('connectome',style='custom',width=444,height=184,editor_args={'image':ImageResource('connectome'),'label':""}),spring,show_labels=False,label=""),
                         springy=True
                     )
     traits_view = QtView(Include('pipeline_group'))

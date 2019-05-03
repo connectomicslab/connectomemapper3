@@ -70,18 +70,15 @@ Get T1w and Diffusion images to be processed, written in a bash script for repro
     datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bvec
     datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bval
 
-Write datalad get commands to get\_required\_files\_for\_analysis.sh
+Write datalad get commands to get\_required\_files\_for\_analysis.sh::
 
-::
     mkdir code
     echo "datalad get -J 4 sub-*/ses-*/anat/sub-*_T1w.nii.gz" > code/get_required_files_for_analysis.sh
     echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.nii.gz" >> code/get_required_files_for_analysis.sh
     echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bvec" >> code/get_required_files_for_analysis.sh
     echo "datalad get -J 4 sub-*/ses-*/dwi/sub-*_dwi.bval" >> code/get_required_files_for_analysis.sh
 
-Add all content in the code/ directory directly to git
-
-::
+Add all content in the code/ directory directly to git::
 
     datalad add --to-git code
 
@@ -90,8 +87,8 @@ Add the container image of the connectome mapper to the dataset
 
 ::
 
-    datalad containers-add connectomemapper-bidsapp-{version-tag} \
-    --url dhub://sebastientourbier/connectomemapper-bidsapp:{version-tag} \
+    datalad containers-add connectomemapper-bidsapp-|release| \
+    --url dhub://sebastientourbier/connectomemapper-bidsapp:|release| \
     --update
 
 Save the state of the dataset prior to analysis
@@ -100,7 +97,7 @@ Save the state of the dataset prior to analysis
 ::
 
     datalad rev-save -m "Seb's test dataset on local \
-    workstation ready for analysis with connectomemapper-bidsapp:{version-tag}" \
+    workstation ready for analysis with connectomemapper-bidsapp:|release|" \
     --version-tag ready4analysis-<date>-<time>
 
 Run Connectome Mapper on all subjects
@@ -108,7 +105,7 @@ Run Connectome Mapper on all subjects
 
 ::
 
-    datalad containers-run --container-name connectomemapper-bidsapp-{version-tag} \
+    datalad containers-run --container-name connectomemapper-bidsapp-|release| \
     '/tmp' '/tmp/derivatives' participant \
     --anat_pipeline_config '/tmp/code/ref_anatomical_config.ini' \
     --dwi_pipeline_config '/tmp/code/ref_diffusion_config.ini' \
@@ -119,7 +116,7 @@ Save the state
 ::
 
     datalad rev-save -m "Seb's test dataset on local \
-    workstation processed by connectomemapper-bidsapp:{version-tag}, {Date/Time}" \
+    workstation processed by connectomemapper-bidsapp:|release|, {Date/Time}" \
     --version-tag processed-<date>-<time>
 
 Report on the state of dataset content
@@ -159,17 +156,13 @@ Get connectome mapper output files (Brain Segmentation and Multi-scale Parcellat
     datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_scale*_atlas.nii.gz
 
 Write datalad get commands to
-get\_required\_files\_for\_analysis\_by\_bob.sh for reproducibility
-
-::
+get\_required\_files\_for\_analysis\_by\_bob.sh for reproducibility::
 
     echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_mask.nii.gz" > code/get_required_files_for_analysis_by_bob.sh
     echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_class-*_dseg.nii.gz" >> code/get_required_files_for_analysis_by_bob.sh
     echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_scale*_atlas.nii.gz" >> code/get_required_files_for_analysis_by_bob.sh
 
-Add all content in the code/ directory directly to git
-
-::
+Add all content in the code/ directory directly to git::
 
     datalad add --to-git code
 
@@ -187,7 +180,7 @@ Save the state
 ::
 
     datalad rev-save -m "Bob's test dataset on local \
-    workstation processed by cartool:{version-tag}, {Date/Time}" \
+    workstation processed by cartool:|release|, {Date/Time}" \
     --version-tag processed-<date>-<time>
 
 Report on the state of dataset content
@@ -198,7 +191,7 @@ Report on the state of dataset content
     datalad rev-status --recursive
 
 With DataLad with don’t have to keep those inputs around – without losing the ability to reproduce an analysis. Let’s uninstall them – checking the size on disk before and after
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
