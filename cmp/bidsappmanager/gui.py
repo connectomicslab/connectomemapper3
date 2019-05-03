@@ -329,10 +329,11 @@ class CMP_Project_Info(HasTraits):
 
     subject_session_view = View(
                         Group(
+                            Item('subject',style='readonly',label='Selected Subject'),
                             Item('subject_session',label='Selected Session'),
                             ),
                         kind='modal',
-                        title='Session selection (subject: %s)'% subject,
+                        title='Session selection',
                         #style_sheet=style_sheet,
                         width=modal_width,
                         buttons=['OK','Cancel'])
