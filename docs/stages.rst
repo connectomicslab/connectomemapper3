@@ -114,9 +114,10 @@ Diffusion reconstruction and tractography
 
 Performs diffusion reconstruction and local deterministic or probabilistic tractography based on several tools. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
 
-	.. image:: images/diffusion_config_window.png
-				:align: center
-	*Diffusion stage configuration window*
+	.. figure:: images/diffusion_config_window.png
+		:align: center
+		
+		Diffusion stage configuration window
 
 
 *Reconstruction tool*
@@ -233,9 +234,9 @@ Computes fiber length connectivity matrices. If DTI data is processed, FA additi
 	Select in which formats the connectivity matrices should be saved.
 	
 
-******
+
 Nipype 
-******
+-------
 
 The Connectome Mapper processing relies on nipype. For each stage, a processing folder is created in $Base_directory/derivatives/nipype/sub-<participant_label>/<pipeline_name>/<stage_name>.
 

@@ -34,6 +34,9 @@ You can find the `raw dataset online <http://cmtk.org/datasets/rawdata/>`_
 .. If you produce any connectome dataset that you want to share with the community, we provide a curated
 .. `cffdata repository on GitHub <http://github.com/LTS5/cffdata>`_.
 
+Folder structure of Connec
+==================
+
 
 Run the Connectome Mapper Graphical User Interface
 ==================================================
@@ -47,7 +50,7 @@ Now, you are ready to start the Graphical User Interface of Connectome Mapper fr
 Project configuration (folder structure)
 ========================================
 
-Running the Connectome Mapper opens the main window as well as a menu toolbar on the top of the screen. The only enabled button is in the toolbar: the "Load BIDS Dataset..." in the File menu.
+Running the Connectome Mapper opens the main window as well as a menu toolbar on the top of the screen. The only enabled button is in the toolbar: the "Load BIDS Dataset..." in the File menu. If necessary, Copy the diffusion (DSI, DTI, Multi-Shell) and morphological T1 images (.nii.gz + .json files as specified by BIDS) in the corresponding folders.
 
 * Click the "Load BIDS Dataset..." button. and select the base directory of the bids dataset 
   Selecting a folder will create the following folder structure::
@@ -86,7 +89,7 @@ Running the Connectome Mapper opens the main window as well as a menu toolbar on
 
   You can also create the folder structure manually before selecting the base directory (existing folders won't be overwritten).
 
-* Copy the diffusion (DSI, DTI, Multi-Shell) and morphological T1 images (.nii.gz + .json files as specified by BIDS) in the corresponding folders.  
+  
 
 * Now you can click on "Check input data" button in the main window.
 

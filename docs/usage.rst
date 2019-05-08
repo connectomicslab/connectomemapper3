@@ -1,5 +1,5 @@
 ***********************
-BIDS App: User's Guide
+Commandline Usage
 ***********************
 
 Introduction
@@ -68,8 +68,3 @@ If you intend to run ``connectomemapper3`` on a remote system, you will need to
 make your data available within that system first. Comprehensive solutions such as `Datalad
 <http://www.datalad.org/>`_ will handle data transfers with the appropriate
 settings and commands. Datalad also performs version control over your data.
-
-Eager to contribute?
-===============================================
-
-See `contributing <contributing.html>`_ for more details.

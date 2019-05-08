@@ -2,7 +2,7 @@
 Connectome Mapper 3 (UNDER DEVELOPMENT)
 =======================================================
 
-This neuroimage processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
+This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
 
 ..
 
@@ -61,11 +61,9 @@ Reproducibility and replicatibility is achieved through the distribution of a BI
    :maxdepth: 2
    :caption: User Documentation
 
+   cmpbackground
+   bidsappmanager
    usage
-   conf
-   stages
-   exampleresults
-   outputs
    datalad
 
 .. _about-docs:
@@ -91,3 +89,15 @@ License information
 This software is distributed under the open-source license Modified BSD. See :ref:`license <LICENSE>` for more details.
 
 All trademarks referenced herein are property of their respective holders.
+
+*******************
+Aknowledgment
+*******************
+
+If your are using the Connectome Mapper 3 in your work, please acknowledge this software and its dependencies. See :ref:`Citing <citing>` for more details.
+
+***********************
+Eager to contribute?
+***********************
+
+See :ref:``Contributing to Connectome Mapper <contributing>` for more details.
