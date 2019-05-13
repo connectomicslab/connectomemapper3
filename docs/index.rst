@@ -100,4 +100,4 @@ If your are using the Connectome Mapper 3 in your work, please acknowledge this 
 Eager to contribute?
 ***********************
 
-See :ref:``Contributing to Connectome Mapper <contributing>` for more details.
+See :ref:`Contributing to Connectome Mapper <contributing>` for more details.

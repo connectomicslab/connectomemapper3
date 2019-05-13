@@ -257,4 +257,4 @@ FreeSurfer is copied into this directory.
 Eager to contribute?
 ---------------------
 
-See `Contributing to Connectome Mapper <contributing.html>`_ for more details.
+See `Contributing to Connectome Mapper <contributing>`_ for more details.
