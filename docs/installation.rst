@@ -85,9 +85,8 @@ Installation of the Connectome Mapper 3 has been facilitated through the distrib
 
   $ docker images
 
-You should see the docker image "connectomemapper-bidsapp" with tag "3.0.0-beta" is now available.
+You should see the docker image "connectomemapper-bidsapp" with tag "|release|" is now available.
 
-.. _installation_gui:
 
 The Connectome Mapper 3 BIDSApp Manager (GUI)
 ==============================================
