@@ -425,6 +425,13 @@ class DiffusionPipeline(Pipeline):
         elif tracking_model == 'Probabilistic':
             tracking_model = 'PROB'
 
+        if self.parcellation_scheme == 'Lausanne2008':
+            bids_atlas_label = 'L2008'
+        elif self.parcellation_scheme == 'Lausanne2018':
+            bids_atlas_label = 'L2018'
+        elif self.parcellation_scheme == 'NativeFreesurfer':
+            bids_atlas_label = 'Desikan'
+
         # Data import
         #datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
         datasource = pe.Node(interface=nio.DataGrabber(outfields = ['diffusion','bvecs','bvals','T1','aparc_aseg','aseg','brain','brain_mask','wm_mask_file','wm_eroded','brain_eroded','csf_eroded','roi_volume_s1','roi_volume_s2','roi_volume_s3','roi_volume_s4','roi_volume_s5','roi_graphml_s1','roi_graphml_s2','roi_graphml_s3','roi_graphml_s4','roi_graphml_s5']), name='datasource')
@@ -433,41 +440,54 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
 
-        if self.parcellation_scheme == 'Lausanne2018':
-            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
+        datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
                                                 T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
                                                 aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
                                                 brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
                                                 wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
                                                 brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
-                                                roi_volume_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.nii.gz',roi_volume_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.nii.gz',
-                                                roi_volume_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.nii.gz',
-                                                roi_volume_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.nii.gz',roi_volume_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.nii.gz',
-                                                roi_graphml_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.graphml',roi_graphml_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.graphml',
-                                                roi_graphml_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.graphml',
-                                                roi_graphml_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.graphml')
-        elif self.parcellation_scheme == 'Lausanne2008':# Lausanne2008 and Freesurfer (to be tested)
-            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
-                                                T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
-                                                aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
-                                                brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
-                                                wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
-                                                brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
-                                                roi_volume_s1='anat/'+self.subject+'_label-L2008_desc-scale1_atlas.nii.gz',roi_volume_s2='anat/'+self.subject+'_label-L2008_desc-scale2_atlas.nii.gz',
-                                                roi_volume_s3='anat/'+self.subject+'_label-L2008_desc-scale3_atlas.nii.gz',
-                                                roi_volume_s4='anat/'+self.subject+'_label-L2008_desc-scale4_atlas.nii.gz',roi_volume_s5='anat/'+self.subject+'_label-L2008_desc-scale5_atlas.nii.gz',
-                                                roi_graphml_s1='anat/'+self.subject+'_label-L2008_desc-scale1_atlas.graphml',roi_graphml_s2='anat/'+self.subject+'_label-L2008_desc-scale2_atlas.graphml',
-                                                roi_graphml_s3='anat/'+self.subject+'_label-L2008_desc-scale3_atlas.graphml',
-                                                roi_graphml_s4='anat/'+self.subject+'_label-L2008_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-L2008_desc-scale5_atlas.graphml')
-        else:# Freesurfer (TODO: to be tested)
-            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
-                                                T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
-                                                aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
-                                                brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
-                                                wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
-                                                brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
-                                                roi_volume_s1='anat/'+self.subject+'_label-Desikan_atlas.nii.gz',
-                                                roi_graphml_s1='anat/'+self.subject+'_label-Desikan_atlas.graphml')
+                                                roi_volume_s1='anat/'+self.subject+'_label-'+bids_atlas_label+'_desc-scale1_atlas.nii.gz',roi_volume_s2='anat/'+self.subject+'_label-'+bids_atlas_label+'_desc-scale2_atlas.nii.gz',
+                                                roi_volume_s3='anat/'+self.subject+'_label-'+bids_atlas_label+'_desc-scale3_atlas.nii.gz',
+                                                roi_volume_s4='anat/'+self.subject+'_label-'+bids_atlas_label+'_desc-scale4_atlas.nii.gz',roi_volume_s5='anat/'+self.subject+'_label-'+bids_atlas_label+'_desc-scale5_atlas.nii.gz',
+                                                roi_graphml_s1='anat/'+self.subject+'_label-'+bids_atlas_label+'_desc-scale1_atlas.graphml',roi_graphml_s2='anat/'+self.subject+'_label-'+bids_atlas_label+'_desc-scale2_atlas.graphml',
+                                                roi_graphml_s3='anat/'+self.subject+'_label-'+bids_atlas_label+'_desc-scale3_atlas.graphml',
+                                                roi_graphml_s4='anat/'+self.subject+'_label-'+bids_atlas_label+'_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-'+bids_atlas_label+'_desc-scale5_atlas.graphml')
+        
+        # if self.parcellation_scheme == 'Lausanne2018':
+        #     datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
+        #                                         T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
+        #                                         aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
+        #                                         brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
+        #                                         wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
+        #                                         brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
+        #                                         roi_volume_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.nii.gz',roi_volume_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.nii.gz',
+        #                                         roi_volume_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.nii.gz',
+        #                                         roi_volume_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.nii.gz',roi_volume_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.nii.gz',
+        #                                         roi_graphml_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.graphml',roi_graphml_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.graphml',
+        #                                         roi_graphml_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.graphml',
+        #                                         roi_graphml_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.graphml')
+        # elif self.parcellation_scheme == 'Lausanne2008':# Lausanne2008 and Freesurfer (to be tested)
+        #     datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
+        #                                         T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
+        #                                         aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
+        #                                         brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
+        #                                         wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
+        #                                         brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
+        #                                         roi_volume_s1='anat/'+self.subject+'_label-L2008_desc-scale1_atlas.nii.gz',roi_volume_s2='anat/'+self.subject+'_label-L2008_desc-scale2_atlas.nii.gz',
+        #                                         roi_volume_s3='anat/'+self.subject+'_label-L2008_desc-scale3_atlas.nii.gz',
+        #                                         roi_volume_s4='anat/'+self.subject+'_label-L2008_desc-scale4_atlas.nii.gz',roi_volume_s5='anat/'+self.subject+'_label-L2008_desc-scale5_atlas.nii.gz',
+        #                                         roi_graphml_s1='anat/'+self.subject+'_label-L2008_desc-scale1_atlas.graphml',roi_graphml_s2='anat/'+self.subject+'_label-L2008_desc-scale2_atlas.graphml',
+        #                                         roi_graphml_s3='anat/'+self.subject+'_label-L2008_desc-scale3_atlas.graphml',
+        #                                         roi_graphml_s4='anat/'+self.subject+'_label-L2008_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-L2008_desc-scale5_atlas.graphml')
+        # else:# Freesurfer (TODO: to be tested)
+        #     datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
+        #                                         T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
+        #                                         aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
+        #                                         brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
+        #                                         wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
+        #                                         brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
+        #                                         roi_volume_s1='anat/'+self.subject+'_label-Desikan_atlas.nii.gz',
+        #                                         roi_graphml_s1='anat/'+self.subject+'_label-Desikan_atlas.graphml')
 
 
         # datasource.inputs.field_template_args = dict(diffusion=[], bvecs=[], bvals=[],T1=[],brain=[],brain_mask=[],
@@ -482,6 +502,7 @@ class DiffusionPipeline(Pipeline):
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
         sinker.inputs.base_directory = os.path.abspath(cmp_deriv_subject_directory)
 
+        
         #Dataname substitutions in order to comply with BIDS derivatives specifications
         if self.stages['Diffusion'].config.tracking_processing_tool == 'Custom':
             sinker.inputs.substitutions = [ #('T1', self.subject+'_T1w_head'),
@@ -506,11 +527,26 @@ class DiffusionPipeline(Pipeline):
                                             ('brain_mask_resampled_warped.nii.gz',self.subject+'_space-DWI_desc-brain_mask'),
                                             ('wm_mask_warped',self.subject+'_space-DWI_label-WM_dseg'),
                                             ('wm_mask_resampled_warped',self.subject+'_space-DWI_label-WM_dseg'),
-                                            ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale1_atlas.nii.gz'),
-                                            ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale2_atlas.nii.gz'),
-                                            ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale3_atlas.nii.gz'),
-                                            ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale4_atlas.nii.gz'),
-                                            ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale5_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale1_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale2_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale3_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale4_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale5_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale1_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale1_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale2_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale2_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale3_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale3_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale4_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale4_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale5_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale5_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale1_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale2_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale3_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale4_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale5_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-L2008_desc-scale1_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale1_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-L2008_desc-scale2_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale2_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-L2008_desc-scale3_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale3_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-L2008_desc-scale4_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale4_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-L2008_desc-scale5_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale5_atlas.nii.gz'),
                                             ('fast__pve_0_out_warped.nii.gz',self.subject+'_space-DWI_label-CSF_probseg.nii.gz'),
                                             ('fast__pve_1_out_warped.nii.gz',self.subject+'_space-DWI_label-GM_probseg.nii.gz'),
                                             ('fast__pve_2_out_warped.nii.gz',self.subject+'_space-DWI_label-WM_probseg.nii.gz'),
@@ -519,16 +555,16 @@ class DiffusionPipeline(Pipeline):
                                             ('pve_2_out_warped.nii.gz',self.subject+'_space-DWI_label-WM_probseg.nii.gz'),
                                             ('act_5tt_resampled_warped.nii.gz',self.subject+'_space-DWI_label-5TT_probseg.nii.gz'),
                                             ('gmwmi_resampled_warped.nii.gz',self.subject+'_space-DWI_label-GMWMI_probseg.nii.gz'),
-                                            # ('connectome_'+self.subject+'_T1w_parc_scale1',self.subject+'_label-L2018_desc-scale1_connectome'),
-                                            # ('connectome_'+self.subject+'_T1w_parc_scale2',self.subject+'_label-L2018_desc-scale2_connectome'),
-                                            # ('connectome_'+self.subject+'_T1w_parc_scale3',self.subject+'_label-L2018_desc-scale3_connectome'),
-                                            # ('connectome_'+self.subject+'_T1w_parc_scale4',self.subject+'_label-L2018_desc-scale4_connectome'),
-                                            # ('connectome_'+self.subject+'_T1w_parc_scale5',self.subject+'_label-L2018_desc-scale5_connectome'),
-                                            ('connectome_scale1',self.subject+'_label-L2018_desc-scale1_connectome'),
-                                            ('connectome_scale2',self.subject+'_label-L2018_desc-scale2_connectome'),
-                                            ('connectome_scale3',self.subject+'_label-L2018_desc-scale3_connectome'),
-                                            ('connectome_scale4',self.subject+'_label-L2018_desc-scale4_connectome'),
-                                            ('connectome_scale5',self.subject+'_label-L2018_desc-scale5_connectome'),
+                                            # ('connectome_'+self.subject+'_T1w_parc_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_connectome'),
+                                            # ('connectome_'+self.subject+'_T1w_parc_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_connectome'),
+                                            # ('connectome_'+self.subject+'_T1w_parc_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_connectome'),
+                                            # ('connectome_'+self.subject+'_T1w_parc_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_connectome'),
+                                            # ('connectome_'+self.subject+'_T1w_parc_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_connectome'),
+                                            ('connectome_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_connectome'),
+                                            ('connectome_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_connectome'),
+                                            ('connectome_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_connectome'),
+                                            ('connectome_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_connectome'),
+                                            ('connectome_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_connectome'),
                                             ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
                                             ('dwi.bval',self.subject+'_dwi.bval'),
                                             # ('dwi.bvec',self.subject+'_dwi.bvec'),
@@ -584,11 +620,26 @@ class DiffusionPipeline(Pipeline):
                                             ('brain_mask_registered_temp_crop',self.subject+'_space-DWI_desc-brain_mask'),
                                             ('wm_mask_warped',self.subject+'_space-DWI_label-WM_dseg'),
                                             ('wm_mask_resampled_warped',self.subject+'_space-DWI_label-WM_dseg'),
-                                            ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale1_atlas.nii.gz'),
-                                            ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale2_atlas.nii.gz'),
-                                            ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale3_atlas.nii.gz'),
-                                            ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale4_atlas.nii.gz'),
-                                            ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_space-DWI_label-L2018_desc-scale5_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale1_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale2_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale3_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale4_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale5_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale1_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale1_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale2_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale2_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale3_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale3_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale4_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale4_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale5_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale5_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale1_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale2_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale3_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale4_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale4_atlas.nii.gz'),
+                                            ('ROIv_HR_th_scale5_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale5_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-L2008_desc-scale1_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale1_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-L2008_desc-scale2_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale2_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-L2008_desc-scale3_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale3_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-L2008_desc-scale4_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale4_atlas.nii.gz'),
+                                            (self.subject+'_space-DWI_label-L2008_desc-scale5_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-L2008_desc-scale5_atlas.nii.gz'),
                                             ('fast__pve_0_out_warped.nii.gz',self.subject+'_space-DWI_label-CSF_probseg.nii.gz'),
                                             ('fast__pve_1_out_warped.nii.gz',self.subject+'_space-DWI_label-GM_probseg.nii.gz'),
                                             ('fast__pve_2_out_warped.nii.gz',self.subject+'_space-DWI_label-WM_probseg.nii.gz'),
@@ -597,16 +648,16 @@ class DiffusionPipeline(Pipeline):
                                             ('pve_2_out_warped.nii.gz',self.subject+'_space-DWI_label-WM_probseg.nii.gz'),
                                             ('act_5tt_resampled_warped.nii.gz',self.subject+'_space-DWI_label-5TT_probseg.nii.gz'),
                                             ('gmwmi_resampled_warped.nii.gz',self.subject+'_space-DWI_label-GMWMI_probseg.nii.gz'),
-                                            # ('connectome_'+self.subject+'_T1w_parc_scale1',self.subject+'_label-L2018_desc-scale1_connectome'),
-                                            # ('connectome_'+self.subject+'_T1w_parc_scale2',self.subject+'_label-L2018_desc-scale2_connectome'),
-                                            # ('connectome_'+self.subject+'_T1w_parc_scale3',self.subject+'_label-L2018_desc-scale3_connectome'),
-                                            # ('connectome_'+self.subject+'_T1w_parc_scale4',self.subject+'_label-L2018_desc-scale4_connectome'),
-                                            # ('connectome_'+self.subject+'_T1w_parc_scale5',self.subject+'_label-L2018_desc-scale5_connectome'),
-                                            ('connectome_scale1',self.subject+'_label-L2018_desc-scale1_connectome'),
-                                            ('connectome_scale2',self.subject+'_label-L2018_desc-scale2_connectome'),
-                                            ('connectome_scale3',self.subject+'_label-L2018_desc-scale3_connectome'),
-                                            ('connectome_scale4',self.subject+'_label-L2018_desc-scale4_connectome'),
-                                            ('connectome_scale5',self.subject+'_label-L2018_desc-scale5_connectome'),
+                                            # ('connectome_'+self.subject+'_T1w_parc_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_connectome'),
+                                            # ('connectome_'+self.subject+'_T1w_parc_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_connectome'),
+                                            # ('connectome_'+self.subject+'_T1w_parc_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_connectome'),
+                                            # ('connectome_'+self.subject+'_T1w_parc_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_connectome'),
+                                            # ('connectome_'+self.subject+'_T1w_parc_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_connectome'),
+                                            ('connectome_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_connectome'),
+                                            ('connectome_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_connectome'),
+                                            ('connectome_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_connectome'),
+                                            ('connectome_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_connectome'),
+                                            ('connectome_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_connectome'),
                                             ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
                                             ('dwi.bval',self.subject+'_dwi.bval'),
                                             # ('dwi.bvec',self.subject+'_dwi.bvec'),
@@ -765,6 +816,8 @@ class DiffusionPipeline(Pipeline):
                                     (reg_flow,diff_flow,[('outputnode.bvecs','inputnode.bvecs')]),
                                     (reg_flow,sinker,[("outputnode.target_epicorrected","dwi.@bdiffusion_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.grad","dwi.@diffusion_grad")]),
+                                    (reg_flow,sinker,[("outputnode.affine_transform","xfm.@affine_transform")]),
+                                    (reg_flow,sinker,[("outputnode.warp_field","xfm.@warp_field")]),
                                     (reg_flow,sinker,[("outputnode.T1_registered_crop","anat.@T1_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.act_5tt_registered_crop","anat.@act_5tt_reg_crop")]),
                                     (reg_flow,sinker,[("outputnode.gmwmi_registered_crop","anat.@gmwmi_reg_crop")]),

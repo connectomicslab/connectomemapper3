@@ -252,7 +252,7 @@ class RegistrationStage(Stage):
         self.config = RegistrationConfig()
         self.config.pipeline = pipeline_mode
         self.inputs = ["T1","act_5TT","gmwmi","target","T2","subjects_dir","subject_id","wm_mask","partial_volume_files","roi_volumes","brain","brain_mask","brain_mask_full","target_mask","bvecs","bvals"]
-        self.outputs = ["T1_registered_crop", "act_5tt_registered_crop", "gmwmi_registered_crop", "brain_registered_crop", "brain_mask_registered_crop", "wm_mask_registered_crop","partial_volumes_registered_crop","roi_volumes_registered_crop","target_epicorrected","grad","bvecs","bvals"]
+        self.outputs = ["T1_registered_crop", "act_5tt_registered_crop", "affine_transform", "warp_field" "gmwmi_registered_crop", "brain_registered_crop", "brain_mask_registered_crop", "wm_mask_registered_crop","partial_volumes_registered_crop","roi_volumes_registered_crop","target_epicorrected","grad","bvecs","bvals"]
         if self.config.pipeline == "fMRI":
             self.inputs = self.inputs + ["eroded_csf","eroded_wm","eroded_brain"]
             self.outputs = self.outputs + ["eroded_wm_registered_crop","eroded_csf_registered_crop","eroded_brain_registered_crop"]
@@ -356,7 +356,8 @@ class RegistrationStage(Stage):
             # [1.3] Transforming T1-space images to avoid rotation of bvecs
             T12DWIaff = pe.Node(interface=fsl.ConvertXFM(invert_xfm=False),name='T12DWIaff')
             flow.connect([
-                        (fsl_flirt, T12DWIaff, [('out_matrix_file','in_file')])
+                        (fsl_flirt, T12DWIaff, [('out_matrix_file','in_file')]),
+                        (T12DWIaff, outputnode, [('out_file','affine_transform')])
                         ])
 
             fsl_applyxfm_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
@@ -417,6 +418,7 @@ class RegistrationStage(Stage):
                         (mr_convert_b0, fsl_fnirt_crop, [('converted','ref_file')]),
                         (inputnode, fsl_fnirt_crop, [('brain','in_file')]),
                         (fsl_flirt, fsl_fnirt_crop, [('out_matrix_file','affine_file')]),
+                        (fsl_fnirt_crop, outputnode, [('fieldcoeff_file','warp_field')]),
                         # (inputnode, fsl_fnirt_crop, [('target_mask','refmask_file')])
                         ])
 
@@ -699,7 +701,7 @@ class RegistrationStage(Stage):
                 # BSplineSyN_registration.inputs.transform_parameters=[(0.25, 26, 0, 3)]
                 # BSplineSyN_registration.inputs.use_histogram_matching=True
                 # BSplineSyN_registration.inputs.verbose = True
-
+                
                 flow.connect([
                         (affine_registration, SyN_registration, [('composite_transform','initial_moving_transform')]),
                         (b0_masking, SyN_registration, [('out_file','fixed_image')]),
@@ -742,6 +744,16 @@ class RegistrationStage(Stage):
             def reverse_order_transforms(transforms):
                 return transforms[::-1]
 
+            def extract_affine_transforms(transforms):
+                for t in transforms:
+                    if 'Affine' in t:
+                        return t
+
+            def extract_warp_field(transforms):
+                    for t in transforms:
+                        if 'Warp' in t:
+                            return t
+
             if self.config.ants_perform_syn:
                 flow.connect([
                             (SyN_registration, ants_applywarp_T1, [(('forward_transforms',reverse_order_transforms),'transforms')]),
@@ -752,6 +764,8 @@ class RegistrationStage(Stage):
                             (SyN_registration, ants_applywarp_wm, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (SyN_registration, ants_applywarp_rois, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (SyN_registration, ants_applywarp_pves, [(('forward_transforms',reverse_order_transforms),'transforms')]),
+                            (SyN_registration, outputnode [(('forward_transforms',extract_affine_transform),'affine_transform')]),
+                            (SyN_registration, outputnode [(('forward_transforms',extract_warp_field),'warp_field')]),
                             ])
             else:
                 flow.connect([
@@ -763,6 +777,7 @@ class RegistrationStage(Stage):
                             (affine_registration, ants_applywarp_wm, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (affine_registration, ants_applywarp_rois, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (affine_registration, ants_applywarp_pves, [(('forward_transforms',reverse_order_transforms),'transforms')]),
+                            (affine_registration, outputnode [(('forward_transforms',extract_affine_transform),'affine_transform')]),
                             ])
 
             flow.connect([
@@ -842,6 +857,7 @@ class RegistrationStage(Stage):
                         (fsl_applyxfm_wm, outputnode, [('out_file','wm_mask_registered_crop')]),
                         (inputnode, fsl_applyxfm_rois, [('roi_volumes','in_files')]),
                         (fsl_flirt, fsl_applyxfm_rois, [('out_matrix_file','xfm_file')]),
+                        (fsl_flirt, outputnode, [('out_matrix_file','affine_transform')]),
                         (fsl_applyxfm_rois, outputnode, [('out_files','roi_volumes_registered_crop')])
                         ])
 
