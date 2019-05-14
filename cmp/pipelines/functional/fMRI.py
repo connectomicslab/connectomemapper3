@@ -395,7 +395,7 @@ class fMRIPipeline(Pipeline):
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(fMRI='fMRI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
-        datasource.inputs.field_template = dict(fMRI='func/'+self.subject+'_task-rest_bold.nii.gz',
+        datasource.inputs.field_template = dict(fMRI='func/'+self.subject+'_task-rest_desc-cmp_bold.nii.gz',
                                                 T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',
                                                 T2='anat/'+self.subject+'_T2w.nii.gz',
                                                 aseg='anat/'+self.subject+'_desc-aseg_desg.nii.gz',
