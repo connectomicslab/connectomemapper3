@@ -153,7 +153,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     def check_input(self, layout, gui=True):
         print('**** Check Inputs  ****')
         t1_available = False
+        t1_json_available = False
         valid_inputs = False
+
+        print("> Looking in %s for...." % self.base_directory)  
 
         types = layout.get_modalities()
 
@@ -176,25 +179,57 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             else:
                 return
 
-        print("> Looking in %s for...." % self.base_directory)
         print("... t1_file : %s" % T1_file)
+
+        if self.global_conf.subject_session == '':
+            T1_json_file = os.path.join(self.subject_directory,'anat',self.subject+'_T1w.json')
+            files = layout.get(subject=subjid,suffix='T1w',extensions='.json')
+            if len(files) > 0:
+                T1_json_file = os.path.join(files[0].dirname,files[0].filename)
+                print T1_json_file
+            else:
+                return
+        else:
+            sessid = self.global_conf.subject_session.split("-")[1]
+            files = layout.get(subject=subjid,suffix='T1w',extensions='.json',session=sessid)
+            if len(files) > 0:
+                T1_json_file = os.path.join(files[0].dirname,files[0].filename)
+                print T1_json_file
+            else:
+                return
+
+        print("... t1_json_file : %s" % T1_json_file)
 
         if os.path.isfile(T1_file):
             # print("%s available" % typ)
             t1_available = True
 
+        if os.path.isfile(T1_json_file):
+            # print("%s available" % typ)
+            t1_json_available = True
+
         if t1_available:
-            #Copy diffusion data to derivatives / cmp  / subject / dwi
+            #Copy T1w data to derivatives / cmp  / subject / anat
             if self.global_conf.subject_session == '':
-                out_T1_file = os.path.join(self.output_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
+                out_T1_file = os.path.join(self.output_directory,'cmp',self.subject,'anat',self.subject+'_desc-cmp_T1w.nii.gz')
             else:
-                out_T1_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'anat',self.subject+'_'+self.global_conf.subject_session+'_T1w.nii.gz')
+                out_T1_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'anat',self.subject+'_'+self.global_conf.subject_session+'_desc-cmp_T1w.nii.gz')
 
             if not os.path.isfile(out_T1_file):
                 shutil.copy(src=T1_file,dst=out_T1_file)
 
             valid_inputs = True
             input_message = 'Inputs check finished successfully. \nOnly anatomical data (T1) available.'
+
+            if t1_json_available:
+                if self.global_conf.subject_session == '':
+                    out_T1_json_file = os.path.join(self.output_directory,'cmp',self.subject,'anat',self.subject+'_desc-cmp_T1w.json')
+                else:
+                    out_T1_json_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'anat',self.subject+'_'+self.global_conf.subject_session+'_desc-cmp_T1w.json')
+
+                if not os.path.isfile(out_T1_json_file):
+                    shutil.copy(src=T1_json_file,dst=out_T1_json_file)
+
         else:
             if self.global_conf.subject_session == '':
                 input_message = 'Error during inputs check. No anatomical data available in folder '+os.path.join(self.base_directory,self.subject)+'/anat/!'
@@ -215,6 +250,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             valid_inputs = True
         else:
             print("ERROR : Missing required inputs. Please see documentation for more details.")
+
+        if not t1_json_available:
+            print("Warning : Missing BIDS json sidecar. Please see documentation for more details.")
 
         # for stage in self.stages.values():
         #     if stage.enabled:
@@ -303,7 +341,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
-        datasource.inputs.field_template = dict(T1='anat/'+self.subject+'_T1w.nii.gz')
+        datasource.inputs.field_template = dict(T1='anat/'+self.subject+'_desc-cmp_T1w.nii.gz')
         #datasource.inputs.field_template_args = dict(T1=[['subject']], T2=[['subject']], diffusion=[['subject', ['subject']]], bvecs=[['subject', ['subject']]], bvals=[['subject', ['subject']]])
         datasource.inputs.sort_filelist=False
         #datasource.inputs.subject = self.subject

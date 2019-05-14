@@ -129,6 +129,7 @@ class fMRIPipeline(Pipeline):
     def check_input(self, layout, gui=True):
         print('**** Check Inputs ****')
         fMRI_available = False
+        fMRI_json_available = False
         t1_available = False
         t2_available = False
         valid_inputs = False
@@ -154,12 +155,12 @@ class fMRIPipeline(Pipeline):
                 print("ERROR : BOLD image not found for subject %s."%(subjid))
                 return
 
-            files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz')
+            files = layout.get(subject=subjid,suffix='bold',extensions='.json')
             if len(files) > 0:
-                t1_file = files[0].filename
-                # print t1_file
+                json_file = files[0].filename
+                # print json_file
             else:
-                print("ERROR : T1w image not found for subject %s."%(subjid))
+                print("WARNING : BOLD json sidecar not found for subject %s."%(subjid))
                 return
 
             files = layout.get(subject=subjid,suffix='T2w',extensions='.nii.gz')
@@ -180,12 +181,12 @@ class fMRIPipeline(Pipeline):
                 print("ERROR : BOLD image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                 return
 
-            files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz',session=sessid)
+            files = layout.get(subject=subjid,suffix='bold',extensions='.json',session=sessid)
             if len(files) > 0:
-                t1_file = files[0].filename
-                # print t1_file
+                json_file = files[0].filename
+                # print json_file
             else:
-                print("ERROR : T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
+                print("WARNING : BOLD json sidecar not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                 return
 
             files = layout.get(subject=subjid,suffix='T2w',extensions='.nii.gz',session=sessid)
@@ -197,7 +198,7 @@ class fMRIPipeline(Pipeline):
 
         print("> Looking for....")
         print("... fmri_file : %s" % fmri_file)
-        print("... t1_file : %s" % t1_file)
+        print("... json_file : %s" % json_file)
         print("... t2_file : %s" % t2_file)
 
         # mods = layout.get_modalities()
@@ -206,15 +207,15 @@ class fMRIPipeline(Pipeline):
         # for typ in types:
         #     print("-%s" % typ)
 
-        if os.path.isfile(t1_file):
-            # print("%s available" % typ)
-            t1_available = True
         if os.path.isfile(t2_file):
             # print("%s available" % typ)
             t2_available = True
         if os.path.isfile(fmri_file):
             # print("%s available" % typ)
             fMRI_available = True
+        if os.path.isfile(json_file):
+            # print("%s available" % typ)
+            fMRI_json_available = True
 
         # print('fMRI :',fMRI_available)
         # print('t1 :',t1_available)
@@ -226,26 +227,26 @@ class fMRIPipeline(Pipeline):
             else:
                 out_dir = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session)
 
-            out_fmri_file = os.path.join(out_dir,'func',subject+'_task-rest_bold.nii.gz')
+            out_fmri_file = os.path.join(out_dir,'func',subject+'_task-rest_desc-cmp_bold.nii.gz')
             shutil.copy(src=fmri_file,dst=out_fmri_file)
+
+            valid_inputs = True
+            input_message = 'Inputs check finished successfully.\nfMRI data available.'
+
             if t2_available:
                 out_t2_file = os.path.join(out_dir,'anat',subject+'_T2w.nii.gz')
                 shutil.copy(src=t2_file,dst=out_t2_file)
                 # swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T2_orig.nii.gz'),
                 #                   ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
                 #                   out_file=os.path.join(self.base_directory,'NIFTI','T2.nii.gz'))
-            if t1_available:
-                # out_t1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
-                # shutil.copy(src=t1_file,dst=out_t1_file)
-                valid_inputs = True
-                input_message = 'Inputs check finished successfully.\nfMRI and morphological data available.'
-            else:
-                input_message = 'Error during inputs check.\nMorphological data (T1) not available.'
-        elif t1_available:
-            input_message = 'Error during inputs check. \nfMRI data not available (fMRI).'
-        else:
-            input_message = 'Error during inputs check. No fMRI or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
 
+            if fMRI_json_available:
+                out_json_file = os.path.join(out_dir,'func',subject+'_task-rest_desc-cmp_bold.json')
+                shutil.copy(src=json_file,dst=out_json_file)
+
+        else:
+            input_message = 'Error during inputs check. \nfMRI data not available (fMRI).'
+        
         print(input_message)
 
         # if gui:
@@ -263,7 +264,7 @@ class fMRIPipeline(Pipeline):
         if t2_available:
             self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
         else:
-            self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
+            self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)']
 
         #self.fill_stages_outputs()
 

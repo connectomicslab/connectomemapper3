@@ -147,6 +147,7 @@ class DiffusionPipeline(Pipeline):
     def check_input(self, layout, gui=True):
         print('**** Check Inputs  ****')
         diffusion_available = False
+        diffusion_json_available = False
         bvecs_available = False
         bvals_available = False
         valid_inputs = False
@@ -157,6 +158,7 @@ class DiffusionPipeline(Pipeline):
             subject = "_".join((self.subject,self.global_conf.subject_session))
 
         dwi_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.nii.gz')
+        json_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.json')
         bval_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.bval')
         bvec_file = os.path.join(self.subject_directory,'dwi',subject+'_dwi.bvec')
 
@@ -174,6 +176,8 @@ class DiffusionPipeline(Pipeline):
             # print "Available modalities :"
             # for mod in mods:
             #     print "-%s" % mod
+            
+            print("> Looking for....")
 
             if self.global_conf.subject_session == '':
 
@@ -189,6 +193,20 @@ class DiffusionPipeline(Pipeline):
                         # print(dwi_file)
                 else:
                     print("ERROR : Diffusion image not found for subject %s."%(subjid))
+                    return
+
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.json')
+                if len(files) > 0:
+                    if self.global_conf.dmri_bids_acq != '':
+                        for file in files:
+                            if self.global_conf.dmri_bids_acq in file.filename:
+                                json_file = os.path.join(file.dirname,file.filename)
+                                break
+                    else:#TODO: Better parsing of multiple runs
+                        json_file = os.path.join(files[0].dirname,files[0].filename)
+                        # print(dwi_file)
+                else:
+                    print("WARNING : Diffusion json sidecar not found for subject %s."%(subjid))
                     return
 
                 files = layout.get(subject=subjid,suffix='dwi',extensions='.bval')
@@ -235,6 +253,20 @@ class DiffusionPipeline(Pipeline):
                     print("ERROR : Diffusion image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                     return
 
+                files = layout.get(subject=subjid,suffix='dwi',extensions='.json',session=sessid)
+                if len(files) > 0:
+                    if self.global_conf.dmri_bids_acq != '':
+                        for file in files:
+                            if self.global_conf.dmri_bids_acq in file.filename:
+                                json_file = os.path.join(file.dirname,file.filename)
+                                break
+                    else:#TODO: Better parsing of multiple runs
+                        json_file = os.path.join(files[0].dirname,files[0].filename)
+                        # print(dwi_file)
+                else:
+                    print("WARNING : Diffusion json sidecar not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
+                    return
+
                 files = layout.get(subject=subjid,suffix='dwi',extensions='.bval',session=sessid)
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != '':
@@ -263,8 +295,8 @@ class DiffusionPipeline(Pipeline):
                     print("ERROR : Diffusion bvec image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
                     return
 
-            print("> Looking for....")
             print("... dwi_file : %s" % dwi_file)
+            print("... json_file : %s" % json_file)
             print("... bvecs_file : %s" % bvec_file)
             print("... bvals_file : %s" % bval_file)
 
@@ -276,9 +308,8 @@ class DiffusionPipeline(Pipeline):
             print("Invalid BIDS dataset. Please see documentation for more details.")
             return
 
-
+        if os.path.isfile(json_file): diffusion_json_available = True
         if os.path.isfile(bval_file): bvals_available = True
-
         if os.path.isfile(bvec_file): bvecs_available = True
 
         if diffusion_available:
@@ -287,13 +318,13 @@ class DiffusionPipeline(Pipeline):
 
                 #Copy diffusion data to derivatives / cmp  / subject / dwi
                 if self.global_conf.subject_session == '':
-                    out_dwi_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',subject+'_dwi.nii.gz')
-                    out_bval_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',subject+'_dwi.bval')
-                    out_bvec_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',subject+'_dwi.bvec')
+                    out_dwi_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',subject+'_desc-cmp_dwi.nii.gz')
+                    out_bval_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',subject+'_desc-cmp_dwi.bval')
+                    out_bvec_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',subject+'_desc-cmp_dwi.bvec')
                 else:
-                    out_dwi_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.nii.gz')
-                    out_bval_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.bval')
-                    out_bvec_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_dwi.bvec')
+                    out_dwi_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_desc-cmp_dwi.nii.gz')
+                    out_bval_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_desc-cmp_dwi.bval')
+                    out_bvec_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',subject+'_desc-cmp_dwi.bvec')
 
                 if not os.path.isfile(out_dwi_file):
                     shutil.copy(src=dwi_file,dst=out_dwi_file)
@@ -304,6 +335,15 @@ class DiffusionPipeline(Pipeline):
 
                 valid_inputs = True
                 input_message = 'Inputs check finished successfully.\nDiffusion and morphological data available.'
+
+                if diffusion_json_available:
+                if self.global_conf.subject_session == '':
+                    out_json_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',self.subject+'_desc-cmp_dwi.json')
+                else:
+                    out_json_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',self.subject+'_'+self.global_conf.subject_session+'_desc-cmp_dwi.json')
+
+                if not os.path.isfile(out_json_file):
+                    shutil.copy(src=json_file,dst=out_json_file)
             else:
                 input_message = 'Error during inputs check.\nDiffusion bvec or bval files not available.'
         else:
@@ -394,7 +434,7 @@ class DiffusionPipeline(Pipeline):
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
 
         if self.parcellation_scheme == 'Lausanne2018':
-            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval',
+            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
                                                 T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
                                                 aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
                                                 brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
@@ -407,7 +447,7 @@ class DiffusionPipeline(Pipeline):
                                                 roi_graphml_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.graphml',
                                                 roi_graphml_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.graphml')
         elif self.parcellation_scheme == 'Lausanne2008':# Lausanne2008 and Freesurfer (to be tested)
-            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval',
+            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
                                                 T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
                                                 aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
                                                 brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
@@ -420,7 +460,7 @@ class DiffusionPipeline(Pipeline):
                                                 roi_graphml_s3='anat/'+self.subject+'_label-L2008_desc-scale3_atlas.graphml',
                                                 roi_graphml_s4='anat/'+self.subject+'_label-L2008_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-L2008_desc-scale5_atlas.graphml')
         else:# Freesurfer (TODO: to be tested)
-            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_dwi.nii.gz', bvecs='dwi/'+self.subject+'_dwi.bvec', bvals='dwi/'+self.subject+'_dwi.bval',
+            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
                                                 T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
                                                 aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
                                                 brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
