@@ -3,9 +3,9 @@
 _version_major = 3
 _version_minor = 0
 _version_micro = 0
-_version_extra = '-beta-singularity'
+_version_extra = '-beta-bidsderivatives'
 
-__release_date__ = '11.04.2017'
+__release_date__ = '14.05.2019'
 
 __minor_version__ = "%s.%s" % (_version_major,
                                _version_minor)
@@ -24,13 +24,17 @@ __license__ = '3-clause BSD'
 __maintainer__ = 'Sebastien Tourbier'
 __email__ = 'sebastien.tourbier@alumni.epfl.ch'
 __status__ = 'Prototype'
-__url__ = 'https://bitbucket.org/sinergiaconsortium/connectomemapper3'
+
 __packagename__ = 'connectomemapper3'
+
+__url__ = 'https://github.com/connectomicslab/{name}'.format(name=__packagename__)
+
+DOWNLOAD_URL = (
+    'https://github.com/connectomicslab/{name}/archive/{ver}.tar.gz'.format(
+        name=__packagename__, ver=__version__))
 
 # DOWNLOAD_URL = (
 #     'https://bitbucket.org/sinergiaconsortium/{name}/get/{ver}.tar.gz'.format(
 #         name=__packagename__, ver=__version__))
 
-DOWNLOAD_URL = (
-    'https://bitbucket.org/sinergiaconsortium/{name}/get/{ver}.tar.gz'.format(
-        name=__packagename__, ver=__version__))
+
