@@ -675,12 +675,12 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         final_fiberlabels = []
         final_fibers_idx = []
 
-        # Open the corresponding ROI
+        # Open the corresponding ROI (scale1 for lausanne2008/18) (first volume for nativefreesurfer)
 
         #print("Open the corresponding ROI")
         for vol in roi_volumes:
             #print parkey
-            if parkey in vol:
+            if (parkey in vol) or (len(roi_volumes)==1):
                 roi_fname = vol
                 #print roi_fname
         #roi_fname = roi_volumes[r]

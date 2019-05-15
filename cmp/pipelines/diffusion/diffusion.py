@@ -337,13 +337,13 @@ class DiffusionPipeline(Pipeline):
                 input_message = 'Inputs check finished successfully.\nDiffusion and morphological data available.'
 
                 if diffusion_json_available:
-                if self.global_conf.subject_session == '':
-                    out_json_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',self.subject+'_desc-cmp_dwi.json')
-                else:
-                    out_json_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',self.subject+'_'+self.global_conf.subject_session+'_desc-cmp_dwi.json')
+                    if self.global_conf.subject_session == '':
+                        out_json_file = os.path.join(self.output_directory,'cmp',self.subject,'dwi',self.subject+'_desc-cmp_dwi.json')
+                    else:
+                        out_json_file = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session,'dwi',self.subject+'_'+self.global_conf.subject_session+'_desc-cmp_dwi.json')
 
-                if not os.path.isfile(out_json_file):
-                    shutil.copy(src=json_file,dst=out_json_file)
+                    if not os.path.isfile(out_json_file):
+                        shutil.copy(src=json_file,dst=out_json_file)
             else:
                 input_message = 'Error during inputs check.\nDiffusion bvec or bval files not available.'
         else:
@@ -440,7 +440,25 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.raise_on_empty = False
         #datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
 
-        datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
+        if self.parcellation_scheme == 'NativeFreesurfer':
+            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
+                                                T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
+                                                aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
+                                                brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
+                                                wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
+                                                brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
+                                                roi_volume_s1='anat/'+self.subject+'_label-'+bids_atlas_label+'_atlas.nii.gz',
+                                                roi_graphml_s1='anat/'+self.subject+'_label-'+bids_atlas_label+'_atlas.graphml',
+                                                roi_volume_s2='anat/irrelevant.nii.gz',
+                                                roi_graphml_s2='anat/irrelevant.graphml',
+                                                roi_volume_s3='anat/irrelevant.nii.gz',
+                                                roi_graphml_s3='anat/irrelevant.graphml',
+                                                roi_volume_s4='anat/irrelevant.nii.gz',
+                                                roi_graphml_s4='anat/irrelevant.graphml',
+                                                roi_volume_s5='anat/irrelevant.nii.gz',
+                                                roi_graphml_s5='anat/irrelevant.graphml',)
+        else:
+            datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
                                                 T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
                                                 aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
                                                 brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
@@ -527,6 +545,7 @@ class DiffusionPipeline(Pipeline):
                                             ('brain_mask_resampled_warped.nii.gz',self.subject+'_space-DWI_desc-brain_mask'),
                                             ('wm_mask_warped',self.subject+'_space-DWI_label-WM_dseg'),
                                             ('wm_mask_resampled_warped',self.subject+'_space-DWI_label-WM_dseg'),
+                                            (self.subject+'_label-Desikan_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-Desikan_atlas.nii.gz'),
                                             ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale1_atlas.nii.gz'),
                                             ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale2_atlas.nii.gz'),
                                             ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale3_atlas.nii.gz'),
@@ -560,11 +579,12 @@ class DiffusionPipeline(Pipeline):
                                             # ('connectome_'+self.subject+'_T1w_parc_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_connectome'),
                                             # ('connectome_'+self.subject+'_T1w_parc_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_connectome'),
                                             # ('connectome_'+self.subject+'_T1w_parc_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_connectome'),
-                                            ('connectome_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_connectome'),
-                                            ('connectome_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_connectome'),
-                                            ('connectome_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_connectome'),
-                                            ('connectome_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_connectome'),
-                                            ('connectome_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_connectome'),
+                                            ('connectome_freesurferaparc',self.subject+'_label-Desikan_conndata-snetwork_connectivity'),
+                                            ('connectome_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_conndata-snetwork_connectivity'),
+                                            ('connectome_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_conndata-snetwork_connectivity'),
+                                            ('connectome_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_conndata-snetwork_connectivity'),
+                                            ('connectome_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_conndata-snetwork_connectivity'),
+                                            ('connectome_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'),
                                             ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
                                             ('dwi.bval',self.subject+'_dwi.bval'),
                                             # ('dwi.bvec',self.subject+'_dwi.bvec'),
@@ -620,6 +640,7 @@ class DiffusionPipeline(Pipeline):
                                             ('brain_mask_registered_temp_crop',self.subject+'_space-DWI_desc-brain_mask'),
                                             ('wm_mask_warped',self.subject+'_space-DWI_label-WM_dseg'),
                                             ('wm_mask_resampled_warped',self.subject+'_space-DWI_label-WM_dseg'),
+                                            (self.subject+'_label-Desikan_atlas_out_warped.nii.gz',self.subject+'_space-DWI_label-Desikan_atlas.nii.gz'),
                                             ('ROIv_HR_th_scale1_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale1_atlas.nii.gz'),
                                             ('ROIv_HR_th_scale2_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale2_atlas.nii.gz'),
                                             ('ROIv_HR_th_scale3_out_warped.nii.gz',self.subject+'_space-DWI_label-'+bids_atlas_label+'_desc-scale3_atlas.nii.gz'),
@@ -653,11 +674,12 @@ class DiffusionPipeline(Pipeline):
                                             # ('connectome_'+self.subject+'_T1w_parc_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_connectome'),
                                             # ('connectome_'+self.subject+'_T1w_parc_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_connectome'),
                                             # ('connectome_'+self.subject+'_T1w_parc_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_connectome'),
-                                            ('connectome_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_connectome'),
-                                            ('connectome_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_connectome'),
-                                            ('connectome_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_connectome'),
-                                            ('connectome_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_connectome'),
-                                            ('connectome_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_connectome'),
+                                            ('connectome_freesurferaparc',self.subject+'_label-Desikan_conndata-snetwork_connectivity'),
+                                            ('connectome_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_conndata-snetwork_connectivity'),
+                                            ('connectome_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_conndata-snetwork_connectivity'),
+                                            ('connectome_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_conndata-snetwork_connectivity'),
+                                            ('connectome_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_conndata-snetwork_connectivity'),
+                                            ('connectome_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'),
                                             ('dwi.nii.gz',self.subject+'_dwi.nii.gz'),
                                             ('dwi.bval',self.subject+'_dwi.bval'),
                                             # ('dwi.bvec',self.subject+'_dwi.bvec'),
@@ -713,6 +735,20 @@ class DiffusionPipeline(Pipeline):
         #                                            ("outputnode.parcellation_scheme","parcellation_scheme"),
         #                                            ("outputnode.atlas_info","atlas_info")]),
         #               ])
+        
+        diffusion_flow.connect([
+                      (datasource,diffusion_inputnode,[("diffusion","diffusion"),
+                                                       ("bvecs","bvecs"),
+                                                       ("bvals","bvals")]),
+                      (datasource,diffusion_inputnode,[("T1","T1"),
+                                                       ("aseg","aseg"),
+                                                       ("aparc_aseg","aparc_aseg"),
+                                                       ("brain","brain"),
+                                                       ("brain_mask","brain_mask"),
+                                                       ("wm_mask_file","wm_mask_file")]), #,( "roi_volumes","roi_volumes")])
+                                                #    ("parcellation_scheme","parcellation_scheme"),
+                                                #    ("atlas_info","atlas_info")]),
+                      ])
 
         merge_roi_volumes = pe.Node(interface=Merge(5),name='merge_roi_volumes')
         merge_roi_graphmls = pe.Node(interface=Merge(5),name='merge_roi_graphmls')
@@ -728,31 +764,14 @@ class DiffusionPipeline(Pipeline):
                                                      ("roi_volume_s2","in2"),
                                                      ("roi_volume_s3","in3"),
                                                      ("roi_volume_s4","in4"),
-                                                     ("roi_volume_s5","in5")])
-                      ])
-
-        diffusion_flow.connect([
+                                                     ("roi_volume_s5","in5")]),
                       (datasource,merge_roi_graphmls,[("roi_graphml_s1","in1"),
                                                       ("roi_graphml_s2","in2"),
                                                       ("roi_graphml_s3","in3"),
                                                       ("roi_graphml_s4","in4"),
-                                                      ("roi_graphml_s5","in5")])
-                      ])
-
-        diffusion_flow.connect([
-                      (datasource,diffusion_inputnode,[("diffusion","diffusion"),
-                                                       ("bvecs","bvecs"),
-                                                       ("bvals","bvals")]),
-                      (datasource,diffusion_inputnode,[("T1","T1"),
-                                                       ("aseg","aseg"),
-                                                       ("aparc_aseg","aparc_aseg"),
-                                                       ("brain","brain"),
-                                                       ("brain_mask","brain_mask"),
-                                                       ("wm_mask_file","wm_mask_file")]), #,( "roi_volumes","roi_volumes")])
+                                                      ("roi_graphml_s5","in5")]),
                       (merge_roi_volumes,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_volumes")]),
                       (merge_roi_graphmls,diffusion_inputnode,[( ("out",remove_non_existing_scales),"roi_graphMLs")])
-                                                #    ("parcellation_scheme","parcellation_scheme"),
-                                                #    ("atlas_info","atlas_info")]),
                       ])
 
         # print diffusion_inputnode.outputs
@@ -891,7 +910,7 @@ class DiffusionPipeline(Pipeline):
                         #                 ('outputnode.filtered_fiberslabel_files','dwi.@filtered_fiberslabel_files'),
                         #                 ('outputnode.final_fiberlabels_files','dwi.@final_fiberlabels_files'),
                                          ('outputnode.streamline_final_file','dwi.@streamline_final_file'),
-                                         ("outputnode.connectivity_matrices","dwi.@connectivity_matrices")
+                                         ("outputnode.connectivity_matrices","connectivity.@connectivity_matrices")
                                         ])
                         ])
 

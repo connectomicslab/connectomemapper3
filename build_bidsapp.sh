@@ -9,6 +9,7 @@ VCS_REF=$(git rev-parse --verify HEAD)
 echo $VCS_REF
 
 MAIN_DOCKER=sebastientourbier/connectomemapper-ubuntu16.04:$VERSION
+MAIN_DOCKER="sebastientourbier/connectomemapper-ubuntu16.04:3.0.0-beta-singularity"
 echo $MAIN_DOCKER
 
 docker build --no-cache --rm --build-arg BUILD_DATE=$CMP_BUILD_DATE \

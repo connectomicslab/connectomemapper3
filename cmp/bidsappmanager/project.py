@@ -1507,6 +1507,8 @@ class ProjectHandlerV2(Handler):
     def load_dataset(self, ui_info, debug=False):
         # print('Load dataset')
 
+        debug=True
+
         loaded_project = gui.CMP_Project_Info()
         np_res = loaded_project.configure_traits(view='open_view')
         loaded_project.output_directory = os.path.join(loaded_project.base_directory,'derivatives')
@@ -1605,29 +1607,64 @@ class ProjectHandlerV2(Handler):
                 loaded_project.subject_sessions = ['']
                 loaded_project.subject_session = ''
 
-            query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='T1w', extensions=['nii', 'nii.gz'])]
-            if len(query_files) > 0:
-                if debug:
-                    print("T1w available: {}".format(query_files))
-                t1_available = True
+            if len(sessions) > 0:
+                print('    ... Check for available input modalities in the first session...')
+                
+                import bids
+                print(bids.__version__)
+                print(subject)
+                print(sessions[0])
+                query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='bold', extensions=['nii', 'nii.gz'])]
+                print(query_files)
+                if len(query_files) > 0:
+                    if debug:
+                        print("BOLD available: {}".format(query_files))
+                    fmri_available = True
 
-            query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='T2w', extensions=['nii', 'nii.gz'])]
-            if len(query_files) > 0:
-                if debug:
-                    print("T2w available: {}".format(query_files))
-                t2_available = True
+                query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='T1w', extensions=['nii', 'nii.gz'])]
+                if len(query_files) > 0:
+                    if debug:
+                        print("T1w available: {}".format(query_files))
+                    t1_available = True
 
-            query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='dwi', extensions=['nii', 'nii.gz'])]
-            if len(query_files) > 0:
-                if debug:
-                    print("DWI available: {}".format(query_files))
-                diffusion_available = True
+                query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='T2w', extensions=['nii', 'nii.gz'])]
+                if len(query_files) > 0:
+                    if debug:
+                        print("T2w available: {}".format(query_files))
+                    t2_available = True
 
-            query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='bold', extensions=['nii', 'nii.gz'])]
-            if len(query_files) > 0:
-                if debug:
-                    print("BOLD available: {}".format(query_files))
-                fmri_available = True
+                query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='dwi', extensions=['nii', 'nii.gz'])]
+                if len(query_files) > 0:
+                    if debug:
+                        print("DWI available: {}".format(query_files))
+                    diffusion_available = True
+
+                
+            else:
+                print('    ... Check for available input modalities...')
+                query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='T1w', extensions=['nii', 'nii.gz'])]
+                if len(query_files) > 0:
+                    if debug:
+                        print("T1w available: {}".format(query_files))
+                    t1_available = True
+
+                query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='T2w', extensions=['nii', 'nii.gz'])]
+                if len(query_files) > 0:
+                    if debug:
+                        print("T2w available: {}".format(query_files))
+                    t2_available = True
+
+                query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='dwi', extensions=['nii', 'nii.gz'])]
+                if len(query_files) > 0:
+                    if debug:
+                        print("DWI available: {}".format(query_files))
+                    diffusion_available = True
+
+                query_files = [f.filename for f in bids_layout.get(subject=subject, suffix='bold', extensions=['nii', 'nii.gz'])]
+                if len(query_files) > 0:
+                    if debug:
+                        print("BOLD available: {}".format(query_files))
+                    fmri_available = True
 
             # types = bids_layout.get_types()
             # print(types)
@@ -1857,6 +1894,10 @@ class ProjectHandlerV2(Handler):
                     self.fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(loaded_project)
                     self.fmri_pipeline.number_of_cores  = loaded_project.number_of_cores
                     self.fmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
+
+                    self.fmri_pipeline.stages["Registration"].pipeline_mode = 'fMRI'
+                    self.fmri_pipeline.stages["Registration"].registration_mode = 'FSL (Linear)'
+                    self.fmri_pipeline.stages["Registration"].registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
 
                     code_directory = os.path.join(loaded_project.base_directory,'code')
 

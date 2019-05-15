@@ -37,7 +37,7 @@ class RegistrationConfigUI(RegistrationConfig):
                               Item('fsl_cost',label="FLIRT metric"),
                               Item('no_search'),
                               Item('flirt_args'),
-                            label='FSL registration settings', show_border=True,visible_when='registration_mode=="Linear (FSL))"'),
+                            label='FSL registration settings', show_border=True,visible_when='registration_mode=="FSL (Linear)"'),
                         Group(
                             Group(
                                 HGroup(
@@ -115,6 +115,8 @@ class RegistrationStageUI(RegistrationStage):
         self.config = RegistrationConfigUI()
         self.config.pipeline = pipeline_mode
         if self.config.pipeline == "fMRI":
+            self.config.registration_mode = 'FSL (Linear)'
+            self.config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
             self.inputs = self.inputs + ["eroded_csf","eroded_wm","eroded_brain"]
             self.outputs = self.outputs + ["eroded_wm_registered_crop","eroded_csf_registered_crop","eroded_brain_registered_crop"]
 

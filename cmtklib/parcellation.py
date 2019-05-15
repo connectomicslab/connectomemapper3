@@ -1694,9 +1694,9 @@ def get_parcellation(parcel = "NativeFreesurfer"):
         			      'annotation' : ['myaparc_5_P1_16', 'myaparc_5_P17_28', 'myaparc_5_P29_36']}
                        }
     else:
-        return {'roi_volumes_flirt_crop_out_dil' : {'number_of_regions' : 83,
+        return {'freesurferaparc' : {'number_of_regions' : 83,
                                     # freesurferaparc; contains name, url, color, freesurfer_label, etc. used for connection matrix
-                                    'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','nativefreesurfer','freesurferaparc','resolution83.graphml')),
+                                    'node_information_graphml' : pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','nativefreesurfer','freesurferaparc','freesurferaparc.graphml')),
                                     # scalar node values on fsaverage? or atlas?
                                     'surface_parcellation' : None,
                                     # scalar node values in fsaverage volume?
@@ -3136,6 +3136,10 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     mri_cmd = ['fslmaths',op.join(fs_dir,'mri','brainmask.nii.gz'),'-bin',op.join(fs_dir,'mri','brainmask.nii.gz')]
     subprocess.check_call(mri_cmd)
 
+
+    mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','ribbon.mgz'),'-o',op.join(fs_dir,'mri','ribbon.nii.gz')]
+    subprocess.check_call(mri_cmd)
+
     print("[DONE]")
 
 def crop_and_move_WM_and_GM(subject_id, subjects_dir):
@@ -3146,6 +3150,7 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
 
     # datasets to crop and move: (from, to)
     ds = [
+          (op.join(fs_dir,'mri','ribbon.nii.gz'), 'ribbon.nii.gz'),
           (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), 'fsmask_1mm.nii.gz'),
           (op.join(fs_dir, 'mri', 'aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz')
           ]

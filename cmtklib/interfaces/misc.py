@@ -433,11 +433,11 @@ class UpdateGMWMInterfaceSeeding(BaseInterface):
         gmwmi_data = gmwmi_img.get_data()
         maxv = gmwmi_data.max()
 
+
         for fname in self.inputs.in_roi_volumes:
-            if "scale1" in fname:
+            if ("scale1" in fname) or (len(self.inputs.in_roi_volumes) == 1):
                 roi_fname = fname
                 print('roi_fname: %s'%roi_fname)
-
 
         roi_img = nib.load(roi_fname)
         roi_data = roi_img.get_data()

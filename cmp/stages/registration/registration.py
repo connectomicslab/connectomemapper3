@@ -251,8 +251,13 @@ class RegistrationStage(Stage):
         self.name = 'registration_stage'
         self.config = RegistrationConfig()
         self.config.pipeline = pipeline_mode
+
+        if pipeline_mode == 'fMRI':
+            self.config.registration_mode = 'FSL (Linear)'
+            self.config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
+
         self.inputs = ["T1","act_5TT","gmwmi","target","T2","subjects_dir","subject_id","wm_mask","partial_volume_files","roi_volumes","brain","brain_mask","brain_mask_full","target_mask","bvecs","bvals"]
-        self.outputs = ["T1_registered_crop", "act_5tt_registered_crop", "affine_transform", "warp_field" "gmwmi_registered_crop", "brain_registered_crop", "brain_mask_registered_crop", "wm_mask_registered_crop","partial_volumes_registered_crop","roi_volumes_registered_crop","target_epicorrected","grad","bvecs","bvals"]
+        self.outputs = ["T1_registered_crop", "act_5tt_registered_crop", "affine_transform", "warp_field", "gmwmi_registered_crop", "brain_registered_crop", "brain_mask_registered_crop", "wm_mask_registered_crop","partial_volumes_registered_crop","roi_volumes_registered_crop","target_epicorrected","grad","bvecs","bvals"]
         if self.config.pipeline == "fMRI":
             self.inputs = self.inputs + ["eroded_csf","eroded_wm","eroded_brain"]
             self.outputs = self.outputs + ["eroded_wm_registered_crop","eroded_csf_registered_crop","eroded_brain_registered_crop"]
@@ -744,7 +749,7 @@ class RegistrationStage(Stage):
             def reverse_order_transforms(transforms):
                 return transforms[::-1]
 
-            def extract_affine_transforms(transforms):
+            def extract_affine_transform(transforms):
                 for t in transforms:
                     if 'Affine' in t:
                         return t
@@ -764,8 +769,8 @@ class RegistrationStage(Stage):
                             (SyN_registration, ants_applywarp_wm, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (SyN_registration, ants_applywarp_rois, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (SyN_registration, ants_applywarp_pves, [(('forward_transforms',reverse_order_transforms),'transforms')]),
-                            (SyN_registration, outputnode [(('forward_transforms',extract_affine_transform),'affine_transform')]),
-                            (SyN_registration, outputnode [(('forward_transforms',extract_warp_field),'warp_field')]),
+                            (SyN_registration, outputnode, [(('forward_transforms',extract_affine_transform),'affine_transform')]),
+                            (SyN_registration, outputnode, [(('forward_transforms',extract_warp_field),'warp_field')]),
                             ])
             else:
                 flow.connect([
@@ -777,7 +782,7 @@ class RegistrationStage(Stage):
                             (affine_registration, ants_applywarp_wm, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (affine_registration, ants_applywarp_rois, [(('forward_transforms',reverse_order_transforms),'transforms')]),
                             (affine_registration, ants_applywarp_pves, [(('forward_transforms',reverse_order_transforms),'transforms')]),
-                            (affine_registration, outputnode [(('forward_transforms',extract_affine_transform),'affine_transform')]),
+                            (affine_registration, outputnode, [(('forward_transforms',extract_affine_transform),'affine_transform')]),
                             ])
 
             flow.connect([
@@ -849,6 +854,8 @@ class RegistrationStage(Stage):
 
             fsl_applyxfm_wm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True,interp="nearestneighbour",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
             fsl_applyxfm_rois = pe.Node(interface=ApplymultipleXfm(),name="apply_registration_roivs")
+
+            # TODO apply xfm to gmwmi / 5tt and pves
 
             flow.connect([
                         (inputnode, fsl_applyxfm_wm, [('wm_mask','in_file')]),
