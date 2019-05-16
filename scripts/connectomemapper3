@@ -3,6 +3,7 @@
 
 import sys
 import os
+import argparse
 
 import subprocess
 
@@ -76,8 +77,38 @@ script is sourced."""
         print error
         sys.exit(2)
 
+def create_parser():
+    p = argparse.ArgumentParser(description='Connectome Mapper 3 main script.')
+    p.add_argument('--bids_dir', required=True, help='The directory with the input dataset '
+                        'formatted according to the BIDS standard.')
+    p.add_argument('--output_dir', required=True, help='The directory where the output files '
+                        'should be stored. If you are running group level analysis '
+                        'this folder should be prepopulated with the results of the'
+                        'participant level analysis.')
+    p.add_argument('--participant_label', required=True, help='The label of the participant'
+                        'that should be analyzed. The label corresponds to'
+                       '<participant_label> from the BIDS spec '
+                       '(so it DOES include "sub-"')
+    p.add_argument('--session_label', help='The label of the participant session'
+                        'that should be analyzed. The label corresponds to'
+                       '<session_label> from the BIDS spec '
+                       '(so it DOES include "ses-"')
+
+    p.add_argument('--anat_pipeline_config', required=True, help='Configuration .txt file for processing stages of the anatomical MRI processing pipeline')
+    p.add_argument('--dwi_pipeline_config', help='Configuration .txt file for processing stages of the diffusion MRI processing pipeline')
+    p.add_argument('--func_pipeline_config', help='Configuration .txt file for processing stages of the fMRI processing pipeline')
+
+    p.add_argument('-v', '--version', action='version',
+                        version='Connectome Mapper version {}'.format(__version__))
+    return p
+
+
 
 if __name__ == "__main__":
+
+    parser = create_parser()
+    args = parser.parse_args()
+
     # check dependencies
     dep_check()
 
@@ -87,80 +118,52 @@ if __name__ == "__main__":
     # version and copyright message
     info()
 
-    argc = len(sys.argv)
+    project = cmp.project.CMP_Project_Info()
+    project.base_directory = os.path.abspath(args.bids_dir)
+    project.output_directory = os.path.abspath(args.output_dir)
+    project.subjects = ['{}'.format(args.participant_label)]
+    project.subject = '{}'.format(args.participant_label)
+    
+    try:
+        bids_layout = BIDSLayout(project.base_directory)
+    except:
+        print("Exception : Raised at BIDSLayout")
+        sys.exit(1)
 
-    if (argc==6) or (argc==7): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical
+    if args.session_label is not None:
+        project.subject_sessions = ['{}'.format(args.session_label)]
+        project.subject_session = '{}'.format(args.session_label)
+        print("INFO : Detected session(s)")
+    else:
+        print("INFO : No detected session")
+        project.subject_sessions = ['']
+        project.subject_session = ''
 
-        project = cmp.project.CMP_Project_Info()
-        project.base_directory = os.path.abspath(sys.argv[1])
-        project.output_directory = os.path.abspath(sys.argv[2])
-        project.subjects = ['%s' % sys.argv[3]]
-        project.subject = '%s' % sys.argv[3]
-        
-        try:
-            bids_layout = BIDSLayout(project.base_directory)
-        except:
-            print("Exception : Raised at BIDSLayout")
-            sys.exit(1)
+    project.anat_config_file = os.path.abspath(args.anat_pipeline_config)
 
-        if "ses-" in sys.argv[4]:
-            offset = 1
-            project.subject_sessions = ['%s' % sys.argv[4]]
-            project.subject_session = '%s' % sys.argv[4]
-            print("INFO : Detected session(s)")
-        else:
-            print("INFO : No detected session")
-            offset = 0
-            project.subject_sessions = ['']
-            project.subject_session = ''
-
-        project.anat_config_file = os.path.abspath(sys.argv[offset+4])
+    # Perform only the anatomical pipeline
+    if args.dwi_pipeline_config is None and args.func_pipeline_config is None:
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline != None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-            if anat_valid_inputs and sys.argv[offset+5]:
+            if anat_valid_inputs:
                 anat_pipeline.process()
-            elif anat_valid_inputs and sys.argv[offset+5]=='False':
-                pass
             else:
                 sys.exit(1)
 
-    elif (argc==8) or (argc==9): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion
+    # Perform the anatomical and the diffusion pipelines
+    elif args.dwi_pipeline_config is not None and args.func_pipeline_config is None:
 
-        project = cmp.project.CMP_Project_Info()
-        project.base_directory = os.path.abspath(sys.argv[1])
-        project.output_directory = os.path.abspath(sys.argv[2])
-        project.subjects = ['%s' % sys.argv[3]]
-        project.subject = '%s' % sys.argv[3]
-
-        try:
-            bids_layout = BIDSLayout(project.base_directory)
-        except:
-            sys.exit(1)
-
-        if "ses-" in sys.argv[4]:
-            offset = 1
-            project.subject_sessions = ['%s' % sys.argv[4]]
-            project.subject_session = '%s' % sys.argv[4]
-        else:
-            offset = 0
-            project.subject_sessions = ['']
-            project.subject_session = ''
-
-        project.anat_config_file = os.path.abspath(sys.argv[offset+4])
-        project.dmri_config_file = os.path.abspath(sys.argv[offset+6])
+        project.dmri_config_file = os.path.abspath(args.dwi_pipeline_config)
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline != None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            if anat_valid_inputs and sys.argv[offset+5]=='True':
+            if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            elif anat_valid_inputs and sys.argv[offset+5]=='False':
-                print(">> Collecting precomputed anatomical pipeline")
-                pass
             else:
                 print("ERROR : Invalid inputs")
                 sys.exit(1)
@@ -173,54 +176,64 @@ if __name__ == "__main__":
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
                 #print sys.argv[offset+7]
-                if dmri_valid_inputs and sys.argv[offset+7]=='True':
+                if dmri_valid_inputs:
                     dmri_pipeline.process()
                 else:
+                    print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
         else:
             print msg
             sys.exit(1)
 
-    elif (argc==10) or (argc==11): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion fmri_ini_file process_fmri
+    # Perform the anatomical and the fMRI pipelines
+    elif args.dwi_pipeline_config is None and args.func_pipeline_config is not None:
 
-        project = cmp.project.CMP_Project_Info()
-        project.base_directory = os.path.abspath(sys.argv[1])
-        project.output_directory = os.path.abspath(sys.argv[2])
-        project.subjects = ['%s' % sys.argv[3]]
-        project.subject = '%s' % sys.argv[3]
-
-        try:
-            bids_layout = BIDSLayout(project.base_directory)
-        except:
-            print("Exception : {}".format(project.base_directory))
-            print("Exception : {}".format(bids_layout))
-            sys.exit(1)
-
-        if "ses-" in sys.argv[4]:
-            offset = 1
-            project.subject_sessions = ['%s' % sys.argv[4]]
-            project.subject_session = '%s' % sys.argv[4]
-        else:
-            offset = 0
-            project.subject_sessions = ['']
-            project.subject_session = ''
-
-        project.anat_config_file = os.path.abspath(sys.argv[offset+4])
-        project.dmri_config_file = os.path.abspath(sys.argv[offset+6])
-        project.fmri_config_file = os.path.abspath(sys.argv[offset+8])
+        project.fmri_config_file = os.path.abspath(args.func_pipeline_config)
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline != None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
 
-            if anat_valid_inputs and sys.argv[offset+5]=='True':
+            if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-            elif anat_valid_inputs and sys.argv[offset+5]=='False':
-                print(">> Collecting precomputed anatomical pipeline")
-                pass
             else:
                 print("ERROR : Invalid inputs")
+                sys.exit(1)
+
+        anat_valid_outputs, msg = anat_pipeline.check_output()
+
+        if anat_valid_outputs:
+            fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
+            if fmri_pipeline != None:
+                fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                # print sys.argv[offset+9]
+                if fmri_valid_inputs:
+                    print(">> Process fmri pipeline")
+                    fmri_pipeline.process()
+                else:
+                    print("   ... ERROR : Invalid inputs")
+                    sys.exit(1)
+        else:
+            print(msg)
+            sys.exit(1)
+
+    # Perform all pipelines (anatomical/diffusion/fMRI)
+    elif args.dwi_pipeline_config is not None and args.func_pipeline_config is not None:
+
+        project.dmri_config_file = os.path.abspath(args.dwi_pipeline_config)
+        project.fmri_config_file = os.path.abspath(args.func_pipeline_config)
+
+        anat_pipeline = cmp.project.init_anat_project(project, False)
+        if anat_pipeline != None:
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
+
+            if anat_valid_inputs:
+                print(">> Process anatomical pipeline")
+                anat_pipeline.process()
+            else:
+                print("   ... ERROR : Invalid inputs")
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
@@ -231,26 +244,195 @@ if __name__ == "__main__":
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
                 # print sys.argv[offset+7]
-                if dmri_valid_inputs and sys.argv[offset+7]=='True':
+                if dmri_valid_inputs:
                     print(">> Process diffusion pipeline")
                     dmri_pipeline.process()
                 else:
-                    print("WARNING: Diffusion pipeline set to not be executed")
+                    print("   ... ERROR : Invalid inputs")
+                    sys.exit(1)
 
             fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
             if fmri_pipeline != None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
                 # print sys.argv[offset+9]
-                if fmri_valid_inputs and sys.argv[offset+9]=='True':
+                if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
                 else:
-                    print("WARNING: Diffusion pipeline set to not be executed")
+                    print("   ... ERROR : Invalid inputs")
+                    sys.exit(1)
         else:
             print(msg)
             sys.exit(1)
 
-    else:
-        usage()
-        sys.exit(2)
+
+
+# Old version with sys.argv for managing script arguments
+#     argc = len(sys.argv)
+
+#     if (argc==6) or (argc==7): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical
+
+#         project = cmp.project.CMP_Project_Info()
+#         project.base_directory = os.path.abspath(sys.argv[1])
+#         project.output_directory = os.path.abspath(sys.argv[2])
+#         project.subjects = ['%s' % sys.argv[3]]
+#         project.subject = '%s' % sys.argv[3]
+        
+#         try:
+#             bids_layout = BIDSLayout(project.base_directory)
+#         except:
+#             print("Exception : Raised at BIDSLayout")
+#             sys.exit(1)
+
+#         if "ses-" in sys.argv[4]:
+#             offset = 1
+#             project.subject_sessions = ['%s' % sys.argv[4]]
+#             project.subject_session = '%s' % sys.argv[4]
+#             print("INFO : Detected session(s)")
+#         else:
+#             print("INFO : No detected session")
+#             offset = 0
+#             project.subject_sessions = ['']
+#             project.subject_session = ''
+
+#         project.anat_config_file = os.path.abspath(sys.argv[offset+4])
+
+#         anat_pipeline = cmp.project.init_anat_project(project, False)
+#         if anat_pipeline != None:
+#             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
+#             if anat_valid_inputs and sys.argv[offset+5]:
+#                 anat_pipeline.process()
+#             elif anat_valid_inputs and sys.argv[offset+5]=='False':
+#                 pass
+#             else:
+#                 sys.exit(1)
+
+#     elif (argc==8) or (argc==9): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion
+
+#         project = cmp.project.CMP_Project_Info()
+#         project.base_directory = os.path.abspath(sys.argv[1])
+#         project.output_directory = os.path.abspath(sys.argv[2])
+#         project.subjects = ['%s' % sys.argv[3]]
+#         project.subject = '%s' % sys.argv[3]
+
+#         try:
+#             bids_layout = BIDSLayout(project.base_directory)
+#         except:
+#             sys.exit(1)
+
+#         if "ses-" in sys.argv[4]:
+#             offset = 1
+#             project.subject_sessions = ['%s' % sys.argv[4]]
+#             project.subject_session = '%s' % sys.argv[4]
+#         else:
+#             offset = 0
+#             project.subject_sessions = ['']
+#             project.subject_session = ''
+
+#         project.anat_config_file = os.path.abspath(sys.argv[offset+4])
+#         project.dmri_config_file = os.path.abspath(sys.argv[offset+6])
+
+#         anat_pipeline = cmp.project.init_anat_project(project, False)
+#         if anat_pipeline != None:
+#             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
+
+#             if anat_valid_inputs and sys.argv[offset+5]=='True':
+#                 print(">> Process anatomical pipeline")
+#                 anat_pipeline.process()
+#             elif anat_valid_inputs and sys.argv[offset+5]=='False':
+#                 print(">> Collecting precomputed anatomical pipeline")
+#                 pass
+#             else:
+#                 print("ERROR : Invalid inputs")
+#                 sys.exit(1)
+
+#         anat_valid_outputs, msg = anat_pipeline.check_output()
+
+#         if anat_valid_outputs:
+#             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
+#             if dmri_pipeline != None:
+#                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+#                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+#                 #print sys.argv[offset+7]
+#                 if dmri_valid_inputs and sys.argv[offset+7]=='True':
+#                     dmri_pipeline.process()
+#                 else:
+#                     sys.exit(1)
+#         else:
+#             print msg
+#             sys.exit(1)
+
+#     elif (argc==10) or (argc==11): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion fmri_ini_file process_fmri
+
+#         project = cmp.project.CMP_Project_Info()
+#         project.base_directory = os.path.abspath(sys.argv[1])
+#         project.output_directory = os.path.abspath(sys.argv[2])
+#         project.subjects = ['%s' % sys.argv[3]]
+#         project.subject = '%s' % sys.argv[3]
+
+#         try:
+#             bids_layout = BIDSLayout(project.base_directory)
+#         except:
+#             print("Exception : {}".format(project.base_directory))
+#             print("Exception : {}".format(bids_layout))
+#             sys.exit(1)
+
+#         if "ses-" in sys.argv[4]:
+#             offset = 1
+#             project.subject_sessions = ['%s' % sys.argv[4]]
+#             project.subject_session = '%s' % sys.argv[4]
+#         else:
+#             offset = 0
+#             project.subject_sessions = ['']
+#             project.subject_session = ''
+
+#         project.anat_config_file = os.path.abspath(sys.argv[offset+4])
+#         project.dmri_config_file = os.path.abspath(sys.argv[offset+6])
+#         project.fmri_config_file = os.path.abspath(sys.argv[offset+8])
+
+#         anat_pipeline = cmp.project.init_anat_project(project, False)
+#         if anat_pipeline != None:
+#             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
+
+#             if anat_valid_inputs and sys.argv[offset+5]=='True':
+#                 print(">> Process anatomical pipeline")
+#                 anat_pipeline.process()
+#             elif anat_valid_inputs and sys.argv[offset+5]=='False':
+#                 print(">> Collecting precomputed anatomical pipeline")
+#                 pass
+#             else:
+#                 print("ERROR : Invalid inputs")
+#                 sys.exit(1)
+
+#         anat_valid_outputs, msg = anat_pipeline.check_output()
+
+#         if anat_valid_outputs:
+#             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
+#             if dmri_pipeline != None:
+#                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+#                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+#                 # print sys.argv[offset+7]
+#                 if dmri_valid_inputs and sys.argv[offset+7]=='True':
+#                     print(">> Process diffusion pipeline")
+#                     dmri_pipeline.process()
+#                 else:
+#                     print("WARNING: Diffusion pipeline set to not be executed")
+
+#             fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
+#             if fmri_pipeline != None:
+#                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+#                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+#                 # print sys.argv[offset+9]
+#                 if fmri_valid_inputs and sys.argv[offset+9]=='True':
+#                     print(">> Process fmri pipeline")
+#                     fmri_pipeline.process()
+#                 else:
+#                     print("WARNING: Diffusion pipeline set to not be executed")
+#         else:
+#             print(msg)
+#             sys.exit(1)
+
+#     else:
+#         usage()
+#         sys.exit(2)

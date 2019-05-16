@@ -33,26 +33,39 @@ from cmp import parser
 
 def create_cmp_command(project,run_anat,run_dmri,run_fmri):
 
-    if len(project.subject_sessions)>0:
-        if run_fmri:
-            cmd = "connectomemapper3 %s %s %s %s %s %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.subject_session,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri,project.fmri_config_file,run_fmri)
-        else:
-            if run_dmri:
-                cmd = "connectomemapper3 %s %s %s %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.subject_session,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri)
-            else:
-                if run_anat:
-                    cmd = "connectomemapper3 %s %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.subject_session,project.anat_config_file,run_anat)
-    else:
-        if run_fmri:
-            cmd = "connectomemapper3 %s %s %s %s %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri,project.fmri_config_file,run_fmri)
-        else:
-            if run_dmri:
-                cmd = "connectomemapper3 %s %s %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.anat_config_file,run_anat,project.dmri_config_file,run_dmri)
-            else:
-                if run_anat:
-                    cmd = "connectomemapper3 %s %s %s %s %s"%(project.base_directory,project.output_directory,project.subject,project.anat_config_file,run_anat)
+    cmd = []
+    cmd.append("connectomemapper3")
+    cmd.append("--bids_dir")
+    cmd.append(project.base_directory)
+    cmd.append("--output_dir")
+    cmd.append(project.output_directory)
+    cmd.append("--participant_label")
+    cmd.append(project.subject)
 
-    return cmd
+    if len(project.subject_sessions)>0:
+        cmd.append("--session_label")
+        cmd.append(project.subject_session) 
+
+    # TODO: review how to handle anatomical pipeline processing 
+    if run_anat:
+        cmd.append("--anat_pipeline_config")
+        cmd.append(project.anat_config_file)
+    else:
+        print("ERROR: anatomical pipeline is mandatory")
+
+    if run_dmri: 
+        cmd.append("--dwi_pipeline_config")
+        cmd.append(project.dmri_config_file)
+    else:
+        print("INFO: diffusion pipeline not performed")
+
+    if run_fmri:
+        cmd.append("--func_pipeline_config")
+        cmd.append(project.fmri_config_file)
+    else:
+        print("INFO: functional pipeline not performed")
+
+    return ' '.join(cmd)
 
 def readLineByLine(filename):
     with open(filename, 'r') as f: #Use with statement to correctly close the file when you read all the lines.
