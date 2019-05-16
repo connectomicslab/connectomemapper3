@@ -42,13 +42,23 @@ def erode_mask(fsdir,maskFile):
     se[1,:,1] = 1; se[:,1,1] = 1; se[1,1,:] = 1
 
     # Erode mask
-    mask = ni.load( maskFile ).get_data().astype( np.uint32 )
+    print('    > Load mask {}'.format(maskFile))
+    img = ni.load( maskFile )
+    mask = img.get_data()
+
+    #Circumvent a casting issue for csf_mask which did not have element exactly equal to 1 (instead 0.999998....)
+    mask[mask>0] = 1
+    mask = mask.astype( np.uint32 )
+
     er_mask = np.zeros( mask.shape )
     idx = np.where( (mask == 1) )
     er_mask[idx] = 1
+    print(er_mask.sum())
     er_mask = imerode(er_mask,se)
+    print(er_mask.sum())
     er_mask = imerode(er_mask,se)
-    img = ni.Nifti1Image(er_mask, ni.load( maskFile ).get_affine(), ni.load( maskFile ).get_header())
+    print(er_mask.sum())
+    img = ni.Nifti1Image(er_mask, img.get_affine(), img.get_header())
     out_fname = os.path.join(fsdir,'mri','{}_eroded.nii.gz'.format(os.path.splitext(op.splitext(op.basename(maskFile))[0])[0]))
     print('    > Save eroded mask to: {}'.format(out_fname))
     ni.save(img, out_fname)
