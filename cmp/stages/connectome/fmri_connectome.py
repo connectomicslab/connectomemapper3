@@ -187,7 +187,9 @@ class rsfmri_conmat(BaseInterface):
             gp = nx.read_graphml(parval['node_information_graphml'])
             ROI_idx = []
             for u,d in gp.nodes(data=True):
-                G.add_node(int(u), d)
+                G.add_node(int(u))
+                for key in d:
+                    G.node[int(u)][key] = d[key]
                 # compute a position for the node based on the mean position of the
                 # ROI in voxel coordinates (segmentation volume )
                 if self.inputs.parcellation_scheme != "Lausanne2018":
@@ -238,7 +240,8 @@ class rsfmri_conmat(BaseInterface):
                     for j in xrange(i,nnodes):
                         j_signal = ts[j,:]
                         value = np.corrcoef(i_signal,j_signal)[0,1]
-                        G.add_edge(ROI_idx[i],ROI_idx[j],corr = value)
+                        G.add_edge(ROI_idx[i],ROI_idx[j])
+                        G[ROI_idx[i]][ROI_idx[j]]['corr'] = value
                     	# fmat[i,j] = value
                 		# fmat[j,i] = value
                 # np.save( op.join(gconf.get_timeseries(), 'fconnectome_%s_after_scrubbing.npy' % s), fmat )
@@ -252,7 +255,8 @@ class rsfmri_conmat(BaseInterface):
                     for j in xrange(i,nnodes):
                         j_signal = ts[j,:]
                         value = np.corrcoef(i_signal,j_signal)[0,1]
-                        G.add_edge(ROI_idx[i],ROI_idx[j],corr = value)
+                        G.add_edge(ROI_idx[i],ROI_idx[j])
+                        G[ROI_idx[i]][ROI_idx[j]]['corr'] = value
                         # fmat[i,j] = value
                         # fmat[j,i] = value
             	# np.save( op.join(gconf.get_timeseries(), 'fconnectome_%s.npy' % s), fmat )
