@@ -364,6 +364,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                         ('brain.nii.gz', self.subject+'_desc-brain_T1w.nii.gz'),
                                         ('brain_mask.nii.gz', self.subject+'_desc-brain_mask.nii.gz'),
                                         ('aseg.nii.gz', self.subject+'_desc-aseg_dseg.nii.gz'),
+                                        ('csf_mask.nii.gz',self.subject+'_label-CSF_dseg.nii.gz'),
                                         ('fsmask_1mm.nii.gz',self.subject+'_label-WM_dseg.nii.gz'),
                                         ('gmmask.nii.gz',self.subject+'_label-GM_dseg.nii.gz'),
                                         ('T1w_class-GM.nii.gz',self.subject+'_label-GM_dseg.nii.gz'),
@@ -395,6 +396,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                         ('brain.nii.gz', self.subject+'_desc-brain_T1w.nii.gz'),
                                         ('brain_mask.nii.gz', self.subject+'_desc-brain_mask.nii.gz'),
                                         ('aseg.nii.gz', self.subject+'_desc-aseg_dseg.nii.gz'),
+                                        ('csf_mask.nii.gz',self.subject+'_label-CSF_dseg.nii.gz'),
                                         ('fsmask_1mm.nii.gz',self.subject+'_label-WM_dseg.nii.gz'),
                                         ('gmmask.nii.gz',self.subject+'_label-GM_dseg.nii.gz'),
                                         ('T1w_class-GM.nii.gz',self.subject+'_label-GM_dseg.nii.gz'),
@@ -431,9 +433,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                         ('brain.nii.gz', self.subject+'_desc-brain_T1w.nii.gz'),
                                         ('brain_mask.nii.gz', self.subject+'_desc-brain_mask.nii.gz'),
                                         ('aseg.nii.gz', self.subject+'_desc-aseg_dseg.nii.gz'),
+                                        ('csf_mask.nii.gz',self.subject+'_label-CSF_dseg.nii.gz'),
                                         ('fsmask_1mm.nii.gz',self.subject+'_label-WM_dseg.nii.gz'),
                                         ('gmmask.nii.gz',self.subject+'_label-GM_dseg.nii.gz'),
                                         ('T1w_class-GM.nii.gz',self.subject+'_label-GM_dseg.nii.gz'),
+                                        ('fsmask_1mm_eroded.nii.gz',self.subject+'_label-WM_desc-eroded_dseg.nii.gz'),
+                                        ('csf_mask_eroded.nii.gz',self.subject+'_label-CSF_desc-eroded_dseg.nii.gz'),
+                                        ('brainmask_eroded.nii.gz',self.subject+'_label-brain_desc-eroded_dseg.nii.gz'),
                                         ('aparc+aseg.native.nii.gz',self.subject+'_desc-aparcaseg_dseg.nii.gz'),
                                         ('aparc+aseg.Lausanne2018.native.nii.gz',self.subject+'_desc-aparcaseg_dseg.nii.gz'),
                                         ('ROIv_HR_th_freesurferaparc.nii.gz',self.subject+'_label-Desikan_atlas.nii.gz'),
@@ -470,7 +476,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         anat_flow = pe.Workflow(name='anatomical_pipeline', base_dir=os.path.abspath(nipype_deriv_subject_directory))
         anat_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
-        anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","aseg","aparc_aseg","brain","brain_mask","wm_mask_file", "gm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
+        anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","aseg","aparc_aseg","brain","brain_mask","csf_mask_file", "wm_mask_file", "gm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
             "roi_volumes","parcellation_scheme","atlas_info","roi_colorLUTs", "roi_graphMLs"]),name="outputnode")
         anat_flow.add_nodes([anat_inputnode,anat_outputnode])
 
@@ -524,6 +530,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                                ("outputnode.roi_graphMLs","roi_graphMLs"),
                                                                ("outputnode.wm_eroded","wm_eroded"),
                                                                ("outputnode.gm_mask_file","gm_mask_file"),
+                                                               ("outputnode.csf_mask_file","csf_mask_file"),
                                                                ("outputnode.csf_eroded","csf_eroded"),
                                                                ("outputnode.brain_eroded","brain_eroded"),
                                                                ("outputnode.T1","T1"),
@@ -560,9 +567,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                         (anat_outputnode,sinker,[("brain_mask","anat.@brain_mask")]),
                         (anat_outputnode,sinker,[("wm_mask_file","anat.@wm_mask")]),
                         (anat_outputnode,sinker,[("gm_mask_file","anat.@gm_mask")]),
+                        (anat_outputnode,sinker,[("csf_mask_file","anat.@csf_mask")]),
                         (anat_outputnode,sinker,[("roi_volumes","anat.@roivs")]),
                         (anat_outputnode,sinker,[("roi_colorLUTs","anat.@luts")]),
-                        (anat_outputnode,sinker,[("roi_graphMLs","anat.@graphmls")])
+                        (anat_outputnode,sinker,[("roi_graphMLs","anat.@graphmls")]),
+                        (anat_outputnode,sinker,[("brain_eroded","anat.@brainmask_eroded")]),
+                        (anat_outputnode,sinker,[("wm_eroded","anat.@wm_eroded")]),
+                        (anat_outputnode,sinker,[("csf_eroded","anat.@csf_eroded")])
                         ])
 
         self.flow = anat_flow
@@ -571,9 +582,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
 
     def process(self):
-        # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
+        # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
         config.enable_provenance()
-        
+
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
