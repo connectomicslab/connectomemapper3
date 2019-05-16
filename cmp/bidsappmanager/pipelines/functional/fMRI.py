@@ -99,6 +99,7 @@ class fMRIPipelineUI(fMRIPipeline):
     def check_input(self, layout, gui=True):
         print '**** Check Inputs ****'
         fMRI_available = False
+        fMRI_json_available = False
         t1_available = False
         t2_available = False
         valid_inputs = False
@@ -114,19 +115,28 @@ class fMRIPipelineUI(fMRIPipeline):
 
         subjid = self.subject.split("-")[1]
 
+        print "Looking for...."
+
         if self.global_conf.subject_session == '':
 
             files = layout.get(subject=subjid,suffix='bold',extensions='.nii.gz')
             if len(files) > 0:
-                fmri_file = files[0].filename
+                fmri_file = os.path.join(files[0].dirname,files[0].filename)
                 print fmri_file
             else:
                 error(message="BOLD image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                 return
 
+            files = layout.get(subject=subjid,suffix='bold',extensions='.json')
+            if len(files) > 0:
+                json_file = os.path.join(files[0].dirname,files[0].filename)
+                print json_file
+            else:
+                error(message="BOLD json sidecar not found for subject %s."%(subjid), title="Warning",buttons = [ 'OK', 'Cancel' ], parent = None)
+
             files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz')
             if len(files) > 0:
-                t1_file = files[0].filename
+                t1_file = os.path.join(files[0].dirname,files[0].filename)
                 print t1_file
             else:
                 error(message="T1w image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
@@ -134,25 +144,32 @@ class fMRIPipelineUI(fMRIPipeline):
 
             files = layout.get(subject=subjid,suffix='T2w',extensions='.nii.gz')
             if len(files) > 0:
-                t2_file = files[0].filename
+                t2_file = os.path.join(files[0].dirname,files[0].filename)
                 print t2_file
             else:
-                error(message="T2w image not found for subject %s."%(subjid), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                error(message="T2w image not found for subject %s."%(subjid), title="Warning",buttons = [ 'OK', 'Cancel' ], parent = None)
 
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
 
             files = layout.get(subject=subjid,suffix='bold',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
-                fmri_file = files[0].filename
+                fmri_file = os.path.join(files[0].dirname,files[0].filename)
                 print fmri_file
             else:
                 error(message="BOLD image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
                 return
 
+            files = layout.get(subject=subjid,suffix='bold',extensions='.json',session=sessid)
+            if len(files) > 0:
+                json_file = os.path.join(files[0].dirname,files[0].filename)
+                print json_file
+            else:
+                error(message="BOLD json sidecar not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Warning",buttons = [ 'OK', 'Cancel' ], parent = None)
+
             files = layout.get(subject=subjid,suffix='T1w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
-                t1_file = files[0].filename
+                t1_file = os.path.join(files[0].dirname,files[0].filename)
                 print t1_file
             else:
                 error(message="T1w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
@@ -160,68 +177,57 @@ class fMRIPipelineUI(fMRIPipeline):
 
             files = layout.get(subject=subjid,suffix='T2w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
-                t2_file = files[0].filename
+                t2_file = os.path.join(files[0].dirname,files[0].filename)
                 print t2_file
             else:
-                error(message="T2w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Error",buttons = [ 'OK', 'Cancel' ], parent = None)
+                error(message="T2w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session), title="Warning",buttons = [ 'OK', 'Cancel' ], parent = None)
 
-
-        print "Looking for...."
         print "fmri_file : %s" % fmri_file
+        print "json_file : %s" % json_file
         print "t1_file : %s" % t1_file
         print "t2_file : %s" % t2_file
 
-        # mods = layout.get_modalities()
-        types = layout.get_modalities()
-        print "Available modalities :"
-        for typ in types:
-            print "-%s" % typ
+        if os.path.isfile(t2_file):
+            # print("%s available" % typ)
+            t2_available = True
+        if os.path.isfile(fmri_file):
+            # print("%s available" % typ)
+            fMRI_available = True
+        if os.path.isfile(json_file):
+            # print("%s available" % typ)
+            fMRI_json_available = True
 
-        for typ in types:
-            if typ == 'T1w' and os.path.isfile(t1_file):
-                print "%s available" % typ
-                t1_available = True
-            if typ == 'T2w' and os.path.isfile(t2_file):
-                print "%s available" % typ
-                t2_available = True
-            if typ == 'bold' and os.path.isfile(fmri_file):
-                print "%s available" % typ
-                fMRI_available = True
-
-        print('fMRI :',fMRI_available)
-        print('t1 :',t1_available)
-        print('t2 :',t2_available)
+        # print('fMRI :',fMRI_available)
+        # print('t1 :',t1_available)
+        # print('t2 :',t2_available)
 
         if fMRI_available:
             if self.global_conf.subject_session == '':
-                out_dir = os.path.join(self.derivatives_directory,'cmp',self.subject)
+                out_dir = os.path.join(self.output_directory,'cmp',self.subject)
             else:
-                out_dir = os.path.join(self.derivatives_directory,'cmp',self.subject,self.global_conf.subject_session)
+                out_dir = os.path.join(self.output_directory,'cmp',self.subject,self.global_conf.subject_session)
 
-            out_fmri_file = os.path.join(out_dir,'func',subject+'_task-rest_bold.nii.gz')
-            if fmri_file != out_fmri_file:
-                shutil.copy(src=fmri_file,dst=out_fmri_file)
+            out_fmri_file = os.path.join(out_dir,'func',subject+'_task-rest_desc-cmp_bold.nii.gz')
+            shutil.copy(src=fmri_file,dst=out_fmri_file)
+
+            valid_inputs = True
+            input_message = 'Inputs check finished successfully.\nfMRI data available.'
 
             if t2_available:
                 out_t2_file = os.path.join(out_dir,'anat',subject+'_T2w.nii.gz')
-                if t2_file != out_t2_file:
-                    shutil.copy(src=t2_file,dst=out_t2_file)
+                shutil.copy(src=t2_file,dst=out_t2_file)
                 # swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T2_orig.nii.gz'),
                 #                   ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
                 #                   out_file=os.path.join(self.base_directory,'NIFTI','T2.nii.gz'))
-            if t1_available:
-                # out_t1_file = os.path.join(self.derivatives_directory,'cmp',self.subject,'anat',self.subject+'_T1w.nii.gz')
-                # shutil.copy(src=t1_file,dst=out_t1_file)
-                valid_inputs = True
-                input_message = 'Inputs check finished successfully.\nfMRI and morphological data available.'
-            else:
-                input_message = 'Error during inputs check.\nMorphological data (T1) not available.'
-        elif t1_available:
-            input_message = 'Error during inputs check. \nfMRI data not available (fMRI).'
-        else:
-            input_message = 'Error during inputs check. No fMRI or morphological data available in folder '+os.path.join(self.base_directory,'RAWDATA')+'!'
 
-        print input_message
+            if fMRI_json_available:
+                out_json_file = os.path.join(out_dir,'func',subject+'_task-rest_desc-cmp_bold.json')
+                shutil.copy(src=json_file,dst=out_json_file)
+
+        else:
+            input_message = 'Error during inputs check. \nfMRI data not available (fMRI).'
+        
+        print(input_message)
 
         # if gui:
         #     # input_notification = Check_Input_Notification(message=input_message, imaging_model='fMRI')
@@ -238,7 +244,7 @@ class fMRIPipelineUI(fMRIPipeline):
         if t2_available:
             self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
         else:
-            self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
+            self.stages['Registration'].config.registration_mode_trait = ['FSL (Linear)']
 
         #self.fill_stages_outputs()
 

@@ -165,14 +165,13 @@ class fMRIPipeline(Pipeline):
                 # print json_file
             else:
                 print("WARNING : BOLD json sidecar not found for subject %s."%(subjid))
-                return
 
             files = layout.get(subject=subjid,suffix='T2w',extensions='.nii.gz')
             if len(files) > 0:
                 t2_file = os.path.join(files[0].dirname,files[0].filename)
                 # print t2_file
             else:
-                print("ERROR : T2w image not found for subject %s."%(subjid))
+                print("WARNING : T2w image not found for subject %s."%(subjid))
 
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
@@ -191,14 +190,13 @@ class fMRIPipeline(Pipeline):
                 # print json_file
             else:
                 print("WARNING : BOLD json sidecar not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
-                return
 
             files = layout.get(subject=subjid,suffix='T2w',extensions='.nii.gz',session=sessid)
             if len(files) > 0:
                 t2_file = os.path.join(files[0].dirname,files[0].filename)
                 # print t2_file
             else:
-                print("ERROR : T2w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
+                print("WARNING : T2w image not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
         
         print("... fmri_file : %s" % fmri_file)
         print("... json_file : %s" % json_file)

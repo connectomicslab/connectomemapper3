@@ -363,18 +363,23 @@ class ConnectomeStage(Stage):
 
     def define_inspect_outputs(self):
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
+
         # print('con_results_path : ',con_results_path)
         if(os.path.exists(con_results_path)):
 
             con_results = pickle.load(gzip.open(con_results_path))
             # print(con_results)
 
-            if isinstance(con_results.outputs.connectivity_matrices, basestring):
-                mat = con_results.outputs.connectivity_matrices
+            mat = con_results.outputs.connectivity_matrices
+            print(mat)
+            if isinstance(mat, basestring):
+                print("single scale")
                 # print(mat)
                 if 'gpickle' in mat:
+                    con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
                     self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%os.path.basename(mat)] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]
             else:
+                print("multi scale")
                 for mat in con_results.outputs.connectivity_matrices:
                     # print(mat)
                     if 'gpickle' in mat:
