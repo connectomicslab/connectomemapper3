@@ -3,6 +3,9 @@
 ARG MAIN_DOCKER
 FROM $MAIN_DOCKER
 
+RUN groupadd -r -g 1000 cmp && \
+    useradd -r -M -u 1000 -g cmp cmp
+
 ##
 # Install any needed packages specified in requirements.txt
 # RUN pip install --trusted-host pypi.python.org -r requirements.txt
