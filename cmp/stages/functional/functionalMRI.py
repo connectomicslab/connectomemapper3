@@ -107,9 +107,11 @@ class nuisance_regression(BaseInterface):
     output_spec = nuisance_OutputSpec
 
     def _run_interface(self,runtime):
+        ''' Regress out nuisance signals (WM, CSF, movements) through GLM
+        '''
+        
         import scipy.io as sio
-        #regress out nuisance signals (WM, CSF, movements) through GLM
-
+        
         # Output from previous preprocessing step
         ref_path = self.inputs.in_file
 
@@ -354,6 +356,7 @@ class Scrubbing(BaseInterface):
         """
         print("Precompute FD and DVARS for scrubbing")
         print("=====================================")
+        import scipy.io as sio
 
         # Output from previous preprocessing step
         ref_path = self.inputs.in_file

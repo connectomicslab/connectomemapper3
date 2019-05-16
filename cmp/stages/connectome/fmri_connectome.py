@@ -138,7 +138,7 @@ class rsfmri_conmat(BaseInterface):
             # Open the corresponding ROI
             print("Open the corresponding ROI")
             for vol in self.inputs.roi_volumes:
-                if parkey in vol:
+                if (parkey in vol) or (len(self.inputs.roi_volumes)==1):
                     roi_fname = vol
                     print(roi_fname)
 
