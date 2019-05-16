@@ -583,7 +583,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
     def process(self):
         # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
-        config.enable_provenance()
+        #config.enable_provenance()
 
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
