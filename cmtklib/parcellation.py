@@ -1609,7 +1609,7 @@ class Parcellate(BaseInterface):
         if self.inputs.erode_masks:
             outputs['wm_eroded'] = op.abspath('wm_eroded.nii.gz')
             outputs['csf_eroded'] = op.abspath('csf_eroded.nii.gz')
-            outputs['brain_eroded'] = op.abspath('brainmask_eroded.nii.gz')
+            outputs['brain_eroded'] = op.abspath('brain_eroded.nii.gz')
 
         return outputs
 
