@@ -50,8 +50,8 @@ If ssh connection is used, make sure to enable the  "install via ssh" and to pro
 .. note:: The input dataset MUST be a valid :abbr:`BIDS (Brain Imaging Data Structure)` structured dataset and must include at least one T1w or MPRAGE structural image. We highly recommend that you validate your dataset with the free, online `BIDS Validator <http://bids-standard.github.io/bids-validator/>`_.
 
 
-Stage configuration
-*******************
+Pipeline stage configuration
+*****************************
 
 Start the Configurator Window
 --------------------------------
@@ -69,9 +69,65 @@ Start the Configurator Window
 	Configurator Window of the Connectome Mapper
 
 The outputs depend on the chosen parameters.
+
+Anatomical pipeline stages
+---------------------------
 	
+
+Segmentation
+""""""""""""""
+
+Performs tissue segmentation using Freesurfer or custom segmentation.  
+
+*Freesurfer*
+
+ 	.. image:: images/segmentation_fs.png
+		:align: center
+
+	* *Freesurfer args:* used to specify Freesurfer processing options
+	* *Use existing freesurfer data:* Check this box if you have already Freesurfer output data available
+	
+*Custom segmentation*
+
+ 	.. image:: images/segmentation_custom.png
+		:align: center
+
+	* *White matter mask:* select the file containing your white matter binary mask
+	
+	
+Parcellation
+""""""""""""""
+
+Generates the Native Freesurfer or Lausanne2008/Lausanne2018 parcellation from Freesurfer data, or takes a custom parcellation atlas.
+	
+*Parcellation scheme*
+
+	.. image:: images/parcellation_fs.png
+		:align: center
+
+	* *NativeFreesurfer:* Atlas composed of 83 regions from the Freesurfer aparc+aseg file
+	
+	.. image:: images/parcellation_lausanne2008.png
+		:align: center
+	
+	* *Lausanne2008:* Multi-resolution atlas
+
+	.. image:: images/parcellation_lausanne2018.png
+		:align: center
+	
+	* *Lausanne2018:* Lausanne 2008 atlas extended with 7 thalamic nuclei, 12 hippocampal subfields, and 4 brainstem sub-structure per hemisphere
+	
+	.. image:: images/parcellation_custom.png
+		:align: center
+	
+	* *Custom:* Custom atlas. Specify the atlas name, the number of regions, the nifti file and a corresponding graphml file. The Graphml file must contain at least a "dn_correspondence_id" field for each node. This field should contain the region's label in the nifti file.
+
+
+Diffusion pipeline stages
+---------------------------
+
 Preprocessing
--------------
+""""""""""""""
 
 Preprocessing includes denoising, bias field correction, motion and eddy current correction for diffusion data.
 
@@ -100,64 +156,15 @@ Preprocessing includes denoising, bias field correction, motion and eddy current
 
 	Resample morphological and diffusion data to F0 x F1 x F2 mm^3
 	
-
-Segmentation
-------------
-
-Performs tissue segmentation using Freesurfer or custom segmentation.  
-
-*Freesurfer*
-
- 	.. image:: images/segmentation_fs.png
-		:align: center
-
-	* *Freesurfer args:* used to specify Freesurfer processing options
-	* *Use existing freesurfer data:* Check this box if you have already Freesurfer output data available
-	
-*Custom segmentation*
-
- 	.. image:: images/segmentation_custom.png
-		:align: center
-
-	* *White matter mask:* select the file containing your white matter binary mask
-	
-	
-Parcellation
-------------
-
-Generates the Native Freesurfer or Lausanne2008/Lausanne2018 parcellation from Freesurfer data, or takes a custom parcellation atlas.
-	
-*Parcellation scheme*
-
-	.. image:: images/parcellation_fs.png
-		:align: center
-
-	* *NativeFreesurfer:* Atlas composed of 83 regions from the Freesurfer aparc+aseg file
-	
-	.. image:: images/parcellation_lausanne2008.png
-		:align: center
-	
-	* *Lausanne2008:* Multi-resolution atlas
-
-	.. image:: images/parcellation_lausanne2018.png
-		:align: center
-	
-	* *Lausanne2018:* Lausanne 2008 atlas extended with 7 thalamic nuclei, 12 hippocampal subfields, and 4 brainstem sub-structure per hemisphere
-	
-	.. image:: images/parcellation_custom.png
-		:align: center
-	
-	* *Custom:* Custom atlas. Specify the atlas name, the number of regions, the nifti file and a corresponding graphml file. The Graphml file must contain at least a "dn_correspondence_id" field for each node. This field should contain the region's label in the nifti file.
-	
 Registration
-------------
+""""""""""""""
 
 *Registration mode*
 
 	.. image:: images/registration_flirt.png
 		:align: center
 
-	* Linear (FSL): perform linear registration from T1 to diffusion b0 using FSL's flirt.
+	* FSL (Linear): perform linear registration from T1 to diffusion b0 using FSL's flirt.
 	
 	.. image:: images/registration_fs.png
 		:align: center
@@ -170,7 +177,7 @@ Registration
 	* Non-linear (ANTS): perform symmetric diffeomorphic SyN registration from T1 to b0 
 
 Diffusion reconstruction and tractography
-------------------------------------------
+""""""""""""""""""""""""""""""""""""""""""""
 
 Performs diffusion reconstruction and local deterministic or probabilistic tractography based on several tools. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
 
@@ -282,9 +289,72 @@ Performs diffusion reconstruction and local deterministic or probabilistic tract
 			
 	
 Connectome
-----------
+""""""""""""""
 
 Computes fiber length connectivity matrices. If DTI data is processed, FA additional map is computed. In case of DSI, additional maps include GFA and RTOP. In case of MAP-MRI, additional maps are RTPP, RTOP, ...
+
+.. image:: images/connectome.png
+	:align: center
+
+*Output types*
+
+	Select in which formats the connectivity matrices should be saved.
+
+FMRI pipeline stages
+---------------------
+
+Preprocessing
+""""""""""""""
+
+Preprocessing refers to processing steps prior to registration. It includes discarding volumes, despiking, slice timing correction and motion correction for fMRI (BOLD) data.
+
+.. image:: images/preprocessing_fmri.png
+	:align: center
+
+*Discard n volummes*
+
+	Discard n volumes from further analysis
+
+*Despiking*
+
+	Perform despiking of the BOLD signal using AFNIT.
+
+*Slice timing and Repetition time*
+
+	Perform slice timing correction
+
+*Motion correction*
+
+	Aligns BOLD volumes to the mean BOLD volume using FSL's MCFLIRT.
+	
+
+	
+Registration
+""""""""""""""
+
+*Registration mode*
+
+	.. image:: images/registration_flirt_fmri.png
+		:align: center
+
+	* FSL (Linear): perform linear registration from T1 to mean BOLD using FSL's flirt.
+	
+	.. image:: images/registration_fs_fmri.png
+		:align: center
+	
+	* BBregister (FS): perform linear registration using Freesurfer BBregister tool from T1 to mean BOLD via T2.
+	
+	
+
+fMRI processing
+"""""""""""""""""""
+
+Performs detrending, nuisance regression, bandpass filteringdiffusion reconstruction and local deterministic or probabilistic tractography based on several tools. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
+
+Connectome
+""""""""""""""
+
+Computes correlation between ROI-averaged time-series.
 
 .. image:: images/connectome.png
 	:align: center
