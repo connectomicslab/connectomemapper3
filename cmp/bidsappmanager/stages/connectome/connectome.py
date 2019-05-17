@@ -50,7 +50,7 @@ class ConnectomeStageUI(ConnectomeStage):
                             Group(
                                 Item('log_visualization',label='Log scale'),
                                 Item('circular_layout',label='Circular layout'),
-                                label='Visualization'
+                                label='Visualization', show_border=True
                                 ),
                             Group(
                                 Item('inspect_outputs_enum',show_label=False),
