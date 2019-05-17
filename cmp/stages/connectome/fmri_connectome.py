@@ -268,7 +268,7 @@ class rsfmri_conmat(BaseInterface):
             if 'mat' in self.inputs.output_types:
                 # edges
                 size_edges = (parval['number_of_regions'],parval['number_of_regions'])
-                edge_keys = G.edges(data=True)[0][2].keys()
+                edge_keys = G.edges[1, 2].keys()
 
                 edge_struct = {}
                 for edge_key in edge_keys:
@@ -276,7 +276,7 @@ class rsfmri_conmat(BaseInterface):
 
                 # nodes
                 size_nodes = parval['number_of_regions']
-                node_keys = G.nodes(data=True)[0][1].keys()
+                node_keys = G.nodes[1].keys()
 
                 node_struct = {}
                 for node_key in node_keys:
@@ -306,7 +306,7 @@ class rsfmri_conmat(BaseInterface):
                     g2.add_edge(u_gml,v_gml,{'corr' : float(d_gml['corr'])})
                 nx.write_graphml(g2,'connectome_%s.graphml' % parkey)
 
-            if 'graphml' in self.inputs.output_types and self.inputs.parcellation_scheme == "Lausanne2018":
+            if 'graphml' in self.inputs.output_types and (self.inputs.parcellation_scheme == "Lausanne2018" or self.inputs.parcellation_scheme == 'NativeFreesurfer'):
                 g2 = nx.Graph()
                 for u_gml,d_gml in G.nodes(data=True):
                     g2.add_node(u_gml,{'dn_multiscaleID':d_gml['dn_multiscaleID'],

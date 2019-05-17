@@ -762,7 +762,11 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         for k,v in mmap.items():
             print("     - %s map" % k)
             da = nibabel.load(v)
-            mmapdata[k] = (np.nan_to_num(da.get_data()), da.get_header().get_zooms() )
+            mdata = da.get_data()
+            print(mdata.max())
+            mdata = np.nan_to_num(mdata)
+            print(mdata.max())
+            mmapdata[k] = (mdata, da.get_header().get_zooms() )
 
         # print("mmapdata size : %g " % len(mmapdata.items()))
 
@@ -923,12 +927,21 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                         print("  ... ERROR - Index error occured when trying extract scalar values for measure", k)
                         print("  ... ERROR - Discard fiber with index", i, "Exception: ", e)
 
-
+                #print(k)
                 da = np.concatenate( val )
+                #print(da.max())
                 # print(np.median(da))
-                di[k + '_mean'] = da.mean().astype(np.float)
-                di[k + '_std'] = da.std().astype(np.float)
-                di[k + '_median'] = np.median(da).astype(np.float)
+                
+                if k == 'shore_rtop': 
+                    di[k + '_mean'] = da.astype(np.float64).mean()
+                    di[k + '_std'] = da.astype(np.float64).std()
+                    di[k + '_median'] = np.median(da.astype(np.float64))
+                else:
+                    di[k + '_mean'] = da.mean().astype(np.float)
+                    di[k + '_std'] = da.std().astype(np.float)
+                    di[k + '_median'] = np.median(da).astype(np.float)
+
+                #print(di[k + '_median'])
                 del da
                 del val
 
@@ -946,7 +959,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         if 'mat' in output_types:
             # edges
             size_edges = (parval['number_of_regions'],parval['number_of_regions'])
-            edge_keys = G.edges(data=True)[0][2].keys()
+            edge_keys = G.edges[1, 2].keys()
 
             edge_struct = {}
             for edge_key in edge_keys:
@@ -954,7 +967,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
             # nodes
             size_nodes = parval['number_of_regions']
-            node_keys = G.nodes(data=True)[0][1].keys()
+            node_keys = G.nodes[1].keys()
 
             # print "size_nodes : "
             # print size_nodes
@@ -987,7 +1000,10 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                     g2[u_gml][v_gml][key] = d_gml[key]
             for u_gml,d_gml in G.nodes(data=True):
                 g2.add_node(u_gml)
-                g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+                if parcellation_scheme != "Lausanne2018":
+                    g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+                else:
+                    g2.node[u_gml]['dn_multiscaleID'] = d_gml['dn_multiscaleID']
                 g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
                 g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
                 g2.node[u_gml]['dn_name'] = d_gml['dn_name']
