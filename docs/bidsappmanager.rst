@@ -72,6 +72,11 @@ The outputs depend on the chosen parameters.
 
 Anatomical pipeline stages
 ---------------------------
+
+.. figure:: images/configurator_pipeline_anat.png
+	:align: center
+
+	Panel for configuration of anatomical pipeline stages
 	
 
 Segmentation
@@ -135,6 +140,11 @@ Generates the Native Freesurfer or Lausanne2008/Lausanne2018 parcellation from F
 
 Diffusion pipeline stages
 ---------------------------
+
+.. figure:: images/configurator_pipeline_dwi.png
+	:align: center
+
+	Panel for configuration of diffusion pipeline stages
 
 Preprocessing
 """"""""""""""
@@ -320,6 +330,11 @@ Compute fiber length connectivity matrices. If DTI data is processed, FA additio
 
 FMRI pipeline stages
 ---------------------
+
+.. figure:: images/configurator_pipeline_fmri.png
+	:align: center
+
+	Panel for configuration of fMRI pipeline stages
 
 Preprocessing
 """"""""""""""
@@ -523,6 +538,109 @@ For each subject, the execution output of the pipelines are redirected to a log 
 
 
 Check stages outputs
-****************************
+******************************
 
-TBC
+
+Start the Inspector Window
+--------------------------------
+
+* From the main window, click on the right button to start the Inspector Window.
+
+.. image:: images/mainWindow_outputs.png
+	:align: center
+
+* The window of the Connectome Mapper BIDS App Inspector will appear, which will assist you in inspecting outputs of the different pipeline stages (each pipeline has a tab panel).
+
+
+Anatomical pipeline stages
+---------------------------
+
+.. figure:: images/outputcheck_pipeline_anat.png
+	:align: center
+
+	Panel for configuration of anatomical pipeline stages	
+
+Segmentation
+""""""""""""""
+
+.. image:: images/outputcheck_stage_seg.png
+	:align: center
+
+
+Parcellation
+""""""""""""""
+
+.. image:: images/outputcheck_stage_parc.png
+	:align: center
+
+Diffusion pipeline stages
+---------------------------
+
+.. figure:: images/outputcheck_pipeline_dwi.png
+	:align: center
+
+	Panel for configuration of diffusion pipeline stages
+
+Preprocessing
+""""""""""""""
+
+.. image:: images/outputcheck_stage_prep.png
+	:align: center
+
+	
+Registration
+""""""""""""""
+
+.. image:: images/outputcheck_stage_reg.png
+	:align: center
+
+
+Diffusion reconstruction and tractography
+""""""""""""""""""""""""""""""""""""""""""""
+
+.. image:: images/outputcheck_stage_dwi.png
+	:align: center
+
+	
+Connectome
+""""""""""""""
+
+.. image:: images/outputcheck_stage_conn.png
+	:align: center
+
+
+
+FMRI pipeline stages
+---------------------
+
+.. figure:: images/outputcheck_pipeline_fmri.png
+	:align: center
+
+	Panel for configuration of fMRI pipeline stages
+
+Preprocessing
+""""""""""""""
+
+.. image:: images/outputcheck_stage_prep_fmri.png
+	:align: center
+
+
+Registration
+""""""""""""""
+
+.. image:: images/outputcheck_stage_reg_fmri.png
+	:align: center
+
+
+fMRI processing
+"""""""""""""""""""
+
+.. image:: images/outputcheck_stage_func.png
+	:align: center
+
+
+Connectome
+""""""""""""""
+
+.. image:: images/outputcheck_stage_conn_fmri.png
+	:align: center
