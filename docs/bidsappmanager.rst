@@ -540,7 +540,6 @@ For each subject, the execution output of the pipelines are redirected to a log 
 Check stages outputs
 ******************************
 
-
 Start the Inspector Window
 --------------------------------
 
@@ -555,92 +554,182 @@ Start the Inspector Window
 Anatomical pipeline stages
 ---------------------------
 
-.. figure:: images/outputcheck_pipeline_anat.png
-	:align: center
+* Click on the stage you wish to check the output(s):
 
-	Panel for configuration of anatomical pipeline stages	
+	.. figure:: images/outputcheck_pipeline_anat.png
+		:align: center
+
+		Panel for configuration of anatomical pipeline stages	
 
 Segmentation
 """"""""""""""
 
-.. image:: images/outputcheck_stage_seg.png
-	:align: center
+* Select the desired output from the list and click on `view`:
 
+	.. image:: images/outputcheck_stage_seg.png
+		:align: center
+
+**Segmentation results**
+
+Surfaces extracted using Freesurfer.
+
+.. image:: images/ex_segmentation1.png
+	:width: 600
+
+T1 segmented using Freesurfer.
+
+.. image:: images/ex_segmentation2.png
+	:width: 600
 
 Parcellation
 """"""""""""""
 
-.. image:: images/outputcheck_stage_parc.png
-	:align: center
+* Select the desired output from the list and click on `view`:
+
+	.. image:: images/outputcheck_stage_parc.png
+		:align: center
+
+**Parcellation results**
+
+Cortical and subcortical parcellation are shown with Freeview.
+
+.. image:: images/ex_parcellation2.png
+	:width: 600
 
 Diffusion pipeline stages
 ---------------------------
 
-.. figure:: images/outputcheck_pipeline_dwi.png
-	:align: center
+* Click on the stage you wish to check the output(s):
+	
+	.. figure:: images/outputcheck_pipeline_dwi.png
+		:align: center
 
-	Panel for configuration of diffusion pipeline stages
+		Panel for configuration of diffusion pipeline stages
 
 Preprocessing
 """"""""""""""
 
-.. image:: images/outputcheck_stage_prep.png
-	:align: center
+* Select the desired output from the list and click on `view`:
+
+	.. image:: images/outputcheck_stage_prep.png
+		:align: center
 
 	
 Registration
 """"""""""""""
 
-.. image:: images/outputcheck_stage_reg.png
-	:align: center
+* Select the desired output from the list and click on `view`:
 
+	.. image:: images/outputcheck_stage_reg.png
+		:align: center
+
+**Registration results**
+
+Registration of T1 to Diffusion space (b0). T1 in copper overlayed to the b0 image.
+
+.. image:: images/ex_registration.png
+	:width: 600
 
 Diffusion reconstruction and tractography
 """"""""""""""""""""""""""""""""""""""""""""
 
-.. image:: images/outputcheck_stage_dwi.png
-	:align: center
+* Select the desired output from the list and click on `view`:
 
+	.. image:: images/outputcheck_stage_dwi.png
+		:align: center
+
+**Tractography results**
+
+DSI Tractography results are displayed with TrackVis.
+
+.. image:: images/ex_tractography1.png
+	:width: 600
+
+.. image:: images/ex_tractography2.png
+	:width: 600
 	
 Connectome
 """"""""""""""
 
-.. image:: images/outputcheck_stage_conn.png
-	:align: center
+* Select the desired output from the list and click on `view`:
 
+	.. image:: images/outputcheck_stage_conn.png
+		:align: center
+
+**Generated connection matrix** 
+
+Displayed using a:
+
+1. matrix layout with pyplot
+
+.. image:: images/ex_connectionmatrix.png
+	:width: 600
+
+2. circular layout with pyplot and MNE
+
+.. image:: images/ex_connectioncircular.png
+	:width: 600
 
 
 FMRI pipeline stages
 ---------------------
 
-.. figure:: images/outputcheck_pipeline_fmri.png
-	:align: center
+* Click on the stage you wish to check the output(s):
 
-	Panel for configuration of fMRI pipeline stages
+	.. figure:: images/outputcheck_pipeline_fmri.png
+		:align: center
+
+		Panel for configuration of fMRI pipeline stages
 
 Preprocessing
 """"""""""""""
 
-.. image:: images/outputcheck_stage_prep_fmri.png
-	:align: center
+* Select the desired output from the list and click on `view`:
+
+	.. image:: images/outputcheck_stage_prep_fmri.png
+		:align: center
 
 
 Registration
 """"""""""""""
 
-.. image:: images/outputcheck_stage_reg_fmri.png
-	:align: center
+* Select the desired output from the list and click on `view`:
+
+	.. image:: images/outputcheck_stage_reg_fmri.png
+		:align: center
 
 
 fMRI processing
 """""""""""""""""""
 
-.. image:: images/outputcheck_stage_func.png
-	:align: center
+* Select the desired output from the list and click on `view`:
 
+	.. image:: images/outputcheck_stage_func.png
+		:align: center
+
+**ROI averaged time-series**
+	
+	.. image:: images/ex_rsfMRI.png
+		:width: 600
 
 Connectome
 """"""""""""""
 
-.. image:: images/outputcheck_stage_conn_fmri.png
-	:align: center
+* Select the desired output from the list and click on `view`:
+
+	.. image:: images/outputcheck_stage_conn_fmri.png
+		:align: center
+
+**Generated connection matrix** 
+
+Displayed using a:
+
+1. matrix layout with pyplot
+
+.. image:: images/ex_connectionmatrix_fmri.png
+	:width: 600
+
+2. circular layout with pyplot and MNE
+
+.. image:: images/ex_connectioncircular_fmri.png
+	:width: 600
