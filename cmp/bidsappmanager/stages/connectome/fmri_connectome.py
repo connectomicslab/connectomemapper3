@@ -59,7 +59,7 @@ class ConnectomeStageUI(ConnectomeStage):
                                 label = 'Configuration', show_border=True
                                 ),
                             ),
-                            scrollable=True, resizable=True, height=270, width=670, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, height=200, width=408, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     def __init__(self):

@@ -91,7 +91,10 @@ class fMRIPipelineUI(fMRIPipeline):
         self.stages['FunctionalMRI'].configure_traits(view=self.view_mode)
 
     def _registration_fired(self, info):
-        self.stages['Registration'].configure_traits(view=self.view_mode)
+        if self.view_mode == 'config_view':
+            self.stages['Registration'].configure_traits(view='config_view_fmri')
+        else:
+            self.stages['Registration'].configure_traits(view=self.view_mode)
 
     def _connectome_fired(self, info):
         self.stages['Connectome'].configure_traits(view=self.view_mode)

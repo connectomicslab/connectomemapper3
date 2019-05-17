@@ -66,7 +66,7 @@ class FunctionalMRIStageUI(FunctionalMRIStage):
                                 label = 'Configuration', show_border=True
                                 ),
                             ),
-                            scrollable=True, resizable=True, height=500, width=500, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, height=528, width=608, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     def __init__(self):

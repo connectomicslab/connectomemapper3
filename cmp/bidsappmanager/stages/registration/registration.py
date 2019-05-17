@@ -110,6 +110,16 @@ class RegistrationStageUI(RegistrationStage):
                             scrollable=True, resizable=True, height=650, width=650, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
+    config_view_fmri = View(Group(
+                            Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('config',style='custom',show_label=False),
+                                label = 'Configuration', show_border=True
+                                ),
+                            ),
+                            scrollable=True, resizable=True, height=366, width=336, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                        )
+
     def __init__(self,pipeline_mode):
         RegistrationStage.__init__(self,pipeline_mode)
         self.config = RegistrationConfigUI()

@@ -47,7 +47,7 @@ class PreprocessingStageUI(PreprocessingStage):
                                 label = 'Configuration', show_border=True
                                 ),
                             ),
-                            scrollable=True, resizable=True, height=550, width=650, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
+                            scrollable=True, resizable=True, height=280, width=350, kind='livemodal', title='Edit stage configuration', buttons=['OK','Cancel']
                         )
 
     # General and UI members
