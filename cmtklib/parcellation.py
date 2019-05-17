@@ -2561,7 +2561,7 @@ def create_roi_v2(subject_id, subjects_dir,v=True):
             gmMask = newrois.copy()
             gmMask[newrois==newrois.max()]=0
             gmMask[gmMask>0]=1
-            out_mask = op.join(fs_dir, 'label', 'T1w_class-GM.nii.gz')
+            out_mask = op.join(subject_dir, 'label', 'T1w_class-GM.nii.gz')
             print("         Save gray matter mask to %s" % out_mask)
             img = ni.Nifti1Image(gmMask, this_nifti.affine, hdr2)
             ni.save(img, out_mask)
@@ -2976,7 +2976,7 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     for parkey, parval in get_parcellation('Lausanne2018').items():
         print("  > Processing %s ..." % ('ROIv_%s_Lausanne2018.nii.gz' % parkey) )
 
-        roi = ni.load(op.join(fs_dir, 'label', 'ROIv_%s_Lausanne2018.nii.gz' % parkey))
+        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s_Lausanne2018.nii.gz' % parkey))
         roid = roi.get_data()
 
         valstem = roid.max()
