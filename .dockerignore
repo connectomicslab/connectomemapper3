@@ -5,6 +5,8 @@
 *.mp4
 atom-config.txt
 
+python3 
+
 docs
 docs/*
 

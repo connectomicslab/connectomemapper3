@@ -984,10 +984,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 node_n = 0
                 for _,node_data in G.nodes(data=True):
                     node_arr[node_n] = node_data[node_key]
-
-                    print " node_arr[%i]:" % node_n
-                    print node_arr[node_n]
-
+                    # print " node_arr[%i]:" % node_n
+                    # print node_arr[node_n]
                     node_n += 1
                 node_struct[node_key] = node_arr
             print('    - connectome_%s.mat' % parkey)

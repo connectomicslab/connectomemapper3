@@ -11,6 +11,8 @@ debian/*
 dist
 dist/*
 
+python3
+
 build
 build/*
 _build
