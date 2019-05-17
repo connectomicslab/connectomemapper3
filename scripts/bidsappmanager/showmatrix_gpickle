@@ -407,6 +407,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 5 and os.path.exists(sys.argv[2]):
         print("read %s" % sys.argv[2])
         a=nx.read_gpickle(sys.argv[2])
+        print("open %s" % sys.argv[3])
         bb=nx.to_numpy_matrix(a,weight=sys.argv[3],dtype=np.float64)
 
         if sys.argv[4]=='True':
@@ -437,8 +438,9 @@ if __name__ == "__main__":
             print("Error: invalid layout mode ('matrix' or 'circular')")
 
     elif len(sys.argv) == 6 and os.path.exists(sys.argv[2]):
-
+        print("read %s" % sys.argv[2])
         a=nx.read_gpickle(sys.argv[2])
+        print("open %s" % sys.argv[3])
         bb=nx.to_numpy_matrix(a,weight=sys.argv[3],dtype=np.float64)
 
         if sys.argv[4]=='True':
@@ -476,6 +478,7 @@ if __name__ == "__main__":
     elif len(sys.argv) == 7 and os.path.exists(sys.argv[2]):
         print "read %s" % sys.argv[2]
         a=nx.read_gpickle(sys.argv[2])
+        print("open %s" % sys.argv[3])
         bb=nx.to_numpy_matrix(a,weight=sys.argv[3],dtype=np.float64)
 
         if sys.argv[4]=='True':
