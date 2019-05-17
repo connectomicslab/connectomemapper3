@@ -89,39 +89,49 @@ Performs tissue segmentation using Freesurfer or custom segmentation.
 	
 *Custom segmentation*
 
+	.. warning:: Not fully tested. Development and testing in progress.
+
  	.. image:: images/segmentation_custom.png
 		:align: center
 
 	* *White matter mask:* select the file containing your white matter binary mask
-	
-	
+
 Parcellation
 """"""""""""""
 
 Generates the Native Freesurfer or Lausanne2008/Lausanne2018 parcellation from Freesurfer data, or takes a custom parcellation atlas.
 	
-*Parcellation scheme*
+**Parcellation scheme**
 
-	.. image:: images/parcellation_fs.png
-		:align: center
+	* *NativeFreesurfer:* 
 
-	* *NativeFreesurfer:* Atlas composed of 83 regions from the Freesurfer aparc+aseg file
-	
-	.. image:: images/parcellation_lausanne2008.png
-		:align: center
-	
-	* *Lausanne2008:* Multi-resolution atlas
+		.. image:: images/parcellation_fs.png
+			:align: center
 
-	.. image:: images/parcellation_lausanne2018.png
-		:align: center
-	
-	* *Lausanne2018:* Lausanne 2008 atlas extended with 7 thalamic nuclei, 12 hippocampal subfields, and 4 brainstem sub-structure per hemisphere
-	
-	.. image:: images/parcellation_custom.png
-		:align: center
-	
-	* *Custom:* Custom atlas. Specify the atlas name, the number of regions, the nifti file and a corresponding graphml file. The Graphml file must contain at least a "dn_correspondence_id" field for each node. This field should contain the region's label in the nifti file.
+		Atlas composed of 83 regions from the Freesurfer aparc+aseg file
 
+	* *Lausanne2008:*
+	
+		.. image:: images/parcellation_lausanne2008.png
+			:align: center
+		
+		Multi-resolution atlas
+
+	* *Lausanne2018:*
+
+		.. image:: images/parcellation_lausanne2018.png
+			:align: center
+		
+		Lausanne 2008 atlas extended with 7 thalamic nuclei, 12 hippocampal subfields, and 4 brainstem sub-structure per hemisphere
+	
+	* *Custom:* 
+
+		.. warning:: Not fully tested. Development and testing in progress.
+
+		.. image:: images/parcellation_custom.png
+			:align: center
+		
+		Custom atlas. Specify the atlas name, the number of regions, the nifti file and a corresponding graphml file. The Graphml file must contain at least a "dn_correspondence_id" field for each node. This field should contain the region's label in the nifti file.
 
 Diffusion pipeline stages
 ---------------------------
@@ -159,27 +169,33 @@ Preprocessing includes denoising, bias field correction, motion and eddy current
 Registration
 """"""""""""""
 
-*Registration mode*
+**Registration mode**
 
-	.. image:: images/registration_flirt.png
-		:align: center
+	* FSL (Linear):
 
-	* FSL (Linear): perform linear registration from T1 to diffusion b0 using FSL's flirt.
+		.. image:: images/registration_flirt.png
+			:align: center
+
+	 	Perform linear registration from T1 to diffusion b0 using FSL's flirt.
 	
-	.. image:: images/registration_fs.png
-		:align: center
+	* BBregister (FS):
+
+		.. image:: images/registration_fs.png
+			:align: center
 	
-	* BBregister (FS): perform linear registration using Freesurfer BBregister tool.
+		Perform linear registration using Freesurfer BBregister tool.
 	
-	.. image:: images/registration_ants.png
-		:align: center
+	* Non-linear (ANTS):
+
+		.. image:: images/registration_ants.png
+			:align: center
 		
-	* Non-linear (ANTS): perform symmetric diffeomorphic SyN registration from T1 to b0 
+	 	Perform symmetric diffeomorphic SyN registration from T1 to b0 
 
 Diffusion reconstruction and tractography
 """"""""""""""""""""""""""""""""""""""""""""
 
-Performs diffusion reconstruction and local deterministic or probabilistic tractography based on several tools. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
+Perform diffusion reconstruction and local deterministic or probabilistic tractography based on several tools. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
 
 	.. figure:: images/diffusion_config_window.png
 		:align: center
@@ -187,10 +203,10 @@ Performs diffusion reconstruction and local deterministic or probabilistic tract
 		Diffusion stage configuration window
 
 
-*Reconstruction tool*
+**Reconstruction tool**
 
 		
-	**Dipy**: performs SHORE, tensor, CSD and MAP-MRI reconstruction.
+	**Dipy**: perform SHORE, tensor, CSD and MAP-MRI reconstruction.
 
 		* SHORE:
 		
@@ -221,7 +237,7 @@ Performs diffusion reconstruction and local deterministic or probabilistic tract
 			MAP-MRI performed only on multi-shell data
 
 
-	**MRtrix**: performs CSD reconstruction.
+	**MRtrix**: perform CSD reconstruction.
 
 		* CSD:
 		
@@ -231,9 +247,9 @@ Performs diffusion reconstruction and local deterministic or probabilistic tract
 			CSD performed on DTI and multi-shell data
 	
 
-*Tractography tool*
+**Tractography tool**
 
-	**Dipy**: performs deterministic and probabilistic fiber tracking as well as particle filtering tractography. 
+	**Dipy**: perform deterministic and probabilistic fiber tracking as well as particle filtering tractography. 
 		
 		* Deterministic tractography:
 		
@@ -256,8 +272,10 @@ Performs diffusion reconstruction and local deterministic or probabilistic tract
 				
 			Probabilistic PFT tracking performed on SHORE or CSD reconstruction. Seeding from the gray matter / white matter interface is possible.
 
+		.. note:: We noticed a shift of the center of tractograms obtained by dipy. As a result, tractograms visualized in TrackVis are not commonly centered despite the fact that the tractogram and the ROIs are properly aligned.
+
 		
-	**MRtrix**: performs deterministic and probabilistic fiber tracking as well as anatomically-constrained tractography. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
+	**MRtrix**: perform deterministic and probabilistic fiber tracking as well as anatomically-constrained tractography. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
 		
 		* Deterministic tractography:
 		
@@ -291,7 +309,7 @@ Performs diffusion reconstruction and local deterministic or probabilistic tract
 Connectome
 """"""""""""""
 
-Computes fiber length connectivity matrices. If DTI data is processed, FA additional map is computed. In case of DSI, additional maps include GFA and RTOP. In case of MAP-MRI, additional maps are RTPP, RTOP, ...
+Compute fiber length connectivity matrices. If DTI data is processed, FA additional map is computed. In case of DSI, additional maps include GFA and RTOP. In case of MAP-MRI, additional maps are RTPP, RTOP, ...
 
 .. image:: images/connectome.png
 	:align: center
@@ -317,46 +335,77 @@ Preprocessing refers to processing steps prior to registration. It includes disc
 
 *Despiking*
 
-	Perform despiking of the BOLD signal using AFNIT.
+	Perform despiking of the BOLD signal using AFNI.
 
 *Slice timing and Repetition time*
 
-	Perform slice timing correction
+	Perform slice timing correction using FSL's slicetimer.
 
 *Motion correction*
 
-	Aligns BOLD volumes to the mean BOLD volume using FSL's MCFLIRT.
-	
+	Align BOLD volumes to the mean BOLD volume using FSL's MCFLIRT.
 
-	
 Registration
 """"""""""""""
 
-*Registration mode*
+**Registration mode**
 
-	.. image:: images/registration_flirt_fmri.png
-		:align: center
+	* FSL (Linear):
 
-	* FSL (Linear): perform linear registration from T1 to mean BOLD using FSL's flirt.
+		.. image:: images/registration_flirt_fmri.png
+			:align: center
+
+		Perform linear registration from T1 to mean BOLD using FSL's flirt.
 	
-	.. image:: images/registration_fs_fmri.png
-		:align: center
+	* BBregister (FS)
+
+		.. image:: images/registration_fs_fmri.png
+			:align: center
 	
-	* BBregister (FS): perform linear registration using Freesurfer BBregister tool from T1 to mean BOLD via T2.
-	
-	
+		Perform linear registration using Freesurfer BBregister tool from T1 to mean BOLD via T2.
+
+		.. warning:: development in progress
 
 fMRI processing
 """""""""""""""""""
 
 Performs detrending, nuisance regression, bandpass filteringdiffusion reconstruction and local deterministic or probabilistic tractography based on several tools. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
 
+
+*Detrending*
+
+	.. image:: images/detrending.png
+		:align: center
+
+	Detrending of BOLD signal using:
+	1. *linear* trend removal algorithm provided by the `scipy` library
+	2. *quadratic* trend removal algorithm provided by the `obspy` library
+
+*Nuisance regression*
+
+	.. image:: images/nuisance.png
+		:align: center
+
+	A number of options for removing nuisance signals is provided. They consist of:
+	1. *Global signal* regression 
+	2. *CSF* regression
+	3. *WM* regression
+	4. *Motion parameters* regression
+
+*Bandpass filtering*
+
+	.. image:: images/bandpass.png
+		:align: center
+
+	Perform bandpass filtering of the time-series using FSL's slicetimer 
+
+
 Connectome
 """"""""""""""
 
-Computes correlation between ROI-averaged time-series.
+Computes ROI-averaged time-series and the correlation connectivity matrices.
 
-.. image:: images/connectome.png
+.. image:: images/connectome_fmri.png
 	:align: center
 
 *Output types*
