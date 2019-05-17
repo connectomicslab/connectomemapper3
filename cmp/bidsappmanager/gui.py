@@ -1301,7 +1301,7 @@ class CMP_ConfiguratorWindow(HasTraits):
 
 ## Window class of the ConnectomeMapper_Pipeline Quality Inspector
 #
-class CMP_QualityControlWindow(HasTraits):
+class CMP_InspectorWindow(HasTraits):
     anat_pipeline = Instance(HasTraits)
     dmri_pipeline = Instance(HasTraits)
     fmri_pipeline = Instance(HasTraits)
@@ -1342,7 +1342,7 @@ class CMP_QualityControlWindow(HasTraits):
                                 label='fMRI pipeline', dock='tab'
                             ),
                             orientation='horizontal', layout='tabbed', springy=True, enabled_when='output_anat_available'),
-                        title='Connectome Mapper 3 Quality Control',
+                        title='Connectome Mapper 3 Inspector',
                         menubar=MenuBar(
                                     Menu(
                                         ActionGroup(
@@ -1877,7 +1877,7 @@ class CMP_MainWindowV2(HasTraits):
         # print(self.project_info.fmri_available)
 
         try:
-            self.quality_control_ui = CMP_QualityControlWindow(project_info = self.project_info,
+            self.quality_control_ui = CMP_InspectorWindow(project_info = self.project_info,
                                                     anat_inputs_checked=self.project_info.t1_available,
                                                     dmri_inputs_checked=self.project_info.dmri_available,
                                                     fmri_inputs_checked=self.project_info.fmri_available
