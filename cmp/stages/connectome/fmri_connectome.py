@@ -35,7 +35,8 @@ class ConnectomeConfig(HasTraits):
     FD_thr = Float(0.2)
     DVARS_thr = Float(4.0)
     output_types = List(['gPickle','mat','cff','graphml'])
-
+    log_visualization = Bool(True)
+    circular_layout = Bool(False)
     subject = Str()
 
 class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
@@ -364,6 +365,15 @@ class ConnectomeStage(Stage):
     def define_inspect_outputs(self):
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
 
+        map_scale = "default"
+        if self.config.log_visualization:
+            map_scale = "log"
+
+        if self.config.circular_layout:
+            layout='circular'
+        else:
+            layout='matrix'
+
         # print('con_results_path : ',con_results_path)
         if(os.path.exists(con_results_path)):
 
@@ -377,14 +387,14 @@ class ConnectomeStage(Stage):
                 # print(mat)
                 if 'gpickle' in mat:
                     con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
-                    self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%os.path.basename(mat)] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]
+                    self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%os.path.basename(mat)] = ["showmatrix_gpickle",layout,mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', map_scale]
             else:
                 print("multi scale")
                 for mat in con_results.outputs.connectivity_matrices:
                     # print(mat)
                     if 'gpickle' in mat:
                         con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
-                        self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%con_name] = ["showmatrix_gpickle",'matrix',mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', "default"]
+                        self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%con_name] = ["showmatrix_gpickle",layout,mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', map_scale]
 
             self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
 

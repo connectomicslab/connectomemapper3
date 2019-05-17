@@ -31,10 +31,18 @@ class ConnectomeConfigUI(ConnectomeConfig):
 
 class ConnectomeStageUI(ConnectomeStage):
 
+    log_visualization = Bool(True)
+    circular_layout = Bool(False)
+
     inspect_output_button = Button('View')
 
     inspect_outputs_view = View(Group(
                             Item('name',editor=TitleEditor(),show_label=False),
+                            Group(
+                                Item('log_visualization',label='Log scale'),
+                                Item('circular_layout',label='Circular layout'),
+                                label='Visualization', show_border=True
+                                ),
                             Group(
                                 Item('inspect_outputs_enum',show_label=False),
                                 Item('inspect_output_button',enabled_when='inspect_outputs_enum!="Outputs not available"',show_label=False),
@@ -57,6 +65,15 @@ class ConnectomeStageUI(ConnectomeStage):
     def __init__(self):
         ConnectomeStage.__init__(self)
         self.config = ConnectomeConfigUI()
+
+    def _log_visualization_changed(self, new):
+        self.config.log_visualization = new
+        self.define_inspect_outputs()
+
+    def _circular_layout_changed(self, new):
+        self.config.circular_layout = new
+        self.define_inspect_outputs()
+
 
     def _inspect_output_button_fired(self,info):
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])
