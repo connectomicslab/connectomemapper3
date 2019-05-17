@@ -262,9 +262,9 @@ class ConnectomeStage(Stage):
                         self.inspect_outputs_dict[con_name+' - MSD median'] = ["showmatrix_gpickle",layout,mat, "shore_msd_median", "False", self.config.subject+' - '+con_name+' - SHORE MSD median', map_scale]
                         self.inspect_outputs_dict[con_name+' - MSD std'] = ["showmatrix_gpickle",layout,mat, "shore_msd_std", "False", self.config.subject+' - '+con_name+' - SHORE MSD std', map_scale]
 
-                        self.inspect_outputs_dict[con_name+' - RTOP mean'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_mean", "False", self.config.subject+' - '+con_name+' - SHORE RTOP mean', map_scale]
-                        self.inspect_outputs_dict[con_name+' - RTOP median'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_median", "False", self.config.subject+' - '+con_name+' - SHORE RTOP median', map_scale]
-                        self.inspect_outputs_dict[con_name+' - RTOP std'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_std", "False", self.config.subject+' - '+con_name+' - SHORE RTOP std', map_scale]
+                        self.inspect_outputs_dict[con_name+' - RTOP mean'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_mean", "False", self.config.subject+' - '+con_name+' - SHORE RTOP mean', map_scale]
+                        self.inspect_outputs_dict[con_name+' - RTOP median'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_median", "False", self.config.subject+' - '+con_name+' - SHORE RTOP median', map_scale]
+                        self.inspect_outputs_dict[con_name+' - RTOP std'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_std", "False", self.config.subject+' - '+con_name+' - SHORE RTOP std', map_scale]
                     else:
                         if any('gFA' in m for m in self.config.connectivity_metrics):
                             self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA mean', map_scale]
@@ -302,9 +302,9 @@ class ConnectomeStage(Stage):
                             self.inspect_outputs_dict[con_name+' - MSD median'] = ["showmatrix_gpickle",layout,mat, "shore_msd_median", "False", self.config.subject+' - '+con_name+' - SHORE MSD median', map_scale]
                             self.inspect_outputs_dict[con_name+' - MSD std'] = ["showmatrix_gpickle",layout,mat, "shore_msd_std", "False", self.config.subject+' - '+con_name+' - SHORE MSD std', map_scale]
 
-                            self.inspect_outputs_dict[con_name+' - RTOP mean'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_mean", "False", self.config.subject+' - '+con_name+' - SHORE RTOP mean', map_scale]
-                            self.inspect_outputs_dict[con_name+' - RTOP median'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_median", "False", self.config.subject+' - '+con_name+' - SHORE RTOP median', map_scale]
-                            self.inspect_outputs_dict[con_name+' - RTOP std'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_std", "False", self.config.subject+' - '+con_name+' - SHORE RTOP std', map_scale]
+                            self.inspect_outputs_dict[con_name+' - RTOP mean'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_mean", "False", self.config.subject+' - '+con_name+' - SHORE RTOP mean', map_scale]
+                            self.inspect_outputs_dict[con_name+' - RTOP median'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_median", "False", self.config.subject+' - '+con_name+' - SHORE RTOP median', map_scale]
+                            self.inspect_outputs_dict[con_name+' - RTOP std'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_std", "False", self.config.subject+' - '+con_name+' - SHORE RTOP std', map_scale]
                         else:
                             if any('gFA' in m for m in self.config.connectivity_metrics):
                                 self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA mean', map_scale]
