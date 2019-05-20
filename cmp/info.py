@@ -15,9 +15,10 @@ __version__ = "%s.%s.%s%s" % (_version_major,
                               _version_micro,
                               _version_extra)
 
+__current_year__ = datetime.datetime.now().strftime("%Y")
 
 __author__ = 'The CMP3 developers'
-__copyright__ = 'Copyright 2009-2019, Brain Communication Pathways Sinergia Consortium'
+__copyright__ = 'Copyright 2009-{}, Brain Communication Pathways Sinergia Consortium'.format(__current_year__)
 __credits__ = ('Contributors: please check the ``.zenodo.json`` file at the top-level folder'
                'of the repository')
 __license__ = '3-clause BSD'
