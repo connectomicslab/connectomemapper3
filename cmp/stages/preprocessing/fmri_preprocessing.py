@@ -115,6 +115,10 @@ class PreprocessingStage(Stage):
                 slc_timing.inputs.interleaved = False
                 slc_timing.inputs.index_dir = True
 
+        # def add_header_and_convert_to_tsv(in_file):
+
+        #     try:
+                
         if self.config.motion_correction:
             mo_corr = pe.Node(interface=fsl.MCFLIRT(stats_imgs = True, save_mats = False, save_plots = True, mean_vol=True),name="motion_correction")
 

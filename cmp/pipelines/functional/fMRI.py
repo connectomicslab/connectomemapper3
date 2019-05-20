@@ -382,17 +382,22 @@ class fMRIPipeline(Pipeline):
                                             ('DVARS.npy', self.subject+'_desc-scrubbing_DVARS.npy'),
                                             ('fMRI_bandpass.nii.gz',self.subject+'_desc-bandpass_task-rest_bold.nii.gz'),
 
-                                            (self.subject+'_T1w_parc_freesurferaparc_flirt.nii.gz',self.subject+'_space-meanBOLD_label-Desikan_atlas.nii.gz'),
+                                            (self.subject+'_label-'+bids_atlas_label+'_atlas_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_atlas.nii.gz'),
+                                            #(self.subject+'_T1w_parc_freesurferaparc_flirt.nii.gz',self.subject+'_space-meanBOLD_label-Desikan_atlas.nii.gz'),
                                             ('connectome_freesurferaparc',self.subject+'_label-Desikan_conndata-fnetwork_connectivity'),
-                                            ('averageTimeseries_freesurferaparc',self.subject+'_label-Desikan_bold_averageTimeseries'),
+                                            ('averageTimeseries_freesurferaparc',self.subject+'_atlas-Desikan_timeseries'),
 
                                           ]
         else:
             sinker.inputs.substitutions = [
                                             ('wm_mask_registered.nii.gz', self.subject+'_space-meanBOLD_label-WM_dseg.nii.gz'),
+                                            ('eroded_csf_registered.nii.gz', self.subject+'_space-meanBOLD_desc-eroded_label-CSF_dseg.nii.gz'),
                                             ('eroded_wm_registered.nii.gz', self.subject+'_space-meanBOLD_desc-eroded_label-WM_dseg.nii.gz'),
                                             ('fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz', self.subject+'_meanBOLD.nii.gz'),
-                                            ('fMRI_despike_st_mcf.nii.gz.par', self.subject+'_motion.par'),
+                                            ('fMRI_despike_st_mcf.nii.gz.par', self.subject+'_motion.tsv'),
+
+
+
                                             ('FD.npy',self.subject+'_desc-scrubbing_FD.npy'),
                                             ('DVARS.npy', self.subject+'_desc-scrubbing_DVARS.npy'),
                                             ('fMRI_bandpass.nii.gz',self.subject+'_desc-bandpass_task-rest_bold.nii.gz'),
@@ -411,11 +416,11 @@ class fMRIPipeline(Pipeline):
                                             ('connectome_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_conndata-fnetwork_connectivity'),
                                             ('connectome_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_conndata-fnetwork_connectivity'),
                                             ('connectome_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-fnetwork_connectivity'),
-                                            ('averageTimeseries_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_bold_averageTimeseries'),
-                                            ('averageTimeseries_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_bold_averageTimeseries'),
-                                            ('averageTimeseries_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_bold_averageTimeseries'),
-                                            ('averageTimeseries_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_bold_averageTimeseries'),
-                                            ('averageTimeseries_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_bold_averageTimeseries'),
+                                            ('averageTimeseries_scale1',self.subject+'_atlas-'+bids_atlas_label+'_desc-scale1_timeseries'),
+                                            ('averageTimeseries_scale2',self.subject+'_atlas-'+bids_atlas_label+'_desc-scale2_timeseries'),
+                                            ('averageTimeseries_scale3',self.subject+'_atlas-'+bids_atlas_label+'_desc-scale3_timeseries'),
+                                            ('averageTimeseries_scale4',self.subject+'_atlas-'+bids_atlas_label+'_desc-scale4_timeseries'),
+                                            ('averageTimeseries_scale5',self.subject+'_atlas-'+bids_atlas_label+'_desc-scale5_timeseries'),
 
                                           ]
 
@@ -523,9 +528,9 @@ class fMRIPipeline(Pipeline):
                           (preproc_flow,reg_flow, [('outputnode.mean_vol','inputnode.target')]),
                           (fMRI_inputnode,reg_flow, [('wm_mask_file','inputnode.wm_mask'),('roi_volumes','inputnode.roi_volumes'),
                                                 ('wm_eroded','inputnode.eroded_wm'),('csf_eroded','inputnode.eroded_csf'),('brain_eroded','inputnode.eroded_brain')]),
-                          (reg_flow,sinker, [('outputnode.wm_mask_registered_crop','func.@registered_wm'),('outputnode.roi_volumes_registered_crop','func.@registered_roi_volumes'),
-                                                 ('outputnode.eroded_wm_registered_crop','func.@eroded_wm'),('outputnode.eroded_csf_registered_crop','func.@eroded_csf'),
-                                                 ('outputnode.eroded_brain_registered_crop','func.@eroded_brain')]),
+                          (reg_flow,sinker, [('outputnode.wm_mask_registered_crop','anat.@registered_wm'),('outputnode.roi_volumes_registered_crop','anat.@registered_roi_volumes'),
+                                                 ('outputnode.eroded_wm_registered_crop','anat.@eroded_wm'),('outputnode.eroded_csf_registered_crop','anat.@eroded_csf'),
+                                                 ('outputnode.eroded_brain_registered_crop','anat.@eroded_brain')]),
                           ])
             if self.stages['FunctionalMRI'].config.global_nuisance:
                 fMRI_flow.connect([
