@@ -397,11 +397,13 @@ class fMRIPipeline(Pipeline):
                                             ('DVARS.npy', self.subject+'_desc-scrubbing_DVARS.npy'),
                                             ('fMRI_bandpass.nii.gz',self.subject+'_desc-bandpass_task-rest_bold.nii.gz'),
 
-                                            (self.subject+'_T1w_parc_scale1_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_desc-scale1_atlas.nii.gz'),
-                                            (self.subject+'_T1w_parc_scale2_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_desc-scale2_atlas.nii.gz'),
-                                            (self.subject+'_T1w_parc_scale3_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_desc-scale3_atlas.nii.gz'),
-                                            (self.subject+'_T1w_parc_scale4_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_desc-scale4_atlas.nii.gz'),
-                                            (self.subject+'_T1w_parc_scale5_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_desc-scale5_atlas.nii.gz'),
+                                            (self.subject+'_label-'+bids_atlas_label+'_atlas_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_atlas.nii.gz'),
+
+                                            (self.subject+'_label-'+bids_atlas_label+'_desc-scale1_atlas_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_desc-scale1_atlas.nii.gz'),
+                                            (self.subject+'_label-'+bids_atlas_label+'_desc-scale1_atlas_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_desc-scale2_atlas.nii.gz'),
+                                            (self.subject+'_label-'+bids_atlas_label+'_desc-scale1_atlas_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_desc-scale3_atlas.nii.gz'),
+                                            (self.subject+'_label-'+bids_atlas_label+'_desc-scale1_atlas_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_desc-scale4_atlas.nii.gz'),
+                                            (self.subject+'_label-'+bids_atlas_label+'_desc-scale1_atlas_flirt.nii.gz',self.subject+'_space-meanBOLD_label-'+bids_atlas_label+'_desc-scale5_atlas.nii.gz'),
 
                                             ('connectome_freesurferaparc',self.subject+'_label-Desikan_conndata-fnetwork_connectivity'),
                                             ('connectome_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_conndata-fnetwork_connectivity'),
