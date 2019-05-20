@@ -15,7 +15,8 @@ __version__ = "%s.%s.%s%s" % (_version_major,
                               _version_micro,
                               _version_extra)
 
-__current_year__ = datetime.datetime.now().strftime("%Y")
+#__current_year__ = datetime.datetime.now().strftime("%Y")
+__current_year__ = '2019'
 
 __author__ = 'The CMP3 developers'
 __copyright__ = 'Copyright 2009-{}, Brain Communication Pathways Sinergia Consortium'.format(__current_year__)
