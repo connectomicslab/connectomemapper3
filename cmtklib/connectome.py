@@ -959,7 +959,13 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         if 'mat' in output_types:
             # edges
             size_edges = (parval['number_of_regions'].astype(np.uint32),parval['number_of_regions'].astype(np.uint32))
-            edge_keys = G.edges[1, 2].keys()
+
+            # Get the edge attributes/keys/weights from the first edge and then break. 
+            # Change w.r.t networkx2
+            edge_keys = []
+            for u,v,d in G.edges(data=True):
+                edge_keys = d.keys()
+                break
 
             edge_struct = {}
             for edge_key in edge_keys:
@@ -967,7 +973,12 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
             # nodes
             size_nodes = parval['number_of_regions'].astype(np.uint32)
-            node_keys = G.nodes[1].keys()
+
+            # Get the node attributes/keys from the first node and then break. 
+            # Change w.r.t networkx2
+            for u,d in G.nodes(data=True):
+                node_keys = d.keys()
+                break
 
             # print "size_nodes : "
             # print size_nodes

@@ -269,7 +269,13 @@ class rsfmri_conmat(BaseInterface):
             if 'mat' in self.inputs.output_types:
                 # edges
                 size_edges = (parval['number_of_regions'],parval['number_of_regions'])
-                edge_keys = G.edges[1, 2].keys()
+                
+                # Get the edge attributes/keys/weights from the first edge and then break. 
+                # Change w.r.t networkx2
+                edge_keys = []
+                for u,v,d in G.edges(data=True):
+                    edge_keys = d.keys()
+                    break
 
                 edge_struct = {}
                 for edge_key in edge_keys:
@@ -277,7 +283,12 @@ class rsfmri_conmat(BaseInterface):
 
                 # nodes
                 size_nodes = parval['number_of_regions']
-                node_keys = G.nodes[1].keys()
+                
+                # Get the node attributes/keys from the first node and then break. 
+                # Change w.r.t networkx2
+                for u,d in G.nodes(data=True):
+                    node_keys = d.keys()
+                    break
 
                 node_struct = {}
                 for node_key in node_keys:
