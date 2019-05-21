@@ -374,6 +374,8 @@ class fMRIPipeline(Pipeline):
 
         if self.parcellation_scheme == 'NativeFreesurfer':
             sinker.inputs.substitutions = [
+                                            ('eroded_brain_registered.nii.gz', self.subject+'_space-meanBOLD_desc-eroded_label-brain_dseg.nii.gz'),
+                                            ('eroded_csf_registered.nii.gz', self.subject+'_space-meanBOLD_desc-eroded_label-CSF_dseg.nii.gz'),
                                             ('wm_mask_registered.nii.gz', self.subject+'_space-meanBOLD_label-WM_dseg.nii.gz'),
                                             ('eroded_wm_registered.nii.gz', self.subject+'_space-meanBOLD_desc-eroded_label-WM_dseg.nii.gz'),
                                             ('fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz', self.subject+'_meanBOLD.nii.gz'),
@@ -390,6 +392,7 @@ class fMRIPipeline(Pipeline):
                                           ]
         else:
             sinker.inputs.substitutions = [
+                                            ('eroded_brain_registered.nii.gz', self.subject+'_space-meanBOLD_desc-eroded_label-brain_dseg.nii.gz'),
                                             ('wm_mask_registered.nii.gz', self.subject+'_space-meanBOLD_label-WM_dseg.nii.gz'),
                                             ('eroded_csf_registered.nii.gz', self.subject+'_space-meanBOLD_desc-eroded_label-CSF_dseg.nii.gz'),
                                             ('eroded_wm_registered.nii.gz', self.subject+'_space-meanBOLD_desc-eroded_label-WM_dseg.nii.gz'),
