@@ -268,7 +268,7 @@ class rsfmri_conmat(BaseInterface):
                 nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
             if 'mat' in self.inputs.output_types:
                 # edges
-                size_edges = (parval['number_of_regions'],parval['number_of_regions'])
+                size_edges = (int(parval['number_of_regions']),int(parval['number_of_regions']))
                 
                 # Get the edge attributes/keys/weights from the first edge and then break. 
                 # Change w.r.t networkx2
@@ -282,7 +282,7 @@ class rsfmri_conmat(BaseInterface):
                     edge_struct[edge_key] = nx.to_numpy_matrix(G,weight=edge_key)
 
                 # nodes
-                size_nodes = parval['number_of_regions']
+                size_nodes = int(parval['number_of_regions'])
                 
                 # Get the node attributes/keys from the first node and then break. 
                 # Change w.r.t networkx2

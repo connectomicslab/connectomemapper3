@@ -958,7 +958,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
         if 'mat' in output_types:
             # edges
-            size_edges = (parval['number_of_regions'].astype(np.uint32),parval['number_of_regions'].astype(np.uint32))
+            size_edges = (int(parval['number_of_regions']),int(parval['number_of_regions']))
 
             # Get the edge attributes/keys/weights from the first edge and then break. 
             # Change w.r.t networkx2
@@ -972,7 +972,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 edge_struct[edge_key] = nx.to_numpy_matrix(G,weight=edge_key)
 
             # nodes
-            size_nodes = parval['number_of_regions'].astype(np.uint32)
+            size_nodes = int(parval['number_of_regions'])
 
             # Get the node attributes/keys from the first node and then break. 
             # Change w.r.t networkx2
