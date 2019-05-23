@@ -42,7 +42,7 @@ def create_cmp_command(project,run_anat,run_dmri,run_fmri):
     cmd.append("--participant_label")
     cmd.append(project.subject)
 
-    if len(project.subject_sessions)>0:
+    if project.subject_session != '':
         cmd.append("--session_label")
         cmd.append(project.subject_session) 
 

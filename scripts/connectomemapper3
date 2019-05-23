@@ -89,14 +89,15 @@ def create_parser():
                         'that should be analyzed. The label corresponds to'
                        '<participant_label> from the BIDS spec '
                        '(so it DOES include "sub-"')
-    p.add_argument('--session_label', help='The label of the participant session'
-                        'that should be analyzed. The label corresponds to'
-                       '<session_label> from the BIDS spec '
-                       '(so it DOES include "ses-"')
-
     p.add_argument('--anat_pipeline_config', required=True, help='Configuration .txt file for processing stages of the anatomical MRI processing pipeline')
+
     p.add_argument('--dwi_pipeline_config', help='Configuration .txt file for processing stages of the diffusion MRI processing pipeline')
     p.add_argument('--func_pipeline_config', help='Configuration .txt file for processing stages of the fMRI processing pipeline')
+    
+    p.add_argument('--session_label', help='The label of the participant session'
+                    'that should be analyzed. The label corresponds to'
+                   '<session_label> from the BIDS spec '
+                   '(so it DOES include "ses-"')
 
     p.add_argument('-v', '--version', action='version',
                         version='Connectome Mapper version {}'.format(__version__))
