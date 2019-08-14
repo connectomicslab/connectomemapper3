@@ -6,7 +6,8 @@ import os
 
 #Setup Qt5 backend for traitsui
 os.environ['ETS_TOOLKIT'] = 'qt4'
-os.environ['QT_API'] = 'pyqt5'
+#os.environ['QT_API'] = 'pyqt5'
+os.environ['QT_API'] = 'pyside2'
 
 import subprocess
 
