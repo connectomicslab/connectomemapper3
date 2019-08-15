@@ -38,7 +38,7 @@ jobs:
           no_output_timeout: 60m
           command: |
             # Get version, update files.
-            THISVERSION=$( python get_version.py )
+            THISVERSION=v$( python get_version.py )
             echo "THISVERSION : ${THISVERSION}"
             echo "CIRCLE_TAG : ${CIRCLE_TAG}"
             if [[ ${THISVERSION:0:1} == "0" ]] ; then
@@ -47,7 +47,19 @@ jobs:
               echo "the command ``git fetch --tags --verbose`` and push"
               echo "them to your fork with ``git push origin --tags``"
             fi
-            # Build docker image
+
+            # Build main docker image
+            cd ubuntu16.04
+            e=1 && for i in {1..5}; do
+              docker build --rm --build-arg BUILD_DATE=$CMP_BUILD_DATE \
+                --build-arg VERSION=$VERSION \
+                --build-arg VCS_REF=$VCS_REF \
+                -t sebastientourbier/connectomemapper-ubuntu16.04:${VERSION} . \
+              && e=0 && break || sleep 15
+            done && [ "$e" -eq "0" ]
+            
+            # Build CMP BIDS App docker image
+            cd ..
             e=1 && for i in {1..5}; do
               docker build \
                 --cache-from=sebastientourbier/connectomemapper3 \
@@ -176,7 +188,7 @@ jobs:
           no_output_timeout: 4h
           command: |
             # Get version, update files.
-            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
+            THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             echo "THISVERSION : ${THISVERSION}"
             docker run -it --rm \
                 -v /tmp/data/ds005:/tmp \
