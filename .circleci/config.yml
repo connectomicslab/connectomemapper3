@@ -5,7 +5,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
       SCRATCH: "/scratch"
     docker:
-      - image: docker:18.01.0-ce-git
+      - image: docker:18.09.3-rc1-git
     working_directory: tmp/src/connectomemapper3
     steps:
       - run:
@@ -35,7 +35,7 @@ jobs:
             fi
       - run:
           name: Build Docker image
-          no_output_timeout: 60m
+          no_output_timeout: 120m
           command: |
             # Get version, update files.
             THISVERSION=v$( python get_version.py )
@@ -52,25 +52,27 @@ jobs:
             cd ubuntu16.04
             ls -la
             e=1 && for i in {1..5}; do
-              docker build --build-arg BUILD_DATE=$CMP_BUILD_DATE \
-                --build-arg VCS_REF=$VCS_REF \
-                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" \
+              docker build \
                 --cache-from=sebastientourbier/connectomemapper-ubuntu16.04 \
                 --rm=false \ 
-                -t sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} . \
+                -t sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} \
+                --build-arg BUILD_DATE=$CMP_BUILD_DATE \
+                --build-arg VCS_REF=$VCS_REF \
+                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
             
             # Build CMP BIDS App docker image
             cd ..
             e=1 && for i in {1..5}; do
-              docker build --build-arg MAIN_DOCKER="sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION}" \
-                --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-                --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" \
+              docker build \
                 --cache-from=sebastientourbier/connectomemapper3 \
                 --rm=false \
-                -t sebastientourbier/connectomemapper3:${THISVERSION} . \
+                -t sebastientourbier/connectomemapper3:${THISVERSION} \
+                --build-arg MAIN_DOCKER="sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION}" \
+                --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+                --build-arg VCS_REF=`git rev-parse --short HEAD` \
+                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
       - run:
