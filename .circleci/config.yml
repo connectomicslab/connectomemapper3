@@ -50,6 +50,7 @@ jobs:
 
             # Build main docker image
             cd ubuntu16.04
+            ls -la
             e=1 && for i in {1..5}; do
               docker build --build-arg BUILD_DATE=$CMP_BUILD_DATE \
                 --build-arg VCS_REF=$VCS_REF \
