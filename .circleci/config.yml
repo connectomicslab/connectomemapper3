@@ -51,10 +51,13 @@ jobs:
             # Build main docker image
             cd ubuntu16.04
             e=1 && for i in {1..5}; do
-              docker build --rm --build-arg BUILD_DATE=$CMP_BUILD_DATE \
-                --build-arg VERSION=$VERSION \
+              docker build \
+                --cache-from=sebastientourbier/connectomemapper-ubuntu16.04 \
+                --rm=false \ 
+                -t sebastientourbier/connectomemapper-ubuntu16.04:${VERSION} \
+                --build-arg BUILD_DATE=$CMP_BUILD_DATE \
                 --build-arg VCS_REF=$VCS_REF \
-                -t sebastientourbier/connectomemapper-ubuntu16.04:${VERSION} . \
+                --build-arg VERSION=$VERSION . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
             
