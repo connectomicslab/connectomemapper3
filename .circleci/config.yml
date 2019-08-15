@@ -54,10 +54,10 @@ jobs:
               docker build \
                 --cache-from=sebastientourbier/connectomemapper-ubuntu16.04 \
                 --rm=false \ 
-                -t sebastientourbier/connectomemapper-ubuntu16.04:${VERSION} \
+                -t sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} \
                 --build-arg BUILD_DATE=$CMP_BUILD_DATE \
                 --build-arg VCS_REF=$VCS_REF \
-                --build-arg VERSION=$VERSION . \
+                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
             
