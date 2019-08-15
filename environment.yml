@@ -16,6 +16,7 @@ dependencies:
 - graphviz=2.40.1
 - nipype=1.1.8
 - git-annex=7.20190219
+- pyside2=5.9.0a1
 
 - pip:
     - duecredit==0.7.0
