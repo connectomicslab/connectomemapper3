@@ -51,27 +51,25 @@ jobs:
             # Build main docker image
             cd ubuntu16.04
             e=1 && for i in {1..5}; do
-              docker build \
+              docker build --build-arg BUILD_DATE=$CMP_BUILD_DATE \
+                --build-arg VCS_REF=$VCS_REF \
+                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" \
                 --cache-from=sebastientourbier/connectomemapper-ubuntu16.04 \
                 --rm=false \ 
-                -t sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} \
-                --build-arg BUILD_DATE=$CMP_BUILD_DATE \
-                --build-arg VCS_REF=$VCS_REF \
-                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
+                -t sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
             
             # Build CMP BIDS App docker image
             cd ..
             e=1 && for i in {1..5}; do
-              docker build \
-                --cache-from=sebastientourbier/connectomemapper3 \
-                --rm=false \
-                -t sebastientourbier/connectomemapper3:${THISVERSION} \
-                --build-arg MAIN_DOCKER="sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION}" \
+              docker build --build-arg MAIN_DOCKER="sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION}" \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
+                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" \
+                --cache-from=sebastientourbier/connectomemapper3 \
+                --rm=false \
+                -t sebastientourbier/connectomemapper3:${THISVERSION} . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
       - run:
