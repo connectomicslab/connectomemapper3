@@ -47,7 +47,6 @@ jobs:
               echo "the command ``git fetch --tags --verbose`` and push"
               echo "them to your fork with ``git push origin --tags``"
             fi
-
             # Build main docker image
             cd ubuntu16.04
             ls -la
@@ -60,8 +59,7 @@ jobs:
                 --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" \
                 -t sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} . \
               && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
-            
+            done && [ "$e" -eq "0" ]   
             # Build CMP BIDS App docker image
             cd ..
             e=1 && for i in {1..5}; do
