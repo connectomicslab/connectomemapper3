@@ -50,24 +50,13 @@ jobs:
             # Build main docker image
             ls -la ./ubuntu16.04
             e=1 && for i in {1..5}; do
-              docker build --cache-from sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} \
-                --rm=false \ 
-                --build-arg BUILD_DATE=$CMP_BUILD_DATE \
-                --build-arg VCS_REF=$VCS_REF \
-                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" \
-                -t sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} ./ubuntu16.04 \
+              docker build --cache-from sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} --rm=false --build-arg BUILD_DATE=$CMP_BUILD_DATE --build-arg VCS_REF=$VCS_REF --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION} ./ubuntu16.04 \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]   
             # Build CMP BIDS App docker image
             ls -la .
             e=1 && for i in {1..5}; do
-              docker build --cache-from sebastientourbier/connectomemapper3:${THISVERSION} \
-                --rm=false \
-                --build-arg MAIN_DOCKER="sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION}" \
-                --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-                --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" \
-                -t sebastientourbier/connectomemapper3:${THISVERSION} . \
+              docker build --cache-from sebastientourbier/connectomemapper3:${THISVERSION} --rm=false --build-arg MAIN_DOCKER="sebastientourbier/connectomemapper-ubuntu16.04:${THISVERSION}" --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3:${THISVERSION} . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
       - run:
