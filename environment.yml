@@ -27,7 +27,7 @@ dependencies:
     - datalad-revolution==0.6.0
     - datalad-container==0.3.1
     - datalad_neuroimaging==0.2.0
-    - pybids==0.8.0
+    - pybids==0.9.1
     - apptools==4.4.0
     - statsmodels==0.9.0
     - networkx==2.2
