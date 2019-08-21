@@ -16,6 +16,7 @@ dependencies:
 - traits=5.1.1
 - nipype=1.1.8
 - git-annex=7.20190219
+- pyside2=5.9.0a1
 
 - pip:
     - duecredit==0.7.0
@@ -26,6 +27,7 @@ dependencies:
     - datalad-revolution==0.6.0
     - datalad-container==0.2.1
     - datalad_neuroimaging==0.2.0
+    - pybids==0.9.1
     - apptools==4.4.0
     - statsmodels==0.9.0
     - networkx==2.2
