@@ -5,6 +5,8 @@
 *.mp4
 atom-config.txt
 
+.DS_Store
+
 debian
 debian/*
 
