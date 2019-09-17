@@ -84,6 +84,12 @@ class DiffusionConfig(HasTraits):
         elif new == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = new
 
+    def _diffusion_model_changed(self,new):
+        if self.recon_processing_tool == 'MRtrix':
+            if new == 'Deterministic':
+                #Make sure backtrack is disable for MRtrix Deterministic (ACT) Tractography
+                self.mrtrix_tracking_config.backtrack = False
+
     def _diffusion_imaging_model_changed(self, new):
         # self.dtk_recon_config.imaging_model = new
         self.mrtrix_recon_config.imaging_model = new
