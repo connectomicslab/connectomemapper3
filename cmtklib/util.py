@@ -7,7 +7,58 @@
 """ CMTK Utility functions
 """ 
 
+
+
+import warnings
+
+warnings.simplefilter("ignore")
+from collections import OrderedDict
+
+from os import path as op
 import numpy as np
+import networkx as nx
+
+def load_graphs(output_dir,subjects,parcellation_scheme,weight):
+
+    if parcellation_scheme == 'Lausanne2008':
+        bids_atlas_label = 'L2008'
+    elif parcellation_scheme == 'Lausanne2018':
+        bids_atlas_label = 'L2018'
+    elif parcellation_scheme == 'NativeFreesurfer':
+        bids_atlas_label = 'Desikan'
+
+    if parcellation_scheme == 'NativeFreesurfer':
+        subj_dir = os.path.join(output_dir,subj)
+        subj_session_dirs = glob(op.join(subj_dir, "ses-*"))
+        subj_sessions = ['ses-{}'.format(subj_session_dir.split("-")[-1]) for subj_session_dir in subj_session_dirs]
+
+        if len(subj_sessions) > 0: #Session structure
+            for subj_session in subj_sessions:
+                conn_derivatives_dir = op.join(output_dir,'cmp', subj, subj_session, 'connectivity')
+
+                #Extract the connectivity matrix
+                #self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'
+                connmat_fname = op.join(conn_derivatives_dir,'{}_{}_label-{}_conndata-snetwork_connectivity.gpickle'.format(sub,subj_session,bids_atlas_label))
+                connmat_gp = nx.read_gpickle(connmat_fname)
+                connmat = nx.to_numpy_matrix(connmat_gp,weight=weight,dtype=np.float32)
+    else:
+        # For each parcellation scale
+        for scale in np.arange(1,6):
+            for subj in subjects:
+                subj_dir = os.path.join(output_dir,subj)
+                subj_session_dirs = glob(op.join(subj_dir, "ses-*"))
+                subj_sessions = ['ses-{}'.format(subj_session_dir.split("-")[-1]) for subj_session_dir in subj_session_dirs]
+
+                if len(subj_sessions) > 0: #Session structure
+                    for subj_session in subj_sessions:
+                        conn_derivatives_dir = op.join(output_dir,'cmp', subj, subj_session, 'connectivity')
+
+                        #Extract the connectivity matrix
+                        #self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'
+                        connmat_fname = op.join(conn_derivatives_dir,'{}_{}_label-{}_desc-scale{}_conndata-snetwork_connectivity.gpickle'.format(sub,subj_session,bids_atlas_label,scale))
+                        connmat_gp = nx.read_gpickle(connmat_fname)
+                        connmat = nx.to_numpy_matrix(connmat_gp,weight=weight,dtype=np.float32)
+
 
 def length(xyz, along=False):
     """
