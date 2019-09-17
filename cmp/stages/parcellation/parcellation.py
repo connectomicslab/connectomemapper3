@@ -168,7 +168,7 @@ class ParcellationStage(Stage):
                                 ])
 
                 flow.connect([
-                            (parcCombiner,outputnode,[("gray_matter_mask_file","gm_mask_file")]),
+                            (parc_node,outputnode,[("gray_matter_mask_file","gm_mask_file")]),
                             (parcCombiner,outputnode,[("aparc_aseg","aparc_aseg")]),
                             (parcCombiner,outputnode,[("output_rois","roi_volumes")]),
                             (parcCombiner,outputnode,[("colorLUT_files","roi_colorLUTs")]),

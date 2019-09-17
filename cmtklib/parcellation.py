@@ -208,10 +208,10 @@ class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
     create_graphml = traits.Bool(True)
     subjects_dir = Directory(desc='Freesurfer subjects dir')
     subject_id = traits.Str(desc='Freesurfer subject id')
+    verbose_level = traits.Enum(1,2,desc='verbose level (1: partial (default) / 2: full)')
 
 class CombineParcellationsOutputSpec(TraitedSpec):
     aparc_aseg = File()
-    gray_matter_mask_file = File(exists=True)
     output_rois = OutputMultiPath(File(exists=True))
     colorLUT_files = OutputMultiPath(File(exists=True))
     graphML_files = OutputMultiPath(File(exists=True))
@@ -228,6 +228,8 @@ class CombineParcellations(BaseInterface):
         return [bind.get(itm, None) for itm in a]  # None can be replaced by any other "not in b" value
 
     def _run_interface(self,runtime):
+
+        iflogger.info("Start running CombineParcellations interface...")
 
         #Freesurfer subject dir
         fs_dir = op.join(self.inputs.subjects_dir,self.inputs.subject_id)
@@ -377,7 +379,43 @@ class CombineParcellations(BaseInterface):
         rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
     	lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
 
+        #Dilate third ventricle and intersect with right and left ventral DC to get voxels of left and right hypothalamus
+
+        for roi_fname in self.inputs.input_rois:
+            if 'scale1' in roi_fname:
+                roi1_fname = roi_fname
+                break
+
+        iflogger.info("  > Create ventricule image")
+        V = ni.load(roi1_fname)
+        I = V.get_data()
+        tmp = np.zeros(I.shape)
+        indV = np.where(I == ventricle3)
+        tmp[indV] = 1
+
+        thirdV = op.abspath('{}.nii.gz'.format("ventricle3"))
+        hdr = V.get_header()
+        hdr2 = hdr.copy()
+        hdr2.set_data_dtype(np.int16)
+        iflogger.info("    ... Image saved to {}".format(thirdV))
+        img = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
+        ni.save(img, thirdV)
+
+        iflogger.info("  > Dilate the ventricule image")
+        thirdV_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
+        fslmaths_cmd = 'fslmaths {} -kernel sphere 5 -dilD {}'.format(thirdV,thirdV_dil)
+        iflogger.info("    ... Command: {}".format(fslmaths_cmd))
+        process = subprocess.Popen(fslmaths_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+
+        tmp = ni.load(thirdV_dil).get_data()
+        indrhypothal = np.where((tmp == 1) & (I == right_ventral))
+        indlhypothal = np.where((tmp == 1) & (I == left_ventral))
+        del(tmp)
+
         f_colorLUT = None
+        f_graphML = None
+
 
         print("create color look up table : ",self.inputs.create_colorLUT)
 
@@ -424,41 +462,91 @@ class CombineParcellations(BaseInterface):
             I[indrep] = 0
 
             #Dilate third ventricle and intersect with right and left ventral DC to get voxels of left and right hypothalamus
-            tmp = np.zeros(I.shape)
-            indV = np.where(I == ventricle3)
-            tmp[indV] = 1
 
-            thirdV = op.abspath('{}.nii.gz'.format("ventricle3"))
-            hdr = V.get_header()
-            hdr2 = hdr.copy()
-            hdr2.set_data_dtype(np.int16)
-            print("Save output image to %s" % thirdV)
-            img = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
-            ni.save(img, thirdV)
+        for roi_fname in self.inputs.input_rois:
+            if 'scale1' in roi_fname:
+                roi1_fname = roi_fname
+                break
 
-            thirdV_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
-            fslmaths_cmd = 'fslmaths %s -kernel sphere 5 -dilD %s' % (thirdV,thirdV_dil)
-            print("RUN")
-            print(fslmaths_cmd)
-            process = subprocess.Popen(fslmaths_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-            proc_stdout = process.communicate()[0].strip()
+        iflogger.info("  > Create ventricule image")
+        V = ni.load(roi1_fname)
+        I = V.get_data()
+        tmp = np.zeros(I.shape)
+        indV = np.where(I == ventricle3)
+        tmp[indV] = 1
 
-            tmp = ni.load(thirdV_dil).get_data()
-            indrhypothal = np.where((tmp == 1) & (I == right_ventral))
-            indlhypothal = np.where((tmp == 1) & (I == left_ventral))
-            del(tmp)
+        thirdV = op.abspath('{}.nii.gz'.format("ventricle3"))
+        hdr = V.get_header()
+        hdr2 = hdr.copy()
+        hdr2.set_data_dtype(np.int16)
+        iflogger.info("    ... Image saved to {}".format(thirdV))
+        img = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
+        ni.save(img, thirdV)
+
+        iflogger.info("  > Dilate the ventricule image")
+        thirdV_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
+        fslmaths_cmd = 'fslmaths {} -kernel sphere 5 -dilD {}'.format(thirdV,thirdV_dil)
+        iflogger.info("    ... Command: {}".format(fslmaths_cmd))
+        process = subprocess.Popen(fslmaths_cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
+
+        tmp = ni.load(thirdV_dil).get_data()
+        indrhypothal = np.where((tmp == 1) & (I == right_ventral))
+        indlhypothal = np.where((tmp == 1) & (I == left_ventral))
+        del(tmp)
+
+        f_colorLUT = None
+        f_graphML = None
+
+        for roi_index, roi in sorted(enumerate(self.inputs.input_rois)):
+            # colorLUT creation if enabled
+            if self.inputs.create_colorLUT:
+                outprefixName = roi.split(".")[0]
+                outprefixName = outprefixName.split("/")[-1:][0]
+                colorLUT_file = op.abspath('{}_FreeSurferColorLUT.txt'.format(outprefixName))
+                iflogger.info("  > Create colorLUT file as %s" % colorLUT_file)
+                f_colorLUT = open(colorLUT_file,'w+')
+                time_now = strftime("%a, %d %b %Y %H:%M:%S",localtime())
+                hdr_lines = ['#$Id: {}_FreeSurferColorLUT.txt {} \n \n'.format(outprefixName,time_now),
+                            '{:<4} {:<55} {:>3} {:>3} {:>3} {} \n \n'.format("#No.","Label Name:","R","G","B","A")]
+                f_colorLUT.writelines (hdr_lines)
+                del hdr_lines
+
+            # Create GraphML if enabled
+            if self.inputs.create_graphml:
+                outprefixName = roi.split(".")[0]
+                outprefixName = outprefixName.split("/")[-1:][0]
+                graphML_file = op.abspath('{}.graphml'.format(outprefixName))
+                iflogger.info("  > Create graphML_file as {}".format(graphML_file))
+                f_graphML = open(graphML_file,'w+')
+
+                hdr_lines = ['{} \n'.format('<?xml version="1.0" encoding="utf-8"?>'),
+                             '{} \n'.format('<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">'),
+                             '{} \n'.format('  <key attr.name="dn_region" attr.type="string" for="node" id="d0" />'),
+                             '{} \n'.format('  <key attr.name="dn_fsname" attr.type="string" for="node" id="d1" />'),
+                             '{} \n'.format('  <key attr.name="dn_hemisphere" attr.type="string" for="node" id="d2" />'),
+                             '{} \n'.format('  <key attr.name="dn_multiscaleID" attr.type="int" for="node" id="d3" />'),
+                             '{} \n'.format('  <key attr.name="dn_name" attr.type="string" for="node" id="d4" />'),
+                             '{} \n'.format('  <key attr.name="dn_fsID" attr.type="int" for="node" id="d5" />'),
+                             '{} \n'.format('  <graph edgedefault="undirected" id="">'),]
+                f_graphML.writelines (hdr_lines)
+                del hdr_lines
+
+            # Reading Cortical Parcellation
+            V = ni.load(roi)
+            I = V.get_data()
+
+            # Replacing the brain stem (Stem is replaced by its own parcellation. Mismatch between both global volumes, mainly due to partial volume effect in the global stem parcellation)
+            indrep = np.where(I == 16)
+            I[indrep] = 0
 
             ## Processing Right Hemisphere
+
             # Relabelling Right hemisphere
             It = np.zeros(I.shape,dtype=np.int16)
             ind = np.where((I >= 2000) & (I < 3000))
             It[ind] = (I[ind] - 2000)
             nlabel = It.max()
-
-            # nlabel = rh_annot[2].size()
-
-
-            print("nlabel %i"%(int(nlabel)))
 
             #ColorLUT (cortical)
             if self.inputs.create_colorLUT or self.inputs.create_graphml:
@@ -469,7 +557,7 @@ class CombineParcellations(BaseInterface):
                     if "scale" in elem:
                         scale = elem
                 rh_annot_file = 'rh.lausanne2008.%s.annot'%scale
-                print("Load %s"%rh_annot_file)
+                iflogger.info("  > Load {}".format(rh_annot_file))
                 rh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',rh_annot_file))
                 rgb_table = rh_annot[1][1:,0:3]
                 roi_names = rh_annot[2][1:]
@@ -511,11 +599,11 @@ class CombineParcellations(BaseInterface):
                     f_colorLUT.write("# Right Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
 
                 newLabels = np.arange(nlabel+1,nlabel+1+right_thalNuclei.shape[0])
-                print(newLabels)
-
+                
                 i=0
                 for lab in right_thalNuclei:
-                    print("update right thalamic nucleus label (%i -> %i)"%(lab,newLabels[i]))
+                    if self.inputs.verbose_level == 2:
+                        iflogger.info("  > Update right thalamic nucleus label ({} -> {})".format(lab,newLabels[i]))
 
                     if self.inputs.create_colorLUT:
                         r = right_thalNuclei_colors_r[i]
@@ -550,7 +638,8 @@ class CombineParcellations(BaseInterface):
 
             i=0
             for lab in right_subc_labels:
-                print("update right subcortical label (%i -> %i)"%(lab,newLabels[i]))
+                if self.inputs.verbose_level == 2:
+                    iflogger.info("  > Update right subcortical label ({} -> {})".format(lab,newLabels[i]))
 
                 if self.inputs.create_colorLUT:
                     r = right_subcIds_colors_r[i]
@@ -585,7 +674,8 @@ class CombineParcellations(BaseInterface):
                 newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
                 i=0
                 for lab in hippo_subf:
-                    print("update right hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
+                    if self.inputs.verbose_level == 2:
+                        iflogger.info("  > Update right hippo subfield label ({} -> {})".format(lab,newLabels[i]))
 
                     if self.inputs.create_colorLUT:
                         # if len(ind) > 0:
@@ -616,7 +706,8 @@ class CombineParcellations(BaseInterface):
             if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
                 # Relabelling Right VentralDC
                 newLabels = np.arange(nlabel+1,nlabel+2)
-                print("update right ventral DC label (%i -> %i)"%(right_ventral,newLabels[0]))
+                if self.inputs.verbose_level == 2:
+                    iflogger.info("  > Update right ventral DC label ({} -> {})".format(right_ventral,newLabels[0]))
                 ind = np.where(I == right_ventral)
                 It[ind] = newLabels[0]
                 nlabel = It.max()
@@ -644,7 +735,8 @@ class CombineParcellations(BaseInterface):
             if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
                 # Relabelling Right Hypothalamus
                 newLabels = np.arange(nlabel+1,nlabel+2)
-                print("update right hypothalamus label (%i -> %i)"%(right_ventral,newLabels[0]))
+                if self.inputs.verbose_level == 2:
+                    iflogger.info("  > Update right hypothalamus label ({} -> {})".format(right_ventral,newLabels[0]))
                 It[indrhypothal] = newLabels[0]
                 nlabel = It.max()
 
@@ -684,7 +776,7 @@ class CombineParcellations(BaseInterface):
                     if "scale" in elem:
                         scale = elem
                 lh_annot_file = 'lh.lausanne2008.%s.annot'%scale
-                print("Load %s"%lh_annot_file)
+                iflogger.info("  > Load {}".format(lh_annot_file))
                 lh_annot = ni.freesurfer.io.read_annot(op.join(self.inputs.subjects_dir,self.inputs.subject_id,'label',lh_annot_file))
                 rgb_table = lh_annot[1][1:,0:3]
                 roi_names = lh_annot[2][1:]
@@ -727,7 +819,8 @@ class CombineParcellations(BaseInterface):
                 newLabels = np.arange(nlabel+1,nlabel+1+left_thalNuclei.shape[0])
                 i=0
                 for lab in left_thalNuclei:
-                    print("update left thalamic nucleus label (%i -> %i)"%(lab,newLabels[i]))
+                    if self.inputs.verbose_level == 2:
+                        iflogger.info("  > Update left thalamic nucleus label ({} -> {})".format(lab,newLabels[i]))
 
                     if self.inputs.create_colorLUT:
                         r = left_thalNuclei_colors_r[i]
@@ -762,7 +855,8 @@ class CombineParcellations(BaseInterface):
 
             i=0
             for lab in left_subc_labels:
-                print("update left subcortical label (%i -> %i)"%(lab,newLabels[i]))
+                if self.inputs.verbose_level == 2:
+                    iflogger.info("  > Update left subcortical label ({} -> {})".format(lab,newLabels[i]))
 
                 if self.inputs.create_colorLUT:
                     r = left_subcIds_colors_r[i]
@@ -797,7 +891,8 @@ class CombineParcellations(BaseInterface):
                 newLabels = np.arange(nlabel+1,nlabel+1+hippo_subf.shape[0])
                 i=0
                 for lab in hippo_subf:
-                    print("update left hippo subfield label (%i -> %i)"%(lab,newLabels[i]))
+                    if self.inputs.verbose_level == 2:
+                        iflogger.info("  > Update left hippo subfield label ({} -> {})".format(lab,newLabels[i]))
 
                     if self.inputs.create_colorLUT:
                         r = hippo_subf_colors_r[i]
@@ -828,7 +923,8 @@ class CombineParcellations(BaseInterface):
             if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
                 # Relabelling Left VentralDC
                 newLabels = np.arange(nlabel+1,nlabel+2)
-                print("update left ventral DC label (%i -> %i)"%(left_ventral,newLabels[0]))
+                if self.inputs.verbose_level == 2:
+                    iflogger.info("  > Update left ventral DC label ({} -> {})".format(left_ventral,newLabels[0]))
                 ind = np.where(I == left_ventral)
                 It[ind] = newLabels[0]
                 nlabel = It.max()
@@ -857,7 +953,8 @@ class CombineParcellations(BaseInterface):
             if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
                 # Relabelling Left Hypothalamus
                 newLabels = np.arange(nlabel+1,nlabel+2)
-                print("update left hypothalamus label (%i -> %i)"%(-1,newLabels[0]))
+                if self.inputs.verbose_level == 2:
+                    iflogger.info("  > Update left hypothalamus label ({} -> {})".format(-1,newLabels[0]))
                 It[indlhypothal] = newLabels[0]
                 nlabel = It.max()
 
@@ -881,15 +978,6 @@ class CombineParcellations(BaseInterface):
                                  '{} \n'.format('    </node>')]
                     f_graphML.writelines(node_lines)
 
-            outprefixName = roi.split(".")[0]
-            outprefixName = outprefixName.split("/")[-1:][0]
-            for elem in outprefixName.split("_"):
-                if "scale" in elem:
-                    scale = elem
-
-            if scale == 'scale1':
-                gmMask = It.copy()
-
             # Relabelling Brain Stem
             if brainstem_defined:
                 if self.inputs.create_colorLUT:
@@ -898,7 +986,8 @@ class CombineParcellations(BaseInterface):
                 newLabels = np.arange(nlabel+1,nlabel+1+brainstem.shape[0])
                 i=0
                 for lab in brainstem:
-                    print("update brainstem parcellation label (%i -> %i)"%(lab,newLabels[i]))
+                    if self.inputs.verbose_level == 2:
+                        iflogger.info("  > Update brainstem parcellation label ({} -> {})".format(lab,newLabels[i]))
 
                     if self.inputs.create_colorLUT:
                         r = brainstem_colors_r[i]
@@ -919,8 +1008,6 @@ class CombineParcellations(BaseInterface):
 
                     ind = np.where(Istem == lab)
                     It[ind] = newLabels[i]
-                    if scale == 'scale1':
-                        gmMask[ind] = 0
                     i += 1
                 nlabel = It.max()
 
@@ -933,10 +1020,8 @@ class CombineParcellations(BaseInterface):
                 newLabels = np.arange(nlabel+1,nlabel+2)
                 It[indrep] = newLabels[0]
 
-                if scale == 'scale1':
-                    gmMask[indrep] = 0
-
-                print("update brainstem parcellation label (%i -> %i)"%(lab,newLabels[0]))
+                if self.inputs.verbose_level == 2:
+                    iflogger.info("  > Update brainstem parcellation label ({} -> {})".format(lab,newLabels[0]))
 
                 if self.inputs.create_colorLUT:
                     r = 119
@@ -960,19 +1045,6 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_colorLUT:
                     f_colorLUT.write("\n")
 
-
-            hdr = V.get_header()
-            hdr2 = hdr.copy()
-            hdr2.set_data_dtype(np.int16)
-
-            # Threshold roi scale 1 with unlabeled BrainStem
-            if scale == 'scale1':
-                gmMask[gmMask>0] = 1
-                gmMask_fn = op.abspath('T1w_class-GM.nii.gz'.format(outprefixName))
-                print("Save graymatter mask to %s" % gmMask_fn)
-                img = ni.Nifti1Image(gmMask, V.get_affine(), hdr2)
-                ni.save(img, gmMask_fn)
-
             # Fix negative values
             It[It<0] = 0
 
@@ -980,7 +1052,10 @@ class CombineParcellations(BaseInterface):
             outprefixName = roi.split(".")[0]
             outprefixName = outprefixName.split("/")[-1:][0]
             output_roi = op.abspath('{}_final.nii.gz'.format(outprefixName))
-            print("Save output image to %s" % output_roi)
+            hdr = V.get_header()
+            hdr2 = hdr.copy()
+            hdr2.set_data_dtype(np.int16)
+            iflogger.info("  > Save output image to {}".format(output_roi))
             img = ni.Nifti1Image(It, V.get_affine(), hdr2)
             ni.save(img, output_roi)
 
@@ -993,22 +1068,24 @@ class CombineParcellations(BaseInterface):
                 f_graphML.writelines(bottom_lines)
                 f_graphML.close()
 
-        # Transform aparc+aseg.mgz to native space
-        print("Correct Freesurfer generated aparc+aseg.mgz...")
-
         orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
         aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
         tmp_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.mgz')
         aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.native.nii.gz')
 
-        print("    Copy aparc+aseg to {}".format(tmp_aparcaseg_fs))
+        iflogger.info("    ... Copy aparc+aseg to {}".format(tmp_aparcaseg_fs))
         shutil.copyfile(aparcaseg_fs,tmp_aparcaseg_fs)
 
-        print("    Transform to native space")
-        cmd = 'mri_vol2vol --mov "%s" --targ "%s" --regheader --o "%s" --no-save-reg --interp nearest' % (aparcaseg_fs,orig,aparcaseg_native)
-        process = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-        proc_stdout = process.communicate()[0].strip()
-        iflogger.info(proc_stdout)
+        # Redirect ouput if low verbose
+        FNULL = open(os.devnull, 'w')
+
+        iflogger.info("    ... Transform to native space")
+        cmd = 'mri_vol2vol --mov "{}" --targ "{}" --regheader --o "{}" --no-save-reg --interp nearest'.format(aparcaseg_fs,orig,aparcaseg_native)
+        iflogger.info("        Command: {}".format(cmd))
+        if self.inputs.verbose_level == 2:
+            status = subprocess.call(cmd, shell=True)
+        else:
+            status = subprocess.call(cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
         # mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
         # subprocess.check_call(mri_cmd)
@@ -1017,6 +1094,7 @@ class CombineParcellations(BaseInterface):
 
         # Refine aparc+aseg.mgz with new subcortical and/or structures (if any)
         if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
+            iflogger.info("  > Correct Freesurfer generated aparc+aseg.mgz...")
 
             Iaparcaseg_new = Iaparcaseg.astype(np.int32)
 
@@ -1047,7 +1125,7 @@ class CombineParcellations(BaseInterface):
                 Iaparcaseg_new[ind] = 10
 
                 out_tmp = op.join(fs_dir, 'tmp', 'aparc-thal.lh.native.nii.gz')
-                print("    Save tmp image to {}".format(out_tmp))
+                iflogger.info("    ... Save tmp image to {}".format(out_tmp))
                 img_tmp = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
                 ni.save(img_tmp, out_tmp)
 
@@ -1067,10 +1145,10 @@ class CombineParcellations(BaseInterface):
                 Iaparcaseg_new[ind] = 49
 
                 out_tmp = op.join(fs_dir, 'tmp', 'aparc-thal.rh.native.nii.gz')
-                print("    Save tmp image to {}".format(out_tmp))
+                iflogger.info("    ... Save tmp image to {}".format(out_tmp))
                 img_tmp = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
                 ni.save(img_tmp, out_tmp)
-
+            
             # # Hippocampal subfields (aparc+aseg labels: 17 and 53)
             # if (lh_subfield_defined and rh_subfield_defined):
             #
@@ -1101,31 +1179,32 @@ class CombineParcellations(BaseInterface):
 
             # new_aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
             new_aparcaseg_native = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
-            print("    Save relabeled image to {}".format(new_aparcaseg_native))
+            iflogger.info("    ... Save relabeled image to {}".format(new_aparcaseg_native))
+            img = ni.Nifti1Image(Iaparcaseg_new, V.get_affine(), hdr2)
             ni.save(img, new_aparcaseg_native)
-        else:
-            aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.native.nii.gz')
-            new_aparcaseg_native = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
-            print("    Copy original aparc+aseg to {}".format(new_aparcaseg_native))
-            shutil.copyfile(aparcaseg_native,new_aparcaseg_native)
 
             # new_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.mgz')
             # aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
 
-            # print("    Transform back to Freesurfer space and replace aparc+aseg.mgz file")
+            # iflogger.info("    Transform back to Freesurfer space and replace aparc+aseg.mgz file")
             # mri_cmd = ['mri_convert', '-rl', aparcaseg_fs, '-rt', 'nearest', new_aparcaseg_native, '-nc', new_aparcaseg_fs]
             # subprocess.check_call(mri_cmd)
 
-            #print("    Replace aparc+aseg.mgz file {} by {}".format(aparcaseg_fs,new_aparcaseg_fs))
+            #iflogger.info("    Replace aparc+aseg.mgz file {} by {}".format(aparcaseg_fs,new_aparcaseg_fs))
             #shutil.copyfile(new_aparcaseg_fs,aparcaseg_fs)
+        else:
+            iflogger.info("  > Correct Freesurfer generated aparc+aseg.mgz...")
 
-        #TODO : correct ribbon?
+            aparcaseg_native = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
+            iflogger.info("    ... Save relabeled image to {}".format(aparcaseg_native))
+            img = ni.Nifti1Image(Iaparcaseg, V.get_affine(), hdr2)
+            ni.save(img, aparcaseg_native)
+
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['gray_matter_mask_file'] = op.abspath('T1w_class-GM.nii.gz')
         outputs['aparc_aseg'] = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
         outputs['output_rois'] = self._gen_outfilenames('ROIv_Lausanne2018','_final.nii.gz')
         outputs['colorLUT_files'] = self._gen_outfilenames('ROIv_Lausanne2018','_FreeSurferColorLUT.txt')
@@ -2771,15 +2850,18 @@ def create_wm_mask(subject_id, subjects_dir):
     mri_cmd = ['fslmaths',op.join(fs_dir,'mri','brainmask.nii.gz'),'-bin',op.join(fs_dir,'mri','brainmask.nii.gz')]
     subprocess.check_call(mri_cmd)
 
-def create_wm_mask_v2(subject_id, subjects_dir):
-    print("Create white matter mask")
+def create_wm_mask_v2(subject_id, subjects_dir, v=True):
+    if v:
+        iflogger.info("  > Create white matter mask")
 
     fs_dir = op.join(subjects_dir,subject_id)
 
-    print("FS dir: %s"%fs_dir)
+    if v:
+        iflogger.info("    ... FreeSurfer dir: %s"%fs_dir)
 
     # load ribbon as basis for white matter mask
-    print("load ribbon")
+    if v:
+        iflogger.info("    > load ribbon")
     fsmask = ni.load(op.join(fs_dir, 'mri', 'ribbon.nii.gz'))
     fsmaskd = fsmask.get_data()
 
@@ -2789,7 +2871,8 @@ def create_wm_mask_v2(subject_id, subjects_dir):
 
     #FIXME understand when ribbon file has default value or has "aseg" value
     # extract right and left white matter
-    print("Extract right and left wm")
+    if v:
+        iflogger.info("    > Extract right and left wm")
     #Ribbon labels by default
     if fsmaskd.max() == 120:
         idx_lh = np.where(fsmaskd == 120)
@@ -2804,20 +2887,21 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     wmmask[idx_rh] = 1
 
     # remove subcortical nuclei from white matter mask
-    print("Load aseg")
+    if v:
+        iflogger.info("     > Load aseg")
     aseg = ni.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
     asegd = aseg.get_data()
 
     try:
         import scipy.ndimage.morphology as nd
     except ImportError:
-        raise Exception('Need scipy for binary erosion of white matter mask')
+        raise Exception('      ... ERROR: Need scipy for binary erosion of white matter mask')
 
     # need binary erosion function
     imerode = nd.binary_erosion
 
     # ventricle erosion
-    print("Ventricle erosion")
+    iflogger.info("    > Ventricle erosion")
     csfA = np.zeros( asegd.shape )
     csfB = np.zeros( asegd.shape )
 
@@ -2839,7 +2923,8 @@ def create_wm_mask_v2(subject_id, subjects_dir):
                     (asegd == 49) )
     csfA[idx] = 1
 
-    print("Save CSF mask")
+    if v:
+        iflogger.info("    > Save CSF mask")
     img = ni.Nifti1Image(csfA, aseg.get_affine(), aseg.get_header())
     ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
     csfA = imerode(imerode(csfA, se1),se)
@@ -2873,7 +2958,8 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     # would stop the fiber going to the segmented "brainstem"
 
     # grey nuclei, either with or without erosion
-    print("grey nuclei, either with or without erosion")
+    if v:
+        iflogger.info("    > Grey nuclei, either with or without erosion")
     gr_ncl = np.zeros( asegd.shape )
 
     # with erosion
@@ -2892,7 +2978,8 @@ def create_wm_mask_v2(subject_id, subjects_dir):
         gr_ncl[idx] = 1
 
     # remove remaining structure, e.g. brainstem
-    print("remove remaining structure, e.g. brainstem")
+    if v:
+        iflogger.info("    > Remove remaining structure, e.g. brainstem")
     remaining = np.zeros( asegd.shape )
     idx = np.where( asegd == 16 )
     remaining[idx] = 1
@@ -2900,13 +2987,14 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     # now remove all the structures from the white matter
     idx = np.where( (csfA != 0) | (csfB != 0) | (gr_ncl != 0) | (remaining != 0) )
     wmmask[idx] = 0
-    print("Removing lateral ventricles and eroded grey nuclei and brainstem from white matter mask")
+    if v:
+        iflogger.info("    > Removing lateral ventricles and eroded grey nuclei and brainstem from white matter mask")
 
     # ADD voxels from 'cc_unknown.nii.gz' dataset
     # ccun = ni.load(op.join(fs_dir, 'label', 'cc_unknown.nii.gz'))
     # ccund = ccun.get_data()
     # idx = np.where(ccund != 0)
-    # print("Add corpus callosum and unknown to wm mask")
+    # iflogger.info("Add corpus callosum and unknown to wm mask")
     # wmmask[idx] = 1
 
     # XXX add unknown dilation for connecting corpus callosum?
@@ -2921,91 +3009,70 @@ def create_wm_mask_v2(subject_id, subjects_dir):
     # output white matter mask. crop and move it afterwards
     # wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm_all.nii.gz')
     # img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
-    # print("Save white matter mask: %s" % wm_out)
+    # iflogger.info("Save white matter mask: %s" % wm_out)
     # ni.save(img, wm_out)
 
     # Extract cortical gray matter mask
     # remove remaining structure, e.g. brainstem
-    # gmmask = np.zeros( asegd.shape )
-    # print("Create gray matter mask")
-    # for parkey, parval in get_parcellation('Lausanne2018').items():
-    #     print("  > Processing %s ..." % ('ROIv_%s_Lausanne2018.nii.gz' % parkey) )
-    #
-    #     roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s_Lausanne2018.nii.gz' % parkey))
-    #     roid = roi.get_data()
-    #
-    #     valstem = roid.max()
-    #     #Extract voxels inside cortical gray matter with respect to Freesurfer-like labels
-    #     idx = np.where((roid > 1000) & (roid < 2000) | (roid > 2000) & (roid < 3000))
-    #     gmmask[idx] = 1
-
+    gmmask = np.zeros( asegd.shape )
 
     # XXX: subtracting wmmask from ROI. necessary?
-    for parkey, parval in get_parcellation('Lausanne2018').items():
-
-        print parkey
-
-        # check if we should subtract the cortical rois from this parcellation
-        if parval.has_key('subtract_from_wm_mask'):
-            if not bool(int(parval['subtract_from_wm_mask'])):
-                continue
-        else:
-            continue
-
-        print("    > Loading %s to subtract cortical ROIs from white matter mask" % ('ROIv_%s_Lausanne2018.nii.gz' % parkey) )
-        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s_Lausanne2018.nii.gz' % parkey))
-        roid = roi.get_data()
-
-        assert roid.shape[0] == wmmask.shape[0]
-
-        pg = nx.read_graphml(parval['node_information_graphml'])
-
-        for brk, brv in pg.nodes(data=True):
-
-            if brv['dn_region'] == 'cortical':
-
-                print("    ... Subtracting region %s with intensity value %s" % (brv['dn_region'], brv['dn_multiscaleID']))
-
-                idx = np.where(roid == int(brv['dn_multiscaleID']))
-                wmmask[idx] = 0
-
-    # Extract cortical gray matter mask
-    # remove remaining structure, e.g. brainstem
-    gmmask = np.zeros( asegd.shape )
-    print("Create gray matter mask")
-    for parkey, parval in get_parcellation('Lausanne2018').items():
-        print("  > Processing %s ..." % ('ROIv_%s_Lausanne2018.nii.gz' % parkey) )
-
-        roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s_Lausanne2018.nii.gz' % parkey))
-        roid = roi.get_data()
-
-        valstem = roid.max()
-        #Remove the brainstem which is supposed to be the label with max value
-        idx = np.where((roid > 0) & (roid < valstem))
-        gmmask[idx] = 1
+    # for parkey, parval in get_parcellation('Lausanne2018').items():
+    #
+    #     print parkey
+    #
+    #     # check if we should subtract the cortical rois from this parcellation
+    #     if parval.has_key('subtract_from_wm_mask'):
+    #         if not bool(int(parval['subtract_from_wm_mask'])):
+    #             continue
+    #     else:
+    #         continue
+    #
+    #     iflogger.info("Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parkey) )
+    #     roi = ni.load(op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % parkey))
+    #     roid = roi.get_data()
+    #
+    #     assert roid.shape[0] == wmmask.shape[0]
+    #
+    #     pg = nx.read_graphml(parval['node_information_graphml'])
+    #
+    #     for brk, brv in pg.nodes(data=True):
+    #
+    #         if brv['dn_region'] == 'cortical':
+    #
+    #             iflogger.info("Subtracting region %s with intensity value %s" % (brv['dn_region'], brv['dn_multiscaleID']))
+    #
+    #             idx = np.where(roid == int(brv['dn_multiscaleID']))
+    #             wmmask[idx] = 0
+    #             gmmask[idx] = 1
 
     # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
     img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header() )
-    print("Save white matter mask: %s" % wm_out)
+    if v:
+        iflogger.info("    > Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
 
-    # output white matter mask. crop and move it afterwards
     gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
     img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header() )
-    print("Save gray matter mask: %s" % gm_out)
+    if v:
+        iflogger.info("    > Save gray matter mask: %s" % gm_out)
     ni.save(img, gm_out)
 
-    # gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
-    # img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header() )
-    # print("Save gray matter mask: %s" % gm_out)
-    # ni.save(img, gm_out)
+    # Redirect ouput if low verbose
+    FNULL = open(os.devnull, 'w')
 
     # Convert whole brain mask
     mri_cmd = ['mri_convert','-i',op.join(fs_dir,'mri','brainmask.mgz'),'-o',op.join(fs_dir,'mri','brainmask.nii.gz')]
-    subprocess.check_call(mri_cmd)
+    if v == 2:
+        status = subprocess.call(' '.join(mri_cmd), shell=True)
+    else:
+        status = subprocess.call(' '.join(mri_cmd), shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
     mri_cmd = ['fslmaths',op.join(fs_dir,'mri','brainmask.nii.gz'),'-bin',op.join(fs_dir,'mri','brainmask.nii.gz')]
-    subprocess.check_call(mri_cmd)
+    if v == 2:
+        status = subprocess.call(' '.join(mri_cmd), shell=True)
+    else:
+        status = subprocess.call(' '.join(mri_cmd), shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
 def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
     fs_dir = op.join(subjects_dir,subject_id)
@@ -3032,7 +3099,7 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
             #ds.append( (op.join(fs_dir, 'label', 'ROI_%s.nii.gz' % p), 'ROI_HR_th_%s.nii.gz' % p) )
             ds.append( (op.join(fs_dir, 'mri','ROI_%s_Lausanne2018.nii.gz' % p), 'ROI_Lausanne2018_%s.nii.gz' % p) )
             ds.append( (op.join(fs_dir, 'mri','ROIv_%s_Lausanne2018.nii.gz' % p), 'ROIv_Lausanne2018_%s.nii.gz' % p) )
-        ds.append( (op.join(fs_dir, 'label', 'T1w_class-GM.nii.gz'), 'T1w_class-GM.nii.gz') )
+        ds.append( (op.join(fs_dir, 'mri', 'gmmask.nii.gz'), 'T1w_class-GM.nii.gz') )
         ds.append( (op.join(fs_dir, 'mri','aparc+aseg.mgz'), 'aparc+aseg.native.nii.gz') )
 #        try:
 #            os.makedirs(op.join('.', p))
@@ -3073,7 +3140,6 @@ def crop_and_move_datasets(parcellation_scheme,subject_id, subjects_dir):
             print("Processing %s:" % d[0])
             mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'cubic', d[0], '-nc', d[1]]
             subprocess.check_call(mri_cmd)
-
 
 def generate_WM_and_GM_mask(subject_id, subjects_dir):
     fs_dir = op.join(subjects_dir,subject_id)
