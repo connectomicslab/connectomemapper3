@@ -10,7 +10,7 @@ __release_date__ = '14.05.2019'
 __minor_version__ = "%s.%s" % (_version_major,
                                _version_minor)
 
-__version__ = "%s.%s.%s%s" % (_version_major,
+__version__ = "v%s.%s.%s%s" % (_version_major,
                               _version_minor,
                               _version_micro,
                               _version_extra)
