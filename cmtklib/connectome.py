@@ -22,6 +22,11 @@ from nipype.interfaces.base import CommandLine, CommandLineInputSpec, traits, Fi
 from util import mean_curvature, length
 from parcellation import get_parcellation
 
+def group_analysis_sconn(output_dir, subjects_to_be_analyzed):
+    """ Perform group level analysis of structural connectivity matrices """
+    print("Perform group level analysis ...")
+
+
 def compute_curvature_array(fib):
     """ Computes the curvature array """
     print("Compute curvature ...")
