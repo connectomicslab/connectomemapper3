@@ -45,17 +45,14 @@ def main(dwi_files, json_files, bval_files, bvec_files, dwi_out_file, json_out_f
             # Combine the bvec and remove the \n newline code
             with open(bvec_file, 'r') as f:
                 lines = f.readlines()
-                print(lines[0][-2:])
-                print(lines[1][-2:])
-                print(lines[2][-2:])
-                bvec_x = ''.join((bvec_x, lines[0].split('\n')[0]))
-                bvec_y = ''.join((bvec_y, lines[1].split('\n')[0]))
-                bvec_z = ''.join((bvec_z, lines[2].split('\n')[0]))
+                bvec_x += lines[0].split('\n')[0]
+                bvec_y += lines[1].split('\n')[0]
+                bvec_z += lines[2].split('\n')[0]
             
             # Combine the bval and remove the \n newline code
             with open(bval_file, 'r') as f:
                 lines = f.readlines()
-                bval_out = ''.join((bval_out, lines[0].split('\n')[0]))
+                bval_out += lines[0].split('\n')[0]
         
             # Combine the json metadata (relevant fields)
             with open(json_file) as f:
@@ -72,17 +69,14 @@ def main(dwi_files, json_files, bval_files, bvec_files, dwi_out_file, json_out_f
             # Combine the bvec and remove the \n newline code
             with open(bvec_file, 'r') as f:
                 lines = f.readlines()
-                print(lines[0][-2:])
-                print(lines[1][-2:])
-                print(lines[2][-2:])
-                bvec_x = ' '.join((bvec_x, lines[0].split('\n')[0]))
-                bvec_y = ' '.join((bvec_y, lines[1].split('\n')[0]))
-                bvec_z = ' '.join((bvec_z, lines[2].split('\n')[0]))
+                bvec_x += lines[0].split('\n')[0]
+                bvec_y += lines[1].split('\n')[0]
+                bvec_z += lines[2].split('\n')[0]
             
             # Combine the bvec and remove the \n newline code
             with open(bval_file, 'r') as f:
                 lines = f.readlines()
-                bval_out = ''.join((bval_out, lines[0].split('\n')[0]))
+                bval_out += lines[0].split('\n')[0]
             
             # Combine the json metadata (relevant fields)
             with open(json_file) as f:
