@@ -377,7 +377,7 @@ def create_mrtrix_recon_flow(config):
         # Compute single fiber response function
         mrtrix_rf = pe.Node(interface=EstimateResponseForSH(),name="mrtrix_rf")
         #if config.lmax_order != 'Auto':
-        mrtrix_rf.inputs.maximum_harmonic_order = 6 #int(config.lmax_order)
+        mrtrix_rf.inputs.maximum_harmonic_order = int(config.lmax_order)
 
         mrtrix_rf.inputs.algorithm='tournier'
         #mrtrix_rf.inputs.normalise = config.normalize_to_B0
@@ -390,6 +390,7 @@ def create_mrtrix_recon_flow(config):
         # Perform spherical deconvolution
         mrtrix_CSD = pe.Node(interface=ConstrainedSphericalDeconvolution(),name="mrtrix_CSD")
         mrtrix_CSD.inputs.algorithm = 'csd'
+        mrtrix_CSD.inputs.maximum_harmonic_order = int(config.lmax_order)
         #mrtrix_CSD.inputs.normalise = config.normalize_to_B0
 
         convert_CSD = pe.Node(interface=MRConvert(out_filename="spherical_harmonics_image.nii.gz"),name='convert_CSD')
