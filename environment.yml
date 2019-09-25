@@ -19,6 +19,7 @@ dependencies:
 - pyside2=5.9.0a1
 
 - pip:
+    - cfflib==2.0.5
     - duecredit==0.7.0
     - dipy==0.15.0
     - mne==0.17.1
