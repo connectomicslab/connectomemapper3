@@ -355,6 +355,7 @@ class PreprocessingStage(Stage):
             ])
         #extract_grad_fsl = pe.Node(interface=mrt.MRTrixInfo(out_grad_mrtrix=('diffusion_denoised.bvec','diffusion_denoised.bval')),name='extract_grad_fsl')
 
+        # TODO extract the total readout directly from the BIDS json file
         acqpnode = pe.Node(interface=CreateAcqpFile(total_readout=self.config.total_readout),name='acqpnode')
 
 
