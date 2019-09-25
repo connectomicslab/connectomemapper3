@@ -19,7 +19,8 @@ dependencies:
 - pyside2=5.9.0a1
 
 - pip:
-    - cfflib==2.0.5
+    #- cfflib==2.0.5
+    - git+https://github.com/LTS5/cfflib.git
     - duecredit==0.7.0
     - dipy==0.15.0
     - mne==0.17.1

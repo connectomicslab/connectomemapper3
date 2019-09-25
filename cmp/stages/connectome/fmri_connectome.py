@@ -23,11 +23,11 @@ import nipype.pipeline.engine as pe
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec,\
     traits, File, TraitedSpec, InputMultiPath, OutputMultiPath
 from nipype.utils.filemanip import split_filename
+import nipype.interfaces.cmtk as cmtk
 
 # Own imports
 from cmtklib.parcellation import get_parcellation
-import cmtklib as cmtk
-# import nipype.interfaces.cmtk as cmtk
+#import cmtklib as cmtk
 from cmp.stages.common import Stage
 
 class ConnectomeConfig(HasTraits):

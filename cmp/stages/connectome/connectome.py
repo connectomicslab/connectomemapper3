@@ -17,8 +17,10 @@ import gzip
 # Nipype imports
 import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
-# import nipype.interfaces.cmtk as cmtk
-import cmtklib as cmtk
+import nipype.interfaces.cmtk as cmtk
+
+#import cmtklib as cmtk
+
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec,\
     traits, File, TraitedSpec, InputMultiPath, OutputMultiPath, isdefined
 from nipype.utils.filemanip import split_filename
