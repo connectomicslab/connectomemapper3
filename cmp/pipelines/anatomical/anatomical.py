@@ -188,7 +188,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 T1_json_file = os.path.join(files[0].dirname,files[0].filename)
                 print T1_json_file
             else:
-                return
+                T1_json_file = 'NotFound'
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(subject=subjid,suffix='T1w',extensions='.json',session=sessid)
@@ -196,7 +196,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 T1_json_file = os.path.join(files[0].dirname,files[0].filename)
                 print T1_json_file
             else:
-                return
+                T1_json_file = 'NotFound'
 
         print("... t1_json_file : %s" % T1_json_file)
 

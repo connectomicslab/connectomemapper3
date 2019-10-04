@@ -206,8 +206,9 @@ class DiffusionPipeline(Pipeline):
                         json_file = os.path.join(files[0].dirname,files[0].filename)
                         # print(dwi_file)
                 else:
+                    json_file = 'NotFound'
                     print("WARNING : Diffusion json sidecar not found for subject %s."%(subjid))
-                    return
+                    
 
                 files = layout.get(subject=subjid,suffix='dwi',extensions='.bval')
                 if len(files) > 0:
@@ -264,8 +265,8 @@ class DiffusionPipeline(Pipeline):
                         json_file = os.path.join(files[0].dirname,files[0].filename)
                         # print(dwi_file)
                 else:
+                    json_file = 'NotFound'
                     print("WARNING : Diffusion json sidecar not found for subject %s, session %s."%(subjid,self.global_conf.subject_session))
-                    return
 
                 files = layout.get(subject=subjid,suffix='dwi',extensions='.bval',session=sessid)
                 if len(files) > 0:
