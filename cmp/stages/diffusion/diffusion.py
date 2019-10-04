@@ -84,12 +84,6 @@ class DiffusionConfig(HasTraits):
         elif new == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = new
 
-    def _diffusion_model_changed(self,new):
-        if self.recon_processing_tool == 'MRtrix':
-            if new == 'Deterministic':
-                #Make sure backtrack is disable for MRtrix Deterministic (ACT) Tractography
-                self.mrtrix_tracking_config.backtrack = False
-
     def _diffusion_imaging_model_changed(self, new):
         # self.dtk_recon_config.imaging_model = new
         self.mrtrix_recon_config.imaging_model = new
@@ -141,9 +135,23 @@ class DiffusionConfig(HasTraits):
             self.dipy_recon_config.tracking_processing_tool = 'MRtrix'
 
     def _diffusion_model_changed(self,new):
+        print("diffusion model changed")
+
         # self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
-        self.mrtrix_tracking_config.tracking_mode = new
-        self.dipy_tracking_config.tracking_mode = new
+        if self.tracking_processing_tool == 'MRtrix':
+            self.mrtrix_tracking_config.tracking_mode = new
+            print('tracking tool mrtrix')
+            if new == 'Deterministic':
+                print('det mode')
+                #Make sure backtrack is disable for MRtrix Deterministic (ACT) Tractography
+                print('Disable backtrack for deterministic ACT')
+                self.mrtrix_tracking_config.backtrack = False
+            else:
+                print('prob mode')
+        elif self.tracking_processing_tool == 'Dipy':
+            print('tracking tool dipy')
+            self.dipy_tracking_config.tracking_mode = new
+     
         # self.camino_tracking_config.tracking_mode = new
         # self.update_camino_tracking_model()
 
