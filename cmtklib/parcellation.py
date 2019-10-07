@@ -1090,11 +1090,12 @@ class CombineParcellations(BaseInterface):
         # mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
         # subprocess.check_call(mri_cmd)
 
-        Iaparcaseg= ni.load(aparcaseg_native).get_data()
+        Vaparcaseg = ni.load(aparcaseg_native)
+        Iaparcaseg= Vaparcaseg.get_data()
 
         # Refine aparc+aseg.mgz with new subcortical and/or structures (if any)
         if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
-            iflogger.info("  > Correct Freesurfer generated aparc+aseg.mgz...")
+            iflogger.info("  > Correct and save Freesurfer-generated aparc+aseg.mgz in native space...")
 
             Iaparcaseg_new = Iaparcaseg.astype(np.int32)
 
@@ -1126,7 +1127,7 @@ class CombineParcellations(BaseInterface):
 
                 out_tmp = op.join(fs_dir, 'tmp', 'aparc-thal.lh.native.nii.gz')
                 iflogger.info("    ... Save tmp image to {}".format(out_tmp))
-                img_tmp = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
+                img_tmp = ni.Nifti1Image(tmp, Vaparcaseg.get_affine(), Vaparcaseg.get_header())
                 ni.save(img_tmp, out_tmp)
 
                 mask_thal_rh = np.zeros(Iaparcaseg.shape)
@@ -1146,7 +1147,7 @@ class CombineParcellations(BaseInterface):
 
                 out_tmp = op.join(fs_dir, 'tmp', 'aparc-thal.rh.native.nii.gz')
                 iflogger.info("    ... Save tmp image to {}".format(out_tmp))
-                img_tmp = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
+                img_tmp = ni.Nifti1Image(tmp, Vaparcaseg.get_affine(), Vaparcaseg.get_header())
                 ni.save(img_tmp, out_tmp)
             
             # # Hippocampal subfields (aparc+aseg labels: 17 and 53)
@@ -1178,9 +1179,9 @@ class CombineParcellations(BaseInterface):
                 Iaparcaseg_new[indstem] = 16
 
             # new_aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
-            new_aparcaseg_native = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
+            new_aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
             iflogger.info("    ... Save relabeled image to {}".format(new_aparcaseg_native))
-            img = ni.Nifti1Image(Iaparcaseg_new, V.get_affine(), hdr2)
+            img = ni.Nifti1Image(Iaparcaseg_new, Vaparcaseg.get_affine(), Vaparcaseg.get_header())
             ni.save(img, new_aparcaseg_native)
 
             # new_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.mgz')
@@ -1193,19 +1194,22 @@ class CombineParcellations(BaseInterface):
             #iflogger.info("    Replace aparc+aseg.mgz file {} by {}".format(aparcaseg_fs,new_aparcaseg_fs))
             #shutil.copyfile(new_aparcaseg_fs,aparcaseg_fs)
         else:
-            iflogger.info("  > Correct Freesurfer generated aparc+aseg.mgz...")
+            iflogger.info("  > Save Freesurfer-generated aparc+aseg.mgz in native space...")
 
-            aparcaseg_native = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
+            aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
             iflogger.info("    ... Save relabeled image to {}".format(aparcaseg_native))
-            img = ni.Nifti1Image(Iaparcaseg, V.get_affine(), hdr2)
+            img = ni.Nifti1Image(Iaparcaseg, Vaparcaseg.get_affine(), Vaparcaseg.get_header())
             ni.save(img, aparcaseg_native)
 
 
         return runtime
 
     def _list_outputs(self):
+
+        fs_dir = op.join(self.inputs.subjects_dir,self.inputs.subject_id)
+
         outputs = self._outputs().get()
-        outputs['aparc_aseg'] = op.abspath('aparc+aseg.Lausanne2018.native.nii.gz')
+        outputs['aparc_aseg'] = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
         outputs['output_rois'] = self._gen_outfilenames('ROIv_Lausanne2018','_final.nii.gz')
         outputs['colorLUT_files'] = self._gen_outfilenames('ROIv_Lausanne2018','_FreeSurferColorLUT.txt')
         outputs['graphML_files'] = self._gen_outfilenames('ROIv_Lausanne2018','.graphml')
