@@ -6,11 +6,6 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 
 ..
 
-.. image:: http://bids.neuroimaging.io/openneuro_badge.svg
-  :target: https://openneuro.org
-  :alt: Available in OpenNeuro!
-
-
 .. image:: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=svg
   :target: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master
   :alt: Continuous Integration Status
