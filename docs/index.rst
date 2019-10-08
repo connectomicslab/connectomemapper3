@@ -6,10 +6,12 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 
 ..
 
+.. image:: https://zenodo.org/badge/183162514.svg
+  :target: https://zenodo.org/badge/latestdoi/183162514
+  :alt: Digital Object Identifier
 .. image:: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=svg
   :target: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master
   :alt: Continuous Integration Status
-
 .. image:: https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest
   :target: https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
