@@ -18,8 +18,16 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 .. image:: https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest
   :target: https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
+  
 
-
+.. warning:: THIS SOFTWARE IS FOR RESEARCH PURPOSES ONLY AND SHALL NOT BE USED FOR
+  ANY CLINICAL USE. THIS SOFTWARE HAS NOT BEEN REVIEWED OR APPROVED BY
+  THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR
+  NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA
+  OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE
+  PROVISION OF PATIENT CARE.
+  
+  
 *********
 About
 *********
