@@ -131,8 +131,8 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * Install the Connectome Mapper BIDS App Manager from the Bash Shell using following commands::
 
-	(py27cmp)$ cd connectomemapper3/
-	(py27cmp)$ python setup_gui.py install
+	(py27cmp-gui)$ cd connectomemapper3/
+	(py27cmp-gui)$ python setup_gui.py install
 
 * You are ready to use the Connectome Mapper 3 BIDS App Manager
 
