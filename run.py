@@ -272,7 +272,7 @@ if args.analysis_level == "participant":
             for session in project.subject_sessions:
 
                 while len(processes) == maxprocs:
-                    self.manage_processes(processes)
+                    manage_processes(processes)
 
                 print('> Process subject {} session {}'.format(project.subject,session))
                 project.subject_session = session
