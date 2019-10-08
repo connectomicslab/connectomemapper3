@@ -1,13 +1,14 @@
 ## Connectome Mapper 3 BIDS App (UNDER DEVELOPMENT)
-[![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=flat)](https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master)
+This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
+[![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=svg)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest)
 
 ### Description
-This BIDS app implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper (CMP) 3,
+Connectome Mapper 3 implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper (CMP) 3,
 from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
 ![Image not found](https://connectome-mapper-3.readthedocs.io/en/latest/_images/flowchart.jpg)
 
-The Connectome Mapper 3 is part of the Connectome Mapping Toolkit (CMTK).
+Connectome Mapper 3 is distributed as a BIDS App, a container image which takes BIDS datasets as inputs.
 
 ### Documentation
 
@@ -21,7 +22,7 @@ All trademarks referenced herein are property of their respective holders.
 Copyright (C) 2009-2019, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Hospital Center and University of Geneva (UNIGE-HUG), Switzerland.
 
 ### Usage
-This App has the following command line arguments:
+This BIDS App has the following command line arguments:
 
         $connectomemapper3 --help
 
@@ -89,10 +90,8 @@ To run it in participant level mode (for one participant):
 * Adrien Birbaumer (abirba)
 * Patric Hagmann (pahagman)
 * Meritxell Bach Cuadra (meribach)
-* Reto Meuli
 
-
-### Contributors
+### Collaborators
 
 Collaboration Signal Processing Laboratory (LTS5) EPFL Lausanne
 
