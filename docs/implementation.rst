@@ -47,7 +47,7 @@ Pipelines
 Anatomical
 +++++++++++
 
-Taking as input BIDS datasets (Gorgolewski 2016) that include an anatomical scan (T1w or MPRAGE), the Connectome Mapper interfaces with FreeSurfer 6.0.1 to perform resampling to isotropic resolution, Desikan-Killiany brain parcella�on (Desikan, 2004), brainstem parcellation (Van Leemput 2015), and hippocampal subfields segmentation (Iglesias 2015). Then, using the new version of CMTK, it performs cortical brain parcellation at 5 different scales (Cammoun 2012), probabilistic atlas-based segmentation of the thalamic nuclei (Najdenovska 2018), and combination of all segmented structures, to create the final parcellation at each scale.
+Taking as input BIDS datasets (Gorgolewski 2016) that include an anatomical scan (T1w or MPRAGE), the Connectome Mapper interfaces with FreeSurfer 6.0.1 to perform resampling to isotropic resolution, Desikan-Killiany brain parcellation (Desikan, 2004), brainstem parcellation (Van Leemput 2015), and hippocampal subfields segmentation (Iglesias 2015). Then, using the new version of CMTK, it performs cortical brain parcellation at 5 different scales (Cammoun 2012), probabilistic atlas-based segmentation of the thalamic nuclei (Najdenovska 2018), and combination of all segmented structures, to create the final parcellation at each scale.
 
 Example results
 ^^^^^^^^^^^^^^^^
