@@ -1703,6 +1703,7 @@ class ProjectHandlerV2(Handler):
         fmri_inputs_checked = False
         if t1_available and fmri_available:
             fmri_inputs_checked = True
+            print('fmri input check : {}'.format(fmri_inputs_checked))
 
         self.anat_inputs_checked = anat_inputs_checked
         self.dmri_inputs_checked = dmri_inputs_checked
@@ -1890,46 +1891,46 @@ class ProjectHandlerV2(Handler):
 
                 self.project_loaded = True
 
-                if fmri_inputs_checked: #and self.fmri_pipeline != None:
-                    self.fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(loaded_project)
-                    self.fmri_pipeline.number_of_cores  = loaded_project.number_of_cores
-                    self.fmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
+            if fmri_inputs_checked: #and self.fmri_pipeline != None:
+                self.fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(loaded_project)
+                self.fmri_pipeline.number_of_cores  = loaded_project.number_of_cores
+                self.fmri_pipeline.parcellation_scheme = ui_info.ui.context["object"].project_info.parcellation_scheme
 
-                    self.fmri_pipeline.stages["Registration"].pipeline_mode = 'fMRI'
-                    self.fmri_pipeline.stages["Registration"].registration_mode = 'FSL (Linear)'
-                    self.fmri_pipeline.stages["Registration"].registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
+                self.fmri_pipeline.stages["Registration"].pipeline_mode = 'fMRI'
+                self.fmri_pipeline.stages["Registration"].registration_mode = 'FSL (Linear)'
+                self.fmri_pipeline.stages["Registration"].registration_mode_trait = ['FSL (Linear)','BBregister (FS)']
 
-                    code_directory = os.path.join(loaded_project.base_directory,'code')
+                code_directory = os.path.join(loaded_project.base_directory,'code')
 
-                    fmri_config_file = os.path.join(code_directory,'ref_fMRI_config.ini')
-                    loaded_project.fmri_config_file = fmri_config_file
+                fmri_config_file = os.path.join(code_directory,'ref_fMRI_config.ini')
+                loaded_project.fmri_config_file = fmri_config_file
 
-                    self.fmri_pipeline.config_file = fmri_config_file
+                self.fmri_pipeline.config_file = fmri_config_file
 
-                    if not os.path.isfile(fmri_config_file) and self.fmri_pipeline!= None: #and fmri_pipeline!= None:
-                        fmri_save_config(self.fmri_pipeline, fmri_config_file)
-                        print("Created reference fMRI config file :  %s"%loaded_project.fmri_config_file)
-                    else:
-                        print("Loaded reference fMRI config file :  %s"%loaded_project.fmri_config_file)
+                if not os.path.isfile(fmri_config_file) and self.fmri_pipeline!= None: #and fmri_pipeline!= None:
+                    fmri_save_config(self.fmri_pipeline, fmri_config_file)
+                    print("Created reference fMRI config file :  %s"%loaded_project.fmri_config_file)
+                else:
+                    print("Loaded reference fMRI config file :  %s"%loaded_project.fmri_config_file)
 
-                        # if datalad_is_available:
-                        #     print('... Datalad get reference fMRI config file : {}'.format(loaded_project.anat_config_file))
-                        #     cmd = 'datalad run -m "Get reference fMRI config file" bash -c "datalad get code/ref_fMRI_config.ini"'
-                        #     try:
-                        #         print('... cmd: {}'.format(cmd))
-                        #         core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
-                        #     except:
-                        #         print("    ERROR: Failed to get file")
+                    # if datalad_is_available:
+                    #     print('... Datalad get reference fMRI config file : {}'.format(loaded_project.anat_config_file))
+                    #     cmd = 'datalad run -m "Get reference fMRI config file" bash -c "datalad get code/ref_fMRI_config.ini"'
+                    #     try:
+                    #         print('... cmd: {}'.format(cmd))
+                    #         core.run( cmd, env={}, cwd=os.path.abspath(loaded_project.base_directory))
+                    #     except:
+                    #         print("    ERROR: Failed to get file")
 
-                        fmri_conf_loaded = fmri_load_config(self.fmri_pipeline, loaded_project.fmri_config_file)
+                    fmri_conf_loaded = fmri_load_config(self.fmri_pipeline, loaded_project.fmri_config_file)
 
-                    ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
-                    loaded_project.fmri_available = self.fmri_inputs_checked
+                ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
+                loaded_project.fmri_available = self.fmri_inputs_checked
 
-                    ui_info.ui.context["object"].project_info = loaded_project
-                    # ui_info.ui.context["object"].handler = self
+                ui_info.ui.context["object"].project_info = loaded_project
+                # ui_info.ui.context["object"].handler = self
 
-                    self.project_loaded = True
+                self.project_loaded = True
 
 
 class CMP_BIDSAppWindowHandler(Handler):
