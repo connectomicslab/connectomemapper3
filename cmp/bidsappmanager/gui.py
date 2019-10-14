@@ -228,7 +228,7 @@ class CMP_Project_Info(HasTraits):
     fmri_stage_names = List
     fmri_custom_last_stage = Str
 
-    number_of_cores = Enum(1,range(1,multiprocessing.cpu_count()+1))
+    number_of_cores = Enum(1,range(1,multiprocessing.cpu_count()))
 
     summary_view_button = Button('Pipeline processing summary')
 
@@ -530,6 +530,9 @@ class CMP_BIDSAppWindow(HasTraits):
     bids_root = Directory()
     subjects = List(Str)
 
+    #multiproc_number_of_cores = Int(1)
+    number_of_participants_processed_in_parallel = Enum(1,range(1,multiprocessing.cpu_count()))
+
     # handler = Instance(project.CMP_BIDSAppWindowHandler)
 
     fs_license = File()
@@ -588,6 +591,8 @@ class CMP_BIDSAppWindow(HasTraits):
                                         ),
                                     ),
                                 label='Participant labels to be processed'),
+                                Group(Item('number_of_participants_processed_in_parallel',label='Number of participants processed in parallel')
+                                    ),
                                 Group(
                                     Group(Item('anat_config',label='Configuration file',visible_when='run_anat_pipeline'), label='Anatomical pipeline'),
                                     Group(Item('run_dmri_pipeline',label='Run processing stages'),Item('dmri_config',label='Configuration file',visible_when='run_dmri_pipeline'), label='Diffusion pipeline'),
@@ -770,6 +775,7 @@ class CMP_BIDSAppWindow(HasTraits):
         print("BIDS App Version Tag: {}".format(self.bidsapp_tag))
         print("Data provenance tracking (datalad) : {}".format(self.data_provenance_tracking))
         print("Update computing environment (datalad) : {}".format(self.datalad_update_environment))
+        print("Number of participant processed in parallel : {}".format(self.number_of_participants_processed_in_parallel))
 
         return True
 
@@ -814,6 +820,8 @@ class CMP_BIDSAppWindow(HasTraits):
         if self.run_fmri_pipeline:
             cmd.append('--func_pipeline_config')
             cmd.append('/tmp/code/ref_fMRI_config.ini')
+
+        cmd.append('--number_of_participants_processed_in_parallel {}'.format(self.number_of_participants_processed_in_parallel))
 
 
         print('... Docker cmd 2 : {}'.format(cmd))
