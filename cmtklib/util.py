@@ -18,6 +18,18 @@ from os import path as op
 import numpy as np
 import networkx as nx
 
+class bcolors:
+    """ Utility class for color unicode
+    """
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def load_graphs(output_dir,subjects,parcellation_scheme,weight):
 
     if parcellation_scheme == 'Lausanne2008':
