@@ -803,6 +803,7 @@ class Generate5ttInputSpec(CommandLineInputSpec):
         'fsl',
         'gif',
         'freesurfer',
+        'hsvs',
         argstr='%s',
         position=-3,
         mandatory=True,

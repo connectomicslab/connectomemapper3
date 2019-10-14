@@ -661,6 +661,7 @@ class PreprocessingStage(Stage):
 
         mrtrix_5tt = pe.Node(interface=Generate5tt(out_file='mrtrix_5tt.nii.gz'),name='mrtrix_5tt')
         mrtrix_5tt.inputs.algorithm = 'freesurfer'
+        #mrtrix_5tt.inputs.algorithm = 'hsvs'
 
         flow.connect([
     		    (processing_input,mrtrix_5tt,[('aparc_aseg','in_file')]),

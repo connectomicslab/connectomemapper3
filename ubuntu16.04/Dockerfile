@@ -173,7 +173,8 @@ RUN apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-o
     libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev && \
     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
     cd mrtrix3 && \
-    git checkout 3.0_RC3 && \
+    git checkout 5ttgen_new_algos && \
+    #git checkout 3.0_RC3 && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
     git describe --tags > /mrtrix3_version
