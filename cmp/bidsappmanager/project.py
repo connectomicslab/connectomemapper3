@@ -51,6 +51,10 @@ def clean_cache(bids_root):
     #Folder can be code/ derivatives/ sub-*/ .datalad/ .git/
     #File can be README.txt CHANGES.txt participants.tsv project_description.json
 
+    for d in glob.glob(os.path.join(bids_root,' hsperfdata_cmp')):
+        print('... DEL: {}'.format(d))
+        shutil.rmtree(d)
+
     for f in glob.glob(os.path.join(bids_root,'._java*')):
         print('... DEL: {}'.format(f))
         os.remove(f)
