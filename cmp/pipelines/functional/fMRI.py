@@ -530,7 +530,7 @@ class fMRIPipeline(Pipeline):
                           (fMRI_inputnode,reg_flow,[('T1','inputnode.T1')]),(fMRI_inputnode,reg_flow,[('T2','inputnode.T2')]),
                           (preproc_flow,reg_flow, [('outputnode.mean_vol','inputnode.target')]),
                           (fMRI_inputnode,reg_flow, [('wm_mask_file','inputnode.wm_mask'),('roi_volumes','inputnode.roi_volumes'),
-                                                ('wm_eroded','inputnode.eroded_wm'),('csf_eroded','inputnode.eroded_csf'),('brain_eroded','inputnode.eroded_brain')]),
+                                                ('wm_eroded','inputnode.eroded_wm')]),
                           (reg_flow,sinker, [('outputnode.wm_mask_registered_crop','anat.@registered_wm'),('outputnode.roi_volumes_registered_crop','anat.@registered_roi_volumes'),
                                                  ('outputnode.eroded_wm_registered_crop','anat.@eroded_wm'),('outputnode.eroded_csf_registered_crop','anat.@eroded_csf'),
                                                  ('outputnode.eroded_brain_registered_crop','anat.@eroded_brain')]),
