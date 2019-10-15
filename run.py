@@ -265,21 +265,21 @@ else:
     parallel_number_of_subjects = 1  
 
 #Setup number of cores to be used by nipype multiproc plugin
-if args.multiproc_number_of_cores != None:
-    multiproc_maxprocs = int(args.multiproc_number_of_cores)  
-    if multiproc_maxprocs > max_number_of_cores:
-        print('  * Number of pipeline processes executed in parallel set to the maximal number of available cores ({})'.format(max_number_of_cores))
-        print(bcolors.WARNING + '   WARNING: the specified number of pipeline processes executed in parallel ({}) exceeds the number of available cores ({})'.format(args.multiproc_number_of_cores,max_number_of_cores) + bcolors.ENDC)
-        multiproc_maxprocs = max_number_of_cores
-    elif multiproc_maxprocs <= 0:
-        print('  * Number of pipeline processes executed in parallel set to one (total: {})'.format(max_number_of_cores))
-        print(bcolors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) should be greater to 0'.format(args.multiproc_number_of_cores) + bcolors.ENDC)
-        multiproc_maxprocs = 1
-    else:
-        print('  * Number of pipeline processes executed in parallel set to {} (total of cores: {})'.format(multiproc_maxprocs,max_number_of_cores))
-else:
-    print('  * Number of pipeline processes executed in parallel set to one (total: {})'.format(max_number_of_cores))
-    multiproc_maxprocs = 1 
+# if args.multiproc_number_of_cores != None:
+#     multiproc_maxprocs = int(args.multiproc_number_of_cores)  
+#     if multiproc_maxprocs > max_number_of_cores:
+#         print('  * Number of pipeline processes executed in parallel set to the maximal number of available cores ({})'.format(max_number_of_cores))
+#         print(bcolors.WARNING + '   WARNING: the specified number of pipeline processes executed in parallel ({}) exceeds the number of available cores ({})'.format(args.multiproc_number_of_cores,max_number_of_cores) + bcolors.ENDC)
+#         multiproc_maxprocs = max_number_of_cores
+#     elif multiproc_maxprocs <= 0:
+#         print('  * Number of pipeline processes executed in parallel set to one (total: {})'.format(max_number_of_cores))
+#         print(bcolors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) should be greater to 0'.format(args.multiproc_number_of_cores) + bcolors.ENDC)
+#         multiproc_maxprocs = 1
+#     else:
+#         print('  * Number of pipeline processes executed in parallel set to {} (total of cores: {})'.format(multiproc_maxprocs,max_number_of_cores))
+# else:
+#     print('  * Number of pipeline processes executed in parallel set to one (total: {})'.format(max_number_of_cores))
+#     multiproc_maxprocs = 1 
 
 # TODO: Implement log for subject(_session)
 # with open(log_filename, 'w+') as log:
@@ -332,15 +332,15 @@ if args.analysis_level == "participant":
                 run_fmri = False
 
                 if args.anat_pipeline_config is not None:
-                    project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical', multiproc_number_of_cores=multiproc_maxprocs)
+                    project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical')
                     run_anat = True
                     print("... Anatomical config created : {}".format(project.anat_config_file))
                 if args.dwi_pipeline_config is not None:
-                    project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion', multiproc_number_of_cores=multiproc_maxprocs)
+                    project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion')
                     run_dmri = True
                     print("... Diffusion config created : {}".format(project.dmri_config_file))
                 if args.func_pipeline_config is not None:
-                    project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI', multiproc_number_of_cores=multiproc_maxprocs)
+                    project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI')
                     run_fmri = True
                     print("... fMRI config created : {}".format(project.fmri_config_file))
 
@@ -393,15 +393,15 @@ if args.analysis_level == "participant":
             run_fmri = False
 
             if args.anat_pipeline_config is not None:
-                project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical', multiproc_number_of_cores=multiproc_maxprocs)
+                project.anat_config_file = create_subject_configuration_from_ref(project,args.anat_pipeline_config,'anatomical')
                 run_anat = True
                 print("... Anatomical config created : {}".format(project.anat_config_file))
             if args.dwi_pipeline_config is not None:
-                project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion', multiproc_number_of_cores=multiproc_maxprocs)
+                project.dmri_config_file = create_subject_configuration_from_ref(project,args.dwi_pipeline_config,'diffusion')
                 run_dmri = True
                 print("... Diffusion config created : {}".format(project.dmri_config_file))
             if args.func_pipeline_config is not None:
-                project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI', multiproc_number_of_cores=multiproc_maxprocs)
+                project.fmri_config_file = create_subject_configuration_from_ref(project,args.func_pipeline_config,'fMRI')
                 run_fmri = True
                 print("... fMRI config created : {}".format(project.fmri_config_file))
 
