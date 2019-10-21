@@ -225,7 +225,7 @@ for tool in tools:
         os.makedirs(tool_dir)
 
 # Make sure freesurfer is happy with the license
-print('> Copy FreeSurfer license (BIDS App) ')
+print('> Set $FS_LICENSE which points to FreeSurfer license location (BIDS App)')
 
 
 if os.access(os.path.join('/tmp','code','license.txt'),os.F_OK):
@@ -243,6 +243,8 @@ elif args.fs_license:
 else:
     print("ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
     sys.exit(1)
+
+print('  ... $FS_LICENSE : {}'.format(os.environ['FS_LICENSE']))
 
 # Keep one core for light processes
 max_number_of_cores = multiprocessing.cpu_count()-1

@@ -946,10 +946,16 @@ class CMP_BIDSAppWindow(HasTraits):
 
         # Copy freesurfer license into dataset/code directory where the BIDS app
         # is looking for.
-        print('> Copy FreeSurfer license (BIDS App Manager) ')
-        print('... src : {}'.format(self.fs_license))
-        print('... dst : {}'.format(os.path.join(self.bids_root,'code','license.txt')))
-        shutil.copyfile(src=self.fs_license,dst=os.path.join(self.bids_root,'code','license.txt'))
+
+        license_dst = os.path.join(self.bids_root,'code','license.txt')
+
+        if not os.access(license_dst,os.F_OK):
+            print('> Copy FreeSurfer license (BIDS App Manager) ')
+            print('... src : {}'.format(self.fs_license))
+            print('... dst : {}'.format())
+            shutil.copy2(src=self.fs_license,dst=os.path.join(self.bids_root,'code','license.txt'))
+        else:
+            print('> FreeSurfer license copy skipped as it already exists(BIDS App Manager) ')
 
         project.fix_dataset_directory_in_pickles(local_dir=self.bids_root,mode='bidsapp')
 
