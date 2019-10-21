@@ -497,8 +497,11 @@ class FunctionalMRIStage(Stage):
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             filtering = pe.Node(interface=afni.Bandpass(out_file='fMRI_bandpass+orig.BRIK'),name='temporal_filter')
             converter = pe.Node(interface=afni.AFNItoNIFTI(out_file='fMRI_bandpass.nii.gz'), name='converter')
-            filtering.inputs.lowpass = self.config.lowpass_filter
-            filtering.inputs.highpass = self.config.highpass_filter
+            # FIXME: Seems that lowpass and highpass inputs of the nipype 3DBandPass interface swaped low and high frequencies
+            filtering.inputs.lowpass = self.config.highpass_filter
+            filtering.inputs.highpass = self.config.lowpass_filter
+            if self.config.detrending:
+                filtering.inputs.no_detrend = True
             flow.connect([
                         (nuisance_output,filtering,[("nuisance_output","in_file")]),
                         (filtering,converter,[("out_file","in_file")]),
