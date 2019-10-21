@@ -31,6 +31,7 @@ echo $( printf "%${#HEADER}s" | tr " " "=" ) >> docs/newchanges
 echo "" >> docs/newchanges
 
 # Search for PRs since previous release
+# git log 3.0.0-beta-20190815..HEAD --pretty='format:  * %b %s'
 git log --grep="Merge pull request" `git describe --tags --abbrev=0`..HEAD --pretty='format:  * %b %s' | sed  's/Merge pull request \#\([^\d]*\)\ from\ .*/(\#\1)/' >> docs/newchanges
 echo "" >> docs/newchanges
 echo "" >> docs/newchanges
