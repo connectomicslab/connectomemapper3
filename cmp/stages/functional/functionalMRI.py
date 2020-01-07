@@ -272,7 +272,7 @@ class nuisance_regression(BaseInterface):
 class detrending_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to detrend")
     gm_file = InputMultiPath(File(exists=True), desc="ROI files registered to fMRI space")
-    mode = Enum(["linear","quadratic"])
+    mode = Enum(["linear","quadratic","cubic"])
 
 class detrending_OutputSpec(TraitedSpec):
     out_file = File(exists=True)
@@ -327,6 +327,21 @@ class Detrending(BaseInterface):
             img = nib.Nifti1Image(new_data_det2, dataimg.get_affine(), dataimg.get_header())
             nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
 
+        if self.inputs.mode == 'cubic':
+            print("Cubic-spline detrending")
+            print("=================")
+            from obspy.signal.detrend import spline
+
+            # GLM: regress out nuisance covariates
+            new_data_det2 = new_data_det.copy()
+            for index,value in np.ndenumerate( gm ):
+                if value == 0:
+                    continue
+                Ydet = spline(new_data_det2[index[0],index[1],index[2],:], order=3)
+
+            img = nib.Nifti1Image(new_data_det2, dataimg.get_affine(), dataimg.get_header())
+            nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
+                
         print("[ DONE ]")
         return runtime
 
