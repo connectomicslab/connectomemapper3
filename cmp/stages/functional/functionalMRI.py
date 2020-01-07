@@ -322,7 +322,7 @@ class Detrending(BaseInterface):
             for index,value in np.ndenumerate( gm ):
                 if value == 0:
                     continue
-                Ydet = polynomial(new_data_det[index[0],index[1],index[2],:], order=2)
+                Ydet = polynomial(new_data_det2[index[0],index[1],index[2],:], order=2)
 
             img = nib.Nifti1Image(new_data_det2, dataimg.get_affine(), dataimg.get_header())
             nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
