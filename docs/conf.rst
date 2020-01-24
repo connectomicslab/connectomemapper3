@@ -34,9 +34,6 @@ You can find the `raw dataset online <http://cmtk.org/datasets/rawdata/>`_
 .. If you produce any connectome dataset that you want to share with the community, we provide a curated
 .. `cffdata repository on GitHub <http://github.com/LTS5/cffdata>`_.
 
-Folder structure of Connec
-==================
-
 
 Run the Connectome Mapper Graphical User Interface
 ==================================================
