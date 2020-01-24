@@ -78,6 +78,7 @@ Reproducibility and replicatibility is achieved through the distribution of a BI
    :caption: About Connectome Mapper
 
    LICENSE
+   changes
    citing
    contributing
 
