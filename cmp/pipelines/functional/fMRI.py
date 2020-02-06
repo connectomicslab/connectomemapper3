@@ -143,6 +143,7 @@ class fMRIPipeline(Pipeline):
             subject = "_".join((self.subject,self.global_conf.subject_session))
 
         fmri_file = os.path.join(self.subject_directory,'func',subject+'_task-rest_bold.nii.gz')
+        json_file = os.path.join(self.subject_directory,'func',subject+'_task-rest_bold.json')
         t1_file = os.path.join(self.subject_directory,'anat',subject+'_T1w.nii.gz')
         t2_file = os.path.join(self.subject_directory,'anat',subject+'_T2w.nii.gz')
 
@@ -530,19 +531,19 @@ class fMRIPipeline(Pipeline):
                           (fMRI_inputnode,reg_flow,[('T1','inputnode.T1')]),(fMRI_inputnode,reg_flow,[('T2','inputnode.T2')]),
                           (preproc_flow,reg_flow, [('outputnode.mean_vol','inputnode.target')]),
                           (fMRI_inputnode,reg_flow, [('wm_mask_file','inputnode.wm_mask'),('roi_volumes','inputnode.roi_volumes'),
-                                                ('wm_eroded','inputnode.eroded_wm')]),
+                                                ('brain_eroded','inputnode.eroded_brain'),('wm_eroded','inputnode.eroded_wm'),('csf_eroded','inputnode.eroded_csf')]),
                           (reg_flow,sinker, [('outputnode.wm_mask_registered_crop','anat.@registered_wm'),('outputnode.roi_volumes_registered_crop','anat.@registered_roi_volumes'),
                                                  ('outputnode.eroded_wm_registered_crop','anat.@eroded_wm'),('outputnode.eroded_csf_registered_crop','anat.@eroded_csf'),
                                                  ('outputnode.eroded_brain_registered_crop','anat.@eroded_brain')]),
                           ])
-            if self.stages['FunctionalMRI'].config.global_nuisance:
-                fMRI_flow.connect([
-                              (fMRI_inputnode,reg_flow,[('brain_eroded','inputnode.eroded_brain')])
-                            ])
-            if self.stages['FunctionalMRI'].config.csf:
-                fMRI_flow.connect([
-                              (fMRI_inputnode,reg_flow,[('csf_eroded','inputnode.eroded_csf')])
-                            ])
+            # if self.stages['FunctionalMRI'].config.global_nuisance:
+            #     fMRI_flow.connect([
+            #                   (fMRI_inputnode,reg_flow,[('brain_eroded','inputnode.eroded_brain')])
+            #                 ])
+            # if self.stages['FunctionalMRI'].config.csf:
+            #     fMRI_flow.connect([
+            #                   (fMRI_inputnode,reg_flow,[('csf_eroded','inputnode.eroded_csf')])
+            #                 ])
             if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
                 fMRI_flow.connect([
                           (fMRI_inputnode,reg_flow, [('subjects_dir','inputnode.subjects_dir'),

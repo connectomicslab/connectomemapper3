@@ -113,6 +113,7 @@ class fMRIPipelineUI(fMRIPipeline):
             subject = "_".join((self.subject,self.global_conf.subject_session))
 
         fmri_file = os.path.join(self.subject_directory,'func',subject+'_task-rest_bold.nii.gz')
+        json_file = os.path.join(self.subject_directory,'func',subject+'_task-rest_bold.json')
         t1_file = os.path.join(self.subject_directory,'anat',subject+'_T1w.nii.gz')
         t2_file = os.path.join(self.subject_directory,'anat',subject+'_T2w.nii.gz')
 
