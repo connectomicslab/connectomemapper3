@@ -3,8 +3,8 @@
 ARG MAIN_DOCKER
 FROM $MAIN_DOCKER
 
-RUN groupadd -r -g 1000 cmp && \
-    useradd -r -M -u 1000 -g cmp cmp
+#RUN groupadd -r -g 1000 cmp && \
+#    useradd -r -M -u 1000 -g cmp cmp
 
 ##
 # Install any needed packages specified in requirements.txt
@@ -34,7 +34,6 @@ RUN /bin/bash -c ". activate $CONDA_ENV && \
 # ENV PATH=$ANTSPATH:$PATH
 ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin
 ENV PATH $ANTSPATH:$PATH
-RUN export
 
 # Create entrypoint script that simulated a X server - required by traitsui?
 # try to change freesurfer home permission to copy the license
@@ -44,7 +43,7 @@ RUN export
 #RUN echo '#! /bin/bash \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
 
 #Current for singularity
-RUN echo '#! /bin/bash \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
+RUN echo '#! /bin/bash \n echo "User: $USER" && echo "Group:"$(id -g -n $USER) && export && . activate $CONDA_ENV && xvfb-run -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed
@@ -52,7 +51,8 @@ RUN chmod 775 /app/connectomemapper3/run.py
 RUN chmod 775 /app/run_connectomemapper3.sh
 RUN chmod 777 /opt/freesurfer
 
-ENV FS_LICENSE /tmp/code/license.txt
+#ENV LC_ALL="en_US.UTF-8"
+#ENV LANG="en_US.UTF-8"
 
 #Temporary tmp folder
 RUN /bin/bash -c "mkdir -p /var/tmp"
@@ -60,9 +60,22 @@ ENV TMPDIR /var/tmp
 ENV TMP /var/tmp
 ENV TEMP /var/tmp
 
+RUN export
 
 #COPY version /version
-WORKDIR /tmp/derivatives
+RUN mkdir /bids_dir && \
+    chmod -R 777 /bids_dir
+
+RUN mkdir /output_dir && \
+    chmod -R 777 /output_dir
+
+ENV FS_LICENSE /output_dir/code/license.txt
+
+ENV LANG C.UTF-8 
+ENV LC_ALL C.UTF-8 
+
+RUN ldconfig
+WORKDIR /tmp/
 ENTRYPOINT ["/app/run_connectomemapper3.sh"]
 
 ARG VERSION
