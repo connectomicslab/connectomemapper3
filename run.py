@@ -303,9 +303,22 @@ if args.analysis_level == "participant":
         project.subjects = ['sub-{}'.format(label) for label in subjects_to_analyze]
         project.subject = 'sub-{}'.format(subject_label)
 
-        # Check if multiple session (sub-XX/ses-YY/anat/... structure or sub-XX/anat.. structure?)
-        subject_session_dirs = glob(os.path.join(args.bids_dir, project.subject, "ses-*"))
-        project.subject_sessions = ['ses-{}'.format(subject_session_dir.split("-")[-1]) for subject_session_dir in subject_session_dirs]
+        if args.session_label != None:
+            print("> Sessions specified by input args : {}".format(args.session_label))
+            subject_session_labels = args.session_label
+            project.subject_sessions = ['ses-{}'.format(subject_session_label) for subject_session_label in subject_session_labels]
+            #Check if session exists
+            for session in  project.subject_sessions:
+                session_path = os.path.join(args.bids_dir, project.subject, session)
+                if not os.path.exists(session_path):
+                    print("ERROR: The directory {} corresponding to the session {} specified by --session_label input flag DOES NOT exist.".format(session_path,session.split("-")[-1]))
+                    sys.exit(1)
+                else:
+                    print("INFO: The directory {} corresponding to the session {} specified by --session_label input flag DOES exist.".format(session_path,session.split("-")[-1]))
+        else:
+            # Check if multiple session (sub-XX/ses-YY/anat/... structure or sub-XX/anat.. structure?)
+            subject_session_dirs = glob(os.path.join(args.bids_dir, project.subject, "ses-*"))
+            project.subject_sessions = ['ses-{}'.format(subject_session_dir.split("-")[-1]) for subject_session_dir in subject_session_dirs]
 
         if len(project.subject_sessions) > 0: #Session structure
 
