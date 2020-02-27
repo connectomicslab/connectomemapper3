@@ -77,9 +77,9 @@ Installation of the Connectome Mapper 3 has been facilitated through the distrib
 
 * Get the latest release (|release|) of the BIDS App:
 
-.. parsed-literal::
+  .. parsed-literal::
 
-  $ docker pull sebastientourbier/connectomemapper-bidsapp:|release|
+    $ docker pull sebastientourbier/connectomemapper-bidsapp:|release|
 
 * To display all docker images available::
 
@@ -117,6 +117,13 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
   $ git clone https://github.com/connectomicslab/connectomemapper3.git connectomemapper3
 
+* Create a branch and checkout the code corresponding to this version release:
+
+  .. parsed-literal::
+
+    $ git fetch
+    $ git checkout tags/|release| -b |release|
+
 * Create a miniconda2 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
 
 	$ conda env create -f connectomemapper3/environment.yml
@@ -125,7 +132,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
   $ source activate py27cmp-gui
 
-  or
+  or::
 
   $ conda activate py27cmp-gui
 
