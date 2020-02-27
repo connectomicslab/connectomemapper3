@@ -14,7 +14,7 @@ dependencies:
 - matplotlib=2.2.3
 - graphviz=2.40.1
 - traits=5.1.1
-- nipype=1.4.2
+- nipype=1.1.8
 - git-annex=7.20190219
 - pyside2=5.9.0a1
 
