@@ -173,11 +173,12 @@ ENV PATH $ANTSPATH:$PATH
 # Get the latest version of MRtrix3
 # MRtrix3 setup
 WORKDIR /opt
-RUN apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
+RUN apt-get update && \
+    apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
     libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev && \
     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
     cd mrtrix3 && \
-    git checkout 5ttgen_new_algos && \
+    git checkout dev && \
     #git checkout 3.0_RC3 && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
