@@ -10,8 +10,6 @@ Date: February 06, 2020
 
 * Implementation of an in-house Nipype interface to AFNI 3DBandPass which can handle to check output as ..++orig.BRIK or as ..tlrc.BRIK (The later can occur with HCP preprocessed fmri data)
 
-* Updated documentation with list of changes
-
 
 *************************
 Version 3.0.0-beta-20200124
