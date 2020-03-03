@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/usr/bin/bash
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
         # Linux
