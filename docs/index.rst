@@ -69,7 +69,15 @@ Reproducibility and replicatibility is achieved through the distribution of a BI
    cmpbackground
    bidsappmanager
    usage
+
+.. _user-usecases:
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples & Tutorials
+
    datalad
+   runonhpc
 
 .. _about-docs:
 

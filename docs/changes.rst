@@ -14,7 +14,7 @@ This version addresses multiple issues to make successful conversion and run of 
 
 	* Install locales and set `$LC_ALL` and `$LANG` to make freesurfer hippocampal subfields and brainstem segmentation (matlab-based) modules working when run in the converted SIngularity image
   	
-  	* BIDS input and output directories inside the BIDS App container are no longer the `/tmp` and `/tmp/derivatives` folders but '/bids_dir' and `/output_dir`.
+  	* BIDS input and output directories inside the BIDS App container are no longer the `/tmp` and `/tmp/derivatives` folders but `/bids_dir` and `/output_dir`.
   	.. warning:: this might affect the use of Datalad container (To be confirmed.)
   	
   	* Fix the branch of mrtrix3 to check out
