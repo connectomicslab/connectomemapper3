@@ -1,8 +1,8 @@
 .. _installation:
 
-***********************************
-Installation Instruction for Users
-***********************************
+************************************
+Installation Instructions for Users
+************************************
 
 .. warning:: This software is for research purposes only and shall not be used for
              any clinical use. This software has not been reviewed or approved by
