@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore", message="UserWarning: No valid root directory 
 
 def info():
     print("\nConnectome Mapper {}".format(__version__))
-    print("""Copyright (C) 2009-{}, Brain Communication Pathways Sinergia Consortium, Switzerland
+    print("""Copyright (C) 2009-{}, Brain Communication Pathways Sinergia Consortium, Switzerland & Contributors
           All rights reserved.\n""".format(__current_year__))
 
 def usage():
