@@ -87,6 +87,8 @@ Installation of the Connectome Mapper 3 has been facilitated through the distrib
 
 You should see the docker image "connectomemapper-bidsapp" with tag "|release|" is now available.
 
+* You are ready to use the Connectome Mapper 3 BIDS App from the terminal. See its `commandline usage <usage.html>`_.
+
 
 The Connectome Mapper 3 BIDSApp Manager (GUI)
 ==============================================
@@ -141,7 +143,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 	(py27cmp-gui)$ cd connectomemapper3/
 	(py27cmp-gui)$ python setup_gui.py install
 
-* You are ready to use the Connectome Mapper 3 BIDS App Manager
+* You are ready to use the Connectome Mapper 3 BIDS App Manager. See the `dedicated user guide <bidsappmanager.html>`_.
 
 Help/Questions
 --------------
