@@ -735,7 +735,7 @@ class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     'the linear frequency filtering parameters used for the initial linear spherical deconvolution step (default = [ 1 1 1 0 0 ]).')
 
     lambda_value = traits.Float(argstr='-norm_lambda %s', desc='the regularisation parameter lambda that controls the strength of the constraint (default = 1.0).')
-    maximum_harmonic_order = traits.Float(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
+    maximum_harmonic_order = traits.Int(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     threshold_value = traits.Float(argstr='-threshold %s', desc='the threshold below which the amplitude of the FOD is assumed to be zero, expressed as a fraction of the mean value of the initial FOD (default = 0.1)')
     iterations = traits.Int(argstr='-niter %s', desc='the maximum number of iterations to perform for each voxel (default = 50)')
 
