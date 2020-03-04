@@ -19,22 +19,25 @@ This software is distributed under the open-source license Modified BSD. See [li
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (C) 2009-2019, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Hospital Center and University of Geneva (UNIGE-HUG), Switzerland.
+Copyright (C) 2009-2020, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
 
 ### Usage
 This BIDS App has the following command line arguments:
 
         $connectomemapper3 --help
 
-        <!-- usage: run_connectomemapper3.py [-h]
-                                        [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
-                                        [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
-                                        [--dwi_pipeline_config DWI_PIPELINE_CONFIG]
-                                        [--func_pipeline_config FUNC_PIPELINE_CONFIG]
-                                        [-v]
-                                        bids_dir output_dir {participant,group}
+        <!-- usage: usage: run.py [-h]
+              [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
+              [--session_label SESSION_LABEL [SESSION_LABEL ...]]
+              [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
+              [--dwi_pipeline_config DWI_PIPELINE_CONFIG]
+              [--func_pipeline_config FUNC_PIPELINE_CONFIG]
+              [--number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL]
+              [--fs_license FS_LICENSE] [-v]
+              bids_dir output_dir {participant,group}
 
-        Example BIDS App entrypoint script.
+        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-beta-20200227
+
 
         positional arguments:
           bids_dir              The directory with the input dataset formatted
@@ -47,7 +50,7 @@ This BIDS App has the following command line arguments:
                                 participant level analyses can be run independently
                                 (in parallel) using the same output_dir.
 
-        optional arguments:
+       optional arguments:
           -h, --help            show this help message and exit
           --participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]
                                 The label(s) of the participant(s) that should be
@@ -56,6 +59,13 @@ This BIDS App has the following command line arguments:
                                 not include "sub-"). If this parameter is not provided
                                 all subjects should be analyzed. Multiple participants
                                 can be specified with a space separated list.
+          --session_label SESSION_LABEL [SESSION_LABEL ...]
+                                The label(s) of the session that should be analyzed.
+                                The label corresponds to ses-<session_label> from the
+                                BIDS spec (so it does not include "ses-"). If this
+                                parameter is not provided all sessions should be
+                                analyzed. Multiple sessions can be specified with a
+                                space separated list.
           --anat_pipeline_config ANAT_PIPELINE_CONFIG
                                 Configuration .txt file for processing stages of the
                                 anatomical MRI processing pipeline
@@ -65,7 +75,12 @@ This BIDS App has the following command line arguments:
           --func_pipeline_config FUNC_PIPELINE_CONFIG
                                 Configuration .txt file for processing stages of the
                                 fMRI processing pipeline
-          -v, --version         show program's version number and exit -->
+          --number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL
+                                The number of subjects to be processed in parallel
+                                (One core used by default).
+          --fs_license FS_LICENSE
+                                Freesurfer license.txt
+          -v, --version         show program's version number and exit
 
 <!-- #### Participant level
 To run it in participant level mode (for one participant):
