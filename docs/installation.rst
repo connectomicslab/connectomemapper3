@@ -1,8 +1,8 @@
 .. _installation:
 
-***********************************
-Installation Instruction for Users
-***********************************
+************************************
+Installation Instructions for Users
+************************************
 
 .. warning:: This software is for research purposes only and shall not be used for
              any clinical use. This software has not been reviewed or approved by
@@ -77,15 +77,17 @@ Installation of the Connectome Mapper 3 has been facilitated through the distrib
 
 * Get the latest release (|release|) of the BIDS App:
 
-.. parsed-literal::
+  .. parsed-literal::
 
-  $ docker pull sebastientourbier/connectomemapper-bidsapp:|release|
+    $ docker pull sebastientourbier/connectomemapper-bidsapp:|release|
 
 * To display all docker images available::
 
   $ docker images
 
 You should see the docker image "connectomemapper-bidsapp" with tag "|release|" is now available.
+
+* You are ready to use the Connectome Mapper 3 BIDS App from the terminal. See its `commandline usage <usage.html>`_.
 
 
 The Connectome Mapper 3 BIDSApp Manager (GUI)
@@ -117,6 +119,13 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
   $ git clone https://github.com/connectomicslab/connectomemapper3.git connectomemapper3
 
+* Create a branch and checkout the code corresponding to this version release:
+
+  .. parsed-literal::
+
+    $ git fetch
+    $ git checkout tags/|release| -b |release|
+
 * Create a miniconda2 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
 
 	$ conda env create -f connectomemapper3/environment.yml
@@ -125,7 +134,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
   $ source activate py27cmp-gui
 
-  or
+  or::
 
   $ conda activate py27cmp-gui
 
@@ -134,7 +143,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 	(py27cmp-gui)$ cd connectomemapper3/
 	(py27cmp-gui)$ python setup_gui.py install
 
-* You are ready to use the Connectome Mapper 3 BIDS App Manager
+* You are ready to use the Connectome Mapper 3 BIDS App Manager. See the `dedicated user guide <bidsappmanager.html>`_.
 
 Help/Questions
 --------------

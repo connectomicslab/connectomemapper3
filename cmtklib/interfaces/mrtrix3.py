@@ -319,7 +319,7 @@ class MRConvertInputSpec(CommandLineInputSpec):
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
     extract_at_axis = traits.Enum(1,2,3, argstr='-coord %s', position=1,
                            desc='"Extract data only at the coordinates specified. This option specifies the Axis. Must be used in conjunction with extract_at_coordinate.')
-    extract_at_coordinate = traits.List(traits.Float, argstr='%s', sep=',', position=2, minlen=1, maxlen=3,
+    extract_at_coordinate = traits.List(traits.Int, argstr='%s', sep=',', position=2, minlen=1, maxlen=3,
         desc='"Extract data only at the coordinates specified. This option specifies the coordinates. Must be used in conjunction with extract_at_axis. Three comma-separated numbers giving the size of each voxel in mm.')
     voxel_dims = traits.List(traits.Float, argstr='-vox %s', sep=',',
         position=3, minlen=3, maxlen=3,
@@ -735,7 +735,7 @@ class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     'the linear frequency filtering parameters used for the initial linear spherical deconvolution step (default = [ 1 1 1 0 0 ]).')
 
     lambda_value = traits.Float(argstr='-norm_lambda %s', desc='the regularisation parameter lambda that controls the strength of the constraint (default = 1.0).')
-    maximum_harmonic_order = traits.Float(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
+    maximum_harmonic_order = traits.Int(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     threshold_value = traits.Float(argstr='-threshold %s', desc='the threshold below which the amplitude of the FOD is assumed to be zero, expressed as a fraction of the mean value of the initial FOD (default = 0.1)')
     iterations = traits.Int(argstr='-niter %s', desc='the maximum number of iterations to perform for each voxel (default = 50)')
 

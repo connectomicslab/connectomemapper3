@@ -311,7 +311,7 @@ class RegistrationStage(Stage):
 
             mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[+1,+2,+3]), name='mr_convert_b0')
             mr_convert_b0.inputs.extract_at_axis = 3
-            mr_convert_b0.inputs.extract_at_coordinate = [0.0]
+            mr_convert_b0.inputs.extract_at_coordinate = [0]
 
             flow.connect([
                 (inputnode,mr_convert_b0,[('target','in_file')])
@@ -512,7 +512,7 @@ class RegistrationStage(Stage):
 
             mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[+1,+2,+3]), name='mr_convert_b0')
             mr_convert_b0.inputs.extract_at_axis = 3
-            mr_convert_b0.inputs.extract_at_coordinate = [0.0]
+            mr_convert_b0.inputs.extract_at_coordinate = [0]
 
             flow.connect([
                 (inputnode,mr_convert_b0,[('target','in_file')])

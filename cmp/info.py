@@ -3,8 +3,7 @@
 _version_major = 3
 _version_minor = 0
 _version_micro = 0
-_version_extra = '-beta-20200206'
-
+_version_extra = '-beta-20200227'
 __release_date__ = '14.05.2019'
 
 __minor_version__ = "%s.%s" % (_version_major,
@@ -19,7 +18,7 @@ __version__ = "v%s.%s.%s%s" % (_version_major,
 __current_year__ = '2020'
 
 __author__ = 'The CMP3 developers'
-__copyright__ = 'Copyright 2009-{}, Brain Communication Pathways Sinergia Consortium'.format(__current_year__)
+__copyright__ = 'Copyright 2009-{}, Brain Communication Pathways Sinergia Consortium & Contributors'.format(__current_year__)
 __credits__ = ('Contributors: please check the ``.zenodo.json`` file at the top-level folder'
                'of the repository')
 __license__ = '3-clause BSD'

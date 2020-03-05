@@ -47,7 +47,7 @@ class Dipy_recon_config(HasTraits):
     # gradient_table = File
     local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
     local_model = Bool(True)
-    lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
+    lmax_order = Enum([2,4,6,8,10,12,14,16])
     # normalize_to_B0 = Bool(False)
     single_fib_thr = Float(0.7,min=0,max=1)
     recon_mode = Str
@@ -104,7 +104,7 @@ class MRtrix_recon_config(HasTraits):
     flip_table_axis = List(['x','y','z'])
     local_model_editor = Dict({False:'1:Tensor',True:'2:Constrained Spherical Deconvolution'})
     local_model = Bool(True)
-    lmax_order = Enum(['Auto',2,4,6,8,10,12,14,16])
+    lmax_order = Enum([2,4,6,8,10,12,14,16])
     normalize_to_B0 = Bool(False)
     single_fib_thr = Float(0.7,min=0,max=1)
     recon_mode = Str

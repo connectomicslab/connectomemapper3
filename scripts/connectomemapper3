@@ -13,7 +13,7 @@ from bids import BIDSLayout
 #CMP imports
 
 import cmp.project
-from cmp.info import __version__
+from cmp.info import __version__, __current_year__
 
 import warnings
 warnings.filterwarnings("ignore", message="UserWarning: No valid root directory found for domain 'derivatives'. Falling back on the Layout's root directory. If this isn't the intended behavior, make sure the config file for this domain includes a 'root' key.")
@@ -21,8 +21,8 @@ warnings.filterwarnings("ignore", message="UserWarning: No valid root directory 
 
 def info():
     print("\nConnectome Mapper {}".format(__version__))
-    print("""Copyright (C) 2009-2018, Brain Communication Pathways Sinergia Consortium, Switzerland
-          All rights reserved.\n""")
+    print("""Copyright (C) 2009-{}, Brain Communication Pathways Sinergia Consortium, Switzerland & Contributors
+          All rights reserved.\n""".format(__current_year__))
 
 def usage():
     print("Usage 1: connectomemapper3 bids_folder sub-<label> (ses-<label>) anatomical_ini_file process_anatomical")

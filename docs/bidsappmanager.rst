@@ -5,7 +5,7 @@ Graphical User Interface
 Introduction
 **************
 
-TBC
+Connectome Mapper 3 comes with a Graphical User Interface, the Connectome Mapper BIDS App manager, designed to facilitate the configuration of all pipeline stages, the configuration of the BIDS App run and its execution, and the inspection of the different stage outputs with appropriate viewers.
 
 .. figure:: images/mainWindow.png
 	:align: center

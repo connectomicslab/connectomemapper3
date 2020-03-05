@@ -22,7 +22,7 @@ jobs:
             - /tmp/cache/docker.tar.gz
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: true
+          docker_layer_caching: false
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m

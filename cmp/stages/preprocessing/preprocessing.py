@@ -257,7 +257,7 @@ class PreprocessingStage(Stage):
 
         mr_convert_b0 = pe.Node(interface=MRConvert(out_filename='b0.nii.gz',stride=[+1,+2,+3]), name='mr_convert_b0')
         mr_convert_b0.inputs.extract_at_axis = 3
-        mr_convert_b0.inputs.extract_at_coordinate = [0.0]
+        mr_convert_b0.inputs.extract_at_coordinate = [0]
 
         flow.connect([
             (processing_input,mr_convert_b0,[('diffusion','in_file')])
@@ -370,7 +370,7 @@ class PreprocessingStage(Stage):
 
         mr_convert_b0_resample = pe.Node(interface=MRConvert(out_filename='b0_resampled.nii.gz',stride=[+1,+2,+3]), name='mr_convert_b0_resample')
         mr_convert_b0_resample.inputs.extract_at_axis = 3
-        mr_convert_b0_resample.inputs.extract_at_coordinate = [0.0]
+        mr_convert_b0_resample.inputs.extract_at_coordinate = [0]
 
         # fs_mriconvert_b0 = pe.Node(interface=fs.MRIConvert(out_type='niigz',out_file='b0_resampled.nii.gz'),name="b0_resample")
         # fs_mriconvert_b0.inputs.vox_size = self.config.resampling

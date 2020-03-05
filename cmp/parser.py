@@ -29,6 +29,18 @@ def get():
                        'participants can be specified with a space separated list.',
                        nargs="+")
 
+    p.add_argument(
+        "--session_label",
+        help="""The label(s) of the
+        session that should be analyzed. The label
+        corresponds to ses-<session_label> from the BIDS
+        spec (so it does not include "ses-"). If this
+        parameter is not provided all sessions should be
+        analyzed. Multiple sessions can be specified
+        with a space separated list.""",
+        nargs="+",
+    )
+
     p.add_argument('--anat_pipeline_config', help='Configuration .txt file for processing stages of the anatomical MRI processing pipeline')
     p.add_argument('--dwi_pipeline_config', help='Configuration .txt file for processing stages of the diffusion MRI processing pipeline')
     p.add_argument('--func_pipeline_config', help='Configuration .txt file for processing stages of the fMRI processing pipeline')
