@@ -34,7 +34,7 @@ To run the docker image in participant level mode (for one participant):
             -v /home/localadmin/data/ds001:/bids_dir \\
             -v /media/localadmin/data/ds001/derivatives:/output_dir \\
             (-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \\)
-            sebastientourbier/connectomemapper3:|release \\|
+            sebastientourbier/connectomemapper3:|release| \\
             /bids_dir /output_dir participant --participant_label 01 \\(--session_label 01 \\)
           	--anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \\)
             (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \\)
