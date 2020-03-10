@@ -17,12 +17,7 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
   :alt: Documentation Status
   
 
-.. warning:: THIS SOFTWARE IS FOR RESEARCH PURPOSES ONLY AND SHALL NOT BE USED FOR
-  ANY CLINICAL USE. THIS SOFTWARE HAS NOT BEEN REVIEWED OR APPROVED BY
-  THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR
-  NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA
-  OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE
-  PROVISION OF PATIENT CARE.
+.. warning:: THIS SOFTWARE IS FOR RESEARCH PURPOSES ONLY AND SHALL NOT BE USED FOR ANY CLINICAL USE. THIS SOFTWARE HAS NOT BEEN REVIEWED OR APPROVED BY THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE PROVISION OF PATIENT CARE.
   
   
 *********
@@ -35,60 +30,29 @@ About
 
 ``Connectome Mapper 3``, part of the Connectome Mapping Toolkit (CMTK), implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
-The ``Connectome Mapper 3`` pipelines uses a combination of tools from well-known software
-packages, including `FSL <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki>`_, `FreeSurfer <https://surfer.nmr.mgh.harvard.edu/>`_, `ANTs <http://stnava.github.io/ANTs/>`_, `MRtrix3 <http://www.mrtrix.org/>`_, `Dipy <https://nipy.org/dipy/>`_ and `AFNI <https://afni.nimh.nih.gov/>`_.
-These pipelines were designed to provide the best software implementation for each
-state of processing, and will be updated as newer and better neuroimaging
-software become available.
+The ``Connectome Mapper 3`` pipelines uses a combination of tools from well-known software packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy_ and AFNI_. These pipelines were designed to provide the best software implementation for each state of processing, and will be updated as newer and better neuroimaging software become available.
 
 This tool allows you to easily do the following:
 
-- Take T1 / Diffusion / resting-state MRI data from raw to multi-resolution connection matrices.
-- Implement tools from different software packages.
-- Achieve optimal data processing quality by using the best tools available
-- Automate and parallelize processing steps, which provides a significant
-  speed-up from typical linear, manual processing.
+  * Take T1 / Diffusion / resting-state MRI data from raw to multi-resolution connection matrices.
+  * Implement tools from different software packages.
+  * Achieve optimal data processing quality by using the best tools available
+  * Automate and parallelize processing steps, which provides a significant speed-up from typical linear, manual processing.
 
 Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which provide a frozen environment where versions of all external softwares and libraries are fixed.
 
+.. _FSL: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki
 
-.. _getting_started:
+.. _FreeSurfer: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Getting started
+.. _ANTs: http://stnava.github.io/ANTs/
 
-   installation
+.. _MRtrix3: http://www.mrtrix.org/
 
-.. _user-docs:
+.. _Dipy: https://nipy.org/dipy/
 
-.. toctree::
-   :maxdepth: 2
-   :caption: User Documentation
+.. _AFNI: https://afni.nimh.nih.gov/
 
-   cmpbackground
-   bidsappmanager
-   usage
-
-.. _user-usecases:
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Examples & Tutorials
-
-   datalad
-   runonhpc
-
-.. _about-docs:
-
-.. toctree::
-   :maxdepth: 1
-   :caption: About Connectome Mapper
-
-   LICENSE
-   changes
-   citing
-   contributing
 
 *********
 Funding
@@ -110,8 +74,55 @@ Aknowledgment
 
 If your are using the Connectome Mapper 3 in your work, please acknowledge this software and its dependencies. See :ref:`Citing <citing>` for more details.
 
+Help/Questions
+--------------
+
+If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_. Code bugs can be reported by creating a "New Issue" on the `source code repository <https://github.com/connectomicslab/connectomemapper3/issues>`_.
+
 ***********************
 Eager to contribute?
 ***********************
 
 See :ref:`Contributing to Connectome Mapper <contributing>` for more details.
+
+***********************
+Contents
+***********************
+
+.. _getting_started:
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Getting started
+
+   installation
+
+.. _user-docs:
+
+.. toctree::
+   :maxdepth: 2
+   :caption: User Documentation
+
+   usage
+   bidsappmanager
+   support
+
+.. _user-usecases:
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples & Tutorials
+
+   datalad
+   runonhpc
+
+.. _about-docs:
+
+.. toctree::
+   :maxdepth: 1
+   :caption: About Connectome Mapper
+
+   LICENSE
+   changes
+   citing
+   contributing
