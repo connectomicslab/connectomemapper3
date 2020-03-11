@@ -6,7 +6,7 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 Connectome Mapper 3 implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper (CMP) 3,
 from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
-![Image not found](https://connectome-mapper-3.readthedocs.io/en/latest/_images/flowchart.jpg)
+![Image not found](https://connectome-mapper-3.readthedocs.io/en/latest/_images/flowchart_bidsapp.png)
 
 Connectome Mapper 3 is distributed as a BIDS App, a container image which takes BIDS datasets as inputs.
 

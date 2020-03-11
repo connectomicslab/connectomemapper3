@@ -24,8 +24,8 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 About
 *********
 
-.. image:: images/flowchart.jpg
-	:height: 300
+.. image:: images/flowchart_bidsapp.png
+	:width: 1000
 	:align: center
 
 ``Connectome Mapper 3``, part of the Connectome Mapping Toolkit (CMTK), implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
