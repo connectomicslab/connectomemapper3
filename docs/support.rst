@@ -1,3 +1,5 @@
+.. _support:
+
 Support, Bugs and New Feature Requests
 =======================================
 
