@@ -1,48 +1,10 @@
+.. _cmdusage:
+
 ***********************
 Commandline Usage
 ***********************
 
-Execution and the BIDS format
-=============================
-
-``Connectome Mapper 3`` is distributed as BIDS App which adopts the :abbr:`BIDS (Brain Imaging Data Structure)` standard for data organization and takes as principal input the path of the dataset that is to be processed. The input dataset is required to be in valid `BIDS` format, and it must include at least a T1w or MPRAGE structural image and a DWI and/or resting-state fMRI image.
-
-For instance, a BIDS dataset with T1w, DWI and rs-fMRI images should adopt the following organization, naming, and file formats:::
-
-    ds-example/
-        
-        README
-        CHANGES
-        participants.tsv
-        dataset_description.json
-        
-        sub-01/
-            anat/
-                sub-01_T1w.nii.gz
-                sub-01_T1w.json
-            dwi/
-                sub-01_dwi.nii.gz
-                sub-01_dwi.json
-                sub-01_dwi.bvec
-                sub-01_dwi.bval
-            func/
-                sub-01_task-rest_bold.nii.gz
-                sub-01_task-rest_bold.json
-        
-        ...
-
-        sub-<subject_label>/
-            anat/
-                sub-<subject_label>_T1w.nii.gz
-                sub-<subject_label>_T1w.json
-            ...
-        ...
-
-For more information about BIDS and BIDS-Apps, please consult the `BIDS Website <https://bids.neuroimaging.io/>`_, the `Online BIDS Specifications <https://bids-specification.readthedocs.io/en/stable/>`_, and the `BIDSApps Website <https://bids-apps.neuroimaging.io/>`_. `HeuDiConv <https://github.com/nipy/heudiconv>`_ can assist you in converting DICOM brain imaging data to BIDS. A nice tutorial can be found @ `BIDS Tutorial Series: HeuDiConv Walkthrough <http://reproducibility.stanford.edu/bids-tutorial-series-part-2a/>`_ .
-
-.. important:: 
-    Before using any BIDS App, we highly recommend you to validate your BIDS structured dataset with the free, online `BIDS Validator <http://bids-standard.github.io/bids-validator/>`_.
-
+``Connectome Mapper 3`` is distributed as a BIDS App which adopts the :abbr:`BIDS (Brain Imaging Data Structure)` standard for data organization and takes as principal input the path of the dataset that is to be processed. The input dataset is required to be in valid `BIDS` format, and it must include at least a T1w or MPRAGE structural image and a DWI and/or resting-state fMRI image. See :ref:`CMP3 and the BIDS format` page that provides links for more information about BIDS and BIDS-Apps as well as an example dataset organization and naming.
 
 Commandline Arguments
 =============================
@@ -53,7 +15,8 @@ The command to run ``Connectome Mapper 3`` follows the `BIDS-Apps <https://githu
 		:ref: cmp.parser.get
 		:prog: connectomemapper3
 
-
+.. important:: 
+    Before using any BIDS App, we highly recommend you to validate your BIDS structured dataset with the free, online `BIDS Validator <http://bids-standard.github.io/bids-validator/>`_.
 
 Participant Level Analysis
 ===========================
