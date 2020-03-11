@@ -103,9 +103,10 @@ Contents
    :maxdepth: 2
    :caption: User Documentation
 
+   cmpbids
    usage
    bidsappmanager
-   support
+   outputs
 
 .. _user-usecases:
 
@@ -126,3 +127,4 @@ Contents
    changes
    citing
    contributing
+   support
