@@ -88,30 +88,30 @@ jobs:
           name: Get test data from ds000005
           command: |
             mkdir -p /tmp/data
-            if [[ ! -d /tmp/data/ds005 ]]; then
+            if [[ ! -d /tmp/data/ds-sample-dsi ]]; then
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O ds005_downsampled.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f32a429ad5a101f977eb75"
-              tar xvzf ds005_downsampled.tar.gz -C /tmp/data/
+                -O ds-sample-dsi.tar.gz "https://osf.io/eq7wg"
+              tar xvzf ds-sample-dsi.tar.gz -C /tmp/data/
             else
-              echo "Dataset ds000005 was cached"
+              echo "Dataset ds-sample-dsi was cached"
             fi
       - run:
           name: Get FreeSurfer derivatives for ds000005
           command: |
-            if [[ ! -d /tmp/data/ds005/derivatives/freesurfer ]]; then
-              mkdir -p /tmp/data/ds005/derivatives
+            if [[ ! -d /tmp/data/ds-sample-dsi/derivatives/freesurfer ]]; then
+              mkdir -p /tmp/data/ds-sample-dsi/derivatives
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O ds005_derivatives_freesurfer.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/58fe59eb594d900250960180"
-              tar xvzf ds005_derivatives_freesurfer.tar.gz -C /tmp/data/ds005/derivatives
+                -O ds-sample-freesurfer.tar.gz "https://osf.io/k4nr2"
+              tar xvzf ds-sample-freesurfer.tar.gz -C /tmp/data/ds-sample-dsi/derivatives
             else
               echo "FreeSurfer derivatives of ds000005 were cached"
             fi
       - run:
           name: Store FreeSurfer license file
           command: |
-            mkdir -p /tmp/data/ds005/code
-            cd /tmp/data/ds005/code
-            echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds005/code/license.txt
+            mkdir -p /tmp/data/ds-sample-dsi/code
+            cd /tmp/data/ds-sample-dsi/code
+            echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds-sample-dsi/code/license.txt
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -138,9 +138,9 @@ jobs:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: circleci/classic:201711-01
-    working_directory: /tmp/data/ds005
+    working_directory: /tmp/data/ds-sample-dsi
     environment:
-      - FS_LICENSE: /tmp/data/ds005/code/license.txt
+      - FS_LICENSE: /tmp/data/ds-sample-dsi/code/license.txt
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
@@ -148,7 +148,7 @@ jobs:
           name: Check whether build should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds005\]' )" != "" ]]; then
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds-sample-dsi\]' )" != "" ]]; then
               echo "Skipping ds000005 build"
               circleci step halt
             fi
@@ -156,10 +156,10 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - ds005-anat-v12-{{ .Branch }}-{{ epoch }}
-            - ds005-anat-v12-{{ .Branch }}
-            - ds005-anat-v12-master
-            - ds005-anat-v12-
+            - ds-sample-dsi-anat-v12-{{ .Branch }}-{{ epoch }}
+            - ds-sample-dsi-anat-v12-{{ .Branch }}
+            - ds-sample-dsi-anat-v12-master
+            - ds-sample-dsi-anat-v12-
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
@@ -172,43 +172,43 @@ jobs:
               docker images
             fi
       - run:
-          name: Run anatomical workflow on ds005
+          name: Run anatomical workflow on ds-sample-dsi
           no_output_timeout: 4h
           command: |
             # Get version, update files.
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
             docker run -it --rm \
-                -v /tmp/data/ds005:/tmp \
+                -v /tmp/data/ds-sample-dsi:/tmp \
                 -v /home/circleci/src/connectomemapper3/config:/tmp/config \
                 sebastientourbier/connectomemapper3 \
                 /tmp /tmp/derivatives participant --participant_label 01 \
                 --anat_pipeline_config /tmp/config/ref_anatomical_config.ini
 
       - save_cache:
-         key: ds005-anat-v12-{{ .Branch }}-{{ epoch }}
+         key: ds-sample-dsi-anat-v12-{{ .Branch }}-{{ epoch }}
          paths:
-            - /tmp/data/ds005/derivatives/cmp
+            - /tmp/data/ds-sample-dsi/derivatives/cmp
       - run:
           name: Checking outputs of Connectome Mapper run (anatomical pipeline only)
           command: |
-            mkdir -p /tmp/data/ds005/test
+            mkdir -p /tmp/data/ds-sample-dsi/test
             # Get all files in derivatives except the _*.json interface hash generated by nipype (find) / remove the full path of the derivatives (sed) / sor the files and write it to a text file
-            find /tmp/data/ds005/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/ds005/derivatives/++ | sort > /tmp/data/ds005/test/outputs.out
+            find /tmp/data/ds-sample-dsi/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/ds-sample-dsi/derivatives/++ | sort > /tmp/data/ds-sample-dsi/test/outputs.out
             #exit $?
       - run:
           name: Clean working directory
           when: always
           command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/data/ds005
-            find /tmp/data/ds005/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
+            sudo chown $(id -un):$(id -gn) -R /tmp/data/ds-sample-dsi
+            find /tmp/data/ds-sample-dsi/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
       - store_artifacts:
-          path: /tmp/data/ds005/test
+          path: /tmp/data/ds-sample-dsi/test
       - store_artifacts:
-          path: /tmp/data/ds005/derivatives/cmp
+          path: /tmp/data/ds-sample-dsi/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/ds005/derivatives/nipype
+          path: /tmp/data/ds-sample-dsi/derivatives/nipype
 
   build_docs:
     machine:
@@ -310,7 +310,7 @@ workflows:
       #     filters:
       #       branches:
       #         ignore:
-      #           - /ds005\/.*/
+      #           - /ds-sample-dsi\/.*/
       #       tags:
       #         only: /.*/
 
