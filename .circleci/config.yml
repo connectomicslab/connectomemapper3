@@ -85,7 +85,7 @@ jobs:
             - data-{{ epoch }}
             - data-
       - run:
-          name: Get test data from ds000005
+          name: Get test data from ds-sample
           command: |
             mkdir -p /tmp/data
             if [[ ! -d /tmp/data/ds-sample ]]; then
@@ -149,7 +149,7 @@ jobs:
           command: |
             cd /home/circleci/src/connectomemapper3
             if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds-sample\]' )" != "" ]]; then
-              echo "Skipping ds000005 build"
+              echo "Skipping ds-sample build"
               circleci step halt
             fi
       - attach_workspace:
