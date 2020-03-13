@@ -5,8 +5,6 @@ FROM ubuntu:xenial-20181218
 COPY files/neurodebian.gpg /root/.neurodebian.gpg
 
 ## Install miniconda2 and CMP dependencies including exfat libraries for exfat-formatted hard-drives (only MAC?) : exfat-fuse exfat-utils
-ENV FS_LICENSE /output_dir/code/license.txt
-
 RUN apt-get update && apt-get -qq -y install locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
