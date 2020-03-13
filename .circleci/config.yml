@@ -156,10 +156,10 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - ds-sample-anat-v12-{{ .Branch }}-{{ epoch }}
-            - ds-sample-anat-v12-{{ .Branch }}
-            - ds-sample-anat-v12-master
-            - ds-sample-anat-v12-
+            - ds-sample-v12-{{ .Branch }}-{{ epoch }}
+            - ds-sample-v12-{{ .Branch }}
+            - ds-sample-v12-master
+            - ds-sample-v12-
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
@@ -172,21 +172,22 @@ jobs:
               docker images
             fi
       - run:
-          name: Run anatomical workflow on ds-sample
+          name: Run anatomical and diffusion pipelines on ds-sample
           no_output_timeout: 4h
           command: |
             # Get version, update files.
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
             docker run -it --rm \
-                -v /tmp/data/ds-sample:/tmp \
-                -v /home/circleci/src/connectomemapper3/config:/tmp/config \
+                -v /tmp/data/ds-sample:/bids_dir \
+                -v /tmp/data/ds-sample/derivatives:/output_dir \
                 sebastientourbier/connectomemapper3 \
-                /tmp /tmp/derivatives participant --participant_label 01 \
-                --anat_pipeline_config /tmp/config/ref_anatomical_config.ini
+                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
+                --anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \
+                --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini
 
       - save_cache:
-         key: ds-sample-anat-v12-{{ .Branch }}-{{ epoch }}
+         key: ds-sample-v12-{{ .Branch }}-{{ epoch }}
          paths:
             - /tmp/data/ds-sample/derivatives/cmp
       - run:
