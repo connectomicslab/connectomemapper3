@@ -228,8 +228,8 @@ for tool in tools:
 print('> Set $FS_LICENSE which points to FreeSurfer license location (BIDS App)')
 
 
-if os.access(os.path.join('/tmp','code','license.txt'),os.F_OK):
-    os.environ['FS_LICENSE'] = os.path.join('/tmp','code','license.txt')
+if os.access(os.path.join('/bids_dir¨','code','license.txt'),os.F_OK):
+    os.environ['FS_LICENSE'] = os.path.join('/bids_dir','code','license.txt')
     # Not anymore needed as we are using the environment variable
     # print('... src : {}'.format(os.path.join('/tmp','code','license.txt')))
     # print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))

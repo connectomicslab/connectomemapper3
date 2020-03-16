@@ -786,7 +786,8 @@ class CMP_BIDSAppWindow(HasTraits):
                # '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(self.fs_average),
                ##'-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
                ##'-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)
-               '-v', '{}:/tmp'.format(self.bids_root),
+               '-v', '{}:/bids_dir'.format(self.bids_root),
+               '-v', '{}/derivatives:/output_dir'.format(self.bids_root),
                #'-v', '{}:/tmp/derivatives'.format(os.path.join(self.bids_root,'derivatives')),
                ]
 
@@ -802,8 +803,8 @@ class CMP_BIDSAppWindow(HasTraits):
         cmd.append('{}:{}'.format(os.geteuid(),os.getegid()))
 
         cmd.append('sebastientourbier/connectomemapper-bidsapp:{}'.format(bidsapp_tag))
-        cmd.append('/tmp')
-        cmd.append('/tmp/derivatives')
+        cmd.append('/bids_dir')
+        cmd.append('/output_dir')
         cmd.append('participant')
 
         cmd.append('--participant_label')
