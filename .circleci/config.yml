@@ -5,7 +5,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
       SCRATCH: "/scratch"
     docker:
-      - image: docker:19.03.1-git
+      - image: docker:19.03.5-git 
     working_directory: tmp/src/connectomemapper3
     steps:
       - run:
@@ -77,7 +77,7 @@ jobs:
   get_data:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201711-01
+      image: docker:19.03.5-git 
     working_directory: /home/circleci/data
     steps:
       - restore_cache:
@@ -136,8 +136,12 @@ jobs:
 
   test:
     machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201711-01
+      ## Ubuntu 14.04 with Docker 17.10.0-ce
+      #image: circleci/classic:201711-01
+      
+      # Ubuntu 14.04 with Docker 18.06.0-ce
+      image: docker:19.03.5-git 
+
     working_directory: /tmp/data/ds-sample
     environment:
       - FS_LICENSE: /tmp/data/ds-sample/code/license.txt
@@ -213,7 +217,7 @@ jobs:
 
   build_docs:
     machine:
-      image: circleci/classic:201711-01
+      image: docker:19.03.5-git 
     working_directory: /home/circleci/out/docs
     steps:
       - checkout:
@@ -257,7 +261,7 @@ jobs:
   deploy_docker:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201711-01
+      image: docker:19.03.5-git 
     working_directory: /tmp/src/connectomemapper3
     steps:
       - attach_workspace:
