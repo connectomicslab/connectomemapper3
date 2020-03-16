@@ -112,6 +112,7 @@ jobs:
             mkdir -p /tmp/data/ds-sample/code
             cd /tmp/data/ds-sample/code
             echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds-sample/code/license.txt
+            cat /tmp/data/ds-sample/code/license.txt
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -182,13 +183,15 @@ jobs:
             # Get version, update files.
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
+            cat /tmp/data/ds-sample/code/license.txt
             docker run -it --rm \
                 -v /tmp/data/ds-sample:/bids_dir \
                 -v /tmp/data/ds-sample/derivatives:/output_dir \
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
                 --anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \
-                --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini
+                --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \
+                --fs_license /bids_dir/code/license.txt
 
       - save_cache:
          key: ds-sample-v12-{{ .Branch }}-{{ epoch }}
