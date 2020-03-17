@@ -90,7 +90,7 @@ jobs:
             mkdir -p /tmp/data
             if [[ ! -d /tmp/data/ds-sample ]]; then
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
-                -O ds-sample.tar.gz "https://zenodo.org/record/3708963/files/ds-sample.tar.gz?download=1"
+                -O ds-sample.tar.gz "https://zenodo.org/record/3712762/files/ds-sample.tar.gz?download=1"
               tar xvzf ds-sample.tar.gz -C /tmp/data/
             else
               echo "Dataset ds-sample was cached"
@@ -101,7 +101,7 @@ jobs:
             if [[ ! -d /tmp/data/ds-sample/derivatives/freesurfer ]]; then
               mkdir -p /tmp/data/ds-sample/derivatives
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
-                -O freesurfer.tar.gz "https://zenodo.org/record/3708963/files/freesurfer.tar.gz?download=1"
+                -O freesurfer.tar.gz "https://zenodo.org/record/3712762/files/freesurfer.tar.gz?download=1"
               tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives
             else
               echo "FreeSurfer derivatives of ds-sample were cached"
