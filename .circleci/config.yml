@@ -184,6 +184,9 @@ jobs:
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
             cat /tmp/data/ds-sample/code/license.txt
+            ls -la  /tmp/data/ds-sample
+            ls -la  /tmp/data/ds-sample/code
+            ls -la  /tmp/data/ds-sample/derivatives
             docker run -it --rm \
                 -v /tmp/data/ds-sample:/bids_dir \
                 -v /tmp/data/ds-sample/derivatives:/output_dir \
