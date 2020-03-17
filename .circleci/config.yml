@@ -80,32 +80,24 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: /home/circleci/data
     steps:
-      - restore_cache:
-          keys:
-            - data-{{ epoch }}
-            - data-
       - run:
           name: Get test data from ds-sample
           command: |
             mkdir -p /tmp/data
-            if [[ ! -d /tmp/data/ds-sample ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
-                -O ds-sample.tar.gz "https://zenodo.org/record/3712762/files/ds-sample.tar.gz?download=1"
-              tar xvzf ds-sample.tar.gz -C /tmp/data/
-            else
-              echo "Dataset ds-sample was cached"
-            fi
+            wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
+              -O ds-sample.tar.gz "https://zenodo.org/record/3712762/files/ds-sample.tar.gz?download=1"
+            tar xvzf ds-sample.tar.gz -C /tmp/data/
+            echo "Dataset ds-sample has been successfully downloaded"
+
       - run:
           name: Get FreeSurfer derivatives for ds-sample
           command: |
-            if [[ ! -d /tmp/data/ds-sample/derivatives/freesurfer ]]; then
-              mkdir -p /tmp/data/ds-sample/derivatives
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
-                -O freesurfer.tar.gz "https://zenodo.org/record/3712762/files/freesurfer.tar.gz?download=1"
-              tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives
-            else
-              echo "FreeSurfer derivatives of ds-sample were cached"
-            fi
+            mkdir -p /tmp/data/ds-sample/derivatives
+            wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
+              -O freesurfer.tar.gz "https://zenodo.org/record/3712762/files/freesurfer.tar.gz?download=1"
+            tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives       
+            echo "FreeSurfer derivatives of ds-sample  have been successfully downloaded"
+            
       - run:
           name: Store FreeSurfer license file
           command: |
@@ -161,10 +153,10 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - ds-sample-v12-{{ .Branch }}-{{ epoch }}
-            - ds-sample-v12-{{ .Branch }}
-            - ds-sample-v12-master
-            - ds-sample-v12-
+            - ds-sample-derivatives-{{ .Branch }}-{{ epoch }}
+            - ds-sample-derivatives-{{ .Branch }}
+            - ds-sample-derivatives-master
+            - ds-sample-derivatives-
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
@@ -197,9 +189,9 @@ jobs:
                 --fs_license /bids_dir/code/license.txt
 
       - save_cache:
-         key: ds-sample-v12-{{ .Branch }}-{{ epoch }}
+         key: ds-sample-derivatives-{{ .Branch }}-{{ epoch }}
          paths:
-            - /tmp/data/ds-sample/derivatives/cmp
+            - /tmp/data/ds-sample/derivatives
       - run:
           name: Checking outputs of Connectome Mapper run (anatomical pipeline only)
           command: |
