@@ -176,7 +176,7 @@ RUN apt-get update && \
     libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev && \
     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
     cd mrtrix3 && \
-    git checkout dev && \
+    git checkout 3.0_RC3_latest && \
     #git checkout 3.0_RC3 && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
