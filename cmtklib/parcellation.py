@@ -1338,8 +1338,7 @@ class ParcellateThalamus(BaseInterface):
         Thresh = 0.05
         # Creating MaxProb
         Ispams = Vspams.copy()
-        ind = np.where(Ispams < Thresh)
-        Ispams[ind] = 0
+        Ispams[Ispams < Thresh] = 0
         ind = np.where(np.sum(Ispams,axis=3) == 0)
         MaxProb = Ispams.argmax(axis=3) + 1
         MaxProb[ind] = 0;
@@ -1361,8 +1360,7 @@ class ParcellateThalamus(BaseInterface):
         del tempImage, T, Vspams, Ij
 
         # Creating MaxProb
-        ind = np.where(Ispams < Thresh)
-        Ispams[ind] = 0
+        Ispams[Ispams < Thresh] = 0
         ind = np.where(np.sum(Ispams,axis=3) == 0)
         MaxProb = Ispams.argmax(axis=3) + 1
         MaxProb[ind] = 0;
@@ -1473,8 +1471,7 @@ class ParcellateThalamus(BaseInterface):
             del tempM
 
             # Creating MaxProb
-            ind = np.where(IspamL < Thresh)
-            IspamL[ind] = 0
+            IspamL[IspamL < Thresh] = 0
             ind = np.where(np.sum(IspamL,axis=3) == 0)
             #MaxProbL = IspamL.max(axis=3)
             MaxProbL = np.argmax(IspamL,axis=3) + 1
@@ -1493,8 +1490,7 @@ class ParcellateThalamus(BaseInterface):
             del tempM
 
             # Creating MaxProb
-            ind = np.where(IspamR < Thresh)
-            IspamR[ind] = 0
+            IspamR[IspamR < Thresh] = 0
             ind = np.where(np.sum(IspamR,axis=3) == 0)
             #MaxProbR = IspamR.max(axis=3)
             MaxProbR = np.argmax(IspamR,axis=3) + 1
@@ -1530,8 +1526,7 @@ class ParcellateThalamus(BaseInterface):
             MaxProb = MaxProbL + MaxProbR
         else:
             # Creating MaxProb
-            ind = np.where(Ispams < Thresh)
-            Ispams[ind] = 0
+            Ispams[Ispams < Thresh] = 0
             ind = np.where(np.sum(Ispams,axis=3) == 0)
             MaxProb = Ispams.argmax(axis=3) + 1
             MaxProb[ind] = 0;
