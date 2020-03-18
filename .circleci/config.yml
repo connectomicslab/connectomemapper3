@@ -282,7 +282,7 @@ jobs:
           no_output_timeout: 40m
           command: |
             # Get version, update files.
-            THISVERSION=$( python /home/circleci/src/multiscalebrainparcellator/get_version.py )
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
             echo "THISVERSION : ${THISVERSION}"
             echo "CIRCLE_TAG : ${CIRCLE_TAG}"
 
@@ -318,7 +318,7 @@ jobs:
           no_output_timeout: 40m
           command: |
             # Get version, update files.
-            THISVERSION=$( python /home/circleci/src/multiscalebrainparcellator/get_version.py )
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
             echo "THISVERSION : ${THISVERSION}"
             echo "CIRCLE_BRANCH : ${CIRCLE_BRANCH}"
 
