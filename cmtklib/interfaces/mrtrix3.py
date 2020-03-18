@@ -223,15 +223,15 @@ class DWIDenoise(CommandLine):
         return None
 
 class DWIBiasCorrectInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='The input image series to be corrected')
-    out_file = File(genfile=True, argstr='%s', position=-1, desc='The output corrected image series')
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=1, desc='The input image series to be corrected')
+    out_file = File(genfile=True, argstr='%s', position=2, desc='The output corrected image series')
 
     mask = File(argstr="-mask %s",position=2,mandatory=False,desc="Manually provide a mask image for bias field estimation (optional)")
     out_bias = File(genfile=True, argstr='-bias %s', position=3, desc='Output the estimated bias field')
 
     _xor_inputs = ('use_ants', 'use_fsl')
-    use_ants = traits.Bool(argstr='-ants', position=1, desc="Use ANTS N4 to estimate the inhomogeneity field", xor=_xor_inputs)
-    use_fsl = traits.Bool(argstr='-fsl', position=1, desc="Use FSL FAST to estimate the inhomogeneity field", xor=_xor_inputs)
+    use_ants = traits.Bool(argstr='-ants', position=-1, desc="Use ANTS N4 to estimate the inhomogeneity field", xor=_xor_inputs)
+    use_fsl = traits.Bool(argstr='-fsl', position=-1, desc="Use FSL FAST to estimate the inhomogeneity field", xor=_xor_inputs)
 
     force_writing = traits.Bool(argstr='-force', position=4, desc="Force file overwriting.")
     #quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
