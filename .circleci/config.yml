@@ -256,7 +256,45 @@ jobs:
       - store_artifacts:
           path: /home/circleci/out/docs
 
-  deploy_docker:
+  deploy_docker_release:
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: ubuntu-1604:201903-01
+    working_directory: /tmp/src/connectomemapper3
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f /tmp/cache/docker.tar.gz ]; then
+              sudo apt update && sudo apt -y install pigz
+              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+              docker images
+            fi
+      - run:
+          name: Deploy release with version tag to Docker Hub
+          no_output_timeout: 40m
+          command: |
+            # Get version, update files.
+            THISVERSION=$( python /home/circleci/src/multiscalebrainparcellator/get_version.py )
+            echo "THISVERSION : ${THISVERSION}"
+            echo "CIRCLE_TAG : ${CIRCLE_TAG}"
+
+            if [[ -n "$DOCKER_PASS" ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+              if [[ -n "$CIRCLE_TAG" ]]; then
+                docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
+                docker push sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
+              fi
+            fi
+
+  deploy_docker_latest:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: ubuntu-1604:201903-01
@@ -276,18 +314,18 @@ jobs:
               docker images
             fi
       - run:
-          name: Deploy to Docker Hub
+          name: Deploy latest master to Docker Hub
           no_output_timeout: 40m
           command: |
+            # Get version, update files.
+            THISVERSION=$( python /home/circleci/src/multiscalebrainparcellator/get_version.py )
+            echo "THISVERSION : ${THISVERSION}"
+            echo "CIRCLE_BRANCH : ${CIRCLE_BRANCH}"
+
             if [[ -n "$DOCKER_PASS" ]]; then
               docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper3:unstable
-              docker push sebastientourbier/connectomemapper3:unstable
-              if [[ -n "$CIRCLE_TAG" ]]; then
-                docker push sebastientourbier/connectomemapper3:latest
-                docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper3:$CIRCLE_TAG
-                docker push sebastientourbier/connectomemapper3:$CIRCLE_TAG
-              fi
+              docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper-bidsapp:latest
+              docker push sebastientourbier/connectomemapper-bidsapp:latest
             fi
 
 workflows:
@@ -339,7 +377,7 @@ workflows:
             tags:
               only: /.*/
 
-      - deploy_docker:
+      - deploy_docker_release:
           requires:
             - build
             # - build_docs
@@ -352,3 +390,13 @@ workflows:
             # only act on version tags
             tags:
               only: /^v.*/
+      
+      - deploy_docker_latest:
+          requires:
+            - build
+            # - build_docs
+            - test
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              only: master
