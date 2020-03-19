@@ -18,7 +18,10 @@ __version__ = "v%s.%s.%s%s" % (_version_major,
 __current_year__ = '2020'
 
 __author__ = 'The CMP3 developers'
-__copyright__ = 'Copyright 2009-{}, Brain Communication Pathways Sinergia Consortium & Contributors'.format(__current_year__)
+
+__copyright__ = """Copyright (C) 2009-{}, Ecole Polytechnique Federale de Lausanne (EPFL), the University Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, & Contributors, 
+All rights reserved.\n""".format(__current_year__)
+
 __credits__ = ('Contributors: please check the ``.zenodo.json`` file at the top-level folder'
                'of the repository')
 __license__ = '3-clause BSD'
