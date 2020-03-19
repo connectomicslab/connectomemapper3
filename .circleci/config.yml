@@ -179,13 +179,19 @@ jobs:
             ls -la  /tmp/data/ds-sample
             ls -la  /tmp/data/ds-sample/code
             ls -la  /tmp/data/ds-sample/derivatives
+
+            #Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
+            rm /tmp/data/ds-sample/code/*.ini
+
+            #Execute BIDS App
             docker run -it --rm \
                 -v /tmp/data/ds-sample:/bids_dir \
                 -v /tmp/data/ds-sample/derivatives:/output_dir \
+                -v /home/circleci/src/connectomemapper3/config:/config \
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \
-                --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \
+                --anat_pipeline_config /config/ref_anatomical_config.ini \
+                --dwi_pipeline_config /config/ref_diffusion_config.ini \
                 --fs_license /bids_dir/code/license.txt
 
       - save_cache:
