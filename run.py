@@ -81,10 +81,10 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type,
 
     if project.subject_session != '': #Session structure
         # print('With session : {}'.format(project.subject_session))
-        subject_conf_file = os.path.join(subject_derivatives_dir,"{}_{}_{}_config.ini".format(project.subject,project.subject_session,pipeline_type))
+        subject_conf_file = os.path.join(subject_derivatives_dir,'cmp',project.subject,project.subject_session,"{}_{}_{}_config.ini".format(project.subject,project.subject_session,pipeline_type))
     else:
         # print('With NO session ')
-        subject_conf_file = os.path.join(subject_derivatives_dir,"{}_{}_config.ini".format(project.subject,pipeline_type))
+        subject_conf_file = os.path.join(subject_derivatives_dir,'cmp',project.subject,"{}_{}_config.ini".format(project.subject,pipeline_type))
 
     if os.path.isfile(subject_conf_file):
         print "WARNING: rewriting config file {}".format(subject_conf_file)
@@ -382,7 +382,7 @@ if args.analysis_level == "participant":
                     # while len(processes) > 0:
                     #     self.manage_bidsapp_procs(processes)
 
-                    proc = run(command=cmd,env={},log_filename=os.path.join(project.output_directory,'cmp','{}_{}_log.txt'.format(project.subject,project.subject_session)))
+                    proc = run(command=cmd,env={},log_filename=os.path.join(project.output_directory,'cmp',project.subject,project.subject_session,'{}_{}_log.txt'.format(project.subject,project.subject_session)))
                     processes.append(proc)
                 else:
                     print "... Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
@@ -433,7 +433,7 @@ if args.analysis_level == "participant":
                 cmd = create_cmp_command(project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
                 print("... cmd : {}".format(cmd))
 
-                proc = run(command=cmd,env={},log_filename=os.path.join(project.output_directory,'cmp','{}_log.txt'.format(project.subject)))
+                proc = run(command=cmd,env={},log_filename=os.path.join(project.output_directory,'cmp',project.subject,'{}_log.txt'.format(project.subject)))
                 processes.append(proc)
             else:
                 print "... Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)"
