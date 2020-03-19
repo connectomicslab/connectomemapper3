@@ -151,12 +151,12 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
-      - restore_cache:
-          keys:
-            - ds-sample-derivatives-{{ .Branch }}-{{ epoch }}
-            - ds-sample-derivatives-{{ .Branch }}
-            - ds-sample-derivatives-master
-            - ds-sample-derivatives-
+      # - restore_cache:
+      #     keys:
+      #       - ds-sample-derivatives-{{ .Branch }}-{{ epoch }}
+      #       - ds-sample-derivatives-{{ .Branch }}
+      #       - ds-sample-derivatives-master
+      #       - ds-sample-derivatives-
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
@@ -194,10 +194,10 @@ jobs:
                 --dwi_pipeline_config /config/ref_diffusion_config.ini \
                 --fs_license /bids_dir/code/license.txt
 
-      - save_cache:
-         key: ds-sample-derivatives-{{ .Branch }}-{{ epoch }}
-         paths:
-            - /tmp/data/ds-sample/derivatives
+      # - save_cache:
+      #    key: ds-sample-derivatives-{{ .Branch }}-{{ epoch }}
+      #    paths:
+      #       - /tmp/data/ds-sample/derivatives
       - run:
           name: Checking outputs of Connectome Mapper run (anatomical pipeline only)
           command: |
