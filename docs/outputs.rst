@@ -2,12 +2,12 @@
 Outputs of Connectome Mapper 3
 *****************************************
 
-Processed, or derivative, data are outputed to ``<bids_dataset/derivatives>/``. In this folder, a configuration file generated for each modality pipeline (i.e. anatomical/diffusion/fMRI) and used for processing each participant is saved as ``sub-<subject_label>_anatomical/diffusion/fMRI_config.ini``. It summarizes pipeline workflow options and parameters used for processing. An execution log for each processing case is saved as `<bids_dataset/derivatives>/cmp/sub-<subject_label>_log.txt``
+Processed, or derivative, data are outputed to ``<bids_dataset/derivatives>/``. 
 
 Main Connectome Mapper Derivatives
 ==========================================
 
-Main outputs produced by Connectome Mapper 3 are written to ``<bids_dataset/derivatives>/cmp/sub-<subject_label>/``. An execution log is saved as `<bids_dataset/derivatives>/cmp/sub-<subject_label>_log.txt``
+Main outputs produced by Connectome Mapper 3 are written to ``<bids_dataset/derivatives>/cmp/sub-<subject_label>/``. In this folder, a configuration file generated for each modality pipeline (i.e. anatomical/diffusion/fMRI) and used for processing each participant is saved as ``sub-<subject_label>_anatomical/diffusion/fMRI_config.ini``. It summarizes pipeline workflow options and parameters used for processing. An execution log of the full workflow is saved as `sub-<subject_label>_log.txt``
 
 Anatomical derivatives
 ------------------------
@@ -99,7 +99,7 @@ Diffusion derivatives in the individual ``DWI`` space are placed in each subject
 
 * The Fiber Orientation DIstribution (FOD) image from Constrained Spherical Deconvolution (CSD) fit (if performed):
 
-    - ``dwi/sub-<subject_label>]_model-CSD_FOD.nii.gz``
+    - ``dwi/sub-<subject_label>]_model-CSD_diffmodel.nii.gz``
 
 
 * The MAP-MRI fit for DSI and multi-shell DWI data (if performed):
