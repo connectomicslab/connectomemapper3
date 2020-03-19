@@ -594,6 +594,7 @@ class DiffusionPipeline(Pipeline):
                                             ('eddy_corrected.nii.gz.eddy_rotated_bvecs',self.subject+'_desc-eddyrotated.bvec'),
                                             ('eddy_corrected.nii.gz',self.subject+'_desc-eddycorrected_dwi.nii.gz'),
                                             ('dwi_brain_mask_resampled.nii.gz',self.subject+'_desc-brain_mask.nii.gz'),
+                                            ('brain_mask_resampled.nii.gz',self.subject+'_desc-brain_mask.nii.gz'),
                                             ('ADC',self.subject+'_model-DTI_MD'),
                                             ('FA',self.subject+'_model-DTI_FA'),
                                             ('diffusion_preproc_resampled_fa',self.subject+'_model-DTI_FA'),
@@ -602,8 +603,9 @@ class DiffusionPipeline(Pipeline):
                                             ('shore_rtop_signal.nii.gz','{}_model-SHORE_RTOP.nii.gz'.format(self.subject)),
                                             ('shore_fodf.nii.gz','{}_model-SHORE_FOD.nii.gz'.format(self.subject)),
                                             ('diffusion_resampled_CSD.mif',self.subject+'_model-CSD_diffmodel.mif'),
-                                            ('diffusion_shm_coeff.nii.gz','{}_model-CSD_SHM.nii.gz'.format(self.subject)),#Dipy
-                                            ('shm_coeff.nii.gz','{}_model-CSD_SHM.nii.gz'.format(self.subject)),#MRtrix
+                                            ('diffusion_shm_coeff.nii.gz','{}_model-CSD_diffmodel.nii.gz'.format(self.subject)),#Dipy
+                                            ('spherical_harmonics_image.nii.gz','{}_model-CSD_diffmodel.nii.gz'.format(self.subject)),#Mrtrix
+                                            ('shm_coeff.nii.gz','{}_model-CSD_diffmodel.nii.gz'.format(self.subject)),#MRtrix
                                             ('dwi_tensor.nii.gz','{}_desc-WLS_model-DTI_diffmodel.nii.gz'.format(self.subject)),#MRtrix
                                             ('grad.txt',self.subject+'_desc-grad_dwi.txt'),
                                             ('target_epicorrected',self.subject+'_desc-preproc_dwi'),
@@ -682,7 +684,7 @@ class DiffusionPipeline(Pipeline):
                                             #('diffusion_resampled_CSD_prob_tracked',self.subject+'_desc-PROB_tractogram'),
                                             ('eddy_corrected.nii.gz.eddy_rotated_bvecs',self.subject+'_desc-eddyrotated.bvec'),
                                             ('eddy_corrected.nii.gz',self.subject+'_desc-eddycorrected_dwi.nii.gz'),
-                                            ('dwi_brain_mask_resampled.nii.gz',self.subject+'_desc-brain_mask_resampled.nii.gz'),
+                                            ('dwi_brain_mask_resampled.nii.gz',self.subject+'_desc-brain_mask.nii.gz'),
                                             ('ADC',self.subject+'_model-DTI_MD'),
                                             ('FA',self.subject+'_model-DTI_FA'),
                                             ('diffusion_preproc_resampled_fa',self.subject+'_model-DTI_FA'),
@@ -691,8 +693,9 @@ class DiffusionPipeline(Pipeline):
                                             ('shore_rtop_signal.nii.gz','{}_model-SHORE_RTOP.nii.gz'.format(self.subject)),
                                             ('shore_fodf.nii.gz','{}_model-SHORE_FOD.nii.gz'.format(self.subject)),
                                             ('diffusion_resampled_CSD.mif',self.subject+'_model-CSD_diffmodel.mif'),
-                                            ('diffusion_shm_coeff.nii.gz','{}_model-CSD_SHM.nii.gz'.format(self.subject)),#Dipy
-                                            ('shm_coeff.nii.gz','{}_model-CSD_SHM.nii.gz'.format(self.subject)),#MRtrix
+                                            ('diffusion_shm_coeff.nii.gz','{}_model-CSD_diffmodel.nii.gz'.format(self.subject)),#Dipy
+                                            ('spherical_harmonics_image.nii.gz','{}_model-CSD_diffmodel.nii.gz'.format(self.subject)),#Mrtrix
+                                            ('shm_coeff.nii.gz','{}_model-CSD_diffmodel.nii.gz'.format(self.subject)),#MRtrix
                                             ('dwi_tensor.nii.gz','{}_desc-WLS_model-DTI_diffmodel.nii.gz'.format(self.subject)),#MRtrix
                                             ('grad.txt',self.subject+'_desc-grad_dwi.txt'),
                                             ('target_epicorrected',self.subject+'_desc-preproc_dwi'),
