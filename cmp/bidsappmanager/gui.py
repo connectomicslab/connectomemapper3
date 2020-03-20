@@ -813,21 +813,21 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('{}'.format(label))
 
         cmd.append('--anat_pipeline_config')
-        cmd.append('/tmp/code/ref_anatomical_config.ini')
+        cmd.append('/bids_dir/code/ref_anatomical_config.ini')
 
         if self.run_dmri_pipeline:
             cmd.append('--dwi_pipeline_config')
-            cmd.append('/tmp/code/ref_diffusion_config.ini')
+            cmd.append('/bids_dir/code/ref_diffusion_config.ini')
 
         if self.run_fmri_pipeline:
             cmd.append('--func_pipeline_config')
-            cmd.append('/tmp/code/ref_fMRI_config.ini')
+            cmd.append('/bids_dir/code/ref_fMRI_config.ini')
 
-        cmd.append('--number_of_participants_processed_in_parallel {}'.format(self.number_of_participants_processed_in_parallel))
         cmd.append('--fs_license {}'.format('/bids_dir/code/license.txt'))
 
+        cmd.append('--number_of_participants_processed_in_parallel {}'.format(self.number_of_participants_processed_in_parallel))
 
-        print('... Docker cmd 2 : {}'.format(cmd))
+        print('... BIDS App execution command: {}'.format(cmd))
 
         log_filename = os.path.join(self.bids_root,'derivatives','cmp','main_log-cmpbidsapp.txt')
 
