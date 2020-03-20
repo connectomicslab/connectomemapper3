@@ -608,6 +608,12 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
             self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
+        if not os.path.exists(os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline")):
+            try:
+                os.makedirs(os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline"))
+            except os.error:
+                print("%s was already existing" % os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline"))
+
         # Initialization
         if os.path.isfile(os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline","pypeline.log")):
             os.unlink(os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline","pypeline.log"))
