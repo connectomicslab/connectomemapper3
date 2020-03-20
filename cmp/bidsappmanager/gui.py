@@ -788,6 +788,7 @@ class CMP_BIDSAppWindow(HasTraits):
                ##'-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)
                '-v', '{}:/bids_dir'.format(self.bids_root),
                '-v', '{}/derivatives:/output_dir'.format(self.bids_root),
+               '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
                #'-v', '{}:/tmp/derivatives'.format(os.path.join(self.bids_root,'derivatives')),
                ]
 
@@ -823,6 +824,7 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('/tmp/code/ref_fMRI_config.ini')
 
         cmd.append('--number_of_participants_processed_in_parallel {}'.format(self.number_of_participants_processed_in_parallel))
+        cmd.append('--fs_license {}'.format('/bids_dir/code/license.txt'))
 
 
         print('... Docker cmd 2 : {}'.format(cmd))
