@@ -170,7 +170,7 @@ jobs:
             fi
       - run:
           name: Run anatomical and diffusion pipelines on ds-sample
-          no_output_timeout: 4h
+          no_output_timeout: 6h
           command: |
             # Get version, update files.
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
