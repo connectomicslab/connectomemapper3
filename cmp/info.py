@@ -3,8 +3,8 @@
 _version_major = 3
 _version_minor = 0
 _version_micro = 0
-_version_extra = '-beta-20200320'
-__release_date__ = '14.05.2019'
+_version_extra = '-beta-RC1'
+__release_date__ = '26.03.2020'
 
 __minor_version__ = "%s.%s" % (_version_major,
                                _version_minor)

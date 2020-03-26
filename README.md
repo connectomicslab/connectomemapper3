@@ -1,4 +1,4 @@
-## Connectome Mapper 3 BIDS App (UNDER DEVELOPMENT)
+## Connectome Mapper 3 BIDS App (Beta release candidate)
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=svg)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest)
 
@@ -36,7 +36,7 @@ This BIDS App has the following command line arguments:
               [--fs_license FS_LICENSE] [-v]
               bids_dir output_dir {participant,group}
 
-        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-beta-20200227
+        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-beta-RC1
 
 
         positional arguments:

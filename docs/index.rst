@@ -1,5 +1,5 @@
 
-Connectome Mapper 3 (UNDER DEVELOPMENT)
+Connectome Mapper 3 (Beta release candidate |release|)
 =======================================================
 
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
