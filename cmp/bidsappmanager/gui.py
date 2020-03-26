@@ -786,7 +786,9 @@ class CMP_BIDSAppWindow(HasTraits):
                # '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(self.fs_average),
                ##'-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
                ##'-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)
-               '-v', '{}:/tmp'.format(self.bids_root),
+               '-v', '{}:/bids_dir'.format(self.bids_root),
+               '-v', '{}/derivatives:/output_dir'.format(self.bids_root),
+               '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
                #'-v', '{}:/tmp/derivatives'.format(os.path.join(self.bids_root,'derivatives')),
                ]
 
@@ -802,8 +804,8 @@ class CMP_BIDSAppWindow(HasTraits):
         cmd.append('{}:{}'.format(os.geteuid(),os.getegid()))
 
         cmd.append('sebastientourbier/connectomemapper-bidsapp:{}'.format(bidsapp_tag))
-        cmd.append('/tmp')
-        cmd.append('/tmp/derivatives')
+        cmd.append('/bids_dir')
+        cmd.append('/output_dir')
         cmd.append('participant')
 
         cmd.append('--participant_label')
@@ -811,20 +813,21 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('{}'.format(label))
 
         cmd.append('--anat_pipeline_config')
-        cmd.append('/tmp/code/ref_anatomical_config.ini')
+        cmd.append('/bids_dir/code/ref_anatomical_config.ini')
 
         if self.run_dmri_pipeline:
             cmd.append('--dwi_pipeline_config')
-            cmd.append('/tmp/code/ref_diffusion_config.ini')
+            cmd.append('/bids_dir/code/ref_diffusion_config.ini')
 
         if self.run_fmri_pipeline:
             cmd.append('--func_pipeline_config')
-            cmd.append('/tmp/code/ref_fMRI_config.ini')
+            cmd.append('/bids_dir/code/ref_fMRI_config.ini')
+
+        cmd.append('--fs_license {}'.format('/bids_dir/code/license.txt'))
 
         cmd.append('--number_of_participants_processed_in_parallel {}'.format(self.number_of_participants_processed_in_parallel))
 
-
-        print('... Docker cmd 2 : {}'.format(cmd))
+        print('... BIDS App execution command: {}'.format(cmd))
 
         log_filename = os.path.join(self.bids_root,'derivatives','cmp','main_log-cmpbidsapp.txt')
 

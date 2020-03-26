@@ -20,12 +20,13 @@ print("Graphical Backend : {}".format(ETSConfig.toolkit))
 #CMP imports
 from cmp.bidsappmanager import gui
 
-from cmp.info import __version__
+from cmp.info import __version__,__copyright__ 
 
 
 def info():
     print("\nConnectome Mapper {} - BIDS App Manager ".format(__version__))
-    print("""Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland. All rights reserved.\n""")
+    print("""{}""".format(__copyright__ ))
+    
 def usage():
     print("Usage : cmpbidsappmanager ")
 

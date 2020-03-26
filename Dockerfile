@@ -69,7 +69,7 @@ RUN mkdir /bids_dir && \
 RUN mkdir /output_dir && \
     chmod -R 777 /output_dir
 
-ENV FS_LICENSE /output_dir/code/license.txt
+ENV FS_LICENSE /bids_dir/code/license.txt
 
 ENV LANG C.UTF-8 
 ENV LC_ALL C.UTF-8 

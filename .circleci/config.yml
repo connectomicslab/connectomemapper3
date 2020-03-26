@@ -5,7 +5,7 @@ jobs:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
       SCRATCH: "/scratch"
     docker:
-      - image: docker:19.03.1-git
+      - image: docker:19.03.1-git 
     working_directory: tmp/src/connectomemapper3
     steps:
       - run:
@@ -76,42 +76,35 @@ jobs:
 
   get_data:
     machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201711-01
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
     working_directory: /home/circleci/data
     steps:
-      - restore_cache:
-          keys:
-            - data-{{ epoch }}
-            - data-
       - run:
-          name: Get test data from ds000005
+          name: Get test data from ds-sample
           command: |
             mkdir -p /tmp/data
-            if [[ ! -d /tmp/data/ds005 ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O ds005_downsampled.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f32a429ad5a101f977eb75"
-              tar xvzf ds005_downsampled.tar.gz -C /tmp/data/
-            else
-              echo "Dataset ds000005 was cached"
-            fi
+            wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
+              -O ds-sample.tar.gz "https://zenodo.org/record/3712762/files/ds-sample.tar.gz?download=1"
+            tar xvzf ds-sample.tar.gz -C /tmp/data/
+            echo "Dataset ds-sample has been successfully downloaded"
+
       - run:
-          name: Get FreeSurfer derivatives for ds000005
+          name: Get FreeSurfer derivatives for ds-sample
           command: |
-            if [[ ! -d /tmp/data/ds005/derivatives/freesurfer ]]; then
-              mkdir -p /tmp/data/ds005/derivatives
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O ds005_derivatives_freesurfer.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/58fe59eb594d900250960180"
-              tar xvzf ds005_derivatives_freesurfer.tar.gz -C /tmp/data/ds005/derivatives
-            else
-              echo "FreeSurfer derivatives of ds000005 were cached"
-            fi
+            mkdir -p /tmp/data/ds-sample/derivatives
+            wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
+              -O freesurfer.tar.gz "https://zenodo.org/record/3712762/files/freesurfer.tar.gz?download=1"
+            tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives       
+            echo "FreeSurfer derivatives of ds-sample  have been successfully downloaded"
+            
       - run:
           name: Store FreeSurfer license file
           command: |
-            mkdir -p /tmp/data/ds005/code
-            cd /tmp/data/ds005/code
-            echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds005/code/license.txt
+            mkdir -p /tmp/data/ds-sample/code
+            cd /tmp/data/ds-sample/code
+            echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds-sample/code/license.txt
+            cat /tmp/data/ds-sample/code/license.txt
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -136,11 +129,12 @@ jobs:
 
   test:
     machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201711-01
-    working_directory: /tmp/data/ds005
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
+
+    working_directory: /tmp/data/ds-sample
     environment:
-      - FS_LICENSE: /tmp/data/ds005/code/license.txt
+      - FS_LICENSE: /tmp/data/ds-sample/code/license.txt
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
@@ -148,18 +142,18 @@ jobs:
           name: Check whether build should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds005\]' )" != "" ]]; then
-              echo "Skipping ds000005 build"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds-sample\]' )" != "" ]]; then
+              echo "Skipping ds-sample build"
               circleci step halt
             fi
       - attach_workspace:
           at: /tmp
-      - restore_cache:
-          keys:
-            - ds005-anat-v12-{{ .Branch }}-{{ epoch }}
-            - ds005-anat-v12-{{ .Branch }}
-            - ds005-anat-v12-master
-            - ds005-anat-v12-
+      # - restore_cache:
+      #     keys:
+      #       - ds-sample-derivatives-{{ .Branch }}-{{ epoch }}
+      #       - ds-sample-derivatives-{{ .Branch }}
+      #       - ds-sample-derivatives-master
+      #       - ds-sample-derivatives-
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
@@ -172,47 +166,62 @@ jobs:
               docker images
             fi
       - run:
-          name: Run anatomical workflow on ds005
-          no_output_timeout: 4h
+          name: Run anatomical and diffusion pipelines on ds-sample
+          no_output_timeout: 6h
           command: |
             # Get version, update files.
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
-            docker run -it --rm \
-                -v /tmp/data/ds005:/tmp \
-                -v /home/circleci/src/connectomemapper3/config:/tmp/config \
-                sebastientourbier/connectomemapper3 \
-                /tmp /tmp/derivatives participant --participant_label 01 \
-                --anat_pipeline_config /tmp/config/ref_anatomical_config.ini
+            cat /tmp/data/ds-sample/code/license.txt
+            ls -la  /tmp/data/ds-sample
+            ls -la  /tmp/data/ds-sample/code
+            ls -la  /tmp/data/ds-sample/derivatives
 
-      - save_cache:
-         key: ds005-anat-v12-{{ .Branch }}-{{ epoch }}
-         paths:
-            - /tmp/data/ds005/derivatives/cmp
+            #Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
+            rm /tmp/data/ds-sample/code/*.ini
+
+            #Execute BIDS App
+            docker run -it --rm \
+                -v /tmp/data/ds-sample:/bids_dir \
+                -v /tmp/data/ds-sample/derivatives:/output_dir \
+                -v /home/circleci/src/connectomemapper3/config:/config \
+                sebastientourbier/connectomemapper3 \
+                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
+                --anat_pipeline_config /config/ref_anatomical_config.ini \
+                --dwi_pipeline_config /config/ref_diffusion_config.ini \
+                --fs_license /bids_dir/code/license.txt
+
+      # - save_cache:
+      #    key: ds-sample-derivatives-{{ .Branch }}-{{ epoch }}
+      #    paths:
+      #       - /tmp/data/ds-sample/derivatives
       - run:
-          name: Checking outputs of Connectome Mapper run (anatomical pipeline only)
+          name: Checking outputs of Connectome Mapper run
           command: |
-            mkdir -p /tmp/data/ds005/test
-            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) / remove the full path of the derivatives (sed) / sor the files and write it to a text file
-            find /tmp/data/ds005/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/ds005/derivatives/++ | sort > /tmp/data/ds005/test/outputs.out
-            #exit $?
+            mkdir -p /tmp/data/ds-sample/test
+            ls -la /tmp/data/ds-sample/derivatives/nipype/sub-01/ses-01/diffusion_pipeline/preprocessing_stage/motion_correction/
+            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) / remove the full path of the derivatives (sed) / sort the files and write it to a text file
+            sudo find /tmp/data/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/outputs.out
+            diff /home/circleci/src/connectomemapper3/.circleci/ds-sample_outputs.txt /tmp/data/ds-sample/test/outputs.out         
+            exit $?
       - run:
           name: Clean working directory
           when: always
           command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/data/ds005
-            find /tmp/data/ds005/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
+            sudo chown $(id -un):$(id -gn) -R /tmp/data/ds-sample
+            find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
       - store_artifacts:
-          path: /tmp/data/ds005/test
+          path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/ds005/derivatives/cmp
+          path: /tmp/data/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/ds005/derivatives/nipype
+          path: /tmp/data/ds-sample/derivatives/nipype
 
   build_docs:
     machine:
-      image: circleci/classic:201711-01
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01 
     working_directory: /home/circleci/out/docs
     steps:
       - checkout:
@@ -253,10 +262,48 @@ jobs:
       - store_artifacts:
           path: /home/circleci/out/docs
 
-  deploy_docker:
+  deploy_docker_release:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201711-01
+      image: ubuntu-1604:201903-01
+    working_directory: /tmp/src/connectomemapper3
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f /tmp/cache/docker.tar.gz ]; then
+              sudo apt update && sudo apt -y install pigz
+              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+              docker images
+            fi
+      - run:
+          name: Deploy release with version tag to Docker Hub
+          no_output_timeout: 40m
+          command: |
+            # Get version, update files.
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
+            echo "THISVERSION : ${THISVERSION}"
+            echo "CIRCLE_TAG : ${CIRCLE_TAG}"
+
+            if [[ -n "$DOCKER_PASS" ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+              if [[ -n "$CIRCLE_TAG" ]]; then
+                docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
+                docker push sebastientourbier/connectomemapper-bidsapp:$CIRCLE_TAG
+              fi
+            fi
+
+  deploy_docker_latest:
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: ubuntu-1604:201903-01
     working_directory: /tmp/src/connectomemapper3
     steps:
       - attach_workspace:
@@ -273,18 +320,18 @@ jobs:
               docker images
             fi
       - run:
-          name: Deploy to Docker Hub
+          name: Deploy latest master to Docker Hub
           no_output_timeout: 40m
           command: |
+            # Get version, update files.
+            THISVERSION=$( python /home/circleci/src/connectomemapper3/get_version.py )
+            echo "THISVERSION : ${THISVERSION}"
+            echo "CIRCLE_BRANCH : ${CIRCLE_BRANCH}"
+
             if [[ -n "$DOCKER_PASS" ]]; then
               docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper3:unstable
-              docker push sebastientourbier/connectomemapper3:unstable
-              if [[ -n "$CIRCLE_TAG" ]]; then
-                docker push sebastientourbier/connectomemapper3:latest
-                docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper3:$CIRCLE_TAG
-                docker push sebastientourbier/connectomemapper3:$CIRCLE_TAG
-              fi
+              docker tag sebastientourbier/connectomemapper3 sebastientourbier/connectomemapper-bidsapp:latest
+              docker push sebastientourbier/connectomemapper-bidsapp:latest
             fi
 
 workflows:
@@ -310,7 +357,7 @@ workflows:
       #     filters:
       #       branches:
       #         ignore:
-      #           - /ds005\/.*/
+      #           - /ds-sample\/.*/
       #       tags:
       #         only: /.*/
 
@@ -336,7 +383,7 @@ workflows:
             tags:
               only: /.*/
 
-      - deploy_docker:
+      - deploy_docker_release:
           requires:
             - build
             # - build_docs
@@ -349,3 +396,13 @@ workflows:
             # only act on version tags
             tags:
               only: /^v.*/
+      
+      - deploy_docker_latest:
+          requires:
+            - build
+            # - build_docs
+            - test
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              only: master

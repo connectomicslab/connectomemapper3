@@ -608,10 +608,16 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
             self.subject = "_".join((self.subject,self.global_conf.subject_session))
 
+        if not os.path.exists(os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline")):
+            try:
+                os.makedirs(os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline"))
+            except os.error:
+                print("%s was already existing" % os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline"))
+
         # Initialization
-        if os.path.isfile(os.path.join(cmp_deriv_subject_directory,"anat","pypeline.log")):
-            os.unlink(os.path.join(cmp_deriv_subject_directory,"anat","pypeline.log"))
-        config.update_config({'logging': {'log_directory': os.path.join(cmp_deriv_subject_directory,"anat"),
+        if os.path.isfile(os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline","pypeline.log")):
+            os.unlink(os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline","pypeline.log"))
+        config.update_config({'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory,"anatomical_pipeline"),
                                   'log_to_file': True},
                               'execution': {'remove_unnecessary_outputs': False,
                               'stop_on_first_crash': True,'stop_on_first_rerun': False,
