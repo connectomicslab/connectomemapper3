@@ -1,5 +1,5 @@
 
-Connectome Mapper 3 (Beta release candidate)
+Connectome Mapper 3 (Beta release)
 ============================================
 
 **Latest released version:** |release|
