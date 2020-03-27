@@ -306,6 +306,8 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: /tmp/src/connectomemapper3
     steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
       - attach_workspace:
           at: /tmp
       - run:
