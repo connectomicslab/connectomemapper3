@@ -31,7 +31,7 @@ import copy
 import cStringIO
 
 try:
-    import Image
+    from PIL import Image
 except ImportError:
     print("PIL not available. Can not insert matplotlib figure inside the PDF. Please install it (conda install pil)")
 
@@ -52,9 +52,9 @@ except ImportError:
     print("reportlab not available. Can not generate PDF report")
 
 try:
-    from bids.grabbids import BIDSLayout
+    from bids import BIDSLayout
 except ImportError:
-    print("BIDS grabbids not available. Can not read BIDS dataset")
+    print("BIDS not available. Can not read BIDS dataset")
 
 """
 ====================End of Importing Libraries ===========================
@@ -129,7 +129,7 @@ def main(bids_dir):
 
         else:
             print "No session"
-            gpickle_fn = os.path.join(bids_dir,'derivatives','cmp','sub-'+str(subj),'dwi','sub-%s_dwi_connectome_scale1.gpickle'%(str(subj)))
+            gpickle_fn = os.path.join(bids_dir,'derivatives','cmp','sub-'+str(subj),'connectivity','sub-%s_label-L2008_desc-scale1_conndata-snetwork_connectivity.gpickle'%(str(subj)))
             if os.path.isfile(gpickle_fn):
                 # c.drawString(10,20+offset,'Subject : %s '%str(subj))
                 G = nx.read_gpickle(gpickle_fn)
