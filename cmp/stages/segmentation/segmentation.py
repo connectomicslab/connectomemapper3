@@ -240,9 +240,10 @@ class SegmentationStage(Stage):
                 fs_path = self.config.freesurfer_subject_id
                 if(os.path.exists(reconall_results_path)):
                     reconall_results = pickle.load(gzip.open(reconall_results_path))
+                    fs_path = reconall_results.outputs.subject_id
             else:
                 fs_path = os.path.join(self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
-            # print "fs_path : %s" % fs_path
+            print "fs_path : %s" % fs_path
 
             if 'FREESURFER_HOME' not in os.environ:
                 colorLUT_file = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'freesurfer', 'FreeSurferColorLUT.txt'))
