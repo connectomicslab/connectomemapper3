@@ -114,13 +114,20 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
             cont = pick.read()
 
             if debug:
-                print("local_dir : {} , cont.find('/tmp/derivatives'): {} (mode: {})".format(local_dir,cont.find('/tmp/derivatives'),mode))
+                print("local_dir : {} , cont.find('/bids_dir'): {}, cont.find('/output_dir'): {}  (mode: {})".format(local_dir,cont.find('/bids_dir'),cont.find('/output_dir'),mode))
 
             # Change pickles: bids app dataset directory -> local dataset directory
             if (mode == 'local'):
                 if debug:
                     print(' bids app dataset directory -> local dataset directory')
-                new_cont = string.replace(cont,'/tmp','{}'.format(local_dir))
+                new_cont = string.replace(cont,'/bids_dir','{}'.format(local_dir))
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont)
+
+                if debug:
+                    print(' bids app output directory -> local dataset derivatives directory')
+                new_cont = string.replace(cont,'/output_dir','{}'.format(os.path.join(local_dir,'derivatives')))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                     f.write(new_cont)
@@ -161,11 +168,20 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
             # Change pickles: local dataset directory -> bids app dataset directory
             elif (mode == 'bidsapp'):
                 if debug:
-                    print(' local dataset directory -> bids app dataset directory')
-                new_cont = string.replace(cont,'{}'.format(local_dir),'/tmp')
+                    print(' local dataset derivatives directory -> bids app output directory')
+                new_cont = string.replace(cont,'{}'.format(os.path.join(local_dir,'derivatives')),'/output_dir')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
                     f.write(new_cont)
+
+                if debug:
+                    print(' local dataset directory -> bids app dataset directory')
+                new_cont = string.replace(cont,'{}'.format(local_dir),'/bids_dir')
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root,'{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont)
+
+               
     return True
 
 
