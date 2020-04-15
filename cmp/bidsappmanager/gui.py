@@ -1440,7 +1440,7 @@ class CMP_InspectorWindow(HasTraits):
                     aborded = True
                     break
 
-                self.project_info.anat_config_file = os.path.join(self.project_info.base_directory,'derivatives','{}_{}_anatomical_config.ini'.format(self.project_info.subject,self.project_info.subject_session))
+                self.project_info.anat_config_file = os.path.join(self.project_info.base_directory,'derivatives','cmp','{}'.format(self.project_info.subject),'{}'.format(self.project_info.subject_session),'{}_{}_anatomical_config.ini'.format(self.project_info.subject,self.project_info.subject_session))
                 if os.access(self.project_info.anat_config_file,os.F_OK):
                     print("> Initialize anatomical pipeline")
                     self.anat_pipeline = project.init_anat_project(self.project_info,False)
@@ -1448,7 +1448,7 @@ class CMP_InspectorWindow(HasTraits):
                     self.anat_pipeline = None
 
                 if self.dmri_inputs_checked:
-                    self.project_info.dmri_config_file = os.path.join(self.project_info.base_directory,'derivatives','{}_{}_diffusion_config.ini'.format(self.project_info.subject,self.project_info.subject_session))
+                    self.project_info.dmri_config_file = os.path.join(self.project_info.base_directory,'derivatives','cmp','{}'.format(self.project_info.subject),'{}'.format(self.project_info.subject_session),'{}_{}_diffusion_config.ini'.format(self.project_info.subject,self.project_info.subject_session))
                     if os.access(self.project_info.dmri_config_file,os.F_OK):
                         print("> Initialize diffusion pipeline")
                         dmri_valid_inputs, self.dmri_pipeline = project.init_dmri_project(self.project_info,bids_layout,False)
@@ -1459,7 +1459,7 @@ class CMP_InspectorWindow(HasTraits):
                     # self.dmri_pipeline.global_conf.subject = self.project_info.subject
 
                 if self.fmri_inputs_checked:
-                    self.project_info.fmri_config_file = os.path.join(self.project_info.base_directory,'derivatives','{}_{}_fMRI_config.ini'.format(self.project_info.subject,self.project_info.subject_session))
+                    self.project_info.fmri_config_file = os.path.join(self.project_info.base_directory,'derivatives','cmp','{}'.format(self.project_info.subject),'{}'.format(self.project_info.subject_session),'{}_{}_fMRI_config.ini'.format(self.project_info.subject,self.project_info.subject_session))
                     if os.access(self.project_info.fmri_config_file,os.F_OK):
                         print("> Initialize fMRI pipeline")
                         fmri_valid_inputs, self.fmri_pipeline = project.init_fmri_project(self.project_info,bids_layout,False)
@@ -1482,14 +1482,14 @@ class CMP_InspectorWindow(HasTraits):
                     self.anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.project_info.base_directory,'derivatives','freesurfer','{}_{}'.format( self.project_info.subject, self.project_info.subject_session))
             else:
                 print("No session detected")
-                self.project_info.anat_config_file = os.path.join(self.project_info.base_directory,'derivatives','{}_anatomical_config.ini'.format(self.project_info.subject))
+                self.project_info.anat_config_file = os.path.join(self.project_info.base_directory,'derivatives','cmp','{}'.format(self.project_info.subject),'{}_anatomical_config.ini'.format(self.project_info.subject))
                 if os.access(self.project_info.anat_config_file,os.F_OK):
                     self.anat_pipeline = project.init_anat_project(self.project_info,False)
                 else:
                     self.anat_pipeline = None
 
                 if self.dmri_inputs_checked:
-                    self.project_info.dmri_config_file = os.path.join(self.project_info.base_directory,'derivatives','{}_diffusion_config.ini'.format(self.project_info.subject))
+                    self.project_info.dmri_config_file = os.path.join(self.project_info.base_directory,'derivatives','cmp','{}'.format(self.project_info.subject),'{}_diffusion_config.ini'.format(self.project_info.subject))
                     if os.access(self.project_info.dmri_config_file,os.F_OK):
                         dmri_valid_inputs, self.dmri_pipeline = project.init_dmri_project(self.project_info,bids_layout,False)
                     else:
@@ -1499,7 +1499,7 @@ class CMP_InspectorWindow(HasTraits):
                     # self.dmri_pipeline.global_conf.subject = self.project_info.subject
 
                 if self.fmri_inputs_checked:
-                    self.project_info.fmri_config_file = os.path.join(self.project_info.base_directory,'derivatives','{}_fMRI_config.ini'.format(self.project_info.subject))
+                    self.project_info.fmri_config_file = os.path.join(self.project_info.base_directory,'derivatives','cmp','{}'.format(self.project_info.subject),'{}_fMRI_config.ini'.format(self.project_info.subject))
                     if os.access(self.project_info.fmri_config_file,os.F_OK):
                         fmri_valid_inputs, self.fmri_pipeline = project.init_fmri_project(self.project_info,bids_layout,False)
                     else:
