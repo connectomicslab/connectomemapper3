@@ -1128,22 +1128,22 @@ class RegistrationStage(Stage):
                     if self.config.registration_mode == 'FSL':
                         if(os.path.exists(fnirt_results_path)):
                                 fnirt_results = pickle.load(gzip.open(fnirt_results_path))
-                                self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['reference'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
-                                self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',fnirt_results.inputs['ref_file'],T1_results.outputs.out_file,'-l',"Copper",'-t','0.5']
-                                self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fslview',fnirt_results.inputs['ref_file'],mrtrix_5tt_results.outputs.output_image,'-l',"Copper",'-t','0.5']
-                                self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
+                                self.inspect_outputs_dict['Linear T1-to-b0'] = ['fsleyes','-sortho',reg_results.inputs['reference'],reg_results.outputs.out_file,'-cm',"copper",'-a','50']
+                                self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fsleyes','-sortho',fnirt_results.inputs['ref_file'],T1_results.outputs.out_file,'-cm',"copper",'-a','50']
+                                self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fsleyes','-sortho',fnirt_results.inputs['ref_file'],mrtrix_5tt_results.outputs.output_image,'-cm',"copper",'-a','50']
+                                self.inspect_outputs_dict['Deformation field'] = ['fsleyes','-sortho',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
 
                                 if type(rois_results.outputs.out_files) == str:
-                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',fnirt_results.inputs['ref_file'],rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.out_files)] = ['fsleyes','-sortho',fnirt_results.inputs['ref_file'],rois_results.outputs.out_files,'-cm','random','-a','50']
                                 else:
                                     for roi_output in rois_results.outputs.out_files:
-                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',fnirt_results.inputs['ref_file'],roi_output,'-l','Random-Rainbow','-t','0.5']
+                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fsleyes','-sortho',fnirt_results.inputs['ref_file'],roi_output,'-cm','random','-a','50']
 
                                 if type(pves_results.outputs.out_files) == str:
-                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.out_files)] = ['fslview',fnirt_results.inputs['ref_file'],pves_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.out_files)] = ['fsleyes','-sortho',fnirt_results.inputs['ref_file'],pves_results.outputs.out_files,'-cm','random','-a','50']
                                 else:
                                     for pve_output in pves_results.outputs.out_files:
-                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',fnirt_results.inputs['ref_file'],pve_output,'-l','Random-Rainbow','-t','0.5']
+                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fsleyes','-sortho',fnirt_results.inputs['ref_file'],pve_output,'-cm','random','-a','50']
 
                     elif self.config.registration_mode == 'ANTs':
 
@@ -1151,72 +1151,72 @@ class RegistrationStage(Stage):
                             # print("reg_results.outputs.warped_image: %s"%reg_results.outputs.warped_image)
 
                             # print("T1_results.outputs.output_image: %s"%T1_results.outputs.output_image)
-                            self.inspect_outputs_dict['Linear T1-to-b0'] = ['fslview',reg_results.inputs['fixed_image'][0],reg_results.outputs.warped_image,'-l',"Copper",'-t','0.5']
+                            self.inspect_outputs_dict['Linear T1-to-b0'] = ['fsleyes','-sortho',reg_results.inputs['fixed_image'][0],reg_results.outputs.warped_image,'-cm','copper','-a','50']
 
                             if self.config.ants_perform_syn:
                                 if(os.path.exists(syn_results_path)):
                                     syn_results = pickle.load(gzip.open(syn_results_path))
                                     # print("syn_results.inputs['fixed_image']: %s"%syn_results.inputs['fixed_image'][0])
-                                    self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fslview',syn_results.inputs['fixed_image'][0],T1_results.outputs.output_image,'-l',"Copper",'-t','0.5']
-                                    #self.inspect_outputs_dict['Deformation field'] = ['fslview',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
+                                    self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fsleyes','-sortho',syn_results.inputs['fixed_image'][0],T1_results.outputs.output_image,'-cm','copper','-a','50']
+                                    #self.inspect_outputs_dict['Deformation field'] = ['fsleyes','-sortho',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
                             # print("rois_results.outputs.output_images: %s"%rois_results.outputs.output_images)
                             # print("pves_results.outputs.output_images: %s"%pves_results.outputs.output_images)
 
-                            self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fslview',reg_results.inputs['fixed_image'][0],mrtrix_5tt_results.outputs.output_image,'-l',"Copper",'-t','0.5']
+                            self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fsleyes','-sortho',reg_results.inputs['fixed_image'][0],mrtrix_5tt_results.outputs.output_image,'-cm','copper','-a','50']
 
                             if type(rois_results.outputs.output_images) == str:
                                 if self.config.ants_perform_syn:
                                     if(os.path.exists(syn_results_path)):
-                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fslview',syn_results.inputs['fixed_image'][0],rois_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fsleyes','-sortho',syn_results.inputs['fixed_image'][0],rois_results.outputs.output_images,'-cm','random','-a','50']
                                 else:
-                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fslview',reg_results.inputs['fixed_image'][0],rois_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
+                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fsleyes','-sortho',reg_results.inputs['fixed_image'][0],rois_results.outputs.output_images,'-cm','random','-a','50']
                             else:
                                 for roi_output in rois_results.outputs.output_images:
                                     if self.config.ants_perform_syn:
                                         if(os.path.exists(syn_results_path)):
-                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',syn_results.inputs['fixed_image'][0],roi_output,'-l','Random-Rainbow','-t','0.5']
+                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fsleyes','-sortho',syn_results.inputs['fixed_image'][0],roi_output,'-cm','random','-a','50']
                                     else:
-                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fslview',reg_results.inputs['fixed_image'][0],roi_output,'-l','Random-Rainbow','-t','0.5']
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fsleyes','-sortho',reg_results.inputs['fixed_image'][0],roi_output,'-cm','random','-a','50']
 
                             if type(pves_results.outputs.output_images) == str:
                                 if self.config.ants_perform_syn:
                                     if(os.path.exists(syn_results_path)):
-                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fslview',syn_results.inputs['fixed_image'][0],pves_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fsleyes','-sortho',syn_results.inputs['fixed_image'][0],pves_results.outputs.output_images,'-cm','random','-a','50']
                                 else:
-                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fslview',reg_results.inputs['fixed_image'][0],pves_results.outputs.output_images,'-l','Random-Rainbow','-t','0.5']
+                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fsleyes','-sortho',reg_results.inputs['fixed_image'][0],pves_results.outputs.output_images,'-cm','random','-a','50']
                             else:
                                 for pve_output in pves_results.outputs.output_images:
                                     if self.config.ants_perform_syn:
                                         if(os.path.exists(syn_results_path)):
-                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',syn_results.inputs['fixed_image'][0],pve_output,'-l','Random-Rainbow','-t','0.5']
+                                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fsleyes','-sortho',syn_results.inputs['fixed_image'][0],pve_output,'-cm','random','-a','50']
                                     else:
-                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fslview',reg_results.inputs['fixed_image'][0],pve_output,'-l','Random-Rainbow','-t','0.5']
+                                        self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fsleyes','-sortho',reg_results.inputs['fixed_image'][0],pve_output,'-cm','random','-a','50']
         else:
             if (os.path.exists(target_path)) and (os.path.exists(reg_results_path)) and (os.path.exists(warpedROIVs_results_path)):
                 target = pickle.load(gzip.open(target_path))
                 reg_results = pickle.load(gzip.open(reg_results_path))
                 rois_results = pickle.load(gzip.open(warpedROIVs_results_path))
 
-                self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fslview',target.inputs['in_file'],reg_results.outputs.out_file,'-l',"Copper",'-t','0.5']
+                self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fsleyes','-sortho',target.inputs['in_file'],reg_results.outputs.out_file,'-cm','copper','-a','50']
 
                 if type(rois_results.outputs.out_files) == str:
-                        self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.out_files,'-l','Random-Rainbow','-t','0.5']
+                        self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = ['fsleyes','-sortho',target.outputs.out_file,rois_results.outputs.out_files,'-cm','random','-a','50']
                 else:
                     for roi_output in rois_results.outputs.out_files:
-                            self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+                            self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fsleyes','-sortho',target.outputs.out_file,roi_output,'-cm','random','-a','50']
 
                     # elif self.config.registration_mode == 'Nonlinear (FSL)':
                     #     if type(rois_results.outputs.warped_files) == str:
                     #         if self.config.pipeline == "Diffusion":
-                    #             self.inspect_outputs_dict['B0/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.warped_files,'-l','Random-Rainbow','-t','0.5']
+                    #             self.inspect_outputs_dict['B0/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fsleyes','-sortho',target.outputs.out_file,rois_results.outputs.warped_files,'-cm','random','-a','50']
                     #         else:
-                    #             self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fslview',target.outputs.out_file,rois_results.outputs.warped_files,'-l','Random-Rainbow','-t','0.5']
+                    #             self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fsleyes','-sortho',target.outputs.out_file,rois_results.outputs.warped_files,'-cm','random','-a','50']
                     #     elif type(rois_results.outputs.warped_files) == TraitListObject:
                     #         for roi_output in rois_results.outputs.warped_files:
                     #             if self.config.pipeline == "Diffusion":
-                    #                 self.inspect_outputs_dict['B0/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+                    #                 self.inspect_outputs_dict['B0/%s' % os.path.basename(roi_output)] = ['fsleyes','-sortho',target.outputs.out_file,roi_output,'-cm','random','-a','50']
                     #             else:
-                    #                 self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fslview',target.outputs.out_file,roi_output,'-l','Random-Rainbow','-t','0.5']
+                    #                 self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fsleyes','-sortho',target.outputs.out_file,roi_output,'-cm','random','-a','50']
 
 
         self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)

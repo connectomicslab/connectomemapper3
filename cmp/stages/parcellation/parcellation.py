@@ -377,26 +377,26 @@ class ParcellationStage(Stage):
 
                         if(os.path.exists(results_path)):
                             results = pickle.load(gzip.open(results_path))
-                            self.inspect_outputs_dict['Thalamic nuclei - Probability maps'] = ['fslview',results.inputs['T1w_image'],results.outputs.prob_maps_registered,'-l',"Copper",'-t','0.5']
-                            self.inspect_outputs_dict['Thalamic nuclei - MaxProb labels'] = ['fslview',results.inputs['T1w_image'],results.outputs.max_prob_registered,"-l","Random-Rainbow",'-t','0.5']
+                            self.inspect_outputs_dict['Thalamic nuclei - Probability maps'] = ['fsleyes','-sortho',results.inputs['T1w_image'],results.outputs.prob_maps_registered,'-cm',"copper",'-a','50']
+                            self.inspect_outputs_dict['Thalamic nuclei - MaxProb labels'] = ['fsleyes','-sortho',results.inputs['T1w_image'],results.outputs.max_prob_registered,"-cm","render3",'-a','50']
 
                         # if self.config.segment_brainstem:
                         results_path = os.path.join(self.stage_dir,"parcBrainStem","result_parcBrainStem.pklz")
 
                         if(os.path.exists(results_path)):
                             results = pickle.load(gzip.open(results_path))
-                            self.inspect_outputs_dict['Brainstem structures'] = ['fslview',results.outputs.brainstem_structures,"-l","Random-Rainbow"]
+                            self.inspect_outputs_dict['Brainstem structures'] = ['fsleyes','-sortho',results.outputs.brainstem_structures,"-cm","random"]
 
                         # if self.config.segment_hippocampal_subfields:
                         results_path = os.path.join(self.stage_dir,"parcHippo","result_parcHippo.pklz")
 
                         if(os.path.exists(results_path)):
                             results = pickle.load(gzip.open(results_path))
-                            self.inspect_outputs_dict['Hippocampal subfields'] = ['fslview',results.outputs.lh_hipposubfields,"-l","Random-Rainbow",results.outputs.rh_hipposubfields,"-l","Random-Rainbow"]
+                            self.inspect_outputs_dict['Hippocampal subfields'] = ['fsleyes','-sortho',results.outputs.lh_hipposubfields,"-cm","random",results.outputs.rh_hipposubfields,"-cm","random"]
 
                 #self.inspect_outputs = self.inspect_outputs_dict.keys()
         else:
-            self.inspect_outputs_dict["Custom atlas"] = ['fslview',self.config.atlas_nifti_file,"-l","Random-Rainbow"]
+            self.inspect_outputs_dict["Custom atlas"] = ['fsleyes',self.config.atlas_nifti_file,"-cm","random"]
 
         self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
 

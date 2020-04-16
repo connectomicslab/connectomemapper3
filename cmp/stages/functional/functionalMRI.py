@@ -570,22 +570,22 @@ class FunctionalMRIStage(Stage):
             res_path = os.path.join(self.stage_dir,"smoothing","result_smoothing.pklz")
             if(os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Smoothed image'] = ['fslview',results.outputs.out_file]
+                self.inspect_outputs_dict['Smoothed image'] = ['fsleyes','-sortho',results.outputs.out_file]
         if self.config.wm or self.config.global_nuisance or self.config.csf or self.config.motion:
             res_path = os.path.join(self.stage_dir,"nuisance_regression","result_nuisance_regression.pklz")
             if(os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Regression output'] = ['fslview',results.outputs.out_file]
+                self.inspect_outputs_dict['Regression output'] = ['fsleyes','-sortho',results.outputs.out_file]
         if self.config.detrending:
             res_path = os.path.join(self.stage_dir,"detrending","result_detrending.pklz")
             if(os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Detrending output'] = ['fslview',results.outputs.out_file]
+                self.inspect_outputs_dict['Detrending output'] = ['fsleyes','-sortho',results.outputs.out_file]
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             res_path = os.path.join(self.stage_dir,"converter","result_converter.pklz")
             if(os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Filter output'] = ['fslview',results.outputs.out_file]
+                self.inspect_outputs_dict['Filter output'] = ['fsleyes','-sortho',results.outputs.out_file]
 
         self.inspect_outputs = self.inspect_outputs_dict.keys()
 

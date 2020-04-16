@@ -255,7 +255,7 @@ class SegmentationStage(Stage):
             self.inspect_outputs_dict['norm/aseg/surf'] = ['tkmedit','-f',os.path.join(fs_path,'mri','norm.mgz'),'-surface',os.path.join(fs_path,'surf','lh.white'),'-aux-surface',os.path.join(fs_path,'surf','rh.white'),'-segmentation',os.path.join(fs_path,'mri','aseg.mgz'),colorLUT_file]
 
         elif self.config.seg_tool == "Custom segmentation":
-            self.inspect_outputs_dict['brainmask'] = ['fslview',self.config.white_matter_mask]
+            self.inspect_outputs_dict['WM mask'] = ['fsleyes',self.config.white_matter_mask]
 
         self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
 

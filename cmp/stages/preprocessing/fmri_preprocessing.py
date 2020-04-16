@@ -162,26 +162,26 @@ class PreprocessingStage(Stage):
             despike_path = os.path.join(self.stage_dir,"converter","result_converter.pklz")
             if(os.path.exists(despike_path)):
                 despike_results = pickle.load(gzip.open(despike_path))
-                self.inspect_outputs_dict['Spike corrected image'] = ['fslview',despike_results.outputs.out_file]
+                self.inspect_outputs_dict['Spike corrected image'] = ['fsleyes','-ad',despike_results.outputs.out_file]
 
         if self.config.slice_timing:
             slc_timing_path = os.path.join(self.stage_dir,"slice_timing","result_slice_timing.pklz")
             if(os.path.exists(slc_timing_path)):
                 slice_results = pickle.load(gzip.open(slc_timing_path))
-                self.inspect_outputs_dict['Slice time corrected image'] = ['fslview',slice_results.outputs.slice_time_corrected_file]
+                self.inspect_outputs_dict['Slice time corrected image'] = ['fsleyes','-ad',slice_results.outputs.slice_time_corrected_file]
                 self.inspect_outputs = self.inspect_outputs_dict.keys()
             if self.config.motion_correction:
                 motion_results_path = os.path.join(self.stage_dir,"motion_correction","result_motion_correction.pklz")
                 if(os.path.exists(motion_results_path)):
                     motion_results = pickle.load(gzip.open(motion_results_path))
-                    self.inspect_outputs_dict['Slice time and motion corrected image'] = ['fslview',motion_results.outputs.out_file]
+                    self.inspect_outputs_dict['Slice time and motion corrected image'] = ['fsleyes','-ad',motion_results.outputs.out_file]
                     self.inspect_outputs = self.inspect_outputs_dict.keys()
 
         elif self.config.motion_correction:
             motion_results_path = os.path.join(self.stage_dir,"motion_correction","result_motion_correction.pklz")
             if(os.path.exists(motion_results_path)):
                 motion_results = pickle.load(gzip.open(motion_results_path))
-                self.inspect_outputs_dict['Motion corrected image'] = ['fslview',motion_results.outputs.out_file]
+                self.inspect_outputs_dict['Motion corrected image'] = ['fsleyes','-ad',motion_results.outputs.out_file]
                 self.inspect_outputs = self.inspect_outputs_dict.keys()
 
 
