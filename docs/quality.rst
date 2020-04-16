@@ -7,7 +7,7 @@ Stage outputs can be visually checked once the stage processing has finished via
 .. image:: images/quality_window.png
 	:align: center
 
-A set of outputs for each pipeline stage is displayed. They can be visually checked with third-party softwares including fslview, freeview, mrview and MNE visualization tools.
+A set of outputs for each pipeline stage is displayed. They can be visually checked with third-party softwares including fsleyes, freeview, mrview, trackvis and MNE visualization tools.
 
 
 Anatomical pipeline
