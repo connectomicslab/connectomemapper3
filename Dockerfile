@@ -51,9 +51,6 @@ RUN chmod 775 /app/connectomemapper3/run.py
 RUN chmod 775 /app/run_connectomemapper3.sh
 RUN chmod 777 /opt/freesurfer
 
-#ENV LC_ALL="en_US.UTF-8"
-#ENV LANG="en_US.UTF-8"
-
 #Temporary tmp folder
 RUN /bin/bash -c "mkdir -p /var/tmp"
 ENV TMPDIR /var/tmp
