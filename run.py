@@ -193,6 +193,10 @@ def run(command, env={}, log_filename={}):
     # if process.returncode != 0:
     #     raise Exception("Non zero return code: %d"%process.returncode)
 
+
+# Initialize random generator for enhanced reproducibility 
+np.random.seed(1234)                 
+
 cmp_parser = parser.get()
 args = cmp_parser.parse_args()
 
