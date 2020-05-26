@@ -13,6 +13,7 @@ import glob
 import os
 import pickle
 import gzip
+import networkx as nx
 
 # Nipype imports
 import nipype.interfaces.utility as util
@@ -216,15 +217,15 @@ class ConnectomeStage(Stage):
         print('inspect outputs connectome stage')
         con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
 
-        # print "Stage dir: %s" % self.stage_dir
+        # print("Stage dir: %s" % self.stage_dir)
         if(os.path.exists(con_results_path)):
-            # print "con_results_path : %s" % con_results_path
+            # print("con_results_path : %s" % con_results_path)
             con_results = pickle.load(gzip.open(con_results_path))
             #print(con_results.inputs)
 
             self.inspect_outputs_dict['Final tractogram'] = ['trackvis',con_results.outputs.streamline_final_file]
             mat = con_results.outputs.connectivity_matrices
-            # print "Conn. matrix : %s" % mat
+            # print("Conn. matrix : %s" % mat)
 
             map_scale = "default"
             if self.config.log_visualization:
@@ -236,89 +237,41 @@ class ConnectomeStage(Stage):
                 layout='matrix'
 
             if isinstance(mat, basestring):
-                # print "is str"
+                # print("is str")
                 if 'gpickle' in mat:
                     # 'Fiber number','Fiber length','Fiber density','ADC','gFA'
                     con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
-                    # print "con_name:"
-                    # print con_name
-                    if any('Fiber number' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - number of fibers'] = ["showmatrix_gpickle",layout,mat, "number_of_fibers", "False", self.config.subject+' - '+con_name+' - number of fibers', map_scale]
-                    if any('Fiber length' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - fiber length mean'] = ["showmatrix_gpickle",layout,mat, "fiber_length_mean", "False", self.config.subject+' - '+con_name+' - fiber length mean', map_scale]
-                        self.inspect_outputs_dict[con_name+' - fiber length median'] = ["showmatrix_gpickle",layout,mat, "fiber_length_median", "False", self.config.subject+' - '+con_name+' - fiber length median', map_scale]
-                        self.inspect_outputs_dict[con_name+' - fiber length std'] = ["showmatrix_gpickle",layout,mat, "fiber_length_std", "False", self.config.subject+' - '+con_name+' - fiber length std', map_scale]
-                    if any('Fiber density' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - fiber density'] = ["showmatrix_gpickle",layout,mat, "fiber_density", "False", self.config.subject+' - '+con_name+' - fiber density', map_scale]
-                    if any('Fiber proportion' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - fiber proportion'] = ["showmatrix_gpickle",layout,mat, "fiber_proportion", "False", self.config.subject+' - '+con_name+' - fiber proportion', map_scale]
-                    if any('Normalized fiber density' in m for m in self.config.connectivity_metrics):
-                        self.inspect_outputs_dict[con_name+' - normalized fiber density'] = ["showmatrix_gpickle",layout,mat, "normalized_fiber_density", "False", self.config.subject+' - '+con_name+' - normalized fiber density', map_scale]
+                    # print("con_name:"+con_name)
 
-                    if len(con_results.inputs['additional_maps']) > 0:
-                        self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_mean", "False", self.config.subject+' - '+con_name+' - SHORE gFA mean', map_scale]
-                        self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_median", "False", self.config.subject+' - '+con_name+' - SHORE gFA median', map_scale]
-                        self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_std", "False", self.config.subject+' - '+con_name+' - SHORE gFA std', map_scale]
+                    # Load the connectivity matrix and extract the attributes (weights)
+                    con_mat = nx.read_gpickle(mat)
+                    con_metrics = con_mat.get_edge_data(1,1).viewkeys()
 
-                        self.inspect_outputs_dict[con_name+' - MSD mean'] = ["showmatrix_gpickle",layout,mat, "shore_msd_mean", "False", self.config.subject+' - '+con_name+' - SHORE MSD mean', map_scale]
-                        self.inspect_outputs_dict[con_name+' - MSD median'] = ["showmatrix_gpickle",layout,mat, "shore_msd_median", "False", self.config.subject+' - '+con_name+' - SHORE MSD median', map_scale]
-                        self.inspect_outputs_dict[con_name+' - MSD std'] = ["showmatrix_gpickle",layout,mat, "shore_msd_std", "False", self.config.subject+' - '+con_name+' - SHORE MSD std', map_scale]
+                    # Create dynamically the list of output connectivity metrics for inspection
+                    for con_metric in con_metrics:
+                        metric_str = ' '.join(con_metric.split('_'))
+                        self.inspect_outputs_dict[con_name+' - '+metric_str] = ["showmatrix_gpickle",layout,mat, con_metric, "False", self.config.subject+' - '+con_name+' - '+metric_str, map_scale]
 
-                        self.inspect_outputs_dict[con_name+' - RTOP mean'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_mean", "False", self.config.subject+' - '+con_name+' - SHORE RTOP mean', map_scale]
-                        self.inspect_outputs_dict[con_name+' - RTOP median'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_median", "False", self.config.subject+' - '+con_name+' - SHORE RTOP median', map_scale]
-                        self.inspect_outputs_dict[con_name+' - RTOP std'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_std", "False", self.config.subject+' - '+con_name+' - SHORE RTOP std', map_scale]
-                    else:
-                        if any('gFA' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA mean', map_scale]
-                            self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",layout,mat, "FA_median", "False",self.config.subject+' - '+con_name+' - gFA median', map_scale]
-                            self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",layout,mat, "FA_std", "False", self.config.subject+' - '+con_name+' - gFA std', map_scale]
-                        if any('ADC' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - ADC mean'] = ["showmatrix_gpickle",layout,mat, "ADC_mean", "False", self.config.subject+' - '+con_name+' - ADC mean', map_scale]
-                            self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",layout,mat, "ADC_median", "False", self.config.subject+' - '+con_name+' - ADC median', map_scale]
-                            self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",layout,mat, "ADC_std", "False", self.config.subject+' - '+con_name+' - ADC std', map_scale]
+                    
             else:
-                # print "is list"
+                # print("is list")
                 for mat in con_results.outputs.connectivity_matrices:
-                    # print "mat : %s" % mat
+                    # print("mat : %s" % mat)
                     if 'gpickle' in mat:
                         con_name = " ".join(os.path.basename(mat).split(".")[0].split("_"))
-                        if any('Fiber number' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - number of fibers'] = ["showmatrix_gpickle",layout,mat, "number_of_fibers", "False", self.config.subject+' - '+con_name+' - number of fibers', map_scale]
-                        if any('Fiber length' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - fiber length mean'] = ["showmatrix_gpickle",layout,mat, "fiber_length_mean", "False", self.config.subject+' - '+con_name+' - fiber length mean', map_scale]
-                            self.inspect_outputs_dict[con_name+' - fiber length std'] = ["showmatrix_gpickle",layout,mat, "fiber_length_std", "False", self.config.subject+' - '+con_name+' - fiber length std', map_scale]
-                            self.inspect_outputs_dict[con_name+' - fiber length median'] = ["showmatrix_gpickle",layout,mat, "fiber_length_median", "False", self.config.subject+' - '+con_name+' - fiber length median', map_scale]
-                        if any('Fiber density' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - fiber density'] = ["showmatrix_gpickle",layout,mat, "fiber_density", "False", self.config.subject+' - '+con_name+' - fiber density', map_scale]
-                        if any('Fiber proportion' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - fiber proportion'] = ["showmatrix_gpickle",layout,mat, "fiber_proportion", "False", self.config.subject+' - '+con_name+' - fiber proportion', map_scale]
-                        if any('Normalized fiber density' in m for m in self.config.connectivity_metrics):
-                            self.inspect_outputs_dict[con_name+' - normalized fiber density'] = ["showmatrix_gpickle",layout,mat, "normalized_fiber_density", "False", self.config.subject+' - '+con_name+' - normalized fiber density', map_scale]
+                        # print("con_name:"+con_name)
 
-                        if len(con_results.inputs['additional_maps']) > 0:
-                            self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_mean", "False", self.config.subject+' - '+con_name+' - SHORE gFA mean', map_scale]
-                            self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_median", "False", self.config.subject+' - '+con_name+' - SHORE gFA median', map_scale]
-                            self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",layout,mat, "shore_gfa_std", "False", self.config.subject+' - '+con_name+' - SHORE gFA std', map_scale]
+                        # Load the connectivity matrix and extract the attributes (weights)
+                        con_mat = nx.read_gpickle(mat)
+                        con_metrics = con_mat.get_edge_data(1,1).viewkeys()
 
-                            self.inspect_outputs_dict[con_name+' - MSD mean'] = ["showmatrix_gpickle",layout,mat, "shore_msd_mean", "False", self.config.subject+' - '+con_name+' - SHORE MSD mean', map_scale]
-                            self.inspect_outputs_dict[con_name+' - MSD median'] = ["showmatrix_gpickle",layout,mat, "shore_msd_median", "False", self.config.subject+' - '+con_name+' - SHORE MSD median', map_scale]
-                            self.inspect_outputs_dict[con_name+' - MSD std'] = ["showmatrix_gpickle",layout,mat, "shore_msd_std", "False", self.config.subject+' - '+con_name+' - SHORE MSD std', map_scale]
-
-                            self.inspect_outputs_dict[con_name+' - RTOP mean'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_mean", "False", self.config.subject+' - '+con_name+' - SHORE RTOP mean', map_scale]
-                            self.inspect_outputs_dict[con_name+' - RTOP median'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_median", "False", self.config.subject+' - '+con_name+' - SHORE RTOP median', map_scale]
-                            self.inspect_outputs_dict[con_name+' - RTOP std'] = ["showmatrix_gpickle",layout,mat, "shore_rtop_signal_std", "False", self.config.subject+' - '+con_name+' - SHORE RTOP std', map_scale]
-                        else:
-                            if any('gFA' in m for m in self.config.connectivity_metrics):
-                                self.inspect_outputs_dict[con_name+' - gFA mean'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA mean', map_scale]
-                                self.inspect_outputs_dict[con_name+' - gFA std'] = ["showmatrix_gpickle",layout,mat, "FA_std", "False", self.config.subject+' - '+con_name+' - gFA std', map_scale]
-                                self.inspect_outputs_dict[con_name+' - gFA median'] = ["showmatrix_gpickle",layout,mat, "FA_mean", "False", self.config.subject+' - '+con_name+' - gFA median', map_scale]
-                            if any('ADC' in m for m in self.config.connectivity_metrics):
-                                self.inspect_outputs_dict[con_name+' - ADC mean'] = ["showmatrix_gpickle",layout,mat, "ADC_mean", "False", self.config.subject+' - '+con_name+' - ADC mean', map_scale]
-                                self.inspect_outputs_dict[con_name+' - ADC std'] = ["showmatrix_gpickle",layout,mat, "ADC_std", "False", self.config.subject+' - '+con_name+' - ADC std', map_scale]
-                                self.inspect_outputs_dict[con_name+' - ADC median'] = ["showmatrix_gpickle",layout,mat, "ADC_median", "False", self.config.subject+' - '+con_name+' - ADC median', map_scale]
+                        # Create dynamically the list of output connectivity metrics for inspection
+                        for con_metric in con_metrics:
+                            metric_str = ' '.join(con_metric.split('_'))
+                            self.inspect_outputs_dict[con_name+' - '+metric_str] = ["showmatrix_gpickle",layout,mat, con_metric, "False", self.config.subject+' - '+con_name+' - '+metric_str, map_scale]
 
             self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
-            #print self.inspect_outputs
+            #print(self.inspect_outputs)
 
     def has_run(self):
         return os.path.exists(os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz"))
