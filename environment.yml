@@ -4,6 +4,7 @@ channels:
 - aramislab
 - anaconda
 - conda-forge
+- conda-forge/label/cf201901
 - defaults
 
 dependencies:
@@ -17,6 +18,8 @@ dependencies:
 - nipype=1.1.8
 - git-annex=7.20190219
 - pyside2=5.9.0a1
+- fslpy=1.13.2
+- fsleyes=0.27.3
 
 - pip:
     #- cfflib==2.0.5
