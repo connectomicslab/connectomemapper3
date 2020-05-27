@@ -195,7 +195,7 @@ def run(command, env={}, log_filename={}):
 
 
 # Initialize random generator for enhanced reproducibility 
-np.random.seed(1234)                 
+numpy.random.seed(1234)                 
 
 cmp_parser = parser.get()
 args = cmp_parser.parse_args()
