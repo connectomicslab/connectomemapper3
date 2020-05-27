@@ -376,7 +376,7 @@ class fMRIPipeline(Pipeline):
             bids_atlas_label = 'Desikan'
 
         # Data sinker for output
-        sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
+        sinker = pe.Node(nio.DataSink(), name="bold_sinker")
         sinker.inputs.base_directory = os.path.join(cmp_deriv_subject_directory)
 
         if self.parcellation_scheme == 'NativeFreesurfer':
