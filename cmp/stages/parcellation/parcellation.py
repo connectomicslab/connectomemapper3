@@ -21,7 +21,9 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import cmtklib as cmtk
 import nipype.interfaces.utility as util
 
-from cmtklib.parcellation import Parcellate, ParcellateBrainstemStructures, ParcellateHippocampalSubfields, ParcellateThalamus, CombineParcellations
+from cmtklib.parcellation import Parcellate, ParcellateBrainstemStructures, \
+                                 ParcellateHippocampalSubfields, ParcellateThalamus, \
+                                 CombineParcellations, ComputeParcellationRoiVolumes
 # Own imports
 from cmp.stages.common import Stage
 
@@ -81,7 +83,8 @@ class ParcellationStage(Stage):
             "csf_mask_file",
             "aseg","aparc_aseg",
     	       #"cc_unknown_file","ribbon_file","roi_files",
-            "roi_volumes","roi_colorLUTs","roi_graphMLs","parcellation_scheme","atlas_info"]
+            "roi_volumes","roi_colorLUTs","roi_graphMLs","roi_volumes_stats",
+            "parcellation_scheme","atlas_info"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         # from nipype.interfaces.fsl.maths import MathsCommand
@@ -175,6 +178,15 @@ class ParcellationStage(Stage):
                             (parcCombiner,outputnode,[("graphML_files","roi_graphMLs")]),
                         ])
 
+                computeROIVolumetry = pe.Node(interface=ComputeParcellationRoiVolumes(), name='computeROIVolumetry')
+                computeROIVolumetry.inputs.parcellation_scheme = self.config.parcellation_scheme
+                
+                flow.connect([
+                            (parcCombiner,computeROIVolumetry,[("output_rois","roi_volumes")]),
+                            (parcCombiner,computeROIVolumetry,[("graphML_files","roi_graphMLs")]),
+                            (computeROIVolumetry,outputnode, [("roi_volumes_stats","roi_volumes_stats")]),
+                            ])
+
 
                     # create_atlas_info = pe.Node(interface=CreateLausanne2018AtlasInfo(),name="create_atlas_info")
                     # flow.connect([
@@ -236,6 +248,15 @@ class ParcellationStage(Stage):
                             # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_LUTs),"roi_colorLUTs")]),
                             # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_graphMLs),"roi_graphMLs")]),
                         ])
+
+                computeROIVolumetry = pe.Node(interface=ComputeParcellationRoiVolumes(), name='computeROIVolumetry')
+                computeROIVolumetry.inputs.parcellation_scheme = self.config.parcellation_scheme
+                
+                flow.connect([
+                            (parc_node,computeROIVolumetry,[("output_rois","roi_volumes")]),
+                            (parc_files,computeROIVolumetry,[("graphML_files","roi_graphMLs")]),
+                            (computeROIVolumetry,outputnode, [("roi_volumes_stats","roi_volumes_stats")]),
+                            ])
             else:
                 # def get_atlas_LUTs(paths):
                 #     colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))),
@@ -264,6 +285,15 @@ class ParcellationStage(Stage):
                             # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_LUTs),"roi_colorLUTs")]),
                             # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_graphMLs),"roi_graphMLs")]),
                         ])
+
+                computeROIVolumetry = pe.Node(interface=ComputeParcellationRoiVolumes(), name='computeROIVolumetry')
+                computeROIVolumetry.inputs.parcellation_scheme = self.config.parcellation_scheme
+                
+                flow.connect([
+                            (parc_node,computeROIVolumetry,[("output_rois","roi_volumes")]),
+                            (parc_files,computeROIVolumetry,[("graphML_files","roi_graphMLs")]),
+                            (computeROIVolumetry,outputnode, [("roi_volumes_stats","roi_volumes_stats")]),
+                            ])
 
 
             # TODO

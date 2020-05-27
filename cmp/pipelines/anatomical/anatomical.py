@@ -393,6 +393,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                         ('resolution258_LUT.txt',self.subject+'_label-L2008_desc-scale3_atlas_FreeSurferColorLUT.txt'),
                                         ('resolution500_LUT.txt',self.subject+'_label-L2008_desc-scale4_atlas_FreeSurferColorLUT.txt'),
                                         ('resolution1015_LUT.txt',self.subject+'_label-L2008_desc-scale5_atlas_FreeSurferColorLUT.txt'),
+                                        ('roi_stats_scale1.tsv',self.subject+'_label-L2008_desc-scale1_stats.tsv'),
+                                        ('roi_stats_scale2.tsv',self.subject+'_label-L2008_desc-scale2_stats.tsv'),
+                                        ('roi_stats_scale3.tsv',self.subject+'_label-L2008_desc-scale3_stats.tsv'),
+                                        ('roi_stats_scale4.tsv',self.subject+'_label-L2008_desc-scale4_stats.tsv'),
+                                        ('roi_stats_scale5.tsv',self.subject+'_label-L2008_desc-scale5_stats.tsv'),
                                         ]
         elif self.parcellation_scheme == 'Lausanne2018':
             sinker.inputs.substitutions = [ ('T1.nii.gz', self.subject+'_desc-head_T1w.nii.gz'),
@@ -433,6 +438,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                         ('ROIv_HR_th_scale125.nii.gz',self.subject+'_label-L2018_desc-scale3_atlas.nii.gz'),
                                         ('ROIv_HR_th_scale250.nii.gz',self.subject+'_label-L2018_desc-scale4_atlas.nii.gz'),
                                         ('ROIv_HR_th_scale500.nii.gz',self.subject+'_label-L2018_desc-scale5_atlas.nii.gz'),
+                                        ('roi_stats_scale1.tsv',self.subject+'_label-L2018_desc-scale1_stats.tsv'),
+                                        ('roi_stats_scale2.tsv',self.subject+'_label-L2018_desc-scale2_stats.tsv'),
+                                        ('roi_stats_scale3.tsv',self.subject+'_label-L2018_desc-scale3_stats.tsv'),
+                                        ('roi_stats_scale4.tsv',self.subject+'_label-L2018_desc-scale4_stats.tsv'),
+                                        ('roi_stats_scale5.tsv',self.subject+'_label-L2018_desc-scale5_stats.tsv'),
                                       ]
         elif self.parcellation_scheme == 'NativeFreesurfer':
             sinker.inputs.substitutions = [ ('T1.nii.gz', self.subject+'_desc-head_T1w.nii.gz'),
@@ -483,7 +493,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         anat_flow = pe.Workflow(name='anatomical_pipeline', base_dir=os.path.abspath(nipype_deriv_subject_directory))
         anat_inputnode = pe.Node(interface=util.IdentityInterface(fields=["T1"]),name="inputnode")
         anat_outputnode = pe.Node(interface=util.IdentityInterface(fields=["subjects_dir","subject_id","T1","aseg","aparc_aseg","brain","brain_mask","csf_mask_file", "wm_mask_file", "gm_mask_file", "wm_eroded","brain_eroded","csf_eroded",
-            "roi_volumes","parcellation_scheme","atlas_info","roi_colorLUTs", "roi_graphMLs"]),name="outputnode")
+            "roi_volumes","parcellation_scheme","atlas_info","roi_colorLUTs", "roi_graphMLs","roi_volumes_stats"]),name="outputnode")
         anat_flow.add_nodes([anat_inputnode,anat_outputnode])
 
         anat_flow.connect([
@@ -534,6 +544,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                                ("outputnode.roi_volumes","roi_volumes"),
                                                                ("outputnode.roi_colorLUTs","roi_colorLUTs"),
                                                                ("outputnode.roi_graphMLs","roi_graphMLs"),
+                                                               ("outputnode.roi_volumes_stats","roi_volumes_stats"),
                                                                ("outputnode.wm_eroded","wm_eroded"),
                                                                ("outputnode.gm_mask_file","gm_mask_file"),
                                                                ("outputnode.csf_mask_file","csf_mask_file"),
@@ -577,6 +588,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                         (anat_outputnode,sinker,[("roi_volumes","anat.@roivs")]),
                         (anat_outputnode,sinker,[("roi_colorLUTs","anat.@luts")]),
                         (anat_outputnode,sinker,[("roi_graphMLs","anat.@graphmls")]),
+                        (anat_outputnode,sinker,[("roi_volumes_stats","anat.@stats")]),
                         (anat_outputnode,sinker,[("brain_eroded","anat.@brainmask_eroded")]),
                         (anat_outputnode,sinker,[("wm_eroded","anat.@wm_eroded")]),
                         (anat_outputnode,sinker,[("csf_eroded","anat.@csf_eroded")])
