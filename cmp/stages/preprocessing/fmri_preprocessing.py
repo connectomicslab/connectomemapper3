@@ -4,16 +4,10 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP preprocessing Stage (not used yet!)
+""" CMP fmri first preprocessing Stage 
 """
 
 from traits.api import *
-
-import nipype.interfaces.utility as util
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
-
-from cmp.stages.common import Stage
-
 import os
 import pickle
 import gzip
@@ -21,39 +15,12 @@ import gzip
 import nipype.pipeline.engine as pe
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces import afni
+import nipype.interfaces.utility as util
 
 import nibabel as nib
 
-class discard_tp_InputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True,mandatory=True)
-    n_discard = Int(mandatory=True)
-
-class discard_tp_OutputSpec(TraitedSpec):
-    out_file = File(exists = True)
-
-class discard_tp(BaseInterface):
-    input_spec = discard_tp_InputSpec
-    output_spec = discard_tp_OutputSpec
-
-    def _run_interface(self,runtime):
-        dataimg = nib.load( self.inputs.in_file )
-        data = dataimg.get_data()
-
-        n_discard = int(self.inputs.n_discard) - 1
-
-        new_data = data.copy()
-        new_data = new_data[:,:,:,n_discard:-1]
-
-        hd = dataimg.get_header()
-        hd.set_data_shape([hd.get_data_shape()[0],hd.get_data_shape()[1],hd.get_data_shape()[2],hd.get_data_shape()[3]-n_discard-1])
-        img = nib.Nifti1Image(new_data, dataimg.get_affine(), hd)
-        nib.save(img, os.path.abspath('fMRI_discard.nii.gz'))
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath("fMRI_discard.nii.gz")
-        return outputs
+from cmp.stages.common import Stage
+from cmtklib.functionalMRI import discard_tp
 
 
 class PreprocessingConfig(HasTraits):
