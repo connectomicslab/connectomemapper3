@@ -1187,7 +1187,7 @@ class ProjectHandler(Handler):
             print "fMRI config file: %s"%loaded_project.fmri_config_file
 
             if os.path.isfile(loaded_project.fmri_config_file):
-                print "Load existing diffusion config file"
+                print "Load existing fmri config file"
                 loaded_project.process_type = get_fmri_process_detail(loaded_project,'Global','process_type')
 
                 fmri_inputs_checked, self.fmri_pipeline= init_fmri_project(loaded_project, bids_layout, False)
@@ -1211,7 +1211,7 @@ class ProjectHandler(Handler):
                         self.project_loaded = True
             else:
                 fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(loaded_project, bids_layout, True)
-                print "No existing config for diffusion pipeline found - Created new fMRI pipeline with default parameters"
+                print "No existing config for fMRI pipeline found - Created new fMRI pipeline with default parameters"
                 if self.fmri_pipeline != None: #and self.fmri_pipeline != None:
                     if fmri_inputs_checked:
                         ui_info.ui.context["object"].project_info = loaded_project
