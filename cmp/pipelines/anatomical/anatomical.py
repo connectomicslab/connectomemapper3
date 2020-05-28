@@ -4,6 +4,8 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
+from __future__ import print_function
+
 """ Anatomical pipeline Class definition
 """
 
@@ -172,7 +174,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             files = layout.get(subject=subjid, suffix='T1w', extensions='.nii.gz')
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
-                print T1_file
+                print(T1_file)
             else:
                 return
         else:
@@ -180,7 +182,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             files = layout.get(subject=subjid, suffix='T1w', extensions='.nii.gz', session=sessid)
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
-                print T1_file
+                print(T1_file)
             else:
                 return
         
@@ -191,7 +193,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             files = layout.get(subject=subjid, suffix='T1w', extensions='.json')
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)
-                print T1_json_file
+                print(T1_json_file)
             else:
                 T1_json_file = 'NotFound'
         else:
@@ -199,7 +201,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             files = layout.get(subject=subjid, suffix='T1w', extensions='.json', session=sessid)
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)
-                print T1_json_file
+                print(T1_json_file)
             else:
                 T1_json_file = 'NotFound'
         
@@ -327,8 +329,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             wm_available = True
         else:
             error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % wm_mask_file
-            print error_message
-        
+            print(error_message)
+
         cnt1 = 0
         cnt2 = 0
         for roiv_file in roiv_files:

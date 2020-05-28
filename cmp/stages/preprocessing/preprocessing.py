@@ -6,7 +6,7 @@
 
 """ CMP preprocessing Stage (not used yet!)
 """
-from pyface.message_dialog import error
+# from pyface.message_dialog import error
 from traits.api import *
 
 from nipype.interfaces.base import traits, BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, CommandLine, \
@@ -832,7 +832,7 @@ class splitDiffusion(BaseInterface):
         affine = diffusion_file.get_affine()
         dim = diffusion.shape
         if self.inputs.start > 0 and self.inputs.end > dim[3] - 1:
-            error('End volume is set to %d but it should be bellow %d' % (self.inputs.end, dim[3] - 1))
+            print('End volume is set to %d but it should be bellow %d' % (self.inputs.end, dim[3] - 1))
         padding_idx1 = range(0, self.inputs.start)
         if len(padding_idx1) > 0:
             temp = diffusion[:, :, :, 0:self.inputs.start]

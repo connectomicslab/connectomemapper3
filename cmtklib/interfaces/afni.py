@@ -8,7 +8,7 @@
 
 import os
 from sys import platform
-from builtins import object
+# from builtins import object
 from future.utils import raise_from
 
 from nipype import logging
