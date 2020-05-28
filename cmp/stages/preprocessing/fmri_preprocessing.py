@@ -125,9 +125,12 @@ class PreprocessingStage(Stage):
 
 
     def define_inspect_outputs(self):
+        #print('Stage (inspect_outputs): '.format(self.stage_dir))
         if self.config.despiking:
+            #print('despiking output')
             despike_path = os.path.join(self.stage_dir,"converter","result_converter.pklz")
             if(os.path.exists(despike_path)):
+                #print('exists')
                 despike_results = pickle.load(gzip.open(despike_path))
                 self.inspect_outputs_dict['Spike corrected image'] = ['fsleyes','-ad',despike_results.outputs.out_file,'-cm','brain_colours_blackbdy_iso']
 
