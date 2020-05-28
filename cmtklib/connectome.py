@@ -6,7 +6,7 @@
 
 """ CMTK Connectome functions
 """
-
+from traits.api import *
 from os import path as op
 import nibabel
 import numpy as np
@@ -16,7 +16,10 @@ import scipy.io
 import nipype.pipeline.engine as pe
 import nipype.interfaces.mrtrix as mrtrix
 
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec, traits, File, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, isdefined
+from nipype.interfaces.base import CommandLine, CommandLineInputSpec, traits, \
+                                   File, TraitedSpec, BaseInterface, \
+                                   BaseInterfaceInputSpec, isdefined, \
+                                   InputMultiPath, OutputMultiPath
 
 
 from util import mean_curvature, length
