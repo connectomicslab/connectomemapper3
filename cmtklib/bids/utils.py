@@ -9,13 +9,13 @@
 import os
 import json
 
+
 def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
-
     from cmp.info import __version__, __url__, DOWNLOAD_URL
-
+    
     bids_dir = os.path.abspath(bids_dir)
     deriv_dir = os.path.abspath(deriv_dir)
-
+    
     if pipeline_name == 'cmp':
         desc = {
             'Name': 'CMP - Connectome Mapper processing workflow',
@@ -67,25 +67,25 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
     if 'CMP_SINGULARITY_URL' in os.environ:
         singularity_url = os.environ['CMP_SINGULARITY_URL']
         desc['SingularityContainerURL'] = singularity_url
-
+        
         singularity_md5 = _get_shub_version(singularity_url)
         if singularity_md5 and singularity_md5 is not NotImplemented:
             desc['SingularityContainerMD5'] = _get_shub_version(singularity_url)
-
+    
     # Keys deriving from source dataset
     orig_desc = {}
     fname = os.path.join(bids_dir, 'dataset_description.json')
-    if os.access(fname,os.R_OK):
-        with open(fname,'r') as fobj:
+    if os.access(fname, os.R_OK):
+        with open(fname, 'r') as fobj:
             orig_desc = json.load(fobj)
-
+    
     if 'DatasetDOI' in orig_desc:
         desc['SourceDatasetsURLs'] = ['https://doi.org/{}'.format(
             orig_desc['DatasetDOI'])]
     if 'License' in orig_desc:
         desc['License'] = orig_desc['License']
-
-    with open(os.path.join(deriv_dir, pipeline_name, 'dataset_description.json'),'w') as fobj:
+    
+    with open(os.path.join(deriv_dir, pipeline_name, 'dataset_description.json'), 'w') as fobj:
         json.dump(desc, fobj, indent=4)
 
 

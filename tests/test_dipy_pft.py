@@ -2,20 +2,22 @@ import sys
 import os
 from os import path as op
 
+
 def test_ExtractPVEsFrom5TT(subject, session, in_5tt_image, ref_image, base_dir):
     from cmtklib.interfaces.misc import ExtractPVEsFrom5TT
     from nipype import Node
-
-    pve_extracter = Node(interface=ExtractPVEsFrom5TT(),name='pve_extracter',base_dir=base_dir)
+    
+    pve_extracter = Node(interface=ExtractPVEsFrom5TT(), name='pve_extracter', base_dir=base_dir)
     pve_extracter.inputs.in_5tt = in_5tt_image
     pve_extracter.inputs.ref_image = ref_image
-    pve_extracter.inputs.pve_csf_file = '%s_%s_class-CSF_probtissue.nii.gz'%(subject,session)
-    pve_extracter.inputs.pve_wm_file = '%s_%s_class-WM_probtissue.nii.gz'%(subject,session)
-    pve_extracter.inputs.pve_gm_file = '%s_%s_class-GM_probtissue.nii.gz'%(subject,session)
-
+    pve_extracter.inputs.pve_csf_file = '%s_%s_class-CSF_probtissue.nii.gz' % (subject, session)
+    pve_extracter.inputs.pve_wm_file = '%s_%s_class-WM_probtissue.nii.gz' % (subject, session)
+    pve_extracter.inputs.pve_gm_file = '%s_%s_class-GM_probtissue.nii.gz' % (subject, session)
+    
     eg = pve_extracter.run()
-
+    
     return eg
+
 
 # def test_dipy_PFT_pipeline(diffusion_img, gtab, gmwmi, pve_results):
 #     import numpy as np
@@ -81,15 +83,16 @@ def test_ExtractPVEsFrom5TT(subject, session, in_5tt_image, ref_image, base_dir)
 #     save_trk("pft_streamline.trk", streamlines, affine, shape)
 
 if __name__ == '__main__':
-
     subjects_dir = '/media/localadmin/17646e81-4a2d-474e-9af6-31b511af858e/DS-Schizo/derivatives/freesurfer'
     subject_id = 'sub-A006_ses-20170523161523'
     base_dir = '~/Desktop/dipy_pft_tests'
     subject = 'sub-A006'
     session = 'ses-20170523161523'
     bids_dataset = '/media/localadmin/17646e81-4a2d-474e-9af6-31b511af858e/DS-Schizo'
-
-    in_5tt_image = op.join(bids_dataset,'derivatives/cmp',subject,session,'tmp/diffusion_pipeline/preprocessing_stage/mrtrix_5tt','mrtrix_5tt.nii.gz')
-    ref_image = op.join(bids_dataset,'derivatives/cmp',subject,session,'tmp/diffusion_pipeline/preprocessing_stage/mr_convert_T1','anat.nii.gz')
-
+    
+    in_5tt_image = op.join(bids_dataset, 'derivatives/cmp', subject, session,
+                           'tmp/diffusion_pipeline/preprocessing_stage/mrtrix_5tt', 'mrtrix_5tt.nii.gz')
+    ref_image = op.join(bids_dataset, 'derivatives/cmp', subject, session,
+                        'tmp/diffusion_pipeline/preprocessing_stage/mr_convert_T1', 'anat.nii.gz')
+    
     test_ExtractPVEsFrom5TT(subject, session, in_5tt_image, ref_image, base_dir=base_dir)

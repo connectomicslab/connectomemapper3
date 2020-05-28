@@ -16,68 +16,67 @@ import pkg_resources
 
 from cmp.stages.diffusion.reconstruction import Dipy_recon_config, MRtrix_recon_config
 
+
 # Reconstruction configuration
 
 class Dipy_recon_configUI(Dipy_recon_config):
-
-    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
-
-    traits_view = View(#Item('gradient_table',label='Gradient table (x,y,z,b):'),
-                       Item('flip_table_axis',style='custom',label='Flip bvecs:'),
-                       #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
-               #Item('b_value'),
-               #Item('b0_volumes'),
-                       Group(
-                            Item('local_model',editor=EnumEditor(name='local_model_editor')),
-                            Group(
-                                Item('lmax_order'),
-                                #Item('normalize_to_B0'),
-                                Item('single_fib_thr',label = 'FA threshold'),
-                                visible_when='local_model'
-                                ),
-                            visible_when='imaging_model != "DSI"'
-                            ),
-                       Group(
-                            Item('shore_radial_order',label='Radial order'),
-                            Item('shore_zeta',label='Scale factor (zeta)'),
-                            Item('shore_lambdaN',label='Radial regularization constant'),
-                            Item('shore_lambdaL',label='Angular regularization constant'),
-                            Item('shore_tau',label='Diffusion time (s)'),
-                            Item('shore_constrain_e0',label='Constrain the optimization such that E(0) = 1.'),
-                            Item('shore_positive_constraint',label='Constrain the propagator to be positive.'),
-                            label='Parameters of SHORE reconstruction model',
-                            visible_when='imaging_model == "DSI"'
-                            ),
-                       Item('mapmri',visible_when='imaging_model != "DTI"'),
-                       Group(
-                            VGroup(
-                                Item('radial_order'),
-                                HGroup(Item('small_delta'),Item('big_delta'))
-                            ),
-                            HGroup(
-                                Item('laplacian_regularization'),Item('laplacian_weighting')
-                            ),
-                            Item('positivity_constraint'),
-                            label="MAP_MRI settings",
-                            visible_when='mapmri'
-                       )
-                    )
+    flip_table_axis = List(editor=CheckListEditor(values=['x', 'y', 'z'], cols=3))
+    
+    traits_view = View(  # Item('gradient_table',label='Gradient table (x,y,z,b):'),
+        Item('flip_table_axis', style='custom', label='Flip bvecs:'),
+        # Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
+        # Item('b_value'),
+        # Item('b0_volumes'),
+        Group(
+            Item('local_model', editor=EnumEditor(name='local_model_editor')),
+            Group(
+                Item('lmax_order'),
+                # Item('normalize_to_B0'),
+                Item('single_fib_thr', label='FA threshold'),
+                visible_when='local_model'
+            ),
+            visible_when='imaging_model != "DSI"'
+        ),
+        Group(
+            Item('shore_radial_order', label='Radial order'),
+            Item('shore_zeta', label='Scale factor (zeta)'),
+            Item('shore_lambdaN', label='Radial regularization constant'),
+            Item('shore_lambdaL', label='Angular regularization constant'),
+            Item('shore_tau', label='Diffusion time (s)'),
+            Item('shore_constrain_e0', label='Constrain the optimization such that E(0) = 1.'),
+            Item('shore_positive_constraint', label='Constrain the propagator to be positive.'),
+            label='Parameters of SHORE reconstruction model',
+            visible_when='imaging_model == "DSI"'
+        ),
+        Item('mapmri', visible_when='imaging_model != "DTI"'),
+        Group(
+            VGroup(
+                Item('radial_order'),
+                HGroup(Item('small_delta'), Item('big_delta'))
+            ),
+            HGroup(
+                Item('laplacian_regularization'), Item('laplacian_weighting')
+            ),
+            Item('positivity_constraint'),
+            label="MAP_MRI settings",
+            visible_when='mapmri'
+        )
+    )
 
 
 class MRtrix_recon_configUI(MRtrix_recon_config):
-
-    flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
-
-    traits_view = View(#Item('gradient_table',label='Gradient table (x,y,z,b):'),
-                       Item('flip_table_axis',style='custom',label='Flip gradient table:'),
-                       #Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
-		       #Item('b_value'),
-		       #Item('b0_volumes'),
-                       Item('local_model',editor=EnumEditor(name='local_model_editor')),
-		       Group(Item('lmax_order'),
-		       Item('normalize_to_B0'),
-		       Item('single_fib_thr',label = 'FA threshold'),visible_when='local_model'),
-                       )
+    flip_table_axis = List(editor=CheckListEditor(values=['x', 'y', 'z'], cols=3))
+    
+    traits_view = View(  # Item('gradient_table',label='Gradient table (x,y,z,b):'),
+        Item('flip_table_axis', style='custom', label='Flip gradient table:'),
+        # Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
+        # Item('b_value'),
+        # Item('b0_volumes'),
+        Item('local_model', editor=EnumEditor(name='local_model_editor')),
+        Group(Item('lmax_order'),
+              Item('normalize_to_B0'),
+              Item('single_fib_thr', label='FA threshold'), visible_when='local_model'),
+    )
 
 # class DTK_recon_config(HasTraits):
 #     imaging_model = Str

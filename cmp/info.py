@@ -10,11 +10,11 @@ __minor_version__ = "%s.%s" % (_version_major,
                                _version_minor)
 
 __version__ = "v%s.%s.%s%s" % (_version_major,
-                              _version_minor,
-                              _version_micro,
-                              _version_extra)
+                               _version_minor,
+                               _version_micro,
+                               _version_extra)
 
-#__current_year__ = datetime.datetime.now().strftime("%Y")
+# __current_year__ = datetime.datetime.now().strftime("%Y")
 __current_year__ = '2020'
 
 __author__ = 'The CMP3 developers'
@@ -40,5 +40,3 @@ DOWNLOAD_URL = (
 # DOWNLOAD_URL = (
 #     'https://bitbucket.org/sinergiaconsortium/{name}/get/{ver}.tar.gz'.format(
 #         name=__packagename__, ver=__version__))
-
-

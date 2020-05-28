@@ -53,7 +53,7 @@ def main(dwi_files, json_files, bval_files, bvec_files, dwi_out_file, json_out_f
             with open(bval_file, 'r') as f:
                 lines = f.readlines()
                 bval_out += lines[0].split('\n')[0]
-        
+            
             # Combine the json metadata (relevant fields)
             with open(json_file) as f:
                 data = json.load(f)
@@ -62,7 +62,7 @@ def main(dwi_files, json_files, bval_files, bvec_files, dwi_out_file, json_out_f
                 json_out_data['SequenceName'] = [json_out_data['SequenceName']]
                 json_out_data['SAR'] = [json_out_data['SAR']]
                 json_out_data['global']['const']['SAR'] = [json_out_data['global']['const']['SAR']]
-    
+        
         else:
             dwi_out_data = np.concatenate((dwi_out_data, data), axis=3)
             
@@ -92,13 +92,15 @@ def main(dwi_files, json_files, bval_files, bvec_files, dwi_out_file, json_out_f
                 json_out_data['time']['samples']['AcquisitionNumber'] += data['time']['samples']['AcquisitionNumber']
                 json_out_data['time']['samples']['AcquisitionTime'] += data['time']['samples']['AcquisitionTime']
                 json_out_data['time']['samples']['ContentTime'] += data['time']['samples']['ContentTime']
-                json_out_data['time']['samples']['InstanceCreationTime'] += data['time']['samples']['InstanceCreationTime']
+                json_out_data['time']['samples']['InstanceCreationTime'] += data['time']['samples'][
+                    'InstanceCreationTime']
                 json_out_data['time']['samples']['InstanceNumber'] += data['time']['samples']['InstanceNumber']
-                json_out_data['time']['samples']['LargestImagePixelValue'] += data['time']['samples']['LargestImagePixelValue']
+                json_out_data['time']['samples']['LargestImagePixelValue'] += data['time']['samples'][
+                    'LargestImagePixelValue']
                 json_out_data['time']['samples']['SequenceName'] += data['time']['samples']['SequenceName']
                 json_out_data['time']['samples']['WindowCenter'] += data['time']['samples']['WindowCenter']
                 json_out_data['time']['samples']['WindowWidth'] += data['time']['samples']['WindowWidth']
-
+    
     # Save output bvec file
     print("Saving output bvec file as {} with:".format(bvec_out_file))
     print('  bvec_x : {}'.format(bvec_x))

@@ -20,65 +20,69 @@ import networkx as nx
 
 # Nipype imports
 import nipype.pipeline.engine as pe
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec,\
+from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, \
     traits, File, TraitedSpec, InputMultiPath, OutputMultiPath
 from nipype.utils.filemanip import split_filename
 import nipype.interfaces.cmtk as cmtk
 
 # Own imports
 from cmtklib.connectome import rsfmri_conmat
-#import cmtklib as cmtk
+# import cmtklib as cmtk
 from cmp.stages.common import Stage
+
 
 class ConnectomeConfig(HasTraits):
     apply_scrubbing = Bool(False)
     FD_thr = Float(0.2)
     DVARS_thr = Float(4.0)
-    output_types = List(['gPickle','mat','cff','graphml'])
+    output_types = List(['gPickle', 'mat', 'cff', 'graphml'])
     log_visualization = Bool(True)
     circular_layout = Bool(False)
     subject = Str()
 
-class ConnectomeStage(Stage):
 
+class ConnectomeStage(Stage):
+    
     def __init__(self):
         self.name = 'connectome_stage'
         self.config = ConnectomeConfig()
-        self.inputs = ["roi_volumes_registered","func_file", "FD","DVARS",
-                  "parcellation_scheme","atlas_info","roi_graphMLs"]
-        self.outputs = ["connectivity_matrices","avg_timeseries"]
-
-
+        self.inputs = ["roi_volumes_registered", "func_file", "FD", "DVARS",
+                       "parcellation_scheme", "atlas_info", "roi_graphMLs"]
+        self.outputs = ["connectivity_matrices", "avg_timeseries"]
+    
     def create_workflow(self, flow, inputnode, outputnode):
-        cmtk_cmat = pe.Node(interface=rsfmri_conmat(),name="compute_matrice")
+        cmtk_cmat = pe.Node(interface=rsfmri_conmat(), name="compute_matrice")
         cmtk_cmat.inputs.output_types = self.config.output_types
         cmtk_cmat.inputs.apply_scrubbing = self.config.apply_scrubbing
         cmtk_cmat.inputs.FD_th = self.config.FD_thr
         cmtk_cmat.inputs.DVARS_th = self.config.DVARS_thr
-
+        
         flow.connect([
-                     (inputnode,cmtk_cmat, [('func_file','func_file'),("FD","FD"),("DVARS","DVARS"),('parcellation_scheme','parcellation_scheme'),('atlas_info','atlas_info'),('roi_volumes_registered','roi_volumes'),('roi_graphMLs','roi_graphmls')]),
-                     (cmtk_cmat,outputnode, [('connectivity_matrices','connectivity_matrices'),("avg_timeseries","avg_timeseries")])
-                     ])
-
+            (inputnode, cmtk_cmat, [('func_file', 'func_file'), ("FD", "FD"), ("DVARS", "DVARS"),
+                                    ('parcellation_scheme', 'parcellation_scheme'), ('atlas_info', 'atlas_info'),
+                                    ('roi_volumes_registered', 'roi_volumes'), ('roi_graphMLs', 'roi_graphmls')]),
+            (cmtk_cmat, outputnode,
+             [('connectivity_matrices', 'connectivity_matrices'), ("avg_timeseries", "avg_timeseries")])
+        ])
+    
     def define_inspect_outputs(self):
-        con_results_path = os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz")
-
+        con_results_path = os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz")
+        
         map_scale = "default"
         if self.config.log_visualization:
             map_scale = "log"
-
+        
         if self.config.circular_layout:
-            layout='circular'
+            layout = 'circular'
         else:
-            layout='matrix'
-
+            layout = 'matrix'
+        
         # print('con_results_path : ',con_results_path)
-        if(os.path.exists(con_results_path)):
-
+        if (os.path.exists(con_results_path)):
+            
             con_results = pickle.load(gzip.open(con_results_path))
             # print(con_results)
-
+            
             mat = con_results.outputs.connectivity_matrices
             print(mat)
             if isinstance(mat, basestring):
@@ -86,16 +90,22 @@ class ConnectomeStage(Stage):
                 # print(mat)
                 if 'gpickle' in mat:
                     con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
-                    self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%os.path.basename(mat)] = ["showmatrix_gpickle",layout,mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', map_scale]
+                    self.inspect_outputs_dict[
+                        'ROI-average time-series correlation - Connectome %s' % os.path.basename(mat)] = [
+                        "showmatrix_gpickle", layout, mat, "corr", "False",
+                        self.config.subject + ' - ' + con_name + ' - Correlation', map_scale]
             else:
                 print("multi scale")
                 for mat in con_results.outputs.connectivity_matrices:
                     # print(mat)
                     if 'gpickle' in mat:
                         con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
-                        self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s'%con_name] = ["showmatrix_gpickle",layout,mat, "corr", "False", self.config.subject+' - '+con_name+' - Correlation', map_scale]
-
-            self.inspect_outputs = sorted( [key.encode('ascii','ignore') for key in self.inspect_outputs_dict.keys()],key=str.lower)
-
+                        self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s' % con_name] = [
+                            "showmatrix_gpickle", layout, mat, "corr", "False",
+                            self.config.subject + ' - ' + con_name + ' - Correlation', map_scale]
+            
+            self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in self.inspect_outputs_dict.keys()],
+                                          key=str.lower)
+    
     def has_run(self):
-        return os.path.exists(os.path.join(self.stage_dir,"compute_matrice","result_compute_matrice.pklz"))
+        return os.path.exists(os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"))
