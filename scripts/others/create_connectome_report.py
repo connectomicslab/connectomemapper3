@@ -78,7 +78,7 @@ def main(bids_dir):
         print subjects
     
     except:
-        error(message="Invalid BIDS dataset. Please see documentation for more details.", title="BIDS error")
+        print("BIDS ERROR: Invalid BIDS dataset. Please see documentation for more details.")
         sys.exit(1)
     
     c = canvas.Canvas(os.path.join(bids_dir, 'derivatives', 'cmp', 'report.pdf'), pagesize=A4)

@@ -11,6 +11,7 @@
 from traits.api import *
 import gzip
 import pickle
+import os
 
 # Nipype imports
 import nipype.pipeline.engine as pe

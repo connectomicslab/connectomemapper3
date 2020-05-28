@@ -10,6 +10,7 @@ import nipype.interfaces.base as nibase
 import nipype.interfaces.utility as util
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File, Directory, \
     InputMultiPath, isdefined
+from nipype.utils import logger
 from nipype.utils.filemanip import split_filename, fname_presuffix
 import os, os.path as op
 

@@ -6,12 +6,17 @@
 
 """ CMTK Connectome functions
 """
+from nipype.interfaces import cmtk
 from traits.api import *
 from os import path as op
+import glob
+import os
 import nibabel
+import nibabel as nib
 import numpy as np
 import networkx as nx
 import scipy.io
+import scipy.io as sio
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.mrtrix as mrtrix
@@ -20,6 +25,8 @@ from nipype.interfaces.base import CommandLine, CommandLineInputSpec, traits, \
     File, TraitedSpec, BaseInterface, \
     BaseInterfaceInputSpec, isdefined, \
     InputMultiPath, OutputMultiPath
+
+from nipype.utils.filemanip import split_filename
 
 from util import mean_curvature, length
 from parcellation import get_parcellation
@@ -125,138 +132,6 @@ def save_fibers(oldhdr, oldfib, fname, indices):
     
     print("Writing final no orphan fibers: %s" % fname)
     nibabel.trackvis.write(fname, outstreams, hdrnew)
-
-
-def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, output_types=['gPickle'],
-                    atlas_info={}):
-    print("Filling probabilistic connectivity matrices:")
-    
-    if parcellation_scheme != "Custom":
-        resolutions = get_parcellation(parcellation_scheme)
-    else:
-        resolutions = atlas_info
-    
-    # firstROIFile = roi_volumes[0]
-    # firstROI = nibabel.load(firstROIFile)
-    # roiVoxelSize = firstROI.get_header().get_zooms()
-    
-    for parkey, parval in resolutions.items():
-        print("Resolution = " + parkey)
-        
-        # Open the corresponding ROI
-        print("Open the corresponding ROI")
-        for vol in roi_volumes:
-            if parkey in vol:
-                roi_fname = vol
-                print roi_fname
-        roi = nibabel.load(roi_fname)
-        roiData = roi.get_data()
-        
-        # Create the matrix
-        nROIs = parval['number_of_regions']
-        print("Create the connection matrix (%s rois)" % nROIs)
-        G = nx.Graph()
-        
-        # Match ROI indexes to matrix indexes
-        ROI_idx = np.unique(roiData[roiData != 0]).astype('int32')
-        
-        # add node information from parcellation
-        gp = nx.read_graphml(parval['node_information_graphml'])
-        for u, d in gp.nodes(data=True):
-            G.add_node(int(u))
-            for key in d:
-                G.node[int(u)][key] = d[key]
-            # compute a position for the node based on the mean position of the
-            # ROI in voxel coordinates (segmentation volume )
-            G.node[int(u)]['dn_position'] = tuple(np.mean(np.where(roiData == int(d["dn_correspondence_id"])), axis=1))
-        
-        tot_tracks = 0
-        
-        pc = -1
-        
-        for voxmat_i in range(0, len(voxel_connectivity_files)):
-            pcN = int(round(float(100 * voxmat_i) / len(voxel_connectivity_files)))
-            if pcN > pc and pcN % 20 == 0:
-                pc = pcN
-                print('%4.0f%%' % (pc))
-            # fib, hdr    = nibabel.trackvis.read(voxel_connectivity[voxmat_i], False)
-            # (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
-            # n = len(fib)
-            
-            startROI = int(ROI_idx[voxmat_i])
-            
-            voxmat = np.loadtxt(voxel_connectivity_files[voxmat_i]).astype('int32')
-            if len(voxmat.shape) > 1:
-                ROImat = np.sum(voxmat, 0)
-            else:
-                ROImat = voxmat
-            
-            for target in range(0, len(ROI_idx)):
-                
-                endROI = int(ROI_idx[target])
-                
-                if startROI != endROI:  # Excludes loops (connections within the same ROI)
-                    # Add edge to graph
-                    if G.has_edge(startROI, endROI):
-                        G[startROI][endROI]['n_tracks'] += ROImat[target]
-                    else:
-                        G.add_edge(startROI, endROI, n_tracks=ROImat[target])
-                    
-                    tot_tracks += ROImat[target]
-        
-        for u, v, d in G.edges(data=True):
-            G.remove_edge(u, v)
-            di = {'number_of_fibers': (float(d['n_tracks']) / tot_tracks.astype(float))}
-            G.add_edge(u, v)
-            for key in di:
-                G[u][v][key] = di[key]
-        
-        # storing network
-        if 'gPickle' in output_types:
-            nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
-        if 'mat' in output_types:
-            # edges
-            size_edges = (parval['number_of_regions'], parval['number_of_regions'])
-            edge_keys = G.edges(data=True)[0][2].keys()
-            
-            edge_struct = {}
-            for edge_key in edge_keys:
-                edge_struct[edge_key] = nx.to_numpy_matrix(G, weight=edge_key)
-            
-            # nodes
-            size_nodes = parval['number_of_regions']
-            node_keys = G.nodes(data=True)[0][1].keys()
-            
-            node_struct = {}
-            for node_key in node_keys:
-                if node_key == 'dn_position':
-                    node_arr = np.zeros([size_nodes, 3], dtype=np.float)
-                else:
-                    node_arr = np.zeros(size_nodes, dtype=np.object_)
-                node_n = 0
-                for _, node_data in G.nodes(data=True):
-                    node_arr[node_n] = node_data[node_key]
-                    node_n += 1
-                node_struct[node_key] = node_arr
-            
-            scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc': edge_struct, 'nodes': node_struct})
-        if 'graphml' in output_types:
-            g2 = nx.Graph()
-            for u_gml, v_gml, d_gml in G.edges(data=True):
-                g2.add_edge(u_gml, v_gml)
-                for key in d_gml:
-                    g2[u_gml][v_gml][key] = d_gml[key]
-            for u_gml, d_gml in G.nodes(data=True):
-                g2.add_node(u_gml)
-                g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
-                g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
-                g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
-                g2.node[u_gml]['dn_name'] = d_gml['dn_name']
-                g2.node[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
-                g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
-                g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
-                g2.node[u_gml]['dn_region'] = d_gml['dn_region']
-            nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
 
 
 def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvature=True, additional_maps={},
@@ -733,6 +608,80 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
     print("========================")
 
 
+class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
+    track_file = InputMultiPath(File(exists=True), desc='Tractography result', mandatory=True)
+    roi_volumes = InputMultiPath(File(exists=True), desc='ROI volumes registered to diffusion space')
+    parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer', 'Custom'],
+                                      usedefault=True)
+    roi_graphMLs = InputMultiPath(File(exists=True), desc='GraphML description of ROI volumes (Lausanne2018)')
+    atlas_info = Dict(mandatory=False, desc="custom atlas information")
+    compute_curvature = traits.Bool(True, desc='Compute curvature', usedefault=True)
+    additional_maps = traits.List(File, desc='Additional calculated maps (ADC, gFA, ...)')
+    output_types = traits.List(Str, desc='Output types of the connectivity matrices')
+    probtrackx = traits.Bool(False)
+    voxel_connectivity = InputMultiPath(File(exists=True),
+                                        desc="ProbtrackX connectivity matrices (# seed voxels x # target ROIs)")
+
+
+class CMTK_cmatOutputSpec(TraitedSpec):
+    endpoints_file = File()
+    endpoints_mm_file = File()
+    final_fiberslength_files = OutputMultiPath(File())
+    filtered_fiberslabel_files = OutputMultiPath(File())
+    final_fiberlabels_files = OutputMultiPath(File())
+    streamline_final_file = File()
+    connectivity_matrices = OutputMultiPath(File())
+
+
+class CMTK_cmat(BaseInterface):
+    input_spec = CMTK_cmatInputSpec
+    output_spec = CMTK_cmatOutputSpec
+    
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.additional_maps):
+            additional_maps = dict(
+                (split_filename(add_map)[1], add_map) for add_map in self.inputs.additional_maps if add_map != '')
+        else:
+            additional_maps = {}
+        
+        # if self.inputs.probtrackx:
+        #     probtrackx_cmat(voxel_connectivity_files=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
+        #                     parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
+        #                     output_types=self.inputs.output_types)
+        # elif len(self.inputs.track_file) > 1:
+        #     prob_cmat(intrk=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
+        #               parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
+        #               output_types=self.inputs.output_types)
+        # else:
+        cmat(intrk=self.inputs.track_file[0], roi_volumes=self.inputs.roi_volumes,
+             roi_graphmls=self.inputs.roi_graphMLs,
+             parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
+             compute_curvature=self.inputs.compute_curvature,
+             additional_maps=additional_maps, output_types=self.inputs.output_types)
+        
+        if 'cff' in self.inputs.output_types:
+            cvt = cmtk.CFFConverter()
+            cvt.inputs.title = 'Connectome mapper'
+            cvt.inputs.nifti_volumes = self.inputs.roi_volumes
+            cvt.inputs.tract_files = ['streamline_final.trk']
+            cvt.inputs.gpickled_networks = glob.glob(os.path.abspath("connectome_*.gpickle"))
+            cvt.run()
+        
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['endpoints_file'] = os.path.abspath('endpoints.npy')
+        outputs['endpoints_mm_file'] = os.path.abspath('endpointsmm.npy')
+        outputs['final_fiberslength_files'] = glob.glob(os.path.abspath('final_fiberslength*'))
+        outputs['filtered_fiberslabel_files'] = glob.glob(os.path.abspath('filtered_fiberslabel*'))
+        outputs['final_fiberlabels_files'] = glob.glob(os.path.abspath('final_fiberlabels*'))
+        outputs['streamline_final_file'] = os.path.abspath('streamline_final.trk')
+        outputs['connectivity_matrices'] = glob.glob(os.path.abspath('connectome*'))
+        
+        return outputs
+
+
 class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
     func_file = File(exists=True, mandatory=True, desc="fMRI volume")
     roi_volumes = InputMultiPath(File(exists=True), desc='ROI volumes registered to functional space')
@@ -1205,180 +1154,312 @@ class rsfmri_conmat(BaseInterface):
 #         outputs['out_file'] = op.abspath(self.inputs.out_file)
 #         return outputs
 
-def mrtrixcmat(intck, fod_file, roi_volumes, parcellation_scheme, compute_curvature=True, additional_maps={},
-               output_types=['gPickle'], atlas_info={}):
-    """ Create the connection matrix using MRTrix fibers and Freesurfer ROIs. """
-    conflow = pe.Workflow(name='MRTRix_connectome_pipeline')
-    # connectome_inputnode = pe.Node(interface=util.IdentityInterface(fields=['intck','fod_file','roi_volumes']),name='inputnode')
-    # connectome_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectome']),name='outputnode')
+# def mrtrixcmat(intck, fod_file, roi_volumes, parcellation_scheme, compute_curvature=True, additional_maps={},
+#                output_types=['gPickle'], atlas_info={}):
+#     """ Create the connection matrix using MRTrix fibers and Freesurfer ROIs. """
+#     conflow = pe.Workflow(name='MRTRix_connectome_pipeline')
+#     # connectome_inputnode = pe.Node(interface=util.IdentityInterface(fields=['intck','fod_file','roi_volumes']),name='inputnode')
+#     # connectome_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectome']),name='outputnode')
     
-    print "INTCK : ", intck
+#     print "INTCK : ", intck
     
-    fibers_filter = pe.Node(interface=FilterTractogram(), name='fibers_filter')
-    fibers_filter.inputs.in_tracks = op.intck
-    fibers_filter.inputs.in_fod = fod_file
-    fibers_filter.inputs.out_file = 'streamlines_weights.txt'
+#     fibers_filter = pe.Node(interface=FilterTractogram(), name='fibers_filter')
+#     fibers_filter.inputs.in_tracks = op.intck
+#     fibers_filter.inputs.in_fod = fod_file
+#     fibers_filter.inputs.out_file = 'streamlines_weights.txt'
     
-    connectome_builder = pe.Node(interface=BuildConnectome(), name='connectome_builder')
-    connectome_builder.inputs.in_tracks = intck
-    connectome_builder.inputs.in_parc = roi_volumes
-    connectome_builder.inputs.zero_diagonal = True
+#     connectome_builder = pe.Node(interface=BuildConnectome(), name='connectome_builder')
+#     connectome_builder.inputs.in_tracks = intck
+#     connectome_builder.inputs.in_parc = roi_volumes
+#     connectome_builder.inputs.zero_diagonal = True
     
-    conflow.connect([
-        (fibers_filter, connectome_builder, [('out_weights', 'in_weights')]),
-    ])
+#     conflow.connect([
+#         (fibers_filter, connectome_builder, [('out_weights', 'in_weights')]),
+#     ])
     
-    conflow.run()
+#     conflow.run()
 
 
-# CMP2
-def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'], atlas_info={}):
-    print("Filling probabilistic connectivity matrices:")
+# # CMP2
+# def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'], atlas_info={}):
+#     print("Filling probabilistic connectivity matrices:")
     
-    if parcellation_scheme != "Custom":
-        resolutions = get_parcellation(parcellation_scheme)
-    else:
-        resolutions = atlas_info
+#     if parcellation_scheme != "Custom":
+#         resolutions = get_parcellation(parcellation_scheme)
+#     else:
+#         resolutions = atlas_info
     
-    firstROIFile = roi_volumes[0]
-    firstROI = nibabel.load(firstROIFile)
-    roiVoxelSize = firstROI.get_header().get_zooms()
+#     firstROIFile = roi_volumes[0]
+#     firstROI = nibabel.load(firstROIFile)
+#     roiVoxelSize = firstROI.get_header().get_zooms()
     
-    for parkey, parval in resolutions.items():
-        print("Resolution = " + parkey)
+#     for parkey, parval in resolutions.items():
+#         print("Resolution = " + parkey)
         
-        # Open the corresponding ROI
-        print("Open the corresponding ROI")
-        for vol in roi_volumes:
-            if parkey in vol:
-                roi_fname = vol
-                print roi_fname
-        roi = nibabel.load(roi_fname)
-        roiData = roi.get_data()
+#         # Open the corresponding ROI
+#         print("Open the corresponding ROI")
+#         for vol in roi_volumes:
+#             if parkey in vol:
+#                 roi_fname = vol
+#                 print roi_fname
+#         roi = nibabel.load(roi_fname)
+#         roiData = roi.get_data()
         
-        # Create the matrix
-        nROIs = parval['number_of_regions']
-        print("Create the connection matrix (%s rois)" % nROIs)
-        G = nx.Graph()
+#         # Create the matrix
+#         nROIs = parval['number_of_regions']
+#         print("Create the connection matrix (%s rois)" % nROIs)
+#         G = nx.Graph()
         
-        # add node information from parcellation
-        gp = nx.read_graphml(parval['node_information_graphml'])
-        for u, d in gp.nodes(data=True):
-            G.add_node(int(u))
-            for key in d:
-                G.node[int(u)][key] = d[key]
-            # compute a position for the node based on the mean position of the
-            # ROI in voxel coordinates (segmentation volume )
-            G.node[int(u)]['dn_position'] = tuple(np.mean(np.where(roiData == int(d["dn_correspondence_id"])), axis=1))
+#         # add node information from parcellation
+#         gp = nx.read_graphml(parval['node_information_graphml'])
+#         for u, d in gp.nodes(data=True):
+#             G.add_node(int(u))
+#             for key in d:
+#                 G.node[int(u)][key] = d[key]
+#             # compute a position for the node based on the mean position of the
+#             # ROI in voxel coordinates (segmentation volume )
+#             G.node[int(u)]['dn_position'] = tuple(np.mean(np.where(roiData == int(d["dn_correspondence_id"])), axis=1))
         
-        graph_matrix = np.zeros((nROIs, nROIs), dtype=int)
+#         graph_matrix = np.zeros((nROIs, nROIs), dtype=int)
         
-        pc = -1
+#         pc = -1
         
-        for intrk_i in range(0, len(intrk)):
-            pcN = int(round(float(100 * intrk_i) / len(intrk)))
-            if pcN > pc and pcN % 20 == 0:
-                pc = pcN
-                print('%4.0f%%' % (pc))
-            fib, hdr = nibabel.trackvis.read(intrk[intrk_i], False)
-            (endpoints, endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
-            n = len(fib)
+#         for intrk_i in range(0, len(intrk)):
+#             pcN = int(round(float(100 * intrk_i) / len(intrk)))
+#             if pcN > pc and pcN % 20 == 0:
+#                 pc = pcN
+#                 print('%4.0f%%' % (pc))
+#             fib, hdr = nibabel.trackvis.read(intrk[intrk_i], False)
+#             (endpoints, endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
+#             n = len(fib)
             
-            dis = 0
+#             dis = 0
             
-            pc = -1
-            for i in range(n):  # n: number of fibers
+#             pc = -1
+#             for i in range(n):  # n: number of fibers
                 
-                # ROI start => ROI end
-                try:
-                    startROI = int(roiData[endpoints[i, 0, 0], endpoints[i, 0, 1], endpoints[
-                        i, 0, 2]])  # endpoints from create_endpoints_array
-                    endROI = int(roiData[endpoints[i, 1, 0], endpoints[i, 1, 1], endpoints[i, 1, 2]])
-                except IndexError:
-                    print(
-                                "An index error occured for fiber %s. This means that the fiber start or endpoint is outside the volume. Continue." % i)
-                    continue
+#                 # ROI start => ROI end
+#                 try:
+#                     startROI = int(roiData[endpoints[i, 0, 0], endpoints[i, 0, 1], endpoints[
+#                         i, 0, 2]])  # endpoints from create_endpoints_array
+#                     endROI = int(roiData[endpoints[i, 1, 0], endpoints[i, 1, 1], endpoints[i, 1, 2]])
+#                 except IndexError:
+#                     print(
+#                                 "An index error occured for fiber %s. This means that the fiber start or endpoint is outside the volume. Continue." % i)
+#                     continue
                 
-                # Filter
-                if startROI == 0 or endROI == 0:
-                    dis += 1
-                    # fiberlabels[i,0] = -1
-                    continue
+#                 # Filter
+#                 if startROI == 0 or endROI == 0:
+#                     dis += 1
+#                     # fiberlabels[i,0] = -1
+#                     continue
                 
-                if startROI > nROIs or endROI > nROIs:
-                    #                print("Start or endpoint of fiber terminate in a voxel which is labeled higher")
-                    #                print("than is expected by the parcellation node information.")
-                    #                print("Start ROI: %i, End ROI: %i" % (startROI, endROI))
-                    #                print("This needs bugfixing!")
-                    continue
+#                 if startROI > nROIs or endROI > nROIs:
+#                     #                print("Start or endpoint of fiber terminate in a voxel which is labeled higher")
+#                     #                print("than is expected by the parcellation node information.")
+#                     #                print("Start ROI: %i, End ROI: %i" % (startROI, endROI))
+#                     #                print("This needs bugfixing!")
+#                     continue
                 
-                # Update fiber label
-                # switch the rois in order to enforce startROI < endROI
-                if endROI < startROI:
-                    tmp = startROI
-                    startROI = endROI
-                    endROI = tmp
+#                 # Update fiber label
+#                 # switch the rois in order to enforce startROI < endROI
+#                 if endROI < startROI:
+#                     tmp = startROI
+#                     startROI = endROI
+#                     endROI = tmp
                 
-                # Add edge to graph
-                if G.has_edge(startROI, endROI):
-                    G[startROI][endROI]['n_tracks'] += 1
-                else:
-                    G.add_edge(startROI, endROI, n_tracks=1)
+#                 # Add edge to graph
+#                 if G.has_edge(startROI, endROI):
+#                     G[startROI][endROI]['n_tracks'] += 1
+#                 else:
+#                     G.add_edge(startROI, endROI, n_tracks=1)
                 
-                graph_matrix[startROI - 1][endROI - 1] += 1
+#                 graph_matrix[startROI - 1][endROI - 1] += 1
         
-        tot_tracks = graph_matrix.sum()
+#         tot_tracks = graph_matrix.sum()
         
-        for u, v, d in G.edges(data=True):
-            G.remove_edge(u, v)
-            di = {'number_of_fibers': (float(d['n_tracks']) / tot_tracks.astype(float))}
-            G.add_edge(u, v)
-            for key in di:
-                G[u][v][key] = di[key]
+#         for u, v, d in G.edges(data=True):
+#             G.remove_edge(u, v)
+#             di = {'number_of_fibers': (float(d['n_tracks']) / tot_tracks.astype(float))}
+#             G.add_edge(u, v)
+#             for key in di:
+#                 G[u][v][key] = di[key]
         
-        # storing network
-        if 'gPickle' in output_types:
-            nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
-        if 'mat' in output_types:
-            # edges
-            size_edges = (parval['number_of_regions'], parval['number_of_regions'])
-            edge_keys = G.edges(data=True)[0][2].keys()
+#         # storing network
+#         if 'gPickle' in output_types:
+#             nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
+#         if 'mat' in output_types:
+#             # edges
+#             size_edges = (parval['number_of_regions'], parval['number_of_regions'])
+#             edge_keys = G.edges(data=True)[0][2].keys()
             
-            edge_struct = {}
-            for edge_key in edge_keys:
-                edge_struct[edge_key] = nx.to_numpy_matrix(G, weight=edge_key)
+#             edge_struct = {}
+#             for edge_key in edge_keys:
+#                 edge_struct[edge_key] = nx.to_numpy_matrix(G, weight=edge_key)
             
-            # nodes
-            size_nodes = parval['number_of_regions']
-            node_keys = G.nodes(data=True)[0][1].keys()
+#             # nodes
+#             size_nodes = parval['number_of_regions']
+#             node_keys = G.nodes(data=True)[0][1].keys()
             
-            node_struct = {}
-            for node_key in node_keys:
-                if node_key == 'dn_position':
-                    node_arr = np.zeros([size_nodes, 3], dtype=np.float)
-                else:
-                    node_arr = np.zeros(size_nodes, dtype=np.object_)
-                node_n = 0
-                for _, node_data in G.nodes(data=True):
-                    node_arr[node_n] = node_data[node_key]
-                    node_n += 1
-                node_struct[node_key] = node_arr
+#             node_struct = {}
+#             for node_key in node_keys:
+#                 if node_key == 'dn_position':
+#                     node_arr = np.zeros([size_nodes, 3], dtype=np.float)
+#                 else:
+#                     node_arr = np.zeros(size_nodes, dtype=np.object_)
+#                 node_n = 0
+#                 for _, node_data in G.nodes(data=True):
+#                     node_arr[node_n] = node_data[node_key]
+#                     node_n += 1
+#                 node_struct[node_key] = node_arr
             
-            scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc': edge_struct, 'nodes': node_struct})
-        if 'graphml' in output_types:
-            g2 = nx.Graph()
-            for u_gml, v_gml, d_gml in G.edges(data=True):
-                g2.add_edge(u_gml, v_gml)
-                for key in d_gml:
-                    g2[u_gml][v_gml][key] = d_gml[key]
-            for u_gml, d_gml in G.nodes(data=True):
-                g2.add_node(u_gml)
-                g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
-                g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
-                g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
-                g2.node[u_gml]['dn_name'] = d_gml['dn_name']
-                g2.node[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
-                g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
-                g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
-                g2.node[u_gml]['dn_region'] = d_gml['dn_region']
-            nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
+#             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc': edge_struct, 'nodes': node_struct})
+#         if 'graphml' in output_types:
+#             g2 = nx.Graph()
+#             for u_gml, v_gml, d_gml in G.edges(data=True):
+#                 g2.add_edge(u_gml, v_gml)
+#                 for key in d_gml:
+#                     g2[u_gml][v_gml][key] = d_gml[key]
+#             for u_gml, d_gml in G.nodes(data=True):
+#                 g2.add_node(u_gml)
+#                 g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+#                 g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
+#                 g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
+#                 g2.node[u_gml]['dn_name'] = d_gml['dn_name']
+#                 g2.node[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
+#                 g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
+#                 g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
+#                 g2.node[u_gml]['dn_region'] = d_gml['dn_region']
+#             nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
+
+
+# def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, output_types=['gPickle'],
+#                     atlas_info={}):
+#     print("Filling probabilistic connectivity matrices:")
+    
+#     if parcellation_scheme != "Custom":
+#         resolutions = get_parcellation(parcellation_scheme)
+#     else:
+#         resolutions = atlas_info
+    
+#     # firstROIFile = roi_volumes[0]
+#     # firstROI = nibabel.load(firstROIFile)
+#     # roiVoxelSize = firstROI.get_header().get_zooms()
+    
+#     for parkey, parval in resolutions.items():
+#         print("Resolution = " + parkey)
+        
+#         # Open the corresponding ROI
+#         print("Open the corresponding ROI")
+#         for vol in roi_volumes:
+#             if parkey in vol:
+#                 roi_fname = vol
+#                 print roi_fname
+#         roi = nibabel.load(roi_fname)
+#         roiData = roi.get_data()
+        
+#         # Create the matrix
+#         nROIs = parval['number_of_regions']
+#         print("Create the connection matrix (%s rois)" % nROIs)
+#         G = nx.Graph()
+        
+#         # Match ROI indexes to matrix indexes
+#         ROI_idx = np.unique(roiData[roiData != 0]).astype('int32')
+        
+#         # add node information from parcellation
+#         gp = nx.read_graphml(parval['node_information_graphml'])
+#         for u, d in gp.nodes(data=True):
+#             G.add_node(int(u))
+#             for key in d:
+#                 G.node[int(u)][key] = d[key]
+#             # compute a position for the node based on the mean position of the
+#             # ROI in voxel coordinates (segmentation volume )
+#             G.node[int(u)]['dn_position'] = tuple(np.mean(np.where(roiData == int(d["dn_correspondence_id"])), axis=1))
+        
+#         tot_tracks = 0
+        
+#         pc = -1
+        
+#         for voxmat_i in range(0, len(voxel_connectivity_files)):
+#             pcN = int(round(float(100 * voxmat_i) / len(voxel_connectivity_files)))
+#             if pcN > pc and pcN % 20 == 0:
+#                 pc = pcN
+#                 print('%4.0f%%' % (pc))
+#             # fib, hdr    = nibabel.trackvis.read(voxel_connectivity[voxmat_i], False)
+#             # (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
+#             # n = len(fib)
+            
+#             startROI = int(ROI_idx[voxmat_i])
+            
+#             voxmat = np.loadtxt(voxel_connectivity_files[voxmat_i]).astype('int32')
+#             if len(voxmat.shape) > 1:
+#                 ROImat = np.sum(voxmat, 0)
+#             else:
+#                 ROImat = voxmat
+            
+#             for target in range(0, len(ROI_idx)):
+                
+#                 endROI = int(ROI_idx[target])
+                
+#                 if startROI != endROI:  # Excludes loops (connections within the same ROI)
+#                     # Add edge to graph
+#                     if G.has_edge(startROI, endROI):
+#                         G[startROI][endROI]['n_tracks'] += ROImat[target]
+#                     else:
+#                         G.add_edge(startROI, endROI, n_tracks=ROImat[target])
+                    
+#                     tot_tracks += ROImat[target]
+        
+#         for u, v, d in G.edges(data=True):
+#             G.remove_edge(u, v)
+#             di = {'number_of_fibers': (float(d['n_tracks']) / tot_tracks.astype(float))}
+#             G.add_edge(u, v)
+#             for key in di:
+#                 G[u][v][key] = di[key]
+        
+#         # storing network
+#         if 'gPickle' in output_types:
+#             nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
+#         if 'mat' in output_types:
+#             # edges
+#             size_edges = (parval['number_of_regions'], parval['number_of_regions'])
+#             edge_keys = G.edges(data=True)[0][2].keys()
+            
+#             edge_struct = {}
+#             for edge_key in edge_keys:
+#                 edge_struct[edge_key] = nx.to_numpy_matrix(G, weight=edge_key)
+            
+#             # nodes
+#             size_nodes = parval['number_of_regions']
+#             node_keys = G.nodes(data=True)[0][1].keys()
+            
+#             node_struct = {}
+#             for node_key in node_keys:
+#                 if node_key == 'dn_position':
+#                     node_arr = np.zeros([size_nodes, 3], dtype=np.float)
+#                 else:
+#                     node_arr = np.zeros(size_nodes, dtype=np.object_)
+#                 node_n = 0
+#                 for _, node_data in G.nodes(data=True):
+#                     node_arr[node_n] = node_data[node_key]
+#                     node_n += 1
+#                 node_struct[node_key] = node_arr
+            
+#             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc': edge_struct, 'nodes': node_struct})
+#         if 'graphml' in output_types:
+#             g2 = nx.Graph()
+#             for u_gml, v_gml, d_gml in G.edges(data=True):
+#                 g2.add_edge(u_gml, v_gml)
+#                 for key in d_gml:
+#                     g2[u_gml][v_gml][key] = d_gml[key]
+#             for u_gml, d_gml in G.nodes(data=True):
+#                 g2.add_node(u_gml)
+#                 g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+#                 g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
+#                 g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
+#                 g2.node[u_gml]['dn_name'] = d_gml['dn_name']
+#                 g2.node[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
+#                 g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
+#                 g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
+#                 g2.node[u_gml]['dn_region'] = d_gml['dn_region']
+#             nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)

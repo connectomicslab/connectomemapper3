@@ -6,13 +6,9 @@
 
 """ CMP registration stage
 """
-try:
-    from traits.api import *
-except ImportError:
-    from enthought.traits.api import *
 
 # General imports
-# from traits.api import *
+from traits.api import *
 import os
 import pickle
 import gzip
@@ -198,7 +194,7 @@ class ApplymultipleMRCrop(BaseInterface):
     
     def _run_interface(self, runtime):
         for in_file in self.inputs.in_files:
-            ax = MRCrop(in_file=in_file, template_image=template_image)
+            ax = MRCrop(in_file=in_file, template_image=self.inputs.template_image)
             ax.run()
         return runtime
     

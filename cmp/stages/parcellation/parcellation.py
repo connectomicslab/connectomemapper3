@@ -21,6 +21,7 @@ import nipype.pipeline.engine as pe  # pypeline engine
 import cmtklib as cmtk
 import nipype.interfaces.utility as util
 
+from cmtklib.interfaces import fsl
 from cmtklib.parcellation import Parcellate, ParcellateBrainstemStructures, \
     ParcellateHippocampalSubfields, ParcellateThalamus, \
     CombineParcellations, ComputeParcellationRoiVolumes

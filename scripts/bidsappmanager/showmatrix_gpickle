@@ -3,6 +3,8 @@
 
 import sys
 import os
+from itertools import cycle
+
 import networkx as nx
 import numpy as np
 import copy

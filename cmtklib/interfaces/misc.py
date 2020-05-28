@@ -6,13 +6,13 @@
 import os
 import glob
 import numpy as np
-
 from traits.api import *
 
 from nipype.utils.filemanip import split_filename
-
+from nipype.workflows.misc.utils import get_vox_dims, get_data_dims
 from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec, \
     TraitedSpec, File, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
+import nipype.pipeline.engine as pe
 
 import nibabel as nib
 
@@ -362,11 +362,11 @@ class Tck2Trk(BaseInterface):
     output_spec = Tck2TrkOutputSpec
     
     def _run_interface(self, runtime):
-        import nibabel
+
         from nibabel.streamlines import Field
         from nibabel.orientations import aff2axcodes
         print '-> Load nifti and copy header'
-        nii = nibabel.load(self.inputs.in_image)
+        nii = nib.load(self.inputs.in_image)
         
         header = {}
         header[Field.VOXEL_TO_RASMM] = nii.affine.copy()
@@ -374,12 +374,12 @@ class Tck2Trk(BaseInterface):
         header[Field.DIMENSIONS] = nii.shape[:3]
         header[Field.VOXEL_ORDER] = "".join(aff2axcodes(nii.affine))
         
-        if nibabel.streamlines.detect_format(self.inputs.in_tracks) is not nibabel.streamlines.TckFile:
-            print("Skipping non TCK file: '{}'".format(tractogram))
+        if nib.streamlines.detect_format(self.inputs.in_tracks) is not nib.streamlines.TckFile:
+            print("Skipping non TCK file: '{}'".format(self.inputs.in_tracks))
         else:
-            tck = nibabel.streamlines.load(self.inputs.in_tracks)
+            tck = nib.streamlines.load(self.inputs.in_tracks)
             self.out_tracks = self.inputs.out_tracks
-            nibabel.streamlines.save(tck.tractogram, self.out_tracks, header=header)
+            nib.streamlines.save(tck.tractogram, self.out_tracks, header=header)
         
         return runtime
     

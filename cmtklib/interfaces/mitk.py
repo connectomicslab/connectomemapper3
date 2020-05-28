@@ -5,6 +5,8 @@
 
 """ The MITK module provides functions for interfacing with MITK functions missing in nipype or modified
 """
+import shutil
+
 from traits.api import *
 
 import os
@@ -12,6 +14,8 @@ import glob
 
 from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec, \
     TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
+
+import nipype.pipeline.engine as pe
 
 
 class MITKqball_commandInputSpec(CommandLineInputSpec):

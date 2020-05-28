@@ -6,6 +6,7 @@
 
 """ Connectome Mapper Controler for handling non GUI general events
 """
+import pickle
 import warnings
 
 warnings.filterwarnings("ignore",

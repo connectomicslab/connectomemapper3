@@ -6,7 +6,7 @@
 
 """ CMP preprocessing Stage (not used yet!)
 """
-
+from pyface.message_dialog import error
 from traits.api import *
 
 from nipype.interfaces.base import traits, BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, CommandLine, \

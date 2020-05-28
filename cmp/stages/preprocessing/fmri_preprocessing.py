@@ -51,7 +51,7 @@ class PreprocessingStage(Stage):
             ])
         else:
             flow.connect([
-                (inputnode, discard, [("functional", "discard_output")])
+                (inputnode, discard_output, [("functional", "discard_output")])
             ])
         
         despiking_output = pe.Node(interface=util.IdentityInterface(fields=["despiking_output"]),

@@ -6,7 +6,11 @@
 """ Connectome Mapper reports builder (based on fMRIprep v1.3.2 reports builder)
 """
 
-from pathlib import Path
+try:
+    from pathlib import Path
+except ImportError:
+    print('Error: missing pathlib')
+    
 import json
 import re
 
@@ -14,7 +18,7 @@ import jinja2
 from nipype.utils.filemanip import copyfile
 from pkg_resources import resource_filename as pkgrf
 
-from niworkflows.utils.misc import read_crashfile
+# from niworkflows.utils.misc import read_crashfile
 
 
 class Element(object):

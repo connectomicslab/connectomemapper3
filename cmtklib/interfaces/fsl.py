@@ -16,7 +16,7 @@ from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
 from nipype.interfaces.base import (traits, TraitedSpec, CommandLineInputSpec, CommandLine, InputMultiPath,
                                     OutputMultiPath, File, Directory,
                                     isdefined)
-from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix
+from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix, copyfile
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

@@ -1393,7 +1393,7 @@ class ProjectHandler(Handler):
                     ui_info.project_info = updated_project
                     ui_info.project_info.on_trait_change(ui_info.update_subject_anat_pipeline, 'subject')
                     ui_info.project_info.on_trait_change(ui_info.update_session_anat_pipeline, 'subject_session')
-                    self.anat_pipeline.number_of_cores = new_project.number_of_cores
+                    self.anat_pipeline.number_of_cores = updated_project.number_of_cores
                     # self.anat_pipeline.flow = self.anat_pipeline.create_pipeline_flow()
                     ui_info.anat_pipeline = self.anat_pipeline
                     # ui_info.dmri_pipeline = self.dmri_pipeline
@@ -1402,11 +1402,11 @@ class ProjectHandler(Handler):
                     anat_save_config(self.anat_pipeline, ui_info.project_info.anat_config_file)
                     self.project_loaded = True
             
-            ui_info.project_info.parcellation_scheme = get_anat_process_detail(new_project, 'parcellation_stage',
+            ui_info.project_info.parcellation_scheme = get_anat_process_detail(updated_project, 'parcellation_stage',
                                                                                'parcellation_scheme')
-            ui_info.project_info.freesurfer_subjects_dir = get_anat_process_detail(new_project, 'segmentation_stage',
+            ui_info.project_info.freesurfer_subjects_dir = get_anat_process_detail(updated_project, 'segmentation_stage',
                                                                                    'freesurfer_subjects_dir')
-            ui_info.project_info.freesurfer_subject_id = get_anat_process_detail(new_project, 'segmentation_stage',
+            ui_info.project_info.freesurfer_subject_id = get_anat_process_detail(updated_project, 'segmentation_stage',
                                                                                  'freesurfer_subject_id')
             # ui_info.project_info.atlas_info = get_anat_process_detail(new_project,'parcellation_stage','atlas_info')
         

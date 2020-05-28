@@ -11,7 +11,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 from future import standard_library
 
 standard_library.install_aliases()
-from builtins import str, open
+# from builtins import str, open
 
 import os.path as op
 
@@ -547,8 +547,8 @@ class TensorInformedEudXTractography(DipyBaseInterface):
     Example
     -------
 
-    >>> from cmp3.interfaces import dipy as ndp
-    >>> track = ndp.DeterministicMaximumDirectionGetterTractography()
+    >>> from cmtklib.interfaces import dipy as ndp
+    >>> track = ndp.TensorInformedEudXTractography()
     >>> track.inputs.in_file = '4d_dwi.nii'
     >>> track.inputs.in_model = 'model.pklz'
     >>> track.inputs.tracking_mask = 'dilated_wm_mask.nii'
@@ -568,8 +568,8 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         import pickle as pickle
         import gzip
         
-        if (not (isdefined(self.inputs.in_model))):
-            raise RuntimeError(('in_model should be supplied'))
+        if not (isdefined(self.inputs.in_model)):
+            raise RuntimeError("in_model should be supplied")
         
         img = nb.load(self.inputs.in_file)
         imref = nb.four_to_three(img)[0]
@@ -780,8 +780,8 @@ class DirectionGetterTractography(DipyBaseInterface):
     Example
     -------
 
-    >>> from cmp3.interfaces import dipy as ndp
-    >>> track = ndp.DeterministicMaximumDirectionGetterTractography()
+    >>> from cmtklib.interfaces import dipy as ndp
+    >>> track = ndp.DirectionGetterTractography()
     >>> track.inputs.in_file = '4d_dwi.nii'
     >>> track.inputs.in_model = 'model.pklz'
     >>> track.inputs.tracking_mask = 'dilated_wm_mask.nii'
@@ -1201,11 +1201,11 @@ class MAPMRI(DipyDiffusionInterface):
         '''
         
         f = gzip.open(self._gen_filename('mapmri', ext='.pklz'), 'wb')
-        pickle.dump(csd_model, f, -1)
+        pickle.dump(map_model_both_aniso, f, -1)
         f.close()
         
         # "rtop", "rtap", "rtpp", "msd", "qiv", "ng", "ng_perp", "ng_para"
-        for metric, data in sampleDict.items():
+        for metric, data in maps.items():
             out_name = self._gen_filename(metric)
             nb.Nifti1Image(data, affine).to_filename(out_name)
             IFLOGGER.info('MAP-MRI {metric} image saved as {i}'.format(i=out_name, metric=metric))

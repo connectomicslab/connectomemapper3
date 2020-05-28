@@ -2899,7 +2899,7 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
             # correct voxels not labeled in current resolution, but labeled in highest resolution
             for j in range(xxMax.size):
                 if (newrois[xxMax[j], yyMax[j], zzMax[j]] == 0):
-                    local = extract(rois, shape, position=(xxMax[j], yyMax[j], zzMax[j]), fill=0)
+                    local = extract(vol, shape, position=(xxMax[j], yyMax[j], zzMax[j]), fill=0)
                     mask = local.copy()
                     mask[np.nonzero(local > 0)] = 1
                     thisdist = np.multiply(dist, mask)

@@ -5,11 +5,8 @@
 
 """ The ANTs module provides functions for interfacing with ANTs registration toolbox missing in nipype or modified
 """
-try:
-    from traits.api import *
+from traits.api import *
 
-except ImportError:
-    from enthought.traits.api import *
 
 import os
 import glob
