@@ -700,8 +700,7 @@ class make_mrtrix_seeds(BaseInterface):
         print(
             "Computing seed files for probabilistic tractography\n===================================================")
         # Load ROI file
-        
-        print self.inputs.ROI_files
+        print(self.inputs.ROI_files)
         
         for ROI_file in self.inputs.ROI_files:
             ROI_vol = nib.load(ROI_file)
