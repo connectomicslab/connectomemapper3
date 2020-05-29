@@ -128,8 +128,9 @@ class ConnectomeStage(Stage):
                     # print("con_name:"+con_name)
                     
                     # Load the connectivity matrix and extract the attributes (weights)
+                    # con_mat =  pickle.load(mat, encoding="latin1")
                     con_mat = nx.read_gpickle(mat)
-                    con_metrics = con_mat.get_edge_data(1, 1).viewkeys()
+                    con_metrics = list(con_mat.edges(data=True))[0][2].keys()
                     
                     # Create dynamically the list of output connectivity metrics for inspection
                     for con_metric in con_metrics:
@@ -149,8 +150,9 @@ class ConnectomeStage(Stage):
                         # print("con_name:"+con_name)
                         
                         # Load the connectivity matrix and extract the attributes (weights)
+                        # con_mat =  pickle.load(mat, encoding="latin1")
                         con_mat = nx.read_gpickle(mat)
-                        con_metrics = con_mat.get_edge_data(1, 1).viewkeys()
+                        con_metrics = list(con_mat.edges(data=True))[0][2].keys()
                         
                         # Create dynamically the list of output connectivity metrics for inspection
                         for con_metric in con_metrics:
