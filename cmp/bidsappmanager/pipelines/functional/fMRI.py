@@ -93,11 +93,11 @@ class fMRIPipelineUI(fMRIPipeline):
                                                             self.pipeline_name, self.stages[stage].name)
     
     def _preprocessing_fired(self, info):
-        print "preproc fired"
+        # print("preproc fired")
         self.stages['Preprocessing'].configure_traits(view=self.view_mode)
     
     def _functionalMRI_fired(self, info):
-        print "func fired"
+        # print("func fired")
         self.stages['FunctionalMRI'].configure_traits(view=self.view_mode)
     
     def _registration_fired(self, info):

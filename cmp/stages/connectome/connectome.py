@@ -98,7 +98,7 @@ class ConnectomeStage(Stage):
         ])
     
     def define_inspect_outputs(self):
-        print('inspect outputs connectome stage')
+        # print('inspect outputs connectome stage')
         con_results_path = os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz")
         
         # print("Stage dir: %s" % self.stage_dir)

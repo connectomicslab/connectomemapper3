@@ -76,15 +76,11 @@ class ConnectomeStage(Stage):
             layout = 'circular'
         else:
             layout = 'matrix'
-        
+
         # print('con_results_path : ',con_results_path)
         if (os.path.exists(con_results_path)):
-            
             con_results = pickle.load(gzip.open(con_results_path))
-            # print(con_results)
-            
             mat = con_results.outputs.connectivity_matrices
-            print(mat)
             if isinstance(mat, basestring):
                 print("single scale")
                 # print(mat)
