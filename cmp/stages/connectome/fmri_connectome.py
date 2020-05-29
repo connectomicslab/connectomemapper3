@@ -26,7 +26,7 @@ from nipype.utils.filemanip import split_filename
 import nipype.interfaces.cmtk as cmtk
 
 # Own imports
-from cmtklib.connectome import rsfmri_conmat
+from cmtklib.connectome import rsfmri_conmat, rsfmri_conmat_OutputSpec, rsfmri_conmat_InputSpec
 # import cmtklib as cmtk
 from cmp.stages.common import Stage
 
