@@ -43,7 +43,7 @@ ENV PATH $ANTSPATH:$PATH
 #RUN echo '#! /bin/bash \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
 
 #Current for singularity
-RUN echo '#! /bin/bash \n echo "User: $USER" && echo "Group:"$(id -g -n $USER) && export && . activate $CONDA_ENV && xvfb-run -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
+RUN echo '#! /bin/bash \n echo "User: $USER" && echo "Group:"$(id -g -n $USER) && export && . activate $CONDA_ENV && xvfb-run -s "-screen 0 900x900x24 -ac +extension GLX -noreset" -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed
