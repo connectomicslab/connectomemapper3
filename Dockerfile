@@ -75,6 +75,7 @@ ENV LC_ALL C.UTF-8
 # Control MRTrix random number generation (RDG) for replicatable probabilistic tractography
 # See https://community.mrtrix.org/t/random-number-generator/2063 for more details
 ENV MRTRIX_RNG_SEED 1234
+ENV ANTS_RANDOM_SEED 1234
 
 RUN ldconfig
 WORKDIR /tmp/
