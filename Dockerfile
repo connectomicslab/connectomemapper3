@@ -79,7 +79,7 @@ ENV MRTRIX_RNG_SEED 1234
 # Control ANTs random number generation (RDG) and multithreading
 # See https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues for more details
 ENV ANTS_RANDOM_SEED 1234
-ENV ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS
+# ENV ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS 
 
 RUN ldconfig
 WORKDIR /tmp/
