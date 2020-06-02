@@ -10,7 +10,7 @@ To help you to do so, we recommend you to use, modify to your needs, and include
 
     Results included in this manuscript come from the Connectome Mapper 3 version latest [ref1]_, a processing pipeline, written in Python which uses Nipype [ref2]_ [ref3]_. It is encapsulated in a BIDS app [ref4]_ based on Docker [ref5]_ and Singularity [ref6]_ container technologies. Resampling to isotropic resolution, Desikan-Killiany brain parcellation [ref7]_, brainstem parcellation [ref8]_, and hippocampal subfields segmentation [ref9]_ were performed using FreeSurfer 6.0.1. Final parcellations were created by performing cortical brain parcellation on at 5 different scales [ref10]_, probabilistic atlas-based segmentation of the thalamic nuclei [ref11]_,and combination of all segmented structures, using in-house CMTK tools and the antsRegistrationSyNQuick tool of ANTS v2.2.0 [ref12]_.
 
-.. [ref1] Tourbier S, Aleman-Gomez Y, Griffa A, Bach Cuadra M, Hagmann P (2019, October 8). connectomicslab/connectomemapper3: Connectome Mapper |release| (Version  |release|). Zenodo. http://doi.org/10.5281/zenodo.3475969.
+.. [ref1] Tourbier S, Aleman-Gomez Y, Griffa A, Bach Cuadra M, Hagmann P (2020). connectomicslab/connectomemapper3: Connectome Mapper |release| (Version  |release|). Zenodo. http://doi.org/10.5281/zenodo.3475969.
 
 .. [ref2] Gorgolewski K, Burns CD, Madison C, Clark D, Halchenko YO, Waskom ML, Ghosh SS (2011). Nipype: a flexible, lightweight and extensible neuroimaging data processing framework in python. Front Neuroinform, vol. 5, no. 13. doi:10.3389/fninf.2011.00013.
 
