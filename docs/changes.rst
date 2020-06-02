@@ -3,6 +3,46 @@ Changes
 ========
 
 ****************************
+Version 3.0.0-beta-RC2
+****************************
+
+Date: June 02, 2020
+
+This version integrates Pull Request #33 which includes in particular: 
+
+
+*Upgrade*
+
+* Uses  `fsleyes` instead of `fslview` (now deprecated), which now included in the conda environment of the GUI (`py27cmp-gui`). 
+
+*New feature*
+
+* Computes of ROI volumetry stored in `<output_dir>/sub-<label>(/ses<label>)/anat` folder, recognized by their `_stats.tsv` file name suffix. 
+
+*Improved replicability*
+
+* Sets the `MATRIX_RNG_SEED` environment variable (used by MRtrix) and seed for the numpy random number generator (`numpy.random.seed()`)
+
+*Bug fixes*
+
+* Fixes the output inspector window of the cmpbidsappmanager (GUI) that fails to find existing outputs, after adoption of /bids_dir and /output_dir in the bidsapp docker image.
+
+* Fixes the way to get the list of networkx edge attributes in `inspect_outputs()` of `ConnectomeStage` for the output inspector window of the cmpbidsappmanager (GUI) 
+
+* Added missing package dependencies (`fury` and `vtk`) that fixes dipy_CSD execution error when trying to import module actor from dipy.viz to save the results in a png 
+
+* Fixes a number of unresolved references identified by pycharm code inspection tool
+
+*Code refactoring*
+
+* Interfaces for fMRI processing were moved to `cmtklib/functionalMRI.py`.
+
+* Interface for fMRI connectome creation (`rsfmri_conmat`)  moved to  `cmtklib/connectome.py`
+
+Please check the `pull request 33 page <https://github.com/connectomicslab/connectomemapper3/pull/33>`_ for change details.
+
+
+****************************
 Version 3.0.0-beta-RC1
 ****************************
 
@@ -16,7 +56,7 @@ This version integrates Pull Request #28 which includes in summary:
 
 * Change in tagging beta version which otherwise might not be meaningfull in accordance with the release date (especially when the expected date is delayed due to unexpected errors that might take longer to be fixed than expected).
 
-Please check the `pull request page <https://github.com/connectomicslab/connectomemapper3/pull/28>`_ for a full list of changes.
+Please check the `pull request 28 page <https://github.com/connectomicslab/connectomemapper3/pull/28>`_ for a full list of changes.
 
 
 ****************************

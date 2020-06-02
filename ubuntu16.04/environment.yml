@@ -15,8 +15,9 @@ dependencies:
 - graphviz=2.40.1
 - traits=5.1.1
 - nipype=1.1.8
-- git-annex=7.20190219
 - pyside2=5.9.0a1
+- vtk=7.0.0
+- git-annex=7.20190219
 
 - pip:
     - git+https://github.com/LTS5/cfflib.git
@@ -36,3 +37,4 @@ dependencies:
     - sphinx_rtd_theme==0.4.3
     - sphinx-argparse==0.2.5
     - recommonmark==0.5.0
+    - fury==0.1.4

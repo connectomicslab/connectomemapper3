@@ -163,6 +163,7 @@ RUN conda env create -f /app/environment.yml
 # ENV ANTSPATH=/opt/conda/bin
 # ENV PATH=$ANTSPATH:$PATH
 ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin
+
 ENV PATH $ANTSPATH:$PATH
 
 ## Install MRTRIX
@@ -176,7 +177,7 @@ RUN apt-get update && \
     libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev && \
     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
     cd mrtrix3 && \
-    git checkout 3.0_RC3_latest && \
+    git checkout -f 3.0_RC3_latest && \
     #git checkout 3.0_RC3 && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
@@ -188,23 +189,25 @@ RUN apt-get update && \
 ENV PATH=/opt/mrtrix3/bin:$PATH
 ENV PYTHONPATH=/opt/mrtrix3/lib:$PYTHONPATH
 
+ENV PYTHONPATH=/opt/conda/envs/$CONDA_ENV/bin
+
 ## Install Neurodebian
-#RUN apt-get install neurodebian && \
+# RUN apt-get install neurodebian && \
 #    apt-get update
 
-#BIDS validator
-#RUN npm install -g bids-validator
+# BIDS validator
+# RUN npm install -g bids-validator
 
 ENV LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
 # Cleanup
-#RUN apt-get -y remove git g++ curl bzip2
+# RUN apt-get -y remove git g++ curl bzip2
     #apt-get -qq -y autoremove && \
     #apt-get autoclean && \
     #rm -rf /var/lib/apt/lists/* /var/log/dpkg.log
 #
 
-#ENV BIN_DIR "/usr/local/bin"
-#ENV DISPLAY :0
+# ENV BIN_DIR "/usr/local/bin"
+# ENV DISPLAY :0
 
 ARG BUILD_DATE
 ARG VCS_REF

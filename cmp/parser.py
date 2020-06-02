@@ -9,26 +9,28 @@
 from info import __version__
 from info import __release_date__
 
+
 def get():
     import argparse
-    p = argparse.ArgumentParser(description='Entrypoint script of the BIDS-App Connectome Mapper version {}'.format(__version__))
+    p = argparse.ArgumentParser(
+        description='Entrypoint script of the BIDS-App Connectome Mapper version {}'.format(__version__))
     p.add_argument('bids_dir', help='The directory with the input dataset '
-                        'formatted according to the BIDS standard.')
+                                    'formatted according to the BIDS standard.')
     p.add_argument('output_dir', help='The directory where the output files '
-                        'should be stored. If you are running group level analysis '
-                        'this folder should be prepopulated with the results of the'
-                        'participant level analysis.')
+                                      'should be stored. If you are running group level analysis '
+                                      'this folder should be prepopulated with the results of the'
+                                      'participant level analysis.')
     p.add_argument('analysis_level', help='Level of the analysis that will be performed. '
-                        'Multiple participant level analyses can be run independently '
-                        '(in parallel) using the same output_dir.',
-                        choices=['participant', 'group'])
+                                          'Multiple participant level analyses can be run independently '
+                                          '(in parallel) using the same output_dir.',
+                   choices=['participant', 'group'])
     p.add_argument('--participant_label', help='The label(s) of the participant(s) that should be analyzed. The label '
-                       'corresponds to sub-<participant_label> from the BIDS spec '
-                       '(so it does not include "sub-"). If this parameter is not '
-                       'provided all subjects should be analyzed. Multiple '
-                       'participants can be specified with a space separated list.',
-                       nargs="+")
-
+                                               'corresponds to sub-<participant_label> from the BIDS spec '
+                                               '(so it does not include "sub-"). If this parameter is not '
+                                               'provided all subjects should be analyzed. Multiple '
+                                               'participants can be specified with a space separated list.',
+                   nargs="+")
+    
     p.add_argument(
         "--session_label",
         help="""The label(s) of the
@@ -40,20 +42,23 @@ def get():
         with a space separated list.""",
         nargs="+",
     )
-
-    p.add_argument('--anat_pipeline_config', help='Configuration .txt file for processing stages of the anatomical MRI processing pipeline')
-    p.add_argument('--dwi_pipeline_config', help='Configuration .txt file for processing stages of the diffusion MRI processing pipeline')
-    p.add_argument('--func_pipeline_config', help='Configuration .txt file for processing stages of the fMRI processing pipeline')
-
-    #p.add_argument('--multiproc_number_of_cores', type=int, help='The number of cores to be used by '
+    
+    p.add_argument('--anat_pipeline_config',
+                   help='Configuration .txt file for processing stages of the anatomical MRI processing pipeline')
+    p.add_argument('--dwi_pipeline_config',
+                   help='Configuration .txt file for processing stages of the diffusion MRI processing pipeline')
+    p.add_argument('--func_pipeline_config',
+                   help='Configuration .txt file for processing stages of the fMRI processing pipeline')
+    
+    # p.add_argument('--multiproc_number_of_cores', type=int, help='The number of cores to be used by '
     #               'the MultiProc plugin of Nipype (One core used by default).')
     p.add_argument('--number_of_participants_processed_in_parallel', type=int, help='The number of subjects '
-                   'to be processed in parallel (One core used by default).')
-
+                                                                                    'to be processed in parallel (One core used by default).')
+    
     p.add_argument('--fs_license', help='Freesurfer license.txt')
-
+    
     # p.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation',
     #                    action='store_true')
     p.add_argument('-v', '--version', action='version',
-                        version='BIDS-App Connectome Mapper version {}'.format(__version__))
+                   version='BIDS-App Connectome Mapper version {}'.format(__version__))
     return p

@@ -15,4 +15,4 @@ def run(command, env={}, cwd=os.getcwd()):
         if line == '' and process.poll() != None:
             break
     if process.returncode != 0:
-        raise Exception("Non zero return code: %d"%process.returncode)
+        raise Exception("Non zero return code: %d" % process.returncode)

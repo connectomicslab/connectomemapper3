@@ -8,7 +8,7 @@
 
 import os
 from sys import platform
-from builtins import object
+# from builtins import object
 from future.utils import raise_from
 
 from nipype import logging
@@ -18,10 +18,9 @@ from nipype.interfaces.base import (
     InputMultiPath, Undefined, Str, InputMultiObject, PackageInfo)
 from nipype.external.due import BibTeX
 
-from nipype.interfaces.afni.base import (AFNICommand, 
-										AFNICommandInputSpec, 
-										AFNICommandOutputSpec)
-
+from nipype.interfaces.afni.base import (AFNICommand,
+                                         AFNICommandInputSpec,
+                                         AFNICommandOutputSpec)
 
 # Use nipype's logging system
 IFLOGGER = logging.getLogger('interface')
@@ -127,24 +126,24 @@ class Bandpass(AFNICommand):
     >>> bandpass.inputs.lowpass = 0.1
     >>> res = bandpass.run() # doctest: +SKIP
     """
-
+    
     _cmd = '3dBandpass'
     input_spec = BandpassInputSpec
     output_spec = AFNICommandOutputSpec
-
+    
     def _list_outputs(self):
-    	outputs = self._outputs().get()
-     	name = 'out_file'
-     	if isdefined(self.inputs.out_file):
-     		if outputs[name]:
-                	print('out_file: {}'.format(outputs[name]))
-                	_, base, ext = split_filename(outputs[name])
-                	if ext == "":
-                		outputs[name] = outputs[name] + "+orig.BRIK"
+        outputs = self._outputs().get()
+        name = 'out_file'
+        if isdefined(self.inputs.out_file):
+            if outputs[name]:
+                print('out_file: {}'.format(outputs[name]))
+                _, base, ext = split_filename(outputs[name])
+                if ext == "":
+                    outputs[name] = outputs[name] + "+orig.BRIK"
         else:
-        	from glob import glob
-        	files = sorted(glob("*.BRIK"))
-        	print("files: {}".format(files))
-        	if len(files) > 0:
-        		outputs[name] = os.path.abspath(files[0])
+            from glob import glob
+            files = sorted(glob("*.BRIK"))
+            print("files: {}".format(files))
+            if len(files) > 0:
+                outputs[name] = os.path.abspath(files[0])
         return outputs

@@ -18,7 +18,7 @@ print(imref.affine.copy())
 print(affine)
 
 header = {}
-header[Field.ORIGIN] = affine[:3,3]
+header[Field.ORIGIN] = affine[:3, 3]
 header[Field.VOXEL_TO_RASMM] = affine
 header[Field.VOXEL_SIZES] = imref.header.get_zooms()[:3]
 header[Field.DIMENSIONS] = imref.shape[:3]
@@ -26,7 +26,7 @@ header[Field.VOXEL_ORDER] = "".join(aff2axcodes(affine))
 
 for i, streamline in enumerate(streamlines):
     for j, voxel in enumerate(streamline):
-       streamlines[i][j] = streamlines[i][j] - imref.affine.copy()[:3,3]
+        streamlines[i][j] = streamlines[i][j] - imref.affine.copy()[:3, 3]
 
 print(header[Field.VOXEL_ORDER])
 tractogram = Tractogram(streamlines=streamlines, affine_to_rasmm=affine)

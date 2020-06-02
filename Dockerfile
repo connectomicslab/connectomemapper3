@@ -43,16 +43,13 @@ ENV PATH $ANTSPATH:$PATH
 #RUN echo '#! /bin/bash \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
 
 #Current for singularity
-RUN echo '#! /bin/bash \n echo "User: $USER" && echo "Group:"$(id -g -n $USER) && export && . activate $CONDA_ENV && xvfb-run -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
+RUN echo '#! /bin/bash \n echo "User: $USER" && echo "Group:"$(id -g -n $USER) && export && . activate $CONDA_ENV && xvfb-run -s "-screen 0 900x900x24 -ac +extension GLX -noreset" -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed
 RUN chmod 775 /app/connectomemapper3/run.py
 RUN chmod 775 /app/run_connectomemapper3.sh
 RUN chmod 777 /opt/freesurfer
-
-#ENV LC_ALL="en_US.UTF-8"
-#ENV LANG="en_US.UTF-8"
 
 #Temporary tmp folder
 RUN /bin/bash -c "mkdir -p /var/tmp"
@@ -71,8 +68,18 @@ RUN mkdir /output_dir && \
 
 ENV FS_LICENSE /bids_dir/code/license.txt
 
+# Set locale settings 
 ENV LANG C.UTF-8 
 ENV LC_ALL C.UTF-8 
+
+# Control MRTrix random number generation (RDG) for replicatable probabilistic tractography
+# See https://community.mrtrix.org/t/random-number-generator/2063 for more details
+ENV MRTRIX_RNG_SEED 1234
+
+# Control ANTs random number generation (RDG) and multithreading
+# See https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues for more details
+ENV ANTS_RANDOM_SEED 1234
+# ENV ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS 
 
 RUN ldconfig
 WORKDIR /tmp/

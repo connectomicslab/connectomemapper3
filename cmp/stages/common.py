@@ -12,6 +12,7 @@ from traits.api import *
 import subprocess
 import os
 
+
 ##  Stage master class, will be inherited by the various stage subclasses. Inherits from HasTraits.
 #
 class Stage(HasTraits):
@@ -20,9 +21,9 @@ class Stage(HasTraits):
     inspect_outputs_dict = Dict
     enabled = True
     config = Instance(HasTraits)
-
+    
     def is_running(self):
         unfinished_files = [os.path.join(dirpath, f)
-                                          for dirpath, dirnames, files in os.walk(self.stage_dir)
-                                          for f in files if f.endswith('_unfinished.json')]
+                            for dirpath, dirnames, files in os.walk(self.stage_dir)
+                            for f in files if f.endswith('_unfinished.json')]
         return len(unfinished_files)

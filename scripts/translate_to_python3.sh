@@ -23,23 +23,24 @@ NAME=cmp
 IN_DIR="${MAIN_DIR}/${NAME}"
 OUT_DIR="${PY3_DIR}/${NAME}"
 echo "Process folder $NAME (in: ${IN_DIR} / out: ${OUT_DIR})"
-2to3 -f all --output-dir=${OUT_DIR} -W -n ${IN_DIR} > ${LOG_FILE}
+2to3 -f all  -p -W --output-dir=${OUT_DIR} -W -n ${IN_DIR} > ${LOG_FILE}
+2to3 -f all  -p -W --output-dir=${OUT_DIR} -W -n ${IN_DIR} > ${LOG_FILE}
 
 NAME=cmtklib
 IN_DIR="${MAIN_DIR}/${NAME}"
 OUT_DIR="${PY3_DIR}/${NAME}"
 echo "Process folder $NAME (in: ${IN_DIR} / out: ${OUT_DIR})"
-2to3 -f all --output-dir=${OUT_DIR} -W -n ${IN_DIR} >> ${LOG_FILE}
+2to3 -f all  -p -W --output-dir=${OUT_DIR} -W -n ${IN_DIR} >> ${LOG_FILE}
 
 
 NAME=tests
 IN_DIR="${MAIN_DIR}/${NAME}"
 OUT_DIR="${PY3_DIR}/${NAME}"
 echo "Process folder $NAME (in: ${IN_DIR} / out: ${OUT_DIR})"
-2to3 -f all --output-dir=${OUT_DIR} -W -n ${IN_DIR} >> ${LOG_FILE}
+2to3 -f all  -p -W --output-dir=${OUT_DIR} -W -n ${IN_DIR} >> ${LOG_FILE}
 
 NAME=scripts
 IN_DIR="${MAIN_DIR}/${NAME}"
 OUT_DIR="${PY3_DIR}/${NAME}"
 echo "Process folder $NAME (in: ${IN_DIR} / out: ${OUT_DIR})"
-2to3 -f all --output-dir=${OUT_DIR} -W -n ${IN_DIR} >> ${LOG_FILE}
+2to3 -f all  -p -W --output-dir=${OUT_DIR} -W -n ${IN_DIR} >> ${LOG_FILE}
