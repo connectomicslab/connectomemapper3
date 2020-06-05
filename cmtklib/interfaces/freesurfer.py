@@ -84,6 +84,34 @@ class copyBrainMaskToFreesurfer(IOBase):
         return outputs
 
 
+class Tkregister2InputSpec(CommandLineInputSpec):
+    subjects_dir = Directory(desc='Use dir as SUBJECTS_DIR', exists=True, argstr="--sd %s")
+    subject_id = traits.Str(desc='Set subject id', argstr="--s %s")
+    regheader = traits.Bool(desc='Compute registration from headers', argstr="--regheader")
+    in_file = File(desc='Movable volume', mandatory=True, argstr="--mov %s")
+    target_file = File(desc='Target volume', mandatory=True, argstr="--targ %s")
+    reg_out = traits.Str(desc='Input/output registration file', mandatory=True, argstr="--reg %s")
+    fslreg_out = traits.Str(desc='FSL-Style registration output matrix', mandatory=True, argstr="--fslregout %s")
+    noedit = traits.Bool(desc='Do not open edit window (exit) - for conversions', argstr="--noedit")
+
+
+class Tkregister2OutputSpec(TraitedSpec):
+    regout_file = File(desc='Resulting registration file')
+    fslregout_file = File(desc='Resulting FSL-Style registration matrix')
+
+
+class Tkregister2(CommandLine):
+    _cmd = 'tkregister2'
+    input_spec = Tkregister2InputSpec
+    output_spec = Tkregister2OutputSpec
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["regout_file"] = os.path.abspath(self.inputs.reg_out)
+        outputs["fslregout_file"] = os.path.abspath(self.inputs.fslreg_out)
+        return outputs
+
+
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s',
                             desc='freesurfer subject id',

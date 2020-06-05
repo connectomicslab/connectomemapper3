@@ -8,8 +8,8 @@
 
 import nipype.interfaces.base as nibase
 import nipype.interfaces.utility as util
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File, Directory, \
-    InputMultiPath, isdefined
+from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, \
+    CommandLine, traits, TraitedSpec, File, Directory, InputMultiPath, OutputMultiPath, isdefined
 from nipype.utils import logger
 from nipype.utils.filemanip import split_filename, fname_presuffix
 import os, os.path as op
@@ -550,6 +550,56 @@ class MRTransform(CommandLine):
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_files[0])
         return name + '_crop.nii.gz'
+
+
+class ApplymultipleMRCropInputSpec(BaseInterfaceInputSpec):
+    in_files = InputMultiPath(File(desc='files to be cropped', mandatory=True, exists=True))
+    template_image = File(mandatory=True, exists=True)
+
+
+class ApplymultipleMRCropOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File())
+
+
+class ApplymultipleMRCrop(BaseInterface):
+    input_spec = ApplymultipleMRCropInputSpec
+    output_spec = ApplymultipleMRCropOutputSpec
+    
+    def _run_interface(self, runtime):
+        for in_file in self.inputs.in_files:
+            ax = MRCrop(in_file=in_file, template_image=self.inputs.template_image)
+            ax.run()
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_files'] = glob.glob(os.path.abspath("*.nii.gz"))
+        return outputs
+
+
+class ApplymultipleMRTransformsInputSpec(BaseInterfaceInputSpec):
+    in_files = InputMultiPath(File(desc='files to be cropped', mandatory=True, exists=True))
+    template_image = File(mandatory=True, exists=True)
+
+
+class ApplymultipleMRTransformsOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File())
+
+
+class ApplymultipleMRTransforms(BaseInterface):
+    input_spec = ApplymultipleMRTransformsInputSpec
+    output_spec = ApplymultipleMRTransformsOutputSpec
+    
+    def _run_interface(self, runtime):
+        for in_file in self.inputs.in_files:
+            mt = MRTransform(in_files=in_file, template_image=self.inputs.template_image)
+            mt.run()
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_files'] = glob.glob(os.path.abspath("*.nii.gz"))
+        return outputs
 
 
 class ExtractFSLGradInputSpec(CommandLineInputSpec):

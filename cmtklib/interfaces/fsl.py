@@ -13,7 +13,7 @@ import warnings
 import numpy as np
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
-from nipype.interfaces.base import (traits, TraitedSpec, CommandLineInputSpec, CommandLine, InputMultiPath,
+from nipype.interfaces.base import (traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec, CommandLineInputSpec, CommandLine, InputMultiPath,
                                     OutputMultiPath, File, Directory,
                                     isdefined)
 from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix, copyfile
@@ -325,6 +325,91 @@ class EddyOpenMP(FSLCommand):
             return self._list_outputs()['eddy_corrected']
         else:
             return None
+
+
+class ApplymultipleXfmInputSpec(BaseInterfaceInputSpec):
+    in_files = InputMultiPath(File(desc='files to be registered', mandatory=True, exists=True))
+    xfm_file = File(mandatory=True, exists=True)
+    reference = File(mandatory=True, exists=True)
+
+
+class ApplymultipleXfmOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File())
+
+
+class ApplymultipleXfm(BaseInterface):
+    input_spec = ApplymultipleXfmInputSpec
+    output_spec = ApplymultipleXfmOutputSpec
+    
+    def _run_interface(self, runtime):
+        for in_file in self.inputs.in_files:
+            ax = fsl.ApplyXFM(in_file=in_file, in_matrix_file=self.inputs.xfm_file, apply_xfm=True,
+                              interp="nearestneighbour", reference=self.inputs.reference)
+            ax.run()
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_files'] = glob.glob(os.path.abspath("*.nii.gz"))
+        return outputs
+
+
+class ApplymultipleWarpInputSpec(BaseInterfaceInputSpec):
+    in_files = InputMultiPath(File(desc='files to be registered', mandatory=True, exists=True))
+    field_file = File(mandatory=True, exists=True)
+    ref_file = File(mandatory=True, exists=True)
+    interp = traits.Enum(
+        'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s', position=-2,
+        desc='interpolation method')
+
+
+class ApplymultipleWarpOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File())
+
+
+class ApplymultipleWarp(BaseInterface):
+    input_spec = ApplymultipleWarpInputSpec
+    output_spec = ApplymultipleWarpOutputSpec
+    
+    def _run_interface(self, runtime):
+        for in_file in self.inputs.in_files:
+            ax = fsl.ApplyWarp(in_file=in_file, interp=self.inputs.interp, field_file=self.inputs.field_file,
+                               ref_file=self.inputs.ref_file)
+            ax.run()
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_files'] = glob.glob(os.path.abspath("*.nii.gz"))
+        return outputs
+
+
+class ApplynlinmultiplewarpsInputSpec(BaseInterfaceInputSpec):
+    in_files = InputMultiPath(File(desc='files to be registered', mandatory=True, exists=True))
+    ref_file = File(mandatory=True, exists=True)
+    premat_file = File(mandatory=True, exists=True)
+    field_file = File(mandatory=True, exists=True)
+
+
+class ApplynlinmultiplewarpsOutputSpec(TraitedSpec):
+    warped_files = OutputMultiPath(File())
+
+
+class Applynlinmultiplewarps(BaseInterface):
+    input_spec = ApplynlinmultiplewarpsInputSpec
+    output_spec = ApplynlinmultiplewarpsOutputSpec
+    
+    def _run_interface(self, runtime):
+        for in_file in self.inputs.in_files:
+            aw = fsl.ApplyWarp(interp="nn", in_file=in_file, ref_file=self.inputs.ref_file,
+                               premat=self.inputs.premat_file, field_file=self.inputs.field_file)
+            aw.run()
+        return runtime
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["warped_files"] = glob.glob(os.path.abspath("*.nii.gz"))
+        return outputs
 
 
 class ProbTrackXInputSpec(FSLCommandInputSpec):
