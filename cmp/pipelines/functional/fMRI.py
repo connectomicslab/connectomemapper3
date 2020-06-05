@@ -69,7 +69,9 @@ class fMRIPipeline(Pipeline):
     
     def __init__(self, project_info):
         self.stages = {'Preprocessing': PreprocessingStage(),
-                       'Registration': RegistrationStage(pipeline_mode="fMRI"),
+                       'Registration': RegistrationStage(pipeline_mode="fMRI",
+                                                        fs_subjects_dir=project_info.freesurfer_subjects_dir,
+                                                        fs_subject_id=os.path.basename(project_info.freesurfer_subject_id)),
                        'FunctionalMRI': FunctionalMRIStage(),
                        'Connectome': ConnectomeStage()}
         Pipeline.__init__(self, project_info)
@@ -528,7 +530,11 @@ class fMRIPipeline(Pipeline):
         fMRI_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         fMRI_inputnode.inputs.atlas_info = self.atlas_info
         fMRI_inputnode.subjects_dir = self.subjects_dir
-        fMRI_inputnode.subject_id = self.subject_id
+        # fMRI_inputnode.subject_id = self.subject_id
+        fMRI_inputnode.subject_id = os.path.basename(self.subject_id)
+
+        # print('fMRI_inputnode.subjects_dir : {}'.format(fMRI_inputnode.subjects_dir))
+        # print('fMRI_inputnode.subject_id : {}'.format(fMRI_inputnode.subject_id))
         
         fMRI_outputnode = pe.Node(interface=util.IdentityInterface(fields=["connectivity_matrices"]), name="outputnode")
         fMRI_flow.add_nodes([fMRI_inputnode, fMRI_outputnode])
@@ -594,11 +600,7 @@ class fMRIPipeline(Pipeline):
             #     fMRI_flow.connect([
             #                   (fMRI_inputnode,reg_flow,[('csf_eroded','inputnode.eroded_csf')])
             #                 ])
-            if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
-                fMRI_flow.connect([
-                    (fMRI_inputnode, reg_flow, [('subjects_dir', 'inputnode.subjects_dir'),
-                                                ('subject_id', 'inputnode.subject_id')]),
-                ])
+
         
         if self.stages['FunctionalMRI'].enabled:
             func_flow = self.create_stage_flow("FunctionalMRI")

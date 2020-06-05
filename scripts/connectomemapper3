@@ -202,12 +202,19 @@ if __name__ == "__main__":
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 
         if anat_valid_outputs:
             fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
             if fmri_pipeline != None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                #fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+                #fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+                #print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
+                #print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
+
                 # print sys.argv[offset+9]
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
@@ -237,6 +244,8 @@ if __name__ == "__main__":
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 
         if anat_valid_outputs:
             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
@@ -255,6 +264,11 @@ if __name__ == "__main__":
             if fmri_pipeline != None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+                fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+                print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
+                print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
+
                 # print sys.argv[offset+9]
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
