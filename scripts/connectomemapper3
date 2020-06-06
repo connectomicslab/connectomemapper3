@@ -169,6 +169,8 @@ if __name__ == "__main__":
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 
         if anat_valid_outputs:
             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)

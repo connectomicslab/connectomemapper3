@@ -103,7 +103,7 @@ def unicode2str(text):
 class RegistrationStage(Stage):
 
     # Freesurfer informations (for BBregister)
-    fs_subjects_dir = Directory
+    fs_subjects_dir = Directory(exists=False,resolve=False)
     fs_subject_id = Str
     
     def __init__(self, pipeline_mode, fs_subjects_dir=None, fs_subject_id=None):

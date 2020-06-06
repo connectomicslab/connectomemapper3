@@ -74,7 +74,9 @@ class DiffusionPipeline(Pipeline):
     def __init__(self, project_info):
         self.stages = {
             'Preprocessing': PreprocessingStage(),
-            'Registration': RegistrationStage(pipeline_mode="Diffusion"),
+            'Registration': RegistrationStage(pipeline_mode="Diffusion",
+                                              fs_subjects_dir=project_info.freesurfer_subjects_dir,
+                                              fs_subject_id=os.path.basename(project_info.freesurfer_subject_id)),
             'Diffusion': DiffusionStage(),
             'Connectome': ConnectomeStage()}
         
