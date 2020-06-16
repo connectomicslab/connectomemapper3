@@ -34,6 +34,8 @@ Joan Rué Queralt, Sébastien Tourbier
   cd ohbm-brainhack-2020
   jupyter notebook
 
+* You can check if cmp is well installed using the `test.ipynb` notebook.
+
 
 **Goals for the OHBM Brainhack**
 
