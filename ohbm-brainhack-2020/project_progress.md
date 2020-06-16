@@ -76,4 +76,5 @@ Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
   mkdir ~/Data
   cd ~/Data
   aws s3 sync --no-sign-request s3://openneuro.org/ds002718 ds002718-download/
+  cd ds002718-download/
 
