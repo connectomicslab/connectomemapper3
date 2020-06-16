@@ -76,5 +76,17 @@ Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
   mkdir ~/Data
   cd ~/Data
   aws s3 sync --no-sign-request s3://openneuro.org/ds002718 ds002718-download/
+  ```
+2. Keep only `sub-002`
+  ```
   cd ds002718-download/
+  ## Remove all sub-0** except sub-002
+  rm -R sub-0*[0-1][3-9]
+  rm -R sub-0*[1][0-2]
+  ## Keep only sub-002 in participants.tsv
+  head -n 2 participants.tsv >> participants.tsv
+  ## Rename T1w to be in valid BIDS format for input to CMP
+  mv sub-002/anat/sub-002_mod-T1w_defacemask.nii.gz sub-002/anat/sub-002_T1w.nii.gz
+  ```
+
 
