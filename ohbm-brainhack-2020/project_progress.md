@@ -13,10 +13,9 @@ Joan Rué Queralt, Sébastien Tourbier
      - Keep only one subject (sub-002)
   - [x] Organize the sample dataset according to BIDS MRI/EEG standard
      - Already BIDS :)
-  - [ ] EEG analysis (computes the inverse solution) by an open-source EEG analysis software such as MNE, EGGLab,... depending of the expertise in the team
-     - Ongoing
-     	- Joan investigates how to get inverse solutions using MNE
-     	- Seb computes multi-scale brain parcellations using CMP3 (v3.0.0-RC2)
+  - EEG analysis (computes the inverse solution) by an open-source EEG analysis software such as MNE, EGGLab,... depending of the expertise in the team. Dispatched tasks:
+     	- [ ] Joan investigates how to get inverse solutions using MNE
+     	- [ ] Seb computes multi-scale brain parcellations using CMP3 (v3.0.0-RC2)
   - [ ] Organization of EEG analysis outputs into the derivatives of the dataset according to new derivatives specs introduced in BIDS 1.4.0 (https://bids-specification.readthedocs.io/en/stable/05-derivatives/01-introduction.html)
 
 2. Implementation of Nipype interfaces that:
