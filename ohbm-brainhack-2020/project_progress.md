@@ -7,33 +7,38 @@ Joan Rué Queralt, Sébastien Tourbier
 
 **How to get setup**
 
-* Clone the repo and track this branch::
-
+* Clone the repo and track this branch
+    ```
     git clone https://github.com/connectomicslab/connectomemapper3.git connectomemapper3
     git fetch
     git checkout --track origin/ohbm-brainhack-2020
+    ```
 
 * Create the conda environment for development::
-
-  conda env create -f environment.yml
-
+    ```
+    conda env create -f environment.yml
+    ```
+    
 * Activate the conda environment::
-
-  conda activate py27cmp-gui
-
+    ```
+    conda activate py27cmp-gui
+    ```
+    
 * Install jupyter notebook and dependencies::
-
-  conda install -y -q jupyter notebook
-
+    ```
+    conda install -y -q jupyter notebook
+    ```
 * Install cmp3
-
-  python setup.py install
-
+    ```
+    python setup.py install
+    ```
+    
 * Go to the ohbm-brainhack-2020 directory and launch Jupyter notebook
-
-  cd ohbm-brainhack-2020
-  jupyter notebook
-
+    ```
+    cd ohbm-brainhack-2020
+    jupyter notebook
+    ```
+    
 * You can check if cmp is well installed using the `test.ipynb` notebook.
 
 
