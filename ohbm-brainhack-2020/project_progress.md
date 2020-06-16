@@ -84,7 +84,7 @@ Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
   cd ds002718-cmpeeg/
   ## Remove all sub-0** except sub-002
   rm -R sub-0*[0-1][3-9]
-  rm -R sub-0*[1][0-2]
+  rm -R sub-0*[1][0-1]
   ## Keep only sub-002 in participants.tsv
   head -n 2 participants.tsv >> participants.tsv
   ## Rename T1w to be in valid BIDS format for input to CMP
