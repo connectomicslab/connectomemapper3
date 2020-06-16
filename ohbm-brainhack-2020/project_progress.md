@@ -29,6 +29,7 @@ Joan Rué Queralt, Sébastien Tourbier
   - [ ] Implementation of the EEG processing pipeline (`cmp/pipelines/functional/eeg.py`)
   - [ ] Extension with graphical components (`cmp/bidsappmanager/pipelines/functional/eeg.py`)
 
+## Achievements
 
 **How to get setup**
 
