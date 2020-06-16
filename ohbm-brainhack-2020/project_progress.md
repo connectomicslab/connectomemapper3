@@ -1,8 +1,8 @@
 # Integrate EEG inside Connectome Mapper 3
 
 **Team**
-Joan Rué Queralt
-Sébastien Tourbier
+
+Joan Rué Queralt, Sébastien Tourbier
 
 **Goals for the OHBM Brainhack**
 
