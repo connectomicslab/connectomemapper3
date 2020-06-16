@@ -65,3 +65,15 @@ Joan Rué Queralt, Sébastien Tourbier
     ```
     
 * You can check if cmp is well installed using the `test.ipynb` notebook.
+
+
+**Creation of sample dataset**
+
+Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
+
+1. Download using aws CLI (faster than downloading directly from openneuro)
+  ```
+  mkdir ~/Data
+  cd ~/Data
+  aws s3 sync --no-sign-request s3://openneuro.org/ds002718 ds002718-download/
+
