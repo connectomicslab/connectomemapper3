@@ -75,11 +75,11 @@ Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
   ```
   mkdir ~/Data
   cd ~/Data
-  aws s3 sync --no-sign-request s3://openneuro.org/ds002718 ds002718-download/
+  aws s3 sync --no-sign-request s3://openneuro.org/ds002718 ds002718-cmpeeg/
   ```
 2. Keep only `sub-002`
   ```
-  cd ds002718-download/
+  cd ds002718-cmpeeg/
   ## Remove all sub-0** except sub-002
   rm -R sub-0*[0-1][3-9]
   rm -R sub-0*[1][0-2]
@@ -90,3 +90,21 @@ Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
   ```
 
 
+**Computing multi-scale brain parcellations**
+
+1. Install the Connectome Mapper 3 GUI inside the `py27cmp-gui` conda environment
+  ```
+  conda activate py27cmp-gui #If not already activated
+  python setup_gui.py install
+  ```
+
+2. Launch the GUI
+  ```
+  cmpbidsappmanager
+  ```
+3. Go to File->Load BIDS dataset.. and Select your `ds002718-cmpeeg/` directory
+
+4. Create the configuration file for the anatomical parcellation (Segmentation stage by default / Parcellation stage: Lausanne 2018 with all extra structures)
+
+5. Run the BIDS App
+  
