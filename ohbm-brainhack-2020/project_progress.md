@@ -5,7 +5,7 @@
 Joan Rué Queralt, Sébastien Tourbier
 
 
-**Goals for the OHBM Brainhack**
+**Goals/Achievements for the OHBM Brainhack**
 
 1. Creation of a sample BIDS dataset with EEG derivatives (computed inverse solutions):
   - [x] Decide a sample dataset (open-source) to use (ultimately with T1w, DWI, rfMRI, EEG modality)
@@ -30,7 +30,7 @@ Joan Rué Queralt, Sébastien Tourbier
   - [ ] Implementation of the EEG processing pipeline (`cmp/pipelines/functional/eeg.py`)
   - [ ] Extension with graphical components (`cmp/bidsappmanager/pipelines/functional/eeg.py`)
 
-## Achievements
+## Project report
 
 **How to get setup**
 
@@ -120,3 +120,6 @@ Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
   | 3D |<img width="1604" alt="3D Lausanne 2018 scale 1" src="https://raw.githubusercontent.com/connectomicslab/connectomemapper3/ohbm-brainhack-2020/ohbm-brainhack-2020/images/sub-002_scale1_3d.png"> |  <img width="1604" alt="3D Lausanne 2018 scale 3" src="https://raw.githubusercontent.com/connectomicslab/connectomemapper3/ohbm-brainhack-2020/ohbm-brainhack-2020/images/sub-002_scale3_3d.png">|<img width="1604" alt="3D Lausanne 2018 scale 5" src="https://raw.githubusercontent.com/connectomicslab/connectomemapper3/ohbm-brainhack-2020/ohbm-brainhack-2020/images/sub-002_scale5_3d.png">|
   
   
+**Computing EEG inverse solutions**
+
+TBC
