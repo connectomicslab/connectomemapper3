@@ -6,7 +6,7 @@ import numpy as np
 from mne.io.constants import FIFF
 from mne.utils import _check_ch_locs, logger, warn
 from _tsv_handler import _from_tsv
-from _montages import make_dig_montage, set_montage
+
 
 def _handle_electrodes_reading(electrodes_fname, coord_frame,
                                coord_unit, raw, verbose):
@@ -58,7 +58,7 @@ def _handle_electrodes_reading(electrodes_fname, coord_frame,
     electrodes_dict['y'] = [_float_or_nan(x) for x in electrodes_dict['y']]
     electrodes_dict['z'] = [_float_or_nan(x) for x in electrodes_dict['z']]
     
-    if coord_frame in ['ARS']:
+    if coord_frame in ['ars']:
         tmp_x = np.copy(electrodes_dict['x'])
         tmp_y = np.copy(electrodes_dict['y'])
         electrodes_dict['x'] = tmp_y 
@@ -66,11 +66,11 @@ def _handle_electrodes_reading(electrodes_fname, coord_frame,
         coord_frame = 'head'
        
     if ch_names_raw[-1] in ['STI 014']:
-        ch_names_raw = [x.encode('utf-8') for i, x in enumerate(ch_names_raw[:-1])
+        ch_names_raw = [x for i, x in enumerate(ch_names_raw[:-1])
                     if (electrodes_dict['x'][i] != "n/a")]
 
     else:
-        ch_names_raw = [x.encode('utf-8') for i, x in enumerate(ch_names_raw)
+        ch_names_raw = [x for i, x in enumerate(ch_names_raw)
                     if (electrodes_dict['x'][i] != "n/a")]
         
     ch_locs = np.c_[electrodes_dict['x'],
@@ -91,10 +91,41 @@ def _handle_electrodes_reading(electrodes_fname, coord_frame,
 
     # create mne.DigMontage
     ch_pos = dict(zip(ch_names_raw, ch_locs))
-    montage = make_dig_montage(ch_pos=ch_pos,
+    montage = mne.channels.make_dig_montage(ch_pos=ch_pos,
                                             coord_frame=coord_frame)
     raw.set_montage(montage)
     return raw
+
+def _handle_coordsystem_reading(coordsystem_fpath, kind, verbose=True):
+    """Read associated coordsystem.json.
+    Handle reading the coordinate frame and coordinate unit
+    of each electrode.
+    """
+    # open coordinate system sidecar json
+    with open(coordsystem_fpath, 'r') as fin:
+        coordsystem_json = json.load(fin)
+
+    if kind == 'meg':
+        coord_frame = coordsystem_json['MEGCoordinateSystem'].lower()
+        coord_unit = coordsystem_json['MEGCoordinateUnits']
+        coord_frame_desc = coordsystem_json.get('MEGCoordinateDescription',
+                                                None)
+    elif kind == 'eeg':
+        coord_frame = coordsystem_json['EEGCoordinateSystem'].lower()
+        coord_unit = coordsystem_json['EEGCoordinateUnits']
+        coord_frame_desc = coordsystem_json.get('EEGCoordinateDescription',
+                                                None)
+    elif kind == 'ieeg':
+        coord_frame = coordsystem_json['iEEGCoordinateSystem'].lower()
+        coord_unit = coordsystem_json['iEEGCoordinateUnits']
+        coord_frame_desc = coordsystem_json.get('iEEGCoordinateDescription',
+                                                None)
+
+    if verbose:
+        print(f"Reading in coordinate system frame {coord_frame}: "
+              f"{coord_frame_desc}.")
+
+    return coord_frame, coord_unit
 
 def _scale_coord_to_meters(coord, unit):
     """Scale units to meters (mne-python default)."""
