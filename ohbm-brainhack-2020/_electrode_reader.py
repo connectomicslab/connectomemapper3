@@ -5,9 +5,8 @@ import mne
 import numpy as np
 from mne.io.constants import FIFF
 from mne.utils import _check_ch_locs, logger, warn
-from mne import montage
 from _tsv_handler import _from_tsv
-
+from _montages import make_dig_montage, set_montage
 
 def _handle_electrodes_reading(electrodes_fname, coord_frame,
                                coord_unit, raw, verbose):
@@ -92,7 +91,7 @@ def _handle_electrodes_reading(electrodes_fname, coord_frame,
 
     # create mne.DigMontage
     ch_pos = dict(zip(ch_names_raw, ch_locs))
-    montage = mne.channels.make_dig_montage(ch_pos=ch_pos,
+    montage = make_dig_montage(ch_pos=ch_pos,
                                             coord_frame=coord_frame)
     raw.set_montage(montage)
     return raw
