@@ -14,7 +14,7 @@ Joan Rué Queralt, Sébastien Tourbier
   - [x] Organize the sample dataset according to BIDS MRI/EEG standard
      - Already BIDS :)
   - [ ] EEG analysis (computes the inverse solution) by an open-source EEG analysis software such as MNE, EGGLab,... depending of the expertise in the team. Dispatched tasks:
-    - [ ] Seb computes multi-scale brain parcellations using CMP3 (v3.0.0-RC2)
+    - [x] Seb computes multi-scale brain parcellations using CMP3 (v3.0.0-RC2)
     - [ ] Joan and Seb investigate how to get inverse solutions using MNE
 
   
