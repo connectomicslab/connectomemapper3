@@ -1,0 +1,25 @@
+name: py3cmp-eeg
+
+channels:
+- aramislab
+- anaconda
+- conda-forge
+- conda-forge/label/cf201901
+- defaults
+
+dependencies:
+- python=3.6
+- numpy=1.15.4
+- matplotlib=2.2.3
+- traits=5.1
+- traitsui=6.0.0
+- nipype=1.1.8
+- graphviz=2.40.1
+- mne-bids=0.4 
+
+- pip:
+    - duecredit==0.7.0
+    - pybids==0.9.1
+    - apptools==4.4.0
+    - networkx==2.2
+    - pydicom==1.4.2
