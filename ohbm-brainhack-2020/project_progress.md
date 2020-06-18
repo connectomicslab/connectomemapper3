@@ -299,4 +299,5 @@ Short version for presentation
 ```
 
 **Final presentation**
-cmp3-eeg.pdf
+Available at
+https://github.com/connectomicslab/connectomemapper3/raw/ohbm-brainhack-2020/ohbm-brainhack-2020/cmp3-eeg.pdf
