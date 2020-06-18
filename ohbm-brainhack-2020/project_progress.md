@@ -48,26 +48,28 @@ Joan Rué Queralt, Sébastien Tourbier
     git checkout --track origin/ohbm-brainhack-2020
     ```
 
-* Create the conda environment for development::
+* Go to the ohbm-brainhack-2020 directory and create the conda environment for development::
     ```
-    conda env create -f environment.yml
+    cd ohbm-brainhack-2020
+    conda env create -f py3EEGenvironment.yml
     ```
     
 * Activate the conda environment::
     ```
-    conda activate py27cmp-gui
+    conda activate py3cmp-eeg
     ```
     
 * Install jupyter notebook and dependencies::
     ```
-    conda install -y -q jupyter notebook
+    conda install -y -q jupyter notebook 
     ```
 * Install cmp3
     ```
+    cd ..
     python setup.py install
     ```
     
-* Go to the ohbm-brainhack-2020 directory and launch Jupyter notebook
+* launch Jupyter notebook
     ```
     cd ohbm-brainhack-2020
     jupyter notebook
