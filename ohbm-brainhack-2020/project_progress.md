@@ -256,3 +256,44 @@ Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
 |   |   +--- sub-01_dwi.nii.gz
 ```
 
+Short version for presentation
+```
++--- participants.tsv
++--- dataset_description.json
++--- ...
++--- sub-01
+|   +--- anat
+|   |   +--- sub-01_T1w.json
+|   |   +--- sub-01_T1w.nii.gz
+|   +--- dwi
+|   |   +--- sub-01_dwi.bval
+|   |   +--- sub-01_dwi.bvec
+|   |   +--- sub-01_dwi.json
+|   |   +--- sub-01_dwi.nii.gz
++--- code
+|   +--- ...
++--- derivatives
+|   +--- cartool
+|   |   +--- ...
+|   +--- cmp
+|   |   +--- sub-01
+|   |   |   +--- anat
+|   |   |   |   +--- ...
+|   |   |   +--- dwi
+|   |   |   |   +--- ...
+|   |   |   +--- xfm
+|   |   |   |   +--- ...
+|   +--- eeglab
+|   |   +--- sub-01
+|   |   |   +--- eeg
+|   |   |   |   +--- ...
+|   +--- freesurfer
+|   |   +--- sub-01
+|   |   |   +--- label
+|   |   |   +--- mri
+|   |   |   +--- surf
+|   |   |   +--- ...
+|   +--- mne
+|   |   +--- sub-01
+|   |   |   +--- ...
+```
