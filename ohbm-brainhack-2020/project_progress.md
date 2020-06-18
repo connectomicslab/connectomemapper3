@@ -14,13 +14,12 @@ Joan Rué Queralt, Sébastien Tourbier
   - [x] Organize the sample dataset according to BIDS MRI/EEG standard
      - Already BIDS :)
   - [ ] EEG analysis (computes the inverse solution, single ROI source dipoles, dynamic functional connectivity) by an open-source EEG analysis software such as MNE, EGGLab,... depending of the expertise in the team. Dispatched tasks:
-    - [x] Seb computes multi-scale brain parcellations using CMP3 (v3.0.0-RC2)
-    - [ ] Joan and Seb investigate how to get inverse solutions using MNE
+    - [x] Compute multi-scale brain parcellations using CMP3 (v3.0.0-RC2)
+    - [x] Investigate how to compute inverse solutions using MNE on the sample dataset
       - Need MNE-BIDS (python3 package)
       - Not straight forward to load the sample dataset (generated with eeglab - coordinatesystem ARS - against MNE - coordinatesystem RAS )
       -> Refined tasks:
-        - [ ] Joan investigates how to compute inverse solutions using MNE on the sample dataset
-        - [ ] Seb investigates how to load inverse solutions already computed with cartool using pycartool and MNE on a second sample (unpublished) dataset (one subject with T1w/DTI/HD-EEG already processed by CMP3 and Cartool)
+        - [x] Investigate how to load inverse solutions already computed with cartool using pycartool and MNE on a second sample (unpublished) dataset (one subject with T1w/DTI/HD-EEG already processed by CMP3 and Cartool)
           - Loaded inverse solutions reconstructed with cartool software using pycartool (https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool)
           - Computed single source dipoles per ROI based on SVD decomposition [Rubega et al. 2018] 
           - Computed diverse common functional connectivity metrics (Imaginary coherence, ...) using MNE 
