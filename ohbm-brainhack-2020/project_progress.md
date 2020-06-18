@@ -21,20 +21,22 @@ Joan Rué Queralt, Sébastien Tourbier
       -> Refined tasks:
         - [ ] Joan investigates how to compute inverse solutions using MNE on the sample dataset
         - [ ] Seb investigates how to load inverse solutions already computed with cartool using pycartool and MNE on a second sample (unpublished) dataset (one subject with T1w/DTI/HD-EEG already processed by CMP3 and Cartool)
-  
-  - [ ] Review EEG analysis outputs into the derivatives of the dataset according to new derivatives specs introduced in BIDS 1.4.0 (https://bids-specification.readthedocs.io/en/stable/05-derivatives/01-introduction.html)
+          - Loaded inverse solutions reconstructed with cartool software using pycartool (https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool)
+          - Computed single source dipoles per ROI based on SVD decomposition [Rubega et al. 2018] 
+          - Computed diverse common functional connectivity metrics (Imaginary coherence, ...) using MNE 
+
+**Remaining tasks for the future**
+
+1. [ ] Review EEG analysis outputs into the derivatives of the dataset according to new derivatives specs introduced in BIDS 1.4.0 (https://bids-specification.readthedocs.io/en/stable/05-derivatives/01-introduction.html)
 
 2. Implementation of Nipype interfaces that:
   - [ ] loads the inverse solutions and their respective x,y,z locations
-  - [ ] computes ROI source dipoles using the SVD technique
-  - [ ] computes single source dipoles per ROI based on SVD decomposition [Rubega et al. 2018] using pycartool (https://github.com/Functional-Brain-Mapping-Laboratory/PyCartool)
+  - [ ] computes single source dipoles per ROI based on SVD decomposition 
   - [ ] computes diverse common functional connectivity metrics (Imaginary coherence, ...) using MNE - See how it integrates #203 
 
 3. Implementation of EEG pipeline in the Connectome Mapper 3
   - [ ] Implementation of the EEG processing pipeline (`cmp/pipelines/functional/eeg.py`)
   - [ ] Extension with graphical components (`cmp/bidsappmanager/pipelines/functional/eeg.py`)
-
-**Remaining tasks for the future**
 
 ## Project report
 
