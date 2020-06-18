@@ -24,7 +24,7 @@ Joan Rué Queralt, Sébastien Tourbier
           - Computed single source dipoles per ROI based on SVD decomposition [Rubega et al. 2018] 
           - Computed diverse common functional connectivity metrics (Imaginary coherence, ...) using MNE 
 
-**Remaining tasks for the future**
+**Remaining tasks for the upcoming future**
 1. Creation of a sample BIDS dataset with EEG derivatives (computed inverse solutions):
   - [ ] Review EEG analysis outputs into the derivatives of the dataset according to new derivatives specs introduced in BIDS 1.4.0 (https://bids-specification.readthedocs.io/en/stable/05-derivatives/01-introduction.html)
 
