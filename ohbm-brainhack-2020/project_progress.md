@@ -140,31 +140,7 @@ Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
 |   |   +--- sub-01
 |   |   |   +--- Cartool.ini
 |   |   |   +--- More
-|   |   |   |   +--- Cartool.ini
-|   |   |   |   +--- ROI_33
-|   |   |   |   |   +--- sub-01.rois
-|   |   |   |   |   +--- sub-01.rois.spi
-|   |   |   |   |   +--- sub-01.rois.vrb
-|   |   |   |   +--- sub-01.Boundary 1.Skull Inner Surface.xyz
-|   |   |   |   +--- sub-01.Boundary 2.Skull Outer Surface.xyz
-|   |   |   |   +--- sub-01.Boundary 3.Scalp Outer Surface.xyz
-|   |   |   |   +--- sub-01.Head Model.xyz
-|   |   |   |   +--- sub-01.Lead Field.For Display.ep
-|   |   |   |   +--- sub-01.Lead Field.lf
-|   |   |   |   +--- sub-01.Original.xyz
-|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Electrodes to Original MRI.txt
-|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Electrodes to Realigned MRI.txt
-|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Original MRI to Electrodes.txt
-|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Projection Center in Original MRI.txt
-|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Projection Center in Realigned MRI.txt
-|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Realigned MRI to Electrodes.txt
-|   |   |   |   +--- sub-01.Transform.MRI Realignment.Original MRI to Realigned MRI.txt
-|   |   |   |   +--- sub-01.Transform.MRI Realignment.Realigned MRI to Original MRI.txt
-|   |   |   |   +--- sub-01_T1w_class-GM_orig.Grey.hdr
-|   |   |   |   +--- sub-01_T1w_class-GM_orig.Grey.img
-|   |   |   |   +--- sub-01_T1w_head_orig.spi
-|   |   |   |   +--- sub-01_T1w_parc_scale1_orig.hdr
-|   |   |   |   +--- sub-01_T1w_parc_scale1_orig.img
+|   |   |   |   +--- ...
 |   |   |   +--- sub-01 -no_ref.xyz
 |   |   |   +--- sub-01.Brain.hdr
 |   |   |   +--- sub-01.Brain.img
