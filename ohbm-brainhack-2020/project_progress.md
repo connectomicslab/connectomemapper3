@@ -26,8 +26,8 @@ Joan Rué Queralt, Sébastien Tourbier
           - Computed diverse common functional connectivity metrics (Imaginary coherence, ...) using MNE 
 
 **Remaining tasks for the future**
-
-1. [ ] Review EEG analysis outputs into the derivatives of the dataset according to new derivatives specs introduced in BIDS 1.4.0 (https://bids-specification.readthedocs.io/en/stable/05-derivatives/01-introduction.html)
+1. Creation of a sample BIDS dataset with EEG derivatives (computed inverse solutions):
+  - [ ] Review EEG analysis outputs into the derivatives of the dataset according to new derivatives specs introduced in BIDS 1.4.0 (https://bids-specification.readthedocs.io/en/stable/05-derivatives/01-introduction.html)
 
 2. Implementation of Nipype interfaces that:
   - [ ] loads the inverse solutions and their respective x,y,z locations
