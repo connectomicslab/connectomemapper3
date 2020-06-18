@@ -13,10 +13,14 @@ Joan Rué Queralt, Sébastien Tourbier
      - Keep only one subject (sub-002)
   - [x] Organize the sample dataset according to BIDS MRI/EEG standard
      - Already BIDS :)
-  - [ ] EEG analysis (computes the inverse solution) by an open-source EEG analysis software such as MNE, EGGLab,... depending of the expertise in the team. Dispatched tasks:
+  - [ ] EEG analysis (computes the inverse solution, single ROI source dipoles, dynamic functional connectivity) by an open-source EEG analysis software such as MNE, EGGLab,... depending of the expertise in the team. Dispatched tasks:
     - [x] Seb computes multi-scale brain parcellations using CMP3 (v3.0.0-RC2)
     - [ ] Joan and Seb investigate how to get inverse solutions using MNE
-
+      - Need MNE-BIDS (python3 package)
+      - Not straight forward to load the sample dataset (generated with eeglab - coordinatesystem ARS - against MNE - coordinatesystem RAS )
+      -> Refined tasks:
+        - [ ] Joan investigates how to compute inverse solutions using MNE on the sample dataset
+        - [ ] Seb investigates how to load inverse solutions already computed with cartool using pycartool and MNE on a second sample (unpublished) dataset (one subject with T1w/DTI/HD-EEG already processed by CMP3 and Cartool)
   
   - [ ] Review EEG analysis outputs into the derivatives of the dataset according to new derivatives specs introduced in BIDS 1.4.0 (https://bids-specification.readthedocs.io/en/stable/05-derivatives/01-introduction.html)
 
@@ -29,6 +33,8 @@ Joan Rué Queralt, Sébastien Tourbier
 3. Implementation of EEG pipeline in the Connectome Mapper 3
   - [ ] Implementation of the EEG processing pipeline (`cmp/pipelines/functional/eeg.py`)
   - [ ] Extension with graphical components (`cmp/bidsappmanager/pipelines/functional/eeg.py`)
+
+**Remaining tasks for the future**
 
 ## Project report
 
