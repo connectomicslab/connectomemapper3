@@ -5,7 +5,7 @@
 Joan Rué Queralt, Sébastien Tourbier
 
 
-**Goals/Achievements for the OHBM Brainhack**
+**Achievements for the OHBM Brainhack**
 
 1. Creation of a sample BIDS dataset with EEG derivatives (computed inverse solutions):
   - [x] Decide a sample dataset (open-source) to use (ultimately with T1w, DWI, rfMRI, EEG modality)
