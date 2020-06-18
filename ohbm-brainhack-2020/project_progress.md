@@ -299,8 +299,4 @@ Short version for presentation
 ```
 
 **Final presentation**
-<object data="https://github.com/connectomicslab/connectomemapper3/raw/ohbm-brainhack-2020/ohbm-brainhack-2020/cmp3-eeg.pdf" type="application/pdf" width="700px" height="700px">
-    <embed src="https://github.com/connectomicslab/connectomemapper3/raw/ohbm-brainhack-2020/ohbm-brainhack-2020/cmp3-eeg.pdf">
-        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="https://github.com/connectomicslab/connectomemapper3/raw/ohbm-brainhack-2020/ohbm-brainhack-2020/cmp3-eeg.pdf">Download PDF</a>.</p>
-    </embed>
-</object>
+cmp3-eeg.pdf
