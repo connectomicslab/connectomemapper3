@@ -255,3 +255,4 @@ Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
 |   |   +--- sub-01_dwi.json
 |   |   +--- sub-01_dwi.nii.gz
 ```
+Feedback is welcome :)
