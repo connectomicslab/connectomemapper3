@@ -129,6 +129,153 @@ Dataset: https://openneuro.org/datasets/ds002718/versions/1.0.2
   | 3D |<img width="1604" alt="3D Lausanne 2018 scale 1" src="https://raw.githubusercontent.com/connectomicslab/connectomemapper3/ohbm-brainhack-2020/ohbm-brainhack-2020/images/sub-002_scale1_3d.png"> |  <img width="1604" alt="3D Lausanne 2018 scale 3" src="https://raw.githubusercontent.com/connectomicslab/connectomemapper3/ohbm-brainhack-2020/ohbm-brainhack-2020/images/sub-002_scale3_3d.png">|<img width="1604" alt="3D Lausanne 2018 scale 5" src="https://raw.githubusercontent.com/connectomicslab/connectomemapper3/ohbm-brainhack-2020/ohbm-brainhack-2020/images/sub-002_scale5_3d.png">|
   
   
-**Computing EEG inverse solutions**
+**New sample dataset with already computed EEG inverse solutions**
 
-TBC
+**Structure:**
+```
++--- code
+|   +--- ...
++--- derivatives
+|   +--- cartool
+|   |   +--- sub-01
+|   |   |   +--- Cartool.ini
+|   |   |   +--- More
+|   |   |   |   +--- Cartool.ini
+|   |   |   |   +--- ROI_33
+|   |   |   |   |   +--- sub-01.rois
+|   |   |   |   |   +--- sub-01.rois.spi
+|   |   |   |   |   +--- sub-01.rois.vrb
+|   |   |   |   +--- sub-01.Boundary 1.Skull Inner Surface.xyz
+|   |   |   |   +--- sub-01.Boundary 2.Skull Outer Surface.xyz
+|   |   |   |   +--- sub-01.Boundary 3.Scalp Outer Surface.xyz
+|   |   |   |   +--- sub-01.Head Model.xyz
+|   |   |   |   +--- sub-01.Lead Field.For Display.ep
+|   |   |   |   +--- sub-01.Lead Field.lf
+|   |   |   |   +--- sub-01.Original.xyz
+|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Electrodes to Original MRI.txt
+|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Electrodes to Realigned MRI.txt
+|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Original MRI to Electrodes.txt
+|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Projection Center in Original MRI.txt
+|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Projection Center in Realigned MRI.txt
+|   |   |   |   +--- sub-01.Transform.Electrodes Coregistration.Realigned MRI to Electrodes.txt
+|   |   |   |   +--- sub-01.Transform.MRI Realignment.Original MRI to Realigned MRI.txt
+|   |   |   |   +--- sub-01.Transform.MRI Realignment.Realigned MRI to Original MRI.txt
+|   |   |   |   +--- sub-01_T1w_class-GM_orig.Grey.hdr
+|   |   |   |   +--- sub-01_T1w_class-GM_orig.Grey.img
+|   |   |   |   +--- sub-01_T1w_head_orig.spi
+|   |   |   |   +--- sub-01_T1w_parc_scale1_orig.hdr
+|   |   |   |   +--- sub-01_T1w_parc_scale1_orig.img
+|   |   |   +--- sub-01 -no_ref.xyz
+|   |   |   +--- sub-01.Brain.hdr
+|   |   |   +--- sub-01.Brain.img
+|   |   |   +--- sub-01.For Display.xyz
+|   |   |   +--- sub-01.Grey.hdr
+|   |   |   +--- sub-01.Grey.img
+|   |   |   +--- sub-01.Head.hdr
+|   |   |   +--- sub-01.Head.img
+|   |   |   +--- sub-01.IS + XYZ.lm
+|   |   |   +--- sub-01.IS.lm
+|   |   |   +--- sub-01.Laura.is
+|   |   |   +--- sub-01.Lead Field.ris
+|   |   |   +--- sub-01.Loreta.is
+|   |   |   +--- sub-01.RIS.lm
+|   |   |   +--- sub-01.spi
+|   |   |   +--- sub-01.vrb
+|   |   |   +--- sub-01.xyz
+|   |   |   +--- sub-01.XYZ.lm
+|   +--- cmp
+|   |   +--- dataset_description.json
+|   |   +--- sub-01
+|   |   |   +--- anat
+|   |   |   |   +--- sub-01_desc-aparcaseg_dseg.nii.gz
+|   |   |   |   +--- sub-01_desc-aseg_dseg.nii.gz
+|   |   |   |   +--- sub-01_desc-brain_mask.nii.gz
+|   |   |   |   +--- sub-01_desc-brain_T1w.nii.gz
+|   |   |   |   +--- sub-01_desc-cmp_T1w.nii.gz
+|   |   |   |   +--- sub-01_desc-head_T1w.nii.gz
+|   |   |   |   +--- sub-01_label-brain_desc-eroded_dseg.nii.gz
+|   |   |   |   +--- sub-01_label-CSF_desc-eroded_dseg.nii.gz
+|   |   |   |   +--- sub-01_label-CSF_dseg.nii.gz
+|   |   |   |   +--- sub-01_label-GM_dseg.nii.gz
+|   |   |   |   +--- sub-01_label-L2008_desc-scale1_atlas.nii.gz
+|   |   |   |   +--- sub-01_label-L2008_desc-scale2_atlas.nii.gz
+|   |   |   |   +--- sub-01_label-L2008_desc-scale3_atlas.nii.gz
+|   |   |   |   +--- sub-01_label-L2008_desc-scale4_atlas.nii.gz
+|   |   |   |   +--- sub-01_label-L2008_desc-scale5_atlas.nii.gz
+|   |   |   |   +--- sub-01_label-WM_desc-eroded_dseg.nii.gz
+|   |   |   |   +--- sub-01_label-WM_dseg.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_desc-brain_mask.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_desc-brain_T1w.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_desc-head_T1w.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-5TT_probseg.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-CSF_probseg.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-GMWMI_probseg.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-GM_probseg.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-L2008_desc-scale1_atlas.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-L2008_desc-scale2_atlas.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-L2008_desc-scale3_atlas.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-L2008_desc-scale4_atlas.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-L2008_desc-scale5_atlas.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-WM_dseg.nii.gz
+|   |   |   |   +--- sub-01_space-DWI_label-WM_probseg.nii.gz
+|   |   |   +--- connectivity
+|   |   |   |   +--- sub-01_label-L2008_desc-scale1_conndata-snetwork_connectivity.gpickle
+|   |   |   |   +--- sub-01_label-L2008_desc-scale1_conndata-snetwork_connectivity.mat
+|   |   |   |   +--- sub-01_label-L2008_desc-scale2_conndata-snetwork_connectivity.gpickle
+|   |   |   |   +--- sub-01_label-L2008_desc-scale2_conndata-snetwork_connectivity.mat
+|   |   |   |   +--- sub-01_label-L2008_desc-scale3_conndata-snetwork_connectivity.gpickle
+|   |   |   |   +--- sub-01_label-L2008_desc-scale3_conndata-snetwork_connectivity.mat
+|   |   |   |   +--- sub-01_label-L2008_desc-scale4_conndata-snetwork_connectivity.gpickle
+|   |   |   |   +--- sub-01_label-L2008_desc-scale4_conndata-snetwork_connectivity.mat
+|   |   |   |   +--- sub-01_label-L2008_desc-scale5_conndata-snetwork_connectivity.gpickle
+|   |   |   |   +--- sub-01_label-L2008_desc-scale5_conndata-snetwork_connectivity.mat
+|   |   |   +--- dwi
+|   |   |   |   +--- sub-01_desc-brain_mask.nii.gz
+|   |   |   |   +--- sub-01_desc-cmp_dwi.bval
+|   |   |   |   +--- sub-01_desc-cmp_dwi.bvec
+|   |   |   |   +--- sub-01_desc-cmp_dwi.json
+|   |   |   |   +--- sub-01_desc-cmp_dwi.nii.gz
+|   |   |   |   +--- sub-01_desc-grad_dwi.txt
+|   |   |   |   +--- sub-01_desc-preproc_dwi.nii.gz
+|   |   |   |   +--- sub-01_dwi.bval
+|   |   |   |   +--- sub-01_dwi.bvec
+|   |   |   |   +--- sub-01_dwi.nii.gz
+|   |   |   |   +--- sub-01_model-CSD_desc-DET_tractogram.trk
+|   |   |   |   +--- sub-01_model-CSD_diffmodel.nii.gz
+|   |   |   |   +--- sub-01_model-DTI_FA.nii.gz
+|   |   |   |   +--- sub-01_model-DTI_MD.nii.gz
+|   |   |   +--- sub-01_anatomical_config.ini
+|   |   |   +--- sub-01_diffusion_config.ini
+|   |   |   +--- sub-01_log.txt
+|   |   |   +--- xfm
+|   |   |   |   +--- ...
+|   +--- eeglab
+|   |   +--- sub-01
+|   |   |   +--- eeg
+|   |   |   |   +--- sub-01_task-Face_eeg.fdt
+|   |   |   |   +--- sub-01_task-Face_eeg.set
+|   |   |   |   +--- sub-01_task-Face_events.txt
+|   +--- freesurfer
+|   |   +--- dataset_description.json
+|   |   +--- fsaverage
+|   |   |   +--- label
+|   |   |   +--- mri
+|   |   |   +--- surf
+|   |   |   +--- ...
+|   +--- mne
+|   |   +--- sub-01
+|   |   |   +--- sub-01-montage.fif
+|   |   |   +--- sub-01_montage.fif
++--- participants.tsv
++--- project_description.json
++--- README.txt
++--- sub-01
+|   +--- anat
+|   |   +--- sub-01_T1w.json
+|   |   +--- sub-01_T1w.nii.gz
+|   +--- dwi
+|   |   +--- sub-01_dwi.bval
+|   |   +--- sub-01_dwi.bvec
+|   |   +--- sub-01_dwi.json
+|   |   +--- sub-01_dwi.nii.gz
+```
