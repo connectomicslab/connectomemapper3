@@ -13,7 +13,7 @@ Joan Rué Queralt, Sébastien Tourbier
      - Keep only one subject (sub-002)
   - [x] Organize the sample dataset according to BIDS MRI/EEG standard
      - Already BIDS :)
-  - [ ] EEG analysis (computes the inverse solution, single ROI source dipoles, dynamic functional connectivity) by an open-source EEG analysis software such as MNE, EGGLab,... depending of the expertise in the team. Dispatched tasks:
+  - [x] EEG analysis (computes the inverse solution, single ROI source dipoles, dynamic functional connectivity) by an open-source EEG analysis software such as MNE, EGGLab,... depending of the expertise in the team. Dispatched tasks:
     - [x] Compute multi-scale brain parcellations using CMP3 (v3.0.0-RC2)
     - [x] Investigate how to compute inverse solutions using MNE on the sample dataset
       - Need MNE-BIDS (python3 package)
