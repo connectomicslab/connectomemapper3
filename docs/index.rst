@@ -6,6 +6,9 @@ Connectome Mapper 3 (Beta release)
 
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
 
+.. image:: https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp  
+  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp 
+  :alt: Docker Image Version (latest by date)
 .. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp   
   :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
   :alt: Docker Pulls
