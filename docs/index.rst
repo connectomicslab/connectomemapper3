@@ -11,9 +11,6 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
   :alt: Docker Image Version (latest by date)
 .. image:: https://img.shields.io/github/release-date/connectomicslab/connectomemapper3   
   :alt: GitHub Release Date
-.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp   
-  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
-  :alt: Docker Pulls
 .. image:: https://zenodo.org/badge/183162514.svg
   :target: https://zenodo.org/badge/latestdoi/183162514
   :alt: Digital Object Identifier
@@ -23,6 +20,9 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 .. image:: https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest
   :target: https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
+.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp   
+  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
+  :alt: Docker Pulls
   
 
 .. warning:: THIS SOFTWARE IS FOR RESEARCH PURPOSES ONLY AND SHALL NOT BE USED FOR ANY CLINICAL USE. THIS SOFTWARE HAS NOT BEEN REVIEWED OR APPROVED BY THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE PROVISION OF PATIENT CARE.
