@@ -4,6 +4,7 @@
 *.xdebug_tkmedit
 *.mp4
 atom-config.txt
+atom*.txt
 
 .DS_Store
 
