@@ -67,13 +67,13 @@ class SummaryAdapter(TabularAdapter):
     def _get_dmri_processed_image(self):
         if self.item.dmri_available:
             if not self.item.dmri_processed:
-                print ("Red")
+                print("Red")
                 return 'red_ball'
             else:
-                print "Green"
+                print("Green")
                 return 'green_ball'
         else:
-            print ("None")
+            print("None")
             return None
     
     def _get_fmri_processed_image(self):
@@ -132,7 +132,7 @@ if __name__ == '__main__':
                 summary_table.append(data)
         # else:
         #     print("Process subject %s - no session "%(sub))
-    print (summary_table)
+    print(summary_table)
     # summary_table = [('i','index'),('Subject/Session Id', 'label'), ('Anatomical Pipeline', 'anatomical_processed'), ('Diffusion Pipeline', 'diffusion_processed'), ('fMRI Pipeline', 'fmri_processed')]
     
     test = Summary(summary_table=summary_table)

@@ -129,7 +129,7 @@ class fMRIPipelineUI(fMRIPipeline):
         
         subjid = self.subject.split("-")[1]
         
-        print "Looking for...."
+        print("Looking for....")
         
         if self.global_conf.subject_session == '':
             
