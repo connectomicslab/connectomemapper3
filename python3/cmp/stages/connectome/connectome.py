@@ -46,7 +46,7 @@ class ConnectomeConfig(HasTraits):
 
 
 class ConnectomeStage(Stage):
-    
+
     def __init__(self):
         self.name = 'connectome_stage'
         self.config = ConnectomeConfig()
@@ -59,16 +59,17 @@ class ConnectomeStage(Stage):
         self.outputs = ["endpoints_file", "endpoints_mm_file", "final_fiberslength_files",
                         "filtered_fiberslabel_files", "final_fiberlabels_files",
                         "streamline_final_file", "connectivity_matrices"]
-    
+
     def create_workflow(self, flow, inputnode, outputnode):
         cmtk_cmat = pe.Node(interface=CMTK_cmat(), name="compute_matrice")
         cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
         cmtk_cmat.inputs.output_types = self.config.output_types
         cmtk_cmat.inputs.probtrackx = self.config.probtrackx
-        
+
         # Additional maps
-        map_merge = pe.Node(interface=util.Merge(9), name="merge_additional_maps")
-        
+        map_merge = pe.Node(interface=util.Merge(
+            9), name="merge_additional_maps")
+
         flow.connect([
             (inputnode, map_merge, [('FA', 'in1'),
                                     ('ADC', 'in2'),
@@ -81,7 +82,7 @@ class ConnectomeStage(Stage):
                                     ('mapmri_maps', 'in9')]),
             (map_merge, cmtk_cmat, [('out', 'additional_maps')])
         ])
-        
+
         flow.connect([
             (inputnode, cmtk_cmat, [('track_file', 'track_file'),
                                     ('roi_graphMLs', 'roi_graphMLs'),
@@ -90,48 +91,56 @@ class ConnectomeStage(Stage):
                                     ('roi_volumes_registered', 'roi_volumes')]),
             (cmtk_cmat, outputnode, [('endpoints_file', 'endpoints_file'),
                                      ('endpoints_mm_file', 'endpoints_mm_file'),
-                                     ('final_fiberslength_files', 'final_fiberslength_files'),
-                                     ('filtered_fiberslabel_files', 'filtered_fiberslabel_files'),
-                                     ('final_fiberlabels_files', 'final_fiberlabels_files'),
-                                     ('streamline_final_file', 'streamline_final_file'),
+                                     ('final_fiberslength_files',
+                                      'final_fiberslength_files'),
+                                     ('filtered_fiberslabel_files',
+                                      'filtered_fiberslabel_files'),
+                                     ('final_fiberlabels_files',
+                                      'final_fiberlabels_files'),
+                                     ('streamline_final_file',
+                                      'streamline_final_file'),
                                      ('connectivity_matrices', 'connectivity_matrices')])
         ])
-    
+
     def define_inspect_outputs(self):
         # print('inspect outputs connectome stage')
-        con_results_path = os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz")
-        
+        con_results_path = os.path.join(
+            self.stage_dir, "compute_matrice", "result_compute_matrice.pklz")
+
         # print("Stage dir: %s" % self.stage_dir)
         if (os.path.exists(con_results_path)):
             # print("con_results_path : %s" % con_results_path)
             con_results = pickle.load(gzip.open(con_results_path))
             # print(con_results.inputs)
-            
-            self.inspect_outputs_dict['Final tractogram'] = ['trackvis', con_results.outputs.streamline_final_file]
+
+            self.inspect_outputs_dict['Final tractogram'] = [
+                'trackvis', con_results.outputs.streamline_final_file]
             mat = con_results.outputs.connectivity_matrices
             # print("Conn. matrix : %s" % mat)
-            
+
             map_scale = "default"
             if self.config.log_visualization:
                 map_scale = "log"
-            
+
             if self.config.circular_layout:
                 layout = 'circular'
             else:
                 layout = 'matrix'
-            
+
             if isinstance(mat, str):
                 # print("is str")
                 if 'gpickle' in mat:
                     # 'Fiber number','Fiber length','Fiber density','ADC','gFA'
-                    con_name = os.path.basename(mat).split(".")[0].split("_")[-1]
+                    con_name = os.path.basename(mat).split(".")[
+                        0].split("_")[-1]
                     # print("con_name:"+con_name)
-                    
+
                     # Load the connectivity matrix and extract the attributes (weights)
                     # con_mat =  pickle.load(mat, encoding="latin1")
                     con_mat = nx.read_gpickle(mat)
-                    con_metrics = list(list(con_mat.edges(data=True))[0][2].keys())
-                    
+                    con_metrics = list(
+                        list(con_mat.edges(data=True))[0][2].keys())
+
                     # Create dynamically the list of output connectivity metrics for inspection
                     for con_metric in con_metrics:
                         metric_str = ' '.join(con_metric.split('_'))
@@ -139,21 +148,22 @@ class ConnectomeStage(Stage):
                                                                                     con_metric, "False",
                                                                                     self.config.subject + ' - ' + con_name + ' - ' + metric_str,
                                                                                     map_scale]
-            
-            
+
             else:
                 # print("is list")
                 for mat in con_results.outputs.connectivity_matrices:
                     # print("mat : %s" % mat)
                     if 'gpickle' in mat:
-                        con_name = " ".join(os.path.basename(mat).split(".")[0].split("_"))
+                        con_name = " ".join(os.path.basename(
+                            mat).split(".")[0].split("_"))
                         # print("con_name:"+con_name)
-                        
+
                         # Load the connectivity matrix and extract the attributes (weights)
                         # con_mat =  pickle.load(mat, encoding="latin1")
                         con_mat = nx.read_gpickle(mat)
-                        con_metrics = list(list(con_mat.edges(data=True))[0][2].keys())
-                        
+                        con_metrics = list(
+                            list(con_mat.edges(data=True))[0][2].keys())
+
                         # Create dynamically the list of output connectivity metrics for inspection
                         for con_metric in con_metrics:
                             metric_str = ' '.join(con_metric.split('_'))
@@ -161,11 +171,11 @@ class ConnectomeStage(Stage):
                                                                                         mat, con_metric, "False",
                                                                                         self.config.subject + ' - ' + con_name + ' - ' + metric_str,
                                                                                         map_scale]
-            
+
             self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
                                           key=str.lower)
             # print(self.inspect_outputs)
-    
+
     def has_run(self):
         return os.path.exists(os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"))
 
@@ -198,21 +208,21 @@ class ConnectomeStage(Stage):
 # class CMTK_mrtrixcmat(BaseInterface):
 #     input_spec = CMTK_mrtrixcmatInputSpec
 #     output_spec = CMTK_mrtrixcmatOutputSpec
-    
+
 #     def _run_interface(self, runtime):
 #         if isdefined(self.inputs.additional_maps):
 #             additional_maps = dict(
 #                 (split_filename(add_map)[1], add_map) for add_map in self.inputs.additional_maps if add_map != '')
 #         else:
 #             additional_maps = {}
-        
+
 #         mrtrixcmat(intck=self.inputs.track_file[0], fod_file=self.inputs.fod_file, roi_volumes=self.inputs.roi_volumes,
 #                    parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
 #                    compute_curvature=self.inputs.compute_curvature, additional_maps=additional_maps,
 #                    output_types=self.inputs.output_types)
-        
+
 #         return runtime
-    
+
 #     def _list_outputs(self):
 #         outputs = self._outputs().get()
 #         # outputs['endpoints_file'] = os.path.abspath('endpoints.npy')
@@ -222,5 +232,5 @@ class ConnectomeStage(Stage):
 #         # outputs['final_fiberlabels_files'] = glob.glob(os.path.abspath('final_fiberlabels*'))
 #         outputs['streamline_final_file'] = os.path.abspath('streamline_final.tck')
 #         outputs['connectivity_matrices'] = glob.glob(os.path.abspath('connectome*'))
-        
+
 #         return outputs

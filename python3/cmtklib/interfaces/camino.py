@@ -14,46 +14,48 @@ import os
 
 
 class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
-    lrange = traits.List(traits.Float, desc='Index to one-tensor LUTs. This is the ratio L1/L3 and L2 / L3.' \
-                                            'The LUT is square, with half the values calculated (because L2 / L3 cannot be less than L1 / L3 by definition).' \
-                                            'The minimum must be >= 1. For comparison, a ratio L1 / L3 = 10 with L2 / L3 = 1 corresponds to an FA of 0.891, ' \
-                                            'and L1 / L3 = 15 with L2 / L3 = 1 corresponds to an FA of 0.929. The default range is 1 to 10.', \
+    lrange = traits.List(traits.Float, desc='Index to one-tensor LUTs. This is the ratio L1/L3 and L2 / L3.'
+                                            'The LUT is square, with half the values calculated (because L2 / L3 cannot be less than L1 / L3 by definition).'
+                                            'The minimum must be >= 1. For comparison, a ratio L1 / L3 = 10 with L2 / L3 = 1 corresponds to an FA of 0.891, '
+                                            'and L1 / L3 = 15 with L2 / L3 = 1 corresponds to an FA of 0.929. The default range is 1 to 10.',
                          argstr='-lrange %s', minlen=2, maxlen=2, position=1,
                          units='NA')
-    
+
     frange = traits.List(traits.Float, desc='Index to two-tensor LUTs. This is the fractional anisotropy \
-        of the two tensors. The default is 0.3 to 0.94', \
+        of the two tensors. The default is 0.3 to 0.94',
                          argstr='-frange %s', minlen=2, maxlen=2, position=1,
                          units='NA')
-    
+
     step = traits.Float(argstr='-step %d', units='NA',
-                        desc='Distance between points in the LUT.' \
-                             'For example, if lrange is 1 to 10 and the step is 0.1, LUT entries will be computed ' \
-                             'at L1 / L3 = 1, 1.1, 1.2 ... 10.0 and at L2 / L3 = 1.0, 1.1 ... L1 / L3.' \
+                        desc='Distance between points in the LUT.'
+                             'For example, if lrange is 1 to 10 and the step is 0.1, LUT entries will be computed '
+                             'at L1 / L3 = 1, 1.1, 1.2 ... 10.0 and at L2 / L3 = 1.0, 1.1 ... L1 / L3.'
                              'For single tensor LUTs, the default step is 0.2, for two-tensor LUTs it is 0.02.')
-    
+
     samples = traits.Int(argstr='-samples %d', units='NA',
                          desc='The number of synthetic measurements to generate at each point in the LUT. The default is 2000.')
-    
+
     snr = traits.Float(argstr='-snr %d', units='NA',
-                       desc='The signal to noise ratio of the unweighted (q = 0) measurements.' \
+                       desc='The signal to noise ratio of the unweighted (q = 0) measurements.'
                             'This should match the SNR (in white matter) of the images that the LUTs are used with.')
-    
-    bingham = traits.Bool(argstr='-bingham', desc="Compute a LUT for the Bingham PDF. This is the default.")
-    
+
+    bingham = traits.Bool(
+        argstr='-bingham', desc="Compute a LUT for the Bingham PDF. This is the default.")
+
     acg = traits.Bool(argstr='-acg', desc="Compute a LUT for the ACG PDF.")
-    
-    watson = traits.Bool(argstr='-watson', desc="Compute a LUT for the Watson PDF.")
-    
+
+    watson = traits.Bool(
+        argstr='-watson', desc="Compute a LUT for the Watson PDF.")
+
     inversion = traits.Int(argstr='-inversion %d', units='NA',
                            desc='Index of the inversion to use. The default is 1 (linear single tensor inversion).')
-    
+
     trace = traits.Float(argstr='-trace %f', units='NA',
                          desc='Trace of the diffusion tensor(s) used in the test function in the LUT generation. The default is 2100E-12 m^2 s^-1.')
-    
+
     scheme_file = File(argstr='-schemefile %s', mandatory=True, position=2,
                        desc='The scheme file of the images to be processed using this LUT.')
-    
+
     cross = traits.Float(argstr='-cross %d',
                          desc='The angle in degrees between the principal directions of the two tensors.')
 
@@ -87,12 +89,12 @@ class DTLUTGen(StdOutCommandLine):
     _cmd = 'dtlutgen'
     input_spec = DTLUTGenInputSpec
     output_spec = DTLUTGenOutputSpec
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['dtLUT'] = os.path.abspath(self._gen_outfilename())
         return outputs
-    
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '.dat'
@@ -101,37 +103,37 @@ class DTLUTGen(StdOutCommandLine):
 class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
                    desc='voxel-order data filename')
-    
+
     inputmodel = traits.Enum('dt', 'multitensor', 'pds',
                              argstr='-inputmodel %s', position=2, desc='input model type', usedefault=True)
-    
+
     luts = InputMultiPath(File(exists=True), argstr='-luts %s', position=3,
                           mandatory=False,
-                          desc='Files containing the lookup tables.' \
-                               'For tensor data, one lut must be specified for each type of inversion used in the image (one-tensor, two-tensor, three-tensor).' \
-                               'For pds, the number of LUTs must match -numpds (it is acceptable to use the same LUT several times - see example, above).' \
+                          desc='Files containing the lookup tables.'
+                               'For tensor data, one lut must be specified for each type of inversion used in the image (one-tensor, two-tensor, three-tensor).'
+                               'For pds, the number of LUTs must match -numpds (it is acceptable to use the same LUT several times - see example, above).'
                                'These LUTs may be generated with dtlutgen.')
-    
+
     # lut_str = traits.Str()
-    
+
     pdf = traits.Enum('watson', 'bingham', 'acg',
-                      argstr='-pdf %s', position=4, desc=' Specifies the PDF to use. There are three choices:' \
-                                                         'watson - The Watson distribution. This distribution is rotationally symmetric.' \
-                                                         'bingham - The Bingham distributionn, which allows elliptical probability density contours.' \
+                      argstr='-pdf %s', position=4, desc=' Specifies the PDF to use. There are three choices:'
+                                                         'watson - The Watson distribution. This distribution is rotationally symmetric.'
+                                                         'bingham - The Bingham distributionn, which allows elliptical probability density contours.'
                                                          'acg - The Angular Central Gaussian distribution, which also allows elliptical probability density contours',
                       usedefault=True)
-    
+
     directmap = traits.Bool(argstr='-directmap',
                             desc="Only applicable when using pds as the inputmodel. Use direct mapping between the eigenvalues and the distribution parameters instead of the log of the eigenvalues.")
-    
+
     maxcomponents = traits.Int(argstr='-maxcomponents %d', units='NA',
-                               desc='The maximum number of tensor components in a voxel (default 2) for multitensor data.' \
+                               desc='The maximum number of tensor components in a voxel (default 2) for multitensor data.'
                                     'Currently, only the default is supported, but future releases may allow the input of three-tensor data using this option.')
-    
+
     numpds = traits.Int(argstr='-numpds %d', units='NA',
-                        desc='The maximum number of PDs in a voxel (default 3) for PD data.' \
-                             'This option determines the size of the input and output voxels.' \
-                             'This means that the data file may be large enough to accomodate three or more PDs,' \
+                        desc='The maximum number of PDs in a voxel (default 3) for PD data.'
+                             'This option determines the size of the input and output voxels.'
+                             'This means that the data file may be large enough to accomodate three or more PDs,'
                              'but does not mean that any of the voxels are classified as containing three or more PDs.')
 
 
@@ -156,12 +158,12 @@ class PicoPDFs(StdOutCommandLine):
     _cmd = 'picopdfs'
     input_spec = PicoPDFsInputSpec
     output_spec = PicoPDFsOutputSpec
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['pdfs'] = os.path.abspath(self._gen_outfilename())
         return outputs
-    
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_pdfs.Bdouble'
@@ -171,13 +173,17 @@ class Voxel2ImageInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', position=1,
                    mandatory=True,
                    desc='image in camino format')
-    header_file = File(exists=True, mandatory=True, argstr='-header %s', position=2, desc="file with desired format")
-    components = traits.Int(argstr='-components %d', mandatory=False, desc="Number of components in inputfile")
-    gzip = traits.Bool(argstr="-gzip", mandatory=False, desc="Compress output image")
+    header_file = File(exists=True, mandatory=True, argstr='-header %s',
+                       position=2, desc="file with desired format")
+    components = traits.Int(argstr='-components %d', mandatory=False,
+                            desc="Number of components in inputfile")
+    gzip = traits.Bool(argstr="-gzip", mandatory=False,
+                       desc="Compress output image")
     out_type = traits.Enum("float", "char", "short", "int", "long", "double", argstr='-outputdatatype %s',
                            desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"',
                            usedefault=True)
-    output_root = traits.Str(argstr="-outputroot %s", position=-1, default_value='converted', usedefault=True)
+    output_root = traits.Str(
+        argstr="-outputroot %s", position=-1, default_value='converted', usedefault=True)
 
 
 class Voxel2ImageOutputSpec(TraitedSpec):
@@ -201,12 +207,12 @@ class Voxel2Image(StdOutCommandLine):
     _cmd = 'voxel2image'
     input_spec = Voxel2ImageInputSpec
     output_spec = Voxel2ImageOutputSpec
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['image_file'] = os.path.abspath(self._gen_outfilename())
         return outputs
-    
+
     def _gen_outfilename(self):
         _, _, ext = split_filename(self.inputs.header_file)
         return self.inputs.output_root + ext

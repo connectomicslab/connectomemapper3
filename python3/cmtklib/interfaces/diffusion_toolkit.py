@@ -8,7 +8,8 @@
 
 import re
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
-import os, glob
+import os
+import glob
 
 __docformat__ = 'restructuredtext'
 
@@ -20,8 +21,10 @@ class HARDIMatInputSpec(CommandLineInputSpec):
     bvecs = File(exists=True, desc='b vectors file',
                  argstr='%s', position=1)
     bvals = File(exists=True, desc='b values file')
-    gradient_table = File(exists=True, desc='Input gradient table', position=1, argstr='%s')
-    out_file = File("recon_mat.dat", desc='output matrix file', argstr='%s', usedefault=True, position=2)
+    gradient_table = File(
+        exists=True, desc='Input gradient table', position=1, argstr='%s')
+    out_file = File("recon_mat.dat", desc='output matrix file',
+                    argstr='%s', usedefault=True, position=2)
     order = traits.Int(argsstr='-order %s', desc="""maximum order of spherical harmonics. must be even number. default
         is 4""")
     odf_file = File(exists=True, argstr='-odf %s', desc="""filename that contains the reconstruction points on a HEMI-sphere.
@@ -57,12 +60,13 @@ class HARDIMat(CommandLine):
     """
     input_spec = HARDIMatInputSpec
     output_spec = HARDIMatOutputSpec
-    
+
     _cmd = 'hardi_mat'
-    
+
     def _create_gradient_matrix(self, bvecs_file, bvals_file):
         _gradient_matrix_file = 'gradient_matrix.txt'
-        bvals = [val for val in re.split('\s+', open(bvals_file).readline().strip())]
+        bvals = [val for val in re.split(
+            '\s+', open(bvals_file).readline().strip())]
         bvecs_f = open(bvecs_file)
         bvecs_x = [val for val in re.split('\s+', bvecs_f.readline().strip())]
         bvecs_y = [val for val in re.split('\s+', bvecs_f.readline().strip())]
@@ -72,16 +76,18 @@ class HARDIMat(CommandLine):
         for i in range(len(bvals)):
             if int(bvals[i]) == 0:
                 continue
-            gradient_matrix_f.write("%s %s %s\n" % (bvecs_x[i], bvecs_y[i], bvecs_z[i]))
+            gradient_matrix_f.write("%s %s %s\n" % (
+                bvecs_x[i], bvecs_y[i], bvecs_z[i]))
         gradient_matrix_f.close()
         return _gradient_matrix_file
-    
+
     def _format_arg(self, name, spec, value):
         if name == "bvecs":
-            new_val = self._create_gradient_matrix(self.inputs.bvecs, self.inputs.bvals)
+            new_val = self._create_gradient_matrix(
+                self.inputs.bvecs, self.inputs.bvals)
             return super(HARDIMat, self)._format_arg("bvecs", spec, new_val)
         return super(HARDIMat, self)._format_arg(name, spec, value)
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
@@ -89,8 +95,10 @@ class HARDIMat(CommandLine):
 
 
 class DiffUnpackInputSpec(CommandLineInputSpec):
-    input_dicom = File(exists=True, mandatory=True, desc='input dicom file', argstr='%s', position=1)
-    out_prefix = traits.Str('output', desc='Output file prefix', argstr='%s', usedefault=True, position=2)
+    input_dicom = File(exists=True, mandatory=True,
+                       desc='input dicom file', argstr='%s', position=1)
+    out_prefix = traits.Str(
+        'output', desc='Output file prefix', argstr='%s', usedefault=True, position=2)
     output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type',
                               usedefault=True)
     split = traits.Bool(desc="""instead of saving everything in one big multi-timepoint 4D image,
@@ -104,19 +112,22 @@ class DiffUnpackOutputSpec(TraitedSpec):
 class DiffUnpack(CommandLine):
     input_spec = DiffUnpackInputSpec
     output_spec = DiffUnpackOutputSpec
-    
+
     _cmd = "diff_unpack"
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        
-        outputs['converted_files'] = glob.glob(os.path.abspath(self.inputs.out_prefix + '*'))
+
+        outputs['converted_files'] = glob.glob(
+            os.path.abspath(self.inputs.out_prefix + '*'))
         return outputs
 
 
 class DTIReconInputSpec(CommandLineInputSpec):
-    DWI = File(desc='Input diffusion volume', argstr='%s', exists=True, mandatory=True, position=1)
-    out_prefix = traits.Str("dti", desc='Output file prefix', argstr='%s', usedefault=True, position=2)
+    DWI = File(desc='Input diffusion volume', argstr='%s',
+               exists=True, mandatory=True, position=1)
+    out_prefix = traits.Str("dti", desc='Output file prefix',
+                            argstr='%s', usedefault=True, position=2)
     output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type',
                               usedefault=True)
     gradient_matrix = File(desc="""specify gradient matrix to use. required.""", argstr='-gm %s', exists=True,
@@ -164,29 +175,42 @@ class DTIReconOutputSpec(TraitedSpec):
 class DTIRecon(CommandLine):
     """Use dti_recon to generate tensors and other maps
     """
-    
+
     input_spec = DTIReconInputSpec
     output_spec = DTIReconOutputSpec
-    
+
     _cmd = 'dti_recon'
-    
+
     def _list_outputs(self):
         out_prefix = self.inputs.out_prefix
         output_type = self.inputs.output_type
-        
+
         outputs = self.output_spec().get()
-        outputs['ADC'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_adc.' + output_type))
-        outputs['B0'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
-        outputs['DWI'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_dwi.' + output_type))
-        outputs['L1'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_e1.' + output_type))
-        outputs['L2'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_e2.' + output_type))
-        outputs['L3'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_e3.' + output_type))
-        outputs['exp'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_exp.' + output_type))
-        outputs['FA'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_fa.' + output_type))
-        outputs['FA_color'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_fa_color.' + output_type))
-        outputs['tensor'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_tensor.' + output_type))
-        outputs['V1'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v1.' + output_type))
-        outputs['V2'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v2.' + output_type))
-        outputs['V3'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v3.' + output_type))
-        
+        outputs['ADC'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_adc.' + output_type))
+        outputs['B0'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_b0.' + output_type))
+        outputs['DWI'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_dwi.' + output_type))
+        outputs['L1'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_e1.' + output_type))
+        outputs['L2'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_e2.' + output_type))
+        outputs['L3'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_e3.' + output_type))
+        outputs['exp'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_exp.' + output_type))
+        outputs['FA'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_fa.' + output_type))
+        outputs['FA_color'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_fa_color.' + output_type))
+        outputs['tensor'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_tensor.' + output_type))
+        outputs['V1'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_v1.' + output_type))
+        outputs['V2'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_v2.' + output_type))
+        outputs['V3'] = os.path.abspath(fname_presuffix(
+            "", prefix=out_prefix, suffix='_v3.' + output_type))
+
         return outputs

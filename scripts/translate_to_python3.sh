@@ -44,3 +44,5 @@ IN_DIR="${MAIN_DIR}/${NAME}"
 OUT_DIR="${PY3_DIR}/${NAME}"
 echo "Process folder $NAME (in: ${IN_DIR} / out: ${OUT_DIR})"
 2to3 -f all  -p -W --output-dir=${OUT_DIR} -W -n ${IN_DIR} >> ${LOG_FILE}
+
+autopep8 -v --in-place --recursive ${PY3_DIR}

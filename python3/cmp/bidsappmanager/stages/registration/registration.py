@@ -25,7 +25,8 @@ from cmp.stages.registration.registration import RegistrationConfig, Registratio
 
 class RegistrationConfigUI(RegistrationConfig):
     traits_view = View(
-        Item('registration_mode', editor=EnumEditor(name='registration_mode_trait')),
+        Item('registration_mode', editor=EnumEditor(
+            name='registration_mode_trait')),
         Group(Item('uses_qform'),
               Item('dof'),
               Item('fsl_cost', label="FLIRT metric"),
@@ -54,11 +55,14 @@ class RegistrationConfigUI(RegistrationConfig):
                     Item('ants_upper_quantile', label='winsorize upper quantile')
                 ),
                 HGroup(
-                    Item('ants_convergence_thresh', label='Convergence threshold'),
-                    Item('ants_convergence_winsize', label='Convergence window size')
+                    Item('ants_convergence_thresh',
+                         label='Convergence threshold'),
+                    Item('ants_convergence_winsize',
+                         label='Convergence window size')
                 ),
                 HGroup(
-                    Item('use_float_precision', label='Use float precision to save memory'),
+                    Item('use_float_precision',
+                         label='Use float precision to save memory'),
                 ),
                 label="General", show_border=False
             ),
@@ -66,19 +70,24 @@ class RegistrationConfigUI(RegistrationConfig):
                 Item('ants_linear_cost', label="Metric"),
                 Item('ants_linear_gradient_step', label="Gradient step size"),
                 HGroup(
-                    Item('ants_linear_sampling_strategy', label="Sampling strategy"),
+                    Item('ants_linear_sampling_strategy',
+                         label="Sampling strategy"),
                     Item('ants_linear_sampling_perc', label="Sampling percentage",
                          visible_when='ants_linear_sampling_strategy!="None"')
                 ),
                 Item('ants_linear_gradient_step', label="Gradient step size"),
                 label="Rigid + Affine", show_border=False
             ),
-            Item('ants_perform_syn', label='Symmetric diffeomorphic SyN registration'),
+            Item('ants_perform_syn',
+                 label='Symmetric diffeomorphic SyN registration'),
             Group(
                 Item('ants_nonlinear_cost', label="Metric"),
-                Item('ants_nonlinear_gradient_step', label="Gradient step size"),
-                Item('ants_nonlinear_update_field_variance', label="Update field variance in voxel space"),
-                Item('ants_nonlinear_total_field_variance', label="Total field variance in voxel space"),
+                Item('ants_nonlinear_gradient_step',
+                     label="Gradient step size"),
+                Item('ants_nonlinear_update_field_variance',
+                     label="Update field variance in voxel space"),
+                Item('ants_nonlinear_total_field_variance',
+                     label="Total field variance in voxel space"),
                 label="SyN (symmetric diffeomorphic registration)", show_border=False, visible_when='ants_perform_syn'
             ),
             label='ANTs registration settings', show_border=True, visible_when='registration_mode=="ANTs"'
@@ -92,7 +101,7 @@ class RegistrationConfigUI(RegistrationConfig):
 
 class RegistrationStageUI(RegistrationStage):
     inspect_output_button = Button('View')
-    
+
     inspect_outputs_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -105,7 +114,7 @@ class RegistrationStageUI(RegistrationStage):
         scrollable=True, resizable=True, width=620, kind='livemodal', title='Inspect stage outputs',
         buttons=['OK', 'Cancel']
     )
-    
+
     config_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -116,7 +125,7 @@ class RegistrationStageUI(RegistrationStage):
         scrollable=True, resizable=True, height=650, width=650, kind='livemodal', title='Edit stage configuration',
         buttons=['OK', 'Cancel']
     )
-    
+
     config_view_fmri = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -127,17 +136,19 @@ class RegistrationStageUI(RegistrationStage):
         scrollable=True, resizable=True, height=366, width=336, kind='livemodal', title='Edit stage configuration',
         buttons=['OK', 'Cancel']
     )
-    
+
     def __init__(self, pipeline_mode):
         RegistrationStage.__init__(self, pipeline_mode)
         self.config = RegistrationConfigUI()
         self.config.pipeline = pipeline_mode
         if self.config.pipeline == "fMRI":
             self.config.registration_mode = 'FSL (Linear)'
-            self.config.registration_mode_trait = ['FSL (Linear)', 'BBregister (FS)']
-            self.inputs = self.inputs + ["eroded_csf", "eroded_wm", "eroded_brain"]
+            self.config.registration_mode_trait = [
+                'FSL (Linear)', 'BBregister (FS)']
+            self.inputs = self.inputs + \
+                ["eroded_csf", "eroded_wm", "eroded_brain"]
             self.outputs = self.outputs + ["eroded_wm_registered_crop", "eroded_csf_registered_crop",
                                            "eroded_brain_registered_crop"]
-    
+
     def _inspect_output_button_fired(self, info):
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

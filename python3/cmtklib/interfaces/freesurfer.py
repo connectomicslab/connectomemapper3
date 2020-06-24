@@ -35,11 +35,11 @@ class copyFileToFreesurfer_OutputSpec(TraitedSpec):
 class copyFileToFreesurfer(IOBase):
     input_spec = copyFileToFreesurfer_InputSpec
     output_spec = copyFileToFreesurfer_OutputSpec
-    
+
     # def _run_interface(self,runtime):
     #     copyfile(self.inputs.in_file,self.inputs.out_file, copy=True)
     #     return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         copyfile(self.inputs.in_file, self.inputs.out_file, copy=True)
@@ -60,39 +60,49 @@ class copyBrainMaskToFreesurfer_OutputSpec(TraitedSpec):
 class copyBrainMaskToFreesurfer(IOBase):
     input_spec = copyBrainMaskToFreesurfer_InputSpec
     output_spec = copyBrainMaskToFreesurfer_OutputSpec
-    
+
     # def _run_interface(self,runtime):
     #     copyfile(self.inputs.in_file,self.inputs.out_file, copy=True)
     #     return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-        
-        brainmask_file = op.join(self.inputs.subject_dir, 'mri', 'brainmask.mgz')
+
+        brainmask_file = op.join(
+            self.inputs.subject_dir, 'mri', 'brainmask.mgz')
         if op.isfile(brainmask_file):
-            copyfile(brainmask_file, op.join(self.inputs.subject_dir, 'mri', 'brainmask.old.mgz'), copy=True)
+            copyfile(brainmask_file, op.join(self.inputs.subject_dir,
+                                             'mri', 'brainmask.old.mgz'), copy=True)
         copyfile(self.inputs.in_file, brainmask_file, copy=True)
-        
-        brainmaskauto_file = op.join(self.inputs.subject_dir, 'mri', 'brainmask.auto.mgz')
+
+        brainmaskauto_file = op.join(
+            self.inputs.subject_dir, 'mri', 'brainmask.auto.mgz')
         if op.isfile(brainmaskauto_file):
-            copyfile(brainmaskauto_file, op.join(self.inputs.subject_dir, 'mri', 'brainmask.auto.old.mgz'), copy=True)
+            copyfile(brainmaskauto_file, op.join(
+                self.inputs.subject_dir, 'mri', 'brainmask.auto.old.mgz'), copy=True)
         copyfile(self.inputs.in_file, brainmaskauto_file, copy=True)
-        
+
         outputs["out_brainmask_file"] = brainmask_file
         outputs["out_brainmaskauto_file"] = brainmaskauto_file
-        
+
         return outputs
 
 
 class Tkregister2InputSpec(CommandLineInputSpec):
-    subjects_dir = Directory(desc='Use dir as SUBJECTS_DIR', exists=True, argstr="--sd %s")
+    subjects_dir = Directory(
+        desc='Use dir as SUBJECTS_DIR', exists=True, argstr="--sd %s")
     subject_id = traits.Str(desc='Set subject id', argstr="--s %s")
-    regheader = traits.Bool(desc='Compute registration from headers', argstr="--regheader")
+    regheader = traits.Bool(
+        desc='Compute registration from headers', argstr="--regheader")
     in_file = File(desc='Movable volume', mandatory=True, argstr="--mov %s")
-    target_file = File(desc='Target volume', mandatory=True, argstr="--targ %s")
-    reg_out = traits.Str(desc='Input/output registration file', mandatory=True, argstr="--reg %s")
-    fslreg_out = traits.Str(desc='FSL-Style registration output matrix', mandatory=True, argstr="--fslregout %s")
-    noedit = traits.Bool(desc='Do not open edit window (exit) - for conversions', argstr="--noedit")
+    target_file = File(desc='Target volume',
+                       mandatory=True, argstr="--targ %s")
+    reg_out = traits.Str(desc='Input/output registration file',
+                         mandatory=True, argstr="--reg %s")
+    fslreg_out = traits.Str(
+        desc='FSL-Style registration output matrix', mandatory=True, argstr="--fslregout %s")
+    noedit = traits.Bool(
+        desc='Do not open edit window (exit) - for conversions', argstr="--noedit")
 
 
 class Tkregister2OutputSpec(TraitedSpec):
@@ -104,7 +114,7 @@ class Tkregister2(CommandLine):
     _cmd = 'tkregister2'
     input_spec = Tkregister2InputSpec
     output_spec = Tkregister2OutputSpec
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["regout_file"] = os.path.abspath(self.inputs.reg_out)
@@ -150,7 +160,8 @@ class BBRegisterInputSpec(FSTraitedSpec):
 class BBRegisterOutputSpec(TraitedSpec):
     out_reg_file = File(exists=True, desc='Output registration file')
     out_fsl_file = File(desc='Output FLIRT-style registration file')
-    min_cost_file = File(exists=True, desc='Output registration minimum cost file')
+    min_cost_file = File(
+        exists=True, desc='Output registration minimum cost file')
     registered_file = File(desc='Registered and resampled source file')
 
 
@@ -171,16 +182,16 @@ class BBRegister(FSCommand):
     'bbregister --t2 --init-header --reg structural_bbreg_me.dat --mov structural.nii --s me'
 
     """
-    
+
     _cmd = 'bbregister'
     input_spec = BBRegisterInputSpec
     output_spec = BBRegisterOutputSpec
-    
+
     def _list_outputs(self):
-        
+
         outputs = self.output_spec().get()
         _in = self.inputs
-        
+
         if isdefined(_in.out_reg_file):
             outputs['out_reg_file'] = op.abspath(_in.out_reg_file)
         elif _in.source_file:
@@ -188,14 +199,14 @@ class BBRegister(FSCommand):
             outputs['out_reg_file'] = fname_presuffix(_in.source_file,
                                                       suffix=suffix,
                                                       use_ext=False)
-        
+
         if isdefined(_in.registered_file):
             if isinstance(_in.registered_file, bool):
                 outputs['registered_file'] = fname_presuffix(_in.source_file,
                                                              suffix='_bbreg')
             else:
                 outputs['registered_file'] = op.abspath(_in.registered_file)
-        
+
         if isdefined(_in.out_fsl_file):
             if isinstance(_in.out_fsl_file, bool):
                 suffix = '_bbreg_%s.mat' % _in.subject_id
@@ -205,12 +216,12 @@ class BBRegister(FSCommand):
                 outputs['out_fsl_file'] = out_fsl_file
             else:
                 outputs['out_fsl_file'] = op.abspath(_in.out_fsl_file)
-        
+
         outputs['min_cost_file'] = outputs['out_reg_file'] + '.mincost'
         return outputs
-    
+
     def _format_arg(self, name, spec, value):
-        
+
         if name in ['registered_file', 'out_fsl_file']:
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
@@ -218,9 +229,9 @@ class BBRegister(FSCommand):
                 fname = value
             return spec.argstr % fname
         return super(BBRegister, self)._format_arg(name, spec, value)
-    
+
     def _gen_filename(self, name):
-        
+
         if name == 'out_reg_file':
             return self._list_outputs()[name]
         return None

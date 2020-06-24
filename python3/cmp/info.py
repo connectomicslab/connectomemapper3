@@ -31,7 +31,8 @@ __status__ = 'Prototype'
 
 __packagename__ = 'connectomemapper3'
 
-__url__ = 'https://github.com/connectomicslab/{name}'.format(name=__packagename__)
+__url__ = 'https://github.com/connectomicslab/{name}'.format(
+    name=__packagename__)
 
 DOWNLOAD_URL = (
     'https://github.com/connectomicslab/{name}/archive/{ver}.tar.gz'.format(
