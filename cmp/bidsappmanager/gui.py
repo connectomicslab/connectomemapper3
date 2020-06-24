@@ -1463,7 +1463,7 @@ class CMP_InspectorWindow(HasTraits):
             
             if len(sessions) > 0:
                 print("Detected sessions")
-                print sessions
+                print(sessions)
                 
                 self.project_info.subject_sessions = []
                 
@@ -1737,7 +1737,7 @@ class CMP_MainWindow(HasTraits):
                 self.project_info.subject_session = ''
             self = self.handler.update_subject_anat_pipeline(self)
         except AttributeError:
-            print "AttributeError: update subject anat"
+            print("AttributeError: update subject anat")
             return
     
     def update_subject_dmri_pipeline(self, new):
@@ -1753,7 +1753,7 @@ class CMP_MainWindow(HasTraits):
                 self.project_info.subject_session = ''
             self = self.handler.update_subject_dmri_pipeline(self)
         except AttributeError:
-            print "AttributeError: update subject dmri"
+            print("AttributeError: update subject dmri")
             return
     
     def update_subject_fmri_pipeline(self, new):
@@ -1769,7 +1769,7 @@ class CMP_MainWindow(HasTraits):
                 self.project_info.subject_session = ''
             self = self.handler.update_subject_fmri_pipeline(self)
         except AttributeError:
-            print "AttributeError: update subject fmri"
+            print("AttributeError: update subject fmri")
             return
     
     def update_session_anat_pipeline(self, new):
@@ -1777,7 +1777,7 @@ class CMP_MainWindow(HasTraits):
             # print "update subject session anat"
             self = self.handler.update_subject_anat_pipeline(self)
         except AttributeError:
-            print "AttributeError: update subject anat"
+            print("AttributeError: update subject anat")
             return
     
     def update_session_dmri_pipeline(self, new):
@@ -1785,7 +1785,7 @@ class CMP_MainWindow(HasTraits):
             # print "update subject session dmri"
             self = self.handler.update_subject_dmri_pipeline(self)
         except AttributeError:
-            print "AttributeError: update subject dmri"
+            print("AttributeError: update subject dmri")
             return
     
     def update_session_fmri_pipeline(self, new):
@@ -1793,7 +1793,7 @@ class CMP_MainWindow(HasTraits):
             # print "update subject session fmri"
             self = self.handler.update_subject_fmri_pipeline(self)
         except AttributeError:
-            print "AttributeError: update subject fmri"
+            print("AttributeError: update subject fmri")
             return
     
     def show_bidsapp_interface(self):

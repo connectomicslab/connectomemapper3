@@ -304,7 +304,7 @@ def create_dipy_tracking_flow(config):
 
 
 def get_freesurfer_parcellation(roi_files):
-    print "%s" % roi_files[0]
+    print("%s" % roi_files[0])
     return roi_files[0]
 
 

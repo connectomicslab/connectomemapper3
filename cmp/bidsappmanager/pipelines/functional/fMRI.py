@@ -110,7 +110,7 @@ class fMRIPipelineUI(fMRIPipeline):
         self.stages['Connectome'].configure_traits(view=self.view_mode)
     
     def check_input(self, layout, gui=True):
-        print '**** Check Inputs ****'
+        print('**** Check Inputs ****')
         fMRI_available = False
         fMRI_json_available = False
         t1_available = False
@@ -136,7 +136,7 @@ class fMRIPipelineUI(fMRIPipeline):
             files = layout.get(subject=subjid, suffix='bold', extensions='.nii.gz')
             if len(files) > 0:
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
-                print fmri_file
+                print(fmri_file)
             else:
                 error(message="BOLD image not found for subject %s." % (subjid), title="Error",
                       buttons=['OK', 'Cancel'], parent=None)
@@ -145,7 +145,7 @@ class fMRIPipelineUI(fMRIPipeline):
             files = layout.get(subject=subjid, suffix='bold', extensions='.json')
             if len(files) > 0:
                 json_file = os.path.join(files[0].dirname, files[0].filename)
-                print json_file
+                print(json_file)
             else:
                 error(message="BOLD json sidecar not found for subject %s." % (subjid), title="Warning",
                       buttons=['OK', 'Cancel'], parent=None)
@@ -153,7 +153,7 @@ class fMRIPipelineUI(fMRIPipeline):
             files = layout.get(subject=subjid, suffix='T1w', extensions='.nii.gz')
             if len(files) > 0:
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
-                print t1_file
+                print(t1_file)
             else:
                 error(message="T1w image not found for subject %s." % (subjid), title="Error", buttons=['OK', 'Cancel'],
                       parent=None)
@@ -162,7 +162,7 @@ class fMRIPipelineUI(fMRIPipeline):
             files = layout.get(subject=subjid, suffix='T2w', extensions='.nii.gz')
             if len(files) > 0:
                 t2_file = os.path.join(files[0].dirname, files[0].filename)
-                print t2_file
+                print(t2_file)
             else:
                 error(message="T2w image not found for subject %s." % (subjid), title="Warning",
                       buttons=['OK', 'Cancel'], parent=None)
@@ -173,7 +173,7 @@ class fMRIPipelineUI(fMRIPipeline):
             files = layout.get(subject=subjid, suffix='bold', extensions='.nii.gz', session=sessid)
             if len(files) > 0:
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
-                print fmri_file
+                print(fmri_file)
             else:
                 error(message="BOLD image not found for subject %s, session %s." % (
                 subjid, self.global_conf.subject_session), title="Error", buttons=['OK', 'Cancel'], parent=None)
@@ -182,7 +182,7 @@ class fMRIPipelineUI(fMRIPipeline):
             files = layout.get(subject=subjid, suffix='bold', extensions='.json', session=sessid)
             if len(files) > 0:
                 json_file = os.path.join(files[0].dirname, files[0].filename)
-                print json_file
+                print(json_file)
             else:
                 error(message="BOLD json sidecar not found for subject %s, session %s." % (
                 subjid, self.global_conf.subject_session), title="Warning", buttons=['OK', 'Cancel'], parent=None)
@@ -190,7 +190,7 @@ class fMRIPipelineUI(fMRIPipeline):
             files = layout.get(subject=subjid, suffix='T1w', extensions='.nii.gz', session=sessid)
             if len(files) > 0:
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
-                print t1_file
+                print(t1_file)
             else:
                 error(message="T1w image not found for subject %s, session %s." % (
                 subjid, self.global_conf.subject_session), title="Error", buttons=['OK', 'Cancel'], parent=None)
@@ -199,15 +199,15 @@ class fMRIPipelineUI(fMRIPipeline):
             files = layout.get(subject=subjid, suffix='T2w', extensions='.nii.gz', session=sessid)
             if len(files) > 0:
                 t2_file = os.path.join(files[0].dirname, files[0].filename)
-                print t2_file
+                print(t2_file)
             else:
                 error(message="T2w image not found for subject %s, session %s." % (
                 subjid, self.global_conf.subject_session), title="Warning", buttons=['OK', 'Cancel'], parent=None)
         
-        print "fmri_file : %s" % fmri_file
-        print "json_file : %s" % json_file
-        print "t1_file : %s" % t1_file
-        print "t2_file : %s" % t2_file
+        print("fmri_file : %s" % fmri_file)
+        print("json_file : %s" % json_file)
+        print("t1_file : %s" % t1_file)
+        print("t2_file : %s" % t2_file)
         
         if os.path.isfile(t2_file):
             # print("%s available" % typ)

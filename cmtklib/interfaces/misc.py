@@ -365,7 +365,7 @@ class Tck2Trk(BaseInterface):
 
         from nibabel.streamlines import Field
         from nibabel.orientations import aff2axcodes
-        print '-> Load nifti and copy header'
+        print('-> Load nifti and copy header')
         nii = nib.load(self.inputs.in_image)
         
         header = {}
@@ -546,8 +546,8 @@ class getCRS2XYZtkRegTransform(CommandLine):
     
     def _run_interface(self, runtime):
         runtime = super(getCRS2XYZtkRegTransform, self)._run_interface(runtime)
-        print 'CMD: ', runtime.cmdline
-        print runtime.stdout
+        print('CMD: ', runtime.cmdline)
+        print(runtime.stdout)
         
         return runtime
     
@@ -641,7 +641,7 @@ class make_seeds(BaseInterface):
         # Load ROI file
         txt_file = open(self.base_name + '_seeds.txt', 'w')
         
-        print self.inputs.ROI_files
+        print(self.inputs.ROI_files)
         
         for ROI_file in self.inputs.ROI_files:
             ROI_vol = nib.load(ROI_file)
@@ -653,13 +653,13 @@ class make_seeds(BaseInterface):
             # Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
             print("ROI dilation...")
             tmp_data = np.unique(ROI_data[ROI_data != 0]).astype(int)
-            print tmp_data.shape
+            print(tmp_data.shape)
             self.ROI_idx = np.unique(tmp_data).astype(int)
             bins = np.arange(83)
             counts = np.histogram(self.ROI_idx, bins=bins)
-            print counts
-            print self.ROI_idx.shape
-            print self.ROI_idx
+            print(counts)
+            print(self.ROI_idx.shape)
+            print(self.ROI_idx)
             # Take overlap between dilated ROIs and WM to define seeding regions
             border = (np.multiply(ROI_data, WM_data)).astype(int)
             # Save one nifti file per seeding ROI
@@ -712,13 +712,13 @@ class make_mrtrix_seeds(BaseInterface):
             # Extract ROI indexes, define number of ROIs, overlap code and start ROI dilation
             print("ROI dilation...")
             tmp_data = np.unique(ROI_data[ROI_data != 0]).astype(int)
-            print tmp_data.shape
+            print(tmp_data.shape)
             self.ROI_idx = np.unique(tmp_data).astype(int)
             bins = np.arange(83)
             counts = np.histogram(self.ROI_idx, bins=bins)
-            print counts
-            print self.ROI_idx.shape
-            print self.ROI_idx
+            print(counts)
+            print(self.ROI_idx.shape)
+            print(self.ROI_idx)
             # Take overlap between dilated ROIs and WM to define seeding regions
             border = (np.multiply(ROI_data, WM_data)).astype(int)
             # Save one nifti file per seeding ROI

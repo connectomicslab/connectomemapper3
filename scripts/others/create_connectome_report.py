@@ -74,8 +74,8 @@ def main(bids_dir):
         for subj in bids_layout.get_subjects():
             subjects.append('sub-' + str(subj))
         
-        print "Available subjects : "
-        print subjects
+        print("Available subjects : ")
+        print(subjects)
     
     except:
         print("BIDS ERROR: Invalid BIDS dataset. Please see documentation for more details.")
@@ -97,7 +97,7 @@ def main(bids_dir):
         
         sessions = bids_layout.get(target='session', return_type='id', subject=subj)
         if len(sessions) > 0:
-            print "Warning: multiple sessions"
+            print("Warning: multiple sessions")
             for ses in sessions:
                 gpickle_fn = os.path.join(bids_dir, 'derivatives', 'cmp', 'sub-' + str(subj), 'ses-' + str(ses), 'dwi',
                                           'sub-%s_ses-%s_dwi_connectome_scale1.gpickle' % (str(subj), str(ses)))
@@ -130,7 +130,7 @@ def main(bids_dir):
         
         
         else:
-            print "No session"
+            print("No session")
             gpickle_fn = os.path.join(bids_dir, 'derivatives', 'cmp', 'sub-' + str(subj), 'connectivity',
                                       'sub-%s_label-L2008_desc-scale1_conndata-snetwork_connectivity.gpickle' % (
                                           str(subj)))

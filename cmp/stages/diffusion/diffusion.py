@@ -223,7 +223,7 @@ class DiffusionStage(Stage):
                     (inputnode, extract_sizes, [("diffusion", "in_file")])
                 ])
                 extract_sizes.run()
-                print "Voxel sizes : ", extract_sizes.outputs.voxel_sizes
+                print("Voxel sizes : ", extract_sizes.outputs.voxel_sizes)
                 
                 min_size = 100
                 for voxel_size in extract_sizes.outputs.voxel_sizes:
@@ -620,7 +620,7 @@ class DiffusionStage(Stage):
                 if os.path.exists(diff_results_path):
                     diff_results = pickle.load(gzip.open(diff_results_path))
                     streamline_res = diff_results.outputs.out_tracks
-                    print streamline_res
+                    print(streamline_res)
                     self.inspect_outputs_dict[
                         self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
                         'trackvis', streamline_res]

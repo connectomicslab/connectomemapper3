@@ -95,7 +95,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         self.stages['Parcellation'].configure_traits(view=self.view_mode)
     
     def check_input(self, layout, gui=True):
-        print '**** Check Inputs  ****'
+        print('**** Check Inputs  ****')
         t1_available = False
         valid_inputs = False
         
@@ -109,18 +109,18 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             files = layout.get(subject=subjid, suffix='T1w', extensions='.nii.gz', session=sessid)
             if len(files) > 0:
                 T1_file = files[0].filename
-                print T1_file
+                print(T1_file)
             else:
                 error(message="T1w image not found for subject %s, session %s." % (
                 subjid, self.global_conf.subject_session), title="Error", buttons=['OK', 'Cancel'], parent=None)
                 return
         
-        print "Looking in %s for...." % self.base_directory
-        print "T1_file : %s" % T1_file
+        print("Looking in %s for...." % self.base_directory)
+        print("T1_file : %s" % T1_file)
         
         for typ in types:
             if typ == 'T1w' and os.path.isfile(T1_file):
-                print "%s available" % typ
+                print("%s available" % typ)
                 t1_available = True
         
         if t1_available:
@@ -147,22 +147,22 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         if gui:
             # input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
             # input_notification.configure_traits()
-            print input_message
+            print(input_message)
         
         else:
-            print input_message
+            print(input_message)
         
         if (t1_available):
             valid_inputs = True
         else:
-            print "Missing required inputs."
+            print("Missing required inputs.")
             error(message="Missing required inputs. Please see documentation for more details.", title="Error",
                   buttons=['OK', 'Cancel'], parent=None)
         
         for stage in self.stages.values():
             if stage.enabled:
-                print stage.name
-                print stage.stage_dir
+                print(stage.name)
+                print(stage.stage_dir)
         
         # self.fill_stages_outputs()
         
@@ -202,28 +202,28 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             t1_available = True
         else:
             error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % T1_file
-            print error_message
+            print(error_message)
             error(message=error_message, title="Error", buttons=['OK', 'Cancel'], parent=None)
         
         if os.path.isfile(brain_file):
             brain_available = True
         else:
             error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % brain_file
-            print error_message
+            print(error_message)
             error(message=error_message, title="Error", buttons=['OK', 'Cancel'], parent=None)
         
         if os.path.isfile(brainmask_file):
             brainmask_available = True
         else:
             error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % brainmask_file
-            print error_message
+            print(error_message)
             error(message=error_message, title="Error", buttons=['OK', 'Cancel'], parent=None)
         
         if os.path.isfile(wm_mask_file):
             wm_available = True
         else:
             error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % wm_mask_file
-            print error_message
+            print(error_message)
             error(message=error_message, title="Error", buttons=['OK', 'Cancel'], parent=None)
         
         cnt1 = 0
@@ -236,11 +236,11 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         else:
             error_message = "Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline" % (
             cnt1 - cnt2, cnt1)
-            print error_message
+            print(error_message)
             error(message=error_message, title="Error", buttons=['OK', 'Cancel'], parent=None)
         
         if t1_available == True and brain_available == True and brainmask_available == True and wm_available == True and roivs_available == True:
-            print "valid deriv/anat output"
+            print("valid deriv/anat output")
             valid_output = True
         
         return valid_output, error_message

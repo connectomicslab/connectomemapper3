@@ -42,7 +42,7 @@ def dep_check():
     # TODO try import all dependencies
 
     if error != "":
-        print error
+        print(error)
         sys.exit(2)
 
 if __name__ == "__main__":

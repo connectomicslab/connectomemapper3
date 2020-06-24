@@ -1832,7 +1832,7 @@ class Parcellate(BaseInterface):
         fsdir = op.join(self.inputs.subjects_dir, self.inputs.subject_id)
         
         if self.inputs.parcellation_scheme == "Lausanne2008":
-            print "Parcellation scheme : Lausanne2008"
+            print("Parcellation scheme : Lausanne2008")
             create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
             create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir)
             create_roi(self.inputs.subject_id, self.inputs.subjects_dir)
@@ -1843,7 +1843,7 @@ class Parcellate(BaseInterface):
                 erode_mask(fsdir, op.join(fsdir, 'mri', 'brainmask.nii.gz'))
             crop_and_move_datasets(self.inputs.parcellation_scheme, self.inputs.subject_id, self.inputs.subjects_dir)
         if self.inputs.parcellation_scheme == "Lausanne2018":
-            print "Parcellation scheme : Lausanne2018"
+            print("Parcellation scheme : Lausanne2018")
             create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
             # create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir)
             create_roi_v2(self.inputs.subject_id, self.inputs.subjects_dir)
@@ -1854,7 +1854,7 @@ class Parcellate(BaseInterface):
                 erode_mask(fsdir, op.join(fsdir, 'mri', 'brainmask.nii.gz'))
             crop_and_move_datasets(self.inputs.parcellation_scheme, self.inputs.subject_id, self.inputs.subjects_dir)
         if self.inputs.parcellation_scheme == "NativeFreesurfer":
-            print "Parcellation scheme : NativeFreesurfer"
+            print("Parcellation scheme : NativeFreesurfer")
             create_T1_and_Brain(self.inputs.subject_id, self.inputs.subjects_dir)
             generate_WM_and_GM_mask(self.inputs.subject_id, self.inputs.subjects_dir)
             if self.inputs.erode_masks:
@@ -2152,8 +2152,8 @@ def create_annot_label(subject_id, subjects_dir):
         mris_cmd = ['mris_ca_label', '-sdir', subjects_dir, subject_id, out[0],
                     fs_dir + '/surf/' + out[0] + '.sphere.reg', gcsfile,
                     op.join(fs_label_dir, out[2])]
-        print '*********'
-        print mris_cmd
+        print('*********')
+        print(mris_cmd)
         subprocess.check_call(mris_cmd)
         print('-----------')
         

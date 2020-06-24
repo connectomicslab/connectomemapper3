@@ -73,7 +73,7 @@ script is sourced."""
 # DTB binaries (e.g. DTB_dtk2dir) are in your path and don't give any error."""
 
     if error != "":
-        print error
+        print(error)
         sys.exit(2)
 
 def create_parser():
@@ -184,7 +184,7 @@ if __name__ == "__main__":
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
         else:
-            print msg
+            print(msg)
             sys.exit(1)
 
     # Perform the anatomical and the fMRI pipelines

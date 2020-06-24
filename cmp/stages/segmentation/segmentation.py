@@ -98,7 +98,7 @@ class SegmentationStage(Stage):
                 orig_dir = os.path.join(self.config.freesurfer_subject_id, "mri", "orig")
                 if not os.path.exists(orig_dir):
                     os.makedirs(orig_dir)
-                    print "INFO : Folder not existing; %s created!" % orig_dir
+                    print("INFO : Folder not existing; %s created!" % orig_dir)
                 rename.inputs.format_string = os.path.join(orig_dir, "001.mgz")
                 
                 if self.config.brain_mask_extraction_tool == "Freesurfer":
@@ -257,7 +257,7 @@ class SegmentationStage(Stage):
                     fs_path = reconall_results.outputs.subject_id
             else:
                 fs_path = os.path.join(self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
-            print "fs_path : %s" % fs_path
+            print ("fs_path : %s" % fs_path)
             
             if 'FREESURFER_HOME' not in os.environ:
                 colorLUT_file = pkg_resources.resource_filename('cmtklib',

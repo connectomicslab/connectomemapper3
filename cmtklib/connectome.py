@@ -729,19 +729,19 @@ class rsfmri_conmat(BaseInterface):
         
         if self.inputs.parcellation_scheme != "Custom":
             if self.inputs.parcellation_scheme != "Lausanne2018":
-                print "get resolutions from parcellation_scheme"
+                print("get resolutions from parcellation_scheme")
                 resolutions = get_parcellation(self.inputs.parcellation_scheme)
             else:
                 resolutions = get_parcellation(self.inputs.parcellation_scheme)
                 for parkey, parval in resolutions.items():
                     for vol, graphml in zip(self.inputs.roi_volumes, self.inputs.roi_graphmls):
-                        print parkey
+                        print(parkey)
                         if parkey in vol:
                             roi_fname = vol
-                            print roi_fname
+                            print(roi_fname)
                         if parkey in graphml:
                             roi_graphml_fname = graphml
-                            print roi_graphml_fname
+                            print(roi_graphml_fname)
                     # roi_fname = roi_volumes[r]
                     # r += 1
                     roi = nib.load(roi_fname)
@@ -818,7 +818,7 @@ class rsfmri_conmat(BaseInterface):
             for vol in self.inputs.roi_volumes:
                 if parkey in vol:
                     roi_fname = vol
-                    print roi_fname
+                    print(roi_fname)
             roi = nib.load(roi_fname)
             roiData = roi.get_data()
             

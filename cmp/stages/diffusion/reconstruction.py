@@ -370,7 +370,7 @@ def create_mrtrix_recon_flow(config):
     
     # Constrained Spherical Deconvolution
     if config.local_model:
-        print "CSD true"
+        print("CSD true")
         # Compute single fiber voxel mask
         mrtrix_erode = pe.Node(interface=Erode(out_filename='wm_mask_res_eroded.nii.gz'), name="mrtrix_erode")
         mrtrix_erode.inputs.number_of_passes = 1
