@@ -6,7 +6,8 @@ import os
 import sys
 from glob import glob
 
-if os.path.exists('MANIFEST'): os.remove('MANIFEST')
+if os.path.exists('MANIFEST'):
+    os.remove('MANIFEST')
 
 packages = ["cmtklib",
             "cmtklib.interfaces",
@@ -38,10 +39,10 @@ packages = ["cmtklib",
             "resources"]
 
 package_data = {'cmp.bidsappmanager':
-                    ['images/*.png',
-                     'pipelines/anatomical/*.png',
-                     'pipelines/diffusion/*.png',
-                     'pipelines/functional/*.png'],
+                ['images/*.png',
+                 'pipelines/anatomical/*.png',
+                 'pipelines/diffusion/*.png',
+                 'pipelines/functional/*.png'],
                 'resources':
                     ['buttons/*.png',
                      'icons/*png'],
@@ -76,8 +77,8 @@ def main(**extra_args):
     setup(name='cmpbidsappmanager',
           version=__version__,
           description='Connectome Mapper 3 BIDS App Manager',
-          long_description="""Connectome Mapper 3 BIDS App Manager allows you to interact with the BIDS App of the Connectome Mapper 3, which implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 """ + \
-                           """data to multi-resolution connection matrices. It also offers support for resting state fMRI data processing and multi-resolution functional connection matrices creation. """ + \
+          long_description="""Connectome Mapper 3 BIDS App Manager allows you to interact with the BIDS App of the Connectome Mapper 3, which implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 """ +
+                           """data to multi-resolution connection matrices. It also offers support for resting state fMRI data processing and multi-resolution functional connection matrices creation. """ +
                            """The Connectome Mapper 3 BIDS App Manager is part of the Connectome Mapping Toolkit.""",
           author='CHUV-EPFL',
           author_email='info@connectomics.org',

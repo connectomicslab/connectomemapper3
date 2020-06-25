@@ -37,27 +37,27 @@ class FunctionalMRIConfig(HasTraits):
     csf = Bool(True)
     wm = Bool(True)
     motion = Bool(True)
-    
+
     detrending = Bool(True)
     detrending_mode = Enum("linear", "quadratic")
-    
+
     lowpass_filter = Float(0.01)
     highpass_filter = Float(0.1)
-    
+
     scrubbing = Bool(True)
 
 
 class FunctionalMRIStage(Stage):
-    
+
     def __init__(self):
         self.name = 'functional_stage'
         self.config = FunctionalMRIConfig()
         self.inputs = ["preproc_file", "motion_par_file", "registered_roi_volumes", "registered_wm", "eroded_wm",
                        "eroded_csf", "eroded_brain"]
         self.outputs = ["func_file", "FD", "DVARS"]
-    
+
     def create_workflow(self, flow, inputnode, outputnode):
-        
+
         # smoothing_output = pe.Node(interface=util.IdentityInterface(fields=["smoothing_output"]),name="smoothing_output")
         # if self.config.smoothing > 0.0:
         #     smoothing = pe.Node(interface=fsl.SpatialFilter(operation='mean',kernel_shape = 'gauss'),name="smoothing")
@@ -88,12 +88,14 @@ class FunctionalMRIStage(Stage):
             flow.connect([
                 (inputnode, scrubbing, [("preproc_file", "in_file")]),
                 (inputnode, scrubbing, [("registered_wm", "wm_mask")]),
-                (inputnode, scrubbing, [("registered_roi_volumes", "gm_file")]),
-                (inputnode, scrubbing, [("motion_par_file", "motion_parameters")]),
+                (inputnode, scrubbing, [
+                 ("registered_roi_volumes", "gm_file")]),
+                (inputnode, scrubbing, [
+                 ("motion_par_file", "motion_parameters")]),
                 (scrubbing, outputnode, [("fd_npy", "FD")]),
                 (scrubbing, outputnode, [("dvars_npy", "DVARS")])
             ])
-        
+
         detrending_output = pe.Node(interface=util.IdentityInterface(fields=["detrending_output"]),
                                     name="detrending_output")
         if self.config.detrending:
@@ -101,24 +103,30 @@ class FunctionalMRIStage(Stage):
             detrending.inputs.mode = self.config.detrending_mode
             flow.connect([
                 (inputnode, detrending, [("preproc_file", "in_file")]),
-                (inputnode, detrending, [("registered_roi_volumes", "gm_file")]),
-                (detrending, detrending_output, [("out_file", "detrending_output")])
+                (inputnode, detrending, [
+                 ("registered_roi_volumes", "gm_file")]),
+                (detrending, detrending_output, [
+                 ("out_file", "detrending_output")])
             ])
         else:
             flow.connect([
-                (inputnode, detrending_output, [("preproc_file", "detrending_output")])
+                (inputnode, detrending_output, [
+                 ("preproc_file", "detrending_output")])
             ])
-        
-        nuisance_output = pe.Node(interface=util.IdentityInterface(fields=["nuisance_output"]), name="nuisance_output")
+
+        nuisance_output = pe.Node(interface=util.IdentityInterface(
+            fields=["nuisance_output"]), name="nuisance_output")
         if self.config.wm or self.config.global_nuisance or self.config.csf or self.config.motion:
-            nuisance = pe.Node(interface=nuisance_regression(), name="nuisance_regression")
+            nuisance = pe.Node(interface=nuisance_regression(),
+                               name="nuisance_regression")
             nuisance.inputs.global_nuisance = self.config.global_nuisance
             nuisance.inputs.csf_nuisance = self.config.csf
             nuisance.inputs.wm_nuisance = self.config.wm
             nuisance.inputs.motion_nuisance = self.config.motion
             nuisance.inputs.n_discard = self.config.discard_n_volumes
             flow.connect([
-                (detrending_output, nuisance, [("detrending_output", "in_file")]),
+                (detrending_output, nuisance, [
+                 ("detrending_output", "in_file")]),
                 (inputnode, nuisance, [("eroded_brain", "brainfile")]),
                 (inputnode, nuisance, [("eroded_csf", "csf_file")]),
                 (inputnode, nuisance, [("registered_wm", "wm_file")]),
@@ -128,24 +136,27 @@ class FunctionalMRIStage(Stage):
             ])
         else:
             flow.connect([
-                (detrending_output, nuisance_output, [("detrending_output", "nuisance_output")])
+                (detrending_output, nuisance_output, [
+                 ("detrending_output", "nuisance_output")])
             ])
-        
-        filter_output = pe.Node(interface=util.IdentityInterface(fields=["filter_output"]), name="filter_output")
+
+        filter_output = pe.Node(interface=util.IdentityInterface(
+            fields=["filter_output"]), name="filter_output")
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             from cmtklib.interfaces.afni import Bandpass
             filtering = pe.Node(interface=Bandpass(), name='temporal_filter')
             # filtering = pe.Node(interface=afni.Bandpass(),name='temporal_filter')
-            converter = pe.Node(interface=afni.AFNItoNIFTI(out_file='fMRI_bandpass.nii.gz'), name='converter')
+            converter = pe.Node(interface=afni.AFNItoNIFTI(
+                out_file='fMRI_bandpass.nii.gz'), name='converter')
             # FIXME: Seems that lowpass and highpass inputs of the nipype 3DBandPass interface swaped low and high frequencies
             filtering.inputs.lowpass = self.config.highpass_filter
             filtering.inputs.highpass = self.config.lowpass_filter
-            
+
             # if self.config.detrending:
             #    filtering.inputs.no_detrend = True
-            
+
             filtering.inputs.no_detrend = True
-            
+
             flow.connect([
                 (nuisance_output, filtering, [("nuisance_output", "in_file")]),
                 # (filtering,filter_output,[("out_file","filter_output")])
@@ -154,9 +165,10 @@ class FunctionalMRIStage(Stage):
             ])
         else:
             flow.connect([
-                (nuisance_output, filter_output, [("nuisance_output", "filter_output")])
+                (nuisance_output, filter_output, [
+                 ("nuisance_output", "filter_output")])
             ])
-        
+
         # OLD version using FSL
         # filter_output = pe.Node(interface=util.IdentityInterface(fields=["filter_output"]),name="filter_output")
         # if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
@@ -171,7 +183,7 @@ class FunctionalMRIStage(Stage):
         #     flow.connect([
         #                 (detrending_output,filter_output,[("detrending_output","filter_output")])
         #                 ])
-        
+
         # if self.config.scrubbing:
         #     scrubbing = pe.Node(interface=Scrubbing(),name='scrubbing')
         #     flow.connect([
@@ -182,39 +194,44 @@ class FunctionalMRIStage(Stage):
         #                 (scrubbing,outputnode,[("fd_npy","FD")]),
         #                 (scrubbing,outputnode,[("dvars_npy","DVARS")])
         #                 ])
-        
+
         flow.connect([
             (filter_output, outputnode, [("filter_output", "func_file")])
         ])
-    
+
     def define_inspect_outputs(self):
         if self.config.smoothing > 0.0:
-            res_path = os.path.join(self.stage_dir, "smoothing", "result_smoothing.pklz")
+            res_path = os.path.join(
+                self.stage_dir, "smoothing", "result_smoothing.pklz")
             if (os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
                 self.inspect_outputs_dict['Smoothed image'] = ['fsleyes', '-sdefault', results.outputs.out_file, '-cm',
                                                                'brain_colours_blackbdy_iso']
         if self.config.wm or self.config.global_nuisance or self.config.csf or self.config.motion:
-            res_path = os.path.join(self.stage_dir, "nuisance_regression", "result_nuisance_regression.pklz")
+            res_path = os.path.join(
+                self.stage_dir, "nuisance_regression", "result_nuisance_regression.pklz")
             if (os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Regression output'] = ['fsleyes', '-sdefault', results.outputs.out_file]
+                self.inspect_outputs_dict['Regression output'] = [
+                    'fsleyes', '-sdefault', results.outputs.out_file]
         if self.config.detrending:
-            res_path = os.path.join(self.stage_dir, "detrending", "result_detrending.pklz")
+            res_path = os.path.join(
+                self.stage_dir, "detrending", "result_detrending.pklz")
             if (os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
                 self.inspect_outputs_dict['Detrending output'] = ['fsleyes', '-sdefault', results.outputs.out_file,
                                                                   '-cm', 'brain_colours_blackbdy_iso']
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
-            res_path = os.path.join(self.stage_dir, "converter", "result_converter.pklz")
+            res_path = os.path.join(
+                self.stage_dir, "converter", "result_converter.pklz")
             if (os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
                 self.inspect_outputs_dict['Filter output'] = ['fsleyes', '-sdefault', results.outputs.out_file, '-cm',
                                                               'brain_colours_blackbdy_iso']
-        
-        self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in self.inspect_outputs_dict.keys()],
+
+        self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
-    
+
     def has_run(self):
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             return os.path.exists(os.path.join(self.stage_dir, "temporal_filter", "result_temporal_filter.pklz"))

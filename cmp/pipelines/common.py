@@ -43,10 +43,10 @@ class ProgressThread(threading.Thread):
     stages = {}
     stage_names = []
     pw = Instance(ProgressWindow)
-    
+
     def run(self):
         c = 0
-        
+
         while (c < len(self.stage_names)):
             time.sleep(5)
             c = 0
@@ -70,7 +70,7 @@ class ProgressThread(threading.Thread):
 
 class ProcessThread(threading.Thread):
     pipeline = Instance(Any)
-    
+
     def run(self):
         self.pipeline.process()
 
@@ -132,40 +132,41 @@ class Pipeline(HasTraits):
     # informations common to project_info
     base_directory = Directory
     output_directory = Directory
-    
+
     root = Property
     subject = 'sub-01'
     last_date_processed = Str
     last_stage_processed = Str
-    
+
     # num core settings
     number_of_cores = 1
-    
+
     anat_flow = None
-    
+
     # -- Traits Default Value Methods -----------------------------------------
-    
+
     # def _base_directory_default(self):
     #     return getcwd()
-    
+
     # -- Property Implementations ---------------------------------------------
-    
+
     @property_depends_on('base_directory')
     def _get_root(self):
         return File(path=self.base_directory)
-    
+
     def __init__(self, project_info):
         self.base_directory = project_info.base_directory
-        
+
         if project_info.output_directory is not None:
             self.output_directory = project_info.output_directory
         else:
-            self.output_directory = os.path.join(self.base_directory, "derivatives")
-        
+            self.output_directory = os.path.join(
+                self.base_directory, "derivatives")
+
         self.subject = project_info.subject
         self.number_of_cores = project_info.number_of_cores
-        
-        for stage in self.stages.keys():
+
+        for stage in list(self.stages.keys()):
             if project_info.subject_session != '':
                 self.stages[stage].stage_dir = os.path.join(self.base_directory, "derivatives", 'nipype', self.subject,
                                                             project_info.subject_session, self.pipeline_name,
@@ -178,7 +179,7 @@ class Pipeline(HasTraits):
             #     self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype','common_stages',self.stages[stage].name)
             # else:
             #     self.stages[stage].stage_dir = os.path.join(self.base_directory,"derivatives",'cmp',self.subject,'tmp','nipype',self.pipeline_name,self.stages[stage].name)
-    
+
     def check_config(self):
         if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation':
             if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
@@ -196,23 +197,25 @@ class Pipeline(HasTraits):
             return (
                 '\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
         return ''
-    
+
     def create_stage_flow(self, stage_name):
         stage = self.stages[stage_name]
         flow = pe.Workflow(name=stage.name)
-        inputnode = pe.Node(interface=util.IdentityInterface(fields=stage.inputs), name="inputnode")
-        outputnode = pe.Node(interface=util.IdentityInterface(fields=stage.outputs), name="outputnode")
+        inputnode = pe.Node(interface=util.IdentityInterface(
+            fields=stage.inputs), name="inputnode")
+        outputnode = pe.Node(interface=util.IdentityInterface(
+            fields=stage.outputs), name="outputnode")
         flow.add_nodes([inputnode, outputnode])
         stage.create_workflow(flow, inputnode, outputnode)
         return flow
-    
+
     def fill_stages_outputs(self):
-        for stage in self.stages.values():
+        for stage in list(self.stages.values()):
             if stage.enabled:
                 stage.define_inspect_outputs()
-    
+
     def clear_stages_outputs(self):
-        for stage in self.stages.values():
+        for stage in list(self.stages.values()):
             if stage.enabled:
                 stage.inspect_outputs_dict = {}
                 stage.inspect_outputs = ['Outputs not available']
@@ -222,7 +225,7 @@ class Pipeline(HasTraits):
                 #                 for f in fnmatch.filter(files, 'result_*.pklz')]
                 # for stage_res in stage_results:
                 #    os.remove(stage_res)
-    
+
     def launch_process(self):
         pt = ProcessThread()
         pt.pipeline = self

@@ -19,11 +19,16 @@ import nipype.pipeline.engine as pe
 
 
 class MITKqball_commandInputSpec(CommandLineInputSpec):
-    in_file = File(argstr="-i %s", position=1, mandatory=True, exists=True, desc="input raw dwi (.dwi or .fsl/.fslgz)")
-    out_file_name = String(argstr="-o %s", position=2, desc='output fiber name (.dti)')
-    sh_order = Int(argstr="-sh %d", position=3, des='spherical harmonics order (optional), (default: 4)')
-    reg_lambda = Float(argstr="-r %0.4f", position=4, desc='ragularization factor lambda (optional), (default: 0.006)')
-    csa = Bool(argstr="-csa", position=5, desc='use constant solid angle consideration (optional)')
+    in_file = File(argstr="-i %s", position=1, mandatory=True,
+                   exists=True, desc="input raw dwi (.dwi or .fsl/.fslgz)")
+    out_file_name = String(argstr="-o %s", position=2,
+                           desc='output fiber name (.dti)')
+    sh_order = Int(argstr="-sh %d", position=3,
+                   des='spherical harmonics order (optional), (default: 4)')
+    reg_lambda = Float(argstr="-r %0.4f", position=4,
+                       desc='ragularization factor lambda (optional), (default: 0.006)')
+    csa = Bool(argstr="-csa", position=5,
+               desc='use constant solid angle consideration (optional)')
 
 
 class MITKqball_commandOutputSpec(TraitedSpec):
@@ -34,7 +39,7 @@ class MITKqball(CommandLine):
     _cmd = 'MitkQballReconstruction.sh'
     input_spec = MITKqball_commandInputSpec
     output_spec = MITKqball_commandOutputSpec
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["out_file"] = self.inputs.out_file_name
@@ -42,8 +47,10 @@ class MITKqball(CommandLine):
 
 
 class MITKtensor_commandInputSpec(CommandLineInputSpec):
-    in_file = File(argstr="-i %s", position=1, mandatory=True, exists=True, desc="input raw dwi (.dwi or .fsl/.fslgz)")
-    out_file_name = String(argstr="-o %s", position=2, desc='output fiber name (.dti)')
+    in_file = File(argstr="-i %s", position=1, mandatory=True,
+                   exists=True, desc="input raw dwi (.dwi or .fsl/.fslgz)")
+    out_file_name = String(argstr="-o %s", position=2,
+                           desc='output fiber name (.dti)')
 
 
 class MITKtensor_commandOutputSpec(TraitedSpec):
@@ -54,7 +61,7 @@ class MITKtensor(CommandLine):
     _cmd = 'MitkTensorReconstruction.sh'
     input_spec = MITKtensor_commandInputSpec
     output_spec = MITKtensor_commandOutputSpec
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["out_file"] = self.inputs.out_file_name
@@ -66,9 +73,12 @@ class gibbs_reconInputSpec(BaseInterfaceInputSpec):
     bvals = File(exists=True)
     bvecs = File(exists=True)
     recon_model = Enum(['Tensor', 'CSD'])
-    sh_order = Int(argstr="-sh %d", position=3, des='spherical harmonics order (optional), (default: 4)')
-    reg_lambda = Float(argstr="-t %0.4f", position=4, desc='ragularization factor lambda (optional), (default: 0.006)')
-    csa = Bool(argstr="-csa", position=5, desc='use constant solid angle consideration (optional)')
+    sh_order = Int(argstr="-sh %d", position=3,
+                   des='spherical harmonics order (optional), (default: 4)')
+    reg_lambda = Float(argstr="-t %0.4f", position=4,
+                       desc='ragularization factor lambda (optional), (default: 0.006)')
+    csa = Bool(argstr="-csa", position=5,
+               desc='use constant solid angle consideration (optional)')
 
 
 class gibbs_reconOutputSpec(TraitedSpec):
@@ -78,14 +88,16 @@ class gibbs_reconOutputSpec(TraitedSpec):
 class gibbs_recon(BaseInterface):
     input_spec = gibbs_reconInputSpec
     output_spec = gibbs_reconOutputSpec
-    
+
     def _run_interface(self, runtime):
         # change DWI and gradient table names
         mitk_dwi = os.path.abspath(os.path.basename(self.inputs.dwi) + '.fsl')
         shutil.copyfile(self.inputs.dwi, mitk_dwi)
-        mitk_bvec = os.path.abspath(os.path.basename(self.inputs.dwi) + '.fsl.bvecs')
+        mitk_bvec = os.path.abspath(
+            os.path.basename(self.inputs.dwi) + '.fsl.bvecs')
         shutil.copyfile(self.inputs.bvecs, mitk_bvec)
-        mitk_bval = os.path.abspath(os.path.basename(self.inputs.dwi) + '.fsl.bvals')
+        mitk_bval = os.path.abspath(
+            os.path.basename(self.inputs.dwi) + '.fsl.bvals')
         shutil.copyfile(self.inputs.bvals, mitk_bval)
         if self.inputs.recon_model == 'Tensor':
             tensor = pe.Node(interface=MITKtensor(in_file=mitk_dwi, out_file_name=os.path.abspath('mitk_tensor.dti')),
@@ -99,9 +111,9 @@ class gibbs_recon(BaseInterface):
             csd.inputs.reg_lambda = self.inputs.reg_lambda
             csd.inputs.csa = self.inputs.csa
             res = csd.run()
-        
+
         return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         if self.inputs.recon_model == 'Tensor':

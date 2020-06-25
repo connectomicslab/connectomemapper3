@@ -29,7 +29,8 @@ class SegmentationConfigUI(SegmentationConfig):
                        Group(
                            HGroup('make_isotropic',
                                   Item('isotropic_vox_size', label="Voxel size (mm)", visible_when='make_isotropic')),
-                           Item('isotropic_interpolation', label='Interpolation', visible_when='make_isotropic'),
+                           Item('isotropic_interpolation', label='Interpolation',
+                                visible_when='make_isotropic'),
                            'brain_mask_extraction_tool',
                            Item('ants_templatefile', label='Template',
                                 visible_when='brain_mask_extraction_tool == "ANTs"'),
@@ -53,7 +54,7 @@ class SegmentationConfigUI(SegmentationConfig):
 
 class SegmentationStageUI(SegmentationStage):
     inspect_output_button = Button('View')
-    
+
     inspect_outputs_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -65,7 +66,7 @@ class SegmentationStageUI(SegmentationStage):
     ),
         scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK', 'Cancel']
     )
-    
+
     config_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -76,11 +77,11 @@ class SegmentationStageUI(SegmentationStage):
         scrollable=True, resizable=True, height=400, width=450, kind='livemodal', title='Edit stage configuration',
         buttons=['OK', 'Cancel']
     )
-    
+
     # General and UI members
     def __init__(self):
         SegmentationStage.__init__(self)
         self.config = SegmentationConfigUI()
-    
+
     def _inspect_output_button_fired(self, info):
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

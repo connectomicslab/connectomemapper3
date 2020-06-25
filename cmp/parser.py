@@ -6,8 +6,8 @@
 """ Multi-scale Brain Parcellator Commandline Parser
 """
 
-from info import __version__
-from info import __release_date__
+from .info import __version__
+from .info import __release_date__
 
 
 def get():
@@ -30,29 +30,29 @@ def get():
                                                'provided all subjects should be analyzed. Multiple '
                                                'participants can be specified with a space separated list.',
                    nargs="+")
-    
-    p.add_argument( "--session_label", help="""The label(s) of the session that should be analyzed. 
+
+    p.add_argument("--session_label", help="""The label(s) of the session that should be analyzed. 
                                             The label corresponds to ses-<session_label> from the 
                                             BIDS spec (so it does not include "ses-"). If this
                                             parameter is not provided all sessions should be
                                             analyzed. Multiple sessions can be specified
                                             with a space separated list.""",
-                                            nargs="+")
-    
+                   nargs="+")
+
     p.add_argument('--anat_pipeline_config',
                    help='Configuration .txt file for processing stages of the anatomical MRI processing pipeline')
     p.add_argument('--dwi_pipeline_config',
                    help='Configuration .txt file for processing stages of the diffusion MRI processing pipeline')
     p.add_argument('--func_pipeline_config',
                    help='Configuration .txt file for processing stages of the fMRI processing pipeline')
-    
+
     # p.add_argument('--multiproc_number_of_cores', type=int, help='The number of cores to be used by '
     #               'the MultiProc plugin of Nipype (One core used by default).')
     p.add_argument('--number_of_participants_processed_in_parallel', type=int, help='The number of subjects '
                                                                                     'to be processed in parallel (One core used by default).')
-    
+
     p.add_argument('--fs_license', help='Freesurfer license.txt')
-    
+
     # p.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation',
     #                    action='store_true')
     p.add_argument('-v', '--version', action='version',

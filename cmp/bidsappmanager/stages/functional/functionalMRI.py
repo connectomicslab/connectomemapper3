@@ -27,7 +27,8 @@ class FunctionalMRIConfigUI(FunctionalMRIConfig):
     traits_view = View(  # Item('smoothing'),
         # Item('discard_n_volumes'),
         HGroup(
-            Item('detrending'), Item('detrending_mode', visible_when='detrending'),
+            Item('detrending'), Item(
+                'detrending_mode', visible_when='detrending'),
             label='Detrending', show_border=True
         ),
         HGroup(
@@ -47,7 +48,7 @@ class FunctionalMRIConfigUI(FunctionalMRIConfig):
 
 class FunctionalMRIStageUI(FunctionalMRIStage):
     inspect_output_button = Button('View')
-    
+
     inspect_outputs_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -59,7 +60,7 @@ class FunctionalMRIStageUI(FunctionalMRIStage):
     ),
         scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK', 'Cancel']
     )
-    
+
     config_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -70,10 +71,10 @@ class FunctionalMRIStageUI(FunctionalMRIStage):
         scrollable=True, resizable=True, height=528, width=608, kind='livemodal', title='Edit stage configuration',
         buttons=['OK', 'Cancel']
     )
-    
+
     def __init__(self):
         FunctionalMRIStage.__init__(self)
         self.config = FunctionalMRIConfigUI()
-    
+
     def _inspect_output_button_fired(self, info):
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

@@ -20,8 +20,9 @@ from cmp.stages.diffusion.reconstruction import Dipy_recon_config, MRtrix_recon_
 # Reconstruction configuration
 
 class Dipy_recon_configUI(Dipy_recon_config):
-    flip_table_axis = List(editor=CheckListEditor(values=['x', 'y', 'z'], cols=3))
-    
+    flip_table_axis = List(editor=CheckListEditor(
+        values=['x', 'y', 'z'], cols=3))
+
     traits_view = View(  # Item('gradient_table',label='Gradient table (x,y,z,b):'),
         Item('flip_table_axis', style='custom', label='Flip bvecs:'),
         # Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),
@@ -43,8 +44,10 @@ class Dipy_recon_configUI(Dipy_recon_config):
             Item('shore_lambdaN', label='Radial regularization constant'),
             Item('shore_lambdaL', label='Angular regularization constant'),
             Item('shore_tau', label='Diffusion time (s)'),
-            Item('shore_constrain_e0', label='Constrain the optimization such that E(0) = 1.'),
-            Item('shore_positive_constraint', label='Constrain the propagator to be positive.'),
+            Item('shore_constrain_e0',
+                 label='Constrain the optimization such that E(0) = 1.'),
+            Item('shore_positive_constraint',
+                 label='Constrain the propagator to be positive.'),
             label='Parameters of SHORE reconstruction model',
             visible_when='imaging_model == "DSI"'
         ),
@@ -65,8 +68,9 @@ class Dipy_recon_configUI(Dipy_recon_config):
 
 
 class MRtrix_recon_configUI(MRtrix_recon_config):
-    flip_table_axis = List(editor=CheckListEditor(values=['x', 'y', 'z'], cols=3))
-    
+    flip_table_axis = List(editor=CheckListEditor(
+        values=['x', 'y', 'z'], cols=3))
+
     traits_view = View(  # Item('gradient_table',label='Gradient table (x,y,z,b):'),
         Item('flip_table_axis', style='custom', label='Flip gradient table:'),
         # Item('custom_gradient_table',enabled_when='gradient_table_file=="Custom..."'),

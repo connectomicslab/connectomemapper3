@@ -28,7 +28,7 @@ class PreprocessingConfigUI(PreprocessingConfig):
 
 class PreprocessingStageUI(PreprocessingStage):
     inspect_output_button = Button('View')
-    
+
     inspect_outputs_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -40,7 +40,7 @@ class PreprocessingStageUI(PreprocessingStage):
     ),
         scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK', 'Cancel']
     )
-    
+
     config_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -51,11 +51,11 @@ class PreprocessingStageUI(PreprocessingStage):
         scrollable=True, resizable=True, height=280, width=350, kind='livemodal', title='Edit stage configuration',
         buttons=['OK', 'Cancel']
     )
-    
+
     # General and UI members
     def __init__(self):
         PreprocessingStage.__init__(self)
         self.config = PreprocessingConfigUI()
-    
+
     def _inspect_output_button_fired(self, info):
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

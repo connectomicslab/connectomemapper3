@@ -126,11 +126,11 @@ class Bandpass(AFNICommand):
     >>> bandpass.inputs.lowpass = 0.1
     >>> res = bandpass.run() # doctest: +SKIP
     """
-    
+
     _cmd = '3dBandpass'
     input_spec = BandpassInputSpec
     output_spec = AFNICommandOutputSpec
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         name = 'out_file'
