@@ -107,8 +107,8 @@ def unicode2str(text):
 class RegistrationStage(Stage):
 
     # Freesurfer informations (for BBregister)
-    fs_subjects_dir = Directory(exists=False, resolve=False)
-    fs_subject_id = Str
+    fs_subjects_dir = Directory(exists=False, resolve=False, mandatory=False)
+    fs_subject_id = Str(mandatory=False)
 
     def __init__(self, pipeline_mode, fs_subjects_dir=None, fs_subject_id=None):
         self.name = 'registration_stage'
@@ -120,8 +120,8 @@ class RegistrationStage(Stage):
             self.config.registration_mode_trait = [
                 'FSL (Linear)', 'BBregister (FS)']
 
-        self.fs_subjects_dir = fs_subjects_dir
-        self.fs_subject_id = fs_subject_id
+        if fs_subjects_dir is not None: self.fs_subjects_dir = fs_subjects_dir
+        if fs_subject_id is not None: self.fs_subject_id = fs_subject_id
 
         self.inputs = ["T1", "act_5TT", "gmwmi", "target", "T2", "subjects_dir", "subject_id", "wm_mask",
                        "partial_volume_files", "roi_volumes", "brain", "brain_mask", "brain_mask_full", "target_mask",
