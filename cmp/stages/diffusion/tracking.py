@@ -27,6 +27,7 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 # import nipype.interfaces.diffusion_toolkit as dtk
+from nipype.interfaces.mrtrix.convert import get_data_dims, get_vox_dims
 import nipype.interfaces.mrtrix as mrtrix
 # import nipype.interfaces.camino as camino
 import nipype.interfaces.dipy as dipy
@@ -39,7 +40,7 @@ from cmtklib.interfaces.dipy import DirectionGetterTractography, TensorInformedE
 from cmtklib.interfaces.misc import Tck2Trk, extractHeaderVoxel2WorldMatrix, match_orientations, make_seeds, \
     make_mrtrix_seeds, getCRS2XYZtkRegTransform, transform_trk_CRS2XYZtkReg
 
-from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
+
 
 import nibabel as nib
 import numpy as np

@@ -9,7 +9,7 @@ import numpy as np
 from traits.api import *
 
 from nipype.utils.filemanip import split_filename
-from nipype.workflows.misc.utils import get_vox_dims, get_data_dims
+from nipype.interfaces.mrtrix.convert  import get_vox_dims, get_data_dims
 from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec, \
     TraitedSpec, File, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 import nipype.pipeline.engine as pe
