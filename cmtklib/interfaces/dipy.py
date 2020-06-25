@@ -319,14 +319,19 @@ class CSD(DipyDiffusionInterface):
             nb.Nifti1Image(csd_peaks.shm_coeff, img.affine, None).to_filename(
                 self._gen_filename('shm_coeff'))
 
-            from dipy.viz import actor, window
-            ren = window.Renderer()
-            ren.add(actor.peak_slicer(csd_peaks.peak_dirs,
-                                      csd_peaks.peak_values,
-                                      colors=None))
+            # FIXME: dipy 1.1.0 and fury 0.5.1 with vtk 8.2.0 -> error:
+            #
+            #  from .vtkIOExodusPython import *
+            #  ImportError: libnetcdf.so.13: cannot open shared object file: No such file or directory
+            #
+            # from dipy.viz import actor, window
+            # ren = window.Renderer()
+            # ren.add(actor.peak_slicer(csd_peaks.peak_dirs,
+            #                           csd_peaks.peak_values,
+            #                           colors=None))
 
-            window.record(ren, out_path=self._gen_filename(
-                'csd_direction_field', ext='.png'), size=(900, 900))
+            # window.record(ren, out_path=self._gen_filename(
+            #     'csd_direction_field', ext='.png'), size=(900, 900))
 
         return runtime
 
