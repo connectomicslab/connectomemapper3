@@ -5,7 +5,13 @@ FROM ubuntu:xenial-20181218
 COPY files/neurodebian.gpg /root/.neurodebian.gpg
 
 ## Install miniconda2 and CMP dependencies including exfat libraries for exfat-formatted hard-drives (only MAC?) : exfat-fuse exfat-utils
-RUN apt-get update && apt-get -qq -y install locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
+RUN apt-get update && \
+    apt-get install software-properties-common -y && \
+    apt-add-repository ppa:saiarcot895/myppa -y && \
+    apt-get update && \
+    apt-get -y install apt-fast \
+    && apt-fast install -qq -y \
+    locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
@@ -83,7 +89,7 @@ ENV PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
 
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends fsl-core=5.0.9-5~nd16.04+1 \
+    apt-fast install -y --no-install-recommends fsl-core=5.0.9-5~nd16.04+1 \
                                                fsl-mni152-templates=5.0.7-2 \
                                                fsl-5.0-eddy-nonfree \
                                                afni=16.2.07~dfsg.1-5~nd16.04+1
@@ -133,7 +139,7 @@ ENV PATH $ANTSPATH:$PATH
 # MRtrix3 setup
 WORKDIR /opt
 RUN apt-get update && \
-    apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
+    apt-fast install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
     libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev && \
     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
     cd mrtrix3 && \
