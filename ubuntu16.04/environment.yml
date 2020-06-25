@@ -18,12 +18,14 @@ dependencies:
 - pyside2=5.9.0a1
 - git-annex=8.20200617 #7.20190219
 - pydotplus=2.0.2
-- fury==0.5.1 #0.1.4 in pip/ vtk=7.0.0 in dependencies (should come with vtk 8.2.0 for dipy viz)
+- dipy=1.1.0
+- fury=0.5.1 #0.1.4 in pip/ vtk=7.0.0 in dependencies (should come with vtk 8.2.0 for dipy viz)
+- libnetcdf=4.7.3
 
 - pip:
     # - git+https://github.com/LTS5/cfflib.git
     - duecredit==0.8.0 #0.7.0
-    - dipy==1.1.1 #0.15.0
+    #- dipy==1.1.1 #0.15.0
     - mne==0.20.7 #0.17.1
     - obspy==1.2.1 #1.1.1
     - datalad[full]==0.13.0 #0.11.3
@@ -39,3 +41,4 @@ dependencies:
     - sphinx-argparse==0.2.5
     - recommonmark==0.6.0 #0.5.0
     - pydicom==2.0.0 #1.4.2
+    #- fury==0.5.0
