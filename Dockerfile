@@ -27,13 +27,18 @@ ADD . /app/connectomemapper3
 ENV CONDA_ENV py36cmp-core
 
 #RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
-RUN /bin/bash -c ". activate $CONDA_ENV && \
+RUN /bin/bash -c ". activate $CONDA_ENV &&\
     python setup.py install"
 
 # ENV ANTSPATH=/opt/conda/bin
 # ENV PATH=$ANTSPATH:$PATH
 ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin
+ENV PYTHONPATH /opt/conda/envs/$CONDA_ENV/bin
 ENV PATH $ANTSPATH:$PATH
+ENV LD_LIBRARY_PATH /opt/conda/envs/$CONDA_ENV/lib:$LD_LIBRARY_PATH
+
+# Make dipy.viz (fury/vtk) happy
+RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.13"
 
 # Create entrypoint script that simulated a X server - required by traitsui?
 # try to change freesurfer home permission to copy the license
@@ -43,7 +48,7 @@ ENV PATH $ANTSPATH:$PATH
 #RUN echo '#! /bin/bash \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
 
 #Current for singularity
-RUN echo '#! /bin/bash \n echo "User: $USER" && echo "Group:"$(id -g -n $USER) && export && . activate $CONDA_ENV && xvfb-run -s "-screen 0 900x900x24 -ac +extension GLX -noreset" -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
+RUN echo '#! /bin/bash \n echo "User: $USER" && echo "Group:"$(id -g -n $USER) && ls -la /opt/conda/envs/$CONDA_ENV/lib && export && . activate $CONDA_ENV && xvfb-run -s "-screen 0 900x900x24 -ac +extension GLX -noreset" -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed
