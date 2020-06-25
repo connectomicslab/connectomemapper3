@@ -346,7 +346,7 @@ class ExtractImageVoxelSizesInputSpec(BaseInterfaceInputSpec):
 
 
 class ExtractImageVoxelSizesOutputSpec(TraitedSpec):
-    voxel_sizes = traits.List(traits.Int(), traits.Int(), traits.Int())
+    voxel_sizes = traits.List((traits.Int(), traits.Int(), traits.Int()))
 
 
 class ExtractImageVoxelSizes(BaseInterface):
