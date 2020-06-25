@@ -128,7 +128,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
 
             # Change pickles: bids app dataset directory -> local dataset directory
             if (mode == 'local') and cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
-                new_cont = string.replace(
+                new_cont = str.replace(
                     cont, 'V/bids_dataset', 'V{}'.format(local_dir))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
@@ -136,7 +136,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
 
             # Change pickles: local dataset directory -> bids app dataset directory
             elif (mode == 'bidsapp') and not cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
-                new_cont = string.replace(
+                new_cont = str.replace(
                     cont, 'V{}'.format(local_dir), 'V/bids_dataset')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
