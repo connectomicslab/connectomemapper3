@@ -10,7 +10,7 @@ RUN apt-get update && apt-get -qq -y install locales libstdc++6 npm curl bzip2 x
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
     localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
-    curl -sSL https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
+    curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
     bash /tmp/miniconda.sh -bfp /opt/conda && \
     rm -rf /tmp/miniconda.sh
 
@@ -20,46 +20,6 @@ ENV PATH /opt/conda/bin:$PATH
 
 RUN conda update conda && \
     conda clean --all --yes
-
-# RUN conda install -y python=2.7.15 && \
-#     conda update conda && \
-#     conda clean --all --yes
-#
-# ## FIXME: (fix nodes_iter() to nodes() for networkx2 support)
-#
-# RUN conda config --add channels conda-forge
-# RUN conda config --add channels aramislab
-#
-# RUN conda install -y ipython jupyter matplotlib
-#
-# RUN conda install -c aramislab -y ants=2.2.0
-# RUN conda install -y networkx=2.2
-#
-# # RUN conda install -y pyqt=5.6.0
-# RUN conda install -y pyqt=4
-#
-# RUN conda install -y scipy=1.1.0
-# RUN conda install -y sphinx=1.5.1
-# RUN conda install -y traits=4.6.0
-# RUN conda install -y dateutil=2.4.1
-# RUN conda install -y certifi=2018.4.16
-# RUN conda install -y pandas=0.23.4
-# RUN conda install -y patsy=0.4.1
-# RUN conda install -y statsmodels=0.8.0
-# RUN conda install -y nose=1.3.7
-# RUN conda install -y pydot=1.2.3
-# RUN conda install -y traitsui=5.1.0
-# RUN conda install -y numpy=1.14
-# RUN conda install -y nipype=1.1.3
-# RUN conda install -c anaconda -y configparser=3.5.0
-# RUN conda install -y dipy=0.14.0
-# RUN conda install -y nibabel=2.3.0
-# RUN conda install -y mne=0.15
-# RUN conda install -y obspy=1.1.0
-# RUN conda install -y graphviz=2.38.0
-# RUN conda install -c aramislab -y pybids
-# RUN conda install -c anaconda -y configparser=3.5.0
-#RUN conda install -c conda-forge python-dateutil=2.5.3
 
 # Installing freesurfer
 RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
