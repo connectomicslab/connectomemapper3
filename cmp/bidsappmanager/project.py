@@ -96,6 +96,7 @@ def is_tool(name):
 
 
 def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
+    encoding="latin-1"
     # mode can be local or newlocal or bidsapp (local by default)
 
     # TODO: make fix more generalized by taking derivatives/output dir
@@ -114,7 +115,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
                     root, dirs, fi, mode))
 
             pick = gzip.open(os.path.join(root, fi))
-            cont = pick.read()
+            cont = pick.read().decode(encoding)
 
             if debug:
                 print("local_dir : {} , cont.find('/bids_dir'): {}, cont.find('/output_dir'): {}  (mode: {})".format(
@@ -128,7 +129,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
                     cont, '/bids_dir', '{}'.format(local_dir))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont)
+                    f.write(new_cont.encode(encoding))
 
                 if debug:
                     print(
@@ -137,7 +138,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
                     cont, '/output_dir', '{}'.format(os.path.join(local_dir, 'derivatives')))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont)
+                    f.write(new_cont.encode(encoding))
 
             elif (mode == 'newlocal'):
                 if debug:
@@ -171,7 +172,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
 
                     pref = fi.split(".")[0]
                     with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                        f.write(new_cont)
+                        f.write(new_cont.encode(encoding))
 
             # Change pickles: local dataset directory -> bids app dataset directory
             elif (mode == 'bidsapp'):
@@ -182,7 +183,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
                     os.path.join(local_dir, 'derivatives')), '/output_dir')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont)
+                    f.write(new_cont.encode(encoding))
 
                 if debug:
                     print(' local dataset directory -> bids app dataset directory')
@@ -190,7 +191,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
                     cont, '{}'.format(local_dir), '/bids_dir')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont)
+                    f.write(new_cont.encode(encoding))
 
     return True
 

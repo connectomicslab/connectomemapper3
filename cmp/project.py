@@ -110,6 +110,7 @@ class CMP_Project_Info(HasTraits):
 
 
 def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
+    encoding="latin-1"
     # mode can be local or bidsapp (local by default)
 
     searchdir = os.path.join(local_dir, 'derivatives', 'nipype')
@@ -124,7 +125,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
             if debug:
                 print("Processing file {} {} {}".format(root, dirs, fi))
             pick = gzip.open(os.path.join(root, fi))
-            cont = pick.read()
+            cont = pick.read().decode(encoding)
 
             # Change pickles: bids app dataset directory -> local dataset directory
             if (mode == 'local') and cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
@@ -132,7 +133,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
                     cont, 'V/bids_dataset', 'V{}'.format(local_dir))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont)
+                    f.write(new_cont.encode(encoding))
 
             # Change pickles: local dataset directory -> bids app dataset directory
             elif (mode == 'bidsapp') and not cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
@@ -140,7 +141,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
                     cont, 'V{}'.format(local_dir), 'V/bids_dataset')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont)
+                    f.write(new_cont.encode(encoding))
     return True
 
 
