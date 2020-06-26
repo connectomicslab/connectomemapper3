@@ -455,7 +455,7 @@ class fMRIPipeline(Pipeline):
                  self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_atlas.nii.gz'),
                 # (self.subject+'_T1w_parc_freesurferaparc_flirt.nii.gz',self.subject+'_space-meanBOLD_label-Desikan_atlas.nii.gz'),
                 ('connectome_freesurferaparc', self.subject + \
-                 '_label-Desikan_conndata-fnetwork_connectivity'),
+                 '_label-Desikan_conndata-network_connectivity'),
                 ('averageTimeseries_freesurferaparc',
                  self.subject + '_atlas-Desikan_timeseries'),
 
@@ -494,17 +494,17 @@ class fMRIPipeline(Pipeline):
                  self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale5_atlas.nii.gz'),
 
                 ('connectome_freesurferaparc', self.subject +
-                 '_label-Desikan_conndata-fnetwork_connectivity'),
+                 '_label-Desikan_conndata-network_connectivity'),
                 ('connectome_scale1',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale1_conndata-fnetwork_connectivity'),
+                 self.subject + '_label-' + bids_atlas_label + '_desc-scale1_conndata-network_connectivity'),
                 ('connectome_scale2',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale2_conndata-fnetwork_connectivity'),
+                 self.subject + '_label-' + bids_atlas_label + '_desc-scale2_conndata-network_connectivity'),
                 ('connectome_scale3',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale3_conndata-fnetwork_connectivity'),
+                 self.subject + '_label-' + bids_atlas_label + '_desc-scale3_conndata-network_connectivity'),
                 ('connectome_scale4',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale4_conndata-fnetwork_connectivity'),
+                 self.subject + '_label-' + bids_atlas_label + '_desc-scale4_conndata-network_connectivity'),
                 ('connectome_scale5',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale5_conndata-fnetwork_connectivity'),
+                 self.subject + '_label-' + bids_atlas_label + '_desc-scale5_conndata-network_connectivity'),
                 ('averageTimeseries_scale1', self.subject + '_atlas-' +
                  bids_atlas_label + '_desc-scale1_timeseries'),
                 ('averageTimeseries_scale2', self.subject + '_atlas-' +
@@ -717,7 +717,7 @@ class fMRIPipeline(Pipeline):
                 (con_flow, fMRI_outputnode, [
                  ("outputnode.connectivity_matrices", "connectivity_matrices")]),
                 (con_flow, sinker, [
-                 ("outputnode.connectivity_matrices", "connectivity.@connectivity_matrices")]),
+                 ("outputnode.connectivity_matrices", "func.@connectivity_matrices")]),
                 (con_flow, sinker, [
                  ("outputnode.avg_timeseries", "func.@avg_timeseries")])
             ])
