@@ -8,8 +8,8 @@
 """
 
 # General imports
-from traits.api import *
 import os
+from traits.api import *
 import pickle
 import gzip
 import glob

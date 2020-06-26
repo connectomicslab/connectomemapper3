@@ -63,8 +63,8 @@ class SegmentationConfig(HasTraits):
 
 
 def extract_base_directory(file):
-    # print "Extract reconall base dir : %s" % file[:-17]
-    return file[:-17]
+    # print("Extract reconall base dir : %s" % file[:-17])
+    return str(file[:-17])
 
 
 class SegmentationStage(Stage):
@@ -230,7 +230,7 @@ class SegmentationStage(Stage):
                     #             ])
 
                     def get_freesurfer_subject_id(file):
-                        # print "Extract reconall base dir : %s" % file[:-18]
+                        # print("Extract reconall base dir : %s" % file[:-18])
                         return file[:-18]
 
                     fs_reconall23 = pe.Node(interface=fs.ReconAll(
