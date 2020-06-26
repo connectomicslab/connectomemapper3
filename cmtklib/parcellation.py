@@ -232,7 +232,7 @@ class Erode(BaseInterface):
 
 class ParcellateHippocampalSubfieldsInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
-    subject_id = traits.String(mandatory=True, desc='Subject ID')
+    subject_id = traits.Str(mandatory=True, desc='Subject ID')
 
 
 class ParcellateHippocampalSubfieldsOutputSpec(TraitedSpec):

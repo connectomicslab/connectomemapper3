@@ -8,9 +8,10 @@
 """
 
 # General imports
+import os
 from traits.api import *
 import pkg_resources
-import os
+
 import pickle
 import gzip
 from traits.trait_handlers import TraitListObject
@@ -97,6 +98,12 @@ class ParcellationStage(Stage):
 
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
 
+        def get_basename(path):
+            import os
+            path = os.path.basename(path)
+            print(path)
+            return path
+
         if self.config.parcellation_scheme != "Custom":
 
             parc_node = pe.Node(interface=Parcellate(
@@ -106,7 +113,7 @@ class ParcellationStage(Stage):
 
             flow.connect([
                 (inputnode, parc_node,
-                 [("subjects_dir", "subjects_dir"), (("subject_id", os.path.basename), "subject_id")]),
+                 [("subjects_dir", "subjects_dir"), (("subject_id",  get_basename), "subject_id")]),
                 (parc_node, outputnode, [  # ("aseg_file","aseg_file"),("cc_unknown_file","cc_unknown_file"),
                     # ("ribbon_file","ribbon_file"),("roi_files","roi_files"),
                     ("white_matter_mask_file", "wm_mask_file"),
@@ -148,7 +155,7 @@ class ParcellationStage(Stage):
 
                 flow.connect([
                     (inputnode, parcCombiner,
-                     [("subjects_dir", "subjects_dir"), (("subject_id", os.path.basename), "subject_id")]),
+                     [("subjects_dir", "subjects_dir"), (("subject_id",  get_basename), "subject_id")]),
                     (parc_node, parcCombiner, [
                      ("roi_files_in_structural_space", "input_rois")]),
                 ])
@@ -159,7 +166,7 @@ class ParcellationStage(Stage):
 
                     flow.connect([
                         (inputnode, parcBrainStem,
-                         [("subjects_dir", "subjects_dir"), (("subject_id", os.path.basename), "subject_id")]),
+                         [("subjects_dir", "subjects_dir"), (("subject_id",  get_basename), "subject_id")]),
                         (parcBrainStem, parcCombiner, [
                          ("brainstem_structures", "brainstem_structures")]),
                     ])
@@ -170,7 +177,7 @@ class ParcellationStage(Stage):
 
                     flow.connect([
                         (inputnode, parcHippo,
-                         [("subjects_dir", "subjects_dir"), (("subject_id", os.path.basename), "subject_id")]),
+                         [("subjects_dir", "subjects_dir"), (("subject_id",  get_basename), "subject_id")]),
                         (parcHippo, parcCombiner, [
                          ("lh_hipposubfields", "lh_hippocampal_subfields")]),
                         (parcHippo, parcCombiner, [
@@ -196,7 +203,7 @@ class ParcellationStage(Stage):
 
                     flow.connect([
                         (inputnode, parcThal,
-                         [("subjects_dir", "subjects_dir"), (("subject_id", os.path.basename), "subject_id")]),
+                         [("subjects_dir", "subjects_dir"), (("subject_id",  get_basename), "subject_id")]),
                         (parc_node, parcThal, [("T1", "T1w_image")]),
                         (parcThal, parcCombiner, [
                          ("max_prob_registered", "thalamus_nuclei")]),

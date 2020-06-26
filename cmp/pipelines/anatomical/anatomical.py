@@ -675,7 +675,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         if self.stages['Parcellation'].enabled:
             parc_flow = self.create_stage_flow("Parcellation")
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
+            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":             
                 anat_flow.connect([(seg_flow, parc_flow, [('outputnode.subjects_dir', 'inputnode.subjects_dir'),
                                                           ('outputnode.subject_id', 'inputnode.subject_id')]),
                                    ])
