@@ -12,7 +12,7 @@ echo "Main dir: ${MAIN_DIR}"
 
 PY3_DIR="${MAIN_DIR}/python3"
 
-mkdir -p ${PY3_DIR}
+mkdir -p "${PY3_DIR}"
 
 LOG_FILE="${PY3_DIR}/translation-log-root.txt"
 
@@ -23,7 +23,7 @@ NAME="setup.py"
 IN_DIR="${MAIN_DIR}/${NAME}"
 OUT_DIR="${PY3_DIR}"
 echo "Process folder $NAME (in: ${IN_DIR} / out: ${OUT_DIR})"
-2to3 -f all  -p -W --output-dir=${OUT_DIR} -W -n ${IN_DIR} >> ${LOG_FILE}
+2to3 -f all  -p -W --output-dir="${OUT_DIR}" -W -n "${IN_DIR}" >> "${LOG_FILE}"
 
 autopep8 -v --in-place "${PY3_DIR}/${NAME}"
 
@@ -31,7 +31,7 @@ NAME="setup_gui.py"
 IN_DIR="${MAIN_DIR}/${NAME}"
 OUT_DIR="${PY3_DIR}"
 echo "Process folder $NAME (in: ${IN_DIR} / out: ${OUT_DIR})"
-2to3 -f all  -p -W --output-dir=${OUT_DIR} -W -n ${IN_DIR} >> ${LOG_FILE}
+2to3 -f all  -p -W --output-dir="${OUT_DIR}" -W -n "${IN_DIR}" >> "${LOG_FILE}"
 
 autopep8 -v --in-place "${PY3_DIR}/${NAME}"
 
@@ -40,6 +40,6 @@ NAME="run.py"
 IN_DIR="${MAIN_DIR}/${NAME}"
 OUT_DIR="${PY3_DIR}"
 echo "Process folder $NAME (in: ${IN_DIR} / out: ${OUT_DIR})"
-2to3 -f all  -p -W --output-dir=${OUT_DIR} -W -n ${IN_DIR} >> ${LOG_FILE}
+2to3 -f all  -p -W --output-dir="${OUT_DIR}" -W -n "${IN_DIR}" >> "${LOG_FILE}"
 
 autopep8 -v --in-place "${PY3_DIR}/${NAME}"

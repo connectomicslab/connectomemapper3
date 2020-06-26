@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # sudo docker run -it --rm \
 #       -v /media/localadmin/17646e81-4a2d-474e-9af6-31b511af858e/DS-Schizo2:/bids_dataset \
 #       -v /media/localadmin/17646e81-4a2d-474e-9af6-31b511af858e/DS-Schizo2/derivatives:/outputs \

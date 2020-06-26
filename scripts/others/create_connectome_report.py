@@ -1,4 +1,4 @@
-#!/home/localadmin/anaconda2/bin/env python
+#!/usr/bin/env python
 # -*- coding:utf-8 -*-
 """
 Syntax :

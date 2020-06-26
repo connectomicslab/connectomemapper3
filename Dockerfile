@@ -1,7 +1,11 @@
-# Use an initial image, where all Connectome Mapper 3 dependencies are installed, as a parent image
-
+# Build environment variables arguments
 ARG MAIN_DOCKER
-FROM $MAIN_DOCKER
+ARG VERSION
+ARG BUILD_DATE
+ARG VCS_REF
+
+# Use an initial image, where all Connectome Mapper 3 dependencies are installed, as a parent image
+FROM "${MAIN_DOCKER}":"$VERSION"
 
 #RUN groupadd -r -g 1000 cmp && \
 #    useradd -r -M -u 1000 -g cmp cmp
@@ -22,7 +26,7 @@ FROM $MAIN_DOCKER
 
 # Set the working directory to /app and copy contents of this repository
 WORKDIR /app/connectomemapper3
-ADD . /app/connectomemapper3
+COPY . /app/connectomemapper3
 
 ENV CONDA_ENV py36cmp-core
 
@@ -48,7 +52,7 @@ RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/cond
 #RUN echo '#! /bin/bash \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
 
 #Current for singularity
-RUN echo '#! /bin/bash \n echo "User: $USER" && echo "Group:"$(id -g -n $USER) && ls -la /opt/conda/envs/$CONDA_ENV/lib && export && . activate $CONDA_ENV && xvfb-run -s "-screen 0 900x900x24 -ac +extension GLX -noreset" -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
+RUN printf '#! /bin/bash \n echo "User: $USER" && echo "Group:"$(id -g -n $USER) && ls -la /opt/conda/envs/$CONDA_ENV/lib && export && . activate $CONDA_ENV && xvfb-run -s "-screen 0 900x900x24 -ac +extension GLX -noreset" -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed
@@ -89,10 +93,6 @@ ENV ANTS_RANDOM_SEED 1234
 RUN ldconfig
 WORKDIR /tmp/
 ENTRYPOINT ["/app/run_connectomemapper3.sh"]
-
-ARG VERSION
-ARG BUILD_DATE
-ARG VCS_REF
 
 #Metadata
 LABEL org.label-schema.build-date=$BUILD_DATE

@@ -64,24 +64,26 @@ RUN rm runtime2012b.tar.gz
 # RUN rm runtime2014b.tar.gz
 
 # Make FreeSurfer happy
-ENV FSL_DIR=/usr/share/fsl/5.0 \
-    OS=Linux \
-    FS_OVERRIDE=0 \
-    FIX_VERTEX_AREA= \
-    FSF_OUTPUT_FORMAT=nii.gz \
-    FREESURFER_HOME=/opt/freesurfer
-ENV SUBJECTS_DIR=$FREESURFER_HOME/subjects \
-    FUNCTIONALS_DIR=$FREESURFER_HOME/sessions \
-    MNI_DIR=$FREESURFER_HOME/mni \
-    LOCAL_DIR=$FREESURFER_HOME/local \
-    FSFAST_HOME=$FREESURFER_HOME/fsfast \
-    MINC_BIN_DIR=$FREESURFER_HOME/mni/bin \
-    MINC_LIB_DIR=$FREESURFER_HOME/mni/lib \
-    MNI_DATAPATH=$FREESURFER_HOME/mni/data \
-    FMRI_ANALYSIS_DIR=$FREESURFER_HOME/fsfast
-ENV PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
-    MNI_PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 \
-    PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH
+ENV FSL_DIR=/usr/share/fsl/5.0 
+ENV OS=Linux 
+ENV FS_OVERRIDE=0 
+ENV FIX_VERTEX_AREA= 
+ENV FSF_OUTPUT_FORMAT=nii.gz 
+ENV FREESURFER_HOME=/opt/freesurfer
+
+ENV SUBJECTS_DIR=$FREESURFER_HOME/subjects 
+ENV FUNCTIONALS_DIR=$FREESURFER_HOME/sessions 
+ENV MNI_DIR=$FREESURFER_HOME/mni 
+ENV LOCAL_DIR=$FREESURFER_HOME/local 
+ENV FSFAST_HOME=$FREESURFER_HOME/fsfast 
+ENV MINC_BIN_DIR=$FREESURFER_HOME/mni/bin 
+ENV MINC_LIB_DIR=$FREESURFER_HOME/mni/lib 
+ENV MNI_DATAPATH=$FREESURFER_HOME/mni/data 
+ENV FMRI_ANALYSIS_DIR=$FREESURFER_HOME/fsfast
+
+ENV PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 
+ENV MNI_PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5 
+ENV PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH
 
 
 ## Install FSL from Neurodebian
@@ -104,18 +106,18 @@ RUN apt-get update && \
 #RUN apt-mark manual ants
 
 #Make FSL/AFNI happy
-ENV FSLDIR=/usr/share/fsl/5.0 \
-    FSLOUTPUTTYPE=NIFTI_GZ \
-    FSLMULTIFILEQUIT=TRUE \
-    POSSUMDIR=/usr/share/fsl/5.0 \
-    LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
-    FSLTCLSH=/usr/bin/tclsh \
-    FSLWISH=/usr/bin/wish \
-    AFNI_MODELPATH=/usr/lib/afni/models \
-    AFNI_IMSAVE_WARNINGS=NO \
-    AFNI_TTATLAS_DATASET=/usr/share/afni/atlases \
-    AFNI_PLUGINPATH=/usr/lib/afni/plugins
-ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
+ENV FSLDIR /usr/share/fsl/5.0 
+ENV FSLOUTPUTTYPE NIFTI_GZ 
+ENV FSLMULTIFILEQUIT TRUE 
+ENV POSSUMDIR /usr/share/fsl/5.0 
+ENV LD_LIBRARY_PATH /usr/lib/fsl/5.0:$LD_LIBRARY_PATH 
+ENV FSLTCLSH /usr/bin/tclsh 
+ENV FSLWISH /usr/bin/wish 
+ENV AFNI_MODELPATH /usr/lib/afni/models 
+ENV AFNI_IMSAVE_WARNINGS NO 
+ENV AFNI_TTATLAS_DATASET /usr/share/afni/atlases 
+ENV AFNI_PLUGINPATH /usr/lib/afni/plugins
+ENV PATH /usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
 
 ## Install ANTs --no-install-suggests
 #RUN apt-get install -y ants=2.2.0-1~nd16.04+1
@@ -123,7 +125,7 @@ ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
 #ENV PATH=$ANTSPATH:$PATH
 
 # Pull the environment name out of the environment.yml
-ADD environment.yml /app/environment.yml
+COPY environment.yml /app/environment.yml
 RUN conda env create -f /app/environment.yml
 
 # ENV ANTSPATH=/opt/conda/bin

@@ -10,10 +10,10 @@ fi
 
 echo "Building documentation in $DIR/docs/_build/html"
 
-OLDPWD=$PWD
+OLDPWD="$PWD"
 
-cd $DIR/docs
+cd "$DIR/docs"
 make clean
 make html
 
-cd $OLDPWD
+cd "$OLDPWD"
