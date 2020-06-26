@@ -7,7 +7,7 @@ channels:
 - defaults
 
 dependencies:
-- python=3.6.10
+- python=3.7
 - pip=20.1.1
 - ants=2.2.0
 - numpy=1.18.5
@@ -19,8 +19,8 @@ dependencies:
 - git-annex=8.20200617 #7.20190219
 - pydotplus=2.0.2
 - dipy=1.1.0
-- fury=0.5.1 #0.1.4 in pip/ vtk=7.0.0 in dependencies (should come with vtk 8.2.0 for dipy viz)
-- libnetcdf=4.7.3
+#- fury=0.5.1 #0.1.4 in pip/ vtk=7.0.0 in dependencies (should come with vtk 8.2.0 for dipy viz)
+#- libnetcdf=4.7.3
 
 - pip:
     # - git+https://github.com/LTS5/cfflib.git
