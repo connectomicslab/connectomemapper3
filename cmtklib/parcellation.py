@@ -1867,10 +1867,10 @@ class ParcellateThalamus(BaseInterface):
             tmpIthalL = np.zeros(
                 (IthalL.shape[0], IthalL.shape[1], IthalL.shape[2], 1))
             tmpIthalL[:, :, :, 0] = IthalL
-            tempM = np.repeat(tmpIthalL, Nspams / 2, axis=3)
+            tempM = np.repeat(tmpIthalL, int(Nspams / 2), axis=3)
             del tmpIthalL
-            IspamL = np.multiply(Ispams[:, :, :, 0:Nspams / 2], tempM)
-            print('IspamL shape:', IspamL.shape)
+            IspamL = np.multiply(Ispams[:, :, :, 0:int(Nspams / 2)], tempM)
+            # print('IspamL shape:', IspamL.shape)
             del tempM
 
             # Creating MaxProb
@@ -1887,10 +1887,10 @@ class ParcellateThalamus(BaseInterface):
             tmpIthalR = np.zeros(
                 (IthalR.shape[0], IthalR.shape[1], IthalR.shape[2], 1))
             tmpIthalR[:, :, :, 0] = IthalR
-            tempM = np.repeat(tmpIthalR, Nspams / 2, axis=3)
+            tempM = np.repeat(tmpIthalR, int(Nspams / 2), axis=3)
             del tmpIthalR
-            IspamR = np.multiply(Ispams[:, :, :, Nspams / 2:Nspams], tempM)
-            print('IspamR shape:', IspamR.shape)
+            IspamR = np.multiply(Ispams[:, :, :, int(Nspams / 2):int(Nspams)], tempM)
+            # print('IspamR shape:', IspamR.shape)
             del tempM
 
             # Creating MaxProb
@@ -1900,13 +1900,13 @@ class ParcellateThalamus(BaseInterface):
             MaxProbR = np.argmax(IspamR, axis=3) + 1
             # ?MaxProbR = imfill(MaxProbR,'holes');
             # ?MaxProbR = Atlas_Corr(IthalR,MaxProbR);
-            MaxProbR[indr] = MaxProbR[indr] + Nspams / 2
+            MaxProbR[indr] = MaxProbR[indr] + int(Nspams / 2)
             MaxProbR[ind] = 0
 
             del indr
 
-            Ispams[:, :, :, 0:Nspams / 2] = IspamL
-            Ispams[:, :, :, Nspams / 2:Nspams] = IspamR
+            Ispams[:, :, :, 0:int(Nspams / 2)] = IspamL
+            Ispams[:, :, :, int(Nspams / 2):Nspams] = IspamR
 
         # Save corrected probability maps of thalamic nuclei
         # update the header
