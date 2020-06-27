@@ -77,9 +77,12 @@ def main(**extra_args):
     setup(name='cmpbidsappmanager',
           version=__version__,
           description='Connectome Mapper 3 BIDS App Manager',
-          long_description="""Connectome Mapper 3 BIDS App Manager allows you to interact with the BIDS App of the Connectome Mapper 3, which implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 """ +
-                           """data to multi-resolution connection matrices. It also offers support for resting state fMRI data processing and multi-resolution functional connection matrices creation. """ +
-                           """The Connectome Mapper 3 BIDS App Manager is part of the Connectome Mapping Toolkit.""",
+          long_description="""Connectome Mapper 3 BIDS App Manager, part of the Connectome Mapping Toolkit, """+
+                           """allows you to easily interact with the BIDS App of the Connectome Mapper 3, """ +
+                           """which implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 """ +
+                           """data to multi-resolution connection matrices. """ +
+                           """It also offers support for resting state fMRI data processing and multi-resolution """ +
+                           """functional connection matrices creation. """,
           author='CHUV-EPFL',
           author_email='info@connectomics.org',
           url='http://www.connectomics.org/',
