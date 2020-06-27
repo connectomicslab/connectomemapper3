@@ -52,7 +52,15 @@ RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/cond
 #RUN echo '#! /bin/bash \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
 
 #Current for singularity
-RUN printf '#! /bin/bash \n echo "User: $USER" && echo "Group:"$(id -g -n $USER) && ls -la /opt/conda/envs/$CONDA_ENV/lib && export && . activate $CONDA_ENV && xvfb-run -s "-screen 0 900x900x24 -ac +extension GLX -noreset" -a python /app/connectomemapper3/run.py $@' > /app/run_connectomemapper3.sh
+
+
+RUN printf '#! /bin/bash\n\
+echo User: $USER && echo Group: $(id -g -n $USER) && \
+. activate ${CONDA_ENV} && \
+xvfb-run -s "-screen 0 900x900x24 -ac +extension GLX -noreset" -a python /app/connectomemapper3/run.py $@'\
+> /app/run_connectomemapper3.sh
+
+RUN cat /app/run_connectomemapper3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed
