@@ -110,7 +110,7 @@ class CMP_Project_Info(HasTraits):
 
 
 def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
-    encoding="latin-1"
+    encoding="utf-8"
     # mode can be local or bidsapp (local by default)
 
     searchdir = os.path.join(local_dir, 'derivatives', 'nipype')

@@ -96,7 +96,7 @@ def is_tool(name):
 
 
 def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
-    encoding="latin-1"
+    encoding="utf-8"
     # mode can be local or newlocal or bidsapp (local by default)
 
     # TODO: make fix more generalized by taking derivatives/output dir
