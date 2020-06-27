@@ -105,10 +105,9 @@ class extractHeaderVoxel2WorldMatrix(BaseInterface):
         im = nib.load(self.inputs.in_file)
         transform = np.array(im.get_affine())
 
-        out_f = file(os.path.abspath('voxel2world.txt'), 'a')
-        np.savetxt(out_f, transform, delimiter=' ', fmt="%6.6g")
-        out_f.close()
-
+        with open(os.path.abspath('voxel2world.txt'), 'a') as out_f:
+            np.savetxt(out_f, transform, delimiter=' ', fmt="%6.6g")
+        
         return runtime
 
     def _list_outputs(self):
@@ -151,11 +150,13 @@ class flipTable(BaseInterface):
         elif self.inputs.orientation == 'h':
             for i in self.inputs.flipping_axis:
                 table[axis_dict[i], :] = -table[axis_dict[i], :]
-        out_f = file(os.path.abspath('flipped_table.txt'), 'a')
-        if self.inputs.header_lines > 0:
-            out_f.write(header)
-        np.savetxt(out_f, table, delimiter=self.inputs.delimiter)
-        out_f.close()
+
+        with open(os.path.abspath('flipped_table.txt'), 'a') as out_f:
+            if self.inputs.header_lines > 0:
+                np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
+            else:
+                np.savetxt(out_f, table, delimiter=self.inputs.delimiter)
+
         return runtime
 
     def _list_outputs(self):
@@ -447,8 +448,11 @@ class flipBvec(BaseInterface):
             for i in self.inputs.flipping_axis:
                 table[axis_dict[i], :] = -table[axis_dict[i], :]
 
-        out_f = os.path.abspath('flipped_bvecs.bvec')
-        np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
+        with open(os.path.abspath('flipped_bvecs.bvec'),'w') as out_f:
+            if self.inputs.header_lines > 0:
+                np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
+            else:
+                np.savetxt(out_f, table, delimiter=self.inputs.delimiter)
         
         # with open(os.path.abspath('flipped_bvecs.bvec'), 'w') as out_f:
         #    np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)

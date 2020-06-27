@@ -107,13 +107,11 @@ class splitBvecBval(BaseInterface):
             bvecs = bvecs[:, self.inputs.start:self.inputs.end + 1]
             bvals = bvals[self.inputs.start:self.inputs.end + 1]
 
-        out_f = file(os.path.abspath('dwi_split.bvec'), 'a')
-        np.savetxt(out_f, bvecs, delimiter=self.inputs.delimiter)
-        out_f.close()
+        with open(os.path.abspath('dwi_split.bvec'), 'a') as out_f:
+            np.savetxt(out_f, bvecs, delimiter=self.inputs.delimiter)
 
-        out_f = file(os.path.abspath('dwi_split.bval'), 'a')
-        np.savetxt(out_f, bvals.T, newline=self.inputs.delimiter)
-        out_f.close()
+        with open(os.path.abspath('dwi_split.bval'), 'a') as out_f:
+            np.savetxt(out_f, bvals.T, newline=self.inputs.delimiter)
 
         return runtime
 
@@ -981,9 +979,9 @@ class CreateAcqpFile(BaseInterface):
         mat = np.array([['0', '1', '0', str(self.inputs.total_readout)],
                         ['0', '-1', '0', str(self.inputs.total_readout)]])
 
-        out_f = file(os.path.abspath('acqp.txt'), 'a')
-        np.savetxt(out_f, mat, fmt="%s", delimiter=' ')
-        out_f.close()
+        with open(os.path.abspath('acqp.txt'), 'a') as out_f:
+            np.savetxt(out_f, mat, fmt="%s", delimiter=' ')
+
         return runtime
 
     def _list_outputs(self):
@@ -1017,9 +1015,9 @@ class CreateIndexFile(BaseInterface):
 
         mat = np.ones((1, lines))
 
-        out_f = file(os.path.abspath('index.txt'), 'a')
-        np.savetxt(out_f, mat, delimiter=' ', fmt="%1.0g")
-        out_f.close()
+        with open(os.path.abspath('index.txt'), 'a') as out_f:
+            np.savetxt(out_f, mat, delimiter=' ', fmt="%1.0g")
+
         return runtime
 
     def _list_outputs(self):
