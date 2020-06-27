@@ -1,4 +1,4 @@
-name: py36cmp-core
+name: py37cmp-core
 
 channels:
 - anaconda

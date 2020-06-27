@@ -1,4 +1,4 @@
-name: py36cmp-gui
+name: py37cmp-gui
 
 channels:
 - aramislab
