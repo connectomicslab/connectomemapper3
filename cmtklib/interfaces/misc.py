@@ -439,17 +439,25 @@ class flipBvec(BaseInterface):
         else:
             table = np.loadtxt(f, delimiter=self.inputs.delimiter)
         f.close()
+        
         if self.inputs.orientation == 'v':
             for i in self.inputs.flipping_axis:
                 table[:, axis_dict[i]] = -table[:, axis_dict[i]]
         elif self.inputs.orientation == 'h':
             for i in self.inputs.flipping_axis:
                 table[axis_dict[i], :] = -table[axis_dict[i], :]
-        out_f = file(os.path.abspath('flipped_bvecs.bvec'), 'a')
-        if self.inputs.header_lines > 0:
-            out_f.write(header)
-        np.savetxt(out_f, table, delimiter=self.inputs.delimiter)
-        out_f.close()
+
+        out_f = os.path.abspath('flipped_bvecs.bvec')
+        np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
+        
+        # with open(os.path.abspath('flipped_bvecs.bvec'), 'w') as out_f:
+        #    np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
+
+        # out_f = file(os.path.abspath('flipped_bvecs.bvec'), 'w')
+        # if self.inputs.header_lines > 0:
+        #     out_f.write(header)
+        # np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
+        # out_f.close()
         return runtime
 
     def _list_outputs(self):
