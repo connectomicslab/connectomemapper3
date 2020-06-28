@@ -434,6 +434,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         total_volume = 0
         u_old = -1
         for u, v, d in G.edges(data=True):
+            print('{}'.format(list(d.keys())))
             total_fibers += len(d['fiblist'])
             if u != u_old:
                 # print("Node %i"%int(u))
@@ -445,6 +446,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         # measures to add here
         # FIXME treat case of self-connection that gives di['fiber_length_mean'] = 0.0
         for u, v, d in G.edges(data=True):
+            print('{}'.format(list(d.keys())))
             G.remove_edge(u, v)
             di = {'number_of_fibers': len(d['fiblist']), }
 

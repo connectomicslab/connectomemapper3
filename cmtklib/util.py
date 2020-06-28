@@ -14,8 +14,12 @@ from collections import OrderedDict
 import warnings
 from glob import glob
 import os
+import pickle
+import gzip
 
 warnings.simplefilter("ignore")
+
+encoding="utf-8"
 
 
 class bcolors:
@@ -185,3 +189,156 @@ def mean_curvature(xyz):
     k = magn(np.cross(dxyz, ddxyz), 1) / (magn(dxyz, 1) ** 3)
 
     return np.mean(k)
+
+def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
+    # encoding="utf-8"
+    # mode can be local or newlocal or bidsapp (local by default)
+
+    # TODO: make fix more generalized by taking derivatives/output dir
+    searchdir = os.path.join(local_dir, 'derivatives', 'nipype')
+
+    for root, dirs, files in os.walk(searchdir):
+        files = [fi for fi in files if (fi.endswith(
+            ".pklz") and not fi.endswith("_new.pklz"))]
+
+        if debug:
+            print('----------------------------------------------------')
+
+        for fi in files:
+            if debug:
+                print("Processing file {} {} {} (mode: {})".format(
+                    root, dirs, fi, mode))
+
+            pick = gzip.open(os.path.join(root, fi))
+            cont = pick.read().decode(encoding)
+
+            if debug:
+                print("local_dir : {} , cont.find('/bids_dir'): {}, cont.find('/output_dir'): {}  (mode: {})".format(
+                    local_dir, cont.find('/bids_dir'), cont.find('/output_dir'), mode))
+
+            # Change pickles: bids app dataset directory -> local dataset directory
+            if (mode == 'local'):
+                if debug:
+                    print(' bids app dataset directory -> local dataset directory')
+                new_cont = str.replace(
+                    cont, '/bids_dir', '{}'.format(local_dir))
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont.encode(encoding))
+
+                if debug:
+                    print(
+                        ' bids app output directory -> local dataset derivatives directory')
+                new_cont = str.replace(
+                    cont, '/output_dir', '{}'.format(os.path.join(local_dir, 'derivatives')))
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont.encode(encoding))
+
+            elif (mode == 'newlocal'):
+                if debug:
+                    print(' old local dataset directory -> local dataset directory')
+
+                old_dir = ''
+
+                newpick = gzip.open(os.path.join(root, fi))
+
+                # Retrieve current BIDS directory written in .pklz files
+                # Suppose that the BIDS App output directory is directly in the root BIDS directory i.e /bids_dataset/derivatives
+                line = newpick.readline()
+                while line != '':
+                    # print('Line: {}'.format(line))
+                    if '/derivatives/' in line:
+                        old_dir, _ = line.split('/derivatives/')
+                        while old_dir[0] != '/':
+                            old_dir = old_dir[1:]
+                        break
+                    line = newpick.readline()
+
+                if debug:
+                    print('Old dir : {}'.format(old_dir))
+                    print('Current dir : {}'.format(local_dir))
+
+                # Test if old_dir is valid (not empty) and different from the current BIDS root directory
+                # In that case, update the path in the .pklz file
+                if (old_dir != '') and (old_dir != local_dir):
+                    new_cont = str.replace(cont, '{}'.format(
+                        old_dir), '{}'.format(local_dir))
+
+                    pref = fi.split(".")[0]
+                    with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
+                        f.write(new_cont.encode(encoding))
+
+            # Change pickles: local dataset directory -> bids app dataset directory
+            elif (mode == 'bidsapp'):
+                if debug:
+                    print(
+                        ' local dataset derivatives directory -> bids app output directory')
+                new_cont = str.replace(cont, '{}'.format(
+                    os.path.join(local_dir, 'derivatives')), '/output_dir')
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont.encode(encoding))
+
+                if debug:
+                    print(' local dataset directory -> bids app dataset directory')
+                new_cont = str.replace(
+                    cont, '{}'.format(local_dir), '/bids_dir')
+                pref = fi.split(".")[0]
+                with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
+                    f.write(new_cont.encode(encoding))
+
+    return True
+
+
+def remove_aborded_interface_pickles(local_dir, debug=False):
+    searchdir = os.path.join(local_dir, 'derivatives/cmp')
+
+    for root, dirs, files in os.walk(searchdir):
+        files = [fi for fi in files if fi.endswith(".pklz")]
+
+        if debug:
+            print('----------------------------------------------------')
+
+        for fi in files:
+            if debug:
+                print("Processing file {} {} {}".format(root, dirs, fi))
+            try:
+                cont = pickle.load(gzip.open(os.path.join(root, fi)))
+            except Exception:
+                # Remove pickle if unpickling error raised
+                print('Unpickling Error: removed {}'.format(
+                    os.path.join(root, fi)))
+                os.remove(os.path.join(root, fi))
+
+
+def remove_aborded_interface_pickles(local_dir, subject, session='', debug=False):
+    if session == '':
+        searchdir = os.path.join(local_dir, 'derivatives/cmp', subject, 'tmp')
+    else:
+        searchdir = os.path.join(
+            local_dir, 'derivatives/cmp', subject, session, 'tmp')
+
+    for root, dirs, files in os.walk(searchdir):
+        files = [fi for fi in files if fi.endswith(".pklz")]
+
+        if debug:
+            print('----------------------------------------------------')
+
+        for fi in files:
+            if debug:
+                print("Processing file {} {} {}".format(root, dirs, fi))
+            try:
+                cont = pickle.load(gzip.open(os.path.join(root, fi)))
+            except Exception as e:
+                # Remove pickle if unpickling error raised
+                print('Unpickling Error: removed {}'.format(
+                    os.path.join(root, fi)))
+                os.remove(os.path.join(root, fi))
+            # except pickle.UnpicklingError as e:
+            #     # normal, somewhat expected
+            #     continue
+            # except (AttributeError,  EOFError, ImportError, IndexError) as e:
+            #     # secondary errors
+            #     print(traceback.format_exc(e))
+            #     continue
