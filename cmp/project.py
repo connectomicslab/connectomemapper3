@@ -10,8 +10,11 @@ from cmtklib.bids.utils import write_derivative_description
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.pipelines.functional import fMRI as FMRI_pipeline
+from cmtklib.config import anat_load_config, anat_save_config, \
+    dmri_load_config, dmri_save_config, fmri_load_config, fmri_save_config, \
+    get_anat_process_detail, get_dmri_process_detail, get_fmri_process_detail
+from cmtklib.util import remove_aborded_interface_pickles, fix_dataset_directory_in_pickles
 from bids import BIDSLayout
-import configparser
 import multiprocessing
 import fnmatch
 import string
@@ -109,344 +112,6 @@ class CMP_Project_Info(HasTraits):
     number_of_cores = Enum(1, list(range(1, multiprocessing.cpu_count() + 1)))
 
 
-def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
-    encoding="utf-8"
-    # mode can be local or bidsapp (local by default)
-
-    searchdir = os.path.join(local_dir, 'derivatives', 'nipype')
-
-    for root, dirs, files in os.walk(searchdir):
-        files = [fi for fi in files if fi.endswith(".pklz")]
-
-        if debug:
-            print('----------------------------------------------------')
-
-        for fi in files:
-            if debug:
-                print("Processing file {} {} {}".format(root, dirs, fi))
-            pick = gzip.open(os.path.join(root, fi))
-            cont = pick.read().decode(encoding)
-
-            # Change pickles: bids app dataset directory -> local dataset directory
-            if (mode == 'local') and cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
-                new_cont = str.replace(
-                    cont, 'V/bids_dataset', 'V{}'.format(local_dir))
-                pref = fi.split(".")[0]
-                with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont.encode(encoding))
-
-            # Change pickles: local dataset directory -> bids app dataset directory
-            elif (mode == 'bidsapp') and not cont.find('/bids_dataset/derivatives') and (local_dir != '/bids_dataset'):
-                new_cont = str.replace(
-                    cont, 'V{}'.format(local_dir), 'V/bids_dataset')
-                pref = fi.split(".")[0]
-                with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont.encode(encoding))
-    return True
-
-
-def remove_aborded_interface_pickles(local_dir, debug=False):
-    searchdir = os.path.join(local_dir, 'derivatives', 'nipype')
-
-    for root, dirs, files in os.walk(searchdir):
-        files = [fi for fi in files if fi.endswith(".pklz")]
-
-        if debug:
-            print('----------------------------------------------------')
-
-        for fi in files:
-            if debug:
-                print("Processing file {} {} {}".format(root, dirs, fi))
-            try:
-                cont = pickle.load(gzip.open(os.path.join(root, fi)))
-            except Exception as e:
-                # Remove pickle if unpickling error raised
-                print('Unpickling Error: removed {}'.format(
-                    os.path.join(root, fi)))
-                os.remove(os.path.join(root, fi))
-
-
-# def remove_aborded_interface_pickles(local_dir, subject, session=''):
-#
-#     if session == '':
-#         searchdir = os.path.join(local_dir,'derivatives/cmp',subject,'tmp')
-#     else:
-#         searchdir = os.path.join(local_dir,'derivatives/cmp',subject,session,'tmp')
-#
-#     for root, dirs, files in os.walk(searchdir):
-#         files = [ fi for fi in files if fi.endswith(".pklz") ]
-#
-#         print('----------------------------------------------------')
-#
-#         for fi in files:
-#             print("Processing file {} {} {}".format(root,dirs,fi))
-#             try:
-#                 cont = pickle.load(gzip.open(os.path.join(root,fi)))
-#             except Exception as e:
-#                 # Remove pickle if unpickling error raised
-#                 print('Unpickling Error: removed {}'.format(os.path.join(root,fi)))
-#                 os.remove(os.path.join(root,fi))
-
-
-def get_process_detail(project_info, section, detail):
-    config = configparser.ConfigParser()
-    # print('Loading config from file: %s' % project_info.config_file)
-    config.read(project_info.config_file)
-    return config.get(section, detail)
-
-
-def get_anat_process_detail(project_info, section, detail):
-    config = configparser.ConfigParser()
-    # print('Loading config from file: %s' % project_info.config_file)
-    config.read(project_info.anat_config_file)
-    res = None
-    if detail == "atlas_info":
-        res = ast.literal_eval(config.get(section, detail))
-    else:
-        res = config.get(section, detail)
-    return res
-
-
-def get_dmri_process_detail(project_info, section, detail):
-    config = configparser.ConfigParser()
-    # print('Loading config from file: %s' % project_info.config_file)
-    config.read(project_info.dmri_config_file)
-    return config.get(section, detail)
-
-
-def get_fmri_process_detail(project_info, section, detail):
-    config = configparser.ConfigParser()
-    # print('Loading config from file: %s' % project_info.config_file)
-    config.read(project_info.fmri_config_file)
-    return config.get(section, detail)
-
-
-def anat_save_config(pipeline, config_path):
-    config = configparser.RawConfigParser()
-    config.add_section('Global')
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   not 'trait' in prop]  # possibly dangerous..?
-    for key in global_keys:
-        # if key != "subject" and key != "subjects":
-        config.set('Global', key, getattr(pipeline.global_conf, key))
-    for stage in list(pipeline.stages.values()):
-        config.add_section(stage.name)
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if not 'trait' in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            keyval = getattr(stage.config, key)
-            if 'config' in key:  # subconfig
-                stage_sub_keys = [prop for prop in list(
-                    keyval.traits().keys()) if not 'trait' in prop]
-                for sub_key in stage_sub_keys:
-                    config.set(stage.name, key + '.' + sub_key,
-                               getattr(keyval, sub_key))
-            else:
-                config.set(stage.name, key, keyval)
-
-    config.add_section('Multi-processing')
-    config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
-
-    with open(config_path, 'wb') as configfile:
-        config.write(configfile)
-
-    print('Config file (anat) saved as {}'.format(config_path))
-
-
-def anat_load_config(pipeline, config_path):
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   not 'trait' in prop]  # possibly dangerous..?
-    for key in global_keys:
-        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions" and key != 'modalities':
-            conf_value = config.get('Global', key)
-            setattr(pipeline.global_conf, key, conf_value)
-    for stage in list(pipeline.stages.values()):
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if not 'trait' in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            if 'config' in key:  # subconfig
-                sub_config = getattr(stage.config, key)
-                stage_sub_keys = [prop for prop in list(
-                    sub_config.traits().keys()) if not 'trait' in prop]
-                for sub_key in stage_sub_keys:
-                    try:
-                        conf_value = config.get(
-                            stage.name, key + '.' + sub_key)
-                        try:
-                            conf_value = eval(conf_value)
-                        except:
-                            pass
-                        setattr(sub_config, sub_key, conf_value)
-                    except:
-                        pass
-            else:
-                try:
-                    conf_value = config.get(stage.name, key)
-                    try:
-                        conf_value = eval(conf_value)
-                    except:
-                        pass
-                    setattr(stage.config, key, conf_value)
-                except:
-                    pass
-    setattr(pipeline, 'number_of_cores', int(
-        config.get('Multi-processing', 'number_of_cores')))
-
-    return True
-
-
-def dmri_save_config(pipeline, config_path):
-    config = configparser.RawConfigParser()
-    config.add_section('Global')
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   not 'trait' in prop]  # possibly dangerous..?
-    for key in global_keys:
-        # if key != "subject" and key != "subjects":
-        config.set('Global', key, getattr(pipeline.global_conf, key))
-    for stage in list(pipeline.stages.values()):
-        config.add_section(stage.name)
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if not 'trait' in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            keyval = getattr(stage.config, key)
-            if 'config' in key:  # subconfig
-                stage_sub_keys = [prop for prop in list(
-                    keyval.traits().keys()) if not 'trait' in prop]
-                for sub_key in stage_sub_keys:
-                    config.set(stage.name, key + '.' + sub_key,
-                               getattr(keyval, sub_key))
-            else:
-                config.set(stage.name, key, keyval)
-
-    config.add_section('Multi-processing')
-    config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
-
-    with open(config_path, 'wb') as configfile:
-        config.write(configfile)
-
-    print('Config file (dmri) saved as {}'.format(config_path))
-
-
-def dmri_load_config(pipeline, config_path):
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   not 'trait' in prop]  # possibly dangerous..?
-    for key in global_keys:
-        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions" and key != 'modalities':
-            conf_value = config.get('Global', key)
-            setattr(pipeline.global_conf, key, conf_value)
-    for stage in list(pipeline.stages.values()):
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if not 'trait' in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            if 'config' in key:  # subconfig
-                sub_config = getattr(stage.config, key)
-                stage_sub_keys = [prop for prop in list(
-                    sub_config.traits().keys()) if not 'trait' in prop]
-                for sub_key in stage_sub_keys:
-                    try:
-                        conf_value = config.get(
-                            stage.name, key + '.' + sub_key)
-                        try:
-                            conf_value = eval(conf_value)
-                        except:
-                            pass
-                        setattr(sub_config, sub_key, conf_value)
-                    except:
-                        pass
-            else:
-                try:
-                    conf_value = config.get(stage.name, key)
-                    try:
-                        conf_value = eval(conf_value)
-                    except:
-                        pass
-                    setattr(stage.config, key, conf_value)
-                except:
-                    pass
-    setattr(pipeline, 'number_of_cores', int(
-        config.get('Multi-processing', 'number_of_cores')))
-    return True
-
-
-def fmri_save_config(pipeline, config_path):
-    config = configparser.RawConfigParser()
-    config.add_section('Global')
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   not 'trait' in prop]  # possibly dangerous..?
-    for key in global_keys:
-        # if key != "subject" and key != "subjects":
-        config.set('Global', key, getattr(pipeline.global_conf, key))
-    for stage in list(pipeline.stages.values()):
-        config.add_section(stage.name)
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if not 'trait' in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            keyval = getattr(stage.config, key)
-            if 'config' in key:  # subconfig
-                stage_sub_keys = [prop for prop in list(
-                    keyval.traits().keys()) if not 'trait' in prop]
-                for sub_key in stage_sub_keys:
-                    config.set(stage.name, key + '.' + sub_key,
-                               getattr(keyval, sub_key))
-            else:
-                config.set(stage.name, key, keyval)
-
-    config.add_section('Multi-processing')
-    config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
-
-    with open(config_path, 'wb') as configfile:
-        config.write(configfile)
-
-    print('Config file (fmri) saved as {}'.format(config_path))
-
-
-def fmri_load_config(pipeline, config_path):
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   not 'trait' in prop]  # possibly dangerous..?
-    for key in global_keys:
-        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions" and key != 'modalities':
-            conf_value = config.get('Global', key)
-            setattr(pipeline.global_conf, key, conf_value)
-    for stage in list(pipeline.stages.values()):
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if not 'trait' in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            if 'config' in key:  # subconfig
-                sub_config = getattr(stage.config, key)
-                stage_sub_keys = [prop for prop in list(
-                    sub_config.traits().keys()) if not 'trait' in prop]
-                for sub_key in stage_sub_keys:
-                    try:
-                        conf_value = config.get(
-                            stage.name, key + '.' + sub_key)
-                        try:
-                            conf_value = eval(conf_value)
-                        except:
-                            pass
-                        setattr(sub_config, sub_key, conf_value)
-                    except:
-                        pass
-            else:
-                try:
-                    conf_value = config.get(stage.name, key)
-                    try:
-                        conf_value = eval(conf_value)
-                    except:
-                        pass
-                    setattr(stage.config, key, conf_value)
-                except:
-                    pass
-    setattr(pipeline, 'number_of_cores', int(
-        config.get('Multi-processing', 'number_of_cores')))
-    return True
-
-
 # Creates (if needed) the folder hierarchy
 #
 def refresh_folder(bids_directory, derivatives_directory, subject, input_folders, session=None):
@@ -509,7 +174,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
     dmri_inputs_checked = dmri_pipeline.check_input(
         layout=bids_layout, gui=gui)
     if dmri_inputs_checked:
-        if is_new_project and dmri_pipeline != None:  # and dmri_pipeline!= None:
+        if is_new_project and dmri_pipeline is not None:  # and dmri_pipelineis not None:
             print("> Initialize dmri project")
             if not os.path.exists(derivatives_directory):
                 try:
@@ -521,7 +186,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                     print("... Info : Created directory %s" %
                           derivatives_directory)
 
-            if (project_info.subject_session != '') and (project_info.subject_session != None):
+            if (project_info.subject_session != '') and (project_info.subject_session is not None):
                 project_info.dmri_config_file = os.path.join(derivatives_directory, '%s_%s_diffusion_config.ini' % (
                     project_info.subject, project_info.subject_session))
             else:
@@ -576,7 +241,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
     fmri_inputs_checked = fmri_pipeline.check_input(
         layout=bids_layout, gui=gui, debug=False)
     if fmri_inputs_checked:
-        if is_new_project and fmri_pipeline != None:  # and fmri_pipeline!= None:
+        if is_new_project and fmri_pipeline is not None:  # and fmri_pipelineis not None:
             print("> Initialize fmri project")
             if not os.path.exists(derivatives_directory):
                 try:
@@ -588,7 +253,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                     print("... Info : Created directory %s" %
                           derivatives_directory)
 
-            if (project_info.subject_session != '') and (project_info.subject_session != None):
+            if (project_info.subject_session != '') and (project_info.subject_session is not None):
                 project_info.fmri_config_file = os.path.join(derivatives_directory, '%s_%s_fMRI_config.ini' % (
                     project_info.subject, project_info.subject_session))
             else:
@@ -633,7 +298,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
     bids_directory = os.path.abspath(project_info.base_directory)
     derivatives_directory = os.path.abspath(project_info.output_directory)
 
-    if (project_info.subject_session != '') and (project_info.subject_session != None):
+    if (project_info.subject_session != '') and (project_info.subject_session is not None):
         if debug:
             print('Refresh folder WITH session')
         refresh_folder(bids_directory, derivatives_directory, project_info.subject, anat_pipeline.input_folders,
@@ -644,7 +309,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
         refresh_folder(bids_directory, derivatives_directory,
                        project_info.subject, anat_pipeline.input_folders)
 
-    if is_new_project and anat_pipeline != None:  # and dmri_pipeline!= None:
+    if is_new_project and anat_pipeline is not None:  # and dmri_pipelineis not None:
         print("> Initialize anatomical project")
         if not os.path.exists(derivatives_directory):
             try:
@@ -656,7 +321,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
                 print("... Info : Created directory %s" %
                       derivatives_directory)
 
-        if (project_info.subject_session != '') and (project_info.subject_session != None):
+        if (project_info.subject_session != '') and (project_info.subject_session is not None):
             project_info.anat_config_file = os.path.join(derivatives_directory, '%s_%s_anatomical_config.ini' % (
                 project_info.subject, project_info.subject_session))
         else:
