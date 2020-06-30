@@ -193,6 +193,7 @@ class CSDInputSpec(DipyBaseInterfaceInputSpec):
                             desc=('save fODFs in file'))
     save_shm_coeff = traits.Bool(True, usedefault=True,
                                  desc=('save Spherical Harmonics Coefficients in file'))
+    tracking_processing_tool = traits.Enum("mrtrix", "dipy")
     out_fods = File(desc=('fODFs output file name'))
     out_shm_coeff = File(
         desc=('Spherical Harmonics Coefficients output file name'))
@@ -288,13 +289,16 @@ class CSD(DipyDiffusionInterface):
         sphere = get_sphere('symmetric724')
         csd_model = ConstrainedSphericalDeconvModel(gtab, response, sh_order=self.inputs.sh_order, reg_sphere=sphere,
                                                     lambda_=np.sqrt(1. / 2))
-
         # IFLOGGER.info('Fitting CSD model')
         # csd_fit = csd_model.fit(data, msk)
+        
+         if self.inputs.tracking_processing_tool == 'mrtrix':
+            sh_basis_type = 'tournier07'
+        elif self.inputs.tracking_processing_tool == 'dipy':
+            sh_basis_type = 'descoteaux07'
 
-        f = gzip.open(self._gen_filename('csdmodel', ext='.pklz'), 'wb')
-        pickle.dump(csd_model, f, -1)
-        f.close()
+        with gzip.open(self._gen_filename('csdmodel', ext='.pklz'), 'wb') as f:
+            pickle.dump(csd_model, f, -1)
 
         if self.inputs.save_shm_coeff:
             # isphere = get_sphere('symmetric724')
@@ -306,11 +310,12 @@ class CSD(DipyDiffusionInterface):
                                          relative_peak_threshold=.5,
                                          min_separation_angle=25,
                                          mask=msk,
+                                         sh_basis_type=sh_basis_type,
                                          return_sh=True,
                                          return_odf=False,
                                          normalize_peaks=True,
                                          npeaks=3,
-                                         parallel=False,
+                                         parallel=True,
                                          nbr_processes=None)
             # fods = csd_fit.odf(sphere)
             # IFLOGGER.info(fods)

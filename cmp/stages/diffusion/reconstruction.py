@@ -218,6 +218,11 @@ def create_dipy_recon_flow(config):
             dipy_CSD.inputs.save_shm_coeff = True
             dipy_CSD.inputs.out_shm_coeff = 'diffusion_shm_coeff.nii.gz'
 
+            if config.tracking_processing_tool == 'MRtrix':
+                dipy_CSD.inputs.tracking_processing_tool = 'mrtrix'
+            elif config.tracking_processing_tool == 'Dipy':
+                dipy_CSD.inputs.tracking_processing_tool = 'dipy'
+
             # dipy_CSD.inputs.save_fods=True
             # dipy_CSD.inputs.out_fods='diffusion_fODFs.nii.gz'
 
