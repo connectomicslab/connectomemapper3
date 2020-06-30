@@ -291,8 +291,8 @@ class CSD(DipyDiffusionInterface):
                                                     lambda_=np.sqrt(1. / 2))
         # IFLOGGER.info('Fitting CSD model')
         # csd_fit = csd_model.fit(data, msk)
-        
-         if self.inputs.tracking_processing_tool == 'mrtrix':
+
+        if self.inputs.tracking_processing_tool == 'mrtrix':
             sh_basis_type = 'tournier07'
         elif self.inputs.tracking_processing_tool == 'dipy':
             sh_basis_type = 'descoteaux07'
