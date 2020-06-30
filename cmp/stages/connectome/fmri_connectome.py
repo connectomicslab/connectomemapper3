@@ -26,7 +26,7 @@ from nipype.utils.filemanip import split_filename
 import nipype.interfaces.cmtk as cmtk
 
 # Own imports
-from cmtklib.connectome import rsfmri_conmat, rsfmri_conmat_OutputSpec, rsfmri_conmat_InputSpec
+import cmtklib.connectome
 # import cmtklib as cmtk
 from cmp.stages.common import Stage
 
@@ -43,15 +43,18 @@ class ConnectomeConfig(HasTraits):
 
 class ConnectomeStage(Stage):
 
-    def __init__(self):
+    def __init__(self, bids_dir, output_dir):
         self.name = 'connectome_stage'
+        self.bids_dir = bids_dir
+        self.output_dir = output_dir
+        
         self.config = ConnectomeConfig()
         self.inputs = ["roi_volumes_registered", "func_file", "FD", "DVARS",
                        "parcellation_scheme", "atlas_info", "roi_graphMLs"]
         self.outputs = ["connectivity_matrices", "avg_timeseries"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        cmtk_cmat = pe.Node(interface=rsfmri_conmat(), name="compute_matrice")
+        cmtk_cmat = pe.Node(interface=cmtklib.connectome.rsfmri_conmat(), name='compute_matrice')
         cmtk_cmat.inputs.output_types = self.config.output_types
         cmtk_cmat.inputs.apply_scrubbing = self.config.apply_scrubbing
         cmtk_cmat.inputs.FD_th = self.config.FD_thr

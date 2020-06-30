@@ -170,7 +170,7 @@ def create_dipy_recon_flow(config):
 
     # Compute single fiber voxel mask
     dipy_erode = pe.Node(interface=Erode(
-        out_filename="wm_mask_resampled.nii.gz"), name="dipy_erode")
+        out_filename="wm_mask_resampled.nii.gz"), name='dipy_erode')
     dipy_erode.inputs.number_of_passes = 1
     dipy_erode.inputs.filtertype = 'erode'
 
@@ -212,7 +212,7 @@ def create_dipy_recon_flow(config):
         # Constrained Spherical Deconvolution
         else:
             # Perform spherical deconvolution
-            dipy_CSD = pe.Node(interface=CSD(), name="dipy_CSD")
+            dipy_CSD = pe.Node(interface=CSD(), name='dipy_CSD')
 
             # if config.tracking_processing_tool != 'Dipy':
             dipy_CSD.inputs.save_shm_coeff = True
@@ -253,7 +253,7 @@ def create_dipy_recon_flow(config):
     else:
         # Perform SHORE reconstruction (DSI)
 
-        dipy_SHORE = pe.Node(interface=SHORE(), name="dipy_SHORE")
+        dipy_SHORE = pe.Node(interface=SHORE(), name='dipy_SHORE')
 
         if config.tracking_processing_tool == 'MRtrix':
             dipy_SHORE.inputs.tracking_processing_tool = 'mrtrix'
@@ -275,7 +275,7 @@ def create_dipy_recon_flow(config):
         # dipy_SHORE.inputs.out_shm_coeff = 'diffusion_shore_shm_coeff.nii.gz'
 
         shore_maps_merge = pe.Node(
-            interface=util.Merge(3), name="merge_shore_maps")
+            interface=util.Merge(3), name='merge_shore_maps')
 
         flow.connect([
             (inputnode, dipy_SHORE, [('diffusion_resampled', 'in_file')]),
@@ -314,7 +314,7 @@ def create_dipy_recon_flow(config):
         dipy_MAPMRI.inputs.big_delta = config.big_delta
 
         mapmri_maps_merge = pe.Node(
-            interface=util.Merge(8), name="merge_mapmri_maps")
+            interface=util.Merge(8), name='merge_mapmri_maps')
 
         flow.connect([
             (inputnode, dipy_MAPMRI, [('diffusion_resampled', 'in_file')]),
@@ -392,7 +392,7 @@ def create_mrtrix_recon_flow(config):
 
     # Tensor -> Eigenvectors
     mrtrix_eigVectors = pe.Node(
-        interface=Tensor2Vector(), name="mrtrix_eigenvectors")
+        interface=Tensor2Vector(), name='mrtrix_eigenvectors')
 
     flow.connect([
         (mrtrix_tensor, mrtrix_eigVectors, [('tensor', 'in_file')]),
@@ -404,7 +404,7 @@ def create_mrtrix_recon_flow(config):
         print("CSD true")
         # Compute single fiber voxel mask
         mrtrix_erode = pe.Node(interface=Erode(
-            out_filename='wm_mask_res_eroded.nii.gz'), name="mrtrix_erode")
+            out_filename='wm_mask_res_eroded.nii.gz'), name='mrtrix_erode')
         mrtrix_erode.inputs.number_of_passes = 1
         mrtrix_erode.inputs.filtertype = 'erode'
         mrtrix_mul_eroded_FA = pe.Node(
@@ -423,7 +423,7 @@ def create_mrtrix_recon_flow(config):
         ])
         # Compute single fiber response function
         mrtrix_rf = pe.Node(
-            interface=EstimateResponseForSH(), name="mrtrix_rf")
+            interface=EstimateResponseForSH(), name='mrtrix_rf')
         # if config.lmax_order != 'Auto':
         mrtrix_rf.inputs.maximum_harmonic_order = int(config.lmax_order)
 
@@ -437,7 +437,7 @@ def create_mrtrix_recon_flow(config):
 
         # Perform spherical deconvolution
         mrtrix_CSD = pe.Node(
-            interface=ConstrainedSphericalDeconvolution(), name="mrtrix_CSD")
+            interface=ConstrainedSphericalDeconvolution(), name='mrtrix_CSD')
         mrtrix_CSD.inputs.algorithm = 'csd'
         mrtrix_CSD.inputs.maximum_harmonic_order = int(config.lmax_order)
         # mrtrix_CSD.inputs.normalise = config.normalize_to_B0

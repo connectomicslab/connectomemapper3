@@ -124,8 +124,11 @@ class splitBvecBval(BaseInterface):
 
 class PreprocessingStage(Stage):
     # General and UI members
-    def __init__(self):
+    def __init__(self, bids_dir, output_dir):
         self.name = 'preprocessing_stage'
+        self.bids_dir = bids_dir
+        self.output_dir = output_dir
+        
         self.config = PreprocessingConfig()
         self.inputs = ["diffusion", "bvecs", "bvals", "T1", "aparc_aseg", "aseg", "brain", "brain_mask", "wm_mask_file",
                        "roi_volumes"]

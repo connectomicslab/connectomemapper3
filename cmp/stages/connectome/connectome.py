@@ -30,7 +30,7 @@ from nipype.utils.filemanip import split_filename
 from nipype.interfaces.mrtrix3.connectivity import BuildConnectome
 from cmtklib.interfaces.mrtrix3 import FilterTractogram
 from cmp.stages.common import Stage
-from cmtklib.connectome import CMTK_cmat
+import cmtklib.connectome 
 
 
 class ConnectomeConfig(HasTraits):
@@ -47,8 +47,11 @@ class ConnectomeConfig(HasTraits):
 
 class ConnectomeStage(Stage):
 
-    def __init__(self):
+    def __init__(self, bids_dir, output_dir):
         self.name = 'connectome_stage'
+        self.bids_dir = bids_dir
+        self.output_dir = output_dir
+        
         self.config = ConnectomeConfig()
         self.inputs = ["roi_volumes_registered", "roi_graphMLs",
                        "track_file",
@@ -61,14 +64,14 @@ class ConnectomeStage(Stage):
                         "streamline_final_file", "connectivity_matrices"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        cmtk_cmat = pe.Node(interface=CMTK_cmat(), name="compute_matrice")
+        cmtk_cmat = pe.Node(interface=cmtklib.connectome.CMTK_cmat(), name='compute_matrice')
         cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
         cmtk_cmat.inputs.output_types = self.config.output_types
         cmtk_cmat.inputs.probtrackx = self.config.probtrackx
 
         # Additional maps
         map_merge = pe.Node(interface=util.Merge(
-            9), name="merge_additional_maps")
+            9), name='merge_additional_maps')
 
         flow.connect([
             (inputnode, map_merge, [('FA', 'in1'),

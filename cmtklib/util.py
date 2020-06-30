@@ -16,10 +16,9 @@ from glob import glob
 import os
 import pickle
 import gzip
+import sys
 
 warnings.simplefilter("ignore")
-
-encoding="utf-8"
 
 
 class bcolors:
@@ -190,8 +189,39 @@ def mean_curvature(xyz):
 
     return np.mean(k)
 
+
+def force_decode(string, codecs=['utf8', 'latin-1']):
+    for codec in codecs:
+        try:
+            return string.decode(codec), codec
+        except UnicodeDecodeError:
+            pass
+
+    print("ERROR: cannot decode pickle content %s" % ([string]))
+
+
+def bidsapp_2_local_bids_dir(local_dir, path, debug=True):   
+    new_path = path.replace(
+                        '/bids_dir', '{}'.format(local_dir))
+    if debug:
+        print(new_path)
+
+    return new_path
+
+
+def bidsapp_2_local_output_dir(local_dir, path, debug=True):
+    new_path = path.replace(
+                        '/output_dir', '{}'.format(os.path.join(local_dir)))
+    if debug:
+        print(new_path)
+
+    return new_path
+
+
 def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
-    # encoding="utf-8"
+    #encoding=sys.getfilesystemencoding()
+    encoding='latin-1'
+    
     # mode can be local or newlocal or bidsapp (local by default)
 
     # TODO: make fix more generalized by taking derivatives/output dir
@@ -210,30 +240,30 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
                     root, dirs, fi, mode))
 
             pick = gzip.open(os.path.join(root, fi))
-            cont = pick.read().decode(encoding)
-
+            cont = pick.read()
+            
             if debug:
                 print("local_dir : {} , cont.find('/bids_dir'): {}, cont.find('/output_dir'): {}  (mode: {})".format(
-                    local_dir, cont.find('/bids_dir'), cont.find('/output_dir'), mode))
+                    local_dir, cont.find(b'/bids_dir'), cont.find(b'/output_dir'), mode))
 
             # Change pickles: bids app dataset directory -> local dataset directory
             if (mode == 'local'):
                 if debug:
                     print(' bids app dataset directory -> local dataset directory')
-                new_cont = str.replace(
-                    cont, '/bids_dir', '{}'.format(local_dir))
+                new_cont = cont.replace(
+                    b'/bids_dir', bytes('{}'.format(local_dir), 'utf-8'))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont.encode(encoding))
+                    f.write(new_cont)
 
                 if debug:
                     print(
                         ' bids app output directory -> local dataset derivatives directory')
-                new_cont = str.replace(
-                    cont, '/output_dir', '{}'.format(os.path.join(local_dir, 'derivatives')))
+                new_cont = cont.replace(
+                    b'/output_dir', bytes('{}'.format(os.path.join(local_dir, 'derivatives')), 'utf-8'))
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont.encode(encoding))
+                    f.write(new_cont)
 
             elif (mode == 'newlocal'):
                 if debug:
@@ -246,6 +276,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
                 # Retrieve current BIDS directory written in .pklz files
                 # Suppose that the BIDS App output directory is directly in the root BIDS directory i.e /bids_dataset/derivatives
                 line = newpick.readline()
+                print(line)
                 while line != '':
                     # print('Line: {}'.format(line))
                     if '/derivatives/' in line:
@@ -262,31 +293,31 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
                 # Test if old_dir is valid (not empty) and different from the current BIDS root directory
                 # In that case, update the path in the .pklz file
                 if (old_dir != '') and (old_dir != local_dir):
-                    new_cont = str.replace(cont, '{}'.format(
-                        old_dir), '{}'.format(local_dir))
+                    new_cont = cont.replace(bytes('{}'.format(
+                        old_dir), 'utf-8'), bytes('{}'.format(local_dir), 'utf-8'))
 
                     pref = fi.split(".")[0]
                     with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                        f.write(new_cont.encode(encoding))
+                        f.write(new_cont)
 
             # Change pickles: local dataset directory -> bids app dataset directory
             elif (mode == 'bidsapp'):
                 if debug:
                     print(
                         ' local dataset derivatives directory -> bids app output directory')
-                new_cont = str.replace(cont, '{}'.format(
-                    os.path.join(local_dir, 'derivatives')), '/output_dir')
+                new_cont = cont.replace(bytes('{}'.format(
+                                    os.path.join(local_dir, 'derivatives')), 'utf-8'), b'/output_dir')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont.encode(encoding))
+                    f.write(new_cont)
 
                 if debug:
                     print(' local dataset directory -> bids app dataset directory')
-                new_cont = str.replace(
-                    cont, '{}'.format(local_dir), '/bids_dir')
+                new_cont = cont.replace(
+                    bytes('{}'.format(local_dir), 'utf-8'), b'/bids_dir')
                 pref = fi.split(".")[0]
                 with gzip.open(os.path.join(root, '{}.pklz'.format(pref)), 'wb') as f:
-                    f.write(new_cont.encode(encoding))
+                    f.write(new_cont)
 
     return True
 

@@ -49,8 +49,11 @@ class FunctionalMRIConfig(HasTraits):
 
 class FunctionalMRIStage(Stage):
 
-    def __init__(self):
+    def __init__(self, bids_dir, output_dir):
         self.name = 'functional_stage'
+        self.bids_dir = bids_dir
+        self.output_dir = output_dir
+        
         self.config = FunctionalMRIConfig()
         self.inputs = ["preproc_file", "motion_par_file", "registered_roi_volumes", "registered_wm", "eroded_wm",
                        "eroded_csf", "eroded_brain"]

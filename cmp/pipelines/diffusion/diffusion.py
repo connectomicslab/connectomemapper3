@@ -73,36 +73,44 @@ class DiffusionPipeline(Pipeline):
     # anat_flow = Instance(pe.Workflow)
 
     def __init__(self, project_info):
-        self.stages = {
-            'Preprocessing': PreprocessingStage(),
-            'Registration': RegistrationStage(pipeline_mode="Diffusion",
-                                              fs_subjects_dir=project_info.freesurfer_subjects_dir,
-                                              fs_subject_id=os.path.basename(project_info.freesurfer_subject_id)),
-            'Diffusion': DiffusionStage(),
-            'Connectome': ConnectomeStage()}
-
-        Pipeline.__init__(self, project_info)
-
-        self.diffusion_imaging_model = project_info.diffusion_imaging_model
-        self.subject = project_info.subject
-
+        print('{}'.format(project_info.base_directory))
+        
         self.global_conf.subjects = project_info.subjects
-        self.global_conf.subject = self.subject
+        self.global_conf.subject = project_info.subject
 
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
             self.subject_directory = os.path.join(
-                self.base_directory, self.subject, project_info.subject_session)
+               project_info.base_directory, project_info.subject, project_info.subject_session)
         else:
             self.global_conf.subject_session = ''
             self.subject_directory = os.path.join(
-                self.base_directory, self.subject)
+                project_info.base_directory, project_info.subject)
 
         self.derivatives_directory = os.path.abspath(
             project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
 
-        self.stages['Connectome'].config.subject = self.subject
+        self.stages = {
+            'Preprocessing': PreprocessingStage(bids_dir=project_info.base_directory, 
+                                                output_dir=self.output_directory),
+            'Registration': RegistrationStage(pipeline_mode="Diffusion",
+                                              fs_subjects_dir=project_info.freesurfer_subjects_dir,
+                                              fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
+                                              bids_dir=project_info.base_directory, 
+                                              output_dir=self.output_directory),
+            'Diffusion': DiffusionStage(bids_dir=project_info.base_directory, 
+                                        output_dir=self.output_directory),
+            'Connectome': ConnectomeStage(bids_dir=project_info.base_directory, 
+                                          output_dir=self.output_directory)}
+        print(self.stages)
+
+        Pipeline.__init__(self, project_info)
+
+        self.subject = project_info.subject
+        self.diffusion_imaging_model = project_info.diffusion_imaging_model 
+        # self.stages['Connectome'].config.subject = self.subject
+
         self.stages['Connectome'].config.on_trait_change(
             self.update_vizualization_layout, 'circular_layout')
         self.stages['Connectome'].config.on_trait_change(

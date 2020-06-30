@@ -85,15 +85,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     flow = Instance(pe.Workflow)
 
     def __init__(self, project_info):
-        self.stages = {'Segmentation': SegmentationStage(),
-                       'Parcellation': ParcellationStage(pipeline_mode="Diffusion")}
-        # import inspect
-        # print inspect.getmro(self)
-        # print isinstance(self, AnatomicalPipeline)
-        # print isinstance(self, Pipeline)
-        # print issubclass(AnatomicalPipeline,Pipeline)
-
-        cmp_common.Pipeline.__init__(self, project_info)
         # super(Pipeline, self).__init__(project_info)
 
         self.subject = project_info.subject
@@ -103,7 +94,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.global_conf.subject = self.subject
 
         if len(project_info.subject_sessions) > 0:
-            self.global_conf.subject_session = project_info.subject_session
+            self.global_conf.subject_session = project_info.subject_session         
             self.subject_directory = os.path.join(
                 self.base_directory, self.subject, self.global_conf.subject_session)
         else:
@@ -115,6 +106,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
 
+        self.stages = {'Segmentation': SegmentationStage(bids_dir=project_info.base_directory, 
+                                                         output_dir=self.output_directory),
+                       'Parcellation': ParcellationStage(pipeline_mode="Diffusion",
+                                                         bids_dir=project_info.base_directory, 
+                                                         output_dir=self.output_directory)}    
+        cmp_common.Pipeline.__init__(self, project_info)
+        
         self.stages['Segmentation'].config.on_trait_change(
             self.update_parcellation, 'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(

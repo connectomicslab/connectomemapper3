@@ -27,6 +27,7 @@ import nipype.interfaces.utility as util
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.interfaces.freesurfer import copyBrainMaskToFreesurfer, copyFileToFreesurfer
+from cmtklib.util import bidsapp_2_local_bids_dir, bidsapp_2_local_output_dir
 
 
 class SegmentationConfig(HasTraits):
@@ -69,8 +70,11 @@ def extract_base_directory(file):
 
 class SegmentationStage(Stage):
     # General and UI members
-    def __init__(self):
+    def __init__(self, bids_dir, output_dir):
         self.name = 'segmentation_stage'
+        self.bids_dir = bids_dir
+        self.output_dir = output_dir
+        
         self.config = SegmentationConfig()
         self.config.ants_templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation',
                                                                                                 'ants_template_IXI',
@@ -90,14 +94,14 @@ class SegmentationStage(Stage):
             if self.config.use_existing_freesurfer_data == False:
                 # Converting to .mgz format
                 fs_mriconvert = pe.Node(interface=fs.MRIConvert(
-                    out_type="mgz", out_file="T1.mgz"), name="mgz_convert")
+                    out_type="mgz", out_file="T1.mgz"), name="mgzConvert")
 
                 if self.config.make_isotropic:
                     fs_mriconvert.inputs.vox_size = (
                         self.config.isotropic_vox_size, self.config.isotropic_vox_size, self.config.isotropic_vox_size)
                     fs_mriconvert.inputs.resample_type = self.config.isotropic_interpolation
 
-                rename = pe.Node(util.Rename(), name="copy_orig")
+                rename = pe.Node(util.Rename(), name='copyOrig')
                 orig_dir = os.path.join(
                     self.config.freesurfer_subject_id, "mri", "orig")
                 if not os.path.exists(orig_dir):
@@ -108,7 +112,7 @@ class SegmentationStage(Stage):
                 if self.config.brain_mask_extraction_tool == "Freesurfer":
                     # ReconAll => named outputnode as we don't want to select a specific output....
                     fs_reconall = pe.Node(interface=fs.ReconAll(
-                        flags='-no-isrunning'), name="reconall")
+                        flags='-no-isrunning'), name='reconall')
                     fs_reconall.inputs.directive = 'all'
                     fs_reconall.inputs.args = self.config.freesurfer_args
 
@@ -134,7 +138,7 @@ class SegmentationStage(Stage):
                 else:
                     # ReconAll => named outputnode as we don't want to select a specific output....
                     fs_autorecon1 = pe.Node(interface=fs.ReconAll(
-                        flags='-no-isrunning'), name="autorecon1")
+                        flags='-no-isrunning'), name='autorecon1')
                     fs_autorecon1.inputs.directive = 'autorecon1'
                     if self.config.brain_mask_extraction_tool == "Custom" or self.config.brain_mask_extraction_tool == "ANTs":
                         fs_autorecon1.inputs.flags = '-noskullstrip'
@@ -156,10 +160,10 @@ class SegmentationStage(Stage):
                     ])
 
                     fs_source = pe.Node(
-                        interface=FreeSurferSource(), name='fs_source')
+                        interface=FreeSurferSource(), name='fsSource')
 
                     fs_mriconvert_nu = pe.Node(interface=fs.MRIConvert(out_type="niigz", out_file="nu.nii.gz"),
-                                               name="niigz_convert")
+                                               name='niigzConvert')
 
                     flow.connect([
                         (fs_autorecon1, fs_source, [
@@ -168,7 +172,7 @@ class SegmentationStage(Stage):
                     ])
 
                     fs_mriconvert_brainmask = pe.Node(interface=fs.MRIConvert(out_type="mgz", out_file="brainmask.mgz"),
-                                                      name='fs_mriconvert_bet_brainmask')
+                                                      name='fsMriconvertBETbrainmask')
 
                     if self.config.brain_mask_extraction_tool == "BET":
                         fsl_bet = pe.Node(
@@ -188,7 +192,7 @@ class SegmentationStage(Stage):
                         # probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz'))
 
                         ants_bet = pe.Node(interface=ants.BrainExtraction(
-                            out_prefix='ants_bet_'), name='ants_bet')
+                            out_prefix='ants_bet_'), name='antsBET')
                         ants_bet.inputs.brain_template = self.config.ants_templatefile
                         ants_bet.inputs.brain_probability_mask = self.config.ants_probmaskfile
                         ants_bet.inputs.extraction_registration_mask = self.config.ants_regmaskfile
@@ -216,7 +220,7 @@ class SegmentationStage(Stage):
                     #             ])
 
                     copy_brainmask_to_fs = pe.Node(
-                        interface=copyBrainMaskToFreesurfer(), name='copy_brainmask_to_fs')
+                        interface=copyBrainMaskToFreesurfer(), name='copyBrainmaskTofs')
 
                     flow.connect([
                         (rename, copy_brainmask_to_fs, [
@@ -234,7 +238,7 @@ class SegmentationStage(Stage):
                         return file[:-18]
 
                     fs_reconall23 = pe.Node(interface=fs.ReconAll(
-                        flags='-no-isrunning'), name="reconall23")
+                        flags='-no-isrunning'), name='reconall23')
                     fs_reconall23.inputs.directive = 'autorecon2'
                     fs_reconall23.inputs.args = self.config.freesurfer_args
                     fs_reconall23.inputs.flags = '-autorecon3'
@@ -258,7 +262,7 @@ class SegmentationStage(Stage):
 
         elif self.config.seg_tool == "Custom segmentation":
 
-            apply_mask = pe.Node(interface=fsl.ApplyMask(), name='apply_mask')
+            apply_mask = pe.Node(interface=fsl.ApplyMask(), name='applyMask')
             apply_mask.inputs.mask_file = self.config.brain_mask_path
             apply_mask.inputs.out_file = 'brain.nii.gz'
 
@@ -285,6 +289,7 @@ class SegmentationStage(Stage):
             else:
                 fs_path = os.path.join(
                     self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
+            fs_path = bidsapp_2_local_output_dir(self.output_dir,fs_path)
             print ("fs_path : %s" % fs_path)
 
             if 'FREESURFER_HOME' not in os.environ:

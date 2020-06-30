@@ -161,7 +161,7 @@ def create_dipy_tracking_flow(config):
     # CRS2XYZtkReg = subprocess.check_output
 
     outputnode = pe.Node(interface=util.IdentityInterface(
-        fields=["track_file"]), name="outputnode")
+        fields=["track_file"]), name='outputnode')
 
     if not config.SD and config.imaging_model != 'DSI':  # If tensor fitting was used
         dipy_tracking = pe.Node(
@@ -211,9 +211,9 @@ def create_dipy_tracking_flow(config):
             #     (dipy_tracking,outputnode,[('tracks','track_file')])
             #     ])
 
-            dipy_seeds = pe.Node(interface=make_seeds(), name="dipy_seeds")
+            dipy_seeds = pe.Node(interface=make_seeds(), name='dipy_seeds')
             dipy_tracking = pe.Node(
-                interface=DirectionGetterTractography(), name="dipy_deterministic_tracking")
+                interface=DirectionGetterTractography(), name='dipy_deterministic_tracking')
             dipy_tracking.inputs.algo = 'deterministic'
             dipy_tracking.inputs.num_seeds = config.number_of_seeds
             dipy_tracking.inputs.fa_thresh = config.fa_thresh
@@ -271,7 +271,7 @@ def create_dipy_tracking_flow(config):
             #     ])
 
             dipy_tracking = pe.Node(
-                interface=DirectionGetterTractography(), name="dipy_probabilistic_tracking")
+                interface=DirectionGetterTractography(), name='dipy_probabilistic_tracking')
             dipy_tracking.inputs.algo = 'probabilistic'
             dipy_tracking.inputs.num_seeds = config.number_of_seeds
             dipy_tracking.inputs.fa_thresh = config.fa_thresh
@@ -332,11 +332,11 @@ def create_mrtrix_tracking_flow(config):
     # CRS2XYZtkReg = subprocess.check_output
 
     outputnode = pe.Node(interface=util.IdentityInterface(
-        fields=["track_file"]), name="outputnode")
+        fields=["track_file"]), name='outputnode')
 
     # Compute single fiber voxel mask
     wm_erode = pe.Node(interface=Erode(
-        out_filename="wm_mask_resampled.nii.gz"), name="wm_erode")
+        out_filename="wm_mask_resampled.nii.gz"), name='wm_erode')
     wm_erode.inputs.number_of_passes = 3
     wm_erode.inputs.filtertype = 'erode'
 
@@ -346,9 +346,9 @@ def create_mrtrix_tracking_flow(config):
 
     if config.tracking_mode == 'Deterministic':
         mrtrix_seeds = pe.Node(
-            interface=make_mrtrix_seeds(), name="mrtrix_seeds")
+            interface=make_mrtrix_seeds(), name='mrtrix_seeds')
         mrtrix_tracking = pe.Node(
-            interface=StreamlineTrack(), name="mrtrix_deterministic_tracking")
+            interface=StreamlineTrack(), name='mrtrix_deterministic_tracking')
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
         # mrtrix_tracking.inputs.maximum_number_of_seeds = config.max_number_of_seeds
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length
@@ -381,7 +381,7 @@ def create_mrtrix_tracking_flow(config):
         #             ])
 
         orientation_matcher = pe.Node(
-            interface=match_orientations(), name="orient_matcher")
+            interface=match_orientations(), name='orient_matcher')
 
         flow.connect([
             (inputnode, mrtrix_seeds, [('wm_mask_resampled', 'WM_file')]),
@@ -413,7 +413,7 @@ def create_mrtrix_tracking_flow(config):
             ])
 
         # converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
-        converter = pe.Node(interface=Tck2Trk(), name="trackvis")
+        converter = pe.Node(interface=Tck2Trk(), name='trackvis')
         converter.inputs.out_tracks = 'converted.trk'
 
         flow.connect([
@@ -445,9 +445,9 @@ def create_mrtrix_tracking_flow(config):
 
     elif config.tracking_mode == 'Probabilistic':
         mrtrix_seeds = pe.Node(
-            interface=make_mrtrix_seeds(), name="mrtrix_seeds")
+            interface=make_mrtrix_seeds(), name='mrtrix_seeds')
         mrtrix_tracking = pe.Node(
-            interface=StreamlineTrack(), name="mrtrix_probabilistic_tracking")
+            interface=StreamlineTrack(), name='mrtrix_probabilistic_tracking')
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
         # mrtrix_tracking.inputs.maximum_number_of_seeds = config.max_number_of_seeds
         mrtrix_tracking.inputs.maximum_tract_length = config.max_length

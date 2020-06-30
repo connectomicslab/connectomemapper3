@@ -110,8 +110,11 @@ class RegistrationStage(Stage):
     fs_subjects_dir = Directory(exists=False, resolve=False, mandatory=False)
     fs_subject_id = Str(mandatory=False)
 
-    def __init__(self, pipeline_mode, fs_subjects_dir=None, fs_subject_id=None):
+    def __init__(self, pipeline_mode, fs_subjects_dir=None, fs_subject_id=None, bids_dir="", output_dir=""):
         self.name = 'registration_stage'
+        self.bids_dir = bids_dir
+        self.output_dir = output_dir
+        
         self.config = RegistrationConfig()
         self.config.pipeline = pipeline_mode
 

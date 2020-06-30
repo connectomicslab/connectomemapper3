@@ -35,8 +35,11 @@ class PreprocessingConfig(HasTraits):
 
 class PreprocessingStage(Stage):
     # General and UI members
-    def __init__(self):
+    def __init__(self, bids_dir, output_dir):
         self.name = 'preprocessing_stage'
+        self.bids_dir = bids_dir
+        self.output_dir = output_dir
+        
         self.config = PreprocessingConfig()
         self.inputs = ["functional"]
         self.outputs = ["functional_preproc", "par_file", "mean_vol"]

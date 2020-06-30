@@ -26,6 +26,8 @@ from cmtklib.interfaces import fsl
 from cmtklib.parcellation import Parcellate, ParcellateBrainstemStructures, \
     ParcellateHippocampalSubfields, ParcellateThalamus, \
     CombineParcellations, ComputeParcellationRoiVolumes
+from cmtklib.util import bidsapp_2_local_bids_dir, bidsapp_2_local_output_dir
+
 # Own imports
 from cmp.stages.common import Stage
 
@@ -73,8 +75,11 @@ class ParcellationConfig(HasTraits):
 
 class ParcellationStage(Stage):
 
-    def __init__(self, pipeline_mode):
+    def __init__(self, pipeline_mode, bids_dir, output_dir):
         self.name = 'parcellation_stage'
+        self.bids_dir = bids_dir
+        self.output_dir = output_dir
+        
         self.config = ParcellationConfig()
         # self.config.template_thalamus = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')))
         # self.config.thalamic_nuclei_maps = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')))
@@ -490,14 +495,20 @@ class ParcellationStage(Stage):
                 parc_results = pickle.load(gzip.open(parc_results_path))
                 # print parc_results
                 # print parc_results.outputs.roi_files_in_structural_space
-                white_matter_file = parc_results.outputs.white_matter_mask_file
+                white_matter_file = bidsapp_2_local_output_dir(
+                    self.output_dir,
+                    parc_results.outputs.white_matter_mask_file)
+
                 if isinstance(parc_results.outputs.roi_files_in_structural_space, str):
                     # print "str: %s" % parc_results.outputs.roi_files_in_structural_space
                     lut_file = pkg_resources.resource_filename('cmtklib',
                                                                os.path.join('data', 'parcellation', 'nativefreesurfer',
                                                                             'freesurferaparc',
                                                                             'FreeSurferColorLUT_adapted.txt'))
-                    roi_v = parc_results.outputs.roi_files_in_structural_space
+                    roi_v = bidsapp_2_local_output_dir(
+                        self.output_dir,
+                        parc_results.outputs.roi_files_in_structural_space)
+
                     # print "roi_v : %s" % os.path.basename(roi_v)
                     self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview', '-v',
                                                                           white_matter_file + ':colormap=GEColor',
@@ -512,6 +523,9 @@ class ParcellationStage(Stage):
                             print(roi_basename)
                             scale = roi_basename[23:-7]
                             print(scale)
+
+                            roi_v = bidsapp_2_local_output_dir(self.output_dir,roi_v)
+
                             # print scale
                             lut_file = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'parcellation',
                                                                                                'lausanne2008',
@@ -533,6 +547,9 @@ class ParcellationStage(Stage):
                             for roi_v, lut_file in zip(finalparc_results.outputs.output_rois,
                                                        finalparc_results.outputs.colorLUT_files):
                                 roi_basename = os.path.basename(roi_v)
+
+                                roi_v = bidsapp_2_local_output_dir(self.output_dir,roi_v)
+
                                 self.inspect_outputs_dict[roi_basename] = ['freeview', '-v',
                                                                            white_matter_file + ':colormap=GEColor',
                                                                            roi_v + ":colormap=lut:lut=" + lut_file]
@@ -544,7 +561,7 @@ class ParcellationStage(Stage):
                         if (os.path.exists(parc_results_path)):
                             parc_results = pickle.load(
                                 gzip.open(parc_results_path))
-                            brain = parc_results.outputs.brain
+                            brain = bidsapp_2_local_output_dir(self.output_dir,parc_results.outputs.brain)
 
                         # if self.config.include_thalamic_nuclei_parcellation:
                         results_path = os.path.join(
@@ -552,16 +569,18 @@ class ParcellationStage(Stage):
 
                         if (os.path.exists(results_path)):
                             results = pickle.load(gzip.open(results_path))
+                            T1w = bidsapp_2_local_output_dir(self.output_dir,results.inputs['T1w_image'])
+                            probmaps = bidsapp_2_local_output_dir(self.output_dir,results.outputs.prob_maps_registered)
+                            maxprob = bidsapp_2_local_output_dir(self.output_dir,results.outputs.prob_maps_registered)
+
                             self.inspect_outputs_dict['Thalamic nuclei - Probability maps'] = ['fsleyes', '-sdefault',
-                                                                                               results.inputs[
-                                                                                                   'T1w_image'],
-                                                                                               results.outputs.prob_maps_registered,
+                                                                                               T1w,
+                                                                                               probmaps,
                                                                                                '-cm', "copper", '-a',
                                                                                                '50']
                             self.inspect_outputs_dict['Thalamic nuclei - MaxProb labels'] = ['fsleyes', '-sdefault',
-                                                                                             results.inputs[
-                                                                                                 'T1w_image'],
-                                                                                             results.outputs.max_prob_registered,
+                                                                                             T1w,
+                                                                                             maxprob,
                                                                                              "-cm", "render3", '-a',
                                                                                              '50']
 
@@ -571,13 +590,15 @@ class ParcellationStage(Stage):
 
                         if (os.path.exists(results_path)):
                             results = pickle.load(gzip.open(results_path))
+                            brainstem = bidsapp_2_local_output_dir(self.output_dir,results.outputs.brainstem_structures)
+
                             if (os.path.exists(brain)):
-                                self.inspect_outputs_dict['Brainstem structures'] = ['fsleyes', '-sdefault', brain,
-                                                                                     results.outputs.brainstem_structures,
+                                self.inspect_outputs_dict['Brainstem structures'] = ['fsleyes', '-sdefault', 
+                                                                                     brain, brainstem,
                                                                                      "-cm", "random", '-a', '50']
                             else:
                                 self.inspect_outputs_dict['Brainstem structures'] = ['fsleyes', '-sdefault',
-                                                                                     results.outputs.brainstem_structures,
+                                                                                     brainstem,
                                                                                      "-cm", "random"]
 
                         # if self.config.segment_hippocampal_subfields:
@@ -586,18 +607,21 @@ class ParcellationStage(Stage):
 
                         if (os.path.exists(results_path)):
                             results = pickle.load(gzip.open(results_path))
+                            lh_hippo = bidsapp_2_local_output_dir(self.output_dir,results.outputs.lh_hipposubfields)
+                            rh_hippo = bidsapp_2_local_output_dir(self.output_dir,results.outputs.rh_hipposubfields)
+
                             if (os.path.exists(brain)):
                                 self.inspect_outputs_dict['Hippocampal subfields'] = ['fsleyes', '-sdefault',
                                                                                       brain,
-                                                                                      results.outputs.lh_hipposubfields,
+                                                                                      lh_hippo,
                                                                                       "-cm", "random", '-a', '50',
-                                                                                      results.outputs.rh_hipposubfields,
+                                                                                      rh_hippo,
                                                                                       "-cm", "random", '-a', '50']
                             else:
                                 self.inspect_outputs_dict['Hippocampal subfields'] = ['fsleyes', '-sdefault',
-                                                                                      results.outputs.lh_hipposubfields,
+                                                                                      lh_hippo,
                                                                                       "-cm", "random",
-                                                                                      results.outputs.rh_hipposubfields,
+                                                                                      rh_hippo,
                                                                                       "-cm", "random"]
 
                 # self.inspect_outputs = self.inspect_outputs_dict.keys()

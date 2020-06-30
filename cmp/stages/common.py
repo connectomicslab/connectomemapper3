@@ -16,6 +16,8 @@ import os
 # Stage master class, will be inherited by the various stage subclasses. Inherits from HasTraits.
 #
 class Stage(HasTraits):
+    bids_dir = Str
+    output_dir = Str
     inspect_outputs = ['Outputs not available']
     inspect_outputs_enum = Enum(values='inspect_outputs')
     inspect_outputs_dict = Dict

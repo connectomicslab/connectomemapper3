@@ -156,14 +156,6 @@ class Pipeline(HasTraits):
 
     def __init__(self, project_info):
         self.base_directory = project_info.base_directory
-
-        if project_info.output_directory is not None:
-            self.output_directory = project_info.output_directory
-        else:
-            self.output_directory = os.path.join(
-                self.base_directory, "derivatives")
-
-        self.subject = project_info.subject
         self.number_of_cores = project_info.number_of_cores
 
         for stage in list(self.stages.keys()):

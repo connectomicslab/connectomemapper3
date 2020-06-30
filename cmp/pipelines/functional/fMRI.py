@@ -69,22 +69,6 @@ class fMRIPipeline(Pipeline):
     subject_id = Str
 
     def __init__(self, project_info):
-        self.stages = {'Preprocessing': PreprocessingStage(),
-                       'Registration': RegistrationStage(pipeline_mode="fMRI",
-                                                         fs_subjects_dir=project_info.freesurfer_subjects_dir,
-                                                         fs_subject_id=os.path.basename(project_info.freesurfer_subject_id)),
-                       'FunctionalMRI': FunctionalMRIStage(),
-                       'Connectome': ConnectomeStage()}
-        Pipeline.__init__(self, project_info)
-        self.stages['FunctionalMRI'].config.on_trait_change(
-            self.update_nuisance_requirements, 'global_nuisance')
-        self.stages['FunctionalMRI'].config.on_trait_change(
-            self.update_nuisance_requirements, 'csf')
-        self.stages['FunctionalMRI'].config.on_trait_change(
-            self.update_nuisance_requirements, 'wm')
-        self.stages['Connectome'].config.on_trait_change(
-            self.update_scrubbing, 'apply_scrubbing')
-
         self.subject = project_info.subject
 
         self.subjects_dir = project_info.freesurfer_subjects_dir
@@ -100,11 +84,39 @@ class fMRIPipeline(Pipeline):
         else:
             self.global_conf.subject_session = ''
             self.subject_directory = os.path.join(
-                self.base_directory, self.subject)
+                project_info.base_directory, self.subject)
 
         self.derivatives_directory = os.path.abspath(
             project_info.output_directory)
-        self.output_directory = os.path.abspath(project_info.output_directory)
+
+        if project_info.output_directory is not None:
+            self.output_directory = os.path.abspath(
+                project_info.output_directory)
+        else:
+            self.output_directory = os.path.join(
+                self.base_directory, "derivatives")
+
+        self.stages = {'Preprocessing': PreprocessingStage(bids_dir=project_info.base_directory, 
+                                                           output_dir=self.output_directory),
+                       'Registration': RegistrationStage(pipeline_mode="fMRI",
+                                                         fs_subjects_dir=project_info.freesurfer_subjects_dir,
+                                                         fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
+                                                         bids_dir=project_info.base_directory, 
+                                                         output_dir=self.output_directory),
+                       'FunctionalMRI': FunctionalMRIStage(bids_dir=project_info.base_directory, 
+                                                           output_dir=self.output_directory),
+                       'Connectome': ConnectomeStage(bids_dir=project_info.base_directory, 
+                                                     output_dir=self.output_directory)}
+        Pipeline.__init__(self, project_info)
+
+        self.stages['FunctionalMRI'].config.on_trait_change(
+            self.update_nuisance_requirements, 'global_nuisance')
+        self.stages['FunctionalMRI'].config.on_trait_change(
+            self.update_nuisance_requirements, 'csf')
+        self.stages['FunctionalMRI'].config.on_trait_change(
+            self.update_nuisance_requirements, 'wm')
+        self.stages['Connectome'].config.on_trait_change(
+            self.update_scrubbing, 'apply_scrubbing')
 
     def _subject_changed(self, new):
         self.stages['Connectome'].config.subject = new

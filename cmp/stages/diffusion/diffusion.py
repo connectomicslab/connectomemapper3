@@ -202,8 +202,11 @@ def strip_suffix(file_input, prefix):
 
 class DiffusionStage(Stage):
 
-    def __init__(self):
+    def __init__(self, bids_dir, output_dir):
         self.name = 'diffusion_stage'
+        self.bids_dir = bids_dir
+        self.output_dir = output_dir
+        
         self.config = DiffusionConfig()
         self.inputs = ["diffusion", "partial_volumes", "wm_mask_registered", "brain_mask_registered",
                        "act_5tt_registered", "gmwmi_registered", "roi_volumes", "grad", "bvals", "bvecs"]
@@ -494,7 +497,7 @@ class DiffusionStage(Stage):
         #                 ])
 
         temp_node = pe.Node(interface=util.IdentityInterface(
-            fields=["diffusion_model"]), name="diffusion_model")
+            fields=["diffusion_model"]), name='diffusion_model')
         temp_node.inputs.diffusion_model = self.config.diffusion_model
         flow.connect([
             (temp_node, outputnode, [("diffusion_model", "diffusion_model")])
@@ -503,7 +506,7 @@ class DiffusionStage(Stage):
         if self.config.tracking_processing_tool == 'Custom':
             # FIXME make sure header of TRK / TCK are consistent with DWI
             custom_node = pe.Node(interface=util.IdentityInterface(fields=["custom_track_file"]),
-                                  name="read_custom_track")
+                                  name='read_custom_track')
             custom_node.inputs.custom_track_file = self.config.custom_track_file
             if nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TrkFile:
                 print("> load TRK tractography file")
@@ -513,7 +516,7 @@ class DiffusionStage(Stage):
                 ])
             elif nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TckFile:
                 print("> load TCK tractography file and convert to TRK format")
-                converter = pe.Node(interface=Tck2Trk(), name="trackvis")
+                converter = pe.Node(interface=Tck2Trk(), name='trackvis')
                 converter.inputs.out_tracks = 'converted.trk'
 
                 flow.connect([
