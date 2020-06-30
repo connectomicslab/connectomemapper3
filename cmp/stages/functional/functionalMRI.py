@@ -23,6 +23,7 @@ from nipype.interfaces import afni
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.functionalMRI import Scrubbing, Detrending, nuisance_regression
+from cmtklib.util import bidsapp_2_local_output_dir
 
 # Imports for processing
 import nibabel as nib
@@ -208,28 +209,32 @@ class FunctionalMRIStage(Stage):
                 self.stage_dir, "smoothing", "result_smoothing.pklz")
             if (os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Smoothed image'] = ['fsleyes', '-sdefault', results.outputs.out_file, '-cm',
+                smooth = bidsapp_2_local_output_dir(self.output_dir, results.outputs.out_file)
+                self.inspect_outputs_dict['Smoothed image'] = ['fsleyes', '-sdefault', smooth, '-cm',
                                                                'brain_colours_blackbdy_iso']
         if self.config.wm or self.config.global_nuisance or self.config.csf or self.config.motion:
             res_path = os.path.join(
                 self.stage_dir, "nuisance_regression", "result_nuisance_regression.pklz")
             if (os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
+                nuis = bidsapp_2_local_output_dir(self.output_dir, results.outputs.out_file)
                 self.inspect_outputs_dict['Regression output'] = [
-                    'fsleyes', '-sdefault', results.outputs.out_file]
+                    'fsleyes', '-sdefault', nuis]
         if self.config.detrending:
             res_path = os.path.join(
                 self.stage_dir, "detrending", "result_detrending.pklz")
             if (os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Detrending output'] = ['fsleyes', '-sdefault', results.outputs.out_file,
+                detrend = bidsapp_2_local_output_dir(self.output_dir, results.outputs.out_file)
+                self.inspect_outputs_dict['Detrending output'] = ['fsleyes', '-sdefault', detrend,
                                                                   '-cm', 'brain_colours_blackbdy_iso']
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             res_path = os.path.join(
                 self.stage_dir, "converter", "result_converter.pklz")
             if (os.path.exists(res_path)):
                 results = pickle.load(gzip.open(res_path))
-                self.inspect_outputs_dict['Filter output'] = ['fsleyes', '-sdefault', results.outputs.out_file, '-cm',
+                filt = bidsapp_2_local_output_dir(self.output_dir, results.outputs.out_file)
+                self.inspect_outputs_dict['Filter output'] = ['fsleyes', '-sdefault', filt, '-cm',
                                                               'brain_colours_blackbdy_iso']
 
         self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],

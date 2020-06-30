@@ -31,6 +31,7 @@ from nipype.interfaces.mrtrix3.connectivity import BuildConnectome
 from cmtklib.interfaces.mrtrix3 import FilterTractogram
 from cmp.stages.common import Stage
 import cmtklib.connectome 
+from cmtklib.util import bidsapp_2_local_output_dir
 
 
 class ConnectomeConfig(HasTraits):
@@ -115,9 +116,10 @@ class ConnectomeStage(Stage):
             # print("con_results_path : %s" % con_results_path)
             con_results = pickle.load(gzip.open(con_results_path))
             # print(con_results.inputs)
-
+            tracto = bidsapp_2_local_output_dir(self.output_dir,
+                                                con_results.outputs.streamline_final_file)
             self.inspect_outputs_dict['Final tractogram'] = [
-                'trackvis', con_results.outputs.streamline_final_file]
+                'trackvis', tracto]
             mat = con_results.outputs.connectivity_matrices
             # print("Conn. matrix : %s" % mat)
 
@@ -137,7 +139,7 @@ class ConnectomeStage(Stage):
                     con_name = os.path.basename(mat).split(".")[
                         0].split("_")[-1]
                     # print("con_name:"+con_name)
-
+                    mat = bidsapp_2_local_output_dir(self.output_dir, mat)
                     # Load the connectivity matrix and extract the attributes (weights)
                     # con_mat =  pickle.load(mat, encoding="latin1")
                     con_mat = nx.read_gpickle(mat)
@@ -160,7 +162,7 @@ class ConnectomeStage(Stage):
                         con_name = " ".join(os.path.basename(
                             mat).split(".")[0].split("_"))
                         # print("con_name:"+con_name)
-
+                        mat = bidsapp_2_local_output_dir(self.output_dir, mat)
                         # Load the connectivity matrix and extract the attributes (weights)
                         # con_mat =  pickle.load(mat, encoding="latin1")
                         con_mat = nx.read_gpickle(mat)

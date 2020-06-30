@@ -53,8 +53,8 @@ class PreprocessingStageUI(PreprocessingStage):
     )
 
     # General and UI members
-    def __init__(self):
-        PreprocessingStage.__init__(self)
+    def __init__(self, bids_dir, output_dir):
+        PreprocessingStage.__init__(self, bids_dir, output_dir)
         self.config = PreprocessingConfigUI()
 
     def _inspect_output_button_fired(self, info):

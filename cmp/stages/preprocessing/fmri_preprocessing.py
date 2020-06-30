@@ -21,6 +21,7 @@ import nibabel as nib
 
 from cmp.stages.common import Stage
 from cmtklib.functionalMRI import discard_tp
+from cmtklib.util import bidsapp_2_local_output_dir
 
 
 class PreprocessingConfig(HasTraits):
@@ -154,8 +155,9 @@ class PreprocessingStage(Stage):
             if (os.path.exists(despike_path)):
                 # print('exists')
                 despike_results = pickle.load(gzip.open(despike_path))
+                despike = bidsapp_2_local_output_dir(self.output_dir, despike_results.outputs.out_file)
                 self.inspect_outputs_dict['Spike corrected image'] = ['fsleyes', '-ad',
-                                                                      despike_results.outputs.out_file, '-cm',
+                                                                      despike, '-cm',
                                                                       'brain_colours_blackbdy_iso']
 
         if self.config.slice_timing:
@@ -163,8 +165,9 @@ class PreprocessingStage(Stage):
                 self.stage_dir, "slice_timing", "result_slice_timing.pklz")
             if (os.path.exists(slc_timing_path)):
                 slice_results = pickle.load(gzip.open(slc_timing_path))
+                tcorr = bidsapp_2_local_output_dir(self.output_dir, slice_results.outputs.slice_time_corrected_file)
                 self.inspect_outputs_dict['Slice time corrected image'] = ['fsleyes', '-ad',
-                                                                           slice_results.outputs.slice_time_corrected_file,
+                                                                           tcorr,
                                                                            '-cm', 'brain_colours_blackbdy_iso']
             if self.config.motion_correction:
                 motion_results_path = os.path.join(
@@ -172,8 +175,9 @@ class PreprocessingStage(Stage):
                 if (os.path.exists(motion_results_path)):
                     motion_results = pickle.load(
                         gzip.open(motion_results_path))
+                    mcorr = bidsapp_2_local_output_dir(self.output_dir, motion_results.outputs.out_file)
                     self.inspect_outputs_dict['Slice time and motion corrected image'] = ['fsleyes', '-ad',
-                                                                                          motion_results.outputs.out_file,
+                                                                                          mcorr,
                                                                                           '-cm',
                                                                                           'brain_colours_blackbdy_iso']
 
@@ -182,8 +186,9 @@ class PreprocessingStage(Stage):
                 self.stage_dir, "motion_correction", "result_motion_correction.pklz")
             if (os.path.exists(motion_results_path)):
                 motion_results = pickle.load(gzip.open(motion_results_path))
+                mcorr = bidsapp_2_local_output_dir(self.output_dir, motion_results.outputs.out_file)
                 self.inspect_outputs_dict['Motion corrected image'] = ['fsleyes', '-ad',
-                                                                       motion_results.outputs.out_file, '-cm',
+                                                                       mcorr, '-cm',
                                                                        'brain_colours_blackbdy_iso']
 
         self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],

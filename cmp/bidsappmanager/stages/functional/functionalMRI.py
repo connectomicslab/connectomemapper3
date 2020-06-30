@@ -72,8 +72,8 @@ class FunctionalMRIStageUI(FunctionalMRIStage):
         buttons=['OK', 'Cancel']
     )
 
-    def __init__(self):
-        FunctionalMRIStage.__init__(self)
+    def __init__(self, bids_dir, output_dir):
+        FunctionalMRIStage.__init__(self, bids_dir, output_dir)
         self.config = FunctionalMRIConfigUI()
 
     def _inspect_output_button_fired(self, info):

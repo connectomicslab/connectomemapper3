@@ -86,10 +86,16 @@ class DiffusionPipelineUI(DiffusionPipeline):
         DiffusionPipeline.__init__(self, project_info)
 
         self.stages = {
-            'Preprocessing': PreprocessingStageUI(),
-            'Registration': RegistrationStageUI(pipeline_mode="Diffusion"),
-            'Diffusion': DiffusionStageUI(),
-            'Connectome': ConnectomeStageUI()}
+            'Preprocessing': PreprocessingStageUI(bids_dir=project_info.base_directory, 
+                                                  output_dir=project_info.output_directory),
+            'Registration': RegistrationStageUI(pipeline_mode="Diffusion",
+                                                bids_dir=project_info.base_directory, 
+                                                output_dir=project_info.output_directory),
+            'Diffusion': DiffusionStageUI(bids_dir=project_info.base_directory, 
+                                          output_dir=project_info.output_directory),
+            'Connectome': ConnectomeStageUI(bids_dir=project_info.base_directory, 
+                                            output_dir=project_info.output_directory)
+            }
 
         for stage in list(self.stages.keys()):
             if project_info.subject_session != '':

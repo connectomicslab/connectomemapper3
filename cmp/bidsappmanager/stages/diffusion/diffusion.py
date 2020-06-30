@@ -125,8 +125,8 @@ class DiffusionStageUI(DiffusionStage):
         buttons=['OK', 'Cancel']
     )
 
-    def __init__(self):
-        DiffusionStage.__init__(self)
+    def __init__(self, bids_dir, output_dir):
+        DiffusionStage.__init__(self, bids_dir, output_dir)
         self.config = DiffusionConfigUI()
 
     def _inspect_output_button_fired(self, info):

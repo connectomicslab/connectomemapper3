@@ -1022,8 +1022,8 @@ class CMP_BIDSAppWindow(HasTraits):
             print(
                 '> FreeSurfer license copy skipped as it already exists(BIDS App Manager) ')
 
-        project.fix_dataset_directory_in_pickles(
-            local_dir=self.bids_root, mode='bidsapp')
+        # project.fix_dataset_directory_in_pickles(
+        #     local_dir=self.bids_root, mode='bidsapp')
 
         print("> Datalad available: {}".format(self.datalad_is_available))
 
@@ -1223,8 +1223,8 @@ class CMP_BIDSAppWindow(HasTraits):
         while len(processes) > 0:
             self.manage_bidsapp_procs(processes)
 
-        project.fix_dataset_directory_in_pickles(
-            local_dir=self.bids_root, mode='local')
+        # project.fix_dataset_directory_in_pickles(
+        #     local_dir=self.bids_root, mode='local')
 
         if self.datalad_is_available and self.data_provenance_tracking:
             # Clean remaining cache files generated in tmp/ of the docker image
@@ -1494,8 +1494,8 @@ class CMP_InspectorWindow(HasTraits):
 
         print('Fix BIDS root directory to {}'.format(
             self.project_info.base_directory))
-        project.fix_dataset_directory_in_pickles(
-            local_dir=self.project_info.base_directory, mode='newlocal')
+        # project.fix_dataset_directory_in_pickles(
+        #     local_dir=self.project_info.base_directory, mode='newlocal')
 
         aborded = self.select_subject()
 

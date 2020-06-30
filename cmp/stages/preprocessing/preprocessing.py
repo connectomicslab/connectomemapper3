@@ -29,6 +29,7 @@ import nipype.interfaces.utility as util
 import nipype.interfaces.mrtrix as mrt
 import nipype.interfaces.ants as ants
 import nipype.interfaces.dipy as dipy
+from nipype.interfaces.mrtrix3.preprocess import ResponseSD
 
 import nibabel as nib
 
@@ -37,8 +38,7 @@ from cmtklib.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, MR
     ExtractMRTrixGrad, Generate5tt, GenerateGMWMInterface
 import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
-
-from nipype.interfaces.mrtrix3.preprocess import ResponseSD
+from cmtklib.util import bidsapp_2_local_output_dir
 
 
 class PreprocessingConfig(HasTraits):
@@ -828,13 +828,17 @@ class PreprocessingStage(Stage):
             if (os.path.exists(denoising_results_path)):
                 dwi_denoise_results = pickle.load(
                     gzip.open(denoising_results_path))
+                denoise = bidsapp_2_local_output_dir(self.output_dir, 
+                                                     dwi_denoise_results.outputs.out_file)
                 # print dwi_denoise_results.outputs.out_file
                 self.inspect_outputs_dict['DWI denoised image'] = [
-                    'mrview', dwi_denoise_results.outputs.out_file]
+                    'mrview', denoise]
                 if self.config.denoising_algo == "MRtrix (MP-PCA)":
+                    noise = bidsapp_2_local_output_dir(self.output_dir,
+                                                       dwi_denoise_results.outputs.out_noisemap)
                     # print dwi_denoise_results.outputs.out_noisemap
                     self.inspect_outputs_dict['Noise map'] = [
-                        'mrview', dwi_denoise_results.outputs.out_noisemap]
+                        'mrview', noise]
 
         if self.config.bias_field_correction:
             bias_field_correction_results_path = os.path.join(self.stage_dir, "dwi_biascorrect",
@@ -844,10 +848,12 @@ class PreprocessingStage(Stage):
                     gzip.open(bias_field_correction_results_path))
                 # print dwi_biascorrect_results.outputs.out_file
                 # print dwi_biascorrect_results.outputs.out_bias
+                bcorr = bidsapp_2_local_output_dir(self.output_dir, dwi_biascorrect_results.outputs.out_file)
                 self.inspect_outputs_dict['Bias field corrected image'] = ['mrview',
-                                                                           dwi_biascorrect_results.outputs.out_file]
+                                                                           bcorr]
+                bias = bidsapp_2_local_output_dir(self.output_dir, dwi_biascorrect_results.outputs.out_bias)
                 self.inspect_outputs_dict['Bias field'] = [
-                    'mrview', dwi_biascorrect_results.outputs.out_bias]
+                    'mrview', bias]
 
         if self.config.eddy_current_and_motion_correction:
             if self.config.eddy_correction_algo == 'FSL eddy_correct':
@@ -855,15 +861,17 @@ class PreprocessingStage(Stage):
                     self.stage_dir, "eddy_correct", "result_eddy_correct.pklz")
                 if (os.path.exists(eddy_results_path)):
                     eddy_results = pickle.load(gzip.open(eddy_results_path))
+                    edcorr = bidsapp_2_local_output_dir(self.output_dir, eddy_results.outputs.eddy_corrected)
                     self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview',
-                                                                                 eddy_results.outputs.eddy_corrected]
+                                                                                 edcorr]
             else:
                 eddy_results_path = os.path.join(
                     self.stage_dir, "eddy", "result_eddy.pklz")
                 if (os.path.exists(eddy_results_path)):
                     eddy_results = pickle.load(gzip.open(eddy_results_path))
+                    edcorr = bidsapp_2_local_output_dir(self.output_dir, eddy_results.outputs.eddy_corrected)
                     self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview',
-                                                                                 eddy_results.outputs.eddy_corrected]
+                                                                                 edcorr]
 
         self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)

@@ -76,8 +76,12 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         AnatomicalPipeline.__init__(self, project_info)
 
         self.stages = {
-            'Segmentation': SegmentationStageUI(),
-            'Parcellation': ParcellationStageUI(pipeline_mode="Diffusion")}
+            'Segmentation': SegmentationStageUI(bids_dir=project_info.base_directory, 
+                                output_dir=project_info.output_directory),
+            'Parcellation': ParcellationStageUI(pipeline_mode="Diffusion",
+                                bids_dir=project_info.base_directory, 
+                                output_dir=project_info.output_directory)
+            }
 
         for stage in list(self.stages.keys()):
             if project_info.subject_session != '':

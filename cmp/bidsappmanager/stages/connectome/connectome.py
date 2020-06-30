@@ -80,8 +80,8 @@ class ConnectomeStageUI(ConnectomeStage):
         buttons=['OK', 'Cancel']
     )
 
-    def __init__(self):
-        ConnectomeStage.__init__(self)
+    def __init__(self, bids_dir, output_dir):
+        ConnectomeStage.__init__(self, bids_dir, output_dir)
         self.config = ConnectomeConfigUI()
         self.log_visualization = self.config.log_visualization
         self.circular_layout = self.config.circular_layout

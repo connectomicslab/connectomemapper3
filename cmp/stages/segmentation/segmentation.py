@@ -289,7 +289,7 @@ class SegmentationStage(Stage):
             else:
                 fs_path = os.path.join(
                     self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
-            fs_path = bidsapp_2_local_output_dir(self.output_dir,fs_path)
+            fs_path = bidsapp_2_local_output_dir(self.output_dir, fs_path)
             print ("fs_path : %s" % fs_path)
 
             if 'FREESURFER_HOME' not in os.environ:

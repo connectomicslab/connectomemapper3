@@ -35,8 +35,6 @@ import warnings
 warnings.filterwarnings(
     "ignore", message="No valid root directory found for domain 'derivatives'.")
 
-encoding = "utf-8"
-
 # Global imports
 
 
@@ -1946,8 +1944,8 @@ class CMP_BIDSAppWindowHandler(Handler):
 
         ui_info.ui.context["object"].docker_running = True
 
-        fix_dataset_directory_in_pickles(
-            local_dir=ui_info.ui.context["object"].bids_root, mode='bidsapp')
+        # fix_dataset_directory_in_pickles(
+        #     local_dir=ui_info.ui.context["object"].bids_root, mode='bidsapp')
 
         for label in ui_info.ui.context["object"].list_of_subjects_to_be_processed:
             while len(processes) == maxprocs:
@@ -1959,8 +1957,8 @@ class CMP_BIDSAppWindowHandler(Handler):
         while len(processes) > 0:
             self.manage_bidsapp_procs(processes)
 
-        fix_dataset_directory_in_pickles(
-            local_dir=ui_info.ui.context["object"].bids_root, mode='local')
+        # fix_dataset_directory_in_pickles(
+        #     local_dir=ui_info.ui.context["object"].bids_root, mode='local')
 
         print('Processing with BIDS App Finished')
 

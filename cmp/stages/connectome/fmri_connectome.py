@@ -29,6 +29,7 @@ import nipype.interfaces.cmtk as cmtk
 import cmtklib.connectome
 # import cmtklib as cmtk
 from cmp.stages.common import Stage
+from cmtklib.util import bidsapp_2_local_output_dir
 
 
 class ConnectomeConfig(HasTraits):
@@ -92,6 +93,7 @@ class ConnectomeStage(Stage):
                 if 'gpickle' in mat:
                     con_name = os.path.basename(mat).split(".")[
                         0].split("_")[-1]
+                    mat = bidsapp_2_local_output_dir(self.output_dir, mat)
                     self.inspect_outputs_dict[
                         'ROI-average time-series correlation - Connectome %s' % os.path.basename(mat)] = [
                         "showmatrix_gpickle", layout, mat, "corr", "False",
@@ -103,6 +105,7 @@ class ConnectomeStage(Stage):
                     if 'gpickle' in mat:
                         con_name = os.path.basename(mat).split(".")[
                             0].split("_")[-1]
+                        mat = bidsapp_2_local_output_dir(self.output_dir, mat)
                         self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s' % con_name] = [
                             "showmatrix_gpickle", layout, mat, "corr", "False",
                             self.config.subject + ' - ' + con_name + ' - Correlation', map_scale]

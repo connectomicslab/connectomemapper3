@@ -26,6 +26,7 @@ from cmp.stages.common import Stage
 from .reconstruction import *
 from .tracking import *
 from cmtklib.interfaces.misc import ExtractImageVoxelSizes, Tck2Trk
+from cmtklib.util import bidsapp_2_local_output_dir
 
 
 class DiffusionConfig(HasTraits):
@@ -551,21 +552,21 @@ class DiffusionStage(Stage):
                     recon_results = pickle.load(gzip.open(recon_results_path))
 
                     if self.config.diffusion_imaging_model == 'DSI':
-                        gfa_res = recon_results.outputs.GFA
+                        gfa_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.GFA)
                         self.inspect_outputs_dict[self.config.recon_processing_tool + ' gFA image'] = ['mrview',
                                                                                                        gfa_res]
-                        msd_res = recon_results.outputs.MSD
+                        msd_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.MSD)
                         self.inspect_outputs_dict[self.config.recon_processing_tool + ' MSD image'] = ['mrview',
                                                                                                        msd_res]
-                        rtop_res = recon_results.outputs.RTOP
+                        rtop_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.RTOP)
                         self.inspect_outputs_dict[self.config.recon_processing_tool + ' RTOP image'] = ['mrview',
                                                                                                         rtop_res]
-                        dodf_res = recon_results.outputs.dodf
+                        dodf_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.dodf)
                         self.inspect_outputs_dict[
                             self.config.recon_processing_tool + ' Diffusion ODF (SHORE) image'] = ['mrview', gfa_res,
                                                                                                    '-odf.load_sh',
                                                                                                    dodf_res]
-                        shm_coeff_res = recon_results.outputs.fodf
+                        shm_coeff_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.fodf)
                         self.inspect_outputs_dict[self.config.recon_processing_tool + ' Fiber ODF (SHORE) image'] = [
                             'mrview', gfa_res, '-odf.load_sh', shm_coeff_res]
                     else:
@@ -576,15 +577,15 @@ class DiffusionStage(Stage):
                             recon_tensor_results = pickle.load(
                                 gzip.open(recon_tensor_results_path))
 
-                            fa_res = recon_tensor_results.outputs.fa_file
+                            fa_res = bidsapp_2_local_output_dir(self.output_dir, recon_tensor_results.outputs.fa_file)
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',
                                                                                                           fa_res]
 
-                            shm_coeff_res = recon_results.outputs.out_shm_coeff
+                            shm_coeff_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.out_shm_coeff)
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
                                 'mrview', fa_res, '-odf.load_sh', shm_coeff_res]
                         else:
-                            shm_coeff_res = recon_results.outputs.out_shm_coeff
+                            shm_coeff_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.out_shm_coeff)
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
                                 'mrview', shm_coeff_res, '-odf.load_sh', shm_coeff_res]
 
@@ -597,11 +598,11 @@ class DiffusionStage(Stage):
             if os.path.exists(metrics_results_path):
                 metrics_results = pickle.load(gzip.open(metrics_results_path))
 
-                fa_res = metrics_results.outputs.out_fa
+                fa_res = bidsapp_2_local_output_dir(self.output_dir, metrics_results.outputs.out_fa)
                 self.inspect_outputs_dict[self.config.recon_processing_tool +
                                           ' FA image'] = ['mrview', fa_res]
 
-                adc_res = metrics_results.outputs.out_adc
+                adc_res = bidsapp_2_local_output_dir(self.output_dir, metrics_results.outputs.out_adc)
                 self.inspect_outputs_dict[self.config.recon_processing_tool +
                                           ' ADC image'] = ['mrview', adc_res]
 
@@ -613,7 +614,7 @@ class DiffusionStage(Stage):
                 if os.path.exists(recon_results_path):
                     recon_results = pickle.load(gzip.open(recon_results_path))
 
-                tensor_res = recon_results.outputs.tensor
+                tensor_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.tensor)
                 self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                               '-odf.load_tensor',
                                                                                               tensor_res]
@@ -624,15 +625,16 @@ class DiffusionStage(Stage):
                     self.stage_dir, "reconstruction", "mrtrix_rf", "result_mrtrix_rf.pklz")
                 if (os.path.exists(RF_path)):
                     RF_results = pickle.load(gzip.open(RF_path))
+                    RF_resp = bidsapp_2_local_output_dir(self.output_dir, RF_results.outputs.response)
                     self.inspect_outputs_dict['MRTRIX Response function'] = ['shview', '-response',
-                                                                             RF_results.outputs.response]
+                                                                             RF_resp]
 
                 recon_results_path = os.path.join(self.stage_dir, "reconstruction", "mrtrix_CSD",
                                                   "result_mrtrix_CSD.pklz")
 
                 if os.path.exists(recon_results_path):
                     recon_results = pickle.load(gzip.open(recon_results_path))
-                    shm_coeff_res = recon_results.outputs.spherical_harmonics_image
+                    shm_coeff_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.spherical_harmonics_image)
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                                   '-odf.load_sh',
                                                                                                   shm_coeff_res]
@@ -649,7 +651,7 @@ class DiffusionStage(Stage):
                     if os.path.exists(diff_results_path):
                         diff_results = pickle.load(
                             gzip.open(diff_results_path))
-                        streamline_res = diff_results.outputs.tracks
+                        streamline_res = bidsapp_2_local_output_dir(self.output_dir, diff_results.outputs.tracks)
                         self.inspect_outputs_dict[
                             self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
                             'trackvis', streamline_res]
@@ -660,7 +662,7 @@ class DiffusionStage(Stage):
                     if os.path.exists(diff_results_path):
                         diff_results = pickle.load(
                             gzip.open(diff_results_path))
-                        streamline_res = diff_results.outputs.tracks
+                        streamline_res = bidsapp_2_local_output_dir(self.output_dir, diff_results.outputs.tracks)
                         self.inspect_outputs_dict[
                             self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
                             'trackvis', streamline_res]
@@ -671,7 +673,7 @@ class DiffusionStage(Stage):
 
                 if os.path.exists(diff_results_path):
                     diff_results = pickle.load(gzip.open(diff_results_path))
-                    streamline_res = diff_results.outputs.tracks
+                    streamline_res = bidsapp_2_local_output_dir(self.output_dir, diff_results.outputs.tracks)
                     self.inspect_outputs_dict[
                         self.config.tracking_processing_tool + ' Tensor-based EuDX streamline'] = ['trackvis',
                                                                                                    streamline_res]
@@ -685,8 +687,8 @@ class DiffusionStage(Stage):
                     self.stage_dir, "tracking", "trackvis", "result_trackvis.pklz")
                 if os.path.exists(diff_results_path):
                     diff_results = pickle.load(gzip.open(diff_results_path))
-                    streamline_res = diff_results.outputs.out_tracks
-                    print(streamline_res)
+                    streamline_res = bidsapp_2_local_output_dir(self.output_dir, diff_results.outputs.out_tracks)
+                    # print(streamline_res)
                     self.inspect_outputs_dict[
                         self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
                         'trackvis', streamline_res]
@@ -698,7 +700,7 @@ class DiffusionStage(Stage):
                 # print diff_results_path
                 if os.path.exists(diff_results_path):
                     diff_results = pickle.load(gzip.open(diff_results_path))
-                    streamline_res = diff_results.outputs.out_tracks
+                    streamline_res = bidsapp_2_local_output_dir(self.output_dir, diff_results.outputs.out_tracks)
                     # print streamline_res
                     self.inspect_outputs_dict[
                         self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [

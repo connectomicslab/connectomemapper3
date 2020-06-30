@@ -78,10 +78,16 @@ class fMRIPipelineUI(fMRIPipeline):
 
         fMRIPipeline.__init__(self, project_info)
 
-        self.stages = {'Preprocessing': PreprocessingStageUI(),
-                       'Registration': RegistrationStageUI(pipeline_mode="fMRI"),
-                       'FunctionalMRI': FunctionalMRIStageUI(),
-                       'Connectome': ConnectomeStageUI()}
+        self.stages = {'Preprocessing': PreprocessingStageUI(bids_dir=project_info.base_directory, 
+                                                             output_dir=project_info.output_directory),
+                       'Registration': RegistrationStageUI(pipeline_mode="fMRI",
+                                                           bids_dir=project_info.base_directory, 
+                                                           output_dir=project_info.output_directory),
+                       'FunctionalMRI': FunctionalMRIStageUI(bids_dir=project_info.base_directory, 
+                                                             output_dir=project_info.output_directory),
+                       'Connectome': ConnectomeStageUI(bids_dir=project_info.base_directory, 
+                                                       output_dir=project_info.output_directory)
+                       }
 
         for stage in list(self.stages.keys()):
             if project_info.subject_session != '':

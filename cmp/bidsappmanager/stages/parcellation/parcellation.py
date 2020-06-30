@@ -77,8 +77,8 @@ class ParcellationStageUI(ParcellationStage):
         buttons=['OK', 'Cancel']
     )
 
-    def __init__(self, pipeline_mode):
-        ParcellationStage.__init__(self, pipeline_mode)
+    def __init__(self, pipeline_mode, bids_dir, output_dir):
+        ParcellationStage.__init__(self, pipeline_mode, bids_dir, output_dir)
         self.config = ParcellationConfigUI()
         self.config.template_thalamus = os.path.join('app', 'connectomemapper3', 'cmtklib', 'data', 'segmentation',
                                                      'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')

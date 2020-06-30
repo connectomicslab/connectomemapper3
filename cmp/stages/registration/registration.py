@@ -22,7 +22,8 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec, \
     TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
-
+from nipype.interfaces.mrtrix3.reconst import FitTensor
+from nipype.interfaces.mrtrix3.utils import TensorMetrics
 import nipype.interfaces.ants as ants
 # from nipype.interfaces.ants.registration import ANTS
 # from nipype.interfaces.ants.resampling import ApplyTransforms, WarpImageMultiTransform
@@ -40,9 +41,7 @@ from cmtklib.interfaces.fsl import FSLCreateHD, ApplymultipleXfm, ApplymultipleW
 import cmtklib.interfaces.freesurfer as cmp_fs
 import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.ants import MultipleANTsApplyTransforms
-
-from nipype.interfaces.mrtrix3.reconst import FitTensor
-from nipype.interfaces.mrtrix3.utils import TensorMetrics
+from cmtklib.util import bidsapp_2_local_output_dir
 
 
 class RegistrationConfig(HasTraits):
@@ -1274,46 +1273,53 @@ class RegistrationStage(Stage):
                     if (os.path.exists(fnirt_results_path)):
                         fnirt_results = pickle.load(
                             gzip.open(fnirt_results_path))
+                        ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['reference'])
+                        out = bidsapp_2_local_output_dir(self.output_dir, reg_results.outputs.out_file)
                         self.inspect_outputs_dict['Linear T1-to-b0'] = ['fsleyes', '-sdefault',
-                                                                        reg_results.inputs['reference'],
-                                                                        reg_results.outputs.out_file, '-cm', "copper",
+                                                                        ref_flirt,
+                                                                        out, '-cm', "copper",
                                                                         '-a', '50']
+                        ref = bidsapp_2_local_output_dir(self.output_dir, fnirt_results.inputs['ref_file'])
+                        out = bidsapp_2_local_output_dir(self.output_dir, T1_results.outputs.out_file)
                         self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fsleyes', '-sdefault',
-                                                                         fnirt_results.inputs['ref_file'],
-                                                                         T1_results.outputs.out_file, '-cm', "copper",
+                                                                         ref,
+                                                                         out, '-cm', "copper",
                                                                          '-a', '50']
+                        ref = bidsapp_2_local_output_dir(self.output_dir, fnirt_results.inputs['ref_file'])
+                        out = bidsapp_2_local_output_dir(self.output_dir, mrtrix_5tt_results.outputs.output_image)
                         self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fsleyes', '-sdefault',
-                                                                          fnirt_results.inputs['ref_file'],
-                                                                          mrtrix_5tt_results.outputs.output_image,
+                                                                          ref,
+                                                                          out,
                                                                           '-cm', "hot", '-a', '50']
+                        field = bidsapp_2_local_output_dir(self.output_dir, fnirt_results.outputs.fieldcoeff_file)
                         self.inspect_outputs_dict['Deformation field'] = ['fsleyes', '-sdefault',
-                                                                          fnirt_results.outputs.fieldcoeff_file]  # ['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
+                                                                          field]  # ['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
 
                         if type(rois_results.outputs.out_files) == str:
+                            roiv = bidsapp_2_local_output_dir(self.output_dir, rois_results.outputs.out_files)
                             self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.out_files)] = [
-                                'fsleyes', '-sdefault', fnirt_results.inputs['ref_file'],
-                                rois_results.outputs.out_files, '-cm', 'random', '-a', '50']
+                                'fsleyes', '-sdefault', ref, roiv, '-cm', 'random', '-a', '50']
                         else:
                             for roi_output in rois_results.outputs.out_files:
+                                roiv = bidsapp_2_local_output_dir(self.output_dir, roi_output)
                                 self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fsleyes',
                                                                                                         '-sdefault',
-                                                                                                        fnirt_results.inputs[
-                                                                                                            'ref_file'],
-                                                                                                        roi_output,
+                                                                                                        ref,
+                                                                                                        roiv,
                                                                                                         '-cm', 'random',
                                                                                                         '-a', '50']
 
                         if type(pves_results.outputs.out_files) == str:
+                            pves = bidsapp_2_local_output_dir(self.output_dir, pves_results.outputs.out_files)
                             self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.out_files)] = [
-                                'fsleyes', '-sdefault', fnirt_results.inputs['ref_file'],
-                                pves_results.outputs.out_files, '-cm', 'hot', '-a', '50']
+                                'fsleyes', '-sdefault', ref, pves, '-cm', 'hot', '-a', '50']
                         else:
                             for pve_output in pves_results.outputs.out_files:
+                                pves = bidsapp_2_local_output_dir(self.output_dir, pve_output)
                                 self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fsleyes',
                                                                                                         '-sdefault',
-                                                                                                        fnirt_results.inputs[
-                                                                                                            'ref_file'],
-                                                                                                        pve_output,
+                                                                                                        ref,
+                                                                                                        pves,
                                                                                                         '-cm', 'hot',
                                                                                                         '-a', '50']
 
@@ -1323,9 +1329,11 @@ class RegistrationStage(Stage):
                     # print("reg_results.outputs.warped_image: %s"%reg_results.outputs.warped_image)
 
                     # print("T1_results.outputs.output_image: %s"%T1_results.outputs.output_image)
+                    ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
+                    out = bidsapp_2_local_output_dir(self.output_dir, reg_results.outputs.warped_image)
                     self.inspect_outputs_dict['Linear T1-to-b0'] = ['fsleyes', '-sdefault',
-                                                                    reg_results.inputs['fixed_image'][0],
-                                                                    reg_results.outputs.warped_image, '-cm', 'copper',
+                                                                    ref,
+                                                                    out, '-cm', 'copper',
                                                                     '-a', '50']
 
                     if self.config.ants_perform_syn:
@@ -1333,39 +1341,42 @@ class RegistrationStage(Stage):
                             syn_results = pickle.load(
                                 gzip.open(syn_results_path))
                             # print("syn_results.inputs['fixed_image']: %s"%syn_results.inputs['fixed_image'][0])
+                            ref = bidsapp_2_local_output_dir(self.output_dir, syn_results.inputs['fixed_image'][0])
+                            out = bidsapp_2_local_output_dir(self.output_dir, T1_results.outputs.output_image)
                             self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fsleyes', '-sdefault',
-                                                                             syn_results.inputs['fixed_image'][0],
-                                                                             T1_results.outputs.output_image, '-cm',
+                                                                             ref,
+                                                                             out, '-cm',
                                                                              'copper', '-a', '50']
                             # self.inspect_outputs_dict['Deformation field'] = ['fsleyes','-sdefault',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
                     # print("rois_results.outputs.output_images: %s"%rois_results.outputs.output_images)
                     # print("pves_results.outputs.output_images: %s"%pves_results.outputs.output_images)
-
+                    ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
+                    out = bidsapp_2_local_output_dir(self.output_dir, mrtrix_5tt_results.outputs.output_image)
                     self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fsleyes', '-sdefault',
-                                                                      reg_results.inputs['fixed_image'][0],
-                                                                      mrtrix_5tt_results.outputs.output_image, '-cm',
+                                                                      ref,
+                                                                      out, '-cm',
                                                                       'copper', '-a', '50']
 
                     if type(rois_results.outputs.output_images) == str:
                         if self.config.ants_perform_syn:
                             if (os.path.exists(syn_results_path)):
+                                ref = bidsapp_2_local_output_dir(self.output_dir, syn_results.inputs['fixed_image'][0])
+                                out = bidsapp_2_local_output_dir(self.output_dir, rois_results.outputs.output_images)
                                 self.inspect_outputs_dict[
                                     '%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fsleyes',
                                                                                                           '-sdefault',
-                                                                                                          syn_results.inputs[
-                                                                                                              'fixed_image'][
-                                                                                                              0],
-                                                                                                          rois_results.outputs.output_images,
+                                                                                                          ref,
+                                                                                                          out,
                                                                                                           '-cm',
                                                                                                           'random',
                                                                                                           '-a', '50']
                         else:
+                            ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
+                            out = bidsapp_2_local_output_dir(self.output_dir, rois_results.outputs.output_images)
                             self.inspect_outputs_dict[
                                 '%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fsleyes',
                                                                                                       '-sdefault',
-                                                                                                      reg_results.inputs[
-                                                                                                          'fixed_image'][
-                                                                                                          0],
+                                                                                                      ref,
                                                                                                       rois_results.outputs.output_images,
                                                                                                       '-cm', 'random',
                                                                                                       '-a', '50']
@@ -1373,67 +1384,67 @@ class RegistrationStage(Stage):
                         for roi_output in rois_results.outputs.output_images:
                             if self.config.ants_perform_syn:
                                 if (os.path.exists(syn_results_path)):
+                                    ref = bidsapp_2_local_output_dir(self.output_dir, syn_results.inputs['fixed_image'][0])
+                                    out = bidsapp_2_local_output_dir(self.output_dir, roi_output)
                                     self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fsleyes',
                                                                                                             '-sdefault',
-                                                                                                            syn_results.inputs[
-                                                                                                                'fixed_image'][
-                                                                                                                0],
-                                                                                                            roi_output,
+                                                                                                            ref,
+                                                                                                            out,
                                                                                                             '-cm',
                                                                                                             'random',
                                                                                                             '-a', '50']
                             else:
+                                ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
+                                out = bidsapp_2_local_output_dir(self.output_dir, roi_output)
                                 self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fsleyes',
                                                                                                         '-sdefault',
-                                                                                                        reg_results.inputs[
-                                                                                                            'fixed_image'][
-                                                                                                            0],
-                                                                                                        roi_output,
+                                                                                                        ref,
+                                                                                                        out,
                                                                                                         '-cm', 'random',
                                                                                                         '-a', '50']
 
                     if type(pves_results.outputs.output_images) == str:
                         if self.config.ants_perform_syn:
                             if (os.path.exists(syn_results_path)):
+                                ref = bidsapp_2_local_output_dir(self.output_dir, syn_results.inputs['fixed_image'][0])
+                                out = bidsapp_2_local_output_dir(self.output_dir, pves_results.outputs.output_images)
                                 self.inspect_outputs_dict[
                                     '%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fsleyes',
                                                                                                           '-sdefault',
-                                                                                                          syn_results.inputs[
-                                                                                                              'fixed_image'][
-                                                                                                              0],
-                                                                                                          pves_results.outputs.output_images,
+                                                                                                          ref,
+                                                                                                          out,
                                                                                                           '-cm', 'hot',
                                                                                                           '-a', '50']
                         else:
+                            ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
+                            out = bidsapp_2_local_output_dir(self.output_dir, pves_results.outputs.output_images)
                             self.inspect_outputs_dict[
                                 '%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fsleyes',
                                                                                                       '-sdefault',
-                                                                                                      reg_results.inputs[
-                                                                                                          'fixed_image'][
-                                                                                                          0],
-                                                                                                      pves_results.outputs.output_images,
+                                                                                                      ref,
+                                                                                                      out,
                                                                                                       '-cm', 'hot',
                                                                                                       '-a', '50']
                     else:
                         for pve_output in pves_results.outputs.output_images:
                             if self.config.ants_perform_syn:
                                 if (os.path.exists(syn_results_path)):
+                                    ref = bidsapp_2_local_output_dir(self.output_dir, syn_results.inputs['fixed_image'][0])
+                                    out = bidsapp_2_local_output_dir(self.output_dir, pve_output)
                                     self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fsleyes',
                                                                                                             '-sdefault',
-                                                                                                            syn_results.inputs[
-                                                                                                                'fixed_image'][
-                                                                                                                0],
-                                                                                                            pve_output,
+                                                                                                            ref,
+                                                                                                            out,
                                                                                                             '-cm',
                                                                                                             'hot', '-a',
                                                                                                             '50']
                             else:
+                                ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
+                                out = bidsapp_2_local_output_dir(self.output_dir, pve_output)
                                 self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fsleyes',
                                                                                                         '-sdefault',
-                                                                                                        reg_results.inputs[
-                                                                                                            'fixed_image'][
-                                                                                                            0],
-                                                                                                        pve_output,
+                                                                                                        ref,
+                                                                                                        out,
                                                                                                         '-cm', 'hot',
                                                                                                         '-a', '50']
         else:
@@ -1443,20 +1454,23 @@ class RegistrationStage(Stage):
                 reg_results = pickle.load(gzip.open(reg_results_path))
                 rois_results = pickle.load(gzip.open(warpedROIVs_results_path))
 
-                self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fsleyes', '-sdefault', target.inputs['in_file'],
-                                                                     reg_results.outputs.out_file, '-cm', 'copper',
+                ref = bidsapp_2_local_output_dir(self.output_dir, target.inputs['in_file'])
+                out = bidsapp_2_local_output_dir(self.output_dir, reg_results.outputs.out_file)
+                self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fsleyes', '-sdefault', ref, out, '-cm', 'copper',
                                                                      '-a', '50']
 
                 if type(rois_results.outputs.out_files) == str:
+                    ref = bidsapp_2_local_output_dir(self.output_dir, target.outputs.out_file)
+                    out = bidsapp_2_local_output_dir(self.output_dir, rois_results.outputs.out_files)
                     self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = [
-                        'fsleyes', '-sdefault', target.outputs.out_file, rois_results.outputs.out_files, '-cm',
-                        'random', '-a', '50']
+                        'fsleyes', '-sdefault', ref, out, '-cm', 'random', '-a', '50']
                 else:
                     for roi_output in rois_results.outputs.out_files:
+                        ref = bidsapp_2_local_output_dir(self.output_dir, target.outputs.out_file)
+                        out = bidsapp_2_local_output_dir(self.output_dir, roi_output)
                         self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fsleyes',
                                                                                                     '-sdefault',
-                                                                                                    target.outputs.out_file,
-                                                                                                    roi_output, '-cm',
+                                                                                                    ref, out, '-cm',
                                                                                                     'random', '-a',
                                                                                                     '50']
 

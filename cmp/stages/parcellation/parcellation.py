@@ -495,9 +495,8 @@ class ParcellationStage(Stage):
                 parc_results = pickle.load(gzip.open(parc_results_path))
                 # print parc_results
                 # print parc_results.outputs.roi_files_in_structural_space
-                white_matter_file = bidsapp_2_local_output_dir(
-                    self.output_dir,
-                    parc_results.outputs.white_matter_mask_file)
+                white_matter_file = bidsapp_2_local_output_dir(self.output_dir,
+                                                               parc_results.outputs.white_matter_mask_file)
 
                 if isinstance(parc_results.outputs.roi_files_in_structural_space, str):
                     # print "str: %s" % parc_results.outputs.roi_files_in_structural_space
@@ -505,9 +504,8 @@ class ParcellationStage(Stage):
                                                                os.path.join('data', 'parcellation', 'nativefreesurfer',
                                                                             'freesurferaparc',
                                                                             'FreeSurferColorLUT_adapted.txt'))
-                    roi_v = bidsapp_2_local_output_dir(
-                        self.output_dir,
-                        parc_results.outputs.roi_files_in_structural_space)
+                    roi_v = bidsapp_2_local_output_dir(self.output_dir,
+                                                       parc_results.outputs.roi_files_in_structural_space)
 
                     # print "roi_v : %s" % os.path.basename(roi_v)
                     self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview', '-v',
@@ -524,7 +522,7 @@ class ParcellationStage(Stage):
                             scale = roi_basename[23:-7]
                             print(scale)
 
-                            roi_v = bidsapp_2_local_output_dir(self.output_dir,roi_v)
+                            roi_v = bidsapp_2_local_output_dir(self.output_dir, roi_v)
 
                             # print scale
                             lut_file = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'parcellation',
@@ -548,7 +546,7 @@ class ParcellationStage(Stage):
                                                        finalparc_results.outputs.colorLUT_files):
                                 roi_basename = os.path.basename(roi_v)
 
-                                roi_v = bidsapp_2_local_output_dir(self.output_dir,roi_v)
+                                roi_v = bidsapp_2_local_output_dir(self.output_dir, roi_v)
 
                                 self.inspect_outputs_dict[roi_basename] = ['freeview', '-v',
                                                                            white_matter_file + ':colormap=GEColor',
@@ -561,7 +559,7 @@ class ParcellationStage(Stage):
                         if (os.path.exists(parc_results_path)):
                             parc_results = pickle.load(
                                 gzip.open(parc_results_path))
-                            brain = bidsapp_2_local_output_dir(self.output_dir,parc_results.outputs.brain)
+                            brain = bidsapp_2_local_output_dir(self.output_dir, parc_results.outputs.brain)
 
                         # if self.config.include_thalamic_nuclei_parcellation:
                         results_path = os.path.join(
@@ -569,9 +567,9 @@ class ParcellationStage(Stage):
 
                         if (os.path.exists(results_path)):
                             results = pickle.load(gzip.open(results_path))
-                            T1w = bidsapp_2_local_output_dir(self.output_dir,results.inputs['T1w_image'])
-                            probmaps = bidsapp_2_local_output_dir(self.output_dir,results.outputs.prob_maps_registered)
-                            maxprob = bidsapp_2_local_output_dir(self.output_dir,results.outputs.prob_maps_registered)
+                            T1w = bidsapp_2_local_output_dir(self.output_dir, results.inputs['T1w_image'])
+                            probmaps = bidsapp_2_local_output_dir(self.output_dir, results.outputs.prob_maps_registered)
+                            maxprob = bidsapp_2_local_output_dir(self.output_dir, results.outputs.prob_maps_registered)
 
                             self.inspect_outputs_dict['Thalamic nuclei - Probability maps'] = ['fsleyes', '-sdefault',
                                                                                                T1w,
@@ -590,7 +588,7 @@ class ParcellationStage(Stage):
 
                         if (os.path.exists(results_path)):
                             results = pickle.load(gzip.open(results_path))
-                            brainstem = bidsapp_2_local_output_dir(self.output_dir,results.outputs.brainstem_structures)
+                            brainstem = bidsapp_2_local_output_dir(self.output_dir, results.outputs.brainstem_structures)
 
                             if (os.path.exists(brain)):
                                 self.inspect_outputs_dict['Brainstem structures'] = ['fsleyes', '-sdefault', 
@@ -607,8 +605,8 @@ class ParcellationStage(Stage):
 
                         if (os.path.exists(results_path)):
                             results = pickle.load(gzip.open(results_path))
-                            lh_hippo = bidsapp_2_local_output_dir(self.output_dir,results.outputs.lh_hipposubfields)
-                            rh_hippo = bidsapp_2_local_output_dir(self.output_dir,results.outputs.rh_hipposubfields)
+                            lh_hippo = bidsapp_2_local_output_dir(self.output_dir, results.outputs.lh_hipposubfields)
+                            rh_hippo = bidsapp_2_local_output_dir(self.output_dir, results.outputs.rh_hipposubfields)
 
                             if (os.path.exists(brain)):
                                 self.inspect_outputs_dict['Hippocampal subfields'] = ['fsleyes', '-sdefault',

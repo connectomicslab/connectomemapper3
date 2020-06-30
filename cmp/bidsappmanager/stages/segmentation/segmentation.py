@@ -79,8 +79,8 @@ class SegmentationStageUI(SegmentationStage):
     )
 
     # General and UI members
-    def __init__(self):
-        SegmentationStage.__init__(self)
+    def __init__(self, bids_dir, output_dir):
+        SegmentationStage.__init__(self, bids_dir, output_dir)
         self.config = SegmentationConfigUI()
 
     def _inspect_output_button_fired(self, info):
