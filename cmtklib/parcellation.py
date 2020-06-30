@@ -608,8 +608,8 @@ class CombineParcellations(BaseInterface):
 
         iflogger.info("  > Dilate the ventricule image")
         thirdV_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
-        fslmaths_cmd = 'fslmaths {} -kernel sphere 5 -dilD {}'.format(
-            thirdV, thirdV_dil)
+        fslmaths_cmd = 'fslmaths -dt char {} -mas {} -kernel sphere 5 -dilD {}'.format(
+            thirdV, thirdV, thirdV_dil)
         iflogger.info("    ... Command: {}".format(fslmaths_cmd))
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -676,45 +676,7 @@ class CombineParcellations(BaseInterface):
             indrep = np.where(I == 16)
             I[indrep] = 0
 
-            # Dilate third ventricle and intersect with right and left ventral DC to get voxels of left and right hypothalamus
-
-        for roi_fname in self.inputs.input_rois:
-            if 'scale1' in roi_fname:
-                roi1_fname = roi_fname
-                break
-
-        iflogger.info("  > Create ventricule image")
-        V = ni.load(roi1_fname)
-        I = V.get_data()
-        tmp = np.zeros(I.shape)
-        indV = np.where(I == ventricle3)
-        tmp[indV] = 1
-
-        thirdV = op.abspath('{}.nii.gz'.format("ventricle3"))
-        hdr = V.get_header()
-        hdr2 = hdr.copy()
-        hdr2.set_data_dtype(np.int16)
-        iflogger.info("    ... Image saved to {}".format(thirdV))
-        img = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
-        ni.save(img, thirdV)
-
-        iflogger.info("  > Dilate the ventricule image")
-        thirdV_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
-        fslmaths_cmd = 'fslmaths {} -kernel sphere 5 -dilD {}'.format(
-            thirdV, thirdV_dil)
-        iflogger.info("    ... Command: {}".format(fslmaths_cmd))
-        process = subprocess.Popen(
-            fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        proc_stdout = process.communicate()[0].strip()
-
-        tmp = ni.load(thirdV_dil).get_data()
-        indrhypothal = np.where((tmp == 1) & (I == right_ventral))
-        indlhypothal = np.where((tmp == 1) & (I == left_ventral))
-        del (tmp)
-
-        f_colorLUT = None
-        f_graphML = None
-
+        
         for roi_index, roi in sorted(enumerate(self.inputs.input_rois)):
             # colorLUT creation if enabled
             if self.inputs.create_colorLUT:
