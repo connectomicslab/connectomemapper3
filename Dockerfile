@@ -56,6 +56,7 @@ RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/cond
 
 RUN printf '#! /bin/bash\n\
 echo User: $USER && echo Group: $(id -g -n $USER) && \
+. $FSLDIR/etc/fslconf/fsl.sh && \
 . activate ${CONDA_ENV} && \
 xvfb-run -s "-screen 0 900x900x24 -ac +extension GLX -noreset" -a python /app/connectomemapper3/run.py $@'\
 > /app/run_connectomemapper3.sh

@@ -1,6 +1,10 @@
 # Use Ubuntu 16.04 LTS
 FROM ubuntu:xenial-20181218
 
+##################################################################
+## Install apt-fast, neurodebian, conda
+##################################################################
+
 # Pre-cache neurodebian key
 COPY files/neurodebian.gpg /root/.neurodebian.gpg
 
@@ -20,14 +24,22 @@ RUN apt-get update && \
     bash /tmp/miniconda.sh -bfp /opt/conda && \
     rm -rf /tmp/miniconda.sh
 
+# Set local enccoding
 ENV LANG en_US.UTF-8
 
+# Add conda to $PATH
 ENV PATH /opt/conda/bin:$PATH
 
+# Update conda
 RUN conda update conda && \
     conda clean --all --yes
 
-# Installing freesurfer
+
+##################################################################
+## Install freesurfer 6.0.1
+##################################################################
+
+# Download
 RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
     --exclude='freesurfer/trctrain' \
     --exclude='freesurfer/subjects/fsaverage_sym' \
@@ -64,7 +76,6 @@ RUN rm runtime2012b.tar.gz
 # RUN rm runtime2014b.tar.gz
 
 # Make FreeSurfer happy
-ENV FSL_DIR=/usr/share/fsl/5.0 
 ENV OS=Linux 
 ENV FS_OVERRIDE=0 
 ENV FIX_VERTEX_AREA= 
@@ -86,15 +97,22 @@ ENV MNI_PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5
 ENV PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH
 
 
-## Install FSL from Neurodebian
-#RUN apt-get install fsl-complete
+##################################################################
+## Install AFNI
+##################################################################
 
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
-    apt-fast install -y --no-install-recommends fsl-core=5.0.9-5~nd16.04+1 \
-                                               fsl-mni152-templates=5.0.7-2 \
-                                               fsl-5.0-eddy-nonfree \
-                                               afni=16.2.07~dfsg.1-5~nd16.04+1
+    apt-fast install -y --no-install-recommends wget afni=16.2.07~dfsg.1-5~nd16.04+1
+                                               # fsl-core=5.0.9-5~nd16.04+1 \
+                                               # fsl-mni152-templates=5.0.7-2 \
+                                               # fsl-5.0-eddy-nonfree \
+#Make AFNI happy
+ENV PATH /usr/lib/afni/bin:$PATH
+ENV AFNI_MODELPATH /usr/lib/afni/models 
+ENV AFNI_IMSAVE_WARNINGS NO 
+ENV AFNI_TTATLAS_DATASET /usr/share/afni/atlases 
+ENV AFNI_PLUGINPATH /usr/lib/afni/plugins
 
 # Mark a package as being manually installed, which will
 # prevent the package from being automatically removed if no other packages
@@ -105,36 +123,23 @@ RUN apt-get update && \
 #RUN apt-mark manual afni
 #RUN apt-mark manual ants
 
-#Make FSL/AFNI happy
-ENV FSLDIR /usr/share/fsl/5.0 
-ENV FSLOUTPUTTYPE NIFTI_GZ 
-ENV FSLMULTIFILEQUIT TRUE 
-ENV POSSUMDIR /usr/share/fsl/5.0 
-ENV LD_LIBRARY_PATH /usr/lib/fsl/5.0:$LD_LIBRARY_PATH 
-ENV FSLTCLSH /usr/bin/tclsh 
-ENV FSLWISH /usr/bin/wish 
-ENV AFNI_MODELPATH /usr/lib/afni/models 
-ENV AFNI_IMSAVE_WARNINGS NO 
-ENV AFNI_TTATLAS_DATASET /usr/share/afni/atlases 
-ENV AFNI_PLUGINPATH /usr/lib/afni/plugins
-ENV PATH /usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
 
-## Install ANTs --no-install-suggests
-#RUN apt-get install -y ants=2.2.0-1~nd16.04+1
-#ENV ANTSPATH=/usr/lib/ants
-#ENV PATH=$ANTSPATH:$PATH
+##################################################################
+## Install conda environment, including ANTs 2.2.0
+##################################################################
 
 # Pull the environment name out of the environment.yml
 COPY environment.yml /app/environment.yml
 RUN conda env create -f /app/environment.yml
+ENV CONDA_ENV py37cmp-core
 
-# ENV ANTSPATH=/opt/conda/bin
-# ENV PATH=$ANTSPATH:$PATH
+# Make ANTs happy
 ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin
-
 ENV PATH $ANTSPATH:$PATH
 
+##################################################################
 ## Install MRTRIX
+##################################################################
 
 # Additional dependencies for MRtrix3 compilation
 # Get the latest version of MRtrix3
@@ -157,6 +162,20 @@ RUN apt-get update && \
 ENV PATH=/opt/mrtrix3/bin:$PATH
 ENV PYTHONPATH=/opt/mrtrix3/lib:$PYTHONPATH
 
+
+##################################################################
+## Install FSL 6.0.0
+##################################################################
+RUN echo "Downloading FSL ..." \
+    && curl -sSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.3-centos6_64.tar.gz \
+    | tar zx -C /opt \
+    && /bin/bash /opt/fsl/etc/fslconf/fslpython_install.sh -q -f /opt/fsl
+
+ENV FSLDIR=/opt/fsl \
+    PATH=/opt/fsl/bin:$PATH
+
+
+#
 ENV PYTHONPATH=/opt/conda/envs/$CONDA_ENV/bin
 
 ## Install Neurodebian
