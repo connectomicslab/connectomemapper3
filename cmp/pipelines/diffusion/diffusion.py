@@ -1037,6 +1037,10 @@ class DiffusionPipeline(Pipeline):
                                           ('outputnode.diffusion_preproc',
                                            'inputnode.target'),
                                           ('outputnode.dwi_brain_mask', 'inputnode.target_mask')]),
+                # (preproc_flow, sinker, [
+                #  ("outputnode.diffusion_noisemap", "dwi.@noisemap")]),
+                # (preproc_flow, sinker, [
+                #  ("outputnode.diffusion_biasfield", "dwi.@biasfield")]),
                 (preproc_flow, sinker, [
                  ("outputnode.bvecs_rot", "dwi.@bvecs_rot")]),
                 (preproc_flow, sinker, [
@@ -1223,7 +1227,9 @@ class DiffusionPipeline(Pipeline):
             {'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory, "diffusion_pipeline"),
                          'log_to_file': True},
              'execution': {'remove_unnecessary_outputs': False,
-                           'stop_on_first_crash': True, 'stop_on_first_rerun': False,
+                           'stop_on_first_crash': True, 
+                           'stop_on_first_rerun': False,
+                           'use_relative_paths': True,
                            'crashfile_format': "txt"}
              })
         logging.update_logging(config)

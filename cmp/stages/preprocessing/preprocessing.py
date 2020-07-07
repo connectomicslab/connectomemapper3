@@ -35,10 +35,11 @@ import nibabel as nib
 
 # from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
 from cmtklib.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, MRThreshold, ExtractFSLGrad, \
-    ExtractMRTrixGrad, Generate5tt, GenerateGMWMInterface
+    ExtractMRTrixGrad, Generate5tt, GenerateGMWMInterface, ApplymultipleMRConvert
 import cmtklib.interfaces.fsl as cmp_fsl
-from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
-from cmtklib.util import bidsapp_2_local_output_dir
+from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding, splitDiffusion, \
+    ConcatOutputsAsTuple, CreateIndexFile, CreateAcqpFile
+from cmtklib.util import get_node_dictionary_outputs
 
 
 class PreprocessingConfig(HasTraits):
@@ -132,7 +133,7 @@ class PreprocessingStage(Stage):
         self.config = PreprocessingConfig()
         self.inputs = ["diffusion", "bvecs", "bvals", "T1", "aparc_aseg", "aseg", "brain", "brain_mask", "wm_mask_file",
                        "roi_volumes"]
-        self.outputs = ["diffusion_preproc", "bvecs_rot", "bvals", "dwi_brain_mask", "T1", "act_5TT", "gmwmi", "brain",
+        self.outputs = ["diffusion_preproc", "bvecs_rot", "bvals", "diffusion_noisemap", "diffusion_biasfield", "dwi_brain_mask", "T1", "act_5TT", "gmwmi", "brain",
                         "brain_mask", "brain_mask_full", "wm_mask_file", "partial_volume_files", "roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -318,6 +319,10 @@ class PreprocessingStage(Stage):
 
         # Diffusion data denoising
         if self.config.denoising:
+
+            mr_convert_noise = pe.Node(interface=MRConvert(out_filename='diffusion_noisemap.nii.gz', stride=[+1, +2, +3, +4]),
+                               name='mr_convert_noise')
+
             if self.config.denoising_algo == "MRtrix (MP-PCA)":
                 mr_convert.inputs.out_filename = 'diffusion.mif'
                 dwi_denoise = pe.Node(
@@ -350,6 +355,11 @@ class PreprocessingStage(Stage):
                     (flirt_dwimask, dwi_denoise, [('out_file', 'in_mask')]),
                     (dwi_denoise, mr_convert, [('out_file', 'in_file')])
                 ])
+
+            flow.connect([
+                (dwi_denoise, mr_convert_noise, [('out_file', 'in_file')]),
+                (mr_convert_noise, outputnode, [('converted', 'diffusion_noisemap')])
+            ])
         else:
             mr_convert.inputs.out_filename = 'diffusion.mif'
             flow.connect([
@@ -359,7 +369,13 @@ class PreprocessingStage(Stage):
         mr_convert_b = pe.Node(interface=MRConvert(out_filename='diffusion_corrected.nii.gz', stride=[+1, +2, +3, +4]),
                                name='mr_convert_b')
 
+        
+
         if self.config.bias_field_correction:
+            
+            mr_convert_bias = pe.Node(interface=MRConvert(out_filename='diffusion_biasfield.nii.gz', stride=[+1, +2, +3, +4]),
+                               name='mr_convert_bias')
+
             if self.config.bias_field_algo == "ANTS N4":
                 dwi_biascorrect = pe.Node(
                     interface=DWIBiasCorrect(
@@ -397,6 +413,11 @@ class PreprocessingStage(Stage):
                     (mr_convert, dwi_biascorrect, [('converted', 'in_file')]),
                     (flirt_dwimask, dwi_biascorrect, [('out_file', 'mask')])
                 ])
+
+            flow.connect([
+                (dwi_biascorrect, mr_convert_bias, [('out_file', 'in_file')]),
+                (mr_convert_bias, outputnode, [('converted', 'diffusion_biasfield')])
+            ])
         else:
             if self.config.denoising:
                 if self.config.denoising_algo == "MRtrix (MP-PCA)":
@@ -822,58 +843,48 @@ class PreprocessingStage(Stage):
 
     def define_inspect_outputs(self):
         # print "stage_dir : %s" % self.stage_dir
+        
         if self.config.denoising:
-            denoising_results_path = os.path.join(
-                self.stage_dir, "dwi_denoise", "result_dwi_denoise.pklz")
-            if (os.path.exists(denoising_results_path)):
-                dwi_denoise_results = pickle.load(
-                    gzip.open(denoising_results_path))
-                denoise = bidsapp_2_local_output_dir(self.output_dir, 
-                                                     dwi_denoise_results.outputs.out_file)
-                # print dwi_denoise_results.outputs.out_file
-                self.inspect_outputs_dict['DWI denoised image'] = [
-                    'mrview', denoise]
+            
+            dwi_denoise_dir = os.path.join(self.stage_dir, 'dwi_denoise')
+            denoise = os.path.join(dwi_denoise_dir,'diffusion_denoised.mif')
+
+            if (os.path.exists(denoise)):
+                self.inspect_outputs_dict['DWI denoised image'] = ['mrview', denoise]
                 if self.config.denoising_algo == "MRtrix (MP-PCA)":
-                    noise = bidsapp_2_local_output_dir(self.output_dir,
-                                                       dwi_denoise_results.outputs.out_noisemap)
-                    # print dwi_denoise_results.outputs.out_noisemap
-                    self.inspect_outputs_dict['Noise map'] = [
-                        'mrview', noise]
+
+                    noise = os.path.join(dwi_denoise_dir,'diffusion_noisemap.mif')
+
+                    if (os.path.exists(denoise)):
+
+                        self.inspect_outputs_dict['Noise map'] = ['mrview', noise]
 
         if self.config.bias_field_correction:
-            bias_field_correction_results_path = os.path.join(self.stage_dir, "dwi_biascorrect",
-                                                              "result_dwi_biascorrect.pklz")
-            if (os.path.exists(bias_field_correction_results_path)):
-                dwi_biascorrect_results = pickle.load(
-                    gzip.open(bias_field_correction_results_path))
-                # print dwi_biascorrect_results.outputs.out_file
-                # print dwi_biascorrect_results.outputs.out_bias
-                bcorr = bidsapp_2_local_output_dir(self.output_dir, dwi_biascorrect_results.outputs.out_file)
-                self.inspect_outputs_dict['Bias field corrected image'] = ['mrview',
-                                                                           bcorr]
-                bias = bidsapp_2_local_output_dir(self.output_dir, dwi_biascorrect_results.outputs.out_bias)
-                self.inspect_outputs_dict['Bias field'] = [
-                    'mrview', bias]
+            
+            dwi_biascorrect_dir = os.path.join(self.stage_dir, 'dwi_biascorrect')
+            bcorr = glob.glob(os.path.join(dwi_biascorrect_dir, '*_biascorr.mif'))[0]
+            bias = glob.glob(os.path.join(dwi_biascorrect_dir, '*_biasfield.mif'))[0]
+
+            if (os.path.exists(bcorr)):
+                self.inspect_outputs_dict['Bias field corrected image'] = ['mrview',bcorr]
+
+            if (os.path.exists(bias)):
+                self.inspect_outputs_dict['Bias field'] = ['mrview', bias]
 
         if self.config.eddy_current_and_motion_correction:
+            
             if self.config.eddy_correction_algo == 'FSL eddy_correct':
-                eddy_results_path = os.path.join(
-                    self.stage_dir, "eddy_correct", "result_eddy_correct.pklz")
-                if (os.path.exists(eddy_results_path)):
-                    eddy_results = pickle.load(gzip.open(eddy_results_path))
-                    edcorr = bidsapp_2_local_output_dir(self.output_dir, eddy_results.outputs.eddy_corrected)
-                    self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview',
-                                                                                 edcorr]
+                eddy_dir = os.path.join(self.stage_dir, 'eddy_correct')
             else:
-                eddy_results_path = os.path.join(
-                    self.stage_dir, "eddy", "result_eddy.pklz")
-                if (os.path.exists(eddy_results_path)):
-                    eddy_results = pickle.load(gzip.open(eddy_results_path))
-                    edcorr = bidsapp_2_local_output_dir(self.output_dir, eddy_results.outputs.eddy_corrected)
-                    self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview',
-                                                                                 edcorr]
+                eddy_dir = os.path.join(self.stage_dir, 'eddy')
 
-        self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
+            #Might need extra if/else for eddy_correct/eddy
+            edcorr = os.path.join(eddy_dir, 'eddy_corrected.nii.gz')
+
+            if (os.path.exists(edcorr)):
+                self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview', edcorr]
+
+        self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
 
     def has_run(self):
@@ -884,217 +895,3 @@ class PreprocessingStage(Stage):
                 return os.path.exists(os.path.join(self.stage_dir, "mr_convert_b", "result_mr_convert_b.pklz"))
         else:
             return os.path.exists(os.path.join(self.stage_dir, "eddy", "result_eddy.pklz"))
-
-
-class splitDiffusion_InputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True)
-    start = Int(0)
-    end = Int()
-
-
-class splitDiffusion_OutputSpec(TraitedSpec):
-    data = File(exists=True)
-    padding1 = File(exists=False)
-    padding2 = File(exists=False)
-
-
-class splitDiffusion(BaseInterface):
-    input_spec = splitDiffusion_InputSpec
-    output_spec = splitDiffusion_OutputSpec
-
-    def _run_interface(self, runtime):
-        diffusion_file = nib.load(self.inputs.in_file)
-        diffusion = diffusion_file.get_data()
-        affine = diffusion_file.get_affine()
-        dim = diffusion.shape
-        if self.inputs.start > 0 and self.inputs.end > dim[3] - 1:
-            print('End volume is set to %d but it should be bellow %d' %
-                  (self.inputs.end, dim[3] - 1))
-        padding_idx1 = list(range(0, self.inputs.start))
-        if len(padding_idx1) > 0:
-            temp = diffusion[:, :, :, 0:self.inputs.start]
-            nib.save(nib.nifti1.Nifti1Image(temp, affine),
-                     os.path.abspath('padding1.nii.gz'))
-        temp = diffusion[:, :, :, self.inputs.start:self.inputs.end + 1]
-        nib.save(nib.nifti1.Nifti1Image(temp, affine),
-                 os.path.abspath('data.nii.gz'))
-        padding_idx2 = list(range(self.inputs.end, dim[3] - 1))
-        if len(padding_idx2) > 0:
-            temp = diffusion[:, :, :, self.inputs.end + 1:dim[3]]
-            nib.save(nib.nifti1.Nifti1Image(temp, affine),
-                     os.path.abspath('padding2.nii.gz'))
-
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["data"] = os.path.abspath('data.nii.gz')
-        if os.path.exists(os.path.abspath('padding1.nii.gz')):
-            outputs["padding1"] = os.path.abspath('padding1.nii.gz')
-        if os.path.exists(os.path.abspath('padding2.nii.gz')):
-            outputs["padding2"] = os.path.abspath('padding2.nii.gz')
-        return outputs
-
-
-# class ConcatOutputsAsTuple(Interface):
-#     """join two inputs into a tuple
-#     """
-#     def __init__(self, *args, **inputs):
-#         self._populate_inputs()
-
-#     def _populate_inputs(self):
-#         self.inputs = Bunch(input1=None,
-#                             input2=None)
-
-#     def get_input_info(self):
-#         return []
-
-#     def outputs(self):
-#         return Bunch(output=None)
-
-#     def aggregate_outputs(self):
-#         outputs = self.outputs()
-#         outputs.output =  (self.inputs.input1,self.inputs.input2)
-#         # if isinstance(self.inputs.input1,str) and isinstance(self.inputs.input2,str):
-#         #     outputs.output =  (self.inputs.input1,self.inputs.input2)
-#         # else:
-#         #     outputs.output.extend(self.inputs.input2)
-#         return outputs
-
-#     def run(self, cwd=None):
-#         """Execute this module.
-#         """
-#         runtime = Bunch(returncode=0,
-#                         stdout=None,
-#                         stderr=None)
-#         outputs=self.aggregate_outputs()
-#         return InterfaceResult(deepcopy(self), runtime, outputs=outputs)
-class CreateAcqpFileInputSpec(BaseInterfaceInputSpec):
-    total_readout = Float(0.0)
-
-
-class CreateAcqpFileOutputSpec(TraitedSpec):
-    acqp = File(exists=True)
-
-
-class CreateAcqpFile(BaseInterface):
-    input_spec = CreateAcqpFileInputSpec
-    output_spec = CreateAcqpFileOutputSpec
-
-    def _run_interface(self, runtime):
-        import numpy as np
-
-        # Matrix giving phase-encoding direction (3 first columns) and total read out time (4th column)
-        # For phase encoding A << P <=> y-direction
-        # Total readout time = Echo spacing x EPI factor x 0.001 [s]
-        mat = np.array([['0', '1', '0', str(self.inputs.total_readout)],
-                        ['0', '-1', '0', str(self.inputs.total_readout)]])
-
-        with open(os.path.abspath('acqp.txt'), 'a') as out_f:
-            np.savetxt(out_f, mat, fmt="%s", delimiter=' ')
-
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["acqp"] = os.path.abspath('acqp.txt')
-        return outputs
-
-
-class CreateIndexFileInputSpec(BaseInterfaceInputSpec):
-    in_grad_mrtrix = File(exists=True, mandatory=True,
-                          desc='Input DWI gradient table in MRTric format')
-
-
-class CreateIndexFileOutputSpec(TraitedSpec):
-    index = File(exists=True)
-
-
-class CreateIndexFile(BaseInterface):
-    input_spec = CreateIndexFileInputSpec
-    output_spec = CreateIndexFileOutputSpec
-
-    def _run_interface(self, runtime):
-        axis_dict = {'x': 0, 'y': 1, 'z': 2}
-        import numpy as np
-
-        with open(self.inputs.in_grad_mrtrix, 'r') as f:
-            for i, l in enumerate(f):
-                pass
-
-        lines = i + 1
-
-        mat = np.ones((1, lines))
-
-        with open(os.path.abspath('index.txt'), 'a') as out_f:
-            np.savetxt(out_f, mat, delimiter=' ', fmt="%1.0g")
-
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["index"] = os.path.abspath('index.txt')
-        return outputs
-
-
-class ConcatOutputsAsTupleInputSpec(BaseInterfaceInputSpec):
-    input1 = File(exists=True)
-    input2 = File(exists=True)
-
-
-class ConcatOutputsAsTupleOutputSpec(TraitedSpec):
-    out_tuple = traits.Tuple(File(exists=True), File(exists=True))
-
-
-class ConcatOutputsAsTuple(BaseInterface):
-    input_spec = ConcatOutputsAsTupleInputSpec
-    output_spec = ConcatOutputsAsTupleOutputSpec
-
-    def _run_interface(self, runtime):
-        self._outputs().out_tuple = (self.inputs.input1, self.inputs.input2)
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_tuple"] = (self.inputs.input1, self.inputs.input2)
-        return outputs
-
-
-class ApplymultipleMRConvertInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(
-        File(desc='files to be registered', mandatory=True, exists=True))
-    stride = traits.List(traits.Int, argstr='-stride %s', sep=',',
-                         position=3, minlen=3, maxlen=4,
-                         desc='Three to four comma-separated numbers specifying the strides of the output data in memory. The actual strides produced will depend on whether the output image format can support it..')
-    output_datatype = traits.Enum("float32", "float32le", "float32be", "float64", "float64le", "float64be", "int64",
-                                  "uint64", "int64le", "uint64le", "int64be", "uint64be", "int32", "uint32", "int32le",
-                                  "uint32le", "int32be", "uint32be", "int16", "uint16", "int16le", "uint16le",
-                                  "int16be", "uint16be", "cfloat32", "cfloat32le", "cfloat32be", "cfloat64",
-                                  "cfloat64le", "cfloat64be", "int8", "uint8", "bit", argstr='-datatype %s', position=2,
-                                  desc='"specify output image data type. Valid choices are: float32, float32le, float32be, float64, float64le, float64be, int64, uint64, int64le, uint64le, int64be, uint64be, int32, uint32, int32le, uint32le, int32be, uint32be, int16, uint16, int16le, uint16le, int16be, uint16be, cfloat32, cfloat32le, cfloat32be, cfloat64, cfloat64le, cfloat64be, int8, uint8, bit."')  # , usedefault=True)
-    extension = traits.Enum("mif", "nii", "float", "char", "short", "int", "long", "double", position=4,
-                            desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"',
-                            usedefault=True)
-
-
-class ApplymultipleMRConvertOutputSpec(TraitedSpec):
-    converted_files = OutputMultiPath(File())
-
-
-class ApplymultipleMRConvert(BaseInterface):
-    input_spec = ApplymultipleMRConvertInputSpec
-    output_spec = ApplymultipleMRConvertOutputSpec
-
-    def _run_interface(self, runtime):
-        for in_file in self.inputs.in_files:
-            # Extract image filename (only) and create output image filename (no renaming)
-            out_filename = in_file.split('/')[-1]
-            ax = MRConvert(in_file=in_file, stride=self.inputs.stride, out_filename=out_filename,
-                           output_datatype=self.inputs.output_datatype, extension=self.inputs.extension)
-            ax.run()
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['converted_files'] = glob.glob(os.path.abspath("*.nii.gz"))
-        return outputs

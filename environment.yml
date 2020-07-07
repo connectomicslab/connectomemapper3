@@ -19,7 +19,8 @@ dependencies:
 - git-annex=8.20200617 # =7.20190219
 - pyside2=5.9.0a1 # =5.9.0a1
 - fslpy=3.2.1 # =1.13.2
-- fsleyes=0.32.3 # =0.27.3
+- fsleyes=0.33.0 # =0.27.3
+- indexed_gzip=1.2.* # requirements of fsleyes
 
 - pip:
     #- cfflib==2.0.5

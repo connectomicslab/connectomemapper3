@@ -69,22 +69,21 @@ class fMRIPipeline(Pipeline):
     subject_id = Str
 
     def __init__(self, project_info):
-        self.subject = project_info.subject
-
+        
         self.subjects_dir = project_info.freesurfer_subjects_dir
         self.subject_id = project_info.freesurfer_subject_id
 
         self.global_conf.subjects = project_info.subjects
-        self.global_conf.subject = self.subject
+        self.global_conf.subject =  project_info.subject
 
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
             self.subject_directory = os.path.join(
-                self.base_directory, self.subject, project_info.subject_session)
+                self.base_directory,  project_info.subject, project_info.subject_session)
         else:
             self.global_conf.subject_session = ''
             self.subject_directory = os.path.join(
-                project_info.base_directory, self.subject)
+                project_info.base_directory,  project_info.subject)
 
         self.derivatives_directory = os.path.abspath(
             project_info.output_directory)
@@ -107,7 +106,10 @@ class fMRIPipeline(Pipeline):
                                                            output_dir=self.output_directory),
                        'Connectome': ConnectomeStage(bids_dir=project_info.base_directory, 
                                                      output_dir=self.output_directory)}
+
         Pipeline.__init__(self, project_info)
+
+        self.subject = project_info.subject
 
         self.stages['FunctionalMRI'].config.on_trait_change(
             self.update_nuisance_requirements, 'global_nuisance')
@@ -375,7 +377,9 @@ class fMRIPipeline(Pipeline):
             {'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline"),
                          'log_to_file': True},
              'execution': {'remove_unnecessary_outputs': False,
-                           'stop_on_first_crash': True, 'stop_on_first_rerun': False,
+                           'stop_on_first_crash': True, 
+                           'stop_on_first_rerun': False,
+                           'use_relative_paths': True,
                            'crashfile_format': "txt"}
              })
         logging.update_logging(config)

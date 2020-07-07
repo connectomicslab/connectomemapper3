@@ -16,6 +16,7 @@ from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
 from nipype.interfaces.base import (traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec, CommandLineInputSpec, CommandLine, InputMultiPath,
                                     OutputMultiPath, File, Directory,
                                     isdefined)
+import nipype.interfaces.fsl as fsl
 from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix, copyfile
 
 warn = warnings.warn
@@ -367,7 +368,7 @@ class ApplymultipleXfm(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_files'] = glob.glob(os.path.abspath("*.nii.gz"))
+        outputs['out_files'] = glob(os.path.abspath("*.nii.gz"))
         return outputs
 
 
@@ -398,7 +399,7 @@ class ApplymultipleWarp(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_files'] = glob.glob(os.path.abspath("*.nii.gz"))
+        outputs['out_files'] = glob(os.path.abspath("*.nii.gz"))
         return outputs
 
 
@@ -427,7 +428,7 @@ class Applynlinmultiplewarps(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["warped_files"] = glob.glob(os.path.abspath("*.nii.gz"))
+        outputs["warped_files"] = glob(os.path.abspath("*.nii.gz"))
         return outputs
 
 

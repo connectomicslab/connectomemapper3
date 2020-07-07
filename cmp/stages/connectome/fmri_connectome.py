@@ -29,7 +29,7 @@ import nipype.interfaces.cmtk as cmtk
 import cmtklib.connectome
 # import cmtklib as cmtk
 from cmp.stages.common import Stage
-from cmtklib.util import bidsapp_2_local_output_dir
+from cmtklib.util import get_pipeline_dictionary_outputs
 
 
 class ConnectomeConfig(HasTraits):
@@ -71,47 +71,50 @@ class ConnectomeStage(Stage):
         ])
 
     def define_inspect_outputs(self):
-        con_results_path = os.path.join(
-            self.stage_dir, "compute_matrice", "result_compute_matrice.pklz")
+        func_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'bold_sinker')
+        func_sinker_report = os.path.join(func_sinker_dir, '_report', 'report.rst')
 
-        map_scale = "default"
-        if self.config.log_visualization:
-            map_scale = "log"
+        if os.path.exists(func_sinker_report):
 
-        if self.config.circular_layout:
-            layout = 'circular'
-        else:
-            layout = 'matrix'
+            func_outputs = get_pipeline_dictionary_outputs(func_sinker_report, self.output_dir)
 
-        # print('con_results_path : ',con_results_path)
-        if (os.path.exists(con_results_path)):
-            con_results = pickle.load(gzip.open(con_results_path))
-            mat = con_results.outputs.connectivity_matrices
+            map_scale = "default"
+            if self.config.log_visualization:
+                map_scale = "log"
+
+            if self.config.circular_layout:
+                layout = 'circular'
+            else:
+                layout = 'matrix'
+
+            mat = func_outputs['func.@connectivity_matrices']
+            # print('con_results_path : ',con_results_path)
+            
             if isinstance(mat, str):
                 print("single scale")
                 # print(mat)
                 if 'gpickle' in mat:
                     con_name = os.path.basename(mat).split(".")[
                         0].split("_")[-1]
-                    mat = bidsapp_2_local_output_dir(self.output_dir, mat)
-                    self.inspect_outputs_dict[
-                        'ROI-average time-series correlation - Connectome %s' % os.path.basename(mat)] = [
-                        "showmatrix_gpickle", layout, mat, "corr", "False",
-                        self.config.subject + ' - ' + con_name + ' - Correlation', map_scale]
+                    if os.path.exists(mat):
+                        self.inspect_outputs_dict[
+                            'ROI-average time-series correlation - Connectome %s' % os.path.basename(mat)] = [
+                            "showmatrix_gpickle", layout, mat, "corr", "False",
+                            self.config.subject + ' - ' + con_name + ' - Correlation', map_scale]
             else:
                 print("multi scale")
-                for mat in con_results.outputs.connectivity_matrices:
+                for mat in func_outputs['func.@connectivity_matrices']:
                     # print(mat)
                     if 'gpickle' in mat:
                         con_name = os.path.basename(mat).split(".")[
                             0].split("_")[-1]
-                        mat = bidsapp_2_local_output_dir(self.output_dir, mat)
-                        self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s' % con_name] = [
-                            "showmatrix_gpickle", layout, mat, "corr", "False",
-                            self.config.subject + ' - ' + con_name + ' - Correlation', map_scale]
+                        if os.path.exists(mat):
+                            self.inspect_outputs_dict['ROI-average time-series correlation - Connectome %s' % con_name] = [
+                                "showmatrix_gpickle", layout, mat, "corr", "False",
+                                self.config.subject + ' - ' + con_name + ' - Correlation', map_scale]
 
-            self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
-                                          key=str.lower)
+            self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
+                                      key=str.lower)
 
     def has_run(self):
         return os.path.exists(os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"))

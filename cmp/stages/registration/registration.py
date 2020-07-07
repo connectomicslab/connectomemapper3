@@ -41,7 +41,7 @@ from cmtklib.interfaces.fsl import FSLCreateHD, ApplymultipleXfm, ApplymultipleW
 import cmtklib.interfaces.freesurfer as cmp_fs
 import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.ants import MultipleANTsApplyTransforms
-from cmtklib.util import bidsapp_2_local_output_dir
+from cmtklib.util import get_pipeline_dictionary_outputs
 
 
 class RegistrationConfig(HasTraits):
@@ -1222,272 +1222,97 @@ class RegistrationStage(Stage):
         #                     ])
 
     def define_inspect_outputs(self):
-        # print "stage_dir : %s" % self.stage_dir
+        # print("stage_dir : %s" % self.stage_dir)
         if self.config.pipeline == "Diffusion":
-            target_path = os.path.join(
-                self.stage_dir, "target_resample", "result_target_resample.pklz")
-            reg_results_path = os.path.join(
-                self.stage_dir, "linear_registration", "result_linear_registration.pklz")
-            warpedROIVs_results_path = os.path.join(
-                self.stage_dir, "apply_warp_roivs", "result_apply_warp_roivs.pklz")
-            warped5TT_results_path = os.path.join(
-                self.stage_dir, "apply_warp_5tt", "result_apply_warp_5tt.pklz")
-            warpedPVEs_results_path = os.path.join(
-                self.stage_dir, "apply_warp_pves", "result_apply_warp_pves.pklz")
-            warpedWM_results_path = os.path.join(
-                self.stage_dir, "apply_warp_wm", "result_apply_warp_wm.pklz")
-            warpedT1_results_path = os.path.join(
-                self.stage_dir, "apply_warp_T1", "result_apply_warp_T1.pklz")
-            if self.config.registration_mode == 'FSL':
-                fnirt_results_path = os.path.join(
-                    self.stage_dir, "fsl_fnirt_crop", "result_fsl_fnirt_crop.pklz")
-            elif self.config.registration_mode == 'ANTs':
-                if self.config.ants_perform_syn:
-                    syn_results_path = os.path.join(
-                        self.stage_dir, "SyN_registration", "result_SyN_registration.pklz")
+            dwi_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'diffusion_sinker')
+            dwi_sinker_report = os.path.join(dwi_sinker_dir, '_report', 'report.rst')
 
-        else:
-            target_path = os.path.join(
-                self.stage_dir, "fMRI_skullstrip", "result_fMRI_skullstrip.pklz")
-            reg_results_path = os.path.join(
-                self.stage_dir, "linear_registration", "result_linear_registration.pklz")
-            warpedROIVs_results_path = os.path.join(self.stage_dir, "apply_registration_roivs",
-                                                    "result_apply_registration_roivs.pklz")
+            if os.path.exists(dwi_sinker_report):
+                print(self.output_dir)
+                dwi_outputs = get_pipeline_dictionary_outputs(dwi_sinker_report, self.output_dir)
 
-        if self.config.pipeline == "Diffusion":
-            if (os.path.exists(target_path) and os.path.exists(reg_results_path) and os.path.exists(
-                    warpedROIVs_results_path) and os.path.exists(warped5TT_results_path) and os.path.exists(
-                    warpedPVEs_results_path) and os.path.exists(warpedWM_results_path) and os.path.exists(
-                    warpedT1_results_path)):
+                tool= self.config.registration_mode
+                ref = dwi_outputs['dwi.@bdiffusion_reg_crop'] 
+                out = dwi_outputs['anat.@brain_reg_crop'] 
 
-                target = pickle.load(gzip.open(target_path))
-                reg_results = pickle.load(gzip.open(reg_results_path))
-                rois_results = pickle.load(gzip.open(warpedROIVs_results_path))
-                mrtrix_5tt_results = pickle.load(
-                    gzip.open(warped5TT_results_path))
-                pves_results = pickle.load(gzip.open(warpedPVEs_results_path))
-                wm_results = pickle.load(gzip.open(warpedWM_results_path))
-                T1_results = pickle.load(gzip.open(warpedT1_results_path))
+                print(ref)
+                print(out)
 
-                if self.config.registration_mode == 'FSL':
-                    if (os.path.exists(fnirt_results_path)):
-                        fnirt_results = pickle.load(
-                            gzip.open(fnirt_results_path))
-                        ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['reference'])
-                        out = bidsapp_2_local_output_dir(self.output_dir, reg_results.outputs.out_file)
-                        self.inspect_outputs_dict['Linear T1-to-b0'] = ['fsleyes', '-sdefault',
-                                                                        ref_flirt,
-                                                                        out, '-cm', "copper",
-                                                                        '-a', '50']
-                        ref = bidsapp_2_local_output_dir(self.output_dir, fnirt_results.inputs['ref_file'])
-                        out = bidsapp_2_local_output_dir(self.output_dir, T1_results.outputs.out_file)
-                        self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fsleyes', '-sdefault',
-                                                                         ref,
-                                                                         out, '-cm', "copper",
-                                                                         '-a', '50']
-                        ref = bidsapp_2_local_output_dir(self.output_dir, fnirt_results.inputs['ref_file'])
-                        out = bidsapp_2_local_output_dir(self.output_dir, mrtrix_5tt_results.outputs.output_image)
-                        self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fsleyes', '-sdefault',
-                                                                          ref,
-                                                                          out,
-                                                                          '-cm', "hot", '-a', '50']
-                        field = bidsapp_2_local_output_dir(self.output_dir, fnirt_results.outputs.fieldcoeff_file)
-                        self.inspect_outputs_dict['Deformation field'] = ['fsleyes', '-sdefault',
-                                                                          field]  # ['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
-
-                        if type(rois_results.outputs.out_files) == str:
-                            roiv = bidsapp_2_local_output_dir(self.output_dir, rois_results.outputs.out_files)
-                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(rois_results.outputs.out_files)] = [
-                                'fsleyes', '-sdefault', ref, roiv, '-cm', 'random', '-a', '50']
-                        else:
-                            for roi_output in rois_results.outputs.out_files:
-                                roiv = bidsapp_2_local_output_dir(self.output_dir, roi_output)
-                                self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fsleyes',
-                                                                                                        '-sdefault',
-                                                                                                        ref,
-                                                                                                        roiv,
-                                                                                                        '-cm', 'random',
-                                                                                                        '-a', '50']
-
-                        if type(pves_results.outputs.out_files) == str:
-                            pves = bidsapp_2_local_output_dir(self.output_dir, pves_results.outputs.out_files)
-                            self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pves_results.outputs.out_files)] = [
-                                'fsleyes', '-sdefault', ref, pves, '-cm', 'hot', '-a', '50']
-                        else:
-                            for pve_output in pves_results.outputs.out_files:
-                                pves = bidsapp_2_local_output_dir(self.output_dir, pve_output)
-                                self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fsleyes',
-                                                                                                        '-sdefault',
-                                                                                                        ref,
-                                                                                                        pves,
-                                                                                                        '-cm', 'hot',
-                                                                                                        '-a', '50']
-
-                elif self.config.registration_mode == 'ANTs':
-
-                    # print("reg_results.inputs['fixed_image']: %s"%reg_results.inputs['fixed_image'][0])
-                    # print("reg_results.outputs.warped_image: %s"%reg_results.outputs.warped_image)
-
-                    # print("T1_results.outputs.output_image: %s"%T1_results.outputs.output_image)
-                    ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
-                    out = bidsapp_2_local_output_dir(self.output_dir, reg_results.outputs.warped_image)
-                    self.inspect_outputs_dict['Linear T1-to-b0'] = ['fsleyes', '-sdefault',
+                if (os.path.exists(ref) and os.path.exists(out)):
+                    print('reg 1')
+                    self.inspect_outputs_dict['Linear T1-to-b0 (%s)' % tool] = ['fsleyes', '-sdefault',
                                                                     ref,
-                                                                    out, '-cm', 'copper',
+                                                                    out, '-cm', "copper",
                                                                     '-a', '50']
-
-                    if self.config.ants_perform_syn:
-                        if (os.path.exists(syn_results_path)):
-                            syn_results = pickle.load(
-                                gzip.open(syn_results_path))
-                            # print("syn_results.inputs['fixed_image']: %s"%syn_results.inputs['fixed_image'][0])
-                            ref = bidsapp_2_local_output_dir(self.output_dir, syn_results.inputs['fixed_image'][0])
-                            out = bidsapp_2_local_output_dir(self.output_dir, T1_results.outputs.output_image)
-                            self.inspect_outputs_dict['Wrapped T1-to-b0'] = ['fsleyes', '-sdefault',
-                                                                             ref,
-                                                                             out, '-cm',
-                                                                             'copper', '-a', '50']
-                            # self.inspect_outputs_dict['Deformation field'] = ['fsleyes','-sdefault',fnirt_results.outputs.fieldcoeff_file]#['mrview',fa_results.inputs['ref_file'],'-vector.load',fnirt_results.outputs.fieldcoeff_file]#
-                    # print("rois_results.outputs.output_images: %s"%rois_results.outputs.output_images)
-                    # print("pves_results.outputs.output_images: %s"%pves_results.outputs.output_images)
-                    ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
-                    out = bidsapp_2_local_output_dir(self.output_dir, mrtrix_5tt_results.outputs.output_image)
-                    self.inspect_outputs_dict['Wrapped 5TT-to-b0'] = ['fsleyes', '-sdefault',
+                
+                out = dwi_outputs['anat.@act_5tt_reg_crop']
+                if (os.path.exists(ref) and os.path.exists(out)):
+                    self.inspect_outputs_dict['Wrapped 5TT-to-b0 (%s)' % tool] = ['fsleyes', '-sdefault',
                                                                       ref,
-                                                                      out, '-cm',
-                                                                      'copper', '-a', '50']
+                                                                      out,
+                                                                      '-cm', "hot", '-a', '50']
 
-                    if type(rois_results.outputs.output_images) == str:
-                        if self.config.ants_perform_syn:
-                            if (os.path.exists(syn_results_path)):
-                                ref = bidsapp_2_local_output_dir(self.output_dir, syn_results.inputs['fixed_image'][0])
-                                out = bidsapp_2_local_output_dir(self.output_dir, rois_results.outputs.output_images)
-                                self.inspect_outputs_dict[
-                                    '%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fsleyes',
-                                                                                                          '-sdefault',
-                                                                                                          ref,
-                                                                                                          out,
-                                                                                                          '-cm',
-                                                                                                          'random',
-                                                                                                          '-a', '50']
-                        else:
-                            ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
-                            out = bidsapp_2_local_output_dir(self.output_dir, rois_results.outputs.output_images)
-                            self.inspect_outputs_dict[
-                                '%s-to-b0' % os.path.basename(rois_results.outputs.output_images)] = ['fsleyes',
-                                                                                                      '-sdefault',
-                                                                                                      ref,
-                                                                                                      rois_results.outputs.output_images,
-                                                                                                      '-cm', 'random',
-                                                                                                      '-a', '50']
-                    else:
-                        for roi_output in rois_results.outputs.output_images:
-                            if self.config.ants_perform_syn:
-                                if (os.path.exists(syn_results_path)):
-                                    ref = bidsapp_2_local_output_dir(self.output_dir, syn_results.inputs['fixed_image'][0])
-                                    out = bidsapp_2_local_output_dir(self.output_dir, roi_output)
-                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fsleyes',
-                                                                                                            '-sdefault',
-                                                                                                            ref,
-                                                                                                            out,
-                                                                                                            '-cm',
-                                                                                                            'random',
-                                                                                                            '-a', '50']
-                            else:
-                                ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
-                                out = bidsapp_2_local_output_dir(self.output_dir, roi_output)
-                                self.inspect_outputs_dict['%s-to-b0' % os.path.basename(roi_output)] = ['fsleyes',
-                                                                                                        '-sdefault',
-                                                                                                        ref,
-                                                                                                        out,
-                                                                                                        '-cm', 'random',
-                                                                                                        '-a', '50']
+                out = dwi_outputs['anat.@gmwmi_reg_crop']
+                if (os.path.exists(ref) and os.path.exists(out)):
+                    self.inspect_outputs_dict['Wrapped GMWMi-to-b0 (%s)' % tool] = ['fsleyes', '-sdefault',
+                                                                      ref,
+                                                                      out,
+                                                                      '-cm', "hot", '-a', '50']
 
-                    if type(pves_results.outputs.output_images) == str:
-                        if self.config.ants_perform_syn:
-                            if (os.path.exists(syn_results_path)):
-                                ref = bidsapp_2_local_output_dir(self.output_dir, syn_results.inputs['fixed_image'][0])
-                                out = bidsapp_2_local_output_dir(self.output_dir, pves_results.outputs.output_images)
-                                self.inspect_outputs_dict[
-                                    '%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fsleyes',
-                                                                                                          '-sdefault',
-                                                                                                          ref,
-                                                                                                          out,
-                                                                                                          '-cm', 'hot',
-                                                                                                          '-a', '50']
-                        else:
-                            ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
-                            out = bidsapp_2_local_output_dir(self.output_dir, pves_results.outputs.output_images)
-                            self.inspect_outputs_dict[
-                                '%s-to-b0' % os.path.basename(pves_results.outputs.output_images)] = ['fsleyes',
-                                                                                                      '-sdefault',
-                                                                                                      ref,
-                                                                                                      out,
-                                                                                                      '-cm', 'hot',
-                                                                                                      '-a', '50']
-                    else:
-                        for pve_output in pves_results.outputs.output_images:
-                            if self.config.ants_perform_syn:
-                                if (os.path.exists(syn_results_path)):
-                                    ref = bidsapp_2_local_output_dir(self.output_dir, syn_results.inputs['fixed_image'][0])
-                                    out = bidsapp_2_local_output_dir(self.output_dir, pve_output)
-                                    self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fsleyes',
-                                                                                                            '-sdefault',
-                                                                                                            ref,
-                                                                                                            out,
-                                                                                                            '-cm',
-                                                                                                            'hot', '-a',
-                                                                                                            '50']
-                            else:
-                                ref = bidsapp_2_local_output_dir(self.output_dir, reg_results.inputs['fixed_image'][0])
-                                out = bidsapp_2_local_output_dir(self.output_dir, pve_output)
-                                self.inspect_outputs_dict['%s-to-b0' % os.path.basename(pve_output)] = ['fsleyes',
-                                                                                                        '-sdefault',
-                                                                                                        ref,
-                                                                                                        out,
-                                                                                                        '-cm', 'hot',
-                                                                                                        '-a', '50']
-        else:
-            if (os.path.exists(target_path)) and (os.path.exists(reg_results_path)) and (
-                    os.path.exists(warpedROIVs_results_path)):
-                target = pickle.load(gzip.open(target_path))
-                reg_results = pickle.load(gzip.open(reg_results_path))
-                rois_results = pickle.load(gzip.open(warpedROIVs_results_path))
+                field = dwi_outputs['xfm.@warp_field']
+                if os.path.exists(field):
+                    self.inspect_outputs_dict['Deformation field (%s)' % tool] = ['fsleyes', '-sdefault',
+                                                                      field]  
 
-                ref = bidsapp_2_local_output_dir(self.output_dir, target.inputs['in_file'])
-                out = bidsapp_2_local_output_dir(self.output_dir, reg_results.outputs.out_file)
-                self.inspect_outputs_dict['Mean-fMRI/T1-to-fMRI'] = ['fsleyes', '-sdefault', ref, out, '-cm', 'copper',
-                                                                     '-a', '50']
-
-                if type(rois_results.outputs.out_files) == str:
-                    ref = bidsapp_2_local_output_dir(self.output_dir, target.outputs.out_file)
-                    out = bidsapp_2_local_output_dir(self.output_dir, rois_results.outputs.out_files)
-                    self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.out_files)] = [
-                        'fsleyes', '-sdefault', ref, out, '-cm', 'random', '-a', '50']
+                if (type(dwi_outputs['anat.@roivs_reg_crop']) == str and os.path.exists(dwi_outputs['anat.@roivs_reg_crop'])):
+                    roiv = dwi_outputs['anat.@roivs_reg_crop']
+                    if os.path.exists(roiv):
+                        self.inspect_outputs_dict['%s-to-b0 (%s)' % (os.path.basename(roiv), tool)] = [
+                            'fsleyes', '-sdefault', ref, roiv, '-cm', 'random', '-a', '50']
                 else:
-                    for roi_output in rois_results.outputs.out_files:
-                        ref = bidsapp_2_local_output_dir(self.output_dir, target.outputs.out_file)
-                        out = bidsapp_2_local_output_dir(self.output_dir, roi_output)
-                        self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fsleyes',
-                                                                                                    '-sdefault',
-                                                                                                    ref, out, '-cm',
-                                                                                                    'random', '-a',
-                                                                                                    '50']
+                    for roi_output in dwi_outputs['anat.@roivs_reg_crop']:
+                        roiv = roi_output
+                        if os.path.exists(roiv):
+                            self.inspect_outputs_dict['%s-to-b0 (%s)' % (os.path.basename(roiv), tool)] = [
+                            'fsleyes', '-sdefault', ref, roiv, '-cm', 'random', '-a', '50']
 
-                    # elif self.config.registration_mode == 'Nonlinear (FSL)':
-                    #     if type(rois_results.outputs.warped_files) == str:
-                    #         if self.config.pipeline == "Diffusion":
-                    #             self.inspect_outputs_dict['B0/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fsleyes','-sdefault',target.outputs.out_file,rois_results.outputs.warped_files,'-cm','random','-a','50']
-                    #         else:
-                    #             self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(rois_results.outputs.warped_files)] = ['fsleyes','-sdefault',target.outputs.out_file,rois_results.outputs.warped_files,'-cm','random','-a','50']
-                    #     elif type(rois_results.outputs.warped_files) == TraitListObject:
-                    #         for roi_output in rois_results.outputs.warped_files:
-                    #             if self.config.pipeline == "Diffusion":
-                    #                 self.inspect_outputs_dict['B0/%s' % os.path.basename(roi_output)] = ['fsleyes','-sdefault',target.outputs.out_file,roi_output,'-cm','random','-a','50']
-                    #             else:
-                    #                 self.inspect_outputs_dict['Mean-fMRI/%s' % os.path.basename(roi_output)] = ['fsleyes','-sdefault',target.outputs.out_file,roi_output,'-cm','random','-a','50']
+                if type(dwi_outputs['anat.@pves_reg_crop']) == str:
+                    pves = dwi_outputs['anat.@pves_reg_crop']
+                    if os.path.exists(pves):
+                        self.inspect_outputs_dict['%s-to-b0 (%s)' % (os.path.basename(pves), tool)] = [
+                            'fsleyes', '-sdefault', ref, pves, '-cm', 'hot', '-a', '50']
+                else:
+                    for pve_output in dwi_outputs['anat.@pves_reg_crop']:
+                        pves = pve_output
+                        if os.path.exists(pves):
+                             self.inspect_outputs_dict['%s-to-b0 (%s)' % (os.path.basename(pves), tool)] = [
+                            'fsleyes', '-sdefault', ref, pves, '-cm', 'hot', '-a', '50']
 
-        self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
+        else:
+            func_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'bold_sinker')
+            func_sinker_report = os.path.join(func_sinker_dir, '_report', 'report.rst')
+
+            if os.path.exists(func_sinker_report):
+
+                func_outputs = get_pipeline_dictionary_outputs(func_sinker_report, self.output_dir)
+
+                tool= self.config.registration_mode
+
+                if type(func_outputs['anat.@registered_roi_volumes']) == str:
+                    ref = func_outputs['func.@mean_vol']
+                    out = func_outputs['anat.@registered_roi_volumes']
+                    if (os.path.exists(ref) and os.path.exists(out)):
+                        self.inspect_outputs_dict['Mean-fMRI/%s (%s)' % (os.path.basename(out), tool)] = [
+                            'fsleyes', '-sdefault', ref, out, '-cm', 'random', '-a', '50']
+                else:
+                    for roi_output in func_outputs['anat.@registered_roi_volumes']:
+                        ref = func_outputs['func.@mean_vol']
+                        out = roi_output
+                        if (os.path.exists(ref) and os.path.exists(out)): 
+                            self.inspect_outputs_dict['Mean-fMRI/%s (%s)' % (os.path.basename(out), tool)] = [
+                            'fsleyes', '-sdefault', ref, out, '-cm', 'random', '-a', '50']
+
+        self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
 
     def has_run(self):

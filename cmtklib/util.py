@@ -17,6 +17,7 @@ import os
 import pickle
 import gzip
 import sys
+import json
 
 warnings.simplefilter("ignore")
 
@@ -209,13 +210,155 @@ def bidsapp_2_local_bids_dir(local_dir, path, debug=True):
     return new_path
 
 
-def bidsapp_2_local_output_dir(local_dir, path, debug=True):
+def bidsapp_2_local_output_dir2(local_dir, path, debug=True):
     new_path = path.replace(
                         '/output_dir', '{}'.format(os.path.join(local_dir)))
     if debug:
         print(new_path)
 
     return new_path
+
+
+def create_results_plkz_local(plkz_file, local_output_dir, encoding='latin-1', debug=True):
+   
+    if debug:
+        print("Processing pickle {} ".format(plkz_file))
+
+    pick = gzip.open(plkz_file,'rb')
+    cont = pick.read()
+    # cont = "".join( chr(x) for x in bytearray(cont))
+    print(cont)
+    
+    # if debug:
+    #     print("local_output_dir : {} , cont.find('/bids_dir'): {}, cont.find('/output_dir'): {} ".format(
+    #         local_output_dir, cont.find('/bids_dir'), cont.find('/output_dir')))
+
+    # if debug:
+    #     print(
+    #         ' bids app output directory -> local dataset derivatives directory')
+    
+    # new_cont = cont.replace('/output_dir', '{}'.format(local_output_dir))
+
+    if debug:
+        print("local_output_dir : {} , cont.find('/bids_dir'): {}, cont.find('/output_dir'): {} ".format(
+            local_output_dir, cont.find(b'/bids_dir'), cont.find(b'/output_dir')))
+
+    if debug:
+        print(
+            ' bids app output directory -> local dataset derivatives directory')
+    
+    new_cont = cont.replace(b'/output_dir', bytearray(local_output_dir, encoding="utf-8"))
+
+    print(new_cont)
+    
+    root = os.path.dirname(plkz_file)
+    base = os.path.basename(plkz_file)
+    pref = os.path.splitext(base)[0]
+
+    out_plkz_file = os.path.join(root, '{}_local.pklz'.format(pref))
+
+    if os.path.exists(out_plkz_file):
+        print('WARNING: remove existing local results pickle file')
+        os.remove(out_plkz_file)
+
+    print('New pickle: {} ({} , {} , {})'.format(out_plkz_file, root, base, pref))
+    try:
+        with gzip.open(out_plkz_file, 'wb') as f:
+            f.write(new_cont)
+    except Exception as e:
+        print(e)
+
+    print('Completed')
+
+    return out_plkz_file
+
+
+def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None):
+    ''' '''
+
+    # Read rst report of a datasink node 
+    with open(reconall_report) as fp:  
+        line = fp.readline()
+        cnt = 1
+        while line:
+            print("Line {}: {}".format(cnt, line.strip()))
+
+            # Extract line containing listing of node outputs
+            if "* subject_id : " in line:
+                fs_subject_dir = line.strip()
+                prefix = '* subject_id : '
+                fs_subject_dir = str.replace(fs_subject_dir,prefix,"")
+                print(fs_subject_dir)
+
+                # Update from BIDS App /output_dir to local output directory 
+                # specified by local_output_dir
+                if local_output_dir is not None:
+                    fs_subject_dir = str.replace(fs_subject_dir,"/output_dir",local_output_dir)
+                break
+
+            line = fp.readline()
+            cnt += 1
+
+    return fs_subject_dir
+
+
+def get_pipeline_dictionary_outputs(datasink_report, local_output_dir=None):
+    ''' '''
+
+    # Read rst report of a datasink node 
+    with open(datasink_report) as fp:  
+        while True:  
+            line = fp.readline()  
+            if not line:  
+                break 
+
+            # Extract line containing listing of node outputs and stop
+            if "_outputs :" in line:
+                str_outputs = line.strip()
+                prefix = '* _outputs : '
+                str_outputs = str.replace(str_outputs,prefix,"")
+                str_outputs = str.replace(str_outputs,"\'","\"")
+                str_outputs = str.replace(str_outputs,"<undefined>","\"\"")
+
+                # Update from BIDS App /output_dir to local output directory 
+                # specified by local_output_dir
+                if local_output_dir is not None:
+                    str_outputs = str.replace(str_outputs,"/output_dir",local_output_dir)
+                break
+
+    # Convert the extracted JSON-structured string to a dictionary
+    dict_outputs = json.loads("{}".format(str_outputs))
+    print("Dictionary of datasink outputs: {}".format(dict_outputs))
+    return dict_outputs
+
+
+def get_node_dictionary_outputs(node_report, local_output_dir=None):
+    ''' '''
+
+    # Read rst report of a datasink node 
+    with open(node_report) as fp:  
+        while True:  
+            line = fp.readline()  
+            if not line:  
+                break 
+
+            # Extract line containing listing of node outputs and stop
+            if "_outputs :" in line:
+                str_outputs = line.strip()
+                prefix = '* _outputs : '
+                str_outputs = str.replace(str_outputs,prefix,"")
+                str_outputs = str.replace(str_outputs,"\'","\"")
+
+                # Update from BIDS App /output_dir to local output directory 
+                # specified by local_output_dir
+                if local_output_dir is not None:
+                    str_outputs = str.replace(str_outputs,"/output_dir",local_output_dir)
+                break
+
+    # Convert the extracted JSON-structured string to a dictionary
+    dict_outputs = json.loads("{}".format(str_outputs))
+    print("Dictionary of datasink outputs: {}".format(dict_outputs))
+    return dict_outputs
 
 
 def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):

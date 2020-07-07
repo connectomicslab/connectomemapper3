@@ -26,7 +26,7 @@ from cmtklib.interfaces import fsl
 from cmtklib.parcellation import Parcellate, ParcellateBrainstemStructures, \
     ParcellateHippocampalSubfields, ParcellateThalamus, \
     CombineParcellations, ComputeParcellationRoiVolumes
-from cmtklib.util import bidsapp_2_local_bids_dir, bidsapp_2_local_output_dir
+from cmtklib.util import get_pipeline_dictionary_outputs
 
 # Own imports
 from cmp.stages.common import Stage
@@ -484,45 +484,41 @@ class ParcellationStage(Stage):
     def define_inspect_outputs(self):
         print("stage_dir : %s" % self.stage_dir)
         print("parcellation scheme : %s" % self.config.parcellation_scheme)
+
+        anat_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'anatomical_sinker')
+        anat_sinker_report = os.path.join(anat_sinker_dir, '_report', 'report.rst')
         # print "atlas info : "
         # print self.config.atlas_info
 
         if self.config.parcellation_scheme != "Custom":
-            parc_results_path = os.path.join(self.stage_dir, "%s_parcellation" % self.config.parcellation_scheme,
-                                             "result_%s_parcellation.pklz" % self.config.parcellation_scheme)
-            # print "parc_results_path : %s" % parc_results_path
-            if (os.path.exists(parc_results_path)):
-                parc_results = pickle.load(gzip.open(parc_results_path))
-                # print parc_results
-                # print parc_results.outputs.roi_files_in_structural_space
-                white_matter_file = bidsapp_2_local_output_dir(self.output_dir,
-                                                               parc_results.outputs.white_matter_mask_file)
+            if (os.path.exists(anat_sinker_report)):
+                anat_outputs = get_pipeline_dictionary_outputs(anat_sinker_report, self.output_dir)
 
-                if isinstance(parc_results.outputs.roi_files_in_structural_space, str):
+                white_matter_file = anat_outputs['anat.@wm_mask']
+
+                if isinstance(anat_outputs['anat.@roivs'], str):
                     # print "str: %s" % parc_results.outputs.roi_files_in_structural_space
                     lut_file = pkg_resources.resource_filename('cmtklib',
                                                                os.path.join('data', 'parcellation', 'nativefreesurfer',
                                                                             'freesurferaparc',
                                                                             'FreeSurferColorLUT_adapted.txt'))
-                    roi_v = bidsapp_2_local_output_dir(self.output_dir,
-                                                       parc_results.outputs.roi_files_in_structural_space)
+                    roi_v = anat_outputs['anat.@roivs']
 
                     # print "roi_v : %s" % os.path.basename(roi_v)
-                    self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview', '-v',
-                                                                          white_matter_file + ':colormap=GEColor',
-                                                                          roi_v + ":colormap=lut:lut=" + lut_file]
-                elif isinstance(parc_results.outputs.roi_files_in_structural_space, TraitListObject):
+                    if (os.path.exists(white_matter_file) and os.path.exists(roi_v)):
+                        self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview', '-v',
+                                                                              white_matter_file + ':colormap=GEColor',
+                                                                              roi_v + ":colormap=lut:lut=" + lut_file]
+                elif isinstance(anat_outputs['anat.@roivs'], list):
                     # print parc_results.outputs.roi_files_in_structural_space
                     if self.config.parcellation_scheme == 'Lausanne2008':
                         resolution = {'1': 'resolution83', '2': 'resolution150', '3': 'resolution258',
                                       '4': 'resolution500', '5': 'resolution1015'}
-                        for roi_v in parc_results.outputs.roi_files_in_structural_space:
+                        for roi_v in anat_outputs['anat.@roivs']:
                             roi_basename = os.path.basename(roi_v)
                             print(roi_basename)
                             scale = roi_basename[23:-7]
                             print(scale)
-
-                            roi_v = bidsapp_2_local_output_dir(self.output_dir, roi_v)
 
                             # print scale
                             lut_file = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'parcellation',
@@ -530,104 +526,28 @@ class ParcellationStage(Stage):
                                                                                                resolution[scale],
                                                                                                resolution[
                                                                                                    scale] + '_LUT.txt'))
-                            self.inspect_outputs_dict[roi_basename] = ['freeview', '-v',
-                                                                       white_matter_file + ':colormap=GEColor',
-                                                                       roi_v + ":colormap=lut:lut=" + lut_file]
+                            if (os.path.exists(white_matter_file) and os.path.exists(roi_v)):
+                                self.inspect_outputs_dict[roi_basename] = ['freeview', '-v',
+                                                                            white_matter_file + ':colormap=GEColor',
+                                                                            roi_v + ":colormap=lut:lut=" + lut_file]
                     elif self.config.parcellation_scheme == 'Lausanne2018':
                         # resolution = {'1':'resolution1','2':'resolution2','3':'resolution3','4':'resolution4','5':'resolution5'}
-                        finalparc_results_path = os.path.join(self.stage_dir, "parcCombiner",
-                                                              "result_parcCombiner.pklz")
 
-                        if (os.path.exists(finalparc_results_path)):
-                            finalparc_results = pickle.load(
-                                gzip.open(finalparc_results_path))
+                        for roi_v, lut_file in zip(anat_outputs['anat.@roivs'],
+                                                   anat_outputs['anat.@luts']):
+                            roi_basename = os.path.basename(roi_v)
 
-                            for roi_v, lut_file in zip(finalparc_results.outputs.output_rois,
-                                                       finalparc_results.outputs.colorLUT_files):
-                                roi_basename = os.path.basename(roi_v)
-
-                                roi_v = bidsapp_2_local_output_dir(self.output_dir, roi_v)
-
+                            if (os.path.exists(white_matter_file) and os.path.exists(roi_v)):
                                 self.inspect_outputs_dict[roi_basename] = ['freeview', '-v',
-                                                                           white_matter_file + ':colormap=GEColor',
-                                                                           roi_v + ":colormap=lut:lut=" + lut_file]
-
-                        # Get brain.nii.gz generated by Lausanne2018_parcellation interface to be overlayed with extract structures (Thalamus, Hippocampus, Brainstem)
-                        parc_results_path = os.path.join(self.stage_dir, "Lausanne2018_parcellation",
-                                                         "result_Lausanne2018_parcellation.pklz")
-                        brain = None
-                        if (os.path.exists(parc_results_path)):
-                            parc_results = pickle.load(
-                                gzip.open(parc_results_path))
-                            brain = bidsapp_2_local_output_dir(self.output_dir, parc_results.outputs.brain)
-
-                        # if self.config.include_thalamic_nuclei_parcellation:
-                        results_path = os.path.join(
-                            self.stage_dir, "parcThal", "result_parcThal.pklz")
-
-                        if (os.path.exists(results_path)):
-                            results = pickle.load(gzip.open(results_path))
-                            T1w = bidsapp_2_local_output_dir(self.output_dir, results.inputs['T1w_image'])
-                            probmaps = bidsapp_2_local_output_dir(self.output_dir, results.outputs.prob_maps_registered)
-                            maxprob = bidsapp_2_local_output_dir(self.output_dir, results.outputs.prob_maps_registered)
-
-                            self.inspect_outputs_dict['Thalamic nuclei - Probability maps'] = ['fsleyes', '-sdefault',
-                                                                                               T1w,
-                                                                                               probmaps,
-                                                                                               '-cm', "copper", '-a',
-                                                                                               '50']
-                            self.inspect_outputs_dict['Thalamic nuclei - MaxProb labels'] = ['fsleyes', '-sdefault',
-                                                                                             T1w,
-                                                                                             maxprob,
-                                                                                             "-cm", "render3", '-a',
-                                                                                             '50']
-
-                        # if self.config.segment_brainstem:
-                        results_path = os.path.join(
-                            self.stage_dir, "parcBrainStem", "result_parcBrainStem.pklz")
-
-                        if (os.path.exists(results_path)):
-                            results = pickle.load(gzip.open(results_path))
-                            brainstem = bidsapp_2_local_output_dir(self.output_dir, results.outputs.brainstem_structures)
-
-                            if (os.path.exists(brain)):
-                                self.inspect_outputs_dict['Brainstem structures'] = ['fsleyes', '-sdefault', 
-                                                                                     brain, brainstem,
-                                                                                     "-cm", "random", '-a', '50']
-                            else:
-                                self.inspect_outputs_dict['Brainstem structures'] = ['fsleyes', '-sdefault',
-                                                                                     brainstem,
-                                                                                     "-cm", "random"]
-
-                        # if self.config.segment_hippocampal_subfields:
-                        results_path = os.path.join(
-                            self.stage_dir, "parcHippo", "result_parcHippo.pklz")
-
-                        if (os.path.exists(results_path)):
-                            results = pickle.load(gzip.open(results_path))
-                            lh_hippo = bidsapp_2_local_output_dir(self.output_dir, results.outputs.lh_hipposubfields)
-                            rh_hippo = bidsapp_2_local_output_dir(self.output_dir, results.outputs.rh_hipposubfields)
-
-                            if (os.path.exists(brain)):
-                                self.inspect_outputs_dict['Hippocampal subfields'] = ['fsleyes', '-sdefault',
-                                                                                      brain,
-                                                                                      lh_hippo,
-                                                                                      "-cm", "random", '-a', '50',
-                                                                                      rh_hippo,
-                                                                                      "-cm", "random", '-a', '50']
-                            else:
-                                self.inspect_outputs_dict['Hippocampal subfields'] = ['fsleyes', '-sdefault',
-                                                                                      lh_hippo,
-                                                                                      "-cm", "random",
-                                                                                      rh_hippo,
-                                                                                      "-cm", "random"]
+                                                                            white_matter_file + ':colormap=GEColor',
+                                                                            roi_v + ":colormap=lut:lut=" + lut_file]
 
                 # self.inspect_outputs = self.inspect_outputs_dict.keys()
         else:
             self.inspect_outputs_dict["Custom atlas"] = [
                 'fsleyes', self.config.atlas_nifti_file, "-cm", "random"]
 
-        self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
+        self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
 
     def has_run(self):

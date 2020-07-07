@@ -755,7 +755,7 @@ class CombineParcellations(BaseInterface):
 
                 lines = []
                 for label, name in enumerate(roi_names):
-                    name = 'ctx-rh-{}'.format(name)
+                    name = 'ctx-rh-{}'.format(name.decode())
                     if self.inputs.create_colorLUT:
                         r = rgb_table[label, 0]
                         g = rgb_table[label, 1]
@@ -1032,7 +1032,7 @@ class CombineParcellations(BaseInterface):
 
                 lines = []
                 for label, name in enumerate(roi_names):
-                    name = 'ctx-lh-{}'.format(name)
+                    name = 'ctx-lh-{}'.format(name.decode())
 
                     if self.inputs.create_colorLUT:
                         r = rgb_table[label, 0]

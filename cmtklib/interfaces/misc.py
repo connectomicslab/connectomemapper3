@@ -779,3 +779,148 @@ class make_mrtrix_seeds(BaseInterface):
         outputs["seed_files"] = os.path.abspath(
             self.base_name + '_seeds.nii.gz')
         return outputs
+
+
+
+class splitDiffusion_InputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True)
+    start = Int(0)
+    end = Int()
+
+
+class splitDiffusion_OutputSpec(TraitedSpec):
+    data = File(exists=True)
+    padding1 = File(exists=False)
+    padding2 = File(exists=False)
+
+
+class splitDiffusion(BaseInterface):
+    input_spec = splitDiffusion_InputSpec
+    output_spec = splitDiffusion_OutputSpec
+
+    def _run_interface(self, runtime):
+        diffusion_file = nib.load(self.inputs.in_file)
+        diffusion = diffusion_file.get_data()
+        affine = diffusion_file.get_affine()
+        dim = diffusion.shape
+        if self.inputs.start > 0 and self.inputs.end > dim[3] - 1:
+            print('End volume is set to %d but it should be bellow %d' %
+                  (self.inputs.end, dim[3] - 1))
+        padding_idx1 = list(range(0, self.inputs.start))
+        if len(padding_idx1) > 0:
+            temp = diffusion[:, :, :, 0:self.inputs.start]
+            nib.save(nib.nifti1.Nifti1Image(temp, affine),
+                     os.path.abspath('padding1.nii.gz'))
+        temp = diffusion[:, :, :, self.inputs.start:self.inputs.end + 1]
+        nib.save(nib.nifti1.Nifti1Image(temp, affine),
+                 os.path.abspath('data.nii.gz'))
+        padding_idx2 = list(range(self.inputs.end, dim[3] - 1))
+        if len(padding_idx2) > 0:
+            temp = diffusion[:, :, :, self.inputs.end + 1:dim[3]]
+            nib.save(nib.nifti1.Nifti1Image(temp, affine),
+                     os.path.abspath('padding2.nii.gz'))
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["data"] = os.path.abspath('data.nii.gz')
+        if os.path.exists(os.path.abspath('padding1.nii.gz')):
+            outputs["padding1"] = os.path.abspath('padding1.nii.gz')
+        if os.path.exists(os.path.abspath('padding2.nii.gz')):
+            outputs["padding2"] = os.path.abspath('padding2.nii.gz')
+        return outputs
+
+
+
+class CreateAcqpFileInputSpec(BaseInterfaceInputSpec):
+    total_readout = Float(0.0)
+
+
+class CreateAcqpFileOutputSpec(TraitedSpec):
+    acqp = File(exists=True)
+
+
+class CreateAcqpFile(BaseInterface):
+    input_spec = CreateAcqpFileInputSpec
+    output_spec = CreateAcqpFileOutputSpec
+
+    def _run_interface(self, runtime):
+        import numpy as np
+
+        # Matrix giving phase-encoding direction (3 first columns) and total read out time (4th column)
+        # For phase encoding A << P <=> y-direction
+        # Total readout time = Echo spacing x EPI factor x 0.001 [s]
+        mat = np.array([['0', '1', '0', str(self.inputs.total_readout)],
+                        ['0', '-1', '0', str(self.inputs.total_readout)]])
+
+        with open(os.path.abspath('acqp.txt'), 'a') as out_f:
+            np.savetxt(out_f, mat, fmt="%s", delimiter=' ')
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["acqp"] = os.path.abspath('acqp.txt')
+        return outputs
+
+
+
+class CreateIndexFileInputSpec(BaseInterfaceInputSpec):
+    in_grad_mrtrix = File(exists=True, mandatory=True,
+                          desc='Input DWI gradient table in MRTric format')
+
+
+class CreateIndexFileOutputSpec(TraitedSpec):
+    index = File(exists=True)
+
+
+class CreateIndexFile(BaseInterface):
+    input_spec = CreateIndexFileInputSpec
+    output_spec = CreateIndexFileOutputSpec
+
+    def _run_interface(self, runtime):
+        axis_dict = {'x': 0, 'y': 1, 'z': 2}
+        import numpy as np
+
+        with open(self.inputs.in_grad_mrtrix, 'r') as f:
+            for i, l in enumerate(f):
+                pass
+
+        lines = i + 1
+
+        mat = np.ones((1, lines))
+
+        with open(os.path.abspath('index.txt'), 'a') as out_f:
+            np.savetxt(out_f, mat, delimiter=' ', fmt="%1.0g")
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["index"] = os.path.abspath('index.txt')
+        return outputs
+
+
+
+class ConcatOutputsAsTupleInputSpec(BaseInterfaceInputSpec):
+    input1 = File(exists=True)
+    input2 = File(exists=True)
+
+
+class ConcatOutputsAsTupleOutputSpec(TraitedSpec):
+    out_tuple = traits.Tuple(File(exists=True), File(exists=True))
+
+
+class ConcatOutputsAsTuple(BaseInterface):
+    input_spec = ConcatOutputsAsTupleInputSpec
+    output_spec = ConcatOutputsAsTupleOutputSpec
+
+    def _run_interface(self, runtime):
+        self._outputs().out_tuple = (self.inputs.input1, self.inputs.input2)
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_tuple"] = (self.inputs.input1, self.inputs.input2)
+        return outputs

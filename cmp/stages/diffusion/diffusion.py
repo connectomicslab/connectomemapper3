@@ -26,7 +26,7 @@ from cmp.stages.common import Stage
 from .reconstruction import *
 from .tracking import *
 from cmtklib.interfaces.misc import ExtractImageVoxelSizes, Tck2Trk
-from cmtklib.util import bidsapp_2_local_output_dir
+from cmtklib.util import create_results_plkz_local
 
 
 class DiffusionConfig(HasTraits):
@@ -542,99 +542,86 @@ class DiffusionStage(Stage):
             if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':  # SHORE or CSD models
 
                 if self.config.diffusion_imaging_model == 'DSI':
-                    recon_results_path = os.path.join(self.stage_dir, "reconstruction", "dipy_SHORE",
-                                                      "result_dipy_SHORE.pklz")
-                else:
-                    recon_results_path = os.path.join(self.stage_dir, "reconstruction", "dipy_CSD",
-                                                      "result_dipy_CSD.pklz")
 
-                if os.path.exists(recon_results_path):
-                    recon_results = pickle.load(gzip.open(recon_results_path))
+                    recon_dir = os.path.join(self.stage_dir, "reconstruction", "dipy_SHORE")
 
-                    if self.config.diffusion_imaging_model == 'DSI':
-                        gfa_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.GFA)
+                    gfa_res = os.path.join(recon_dir, 'shore_gfa.nii.gz')
+                    if os.path.exists(gfa_res):
                         self.inspect_outputs_dict[self.config.recon_processing_tool + ' gFA image'] = ['mrview',
                                                                                                        gfa_res]
-                        msd_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.MSD)
+                    msd_res = os.path.join(recon_dir, 'shore_msd.nii.gz')
+                    if os.path.exists(msd_res):
                         self.inspect_outputs_dict[self.config.recon_processing_tool + ' MSD image'] = ['mrview',
                                                                                                        msd_res]
-                        rtop_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.RTOP)
+                    rtop_res = os.path.join(recon_dir, 'shore_rtop_signal.nii.gz')
+                    if os.path.exists(rtop_res):
                         self.inspect_outputs_dict[self.config.recon_processing_tool + ' RTOP image'] = ['mrview',
                                                                                                         rtop_res]
-                        dodf_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.dodf)
+                    dodf_res = os.path.join(recon_dir, 'shore_dodf.nii.gz')
+                    if os.path.exists(dodf_res):
                         self.inspect_outputs_dict[
                             self.config.recon_processing_tool + ' Diffusion ODF (SHORE) image'] = ['mrview', gfa_res,
-                                                                                                   '-odf.load_sh',
-                                                                                                   dodf_res]
-                        shm_coeff_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.fodf)
+                                                                                               '-odf.load_sh',
+                                                                                               dodf_res]
+                    shm_coeff_res = os.path.join(recon_dir, 'shore_fodf.nii.gz')
+                    if os.path.exists(shm_coeff_res):
                         self.inspect_outputs_dict[self.config.recon_processing_tool + ' Fiber ODF (SHORE) image'] = [
                             'mrview', gfa_res, '-odf.load_sh', shm_coeff_res]
-                    else:
-                        recon_tensor_results_path = os.path.join(self.stage_dir, "reconstruction", "dipy_tensor",
-                                                                 "result_dipy_tensor.pklz")
+                else:
+                    recon_tensor_dir = os.path.join(self.stage_dir, "reconstruction", "dipy_tensor")
 
-                        if os.path.exists(recon_tensor_results_path):
-                            recon_tensor_results = pickle.load(
-                                gzip.open(recon_tensor_results_path))
+                    fa_res = os.path.join(recon_tensor_dir,'diffusion_preproc_resampled_fa.nii.gz')
+                    if os.path.exists(fa_res):
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',
+                                                                                                      fa_res]
 
-                            fa_res = bidsapp_2_local_output_dir(self.output_dir, recon_tensor_results.outputs.fa_file)
-                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',
-                                                                                                          fa_res]
-
-                            shm_coeff_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.out_shm_coeff)
+                    recon_dir = os.path.join(self.stage_dir, "reconstruction", "dipy_CSD")                                                                                  
+                    shm_coeff_res = os.path.join(recon_dir, 'diffusion_shm_coeff.nii.gz')
+                    if os.path.exists(shm_coeff_res):
+                        if os.path.exists(fa_res):    
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
                                 'mrview', fa_res, '-odf.load_sh', shm_coeff_res]
                         else:
-                            shm_coeff_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.out_shm_coeff)
+                            shm_coeff_res = recon_results.outputs.out_shm_coeff
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
                                 'mrview', shm_coeff_res, '-odf.load_sh', shm_coeff_res]
 
         # TODO: add Tensor image in case of DTI+Tensor modeling
         # MRtrix
         if self.config.recon_processing_tool == 'MRtrix':
-            metrics_results_path = os.path.join(self.stage_dir, "reconstruction", "mrtrix_tensor_metrics",
-                                                "result_mrtrix_tensor_metrics.pklz")
+            metrics_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_tensor_metrics")
 
-            if os.path.exists(metrics_results_path):
-                metrics_results = pickle.load(gzip.open(metrics_results_path))
-
-                fa_res = bidsapp_2_local_output_dir(self.output_dir, metrics_results.outputs.out_fa)
+            fa_res = os.path.join(metrics_dir, 'FA.mif')
+            if os.path.exists(fa_res):
                 self.inspect_outputs_dict[self.config.recon_processing_tool +
                                           ' FA image'] = ['mrview', fa_res]
 
-                adc_res = bidsapp_2_local_output_dir(self.output_dir, metrics_results.outputs.out_adc)
+            adc_res = os.path.join(metrics_dir, 'ADC.mif')
+            if os.path.exists(adc_res):
                 self.inspect_outputs_dict[self.config.recon_processing_tool +
-                                          ' ADC image'] = ['mrview', adc_res]
+                                      ' ADC image'] = ['mrview', adc_res]
 
             # Tensor model (DTI)
             if not self.config.mrtrix_recon_config.local_model:
-                recon_results_path = os.path.join(self.stage_dir, "reconstruction", "mrtrix_make_tensor",
-                                                  "result_mrtrix_make_tensor.pklz")
+                recon_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_make_tensor")
 
-                if os.path.exists(recon_results_path):
-                    recon_results = pickle.load(gzip.open(recon_results_path))
-
-                tensor_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.tensor)
-                self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
-                                                                                              '-odf.load_tensor',
-                                                                                              tensor_res]
+                tensor_res = os.path.join(recon_dir, 'diffusion_preproc_resampled_tensor.mif')
+                if (os.path.exists(fa_res) and os.path.exists(tensor_res)):
+                    self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
+                                                                                                  '-odf.load_tensor',
+                                                                                                  tensor_res]
 
             else:  # CSD model
 
-                RF_path = os.path.join(
-                    self.stage_dir, "reconstruction", "mrtrix_rf", "result_mrtrix_rf.pklz")
-                if (os.path.exists(RF_path)):
-                    RF_results = pickle.load(gzip.open(RF_path))
-                    RF_resp = bidsapp_2_local_output_dir(self.output_dir, RF_results.outputs.response)
+                RF_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_rf")
+                RF_resp = os.path.join(RF_dir, 'diffusion_preproc_resampled_ER.mif')
+                if (os.path.exists(RF_resp)):
                     self.inspect_outputs_dict['MRTRIX Response function'] = ['shview', '-response',
                                                                              RF_resp]
 
-                recon_results_path = os.path.join(self.stage_dir, "reconstruction", "mrtrix_CSD",
-                                                  "result_mrtrix_CSD.pklz")
-
-                if os.path.exists(recon_results_path):
-                    recon_results = pickle.load(gzip.open(recon_results_path))
-                    shm_coeff_res = bidsapp_2_local_output_dir(self.output_dir, recon_results.outputs.spherical_harmonics_image)
+                recon_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_CSD")
+                shm_coeff_res = os.path.join(recon_dir, 'diffusion_preproc_resampled_CSD.mif')
+                if (os.path.exists(fa_res) and os.path.exists(shm_coeff_res)):
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                                   '-odf.load_sh',
                                                                                                   shm_coeff_res]
@@ -646,88 +633,38 @@ class DiffusionStage(Stage):
             if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
 
                 if self.config.diffusion_model == 'Deterministic':
-                    diff_results_path = os.path.join(self.stage_dir, "tracking", "dipy_deterministic_tracking",
-                                                     "result_dipy_deterministic_tracking.pklz")
-                    if os.path.exists(diff_results_path):
-                        diff_results = pickle.load(
-                            gzip.open(diff_results_path))
-                        streamline_res = bidsapp_2_local_output_dir(self.output_dir, diff_results.outputs.tracks)
-                        self.inspect_outputs_dict[
-                            self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
-                            'trackvis', streamline_res]
-
+                    diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_deterministic_tracking")
+                    streamline_res = ""
                 else:
-                    diff_results_path = os.path.join(self.stage_dir, "tracking", "dipy_probabilistic_tracking",
-                                                     "result_dipy_probabilistic_tracking.pklz")
-                    if os.path.exists(diff_results_path):
-                        diff_results = pickle.load(
-                            gzip.open(diff_results_path))
-                        streamline_res = bidsapp_2_local_output_dir(self.output_dir, diff_results.outputs.tracks)
-                        self.inspect_outputs_dict[
-                            self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
-                            'trackvis', streamline_res]
+                    diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_probabilistic_tracking")
+                    streamline_res = ""
+
+                if os.path.exists(streamline_res):
+                    self.inspect_outputs_dict[
+                        self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
+                        'trackvis', streamline_res]
+
             else:
 
-                diff_results_path = os.path.join(self.stage_dir, "tracking", "dipy_dtieudx_tracking",
-                                                 "result_dipy_dtieudx_tracking.pklz")
-
-                if os.path.exists(diff_results_path):
-                    diff_results = pickle.load(gzip.open(diff_results_path))
-                    streamline_res = bidsapp_2_local_output_dir(self.output_dir, diff_results.outputs.tracks)
+                diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_dtieudx_tracking")
+                streamline_res = ""
+                if os.path.exists(streamline_res):
                     self.inspect_outputs_dict[
                         self.config.tracking_processing_tool + ' Tensor-based EuDX streamline'] = ['trackvis',
                                                                                                    streamline_res]
 
         # MRtrix
         if self.config.tracking_processing_tool == 'MRtrix':
-            # print('MRtrix tracking: true')
-            if self.config.diffusion_model == 'Deterministic':
-                # print('Git THEREEEEEEEEEEEE 11111111111111111111111111111111111')
-                diff_results_path = os.path.join(
-                    self.stage_dir, "tracking", "trackvis", "result_trackvis.pklz")
-                if os.path.exists(diff_results_path):
-                    diff_results = pickle.load(gzip.open(diff_results_path))
-                    streamline_res = bidsapp_2_local_output_dir(self.output_dir, diff_results.outputs.out_tracks)
-                    # print(streamline_res)
-                    self.inspect_outputs_dict[
-                        self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
-                        'trackvis', streamline_res]
+            
+            diff_dir = os.path.join(self.stage_dir, "tracking", "trackvis")
+            streamline_res = ""
 
-            else:
-                # print('Git THEREEEEEEEEEEEE 22222222222222222222222222222222222222')
-                diff_results_path = os.path.join(
-                    self.stage_dir, "tracking", "trackvis", "result_trackvis.pklz")
-                # print diff_results_path
-                if os.path.exists(diff_results_path):
-                    diff_results = pickle.load(gzip.open(diff_results_path))
-                    streamline_res = bidsapp_2_local_output_dir(self.output_dir, diff_results.outputs.out_tracks)
-                    # print streamline_res
-                    self.inspect_outputs_dict[
-                        self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
-                        'trackvis', streamline_res]
+            if os.path.exists(streamline_res):
+               self.inspect_outputs_dict[
+                    self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
+                    'trackvis', streamline_res]
 
-            # if self.config.mrtrix_recon_config.local_model:
-            #
-            #     RF_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_rf","result_mrtrix_rf.pklz")
-            #     if(os.path.exists(RF_path)):
-            #         RF_results = pickle.load(gzip.open(RF_path))
-            #         self.inspect_outputs_dict['MRTRIX Response function'] = ['shview','-response',RF_results.outputs.response]
-            #
-            #     CSD_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_CSD","result_mrtrix_CSD.pklz")
-            #     tensor_path = os.path.join(self.stage_dir,"reconstruction","mrtrix_make_tensor","result_mrtrix_make_tensor.pklz")
-            #     if(os.path.exists(CSD_path) and os.path.exists(tensor_path)):
-            #         CSD_results = pickle.load(gzip.open(CSD_path))
-            #         self.inspect_outputs_dict['MRTrix Spherical Harmonics image'] = ['mrview',CSD_results.outputs.spherical_harmonics_image]
-            #         Tensor_results = pickle.load(gzip.open(tensor_path))
-            #         self.inspect_outputs_dict['MRTrix SH/tensor images'] = ['mrview',CSD_results.outputs.spherical_harmonics_image,'-odf.load_tensor',Tensor_results.outputs.tensor]
-            #         self.inspect_outputs = self.inspect_outputs_dict.keys()
-            #
-            #     FA_path = os.path.join(self.stage_dir,"reconstruction","convert_FA","result_convert_FA.pklz")
-            #     if(os.path.exists(FA_path)):
-            #         FA_results = pickle.load(gzip.open(FA_path))
-            #         self.inspect_outputs_dict['MRTrix FA'] = ['mrview',FA_results.outputs.converted]
-
-        self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
+        self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
 
     def has_run(self):

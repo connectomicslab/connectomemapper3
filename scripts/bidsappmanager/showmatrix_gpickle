@@ -499,7 +499,7 @@ if __name__ == "__main__":
                 title("%s (#fibers: %i)"%(sys.argv[5],b.sum()))
             else:
                 title("%s"%(sys.argv[5]))
-            print "sys.argv[5]==%s" % sys.argv[6]
+            print("sys.argv[5]==%s" % sys.argv[6])
             if sys.argv[6]=="log":
                 print("log scaling...")
                 my_cmap = copy.copy(cm.get_cmap('inferno')) # copy the default cmap (0,0,0.5156)

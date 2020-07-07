@@ -806,7 +806,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             {'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory, "anatomical_pipeline"),
                          'log_to_file': True},
              'execution': {'remove_unnecessary_outputs': False,
-                           'stop_on_first_crash': True, 'stop_on_first_rerun': False,
+                           'stop_on_first_crash': True, 
+                           'stop_on_first_rerun': False,
+                           'use_relative_paths': True,
                            'crashfile_format': "txt"}
              })
         logging.update_logging(config)

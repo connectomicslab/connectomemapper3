@@ -107,25 +107,25 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
         paths.append(os.path.join(
             derivatives_directory, 'freesurfer', subject))
         paths.append(os.path.join(derivatives_directory, 'cmp', subject))
+        paths.append(os.path.join(derivatives_directory, 'nipype', subject))
 
         for in_f in input_folders:
             paths.append(os.path.join(
                 derivatives_directory, 'cmp', subject, in_f))
+            # paths.append(os.path.join(derivatives_directory,'nipype',subject,in_f))
 
-        paths.append(os.path.join(
-            derivatives_directory, 'cmp', subject, 'tmp'))
     else:
         paths.append(os.path.join(derivatives_directory,
                                   'freesurfer', '%s_%s' % (subject, session)))
         paths.append(os.path.join(
             derivatives_directory, 'cmp', subject, session))
+        paths.append(os.path.join(derivatives_directory,
+                                  'nipype', subject, session))
 
         for in_f in input_folders:
             paths.append(os.path.join(derivatives_directory,
                                       'cmp', subject, session, in_f))
-
-        paths.append(os.path.join(derivatives_directory,
-                                  'cmp', subject, session, 'tmp'))
+            # paths.append(os.path.join(derivatives_directory,'nipype',subject,session,in_f))
 
     for full_p in paths:
         if not os.path.exists(full_p):

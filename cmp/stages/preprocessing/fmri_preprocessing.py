@@ -21,7 +21,7 @@ import nibabel as nib
 
 from cmp.stages.common import Stage
 from cmtklib.functionalMRI import discard_tp
-from cmtklib.util import bidsapp_2_local_output_dir
+from cmtklib.util import get_node_dictionary_outputs
 
 
 class PreprocessingConfig(HasTraits):
@@ -149,49 +149,35 @@ class PreprocessingStage(Stage):
     def define_inspect_outputs(self):
         # print('Stage (inspect_outputs): '.format(self.stage_dir))
         if self.config.despiking:
-            # print('despiking output')
-            despike_path = os.path.join(
-                self.stage_dir, "converter", "result_converter.pklz")
-            if (os.path.exists(despike_path)):
-                # print('exists')
-                despike_results = pickle.load(gzip.open(despike_path))
-                despike = bidsapp_2_local_output_dir(self.output_dir, despike_results.outputs.out_file)
+            despike_dir = os.path.join(self.stage_dir, "converter")
+            despike = os.path.join(despike_dir, "converter")
+            if (os.path.exists(despike)):
                 self.inspect_outputs_dict['Spike corrected image'] = ['fsleyes', '-ad',
                                                                       despike, '-cm',
                                                                       'brain_colours_blackbdy_iso']
 
         if self.config.slice_timing:
-            slc_timing_path = os.path.join(
-                self.stage_dir, "slice_timing", "result_slice_timing.pklz")
-            if (os.path.exists(slc_timing_path)):
-                slice_results = pickle.load(gzip.open(slc_timing_path))
-                tcorr = bidsapp_2_local_output_dir(self.output_dir, slice_results.outputs.slice_time_corrected_file)
+            slc_timing_dir = os.path.join(self.stage_dir, "slice_timing")
+            tcorr = os.path.join(slc_timing_dir, "slice_timing")
+                
+            if (os.path.exists(tcorr)):
                 self.inspect_outputs_dict['Slice time corrected image'] = ['fsleyes', '-ad',
                                                                            tcorr,
                                                                            '-cm', 'brain_colours_blackbdy_iso']
-            if self.config.motion_correction:
-                motion_results_path = os.path.join(
-                    self.stage_dir, "motion_correction", "result_motion_correction.pklz")
-                if (os.path.exists(motion_results_path)):
-                    motion_results = pickle.load(
-                        gzip.open(motion_results_path))
-                    mcorr = bidsapp_2_local_output_dir(self.output_dir, motion_results.outputs.out_file)
-                    self.inspect_outputs_dict['Slice time and motion corrected image'] = ['fsleyes', '-ad',
-                                                                                          mcorr,
-                                                                                          '-cm',
-                                                                                          'brain_colours_blackbdy_iso']
+            
+                    
+        if self.config.motion_correction:
+            motion_results_dir = os.path.join(self.stage_dir, "motion_correction")
+            mcorr = os.path.join(motion_results_dir, "motion_correction")
 
-        elif self.config.motion_correction:
-            motion_results_path = os.path.join(
-                self.stage_dir, "motion_correction", "result_motion_correction.pklz")
-            if (os.path.exists(motion_results_path)):
-                motion_results = pickle.load(gzip.open(motion_results_path))
-                mcorr = bidsapp_2_local_output_dir(self.output_dir, motion_results.outputs.out_file)
-                self.inspect_outputs_dict['Motion corrected image'] = ['fsleyes', '-ad',
-                                                                       mcorr, '-cm',
-                                                                       'brain_colours_blackbdy_iso']
+            if (os.path.exists(mcorr)):
+                self.inspect_outputs_dict['Slice time and motion corrected image'] = ['fsleyes', '-ad',
+                                                                                      mcorr,
+                                                                                      '-cm',
+                                                                                      'brain_colours_blackbdy_iso']
 
-        self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
+
+        self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
 
     def has_run(self):

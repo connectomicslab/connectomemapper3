@@ -565,7 +565,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
             edge_struct = {}
             for edge_key in edge_keys:
-                print('edge key: %s ' % edge_key)
+                # print('edge key: %s ' % edge_key)
                 edge_struct[edge_key] = nx.to_numpy_matrix(G, weight=edge_key)
 
             # nodes
@@ -595,7 +595,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                     # print " node_arr[%i]:" % node_n
                     # print node_arr[node_n]
                     node_n += 1
-                print('node key: %s ' % node_key)
+                # print('node key: %s ' % node_key)
                 node_struct[node_key] = node_arr
             print('    - connectome_%s.mat' % parkey)
             scipy.io.savemat('connectome_%s.mat' % parkey, long_field_names=True,

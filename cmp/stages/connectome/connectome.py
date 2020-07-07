@@ -31,7 +31,7 @@ from nipype.interfaces.mrtrix3.connectivity import BuildConnectome
 from cmtklib.interfaces.mrtrix3 import FilterTractogram
 from cmp.stages.common import Stage
 import cmtklib.connectome 
-from cmtklib.util import bidsapp_2_local_output_dir
+from cmtklib.util import get_pipeline_dictionary_outputs
 
 
 class ConnectomeConfig(HasTraits):
@@ -108,21 +108,19 @@ class ConnectomeStage(Stage):
 
     def define_inspect_outputs(self):
         # print('inspect outputs connectome stage')
-        con_results_path = os.path.join(
-            self.stage_dir, "compute_matrice", "result_compute_matrice.pklz")
+        dwi_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'diffusion_sinker')
+        dwi_sinker_report = os.path.join(dwi_sinker_dir, '_report', 'report.rst')
 
-        # print("Stage dir: %s" % self.stage_dir)
-        if (os.path.exists(con_results_path)):
-            # print("con_results_path : %s" % con_results_path)
-            con_results = pickle.load(gzip.open(con_results_path))
-            # print(con_results.inputs)
-            tracto = bidsapp_2_local_output_dir(self.output_dir,
-                                                con_results.outputs.streamline_final_file)
-            self.inspect_outputs_dict['Final tractogram'] = [
-                'trackvis', tracto]
-            mat = con_results.outputs.connectivity_matrices
-            # print("Conn. matrix : %s" % mat)
+        if os.path.exists(dwi_sinker_report):
+            dwi_outputs = get_pipeline_dictionary_outputs(dwi_sinker_report, self.output_dir)
 
+            tracto = dwi_outputs['dwi.@streamline_final_file']
+            if os.path.exists(tracto):
+                self.inspect_outputs_dict['Final tractogram'] = [
+                    'trackvis', tracto]
+            
+            mat = dwi_outputs['dwi.@connectivity_matrices']
+            
             map_scale = "default"
             if self.config.log_visualization:
                 map_scale = "log"
@@ -139,7 +137,7 @@ class ConnectomeStage(Stage):
                     con_name = os.path.basename(mat).split(".")[
                         0].split("_")[-1]
                     # print("con_name:"+con_name)
-                    mat = bidsapp_2_local_output_dir(self.output_dir, mat)
+
                     # Load the connectivity matrix and extract the attributes (weights)
                     # con_mat =  pickle.load(mat, encoding="latin1")
                     con_mat = nx.read_gpickle(mat)
@@ -156,13 +154,13 @@ class ConnectomeStage(Stage):
 
             else:
                 # print("is list")
-                for mat in con_results.outputs.connectivity_matrices:
+                for mat in dwi_outputs['dwi.@connectivity_matrices']:
                     # print("mat : %s" % mat)
                     if 'gpickle' in mat:
                         con_name = " ".join(os.path.basename(
                             mat).split(".")[0].split("_"))
                         # print("con_name:"+con_name)
-                        mat = bidsapp_2_local_output_dir(self.output_dir, mat)
+
                         # Load the connectivity matrix and extract the attributes (weights)
                         # con_mat =  pickle.load(mat, encoding="latin1")
                         con_mat = nx.read_gpickle(mat)
@@ -177,65 +175,9 @@ class ConnectomeStage(Stage):
                                                                                         self.config.subject + ' - ' + con_name + ' - ' + metric_str,
                                                                                         map_scale]
 
-            self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
-                                          key=str.lower)
+            self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
+                                      key=str.lower)
             # print(self.inspect_outputs)
 
     def has_run(self):
         return os.path.exists(os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"))
-
-# # OLD
-# class CMTK_mrtrixcmatInputSpec(BaseInterfaceInputSpec):
-#     track_file = InputMultiPath(File(exists=True), desc='Tractography result', mandatory=True)
-#     fod_file = InputMultiPath(File(exists=True),
-#                               desc='Input image containing the spherical harmonics of the fibre orientation distributions',
-#                               mandatory=True)
-#     roi_volumes = InputMultiPath(File(exists=True), desc='ROI volumes ')
-#     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'NativeFreesurfer', 'Custom'], usedefault=True)
-#     atlas_info = Dict(mandatory=False, desc="custom atlas information")
-#     compute_curvature = traits.Bool(True, desc='Compute curvature', usedefault=True)
-#     additional_maps = traits.List(File, desc='Additional calculated maps (ADC, gFA, ...)')
-#     output_types = traits.List(Str, desc='Output types of the connectivity matrices')
-#     # probtrackx = traits.Bool(False)
-#     # voxel_connectivity = InputMultiPath(File(exists=True),desc = "ProbtrackX connectivity matrices (# seed voxels x # target ROIs)")
-
-
-# class CMTK_mrtrixcmatOutputSpec(TraitedSpec):
-#     # endpoints_file = File()
-#     # endpoints_mm_file = File()
-#     # final_fiberslength_files = OutputMultiPath(File())
-#     # filtered_fiberslabel_files = OutputMultiPath(File())
-#     # final_fiberlabels_files = OutputMultiPath(File())
-#     streamline_final_file = File()
-#     connectivity_matrices = OutputMultiPath(File())
-
-
-# class CMTK_mrtrixcmat(BaseInterface):
-#     input_spec = CMTK_mrtrixcmatInputSpec
-#     output_spec = CMTK_mrtrixcmatOutputSpec
-
-#     def _run_interface(self, runtime):
-#         if isdefined(self.inputs.additional_maps):
-#             additional_maps = dict(
-#                 (split_filename(add_map)[1], add_map) for add_map in self.inputs.additional_maps if add_map != '')
-#         else:
-#             additional_maps = {}
-
-#         mrtrixcmat(intck=self.inputs.track_file[0], fod_file=self.inputs.fod_file, roi_volumes=self.inputs.roi_volumes,
-#                    parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
-#                    compute_curvature=self.inputs.compute_curvature, additional_maps=additional_maps,
-#                    output_types=self.inputs.output_types)
-
-#         return runtime
-
-#     def _list_outputs(self):
-#         outputs = self._outputs().get()
-#         # outputs['endpoints_file'] = os.path.abspath('endpoints.npy')
-#         # outputs['endpoints_mm_file'] = os.path.abspath('endpointsmm.npy')
-#         # outputs['final_fiberslength_files'] = glob.glob(os.path.abspath('final_fiberslength*'))
-#         # outputs['filtered_fiberslabel_files'] = glob.glob(os.path.abspath('filtered_fiberslabel*'))
-#         # outputs['final_fiberlabels_files'] = glob.glob(os.path.abspath('final_fiberlabels*'))
-#         outputs['streamline_final_file'] = os.path.abspath('streamline_final.tck')
-#         outputs['connectivity_matrices'] = glob.glob(os.path.abspath('connectome*'))
-
-#         return outputs

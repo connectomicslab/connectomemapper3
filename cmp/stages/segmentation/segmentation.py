@@ -23,11 +23,12 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.ants as ants
 from nipype.interfaces.io import FreeSurferSource
 import nipype.interfaces.utility as util
+from nipype.utils.filemanip import loadpkl
 
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.interfaces.freesurfer import copyBrainMaskToFreesurfer, copyFileToFreesurfer
-from cmtklib.util import bidsapp_2_local_bids_dir, bidsapp_2_local_output_dir
+from cmtklib.util import extract_freesurfer_subject_dir, get_pipeline_dictionary_outputs
 
 
 class SegmentationConfig(HasTraits):
@@ -46,7 +47,7 @@ class SegmentationConfig(HasTraits):
     use_fsl_brain_mask = Bool(False)
     brain_mask_path = File
     use_existing_freesurfer_data = Bool(False)
-    freesurfer_subjects_dir = Directory
+    freesurfer_subjects_dir = Str
     freesurfer_subject_id_trait = List
     freesurfer_subject_id = Str
     freesurfer_args = Str
@@ -276,20 +277,23 @@ class SegmentationStage(Stage):
 
     def define_inspect_outputs(self):
         # print "stage_dir : %s" % self.stage_dir
+        from nipype.utils.filemanip import loadpkl
+        from nipype.pipeline.engine.utils import load_resultfile
+
         if self.config.seg_tool == "Freesurfer":
             fs_path = ''
             if self.config.use_existing_freesurfer_data == False:
-                reconall_results_path = os.path.join(
-                    self.stage_dir, "reconall", "result_reconall.pklz")
+                reconall_report_path = os.path.join(
+                    self.stage_dir, "reconall", "_report", "report.rst")
                 fs_path = self.config.freesurfer_subject_id
-                if (os.path.exists(reconall_results_path)):
-                    reconall_results = pickle.load(
-                        gzip.open(reconall_results_path))
-                    fs_path = reconall_results.outputs.subject_id
+                if (os.path.exists(reconall_report_path)):
+                    # print('Load pickle content')
+                    print("Read {}".format(reconall_report_path))
+                    fs_path = extract_freesurfer_subject_dir(reconall_report_path, self.output_dir)
             else:
                 fs_path = os.path.join(
                     self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
-            fs_path = bidsapp_2_local_output_dir(self.output_dir, fs_path)
+
             print ("fs_path : %s" % fs_path)
 
             if 'FREESURFER_HOME' not in os.environ:
@@ -323,7 +327,7 @@ class SegmentationStage(Stage):
             self.inspect_outputs_dict['WM mask'] = [
                 'fsleyes', self.config.white_matter_mask]
 
-        self.inspect_outputs = sorted([key.encode('ascii', 'ignore') for key in list(self.inspect_outputs_dict.keys())],
+        self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
 
     def has_run(self):

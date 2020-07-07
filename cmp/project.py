@@ -117,7 +117,7 @@ class CMP_Project_Info(HasTraits):
 def refresh_folder(bids_directory, derivatives_directory, subject, input_folders, session=None):
     paths = []
 
-    if session == None or session == '':
+    if session is None or session == '':
         paths.append(os.path.join(
             derivatives_directory, 'freesurfer', subject))
         paths.append(os.path.join(derivatives_directory, 'cmp', subject))

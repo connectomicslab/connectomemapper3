@@ -137,8 +137,8 @@ class RegistrationStageUI(RegistrationStage):
         buttons=['OK', 'Cancel']
     )
 
-    def __init__(self, pipeline_mode, bids_dir, output_dir):
-        RegistrationStage.__init__(self, pipeline_mode, bids_dir, output_dir)
+    def __init__(self, pipeline_mode, fs_subjects_dir=None, fs_subject_id=None, bids_dir="", output_dir=""):
+        RegistrationStage.__init__(self, pipeline_mode, fs_subjects_dir, fs_subject_id, bids_dir, output_dir)
         self.config = RegistrationConfigUI()
         self.config.pipeline = pipeline_mode
         if self.config.pipeline == "fMRI":
