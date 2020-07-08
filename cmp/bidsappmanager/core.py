@@ -12,7 +12,7 @@ def run(command, env={}, cwd=os.getcwd()):
         line = process.stdout.readline()
         line = str(line)[:-1]
         print(line)
-        if line == '' and process.poll() != None:
+        if line == '' and process.poll() is not None:
             break
     if process.returncode != 0:
         raise Exception("Non zero return code: %d" % process.returncode)

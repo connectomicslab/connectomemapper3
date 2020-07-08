@@ -196,7 +196,7 @@ def run(command, env={}, log_filename={}):
     #     line = process.stdout.readline()
     #     line = str(line)[:-1]
     #     print(line)
-    #     if line == '' and process.poll() != None:
+    #     if line == '' and process.poll() is not None:
     #         break
     # if process.returncode != 0:
     #     raise Exception("Non zero return code: %d"%process.returncode)
@@ -263,7 +263,7 @@ print('  ... $FS_LICENSE : {}'.format(os.environ['FS_LICENSE']))
 max_number_of_cores = multiprocessing.cpu_count() - 1
 
 # Setup number of subjects to be processed in parallel
-if args.number_of_participants_processed_in_parallel != None:
+if args.number_of_participants_processed_in_parallel is not None:
     parallel_number_of_subjects = int(
         args.number_of_participants_processed_in_parallel)
     if parallel_number_of_subjects > max_number_of_cores:
@@ -289,7 +289,7 @@ else:
     parallel_number_of_subjects = 1
 
 # Setup number of cores to be used by nipype multiproc plugin
-# if args.multiproc_number_of_cores != None:
+# if args.multiproc_number_of_cores is not None:
 #     multiproc_maxprocs = int(args.multiproc_number_of_cores)
 #     if multiproc_maxprocs > max_number_of_cores:
 #         print('  * Number of pipeline processes executed in parallel set to the maximal number of available cores ({})'.format(max_number_of_cores))
@@ -326,7 +326,7 @@ if args.analysis_level == "participant":
                             for label in subjects_to_analyze]
         project.subject = 'sub-{}'.format(subject_label)
 
-        if args.session_label != None:
+        if args.session_label is not None:
             print("> Sessions specified by input args : {}".format(
                 args.session_label))
             subject_session_labels = args.session_label

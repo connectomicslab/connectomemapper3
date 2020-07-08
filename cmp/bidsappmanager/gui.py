@@ -36,10 +36,10 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 # CMP imports
 
-global modal_width
+# global modal_width
 modal_width = 400
 
-global style_sheet
+# global style_sheet
 style_sheet = '''
             QLabel {
                 font: 12pt "Verdana";
@@ -168,11 +168,17 @@ class CMP_Project_Info(HasTraits):
 
     # current_subj = Str()
     anat_warning_msg = Str(
-        '\nWarning: selected directory is already configured for anatomical data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
+        '\nWarning: selected directory is already configured'
+        'for anatomical data processing.\n\n'
+        'Do you want to reset the configuration to default parameters ?\n')
     dmri_warning_msg = Str(
-        '\nWarning: selected directory is already configured for diffusion data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
+        '\nWarning: selected directory is already configured'
+        'for diffusion data processing.\n\n'
+        'Do you want to reset the configuration to default parameters ?\n')
     fmri_warning_msg = Str(
-        '\nWarning: selected directory is already configured for resting-state data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
+        '\nWarning: selected directory is already configured'
+        'for resting-state data processing.\n\n'
+        'Do you want to reset the configuration to default parameters ?\n')
 
     # process_type = Enum('diffusion',['diffusion','fMRI'])
     diffusion_imaging_model = Enum('DTI', ['DSI', 'DTI', 'multi-shell'])
@@ -590,8 +596,17 @@ class CMP_BIDSAppWindow(HasTraits):
     datalad_update_environment = Bool(True)
     datalad_is_available = Bool(False)
 
-    # check = Action(name='Check settings!',action='check_settings',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-check-settings.png'))))
-    # start_bidsapp = Action(name='Start BIDS App!',action='start_bids_app',enabled_when='settings_checked==True and docker_running==False',image=ImageResource(pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))))
+    # check = Action(name='Check settings!',
+    #                action='check_settings',
+    #                image=ImageResource(
+    #                           pkg_resources.resource_filename('resources',
+    #                               os.path.join('buttons', 'bidsapp-check-settings.png'))))
+    # start_bidsapp = Action(name='Start BIDS App!',
+                    # action='start_bids_app',
+                    # enabled_when='settings_checked==True and docker_running==False',
+                    # image=ImageResource(
+                    #         pkg_resources.resource_filename('resources',
+                    #             os.path.join('buttons', 'bidsapp-run.png'))))
 
     update_selection = Button()
     check = Button()
@@ -698,7 +713,7 @@ class CMP_BIDSAppWindow(HasTraits):
         icon=ImageResource('bidsapp.png')
     )
 
-    def __init__(self, project_info=None, bids_root='', subjects=[''], list_of_subjects_to_be_processed=[''],
+    def __init__(self, project_info=None, bids_root='', subjects=None, list_of_subjects_to_be_processed=None,
                  anat_config='', dmri_config='', fmri_config=''):
 
         self.project_info = project_info
@@ -746,7 +761,7 @@ class CMP_BIDSAppWindow(HasTraits):
     def update_run_anat_pipeline(self, new):
         # print('Update run anat: %s'%new)
         # print('Update run anat: %s'%self.run_anat_pipeline)
-        if new == False:
+        if new is False:
             print('At least anatomical pipeline should be run!')
             self.run_anat_pipeline = True
 
@@ -982,14 +997,16 @@ class CMP_BIDSAppWindow(HasTraits):
 
         return proc
 
-    def manage_bidsapp_procs(self, proclist):
+    @classmethod
+    def manage_bidsapp_procs(proclist):
         for proc in proclist:
             if proc.poll() is not None:
                 proclist.remove(proc)
 
-    def run(self, command, env={}, cwd=os.getcwd()):
+    def run(self, command, env=None, cwd=os.getcwd()):
         merged_env = os.environ
-        merged_env.update(env)
+        if env is not None:
+            merged_env.update(env)
         process = Popen(command, stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT, shell=True,
                         env=merged_env, cwd=cwd)
@@ -997,7 +1014,7 @@ class CMP_BIDSAppWindow(HasTraits):
             line = process.stdout.readline()
             line = str(line)[:-1]
             print(line)
-            if line == '' and process.poll() != None:
+            if line == '' and process.poll() is not None:
                 break
         if process.returncode != 0:
             raise Exception("Non zero return code: %d" % process.returncode)
@@ -1011,11 +1028,12 @@ class CMP_BIDSAppWindow(HasTraits):
         license_dst = os.path.join(self.bids_root, 'code', 'license.txt')
 
         if not os.access(license_dst, os.F_OK):
+            dst = os.path.join(
+                self.bids_root, 'code', 'license.txt')
             print('> Copy FreeSurfer license (BIDS App Manager) ')
             print('... src : {}'.format(self.fs_license))
-            print('... dst : {}'.format())
-            shutil.copy2(src=self.fs_license, dst=os.path.join(
-                self.bids_root, 'code', 'license.txt'))
+            print('... dst : {}'.format(dst))
+            shutil.copy2(src=self.fs_license, dst=dst)
         else:
             print(
                 '> FreeSurfer license copy skipped as it already exists(BIDS App Manager) ')
@@ -1048,7 +1066,7 @@ class CMP_BIDSAppWindow(HasTraits):
                 try:
                     print('... cmd: {}'.format(cmd))
                     self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-                except:
+                except Exception:
                     print("    DATALAD ERROR: Failed to create the datalad dataset")
             else:
                 print("    INFO: A datalad dataset already exists!")
@@ -1067,7 +1085,7 @@ class CMP_BIDSAppWindow(HasTraits):
             try:
                 print('... cmd: {}'.format(cmd))
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except:
+            except Exception:
                 print("    DATALAD ERROR: Failed to add changes to dataset")
 
             datalad_container = os.path.join(self.bids_root, '.datalad', 'environments',
@@ -1095,14 +1113,17 @@ class CMP_BIDSAppWindow(HasTraits):
                 try:
                     print('... cmd: {}'.format(cmd))
                     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
-                except:
+                except Exception:
                     print(
                         "   DATALAD ERROR: Failed to link the container image to the dataset")
 
             # Implementation with --upgrade available in latest version but not
             # in stable version of datalad_container
 
-            # cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{} --update".format(self.bidsapp_tag,self.bidsapp_tag)
+            # cmd = "datalad containers-add connectomemapper-bidsapp-{}"
+                   # " --url dhub://sebastientourbier/connectomemapper-bidsapp:{} --update".format(
+                   #                                                                      self.bidsapp_tag,
+                   #                                                                      self.bidsapp_tag)
             #
             # try:
             #     print('... cmd: {}'.format(cmd))
@@ -1192,7 +1213,7 @@ class CMP_BIDSAppWindow(HasTraits):
             except:
                 print("    DATALAD ERROR: Failed to run datalad rev-status")
 
-        maxprocs = multiprocessing.cpu_count()
+        # maxprocs = multiprocessing.cpu_count()
         processes = []
 
         self.docker_running = True
@@ -1270,9 +1291,9 @@ class CMP_BIDSAppWindow(HasTraits):
     #
     #     self.anat_config = ui_info.ui.context["object"].project_info.anat_config_to_load
     #
-    #     if ui_info.ui.context["object"].project_info.dmri_config_to_load != None:
+    #     if ui_info.ui.context["object"].project_info.dmri_config_to_load is not None:
     #         self.dmri_config = ui_info.ui.context["object"].project_info.dmri_config_to_load
-    #     if ui_info.ui.context["object"].project_info.fmri_config_to_load != None:
+    #     if ui_info.ui.context["object"].project_info.fmri_config_to_load is not None:
     #         self.fmri_config = ui_info.ui.context["object"].project_info.fmri_config_to_load
     #
     #     self.bids_root = ui_info.ui.context["object"].project_info.base_directory
@@ -1370,13 +1391,13 @@ class CMP_ConfiguratorWindow(HasTraits):
         self.dmri_pipeline = dmri_pipeline
         self.fmri_pipeline = fmri_pipeline
 
-        if self.anat_pipeline != None:
+        if self.anat_pipeline is not None:
             self.anat_pipeline.view_mode = 'config_view'
 
-        if self.dmri_pipeline != None:
+        if self.dmri_pipeline is not None:
             self.dmri_pipeline.view_mode = 'config_view'
 
-        if self.fmri_pipeline != None:
+        if self.fmri_pipeline is not None:
             self.fmri_pipeline.view_mode = 'config_view'
 
         self.anat_inputs_checked = anat_inputs_checked
@@ -1598,15 +1619,15 @@ class CMP_InspectorWindow(HasTraits):
 
                 # self.anat_pipeline.global_conf.subject_session = self.project_info.subject_session
 
-                # if self.dmri_pipeline != None:
+                # if self.dmri_pipeline is not None:
                 #     self.dmri_pipeline.global_conf.subject_session = self.project_info.subject_session
                 #
-                # if self.fmri_pipeline != None:
+                # if self.fmri_pipeline is not None:
                 #     self.fmri_pipeline.global_conf.subject_session = self.project_info.subject_session
 
                 print("Selected session %s" %
                       self.project_info.subject_session)
-                if self.anat_pipeline != None:
+                if self.anat_pipeline is not None:
                     self.anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(
                         self.project_info.base_directory, 'derivatives', 'freesurfer',
                         '{}_{}'.format(self.project_info.subject, self.project_info.subject_session))
@@ -1654,14 +1675,14 @@ class CMP_InspectorWindow(HasTraits):
                     # self.fmri_pipeline.global_conf.subject = self.project_info.subject
 
                 # self.anat_pipeline.global_conf.subject_session = ''
-                if self.anat_pipeline != None:
+                if self.anat_pipeline is not None:
                     self.anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(
                         self.project_info.base_directory, 'derivatives', 'freesurfer',
                         '{}'.format(self.project_info.subject))
 
             print("[PIPELINE INIT DONE]")
 
-            if self.anat_pipeline != None:
+            if self.anat_pipeline is not None:
                 print("> Anatomical pipeline output inspection")
                 self.anat_pipeline.view_mode = 'inspect_outputs_view'
                 for stage in list(self.anat_pipeline.stages.values()):
@@ -1671,7 +1692,7 @@ class CMP_InspectorWindow(HasTraits):
                     if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         self.output_anat_available = True
 
-            if self.dmri_pipeline != None:
+            if self.dmri_pipeline is not None:
                 print("> Diffusion pipeline output inspection")
                 self.dmri_pipeline.view_mode = 'inspect_outputs_view'
                 for stage in list(self.dmri_pipeline.stages.values()):
@@ -1681,7 +1702,7 @@ class CMP_InspectorWindow(HasTraits):
                     if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         self.output_dmri_available = True
 
-            if self.fmri_pipeline != None:
+            if self.fmri_pipeline is not None:
                 print("> fMRI pipeline output inspection")
                 self.fmri_pipeline.view_mode = 'inspect_outputs_view'
                 for stage in list(self.fmri_pipeline.stages.values()):

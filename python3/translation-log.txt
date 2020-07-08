@@ -241,7 +241,7 @@
      # handler = Instance(project.CMP_BIDSAppWindowHandler)
      
 @@ -1585,7 +1585,7 @@
-             if self.anat_pipeline != None:
+             if self.anat_pipeline is not None:
                  print("> Anatomical pipeline output inspection")
                  self.anat_pipeline.view_mode = 'inspect_outputs_view'
 -                for stage in self.anat_pipeline.stages.values():
@@ -250,7 +250,7 @@
                      stage.define_inspect_outputs()
                      # print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
 @@ -1595,7 +1595,7 @@
-             if self.dmri_pipeline != None:
+             if self.dmri_pipeline is not None:
                  print("> Diffusion pipeline output inspection")
                  self.dmri_pipeline.view_mode = 'inspect_outputs_view'
 -                for stage in self.dmri_pipeline.stages.values():
@@ -259,7 +259,7 @@
                      stage.define_inspect_outputs()
                      # print('Stage {}: {}'.format(stage.stage_dir, stage.inspect_outputs))
 @@ -1605,7 +1605,7 @@
-             if self.fmri_pipeline != None:
+             if self.fmri_pipeline is not None:
                  print("> fMRI pipeline output inspection")
                  self.fmri_pipeline.view_mode = 'inspect_outputs_view'
 -                for stage in self.fmri_pipeline.stages.values():

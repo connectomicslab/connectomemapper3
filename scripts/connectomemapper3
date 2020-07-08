@@ -145,7 +145,7 @@ if __name__ == "__main__":
     if args.dwi_pipeline_config is None and args.func_pipeline_config is None:
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
-        if anat_pipeline != None:
+        if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
             if anat_valid_inputs:
                 anat_pipeline.process()
@@ -158,7 +158,7 @@ if __name__ == "__main__":
         project.dmri_config_file = os.path.abspath(args.dwi_pipeline_config)
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
-        if anat_pipeline != None:
+        if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             if anat_valid_inputs:
@@ -174,7 +174,7 @@ if __name__ == "__main__":
 
         if anat_valid_outputs:
             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
-            if dmri_pipeline != None:
+            if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
                 #print sys.argv[offset+7]
@@ -193,7 +193,7 @@ if __name__ == "__main__":
         project.fmri_config_file = os.path.abspath(args.func_pipeline_config)
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
-        if anat_pipeline != None:
+        if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
 
             if anat_valid_inputs:
@@ -209,7 +209,7 @@ if __name__ == "__main__":
 
         if anat_valid_outputs:
             fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
-            if fmri_pipeline != None:
+            if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
                 #fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
@@ -235,7 +235,7 @@ if __name__ == "__main__":
         project.fmri_config_file = os.path.abspath(args.func_pipeline_config)
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
-        if anat_pipeline != None:
+        if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
 
             if anat_valid_inputs:
@@ -251,7 +251,7 @@ if __name__ == "__main__":
 
         if anat_valid_outputs:
             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
-            if dmri_pipeline != None:
+            if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
                 # print sys.argv[offset+7]
@@ -263,7 +263,7 @@ if __name__ == "__main__":
                     sys.exit(1)
 
             fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
-            if fmri_pipeline != None:
+            if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
                 fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
@@ -315,7 +315,7 @@ if __name__ == "__main__":
 #         project.anat_config_file = os.path.abspath(sys.argv[offset+4])
 
 #         anat_pipeline = cmp.project.init_anat_project(project, False)
-#         if anat_pipeline != None:
+#         if anat_pipeline is not None:
 #             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 #             if anat_valid_inputs and sys.argv[offset+5]:
 #                 anat_pipeline.process()
@@ -350,7 +350,7 @@ if __name__ == "__main__":
 #         project.dmri_config_file = os.path.abspath(sys.argv[offset+6])
 
 #         anat_pipeline = cmp.project.init_anat_project(project, False)
-#         if anat_pipeline != None:
+#         if anat_pipeline is not None:
 #             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
 #             if anat_valid_inputs and sys.argv[offset+5]=='True':
@@ -367,7 +367,7 @@ if __name__ == "__main__":
 
 #         if anat_valid_outputs:
 #             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
-#             if dmri_pipeline != None:
+#             if dmri_pipeline is not None:
 #                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
 #                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
 #                 #print sys.argv[offset+7]
@@ -408,7 +408,7 @@ if __name__ == "__main__":
 #         project.fmri_config_file = os.path.abspath(sys.argv[offset+8])
 
 #         anat_pipeline = cmp.project.init_anat_project(project, False)
-#         if anat_pipeline != None:
+#         if anat_pipeline is not None:
 #             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
 
 #             if anat_valid_inputs and sys.argv[offset+5]=='True':
@@ -425,7 +425,7 @@ if __name__ == "__main__":
 
 #         if anat_valid_outputs:
 #             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
-#             if dmri_pipeline != None:
+#             if dmri_pipeline is not None:
 #                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
 #                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
 #                 # print sys.argv[offset+7]
@@ -436,7 +436,7 @@ if __name__ == "__main__":
 #                     print("WARNING: Diffusion pipeline set to not be executed")
 
 #             fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
-#             if fmri_pipeline != None:
+#             if fmri_pipeline is not None:
 #                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
 #                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
 #                 # print sys.argv[offset+9]
