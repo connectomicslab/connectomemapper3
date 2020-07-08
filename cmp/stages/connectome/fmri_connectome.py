@@ -9,21 +9,17 @@
 
 # Global imports
 from traits.api import *
-import glob
+
 import os
-import pickle
-import gzip
-import nibabel as nib
-import numpy as np
-import scipy.io as sio
-import networkx as nx
+# import pickle
+# import gzip
+
 
 # Nipype imports
 import nipype.pipeline.engine as pe
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, \
+from nipype.interfaces.base import BaseInterfaceInputSpec, \
     traits, File, TraitedSpec, InputMultiPath, OutputMultiPath
-from nipype.utils.filemanip import split_filename
-import nipype.interfaces.cmtk as cmtk
+# from nipype.utils.filemanip import split_filename
 
 # Own imports
 import cmtklib.connectome

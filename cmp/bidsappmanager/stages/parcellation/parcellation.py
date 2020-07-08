@@ -9,12 +9,8 @@
 
 # General imports
 import os
-import pickle
-import gzip
-import pkg_resources
 
 from traits.api import *
-from traits.trait_handlers import TraitListObject
 
 from traitsui.api import *
 

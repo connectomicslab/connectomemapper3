@@ -8,7 +8,7 @@ SCRIPT_DIR="$(readlink -f "${SCRIPT_DIR}")"
 
 MAIN_DIR="$(dirname "${SCRIPT_DIR}")"
 
-echo "Main dir: ${MAIN_DIR}
+echo "Main dir: ${MAIN_DIR}"
 
 PY3_DIR="${MAIN_DIR}/python3"
 

@@ -8,10 +8,6 @@
 """
 
 # General imports
-import os
-import pickle
-import gzip
-import pkg_resources
 
 from traits.api import *
 from traitsui.api import *
@@ -42,8 +38,11 @@ class SegmentationConfigUI(SegmentationConfig):
                                 visible_when='brain_mask_extraction_tool == "Custom"'),
                            'freesurfer_args',
                            # 'use_existing_freesurfer_data',
-                           # Item('freesurfer_subjects_dir', enabled_when='use_existing_freesurfer_data is True'),
-                           # Item('freesurfer_subject_id',editor=EnumEditor(name='freesurfer_subject_id_trait'), enabled_when='use_existing_freesurfer_data is True'),
+                           # Item('freesurfer_subjects_dir',
+                           # enabled_when='use_existing_freesurfer_data is True'),
+                           # Item('freesurfer_subject_id',
+                           # editor=EnumEditor(name='freesurfer_subject_id_trait'),
+                           # enabled_when='use_existing_freesurfer_data is True'),
                            visible_when="seg_tool=='Freesurfer'"),
                        Group(
                            'white_matter_mask',

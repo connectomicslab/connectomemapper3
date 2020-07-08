@@ -2,9 +2,10 @@ import os
 import subprocess
 
 
-def run(command, env={}, cwd=os.getcwd()):
+def run(command, env=None, cwd=os.getcwd()):
     merged_env = os.environ
-    merged_env.update(env)
+    if env is not None:
+        merged_env.update(env)
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT, shell=True,
                                env=merged_env, cwd=cwd)

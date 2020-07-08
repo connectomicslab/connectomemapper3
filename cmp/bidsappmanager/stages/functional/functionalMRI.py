@@ -8,9 +8,6 @@
 """
 
 # General imports
-import os
-import gzip
-import pickle
 
 from traits.api import *
 from traitsui.api import *

@@ -10,10 +10,7 @@
 # Global imports
 from traits.api import *
 from traitsui.api import *
-import glob
-import os
-import pickle
-import gzip
+
 import subprocess
 
 # Own imports

@@ -7,10 +7,6 @@
 """ CMP preprocessing Stage (not used yet!)
 """
 
-import os
-import pickle
-import gzip
-
 from traits.api import *
 from traitsui.api import *
 

@@ -8,34 +8,28 @@
 """
 
 import os
-import datetime
 
 from traits.api import *
 from traitsui.api import *
 from traitsui.qt4.extra.qt_view import QtView
 
-from pyface.ui.qt4.image_resource import ImageResource
+# from pyface.ui.qt4.image_resource import ImageResource
 from pyface.qt.QtCore import *
 from pyface.qt.QtGui import *
 
-import nipype.pipeline.engine as pe
 from pyface.api import ImageResource
 
 import shutil
 
-from bids import BIDSLayout
+# from bids import BIDSLayout
 
 # from cmp.bidsappmanager.pipelines.common import *
-from cmp.bidsappmanager.pipelines.anatomical.anatomical import AnatomicalPipelineUI
 from cmp.bidsappmanager.stages.preprocessing.fmri_preprocessing import PreprocessingStageUI
-from cmp.bidsappmanager.stages.segmentation.segmentation import SegmentationStageUI
-from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStageUI
 from cmp.bidsappmanager.stages.registration.registration import RegistrationStageUI
 from cmp.bidsappmanager.stages.functional.functionalMRI import FunctionalMRIStageUI
 from cmp.bidsappmanager.stages.connectome.fmri_connectome import ConnectomeStageUI
 
-from cmp.pipelines.common import Pipeline
-from cmp.pipelines.functional.fMRI import Global_Configuration, Check_Input_Notification, fMRIPipeline
+from cmp.pipelines.functional.fMRI import Check_Input_Notification, fMRIPipeline
 
 
 class Check_Input_NotificationUI(Check_Input_Notification):
@@ -231,6 +225,9 @@ class fMRIPipelineUI(fMRIPipeline):
         print("t1_file : %s" % t1_file)
         print("t2_file : %s" % t2_file)
 
+        if os.path.isfile(t1_file):
+            # print("%s available" % typ)
+            t1_available = True
         if os.path.isfile(t2_file):
             # print("%s available" % typ)
             t2_available = True
