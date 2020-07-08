@@ -90,7 +90,7 @@ class SegmentationStage(Stage):
 
     def create_workflow(self, flow, inputnode, outputnode):
         if self.config.seg_tool == "Freesurfer":
-            if self.config.use_existing_freesurfer_data == False:
+            if self.config.use_existing_freesurfer_data is False:
                 # Converting to .mgz format
                 fs_mriconvert = pe.Node(interface=fs.MRIConvert(
                     out_type="mgz", out_file="T1.mgz"), name="mgzConvert")
@@ -278,7 +278,7 @@ class SegmentationStage(Stage):
 
         if self.config.seg_tool == "Freesurfer":
             fs_path = ''
-            if self.config.use_existing_freesurfer_data == False:
+            if self.config.use_existing_freesurfer_data is False:
                 reconall_report_path = os.path.join(
                     self.stage_dir, "reconall", "_report", "report.rst")
                 fs_path = self.config.freesurfer_subject_id

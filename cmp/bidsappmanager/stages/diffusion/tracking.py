@@ -20,7 +20,7 @@ class Dipy_tracking_configUI(Dipy_tracking_config):
             Item('step_size', label="Step size"),
             Item('max_angle', label="Max angle (degree)"),
             Item('fa_thresh', label="FA threshold (classifier)",
-                 visible_when='seed_from_gmwmi == False'),
+                 visible_when='seed_from_gmwmi is False'),
             label='Streamlines settings',
             orientation='vertical'
         ),

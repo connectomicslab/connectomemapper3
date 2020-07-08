@@ -238,7 +238,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 print("DWI available")
                 diffusion_available = True
 
-        except:
+        except Exception:
             error(message="Invalid BIDS dataset. Please see documentation for more details.", title="Error",
                   buttons=['OK', 'Cancel'], parent=None)
             return

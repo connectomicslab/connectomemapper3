@@ -364,7 +364,7 @@ class DiffusionPipeline(Pipeline):
                 # print("%s available" % typ)
                 diffusion_available = True
 
-        except:
+        except Exception:
             print("Invalid BIDS dataset. Please see documentation for more details.")
             return
 

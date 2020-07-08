@@ -97,7 +97,7 @@ class Dipy_tracking_config(HasTraits):
             self.curvature = 0.0
 
     def _use_act_changed(self, new):
-        if new == False:
+        if new is False:
             self.seed_from_gmwmi = False
 
 
@@ -131,7 +131,7 @@ class MRtrix_tracking_config(HasTraits):
             self.curvature = 1.0
 
     def _use_act_changed(self, new):
-        if new == False:
+        if new is False:
             self.crop_at_gmwmi = False
             self.seed_from_gmwmi = False
             self.backtrack = False
