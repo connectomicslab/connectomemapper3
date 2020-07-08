@@ -130,7 +130,7 @@ class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
 
     directmap = traits.Bool(argstr='-directmap',
                             desc="""Only applicable when using pds as the inputmodel
-                                    Use direct mapping between the eigenvalues and the 
+                                    Use direct mapping between the eigenvalues and the
                                     distribution parameters instead of the log of the eigenvalues.""")
 
     maxcomponents = traits.Int(argstr='-maxcomponents %d', units='NA',

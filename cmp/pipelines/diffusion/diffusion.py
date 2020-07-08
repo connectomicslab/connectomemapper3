@@ -74,7 +74,7 @@ class DiffusionPipeline(Pipeline):
 
     def __init__(self, project_info):
         print('{}'.format(project_info.base_directory))
-        
+
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = project_info.subject
 

@@ -112,7 +112,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                          bids_dir=project_info.base_directory,
                                                          output_dir=self.output_directory)}
         cmp_common.Pipeline.__init__(self, project_info)
-        
+
         self.stages['Segmentation'].config.on_trait_change(
             self.update_parcellation, 'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(

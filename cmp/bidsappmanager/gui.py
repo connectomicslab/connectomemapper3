@@ -602,11 +602,11 @@ class CMP_BIDSAppWindow(HasTraits):
     #                           pkg_resources.resource_filename('resources',
     #                               os.path.join('buttons', 'bidsapp-check-settings.png'))))
     # start_bidsapp = Action(name='Start BIDS App!',
-                    # action='start_bids_app',
-                    # enabled_when='settings_checked==True and docker_running==False',
-                    # image=ImageResource(
-                    #         pkg_resources.resource_filename('resources',
-                    #             os.path.join('buttons', 'bidsapp-run.png'))))
+    # action='start_bids_app',
+    # enabled_when='settings_checked==True and docker_running==False',
+    # image=ImageResource(
+    #         pkg_resources.resource_filename('resources',
+    #             os.path.join('buttons', 'bidsapp-run.png'))))
 
     update_selection = Button()
     check = Button()
@@ -1003,7 +1003,8 @@ class CMP_BIDSAppWindow(HasTraits):
             if proc.poll() is not None:
                 proclist.remove(proc)
 
-    def run(self, command, env=None, cwd=os.getcwd()):
+    @classmethod
+    def run(command, env=None, cwd=os.getcwd()):
         merged_env = os.environ
         if env is not None:
             merged_env.update(env)
@@ -1121,9 +1122,9 @@ class CMP_BIDSAppWindow(HasTraits):
             # in stable version of datalad_container
 
             # cmd = "datalad containers-add connectomemapper-bidsapp-{}"
-                   # " --url dhub://sebastientourbier/connectomemapper-bidsapp:{} --update".format(
-                   #                                                                      self.bidsapp_tag,
-                   #                                                                      self.bidsapp_tag)
+            # " --url dhub://sebastientourbier/connectomemapper-bidsapp:{} --update".format(
+            #                                                                       self.bidsapp_tag,
+            #                                                                       self.bidsapp_tag)
             #
             # try:
             #     print('... cmd: {}'.format(cmd))

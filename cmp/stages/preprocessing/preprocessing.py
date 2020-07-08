@@ -129,7 +129,7 @@ class PreprocessingStage(Stage):
         self.name = 'preprocessing_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        
+
         self.config = PreprocessingConfig()
         self.inputs = ["diffusion", "bvecs", "bvals", "T1", "aparc_aseg", "aseg", "brain", "brain_mask", "wm_mask_file",
                        "roi_volumes"]
@@ -370,10 +370,10 @@ class PreprocessingStage(Stage):
         mr_convert_b = pe.Node(interface=MRConvert(out_filename='diffusion_corrected.nii.gz', stride=[+1, +2, +3, +4]),
                                name='mr_convert_b')
 
-        
+
 
         if self.config.bias_field_correction:
-            
+
             mr_convert_bias = pe.Node(interface=MRConvert(out_filename='diffusion_biasfield.nii.gz', stride=[+1, +2, +3, +4]),
                                name='mr_convert_bias')
 
@@ -844,9 +844,9 @@ class PreprocessingStage(Stage):
 
     def define_inspect_outputs(self):
         # print "stage_dir : %s" % self.stage_dir
-        
+
         if self.config.denoising:
-            
+
             dwi_denoise_dir = os.path.join(self.stage_dir, 'dwi_denoise')
             denoise = os.path.join(dwi_denoise_dir,'diffusion_denoised.mif')
 
@@ -861,7 +861,7 @@ class PreprocessingStage(Stage):
                         self.inspect_outputs_dict['Noise map'] = ['mrview', noise]
 
         if self.config.bias_field_correction:
-            
+
             dwi_biascorrect_dir = os.path.join(self.stage_dir, 'dwi_biascorrect')
             bcorr = glob.glob(os.path.join(dwi_biascorrect_dir, '*_biascorr.mif'))[0]
             bias = glob.glob(os.path.join(dwi_biascorrect_dir, '*_biasfield.mif'))[0]
@@ -873,7 +873,7 @@ class PreprocessingStage(Stage):
                 self.inspect_outputs_dict['Bias field'] = ['mrview', bias]
 
         if self.config.eddy_current_and_motion_correction:
-            
+
             if self.config.eddy_correction_algo == 'FSL eddy_correct':
                 eddy_dir = os.path.join(self.stage_dir, 'eddy_correct')
             else:

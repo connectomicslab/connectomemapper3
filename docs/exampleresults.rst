@@ -59,8 +59,8 @@ Generated connection matrix can be displayed using a:
 ..
 	Rs-fMRI Average Time-Courses
 	----------------------------
-	
+
 	Average time-courses are displayed with Matplotlib.
-	
+
 	.. image:: images/ex_rsfMRI.png
 		:width: 600

@@ -2,9 +2,9 @@
 Implementation
 *******************************
 
-The structural and functional processing pipelines of the Connectome Mapper are written in Python and uses Nipype (Gorgolewski 2011) to interface with `FSL <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki>`_, `FreeSurfer <https://surfer.nmr.mgh.harvard.edu/>`_, `ANTs <http://stnava.github.io/ANTs/>`_, `MRtrix3 <http://www.mrtrix.org/>`_, `Dipy <https://nipy.org/dipy/>`_ and `AFNI <https://afni.nimh.nih.gov/>`_ and the included Connectome Mapping Toolkit library. The pipelines take BIDS formatted datasets as inputs, using the `PyBIDS library <https://github.com/bids-standard/pybids>`_. 
+The structural and functional processing pipelines of the Connectome Mapper are written in Python and uses Nipype (Gorgolewski 2011) to interface with `FSL <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki>`_, `FreeSurfer <https://surfer.nmr.mgh.harvard.edu/>`_, `ANTs <http://stnava.github.io/ANTs/>`_, `MRtrix3 <http://www.mrtrix.org/>`_, `Dipy <https://nipy.org/dipy/>`_ and `AFNI <https://afni.nimh.nih.gov/>`_ and the included Connectome Mapping Toolkit library. The pipelines take BIDS formatted datasets as inputs, using the `PyBIDS library <https://github.com/bids-standard/pybids>`_.
 
-The pipelines are encapsulated in a BIDS App (Gorgolewski 2017), a framework (which promotes portability and reproducibility. The container image of the BIDS App is built using Docker container technology (Merkel 2014). Releases are available at `sebastientourbier/connectomemapper-bidsapp on the Docker Hub <https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp>`_, but can be easily converted into a Singularity image (Kurtzer 2017) for large scale processing on clusters. 
+The pipelines are encapsulated in a BIDS App (Gorgolewski 2017), a framework (which promotes portability and reproducibility. The container image of the BIDS App is built using Docker container technology (Merkel 2014). Releases are available at `sebastientourbier/connectomemapper-bidsapp on the Docker Hub <https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp>`_, but can be easily converted into a Singularity image (Kurtzer 2017) for large scale processing on clusters.
 
 
 BIDS formatted datasets
@@ -14,7 +14,7 @@ The Connectome Mapper 3 BIDS App pipelines takes as principal input the path of 
 
 
 To get you started, we provide one sample BIDS formatted dataset. The dataset structure is as follow::
-        
+
         ├── cmpsample
         │   ├── sub-001
         │   │       ├── anat
@@ -29,11 +29,11 @@ To get you started, we provide one sample BIDS formatted dataset. The dataset st
         │   │       |    ├── sub-001_acq-multishell_dwi.json
         │   │       ├── func
         │   │       |    ├── sub-001_task-rest_bold.nii.gz
-        │   │       |    ├── sub-001_task-rest_bold.json 
+        │   │       |    ├── sub-001_task-rest_bold.json
 
 
 
-You can find the `raw dataset online <http://cmtk.org/datasets/rawdata/>`_ 
+You can find the `raw dataset online <http://cmtk.org/datasets/rawdata/>`_
 
 
 Architecture
@@ -84,7 +84,7 @@ Example results
 
 * *Registration*
 
-    Registration of T1 to Diffusion space (b0). 
+    Registration of T1 to Diffusion space (b0).
 
     .. figure:: images/ex_registration.png
         :width: 600
@@ -123,7 +123,7 @@ Example results
 ^^^^^^^^^^^^^^^^
 
 * *Average time-courses per cortical and subcortical parcel*
-      
+
     .. figure:: images/ex_rsfMRI.png
         :width: 600
 
@@ -148,7 +148,7 @@ Outputs (Processed / derivatives data and folder structure) of the Connectome Ma
 
 Taking the sample dataset as example, running the Connectome Mapper will result in the following folder structure::
 
-        ├── cmpsample  
+        ├── cmpsample
         │   ├── sub-001
         │   │       ├── anat
         │   │       |    ├── sub-001_T1w.nii.gz

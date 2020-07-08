@@ -8,16 +8,16 @@ Version 3.0.0-beta-RC2
 
 Date: June 02, 2020
 
-This version integrates Pull Request #33 which includes in particular: 
+This version integrates Pull Request #33 which includes in particular:
 
 
 *Upgrade*
 
-* Uses  `fsleyes` instead of `fslview` (now deprecated), which now included in the conda environment of the GUI (`py27cmp-gui`). 
+* Uses  `fsleyes` instead of `fslview` (now deprecated), which now included in the conda environment of the GUI (`py27cmp-gui`).
 
 *New feature*
 
-* Computes of ROI volumetry stored in `<output_dir>/sub-<label>(/ses<label>)/anat` folder, recognized by their `_stats.tsv` file name suffix. 
+* Computes of ROI volumetry stored in `<output_dir>/sub-<label>(/ses<label>)/anat` folder, recognized by their `_stats.tsv` file name suffix.
 
 *Improved replicability*
 
@@ -27,9 +27,9 @@ This version integrates Pull Request #33 which includes in particular:
 
 * Fixes the output inspector window of the cmpbidsappmanager (GUI) that fails to find existing outputs, after adoption of /bids_dir and /output_dir in the bidsapp docker image.
 
-* Fixes the way to get the list of networkx edge attributes in `inspect_outputs()` of `ConnectomeStage` for the output inspector window of the cmpbidsappmanager (GUI) 
+* Fixes the way to get the list of networkx edge attributes in `inspect_outputs()` of `ConnectomeStage` for the output inspector window of the cmpbidsappmanager (GUI)
 
-* Added missing package dependencies (`fury` and `vtk`) that fixes dipy_CSD execution error when trying to import module actor from dipy.viz to save the results in a png 
+* Added missing package dependencies (`fury` and `vtk`) that fixes dipy_CSD execution error when trying to import module actor from dipy.viz to save the results in a png
 
 * Fixes a number of unresolved references identified by pycharm code inspection tool
 
@@ -70,10 +70,10 @@ This version addresses multiple issues to make successful conversion and run of 
 * Revised the build of the master and BIDS App images:
 
 	* Install locales and set `$LC_ALL` and `$LANG` to make freesurfer hippocampal subfields and brainstem segmentation (matlab-based) modules working when run in the converted SIngularity image
-  	
+
   	* BIDS input and output directories inside the BIDS App container are no longer the `/tmp` and `/tmp/derivatives` folders but `/bids_dir` and `/output_dir`.
   	  .. warning:: this might affect the use of Datalad container (To be confirmed.)
-  	
+
   	* Fix the branch of mrtrix3 to check out
 
   	* Updated metadata

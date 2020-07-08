@@ -25,13 +25,13 @@ class HARDIMatInputSpec(CommandLineInputSpec):
         exists=True, desc='Input gradient table', position=1, argstr='%s')
     out_file = File("recon_mat.dat", desc='output matrix file',
                     argstr='%s', usedefault=True, position=2)
-    order = traits.Int(argsstr='-order %s', 
+    order = traits.Int(argsstr='-order %s',
         desc="""maximum order of spherical harmonics. must be even number. default
         is 4""")
     odf_file = File(exists=True, argstr='-odf %s',
         desc="""filename that contains the reconstruction points on a HEMI-sphere.
         use the pre-set 181 points by default""")
-    reference_file = File(exists=True, argstr='-ref %s', 
+    reference_file = File(exists=True, argstr='-ref %s',
         desc="""provide a dicom or nifti image as the reference for the program to
         figure out the image orientation information. if no such info was
         found in the given image header, the next 5 options -info, etc.,
@@ -50,7 +50,7 @@ class HARDIMatInputSpec(CommandLineInputSpec):
         numbers and construct the 1st and 2nd vector and calculate the 3rd
         one automatically. This information will be used to determine image orientation,
         as well as to adjust gradient vectors with oblique angle when""", argstr="-iop %f")
-    oblique_correction = traits.Bool(desc="""when oblique angle(s) applied, some SIEMENS dti 
+    oblique_correction = traits.Bool(desc="""when oblique angle(s) applied, some SIEMENS dti
         protocols do not adjust gradient accordingly, thus it requires adjustment for correct
         diffusion tensor calculation""", argstr="-oc")
 

@@ -155,7 +155,7 @@ def mean_curvature(xyz):
 
     Returns
     -----------
-    m : float 
+    m : float
         float representing the mean curvature
 
     Examples
@@ -168,13 +168,13 @@ def mean_curvature(xyz):
     >>> y=0*x
     >>> z=0*x
     >>> xyz=np.vstack((x,y,z)).T
-    >>> m=tm.mean_curvature(xyz) #mean curvature straight line    
+    >>> m=tm.mean_curvature(xyz) #mean curvature straight line
     >>> theta=np.pi*np.linspace(0,1,100)
     >>> x=np.cos(theta)
     >>> y=np.sin(theta)
     >>> z=0*x
     >>> xyz=np.vstack((x,y,z)).T
-    >>> m=tm.mean_curvature(xyz) #mean curvature for semi-circle    
+    >>> m=tm.mean_curvature(xyz) #mean curvature for semi-circle
     '''
     xyz = np.asarray(xyz)
     n_pts = xyz.shape[0]
@@ -191,7 +191,7 @@ def mean_curvature(xyz):
 
 
 def force_decode(string, codecs=None):
-    
+
     if codecs is None:
         codecs = ['utf8', 'latin-1']
 
@@ -223,7 +223,7 @@ def bidsapp_2_local_output_dir2(local_dir, path, debug=True):
 
 
 def create_results_plkz_local(plkz_file, local_output_dir, encoding='latin-1', debug=True):
-   
+
     if debug:
         print("Processing pickle {} ".format(plkz_file))
 
@@ -231,7 +231,7 @@ def create_results_plkz_local(plkz_file, local_output_dir, encoding='latin-1', d
     cont = pick.read()
     # cont = "".join( chr(x) for x in bytearray(cont))
     print(cont)
-    
+
     # if debug:
     #     print("local_output_dir : {} , cont.find('/bids_dir'): {}, cont.find('/output_dir'): {} ".format(
     #         local_output_dir, cont.find('/bids_dir'), cont.find('/output_dir')))
@@ -239,7 +239,7 @@ def create_results_plkz_local(plkz_file, local_output_dir, encoding='latin-1', d
     # if debug:
     #     print(
     #         ' bids app output directory -> local dataset derivatives directory')
-    
+
     # new_cont = cont.replace('/output_dir', '{}'.format(local_output_dir))
 
     if debug:
@@ -249,11 +249,11 @@ def create_results_plkz_local(plkz_file, local_output_dir, encoding='latin-1', d
     if debug:
         print(
             ' bids app output directory -> local dataset derivatives directory')
-    
+
     new_cont = cont.replace(b'/output_dir', bytearray(local_output_dir, encoding="utf-8"))
 
     print(new_cont)
-    
+
     root = os.path.dirname(plkz_file)
     base = os.path.basename(plkz_file)
     pref = os.path.splitext(base)[0]
@@ -323,7 +323,7 @@ def get_pipeline_dictionary_outputs(datasink_report, local_output_dir=None):
                 str_outputs = str.replace(str_outputs,"\'","\"")
                 str_outputs = str.replace(str_outputs,"<undefined>","\"\"")
 
-                # Update from BIDS App /output_dir to local output directory 
+                # Update from BIDS App /output_dir to local output directory
                 # specified by local_output_dir
                 if local_output_dir is not None:
                     str_outputs = str.replace(str_outputs,"/output_dir",local_output_dir)
@@ -352,7 +352,7 @@ def get_node_dictionary_outputs(node_report, local_output_dir=None):
                 str_outputs = str.replace(str_outputs,prefix,"")
                 str_outputs = str.replace(str_outputs,"\'","\"")
 
-                # Update from BIDS App /output_dir to local output directory 
+                # Update from BIDS App /output_dir to local output directory
                 # specified by local_output_dir
                 if local_output_dir is not None:
                     str_outputs = str.replace(str_outputs,"/output_dir",local_output_dir)
@@ -366,7 +366,7 @@ def get_node_dictionary_outputs(node_report, local_output_dir=None):
 
 def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
     #encoding=sys.getfilesystemencoding()
-    
+
     # mode can be local or newlocal or bidsapp (local by default)
 
     # TODO: make fix more generalized by taking derivatives/output dir
@@ -386,7 +386,7 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
 
             pick = gzip.open(os.path.join(root, fi))
             cont = pick.read()
-            
+
             if debug:
                 print("local_dir : {} , cont.find('/bids_dir'): {}, cont.find('/output_dir'): {}  (mode: {})".format(
                     local_dir, cont.find(b'/bids_dir'), cont.find(b'/output_dir'), mode))

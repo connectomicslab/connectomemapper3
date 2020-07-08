@@ -52,7 +52,7 @@ class ConnectomeStage(Stage):
         self.name = 'connectome_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        
+
         self.config = ConnectomeConfig()
         self.inputs = ["roi_volumes_registered", "roi_graphMLs",
                        "track_file",
@@ -118,9 +118,9 @@ class ConnectomeStage(Stage):
             if os.path.exists(tracto):
                 self.inspect_outputs_dict['Final tractogram'] = [
                     'trackvis', tracto]
-            
+
             mat = dwi_outputs['dwi.@connectivity_matrices']
-            
+
             map_scale = "default"
             if self.config.log_visualization:
                 map_scale = "log"

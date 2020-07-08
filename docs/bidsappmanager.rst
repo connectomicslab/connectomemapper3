@@ -79,12 +79,12 @@ Anatomical pipeline stages
 	:align: center
 
 	Panel for configuration of anatomical pipeline stages
-	
+
 
 Segmentation
 """"""""""""""
 
-Performs tissue segmentation using Freesurfer or custom segmentation.  
+Performs tissue segmentation using Freesurfer or custom segmentation.
 
 *Freesurfer*
 
@@ -93,7 +93,7 @@ Performs tissue segmentation using Freesurfer or custom segmentation.
 
 	* *Freesurfer args:* used to specify Freesurfer processing options
 	* *Use existing freesurfer data:* Check this box if you have already Freesurfer output data available
-	
+
 *Custom segmentation*
 
 	.. warning:: Not fully tested. Development and testing in progress.
@@ -107,10 +107,10 @@ Parcellation
 """"""""""""""
 
 Generates the Native Freesurfer or Lausanne2008/Lausanne2018 parcellation from Freesurfer data, or takes a custom parcellation atlas.
-	
+
 **Parcellation scheme**
 
-	* *NativeFreesurfer:* 
+	* *NativeFreesurfer:*
 
 		.. image:: images/parcellation_fs.png
 			:align: center
@@ -118,26 +118,26 @@ Generates the Native Freesurfer or Lausanne2008/Lausanne2018 parcellation from F
 		Atlas composed of 83 regions from the Freesurfer aparc+aseg file
 
 	* *Lausanne2008:*
-	
+
 		.. image:: images/parcellation_lausanne2008.png
 			:align: center
-		
+
 		Multi-resolution atlas
 
 	* *Lausanne2018:*
 
 		.. image:: images/parcellation_lausanne2018.png
 			:align: center
-		
+
 		Lausanne 2008 atlas extended with 7 thalamic nuclei, 12 hippocampal subfields, and 4 brainstem sub-structure per hemisphere
-	
-	* *Custom:* 
+
+	* *Custom:*
 
 		.. warning:: Not fully tested. Development and testing in progress.
 
 		.. image:: images/parcellation_custom.png
 			:align: center
-		
+
 		Custom atlas. Specify the atlas name, the number of regions, the nifti file and a corresponding graphml file. The Graphml file must contain at least a "dn_correspondence_id" field for each node. This field should contain the region's label in the nifti file.
 
 Diffusion pipeline stages
@@ -167,7 +167,7 @@ Preprocessing includes denoising, bias field correction, motion and eddy current
 *Motion correction*
 
 	Aligns diffusion volumes to the b0 volume using FSL's MCFLIRT.
-	
+
 	.. note:: For hemi-sphere DSI aquisitions, warning outputs will be displayed in the console when processing empty volumes.
 
 *Eddy current correction*
@@ -177,7 +177,7 @@ Preprocessing includes denoising, bias field correction, motion and eddy current
 *Resampling*
 
 	Resample morphological and diffusion data to F0 x F1 x F2 mm^3
-	
+
 Registration
 """"""""""""""
 
@@ -189,20 +189,20 @@ Registration
 			:align: center
 
 	 	Perform linear registration from T1 to diffusion b0 using FSL's flirt.
-	
+
 	* BBregister (FS):
 
 		.. image:: images/registration_fs.png
 			:align: center
-	
+
 		Perform linear registration using Freesurfer BBregister tool.
-	
+
 	* Non-linear (ANTS):
 
 		.. image:: images/registration_ants.png
 			:align: center
-		
-	 	Perform symmetric diffeomorphic SyN registration from T1 to b0 
+
+	 	Perform symmetric diffeomorphic SyN registration from T1 to b0
 
 Diffusion reconstruction and tractography
 """"""""""""""""""""""""""""""""""""""""""""
@@ -211,113 +211,113 @@ Perform diffusion reconstruction and local deterministic or probabilistic tracto
 
 	.. figure:: images/diffusion_config_window.png
 		:align: center
-		
+
 		Diffusion stage configuration window
 
 
 **Reconstruction tool**
 
-		
+
 	**Dipy**: perform SHORE, tensor, CSD and MAP-MRI reconstruction.
 
 		* SHORE:
-		
+
 			.. image:: images/diffusion_dipy_shore.png
 				:align: center
-				
+
 			SHORE performed only on DSI data
 
 		* Tensor:
-		
+
 			.. image:: images/diffusion_dipy_tensor.png
 				:align: center
-				
+
 			Tensor performed only on DTI data
 
 		* CSD:
-		
+
 			.. image:: images/diffusion_dipy_csd.png
 				:align: center
-				
+
 			CSD performed on DTI and multi-shell data
 
 		* MAP_MRI:
-		
+
 			.. image:: images/diffusion_dipy_mapmri.png
 				:align: center
-				
+
 			MAP-MRI performed only on multi-shell data
 
 
 	**MRtrix**: perform CSD reconstruction.
 
 		* CSD:
-		
+
 			.. image:: images/diffusion_mrtrix_csd.png
 				:align: center
-				
+
 			CSD performed on DTI and multi-shell data
-	
+
 
 **Tractography tool**
 
-	**Dipy**: perform deterministic and probabilistic fiber tracking as well as particle filtering tractography. 
-		
+	**Dipy**: perform deterministic and probabilistic fiber tracking as well as particle filtering tractography.
+
 		* Deterministic tractography:
-		
+
 			.. image:: images/diffusion_dipy_deterministic.png
 				:align: center
-				
+
 			Deterministic tractography (SD_STREAM) performed on single tensor or CSD reconstruction
 
 		* Probabilistic tractography:
-		
+
 			.. image:: images/diffusion_dipy_probabilistic.png
 				:align: center
-				
+
 			Probabilistic tractography (iFOD2) performed on SHORE or CSD reconstruction
 
 		* Probabilistic particle filtering tractography (PFT):
-		
+
 			.. image:: images/diffusion_dipy_probabilistic_PFT.png
 				:align: center
-				
+
 			Probabilistic PFT tracking performed on SHORE or CSD reconstruction. Seeding from the gray matter / white matter interface is possible.
 
 		.. note:: We noticed a shift of the center of tractograms obtained by dipy. As a result, tractograms visualized in TrackVis are not commonly centered despite the fact that the tractogram and the ROIs are properly aligned.
 
-		
+
 	**MRtrix**: perform deterministic and probabilistic fiber tracking as well as anatomically-constrained tractography. ROI dilation is required to map brain connections when the tracking only operates in the white matter.
-		
+
 		* Deterministic tractography:
-		
+
 			.. image:: images/diffusion_mrtrix_deterministic.png
 				:align: center
-				
+
 			Deterministic tractography (SD_STREAM) performed on single tensor or CSD reconstruction
 
 		* Deterministic anatomically-constrained tractography (ACT):
-		
+
 			.. image:: images/diffusion_mrtrix_deterministic_ACT.png
 				:align: center
-				
+
 			Deterministic ACT tracking performed on single tensor or CSD reconstruction. Seeding from the gray matter / white matter interface is possible. Backtrack option is not available in deterministic tracking.
 
 		* Probabilistic tractography:
-		
+
 			.. image:: images/diffusion_mrtrix_probabilistic.png
 				:align: center
-				
+
 			Probabilistic tractography (iFOD2) performed on SHORE or CSD reconstruction
 
 		* Probabilistic anatomically-constrained tractography (ACT):
-		
+
 			.. image:: images/diffusion_mrtrix_probabilistic_ACT.png
 				:align: center
-				
+
 			Probabilistic ACT tracking performed on SHORE or CSD reconstruction. Seeding from the gray matter / white matter interface is possible.
-			
-	
+
+
 Connectome
 """"""""""""""
 
@@ -373,12 +373,12 @@ Registration
 			:align: center
 
 		Perform linear registration from T1 to mean BOLD using FSL's flirt.
-	
+
 	* BBregister (FS)
 
 		.. image:: images/registration_fs_fmri.png
 			:align: center
-	
+
 		Perform linear registration using Freesurfer BBregister tool from T1 to mean BOLD via T2.
 
 		.. warning:: development in progress
@@ -404,7 +404,7 @@ Performs detrending, nuisance regression, bandpass filteringdiffusion reconstruc
 		:align: center
 
 	A number of options for removing nuisance signals is provided. They consist of:
-	1. *Global signal* regression 
+	1. *Global signal* regression
 	2. *CSF* regression
 	3. *WM* regression
 	4. *Motion parameters* regression
@@ -414,7 +414,7 @@ Performs detrending, nuisance regression, bandpass filteringdiffusion reconstruc
 	.. image:: images/bandpass.png
 		:align: center
 
-	Perform bandpass filtering of the time-series using FSL's slicetimer 
+	Perform bandpass filtering of the time-series using FSL's slicetimer
 
 
 Connectome
@@ -428,7 +428,7 @@ Computes ROI-averaged time-series and the correlation connectivity matrices.
 *Output types*
 
 	Select in which formats the connectivity matrices should be saved.
-	
+
 Save the configuration files
 -------------------------------
 
@@ -437,14 +437,14 @@ You can save the pipeline stage configuration files in two different way:
 	1. You can save all configuration files at once by clicking on the `Save All Pipeline Configuration Files`. This  will save automatically the configuration file of the anatomical / diffusion / fMRI pipeline to `<bids_dataset>/code/ref_anatomical_config.ini` / `<bids_dataset>/code/ref_diffusion_config.ini` / `<bids_dataset>/code/ref_fMRI_config.ini` respectively.
 
 	2. You can save individually each of the pipeline configuration files and edit its filename in the File menu (File -> Save anatomical/diffusion/fMRI configuration file as...)
- 
-Nipype 
+
+Nipype
 -------
 
 The Connectome Mapper processing relies on nipype. For each stage, a processing folder is created in $Base_directory/derivatives/nipype/sub-<participant_label>/<pipeline_name>/<stage_name>.
 
 All intermediate steps for the processing are saved in the corresponding stage folders.
-	
+
 
 Run the BIDS App
 *********************
@@ -475,7 +475,7 @@ Run configuration
 * Check/Uncheck the pipelines to be performed
 
 	.. image:: images/bidsapp_pipeline_check.png
-		:align: center	
+		:align: center
 
 * Specify your Freesurfer license
 
@@ -485,7 +485,7 @@ Run configuration
 	.. note:: Your freesurfer license will be copied to your dataset directory as `<bids_dataset>/code/license.txt` which will be mounted inside the BIDS App container image.
 
 
-* When the run is set up, you can click on the `Check settings` button. 
+* When the run is set up, you can click on the `Check settings` button.
 
 	.. image:: images/bidsapp_checksettings.png
 		:align: center
@@ -510,21 +510,21 @@ Launch the BIDS App run
 	.. code-block:: console
 
 		Start BIDS App
-		> Copy FreeSurfer license (BIDS App Manager) 
+		> Copy FreeSurfer license (BIDS App Manager)
 		... src : /usr/local/freesurfer/license.txt
 		... dst : /media/localadmin/HagmannHDD/Seb/ds-testLausanne2008SHOREPFT/code/license.txt
 		> Datalad available: True
 		*... Docker cmd 2 : ['docker', 'run', '-it', '--rm', '-v', '/media/localadmin/HagmannHDD/Seb/ds-testLausanne2008SHOREPFT:/tmp', '-u', '1000:1000', 'sebastientourbier/connectomemapper-bidsapp:3.0.0-beta-singularity', '/tmp', '/tmp/derivatives', 'participant', '--participant_label', 'A001', '--anat_pipeline_config', '/tmp/code/ref_anatomical_config.ini', '--dwi_pipeline_config', '/tmp/code/ref_diffusion_config.ini']*
 		> BIDS dataset: /tmp
 		> Subjects to analyze : ['A001']
-		> Copy FreeSurfer license (BIDS App) 
+		> Copy FreeSurfer license (BIDS App)
 		> Sessions to analyze : ['ses-20150203160809']
 		> Process subject sub-A001 session ses-20150203160809
 		WARNING: rewriting config file /tmp/derivatives/sub-A001_ses-20150203160809_anatomical_config.ini
 		... Anatomical config created : /tmp/derivatives/sub-A001_ses-20150203160809_anatomical_config.ini
 		WARNING: rewriting config file /tmp/derivatives/sub-A001_ses-20150203160809_diffusion_config.ini
 		... Diffusion config created : /tmp/derivatives/sub-A001_ses-20150203160809_diffusion_config.ini
-		... Running pipelines : 
+		... Running pipelines :
 		        - Anatomical MRI (segmentation and parcellation)
 		        - Diffusion MRI (structural connectivity matrices)
 		... cmd : connectomemapper3 /tmp /tmp/derivatives sub-A001 ses-20150203160809 /tmp/derivatives/sub-A001_ses-20150203160809_anatomical_config.ini True /tmp/derivatives/sub-A001_ses-20150203160809_diffusion_config.ini True
@@ -536,7 +536,7 @@ Launch the BIDS App run
 Check progress
 ------------------
 
-For each subject, the execution output of the pipelines are redirected to a log file, written as ``<bids_dataset/derivatives>/cmp/sub-<subject_label>_log.txt``. Execution progress can be checked by the means of these log files. 
+For each subject, the execution output of the pipelines are redirected to a log file, written as ``<bids_dataset/derivatives>/cmp/sub-<subject_label>_log.txt``. Execution progress can be checked by the means of these log files.
 
 
 Check stages outputs
@@ -561,7 +561,7 @@ Anatomical pipeline stages
 	.. figure:: images/outputcheck_pipeline_anat.png
 		:align: center
 
-		Panel for configuration of anatomical pipeline stages	
+		Panel for configuration of anatomical pipeline stages
 
 Segmentation
 """"""""""""""
@@ -602,7 +602,7 @@ Diffusion pipeline stages
 ---------------------------
 
 * Click on the stage you wish to check the output(s):
-	
+
 	.. figure:: images/outputcheck_pipeline_dwi.png
 		:align: center
 
@@ -616,7 +616,7 @@ Preprocessing
 	.. image:: images/outputcheck_stage_prep.png
 		:align: center
 
-	
+
 Registration
 """"""""""""""
 
@@ -649,7 +649,7 @@ DSI Tractography results are displayed with TrackVis.
 
 .. image:: images/ex_tractography2.png
 	:width: 600
-	
+
 Connectome
 """"""""""""""
 
@@ -658,7 +658,7 @@ Connectome
 	.. image:: images/outputcheck_stage_conn.png
 		:align: center
 
-**Generated connection matrix** 
+**Generated connection matrix**
 
 Displayed using a:
 
@@ -710,7 +710,7 @@ fMRI processing
 		:align: center
 
 **ROI averaged time-series**
-	
+
 	.. image:: images/ex_rsfMRI.png
 		:width: 600
 
@@ -722,7 +722,7 @@ Connectome
 	.. image:: images/outputcheck_stage_conn_fmri.png
 		:align: center
 
-**Generated connection matrix** 
+**Generated connection matrix**
 
 Displayed using a:
 

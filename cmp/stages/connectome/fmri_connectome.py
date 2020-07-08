@@ -48,7 +48,7 @@ class ConnectomeStage(Stage):
         self.name = 'connectome_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        
+
         self.config = ConnectomeConfig()
         self.inputs = ["roi_volumes_registered", "func_file", "FD", "DVARS",
                        "parcellation_scheme", "atlas_info", "roi_graphMLs"]
@@ -89,7 +89,7 @@ class ConnectomeStage(Stage):
 
             mat = func_outputs['func.@connectivity_matrices']
             # print('con_results_path : ',con_results_path)
-            
+
             if isinstance(mat, str):
                 print("single scale")
                 # print(mat)

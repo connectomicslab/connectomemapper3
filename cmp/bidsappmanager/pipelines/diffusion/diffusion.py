@@ -79,6 +79,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                show_labels=False, label=""),
         springy=True
     )
+
     traits_view = QtView(Include('pipeline_group'))
 
     def __init__(self, project_info):

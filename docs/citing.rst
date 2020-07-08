@@ -4,7 +4,7 @@
 Citing
 *********
 
-If your are using the Connectome Mapper 3 in your work, please acknowledge this software and its dependencies. 
+If your are using the Connectome Mapper 3 in your work, please acknowledge this software and its dependencies.
 
 To help you to do so, we recommend you to use, modify to your needs, and include in your work the following text:
 

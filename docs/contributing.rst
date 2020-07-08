@@ -4,7 +4,7 @@
 Contributing to Connectome Mapper
 =================================
 
-:Authors: Sebastien Tourbier, Adrien Birbaumer 
+:Authors: Sebastien Tourbier, Adrien Birbaumer
 :Version: Revision: 2
 :Copyright: Copyright (C) 2017-2019, Brain Communication Pathways Sinergia Consortium, Switzerland.
             This software is distributed under the open-source license Modified BSD.

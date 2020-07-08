@@ -113,7 +113,7 @@ class RegistrationStage(Stage):
         self.name = 'registration_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        
+
         self.config = RegistrationConfig()
         self.config.pipeline = pipeline_mode
 
@@ -1244,7 +1244,7 @@ class RegistrationStage(Stage):
                                                                     ref,
                                                                     out, '-cm', "copper",
                                                                     '-a', '50']
-                
+
                 out = dwi_outputs['anat.@act_5tt_reg_crop']
                 if (os.path.exists(ref) and os.path.exists(out)):
                     self.inspect_outputs_dict['Wrapped 5TT-to-b0 (%s)' % tool] = ['fsleyes', '-sdefault',

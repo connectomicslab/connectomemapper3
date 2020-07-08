@@ -13,7 +13,7 @@ from bids import BIDSLayout
 #CMP imports
 
 import cmp.project
-from cmp.info import __version__, __current_year__,__copyright__ 
+from cmp.info import __version__, __current_year__,__copyright__
 
 import warnings
 warnings.filterwarnings("ignore", message="UserWarning: No valid root directory found for domain 'derivatives'. Falling back on the Layout's root directory. If this isn't the intended behavior, make sure the config file for this domain includes a 'root' key.")
@@ -92,7 +92,7 @@ def create_parser():
 
     p.add_argument('--dwi_pipeline_config', help='Configuration .txt file for processing stages of the diffusion MRI processing pipeline')
     p.add_argument('--func_pipeline_config', help='Configuration .txt file for processing stages of the fMRI processing pipeline')
-    
+
     p.add_argument('--session_label', help='The label of the participant session'
                     'that should be analyzed. The label corresponds to'
                    '<session_label> from the BIDS spec '
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     project.output_directory = os.path.abspath(args.output_dir)
     project.subjects = ['{}'.format(args.participant_label)]
     project.subject = '{}'.format(args.participant_label)
-    
+
     try:
         bids_layout = BIDSLayout(project.base_directory)
     except:
@@ -294,7 +294,7 @@ if __name__ == "__main__":
 #         project.output_directory = os.path.abspath(sys.argv[2])
 #         project.subjects = ['%s' % sys.argv[3]]
 #         project.subject = '%s' % sys.argv[3]
-        
+
 #         try:
 #             bids_layout = BIDSLayout(project.base_directory)
 #         except:

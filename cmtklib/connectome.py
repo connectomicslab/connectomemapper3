@@ -474,7 +474,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                         # Compute density
                         # density = (#fibers / mean_fibers_length) * (2 / (area_roi_u + area_roi_v))
 
-                        # print "G.nodes[int(u)]['roi_volume'] : %i / G.nodes[int(v)]['roi_volume'] : %i" 
+                        # print "G.nodes[int(u)]['roi_volume'] : %i / G.nodes[int(v)]['roi_volume'] : %i"
                         #   % (G.nodes[int(u)]['roi_volume'],G.nodes[int(v)]['roi_volume'])
                         # print "di['number_of_fibers'] : %i / di['fiber_length_mean'] : %i" % (di['number_of_fibers'],di['fiber_length_mean'])
 

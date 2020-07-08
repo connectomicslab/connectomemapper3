@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP fmri first preprocessing Stage 
+""" CMP fmri first preprocessing Stage
 """
 
 from traits.api import *
@@ -41,7 +41,7 @@ class PreprocessingStage(Stage):
         self.name = 'preprocessing_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        
+
         self.config = PreprocessingConfig()
         self.inputs = ["functional"]
         self.outputs = ["functional_preproc", "par_file", "mean_vol"]
@@ -159,13 +159,13 @@ class PreprocessingStage(Stage):
         if self.config.slice_timing:
             slc_timing_dir = os.path.join(self.stage_dir, "slice_timing")
             tcorr = os.path.join(slc_timing_dir, "slice_timing")
-                
+
             if (os.path.exists(tcorr)):
                 self.inspect_outputs_dict['Slice time corrected image'] = ['fsleyes', '-ad',
                                                                            tcorr,
                                                                            '-cm', 'brain_colours_blackbdy_iso']
-            
-                    
+
+
         if self.config.motion_correction:
             motion_results_dir = os.path.join(self.stage_dir, "motion_correction")
             mcorr = os.path.join(motion_results_dir, "motion_correction")

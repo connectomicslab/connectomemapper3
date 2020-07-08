@@ -7,7 +7,7 @@ atom-config.txt
 
 .DS_Store
 
-python3 
+python3
 
 docs
 docs/*

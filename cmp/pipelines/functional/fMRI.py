@@ -69,7 +69,7 @@ class fMRIPipeline(Pipeline):
     subject_id = Str
 
     def __init__(self, project_info):
-        
+
         self.subjects_dir = project_info.freesurfer_subjects_dir
         self.subject_id = project_info.freesurfer_subject_id
 
@@ -265,7 +265,7 @@ class fMRIPipeline(Pipeline):
         print("... t2_file : %s" % t2_file)
         print("... fmri_file : %s" % fmri_file)
         print("... json_file : %s" % json_file)
-        
+
         # mods = layout.get_modalities()
         # types = layout.get_modalities()
         # print("Available modalities :")

@@ -38,12 +38,12 @@ iflogger = logging.getLogger('nipype.interface')
 
 
 class ComputeParcellationRoiVolumesInputSpec(BaseInterfaceInputSpec):
-    """ 
-    This is a class for the definition of inputs of the ComputeParcellationRoiVolumes nipype interface. 
+    """
+    This is a class for the definition of inputs of the ComputeParcellationRoiVolumes nipype interface.
 
-    Attributes: 
+    Attributes:
         roi_volumes (files): ROI volumes registered to diffusion space
-        parcellation_scheme (files): Parcellation scheme being used (only Lausanne2018) 
+        parcellation_scheme (files): Parcellation scheme being used (only Lausanne2018)
         roi_graphMLs (files): GraphML description of ROI volumes (Lausanne2018)
     """
     roi_volumes = InputMultiPath(File(
@@ -55,19 +55,19 @@ class ComputeParcellationRoiVolumesInputSpec(BaseInterfaceInputSpec):
 
 
 class ComputeParcellationRoiVolumesOutputSpec(TraitedSpec):
-    """ 
-    This is a class for the definition of outputs of the ComputeParcellationRoiVolumes nipype interface. 
+    """
+    This is a class for the definition of outputs of the ComputeParcellationRoiVolumes nipype interface.
 
-    Attributes: 
+    Attributes:
         roi_volumes_stats (files): TSV files with volumes of ROIs for each scale
     """
     roi_volumes_stats = OutputMultiPath(File())
 
 
 class ComputeParcellationRoiVolumes(BaseInterface):
-    """ 
+    """
     This is a class for the definition of the ComputeParcellationRoiVolumes nipype interface.
-    It computes the volumes of each ROI for each parcellation scale. 
+    It computes the volumes of each ROI for each parcellation scale.
     """
     input_spec = ComputeParcellationRoiVolumesInputSpec
     output_spec = ComputeParcellationRoiVolumesOutputSpec
@@ -676,7 +676,7 @@ class CombineParcellations(BaseInterface):
             indrep = np.where(I == 16)
             I[indrep] = 0
 
-        
+
         for roi_index, roi in sorted(enumerate(self.inputs.input_rois)):
             # colorLUT creation if enabled
             if self.inputs.create_colorLUT:

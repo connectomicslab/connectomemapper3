@@ -53,7 +53,7 @@ class FunctionalMRIStage(Stage):
         self.name = 'functional_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        
+
         self.config = FunctionalMRIConfig()
         self.inputs = ["preproc_file", "motion_par_file", "registered_roi_volumes", "registered_wm", "eroded_wm",
                        "eroded_csf", "eroded_brain"]
@@ -203,7 +203,7 @@ class FunctionalMRIStage(Stage):
         ])
 
     def define_inspect_outputs(self):
-        
+
         if self.config.smoothing > 0.0:
             res_dir = os.path.join(self.stage_dir, "smoothing")
             smooth = os.path.join(res_dir, "smooth")
@@ -217,14 +217,14 @@ class FunctionalMRIStage(Stage):
             if (os.path.exists(nuis)):
                 self.inspect_outputs_dict['Regression output'] = [
                     'fsleyes', '-sdefault', nuis]
-        
+
         if self.config.detrending:
             res_dir = os.path.join(self.stage_dir, "detrending")
             detrend = os.path.join(res_dir, "detrend")
             if (os.path.exists(detrend)):
                 self.inspect_outputs_dict['Detrending output'] = ['fsleyes', '-sdefault', detrend,
                                                                   '-cm', 'brain_colours_blackbdy_iso']
-        
+
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             res_dir = os.path.join(self.stage_dir, "converter")
             filt = os.path.join(res_dir, "filter")

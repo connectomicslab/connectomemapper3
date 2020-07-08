@@ -653,7 +653,7 @@ class DiffusionStage(Stage):
 
         # MRtrix
         if self.config.tracking_processing_tool == 'MRtrix':
-            
+
             diff_dir = os.path.join(self.stage_dir, "tracking", "trackvis")
             streamline_res = os.path.join(diff_dir,"tract.trk")
 

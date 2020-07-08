@@ -19,7 +19,7 @@ __current_year__ = '2020'
 
 __author__ = 'The CMP3 developers'
 
-__copyright__ = """Copyright (C) 2009-{}, Ecole Polytechnique Federale de Lausanne (EPFL), the University Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, & Contributors, 
+__copyright__ = """Copyright (C) 2009-{}, Ecole Polytechnique Federale de Lausanne (EPFL), the University Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, & Contributors,
 All rights reserved.\n""".format(__current_year__)
 
 __credits__ = ('Contributors: please check the ``.zenodo.json`` file at the top-level folder'

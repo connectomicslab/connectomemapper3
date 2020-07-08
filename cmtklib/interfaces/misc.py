@@ -107,7 +107,7 @@ class extractHeaderVoxel2WorldMatrix(BaseInterface):
 
         with open(os.path.abspath('voxel2world.txt'), 'a') as out_f:
             np.savetxt(out_f, transform, delimiter=' ', fmt="%6.6g")
-        
+
         return runtime
 
     def _list_outputs(self):
@@ -440,7 +440,7 @@ class flipBvec(BaseInterface):
         else:
             table = np.loadtxt(f, delimiter=self.inputs.delimiter)
         f.close()
-        
+
         if self.inputs.orientation == 'v':
             for i in self.inputs.flipping_axis:
                 table[:, axis_dict[i]] = -table[:, axis_dict[i]]
@@ -453,7 +453,7 @@ class flipBvec(BaseInterface):
                 np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
             else:
                 np.savetxt(out_f, table, delimiter=self.inputs.delimiter)
-        
+
         # with open(os.path.abspath('flipped_bvecs.bvec'), 'w') as out_f:
         #    np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
 
