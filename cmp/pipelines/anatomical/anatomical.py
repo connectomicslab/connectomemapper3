@@ -11,36 +11,25 @@
 import datetime
 import os
 import glob
-import fnmatch
 import shutil
-import threading
-import multiprocessing
-import time
 
-from nipype.utils.filemanip import copyfile
+# from nipype.utils.filemanip import copyfile
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
-from nipype.interfaces.dcm2nii import Dcm2niix
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.freesurfer as fs
+
 
 # from pyface.api import ImageResource
 import nipype.interfaces.io as nio
 from nipype import config, logging
 
-from nipype.caching import Memory
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, BaseInterface, \
+from nipype.interfaces.base import CommandLine, traits, BaseInterface, \
     BaseInterfaceInputSpec, File, TraitedSpec, isdefined, Directory, InputMultiPath
-from nipype.utils.filemanip import split_filename
 
 from traits.api import *
-import apptools.io.api as io
 
-from bids import BIDSLayout
+# from bids import BIDSLayout
 
 # Own import
-import cmtklib.interfaces.fsl as cmp_fsl
-
 import cmp.pipelines.common as cmp_common
 from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
@@ -125,13 +114,19 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation':
             if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
                 return (
-                    '\nCustom segmentation selected but no WM mask provided.\nPlease provide an existing WM mask file in the Segmentation configuration window.\n')
+                    '\nCustom segmentation selected but no WM mask provided.\n'
+                    'Please provide an existing WM mask file in the Segmentation configuration '
+                    'window.\n')
             if not os.path.exists(self.stages['Parcellation'].config.atlas_nifti_file):
                 return (
-                    '\n\tCustom segmentation selected but no atlas provided.\nPlease specify an existing atlas file in the Parcellation configuration window.\t\n')
+                    '\n\tCustom segmentation selected but no atlas provided.\n'
+                    'Please specify an existing atlas file in the '
+                    'Parcellation configuration window.\t\n')
             if not os.path.exists(self.stages['Parcellation'].config.graphml_file):
                 return (
-                    '\n\tCustom segmentation selected but no graphml info provided.\nPlease specify an existing graphml file in the Parcellation configuration window.\t\n')
+                    '\n\tCustom segmentation selected but no graphml info provided.\n'
+                    'Please specify an existing graphml file in the '
+                    'Parcellation configuration window.\t\n')
         return ''
 
     def update_parcellation_scheme(self):
@@ -169,7 +164,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         print("> Looking in %s for...." % self.base_directory)
 
-        types = layout.get_modalities()
+        # types = layout.get_modalities()
 
         subjid = self.subject.split("-")[1]
 
@@ -266,8 +261,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         # diffusion_imaging_model = diffusion_imaging_model[0]
 
         if gui:
-            # input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
-            # input_notification.configure_traits()
             print(input_message)
 
         else:
@@ -364,7 +357,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 cnt1 - cnt2, cnt1)
             print(error_message)
 
-        if t1_available == True and brain_available == True and brainmask_available == True and wm_available == True and roivs_available == True:
+        if t1_available is True and brain_available is True and brainmask_available is True and wm_available is True and roivs_available is True:
             print("INFO : Valid derivatives for anatomical pipeline")
             valid_output = True
 
@@ -374,33 +367,28 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         subject_directory = self.subject_directory
 
         # Data import
-        # datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
         datasource = pe.Node(interface=nio.DataGrabber(
             outfields=['T1']), name='datasource')
         datasource.inputs.base_directory = cmp_deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
-        # datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
         datasource.inputs.field_template = dict(
             T1='anat/' + self.subject + '_desc-cmp_T1w.nii.gz')
-        # datasource.inputs.field_template_args = dict(T1=[['subject']], T2=[['subject']], diffusion=[['subject', ['subject']]], bvecs=[['subject', ['subject']]], bvals=[['subject', ['subject']]])
         datasource.inputs.sort_filelist = False
-        # datasource.inputs.subject = self.subject
 
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="anatomical_sinker")
         sinker.inputs.base_directory = os.path.abspath(
             cmp_deriv_subject_directory)
 
-        if self.parcellation_scheme == 'Lausanne2008':
-            bids_atlas_label = 'L2008'
-        elif self.parcellation_scheme == 'Lausanne2018':
-            bids_atlas_label = 'L2018'
-        elif self.parcellation_scheme == 'NativeFreesurfer':
-            bids_atlas_label = 'Desikan'
+        # if self.parcellation_scheme == 'Lausanne2008':
+        #     bids_atlas_label = 'L2008'
+        # elif self.parcellation_scheme == 'Lausanne2018':
+        #     bids_atlas_label = 'L2018'
+        # elif self.parcellation_scheme == 'NativeFreesurfer':
+        #     bids_atlas_label = 'Desikan'
 
         # Dataname substitutions in order to comply with BIDS derivatives specifications
-        # if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
         if self.parcellation_scheme == 'Lausanne2008':
             sinker.inputs.substitutions = [('T1.nii.gz', self.subject + '_desc-head_T1w.nii.gz'),
                                            ('brain.nii.gz', self.subject +
@@ -644,7 +632,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if self.stages['Segmentation'].enabled:
             if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
 
-                if self.stages['Segmentation'].config.use_existing_freesurfer_data == False:
+                if self.stages['Segmentation'].config.use_existing_freesurfer_data is False:
                     self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.output_directory,
                                                                                               'freesurfer')
                     print("Freesurfer_subjects_dir: %s" %
@@ -774,7 +762,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if '_' in self.subject:
             self.subject = self.subject.split('_')[0]
 
-        old_subject = self.subject
+        # old_subject = self.subject
 
         if self.global_conf.subject_session == '':
             cmp_deriv_subject_directory = os.path.join(

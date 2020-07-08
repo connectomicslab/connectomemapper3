@@ -59,7 +59,7 @@ class SegmentationConfig(HasTraits):
         self.freesurfer_subject_id_trait = dirnames
 
     def _use_existing_freesurfer_data_changed(self, new):
-        if new == True:
+        if new is True:
             self.custom_segmentation = False
 
 

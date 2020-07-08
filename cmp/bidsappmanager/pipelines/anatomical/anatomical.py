@@ -258,7 +258,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             error(message=error_message, title="Error",
                   buttons=['OK', 'Cancel'], parent=None)
 
-        if t1_available == True and brain_available == True and brainmask_available == True and wm_available == True and roivs_available == True:
+        if t1_available is True and brain_available is True and brainmask_available is True and wm_available is True and roivs_available is True:
             print("valid deriv/anat output")
             valid_output = True
 

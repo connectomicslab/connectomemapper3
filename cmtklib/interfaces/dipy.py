@@ -11,7 +11,7 @@ Interfaces to the algorithms in dipy
 from nipype.interfaces.dipy.base import DipyDiffusionInterface, DipyBaseInterface, DipyBaseInterfaceInputSpec
 from nipype.interfaces.base import TraitedSpec, File, traits, isdefined, BaseInterfaceInputSpec, InputMultiPath
 from nipype import logging
-import nipype.pipeline.engine as pe
+# import nipype.pipeline.engine as pe
 import gzip
 import nibabel as nb
 import numpy as np
@@ -77,7 +77,7 @@ class DTIEstimateResponseSH(DipyDiffusionInterface):
     output_spec = DTIEstimateResponseSHOutputSpec
 
     def _run_interface(self, runtime):
-        from dipy.core.gradients import GradientTable
+        # from dipy.core.gradients import GradientTable
         from dipy.reconst.dti import fractional_anisotropy, mean_diffusivity, TensorModel
         from dipy.reconst.csdeconv import recursive_response, auto_response
 
@@ -232,14 +232,13 @@ class CSD(DipyDiffusionInterface):
 
     def _run_interface(self, runtime):
         from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, auto_response
-        from dipy.data import get_sphere, default_sphere
+        from dipy.data import get_sphere
         # import marshal as pickle
         import pickle as pickle
-        import gzip
+        # import gzip
 
         img = nb.load(self.inputs.in_file)
         imref = nb.four_to_three(img)[0]
-        affine = img.affine
 
         def clipMask(mask):
             """This is a hack until we fix the behaviour of the tracking objects
@@ -261,7 +260,7 @@ class CSD(DipyDiffusionInterface):
         data = img.get_data().astype(np.float32)
         data[msk == 0] *= 0
 
-        hdr = imref.header.copy()
+        # hdr = imref.header.copy()
 
         gtab = self._get_gradient_table()
 
@@ -406,11 +405,10 @@ class SHORE(DipyDiffusionInterface):
     output_spec = SHOREOutputSpec
 
     def _run_interface(self, runtime):
-        import nibabel as nib
+        # import nibabel as nib
 
         import pickle as pickle
         import gzip
-        import multiprocessing as mp
 
         from dipy.data import get_sphere, default_sphere
         from dipy.io import read_bvals_bvecs
@@ -418,7 +416,7 @@ class SHORE(DipyDiffusionInterface):
         from dipy.reconst.shore import ShoreModel
         from dipy.reconst.odf import gfa
         from dipy.reconst.csdeconv import odf_sh_to_sharp
-        from dipy.reconst.shm import sh_to_sf, sf_to_sh
+        from dipy.reconst.shm import sf_to_sh
         from dipy.core.ndindex import ndindex
 
         img = nb.load(self.inputs.in_file)
@@ -834,7 +832,8 @@ class DirectionGetterTractography(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.tracking import utils
         from dipy.direction import DeterministicMaximumDirectionGetter, ProbabilisticDirectionGetter
-        from dipy.tracking.local import ThresholdTissueClassifier, BinaryTissueClassifier, ActTissueClassifier, \
+        # from dipy.tracking.local import ThresholdTissueClassifier
+        from dipy.tracking.local import BinaryTissueClassifier, ActTissueClassifier, \
             LocalTracking, CmcTissueClassifier, ParticleFilteringTracking
         from dipy.reconst.peaks import peaks_from_model
         from dipy.data import get_sphere, default_sphere
@@ -1019,7 +1018,6 @@ class DirectionGetterTractography(DipyBaseInterface):
                                                                sphere=sphere)
 
         else:
-            from dipy.io.image import load_nifti
 
             IFLOGGER.info('Loading SHORE FOD')
             sh = nb.load(self.inputs.fod_file).get_data()
@@ -1066,7 +1064,6 @@ class DirectionGetterTractography(DipyBaseInterface):
             #
             # save_trk(self._gen_filename('tracked_old', ext='.trk'), streamlines, affine, fa.shape)
 
-            import nibabel
             from nibabel.streamlines import Field, Tractogram
             from nibabel.orientations import aff2axcodes
 
@@ -1090,7 +1087,7 @@ class DirectionGetterTractography(DipyBaseInterface):
 
             # Remove origin from streamlines (TODO: understand why needed)
             for i, streamline in enumerate(streamlines):
-                for j, voxel in enumerate(streamline):
+                for j, _ in enumerate(streamline):
                     streamlines[i][j] = streamlines[i][j] - \
                         imref.affine.copy()[:3, 3]
 
@@ -1183,8 +1180,7 @@ class MAPMRIOutputSpec(TraitedSpec):
 
 
 class MAPMRI(DipyDiffusionInterface):
-    '''MAP MRI settings'''
-    '''
+    '''MAP MRI settings
 
     .. check http://nipy.org/dipy/examples_built/reconst_mapmri.html#example-reconst-mapmri
     for reference on the settings
@@ -1199,14 +1195,14 @@ class MAPMRI(DipyDiffusionInterface):
     >>> mapmri.inputs.in_bval = 'bvals'
     >>> mapmri.inputs.in_bvec = 'bvecs'
     >>> res = mapmri.run() # doctest: +SKIP
-    """
     '''
     input_spec = MAPMRIInputSpec
     output_spec = MAPMRIOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst import mapmri
-        from dipy.data import fetch_cenir_multib, read_cenir_multib, get_sphere, default_sphere
+        # from dipy.data import fetch_cenir_multib
+        from dipy.data import read_cenir_multib, get_sphere, default_sphere
         from dipy.core.gradients import gradient_table
         # import marshal as pickle
         import pickle as pickle

@@ -343,11 +343,11 @@ class fMRIPipeline(Pipeline):
         return valid_inputs
 
     def check_config(self):
-        if self.stages['FunctionalMRI'].config.motion == True and self.stages[
+        if self.stages['FunctionalMRI'].config.motion is True and self.stages[
                 'Preprocessing'].config.motion_correction == False:
             return (
                 '\n\tMotion signal regression selected but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configuration window,\n\tor disable the motion signal regression in the functional configuration window.\t\n')
-        if self.stages['Connectome'].config.apply_scrubbing == True and self.stages[
+        if self.stages['Connectome'].config.apply_scrubbing is True and self.stages[
                 'Preprocessing'].config.motion_correction == False:
             return (
                 '\n\tScrubbing applied but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configutation window,\n\tor disable scrubbing in the connectome configuration window.\t\n')
