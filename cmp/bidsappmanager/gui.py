@@ -16,9 +16,8 @@ from traitsui.qt4.extra.qt_view import QtView
 from traitsui.tabular_adapter import TabularAdapter
 from traitsui.api import *
 from traits.api import *
-import string
-import pickle
-import gzip
+# import pickle
+# import gzip
 import pkg_resources
 from subprocess import Popen
 import subprocess
@@ -27,7 +26,6 @@ import shutil
 import time
 import glob
 import os
-import sys
 import warnings
 
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
@@ -887,8 +885,8 @@ class CMP_BIDSAppWindow(HasTraits):
 
         print('... BIDS App execution command: {}'.format(cmd))
 
-        log_filename = os.path.join(
-            self.bids_root, 'derivatives', 'cmp', 'main_log-cmpbidsapp.txt')
+        # log_filename = os.path.join(
+        #     self.bids_root, 'derivatives', 'cmp', 'main_log-cmpbidsapp.txt')
 
         if not os.path.exists(os.path.join(self.bids_root, 'derivatives', 'cmp')):
             os.makedirs(os.path.join(self.bids_root, 'derivatives', 'cmp'))

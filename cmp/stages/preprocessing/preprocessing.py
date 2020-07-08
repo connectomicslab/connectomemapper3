@@ -33,13 +33,13 @@ from nipype.interfaces.mrtrix3.preprocess import ResponseSD
 
 import nibabel as nib
 
-# from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
-from cmtklib.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, MRThreshold, ExtractFSLGrad, \
-    ExtractMRTrixGrad, Generate5tt, GenerateGMWMInterface, ApplymultipleMRConvert
 import cmtklib.interfaces.fsl as cmp_fsl
-from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding, splitDiffusion, \
-    ConcatOutputsAsTuple, CreateIndexFile, CreateAcqpFile
-from cmtklib.util import get_node_dictionary_outputs
+# from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
+from cmtklib.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, \
+    MRThreshold, ExtractFSLGrad, ExtractMRTrixGrad, Generate5tt, \
+    GenerateGMWMInterface, ApplymultipleMRConvert
+from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding, \
+    CreateIndexFile, CreateAcqpFile
 
 
 class PreprocessingConfig(HasTraits):
@@ -133,8 +133,9 @@ class PreprocessingStage(Stage):
         self.config = PreprocessingConfig()
         self.inputs = ["diffusion", "bvecs", "bvals", "T1", "aparc_aseg", "aseg", "brain", "brain_mask", "wm_mask_file",
                        "roi_volumes"]
-        self.outputs = ["diffusion_preproc", "bvecs_rot", "bvals", "diffusion_noisemap", "diffusion_biasfield", "dwi_brain_mask", "T1", "act_5TT", "gmwmi", "brain",
-                        "brain_mask", "brain_mask_full", "wm_mask_file", "partial_volume_files", "roi_volumes"]
+        self.outputs = ["diffusion_preproc", "bvecs_rot", "bvals", "diffusion_noisemap", "diffusion_biasfield", "dwi_brain_mask",
+                        "T1", "act_5TT", "gmwmi", "brain", "brain_mask", "brain_mask_full", "wm_mask_file", "partial_volume_files",
+                        "roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         # print inputnode

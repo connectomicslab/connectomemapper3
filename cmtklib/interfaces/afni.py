@@ -147,3 +147,57 @@ class Bandpass(AFNICommand):
             if len(files) > 0:
                 outputs[name] = os.path.abspath(files[0])
         return outputs
+
+
+
+class DespikeInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc="input file to 3dDespike",
+        argstr="%s",
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False,
+    )
+    out_file = File(
+        name_template="%s_despike",
+        desc="output image file name",
+        argstr="-prefix %s",
+        name_source="in_file",
+    )
+
+
+class Despike(AFNICommand):
+    """Removes 'spikes' from the 3D+time input dataset
+    For complete details, see the `3dDespike Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDespike.html>`_
+    Examples
+    --------
+    >>> from nipype.interfaces import afni
+    >>> despike = afni.Despike()
+    >>> despike.inputs.in_file = 'functional.nii'
+    >>> despike.cmdline
+    '3dDespike -prefix functional_despike functional.nii'
+    >>> res = despike.run()  # doctest: +SKIP
+    """
+
+    _cmd = "3dDespike"
+    input_spec = DespikeInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        name = 'out_file'
+        if isdefined(self.inputs.out_file):
+            if outputs[name]:
+                print('out_file: {}'.format(outputs[name]))
+                _, base, ext = split_filename(outputs[name])
+                if ext == "":
+                    outputs[name] = outputs[name] + "+orig.BRIK"
+        else:
+            from glob import glob
+            files = sorted(glob("*.BRIK"))
+            print("files: {}".format(files))
+            if len(files) > 0:
+                outputs[name] = os.path.abspath(files[0])
+        return outputs

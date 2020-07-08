@@ -170,8 +170,8 @@ def dmri_load_config(pipeline, config_path):
     try:
         config.read(config_path)
     except configparser.MissingSectionHeaderError:
-        print(
-            '... error : file is a datalad git annex but it has not been retrieved yet. Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)')
+        print('... error : file is a datalad git annex but it has not been retrieved yet.'
+              'Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)')
 
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
                    'trait' not in prop]  # possibly dangerous..?

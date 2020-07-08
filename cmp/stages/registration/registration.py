@@ -1232,8 +1232,8 @@ class RegistrationStage(Stage):
                 dwi_outputs = get_pipeline_dictionary_outputs(dwi_sinker_report, self.output_dir)
 
                 tool= self.config.registration_mode
-                ref = dwi_outputs['dwi.@bdiffusion_reg_crop'] 
-                out = dwi_outputs['anat.@brain_reg_crop'] 
+                ref = dwi_outputs['dwi.@bdiffusion_reg_crop']
+                out = dwi_outputs['anat.@brain_reg_crop']
 
                 print(ref)
                 print(out)
@@ -1262,9 +1262,9 @@ class RegistrationStage(Stage):
                 field = dwi_outputs['xfm.@warp_field']
                 if os.path.exists(field):
                     self.inspect_outputs_dict['Deformation field (%s)' % tool] = ['fsleyes', '-sdefault',
-                                                                      field]  
+                                                                      field]
 
-                if (type(dwi_outputs['anat.@roivs_reg_crop']) == str and os.path.exists(dwi_outputs['anat.@roivs_reg_crop'])):
+                if (isinstance(dwi_outputs['anat.@roivs_reg_crop'], str) and os.path.exists(dwi_outputs['anat.@roivs_reg_crop'])):
                     roiv = dwi_outputs['anat.@roivs_reg_crop']
                     if os.path.exists(roiv):
                         self.inspect_outputs_dict['%s-to-b0 (%s)' % (os.path.basename(roiv), tool)] = [
@@ -1276,7 +1276,7 @@ class RegistrationStage(Stage):
                             self.inspect_outputs_dict['%s-to-b0 (%s)' % (os.path.basename(roiv), tool)] = [
                             'fsleyes', '-sdefault', ref, roiv, '-cm', 'random', '-a', '50']
 
-                if type(dwi_outputs['anat.@pves_reg_crop']) == str:
+                if isinstance(dwi_outputs['anat.@pves_reg_crop'], str):
                     pves = dwi_outputs['anat.@pves_reg_crop']
                     if os.path.exists(pves):
                         self.inspect_outputs_dict['%s-to-b0 (%s)' % (os.path.basename(pves), tool)] = [
@@ -1298,7 +1298,7 @@ class RegistrationStage(Stage):
 
                 tool= self.config.registration_mode
 
-                if type(func_outputs['anat.@registered_roi_volumes']) == str:
+                if isinstance(func_outputs['anat.@registered_roi_volumes'], str):
                     ref = func_outputs['func.@mean_vol']
                     out = func_outputs['anat.@registered_roi_volumes']
                     if (os.path.exists(ref) and os.path.exists(out)):
@@ -1308,7 +1308,7 @@ class RegistrationStage(Stage):
                     for roi_output in func_outputs['anat.@registered_roi_volumes']:
                         ref = func_outputs['func.@mean_vol']
                         out = roi_output
-                        if (os.path.exists(ref) and os.path.exists(out)): 
+                        if (os.path.exists(ref) and os.path.exists(out)):
                             self.inspect_outputs_dict['Mean-fMRI/%s (%s)' % (os.path.basename(out), tool)] = [
                             'fsleyes', '-sdefault', ref, out, '-cm', 'random', '-a', '50']
 

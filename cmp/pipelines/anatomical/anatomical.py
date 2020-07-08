@@ -94,7 +94,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.global_conf.subject = self.subject
 
         if len(project_info.subject_sessions) > 0:
-            self.global_conf.subject_session = project_info.subject_session         
+            self.global_conf.subject_session = project_info.subject_session
             self.subject_directory = os.path.join(
                 self.base_directory, self.subject, self.global_conf.subject_session)
         else:
@@ -106,11 +106,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
 
-        self.stages = {'Segmentation': SegmentationStage(bids_dir=project_info.base_directory, 
+        self.stages = {'Segmentation': SegmentationStage(bids_dir=project_info.base_directory,
                                                          output_dir=self.output_directory),
                        'Parcellation': ParcellationStage(pipeline_mode="Diffusion",
-                                                         bids_dir=project_info.base_directory, 
-                                                         output_dir=self.output_directory)}    
+                                                         bids_dir=project_info.base_directory,
+                                                         output_dir=self.output_directory)}
         cmp_common.Pipeline.__init__(self, project_info)
         
         self.stages['Segmentation'].config.on_trait_change(
@@ -673,7 +673,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         if self.stages['Parcellation'].enabled:
             parc_flow = self.create_stage_flow("Parcellation")
-            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":             
+            if self.stages['Segmentation'].config.seg_tool == "Freesurfer":
                 anat_flow.connect([(seg_flow, parc_flow, [('outputnode.subjects_dir', 'inputnode.subjects_dir'),
                                                           ('outputnode.subject_id', 'inputnode.subject_id')]),
                                    ])
@@ -806,7 +806,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             {'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory, "anatomical_pipeline"),
                          'log_to_file': True},
              'execution': {'remove_unnecessary_outputs': False,
-                           'stop_on_first_crash': True, 
+                           'stop_on_first_crash': True,
                            'stop_on_first_rerun': False,
                            'use_relative_paths': True,
                            'crashfile_format': "txt"}

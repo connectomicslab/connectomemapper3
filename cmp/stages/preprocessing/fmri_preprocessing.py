@@ -17,11 +17,12 @@ import nipype.interfaces.fsl as fsl
 from nipype.interfaces import afni
 import nipype.interfaces.utility as util
 
+from cmtklib.interfaces.afni import Despike
+
 import nibabel as nib
 
 from cmp.stages.common import Stage
 from cmtklib.functionalMRI import discard_tp
-from cmtklib.util import get_node_dictionary_outputs
 
 
 class PreprocessingConfig(HasTraits):
@@ -63,8 +64,7 @@ class PreprocessingStage(Stage):
         despiking_output = pe.Node(interface=util.IdentityInterface(fields=["despiking_output"]),
                                    name="despkiking_output")
         if self.config.despiking:
-            despike = pe.Node(interface=afni.Despike(
-                out_file='despike+orig.BRIK'), name='afni_despike')
+            despike = pe.Node(interface=Despike(), name='afni_despike')
             converter = pe.Node(interface=afni.AFNItoNIFTI(
                 out_file='fMRI_despike.nii.gz'), name='converter')
             flow.connect([

@@ -79,7 +79,6 @@ class ParcellationStage(Stage):
         self.name = 'parcellation_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        
         self.config = ParcellationConfig()
         # self.config.template_thalamus = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')))
         # self.config.thalamic_nuclei_maps = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')))

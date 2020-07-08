@@ -17,8 +17,8 @@ from nipype.utils.filemanip import copyfile
 import glob
 import os
 import pkg_resources
-import subprocess
-import shutil
+# import subprocess
+
 from nipype.utils.filemanip import split_filename
 
 import nipype.pipeline.engine as pe
@@ -27,7 +27,6 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 # import nipype.interfaces.diffusion_toolkit as dtk
-from nipype.interfaces.mrtrix.convert import get_data_dims, get_vox_dims
 import nipype.interfaces.mrtrix as mrtrix
 # import nipype.interfaces.camino as camino
 import nipype.interfaces.dipy as dipy
@@ -211,7 +210,8 @@ def create_dipy_tracking_flow(config):
             #     (dipy_tracking,outputnode,[('tracks','track_file')])
             #     ])
 
-            dipy_seeds = pe.Node(interface=make_seeds(), name='dipy_seeds')
+            # dipy_seeds = pe.Node(interface=make_seeds(), name='dipy_seeds')
+
             dipy_tracking = pe.Node(
                 interface=DirectionGetterTractography(), name='dipy_deterministic_tracking')
             dipy_tracking.inputs.algo = 'deterministic'
@@ -380,8 +380,8 @@ def create_mrtrix_tracking_flow(config):
         #             (inputnode,transform_trackvisdata,[('wm_mask_resampled','ref_image_file')])
         #             ])
 
-        orientation_matcher = pe.Node(
-            interface=match_orientations(), name='orient_matcher')
+        # orientation_matcher = pe.Node(
+        #     interface=match_orientations(), name='orient_matcher')
 
         flow.connect([
             (inputnode, mrtrix_seeds, [('wm_mask_resampled', 'WM_file')]),

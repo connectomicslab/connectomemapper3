@@ -110,25 +110,33 @@ class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
     luts = InputMultiPath(File(exists=True), argstr='-luts %s', position=3,
                           mandatory=False,
                           desc='Files containing the lookup tables.'
-                               'For tensor data, one lut must be specified for each type of inversion used in the image (one-tensor, two-tensor, three-tensor).'
-                               'For pds, the number of LUTs must match -numpds (it is acceptable to use the same LUT several times - see example, above).'
+                               'For tensor data, one lut must be specified for each type of inversion used'
+                               'in the image (one-tensor, two-tensor, three-tensor).'
+                               'For pds, the number of LUTs must match -numpds (it is acceptable to use'
+                               'the same LUT several times - see example, above).'
                                'These LUTs may be generated with dtlutgen.')
 
     # lut_str = traits.Str()
 
     pdf = traits.Enum('watson', 'bingham', 'acg',
                       argstr='-pdf %s', position=4, desc=' Specifies the PDF to use. There are three choices:'
-                                                         'watson - The Watson distribution. This distribution is rotationally symmetric.'
-                                                         'bingham - The Bingham distributionn, which allows elliptical probability density contours.'
-                                                         'acg - The Angular Central Gaussian distribution, which also allows elliptical probability density contours',
+                                                         'watson - The Watson distribution. This distribution is'
+                                                         'rotationally symmetric.'
+                                                         'bingham - The Bingham distributionn, which allows'
+                                                         'elliptical probability density contours.'
+                                                         'acg - The Angular Central Gaussian distribution, which'
+                                                         'also allows elliptical probability density contours',
                       usedefault=True)
 
     directmap = traits.Bool(argstr='-directmap',
-                            desc="Only applicable when using pds as the inputmodel. Use direct mapping between the eigenvalues and the distribution parameters instead of the log of the eigenvalues.")
+                            desc="""Only applicable when using pds as the inputmodel
+                                    Use direct mapping between the eigenvalues and the 
+                                    distribution parameters instead of the log of the eigenvalues.""")
 
     maxcomponents = traits.Int(argstr='-maxcomponents %d', units='NA',
                                desc='The maximum number of tensor components in a voxel (default 2) for multitensor data.'
-                                    'Currently, only the default is supported, but future releases may allow the input of three-tensor data using this option.')
+                                    'Currently, only the default is supported, but future releases may allow'
+                                    'the input of three-tensor data using this option.')
 
     numpds = traits.Int(argstr='-numpds %d', units='NA',
                         desc='The maximum number of PDs in a voxel (default 3) for PD data.'

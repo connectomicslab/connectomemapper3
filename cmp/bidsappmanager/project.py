@@ -14,22 +14,21 @@ from cmp.bidsappmanager.pipelines.functional import fMRI as FMRI_pipeline
 from cmtklib.config import anat_load_config, anat_save_config, \
     dmri_load_config, dmri_save_config, fmri_load_config, fmri_save_config, \
     get_anat_process_detail, get_dmri_process_detail, get_fmri_process_detail
-from cmtklib.util import remove_aborded_interface_pickles, fix_dataset_directory_in_pickles
+# from cmtklib.util import fix_dataset_directory_in_pickles
 # import nibabel as nib
 from bids import BIDSLayout
 from pyface.api import FileDialog, OK
-import gzip
-import pickle
+# import gzip
+# import pickle
 import multiprocessing
 from subprocess import Popen
 import fnmatch
 import glob
 import os
-import ast
+# import ast
 import shutil
 from traitsui.api import *
 from traits.api import *
-import ast
 import warnings
 
 warnings.filterwarnings(
@@ -1539,7 +1538,7 @@ class ProjectHandlerV2(Handler):
                 dmri_inputs_checked = True
 
             if t2_available:
-                 print('T2 available') 
+                 print('T2 available')
 
             fmri_inputs_checked = False
             if t1_available and fmri_available:
@@ -1709,17 +1708,18 @@ class ProjectHandlerV2(Handler):
                                 loaded_project.configure_traits(
                                     view='diffusion_imaging_model_select_view')
 
-                            files = [f.filename for f in
-                                     bids_layout.get(subject=subject, suffix='dwi', extensions=['nii', 'nii.gz'])]
+                            # #Retrieve dwi file based on acq-<keyword> if provided (used for debugging)
+                            # files = [f.filename for f in
+                            #          bids_layout.get(subject=subject, suffix='dwi', extensions=['nii', 'nii.gz'])]
 
-                            dwi_file = ''
-                            if (loaded_project.dmri_bids_acq != ''):
-                                for file in files:
-                                    if (loaded_project.dmri_bids_acq in file):
-                                        dwi_file = file
-                                        break
-                            else:
-                                dwi_file = files[0]
+                            # dwi_file = ''
+                            # if (loaded_project.dmri_bids_acq != ''):
+                            #     for file in files:
+                            #         if (loaded_project.dmri_bids_acq in file):
+                            #             dwi_file = file
+                            #             break
+                            # else:
+                            #     dwi_file = files[0]
 
                         # img = nib.load(dwi_file)
                         # print('#####################')

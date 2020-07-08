@@ -23,7 +23,6 @@ from nipype.interfaces import afni
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.functionalMRI import Scrubbing, Detrending, nuisance_regression
-from cmtklib.util import create_results_plkz_local
 
 # Imports for processing
 import nibabel as nib

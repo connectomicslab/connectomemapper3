@@ -30,7 +30,7 @@ from nipype.utils.filemanip import split_filename
 from nipype.interfaces.mrtrix3.connectivity import BuildConnectome
 from cmtklib.interfaces.mrtrix3 import FilterTractogram
 from cmp.stages.common import Stage
-import cmtklib.connectome 
+import cmtklib.connectome
 from cmtklib.util import get_pipeline_dictionary_outputs
 
 

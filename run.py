@@ -14,13 +14,12 @@ from cmp.info import __version__
 from cmp.project import CMP_Project_Info
 from glob import glob
 import numpy
-import nibabel
+# import nibabel
 import multiprocessing
 import subprocess
 import shutil
 import sys
 import os
-import argparse
 import warnings
 
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")

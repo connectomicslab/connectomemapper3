@@ -1109,9 +1109,11 @@ class GenerateGMWMInterface(CommandLine):
 
 
 class StreamlineTrackInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=2, desc='the image containing the source data.'
-                                                                              'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, '
-                                                                              'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=2, 
+                    desc='the image containing the source data.'
+                         'The type of data required depends on the type of tracking as set in the preceeding argument.'
+                         'For DT methods, the base DWI are needed.'
+                         'For SD methods, the SH harmonic coefficients of the FOD are needed.')
 
     seed_file = File(exists=True, argstr='-seed_image %s', desc='seed file')
     seed_spec = traits.List(traits.Int, desc='seed specification in voxels and radius (x y z r)',
@@ -1128,18 +1130,22 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     #     argstr='-mask %s', minlen=4, maxlen=4, sep=',', units='voxels')
 
     gradient_encoding_file = File(exists=True, argstr='-grad %s', mandatory=False,
-                                  desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                                  desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ]'
+                                  'where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value'
+                                  'in units (1000 s/mm^2). See FSL2MRTrix')
 
     inputmodel = traits.Enum('FACT', 'iFOD1', 'iFOD2', 'Nulldist1', 'Nulldist2', 'SD_Stream', 'Seedtest', 'Tensor_Det',
                              'Tensor_Prob',
                              argstr='-algorithm %s',
-                             desc='specify the tractography algorithm to use. Valid choices are: FACT, iFOD1, iFOD2, Nulldist1, Nulldist2, SD_Stream, Seedtest, Tensor_Det, Tensor_Prob (default: iFOD2).',
+                             desc='specify the tractography algorithm to use. Valid choices are:'
+                             'FACT, iFOD1, iFOD2, Nulldist1, Nulldist2, SD_Stream, Seedtest, Tensor_Det, Tensor_Prob (default: iFOD2).',
                              usedefault=True, position=-3)
 
     stop = traits.Bool(
         argstr='-stop', desc="stop track as soon as it enters any of the include regions.")
     do_not_precompute = traits.Bool(argstr='-noprecomputed',
-                                    desc="Turns off precomputation of the legendre polynomial values. Warning: this will slow down the algorithm by a factor of approximately 4.")
+                                    desc="Turns off precomputation of the legendre polynomial values."
+                                    "Warning: this will slow down the algorithm by a factor of approximately 4.")
     unidirectional = traits.Bool(argstr='-seed_unidirectional',
                                  desc="Track from the seed point in one direction only (default is to track in both directions).")
     # no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
@@ -1148,12 +1154,14 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
                              desc="Set the step size of the algorithm in mm (default is 0.5).")
     # minimum_radius_of_curvature = traits.Float(argstr='-curvature %s', units='mm',
     #     desc="Set the minimum radius of curvature (default is 2 mm for DT_STREAM, 0 for SD_STREAM, 1 mm for SD_PROB and DT_PROB)")
-    desired_number_of_tracks = traits.Int(argstr='-select %d', desc='Sets the desired number of tracks.'
-                                                                    'The program will continue to generate tracks until this number of tracks have been selected and written to the output file'
-                                                                    '(default is 100 for *_STREAM methods, 1000 for *_PROB methods).')
-    maximum_number_of_seeds = traits.Int(argstr='-seeds %d', desc='Sets the maximum number of tracks to generate.'
-                                                                  "The program will not generate more tracks than this number, even if the desired number of tracks hasn't yet been reached"
-                                                                  '(default is 1000 x number of streamlines).')
+    desired_number_of_tracks = traits.Int(argstr='-select %d', 
+                                          desc='Sets the desired number of tracks.'
+                                          'The program will continue to generate tracks until this number of tracks have been selected and written to the output file'
+                                          '(default is 100 for *_STREAM methods, 1000 for *_PROB methods).')
+    maximum_number_of_seeds = traits.Int(argstr='-seeds %d', 
+                                         desc='Sets the maximum number of tracks to generate.'
+                                         "The program will not generate more tracks than this number, even if the desired number of tracks hasn't yet been reached"
+                                          '(default is 1000 x number of streamlines).')
     rk4 = traits.Bool(argstr='-rk4',
                       desc='use 4th-order Runge-Kutta integration (slower, but eliminates curvature overshoot in 1st-order deterministic methods)')
     minimum_tract_length = traits.Float(argstr='-minlength %s', units='mm',

@@ -92,23 +92,23 @@ class DiffusionPipeline(Pipeline):
         self.output_directory = os.path.abspath(project_info.output_directory)
 
         self.stages = {
-            'Preprocessing': PreprocessingStage(bids_dir=project_info.base_directory, 
+            'Preprocessing': PreprocessingStage(bids_dir=project_info.base_directory,
                                                 output_dir=self.output_directory),
             'Registration': RegistrationStage(pipeline_mode="Diffusion",
                                               fs_subjects_dir=project_info.freesurfer_subjects_dir,
                                               fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
-                                              bids_dir=project_info.base_directory, 
+                                              bids_dir=project_info.base_directory,
                                               output_dir=self.output_directory),
-            'Diffusion': DiffusionStage(bids_dir=project_info.base_directory, 
+            'Diffusion': DiffusionStage(bids_dir=project_info.base_directory,
                                         output_dir=self.output_directory),
-            'Connectome': ConnectomeStage(bids_dir=project_info.base_directory, 
+            'Connectome': ConnectomeStage(bids_dir=project_info.base_directory,
                                           output_dir=self.output_directory)}
         print(self.stages)
 
         Pipeline.__init__(self, project_info)
 
         self.subject = project_info.subject
-        self.diffusion_imaging_model = project_info.diffusion_imaging_model 
+        self.diffusion_imaging_model = project_info.diffusion_imaging_model
         # self.stages['Connectome'].config.subject = self.subject
 
         self.stages['Connectome'].config.on_trait_change(
@@ -969,7 +969,7 @@ class DiffusionPipeline(Pipeline):
         def remove_non_existing_scales(roi_volumes):
             out_roi_volumes = []
             for vol in roi_volumes:
-                if vol != None:
+                if vol is not None:
                     out_roi_volumes.append(vol)
             return out_roi_volumes
 
@@ -1227,7 +1227,7 @@ class DiffusionPipeline(Pipeline):
             {'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory, "diffusion_pipeline"),
                          'log_to_file': True},
              'execution': {'remove_unnecessary_outputs': False,
-                           'stop_on_first_crash': True, 
+                           'stop_on_first_crash': True,
                            'stop_on_first_rerun': False,
                            'use_relative_paths': True,
                            'crashfile_format': "txt"}

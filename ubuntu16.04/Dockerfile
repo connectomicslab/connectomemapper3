@@ -78,7 +78,7 @@ RUN rm runtime2012b.tar.gz
 # Make FreeSurfer happy
 ENV OS=Linux 
 ENV FS_OVERRIDE=0 
-ENV FIX_VERTEX_AREA= 
+ENV FIX_VERTEX_AREA="" 
 ENV FSF_OUTPUT_FORMAT=nii.gz 
 ENV FREESURFER_HOME=/opt/freesurfer
 

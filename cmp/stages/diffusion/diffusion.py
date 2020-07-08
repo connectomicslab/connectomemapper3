@@ -26,7 +26,6 @@ from cmp.stages.common import Stage
 from .reconstruction import *
 from .tracking import *
 from cmtklib.interfaces.misc import ExtractImageVoxelSizes, Tck2Trk
-from cmtklib.util import create_results_plkz_local
 
 
 class DiffusionConfig(HasTraits):
@@ -207,7 +206,6 @@ class DiffusionStage(Stage):
         self.name = 'diffusion_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        
         self.config = DiffusionConfig()
         self.inputs = ["diffusion", "partial_volumes", "wm_mask_registered", "brain_mask_registered",
                        "act_5tt_registered", "gmwmi_registered", "roi_volumes", "grad", "bvals", "bvecs"]
@@ -575,10 +573,10 @@ class DiffusionStage(Stage):
                         self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',
                                                                                                       fa_res]
 
-                    recon_dir = os.path.join(self.stage_dir, "reconstruction", "dipy_CSD")                                                                                  
+                    recon_dir = os.path.join(self.stage_dir, "reconstruction", "dipy_CSD")
                     shm_coeff_res = os.path.join(recon_dir, 'diffusion_shm_coeff.nii.gz')
                     if os.path.exists(shm_coeff_res):
-                        if os.path.exists(fa_res):    
+                        if os.path.exists(fa_res):
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
                                 'mrview', fa_res, '-odf.load_sh', shm_coeff_res]
                         else:
@@ -634,10 +632,10 @@ class DiffusionStage(Stage):
 
                 if self.config.diffusion_model == 'Deterministic':
                     diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_deterministic_tracking")
-                    streamline_res = ""
+                    streamline_res = os.path.join(diff_dir,"tract.trk")
                 else:
                     diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_probabilistic_tracking")
-                    streamline_res = ""
+                    streamline_res = os.path.join(diff_dir,"tract.trk")
 
                 if os.path.exists(streamline_res):
                     self.inspect_outputs_dict[
@@ -647,7 +645,7 @@ class DiffusionStage(Stage):
             else:
 
                 diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_dtieudx_tracking")
-                streamline_res = ""
+                streamline_res = os.path.join(diff_dir,"tract.trk")
                 if os.path.exists(streamline_res):
                     self.inspect_outputs_dict[
                         self.config.tracking_processing_tool + ' Tensor-based EuDX streamline'] = ['trackvis',
@@ -657,7 +655,7 @@ class DiffusionStage(Stage):
         if self.config.tracking_processing_tool == 'MRtrix':
             
             diff_dir = os.path.join(self.stage_dir, "tracking", "trackvis")
-            streamline_res = ""
+            streamline_res = os.path.join(diff_dir,"tract.trk")
 
             if os.path.exists(streamline_res):
                self.inspect_outputs_dict[

@@ -16,7 +16,6 @@ from glob import glob
 import os
 import pickle
 import gzip
-import sys
 import json
 
 warnings.simplefilter("ignore")
@@ -191,7 +190,11 @@ def mean_curvature(xyz):
     return np.mean(k)
 
 
-def force_decode(string, codecs=['utf8', 'latin-1']):
+def force_decode(string, codecs=None):
+    
+    if codecs is None:
+        codecs = ['utf8', 'latin-1']
+
     for codec in codecs:
         try:
             return string.decode(codec), codec
@@ -201,7 +204,7 @@ def force_decode(string, codecs=['utf8', 'latin-1']):
     print("ERROR: cannot decode pickle content %s" % ([string]))
 
 
-def bidsapp_2_local_bids_dir(local_dir, path, debug=True):   
+def bidsapp_2_local_bids_dir(local_dir, path, debug=True):
     new_path = path.replace(
                         '/bids_dir', '{}'.format(local_dir))
     if debug:
@@ -276,8 +279,8 @@ def create_results_plkz_local(plkz_file, local_output_dir, encoding='latin-1', d
 def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None):
     ''' '''
 
-    # Read rst report of a datasink node 
-    with open(reconall_report) as fp:  
+    # Read rst report of a datasink node
+    with open(reconall_report) as fp:
         line = fp.readline()
         cnt = 1
         while line:
@@ -290,7 +293,7 @@ def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None):
                 fs_subject_dir = str.replace(fs_subject_dir,prefix,"")
                 print(fs_subject_dir)
 
-                # Update from BIDS App /output_dir to local output directory 
+                # Update from BIDS App /output_dir to local output directory
                 # specified by local_output_dir
                 if local_output_dir is not None:
                     fs_subject_dir = str.replace(fs_subject_dir,"/output_dir",local_output_dir)
@@ -305,12 +308,12 @@ def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None):
 def get_pipeline_dictionary_outputs(datasink_report, local_output_dir=None):
     ''' '''
 
-    # Read rst report of a datasink node 
-    with open(datasink_report) as fp:  
-        while True:  
-            line = fp.readline()  
-            if not line:  
-                break 
+    # Read rst report of a datasink node
+    with open(datasink_report) as fp:
+        while True:
+            line = fp.readline()
+            if not line:
+                break
 
             # Extract line containing listing of node outputs and stop
             if "_outputs :" in line:
@@ -335,12 +338,12 @@ def get_pipeline_dictionary_outputs(datasink_report, local_output_dir=None):
 def get_node_dictionary_outputs(node_report, local_output_dir=None):
     ''' '''
 
-    # Read rst report of a datasink node 
-    with open(node_report) as fp:  
-        while True:  
-            line = fp.readline()  
-            if not line:  
-                break 
+    # Read rst report of a datasink node
+    with open(node_report) as fp:
+        while True:
+            line = fp.readline()
+            if not line:
+                break
 
             # Extract line containing listing of node outputs and stop
             if "_outputs :" in line:
@@ -363,7 +366,6 @@ def get_node_dictionary_outputs(node_report, local_output_dir=None):
 
 def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
     #encoding=sys.getfilesystemencoding()
-    encoding='latin-1'
     
     # mode can be local or newlocal or bidsapp (local by default)
 
@@ -465,54 +467,54 @@ def fix_dataset_directory_in_pickles(local_dir, mode='local', debug=False):
     return True
 
 
-def remove_aborded_interface_pickles(local_dir, debug=False):
-    searchdir = os.path.join(local_dir, 'derivatives/cmp')
+# def remove_aborded_interface_pickles(local_dir, debug=False):
+#     searchdir = os.path.join(local_dir, 'derivatives/cmp')
 
-    for root, dirs, files in os.walk(searchdir):
-        files = [fi for fi in files if fi.endswith(".pklz")]
+#     for root, dirs, files in os.walk(searchdir):
+#         files = [fi for fi in files if fi.endswith(".pklz")]
 
-        if debug:
-            print('----------------------------------------------------')
+#         if debug:
+#             print('----------------------------------------------------')
 
-        for fi in files:
-            if debug:
-                print("Processing file {} {} {}".format(root, dirs, fi))
-            try:
-                cont = pickle.load(gzip.open(os.path.join(root, fi)))
-            except Exception:
-                # Remove pickle if unpickling error raised
-                print('Unpickling Error: removed {}'.format(
-                    os.path.join(root, fi)))
-                os.remove(os.path.join(root, fi))
+#         for fi in files:
+#             if debug:
+#                 print("Processing file {} {} {}".format(root, dirs, fi))
+#             try:
+#                 cont = pickle.load(gzip.open(os.path.join(root, fi)))
+#             except Exception:
+#                 # Remove pickle if unpickling error raised
+#                 print('Unpickling Error: removed {}'.format(
+#                     os.path.join(root, fi)))
+#                 os.remove(os.path.join(root, fi))
 
 
-def remove_aborded_interface_pickles(local_dir, subject, session='', debug=False):
-    if session == '':
-        searchdir = os.path.join(local_dir, 'derivatives/cmp', subject, 'tmp')
-    else:
-        searchdir = os.path.join(
-            local_dir, 'derivatives/cmp', subject, session, 'tmp')
+# def remove_aborded_interface_pickles(local_dir, subject, session='', debug=False):
+#     if session == '':
+#         searchdir = os.path.join(local_dir, 'derivatives/cmp', subject, 'tmp')
+#     else:
+#         searchdir = os.path.join(
+#             local_dir, 'derivatives/cmp', subject, session, 'tmp')
 
-    for root, dirs, files in os.walk(searchdir):
-        files = [fi for fi in files if fi.endswith(".pklz")]
+#     for root, dirs, files in os.walk(searchdir):
+#         files = [fi for fi in files if fi.endswith(".pklz")]
 
-        if debug:
-            print('----------------------------------------------------')
+#         if debug:
+#             print('----------------------------------------------------')
 
-        for fi in files:
-            if debug:
-                print("Processing file {} {} {}".format(root, dirs, fi))
-            try:
-                cont = pickle.load(gzip.open(os.path.join(root, fi)))
-            except Exception as e:
-                # Remove pickle if unpickling error raised
-                print('Unpickling Error: removed {}'.format(
-                    os.path.join(root, fi)))
-                os.remove(os.path.join(root, fi))
-            # except pickle.UnpicklingError as e:
-            #     # normal, somewhat expected
-            #     continue
-            # except (AttributeError,  EOFError, ImportError, IndexError) as e:
-            #     # secondary errors
-            #     print(traceback.format_exc(e))
-            #     continue
+#         for fi in files:
+#             if debug:
+#                 print("Processing file {} {} {}".format(root, dirs, fi))
+#             try:
+#                 cont = pickle.load(gzip.open(os.path.join(root, fi)))
+#             except Exception:
+#                 # Remove pickle if unpickling error raised
+#                 print('Unpickling Error: removed {}'.format(
+#                     os.path.join(root, fi)))
+#                 os.remove(os.path.join(root, fi))
+#             # except pickle.UnpicklingError as e:
+#             #     # normal, somewhat expected
+#             #     continue
+#             # except (AttributeError,  EOFError, ImportError, IndexError) as e:
+#             #     # secondary errors
+#             #     print(traceback.format_exc(e))
+#             #     continue

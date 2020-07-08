@@ -11,20 +11,20 @@ from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.pipelines.functional import fMRI as FMRI_pipeline
 from cmtklib.config import anat_load_config, anat_save_config, \
-    dmri_load_config, dmri_save_config, fmri_load_config, fmri_save_config, \
-    get_anat_process_detail, get_dmri_process_detail, get_fmri_process_detail
-from cmtklib.util import remove_aborded_interface_pickles, fix_dataset_directory_in_pickles
+    dmri_load_config, dmri_save_config, fmri_load_config, fmri_save_config
+# from cmtklib.util import remove_aborded_interface_pickles, fix_dataset_directory_in_pickles
 from bids import BIDSLayout
 import multiprocessing
 import fnmatch
-import string
+
 import glob
-import gzip
 import os
 import shutil
 from traits.api import *
-import ast
-import pickle
+
+# import pickle
+# import gzip
+
 import warnings
 
 warnings.filterwarnings("ignore",
@@ -356,8 +356,8 @@ def init_anat_project(project_info, is_new_project, debug=False):
 def update_anat_last_processed(project_info, pipeline):
     # last date
     if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
-        out_dirs = os.listdir(os.path.join(
-            project_info.output_directory, 'nipype', project_info.subject))
+        # out_dirs = os.listdir(os.path.join(
+        #     project_info.output_directory, 'nipype', project_info.subject))
         # for out in out_dirs:
         #     if (project_info.last_date_processed == "Not yet processed" or
         #         out > project_info.last_date_processed):
@@ -390,8 +390,8 @@ def update_anat_last_processed(project_info, pipeline):
 def update_dmri_last_processed(project_info, pipeline):
     # last date
     if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
-        out_dirs = os.listdir(os.path.join(
-            project_info.output_directory, 'nipype', project_info.subject))
+        # out_dirs = os.listdir(os.path.join(
+        #     project_info.output_directory, 'nipype', project_info.subject))
         # for out in out_dirs:
         #     if (project_info.last_date_processed == "Not yet processed" or
         #         out > project_info.last_date_processed):
@@ -420,8 +420,8 @@ def update_dmri_last_processed(project_info, pipeline):
 def update_fmri_last_processed(project_info, pipeline):
     # last date
     if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
-        out_dirs = os.listdir(os.path.join(
-            project_info.output_directory, 'nipype', project_info.subject))
+        # out_dirs = os.listdir(os.path.join(
+        #     project_info.output_directory, 'nipype', project_info.subject))
         # for out in out_dirs:
         #     if (project_info.last_date_processed == "Not yet processed" or
         #         out > project_info.last_date_processed):

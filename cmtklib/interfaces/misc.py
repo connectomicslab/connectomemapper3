@@ -880,11 +880,10 @@ class CreateIndexFile(BaseInterface):
     output_spec = CreateIndexFileOutputSpec
 
     def _run_interface(self, runtime):
-        axis_dict = {'x': 0, 'y': 1, 'z': 2}
         import numpy as np
 
         with open(self.inputs.in_grad_mrtrix, 'r') as f:
-            for i, l in enumerate(f):
+            for i, _ in enumerate(f):
                 pass
 
         lines = i + 1

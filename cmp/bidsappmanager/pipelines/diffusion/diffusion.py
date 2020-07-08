@@ -86,16 +86,16 @@ class DiffusionPipelineUI(DiffusionPipeline):
         DiffusionPipeline.__init__(self, project_info)
 
         self.stages = {
-            'Preprocessing': PreprocessingStageUI(bids_dir=project_info.base_directory, 
+            'Preprocessing': PreprocessingStageUI(bids_dir=project_info.base_directory,
                                                   output_dir=project_info.output_directory),
             'Registration': RegistrationStageUI(pipeline_mode="Diffusion",
                                               fs_subjects_dir=project_info.freesurfer_subjects_dir,
                                               fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
-                                              bids_dir=project_info.base_directory, 
+                                              bids_dir=project_info.base_directory,
                                               output_dir=self.output_directory),
-            'Diffusion': DiffusionStageUI(bids_dir=project_info.base_directory, 
+            'Diffusion': DiffusionStageUI(bids_dir=project_info.base_directory,
                                           output_dir=project_info.output_directory),
-            'Connectome': ConnectomeStageUI(bids_dir=project_info.base_directory, 
+            'Connectome': ConnectomeStageUI(bids_dir=project_info.base_directory,
                                             output_dir=project_info.output_directory)
             }
 

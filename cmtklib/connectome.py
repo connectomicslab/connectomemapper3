@@ -444,12 +444,12 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         # update edges
         # measures to add here
         # FIXME treat case of self-connection that gives di['fiber_length_mean'] = 0.0
-        for u in G.nodes():     
+        for u in G.nodes():
             for v in G.nodes():
                 if G.has_edge(u,v):
                     # Check for diagonal elements that raise an error when the edge is visited a second time
-                    # print('({}, {}): {}'.format(u, v, list(G[u][v].keys()))) 
-                    if len(list(G[u][v].keys())) == 1: 
+                    # print('({}, {}): {}'.format(u, v, list(G[u][v].keys())))
+                    if len(list(G[u][v].keys())) == 1:
                         di = {'number_of_fibers': len(G[u][v]['fiblist']) }
 
                         # print di
@@ -474,7 +474,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                         # Compute density
                         # density = (#fibers / mean_fibers_length) * (2 / (area_roi_u + area_roi_v))
 
-                        # print "G.nodes[int(u)]['roi_volume'] : %i / G.nodes[int(v)]['roi_volume'] : %i" % (G.nodes[int(u)]['roi_volume'],G.nodes[int(v)]['roi_volume'])
+                        # print "G.nodes[int(u)]['roi_volume'] : %i / G.nodes[int(v)]['roi_volume'] : %i" 
+                        #   % (G.nodes[int(u)]['roi_volume'],G.nodes[int(v)]['roi_volume'])
                         # print "di['number_of_fibers'] : %i / di['fiber_length_mean'] : %i" % (di['number_of_fibers'],di['fiber_length_mean'])
 
                         if di['fiber_length_mean'] > 0.0:
@@ -533,15 +534,15 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                         for key in di:
                             G[u][v][key] = di[key]
 
-                        # print('({}, {}): {}'.format(u, v, list(G[u][v].keys()))) 
+                        # print('({}, {}): {}'.format(u, v, list(G[u][v].keys())))
 
         # print("  ************************************************************************")
 
         # for u, v, d in G.edges(data=True):
 
-        #     print('({}, {}): {}'.format(u, v, list(d.keys()))) 
+        #     print('({}, {}): {}'.format(u, v, list(d.keys())))
         #     if 'fiblist' in list(d.keys()):
-        #         print(G[u][v]['fiblist'])          
+        #         print(G[u][v]['fiblist'])
 
         print("  ************************************************")
 
@@ -552,8 +553,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
         if 'mat' in output_types:
             # edges
-            size_edges = (int(parval['number_of_regions']), int(
-                parval['number_of_regions']))
+            # size_edges = (int(parval['number_of_regions']), int(
+            #     parval['number_of_regions']))
 
             # Get the edge attributes/keys/weights from the first edge and then break.
             # Change w.r.t networkx2
@@ -599,7 +600,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 node_struct[node_key] = node_arr
             print('    - connectome_%s.mat' % parkey)
             scipy.io.savemat('connectome_%s.mat' % parkey, long_field_names=True,
-                                                           mdict={'sc': edge_struct, 
+                                                           mdict={'sc': edge_struct,
                                                                   'nodes': node_struct})
         if 'graphml' in output_types:
             g2 = nx.Graph()
@@ -974,8 +975,8 @@ class rsfmri_conmat(BaseInterface):
                 nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
             if 'mat' in self.inputs.output_types:
                 # edges
-                size_edges = (int(parval['number_of_regions']), int(
-                    parval['number_of_regions']))
+                # size_edges = (int(parval['number_of_regions']), int(
+                #     parval['number_of_regions']))
 
                 # Get the edge attributes/keys/weights from the first edge and then break.
                 # Change w.r.t networkx2

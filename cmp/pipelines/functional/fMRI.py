@@ -95,16 +95,16 @@ class fMRIPipeline(Pipeline):
             self.output_directory = os.path.join(
                 self.base_directory, "derivatives")
 
-        self.stages = {'Preprocessing': PreprocessingStage(bids_dir=project_info.base_directory, 
+        self.stages = {'Preprocessing': PreprocessingStage(bids_dir=project_info.base_directory,
                                                            output_dir=self.output_directory),
                        'Registration': RegistrationStage(pipeline_mode="fMRI",
                                                          fs_subjects_dir=project_info.freesurfer_subjects_dir,
                                                          fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
-                                                         bids_dir=project_info.base_directory, 
+                                                         bids_dir=project_info.base_directory,
                                                          output_dir=self.output_directory),
-                       'FunctionalMRI': FunctionalMRIStage(bids_dir=project_info.base_directory, 
+                       'FunctionalMRI': FunctionalMRIStage(bids_dir=project_info.base_directory,
                                                            output_dir=self.output_directory),
-                       'Connectome': ConnectomeStage(bids_dir=project_info.base_directory, 
+                       'Connectome': ConnectomeStage(bids_dir=project_info.base_directory,
                                                      output_dir=self.output_directory)}
 
         Pipeline.__init__(self, project_info)
@@ -205,6 +205,14 @@ class fMRIPipeline(Pipeline):
             else:
                 print("WARNING : BOLD json sidecar not found for subject %s." % (subjid))
 
+            files = layout.get(subject=subjid, suffix='T1w',
+                               extensions='.nii.gz')
+            if len(files) > 0:
+                t1_file = os.path.join(files[0].dirname, files[0].filename)
+                # print t2_file
+            else:
+                print("WARNING : T1w image not found for subject %s." % (subjid))
+
             files = layout.get(subject=subjid, suffix='T2w',
                                extensions='.nii.gz')
             if len(files) > 0:
@@ -235,6 +243,15 @@ class fMRIPipeline(Pipeline):
                 print("WARNING : BOLD json sidecar not found for subject %s, session %s." % (
                     subjid, self.global_conf.subject_session))
 
+            files = layout.get(subject=subjid, suffix='T1w',
+                               extensions='.nii.gz', session=sessid)
+            if len(files) > 0:
+                t1_file = os.path.join(files[0].dirname, files[0].filename)
+                # print t2_file
+            else:
+                print("WARNING : T1w image not found for subject %s, session %s." % (
+                    subjid, self.global_conf.subject_session))
+
             files = layout.get(subject=subjid, suffix='T2w',
                                extensions='.nii.gz', session=sessid)
             if len(files) > 0:
@@ -244,10 +261,11 @@ class fMRIPipeline(Pipeline):
                 print("WARNING : T2w image not found for subject %s, session %s." % (
                     subjid, self.global_conf.subject_session))
 
+        print("... t1_file : %s" % t2_file)
+        print("... t2_file : %s" % t2_file)
         print("... fmri_file : %s" % fmri_file)
         print("... json_file : %s" % json_file)
-        print("... t2_file : %s" % t2_file)
-
+        
         # mods = layout.get_modalities()
         # types = layout.get_modalities()
         # print("Available modalities :")
@@ -377,7 +395,7 @@ class fMRIPipeline(Pipeline):
             {'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline"),
                          'log_to_file': True},
              'execution': {'remove_unnecessary_outputs': False,
-                           'stop_on_first_crash': True, 
+                           'stop_on_first_crash': True,
                            'stop_on_first_rerun': False,
                            'use_relative_paths': True,
                            'crashfile_format': "txt"}
@@ -629,7 +647,7 @@ class fMRIPipeline(Pipeline):
         def remove_non_existing_scales(roi_volumes):
             out_roi_volumes = []
             for vol in roi_volumes:
-                if vol != None:
+                if vol is not None:
                     out_roi_volumes.append(vol)
             return out_roi_volumes
 

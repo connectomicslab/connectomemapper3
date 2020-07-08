@@ -23,12 +23,11 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.ants as ants
 from nipype.interfaces.io import FreeSurferSource
 import nipype.interfaces.utility as util
-from nipype.utils.filemanip import loadpkl
 
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.interfaces.freesurfer import copyBrainMaskToFreesurfer, copyFileToFreesurfer
-from cmtklib.util import extract_freesurfer_subject_dir, get_pipeline_dictionary_outputs
+from cmtklib.util import extract_freesurfer_subject_dir
 
 
 class SegmentationConfig(HasTraits):
@@ -75,7 +74,6 @@ class SegmentationStage(Stage):
         self.name = 'segmentation_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        
         self.config = SegmentationConfig()
         self.config.ants_templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation',
                                                                                                 'ants_template_IXI',
@@ -277,8 +275,6 @@ class SegmentationStage(Stage):
 
     def define_inspect_outputs(self):
         # print "stage_dir : %s" % self.stage_dir
-        from nipype.utils.filemanip import loadpkl
-        from nipype.pipeline.engine.utils import load_resultfile
 
         if self.config.seg_tool == "Freesurfer":
             fs_path = ''
