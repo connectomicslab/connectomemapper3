@@ -37,7 +37,7 @@ This BIDS App has the following command line arguments:
               [--fs_license FS_LICENSE] [-v]
               bids_dir output_dir {participant,group}
 
-        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-beta-RC1
+        Entrypoint script of the Connectome Mapper BIDS-App
 
 
         positional arguments:
