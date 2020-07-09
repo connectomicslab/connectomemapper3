@@ -14,7 +14,7 @@ RUN apt-get update && \
     apt-add-repository ppa:saiarcot895/myppa -y && \
     apt-get update && \
     apt-get -y install apt-fast \
-    && apt-fast install -qq -y \
+    && apt-fast install -qq -y bc \
     locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
