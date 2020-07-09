@@ -15,8 +15,7 @@ Philosophy
 The development philosophy for this new version of the Connectome Mapper is to:
 
 I. Keep the code of the processing as much as possible outside of the actual
-main Connectome Mapper code, through the use and extension of existing Nipype interfaces and
-an external library (dubbed cmtklib).
+main Connectome Mapper code, through the use and extension of existing Nipype interfaces and an external library (dubbed cmtklib).
 
 II. Enhance portability by freezing the computing environment with all software dependencies installed, through the adoption of the BIDS App framework relying on light software container technologies.
 
