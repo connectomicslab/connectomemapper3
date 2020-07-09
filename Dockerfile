@@ -55,11 +55,11 @@ RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/cond
 
 # Create content of entrypoint script
 ENV content="#! /bin/bash\n"
-ENV content="${content}echo User: \"\$USER\" && echo Group: \$(id -g -n \"\$USER\") &&"
+ENV content="${content}echo User: \$(id -un \$USER) && echo Group: \$(id -gn \$USER) &&"
 ENV content="$content . \"$FSLDIR/etc/fslconf/fsl.sh\" &&"
 ENV content="$content . activate \"${CONDA_ENV}\" &&"
 ENV content="$content xvfb-run -s \"-screen 0 900x900x24 -ac +extension GLX -noreset\" \
--a python /app/connectomemapper3/run.py \"\$@\"\n"
+-a python /app/connectomemapper3/run.py \$@"
 
 # Write content to BIDSapp entrypoint script
 RUN printf "$content" > /app/run_connectomemapper3.sh
