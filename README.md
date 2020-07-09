@@ -100,33 +100,33 @@ To run it in participant level mode (for one participant):
 
 ### Credits
 
-* Sebastien Tourbier (sebastientourbier)
-* Yasser Aleman-Gomez (yasseraleman)
-* Alessandra Griffa (agriffa)
-* Adrien Birbaumer (abirba)
-* Patric Hagmann (pahagman)
-* Meritxell Bach Cuadra (meribach)
+*   Sebastien Tourbier (sebastientourbier)
+*   Yasser Aleman-Gomez (yasseraleman)
+*   lessandra Griffa (agriffa)
+*   Adrien Birbaumer (abirba)
+*   Patric Hagmann (pahagman)
+*   Meritxell Bach Cuadra (meribach)
 
 ### Collaborators
 
 Collaboration Signal Processing Laboratory (LTS5) EPFL Lausanne
 
-* Jean-Philippe Thiran
-* Xavier Gigandet
-* Leila Cammoun
-* Alia Lemkaddem (allem)
-* Alessandro Daducci (daducci)
-* David Romascano (davidrs06)
-* Stephan Gerhard (unidesigner)
-* Christophe Chênes (Cwis)
-* Oscar Esteban (oesteban)
+*   Jean-Philippe Thiran
+*   Xavier Gigandet
+*   Leila Cammoun
+*   Alia Lemkaddem (allem)
+*   Alessandro Daducci (daducci)
+*   David Romascano (davidrs06)
+*   Stephan Gerhard (unidesigner)
+*   Christophe Chênes (Cwis)
+*   Oscar Esteban (oesteban)
 
 Collaboration Children's Hospital Boston
 
-* Ellen Grant
-* Daniel Ginsburg (danginsburg)
-* Rudolph Pienaar (rudolphpienaar)
-* Nicolas Rannou (NicolasRannou)
+*   Ellen Grant
+*   Daniel Ginsburg (danginsburg)
+*   Rudolph Pienaar (rudolphpienaar)
+*   Nicolas Rannou (NicolasRannou)
 
 ### Funding
 
