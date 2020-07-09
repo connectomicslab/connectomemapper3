@@ -410,7 +410,7 @@ class SHORE(DipyDiffusionInterface):
         import pickle as pickle
         import gzip
 
-        from dipy.data import get_sphere, default_sphere
+        from dipy.data import get_sphere
         from dipy.io import read_bvals_bvecs
         from dipy.core.gradients import gradient_table
         from dipy.reconst.shore import ShoreModel
@@ -595,7 +595,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         from dipy.direction import peaks_from_model
         from dipy.tracking.local import ThresholdTissueClassifier, BinaryTissueClassifier
         from dipy.tracking.eudx import EuDX
-        from dipy.data import get_sphere, default_sphere
+        from dipy.data import get_sphere
         from dipy.io.trackvis import save_trk
         # import marshal as pickle
         import pickle as pickle
@@ -831,12 +831,13 @@ class DirectionGetterTractography(DipyBaseInterface):
 
     def _run_interface(self, runtime):
         from dipy.tracking import utils
-        from dipy.direction import DeterministicMaximumDirectionGetter, ProbabilisticDirectionGetter
-        # from dipy.tracking.local import ThresholdTissueClassifier
-        from dipy.tracking.local import BinaryTissueClassifier, ActTissueClassifier, \
+        from dipy.direction import DeterministicMaximumDirectionGetter, \
+            ProbabilisticDirectionGetter
+        # from dipy.tracking.local import ThresholdTissueClassifier, ActTissueClassifier
+        from dipy.tracking.local import BinaryTissueClassifier, \
             LocalTracking, CmcTissueClassifier, ParticleFilteringTracking
         from dipy.reconst.peaks import peaks_from_model
-        from dipy.data import get_sphere, default_sphere
+        from dipy.data import get_sphere
         from dipy.io.streamline import save_trk
         # import marshal as pickle
         import pickle as pickle
@@ -1201,8 +1202,7 @@ class MAPMRI(DipyDiffusionInterface):
 
     def _run_interface(self, runtime):
         from dipy.reconst import mapmri
-        # from dipy.data import fetch_cenir_multib
-        from dipy.data import read_cenir_multib, get_sphere, default_sphere
+        # from dipy.data import fetch_cenir_multib, read_cenir_multib
         from dipy.core.gradients import gradient_table
         # import marshal as pickle
         import pickle as pickle
