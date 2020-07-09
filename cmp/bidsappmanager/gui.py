@@ -998,13 +998,13 @@ class CMP_BIDSAppWindow(HasTraits):
         return proc
 
     @classmethod
-    def manage_bidsapp_procs(proclist):
+    def manage_bidsapp_procs(self, proclist):
         for proc in proclist:
             if proc.poll() is not None:
                 proclist.remove(proc)
 
     @classmethod
-    def run(command, env=None, cwd=os.getcwd()):
+    def run(self, command, env=None, cwd=os.getcwd()):
         merged_env = os.environ
         if env is not None:
             merged_env.update(env)

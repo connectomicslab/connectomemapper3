@@ -1931,7 +1931,7 @@ class CMP_BIDSAppWindowHandler(Handler):
         return proc
 
     @classmethod
-    def manage_bidsapp_procs(proclist):
+    def manage_bidsapp_procs(self, proclist):
         for proc in proclist:
             if proc.poll() is not None:
                 proclist.remove(proc)
