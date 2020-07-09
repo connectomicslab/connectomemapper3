@@ -1,11 +1,12 @@
 # Build environment variables arguments
 ARG MAIN_DOCKER
+ARG MAIN_VERSION
 ARG VERSION
 ARG BUILD_DATE
 ARG VCS_REF
 
 # Use an initial image, where all Connectome Mapper 3 dependencies are installed, as a parent image
-FROM "${MAIN_DOCKER}":"$VERSION"
+FROM "${MAIN_DOCKER}":"${MAIN_VERSION}"
 
 #RUN groupadd -r -g 1000 cmp && \
 #    useradd -r -M -u 1000 -g cmp cmp
