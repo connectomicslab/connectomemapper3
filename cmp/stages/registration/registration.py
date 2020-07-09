@@ -1292,6 +1292,8 @@ class RegistrationStage(Stage):
             func_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'bold_sinker')
             func_sinker_report = os.path.join(func_sinker_dir, '_report', 'report.rst')
 
+            print('fMRI registration (tool %s)' % self.config.registration_mode)
+
             if os.path.exists(func_sinker_report):
 
                 func_outputs = get_pipeline_dictionary_outputs(func_sinker_report, self.output_dir)
