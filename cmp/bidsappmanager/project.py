@@ -1240,7 +1240,7 @@ class ProjectHandler(Handler):
         return ui_info
 
     @classmethod
-    def save_anat_config_file( ui_info):
+    def save_anat_config_file(self, ui_info):
         dialog = FileDialog(action="save as",
                             default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
                                                           'code', 'ref_anatomical_config.ini'))
@@ -1264,7 +1264,7 @@ class ProjectHandler(Handler):
             # TODO: load_config (anat_ or dmri_ ?)
 
     @classmethod
-    def save_dmri_config_file(ui_info):
+    def save_dmri_config_file(self, ui_info):
         dialog = FileDialog(action="save as",
                             default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
                                                           'code', 'ref_diffusion_config.ini'))
@@ -1287,7 +1287,7 @@ class ProjectHandler(Handler):
                 self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
 
     @classmethod
-    def save_fmri_config_file(ui_info):
+    def save_fmri_config_file(self, ui_info):
         dialog = FileDialog(action="save as",
                             default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
                                                           'code', 'ref_fMRI_config.ini'))
