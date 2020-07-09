@@ -66,7 +66,7 @@ jobs:
             # Get version, update files.
             THISVERSION=$( python get_version.py )
             mkdir -p /tmp/cache
-            docker save CI: ssebastientourbier/connectomemapper3 \
+            docker save sebastientourbier/connectomemapper3 \
             | pigz -8 -p 3 > /tmp/cache/docker.tar.gz
       - persist_to_workspace:
           root: /tmp
