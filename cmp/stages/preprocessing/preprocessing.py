@@ -863,8 +863,16 @@ class PreprocessingStage(Stage):
         if self.config.bias_field_correction:
 
             dwi_biascorrect_dir = os.path.join(self.stage_dir, 'dwi_biascorrect')
-            bcorr = glob.glob(os.path.join(dwi_biascorrect_dir, '*_biascorr.mif'))[0]
-            bias = glob.glob(os.path.join(dwi_biascorrect_dir, '*_biasfield.mif'))[0]
+
+            bcorr = ""
+            files = glob.glob(os.path.join(dwi_biascorrect_dir, '*_biascorr.mif'))
+            if len(files)>0:
+                bcorr = files[0]
+
+            bias = ""
+            files = glob.glob(os.path.join(dwi_biascorrect_dir, '*_biasfield.mif'))
+            if len(files)>0:
+                bias = files[0]
 
             if (os.path.exists(bcorr)):
                 self.inspect_outputs_dict['Bias field corrected image'] = ['mrview',bcorr]
