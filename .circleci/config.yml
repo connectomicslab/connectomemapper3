@@ -66,6 +66,9 @@ jobs:
           name: Prune Docker volume (temporary)
           command: docker volume prune --force
       - run:
+          name: Display storage information
+          command: df -h
+      - run:
           name: Save Docker Images
           no_output_timeout: 40m
           command: |
