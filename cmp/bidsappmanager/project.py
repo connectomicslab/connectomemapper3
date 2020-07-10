@@ -1678,6 +1678,7 @@ class ProjectHandlerV2(Handler):
                                 for file in files:
                                     if (loaded_project.dmri_bids_acq in file):
                                         dwi_file = file
+                                        print('Loaded DWI file: {}'.format(dwi_file))
                                         break
                             else:
                                 dwi_file = files[0]

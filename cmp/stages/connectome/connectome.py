@@ -20,18 +20,13 @@ import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
 import nipype.interfaces.cmtk as cmtk
 
-# import cmtklib as cmtk
-
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, \
-    traits, File, TraitedSpec, InputMultiPath, OutputMultiPath, isdefined
-from nipype.utils.filemanip import split_filename
-
 # Own imports
 from nipype.interfaces.mrtrix3.connectivity import BuildConnectome
 from cmtklib.interfaces.mrtrix3 import FilterTractogram
 from cmp.stages.common import Stage
 import cmtklib.connectome
 from cmtklib.util import get_pipeline_dictionary_outputs
+# import cmtklib as cmtk
 
 
 class ConnectomeConfig(HasTraits):

@@ -261,7 +261,7 @@ class fMRIPipeline(Pipeline):
                 print("WARNING : T2w image not found for subject %s, session %s." % (
                     subjid, self.global_conf.subject_session))
 
-        print("... t1_file : %s" % t2_file)
+        print("... t1_file : %s" % t1_file)
         print("... t2_file : %s" % t2_file)
         print("... fmri_file : %s" % fmri_file)
         print("... json_file : %s" % json_file)

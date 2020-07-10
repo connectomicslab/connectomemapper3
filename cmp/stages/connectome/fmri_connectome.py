@@ -17,8 +17,6 @@ import os
 
 # Nipype imports
 import nipype.pipeline.engine as pe
-from nipype.interfaces.base import BaseInterfaceInputSpec, \
-    traits, File, TraitedSpec, InputMultiPath, OutputMultiPath
 # from nipype.utils.filemanip import split_filename
 
 # Own imports
