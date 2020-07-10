@@ -60,6 +60,12 @@ jobs:
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
       - run:
+          name: Prune Docker cache (temporary)
+          command: docker system prune -f
+      - run:
+          name: Prune Docker volume (temporary)
+          command: docker volume prune --force
+      - run:
           name: Save Docker Images
           no_output_timeout: 40m
           command: |
