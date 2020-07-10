@@ -1,4 +1,8 @@
-version: 2
+version: 2.1
+
+orbs:
+  coverage-reporter: codacy/coverage-reporter@11.0.1
+
 jobs:
   build:
     environment:
@@ -68,10 +72,10 @@ jobs:
       - run:
           name: Display storage information
           command: df -h
-      - run:
-          name: Keep only connectomemapper docker image
-          command: |
-            docker rmi $(docker images | grep connectomemapper-ubuntu16.04 | tr -s ' ' | cut -d ' ' -f 3)
+      # - run:
+      #     name: Keep only connectomemapper docker image
+      #     command: |
+      #       docker rmi $(docker images | grep connectomemapper-ubuntu16.04 | tr -s ' ' | cut -d ' ' -f 3)
       - run:
           name: Save Docker Image
           no_output_timeout: 40m
@@ -226,6 +230,12 @@ jobs:
             sudo chown $(id -un):$(id -gn) -R /tmp/data/ds-sample
             find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
+
+      - run commands to generate the coverage result
+      - coverage-reporter/send_report:
+          coverage-reports: '/tmp/data/ds-sample/code/coverage.xml'
+          project-token: $CODACY_PROJECT_TOKEN
+
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
