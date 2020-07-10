@@ -166,7 +166,7 @@ RUN apt-get update && \
     #git checkout 3.0_RC3 && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
-    git describe --tags > /mrtrix3_version \
+    git describe --tags > /mrtrix3_version && \
     # rm -r /var/cache/apt/archives/apt-fast && \
     apt-get clean && \
     # apt-fast clean && \
