@@ -181,7 +181,7 @@ jobs:
             fi
       - run:
           name: Run anatomical and diffusion pipelines on ds-sample
-          no_output_timeout: 6h
+          no_output_timeout: 8h
           command: |
             # Get version, update files.
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
@@ -196,6 +196,7 @@ jobs:
 
             #Execute BIDS App
             docker run -it --rm \
+                --entrypoint /app/run_coverage_cmp3.sh \
                 -v /tmp/data/ds-sample:/bids_dir \
                 -v /tmp/data/ds-sample/derivatives:/output_dir \
                 -v /home/circleci/src/connectomemapper3/config:/config \
@@ -227,6 +228,8 @@ jobs:
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
       - store_artifacts:
           path: /tmp/data/ds-sample/test
+      - store_artifacts:
+          path: /tmp/data/ds-sample/code
       - store_artifacts:
           path: /tmp/data/ds-sample/derivatives/cmp
       - store_artifacts:
