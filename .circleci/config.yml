@@ -69,7 +69,11 @@ jobs:
           name: Display storage information
           command: df -h
       - run:
-          name: Save Docker Images
+          name: Keep only connectomemapper docker image
+          command: |
+            docker rmi $(docker images | grep connectomemapper-ubuntu16.04 | tr -s ' ' | cut -d ' ' -f 3)
+      - run:
+          name: Save Docker Image
           no_output_timeout: 40m
           command: |
             # Get version, update files.
