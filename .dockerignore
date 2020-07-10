@@ -26,3 +26,6 @@ _static
 _templates
 
 *.ipynb_checkpoints
+
+.git
+.git/*
