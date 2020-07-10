@@ -25,6 +25,7 @@ dependencies:
 
 - pip:
     # - git+https://github.com/LTS5/cfflib.git
+    - coverage==5.2
     - duecredit==0.8.0 #0.7.0
     #- dipy==1.1.1 #0.15.0
     - mne==0.20.7 #0.17.1

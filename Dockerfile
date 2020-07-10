@@ -63,14 +63,30 @@ ENV content="$content xvfb-run -s \"-screen 0 900x900x24 -ac +extension GLX -nor
 -a python /app/connectomemapper3/run.py \$@"
 
 # Write content to BIDSapp entrypoint script
-RUN printf "$content" > /app/run_connectomemapper3.sh
+RUN printf "$content" > /app/run_cmp3.sh
+RUN cat /app/run_cmp3.sh
 
-RUN cat /app/run_connectomemapper3.sh
+# Create content of entrypoint script with coverage
+ENV content_cov="#! /bin/bash\n"
+ENV content_cov="${content_cov}echo User: \$(id -un \$USER) && echo Group: \$(id -gn \$USER) &&"
+ENV content_cov="${content_cov} . \"$FSLDIR/etc/fslconf/fsl.sh\" &&"
+ENV content_cov="${content_cov} . activate \"${CONDA_ENV}\" &&"
+ENV content_cov="${content_cov} xvfb-run -s \"-screen 0 900x900x24 -ac +extension GLX -noreset\" \
+-a coverage run --source=cmp,cmtklib /app/connectomemapper3/run.py \$@ &&"
+ENV content_cov="${content_cov} coverage html -d /bids_dir/code/coverage_html &&"
+ENV content_cov="${content_cov} coverage xml -o /bids_dir/code/coverage.xml &&"
+ENV content_cov="${content_cov} coverage json -o /bids_dir/code/coverage.json &&"
+ENV content_cov="${content_cov} cp .coveragerc /bids_dir/code/.coveragerc"
+
+# Write content to BIDSapp entrypoint script
+RUN printf "$content_cov" > /app/run_coverage_cmp3.sh
+RUN cat /app/run_coverage_cmp3.sh
 
 # Set the working directory back to /app
 # Acquire script to be executed
 RUN chmod 775 /app/connectomemapper3/run.py
-RUN chmod 775 /app/run_connectomemapper3.sh
+RUN chmod 775 /app/run_cmp3.sh
+RUN chmod 775 /app/run_coverage_cmp3.sh
 RUN chmod 777 /opt/freesurfer
 
 #Temporary tmp folder
@@ -105,7 +121,7 @@ ENV ANTS_RANDOM_SEED 1234
 
 RUN ldconfig
 WORKDIR /tmp/
-ENTRYPOINT ["/app/run_connectomemapper3.sh"]
+ENTRYPOINT ["/app/run_cmp3.sh"]
 
 #Metadata
 LABEL org.label-schema.build-date=$BUILD_DATE
