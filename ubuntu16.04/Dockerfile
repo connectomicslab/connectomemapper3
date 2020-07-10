@@ -143,7 +143,6 @@ ENV CONDA_ENV py37cmp-core
 COPY environment.yml /app/environment.yml
 RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_ENV &&\
      conda clean -v --all --yes"
-RUN conda env create -f /app/environment.yml
 
 
 # Make ANTs happy
