@@ -24,3 +24,18 @@ sudo docker run -it --rm \
       --dwi_pipeline_config /code/ref_diffusion_config.ini \
       --func_pipeline_config /code/ref_fMRI_config.ini
 
+
+
+docker run -it --rm \
+--entrypoint /app/run_coverage.sh \
+-v /home/localadmin/Desktop/hcp-retest-d2:/bids_dir \
+-v /home/localadmin/Desktop/hcp-retest-d2/derivatives:/output_dir \
+-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \
+-u 1000:1000 \
+sebastientourbier/connectomemapper-bidsapp:v3.0.0-beta-RC2 \
+/bids_dir /output_dir participant --participant_label 103818 \
+--anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \
+--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \
+--func_pipeline_config /bids_dir/code/ref_fMRI_config.ini \
+--fs_license /bids_dir/code/license.txt \
+--number_of_participants_processed_in_parallel 1'
