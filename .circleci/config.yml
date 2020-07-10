@@ -231,7 +231,6 @@ jobs:
             find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
       # Send coverage report to codacy
-      - run commands to generate the coverage result
       - coverage-reporter/send_report:
           coverage-reports: '/tmp/data/ds-sample/code/coverage.xml'
           project-token: $CODACY_PROJECT_TOKEN
