@@ -8,24 +8,31 @@ FROM ubuntu:xenial-20181218
 # Pre-cache neurodebian key
 COPY files/neurodebian.gpg /root/.neurodebian.gpg
 
-## Install miniconda2 and CMP dependencies including exfat libraries for exfat-formatted hard-drives (only MAC?) : exfat-fuse exfat-utils
+# Install system library dependencies including
+# exfat libraries for exfat-formatted hard-drives (only MAC?) : exfat-fuse exfat-utils
+# Neurodebian
 RUN apt-get update && \
     apt-get install software-properties-common -y && \
-    apt-add-repository ppa:saiarcot895/myppa -y && \
-    apt-get update && \
-    apt-get -y install apt-fast \
-    && apt-fast install -qq -y bc \
+    # apt-add-repository ppa:saiarcot895/myppa -y && \
+    # apt-get update && \
+    # apt-get -y install apt-fast \
+    apt-get install -qq -y bc \
     locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
     localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
-    curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
-    bash /tmp/miniconda.sh -bfp /opt/conda && \
-    rm -rf /tmp/miniconda.sh
+    apt-get update && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set local enccoding
 ENV LANG en_US.UTF-8
+
+# Install Miniconda3
+RUN curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -bfp /opt/conda && \
+    rm -rf /tmp/miniconda.sh
 
 # Add conda to $PATH
 ENV PATH /opt/conda/bin:$PATH
@@ -103,7 +110,11 @@ ENV PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BI
 
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
-    apt-fast install -y --no-install-recommends wget afni=16.2.07~dfsg.1-5~nd16.04+1
+    apt-get install -y --no-install-recommends wget afni=16.2.07~dfsg.1-5~nd16.04+1 && \
+    # rm -r /var/cache/apt/archives/apt-fast && \
+    apt-get clean && \
+    # apt-fast clean && \
+    rm -rf /var/lib/apt/lists/*
                                                # fsl-core=5.0.9-5~nd16.04+1 \
                                                # fsl-mni152-templates=5.0.7-2 \
                                                # fsl-5.0-eddy-nonfree \
@@ -127,11 +138,13 @@ ENV AFNI_PLUGINPATH /usr/lib/afni/plugins
 ##################################################################
 ## Install conda environment, including ANTs 2.2.0
 ##################################################################
-
+ENV CONDA_ENV py37cmp-core
 # Pull the environment name out of the environment.yml
 COPY environment.yml /app/environment.yml
+RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_ENV &&\
+     conda clean -v --all --yes"
 RUN conda env create -f /app/environment.yml
-ENV CONDA_ENV py37cmp-core
+
 
 # Make ANTs happy
 ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin
@@ -146,7 +159,7 @@ ENV PATH $ANTSPATH:$PATH
 # MRtrix3 setup
 WORKDIR /opt
 RUN apt-get update && \
-    apt-fast install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
+    apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
     libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev && \
     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
     cd mrtrix3 && \
@@ -154,7 +167,11 @@ RUN apt-get update && \
     #git checkout 3.0_RC3 && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
-    git describe --tags > /mrtrix3_version
+    git describe --tags > /mrtrix3_version \
+    # rm -r /var/cache/apt/archives/apt-fast && \
+    apt-get clean && \
+    # apt-fast clean && \
+    rm -rf /var/lib/apt/lists/*
     #&& \
     #apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -169,7 +186,13 @@ ENV PYTHONPATH=/opt/mrtrix3/lib:$PYTHONPATH
 RUN echo "Downloading FSL ..." \
     && curl -sSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.3-centos6_64.tar.gz \
     | tar zx -C /opt \
-    && /bin/bash /opt/fsl/etc/fslconf/fslpython_install.sh -q -f /opt/fsl
+    && /bin/bash /opt/fsl/etc/fslconf/fslpython_install.sh -q -f /opt/fsl \
+    && rm -rf /opt/fsl/data/first \
+    && rm -rf /opt/fsl/data/possum \
+    && rm -rf /opt/fsl/data/atlases/HarvardOxford \
+    && rm -rf /opt/fsl/data/atlases/JHU \
+    && rm -rf /opt/fsl/data/atlases/Juelich \
+    && rm -rf /opt/fsl/doc
 
 ENV FSLDIR=/opt/fsl \
     PATH=/opt/fsl/bin:$PATH
