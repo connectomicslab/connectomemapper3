@@ -75,8 +75,7 @@ ENV content_cov="${content_cov} xvfb-run -s \"-screen 0 900x900x24 -ac +extensio
 -a coverage run --source=cmp,cmtklib --omit=*/bidsappmanager/*,*/viz/* /app/connectomemapper3/run.py \$@ &&"
 ENV content_cov="${content_cov} coverage html -d /bids_dir/code/coverage_html &&"
 ENV content_cov="${content_cov} coverage xml -o /bids_dir/code/coverage.xml &&"
-ENV content_cov="${content_cov} coverage json -o /bids_dir/code/coverage.json &&"
-ENV content_cov="${content_cov} cp .coveragerc /bids_dir/code/.coveragerc"
+ENV content_cov="${content_cov} coverage json -o /bids_dir/code/coverage.json"
 
 # Write content to BIDSapp entrypoint script
 RUN printf "$content_cov" > /app/run_coverage_cmp3.sh
