@@ -376,7 +376,7 @@ jobs:
             fi
 
 workflows:
-  version: 2
+  version: 2.1
   build_test_cov_deploy:
     jobs:
       - build:
@@ -425,15 +425,15 @@ workflows:
               only: /.*/
 
       - codacy-coverage-report:
-        requires:
-          - build
-          - test
-        filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
+          requires:
+            - build
+            - test
+          filters:
+              branches:
+                ignore:
+                  - /docs?\/.*/
+              tags:
+                only: /.*/
       
       - deploy_docker_release:
           requires:
