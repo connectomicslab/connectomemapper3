@@ -249,7 +249,6 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
-      - "Run commands to generate the coverage result"
       - coverage-reporter/send_report:
           coverage-reports: '/tmp/data/ds-sample/code/coverage.xml'
           project-token: ${CODACY_PROJECT_TOKEN}
