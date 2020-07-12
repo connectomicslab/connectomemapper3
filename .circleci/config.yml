@@ -230,10 +230,7 @@ jobs:
             sudo chown $(id -un):$(id -gn) -R /tmp/data/ds-sample
             find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
-      # Send coverage report to codacy
-      - coverage-reporter/send_report:
-          coverage-reports: '/tmp/data/ds-sample/code/coverage.xml'
-          project-token: $CODACY_PROJECT_TOKEN
+      
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -242,7 +239,21 @@ jobs:
           path: /tmp/data/ds-sample/derivatives/cmp
       - store_artifacts:
           path: /tmp/data/ds-sample/derivatives/nipype
-
+          
+  codacy-coverage-report:
+    docker:
+      - image: 'circleci/openjdk:8-jdk'
+      
+    working_directory: /tmp/data/ds-sample/code
+    
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - "Run commands to generate the coverage result"
+      - coverage-reporter/send_report:
+          coverage-reports: '/tmp/data/ds-sample/code/coverage.xml'
+          project-token: ${CODACY_PROJECT_TOKEN}
+          
   build_docs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
@@ -366,7 +377,7 @@ jobs:
 
 workflows:
   version: 2
-  build_test_deploy:
+  build_test_cov_deploy:
     jobs:
       - build:
           filters:
@@ -413,6 +424,17 @@ workflows:
             tags:
               only: /.*/
 
+      - codacy-coverage-report:
+        requires:
+          - build
+          - test
+        filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+      
       - deploy_docker_release:
           requires:
             - build
