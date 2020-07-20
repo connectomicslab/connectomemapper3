@@ -230,7 +230,7 @@ jobs:
             sudo chown $(id -un):$(id -gn) -R /tmp/data/ds-sample
             find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
-       - persist_to_workspace:
+      - persist_to_workspace:
           root: /tmp
           paths:
             - data/ds-sample/code
