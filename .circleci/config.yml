@@ -327,7 +327,7 @@ jobs:
             
             # Rename partial coverage 
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-05_coverage.xml
-       - run:
+      - run:
           name: Run anatomical pipelines on ds-sample (test 6 - NativeFreesurfer)
           no_output_timeout: 8h
           command: |
