@@ -9,6 +9,7 @@
 
 from traits.api import *
 import os
+from glob import glob
 import pickle
 import gzip
 
@@ -150,35 +151,35 @@ class PreprocessingStage(Stage):
         # print('Stage (inspect_outputs): '.format(self.stage_dir))
         if self.config.despiking:
             despike_dir = os.path.join(self.stage_dir, "converter")
-            despike = os.path.join(despike_dir, "converter")
+            despike = os.path.join(despike_dir, "fMRI_despike.nii.gz")
             if (os.path.exists(despike)):
                 self.inspect_outputs_dict['Spike corrected image'] = ['fsleyes', '-ad',
                                                                       despike, '-cm',
                                                                       'brain_colours_blackbdy_iso']
-
         if self.config.slice_timing:
             slc_timing_dir = os.path.join(self.stage_dir, "slice_timing")
-            tcorr = os.path.join(slc_timing_dir, "slice_timing")
-
-            if (os.path.exists(tcorr)):
-                self.inspect_outputs_dict['Slice time corrected image'] = ['fsleyes', '-ad',
-                                                                           tcorr,
-                                                                           '-cm', 'brain_colours_blackbdy_iso']
-
-
+            files = glob(os.path.join(slc_timing_dir, "*_st.nii.gz"))
+            if len(files) > 0:
+                tcorr = files[0]
+                if (os.path.exists(tcorr)):
+                    self.inspect_outputs_dict['Slice time corrected image'] = ['fsleyes', '-ad',
+                                                                                tcorr,
+                                                                                '-cm',
+                                                                                'brain_colours_blackbdy_iso']
         if self.config.motion_correction:
             motion_results_dir = os.path.join(self.stage_dir, "motion_correction")
-            mcorr = os.path.join(motion_results_dir, "motion_correction")
-
-            if (os.path.exists(mcorr)):
-                self.inspect_outputs_dict['Slice time and motion corrected image'] = ['fsleyes', '-ad',
-                                                                                      mcorr,
-                                                                                      '-cm',
-                                                                                      'brain_colours_blackbdy_iso']
-
+            files = glob(os.path.join(motion_results_dir, "*_mcf.nii.gz"))
+            if len(files) > 0:
+                mcorr = files[0]
+                if (os.path.exists(mcorr)):
+                    self.inspect_outputs_dict['Slice time and motion corrected image'] = ['fsleyes', '-ad',
+                                                                                            mcorr,
+                                                                                            '-cm',
+                                                                                            'brain_colours_blackbdy_iso']
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
+        print(self.inspect_outputs)
 
     def has_run(self):
         if self.config.motion_correction:

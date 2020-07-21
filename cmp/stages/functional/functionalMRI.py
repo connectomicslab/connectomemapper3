@@ -204,30 +204,23 @@ class FunctionalMRIStage(Stage):
 
     def define_inspect_outputs(self):
 
-        if self.config.smoothing > 0.0:
-            res_dir = os.path.join(self.stage_dir, "smoothing")
-            smooth = os.path.join(res_dir, "smooth")
-            if (os.path.exists(res_path)):
-                self.inspect_outputs_dict['Smoothed image'] = ['fsleyes', '-sdefault', smooth, '-cm',
-                                                               'brain_colours_blackbdy_iso']
-
         if self.config.wm or self.config.global_nuisance or self.config.csf or self.config.motion:
             res_dir = os.path.join(self.stage_dir, "nuisance_regression")
-            nuis = os.path.join(res_dir, "nuisance")
+            nuis = os.path.join(res_dir, "fMRI_nuisance.nii.gz")
             if (os.path.exists(nuis)):
                 self.inspect_outputs_dict['Regression output'] = [
                     'fsleyes', '-sdefault', nuis]
 
         if self.config.detrending:
             res_dir = os.path.join(self.stage_dir, "detrending")
-            detrend = os.path.join(res_dir, "detrend")
+            detrend = os.path.join(res_dir, "fMRI_detrending.nii.gz")
             if (os.path.exists(detrend)):
                 self.inspect_outputs_dict['Detrending output'] = ['fsleyes', '-sdefault', detrend,
                                                                   '-cm', 'brain_colours_blackbdy_iso']
 
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             res_dir = os.path.join(self.stage_dir, "converter")
-            filt = os.path.join(res_dir, "filter")
+            filt = os.path.join(res_dir, "fMRI_bandpass.nii.gz")
             if (os.path.exists(filt)):
                 self.inspect_outputs_dict['Filter output'] = ['fsleyes', '-sdefault', filt, '-cm',
                                                               'brain_colours_blackbdy_iso']
