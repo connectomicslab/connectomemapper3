@@ -9,6 +9,7 @@
 from nipype.interfaces import cmtk
 from traits.api import *
 from os import path as op
+import csv
 import glob
 import os
 import nibabel
@@ -547,6 +548,31 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         print("  ************************************************")
 
         print("  >> Save connectome maps as :")
+
+        # Get the edge attributes/keys/weights from the first edge and then break.
+        # Change w.r.t networkx2
+        edge_keys = []
+        for u, v, d in G.edges(data=True):
+            #print(list(d.keys()))
+            edge_keys = list(d.keys())
+            break
+
+        print('    - connectome_%s.tsv' % parkey)
+
+        with open('connectome_%s.tsv' % parkey, 'w') as out_file:
+            tsv_writer = csv.writer(out_file, delimiter='\t')
+            header = ['source', 'target']
+            header = header + [key for key in edge_keys]
+            tsv_writer.writerow(header)
+
+        with open('connectome_%s.tsv' % parkey, 'ab') as out_file:
+            nx.write_edgelist(G,
+                              out_file,
+                              comments='#',
+                              delimiter = '\t',
+                              data = edge_keys,
+                              encoding='utf-8')
+
         # storing network
         if 'gPickle' in output_types:
             print('    - connectome_%s.gpickle' % parkey)
@@ -555,14 +581,6 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             # edges
             # size_edges = (int(parval['number_of_regions']), int(
             #     parval['number_of_regions']))
-
-            # Get the edge attributes/keys/weights from the first edge and then break.
-            # Change w.r.t networkx2
-            edge_keys = []
-            for u, v, d in G.edges(data=True):
-                #print(list(d.keys()))
-                edge_keys = list(d.keys())
-                break
 
             edge_struct = {}
             for edge_key in edge_keys:
