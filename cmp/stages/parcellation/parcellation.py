@@ -351,9 +351,9 @@ class ParcellationStage(Stage):
 
                 flow.connect([
                     (parc_node, computeROIVolumetry, [
-                     ("output_rois", "roi_volumes")]),
+                     ("roi_files_in_structural_space", "roi_volumes")]),
                     (parc_files, computeROIVolumetry, [
-                     ("graphML_files", "roi_graphMLs")]),
+                     ("roi_graphMLs", "roi_graphMLs")]),
                     (computeROIVolumetry, outputnode, [
                      ("roi_volumes_stats", "roi_volumes_stats")]),
                 ])
@@ -407,9 +407,9 @@ class ParcellationStage(Stage):
 
                 flow.connect([
                     (parc_node, computeROIVolumetry, [
-                     ("output_rois", "roi_volumes")]),
+                     ("roi_files_in_structural_space", "roi_volumes")]),
                     (parc_files, computeROIVolumetry, [
-                     ("graphML_files", "roi_graphMLs")]),
+                     ("roi_graphMLs", "roi_graphMLs")]),
                     (computeROIVolumetry, outputnode, [
                      ("roi_volumes_stats", "roi_volumes_stats")]),
                 ])
