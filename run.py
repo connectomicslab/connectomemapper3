@@ -425,8 +425,7 @@ if args.analysis_level == "participant":
                         cmd = create_cmp_command(project=project,
                                                  run_anat=run_anat,
                                                  run_dmri=run_dmri,
-                                                 run_fmri=run_fmri,
-                                                 run_coverage=run_coverage)
+                                                 run_fmri=run_fmri)
                         print("... cmd : {}".format(cmd))
 
                         proc = run(command=cmd, env={},
