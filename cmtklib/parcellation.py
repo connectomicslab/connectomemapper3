@@ -139,7 +139,10 @@ class ComputeParcellationRoiVolumes(BaseInterface):
                     iflogger.info('%4.0f%%' % (pc))
 
                 # Get the label number
-                parcel_label = d["dn_multiscaleID"]
+                if self.inputs.parcellation_scheme == 'Lausanne2018':
+                    parcel_label = d["dn_multiscaleID"]
+                else:
+                    parcel_label = d["dn_correspondence_id"]
 
                 # Get each the parcel is cortical or subcortical
                 parcel_type = d["dn_region"]
@@ -149,7 +152,7 @@ class ComputeParcellationRoiVolumes(BaseInterface):
 
                 # Compute the parcel/ROI volume
                 parcel_volumetry = np.sum(roiData == int(
-                    d["dn_multiscaleID"])) * voxel_volume
+                    parcel_label)) * voxel_volume
 
                 f_volumetry.write(
                     '{:<4}, {:<55}, {:<10}, {:>10} \n'.format(parcel_label, parcel_name, parcel_type, parcel_volumetry))
