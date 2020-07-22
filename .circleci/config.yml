@@ -216,6 +216,9 @@ jobs:
 
             # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-01_coverage.xml
+
+            # Rename execution log
+            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-01_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 1)
           command: |
@@ -243,6 +246,9 @@ jobs:
 
             # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-02_coverage.xml
+
+            # Rename execution log
+            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-02_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 2)
           command: |
@@ -270,6 +276,9 @@ jobs:
 
             # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-03_coverage.xml
+
+            # Rename execution log
+            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-03_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 3)
           command: |
@@ -297,6 +306,9 @@ jobs:
 
             # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-04_coverage.xml
+
+            # Rename execution log
+            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-04_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 4)
           command: |
@@ -323,6 +335,9 @@ jobs:
 
             # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-05_coverage.xml
+
+            # Rename execution log
+            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-05_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 5)
           command: |
@@ -349,6 +364,9 @@ jobs:
 
             # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-06_coverage.xml
+
+            # Rename execution log
+            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-06_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 6)
           command: |
