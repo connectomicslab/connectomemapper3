@@ -378,7 +378,7 @@ class ParcellationStage(Stage):
                                                                              os.path.join('data', 'parcellation',
                                                                                           'nativefreesurfer',
                                                                                           'freesurferaparc',
-                                                                                          'resolution83.graphml')))]
+                                                                                          'freesurferaparc.graphml')))]
 
                 parc_files = pe.Node(interface=util.IdentityInterface(fields=["roi_colorLUTs", "roi_graphMLs"]),
                                      name="parcellation_files")
