@@ -11,7 +11,7 @@
 from cmtklib.util import bcolors
 from cmp import parser
 from cmp.info import __version__
-from cmp.project import CMP_Project_Info
+from cmp.project import CMP_Project_Info, run_individual
 from glob import glob
 import numpy
 # import nibabel
@@ -33,21 +33,10 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 # __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                 'version')).read()
 
-def create_cmp_command(project, run_anat, run_dmri, run_fmri, run_coverage=False):
+def create_cmp_command(project, run_anat, run_dmri, run_fmri):
     cmd = []
 
-    if run_coverage:
-        # Set CONDA paths as in Bthe IDS App
-        conda_dir = os.path.join('/opt','conda','envs','py37cmp-core')
-        conda_pkg = os.path.join(conda_dir,'lib','python3.7','site-packages')
-        cmd.append("coverage")
-        cmd.append("run")
-        cmd.append("--source=%s/cmp,%s/cmtklib" % (conda_pkg, conda_pkg))
-        cmd.append("--omit=*/bidsappmanager/*,*/viz/*")
-        cmd.append(os.path.join(conda_dir,'bin','connectomemapper3'))
-    else:
-        cmd.append("connectomemapper3")
-
+    cmd.append("connectomemapper3")
     cmd.append("--bids_dir")
     cmd.append(project.base_directory)
     cmd.append("--output_dir")
@@ -370,8 +359,9 @@ if args.analysis_level == "participant":
 
             for session in project.subject_sessions:
 
-                while len(processes) == maxprocs:
-                    manage_processes(processes)
+                if not args.coverage:
+                    while len(processes) == maxprocs:
+                        manage_processes(processes)
 
                 print('> Process subject {} session {}'.format(
                     project.subject, session))
@@ -423,34 +413,28 @@ if args.analysis_level == "participant":
                     if args.func_pipeline_config is not None:
                         print("        - fMRI (functional connectivity matrices)")
 
-                    run_coverage = False
+
                     if args.coverage:
-                        run_coverage = True
+                        run_individual(project.base_directory, project.output_directory,
+                                       project.subject,
+                                       project.subject_session,
+                                       project.anat_config_file,
+                                       project.dmri_config_file,
+                                       project.fmri_config_file)
+                    else:
+                        cmd = create_cmp_command(project=project,
+                                                 run_anat=run_anat,
+                                                 run_dmri=run_dmri,
+                                                 run_fmri=run_fmri,
+                                                 run_coverage=run_coverage)
+                        print("... cmd : {}".format(cmd))
 
-                    cmd = create_cmp_command(project=project,
-                                             run_anat=run_anat,
-                                             run_dmri=run_dmri,
-                                             run_fmri=run_fmri,
-                                             run_coverage=run_coverage)
-
-                    print("... cmd : {}".format(cmd))
-
-                    # for label in self.list_of_subjects_to_be_processed:
-                    #     while len(processes) == maxprocs:
-                    #         self.manage_bidsapp_procs(processes)
-                    #
-                    #     proc = self.start_bidsapp_participant_level_process(self.bidsapp_tag,label)
-                    #     processes.append(proc)
-                    #
-                    # while len(processes) > 0:
-                    #     self.manage_bidsapp_procs(processes)
-
-                    proc = run(command=cmd, env={},
-                               log_filename=os.path.join(project.output_directory, 'cmp', project.subject,
-                                                         project.subject_session,
-                                                         '{}_{}_log.txt'.format(project.subject,
-                                                                                project.subject_session)))
-                    processes.append(proc)
+                        proc = run(command=cmd, env={},
+                                   log_filename=os.path.join(project.output_directory, 'cmp', project.subject,
+                                                             project.subject_session,
+                                                             '{}_{}_log.txt'.format(project.subject,
+                                                                                    project.subject_session)))
+                        processes.append(proc)
                 else:
                     print(
                         "... Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)")
@@ -459,8 +443,9 @@ if args.analysis_level == "participant":
 
             print('> Process subject {}'.format(project.subject))
 
-            while len(processes) == maxprocs:
-                manage_processes(processes)
+            if not args.coverage:
+                while len(processes) == maxprocs:
+                    manage_processes(processes)
 
             project.subject_sessions = ['']
             project.subject_session = ''
@@ -505,30 +490,34 @@ if args.analysis_level == "participant":
                     if args.func_pipeline_config is not None:
                         print("        - fMRI (functional connectivity matrices)")
 
-                run_coverage = False
                 if args.coverage:
-                    run_coverage = True
+                    run_individual(project.base_directory, project.output_directory,
+                                   project.subject,
+                                   project.subject_session,
+                                   project.anat_config_file,
+                                   project.dmri_config_file,
+                                   project.fmri_config_file)
+                else:
 
-                cmd = create_cmp_command(project=project,
-                                         run_anat=run_anat,
-                                         run_dmri=run_dmri,
-                                         run_fmri=run_fmri,
-                                         run_coverage=run_coverage)
+                    cmd = create_cmp_command(project=project,
+                                             run_anat=run_anat,
+                                             run_dmri=run_dmri,
+                                             run_fmri=run_fmri)
+                    print("... cmd : {}".format(cmd))
 
-                print("... cmd : {}".format(cmd))
-
-                proc = run(command=cmd, env={},
-                           log_filename=os.path.join(project.output_directory,
-                                                     'cmp', project.subject,
-                                                     '{}_log.txt'.format(project.subject))
-                           )
-                processes.append(proc)
+                    proc = run(command=cmd, env={},
+                               log_filename=os.path.join(project.output_directory,
+                                                         'cmp', project.subject,
+                                                         '{}_log.txt'.format(project.subject))
+                               )
+                    processes.append(proc)
             else:
                 print(
                     "... Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)")
 
-    while len(processes) > 0:
-        manage_processes(processes)
+    if not args.coverage:
+        while len(processes) > 0:
+            manage_processes(processes)
 
     clean_cache(args.bids_dir)
 

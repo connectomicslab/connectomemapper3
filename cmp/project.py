@@ -17,6 +17,7 @@ from bids import BIDSLayout
 import multiprocessing
 import fnmatch
 
+import sys
 import glob
 import os
 import shutil
@@ -444,3 +445,168 @@ def update_fmri_last_processed(project_info, pipeline):
             if stage.lower() + '_stage' in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
+
+def run_individual(bids_dir, output_dir, participant_label, session_label, anat_pipeline_config, dwi_pipeline_config, func_pipeline_config):
+    project = CMP_Project_Info()
+    project.base_directory = os.path.abspath(bids_dir)
+    project.output_directory = os.path.abspath(output_dir)
+    project.subjects = ['{}'.format(participant_label)]
+    project.subject = '{}'.format(participant_label)
+
+    try:
+        bids_layout = BIDSLayout(project.base_directory)
+    except:
+        print("Exception : Raised at BIDSLayout")
+        sys.exit(1)
+
+    if session_label is not None:
+        project.subject_sessions = ['{}'.format(session_label)]
+        project.subject_session = '{}'.format(session_label)
+        print("INFO : Detected session(s)")
+    else:
+        print("INFO : No detected session")
+        project.subject_sessions = ['']
+        project.subject_session = ''
+
+    project.anat_config_file = os.path.abspath(anat_pipeline_config)
+
+    # Perform only the anatomical pipeline
+    if dwi_pipeline_config is None and func_pipeline_config is None:
+
+        anat_pipeline = init_anat_project(project, False)
+        if anat_pipeline is not None:
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
+            if anat_valid_inputs:
+                anat_pipeline.process()
+            else:
+                sys.exit(1)
+
+    # Perform the anatomical and the diffusion pipelines
+    elif dwi_pipeline_config is not None and func_pipeline_config is None:
+
+        project.dmri_config_file = os.path.abspath(dwi_pipeline_config)
+
+        anat_pipeline = init_anat_project(project, False)
+        if anat_pipeline is not None:
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
+
+            if anat_valid_inputs:
+                print(">> Process anatomical pipeline")
+                anat_pipeline.process()
+            else:
+                print("ERROR : Invalid inputs")
+                sys.exit(1)
+
+        anat_valid_outputs, msg = anat_pipeline.check_output()
+        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+
+        if anat_valid_outputs:
+            dmri_valid_inputs, dmri_pipeline = init_dmri_project(project, bids_layout, False)
+            if dmri_pipeline is not None:
+                dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                #print sys.argv[offset+7]
+                if dmri_valid_inputs:
+                    dmri_pipeline.process()
+                else:
+                    print("   ... ERROR : Invalid inputs")
+                    sys.exit(1)
+        else:
+            print(msg)
+            sys.exit(1)
+
+    # Perform the anatomical and the fMRI pipelines
+    elif dwi_pipeline_config is None and func_pipeline_config is not None:
+
+        project.fmri_config_file = os.path.abspath(func_pipeline_config)
+
+        anat_pipeline = init_anat_project(project, False)
+        if anat_pipeline is not None:
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
+
+            if anat_valid_inputs:
+                print(">> Process anatomical pipeline")
+                anat_pipeline.process()
+            else:
+                print("ERROR : Invalid inputs")
+                sys.exit(1)
+
+        anat_valid_outputs, msg = anat_pipeline.check_output()
+        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+
+        if anat_valid_outputs:
+            fmri_valid_inputs, fmri_pipeline = init_fmri_project(project, bids_layout, False)
+            if fmri_pipeline is not None:
+                fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                #fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+                #fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+                #print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
+                #print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
+
+                # print sys.argv[offset+9]
+                if fmri_valid_inputs:
+                    print(">> Process fmri pipeline")
+                    fmri_pipeline.process()
+                else:
+                    print("   ... ERROR : Invalid inputs")
+                    sys.exit(1)
+        else:
+            print(msg)
+            sys.exit(1)
+
+    # Perform all pipelines (anatomical/diffusion/fMRI)
+    elif dwi_pipeline_config is not None and func_pipeline_config is not None:
+
+        project.dmri_config_file = os.path.abspath(dwi_pipeline_config)
+        project.fmri_config_file = os.path.abspath(func_pipeline_config)
+
+        anat_pipeline = init_anat_project(project, False)
+        if anat_pipeline is not None:
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
+
+            if anat_valid_inputs:
+                print(">> Process anatomical pipeline")
+                anat_pipeline.process()
+            else:
+                print("   ... ERROR : Invalid inputs")
+                sys.exit(1)
+
+        anat_valid_outputs, msg = anat_pipeline.check_output()
+        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+
+        if anat_valid_outputs:
+            dmri_valid_inputs, dmri_pipeline = init_dmri_project(project, bids_layout, False)
+            if dmri_pipeline is not None:
+                dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                # print sys.argv[offset+7]
+                if dmri_valid_inputs:
+                    print(">> Process diffusion pipeline")
+                    dmri_pipeline.process()
+                else:
+                    print("   ... ERROR : Invalid inputs")
+                    sys.exit(1)
+
+            fmri_valid_inputs, fmri_pipeline = init_fmri_project(project, bids_layout, False)
+            if fmri_pipeline is not None:
+                fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
+                fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+                fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+                print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
+                print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
+
+                # print sys.argv[offset+9]
+                if fmri_valid_inputs:
+                    print(">> Process fmri pipeline")
+                    fmri_pipeline.process()
+                else:
+                    print("   ... ERROR : Invalid inputs")
+                    sys.exit(1)
+        else:
+            print(msg)
+            sys.exit(1)
