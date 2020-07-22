@@ -53,6 +53,8 @@ def get():
 
     p.add_argument('--fs_license', help='Freesurfer license.txt')
 
+    p.add_argument('--coverage', help='Run connectomemapper3 with coverage', action='store_true')
+
     # p.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation',
     #                    action='store_true')
     p.add_argument('-v', '--version', action='version',

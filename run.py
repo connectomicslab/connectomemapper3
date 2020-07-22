@@ -33,9 +33,21 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 # __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                 'version')).read()
 
-def create_cmp_command(project, run_anat, run_dmri, run_fmri):
+def create_cmp_command(project, run_anat, run_dmri, run_fmri, run_coverage=False):
     cmd = []
-    cmd.append("connectomemapper3")
+
+    if run_coverage:
+        # Set CONDA paths as in Bthe IDS App
+        conda_dir = os.path.join('/opt','conda','envs','py37cmp-core')
+        conda_pkg = os.path.join(conda_dir,'lib','python3.7','site-packages')
+        cmd.append("coverage")
+        cmd.append("run")
+        cmd.append("--source=%s/cmp,%s/cmtklib" % (conda_pkg, conda_pkg))
+        cmd.append("--omit=*/bidsappmanager/*,*/viz/*")
+        cmd.append(os.path.join(conda_dir,'bin','connectomemapper3'))
+    else:
+        cmd.append("connectomemapper3")
+
     cmd.append("--bids_dir")
     cmd.append(project.base_directory)
     cmd.append("--output_dir")
@@ -411,8 +423,16 @@ if args.analysis_level == "participant":
                     if args.func_pipeline_config is not None:
                         print("        - fMRI (functional connectivity matrices)")
 
-                    cmd = create_cmp_command(
-                        project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
+                    run_coverage = False
+                    if args.coverage:
+                        run_coverage = True
+
+                    cmd = create_cmp_command(project=project,
+                                             run_anat=run_anat,
+                                             run_dmri=run_dmri,
+                                             run_fmri=run_fmri,
+                                             run_coverage=run_coverage)
+
                     print("... cmd : {}".format(cmd))
 
                     # for label in self.list_of_subjects_to_be_processed:
@@ -485,13 +505,23 @@ if args.analysis_level == "participant":
                     if args.func_pipeline_config is not None:
                         print("        - fMRI (functional connectivity matrices)")
 
-                cmd = create_cmp_command(
-                    project=project, run_anat=run_anat, run_dmri=run_dmri, run_fmri=run_fmri)
+                run_coverage = False
+                if args.coverage:
+                    run_coverage = True
+
+                cmd = create_cmp_command(project=project,
+                                         run_anat=run_anat,
+                                         run_dmri=run_dmri,
+                                         run_fmri=run_fmri,
+                                         run_coverage=run_coverage)
+
                 print("... cmd : {}".format(cmd))
 
                 proc = run(command=cmd, env={},
-                           log_filename=os.path.join(project.output_directory, 'cmp', project.subject,
-                                                     '{}_log.txt'.format(project.subject)))
+                           log_filename=os.path.join(project.output_directory,
+                                                     'cmp', project.subject,
+                                                     '{}_log.txt'.format(project.subject))
+                           )
                 processes.append(proc)
             else:
                 print(

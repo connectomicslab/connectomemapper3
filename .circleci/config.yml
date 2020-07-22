@@ -191,7 +191,7 @@ jobs:
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
             #echo "THISVERSION : ${THISVERSION}"
             ls -la  /tmp/data/ds-sample/code
-            
+
             # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
             rm -f /tmp/data/ds-sample/code/*.ini
 
@@ -211,9 +211,10 @@ jobs:
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
                 --anat_pipeline_config /config/ref_anatomical_config_1.ini \
                 --dwi_pipeline_config /config/ref_diffusion_config_1.ini \
-                --fs_license /bids_dir/code/license.txt
+                --fs_license /bids_dir/code/license.txt \
+                --coverage
 
-            # Rename partial coverage 
+            # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-01_coverage.xml
       - run:
           name: Checking outputs of Connectome Mapper run (test 1)
@@ -237,9 +238,10 @@ jobs:
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
                 --anat_pipeline_config /config/ref_anatomical_config_1.ini \
                 --dwi_pipeline_config /config/ref_diffusion_config_2.ini \
-                --fs_license /bids_dir/code/license.txt
-            
-            # Rename partial coverage 
+                --fs_license /bids_dir/code/license.txt \
+                --coverage
+
+            # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-02_coverage.xml
       - run:
           name: Checking outputs of Connectome Mapper run (test 2)
@@ -263,9 +265,10 @@ jobs:
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
                 --anat_pipeline_config /config/ref_anatomical_config_1.ini \
                 --dwi_pipeline_config /config/ref_diffusion_config_3.ini \
-                --fs_license /bids_dir/code/license.txt
-            
-            # Rename partial coverage 
+                --fs_license /bids_dir/code/license.txt \
+                --coverage
+
+            # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-03_coverage.xml
       - run:
           name: Checking outputs of Connectome Mapper run (test 3)
@@ -289,9 +292,10 @@ jobs:
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
                 --anat_pipeline_config /config/ref_anatomical_config_1.ini \
                 --dwi_pipeline_config /config/ref_diffusion_config_4.ini \
-                --fs_license /bids_dir/code/license.txt
-            
-            # Rename partial coverage 
+                --fs_license /bids_dir/code/license.txt \
+                --coverage
+
+            # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-04_coverage.xml
       - run:
           name: Checking outputs of Connectome Mapper run (test 4)
@@ -314,9 +318,10 @@ jobs:
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
                 --anat_pipeline_config /config/ref_anatomical_config_2.ini \
-                --fs_license /bids_dir/code/license.txt
-            
-            # Rename partial coverage 
+                --fs_license /bids_dir/code/license.txt \
+                --coverage
+
+            # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-05_coverage.xml
       - run:
           name: Checking outputs of Connectome Mapper run (test 5)
@@ -339,9 +344,10 @@ jobs:
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
                 --anat_pipeline_config /config/ref_anatomical_config_3.ini \
-                --fs_license /bids_dir/code/license.txt
-            
-            # Rename partial coverage 
+                --fs_license /bids_dir/code/license.txt \
+                --coverage
+
+            # Rename partial coverage
             mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-06_coverage.xml
       - run:
           name: Checking outputs of Connectome Mapper run (test 6)
@@ -374,20 +380,20 @@ jobs:
           path: /tmp/data/ds-sample/derivatives/cmp
       - store_artifacts:
           path: /tmp/data/ds-sample/derivatives/nipype
-          
+
   codacy-coverage-report:
     docker:
       - image: 'circleci/openjdk:8-jdk'
-      
+
     working_directory: /tmp/data/ds-sample/code
-    
+
     steps:
       - attach_workspace:
           at: /tmp
       - coverage-reporter/send_report:
           coverage-reports: '/tmp/data/ds-sample/code/test-01_coverage.xml,/tmp/data/ds-sample/code/test-02_coverage.xml,/tmp/data/ds-sample/code/test-03_coverage.xml,/tmp/data/ds-sample/code/test-04_coverage.xml,/tmp/data/ds-sample/code/test-05_coverage.xml,/tmp/data/ds-sample/code/test-06_coverage.xml'
           project-token: ${CODACY_PROJECT_TOKEN}
-          
+
   build_docs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
@@ -568,7 +574,7 @@ workflows:
                   - /docs?\/.*/
               tags:
                 only: /.*/
-      
+
       - deploy_docker_release:
           requires:
             - build
