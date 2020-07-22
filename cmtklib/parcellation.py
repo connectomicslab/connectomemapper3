@@ -49,7 +49,7 @@ class ComputeParcellationRoiVolumesInputSpec(BaseInterfaceInputSpec):
     roi_volumes = InputMultiPath(File(
         exists=True), desc='ROI volumes registered to diffusion space', mandatory=True)
     parcellation_scheme = traits.Enum(
-        'Lausanne2018', ['Lausanne2018'], usedefault=True, mandatory=True)
+        'Lausanne2018', ['NativeFreesurfer','Lausanne2008','Lausanne2018'], usedefault=True, mandatory=True)
     roi_graphMLs = InputMultiPath(File(exists=True), desc='GraphML description of ROI volumes (Lausanne2018)',
                                   mandatory=True)
 
