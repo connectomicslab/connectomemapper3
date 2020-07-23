@@ -415,12 +415,39 @@ if args.analysis_level == "participant":
 
 
                     if args.coverage:
-                        run_individual(project.base_directory, project.output_directory,
-                                       project.subject,
-                                       project.subject_session,
-                                       project.anat_config_file,
-                                       project.dmri_config_file,
-                                       project.fmri_config_file)
+                        if run_anat:
+                            if run_dmri and not run_fmri:
+                                run_individual(project.base_directory,
+                                               project.output_directory,
+                                               project.subject,
+                                               project.subject_session,
+                                               project.anat_config_file,
+                                               project.dmri_config_file,
+                                               None)
+                            if not run_dmri and run_fmri:
+                                run_individual(project.base_directory,
+                                               project.output_directory,
+                                               project.subject,
+                                               project.subject_session,
+                                               project.anat_config_file,
+                                               None,
+                                               project.fmri_config_file)
+                            if run_dmri and run_fmri:
+                                run_individual(project.base_directory,
+                                               project.output_directory,
+                                               project.subject,
+                                               project.subject_session,
+                                               project.anat_config_file,
+                                               project.dmri_config_file,
+                                               project.fmri_config_file)
+                            else: # anatomical pipeline only
+                                run_individual(project.base_directory,
+                                               project.output_directory,
+                                               project.subject,
+                                               project.subject_session,
+                                               project.anat_config_file,
+                                               None,
+                                               None)
                     else:
                         cmd = create_cmp_command(project=project,
                                                  run_anat=run_anat,
