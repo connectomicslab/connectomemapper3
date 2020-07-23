@@ -15,10 +15,10 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 .. image:: https://zenodo.org/badge/183162514.svg
   :target: https://zenodo.org/badge/latestdoi/183162514
   :alt: Digital Object Identifier
-.. image:: https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp
+.. image:: https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?label=docker
   :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
   :alt: Docker Image Version (latest by date)
-.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp?label=docker
+.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp
   :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
   :alt: Docker Pulls
 .. image:: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=svg
