@@ -234,4 +234,4 @@ Execution details (data provenance) of each interface (node) of a given pipeline
     :width: 888
     :align: center
 
-.. note:: Connectome Mapper 3 outputs are currently being updated to conform to the :abbr:`BIDS (brain imaging data structure)` Derivatives specification (see `BIDS Derivatives Extension <https://bids-specification.readthedocs.io/en/derivatives/>`_).
+.. note:: Connectome Mapper 3 outputs are currently being updated to conform to :abbr:`BIDS (brain imaging data structure)` v1.4.0.
