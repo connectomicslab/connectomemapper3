@@ -97,7 +97,7 @@ Diffusion derivatives in the individual ``DWI`` space are placed in each subject
     - ``dwi/sub-<subject_label>]_model-DTI_MD.nii.gz``
 
 
-* The Fiber Orientation DIstribution (FOD) image from Constrained Spherical Deconvolution (CSD) fit (if performed):
+* The Fiber Orientation Distribution (FOD) image from Constrained Spherical Deconvolution (CSD) fit (if performed):
 
     - ``dwi/sub-<subject_label>]_model-CSD_diffmodel.nii.gz``
 
