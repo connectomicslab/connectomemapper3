@@ -18,6 +18,7 @@ import numpy as np
 import networkx as nx
 import scipy.io
 import scipy.io as sio
+import copy
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.mrtrix as mrtrix
@@ -423,6 +424,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         finalfiberlength = []
         for idx in final_fibers_idx:
             # compute length of fiber
+            # print('Fiber %i length: %d' % (idx, length(fib[idx][0])))
             finalfiberlength.append(length(fib[idx][0]))
 
         # convert to array
@@ -442,100 +444,112 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 total_volume += G.nodes[int(u)]['roi_volume']
             u_old = u
 
+        G_out = copy.deepcopy(G)
+
         # update edges
         # measures to add here
         # FIXME treat case of self-connection that gives di['fiber_length_mean'] = 0.0
-        for u in G.nodes():
-            for v in G.nodes():
-                if G.has_edge(u,v):
-                    # Check for diagonal elements that raise an error when the edge is visited a second time
-                    # print('({}, {}): {}'.format(u, v, list(G[u][v].keys())))
-                    if len(list(G[u][v].keys())) == 1:
-                        di = {'number_of_fibers': len(G[u][v]['fiblist']) }
+        for u, v, d in G.edges(data=True):
+            # Check for diagonal elements that raise an error when the edge is visited a second time
+            # print('({}, {}): {}'.format(u, v, list(G[u][v].keys())))
+            G_out.remove_edge(u, v)
 
-                        # print di
+            print("u / v : {} / {}".format(u,v))
+            if len(list(G[u][v].keys())) == 1:
+                di = {'number_of_fibers': len(G[u][v]['fiblist']) }
 
-                        # additional measures
-                        # compute mean/std of fiber measure
-                        idx = np.where((final_fiberlabels_array[:, 0] == int(u)) & (
-                            final_fiberlabels_array[:, 1] == int(v)))[0]
+                print("G[u][v]['fiblist'] : {}".format(G[u][v]['fiblist']))
 
-                        # print "idx : ",idx
+                # additional measures
+                # compute mean/std of fiber measure
+                if u <= v:
+                    idx = np.where((final_fiberlabels_array[:, 0] == int(u)) & (
+                        final_fiberlabels_array[:, 1] == int(v)))[0]
+                else:
+                    idx = np.where((final_fiberlabels_array[:, 0] == int(v)) & (
+                        final_fiberlabels_array[:, 1] == int(u)))[0]
 
-                        di['fiber_length_mean'] = float(
-                            np.mean(final_fiberlength_array[idx]))
-                        di['fiber_length_median'] = float(
-                            np.median(final_fiberlength_array[idx]))
-                        di['fiber_length_std'] = float(
-                            np.std(final_fiberlength_array[idx]))
+                print("idx : {}".format(idx))
+                print("final_fiberlength_array[idx] : {}".format(final_fiberlength_array[idx]))
 
-                        di['fiber_proportion'] = float(
-                            100.0 * (di['number_of_fibers'] / float(total_fibers)))
+                di['fiber_length_mean'] = float(
+                    np.nanmean(final_fiberlength_array[idx]))
+                di['fiber_length_median'] = float(
+                    np.nanmedian(final_fiberlength_array[idx]))
+                di['fiber_length_std'] = float(
+                    np.nanstd(final_fiberlength_array[idx]))
 
-                        # Compute density
-                        # density = (#fibers / mean_fibers_length) * (2 / (area_roi_u + area_roi_v))
+                di['fiber_proportion'] = float(
+                    100.0 * (di['number_of_fibers'] / float(total_fibers)))
 
-                        # print "G.nodes[int(u)]['roi_volume'] : %i / G.nodes[int(v)]['roi_volume'] : %i"
-                        #   % (G.nodes[int(u)]['roi_volume'],G.nodes[int(v)]['roi_volume'])
-                        # print "di['number_of_fibers'] : %i / di['fiber_length_mean'] : %i" % (di['number_of_fibers'],di['fiber_length_mean'])
+                # Compute density
+                # density = (#fibers / mean_fibers_length) * (2 / (area_roi_u + area_roi_v))
 
-                        if di['fiber_length_mean'] > 0.0:
-                            di['fiber_density'] = float((float(di['number_of_fibers']) / float(di['fiber_length_mean'])) * float(
-                                2.0 / (G.nodes[int(u)]['roi_volume'] + G.nodes[int(v)]['roi_volume'])))
-                            di['normalized_fiber_density'] = float(
-                                ((float(di['number_of_fibers']) / float(total_fibers)) / float(di['fiber_length_mean'])) * (
-                                    (2.0 * float(total_volume)) / (
-                                        G.nodes[int(u)]['roi_volume'] + G.nodes[int(v)]['roi_volume'])))
+                # print "G.nodes[int(u)]['roi_volume'] : %i / G.nodes[int(v)]['roi_volume'] : %i"
+                #   % (G.nodes[int(u)]['roi_volume'],G.nodes[int(v)]['roi_volume'])
+                # print "di['number_of_fibers'] : %i / di['fiber_length_mean'] : %i" % (di['number_of_fibers'],di['fiber_length_mean'])
+
+                if di['fiber_length_mean'] > 0.0:
+                    di['fiber_density'] = float((float(di['number_of_fibers']) / float(di['fiber_length_mean'])) * float(
+                        2.0 / (G.nodes[int(u)]['roi_volume'] + G.nodes[int(v)]['roi_volume'])))
+                    di['normalized_fiber_density'] = float(
+                        ((float(di['number_of_fibers']) / float(total_fibers)) / float(di['fiber_length_mean'])) * (
+                            (2.0 * float(total_volume)) / (
+                                G.nodes[int(u)]['roi_volume'] + G.nodes[int(v)]['roi_volume'])))
+                else:
+                    di['fiber_density'] = 0.0
+                    di['normalized_fiber_density'] = 0.0
+                # this is indexed into the fibers that are valid in the sense of touching start
+                # and end roi and not going out of the volume
+                if u <= v:
+                    idx_valid = np.where((fiberlabels[:, 0] == int(u)) & (
+                        fiberlabels[:, 1] == int(v)))[0]
+                else:
+                    idx_valid = np.where((fiberlabels[:, 0] == int(v)) & (
+                        fiberlabels[:, 1] == int(u)))[0]
+
+                for k, vv in list(mmapdata.items()):
+                    val = []
+
+                    # print("Processing %s map..." % k)
+                    # print(vv[1])
+                    for i in idx_valid:
+                        # retrieve indices
+                        try:
+                            # print(h[i])
+                            idx2 = (h[i] / vv[1]).astype(np.uint32)
+                            # print "idx2 : ",idx2
+                            val.append(vv[0][idx2[:, 0], idx2[:, 1], idx2[:, 2]])
+                        except IndexError as e:
+                            print(
+                                "  ... ERROR - Index error occured when trying extract scalar values for measure", k)
+                            print("  ... ERROR - Discard fiber with index",
+                                  i, "Exception: ", e)
+
+                    # print(k)
+                    if len(val) > 0:
+                        da = np.concatenate(val)
+                        # print(da.max())
+                        # print(np.median(da))
+
+                        if k == 'shore_rtop':
+                            di[k + '_mean'] = da.astype(np.float64).mean()
+                            di[k + '_std'] = da.astype(np.float64).std()
+                            di[k + '_median'] = np.median(da.astype(np.float64))
                         else:
-                            di['fiber_density'] = 0.0
-                            di['normalized_fiber_density'] = 0.0
-                        # this is indexed into the fibers that are valid in the sense of touching start
-                        # and end roi and not going out of the volume
-                        idx_valid = np.where((fiberlabels[:, 0] == int(u)) & (
-                            fiberlabels[:, 1] == int(v)))[0]
+                            di[k + '_mean'] = da.mean().astype(np.float)
+                            di[k + '_std'] = da.std().astype(np.float)
+                            di[k + '_median'] = np.median(da).astype(np.float)
 
-                        for k, vv in list(mmapdata.items()):
-                            val = []
+                        # print(di[k + '_median'])
+                        del da
+                        del val
 
-                            # print("Processing %s map..." % k)
-                            # print(vv[1])
-                            for i in idx_valid:
-                                # retrieve indices
-                                try:
-                                    # print(h[i])
-                                    idx2 = (h[i] / vv[1]).astype(np.uint32)
-                                    # print "idx2 : ",idx2
-                                    val.append(vv[0][idx2[:, 0], idx2[:, 1], idx2[:, 2]])
-                                except IndexError as e:
-                                    print(
-                                        "  ... ERROR - Index error occured when trying extract scalar values for measure", k)
-                                    print("  ... ERROR - Discard fiber with index",
-                                          i, "Exception: ", e)
+                G_out.add_edge(u, v)
+                for key in di:
+                    G_out[u][v][key] = di[key]
 
-                            # print(k)
-                            da = np.concatenate(val)
-                            # print(da.max())
-                            # print(np.median(da))
-
-                            if k == 'shore_rtop':
-                                di[k + '_mean'] = da.astype(np.float64).mean()
-                                di[k + '_std'] = da.astype(np.float64).std()
-                                di[k + '_median'] = np.median(da.astype(np.float64))
-                            else:
-                                di[k + '_mean'] = da.mean().astype(np.float)
-                                di[k + '_std'] = da.std().astype(np.float)
-                                di[k + '_median'] = np.median(da).astype(np.float)
-
-                            # print(di[k + '_median'])
-                            del da
-                            del val
-
-                        G.remove_edge(u, v)
-                        G.add_edge(u, v)
-                        for key in di:
-                            G[u][v][key] = di[key]
-
-                        # print('({}, {}): {}'.format(u, v, list(G[u][v].keys())))
+                # print('({}, {}): {}'.format(u, v, list(G[u][v].keys())))
 
         # print("  ************************************************************************")
 
@@ -545,6 +559,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         #     if 'fiblist' in list(d.keys()):
         #         print(G[u][v]['fiblist'])
 
+        del G
+
         print("  ************************************************")
 
         print("  >> Save connectome maps as :")
@@ -552,7 +568,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         # Get the edge attributes/keys/weights from the first edge and then break.
         # Change w.r.t networkx2
         edge_keys = []
-        for u, v, d in G.edges(data=True):
+        for u, v, d in G_out.edges(data=True):
             #print(list(d.keys()))
             edge_keys = list(d.keys())
             break
@@ -566,7 +582,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             tsv_writer.writerow(header)
 
         with open('connectome_%s.tsv' % parkey, 'ab') as out_file:
-            nx.write_edgelist(G,
+            nx.write_edgelist(G_out,
                               out_file,
                               comments='#',
                               delimiter = '\t',
@@ -576,7 +592,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         # storing network
         if 'gPickle' in output_types:
             print('    - connectome_%s.gpickle' % parkey)
-            nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
+            nx.write_gpickle(G_out, 'connectome_%s.gpickle' % parkey)
         if 'mat' in output_types:
             # edges
             # size_edges = (int(parval['number_of_regions']), int(
@@ -584,15 +600,16 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
             edge_struct = {}
             for edge_key in edge_keys:
-                # print('edge key: %s ' % edge_key)
-                edge_struct[edge_key] = nx.to_numpy_matrix(G, weight=edge_key)
+                if edge_key != 'fiblist':
+                    print('edge key: %s ' % edge_key)
+                    edge_struct[edge_key] = nx.to_numpy_matrix(G_out, weight=edge_key)
 
             # nodes
             size_nodes = int(parval['number_of_regions'])
 
             # Get the node attributes/keys from the first node and then break.
             # Change w.r.t networkx2
-            for u, d in G.nodes(data=True):
+            for u, d in G_out.nodes(data=True):
                 node_keys = list(d.keys())
                 break
 
@@ -609,7 +626,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                     node_arr = np.zeros(size_nodes, dtype=np.object_)
 
                 node_n = 0
-                for _, node_data in G.nodes(data=True):
+                for _, node_data in G_out.nodes(data=True):
                     node_arr[node_n] = node_data[node_key]
                     # print " node_arr[%i]:" % node_n
                     # print node_arr[node_n]
@@ -622,11 +639,11 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                                                                   'nodes': node_struct})
         if 'graphml' in output_types:
             g2 = nx.Graph()
-            for u_gml, v_gml, d_gml in G.edges(data=True):
+            for u_gml, v_gml, d_gml in G_out.edges(data=True):
                 g2.add_edge(u_gml, v_gml)
                 for key in d_gml:
                     g2[u_gml][v_gml][key] = d_gml[key]
-            for u_gml, d_gml in G.nodes(data=True):
+            for u_gml, d_gml in G_out.nodes(data=True):
                 g2.add_node(u_gml)
                 if parcellation_scheme != "Lausanne2018":
                     g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
