@@ -3,6 +3,45 @@ Changes
 ========
 
 ****************************
+Version 3.0.0-RC1
+****************************
+
+Date: July 24, 2020
+
+This version corresponds to the first release candidate of Connectome Mapper 3. In particular, it integrates Pull Request #40 where the last major changes prior to its official release have been made, which includes in particular:
+
+*Migration to Python 3*
+
+* Fixes automatically with ``2to3`` and manually a number of Python 2 statements invalid in python 3 including the print() function
+
+* Correct automatically PEP8 code style issues with autopep8
+
+* Correct a number of code stly issues reported by Codacy (bandits/pylints/flake8)
+
+*Code coverage*
+
+* Use `coveragepy <https://coverage.readthedocs.io/en/coverage-5.2/>`_  in CircleCI during regression tests of the BIDS app and create code coverage reports
+
+*Changes in BIDS derivatives*
+
+* Renamed parcellation files
+
+* Renamed connectivity graph files
+
+*Upgrade*
+
+* Refactored code to inspect outputs with the graphical user interface (cmpbidsappmanager)
+
+*Bug fixes*
+
+* Fixes to computes ROI volumetry for Lausanne2008 and NativeFreesurfer parcellation schemes
+
+* Fixes to compute the structural connectivity matrices following migration to python 3
+
+Please check the `pull request 40 page <https://github.com/connectomicslab/connectomemapper3/pull/40>`_ for change details.
+
+
+****************************
 Version 3.0.0-beta-RC2
 ****************************
 
