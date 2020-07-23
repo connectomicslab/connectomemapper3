@@ -1,7 +1,7 @@
-## Connectome Mapper 3 BIDS App (Beta release)
+## Connectome Mapper 3 BIDS App 
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 
-![Docker Image Version (latest by date)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3) [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/connectomicslab/connectomemapper3) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3?color=orange) [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) ![Docker Image Version (latest by date)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?color=orange)
 
 ### Description
 Connectome Mapper 3 implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper (CMP) 3,
@@ -11,16 +11,12 @@ from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices
 
 Connectome Mapper 3 is distributed as a BIDS App, a container image which takes BIDS datasets as inputs.
 
-### Documentation
+### Resources
 
-More information and documentation can be found at [https://connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io)
-
-### License
-This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
-
-All trademarks referenced herein are property of their respective holders.
-
-Copyright (C) 2009-2020, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
+* **Documentation:** [https://connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io)
+* **Mailing list:** [https://groups.google.com/forum/#!forum/cmtk-users](https://groups.google.com/forum/#!forum/cmtk-users)
+* **Source:** [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3)
+* **Bug reports:** [https://github.com/connectomicslab/connectomemapper3/issues](https://github.com/connectomicslab/connectomemapper3/issues)
 
 ### Usage
 This BIDS App has the following command line arguments:
@@ -102,7 +98,7 @@ To run it in participant level mode (for one participant):
 
 *   Sebastien Tourbier (sebastientourbier)
 *   Yasser Aleman-Gomez (yasseraleman)
-*   lessandra Griffa (agriffa)
+*   Alessandra Griffa (agriffa)
 *   Adrien Birbaumer (abirba)
 *   Patric Hagmann (pahagman)
 *   Meritxell Bach Cuadra (meribach)
@@ -131,3 +127,10 @@ Collaboration Children's Hospital Boston
 ### Funding
 
 Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
+
+### License
+This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
+
+All trademarks referenced herein are property of their respective holders.
+
+Copyright (C) 2009-2020, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
