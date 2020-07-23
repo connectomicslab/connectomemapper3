@@ -490,11 +490,11 @@ class SHORE(DipyDiffusionInterface):
         RTOP = np.zeros(dimsODF[:3])
         MSD = np.zeros(dimsODF[:3])
 
-        # Dipy 0.16 - basis : {None, ‘tournier07’, ‘descoteaux07’}
+        # Dipy >= 0.16 - basis : {None, ‘tournier07’, ‘descoteaux07’}
         if self.inputs.tracking_processing_tool == "mrtrix":
-            basis = 'mrtrix'
+            basis = 'tournier07'
         else:
-            basis = None
+            basis = 'descoteaux07'
 
         # calculate odf per slice
         IFLOGGER.info('Fitting SHORE model')
