@@ -4,9 +4,12 @@ Connectome Mapper 3 (Beta release)
 
 **Latest released version:** |release|
 
-This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
+This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution. Source code is hosted on GitHub at `the following link <https://github.com/connectomicslab/connectomemapper3>`_.
 
 
+.. image:: https://img.shields.io/github/v/release/connectomicslab/connectomemapper3?include_prereleases
+  :target: https://github.com/connectomicslab/connectomemapper3/releases
+  :alt: GitHub release (latest by date including pre-releases)
 .. image:: https://img.shields.io/github/release-date/connectomicslab/connectomemapper3
   :alt: GitHub Release Date
 .. image:: https://zenodo.org/badge/183162514.svg
@@ -15,7 +18,7 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 .. image:: https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp
   :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
   :alt: Docker Image Version (latest by date)
-.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp
+.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp?label=docker
   :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
   :alt: Docker Pulls
 .. image:: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=svg
@@ -37,7 +40,7 @@ About
 	:width: 1000
 	:align: center
 
-``Connectome Mapper 3``, part of the Connectome Mapping Toolkit (CMTK), implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
+``Connectome Mapper 3`` implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
 The ``Connectome Mapper 3`` pipelines uses a combination of tools from well-known software packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy_ and AFNI_. These pipelines were designed to provide the best software implementation for each state of processing, and will be updated as newer and better neuroimaging software become available.
 
