@@ -6,23 +6,24 @@ Connectome Mapper 3 (Beta release)
 
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
 
-.. image:: https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp
-  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
-  :alt: Docker Image Version (latest by date)
+
 .. image:: https://img.shields.io/github/release-date/connectomicslab/connectomemapper3
   :alt: GitHub Release Date
 .. image:: https://zenodo.org/badge/183162514.svg
   :target: https://zenodo.org/badge/latestdoi/183162514
   :alt: Digital Object Identifier
+.. image:: https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp
+  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
+  :alt: Docker Image Version (latest by date)
+.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp
+  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
+  :alt: Docker Pulls
 .. image:: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=svg
   :target: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master
   :alt: Continuous Integration Status
 .. image:: https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest
   :target: https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
-.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp
-  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
-  :alt: Docker Pulls
 
 
 .. warning:: THIS SOFTWARE IS FOR RESEARCH PURPOSES ONLY AND SHALL NOT BE USED FOR ANY CLINICAL USE. THIS SOFTWARE HAS NOT BEEN REVIEWED OR APPROVED BY THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE PROVISION OF PATIENT CARE.
@@ -62,12 +63,6 @@ Reproducibility and replicatibility is achieved through the distribution of a BI
 .. _AFNI: https://afni.nimh.nih.gov/
 
 
-*********
-Funding
-*********
-
-Work supported by the SNF Sinergia Grant 170873 (http://p3.snf.ch/Project-170873).
-
 *******************
 License information
 *******************
@@ -91,7 +86,7 @@ If you run into any problems or have any questions, you can post to the `CMTK-us
 Eager to contribute?
 ***********************
 
-See :ref:`Contributing to Connectome Mapper <contributing>` for more details.
+Connectome Mapper 3 is open-source and all kind of contributions (bug reporting, documentation, code,...) are welcome! See :ref:`Contributing to Connectome Mapper <contributing>` for more details.
 
 ***********************
 Contents
@@ -136,3 +131,9 @@ Contents
    citing
    contributing
    support
+
+*********
+Funding
+*********
+
+Work supported by the SNF Sinergia Grant 170873 (http://p3.snf.ch/Project-170873).
