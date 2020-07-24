@@ -215,10 +215,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-01_coverage.xml
+            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-01_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-01_log.txt
+            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-01_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 1)
           command: |
@@ -245,10 +245,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-02_coverage.xml
+            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-02_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-02_log.txt
+            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-02_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 2)
           command: |
@@ -275,10 +275,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-03_coverage.xml
+            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-03_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-03_log.txt
+            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-03_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 3)
           command: |
@@ -305,10 +305,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-04_coverage.xml
+            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-04_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-04_log.txt
+            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-04_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 4)
           command: |
@@ -334,10 +334,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-05_coverage.xml
+            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-05_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-05_log.txt
+            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-05_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 5)
           command: |
@@ -363,10 +363,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/code/test-06_coverage.xml
+            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-06_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/sub-01_ses-01_log.txt /tmp/data/ds-sample/derivatives/cmp/sub-01/ses-01/test-06_log.txt
+            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-06_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 6)
           command: |
@@ -385,7 +385,8 @@ jobs:
           command: |
             sudo chown $(id -un):$(id -gn) -R /tmp/data/ds-sample
             find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
-                -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" -not -name "*.pklz" -type f -delete
+                -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
+                -not -name "*.log" -not -name "*.pklz" -type f -delete
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -409,7 +410,7 @@ jobs:
       - attach_workspace:
           at: /tmp
       - coverage-reporter/send_report:
-          coverage-reports: '/tmp/data/ds-sample/code/test-01_coverage.xml,/tmp/data/ds-sample/code/test-02_coverage.xml,/tmp/data/ds-sample/code/test-03_coverage.xml,/tmp/data/ds-sample/code/test-04_coverage.xml,/tmp/data/ds-sample/code/test-05_coverage.xml,/tmp/data/ds-sample/code/test-06_coverage.xml'
+          coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml,/tmp/data/ds-sample/test/test-05_coverage.xml,/tmp/data/ds-sample/test/test-06_coverage.xml'
           project-token: ${CODACY_PROJECT_TOKEN}
 
   build_docs:

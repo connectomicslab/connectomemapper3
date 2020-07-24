@@ -72,7 +72,8 @@ ENV content_cov="${content_cov}echo User: \$(id -un \$USER) && echo Group: \$(id
 ENV content_cov="${content_cov} . \"$FSLDIR/etc/fslconf/fsl.sh\" &&"
 ENV content_cov="${content_cov} . activate \"${CONDA_ENV}\" &&"
 ENV content_cov="${content_cov} xvfb-run -s \"-screen 0 900x900x24 -ac +extension GLX -noreset\" \
--a coverage run --source=cmp,cmtklib --omit=*/bidsappmanager/*,*/viz/* /app/connectomemapper3/run.py \$@ &&"
+-a coverage run --source=cmp,cmtklib --omit=*/bidsappmanager/*,*/viz/* /app/connectomemapper3/run.py \$@ \
+|& tee /bids_dir/code/log.txt &&"
 # ENV content_cov="${content_cov} xvfb-run -s \"-screen 0 900x900x24 -ac +extension GLX -noreset\" \
 # -a coverage run --source=/opt/conda/envs/${CONDA_ENV}/lib/python3.7/site-packages/cmp,/opt/conda/envs/py27cmp-core/lib/python3.7/site-packages/cmtklib --omit=*/bidsappmanager/*,*/viz/* /app/connectomemapper3/run.py \$@ &&"
 
