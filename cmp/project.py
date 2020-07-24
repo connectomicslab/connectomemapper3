@@ -10,8 +10,8 @@ from cmtklib.bids.utils import write_derivative_description
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.pipelines.functional import fMRI as FMRI_pipeline
-from cmtklib.config import anat_load_config, anat_save_config, \
-    dmri_load_config, dmri_save_config, fmri_load_config, fmri_save_config
+from cmtklib.config import anat_load_config_ini, anat_save_config, \
+    dmri_load_config_ini, dmri_save_config, fmri_load_config_ini, fmri_save_config
 # from cmtklib.util import remove_aborded_interface_pickles, fix_dataset_directory_in_pickles
 from bids import BIDSLayout
 import multiprocessing
@@ -213,7 +213,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                 print("int_project dmri_pipeline.global_config.subjects : ")
                 print(dmri_pipeline.global_conf.subjects)
 
-            dmri_conf_loaded = dmri_load_config(
+            dmri_conf_loaded = dmri_load_config_ini(
                 dmri_pipeline, project_info.dmri_config_file)
 
             if not dmri_conf_loaded:
@@ -267,7 +267,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                 if warn_res:
                     print("... Read : fMRI config file (%s)" %
                           project_info.fmri_config_file)
-                    fmri_load_config(
+                    fmri_load_config_ini(
                         fmri_pipeline, project_info.fmri_config_file)
                 else:
                     return None
@@ -280,7 +280,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                 print("int_project fmri_pipeline.global_config.subjects : ")
                 print(fmri_pipeline.global_conf.subjects)
 
-            fmri_conf_loaded = fmri_load_config(
+            fmri_conf_loaded = fmri_load_config_ini(
                 fmri_pipeline, project_info.fmri_config_file)
 
             if not fmri_conf_loaded:
@@ -343,7 +343,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
             print("int_project anat_pipeline.global_config.subjects : ")
             print(anat_pipeline.global_conf.subjects)
 
-        anat_conf_loaded = anat_load_config(
+        anat_conf_loaded = anat_load_config_ini(
             anat_pipeline, project_info.anat_config_file)
 
         if not anat_conf_loaded:

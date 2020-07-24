@@ -11,9 +11,9 @@ from . import gui
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.bidsappmanager.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.bidsappmanager.pipelines.functional import fMRI as FMRI_pipeline
-from cmtklib.config import anat_load_config, anat_save_config, \
-    dmri_load_config, dmri_save_config, fmri_load_config, fmri_save_config, \
-    get_anat_process_detail, get_dmri_process_detail, get_fmri_process_detail
+from cmtklib.config import anat_load_config_ini, anat_save_config, \
+    dmri_load_config_ini, dmri_save_config, fmri_load_config_ini, fmri_save_config, \
+    get_anat_process_detail_ini, get_dmri_process_detail_ini, get_fmri_process_detail_ini
 # from cmtklib.util import fix_dataset_directory_in_pickles
 # import nibabel as nib
 from bids import BIDSLayout
@@ -187,7 +187,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
             # print("int_project dmri_pipeline.global_config.subjects : ")
             # print(dmri_pipeline.global_conf.subjects)
 
-            dmri_conf_loaded = dmri_load_config(
+            dmri_conf_loaded = dmri_load_config_ini(
                 dmri_pipeline, project_info.dmri_config_file)
 
             if not dmri_conf_loaded:
@@ -241,7 +241,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
                 if warn_res:
                     print("Read fMRI config file (%s)" %
                           project_info.fmri_config_file)
-                    fmri_load_config(
+                    fmri_load_config_ini(
                         fmri_pipeline, project_info.fmri_config_file)
                 else:
                     return None
@@ -253,7 +253,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
             # print("int_project fmri_pipeline.global_config.subjects : ")
             # print(fmri_pipeline.global_conf.subjects)
 
-            fmri_conf_loaded = fmri_load_config(
+            fmri_conf_loaded = fmri_load_config_ini(
                 fmri_pipeline, project_info.fmri_config_file)
 
             if not fmri_conf_loaded:
@@ -324,7 +324,7 @@ def init_anat_project(project_info, is_new_project):
         # print("int_project anat_pipeline.global_config.subjects : ")
         # print(anat_pipeline.global_conf.subjects)
 
-        anat_conf_loaded = anat_load_config(
+        anat_conf_loaded = anat_load_config_ini(
             anat_pipeline, project_info.anat_config_file)
         # dmri_conf_loaded = load_config(dmri_pipeline, project_info.dmri_config_file)
 
@@ -535,14 +535,14 @@ class ProjectHandler(Handler):
                         self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
                     self.project_loaded = True
 
-                    ui_info.ui.context["object"].project_info.parcellation_scheme = get_anat_process_detail(new_project,
+                    ui_info.ui.context["object"].project_info.parcellation_scheme = get_anat_process_detail_ini(new_project,
                                                                                                             'parcellation_stage',
                                                                                                             'parcellation_scheme')
-                    ui_info.ui.context["object"].project_info.freesurfer_subjects_dir = get_anat_process_detail(
+                    ui_info.ui.context["object"].project_info.freesurfer_subjects_dir = get_anat_process_detail_ini(
                         new_project, 'segmentation_stage', 'freesurfer_subjects_dir')
-                    ui_info.ui.context["object"].project_info.freesurfer_subject_id = get_anat_process_detail(
+                    ui_info.ui.context["object"].project_info.freesurfer_subject_id = get_anat_process_detail_ini(
                         new_project, 'segmentation_stage', 'freesurfer_subject_id')
-                    # ui_info.ui.context["object"].project_info.atlas_info = get_anat_process_detail(new_project,'parcellation_stage','atlas_info')
+                    # ui_info.ui.context["object"].project_info.atlas_info = get_anat_process_detail_ini(new_project,'parcellation_stage','atlas_info')
 
                     dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
                         new_project, bids_layout, True)
@@ -694,7 +694,7 @@ class ProjectHandler(Handler):
             print("Anatomical config file: %s" %
                   loaded_project.anat_config_file)
 
-            loaded_project.subject = get_anat_process_detail(
+            loaded_project.subject = get_anat_process_detail_ini(
                 loaded_project, 'Global', 'subject')
             loaded_project.subject_sessions = ["ses-%s" % s for s in bids_layout.get(target='session', return_type='id',
                                                                                      subject=loaded_project.subject.split('-')[
@@ -702,7 +702,7 @@ class ProjectHandler(Handler):
 
             if len(loaded_project.subject_sessions) > 0:
 
-                loaded_project.subject_session = get_anat_process_detail(
+                loaded_project.subject_session = get_anat_process_detail_ini(
                     loaded_project, 'Global', 'subject_session')
                 print("Selected session : " + loaded_project.subject_session)
             else:
@@ -710,13 +710,13 @@ class ProjectHandler(Handler):
                 loaded_project.subject_session = ''
                 print("No session")
 
-            loaded_project.parcellation_scheme = get_anat_process_detail(loaded_project, 'parcellation_stage',
+            loaded_project.parcellation_scheme = get_anat_process_detail_ini(loaded_project, 'parcellation_stage',
                                                                          'parcellation_scheme')
-            loaded_project.atlas_info = get_anat_process_detail(
+            loaded_project.atlas_info = get_anat_process_detail_ini(
                 loaded_project, 'parcellation_stage', 'atlas_info')
-            loaded_project.freesurfer_subjects_dir = get_anat_process_detail(loaded_project, 'segmentation_stage',
+            loaded_project.freesurfer_subjects_dir = get_anat_process_detail_ini(loaded_project, 'segmentation_stage',
                                                                              'freesurfer_subjects_dir')
-            loaded_project.freesurfer_subject_id = get_anat_process_detail(loaded_project, 'segmentation_stage',
+            loaded_project.freesurfer_subject_id = get_anat_process_detail_ini(loaded_project, 'segmentation_stage',
                                                                            'freesurfer_subject_id')
 
             self.anat_pipeline = init_anat_project(loaded_project, False)
@@ -792,9 +792,9 @@ class ProjectHandler(Handler):
 
             if os.path.isfile(loaded_project.dmri_config_file):
                 print("Load existing diffusion config file")
-                loaded_project.process_type = get_dmri_process_detail(
+                loaded_project.process_type = get_dmri_process_detail_ini(
                     loaded_project, 'Global', 'process_type')
-                loaded_project.diffusion_imaging_model = get_dmri_process_detail(loaded_project, 'Global',
+                loaded_project.diffusion_imaging_model = get_dmri_process_detail_ini(loaded_project, 'Global',
                                                                                  'diffusion_imaging_model')
 
                 dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
@@ -892,7 +892,7 @@ class ProjectHandler(Handler):
 
             if os.path.isfile(loaded_project.fmri_config_file):
                 print("Load existing fmri config file")
-                loaded_project.process_type = get_fmri_process_detail(
+                loaded_project.process_type = get_fmri_process_detail_ini(
                     loaded_project, 'Global', 'process_type')
 
                 fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
@@ -982,13 +982,13 @@ class ProjectHandler(Handler):
             print("Existing anatomical config file for subject %s: %s" % (
                 updated_project.subject, updated_project.anat_config_file))
 
-            updated_project.parcellation_scheme = get_anat_process_detail(updated_project, 'parcellation_stage',
+            updated_project.parcellation_scheme = get_anat_process_detail_ini(updated_project, 'parcellation_stage',
                                                                           'parcellation_scheme')
-            updated_project.atlas_info = get_anat_process_detail(
+            updated_project.atlas_info = get_anat_process_detail_ini(
                 updated_project, 'parcellation_stage', 'atlas_info')
-            updated_project.freesurfer_subjects_dir = get_anat_process_detail(updated_project, 'segmentation_stage',
+            updated_project.freesurfer_subjects_dir = get_anat_process_detail_ini(updated_project, 'segmentation_stage',
                                                                               'freesurfer_subjects_dir')
-            updated_project.freesurfer_subject_id = get_anat_process_detail(updated_project, 'segmentation_stage',
+            updated_project.freesurfer_subject_id = get_anat_process_detail_ini(updated_project, 'segmentation_stage',
                                                                             'freesurfer_subject_id')
 
             self.anat_pipeline = init_anat_project(updated_project, False)
@@ -1039,13 +1039,13 @@ class ProjectHandler(Handler):
                                      ui_info.project_info.anat_config_file)
                     self.project_loaded = True
 
-            ui_info.project_info.parcellation_scheme = get_anat_process_detail(updated_project, 'parcellation_stage',
+            ui_info.project_info.parcellation_scheme = get_anat_process_detail_ini(updated_project, 'parcellation_stage',
                                                                                'parcellation_scheme')
-            ui_info.project_info.freesurfer_subjects_dir = get_anat_process_detail(updated_project, 'segmentation_stage',
+            ui_info.project_info.freesurfer_subjects_dir = get_anat_process_detail_ini(updated_project, 'segmentation_stage',
                                                                                    'freesurfer_subjects_dir')
-            ui_info.project_info.freesurfer_subject_id = get_anat_process_detail(updated_project, 'segmentation_stage',
+            ui_info.project_info.freesurfer_subject_id = get_anat_process_detail_ini(updated_project, 'segmentation_stage',
                                                                                  'freesurfer_subject_id')
-            # ui_info.project_info.atlas_info = get_anat_process_detail(new_project,'parcellation_stage','atlas_info')
+            # ui_info.project_info.atlas_info = get_anat_process_detail_ini(new_project,'parcellation_stage','atlas_info')
 
         return ui_info
 
@@ -1076,9 +1076,9 @@ class ProjectHandler(Handler):
 
         if os.path.isfile(updated_project.dmri_config_file):
             print("Load existing diffusion config file")
-            updated_project.process_type = get_dmri_process_detail(
+            updated_project.process_type = get_dmri_process_detail_ini(
                 updated_project, 'Global', 'process_type')
-            updated_project.diffusion_imaging_model = get_dmri_process_detail(updated_project, 'diffusion_stage',
+            updated_project.diffusion_imaging_model = get_dmri_process_detail_ini(updated_project, 'diffusion_stage',
                                                                               'diffusion_imaging_model')
 
             dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
@@ -1179,7 +1179,7 @@ class ProjectHandler(Handler):
         if os.path.isfile(updated_project.fmri_config_file):
             print("Load existing fMRI config file for subject %s" %
                   updated_project.subject)
-            updated_project.process_type = get_fmri_process_detail(
+            updated_project.process_type = get_fmri_process_detail_ini(
                 updated_project, 'Global', 'process_type')
 
             fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
@@ -1259,7 +1259,7 @@ class ProjectHandler(Handler):
             if dialog.path != ui_info.ui.context["object"].project_info.anat_config_file:
                 shutil.copy(
                     dialog.path, ui_info.ui.context["object"].project_info.anat_config_file)
-            anat_load_config(
+            anat_load_config_ini(
                 self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
             # TODO: load_config (anat_ or dmri_ ?)
 
@@ -1283,7 +1283,7 @@ class ProjectHandler(Handler):
             if dialog.path != ui_info.ui.context["object"].project_info.dmri_config_file:
                 shutil.copy(
                     dialog.path, ui_info.ui.context["object"].project_info.dmri_config_file)
-            dmri_load_config(
+            dmri_load_config_ini(
                 self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
 
     @classmethod
@@ -1306,7 +1306,7 @@ class ProjectHandler(Handler):
             if dialog.path != ui_info.ui.context["object"].project_info.fmri_config_file:
                 shutil.copy(
                     dialog.path, ui_info.ui.context["object"].project_info.fmri_config_file)
-            fmri_load_config(
+            fmri_load_config_ini(
                 self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
 
 
@@ -1589,7 +1589,7 @@ class ProjectHandlerV2(Handler):
                     #     except Exception:
                     #         print("    ERROR: Failed to get file")
 
-                    anat_load_config(
+                    anat_load_config_ini(
                         self.anat_pipeline, loaded_project.anat_config_file)
 
                 self.anat_pipeline.config_file = loaded_project.anat_config_file
@@ -1598,11 +1598,11 @@ class ProjectHandlerV2(Handler):
                 ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
                 loaded_project.t1_available = self.anat_inputs_checked
 
-                loaded_project.parcellation_scheme = get_anat_process_detail(loaded_project, 'parcellation_stage',
+                loaded_project.parcellation_scheme = get_anat_process_detail_ini(loaded_project, 'parcellation_stage',
                                                                              'parcellation_scheme')
-                loaded_project.freesurfer_subjects_dir = get_anat_process_detail(loaded_project, 'segmentation_stage',
+                loaded_project.freesurfer_subjects_dir = get_anat_process_detail_ini(loaded_project, 'segmentation_stage',
                                                                                  'freesurfer_subjects_dir')
-                loaded_project.freesurfer_subject_id = get_anat_process_detail(loaded_project, 'segmentation_stage',
+                loaded_project.freesurfer_subject_id = get_anat_process_detail_ini(loaded_project, 'segmentation_stage',
                                                                                'freesurfer_subject_id')
 
                 ui_info.ui.context["object"].project_info = loaded_project
@@ -1755,7 +1755,7 @@ class ProjectHandlerV2(Handler):
                         #     except Exception:
                         #         print("    ERROR: Failed to get file")
 
-                        dmri_load_config(
+                        dmri_load_config_ini(
                             self.dmri_pipeline, loaded_project.dmri_config_file)
                         # TODO: check if diffusion imaging model (DSI/DTI/HARDI) is correct/valid.
 
@@ -1806,7 +1806,7 @@ class ProjectHandlerV2(Handler):
                         #     except Exception:
                         #         print("    ERROR: Failed to get file")
 
-                        fmri_load_config(
+                        fmri_load_config_ini(
                             self.fmri_pipeline, loaded_project.fmri_config_file)
 
                     ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
