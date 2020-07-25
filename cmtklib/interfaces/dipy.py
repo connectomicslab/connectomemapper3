@@ -593,10 +593,10 @@ class TensorInformedEudXTractography(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.tracking import utils
         from dipy.direction import peaks_from_model
-        from dipy.tracking.local import ThresholdTissueClassifier, BinaryTissueClassifier
-        from dipy.tracking.eudx import EuDX
+        from dipy.tracking.stopping_criterion import ThresholdTissueClassifier, BinaryTissueClassifier
+        from dipy.tracking.eudx import EuDX #FIXME: see changes in Dipy 1.0
         from dipy.data import get_sphere
-        from dipy.io.trackvis import save_trk
+        from dipy.io.streamline import save_trk
         # import marshal as pickle
         import pickle as pickle
         import gzip
@@ -834,8 +834,8 @@ class DirectionGetterTractography(DipyBaseInterface):
         from dipy.direction import DeterministicMaximumDirectionGetter, \
             ProbabilisticDirectionGetter
         # from dipy.tracking.local import ThresholdTissueClassifier, ActTissueClassifier
-        from dipy.tracking.local import BinaryTissueClassifier, \
-            LocalTracking, CmcTissueClassifier, ParticleFilteringTracking
+        from dipy.tracking.stopping_criterion import BinaryTissueClassifier, CmcTissueClassifier 
+        from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
         from dipy.reconst.peaks import peaks_from_model
         from dipy.data import get_sphere
         from dipy.io.streamline import save_trk
