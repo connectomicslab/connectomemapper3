@@ -867,6 +867,8 @@ class DirectionGetterTractography(DipyBaseInterface):
             voxel_size = np.average(img_pve_wm.header['pixdim'][1:4])
             step_size = self.inputs.step_size
 
+
+
             IFLOGGER.info('Building CMC Tissue Classifier')
 
             cmc_classifier = CmcStoppingCriterion.from_pve(img_pve_wm.get_data(),
@@ -874,6 +876,13 @@ class DirectionGetterTractography(DipyBaseInterface):
                                                           img_pve_csf.get_data(),
                                                           step_size=step_size,
                                                           average_voxel_size=voxel_size)
+
+            if self.inputs.recon_model == 'CSD':
+                IFLOGGER.info('Creating mask used by CSD model from partial volume maps of GM and WM')
+
+                tmsk = img_pve_wm.get_data() + img_pve_gm.get_data()
+                tmsk[tmsk > 0] = 1
+                tmsk[tmsk < 0] = 0
 
             # background = np.ones(imref.shape)
             # pve_sum = np.zeros(imref.shape)
