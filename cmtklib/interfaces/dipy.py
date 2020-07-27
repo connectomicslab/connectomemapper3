@@ -1045,65 +1045,28 @@ class DirectionGetterTractography(DipyBaseInterface):
                                                                  return_all=False)
 
             # streamlines = list(pft_streamline_generator)
-            from dipy.tracking.streamline import Streamlines
-            streamlines = Streamlines(pft_streamline_generator)
+
 
             IFLOGGER.info('Saving tracks')
-            #
-            # save_trk(self._gen_filename('tracked_old', ext='.trk'), streamlines, affine, fa.shape)
+            from dipy.tracking.streamline import Streamlines
 
-            from nibabel.streamlines import Field, Tractogram
-            from nibabel.orientations import aff2axcodes
+            streamlines = Streamlines(pft_streamline_generator)
+            sft = StatefulTractogram(streamlines, imref, Space.RASMM)
+            save_trk(sft, self._gen_filename('tracked', ext='.trk'))
 
-            print('-> Load nifti and copy header 1')
+            # from nibabel.streamlines import Field, Tractogram
+            # from nibabel.orientations import aff2axcodes
 
-            trkhdr = nib.trackvis.empty_header()
-            trkhdr['dim'] = imref.shape[:3]
-            trkhdr['voxel_size'] = imref.header.get_zooms()[:3]
-            trkhdr['voxel_order'] = "".join(aff2axcodes(imref.affine))
-            # utils.affine_for_trackvis(trkhdr['voxel_size'])
-            trkhdr['vox_to_ras'] = imref.affine.copy()
+            # print('-> Load nifti and copy header 1')
 
-            np.save(self._gen_filename('streamlines', ext='.npy'), streamlines)
+            # trkhdr = nib.trackvis.empty_header()
+            # trkhdr['dim'] = imref.shape[:3]
+            # trkhdr['voxel_size'] = imref.header.get_zooms()[:3]
+            # trkhdr['voxel_order'] = "".join(aff2axcodes(imref.affine))
+            # # utils.affine_for_trackvis(trkhdr['voxel_size'])
+            # trkhdr['vox_to_ras'] = imref.affine.copy()
 
-            header = {}
-            header[Field.ORIGIN] = imref.affine.copy()[:3, 3]
-            header[Field.VOXEL_TO_RASMM] = imref.affine.copy()
-            header[Field.VOXEL_SIZES] = imref.header.get_zooms()[:3]
-            header[Field.DIMENSIONS] = imref.shape[:3]
-            header[Field.VOXEL_ORDER] = "".join(aff2axcodes(imref.affine))
-
-            # Remove origin from streamlines (TODO: understand why needed)
-            for i, streamline in enumerate(streamlines):
-                for j, _ in enumerate(streamline):
-                    streamlines[i][j] = streamlines[i][j] - \
-                        imref.affine.copy()[:3, 3]
-
-            tractogram = Tractogram(
-                streamlines=streamlines, affine_to_rasmm=imref.affine.copy())
-            nib.streamlines.save(tractogram, self._gen_filename(
-                'tracked', ext='.trk'), header=header)
-
-            # nib.trackvis.write(self._gen_filename('tracked_nib2', ext='.trk'), streamlines, trkhdr)
-
-        # IFLOGGER.info('Loading CSD model and fitting')
-        # f = gzip.open(self.inputs.in_model, 'rb')
-        # csd_model = pickle.load(f)
-        # f.close()
-
-        # csd_fit = csd_model.fit(data, mask=tmsk)
-
-        # if self.inputs.algo == 'deterministic':
-        #     dg = DeterministicMaximumDirectionGetter.from_shcoeff(csd_fit.shm_coeff, max_angle=self.inputs.max_angle, sphere=sphere)
-        # else:
-        #     dg = ProbabilisticDirectionGetter.from_shcoeff(csd_fit.shm_coeff, max_angle=self.inputs.max_angle, sphere=sphere)
-
-        # IFLOGGER.info(('Performing %s tractography') % (self.inputs.algo))
-
-        # streamlines = LocalTracking(dg, classifier, tseeds, affine, step_size=self.inputs.step_size)
-
-        # IFLOGGER.info('Saving tracks')
-        # save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
+            # np.save(self._gen_filename('streamlines', ext='.npy'), streamlines)
 
         return runtime
 
