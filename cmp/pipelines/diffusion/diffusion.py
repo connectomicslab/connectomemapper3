@@ -759,6 +759,9 @@ class DiffusionPipeline(Pipeline):
                 # Dipy
                 ('spherical_harmonics_image.nii.gz',
                  '{}_model-CSD_diffmodel.nii.gz'.format(self.subject)),
+                ('diffusion_preproc_resampled_ad', self.subject + '_model-CSD_AD'),
+                ('diffusion_preproc_resampled_md', self.subject + '_model-CSD_MD'),
+                ('diffusion_preproc_resampled_rd', self.subject + '_model-CSD_RD'),
                 # Mrtrix
                 ('shm_coeff.nii.gz', '{}_model-CSD_diffmodel.nii.gz'.format(self.subject)),
                 # MRtrix
