@@ -585,6 +585,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                             '_label-Desikan_atlas.graphml'),
                                            ('FreeSurferColorLUT_adapted.txt',
                                             self.subject + '_label-Desikan_FreeSurferColorLUT.txt'),
+                                           (
+                                           'roi_stats_freesurferaparc.tsv', self.subject + '_label-Desikan_stats.tsv'),
                                            ]
         # else:
         #     sinker.inputs.substitutions = [ (self.subject+'_T1w.nii.gz', self.subject+'_T1w_head.nii.gz'),
