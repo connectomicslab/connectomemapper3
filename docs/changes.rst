@@ -28,17 +28,33 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 
 * Renamed connectivity graph files
 
-*Upgrade*
+*Upgrades*
 
-* Refactored code to inspect outputs with the graphical user interface (cmpbidsappmanager)
+* Use Dipy 1.0 and related code changes in ``cmtklib/interfaces/dipy`` (Check `here <https://dipy.org/documentation/1.0.0./api_changes/#dipy-1-0-changes>`_ for more details about Dipy 1.0 changes)
+
+* Use Nipype 1.5.0
+
+* Use NetworkX 2.4
+
+*Code refactoring*
+
+* Functions to save and load pipeline configuration files have been moved to ``cmtklib/config.py``
 
 *Bug fixes*
 
-* Fixes to computes ROI volumetry for Lausanne2008 and NativeFreesurfer parcellation schemes
+* Major changes in how inspection of stage/pipeline outputs with the graphical user interface (cmpbidsappmanager) which was not working anymore after migration to Python3
 
 * Fixes to compute the structural connectivity matrices following migration to python 3
 
-Please check the `pull request 40 page <https://github.com/connectomicslab/connectomemapper3/pull/40>`_ for change details.
+* Fixes to computes ROI volumetry for Lausanne2008 and NativeFreesurfer parcellation schemes
+
+* Add missing renaming of the ROI volumetry file for the NativeFreesurfer parcellation scheme following BIDS
+
+* Create the mask used for computing peaks from the Dipy CSD model when performing Particle Filtering Tractography (development still on-going)
+
+* Add missing renaming of Dipy tensor-related maps (AD, RD, MD) following BIDS
+
+Please check the `pull request 40 page <https://github.com/connectomicslab/connectomemapper3/pull/40>`_ for more details.
 
 
 ****************************
