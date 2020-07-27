@@ -815,6 +815,7 @@ class DirectionGetterTractography(DipyBaseInterface):
         from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
         from dipy.direction.peaks import peaks_from_model
         from dipy.data import get_sphere
+        from dipy.io.stateful_tractogram import Space, StatefulTractogram
         from dipy.io.streamline import save_trk
         # import marshal as pickle
         import pickle
