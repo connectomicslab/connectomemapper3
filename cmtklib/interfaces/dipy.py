@@ -1016,8 +1016,8 @@ class DirectionGetterTractography(DipyBaseInterface):
                 dg, classifier, tseeds, affine, step_size=self.inputs.step_size, max_cross=1)
 
             IFLOGGER.info('Saving tracks')
-            save_trk(self._gen_filename('tracked', ext='.trk'),
-                     streamlines, affine, fa.shape)
+            sft = StatefulTractogram(streamlines, imref, Space.RASMM)
+            save_trk(sft, self._gen_filename('tracked', ext='.trk'))
 
         else:
             IFLOGGER.info('Performing PFT tractography')
