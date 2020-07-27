@@ -836,11 +836,11 @@ class DirectionGetterTractography(DipyBaseInterface):
         # from dipy.tracking.local import ThresholdStoppingCriterion, ActStoppingCriterion
         from dipy.tracking.stopping_criterion import BinaryStoppingCriterion, CmcStoppingCriterion
         from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
-        from dipy.reconst.peaks import peaks_from_model
+        from dipy.direction.peaks import peaks_from_model
         from dipy.data import get_sphere
         from dipy.io.streamline import save_trk
         # import marshal as pickle
-        import pickle as pickle
+        import pickle
         import gzip
 
         if (not (isdefined(self.inputs.in_model))):
