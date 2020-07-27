@@ -371,7 +371,7 @@ class SHOREInputSpec(DipyBaseInterfaceInputSpec):
 
 
 class SHOREOutputSpec(TraitedSpec):
-    model = File(desc='Python pickled object of the CSD model fitted.')
+    model = File(desc='Python pickled object of the SHORE model fitted.')
     fodf = File(
         desc=('Fiber Orientation Distribution Function output file name'))
     dodf = File(
@@ -450,32 +450,9 @@ class SHORE(DipyDiffusionInterface):
         bvecs = np.array([-bvecs[:, 0], bvecs[:, 1], bvecs[:, 2]]).transpose()
         gtab = gradient_table(bvals, bvecs)
 
-        # if isdefined(self.inputs.response):
-        #     resp_file = np.loadtxt(self.inputs.response)
-        #
-        #     response = (np.array(resp_file[0:3]), resp_file[-1])
-        #     ratio = response[0][1] / response[0][0]
-        #
-        #     if abs(ratio - 0.2) > 0.1:
-        #         IFLOGGER.warn(('Estimated response is not prolate enough. '
-        #                        'Ratio=%0.3f.') % ratio)
-        # else:
-        #     response, ratio, counts = auto_response(gtab, data, fa_thr=0.5, return_number_of_voxels=True)
-        #     IFLOGGER.info("response: ")
-        #     IFLOGGER.info(response)
-        #     IFLOGGER.info("ratio: %g"%ratio)
-        #     IFLOGGER.info("nbr_voxel_used: %g"%counts)
-        #
-        #     if abs(ratio - 0.2) > 0.1:
-        #         IFLOGGER.warn(('Estimated response is not prolate enough. '
-        #                        'Ratio=%0.3f.') % ratio)
-
         sphere = get_sphere('symmetric724')
         shore_model = ShoreModel(gtab, radial_order=self.inputs.radial_order, zeta=self.inputs.zeta,
                                  lambdaN=self.inputs.lambdaN, lambdaL=self.inputs.lambdaL)
-
-        # IFLOGGER.info('Fitting CSD model')
-        # csd_fit = csd_model.fit(data, msk)
 
         f = gzip.open(op.abspath('shoremodel.pklz'), 'wb')
         pickle.dump(shore_model, f, -1)
