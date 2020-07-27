@@ -593,7 +593,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.tracking import utils
         from dipy.direction import peaks_from_model
-        from dipy.tracking.stopping_criterion import ThresholdTissueClassifier, BinaryTissueClassifier
+        from dipy.tracking.stopping_criterion import ThresholdStoppingCriterion, BinaryStoppingCriterion
         from dipy.tracking.eudx import EuDX #FIXME: see changes in Dipy 1.0
         from dipy.data import get_sphere
         from dipy.io.streamline import save_trk
@@ -679,8 +679,8 @@ class TensorInformedEudXTractography(DipyBaseInterface):
             self._gen_filename('fa_masked'))
 
         IFLOGGER.info('Building Tissue Classifier')
-        # classifier = ThresholdTissueClassifier(fa,self.inputs.fa_thresh)
-        classifier = BinaryTissueClassifier(tmsk)
+        # classifier = ThresholdStoppingCriterion(fa,self.inputs.fa_thresh)
+        classifier = BinaryStoppingCriterion(tmsk)
 
         IFLOGGER.info('Loading tensor model')
         f = gzip.open(self.inputs.in_model, 'rb')
@@ -833,8 +833,8 @@ class DirectionGetterTractography(DipyBaseInterface):
         from dipy.tracking import utils
         from dipy.direction import DeterministicMaximumDirectionGetter, \
             ProbabilisticDirectionGetter
-        # from dipy.tracking.local import ThresholdTissueClassifier, ActTissueClassifier
-        from dipy.tracking.stopping_criterion import BinaryTissueClassifier, CmcTissueClassifier 
+        # from dipy.tracking.local import ThresholdStoppingCriterion, ActStoppingCriterion
+        from dipy.tracking.stopping_criterion import BinaryStoppingCriterion, CmcStoppingCriterion
         from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
         from dipy.reconst.peaks import peaks_from_model
         from dipy.data import get_sphere
@@ -891,7 +891,7 @@ class DirectionGetterTractography(DipyBaseInterface):
 
             IFLOGGER.info('Building CMC Tissue Classifier')
 
-            cmc_classifier = CmcTissueClassifier.from_pve(img_pve_wm.get_data(),
+            cmc_classifier = CmcStoppingCriterion.from_pve(img_pve_wm.get_data(),
                                                           img_pve_gm.get_data(),
                                                           img_pve_csf.get_data(),
                                                           step_size=step_size,
@@ -918,7 +918,7 @@ class DirectionGetterTractography(DipyBaseInterface):
             #
             # include_map[background>0] = 1
             # IFLOGGER.info('Building ACT Tissue Classifier')
-            # classifier = ActTissueClassifier(include_map,exclude_map)
+            # classifier = ActStoppingCriterion(include_map,exclude_map)
         else:
             if isdefined(self.inputs.tracking_mask):
                 IFLOGGER.info('Loading Tracking Mask')
@@ -939,8 +939,8 @@ class DirectionGetterTractography(DipyBaseInterface):
                 self._gen_filename('fa_masked'))
 
             IFLOGGER.info('Building Binary Tissue Classifier')
-            # classifier = ThresholdTissueClassifier(fa,self.inputs.fa_thresh)
-            classifier = BinaryTissueClassifier(tmsk)
+            # classifier = ThresholdStoppingCriterion(fa,self.inputs.fa_thresh)
+            classifier = BinaryStoppingCriterion(tmsk)
 
         seeds = self.inputs.num_seeds
 
