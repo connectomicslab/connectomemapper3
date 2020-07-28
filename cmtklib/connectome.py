@@ -687,7 +687,7 @@ class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
         File(exists=True), desc='ROI volumes registered to diffusion space')
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer', 'Custom'],
                                       usedefault=True)
-    roi_graphMLs = InputMultiPath(
+    roi_graphmls = InputMultiPath(
         File(exists=True), desc='GraphML description of ROI volumes (Lausanne2018)')
     atlas_info = Dict(mandatory=False, desc="custom atlas information")
     compute_curvature = traits.Bool(
@@ -732,7 +732,7 @@ class CMTK_cmat(BaseInterface):
         #               output_types=self.inputs.output_types)
         # else:
         cmat(intrk=self.inputs.track_file[0], roi_volumes=self.inputs.roi_volumes,
-             roi_graphmls=self.inputs.roi_graphMLs,
+             roi_graphmls=self.inputs.roi_graphmls,
              parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
              compute_curvature=self.inputs.compute_curvature,
              additional_maps=additional_maps, output_types=self.inputs.output_types)

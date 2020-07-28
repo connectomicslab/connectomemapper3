@@ -389,7 +389,7 @@ class MRConvertInputSpec(CommandLineInputSpec):
                             units='mm', desc='Apply scaling to the intensity values.')
     offset_bias = traits.Float(argstr='-scale %d', position=7,
                                units='mm', desc='Apply offset to the intensity values.')
-    replace_NaN_with_zero = traits.Bool(
+    replace_nan_with_zero = traits.Bool(
         argstr='-zero', position=8, desc="Replace all NaN values with zero.")
     prs = traits.Bool(argstr='-prs', position=3,
                       desc="Assume that the DW gradients are specified in the PRS frame (Siemens DICOM only).")
