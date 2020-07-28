@@ -246,24 +246,6 @@ class ParcellationStage(Stage):
                 #         ])
             elif self.config.parcellation_scheme == 'Lausanne2008':
 
-                # def get_atlas_LUTs(paths):
-                #     colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008','resolution83','resolution83_LUT.txt'))),
-                #                  os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008','resolution150','resolution150_LUT.txt'))),
-                #                  os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008','resolution258','resolution258_LUT.txt'))),
-                #                  os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008','resolution500','resolution500_LUT.txt'))),
-                #                  os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008','resolution1015','resolution1015_LUT.txt')))
-                #                  ]
-                #     return colorLUTs
-                #
-                # def get_atlas_graphMLs(paths):
-                #     graphMLs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008','resolution83','resolution83.graphml'))),
-                #                  os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008','resolution150','resolution150.graphml'))),
-                #                  os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008','resolution258','resolution258.graphml'))),
-                #                  os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008','resolution500','resolution500.graphml'))),
-                #                  os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','lausanne2008','resolution1015','resolution1015.graphml')))
-                #                  ]
-                #     return graphMLs
-
                 roi_colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',
                                                                               os.path.join('data', 'parcellation',
                                                                                            'lausanne2008',

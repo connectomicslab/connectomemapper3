@@ -1285,8 +1285,8 @@ class RegistrationStage(Stage):
                     for pve_output in dwi_outputs['anat.@pves_reg_crop']:
                         pves = pve_output
                         if os.path.exists(pves):
-                             self.inspect_outputs_dict['%s-to-b0 (%s)' % (os.path.basename(pves), tool)] = [
-                            'fsleyes', '-sdefault', ref, pves, '-cm', 'hot', '-a', '50']
+                            self.inspect_outputs_dict['%s-to-b0 (%s)' % (os.path.basename(pves), tool)] = [
+                                'fsleyes', '-sdefault', ref, pves, '-cm', 'hot', '-a', '50']
 
         else:
             func_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'bold_sinker')

@@ -1538,7 +1538,7 @@ class ProjectHandlerV2(Handler):
                 dmri_inputs_checked = True
 
             if t2_available:
-                 print('T2 available')
+                print('T2 available')
 
             fmri_inputs_checked = False
             if t1_available and fmri_available:
