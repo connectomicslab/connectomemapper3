@@ -704,7 +704,6 @@ workflows:
 
       - codacy-coverage-report:
           requires:
-            - build
             - test_dsi_mrtrix
             - test_dsi_dipy
             - test_parcellation
@@ -717,7 +716,6 @@ workflows:
 
       - deploy_docker_release:
           requires:
-            - build
             # - build_docs
             - test_dsi_mrtrix
             - test_dsi_dipy
@@ -733,7 +731,6 @@ workflows:
 
       - deploy_docker_latest:
           requires:
-            - build
             # - build_docs
             - test_dsi_mrtrix
             - test_dsi_dipy
