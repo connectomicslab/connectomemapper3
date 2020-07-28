@@ -36,7 +36,7 @@ import nibabel as nib
 import cmtklib.interfaces.fsl as cmp_fsl
 # from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
 from cmtklib.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, \
-    MRThreshold, ExtractFSLGrad, ExtractMRTrixGrad, Generate5tt, \
+    MRThreshold, ExtractMRTrixGrad, Generate5tt, \
     GenerateGMWMInterface, ApplymultipleMRConvert
 from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding, \
     CreateIndexFile, CreateAcqpFile

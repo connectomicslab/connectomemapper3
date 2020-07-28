@@ -21,11 +21,16 @@ import glob
 #     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
 #         desc='Input images to be read')
 #     _xor_inputs = ('out_grad_mrtrix','out_grad_fsl')
-#     out_grad_mrtrix = File(argstr='-export_grad_mrtrix %s',desc='export the DWI gradient table to file in MRtrix format',xor=_xor_inputs)
-#     out_grad_fsl =  traits.Tuple(File(),File(), argstr='-export_grad_fsl %s %s', desc='export the DWI gradient table to files in FSL (bvecs / bvals) format', xor=_xor_inputs)
+#     out_grad_mrtrix = File(argstr='-export_grad_mrtrix %s',
+#                            desc='export the DWI gradient table to file in MRtrix format',
+#                            xor=_xor_inputs)
+#     out_grad_fsl =  traits.Tuple(File(),File(), argstr='-export_grad_fsl %s %s',
+#                                                 desc='export the DWI gradient table to files in FSL (bvecs / bvals) format',
+#                                                 xor=_xor_inputs)
 
 # class MRTrixInfoOutputSpec(TraitedSpec):
-#     out_grad_mrtrix = traits.Tuple(File(exists=True),File(exists=True), desc='Outputs [bvecs, bvals] DW gradient scheme (FSL format) if set')
+#     out_grad_mrtrix = traits.Tuple(File(exists=True),File(exists=True),
+#                                    desc='Outputs [bvecs, bvals] DW gradient scheme (FSL format) if set')
 #     out_grad_fsl = File(exits=True,desc='Output MRtrix gradient text file if set')
 
 # class MRTrixInfo(CommandLine):
@@ -51,7 +56,8 @@ import glob
 #         if isdefined(self.inputs.out_grad_mrtrix):
 #             outputs['out_grad_mrtrix'] = op.abspath(self.inputs.out_grad_mrtrix)
 #         if isdefined(self.inputs.out_grad_fsl):
-#             outputs['out_grad_fsl'] = (op.abspath(self.inputs.out_grad_fsl[0]),op.abspath(self.inputs.out_grad_mrtrix[1]))
+#             outputs['out_grad_fsl'] =
+#                 (op.abspath(self.inputs.out_grad_fsl[0]),op.abspath(self.inputs.out_grad_mrtrix[1]))
 #         return outputs
 
 
@@ -1126,7 +1132,8 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     #     argstr='-exclude %s', minlen=4, maxlen=4, sep=',', units='voxels')
     mask_file = File(exists=True, argstr='-mask %s', mandatory=False,
                      desc='mask file. Only tracks within mask.')
-    # mask_spec = traits.List(traits.Int, desc='Mask specification in voxels and radius (x y z r). Tracks will be terminated when they leave the ROI.',
+    # mask_spec = traits.List(traits.Int, desc='Mask specification in voxels and radius (x y z r).'
+    #                                          'Tracks will be terminated when they leave the ROI.',
     #     argstr='-mask %s', minlen=4, maxlen=4, sep=',', units='voxels')
 
     gradient_encoding_file = File(exists=True, argstr='-grad %s', mandatory=False,
@@ -1156,11 +1163,12 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     #     desc="Set the minimum radius of curvature (default is 2 mm for DT_STREAM, 0 for SD_STREAM, 1 mm for SD_PROB and DT_PROB)")
     desired_number_of_tracks = traits.Int(argstr='-select %d',
                                           desc='Sets the desired number of tracks.'
-                                          'The program will continue to generate tracks until this number of tracks have been selected and written to the output file'
-                                          '(default is 100 for *_STREAM methods, 1000 for *_PROB methods).')
+                                          'The program will continue to generate tracks until this number of tracks have been selected'
+                                          'and written to the output file (default is 100 for *_STREAM methods, 1000 for *_PROB methods).')
     maximum_number_of_seeds = traits.Int(argstr='-seeds %d',
                                          desc='Sets the maximum number of tracks to generate.'
-                                         "The program will not generate more tracks than this number, even if the desired number of tracks hasn't yet been reached"
+                                         'The program will not generate more tracks than this number,'
+                                         "even if the desired number of tracks hasn't yet been reached"
                                           '(default is 1000 x number of streamlines).')
     rk4 = traits.Bool(argstr='-rk4',
                       desc='use 4th-order Runge-Kutta integration (slower, but eliminates curvature overshoot in 1st-order deterministic methods)')

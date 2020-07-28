@@ -356,9 +356,9 @@ class SHOREInputSpec(DipyBaseInterfaceInputSpec):
     radial_order = traits.Int(6, usedefault=True, desc=(
         'Even number that represents the order of the basis'))
     zeta = traits.Int(700, usedefault=True, desc=('Scale factor'))
-    lambdaN = traits.Float(1e-8, usedefault=True,
+    lambda_n = traits.Float(1e-8, usedefault=True,
                            desc=('radial regularisation constant'))
-    lambdaL = traits.Float(1e-8, usedefault=True,
+    lambda_l = traits.Float(1e-8, usedefault=True,
                            desc=('angular regularisation constant'))
     tau = traits.Float(0.025330295910584444, desc=(
         'Diffusion time. By default the value that makes q equal to the square root of the b-value.'))
@@ -395,7 +395,7 @@ class SHORE(DipyDiffusionInterface):
     -------
 
     >>> from cmtklib.interfaces.dipy import SHORE
-    >>> asm = SHORE(radial_order=radial_order,zeta=zeta, lambdaN=lambdaN, lambdaL=lambdaL)
+    >>> asm = SHORE(radial_order=radial_order,zeta=zeta, lambda_n=lambdaN, lambda_l=lambdaL)
     >>> asm.inputs.in_file = '4d_dwi.nii'
     >>> asm.inputs.in_bval = 'bvals'
     >>> asm.inputs.in_bvec = 'bvecs'
@@ -452,7 +452,7 @@ class SHORE(DipyDiffusionInterface):
 
         sphere = get_sphere('symmetric724')
         shore_model = ShoreModel(gtab, radial_order=self.inputs.radial_order, zeta=self.inputs.zeta,
-                                 lambdaN=self.inputs.lambdaN, lambdaL=self.inputs.lambdaL)
+                                 lambdaN=self.inputs.lambda_n, lambdaL=self.inputs.lambda_l)
 
         f = gzip.open(op.abspath('shoremodel.pklz'), 'wb')
         pickle.dump(shore_model, f, -1)
@@ -570,7 +570,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.tracking import utils
         from dipy.direction import peaks_from_model
-        from dipy.tracking.stopping_criterion import ThresholdStoppingCriterion, BinaryStoppingCriterion
+        # from dipy.tracking.stopping_criterion import ThresholdStoppingCriterion, BinaryStoppingCriterion
         from dipy.tracking.eudx import EuDX #FIXME: see changes in Dipy 1.0
         from dipy.data import get_sphere
         from dipy.io.streamline import save_trk
@@ -657,7 +657,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
 
         IFLOGGER.info('Building Tissue Classifier')
         # classifier = ThresholdStoppingCriterion(fa,self.inputs.fa_thresh)
-        classifier = BinaryStoppingCriterion(tmsk)
+        # classifier = BinaryStoppingCriterion(tmsk)
 
         IFLOGGER.info('Loading tensor model')
         f = gzip.open(self.inputs.in_model, 'rb')

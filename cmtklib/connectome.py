@@ -988,7 +988,8 @@ class rsfmri_conmat(BaseInterface):
                         # fmat[i,j] = value
                         # fmat[j,i] = value
                 # np.save( op.join(gconf.get_timeseries(), 'fconnectome_%s_after_scrubbing.npy' % s), fmat )
-                # sio.savemat( op.join(gconf.get_timeseries(), 'fconnectome_%s_after_scrubbing.mat' % s), {'fmat':fmat} )
+                # sio.savemat( op.join(gconf.get_timeseries(),
+                #    'fconnectome_%s_after_scrubbing.mat' % s), {'fmat':fmat} )
             else:
                 nnodes = ts.shape[0]
 
@@ -1008,7 +1009,7 @@ class rsfmri_conmat(BaseInterface):
             # Get the edge attributes/keys/weights from the first edge and then break.
             # Change w.r.t networkx2
             edge_keys = []
-            for u, v, d in G.edges(data=True):
+            for _, _, d in G.edges(data=True):
                 #print(list(d.keys()))
                 edge_keys = list(d.keys())
                 break

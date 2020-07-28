@@ -14,7 +14,7 @@ from collections import OrderedDict
 import warnings
 from glob import glob
 import os
-import pickle
+# import pickle
 import gzip
 import json
 
@@ -85,6 +85,8 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
                         connmat_gp = nx.read_gpickle(connmat_fname)
                         connmat = nx.to_numpy_matrix(
                             connmat_gp, weight=weight, dtype=np.float32)
+                # TODO: finalize condition and append all conmat to a list
+    return connmat
 
 
 def length(xyz, along=False):
