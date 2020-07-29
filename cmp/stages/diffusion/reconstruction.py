@@ -82,9 +82,9 @@ class Dipy_recon_config(HasTraits):
     shore_radial_order = Enum(6, values='radial_order_values', usedefault=True,
                               desc=('Even number that represents the order of the basis'))
     shore_zeta = traits.Int(700, usedefault=True, desc=('Scale factor'))
-    shore_lambdaN = traits.Float(
+    shore_lambda_n = traits.Float(
         1e-8, usedefault=True, desc=('radial regularisation constant'))
-    shore_lambdaL = traits.Float(
+    shore_lambda_l = traits.Float(
         1e-8, usedefault=True, desc=('angular regularisation constant'))
     shore_tau = traits.Float(0.025330295910584444, desc=(
         'Diffusion time. By default the value that makes q equal to the square root of the b-value.'))
@@ -266,8 +266,8 @@ def create_dipy_recon_flow(config):
 
         dipy_SHORE.inputs.radial_order = int(config.shore_radial_order)
         dipy_SHORE.inputs.zeta = config.shore_zeta
-        dipy_SHORE.inputs.lambdaN = config.shore_lambdaN
-        dipy_SHORE.inputs.lambdaL = config.shore_lambdaL
+        dipy_SHORE.inputs.lambda_n = config.shore_lambda_n
+        dipy_SHORE.inputs.lambda_l = config.shore_lambda_l
         dipy_SHORE.inputs.tau = config.shore_tau
         dipy_SHORE.inputs.constrain_e0 = config.shore_constrain_e0
         dipy_SHORE.inputs.positive_constraint = config.shore_positive_constraint
