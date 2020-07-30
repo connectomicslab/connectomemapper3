@@ -34,9 +34,12 @@ class DiffusionConfig(HasTraits):
     dilate_rois = Bool(True)
     dilation_kernel = Enum(['Box', 'Gauss', 'Sphere'])
     dilation_radius = Enum([1, 2, 3, 4])
-    recon_processing_tool_editor = List(['Dipy', 'MRtrix', 'Custom'])
-    tracking_processing_tool_editor = List(['Dipy', 'MRtrix', 'Custom'])
-    processing_tool_editor = List(['Dipy', 'MRtrix', 'Custom'])
+    # recon_processing_tool_editor = List(['Dipy', 'MRtrix', 'Custom'])
+    # tracking_processing_tool_editor = List(['Dipy', 'MRtrix', 'Custom'])
+    # processing_tool_editor = List(['Dipy', 'MRtrix', 'Custom'])
+    recon_processing_tool_editor = List(['Dipy', 'MRtrix'])
+    tracking_processing_tool_editor = List(['Dipy', 'MRtrix'])
+    processing_tool_editor = List(['Dipy', 'MRtrix'])
     recon_processing_tool = Str('MRtrix')
     tracking_processing_tool = Str('MRtrix')
     custom_track_file = File
@@ -103,16 +106,20 @@ class DiffusionConfig(HasTraits):
         # self.dtk_tracking_config.imaging_model = new
         # self.dtb_tracking_config.imaging_model = new
         # Remove MRtrix from recon and tracking methods and Probabilistic from diffusion model if diffusion_imaging_model is DSI
-        if (new == 'DSI') and (self.recon_processing_tool != 'Custom'):
+        if (new == 'DSI'): # and (self.recon_processing_tool != 'Custom'):
             self.recon_processing_tool = 'Dipy'
-            self.recon_processing_tool_editor = ['Dipy', 'Custom']
-            self.tracking_processing_tool_editor = ['Dipy', 'MRtrix', 'Custom']
+            # self.recon_processing_tool_editor = ['Dipy', 'Custom']
+            # self.tracking_processing_tool_editor = ['Dipy', 'MRtrix', 'Custom']
+            self.recon_processing_tool_editor = ['Dipy']
+            self.tracking_processing_tool_editor = ['Dipy', 'MRtrix']
             self.diffusion_model_editor = ['Deterministic', 'Probabilistic']
         else:
             # self.processing_tool_editor = ['DTK','MRtrix','Camino','FSL','Gibbs']
             # self.processing_tool_editor = ['Dipy','MRtrix']
-            self.recon_processing_tool_editor = ['Dipy', 'MRtrix', 'Custom']
-            self.tracking_processing_tool_editor = ['Dipy', 'MRtrix', 'Custom']
+            # self.recon_processing_tool_editor = ['Dipy', 'MRtrix', 'Custom']
+            # self.tracking_processing_tool_editor = ['Dipy', 'MRtrix', 'Custom']
+            self.recon_processing_tool_editor = ['Dipy', 'MRtrix']
+            self.tracking_processing_tool_editor = ['Dipy', 'MRtrix']
 
             if self.tracking_processing_tool == 'DTK':
                 self.diffusion_model_editor = ['Deterministic']
@@ -135,8 +142,8 @@ class DiffusionConfig(HasTraits):
                 self.tracking_processing_tool = tracking_processing_tool
         elif new == 'MRtrix':
             self.tracking_processing_tool_editor = ['MRtrix']
-        elif new == 'Custom':
-            self.tracking_processing_tool_editor = ['Custom']
+        # elif new == 'Custom':
+        #     self.tracking_processing_tool_editor = ['Custom']
 
     def _tracking_processing_tool_changed(self, new):
         # print("tracking_processing_tool changed: %s"%new)
@@ -502,32 +509,32 @@ class DiffusionStage(Stage):
             (temp_node, outputnode, [("diffusion_model", "diffusion_model")])
         ])
 
-        if self.config.tracking_processing_tool == 'Custom':
-            # FIXME make sure header of TRK / TCK are consistent with DWI
-            custom_node = pe.Node(interface=util.IdentityInterface(fields=["custom_track_file"]),
-                                  name='read_custom_track')
-            custom_node.inputs.custom_track_file = self.config.custom_track_file
-            if nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TrkFile:
-                print("> load TRK tractography file")
-                flow.connect([
-                    (custom_node, outputnode, [
-                     ("custom_track_file", "track_file")])
-                ])
-            elif nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TckFile:
-                print("> load TCK tractography file and convert to TRK format")
-                converter = pe.Node(interface=Tck2Trk(), name='trackvis')
-                converter.inputs.out_tracks = 'converted.trk'
+        # if self.config.tracking_processing_tool == 'Custom':
+        #     # FIXME make sure header of TRK / TCK are consistent with DWI
+        #     custom_node = pe.Node(interface=util.IdentityInterface(fields=["custom_track_file"]),
+        #                           name='read_custom_track')
+        #     custom_node.inputs.custom_track_file = self.config.custom_track_file
+        #     if nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TrkFile:
+        #         print("> load TRK tractography file")
+        #         flow.connect([
+        #             (custom_node, outputnode, [
+        #              ("custom_track_file", "track_file")])
+        #         ])
+        #     elif nib.streamlines.detect_format(self.config.custom_track_file) is nib.streamlines.TckFile:
+        #         print("> load TCK tractography file and convert to TRK format")
+        #         converter = pe.Node(interface=Tck2Trk(), name='trackvis')
+        #         converter.inputs.out_tracks = 'converted.trk'
 
-                flow.connect([
-                    (custom_node, converter, [
-                     ('custom_track_file', 'in_tracks')]),
-                    (inputnode, converter, [
-                     ('wm_mask_registered', 'in_image')]),
-                    (converter, outputnode, [('out_tracks', 'track_file')])
-                ])
-            else:
-                print(
-                    "Invalid tractography input format. Valid formats are .tck (MRtrix) and .trk (DTK/Trackvis)")
+        #         flow.connect([
+        #             (custom_node, converter, [
+        #              ('custom_track_file', 'in_tracks')]),
+        #             (inputnode, converter, [
+        #              ('wm_mask_registered', 'in_image')]),
+        #             (converter, outputnode, [('out_tracks', 'track_file')])
+        #         ])
+        #     else:
+        #         print(
+        #             "Invalid tractography input format. Valid formats are .tck (MRtrix) and .trk (DTK/Trackvis)")
 
     def define_inspect_outputs(self):
         # print "stage_dir : %s" % self.stage_dir

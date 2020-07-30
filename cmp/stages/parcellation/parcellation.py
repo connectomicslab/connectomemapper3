@@ -35,8 +35,10 @@ from cmp.stages.common import Stage
 class ParcellationConfig(HasTraits):
     pipeline_mode = Enum(["Diffusion", "fMRI"])
     parcellation_scheme = Str('Lausanne2008')
+    # parcellation_scheme_editor = List(
+    #     ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018', 'Custom'])
     parcellation_scheme_editor = List(
-        ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018', 'Custom'])
+        ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018'])
     include_thalamic_nuclei_parcellation = Bool(True)
     ants_precision_type = Enum(['double', 'float'])
     # template_thalamus = File()
@@ -68,9 +70,9 @@ class ParcellationConfig(HasTraits):
     def _graphml_file_changed(self, new):
         self.update_atlas_info()
 
-    def _parcellation_scheme_changed(self, old, new):
-        if new == 'Custom':
-            self.pre_custom = old
+    # def _parcellation_scheme_changed(self, old, new):
+    #     if new == 'Custom':
+    #         self.pre_custom = old
 
 
 class ParcellationStage(Stage):
@@ -413,54 +415,54 @@ class ParcellationStage(Stage):
             #         flow.connect([
             #                     (erode_brain,outputnode,[("out_file","brain_eroded")])
             #                     ])
+        # Custom parcellation (CMP2)
+        # else:
+        #     temp_node = pe.Node(interface=util.IdentityInterface(fields=["roi_volumes", "atlas_info"]),
+        #                         name="custom_parcellation")
+        #     temp_node.inputs.roi_volumes = self.config.atlas_nifti_file
+        #     temp_node.inputs.atlas_info = self.config.atlas_info
+        #     flow.connect([
+        #         (temp_node, outputnode, [("roi_volumes", "roi_volumes")]),
+        #         (temp_node, outputnode, [("atlas_info", "atlas_info")]),
+        #         (inputnode, outputnode, [("custom_wm_mask", "wm_mask_file")])
+        #     ])
 
-        else:
-            temp_node = pe.Node(interface=util.IdentityInterface(fields=["roi_volumes", "atlas_info"]),
-                                name="custom_parcellation")
-            temp_node.inputs.roi_volumes = self.config.atlas_nifti_file
-            temp_node.inputs.atlas_info = self.config.atlas_info
-            flow.connect([
-                (temp_node, outputnode, [("roi_volumes", "roi_volumes")]),
-                (temp_node, outputnode, [("atlas_info", "atlas_info")]),
-                (inputnode, outputnode, [("custom_wm_mask", "wm_mask_file")])
-            ])
+        #     threshold_roi = pe.Node(
+        #         interface=fsl.BinaryThreshold(
+        #             thresh=0.0, binarize=True, out_file='T1w_class-GM.nii.gz'),
+        #         name='threshold_roi_bin')
 
-            threshold_roi = pe.Node(
-                interface=fsl.BinaryThreshold(
-                    thresh=0.0, binarize=True, out_file='T1w_class-GM.nii.gz'),
-                name='threshold_roi_bin')
+        #     def get_first(roi_volumes):
+        #         if len(roi_volumes) > 1:
+        #             return roi_volumes[0]
+        #         else:
+        #             return roi_volumes
 
-            def get_first(roi_volumes):
-                if len(roi_volumes) > 1:
-                    return roi_volumes[0]
-                else:
-                    return roi_volumes
+        #     flow.connect([
+        #         (temp_node, threshold_roi, [
+        #          (("roi_volumes", get_first), "in_file")]),
+        #         (threshold_roi, outputnode, [("out_file", "gm_mask_file")]),
+        #     ])
 
-            flow.connect([
-                (temp_node, threshold_roi, [
-                 (("roi_volumes", get_first), "in_file")]),
-                (threshold_roi, outputnode, [("out_file", "gm_mask_file")]),
-            ])
-
-            if self.config.pipeline_mode == "fMRI":
-                erode_wm = pe.Node(interface=cmtk.Erode(), name="erode_wm")
-                flow.connect([
-                    (inputnode, erode_wm, [("custom_wm_mask", "in_file")]),
-                    (erode_wm, outputnode, [("out_file", "wm_eroded")]),
-                ])
-                if os.path.exists(self.config.csf_file):
-                    erode_csf = pe.Node(interface=cmtk.Erode(
-                        in_file=self.config.csf_file), name="erode_csf")
-                    flow.connect([
-                        (erode_csf, outputnode, [("out_file", "csf_eroded")])
-                    ])
-                if os.path.exists(self.config.brain_file):
-                    erode_brain = pe.Node(interface=cmtk.Erode(
-                        in_file=self.config.brain_file), name="erode_brain")
-                    flow.connect([
-                        (erode_brain, outputnode, [
-                         ("out_file", "brain_eroded")])
-                    ])
+        #     if self.config.pipeline_mode == "fMRI":
+        #         erode_wm = pe.Node(interface=cmtk.Erode(), name="erode_wm")
+        #         flow.connect([
+        #             (inputnode, erode_wm, [("custom_wm_mask", "in_file")]),
+        #             (erode_wm, outputnode, [("out_file", "wm_eroded")]),
+        #         ])
+        #         if os.path.exists(self.config.csf_file):
+        #             erode_csf = pe.Node(interface=cmtk.Erode(
+        #                 in_file=self.config.csf_file), name="erode_csf")
+        #             flow.connect([
+        #                 (erode_csf, outputnode, [("out_file", "csf_eroded")])
+        #             ])
+        #         if os.path.exists(self.config.brain_file):
+        #             erode_brain = pe.Node(interface=cmtk.Erode(
+        #                 in_file=self.config.brain_file), name="erode_brain")
+        #             flow.connect([
+        #                 (erode_brain, outputnode, [
+        #                  ("out_file", "brain_eroded")])
+        #             ])
 
     def define_inspect_outputs(self):
         print("stage_dir : %s" % self.stage_dir)
@@ -524,9 +526,9 @@ class ParcellationStage(Stage):
                                                                             roi_v + ":colormap=lut:lut=" + lut_file]
 
                 # self.inspect_outputs = self.inspect_outputs_dict.keys()
-        else:
-            self.inspect_outputs_dict["Custom atlas"] = [
-                'fsleyes', self.config.atlas_nifti_file, "-cm", "random"]
+        # else:
+        #     self.inspect_outputs_dict["Custom atlas"] = [
+        #         'fsleyes', self.config.atlas_nifti_file, "-cm", "random"]
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
@@ -538,5 +540,5 @@ class ParcellationStage(Stage):
             else:
                 return os.path.exists(os.path.join(self.stage_dir, "%s_parcellation" % self.config.parcellation_scheme,
                                                    "result_%s_parcellation.pklz" % self.config.parcellation_scheme))
-        else:
-            return os.path.exists(self.config.atlas_nifti_file)
+        # else:
+        #     return os.path.exists(self.config.atlas_nifti_file)

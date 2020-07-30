@@ -124,22 +124,22 @@ class fMRIPipeline(Pipeline):
         self.stages['Connectome'].config.subject = new
 
     def update_registration(self):
-        if self.seg_tool == "Custom segmentation":
-            if self.stages['Registration'].config.registration_mode == 'BBregister (FS)':
-                self.stages['Registration'].config.registration_mode = 'Linear (FSL)'
-            if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
-                self.stages['Registration'].config.registration_mode_trait = [
-                    'Linear (FSL)', 'Nonlinear (FSL)']
-            else:
-                self.stages['Registration'].config.registration_mode_trait = [
-                    'Linear (FSL)']
+        # if self.seg_tool == "Custom segmentation":
+        #     if self.stages['Registration'].config.registration_mode == 'BBregister (FS)':
+        #         self.stages['Registration'].config.registration_mode = 'Linear (FSL)'
+        #     if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
+        #         self.stages['Registration'].config.registration_mode_trait = [
+        #             'Linear (FSL)', 'Nonlinear (FSL)']
+        #     else:
+        #         self.stages['Registration'].config.registration_mode_trait = [
+        #             'Linear (FSL)']
+        # else:
+        if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
+            self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)', 'BBregister (FS)',
+                                                                          'Nonlinear (FSL)']
         else:
-            if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
-                self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)', 'BBregister (FS)',
-                                                                              'Nonlinear (FSL)']
-            else:
-                self.stages['Registration'].config.registration_mode_trait = [
-                    'Linear (FSL)', 'BBregister (FS)']
+            self.stages['Registration'].config.registration_mode_trait = [
+                'Linear (FSL)', 'BBregister (FS)']
 
     def update_nuisance_requirements(self):
         self.stages['Registration'].config.apply_to_eroded_brain = self.stages['FunctionalMRI'].config.global_nuisance
@@ -756,8 +756,8 @@ class fMRIPipeline(Pipeline):
                  ("outputnode.avg_timeseries", "func.@avg_timeseries")])
             ])
 
-            if self.parcellation_scheme == "Custom":
-                fMRI_flow.connect(
-                    [(fMRI_inputnode, con_flow, [('atlas_info', 'inputnode.atlas_info')])])
+            # if self.parcellation_scheme == "Custom":
+            #     fMRI_flow.connect(
+            #         [(fMRI_inputnode, con_flow, [('atlas_info', 'inputnode.atlas_info')])])
 
         return fMRI_flow

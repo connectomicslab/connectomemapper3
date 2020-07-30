@@ -31,13 +31,16 @@ from cmtklib.util import extract_freesurfer_subject_dir
 
 
 class SegmentationConfig(HasTraits):
-    seg_tool = Enum(["Freesurfer", "Custom segmentation"])
+    # seg_tool = Enum(["Freesurfer", "Custom segmentation"])
+    seg_tool = Enum(["Freesurfer"])
     make_isotropic = Bool(False)
     isotropic_vox_size = Float(1.2, desc='specify the size (mm)')
     isotropic_interpolation = Enum('cubic', 'weighted', 'nearest', 'sinc', 'interpolate',
                                    desc='<interpolate|weighted|nearest|sinc|cubic> (default is cubic)')
+    # brain_mask_extraction_tool = Enum(
+    #     "Freesurfer", ["Freesurfer", "BET", "ANTs", "Custom"])
     brain_mask_extraction_tool = Enum(
-        "Freesurfer", ["Freesurfer", "BET", "ANTs", "Custom"])
+        "Freesurfer", ["Freesurfer", "BET", "ANTs"])
     ants_templatefile = File(desc="Anatomical template")
     ants_probmaskfile = File(desc="Brain probability mask")
     ants_regmaskfile = File(
@@ -139,7 +142,9 @@ class SegmentationStage(Stage):
                     fs_autorecon1 = pe.Node(interface=fs.ReconAll(
                         flags='-no-isrunning'), name='autorecon1')
                     fs_autorecon1.inputs.directive = 'autorecon1'
-                    if self.config.brain_mask_extraction_tool == "Custom" or self.config.brain_mask_extraction_tool == "ANTs":
+
+                    # if self.config.brain_mask_extraction_tool == "Custom" or self.config.brain_mask_extraction_tool == "ANTs":
+                    if self.config.brain_mask_extraction_tool == "ANTs":
                         fs_autorecon1.inputs.flags = '-noskullstrip'
                     fs_autorecon1.inputs.args = self.config.freesurfer_args
 
@@ -203,9 +208,9 @@ class SegmentationStage(Stage):
                             (ants_bet, fs_mriconvert_brainmask, [
                              ('BrainExtractionBrain', 'in_file')])
                         ])
-                    elif self.config.brain_mask_extraction_tool == "Custom":
-                        fs_mriconvert_brainmask.inputs.in_file = os.path.abspath(
-                            self.config.brain_mask_path)
+                    # elif self.config.brain_mask_extraction_tool == "Custom":
+                    #     fs_mriconvert_brainmask.inputs.in_file = os.path.abspath(
+                    #         self.config.brain_mask_path)
 
                     # copy_brainmask_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmask_to_fs')
                     # copy_brainmask_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.mgz")
@@ -259,19 +264,19 @@ class SegmentationStage(Stage):
                 outputnode.inputs.subjects_dir = self.config.freesurfer_subjects_dir
                 outputnode.inputs.subject_id = self.config.freesurfer_subject_id
 
-        elif self.config.seg_tool == "Custom segmentation":
+        # elif self.config.seg_tool == "Custom segmentation":
 
-            apply_mask = pe.Node(interface=fsl.ApplyMask(), name='applyMask')
-            apply_mask.inputs.mask_file = self.config.brain_mask_path
-            apply_mask.inputs.out_file = 'brain.nii.gz'
+        #     apply_mask = pe.Node(interface=fsl.ApplyMask(), name='applyMask')
+        #     apply_mask.inputs.mask_file = self.config.brain_mask_path
+        #     apply_mask.inputs.out_file = 'brain.nii.gz'
 
-            flow.connect([
-                (inputnode, apply_mask, [("T1", "in_file")]),
-                (apply_mask, outputnode, [("out_file", "brain")]),
-            ])
+        #     flow.connect([
+        #         (inputnode, apply_mask, [("T1", "in_file")]),
+        #         (apply_mask, outputnode, [("out_file", "brain")]),
+        #     ])
 
-            outputnode.inputs.brain_mask = self.config.brain_mask_path
-            outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
+        #     outputnode.inputs.brain_mask = self.config.brain_mask_path
+        #     outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
 
     def define_inspect_outputs(self):
         # print "stage_dir : %s" % self.stage_dir
@@ -319,15 +324,15 @@ class SegmentationStage(Stage):
                                                                fs_path, 'mri', 'aseg.mgz'),
                                                            colorLUT_file]
 
-        elif self.config.seg_tool == "Custom segmentation":
-            self.inspect_outputs_dict['WM mask'] = [
-                'fsleyes', self.config.white_matter_mask]
+        # elif self.config.seg_tool == "Custom segmentation":
+        #     self.inspect_outputs_dict['WM mask'] = [
+        #         'fsleyes', self.config.white_matter_mask]
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
 
     def has_run(self):
-        if self.config.use_existing_freesurfer_data or self.config.seg_tool == "Custom segmentation":
+        if self.config.use_existing_freesurfer_data:# or self.config.seg_tool == "Custom segmentation":
             return True
         else:
             return os.path.exists(os.path.join(self.stage_dir, "reconall", "result_reconall.pklz"))
