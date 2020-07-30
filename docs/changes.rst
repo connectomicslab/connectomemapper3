@@ -6,7 +6,7 @@ Changes
 Version 3.0.0-RC1
 ****************************
 
-Date: July 24, 2020
+Date: August 03, 2020
 
 This version corresponds to the first release candidate of Connectome Mapper 3. In particular, it integrates Pull Request #40 where the last major changes prior to its official release have been made, which includes in particular:
 
@@ -18,9 +18,17 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 
 * Correct a number of code stly issues reported by Codacy (bandits/pylints/flake8)
 
-*Code coverage*
+*Software development life cycle*
 
 * Use `coveragepy <https://coverage.readthedocs.io/en/coverage-5.2/>`_  in CircleCI during regression tests of the BIDS app and create code coverage reports
+
+* Add new regression tests in CircleCI to improve code coverage:
+	* Test 01: Lausanne2018 (full) parcellation + Dipy SHORE + Mrtrix3 SD_STREAM tractography
+	* Test 02: Lausanne2018 (full) parcellation + Dipy SHORE + Mrtrix3 ACT iFOV2 tractography
+	* Test 03: Lausanne2018 (full) parcellation + Dipy SHORE + Dipy deterministic tractography
+	* Test 04: Lausanne2018 (full) parcellation + Dipy SHORE + Dipy Particle Filtering tractography
+	* Test 05: Native Freesurfer (Desikan-Killiany) parcellation
+	* Test 06: Lausanne2008 parcellation (as implemented in CMP2)
 
 *Changes in BIDS derivatives*
 
@@ -31,6 +39,9 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 *Upgrades*
 
 * Use Dipy 1.0 and related code changes in ``cmtklib/interfaces/dipy`` (Check `here <https://dipy.org/documentation/1.0.0./api_changes/#dipy-1-0-changes>`_ for more details about Dipy 1.0 changes)
+
+.. warning::
+	Interface for tractography based on Dipy DTI model and EuDX tractography has not been updated yet, It will be part of the next release candidate.
 
 * Use Nipype 1.5.0
 
@@ -54,6 +65,8 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 
 * Add missing renaming of Dipy tensor-related maps (AD, RD, MD) following BIDS
 
+* Remove all references to use Custom segmentation / parcellation / diffusion FOD image / tractogram, inherited from CMP2 but not anymore functional following the adoption of BIDS standard inside CMP3.
+
 Please check the `pull request 40 page <https://github.com/connectomicslab/connectomemapper3/pull/40>`_ for more details.
 
 
@@ -63,7 +76,7 @@ Version 3.0.0-beta-RC2
 
 Date: June 02, 2020
 
-This version integrates Pull Request #33 which includes in particular:
+This version integrates Pull Request #33 which corresponds to the last beta release that still relies on Python 2.7. It includes in particular:
 
 
 *Upgrade*
