@@ -134,18 +134,18 @@ jobs:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
 
-    working_directory: /tmp/data/ds-sample
+    working_directory: /tmp/data
     environment:
-      - FS_LICENSE: /tmp/data/ds-sample/code/license.txt
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether build should be skipped
+          name: Check whether test_dsi_mrtrix should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds-sample\]' )" != "" ]]; then
-              echo "Skipping ds-sample build"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_dsi_mrtrix\]' )" != "" ]]; then
+              echo "Skipping test_dsi_mrtrix job"
               circleci step halt
             fi
       - attach_workspace:
@@ -176,6 +176,11 @@ jobs:
 
             # Create the test folder to store list of test output files
             mkdir -p /tmp/data/ds-sample/test
+
+            # Create the dataset dedicated to this job and copy data into it
+            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
+            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
       - run:
           name: Run anatomical and diffusion pipelines on ds-sample (test 1 - Dipy SHORE + MRtrix SD_STREAM tracking)
           no_output_timeout: 8h
@@ -183,8 +188,8 @@ jobs:
             # Execute BIDS App
             docker run -it --rm \
                 --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/ds-sample:/bids_dir \
-                -v /tmp/data/ds-sample/derivatives:/output_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
                 -v /home/circleci/src/connectomemapper3/config:/config \
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
@@ -194,10 +199,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-01_coverage.xml
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-01_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-01_log.txt
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-01_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 1)
           command: |
@@ -213,8 +218,8 @@ jobs:
             # Execute BIDS App
             docker run -it --rm \
                 --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/ds-sample:/bids_dir \
-                -v /tmp/data/ds-sample/derivatives:/output_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
                 -v /home/circleci/src/connectomemapper3/config:/config \
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
@@ -224,10 +229,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-02_coverage.xml
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-02_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-02_log.txt
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-02_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 2)
           command: |
@@ -243,29 +248,29 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/ds-sample/code
+          path: /tmp/data/${CIRCLE_JOB}/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/ds-sample/derivatives/cmp
+          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/ds-sample/derivatives/nipype
+          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/nipype
 
   test_dsi_dipy:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
 
-    working_directory: /tmp/data/ds-sample
+    working_directory: /tmp/data
     environment:
-      - FS_LICENSE: /tmp/data/ds-sample/code/license.txt
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether build should be skipped
+          name: Check whether test_dsi_dipy should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds-sample\]' )" != "" ]]; then
-              echo "Skipping ds-sample build"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_dsi_dipy\]' )" != "" ]]; then
+              echo "Skipping test_dsi_dipy job"
               circleci step halt
             fi
       - attach_workspace:
@@ -296,6 +301,11 @@ jobs:
 
             # Create the test folder to store list of test output files
             mkdir -p /tmp/data/ds-sample/test
+
+            # Create the dataset dedicated to this job and copy data into it
+            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
+            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
       - run:
           name: Run anatomical and diffusion pipelines on ds-sample (test 3 - Dipy SHORE + Deterministic tracking)
           no_output_timeout: 8h
@@ -303,8 +313,8 @@ jobs:
             # Execute BIDS App
             docker run -it --rm \
                 --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/ds-sample:/bids_dir \
-                -v /tmp/data/ds-sample/derivatives:/output_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
                 -v /home/circleci/src/connectomemapper3/config:/config \
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
@@ -314,10 +324,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-03_coverage.xml
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-03_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-03_log.txt
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-03_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 3)
           command: |
@@ -333,8 +343,8 @@ jobs:
             # Execute BIDS App
             docker run -it --rm \
                 --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/ds-sample:/bids_dir \
-                -v /tmp/data/ds-sample/derivatives:/output_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
                 -v /home/circleci/src/connectomemapper3/config:/config \
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
@@ -344,10 +354,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-04_coverage.xml
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-04_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-04_log.txt
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-04_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 4)
           command: |
@@ -363,29 +373,29 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/ds-sample/code
+          path: /tmp/data/${CIRCLE_JOB}/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/ds-sample/derivatives/cmp
+          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/ds-sample/derivatives/nipype
+          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/nipype
 
   test_parcellation:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
 
-    working_directory: /tmp/data/ds-sample
+    working_directory: /tmp/data
     environment:
-      - FS_LICENSE: /tmp/data/ds-sample/code/license.txt
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
     steps:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether build should be skipped
+          name: Check whether test_parcellation should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds-sample\]' )" != "" ]]; then
-              echo "Skipping ds-sample build"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_parcellation\]' )" != "" ]]; then
+              echo "Skipping test_parcellation job"
               circleci step halt
             fi
       - attach_workspace:
@@ -416,6 +426,11 @@ jobs:
 
             # Create the test folder to store list of test output files
             mkdir -p /tmp/data/ds-sample/test
+
+            # Create the dataset dedicated to this job and copy data into it
+            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
+            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
       - run:
           name: Run anatomical pipeline on ds-sample (test 5 - Lausanne 2008)
           no_output_timeout: 8h
@@ -423,8 +438,8 @@ jobs:
             # Execute BIDS App
             docker run -it --rm \
                 --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/ds-sample:/bids_dir \
-                -v /tmp/data/ds-sample/derivatives:/output_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/output_dir \
                 -v /home/circleci/src/connectomemapper3/config:/config \
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
@@ -433,10 +448,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-05_coverage.xml
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-05_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-05_log.txt
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-05_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 5)
           command: |
@@ -452,8 +467,8 @@ jobs:
             # Execute BIDS App
             docker run -it --rm \
                 --entrypoint /app/run_coverage_cmp3.sh \
-                -v /tmp/data/ds-sample:/bids_dir \
-                -v /tmp/data/ds-sample/derivatives:/output_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
                 -v /home/circleci/src/connectomemapper3/config:/config \
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
@@ -462,10 +477,10 @@ jobs:
                 --coverage
 
             # Rename partial coverage
-            mv /tmp/data/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-06_coverage.xml
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/test-06_coverage.xml
 
             # Rename execution log
-            mv /tmp/data/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-06_log.txt
+            mv /tmp/data/${CIRCLE_JOB}/ds-sample/code/log.txt /tmp/data/ds-sample/test/test-06_log.txt
       - run:
           name: Checking outputs of Connectome Mapper run (test 6)
           command: |
@@ -478,7 +493,7 @@ jobs:
           name: Clean working directory
           when: always
           command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/data/ds-sample
+            sudo chown $(id -un):$(id -gn) -R /tmp/data/${CIRCLE_JOB}/ds-sample
             find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
                 -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
                 -not -name "*.log" -not -name "*.pklz" -type f -delete
@@ -489,11 +504,11 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/ds-sample/code
+          path: /tmp/data/${CIRCLE_JOB}/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/ds-sample/derivatives/cmp
+          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/ds-sample/derivatives/nipype
+          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/nipype
 
   codacy-coverage-report:
     docker:
