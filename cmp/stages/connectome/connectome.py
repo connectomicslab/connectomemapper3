@@ -84,7 +84,7 @@ class ConnectomeStage(Stage):
 
         flow.connect([
             (inputnode, cmtk_cmat, [('track_file', 'track_file'),
-                                    ('roi_graphMLs', 'roi_graphMLs'),
+                                    ('roi_graphMLs', 'roi_graphmls'),
                                     ('parcellation_scheme', 'parcellation_scheme'),
                                     ('atlas_info', 'atlas_info'),
                                     ('roi_volumes_registered', 'roi_volumes')]),
