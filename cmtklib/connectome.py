@@ -454,11 +454,11 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             # print('({}, {}): {}'.format(u, v, list(G[u][v].keys())))
             G_out.remove_edge(u, v)
 
-            print("u / v : {} / {}".format(u,v))
+            # print("u / v : {} / {}".format(u,v))
             if len(list(G[u][v].keys())) == 1:
                 di = {'number_of_fibers': len(G[u][v]['fiblist']) }
 
-                print("G[u][v]['fiblist'] : {}".format(G[u][v]['fiblist']))
+                # print("G[u][v]['fiblist'] : {}".format(G[u][v]['fiblist']))
 
                 # additional measures
                 # compute mean/std of fiber measure
@@ -469,8 +469,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                     idx = np.where((final_fiberlabels_array[:, 0] == int(v)) & (
                         final_fiberlabels_array[:, 1] == int(u)))[0]
 
-                print("idx : {}".format(idx))
-                print("final_fiberlength_array[idx] : {}".format(final_fiberlength_array[idx]))
+                # print("idx : {}".format(idx))
+                # print("final_fiberlength_array[idx] : {}".format(final_fiberlength_array[idx]))
 
                 di['fiber_length_mean'] = float(
                     np.nanmean(final_fiberlength_array[idx]))
@@ -565,6 +565,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         print("  >> Save connectome maps as :")
 
+
         # Get the edge attributes/keys/weights from the first edge and then break.
         # Change w.r.t networkx2
         edge_keys = []
@@ -573,14 +574,15 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             edge_keys = list(d.keys())
             break
 
+        # Storing network/graph in TSV format (by default to be BIDS compliant)
         print('    - connectome_%s.tsv' % parkey)
-
+        # Write header fields
         with open('connectome_%s.tsv' % parkey, 'w') as out_file:
             tsv_writer = csv.writer(out_file, delimiter='\t')
             header = ['source', 'target']
             header = header + [key for key in edge_keys]
             tsv_writer.writerow(header)
-
+        # Write list of graph edges with all connectivity metrics (edge_keys)
         with open('connectome_%s.tsv' % parkey, 'ab') as out_file:
             nx.write_edgelist(G_out,
                               out_file,
@@ -589,7 +591,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                               data = edge_keys,
                               encoding='utf-8')
 
-        # storing network
+        # Storing network/graph in other formats that might be prefered by the user
         if 'gPickle' in output_types:
             print('    - connectome_%s.gpickle' % parkey)
             nx.write_gpickle(G_out, 'connectome_%s.gpickle' % parkey)
@@ -601,7 +603,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             edge_struct = {}
             for edge_key in edge_keys:
                 if edge_key != 'fiblist':
-                    print('edge key: %s ' % edge_key)
+                    # print('edge key: %s ' % edge_key)
                     edge_struct[edge_key] = nx.to_numpy_matrix(G_out, weight=edge_key)
 
             # nodes
