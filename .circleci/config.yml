@@ -248,11 +248,11 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/${CIRCLE_JOB}/ds-sample/code
+          path: /tmp/data/test_dsi_mrtrix/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/cmp
+          path: /tmp/data/test_dsi_mrtrix/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/nipype
+          path: /tmp/data/test_dsi_mrtrix/ds-sample/derivatives/nipype
 
   test_dsi_dipy:
     machine:
@@ -373,11 +373,11 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/${CIRCLE_JOB}/ds-sample/code
+          path: /tmp/data/test_dsi_dipy/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/cmp
+          path: /tmp/data/test_dsi_dipy/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/nipype
+          path: /tmp/data/test_dsi_dipy/ds-sample/derivatives/nipype
 
   test_parcellation:
     machine:
@@ -504,11 +504,11 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/${CIRCLE_JOB}/ds-sample/code
+          path: /tmp/data/test_parcellation/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/cmp
+          path: /tmp/data/test_parcellation/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/nipype
+          path: /tmp/data/test_parcellation/ds-sample/derivatives/nipype
 
   codacy-coverage-report:
     docker:
