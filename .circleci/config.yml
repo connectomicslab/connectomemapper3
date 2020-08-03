@@ -520,7 +520,9 @@ jobs:
       - attach_workspace:
           at: /tmp
       - coverage-reporter/send_report:
-          coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml,/tmp/data/ds-sample/test/test-05_coverage.xml,/tmp/data/ds-sample/test/test-06_coverage.xml'
+          # With parcellation tests
+          # coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml,/tmp/data/ds-sample/test/test-05_coverage.xml,/tmp/data/ds-sample/test/test-06_coverage.xml'
+          coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml'
           project-token: ${CODACY_PROJECT_TOKEN}
 
   build_docs:
@@ -705,23 +707,24 @@ workflows:
             tags:
               only: /.*/
 
-      - test_parcellation:
-          requires:
-            - get_data
-            # - update_cache
-            - build
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
+      # JOB taking more than 5hours (CircleCI hard limit)
+      # - test_parcellation:
+      #     requires:
+      #       - get_data
+      #       # - update_cache
+      #       - build
+      #     filters:
+      #       branches:
+      #         ignore:
+      #           - /docs?\/.*/
+      #       tags:
+      #         only: /.*/
 
       - codacy-coverage-report:
           requires:
             - test_dsi_mrtrix
             - test_dsi_dipy
-            - test_parcellation
+            # - test_parcellation
           filters:
               branches:
                 ignore:
@@ -734,7 +737,7 @@ workflows:
             # - build_docs
             - test_dsi_mrtrix
             - test_dsi_dipy
-            - test_parcellation
+            # - test_parcellation
           filters:
             # ignore any commit on any branch by default
             branches:
@@ -749,7 +752,7 @@ workflows:
             # - build_docs
             - test_dsi_mrtrix
             - test_dsi_dipy
-            - test_parcellation
+            # - test_parcellation
           filters:
             # ignore any commit on any branch by default
             branches:
