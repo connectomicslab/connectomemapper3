@@ -78,7 +78,7 @@ All trademarks referenced herein are property of their respective holders.
 Aknowledgment
 *******************
 
-If your are using the Connectome Mapper 3 in your work, please acknowledge this software and its dependencies. See :ref:`Citing <citing>` for more details.
+If your are using the Connectome Mapper 3 in your work, please acknowledge this software. See :ref:`Citing <citing>` for more details.
 
 Help/Questions
 --------------
