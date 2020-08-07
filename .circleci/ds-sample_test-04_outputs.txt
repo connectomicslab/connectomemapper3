@@ -64,6 +64,7 @@ cmp/sub-01/ses-01/dwi/sub-01_ses-01_label-L2018_desc-scale4_conndata-network_con
 cmp/sub-01/ses-01/dwi/sub-01_ses-01_label-L2018_desc-scale5_conndata-network_connectivity.gpickle
 cmp/sub-01/ses-01/dwi/sub-01_ses-01_label-L2018_desc-scale5_conndata-network_connectivity.tsv
 cmp/sub-01/ses-01/dwi/sub-01_ses-01_model-SHORE_desc-DET_tractogram.trk
+cmp/sub-01/ses-01/dwi/sub-01_ses-01_model-SHORE_desc-PROB_tractogram.trk
 cmp/sub-01/ses-01/dwi/sub-01_ses-01_model-SHORE_FOD.nii.gz
 cmp/sub-01/ses-01/dwi/sub-01_ses-01_model-SHORE_GFA.nii.gz
 cmp/sub-01/ses-01/dwi/sub-01_ses-01_model-SHORE_MSD.nii.gz
@@ -963,6 +964,12 @@ nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/dipy_determinis
 nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/dipy_deterministic_tracking/_node.pklz
 nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/dipy_deterministic_tracking/_report/report.rst
 nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/dipy_deterministic_tracking/result_dipy_deterministic_tracking.pklz
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/dipy_probabilistic_tracking/diffusion_preproc_resampled_desc-seed_mask.nii.gz
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/dipy_probabilistic_tracking/diffusion_preproc_resampled_tracked.trk
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/dipy_probabilistic_tracking/_inputs.pklz
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/dipy_probabilistic_tracking/_node.pklz
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/dipy_probabilistic_tracking/_report/report.rst
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/dipy_probabilistic_tracking/result_dipy_probabilistic_tracking.pklz
 nipype/sub-01/ses-01/diffusion_pipeline/graph1.json
 nipype/sub-01/ses-01/diffusion_pipeline/graph.dot
 nipype/sub-01/ses-01/diffusion_pipeline/graph.json
