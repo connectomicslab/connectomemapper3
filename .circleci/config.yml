@@ -370,9 +370,6 @@ jobs:
           root: /tmp
           paths:
             - data/ds-sample/test
-            - data/test_dsi_dipy/ds-sample/derivatives/cmp/sub-01/ses-01/anat
-            - data/test_dsi_dipy/ds-sample/derivatives/freesurfer
-            - data/test_dsi_dipy/ds-sample/derivatives/nipype/sub-01/ses-01/anatomical_pipeline/
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -434,7 +431,6 @@ jobs:
             echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
             mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
             cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/test_dsi_dipy/ds-sample/derivatives/* /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - run:
           name: Run anatomical pipeline on ds-sample (test 5 - NativeFreesurfer)
           no_output_timeout: 5h
@@ -443,7 +439,7 @@ jobs:
             docker run -it --rm \
                 --entrypoint /app/run_coverage_cmp3.sh \
                 -v /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                -v /tmp/data/${CIRCLE_JOB}/ds-sample:/output_dir \
+                -v /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
                 -v /home/circleci/src/connectomemapper3/config:/config \
                 sebastientourbier/connectomemapper3 \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
@@ -525,8 +521,8 @@ jobs:
           at: /tmp
       - coverage-reporter/send_report:
           # With parcellation tests
-          # coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml,/tmp/data/ds-sample/test/test-05_coverage.xml,/tmp/data/ds-sample/test/test-06_coverage.xml'
-          coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml'
+          coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml,/tmp/data/ds-sample/test/test-05_coverage.xml,/tmp/data/ds-sample/test/test-06_coverage.xml'
+          # coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml'
           project-token: ${CODACY_PROJECT_TOKEN}
 
   build_docs:
@@ -717,7 +713,6 @@ workflows:
             - get_data
             # - update_cache
             - build
-            - test_dsi_dipy
           filters:
             branches:
               ignore:
