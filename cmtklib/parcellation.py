@@ -83,10 +83,13 @@ class ComputeParcellationRoiVolumes(BaseInterface):
                     roi_fname = roi
                     break
 
-            for graphml in self.inputs.roi_graphMLs:
-                if parkey in graphml:
-                    roi_info_graphml = graphml
-                    break
+            if self.inputs.parcellation_scheme != 'Lausanne2008':
+                for graphml in self.inputs.roi_graphMLs:
+                    if parkey in graphml:
+                        roi_info_graphml = graphml
+                        break
+            else:
+                roi_info_graphml = parval['node_information_graphml']
 
             iflogger.info(
                 "-------------------------------------------------------")
