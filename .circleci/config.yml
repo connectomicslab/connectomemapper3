@@ -724,7 +724,7 @@ workflows:
           requires:
             - test_dsi_mrtrix
             - test_dsi_dipy
-            # - test_parcellation
+            - test_parcellation
           filters:
               branches:
                 ignore:
