@@ -370,7 +370,9 @@ jobs:
           root: /tmp
           paths:
             - data/ds-sample/test
-            - data/test_dsi_dipy/ds-sample
+            - data/test_dsi_dipy/ds-sample/derivatives/cmp/sub-01/ses-01/anat
+            - data/test_dsi_dipy/ds-sample/derivatives/freesurfer
+            - data/test_dsi_dipy/ds-sample/derivatives/nipype/sub-01/ses-01/anatomical_pipeline/
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
@@ -431,9 +433,10 @@ jobs:
             # Create the dataset dedicated to this job and copy data into it
             echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
             mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/test_dsi_dipy/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
+            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
+            cp -R /tmp/data/test_dsi_dipy/ds-sample/derivatives/* /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives
       - run:
-          name: Run anatomical pipeline on ds-sample (test 5 - Lausanne 2008)
+          name: Run anatomical pipeline on ds-sample (test 5 - NativeFreesurfer)
           no_output_timeout: 5h
           command: |
             # Execute BIDS App
@@ -462,7 +465,7 @@ jobs:
             # diff /home/circleci/src/connectomemapper3/.circleci/ds-sample_test-05_outputs.txt /tmp/data/ds-sample/test/test-05_outputs.out
             # exit $?
       - run:
-          name: Run anatomical pipeline on ds-sample (test 6 - NativeFreesurfer)
+          name: Run anatomical pipeline on ds-sample (test 6 - Lausanne 2008)
           no_output_timeout: 5h
           command: |
             # Execute BIDS App
