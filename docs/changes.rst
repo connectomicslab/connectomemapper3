@@ -16,7 +16,7 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 
 * Correct automatically PEP8 code style issues with autopep8
 
-* Correct a number of code stly issues reported by Codacy (bandits/pylints/flake8)
+* Correct manually a number of code stly issues reported by Codacy (bandits/pylints/flake8)
 
 *Software development life cycle*
 
@@ -32,9 +32,7 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 
 *Changes in BIDS derivatives*
 
-* Renamed parcellation files
-
-* Renamed connectivity graph files
+* Renamed connectivity graph files to better conform to the BIDS extension proposal on connectivity data schema. They are now saved by default in a TSV file as a list of edges.
 
 *Upgrades*
 
