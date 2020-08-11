@@ -56,9 +56,12 @@ Anatomical derivatives
 
     * The five different brain parcellation are saved as:
 
-        - ``anat/sub-<subject_label>_space-DWI_label-L2018_desc-<scale_label>_atlas.nii.gz``
+        - ``anat/sub-<subject_label>_space-DWI_label-<atlas_label>_desc-<scale_label>_atlas.nii.gz``
 
-        where ``<scale_label>`` : ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5`` corresponds to the parcellation scale.
+       where:
+
+    - ``<atlas_label>``:``Desikan``/``L2008``/``L2018`` is the parcellation scheme used
+    - ``<scale_label>`` : ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5`` corresponds to the parcellation scale.
 
     * The 5TT image used for Anatomically Constrained Tractorgaphy (ACT):
 
@@ -134,12 +137,12 @@ Diffusion derivatives in the individual ``DWI`` space are placed in each subject
 
 * The structural connectivity (SC) graphs:
 
-    - ``dwi/sub-<subject_label>__label-<parcellation_atlas>(_desc-<scale>)_conndata-network_connectivity.<format>``
+    - ``dwi/sub-<subject_label>__label-<atlas_label>(_desc-<scale_label>)_conndata-network_connectivity.<format>``
 
     where:
 
-    - ``<parcellation_atlas>``:``Desikan``/``L2008``/``L2018`` is the parcellation scheme used
-    - ``<scale>`` is the parcellation scale if applicable
+    - ``<atlas_label>``:``Desikan``/``L2008``/``L2018`` is the parcellation scheme used
+    - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5`` corresponds to the parcellation scale if applicable
     - ``<format>``: ``mat``/``gpickle``/``tsv``/``graphml`` is the prefered format employed to stored the graph.
 
 
@@ -184,11 +187,11 @@ Functional derivatives in the 'meanBOLD' (individual) space are placed in each s
 
 * The functional connectivity (FC) graphs:
 
-    - ``func/sub-<subject_label>__label-<parcellation_atlas>(_desc-<scale_label>)_conndata-network_connectivity.<format>``
+    - ``func/sub-<subject_label>__label-<atlas_label>(_desc-<scale_label>)_conndata-network_connectivity.<format>``
 
     where:
 
-    - ``<parcellation_atlas>``:``Desikan``, ``L2008``, ``L2018`` is the parcellation scheme used
+    - ``<atlas_label>``:``Desikan``, ``L2008``, ``L2018`` is the parcellation scheme used
     - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5`` corresponds to the parcellation scale if applicable
     - ``<format>``: ``mat``, ``gpickle``, ``tsv``, ``graphml`` is the prefered format employed to stored the graph
 
