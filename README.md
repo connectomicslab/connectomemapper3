@@ -4,12 +4,21 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/connectomicslab/connectomemapper3) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3?color=orange) [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?color=orange&label=docker%20version) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest)
 
 ### Description
-Connectome Mapper 3 implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper (CMP) 3,
-from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
+Connectome Mapper 3 is an open-source Python3 image processing pipeline software that implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
 ![Image not found](https://connectome-mapper-3.readthedocs.io/en/latest/_images/flowchart_bidsapp.png)
 
-Connectome Mapper 3 is distributed as a BIDS App, a container image which takes BIDS datasets as inputs.
+Connectome Mapper 3 pipelines use a combination of tools from well-known software packages, including [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki), [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki), [ANTs](http://stnava.github.io/ANTs/), [MRtrix3](http://www.mrtrix.org/), [Dipy](https://nipy.org/dipy/) and [AFNI](https://afni.nimh.nih.gov/), orchestrated by the [Nipype](https://nipype.readthedocs.io/en/latest/) dataflow library. These pipelines were designed to provide the best software implementation for each state of processing, and will be updated as newer and better neuroimaging software become available.
+
+This tool allows you to easily do the following:
+
+  * Take T1 / Diffusion / resting-state MRI data from raw to multi-resolution connection matrices.
+  * Implement tools from different software packages.
+  * Achieve optimal data processing quality by using the best tools available
+  * Automate and parallelize processing steps, providing a significant speed-up from typical linear, manual processing.
+
+Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which takes BIDS datasets as inputs and which provides a frozen environment where versions of all external softwares and libraries are fixed.
+
 
 ### Resources
 

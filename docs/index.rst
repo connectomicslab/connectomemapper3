@@ -42,7 +42,7 @@ About
 
 ``Connectome Mapper 3`` implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
-``Connectome Mapper 3`` pipelines use a combination of tools from well-known software packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy_ and AFNI_. These pipelines were designed to provide the best software implementation for each state of processing, and will be updated as newer and better neuroimaging software become available.
+``Connectome Mapper 3`` pipelines use a combination of tools from well-known software packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy_ and AFNI_, orchestrated by the Nipype_ dataflow library. These pipelines were designed to provide the best software implementation for each state of processing, and will be updated as newer and better neuroimaging software become available.
 
 This tool allows you to easily do the following:
 
@@ -64,6 +64,8 @@ Reproducibility and replicatibility is achieved through the distribution of a BI
 .. _Dipy: https://nipy.org/dipy/
 
 .. _AFNI: https://afni.nimh.nih.gov/
+
+.. _Nipype: https://nipype.readthedocs.io/en/latest/
 
 
 *******************
