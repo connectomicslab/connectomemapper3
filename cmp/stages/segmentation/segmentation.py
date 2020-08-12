@@ -56,6 +56,8 @@ class SegmentationConfig(HasTraits):
 
     white_matter_mask = File(exist=True)
 
+    number_of_threads = Int(1, desc="Number of threads used in the stage by Freesurfer and ANTs")
+
     def _freesurfer_subjects_dir_changed(self, old, new):
         dirnames = [name for name in os.listdir(self.freesurfer_subjects_dir) if
                     os.path.isdir(os.path.join(self.freesurfer_subjects_dir, name))]
@@ -114,7 +116,7 @@ class SegmentationStage(Stage):
                 if self.config.brain_mask_extraction_tool == "Freesurfer":
                     # ReconAll => named outputnode as we don't want to select a specific output....
                     fs_reconall = pe.Node(interface=fs.ReconAll(
-                        flags='-no-isrunning'), name='reconall')
+                        flags='-no-isrunning -parallel -openmp {}'.format(self.config.number_of_threads)), name='reconall')
                     fs_reconall.inputs.directive = 'all'
                     fs_reconall.inputs.args = self.config.freesurfer_args
 
@@ -140,12 +142,12 @@ class SegmentationStage(Stage):
                 else:
                     # ReconAll => named outputnode as we don't want to select a specific output....
                     fs_autorecon1 = pe.Node(interface=fs.ReconAll(
-                        flags='-no-isrunning'), name='autorecon1')
+                        flags='-no-isrunning -parallel -openmp {}'.format(self.config.number_of_threads)), name='autorecon1')
                     fs_autorecon1.inputs.directive = 'autorecon1'
 
                     # if self.config.brain_mask_extraction_tool == "Custom" or self.config.brain_mask_extraction_tool == "ANTs":
                     if self.config.brain_mask_extraction_tool == "ANTs":
-                        fs_autorecon1.inputs.flags = '-noskullstrip'
+                        fs_autorecon1.inputs.flags = '-no-isrunning -noskullstrip -parallel -openmp {}'.format(self.config.number_of_threads)
                     fs_autorecon1.inputs.args = self.config.freesurfer_args
 
                     # fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
@@ -200,7 +202,7 @@ class SegmentationStage(Stage):
                         ants_bet.inputs.brain_template = self.config.ants_templatefile
                         ants_bet.inputs.brain_probability_mask = self.config.ants_probmaskfile
                         ants_bet.inputs.extraction_registration_mask = self.config.ants_regmaskfile
-                        ants_bet.inputs.num_threads = mp.cpu_count()
+                        ants_bet.inputs.num_threads = self.config.number_of_threads
 
                         flow.connect([
                             (fs_mriconvert_nu, ants_bet, [
@@ -242,7 +244,7 @@ class SegmentationStage(Stage):
                         return file[:-18]
 
                     fs_reconall23 = pe.Node(interface=fs.ReconAll(
-                        flags='-no-isrunning'), name='reconall23')
+                        flags='-no-isrunning -parallel -openmp {}'.format(self.config.number_of_threads)), name='reconall23')
                     fs_reconall23.inputs.directive = 'autorecon2'
                     fs_reconall23.inputs.args = self.config.freesurfer_args
                     fs_reconall23.inputs.flags = '-autorecon3'

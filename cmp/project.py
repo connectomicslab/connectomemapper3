@@ -446,7 +446,7 @@ def update_fmri_last_processed(project_info, pipeline):
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
 
-def run_individual(bids_dir, output_dir, participant_label, session_label, anat_pipeline_config, dwi_pipeline_config, func_pipeline_config):
+def run_individual(bids_dir, output_dir, participant_label, session_label, anat_pipeline_config, dwi_pipeline_config, func_pipeline_config, number_of_threads=1):
     project = CMP_Project_Info()
     project.base_directory = os.path.abspath(bids_dir)
     project.output_directory = os.path.abspath(output_dir)
@@ -476,12 +476,19 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         anat_pipeline = init_anat_project(project, False)
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
+
+            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
+            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
+
             if anat_valid_inputs:
+                print(">> Process anatomical pipeline")
                 anat_pipeline.process()
             else:
+                print("ERROR : Invalid inputs")
                 sys.exit(1)
 
             anat_pipeline.fill_stages_outputs()
+
     # Perform the anatomical and the diffusion pipelines
     elif dwi_pipeline_config is not None and func_pipeline_config is None:
 
@@ -490,6 +497,9 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         anat_pipeline = init_anat_project(project, False)
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
+
+            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
+            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -500,6 +510,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
         anat_pipeline.fill_stages_outputs()
+
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
         project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 
@@ -527,6 +538,9 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
 
+            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
+            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
+
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
@@ -536,6 +550,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
         anat_pipeline.fill_stages_outputs()
+
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
         project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 
@@ -569,6 +584,9 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         anat_pipeline = init_anat_project(project, False)
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
+
+            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
+            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")

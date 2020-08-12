@@ -33,7 +33,7 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 # __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                 'version')).read()
 
-def create_cmp_command(project, run_anat, run_dmri, run_fmri):
+def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=1):
     cmd = []
 
     cmd.append("connectomemapper3")
@@ -66,6 +66,9 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri):
         cmd.append(project.fmri_config_file)
     else:
         print("INFO: functional pipeline not performed")
+
+    cmd.append('--number_of_threads')
+    cmd.append(number_of_threads)
 
     return ' '.join(cmd)
 
@@ -289,22 +292,44 @@ else:
     print('  * Number of subjects to be processed in parallel set to one (sequential run)')
     parallel_number_of_subjects = 1
 
-# Setup number of cores to be used by nipype multiproc plugin
-# if args.multiproc_number_of_cores is not None:
-#     multiproc_maxprocs = int(args.multiproc_number_of_cores)
-#     if multiproc_maxprocs > max_number_of_cores:
-#         print('  * Number of pipeline processes executed in parallel set to the maximal number of available cores ({})'.format(max_number_of_cores))
-#         print(bcolors.WARNING + '   WARNING: the specified number of pipeline processes executed in parallel ({}) exceeds the number of available cores ({})'.format(args.multiproc_number_of_cores,max_number_of_cores) + bcolors.ENDC)
-#         multiproc_maxprocs = max_number_of_cores
-#     elif multiproc_maxprocs <= 0:
-#         print('  * Number of pipeline processes executed in parallel set to one (total: {})'.format(max_number_of_cores))
-#         print(bcolors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) should be greater to 0'.format(args.multiproc_number_of_cores) + bcolors.ENDC)
-#         multiproc_maxprocs = 1
-#     else:
-#         print('  * Number of pipeline processes executed in parallel set to {} (total of cores: {})'.format(multiproc_maxprocs,max_number_of_cores))
-# else:
-#     print('  * Number of pipeline processes executed in parallel set to one (total: {})'.format(max_number_of_cores))
-#     multiproc_maxprocs = 1
+# Setup number of threads to be used fro multithreading by OpenMP
+if args.number_of_threads is not None:
+    number_of_threads = int(args.number_of_threads)
+    if parallel_number_of_subjects == 1:
+        if number_of_threads > max_number_of_cores:
+            print('  * Number of parallel threads set to the maximal number of available cores ({})'.format(
+                max_number_of_cores))
+            print(bcolors.WARNING + '   WARNING: the specified number of pipeline processes executed in parallel ({}) exceeds the number of available cores ({})'.format(
+                args.multiproc_number_of_cores, max_number_of_cores) + bcolors.ENDC)
+            number_of_threads = max_number_of_cores
+        elif number_of_threads <= 0:
+            print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
+            print(bcolors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) should be greater to 0'.format(
+                args.multiproc_number_of_cores) + bcolors.ENDC)
+            number_of_threads = 1
+        else:
+            print('  * Number of parallel threads set to {} (total of cores: {})'.format(
+                number_of_threads, max_number_of_cores))
+    else:
+        # Make sure that the total number of threads used does not exceed the total number of available cores
+        # Otherwise parallelize only at the subject level
+        total_number_of_threads = parallel_number_of_subjects * number_of_threads
+        if total_number_of_threads > max_number_of_cores:
+            print(bcolors.WARNING + '  * Total number of cores used (Subjects in parallel: {}, Threads in parallel: {}, Total: {})'.format(parallel_number_of_subjects,
+                                                                                                                                           number_of_threads,
+                                                                                                                                           total_number_of_threads)
+                + 'is greater than the number of available cores ({})'.format(max_number_of_cores) + bcolors.ENDC)
+            number_of_threads = 1
+            parallel_number_of_subjects = max_number_of_cores
+            print(bcolors.WARNING + '    Processing will be ONLY parallelized at the subject level using {} cores.'.format(parallel_number_of_subjects)+bcolors.ENDC)
+else:
+    print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
+    number_of_threads = 1
+
+# Set number of threads used by programs based on OpenMP mult-threading library 
+# This includes AFNI, ANTs, Dipy, Freesurfer, FSL, MRtrix3.
+os.environ['OMP_NUM_THREADS'] = number_of_threads
+
 
 # TODO: Implement log for subject(_session)
 # with open(log_filename, 'w+') as log:
@@ -423,7 +448,8 @@ if args.analysis_level == "participant":
                                                project.subject_session,
                                                project.anat_config_file,
                                                project.dmri_config_file,
-                                               None)
+                                               None,
+                                               number_of_threads=number_of_threads)
                             if not run_dmri and run_fmri:
                                 run_individual(project.base_directory,
                                                project.output_directory,
@@ -431,7 +457,8 @@ if args.analysis_level == "participant":
                                                project.subject_session,
                                                project.anat_config_file,
                                                None,
-                                               project.fmri_config_file)
+                                               project.fmri_config_file,
+                                               number_of_threads=number_of_threads)
                             if run_dmri and run_fmri:
                                 run_individual(project.base_directory,
                                                project.output_directory,
@@ -439,7 +466,8 @@ if args.analysis_level == "participant":
                                                project.subject_session,
                                                project.anat_config_file,
                                                project.dmri_config_file,
-                                               project.fmri_config_file)
+                                               project.fmri_config_file,
+                                               number_of_threads=number_of_threads)
                             else: # anatomical pipeline only
                                 run_individual(project.base_directory,
                                                project.output_directory,
@@ -447,12 +475,14 @@ if args.analysis_level == "participant":
                                                project.subject_session,
                                                project.anat_config_file,
                                                None,
-                                               None)
+                                               None,
+                                               number_of_threads=number_of_threads)
                     else:
                         cmd = create_cmp_command(project=project,
                                                  run_anat=run_anat,
                                                  run_dmri=run_dmri,
-                                                 run_fmri=run_fmri)
+                                                 run_fmri=run_fmri,
+                                                 number_of_threads=number_of_threads)
                         print("... cmd : {}".format(cmd))
 
                         proc = run(command=cmd, env={},
@@ -525,7 +555,8 @@ if args.analysis_level == "participant":
                                            project.subject_session,
                                            project.anat_config_file,
                                            project.dmri_config_file,
-                                           None)
+                                           None,
+                                           number_of_threads=number_of_threads)
                         if not run_dmri and run_fmri:
                             run_individual(project.base_directory,
                                            project.output_directory,
@@ -533,7 +564,8 @@ if args.analysis_level == "participant":
                                            project.subject_session,
                                            project.anat_config_file,
                                            None,
-                                           project.fmri_config_file)
+                                           project.fmri_config_file,
+                                           number_of_threads=number_of_threads)
                         if run_dmri and run_fmri:
                             run_individual(project.base_directory,
                                            project.output_directory,
@@ -541,7 +573,8 @@ if args.analysis_level == "participant":
                                            project.subject_session,
                                            project.anat_config_file,
                                            project.dmri_config_file,
-                                           project.fmri_config_file)
+                                           project.fmri_config_file,
+                                           number_of_threads=number_of_threads)
                         else: # anatomical pipeline only
                             run_individual(project.base_directory,
                                            project.output_directory,
@@ -549,13 +582,15 @@ if args.analysis_level == "participant":
                                            project.subject_session,
                                            project.anat_config_file,
                                            None,
-                                           None)
+                                           None,
+                                           number_of_threads=number_of_threads)
                 else:
 
                     cmd = create_cmp_command(project=project,
                                              run_anat=run_anat,
                                              run_dmri=run_dmri,
-                                             run_fmri=run_fmri)
+                                             run_fmri=run_fmri,
+                                             number_of_threads=number_of_threads)
                     print("... cmd : {}".format(cmd))
 
                     proc = run(command=cmd, env={},

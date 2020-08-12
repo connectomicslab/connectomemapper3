@@ -98,6 +98,10 @@ def create_parser():
                    '<session_label> from the BIDS spec '
                    '(so it DOES include "ses-"')
 
+    p.add_argument('--number_of_threads', type=int, help='The number of OpenMP threads used for multi-threading by'
+                                                         'Freesurfer, FSL, MRtrix3, Dipy, AFNI'
+                                                         '(Set to [Number of available CPUs -1] by default).')
+
     p.add_argument('-v', '--version', action='version',
                         version='Connectome Mapper version {}'.format(__version__))
     return p
@@ -145,8 +149,13 @@ if __name__ == "__main__":
     if args.dwi_pipeline_config is None and args.func_pipeline_config is None:
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
-        if anat_pipeline is not None:
+        if anat_pipeline is not None:    
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
+            
+            if args.number_of_threads is not None:
+                print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(args.number_of_threads))
+                anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
+
             if anat_valid_inputs:
                 anat_pipeline.process()
             else:
@@ -158,8 +167,13 @@ if __name__ == "__main__":
         project.dmri_config_file = os.path.abspath(args.dwi_pipeline_config)
 
         anat_pipeline = cmp.project.init_anat_project(project, False)
+        
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
+
+            if args.number_of_threads is not None:
+                print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(args.number_of_threads))
+                anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -195,6 +209,10 @@ if __name__ == "__main__":
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
+            
+            if args.number_of_threads is not None:
+                print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(args.number_of_threads))
+                anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -237,6 +255,10 @@ if __name__ == "__main__":
         anat_pipeline = cmp.project.init_anat_project(project, False)
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
+            
+            if args.number_of_threads is not None:
+                print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(args.number_of_threads))
+                anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")

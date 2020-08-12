@@ -46,10 +46,12 @@ def get():
     p.add_argument('--func_pipeline_config',
                    help='Configuration .txt file for processing stages of the fMRI processing pipeline')
 
-    # p.add_argument('--multiproc_number_of_cores', type=int, help='The number of cores to be used by '
-    #               'the MultiProc plugin of Nipype (One core used by default).')
+    p.add_argument('--number_of_threads', type=int, help='The number of OpenMP threads used for multi-threading by'
+                                                         'Freesurfer, FSL, MRtrix3, Dipy, AFNI'
+                                                         '(Set to [Number of available CPUs -1] by default).')
+
     p.add_argument('--number_of_participants_processed_in_parallel', type=int, help='The number of subjects '
-                                                                                    'to be processed in parallel (One core used by default).')
+                                                                                    'to be processed in parallel (One by default).')
 
     p.add_argument('--fs_license', help='Freesurfer license.txt')
 
