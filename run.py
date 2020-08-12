@@ -330,7 +330,8 @@ else:
 
 # Set number of threads used by programs based on OpenMP mult-threading library 
 # This includes AFNI, ANTs, Dipy, Freesurfer, FSL, MRtrix3.
-os.environ['OMP_NUM_THREADS'] = number_of_threads
+os.environ['OMP_NUM_THREADS'] = '{}'.format(number_of_threads)
+print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'],  max_number_of_cores))
 
 
 # TODO: Implement log for subject(_session)
