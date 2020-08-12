@@ -481,6 +481,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
             else:
                 sys.exit(1)
 
+            anat_pipeline.fill_stages_outputs()
     # Perform the anatomical and the diffusion pipelines
     elif dwi_pipeline_config is not None and func_pipeline_config is None:
 
@@ -498,6 +499,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        anat_pipeline.fill_stages_outputs()
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
         project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 
@@ -533,6 +535,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        anat_pipeline.fill_stages_outputs()
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
         project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 
@@ -575,6 +578,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        anat_pipeline.fill_stages_outputs()
+        
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
         project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 
