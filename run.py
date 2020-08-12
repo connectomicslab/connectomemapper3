@@ -263,8 +263,10 @@ else:
 
 print('  ... $FS_LICENSE : {}'.format(os.environ['FS_LICENSE']))
 
-# Keep one core for light processes
+# Get the number of available cores and keep one for light processes if possible
 max_number_of_cores = multiprocessing.cpu_count() - 1
+if max_number_of_cores < 1: # handles case with one CPU available
+    max_number_of_cores = 1
 
 # Setup number of subjects to be processed in parallel
 if args.number_of_participants_processed_in_parallel is not None:
