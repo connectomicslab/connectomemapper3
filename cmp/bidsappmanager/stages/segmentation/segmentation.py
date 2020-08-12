@@ -27,6 +27,7 @@ class SegmentationConfigUI(SegmentationConfig):
                                   Item('isotropic_vox_size', label="Voxel size (mm)", visible_when='make_isotropic')),
                            Item('isotropic_interpolation', label='Interpolation',
                                 visible_when='make_isotropic'),
+                           Item('number_of_threads', label='Number of threads used for multithreading in Freesurfer and ANTs'),
                            'brain_mask_extraction_tool',
                            Item('ants_templatefile', label='Template',
                                 visible_when='brain_mask_extraction_tool == "ANTs"'),
