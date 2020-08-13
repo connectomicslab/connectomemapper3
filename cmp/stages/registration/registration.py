@@ -305,7 +305,7 @@ class RegistrationStage(Stage):
             fsl_applyxfm_gmwmi = pe.Node(
                 interface=fsl.ApplyXFM(
                     apply_xfm=True, interp="spline", out_file="gmwmi_registered.nii.gz"),
-                name="apply_registration_5tt")
+                name="apply_registration_gmwmi")
             # fsl_create_HD = pe.Node(interface=FSLCreateHD(im_size=[256,256,256,1],vox_size=[1,1,1],origin=[0,0,0],tr=1,datatype='16',out_filename='tempref.nii.gz'),name='fsl_create_HD')
 
             flow.connect([
