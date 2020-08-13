@@ -8,25 +8,19 @@
 """
 
 # General imports
-from traits.api import *
-import gzip
-import pickle
 import os
+
+from traits.api import *
+
 
 # Nipype imports
 import nipype.pipeline.engine as pe
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.fsl as fsl
 import nipype.interfaces.utility as util
 from nipype.interfaces import afni
 
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.functionalMRI import Scrubbing, Detrending, nuisance_regression
-
-# Imports for processing
-import nibabel as nib
-import numpy as np
 
 
 class FunctionalMRIConfig(HasTraits):

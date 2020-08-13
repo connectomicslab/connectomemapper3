@@ -9,26 +9,21 @@
 
 import os
 import datetime
+import shutil
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
 from nipype.interfaces.utility import Merge
 from nipype import config, logging
-from nipype.caching import Memory
-import shutil
 
 from traits.api import *
-import apptools.io.api as io
 
 import nibabel as nib
 
 from bids import BIDSLayout
 
 from cmp.pipelines.common import *
-from cmp.pipelines.anatomical.anatomical import AnatomicalPipeline
 from cmp.stages.preprocessing.fmri_preprocessing import PreprocessingStage
-from cmp.stages.segmentation.segmentation import SegmentationStage
-from cmp.stages.parcellation.parcellation import ParcellationStage
 from cmp.stages.registration.registration import RegistrationStage
 from cmp.stages.functional.functionalMRI import FunctionalMRIStage
 from cmp.stages.connectome.fmri_connectome import ConnectomeStage
@@ -74,7 +69,7 @@ class fMRIPipeline(Pipeline):
         self.subject_id = project_info.freesurfer_subject_id
 
         self.global_conf.subjects = project_info.subjects
-        self.global_conf.subject =  project_info.subject
+        self.global_conf.subject = project_info.subject
 
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
@@ -346,11 +341,15 @@ class fMRIPipeline(Pipeline):
         if self.stages['FunctionalMRI'].config.motion is True and self.stages[
                 'Preprocessing'].config.motion_correction is False:
             return (
-                '\n\tMotion signal regression selected but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configuration window,\n\tor disable the motion signal regression in the functional configuration window.\t\n')
+                '\n\tMotion signal regression selected but no motion correction set.\t\n\t'
+                'Please activate motion correction in the preprocessing configuration window,\n\t'
+                'or disable the motion signal regression in the functional configuration window.\t\n')
         if self.stages['Connectome'].config.apply_scrubbing is True and self.stages[
                 'Preprocessing'].config.motion_correction is False:
             return (
-                '\n\tScrubbing applied but no motion correction set.\t\n\tPlease activate motion correction in the preprocessing configutation window,\n\tor disable scrubbing in the connectome configuration window.\t\n')
+                '\n\tScrubbing applied but no motion correction set.\t\n\t'
+                'Please activate motion correction in the preprocessing configutation window,\n\t'
+                'or disable scrubbing in the connectome configuration window.\t\n')
         return ''
 
     def process(self):
@@ -668,19 +667,15 @@ class fMRIPipeline(Pipeline):
              [("fMRI", "fMRI"), ("T1", "T1"), ("T2", "T2"), ("aseg", "aseg"), ("wm_mask_file", "wm_mask_file"),
               ("brain_eroded", "brain_eroded"), ("wm_eroded", "wm_eroded"), ("csf_eroded", "csf_eroded")]),
             # ,( "roi_volumes","roi_volumes")])
-            (merge_roi_volumes, fMRI_inputnode, [
-             (("out", remove_non_existing_scales), "roi_volumes")]),
-            (merge_roi_graphmls, fMRI_inputnode, [
-             (("out", remove_non_existing_scales), "roi_graphMLs")]),
+            (merge_roi_volumes, fMRI_inputnode, [(("out", remove_non_existing_scales), "roi_volumes")]),
+            (merge_roi_graphmls, fMRI_inputnode, [(("out", remove_non_existing_scales), "roi_graphMLs")]),
         ])
 
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
             fMRI_flow.connect([
-                (fMRI_inputnode, preproc_flow, [
-                 ("fMRI", "inputnode.functional")]),
-                (preproc_flow, sinker, [
-                 ("outputnode.mean_vol", "func.@mean_vol")]),
+                (fMRI_inputnode, preproc_flow, [("fMRI", "inputnode.functional")]),
+                (preproc_flow, sinker, [("outputnode.mean_vol", "func.@mean_vol")]),
             ])
 
         if self.stages['Registration'].enabled:
@@ -688,8 +683,7 @@ class fMRIPipeline(Pipeline):
             fMRI_flow.connect([
                 (fMRI_inputnode, reg_flow, [('T1', 'inputnode.T1')]),
                 (fMRI_inputnode, reg_flow, [('T2', 'inputnode.T2')]),
-                (preproc_flow, reg_flow, [
-                 ('outputnode.mean_vol', 'inputnode.target')]),
+                (preproc_flow, reg_flow, [('outputnode.mean_vol', 'inputnode.target')]),
                 (fMRI_inputnode, reg_flow,
                  [('wm_mask_file', 'inputnode.wm_mask'), ('roi_volumes', 'inputnode.roi_volumes'),
                   ('brain_eroded', 'inputnode.eroded_brain'), ('wm_eroded',
@@ -731,10 +725,8 @@ class fMRIPipeline(Pipeline):
             ])
             if self.stages['FunctionalMRI'].config.scrubbing or self.stages['FunctionalMRI'].config.motion:
                 fMRI_flow.connect([
-                    (preproc_flow, func_flow, [
-                     ("outputnode.par_file", "inputnode.motion_par_file")]),
-                    (preproc_flow, sinker, [
-                     ("outputnode.par_file", "func.@motion_par_file")])
+                    (preproc_flow, func_flow, [("outputnode.par_file", "inputnode.motion_par_file")]),
+                    (preproc_flow, sinker, [("outputnode.par_file", "func.@motion_par_file")])
                 ])
 
         if self.stages['Connectome'].enabled:

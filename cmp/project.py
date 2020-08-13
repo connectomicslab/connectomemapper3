@@ -6,30 +6,34 @@
 
 """ Connectome Mapper Controler for handling non GUI general events
 """
+import multiprocessing
+import fnmatch
+
+import sys
+import os
+import warnings
+
+from traits.api import *
+
+from bids import BIDSLayout
+
 from cmtklib.bids.utils import write_derivative_description
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.pipelines.functional import fMRI as FMRI_pipeline
 from cmtklib.config import anat_load_config_ini, anat_save_config, \
     dmri_load_config_ini, dmri_save_config, fmri_load_config_ini, fmri_save_config
-# from cmtklib.util import remove_aborded_interface_pickles, fix_dataset_directory_in_pickles
-from bids import BIDSLayout
-import multiprocessing
-import fnmatch
 
-import sys
-import glob
-import os
-import shutil
-from traits.api import *
+warnings.filterwarnings("ignore",
+                        message="UserWarning: No valid root directory found for domain 'derivatives'."
+                                " Falling back on the Layout's root directory. If this isn't the intended behavior, "
+                                "make sure the config file for this domain includes a 'root' key.")
+
+# from cmtklib.util import remove_aborded_interface_pickles, fix_dataset_directory_in_pickles
 
 # import pickle
 # import gzip
 
-import warnings
-
-warnings.filterwarnings("ignore",
-                        message="UserWarning: No valid root directory found for domain 'derivatives'. Falling back on the Layout's root directory. If this isn't the intended behavior, make sure the config file for this domain includes a 'root' key.")
 
 # Global imports
 
@@ -38,7 +42,7 @@ warnings.filterwarnings("ignore",
 # import pipelines.diffusion.diffusion as Diffusion_pipeline
 
 
-##from cmp.configurator.project import fix_dataset_directory_in_pickles, remove_aborded_interface_pickles
+# #from cmp.configurator.project import fix_dataset_directory_in_pickles, remove_aborded_interface_pickles
 
 # import CMP_MainWindow
 # import pipelines.egg.eeg as EEG_pipeline
@@ -58,11 +62,14 @@ class CMP_Project_Info(HasTraits):
 
     # current_subj = Str()
     anat_warning_msg = Str(
-        '\nWarning: selected directory is already configured for anatomical data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
+        '\nWarning: selected directory is already configured for anatomical data processing.\n\n'
+        'Do you want to reset the configuration to default parameters ?\n')
     dmri_warning_msg = Str(
-        '\nWarning: selected directory is already configured for diffusion data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
+        '\nWarning: selected directory is already configured for diffusion data processing.\n\n'
+        'Do you want to reset the configuration to default parameters ?\n')
     fmri_warning_msg = Str(
-        '\nWarning: selected directory is already configured for resting-state data processing.\n\nDo you want to reset the configuration to default parameters ?\n')
+        '\nWarning: selected directory is already configured for resting-state data processing.\n\n'
+        'Do you want to reset the configuration to default parameters ?\n')
 
     # process_type = Enum('diffusion',['diffusion','fMRI'])
     diffusion_imaging_model = Enum('DTI', ['DSI', 'DTI', 'HARDI'])
@@ -113,9 +120,8 @@ class CMP_Project_Info(HasTraits):
     number_of_cores = Enum(1, list(range(1, multiprocessing.cpu_count() + 1)))
 
 
-# Creates (if needed) the folder hierarchy
-#
 def refresh_folder(bids_directory, derivatives_directory, subject, input_folders, session=None):
+    '''Creates (if needed) the folder hierarchy.'''
     paths = []
 
     if session is None or session == '':
@@ -159,6 +165,7 @@ def refresh_folder(bids_directory, derivatives_directory, subject, input_folders
 
 
 def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
+    '''Initialize the diffusion processing pipeline'''
     dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
 
     bids_directory = os.path.abspath(project_info.base_directory)
@@ -227,6 +234,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
 
 def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
+    '''Initialize the fMRI processing pipeline'''
     fmri_pipeline = FMRI_pipeline.fMRIPipeline(project_info)
 
     bids_directory = os.path.abspath(project_info.base_directory)
@@ -294,6 +302,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
 
 def init_anat_project(project_info, is_new_project, debug=False):
+    '''Initialize the anatomical processing pipeline'''
     anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
 
     bids_directory = os.path.abspath(project_info.base_directory)
@@ -446,7 +455,10 @@ def update_fmri_last_processed(project_info, pipeline):
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
 
-def run_individual(bids_dir, output_dir, participant_label, session_label, anat_pipeline_config, dwi_pipeline_config, func_pipeline_config, number_of_threads=1):
+
+def run_individual(bids_dir, output_dir, participant_label, session_label, anat_pipeline_config,
+                   dwi_pipeline_config, func_pipeline_config, number_of_threads=1):
+    '''Function that create the processing pipeline for complete coverage'''
     project = CMP_Project_Info()
     project.base_directory = os.path.abspath(bids_dir)
     project.output_directory = os.path.abspath(output_dir)
@@ -455,7 +467,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
 
     try:
         bids_layout = BIDSLayout(project.base_directory)
-    except:
+    except Exception:
         print("Exception : Raised at BIDSLayout")
         sys.exit(1)
 
@@ -519,7 +531,6 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                #print sys.argv[offset+7]
                 if dmri_valid_inputs:
                     dmri_pipeline.process()
                 else:
@@ -536,7 +547,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
 
         anat_pipeline = init_anat_project(project, False)
         if anat_pipeline is not None:
-            anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
             anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
@@ -559,10 +570,10 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                #fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                #fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                #print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
-                #print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
+                # fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+                # fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+                # print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
+                # print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
 
                 # print sys.argv[offset+9]
                 if fmri_valid_inputs:
@@ -583,7 +594,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
 
         anat_pipeline = init_anat_project(project, False)
         if anat_pipeline is not None:
-            anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
+            anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
             anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
@@ -597,7 +608,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
         anat_pipeline.fill_stages_outputs()
-        
+       
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
         project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 

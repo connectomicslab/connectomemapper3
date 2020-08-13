@@ -6,12 +6,15 @@
 """ Multi-scale Brain Parcellator Commandline Parser
 """
 
+import argparse
+
 from .info import __version__
 from .info import __release_date__
 
 
 def get():
-    import argparse
+    '''Return the argparse parser of the BIDS App'''
+
     p = argparse.ArgumentParser(
         description='Entrypoint script of the BIDS-App Connectome Mapper version {}'.format(__version__))
     p.add_argument('bids_dir', help='The directory with the input dataset '
@@ -60,5 +63,5 @@ def get():
     # p.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation',
     #                    action='store_true')
     p.add_argument('-v', '--version', action='version',
-                   version='BIDS-App Connectome Mapper version {}'.format(__version__))
+                   version='BIDS-App Connectome Mapper version {} \nRelease date: {}'.format(__version__, __release_date__))
     return p
