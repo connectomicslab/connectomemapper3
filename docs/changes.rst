@@ -18,16 +18,42 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 
 * Correct manually a number of code stly issues reported by Codacy (bandits/pylints/flake8)
 
-* Major dependency upgrades:
+* Major dependency upgrades including:
 
-	* Use Dipy 1.0 and related code changes in ``cmtklib/interfaces/dipy`` (Check `here <https://dipy.org/documentation/1.0.0./api_changes/#dipy-1-0-changes>`_ for more details about Dipy 1.0 changes)
+	* ``dipy 0.15 -> 1.0`` and related code changes in ``cmtklib/interfaces/dipy`` (Check `here <https://dipy.org/documentation/1.0.0./api_changes/#dipy-1-0-changes>`_ for more details about Dipy 1.0 changes)
 
 	.. warning::
-	  Interface for tractography based on Dipy DTI model and EuDX tractography, which have been drastically changed in Dipy 1.0, has not been updated yet, It will be part of the next release candidate.
+	  Interface for tractography based on Dipy DTI model and EuDX tractography, which has been drastically changed in Dipy 1.0, has not been updated yet, It will be part of the next release candidate.
 
-	* Use Nipype 1.5.0
+	* ``nipype 1.1.8 -> 1.5.0``
 
-	* Use NetworkX 2.4
+	* ``pybids 0.9.5 -> 0.10.2``
+	
+	* ``pydicom 1.4.2 -> 2.0.0``
+
+	* ``networkX 2.2 -> 2.4``
+
+    * ``statsmodels 0.9.0 -> 0.11.1``
+
+	* ``obspy 1.1.1 -> 1.2.1``
+
+	* ``traits 5.1 -> 6.0.0``
+
+	* ``traitsui 6.0.0 -> 6.1.3``
+
+	* ``numpy 1.15.4 -> 1.18.5``
+
+	* ``matplotlib 1.1.8 -> 1.5.0``
+
+	* ``fsleyes 0.27.3 -> 0.33.0``
+
+	* ``mne 0.17.1 -> 0.20.7``
+
+    * ``sphinx 1.8.5 -> 3.1.1``
+    
+    * ``sphinx_rtd_theme 0.4.3 -> 0.5.0``
+    
+    * ``recommonmark 0.5.0 -> 0.6.0``
 
 *New feature*
 
