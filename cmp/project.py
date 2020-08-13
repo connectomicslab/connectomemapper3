@@ -383,7 +383,7 @@ def update_anat_last_processed(project_info, pipeline):
     if os.path.exists(
             os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'anatomical_pipeline')):
         stage_dirs = []
-        for root, dirnames, _ in os.walk(
+        for _, dirnames, _ in os.walk(
                 os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'anatomical_pipeline')):
             for dirname in fnmatch.filter(dirnames, '*_stage'):
                 stage_dirs.append(dirname)
@@ -417,7 +417,7 @@ def update_dmri_last_processed(project_info, pipeline):
     if os.path.exists(
             os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'diffusion_pipeline')):
         stage_dirs = []
-        for root, dirnames, _ in os.walk(
+        for _, dirnames, _ in os.walk(
                 os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'diffusion_pipeline')):
             for dirname in fnmatch.filter(dirnames, '*_stage'):
                 stage_dirs.append(dirname)
@@ -446,7 +446,7 @@ def update_fmri_last_processed(project_info, pipeline):
     # last stage
     if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'fMRI_pipeline')):
         stage_dirs = []
-        for root, dirnames, _ in os.walk(
+        for _, dirnames, _ in os.walk(
                 os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'fMRI_pipeline')):
             for dirname in fnmatch.filter(dirnames, '*_stage'):
                 stage_dirs.append(dirname)

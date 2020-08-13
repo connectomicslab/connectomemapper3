@@ -15,7 +15,7 @@ from .util import length
 
 
 def compute_length_array(trkfile=None, streams=None, savefname='lengths.npy'):
-    if streams is None and not trkfile is None:
+    if streams is None and trkfile is not None:
         print("Compute length array for fibers in %s" % trkfile)
         streams, hdr = tv.read(trkfile, as_generator=True)
         n_fibers = hdr['n_count']

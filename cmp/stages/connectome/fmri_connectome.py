@@ -8,9 +8,10 @@
 """
 
 # Global imports
+import os
+
 from traits.api import *
 
-import os
 # import pickle
 # import gzip
 
@@ -108,7 +109,7 @@ class ConnectomeStage(Stage):
                                 self.config.subject + ' - ' + con_name + ' - Correlation', map_scale]
 
             self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
-                                      key=str.lower)
+                                          key=str.lower)
 
     def has_run(self):
         return os.path.exists(os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"))

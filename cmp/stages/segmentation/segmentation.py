@@ -194,8 +194,12 @@ class SegmentationStage(Stage):
                         ])
 
                     elif self.config.brain_mask_extraction_tool == "ANTs":
-                        # templatefile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz'))
-                        # probmaskfile = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'ants_template_IXI', 'T_template_BrainCerebellumProbabilityMask.nii.gz'))
+                        # templatefile =
+                        #    pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation',
+                        #                                    'ants_template_IXI', 'T_template2_BrainCerebellum.nii.gz'))
+                        # probmaskfile = pkg_resources.resource_filename('cmtklib',
+                        #     os.path.join('data', 'segmentation', 'ants_template_IXI',
+                        #     'T_template_BrainCerebellumProbabilityMask.nii.gz'))
 
                         ants_bet = pe.Node(interface=ants.BrainExtraction(
                             out_prefix='ants_bet_'), name='antsBET')
@@ -215,10 +219,12 @@ class SegmentationStage(Stage):
                     #         self.config.brain_mask_path)
 
                     # copy_brainmask_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmask_to_fs')
-                    # copy_brainmask_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.mgz")
+                    # copy_brainmask_to_fs.inputs.out_file =
+                    #    os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.mgz")
 
                     # copy_brainmaskauto_to_fs = pe.Node(interface=copyFileToFreesurfer(),name='copy_brainmaskauto_to_fs')
-                    # copy_brainmaskauto_to_fs.inputs.out_file = os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.auto.mgz")
+                    # copy_brainmaskauto_to_fs.inputs.out_file =
+                    #    os.path.join(self.config.freesurfer_subject_id,"mri","brainmask.auto.mgz")
 
                     # flow.connect([
                     #             (fs_mriconvert_brainmask,copy_brainmask_to_fs,[('out_file','in_file')]),
@@ -297,7 +303,7 @@ class SegmentationStage(Stage):
                 fs_path = os.path.join(
                     self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
 
-            print ("fs_path : %s" % fs_path)
+            print("fs_path : %s" % fs_path)
 
             if 'FREESURFER_HOME' not in os.environ:
                 colorLUT_file = pkg_resources.resource_filename('cmtklib',
@@ -334,7 +340,7 @@ class SegmentationStage(Stage):
                                       key=str.lower)
 
     def has_run(self):
-        if self.config.use_existing_freesurfer_data:# or self.config.seg_tool == "Custom segmentation":
+        if self.config.use_existing_freesurfer_data:
             return True
         else:
             return os.path.exists(os.path.join(self.stage_dir, "reconall", "result_reconall.pklz"))

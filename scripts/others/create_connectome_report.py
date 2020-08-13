@@ -77,7 +77,7 @@ def main(bids_dir):
         print("Available subjects : ")
         print(subjects)
 
-    except:
+    except Exception:
         print(
             "BIDS ERROR: Invalid BIDS dataset. Please see documentation for more details.")
         sys.exit(1)

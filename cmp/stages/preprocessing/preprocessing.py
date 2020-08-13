@@ -7,31 +7,21 @@
 """ CMP preprocessing Stage (not used yet!)
 """
 # from pyface.message_dialog import error
+import os
+import glob
+
 from traits.api import *
 
-from nipype.interfaces.base import traits, BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, CommandLine, \
-    InputMultiPath, OutputMultiPath, TraitedSpec, Interface, InterfaceResult, isdefined
+from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, \
+    TraitedSpec, Interface
 import nipype.interfaces.utility as util
-
-from cmp.stages.common import Stage
-
-import os
-import pickle
-import gzip
-import glob
-import pkg_resources
 
 import nipype.pipeline.engine as pe
-import nipype.pipeline as pip
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.utility as util
-import nipype.interfaces.mrtrix as mrt
-import nipype.interfaces.ants as ants
 import nipype.interfaces.dipy as dipy
-from nipype.interfaces.mrtrix3.preprocess import ResponseSD
 
-import nibabel as nib
+from cmp.stages.common import Stage
 
 import cmtklib.interfaces.fsl as cmp_fsl
 # from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
@@ -322,7 +312,7 @@ class PreprocessingStage(Stage):
         if self.config.denoising:
 
             mr_convert_noise = pe.Node(interface=MRConvert(out_filename='diffusion_noisemap.nii.gz', stride=[+1, +2, +3, +4]),
-                               name='mr_convert_noise')
+                                       name='mr_convert_noise')
 
             if self.config.denoising_algo == "MRtrix (MP-PCA)":
                 mr_convert.inputs.out_filename = 'diffusion.mif'
@@ -370,12 +360,10 @@ class PreprocessingStage(Stage):
         mr_convert_b = pe.Node(interface=MRConvert(out_filename='diffusion_corrected.nii.gz', stride=[+1, +2, +3, +4]),
                                name='mr_convert_b')
 
-
-
         if self.config.bias_field_correction:
 
             mr_convert_bias = pe.Node(interface=MRConvert(out_filename='diffusion_biasfield.nii.gz', stride=[+1, +2, +3, +4]),
-                               name='mr_convert_bias')
+                                      name='mr_convert_bias')
 
             if self.config.bias_field_algo == "ANTS N4":
                 dwi_biascorrect = pe.Node(
@@ -848,15 +836,15 @@ class PreprocessingStage(Stage):
         if self.config.denoising:
 
             dwi_denoise_dir = os.path.join(self.stage_dir, 'dwi_denoise')
-            denoise = os.path.join(dwi_denoise_dir,'diffusion_denoised.mif')
+            denoise = os.path.join(dwi_denoise_dir, 'diffusion_denoised.mif')
 
-            if (os.path.exists(denoise)):
+            if os.path.exists(denoise):
                 self.inspect_outputs_dict['DWI denoised image'] = ['mrview', denoise]
                 if self.config.denoising_algo == "MRtrix (MP-PCA)":
 
-                    noise = os.path.join(dwi_denoise_dir,'diffusion_noisemap.mif')
+                    noise = os.path.join(dwi_denoise_dir, 'diffusion_noisemap.mif')
 
-                    if (os.path.exists(denoise)):
+                    if os.path.exists(denoise):
 
                         self.inspect_outputs_dict['Noise map'] = ['mrview', noise]
 
@@ -866,18 +854,18 @@ class PreprocessingStage(Stage):
 
             bcorr = ""
             files = glob.glob(os.path.join(dwi_biascorrect_dir, '*_biascorr.mif'))
-            if len(files)>0:
+            if len(files) > 0:
                 bcorr = files[0]
 
             bias = ""
             files = glob.glob(os.path.join(dwi_biascorrect_dir, '*_biasfield.mif'))
-            if len(files)>0:
+            if len(files) > 0:
                 bias = files[0]
 
-            if (os.path.exists(bcorr)):
-                self.inspect_outputs_dict['Bias field corrected image'] = ['mrview',bcorr]
+            if os.path.exists(bcorr):
+                self.inspect_outputs_dict['Bias field corrected image'] = ['mrview', bcorr]
 
-            if (os.path.exists(bias)):
+            if os.path.exists(bias):
                 self.inspect_outputs_dict['Bias field'] = ['mrview', bias]
 
         if self.config.eddy_current_and_motion_correction:
@@ -887,10 +875,10 @@ class PreprocessingStage(Stage):
             else:
                 eddy_dir = os.path.join(self.stage_dir, 'eddy')
 
-            #Might need extra if/else for eddy_correct/eddy
+            # Might need extra if/else for eddy_correct/eddy
             edcorr = os.path.join(eddy_dir, 'eddy_corrected.nii.gz')
 
-            if (os.path.exists(edcorr)):
+            if os.path.exists(edcorr):
                 self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview', edcorr]
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],

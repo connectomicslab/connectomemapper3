@@ -16,8 +16,6 @@ import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
-from nipype.interfaces.base import isdefined, CommandLine, CommandLineInputSpec, \
-    TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 from nipype.interfaces.mrtrix3.utils import TensorMetrics
 import nipype.interfaces.ants as ants
 # from nipype.interfaces.ants.registration import ANTS
@@ -27,10 +25,9 @@ import nipype.interfaces.ants as ants
 from cmp.stages.common import Stage
 
 # from cmp.pipelines.common import MRThreshold, MRCrop, ExtractMRTrixGrad, FSLCreateHD
-from cmtklib.interfaces.mrtrix3 import DWI2Tensor, MRConvert \
-    MRThreshold, MRCrop, ExtractMRTrixGrad, ApplymultipleMRTransforms, ApplymultipleMRCrop
-from cmtklib.interfaces.fsl import ApplymultipleXfm, ApplymultipleWarp, \
-    Applynlinmultiplewarps
+from cmtklib.interfaces.mrtrix3 import DWI2Tensor, MRConvert, ExtractMRTrixGrad
+from cmtklib.interfaces.fsl import ApplymultipleXfm, ApplymultipleWarp
+
 # from cmtklib.interfaces.fsl import  FSLCreateHD,
 import cmtklib.interfaces.freesurfer as cmp_fs
 import cmtklib.interfaces.fsl as cmp_fsl

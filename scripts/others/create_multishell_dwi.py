@@ -2,7 +2,6 @@
 
 import sys
 import json
-import csv
 import argparse
 import nibabel as nib
 import numpy as np
