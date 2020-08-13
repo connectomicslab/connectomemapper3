@@ -187,7 +187,8 @@ class Pipeline(HasTraits):
         #     return('\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
         if self.stages['Connectome'].config.output_types == []:
             return (
-                '\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
+                '\n\tNo output type selected for the connectivity matrices.\t\n\t'
+                'Please select at least one output type in the connectome configuration window.\t\n')
         return ''
 
     def create_stage_flow(self, stage_name):
