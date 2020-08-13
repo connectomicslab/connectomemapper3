@@ -8,42 +8,32 @@
 """
 
 # General imports
-import re
-import os
-import shutil
+
 from traits.api import *
-import pkg_resources
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
-import nipype.interfaces.diffusion_toolkit as dtk
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.mrtrix as mrtrix
-import nipype.interfaces.camino as camino
-from nipype.utils.filemanip import split_filename
 
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec, \
-    traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec
-import nipype.interfaces.base as nibase
-
-from cmtklib.interfaces.mrtrix3 import Erode, MRtrix_mul, MRThreshold, MRConvert, EstimateResponseForSH, \
-    ConstrainedSphericalDeconvolution, DWI2Tensor, Tensor2Vector
-from nipype.interfaces.mrtrix3.reconst import FitTensor, EstimateFOD
+from nipype.interfaces.base import traits
 from nipype.interfaces.mrtrix3.utils import TensorMetrics
-# from nipype.interfaces.mrtrix3.preprocess import ResponseSD
-from cmtklib.interfaces.misc import flipBvec, flipTable
-from cmtklib.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE
-# from nipype.interfaces.dipy import CSD
 
 from nipype import logging
+
+from cmtklib.interfaces.mrtrix3 import Erode, MRtrix_mul, MRThreshold, \
+    MRConvert, EstimateResponseForSH, \
+    ConstrainedSphericalDeconvolution, DWI2Tensor, Tensor2Vector
+
+# from nipype.interfaces.mrtrix3.preprocess import ResponseSD
+from cmtklib.interfaces.misc import flipBvec, flipTable
+from cmtklib.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE, MAPMRI
+# from nipype.interfaces.dipy import CSD
+
 
 iflogger = logging.getLogger('nipype.interface')
 
 
-# Reconstruction configuration
-
 class Dipy_recon_config(HasTraits):
+    ''' Reconstruction configuration '''
     imaging_model = Str
     # flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     flip_table_axis = List(['x', 'y', 'z'])
@@ -149,9 +139,13 @@ class MRtrix_recon_config(HasTraits):
 
 def create_dipy_recon_flow(config):
     flow = pe.Workflow(name="reconstruction")
-    inputnode = pe.Node(interface=util.IdentityInterface(
-        fields=["diffusion", "diffusion_resampled", "brain_mask_resampled", "wm_mask_resampled", "bvals", "bvecs"]),
-        name="inputnode")
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion",
+                                                                 "diffusion_resampled",
+                                                                 "brain_mask_resampled",
+                                                                 "wm_mask_resampled",
+                                                                 "bvals",
+                                                                 "bvecs"]),
+                        name="inputnode")
     outputnode = pe.Node(interface=util.IdentityInterface(
         fields=["DWI", "FA", "AD", "MD", "RD", "fod", "model", "eigVec", "RF", "grad", "bvecs", "shore_maps",
                 "mapmri_maps"], mandatory_inputs=True), name="outputnode")
@@ -303,7 +297,6 @@ def create_dipy_recon_flow(config):
         ])
 
     if config.mapmri:
-        from cmtklib.interfaces.dipy import MAPMRI
         dipy_MAPMRI = pe.Node(interface=MAPMRI(), name='dipy_mapmri')
 
         dipy_MAPMRI.inputs.laplacian_regularization = config.laplacian_regularization
@@ -338,7 +331,15 @@ def create_dipy_recon_flow(config):
 
 
 def create_mrtrix_recon_flow(config):
-    # TODO Add AD and RD maps
+    '''Create the diffusion reconstruction workflow.
+
+    It estimates the tensors or the fiber orientation distribution functions.
+
+    Parameters
+    ----------
+    config '''
+
+    # TODO: Add AD and RD maps
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(
         interface=util.IdentityInterface(
@@ -451,8 +452,7 @@ def create_mrtrix_recon_flow(config):
             (mrtrix_rf, outputnode, [('response', 'RF')]),
             (inputnode, mrtrix_CSD, [("wm_mask_resampled", 'mask_image')]),
             (flip_table, mrtrix_CSD, [("table", "encoding_file")]),
-            (mrtrix_CSD, convert_CSD, [
-             ('spherical_harmonics_image', 'in_file')]),
+            (mrtrix_CSD, convert_CSD, [('spherical_harmonics_image', 'in_file')]),
             (convert_CSD, outputnode, [("converted", "DWI")])
             # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
         ])

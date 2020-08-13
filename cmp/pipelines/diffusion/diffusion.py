@@ -17,12 +17,10 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
 from nipype.interfaces.utility import Merge
 from nipype import config, logging
-from nipype.caching import Memory
 
-import nibabel as nib
+# import nibabel as nib
 
 from cmp.pipelines.common import *
-from cmp.pipelines.anatomical.anatomical import AnatomicalPipeline
 
 from cmp.stages.preprocessing.preprocessing import PreprocessingStage
 from cmp.stages.diffusion.diffusion import DiffusionStage
@@ -144,10 +142,12 @@ class DiffusionPipeline(Pipeline):
 
     def check_config(self):
         # if self.stages['MRTrixConnectome'].config.output_types == []:
-        #     return('\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
+        #     return('\n\tNo output type selected for the connectivity matrices.\t\n\t'
+        #            'Please select at least one output type in the connectome configuration window.\t\n')
         if self.stages['Connectome'].config.output_types == []:
             return (
-                '\n\tNo output type selected for the connectivity matrices.\t\n\tPlease select at least one output type in the connectome configuration window.\t\n')
+                '\n\tNo output type selected for the connectivity matrices.\t\n\t'
+                'Please select at least one output type in the connectome configuration window.\t\n')
         return ''
 
     def define_custom_mapping(self, custom_last_stage):
@@ -431,28 +431,14 @@ class DiffusionPipeline(Pipeline):
         # diffusion_imaging_model = diffusion_imaging_model[0]
 
         if gui:
-            # input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
-            # input_notification.configure_traits()
             print(input_message)
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
-
-            # if diffusion_available:
-            #     n_vol = nib.load(dwi_file).shape[3]
-            #     if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
-            #         self.stages['Preprocessing'].config.end_vol = n_vol-1
-            #     self.stages['Preprocessing'].config.max_vol = n_vol-1
 
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
         else:
             print(input_message)
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
-
-            # if diffusion_available:
-            #     n_vol = nib.load(dwi_file).shape[3]
-            #     if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
-            #         self.stages['Preprocessing'].config.end_vol = n_vol-1
-            #     self.stages['Preprocessing'].config.max_vol = n_vol-1
 
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
@@ -473,8 +459,6 @@ class DiffusionPipeline(Pipeline):
         return valid_inputs
 
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
-
-        subject_directory = self.subject_directory
 
         acquisition_model = self.stages['Diffusion'].config.diffusion_imaging_model
         recon_tool = self.stages['Diffusion'].config.recon_processing_tool
@@ -519,7 +503,11 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.base_directory = cmp_deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
-        # datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', T2='anat/T2.nii.gz', diffusion='dwi/dwi.nii.gz', bvecs='dwi/dwi.bvec', bvals='dwi/dwi.bval')
+        # datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', 
+        #                                         T2='anat/T2.nii.gz', 
+        #                                         diffusion='dwi/dwi.nii.gz',
+        #                                          bvecs='dwi/dwi.bvec', 
+        #                                          bvals='dwi/dwi.bval')
 
         if self.parcellation_scheme == 'NativeFreesurfer':
             datasource.inputs.field_template = dict(diffusion='dwi/' + self.subject + '_desc-cmp_dwi.nii.gz',
@@ -579,46 +567,6 @@ class DiffusionPipeline(Pipeline):
                                                     bids_atlas_label + '_desc-scale4_atlas.graphml',
                                                     roi_graphml_s5='anat/' + self.subject + '_label-' + bids_atlas_label + '_desc-scale5_atlas.graphml')
 
-        # if self.parcellation_scheme == 'Lausanne2018':
-        #     datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
-        #                                         T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
-        #                                         aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
-        #                                         brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
-        #                                         wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
-        #                                         brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
-        #                                         roi_volume_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.nii.gz',roi_volume_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.nii.gz',
-        #                                         roi_volume_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.nii.gz',
-        #                                         roi_volume_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.nii.gz',roi_volume_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.nii.gz',
-        #                                         roi_graphml_s1='anat/'+self.subject+'_label-L2018_desc-scale1_atlas.graphml',roi_graphml_s2='anat/'+self.subject+'_label-L2018_desc-scale2_atlas.graphml',
-        #                                         roi_graphml_s3='anat/'+self.subject+'_label-L2018_desc-scale3_atlas.graphml',
-        #                                         roi_graphml_s4='anat/'+self.subject+'_label-L2018_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-L2018_desc-scale5_atlas.graphml')
-        # elif self.parcellation_scheme == 'Lausanne2008':# Lausanne2008 and Freesurfer (to be tested)
-        #     datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
-        #                                         T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
-        #                                         aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
-        #                                         brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
-        #                                         wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
-        #                                         brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
-        #                                         roi_volume_s1='anat/'+self.subject+'_label-L2008_desc-scale1_atlas.nii.gz',roi_volume_s2='anat/'+self.subject+'_label-L2008_desc-scale2_atlas.nii.gz',
-        #                                         roi_volume_s3='anat/'+self.subject+'_label-L2008_desc-scale3_atlas.nii.gz',
-        #                                         roi_volume_s4='anat/'+self.subject+'_label-L2008_desc-scale4_atlas.nii.gz',roi_volume_s5='anat/'+self.subject+'_label-L2008_desc-scale5_atlas.nii.gz',
-        #                                         roi_graphml_s1='anat/'+self.subject+'_label-L2008_desc-scale1_atlas.graphml',roi_graphml_s2='anat/'+self.subject+'_label-L2008_desc-scale2_atlas.graphml',
-        #                                         roi_graphml_s3='anat/'+self.subject+'_label-L2008_desc-scale3_atlas.graphml',
-        #                                         roi_graphml_s4='anat/'+self.subject+'_label-L2008_desc-scale4_atlas.graphml',roi_graphml_s5='anat/'+self.subject+'_label-L2008_desc-scale5_atlas.graphml')
-        # else:# Freesurfer (TODO: to be tested)
-        #     datasource.inputs.field_template = dict(diffusion='dwi/'+self.subject+'_desc-cmp_dwi.nii.gz', bvecs='dwi/'+self.subject+'_desc-cmp_dwi.bvec', bvals='dwi/'+self.subject+'_desc-cmp_dwi.bval',
-        #                                         T1='anat/'+self.subject+'_desc-head_T1w.nii.gz',aseg='anat/'+self.subject+'_desc-aseg_dseg.nii.gz',
-        #                                         aparc_aseg='anat/'+self.subject+'_desc-aparcaseg_dseg.nii.gz',brain='anat/'+self.subject+'_desc-brain_T1w.nii.gz',
-        #                                         brain_mask='anat/'+self.subject+'_desc-brain_mask.nii.gz',
-        #                                         wm_mask_file='anat/'+self.subject+'_label-WM_dseg.nii.gz',wm_eroded='anat/'+self.subject+'_label-WM_dseg.nii.gz',
-        #                                         brain_eroded='anat/'+self.subject+'_desc-brain_mask.nii.gz',csf_eroded='anat/'+self.subject+'_label-CSF_dseg.nii.gz',
-        #                                         roi_volume_s1='anat/'+self.subject+'_label-Desikan_atlas.nii.gz',
-        #                                         roi_graphml_s1='anat/'+self.subject+'_label-Desikan_atlas.graphml')
-
-        # datasource.inputs.field_template_args = dict(diffusion=[], bvecs=[], bvals=[],T1=[],brain=[],brain_mask=[],
-        #                                         wm_mask_file=[],wm_eroded=[],brain_eroded=[],csf_eroded=[],
-        #                                         roi_volumes=[['%s'%self.subject],[1,2,3,4,5]])
-        # datasource.inputs.field_template_args = dict(T1=[['subject']], T2=[['subject']], diffusion=[['subject', ['subject']]], bvecs=[['subject', ['subject']]], bvals=[['subject', ['subject']]])
         datasource.inputs.sort_filelist = True
 
         # datasource.inputs.subject = self.subject
@@ -1197,8 +1145,6 @@ class DiffusionPipeline(Pipeline):
 
         if '_' in self.subject:
             self.subject = self.subject.split('_')[0]
-
-        old_subject = self.subject
 
         if self.global_conf.subject_session == '':
             cmp_deriv_subject_directory = os.path.join(

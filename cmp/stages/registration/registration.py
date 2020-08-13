@@ -10,34 +10,28 @@
 # General imports
 import os
 from traits.api import *
-import pickle
-import gzip
-import glob
 
 # Nipype imports
 import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
-import nipype.interfaces.mrtrix as mrt
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
-from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec, \
+from nipype.interfaces.base import isdefined, CommandLine, CommandLineInputSpec, \
     TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
-from nipype.interfaces.mrtrix3.reconst import FitTensor
 from nipype.interfaces.mrtrix3.utils import TensorMetrics
 import nipype.interfaces.ants as ants
 # from nipype.interfaces.ants.registration import ANTS
 # from nipype.interfaces.ants.resampling import ApplyTransforms, WarpImageMultiTransform
 
-import nibabel as nib
-
 # Own imports
 from cmp.stages.common import Stage
 
 # from cmp.pipelines.common import MRThreshold, MRCrop, ExtractMRTrixGrad, FSLCreateHD
-from cmtklib.interfaces.mrtrix3 import DWI2Tensor, MRConvert, MRTransform, \
+from cmtklib.interfaces.mrtrix3 import DWI2Tensor, MRConvert \
     MRThreshold, MRCrop, ExtractMRTrixGrad, ApplymultipleMRTransforms, ApplymultipleMRCrop
-from cmtklib.interfaces.fsl import FSLCreateHD, ApplymultipleXfm, ApplymultipleWarp, \
+from cmtklib.interfaces.fsl import ApplymultipleXfm, ApplymultipleWarp, \
     Applynlinmultiplewarps
+# from cmtklib.interfaces.fsl import  FSLCreateHD,
 import cmtklib.interfaces.freesurfer as cmp_fs
 import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.ants import MultipleANTsApplyTransforms
@@ -287,17 +281,6 @@ class RegistrationStage(Stage):
                     apply_xfm=True, interp="spline", out_file="T1_registered.nii.gz"),
                 name="apply_registration_T1")
 
-            mr_threshold_brain_mask = pe.Node(
-                interface=MRThreshold(abs_value=0.5, out_file='brain_mask2_registered.nii.gz', quiet=True,
-                                      force_writing=True), name="mr_threshold_brain_mask")
-            mr_threshold_brain_mask_full = pe.Node(
-                interface=MRThreshold(abs_value=1, out_file='brain_mask_registered.nii.gz', quiet=True,
-                                      force_writing=True), name="mr_threshold_brain_mask_full")
-            mr_threshold_T1 = pe.Node(
-                interface=MRThreshold(
-                    abs_value=10, out_file='T1_registered_th.nii.gz', quiet=True, force_writing=True),
-                name="mr_threshold_T1")
-
             fsl_applyxfm_5tt = pe.Node(
                 interface=fsl.ApplyXFM(
                     apply_xfm=True, interp="spline", out_file="5tt_registered.nii.gz"),
@@ -306,7 +289,10 @@ class RegistrationStage(Stage):
                 interface=fsl.ApplyXFM(
                     apply_xfm=True, interp="spline", out_file="gmwmi_registered.nii.gz"),
                 name="apply_registration_gmwmi")
-            # fsl_create_HD = pe.Node(interface=FSLCreateHD(im_size=[256,256,256,1],vox_size=[1,1,1],origin=[0,0,0],tr=1,datatype='16',out_filename='tempref.nii.gz'),name='fsl_create_HD')
+            # fsl_create_HD = pe.Node(interface=FSLCreateHD(im_size=[256,256,256,1],
+            #                                               vox_size=[1,1,1],origin=[0,0,0],
+            #                                               tr=1,datatype='16',out_filename='tempref.nii.gz'),
+            #                                               name='fsl_create_HD')
 
             flow.connect([
                 (inputnode, fsl_applyxfm_wm, [('wm_mask', 'in_file')]),
@@ -1125,7 +1111,8 @@ class RegistrationStage(Stage):
         #     fsl_flirt_2.inputs.no_search = True
         #     #[1.3] -> apply the linear registration "T1" --> "target" (for comparison)
         #     fsl_concatxfm = pe.Node(interface=fsl.ConvertXFM(concat_xfm=True),name="fsl_concatxfm")
-        #     fsl_applyxfm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True, interp="sinc",out_file='T1-TO-target.nii.gz',out_matrix_file='T1-TO-TARGET.mat'),name="linear_registration")
+        #     fsl_applyxfm = pe.Node(interface=fsl.ApplyXFM(apply_xfm=True, interp="sinc",out_file='T1-TO-target.nii.gz',out_matrix_file='T1-TO-TARGET.mat'),
+        #                             name="linear_registration")
         #     #"[SUB-STEP 2] Create BINARY MASKS for nonlinear registration"
         #     # [2.1] -> create a T2 brain mask
         #     fsl_bet_1 = pe.Node(interface=fsl.BET(out_file='T2-brain',mask=True,no_output=True,robust=True),name="t2_brain_mask")
@@ -1147,7 +1134,8 @@ class RegistrationStage(Stage):
         #     #[3.2] -> apply the warp found for "T2" also onto "T1"
         #     fsl_applywarp = pe.Node(interface=fsl.ApplyWarp(out_file='T1_warped.nii.gz'),name="nonlinear_registration")
         #     fsl_applywarp_wm = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="wm_mask_registered.nii.gz"),name="apply_registration_wm")
-        #     fsl_applywarp_rois = pe.Node(interface=Applynlinmultiplewarps(),name="apply_registration_roivs") # TO FIX: Applynlinmultiplewarps() done because applying MapNode to fsl.ApplyWarp crashes
+        #     fsl_applywarp_rois = pe.Node(interface=Applynlinmultiplewarps(),name="apply_registration_roivs") 
+        # TO FIX: Applynlinmultiplewarps() done because applying MapNode to fsl.ApplyWarp crashes
         #     #fsl_applywarp_rois = pe.MapNode(interface=fsl.ApplyWarp(interp="nn"),name="apply_registration_roivs",iterfield=["in_file"])
         #
         #     flow.connect([
@@ -1184,9 +1172,11 @@ class RegistrationStage(Stage):
         #                     (inputnode, fsl_applywarp_wm, [('target','ref_file')]),
         #                     (inputnode, fsl_applywarp_rois, [('target','ref_file')]),
         #                     ])
-        #         fsl_applywarp_eroded_wm = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_wm_registered.nii.gz"),name="apply_registration_eroded_wm")
+        #         fsl_applywarp_eroded_wm = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_wm_registered.nii.gz"),
+        #                                            name="apply_registration_eroded_wm")
         #         if self.config.apply_to_eroded_csf:
-        #             fsl_applywarp_eroded_csf = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_csf_registered.nii.gz"),name="apply_registration_eroded_csf")
+        #             fsl_applywarp_eroded_csf = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_csf_registered.nii.gz"),
+        #                                                 name="apply_registration_eroded_csf")
         #             flow.connect([
         #                           (inputnode, fsl_applywarp_eroded_csf, [('eroded_csf','in_file')]),
         #                           (inputnode, fsl_applywarp_eroded_csf, [('target','ref_file')]),
@@ -1195,7 +1185,8 @@ class RegistrationStage(Stage):
         #                           (fsl_applywarp_eroded_csf, outputnode, [('out_file','eroded_csf_registered_crop')])
         #                         ])
         #         if self.config.apply_to_eroded_brain:
-        #             fsl_applywarp_eroded_brain = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_brain_registered.nii.gz"),name="apply_registration_eroded_brain")
+        #             fsl_applywarp_eroded_brain = pe.Node(interface=fsl.ApplyWarp(interp="nn",out_file="eroded_brain_registered.nii.gz"),
+        #                                                  name="apply_registration_eroded_brain")
         #             flow.connect([
         #                           (inputnode, fsl_applywarp_eroded_brain, [('eroded_brain','in_file')]),
         #                           (inputnode, fsl_applywarp_eroded_brain, [('target','ref_file')]),

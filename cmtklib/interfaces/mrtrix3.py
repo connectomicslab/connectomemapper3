@@ -7,7 +7,6 @@
 """
 
 import nipype.interfaces.base as nibase
-import nipype.interfaces.utility as util
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, \
     CommandLine, traits, TraitedSpec, File, Directory, InputMultiPath, OutputMultiPath, isdefined
 from nipype.utils import logger
@@ -365,26 +364,36 @@ class MRConvertInputSpec(CommandLineInputSpec):
     out_filename = File(genfile=True, argstr='%s',
                         position=-1, desc='Output filename')
     extract_at_axis = traits.Enum(1, 2, 3, argstr='-coord %s', position=1,
-                                  desc='"Extract data only at the coordinates specified. This option specifies the Axis. Must be used in conjunction with extract_at_coordinate.')
+                                  desc='Extract data only at the coordinates specified.'
+                                  'This option specifies the Axis. Must be used in conjunction with extract_at_coordinate. ')
     extract_at_coordinate = traits.List(traits.Int, argstr='%s', sep=',', position=2, minlen=1, maxlen=3,
-                                        desc='"Extract data only at the coordinates specified. This option specifies the coordinates. Must be used in conjunction with extract_at_axis. Three comma-separated numbers giving the size of each voxel in mm.')
+                                        desc='Extract data only at the coordinates specified. This option specifies the coordinates. '
+                                        'Must be used in conjunction with extract_at_axis. '
+                                        'Three comma-separated numbers giving the size of each voxel in mm.')
     voxel_dims = traits.List(traits.Float, argstr='-vox %s', sep=',',
                              position=3, minlen=3, maxlen=3,
                              desc='Three comma-separated numbers giving the size of each voxel in mm.')
     stride = traits.List(traits.Int, argstr='-stride %s', sep=',',
                          position=3, minlen=3, maxlen=4,
-                         desc='Three to four comma-separated numbers specifying the strides of the output data in memory. The actual strides produced will depend on whether the output image format can support it..')
+                         desc='Three to four comma-separated numbers specifying the strides of the output data in memory. '
+                         'The actual strides produced will depend on whether the output image format can support it..')
     output_datatype = traits.Enum("float32", "float32le", "float32be", "float64", "float64le", "float64be", "int64",
                                   "uint64", "int64le", "uint64le", "int64be", "uint64be", "int32", "uint32", "int32le",
                                   "uint32le", "int32be", "uint32be", "int16", "uint16", "int16le", "uint16le",
                                   "int16be", "uint16be", "cfloat32", "cfloat32le", "cfloat32be", "cfloat64",
                                   "cfloat64le", "cfloat64be", "int8", "uint8", "bit", argstr='-datatype %s', position=2,
-                                  desc='"specify output image data type. Valid choices are: float32, float32le, float32be, float64, float64le, float64be, int64, uint64, int64le, uint64le, int64be, uint64be, int32, uint32, int32le, uint32le, int32be, uint32be, int16, uint16, int16le, uint16le, int16be, uint16be, cfloat32, cfloat32le, cfloat32be, cfloat64, cfloat64le, cfloat64be, int8, uint8, bit."')  # , usedefault=True)
+                                  desc='specify output image data type. Valid choices are: '
+                                  'float32, float32le, float32be, float64, float64le, float64be, '
+                                  'int64, uint64, int64le, uint64le, int64be, uint64be, int32, uint32, '
+                                  'int32le, uint32le, int32be, uint32be, int16, uint16, int16le, '
+                                  'uint16le, int16be, uint16be, cfloat32, cfloat32le, cfloat32be, '
+                                  'cfloat64, cfloat64le, cfloat64be, int8, uint8, bit."')  # , usedefault=True)
     extension = traits.Enum("mif", "nii", "float", "char", "short", "int", "long", "double", position=4,
                             desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"',
                             usedefault=True)
     layout = traits.Enum("nii", "float", "char", "short", "int", "long", "double", argstr='-output %s', position=5,
-                         desc='specify the layout of the data in memory. The actual layout produced will depend on whether the output image format can support it.')
+                         desc='specify the layout of the data in memory. '
+                         'The actual layout produced will depend on whether the output image format can support it.')
     resample = traits.Float(argstr='-scale %d', position=6,
                             units='mm', desc='Apply scaling to the intensity values.')
     offset_bias = traits.Float(argstr='-scale %d', position=7,
@@ -394,7 +403,9 @@ class MRConvertInputSpec(CommandLineInputSpec):
     prs = traits.Bool(argstr='-prs', position=3,
                       desc="Assume that the DW gradients are specified in the PRS frame (Siemens DICOM only).")
     grad = File(exists=True, argstr='-grad %s', position=9,
-                desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], '
+                'where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). '
+                'See FSL2MRTrix')
     grad_fsl = traits.Tuple(File(exists=True), File(exists=True), argstr='-fslgrad %s %s',
                             desc='[bvecs, bvals] DW gradient scheme (FSL format)')
 
@@ -774,9 +785,12 @@ class DWI2TensorInputSpec(CommandLineInputSpec):
     in_mask_file = File(exists=True, argstr='-mask %s',
                         position=-3, desc='Input DWI mask')
     encoding_file = File(argstr='-grad %s', position=2,
-                         desc='Encoding file, , supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix()')
+                         desc='Encoding file, , supplied as a 4xN text file with each line is in the format [ X Y Z b ], '
+                         'where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). '
+                         'See FSL2MRTrix()')
     ignore_slice_by_volume = traits.List(traits.Int, argstr='-ignoreslices %s', sep=' ', position=2, minlen=2, maxlen=2,
-                                         desc='Requires two values (i.e. [34 1] for [Slice Volume] Ignores the image slices specified when computing the tensor. Slice here means the z coordinate of the slice to be ignored.')
+                                         desc='Requires two values (i.e. [34 1] for [Slice Volume] Ignores the image slices '
+                                         'specified when computing the tensor. Slice here means the z coordinate of the slice to be ignored.')
     ignore_volumes = traits.List(traits.Int, argstr='-ignorevolumes %s', sep=' ', position=2, minlen=1,
                                  desc='Requires two values (i.e. [2 5 6] for [Volumes] Ignores the image volumes specified when computing the tensor.')
     quiet = traits.Bool(argstr='-quiet', position=1,
@@ -880,15 +894,20 @@ class EstimateResponseForSHInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True,
                    position=2, desc='Diffusion-weighted images')
     algorithm = traits.Enum('dhollander', 'fa', 'manual', 'msmt_5tt', 'tax', 'tournier', argstr='%s', position=1,
-                            desc='Select the algorithm to be used to derive the response function; additional details and options become available once an algorithm is nominated. Options are: dhollander, fa, manual, msmt_5tt, tax, tournier')
+                            desc='Select the algorithm to be used to derive the response function; '
+                            'additional details and options become available once an algorithm is nominated. '
+                            'Options are: dhollander, fa, manual, msmt_5tt, tax, tournier')
     mask_image = File(exists=True, mandatory=True, argstr='-mask %s', position=-1,
                       desc='only perform computation within the specified binary brain mask image')
     out_filename = File(genfile=True, argstr='%s',
                         position=3, desc='Output filename')
     encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2,
-                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], '
+                         'where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). '
+                         'See FSL2MRTrix')
     maximum_harmonic_order = traits.Int(argstr='-lmax %s', position=-3,
-                                        desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
+                                        desc='set the maximum harmonic order for the output series. '
+                                        'By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     # normalise = traits.Bool(argstr='-normalise', desc='normalise the DW signal to the b=0 image')
 
     quiet = traits.Bool(
@@ -946,7 +965,9 @@ class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     mask_image = File(exists=True, argstr='-mask %s', position=2,
                       desc='only perform computation within the specified binary brain mask image')
     encoding_file = File(exists=True, argstr='-grad %s', position=1,
-                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], '
+                         'where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). '
+                         'See FSL2MRTrix')
     filter_file = File(exists=True, argstr='-filter %s', position=-2,
                        desc='a text file containing the filtering coefficients for each even harmonic order.'
                             'the linear frequency filtering parameters used for the initial linear spherical deconvolution step (default = [ 1 1 1 0 0 ]).')
@@ -954,14 +975,18 @@ class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     lambda_value = traits.Float(argstr='-norm_lambda %s',
                                 desc='the regularisation parameter lambda that controls the strength of the constraint (default = 1.0).')
     maximum_harmonic_order = traits.Int(argstr='-lmax %s',
-                                        desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
+                                        desc='set the maximum harmonic order for the output series. '
+                                        'By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     threshold_value = traits.Float(argstr='-threshold %s',
-                                   desc='the threshold below which the amplitude of the FOD is assumed to be zero, expressed as a fraction of the mean value of the initial FOD (default = 0.1)')
+                                   desc='the threshold below which the amplitude of the FOD is assumed to be zero, '
+                                   'expressed as a fraction of the mean value of the initial FOD (default = 0.1)')
     iterations = traits.Int(argstr='-niter %s',
                             desc='the maximum number of iterations to perform for each voxel (default = 50)')
 
     directions_file = File(exists=True, argstr='-directions %s', position=-2,
-                           desc='a text file containing the [ el az ] pairs for the directions: Specify the directions over which to apply the non-negativity constraint (by default, the built-in 300 direction set is used)')
+                           desc='a text file containing the [ el az ] pairs for the directions: '
+                           'Specify the directions over which to apply the non-negativity constraint '
+                           '(by default, the built-in 300 direction set is used)')
 
     # normalise = traits.Bool(argstr='-normalise', position=3, desc="normalise the DW signal to the b=0 image")
 
@@ -1266,9 +1291,9 @@ class MRTrix3Base(CommandLine):
             try:
                 from multiprocessing import cpu_count
                 value = cpu_count()
-            except:
+            except Exception:
                 logger.warn('Number of threads could not be computed')
-                pass
+                # pass
             return trait_spec.argstr % value
 
         if name == 'in_bvec':

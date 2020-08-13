@@ -9,42 +9,21 @@
 
 from traits.api import *
 
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec, \
-    traits, File, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, isdefined, OutputMultiPath, InputMultiPath
+from nipype.interfaces.base import traits
 
-from nipype.utils.filemanip import copyfile
-
-import glob
-import os
-import pkg_resources
 # import subprocess
-
-from nipype.utils.filemanip import split_filename
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.fsl as fsl
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-# import nipype.interfaces.diffusion_toolkit as dtk
-import nipype.interfaces.mrtrix as mrtrix
-# import nipype.interfaces.camino as camino
-import nipype.interfaces.dipy as dipy
 
 #  import nipype.interfaces.camino2trackvis as camino2trackvis
 # import cmtklib.interfaces.camino2trackvis as camino2trackvis
 from cmtklib.interfaces.mrtrix3 import Erode, StreamlineTrack
-from cmtklib.interfaces.fsl import mapped_ProbTrackX
 from cmtklib.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
 from cmtklib.interfaces.misc import Tck2Trk, extractHeaderVoxel2WorldMatrix, match_orientations, make_seeds, \
-    make_mrtrix_seeds, getCRS2XYZtkRegTransform, transform_trk_CRS2XYZtkReg
+    make_mrtrix_seeds, transform_trk_CRS2XYZtkReg
 
-
-
-import nibabel as nib
-import numpy as np
-
-from cmtklib.diffusion import filter_fibers
+# from cmtklib.diffusion import filter_fibers
 
 # import matplotlib.pyplot as plt
 
@@ -59,7 +38,8 @@ class Dipy_tracking_config(HasTraits):
     SD = Bool
     number_of_seeds = Int(1000)
     seed_density = Float(1.0,
-                         desc="Number of seeds to place along each direction. A density of 2 is the same as [2, 2, 2] and will result in a total of 8 seeds per voxel.")
+                         desc='Number of seeds to place along each direction. '
+                         'A density of 2 is the same as [2, 2, 2] and will result in a total of 8 seeds per voxel.')
     fa_thresh = Float(0.2)
     step_size = traits.Float(0.5)
     max_angle = Float(25.0)
@@ -118,7 +98,8 @@ class MRtrix_tracking_config(HasTraits):
     seed_from_gmwmi = traits.Bool(False,
                                   desc="Seed from Grey Matter / White Matter interface (requires Anatomically-Constrained Tractography (ACT))")
     crop_at_gmwmi = traits.Bool(True,
-                                desc="Crop streamline endpoints more precisely as they cross the GM-WM interface (requires Anatomically-Constrained Tractography (ACT))")
+                                desc='Crop streamline endpoints more precisely as they cross the GM-WM interface '
+                                '(requires Anatomically-Constrained Tractography (ACT))')
     backtrack = traits.Bool(True,
                             desc="Allow tracks to be truncated (requires Anatomically-Constrained Tractography (ACT))")
 
