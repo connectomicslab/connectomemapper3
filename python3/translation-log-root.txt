@@ -4,7 +4,7 @@
 -#!/usr/bin/env python2
 -# -*-coding:Latin-1 -*
 -
--# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
+-# Copyright (C) 2009-2020, Ecole Polytechnique Federale de Lausanne (EPFL) and
 -# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 -# All rights reserved.
 -#
