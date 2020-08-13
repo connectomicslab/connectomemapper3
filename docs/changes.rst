@@ -28,12 +28,12 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 	* ``nipype 1.1.8 -> 1.5.0``
 
 	* ``pybids 0.9.5 -> 0.10.2``
-	
+
 	* ``pydicom 1.4.2 -> 2.0.0``
 
 	* ``networkX 2.2 -> 2.4``
 
-    * ``statsmodels 0.9.0 -> 0.11.1``
+	* ``statsmodels 0.9.0 -> 0.11.1``
 
 	* ``obspy 1.1.1 -> 1.2.1``
 
@@ -49,11 +49,11 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 
 	* ``mne 0.17.1 -> 0.20.7``
 
-    * ``sphinx 1.8.5 -> 3.1.1``
-    
-    * ``sphinx_rtd_theme 0.4.3 -> 0.5.0``
-    
-    * ``recommonmark 0.5.0 -> 0.6.0``
+	* ``sphinx 1.8.5 -> 3.1.1``
+
+	* ``sphinx_rtd_theme 0.4.3 -> 0.5.0``
+
+	* ``recommonmark 0.5.0 -> 0.6.0``
 
 *New feature*
 
