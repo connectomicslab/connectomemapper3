@@ -61,7 +61,7 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 
 * Use `Codacy <https://www.codacy.com/>`_ to support code reviews and monitor code quality over time.
 
-* Use `coveragepy <https://coverage.readthedocs.io/en/coverage-5.2/>`_  in CircleCI during regression tests of the BIDS app and create code coverage reports published on our `Codacy project page <https://coverage.readthedocs.io/en/coverage-5.2/>`_.
+* Use `coveragepy <https://coverage.readthedocs.io/en/coverage-5.2/>`_  in CircleCI during regression tests of the BIDS app and create code coverage reports published on our `Codacy project page <https://app.codacy.com/gh/connectomicslab/connectomemapper3/dashboard>`_.
 
 * Add new regression tests in CircleCI to improve code coverage:
 	* Test 01: Lausanne2018 (full) parcellation + Dipy SHORE + Mrtrix3 SD_STREAM tractography
