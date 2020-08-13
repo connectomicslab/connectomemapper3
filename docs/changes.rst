@@ -23,7 +23,7 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 	* Use Dipy 1.0 and related code changes in ``cmtklib/interfaces/dipy`` (Check `here <https://dipy.org/documentation/1.0.0./api_changes/#dipy-1-0-changes>`_ for more details about Dipy 1.0 changes)
 
 	.. warning::
-	  Interface for tractography based on Dipy DTI model and EuDX tractography has not been updated yet, It will be part of the next release candidate.
+	  Interface for tractography based on Dipy DTI model and EuDX tractography, which have been drastically changed in Dipy 1.0, has not been updated yet, It will be part of the next release candidate.
 
 	* Use Nipype 1.5.0
 
@@ -31,11 +31,11 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 
 *New feature*
 
-* Option to run Freesurfer recon-all in parallel and to specify the number of threads used by not only Freesurfer but also all softwares relying on OpenMP for multi-threading. This can be achieved by the new ``--number_of_threads``
+* Option to run Freesurfer recon-all in parallel and to specify the number of threads used by not only Freesurfer but also all softwares relying on OpenMP for multi-threading. This can be achieved by running the BIDS App with the new option flag ``--number_of_threads``.
 
 *Changes in BIDS derivatives*
 
-* Renamed connectivity graph files to better conform to the BIDS extension proposal on connectivity data schema. They are now saved by default in a TSV file as a list of edges.
+* Renamed connectivity graph files to better conform to the  `BIDS extension proposal on connectivity data schema <https://docs.google.com/document/d/1ugBdUF6dhElXdj3u9vw0iWjE6f_Bibsro3ah7sRV0GA>`_. They are now saved by default in a TSV file as a list of edges.
 
 *Code refactoring*
 
