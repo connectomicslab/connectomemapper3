@@ -18,32 +18,24 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 
 * Correct manually a number of code stly issues reported by Codacy (bandits/pylints/flake8)
 
-*Software development life cycle*
+* Major dependency upgrades:
 
-* Use `coveragepy <https://coverage.readthedocs.io/en/coverage-5.2/>`_  in CircleCI during regression tests of the BIDS app and create code coverage reports
+	* Use Dipy 1.0 and related code changes in ``cmtklib/interfaces/dipy`` (Check `here <https://dipy.org/documentation/1.0.0./api_changes/#dipy-1-0-changes>`_ for more details about Dipy 1.0 changes)
 
-* Add new regression tests in CircleCI to improve code coverage:
-	* Test 01: Lausanne2018 (full) parcellation + Dipy SHORE + Mrtrix3 SD_STREAM tractography
-	* Test 02: Lausanne2018 (full) parcellation + Dipy SHORE + Mrtrix3 ACT iFOV2 tractography
-	* Test 03: Lausanne2018 (full) parcellation + Dipy SHORE + Dipy deterministic tractography
-	* Test 04: Lausanne2018 (full) parcellation + Dipy SHORE + Dipy Particle Filtering tractography
-	* Test 05: Native Freesurfer (Desikan-Killiany) parcellation
-	* Test 06: Lausanne2008 parcellation (as implemented in CMP2)
+	.. warning::
+	  Interface for tractography based on Dipy DTI model and EuDX tractography has not been updated yet, It will be part of the next release candidate.
+
+	* Use Nipype 1.5.0
+
+	* Use NetworkX 2.4
+
+*New feature*
+
+* Option to run Freesurfer recon-all in parallel and to specify the number of threads used by not only Freesurfer but also all softwares relying on OpenMP for multi-threading. This can be achieved by the new ``--number_of_threads``
 
 *Changes in BIDS derivatives*
 
 * Renamed connectivity graph files to better conform to the BIDS extension proposal on connectivity data schema. They are now saved by default in a TSV file as a list of edges.
-
-*Upgrades*
-
-* Use Dipy 1.0 and related code changes in ``cmtklib/interfaces/dipy`` (Check `here <https://dipy.org/documentation/1.0.0./api_changes/#dipy-1-0-changes>`_ for more details about Dipy 1.0 changes)
-
-.. warning::
-	Interface for tractography based on Dipy DTI model and EuDX tractography has not been updated yet, It will be part of the next release candidate.
-
-* Use Nipype 1.5.0
-
-* Use NetworkX 2.4
 
 *Code refactoring*
 
@@ -64,6 +56,25 @@ This version corresponds to the first release candidate of Connectome Mapper 3. 
 * Add missing renaming of Dipy tensor-related maps (AD, RD, MD) following BIDS
 
 * Remove all references to use Custom segmentation / parcellation / diffusion FOD image / tractogram, inherited from CMP2 but not anymore functional following the adoption of BIDS standard inside CMP3.
+
+*Software development life cycle*
+
+* Use `Codacy <https://www.codacy.com/>`_ to support code reviews and monitor code quality over time.
+
+* Use `coveragepy <https://coverage.readthedocs.io/en/coverage-5.2/>`_  in CircleCI during regression tests of the BIDS app and create code coverage reports published on our `Codacy project page <https://coverage.readthedocs.io/en/coverage-5.2/>`_.
+
+* Add new regression tests in CircleCI to improve code coverage:
+	* Test 01: Lausanne2018 (full) parcellation + Dipy SHORE + Mrtrix3 SD_STREAM tractography
+	* Test 02: Lausanne2018 (full) parcellation + Dipy SHORE + Mrtrix3 ACT iFOV2 tractography
+	* Test 03: Lausanne2018 (full) parcellation + Dipy SHORE + Dipy deterministic tractography
+	* Test 04: Lausanne2018 (full) parcellation + Dipy SHORE + Dipy Particle Filtering tractography
+	* Test 05: Native Freesurfer (Desikan-Killiany) parcellation
+	* Test 06: Lausanne2008 parcellation (as implemented in CMP2)
+
+* Moved pipeline configurations for regression tests in CircleCI from ``config/`` to ``.circle/tests/configuration_files``
+
+* Moved lists of expected regression test outputs  in CircleCI from ``.circle/`` to ``.circle/tests/expected_outputs``
+
 
 Please check the `pull request 40 page <https://github.com/connectomicslab/connectomemapper3/pull/40>`_ for more details.
 
