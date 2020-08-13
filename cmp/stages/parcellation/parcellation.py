@@ -12,17 +12,11 @@ import os
 from traits.api import *
 import pkg_resources
 
-import pickle
-import gzip
-from traits.trait_handlers import TraitListObject
-
 # Nipype imports
 import nipype.pipeline.engine as pe  # pypeline engine
 # import nipype.interfaces.cmtk as cmtk
-import cmtklib as cmtk
 import nipype.interfaces.utility as util
 
-from cmtklib.interfaces import fsl
 from cmtklib.parcellation import Parcellate, ParcellateBrainstemStructures, \
     ParcellateHippocampalSubfields, ParcellateThalamus, \
     CombineParcellations, ComputeParcellationRoiVolumes
@@ -82,8 +76,12 @@ class ParcellationStage(Stage):
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = ParcellationConfig()
-        # self.config.template_thalamus = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')))
-        # self.config.thalamic_nuclei_maps = os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')))
+        # self.config.template_thalamus =
+        #    os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation',
+        #                                                    'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz')))
+        # self.config.thalamic_nuclei_maps =
+        #    os.path.abspath(pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018',
+        #                                                    'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')))
         self.config.pipeline_mode = pipeline_mode
         self.inputs = ["subjects_dir", "subject_id", "custom_wm_mask"]
         self.outputs = [  # "aseg_file",
@@ -134,18 +132,6 @@ class ParcellationStage(Stage):
             flow.connect([
                 (parc_node, outputnode, [("aseg", "aseg")]),
             ])
-
-            def get_first(roi_volumes):
-                if len(roi_volumes) > 1:
-                    return roi_volumes[0]
-                else:
-                    return roi_volumes
-
-            def max_val(roi_volumes):
-                import nibabel as nib
-                roin = roi_volumes[0]
-                roid = nib.load(roin).get_data()
-                return '-thr 0 -uthr {} -bin'.format(roid.max() - 1)
 
             # threshold_roi = pe.Node(interface=fsl.MathsCommand(out_file='T1w_class-GM.nii.gz'),name='make_gm_mask')
             #
@@ -343,12 +329,16 @@ class ParcellationStage(Stage):
                 ])
             else:
                 # def get_atlas_LUTs(paths):
-                #     colorLUTs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','FreeSurferColorLUT_adapted.txt'))),
+                #     colorLUTs = [os.path.join(pkg_resources.resource_filename('
+                #                     cmtklib',os.path.join('data','parcellation','nativefreesurfer','
+                #                                           freesurferaparc','FreeSurferColorLUT_adapted.txt'))),
                 #                  ]
                 #     return colorLUTs
                 #
                 # def get_atlas_graphMLs(paths):
-                #     graphMLs = [os.path.join(pkg_resources.resource_filename('cmtklib',os.path.join('data','parcellation','nativefreesurfer','freesurferaparc','resolution83.graphml'))),
+                #     graphMLs = [os.path.join(pkg_resources.resource_filename(
+                #                   'cmtklib',os.path.join('data','parcellation','nativefreesurfer',
+                #                                          'freesurferaparc','resolution83.graphml'))),
                 #                  ]
                 #     return graphMLs
 

@@ -8,21 +8,19 @@
 """
 
 # Global imports
-from traits.api import *
-import glob
 import os
-import pickle
-import gzip
+
+from traits.api import *
+
 import networkx as nx
 
 # Nipype imports
 import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
-import nipype.interfaces.cmtk as cmtk
 
 # Own imports
-from nipype.interfaces.mrtrix3.connectivity import BuildConnectome
-from cmtklib.interfaces.mrtrix3 import FilterTractogram
+# from nipype.interfaces.mrtrix3.connectivity import BuildConnectome
+# from cmtklib.interfaces.mrtrix3 import FilterTractogram
 from cmp.stages.common import Stage
 import cmtklib.connectome
 from cmtklib.util import get_pipeline_dictionary_outputs
@@ -171,7 +169,7 @@ class ConnectomeStage(Stage):
                                                                                         map_scale]
 
             self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
-                                      key=str.lower)
+                                          key=str.lower)
             # print(self.inspect_outputs)
 
     def has_run(self):

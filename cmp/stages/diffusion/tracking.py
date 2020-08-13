@@ -10,24 +10,21 @@
 from traits.api import *
 
 from nipype.interfaces.base import traits
-
-# import subprocess
-
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
+from nipype import logging
+
+# import matplotlib.pyplot as plt
 
 #  import nipype.interfaces.camino2trackvis as camino2trackvis
 # import cmtklib.interfaces.camino2trackvis as camino2trackvis
 from cmtklib.interfaces.mrtrix3 import Erode, StreamlineTrack
 from cmtklib.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
-from cmtklib.interfaces.misc import Tck2Trk, extractHeaderVoxel2WorldMatrix, match_orientations, make_seeds, \
-    make_mrtrix_seeds, transform_trk_CRS2XYZtkReg
+from cmtklib.interfaces.misc import Tck2Trk, extractHeaderVoxel2WorldMatrix, \
+    make_mrtrix_seeds
 
 # from cmtklib.diffusion import filter_fibers
 
-# import matplotlib.pyplot as plt
-
-from nipype import logging
 
 iflogger = logging.getLogger('nipype.interface')
 

@@ -22,8 +22,7 @@ import nipype.interfaces.utility as util
 import nipype.interfaces.io as nio
 from nipype import config, logging
 
-from nipype.interfaces.base import CommandLine, traits, BaseInterface, \
-    BaseInterfaceInputSpec, File, TraitedSpec, isdefined, Directory, InputMultiPath
+from nipype.interfaces.base import Directory
 
 from traits.api import *
 

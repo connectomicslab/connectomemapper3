@@ -503,10 +503,10 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.base_directory = cmp_deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
-        # datasource.inputs.field_template = dict(T1='anat/T1.nii.gz', 
-        #                                         T2='anat/T2.nii.gz', 
+        # datasource.inputs.field_template = dict(T1='anat/T1.nii.gz',
+        #                                         T2='anat/T2.nii.gz',
         #                                         diffusion='dwi/dwi.nii.gz',
-        #                                          bvecs='dwi/dwi.bvec', 
+        #                                          bvecs='dwi/dwi.bvec',
         #                                          bvals='dwi/dwi.bval')
 
         if self.parcellation_scheme == 'NativeFreesurfer':
@@ -1064,7 +1064,8 @@ class DiffusionPipeline(Pipeline):
         #     con_flow = self.create_stage_flow("MRTrixConnectome")
         #     diffusion_flow.connect([
         #           (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
-        #           (diff_flow,con_flow, [('outputnode.diffusion_model','inputnode.diffusion_model'),('outputnode.track_file','inputnode.track_file'),('outputnode.fod_file','inputnode.fod_file'),('outputnode.gFA','inputnode.gFA'),
+        #           (diff_flow,con_flow, [('outputnode.diffusion_model','inputnode.diffusion_model'),('outputnode.track_file','inputnode.track_file'),
+        #           ('outputnode.fod_file','inputnode.fod_file'),('outputnode.gFA','inputnode.gFA'),
         #                                       ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
         #                                 ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
         #                                 ('outputnode.P0','inputnode.P0')]),

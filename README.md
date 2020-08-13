@@ -19,7 +19,6 @@ This tool allows you to easily do the following:
 
 Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which takes BIDS datasets as inputs and which provides a frozen environment where versions of all external softwares and libraries are fixed.
 
-
 ### Resources
 
   * **Documentation:** [https://connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io)

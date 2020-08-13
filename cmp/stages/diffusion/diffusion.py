@@ -8,24 +8,20 @@
 """
 
 # General imports
-from traits.api import *
-import gzip
-import pickle
 import os
+
+from traits.api import *
 
 # Nipype imports
 import nipype.pipeline.engine as pe
-import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.utility as util
 
-import nibabel as nib
-
 # Own imports
 from cmp.stages.common import Stage
+from cmtklib.interfaces.misc import ExtractImageVoxelSizes
 from .reconstruction import *
 from .tracking import *
-from cmtklib.interfaces.misc import ExtractImageVoxelSizes, Tck2Trk
 
 
 class DiffusionConfig(HasTraits):
@@ -188,7 +184,8 @@ class DiffusionConfig(HasTraits):
     # def update_camino_tracking_model(self):
     #     if self.diffusion_model == 'Probabilistic':
     #         self.camino_tracking_config.tracking_model = 'pico'
-    #     elif self.camino_recon_config.model_type == 'Single-Tensor' or self.camino_recon_config.local_model == 'restore' or self.camino_recon_config.local_model == 'adc':
+    #     elif (self.camino_recon_config.model_type == 'Single-Tensor' or
+    #           self.camino_recon_config.local_model == 'restore' or self.camino_recon_config.local_model == 'adc'):
     #         self.camino_tracking_config.tracking_model = 'dt'
     #     elif self.camino_recon_config.local_model == 'ball_stick':
     #         self.camino_tracking_config.tracking_model = 'ballstick'

@@ -7,11 +7,11 @@
 """ CMP fmri first preprocessing Stage
 """
 
-from traits.api import *
+
 import os
 from glob import glob
-import pickle
-import gzip
+
+from traits.api import *
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.fsl as fsl
@@ -19,9 +19,6 @@ from nipype.interfaces import afni
 import nipype.interfaces.utility as util
 
 from cmtklib.interfaces.afni import Despike
-
-import nibabel as nib
-
 from cmp.stages.common import Stage
 from cmtklib.functionalMRI import discard_tp
 
@@ -163,9 +160,9 @@ class PreprocessingStage(Stage):
                 tcorr = files[0]
                 if (os.path.exists(tcorr)):
                     self.inspect_outputs_dict['Slice time corrected image'] = ['fsleyes', '-ad',
-                                                                                tcorr,
-                                                                                '-cm',
-                                                                                'brain_colours_blackbdy_iso']
+                                                                               tcorr,
+                                                                               '-cm',
+                                                                               'brain_colours_blackbdy_iso']
         if self.config.motion_correction:
             motion_results_dir = os.path.join(self.stage_dir, "motion_correction")
             files = glob(os.path.join(motion_results_dir, "*_mcf.nii.gz"))
@@ -173,9 +170,9 @@ class PreprocessingStage(Stage):
                 mcorr = files[0]
                 if (os.path.exists(mcorr)):
                     self.inspect_outputs_dict['Slice time and motion corrected image'] = ['fsleyes', '-ad',
-                                                                                            mcorr,
-                                                                                            '-cm',
-                                                                                            'brain_colours_blackbdy_iso']
+                                                                                          mcorr,
+                                                                                          '-cm',
+                                                                                          'brain_colours_blackbdy_iso']
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)

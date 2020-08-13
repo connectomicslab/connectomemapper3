@@ -7,14 +7,8 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-# Remove warnings visible whenever you import scipy (or another package) that was compiled against an older numpy than is installed.
-from cmtklib.util import bcolors
-from cmp import parser
-from cmp.info import __version__
-from cmp.project import CMP_Project_Info, run_individual
-from glob import glob
-import numpy
-# import nibabel
+# Remove warnings visible whenever you import scipy (or another package)
+# that was compiled against an older numpy than is installed.
 import multiprocessing
 import subprocess
 import shutil
@@ -22,16 +16,22 @@ import sys
 import os
 import warnings
 
+from glob import glob
+import numpy
+# import nibabel
+
+# Own imports
+from cmtklib.util import bcolors
+from cmp import parser
+from cmp.info import __version__
+from cmp.project import CMP_Project_Info, run_individual
+
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
-# Imports
-
-# Own imports
-
-
 # __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                 'version')).read()
+
 
 def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=1):
     cmd = []
@@ -76,9 +76,10 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=
 def readLineByLine(filename):
     # Use with statement to correctly close the file when you read all the lines.
     with open(filename, 'r') as f:
-        for line in f:  # Use implicit iterator over filehandler to minimize memory used
-            yield line.strip(
-                '\n')  # Use generator, to minimize memory used, removing trailing carriage return as it is not part of the command.
+        # Use implicit iterator over filehandler to minimize memory used
+        for line in f:
+            # Use generator, to minimize memory used, removing trailing carriage return as it is not part of the command.
+            yield line.strip('\n')
 
 
 def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type, multiproc_number_of_cores=1):
@@ -277,15 +278,17 @@ if args.number_of_participants_processed_in_parallel is not None:
             '  * Number of subjects to be processed in parallel set to the maximal number of available cores ({})'.format(
                 max_number_of_cores))
         print(
-            bcolors.WARNING + '    WARNING: the specified number of subjects to be processed in parallel ({}) exceeds the number of available cores ({})'.format(
-                args.number_of_participants_processed_in_parallel, max_number_of_cores) + bcolors.ENDC)
+            bcolors.WARNING + '    WARNING: the specified number of subjects to be processed in parallel ({})' +
+            ' exceeds the number of available cores ({})'.format(args.number_of_participants_processed_in_parallel,
+                                                                 max_number_of_cores) +
+            bcolors.ENDC)
         parallel_number_of_subjects = max_number_of_cores
     elif parallel_number_of_subjects <= 0:
         print(
             '  * Number of subjects to be processed in parallel set to one (sequential run)')
         print(
-            bcolors.WARNING + '    WARNING: the specified number of subjects to be processed in parallel ({}) should be greater to 0'.format(
-                args.number_of_participants_processed_in_parallel) + bcolors.ENDC)
+            bcolors.WARNING + '    WARNING: the specified number of subjects to be processed in parallel ({}) ' +
+            'should be greater to 0'.format(args.number_of_participants_processed_in_parallel) + bcolors.ENDC)
         parallel_number_of_subjects = 1
     else:
         print('  * Number of subjects to be processed in parallel set to {} (Total of cores available: {})'.format(
@@ -301,13 +304,14 @@ if args.number_of_threads is not None:
         if number_of_threads > max_number_of_cores:
             print('  * Number of parallel threads set to the maximal number of available cores ({})'.format(
                 max_number_of_cores))
-            print(bcolors.WARNING + '   WARNING: the specified number of pipeline processes executed in parallel ({}) exceeds the number of available cores ({})'.format(
-                args.multiproc_number_of_cores, max_number_of_cores) + bcolors.ENDC)
+            print(bcolors.WARNING + '   WARNING: the specified number of pipeline processes executed in parallel ({}) ' +
+                  'exceeds the number of available cores ({})'.format(args.multiproc_number_of_cores, max_number_of_cores) +
+                  bcolors.ENDC)
             number_of_threads = max_number_of_cores
         elif number_of_threads <= 0:
             print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
-            print(bcolors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) should be greater to 0'.format(
-                args.multiproc_number_of_cores) + bcolors.ENDC)
+            print(bcolors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) ' +
+                  'should be greater to 0'.format(args.multiproc_number_of_cores) + bcolors.ENDC)
             number_of_threads = 1
         else:
             print('  * Number of parallel threads set to {} (total of cores: {})'.format(
@@ -317,13 +321,16 @@ if args.number_of_threads is not None:
         # Otherwise parallelize only at the subject level
         total_number_of_threads = parallel_number_of_subjects * number_of_threads
         if total_number_of_threads > max_number_of_cores:
-            print(bcolors.WARNING + '  * Total number of cores used (Subjects in parallel: {}, Threads in parallel: {}, Total: {})'.format(parallel_number_of_subjects,
-                                                                                                                                           number_of_threads,
-                                                                                                                                           total_number_of_threads)
-                + 'is greater than the number of available cores ({})'.format(max_number_of_cores) + bcolors.ENDC)
+            print(bcolors.WARNING +
+                  '  * Total number of cores used (Subjects in parallel: {}, Threads in parallel: {}, Total: {})'.format(parallel_number_of_subjects,
+                                                                                                                         number_of_threads,
+                                                                                                                         total_number_of_threads) +
+                  'is greater than the number of available cores ({})'.format(max_number_of_cores) + bcolors.ENDC)
             number_of_threads = 1
             parallel_number_of_subjects = max_number_of_cores
-            print(bcolors.WARNING + '    Processing will be ONLY parallelized at the subject level using {} cores.'.format(parallel_number_of_subjects)+bcolors.ENDC)
+            print(bcolors.WARNING +
+                  '    Processing will be ONLY parallelized at the subject level using {} cores.'.format(parallel_number_of_subjects) +
+                  bcolors.ENDC)
 else:
     print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
     number_of_threads = 1
