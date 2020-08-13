@@ -182,7 +182,7 @@ jobs:
             mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
             cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
       - run:
-          name: Run anatomical and diffusion pipelines on ds-sample (test 1 - Dipy SHORE + MRtrix SD_STREAM tracking)
+          name: Run anatomical and diffusion pipelines on ds-sample (test 1 - Lausanne2018 + FSL FLIRT + Dipy SHORE + MRtrix SD_STREAM tracking)
           no_output_timeout: 8h
           command: |
             # Execute BIDS App
@@ -212,7 +212,7 @@ jobs:
             diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-01_outputs.txt /tmp/data/ds-sample/test/test-01_outputs.out
             exit $?
       - run:
-          name: Run anatomical and diffusion pipelines on ds-sample (test 2 - Dipy SHORE + MRtrix ACT iFOV2 tracking)
+          name: Run anatomical and diffusion pipelines on ds-sample (test 2 - Lausanne2018 + ANTs SyN + Dipy SHORE + MRtrix ACT iFOV2 tracking)
           no_output_timeout: 8h
           command: |
             # Execute BIDS App
