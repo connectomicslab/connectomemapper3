@@ -161,18 +161,18 @@ RUN apt-get update && \
     apt-get install -y build-essential git g++ libeigen3-dev zlib1g-dev libqt4-opengl-dev \
     libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev && \
     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
-    cd mrtrix3 && \
-    git checkout -f 3.0_RC3_latest && \
-    #git checkout 3.0_RC3 && \
-    python configure -nogui && \
-    python build -persistent -nopaginate && \
-    git describe --tags > /mrtrix3_version && \
-    # rm -r /var/cache/apt/archives/apt-fast && \
     apt-get clean && \
     # apt-fast clean && \
     rm -rf /var/lib/apt/lists/*
     #&& \
     #apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+WORKDIR /opt/mrtrix3    
+RUN git checkout -f 3.0_RC3_latest && \
+    #git checkout 3.0_RC3 && \
+    python configure -nogui && \
+    python build -persistent -nopaginate && \
+    git describe --tags > /mrtrix3_version
 
 # Setup environment variables for MRtrix3
 ENV PATH=/opt/mrtrix3/bin:$PATH
@@ -182,6 +182,7 @@ ENV PYTHONPATH=/opt/mrtrix3/lib:$PYTHONPATH
 ##################################################################
 ## Install FSL 6.0.0
 ##################################################################
+WORKDIR /opt
 RUN echo "Downloading FSL ..." \
     && curl -sSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.3-centos6_64.tar.gz \
     | tar zx -C /opt \

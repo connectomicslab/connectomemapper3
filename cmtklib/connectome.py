@@ -246,16 +246,15 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         # r += 1
         roi = nib.load(roi_fname)
         roiData = roi.get_data()
-        affine_vox_to_world = np.matrix(roi.affine[:3, :3])
+
+        # affine_vox_to_world = np.matrix(roi.affine[:3, :3])
 
         # print "roiData shape : %s " % roiData.shape
-
         # print "Affine Voxel 2 World transformation : ",affine_vox_to_world
 
-        affine_world_to_vox = np.linalg.inv(affine_vox_to_world)
+        # affine_world_to_vox = np.linalg.inv(affine_vox_to_world)
+        # origin = np.matrix(roi.affine[:3, 3]).T
         # print "Affine World 2 Voxel transformation : ",affine_world_to_vox
-
-        origin = np.matrix(roi.affine[:3, 3]).T
 
         # Create the matrix
         print("  >> Create the connection matrix (%s rois)" %

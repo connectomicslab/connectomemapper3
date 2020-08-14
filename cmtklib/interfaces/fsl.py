@@ -747,10 +747,11 @@ class mapped_ProbTrackX(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if not isdefined(self.inputs.out_dir):
-            out_dir = self._gen_filename("out_dir")
-        else:
-            out_dir = self.inputs.out_dir
+        
+        # if not isdefined(self.inputs.out_dir):
+        #     out_dir = self._gen_filename("out_dir")
+        # else:
+        #     out_dir = self.inputs.out_dir
 
         # handle seeds-to-target output files
         if isdefined(self.inputs.target_masks):

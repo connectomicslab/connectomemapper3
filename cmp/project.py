@@ -608,7 +608,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
         anat_pipeline.fill_stages_outputs()
-       
+
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
         project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 

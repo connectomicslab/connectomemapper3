@@ -143,28 +143,28 @@ def clean_cache(bids_root):
         print('... DEL: {}'.format(f))
         try:
             os.remove(f)
-        except:
+        except Exception:
             pass
 
     for f in glob(os.path.join(bids_root, 'mri_segstats.tmp*')):
         print('... DEL: {}'.format(f))
         try:
             os.remove(f)
-        except:
+        except Exception:
             pass
 
     for d in glob(os.path.join(bids_root, 'MCR_*')):
         print('... DEL: {}'.format(d))
         try:
             shutil.rmtree(d)
-        except:
+        except Exception:
             pass
 
     # for d in glob(os.path.join(bids_root,'matplotlib*')):
     #     print('... DEL: {}'.format(d))
     #     try:
     #         shutil.rmtree(d)
-    #     except:
+    #     except Exception:
     #         pass
 
     # for d in glob(os.path.join(bids_root,'xvfb-run.*')):
@@ -183,7 +183,7 @@ def clean_cache(bids_root):
         print('... DEL: {}'.format(f))
         try:
             os.remove(f)
-        except:
+        except Exception:
             pass
 
 
@@ -266,7 +266,8 @@ print('  ... $FS_LICENSE : {}'.format(os.environ['FS_LICENSE']))
 
 # Get the number of available cores and keep one for light processes if possible
 max_number_of_cores = multiprocessing.cpu_count() - 1
-if max_number_of_cores < 1: # handles case with one CPU available
+# handles case with one CPU available
+if max_number_of_cores < 1:
     max_number_of_cores = 1
 
 # Setup number of subjects to be processed in parallel
@@ -278,17 +279,18 @@ if args.number_of_participants_processed_in_parallel is not None:
             '  * Number of subjects to be processed in parallel set to the maximal number of available cores ({})'.format(
                 max_number_of_cores))
         print(
-            bcolors.WARNING + '    WARNING: the specified number of subjects to be processed in parallel ({})' +
-            ' exceeds the number of available cores ({})'.format(args.number_of_participants_processed_in_parallel,
-                                                                 max_number_of_cores) +
+            bcolors.WARNING +
+            '    WARNING: the specified number of subjects to be processed in parallel ({})'.format(args.number_of_participants_processed_in_parallel) +
+            ' exceeds the number of available cores ({})'.format(max_number_of_cores) +
             bcolors.ENDC)
         parallel_number_of_subjects = max_number_of_cores
     elif parallel_number_of_subjects <= 0:
         print(
             '  * Number of subjects to be processed in parallel set to one (sequential run)')
         print(
-            bcolors.WARNING + '    WARNING: the specified number of subjects to be processed in parallel ({}) ' +
-            'should be greater to 0'.format(args.number_of_participants_processed_in_parallel) + bcolors.ENDC)
+            bcolors.WARNING +
+            '    WARNING: the specified number of subjects to be processed in parallel ({}) '.format(args.number_of_participants_processed_in_parallel) +
+            'should be greater to 0' + bcolors.ENDC)
         parallel_number_of_subjects = 1
     else:
         print('  * Number of subjects to be processed in parallel set to {} (Total of cores available: {})'.format(
@@ -304,14 +306,15 @@ if args.number_of_threads is not None:
         if number_of_threads > max_number_of_cores:
             print('  * Number of parallel threads set to the maximal number of available cores ({})'.format(
                 max_number_of_cores))
-            print(bcolors.WARNING + '   WARNING: the specified number of pipeline processes executed in parallel ({}) ' +
-                  'exceeds the number of available cores ({})'.format(args.multiproc_number_of_cores, max_number_of_cores) +
+            print(bcolors.WARNING +
+                  '   WARNING: the specified number of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
+                  'exceeds the number of available cores ({})'.format(max_number_of_cores) +
                   bcolors.ENDC)
             number_of_threads = max_number_of_cores
         elif number_of_threads <= 0:
             print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
-            print(bcolors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) ' +
-                  'should be greater to 0'.format(args.multiproc_number_of_cores) + bcolors.ENDC)
+            print(bcolors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
+                  'should be greater to 0' + bcolors.ENDC)
             number_of_threads = 1
         else:
             print('  * Number of parallel threads set to {} (total of cores: {})'.format(
@@ -335,11 +338,10 @@ else:
     print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
     number_of_threads = 1
 
-# Set number of threads used by programs based on OpenMP mult-threading library 
+# Set number of threads used by programs based on OpenMP mult-threading library
 # This includes AFNI, ANTs, Dipy, Freesurfer, FSL, MRtrix3.
 os.environ['OMP_NUM_THREADS'] = '{}'.format(number_of_threads)
-print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'],  max_number_of_cores))
-
+print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'], max_number_of_cores))
 
 # TODO: Implement log for subject(_session)
 # with open(log_filename, 'w+') as log:
@@ -448,7 +450,6 @@ if args.analysis_level == "participant":
                     if args.func_pipeline_config is not None:
                         print("        - fMRI (functional connectivity matrices)")
 
-
                     if args.coverage:
                         if run_anat:
                             if run_dmri and not run_fmri:
@@ -478,7 +479,8 @@ if args.analysis_level == "participant":
                                                project.dmri_config_file,
                                                project.fmri_config_file,
                                                number_of_threads=number_of_threads)
-                            else: # anatomical pipeline only
+                            # anatomical pipeline only
+                            else:
                                 run_individual(project.base_directory,
                                                project.output_directory,
                                                project.subject,
@@ -585,7 +587,8 @@ if args.analysis_level == "participant":
                                            project.dmri_config_file,
                                            project.fmri_config_file,
                                            number_of_threads=number_of_threads)
-                        else: # anatomical pipeline only
+                        # anatomical pipeline only
+                        else:
                             run_individual(project.base_directory,
                                            project.output_directory,
                                            project.subject,

@@ -44,7 +44,7 @@ def filter_fibers(intrk, outtrk='', fiber_cutoff_lower=20, fiber_cutoff_upper=50
     print("Input file for fiber cutting is: %s" % intrk)
 
     if outtrk == '':
-        path, filename = os.path.split(intrk)
+        _, filename = os.path.split(intrk)
         base, ext = os.path.splitext(filename)
         outtrk = os.path.abspath(base + '_cutfiltered' + ext)
 

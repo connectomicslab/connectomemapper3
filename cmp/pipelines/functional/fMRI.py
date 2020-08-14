@@ -264,15 +264,13 @@ class fMRIPipeline(Pipeline):
         # print("Available modalities :")
         # for typ in types:
         #     print("-%s" % typ)
-
+        if os.path.isfile(t1_file):
+            t1_available = True
         if os.path.isfile(t2_file):
-            # print("%s available" % typ)
             t2_available = True
         if os.path.isfile(fmri_file):
-            # print("%s available" % typ)
             fMRI_available = True
         if os.path.isfile(json_file):
-            # print("%s available" % typ)
             fMRI_json_available = True
 
         # print('fMRI :',fMRI_available)
@@ -360,7 +358,7 @@ class fMRIPipeline(Pipeline):
         if '_' in self.subject:
             self.subject = self.subject.split('_')[0]
 
-        old_subject = self.subject
+        # old_subject = self.subject
 
         if self.global_conf.subject_session == '':
             cmp_deriv_subject_directory = os.path.join(
@@ -418,9 +416,9 @@ class fMRIPipeline(Pipeline):
 
         iflogger.info("**** Processing finished ****")
 
-        return True, 'Processing sucessful'
+        return True, 'Processing successful'
 
-        self.subject = old_subject
+        # self.subject = old_subject
 
         # except Exception:
         #
@@ -448,7 +446,7 @@ class fMRIPipeline(Pipeline):
 
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
 
-        subject_directory = self.subject_directory
+        # subject_directory = self.subject_directory
 
         # datasource.inputs.subject = self.subject
 

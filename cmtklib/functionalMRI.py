@@ -224,7 +224,7 @@ class nuisance_regression(BaseInterface):
         # print(X.shape)
 
         # loop throughout all GM voxels
-        for index, value in np.ndenumerate(gm):
+        for index, _ in np.ndenumerate(gm):
             Y = data[index[0], index[1], index[2], :].reshape(tp, 1)
             gls_model = sm.GLS(Y, X)
             gls_results = gls_model.fit()

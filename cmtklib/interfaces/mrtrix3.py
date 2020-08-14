@@ -601,9 +601,12 @@ class MRTransformInputSpec(CommandLineInputSpec):
     template_image = File(exists=True, argstr='-template %s', position=1,
                           desc='Reslice the input image to match the specified template image.')
     reference_image = File(exists=True, argstr='-reference %s', position=1,
-                           desc='in case the transform supplied maps from the input image onto a reference image, use this option to specify the reference. Note that this implicitly sets the -replace option.')
+                           desc='in case the transform supplied maps from the input image onto a reference image, use this option to specify the reference. '
+                           'Note that this implicitly sets the -replace option.')
     flip_x = traits.Bool(argstr='-flipx', position=1,
-                         desc="assume the transform is supplied assuming a coordinate system with the x-axis reversed relative to the MRtrix convention (i.e. x increases from right to left). This is required to handle transform matrices produced by FSL's FLIRT command. This is only used in conjunction with the -reference option.")
+                         desc="assume the transform is supplied assuming a coordinate system with the x-axis reversed relative to the MRtrix convention "
+                              "(i.e. x increases from right to left). This is required to handle transform matrices produced by FSL's FLIRT command. "
+                              "This is only used in conjunction with the -reference option.")
     interp = traits.Enum('nearest', 'linear', 'cubic', 'sinc',
                          argstr='-interp %s',
                          desc='set the interpolation method to use when reslicing (choices: nearest,linear, cubic, sinc. Default: cubic).')

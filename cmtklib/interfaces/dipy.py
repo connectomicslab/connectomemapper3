@@ -408,7 +408,6 @@ class SHORE(DipyDiffusionInterface):
         # import nibabel as nib
 
         import pickle as pickle
-        import gzip
 
         from dipy.data import get_sphere
         from dipy.io import read_bvals_bvecs
@@ -443,7 +442,7 @@ class SHORE(DipyDiffusionInterface):
         data = img.get_data().astype(np.float32)
         data[msk == 0] *= 0
 
-        hdr = imref.header.copy()
+        # hdr = imref.header.copy()
 
         bvals, bvecs = read_bvals_bvecs(
             self.inputs.in_bval, self.inputs.in_bvec)
@@ -576,7 +575,6 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         from dipy.io.streamline import save_trk
         # import marshal as pickle
         import pickle as pickle
-        import gzip
 
         if not (isdefined(self.inputs.in_model)):
             raise RuntimeError("in_model should be supplied")
@@ -594,7 +592,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         trkhdr['dim'] = imref.get_data().shape
         trkhdr['voxel_size'] = imref.get_header().get_zooms()[:3]
         trkhdr['voxel_order'] = 'ras'
-        trackvis_affine = utils.affine_for_trackvis(trkhdr['voxel_size'])
+        # trackvis_affine = utils.affine_for_trackvis(trkhdr['voxel_size'])
 
         sphere = get_sphere('repulsion724')
 
@@ -622,7 +620,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         if isdefined(self.inputs.seed_mask[0]):
             IFLOGGER.info('Loading Seed Mask')
             seedmsk = clipMask(nib.load(self.inputs.seed_mask[0]).get_data())
-            assert (seedmsk.shape == data.shape[:3])
+            # assert (seedmsk.shape == data.shape[:3])
             seedmsk[seedmsk > 0] = 1
             seedmsk[seedmsk < 1] = 0
             seedps = np.array(np.where(seedmsk == 1), dtype=np.float32).T
@@ -643,7 +641,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
                 if self.inputs.save_seeds:
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
 
-            tseeds = utils.seeds_from_mask(seedmsk, density=2, affine=affine)
+            # tseeds = utils.seeds_from_mask(seedmsk, density=2, affine=affine)
 
         IFLOGGER.info('Loading and masking FA')
         img_fa = nib.load(self.inputs.in_fa)

@@ -363,7 +363,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return valid_output, error_message
 
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
-        subject_directory = self.subject_directory
+        # subject_directory = self.subject_directory
 
         # Data import
         datasource = pe.Node(interface=nio.DataGrabber(

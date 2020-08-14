@@ -4,6 +4,8 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 import os
+import subprocess
+
 import numpy as np
 from traits.api import *
 
@@ -64,7 +66,7 @@ class match_orientations(BaseInterface):
             flip_z = 1
         trk_header['voxel_order'] = axcode[0] + axcode[1] + axcode[2]
         new_fib = []
-        for i in range(len(fib)):
+        for i in enumerate(fib):
             temp_fib = fib[i][0].copy()
             for j in range(len(fib[i][0])):
                 temp_fib[j] = [flip_x * (fib[i][0][j][0] - hdr['origin'][0]) + vx / 2,
@@ -133,7 +135,6 @@ class flipTable(BaseInterface):
 
     def _run_interface(self, runtime):
         axis_dict = {'x': 0, 'y': 1, 'z': 2}
-        import numpy as np
         f = open(self.inputs.table, 'r')
         header = ''
         for h in range(self.inputs.header_lines):
@@ -186,13 +187,11 @@ class ExtractPVEsFrom5TT(BaseInterface):
     output_spec = ExtractPVEsFrom5TTOutputSpec
 
     def _run_interface(self, runtime):
-        import subprocess
-
         img_5tt = nib.load(self.inputs.in_5tt)
         data_5tt = img_5tt.get_data()
 
         ref_img = nib.load(self.inputs.ref_image)
-        hdr = ref_img.get_header()
+        # hdr = ref_img.get_header()
         affine = ref_img.get_affine()
 
         print('Shape : {}'.format(data_5tt.shape))
@@ -616,14 +615,14 @@ class transform_trk_CRS2XYZtkReg(BaseInterface):
 
     def _run_interface(self, runtime):
         _, name, _ = split_filename(self.inputs.trackvis_file)
-        transform_filename = 'CRS2XYZtkReg.txt'
+        # transform_filename = 'CRS2XYZtkReg.txt'
         out_trackvis_filename = name + '_tkreg.trk'
 
         # Load original Trackvis file
         fib, hdr = nib.trackvis.read(self.inputs.trackvis_file)
 
         # Load reference image file
-        ref_image = nib.load(self.inputs.ref_image_file)
+        # ref_image = nib.load(self.inputs.ref_image_file)
 
         CRS2XYZtkRegtransform = pe.Node(interface=getCRS2XYZtkRegTransform(crs2ras_tkr=True),
                                         name='CRS2XYZtkRegtransform')
