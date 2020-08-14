@@ -942,7 +942,7 @@ class DirectionGetterTractography(DipyBaseInterface):
                     self.inputs.seed_mask[0]))
                 seedmsk = nib.load(self.inputs.seed_mask[0]).get_data()
 
-            assert (seedmsk.shape == data.shape[:3])
+            # assert (seedmsk.shape == data.shape[:3])
             seedmsk = clipMask(seedmsk)
 
             print('seedmsk min: {}'.format(seedmsk.min()))
