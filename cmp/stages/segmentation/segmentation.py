@@ -10,11 +10,8 @@
 # General imports
 import os
 from traits.api import *
-import pickle
-import gzip
-import shutil
+
 import pkg_resources
-import multiprocessing as mp
 
 # Nipype imports
 import nipype.pipeline.engine as pe
@@ -26,7 +23,7 @@ import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
-from cmtklib.interfaces.freesurfer import copyBrainMaskToFreesurfer, copyFileToFreesurfer
+from cmtklib.interfaces.freesurfer import copyBrainMaskToFreesurfer
 from cmtklib.util import extract_freesurfer_subject_dir
 
 

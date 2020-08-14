@@ -6,28 +6,26 @@
 
 """ CMTK Connectome functions
 """
-from nipype.interfaces import cmtk
-from traits.api import *
+
 from os import path as op
 import csv
 import glob
 import os
-import nibabel
+import copy
+
+from traits.api import *
+
 import nibabel as nib
 import numpy as np
 import networkx as nx
-import scipy.io
+
 import scipy.io as sio
-import copy
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.mrtrix as mrtrix
-
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec, traits, \
+from nipype.interfaces.base import traits, \
     File, TraitedSpec, BaseInterface, \
     BaseInterfaceInputSpec, isdefined, \
     InputMultiPath, OutputMultiPath
-
+from nipype.interfaces import cmtk
 from nipype.utils.filemanip import split_filename
 
 from .util import mean_curvature, length
@@ -133,7 +131,7 @@ def save_fibers(oldhdr, oldfib, fname, indices):
     hdrnew['n_count'] = n_fib_out
 
     print("Writing final no orphan fibers: %s" % fname)
-    nibabel.trackvis.write(fname, outstreams, hdrnew)
+    nib.trackvis.write(fname, outstreams, hdrnew)
 
 
 def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvature=True, additional_maps={},
@@ -150,7 +148,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
     curv_fname = 'meancurvature.npy'
     # intrk = op.join(gconf.get_cmp_fibers(), 'streamline_filtered.trk')
     print('... tractogram :' + intrk)
-    fib, hdr = nibabel.trackvis.read(intrk, False)
+    fib, hdr = nib.trackvis.read(intrk, False)
 
     # print "Header trackvis : ",hdr
     # print "Header trackvis id_string : ",hdr['id_string']
@@ -175,7 +173,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                         # print roi_graphml_fname
                 # roi_fname = roi_volumes[r]
                 # r += 1
-                roi = nibabel.load(roi_fname)
+                roi = nib.load(roi_fname)
                 roiData = roi.get_data()
                 resolutions[parkey]['number_of_regions'] = roiData.max()
                 resolutions[parkey]['node_information_graphml'] = op.abspath(
@@ -201,7 +199,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
     # voxel size, so this code just loads the first one to determine
     # what it should be
     firstROIFile = roi_volumes[0]
-    firstROI = nibabel.load(firstROIFile)
+    firstROI = nib.load(firstROIFile)
     roiVoxelSize = firstROI.get_header().get_zooms()
 
     # print "roi Voxel Size",roiVoxelSize
@@ -246,7 +244,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 # print roi_fname
         # roi_fname = roi_volumes[r]
         # r += 1
-        roi = nibabel.load(roi_fname)
+        roi = nib.load(roi_fname)
         roiData = roi.get_data()
         affine_vox_to_world = np.matrix(roi.affine[:3, :3])
 
@@ -326,7 +324,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
         print('  >> Maps to be processed :')
         for k, v in list(mmap.items()):
             print("     - %s map" % k)
-            da = nibabel.load(v)
+            da = nib.load(v)
             mdata = da.get_data()
             print(mdata.max())
             mdata = np.nan_to_num(mdata)
@@ -456,7 +454,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
             # print("u / v : {} / {}".format(u,v))
             if len(list(G[u][v].keys())) == 1:
-                di = {'number_of_fibers': len(G[u][v]['fiblist']) }
+                di = {'number_of_fibers': len(G[u][v]['fiblist'])}
 
                 # print("G[u][v]['fiblist'] : {}".format(G[u][v]['fiblist']))
 
@@ -565,12 +563,11 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
         print("  >> Save connectome maps as :")
 
-
         # Get the edge attributes/keys/weights from the first edge and then break.
         # Change w.r.t networkx2
         edge_keys = []
         for u, v, d in G_out.edges(data=True):
-            #print(list(d.keys()))
+            # print(list(d.keys()))
             edge_keys = list(d.keys())
             break
 
@@ -587,8 +584,8 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             nx.write_edgelist(G_out,
                               out_file,
                               comments='#',
-                              delimiter = '\t',
-                              data = edge_keys,
+                              delimiter='\t',
+                              data=edge_keys,
                               encoding='utf-8')
 
         # Storing network/graph in other formats that might be prefered by the user
@@ -636,9 +633,9 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 # print('node key: %s ' % node_key)
                 node_struct[node_key] = node_arr
             print('    - connectome_%s.mat' % parkey)
-            scipy.io.savemat('connectome_%s.mat' % parkey, long_field_names=True,
-                                                           mdict={'sc': edge_struct,
-                                                                  'nodes': node_struct})
+            sio.savemat('connectome_%s.mat' % parkey, long_field_names=True,
+                        mdict={'sc': edge_struct,
+                               'nodes': node_struct})
         if 'graphml' in output_types:
             g2 = nx.Graph()
             for u_gml, v_gml, d_gml in G_out.edges(data=True):
@@ -1012,7 +1009,7 @@ class rsfmri_conmat(BaseInterface):
             # Change w.r.t networkx2
             edge_keys = []
             for _, _, d in G.edges(data=True):
-                #print(list(d.keys()))
+                # print(list(d.keys()))
                 edge_keys = list(d.keys())
                 break
 
@@ -1028,8 +1025,8 @@ class rsfmri_conmat(BaseInterface):
                 nx.write_edgelist(G,
                                   out_file,
                                   comments='#',
-                                  delimiter = '\t',
-                                  data = edge_keys,
+                                  delimiter='\t',
+                                  data=edge_keys,
                                   encoding='utf-8')
 
             # storing network
@@ -1309,7 +1306,7 @@ class rsfmri_conmat(BaseInterface):
 #         resolutions = atlas_info
 
 #     firstROIFile = roi_volumes[0]
-#     firstROI = nibabel.load(firstROIFile)
+#     firstROI = nib.load(firstROIFile)
 #     roiVoxelSize = firstROI.get_header().get_zooms()
 
 #     for parkey, parval in resolutions.items():
@@ -1321,7 +1318,7 @@ class rsfmri_conmat(BaseInterface):
 #             if parkey in vol:
 #                 roi_fname = vol
 #                 print roi_fname
-#         roi = nibabel.load(roi_fname)
+#         roi = nib.load(roi_fname)
 #         roiData = roi.get_data()
 
 #         # Create the matrix
@@ -1348,7 +1345,7 @@ class rsfmri_conmat(BaseInterface):
 #             if pcN > pc and pcN % 20 == 0:
 #                 pc = pcN
 #                 print('%4.0f%%' % (pc))
-#             fib, hdr = nibabel.trackvis.read(intrk[intrk_i], False)
+#             fib, hdr = nib.trackvis.read(intrk[intrk_i], False)
 #             (endpoints, endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
 #             n = len(fib)
 
@@ -1432,7 +1429,7 @@ class rsfmri_conmat(BaseInterface):
 #                     node_n += 1
 #                 node_struct[node_key] = node_arr
 
-#             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc': edge_struct, 'nodes': node_struct})
+#             sio.savemat('connectome_%s.mat' % parkey, mdict={'sc': edge_struct, 'nodes': node_struct})
 #         if 'graphml' in output_types:
 #             g2 = nx.Graph()
 #             for u_gml, v_gml, d_gml in G.edges(data=True):
@@ -1462,7 +1459,7 @@ class rsfmri_conmat(BaseInterface):
 #         resolutions = atlas_info
 
 #     # firstROIFile = roi_volumes[0]
-#     # firstROI = nibabel.load(firstROIFile)
+#     # firstROI = nib.load(firstROIFile)
 #     # roiVoxelSize = firstROI.get_header().get_zooms()
 
 #     for parkey, parval in resolutions.items():
@@ -1474,7 +1471,7 @@ class rsfmri_conmat(BaseInterface):
 #             if parkey in vol:
 #                 roi_fname = vol
 #                 print roi_fname
-#         roi = nibabel.load(roi_fname)
+#         roi = nib.load(roi_fname)
 #         roiData = roi.get_data()
 
 #         # Create the matrix
@@ -1504,7 +1501,7 @@ class rsfmri_conmat(BaseInterface):
 #             if pcN > pc and pcN % 20 == 0:
 #                 pc = pcN
 #                 print('%4.0f%%' % (pc))
-#             # fib, hdr    = nibabel.trackvis.read(voxel_connectivity[voxmat_i], False)
+#             # fib, hdr    = nib.trackvis.read(voxel_connectivity[voxmat_i], False)
 #             # (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
 #             # n = len(fib)
 
@@ -1564,7 +1561,7 @@ class rsfmri_conmat(BaseInterface):
 #                     node_n += 1
 #                 node_struct[node_key] = node_arr
 
-#             scipy.io.savemat('connectome_%s.mat' % parkey, mdict={'sc': edge_struct, 'nodes': node_struct})
+#             sio.savemat('connectome_%s.mat' % parkey, mdict={'sc': edge_struct, 'nodes': node_struct})
 #         if 'graphml' in output_types:
 #             g2 = nx.Graph()
 #             for u_gml, v_gml, d_gml in G.edges(data=True):

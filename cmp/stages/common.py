@@ -8,14 +8,17 @@
 """
 
 # Libraries imports
-from traits.api import *
-import subprocess
 import os
 
+from traits.api import *
 
-# Stage master class, will be inherited by the various stage subclasses. Inherits from HasTraits.
-#
+
 class Stage(HasTraits):
+    '''Stage master class.
+
+    It will be inherited by the various stage subclasses.
+
+    Inherits from HasTraits.'''
     bids_dir = Str
     output_dir = Str
     inspect_outputs = ['Outputs not available']

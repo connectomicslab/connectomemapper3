@@ -10,14 +10,14 @@ import os
 from glob import glob
 import warnings
 
-import numpy as np
-
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
-from nipype.interfaces.base import (traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec, CommandLineInputSpec, CommandLine, InputMultiPath,
-                                    OutputMultiPath, File, Directory,
+from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
+from nipype.interfaces.base import (traits, BaseInterface, BaseInterfaceInputSpec,
+                                    TraitedSpec, CommandLineInputSpec, CommandLine,
+                                    InputMultiPath, OutputMultiPath, File, Directory,
                                     isdefined)
 import nipype.interfaces.fsl as fsl
-from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix, copyfile
+# from nipype.utils.filemanip import load_json, save_json, fname_presuffix
+from nipype.utils.filemanip import split_filename, copyfile
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

@@ -7,16 +7,12 @@
 """
 
 import os
-from sys import platform
-# from builtins import object
-from future.utils import raise_from
 
 from nipype import logging
 from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import (
-    CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec,
-    InputMultiPath, Undefined, Str, InputMultiObject, PackageInfo)
-from nipype.external.due import BibTeX
+    traits, isdefined, File, InputMultiPath)
+# from nipype.external.due import BibTeX
 
 from nipype.interfaces.afni.base import (AFNICommand,
                                          AFNICommandInputSpec,

@@ -4,13 +4,12 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 import os
-import glob
 import numpy as np
 from traits.api import *
 
 from nipype.utils.filemanip import split_filename
-from nipype.interfaces.mrtrix.convert  import get_vox_dims, get_data_dims
-from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec, \
+from nipype.interfaces.mrtrix.convert import get_vox_dims, get_data_dims
+from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec, \
     TraitedSpec, File, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 import nipype.pipeline.engine as pe
 
@@ -43,7 +42,7 @@ class match_orientations(BaseInterface):
         vx, vy, vz = get_vox_dims(self.inputs.ref_image_file)
         image_file = nib.load(self.inputs.ref_image_file)
         affine = image_file.get_affine()
-        import numpy as np
+
         # Reads MITK tracks
         fib, hdr = nib.trackvis.read(self.inputs.trackvis_file)
         trk_header = nib.trackvis.empty_header()
@@ -448,7 +447,7 @@ class flipBvec(BaseInterface):
             for i in self.inputs.flipping_axis:
                 table[axis_dict[i], :] = -table[axis_dict[i], :]
 
-        with open(os.path.abspath('flipped_bvecs.bvec'),'w') as out_f:
+        with open(os.path.abspath('flipped_bvecs.bvec'), 'w') as out_f:
             if self.inputs.header_lines > 0:
                 np.savetxt(out_f, table, header=header, delimiter=self.inputs.delimiter)
             else:
@@ -781,7 +780,6 @@ class make_mrtrix_seeds(BaseInterface):
         return outputs
 
 
-
 class splitDiffusion_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True)
     start = Int(0)
@@ -804,8 +802,7 @@ class splitDiffusion(BaseInterface):
         affine = diffusion_file.get_affine()
         dim = diffusion.shape
         if self.inputs.start > 0 and self.inputs.end > dim[3] - 1:
-            print('End volume is set to %d but it should be bellow %d' %
-                  (self.inputs.end, dim[3] - 1))
+            print('End volume is set to {} but it should be bellow {}'.format(self.inputs.end, dim[3] - 1))
         padding_idx1 = list(range(0, self.inputs.start))
         if len(padding_idx1) > 0:
             temp = diffusion[:, :, :, 0:self.inputs.start]
@@ -830,7 +827,6 @@ class splitDiffusion(BaseInterface):
         if os.path.exists(os.path.abspath('padding2.nii.gz')):
             outputs["padding2"] = os.path.abspath('padding2.nii.gz')
         return outputs
-
 
 
 class CreateAcqpFileInputSpec(BaseInterfaceInputSpec):
@@ -863,7 +859,6 @@ class CreateAcqpFile(BaseInterface):
         outputs = self._outputs().get()
         outputs["acqp"] = os.path.abspath('acqp.txt')
         return outputs
-
 
 
 class CreateIndexFileInputSpec(BaseInterfaceInputSpec):
@@ -899,7 +894,6 @@ class CreateIndexFile(BaseInterface):
         outputs = self._outputs().get()
         outputs["index"] = os.path.abspath('index.txt')
         return outputs
-
 
 
 class ConcatOutputsAsTupleInputSpec(BaseInterfaceInputSpec):

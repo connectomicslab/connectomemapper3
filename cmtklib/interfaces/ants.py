@@ -5,19 +5,16 @@
 
 """ The ANTs module provides functions for interfacing with ANTs registration toolbox missing in nipype or modified
 """
-from traits.api import *
-
-
 import os
 import glob
 
-from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec, \
-    TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
+from traits.api import *
+
+from nipype.interfaces.base import traits, \
+    TraitedSpec, InputMultiPath, OutputMultiPath, \
+    BaseInterface, BaseInterfaceInputSpec
 
 from nipype.interfaces.ants.resampling import ApplyTransforms
-
-import multiprocessing as mp
-
 
 # class RegistrationSyNInputSpec(BaseInterfaceInputSpec):
 #     input_image = File(desc='image to be registered')

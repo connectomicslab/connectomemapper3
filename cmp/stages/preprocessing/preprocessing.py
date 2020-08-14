@@ -12,8 +12,8 @@ import glob
 
 from traits.api import *
 
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, \
-    TraitedSpec, Interface
+from nipype.interfaces.base import BaseInterface, \
+    BaseInterfaceInputSpec, TraitedSpec
 import nipype.interfaces.utility as util
 
 import nipype.pipeline.engine as pe

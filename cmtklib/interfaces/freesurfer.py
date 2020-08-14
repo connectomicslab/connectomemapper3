@@ -8,19 +8,15 @@
 
 import os
 import os.path as op
-from glob import glob
 # import itertools
-import numpy as np
 
-from nibabel import load
 from nipype.utils.filemanip import fname_presuffix, copyfile
-from nipype.interfaces.io import FreeSurferSource, IOBase
+from nipype.interfaces.io import IOBase
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
-                                    Directory, InputMultiPath,
-                                    OutputMultiPath, CommandLine,
-                                    CommandLineInputSpec, isdefined, BaseInterface, BaseInterfaceInputSpec)
+                                    Directory, CommandLine,
+                                    CommandLineInputSpec, isdefined, BaseInterfaceInputSpec)
 
 
 class copyFileToFreesurfer_InputSpec(BaseInterfaceInputSpec):

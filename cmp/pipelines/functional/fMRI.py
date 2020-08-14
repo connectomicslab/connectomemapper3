@@ -18,9 +18,7 @@ from nipype import config, logging
 
 from traits.api import *
 
-import nibabel as nib
-
-from bids import BIDSLayout
+# from bids import BIDSLayout
 
 from cmp.pipelines.common import *
 from cmp.stages.preprocessing.fmri_preprocessing import PreprocessingStage

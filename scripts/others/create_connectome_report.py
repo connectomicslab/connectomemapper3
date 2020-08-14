@@ -30,22 +30,23 @@ import copy
 
 import io
 
-try:
-    from PIL import Image
-except ImportError:
-    print("PIL not available. Can not insert matplotlib figure inside the PDF. Please install it (conda install pil)")
+# try:
+#     from PIL import Image
+# except ImportError:
+#     print("PIL not available. Can not insert matplotlib figure inside the PDF. Please install it (conda install pil)")
 
 try:
     import matplotlib.colors as colors
     # import matplotlib
     # matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
-    from matplotlib.pyplot import title, suptitle, imshow, show, cm, figure, pcolor, colorbar, savefig
+    from matplotlib.pyplot import title, suptitle, imshow, cm, figure, colorbar
 except ImportError:
     print("matplotlib not available. Can not plot matrix")
 
 try:
     from reportlab.pdfgen import canvas
-    from reportlab.lib.pagesizes import letter, A4
+    # from reportlab.lib.pagesizes import letter
+    from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import inch
     from reportlab.lib.utils import ImageReader
 except ImportError:

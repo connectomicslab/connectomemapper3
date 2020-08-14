@@ -6,17 +6,18 @@
 
 """ CMTK Utility functions
 """
-
-import networkx as nx
-import numpy as np
+import os
 from os import path as op
-from collections import OrderedDict
+
 import warnings
 from glob import glob
-import os
+
 # import pickle
 import gzip
 import json
+
+import networkx as nx
+import numpy as np
 
 warnings.simplefilter("ignore")
 
