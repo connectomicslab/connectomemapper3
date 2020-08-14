@@ -87,21 +87,6 @@ This BIDS App has the following command line arguments:
                                 Freesurfer license.txt
           -v, --version         show program's version number and exit
 
-<!-- #### Participant level
-To run it in participant level mode (for one participant):
-
-        docker run -it --rm \
-        -v /home/localadmin/data/ds001:/bids_dataset \
-        -v /media/localadmin/17646e81-4a2d-474e-9af6-31b511af858e/DS-Schizo2/derivatives:/outputs \
-        -v /home/localadmin/data/ds001/code:/code \
-        -v /usr/local/freesurfer/subjects/fsaverage:/bids_dataset/derivatives/freesurfer/fsaverage \
-        -v /usr/local/freesurfer/license.txt:/opt/freesurfer/license.txt \
-        sebastientourbier/connectomemapper3 \
-        /bids_dataset /outputs participant --participant_label 01 \
-        --anat_pipeline_config /code/ref_anatomical_config.ini \
-        --dwi_pipeline_config /code/ref_diffusion_config.ini \
-        --func_pipeline_config /code/ref_fMRI_config.ini -->
-
 ### Credits
 
 *   Sebastien Tourbier (sebastientourbier)
