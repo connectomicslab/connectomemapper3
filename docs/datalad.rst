@@ -4,7 +4,7 @@ Adopting Datalad for collaboration
 
 Datalad is a powerful tool for the versioning and sharing raw and processed data as well as for the tracking of data provenance (i.e. the recording on how data was processed). This page was created with the intention to share with the user how we adopted the use of datalad datasets with the connectome mapper in in our lab at the time of creation of this document (2019 Jan 8). For more details and tutorials on Datalad,please check the recent `Datalad Handbook <http://handbook.datalad.org/en/latest/>`_
 
-.. warning:: This was tested on ``Ubuntu 16.04`` with ``Datalad 0.11.3`` and its extensions ``datalad-container 0.3.1``, ``datalad_neuroimaging 0.2.0`` and ``datalad_revolution 0.6.0``. This example might not work with their latest versions as they are under intensive developement and a number of new versions with minor and major changes have been released in the meantime. 
+.. warning:: This was tested on ``Ubuntu 16.04`` with ``Datalad 0.11.3`` and its extensions ``datalad-container 0.3.1``, ``datalad_neuroimaging 0.2.0`` and ``datalad_revolution 0.6.0``. This example might not work with their latest versions as they are under intensive developement and a number of new versions with minor and major changes have been released in the meantime.
 
 Move original BIDS dataset to server
 ------------------------------------
@@ -131,7 +131,7 @@ Report on the state of dataset content
 
     datalad rev-status --recursive
 
-With DataLad with don’t have to keep those inputs around – without losing the ability to reproduce an analysis. 
+With DataLad with don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -196,7 +196,7 @@ Report on the state of dataset content
 
     datalad rev-status --recursive
 
-With DataLad with don’t have to keep those inputs around – without losing the ability to reproduce an analysis. 
+With DataLad with don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Let’s uninstall them – checking the size on disk before and after::

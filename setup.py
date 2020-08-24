@@ -6,7 +6,8 @@ import os
 import sys
 from glob import glob
 
-if os.path.exists('MANIFEST'): os.remove('MANIFEST')
+if os.path.exists('MANIFEST'):
+    os.remove('MANIFEST')
 
 packages = ["cmp", "cmp.stages",
             "cmp.stages.preprocessing",
@@ -25,10 +26,10 @@ packages = ["cmp", "cmp.stages",
             "resources"]
 
 package_data = {'cmp':
-                    ['cmp3_icon.png',
-                     'pipelines/anatomical/*.png',
-                     'pipelines/diffusion/*.png',
-                     'pipelines/functional/*.png'],
+                ['cmp3_icon.png',
+                 'pipelines/anatomical/*.png',
+                 'pipelines/diffusion/*.png',
+                 'pipelines/functional/*.png'],
                 'resources':
                     ['buttons/*.png',
                      'icons/*png'],
@@ -69,9 +70,11 @@ def main(**extra_args):
     setup(name='cmp',
           version=__version__,
           description='Connectome Mapper',
-          long_description="""Connectome Mapper implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 """ + \
-                           """data to multi-resolution connection matrices. It also offers support for resting state fMRI data processing and multi-resolution functional connection matrices creation. """ + \
-                           """The Connectome Mapper is part of the Connectome Mapping Toolkit.""",
+          long_description="""Connectome Mapper, part of the Connectome Mapping Toolkit, implements """ +
+                           """a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 """ +
+                           """data to multi-resolution connection matrices. It also offers support """ +
+                           """for resting state fMRI data processing and multi-resolution functional """ +
+                           """connection matrices creation. """,
           author='CHUV',
           author_email='info@connectomics.org',
           url='http://www.connectomics.org/',

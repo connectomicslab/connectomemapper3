@@ -27,34 +27,34 @@ class SummaryAdapter(TabularAdapter):
         ('Anatomical Pipeline', 'anat_processed'),
         ('Diffusion Pipeline', 'dmri_processed'),
         ('fMRI Pipeline', 'fmri_processed')]
-    
+
     # even_bg_color  = wx.Colour( 201, 223, 241 )
     font = 'Courier 10'
     label_alignment = Str('right')
-    
+
     anat_processed_image = Property
     dmri_processed_image = Property
     fmri_processed_image = Property
-    
+
     # big_text       = Str
     # big_width      = Float( 18 )
     # big_image      = Property
-    
+
     # def _get_index_text(self):
     #     return str(self.row)
-    
+
     def _get_session_text(self):
         if self.item.session != '':
             return str(self.row)
         else:
             return str("N.A.")
-    
+
     def _get_label_text(self):
         if self.item.session != '':
             return str("%s_%s" % (self.item.subject, self.item.session))
         else:
             return str("%s" % (self.item.subject))
-    
+
     def _get_anat_processed_image(self):
         if self.item.anat_available:
             if not self.item.anat_processed:
@@ -63,19 +63,19 @@ class SummaryAdapter(TabularAdapter):
                 return 'green_ball'
         else:
             return None
-    
+
     def _get_dmri_processed_image(self):
         if self.item.dmri_available:
             if not self.item.dmri_processed:
-                print "Red"
+                print("Red")
                 return 'red_ball'
             else:
-                print "Green"
+                print("Green")
                 return 'green_ball'
         else:
-            print "None"
+            print("None")
             return None
-    
+
     def _get_fmri_processed_image(self):
         if self.item.fmri_available:
             if not self.item.fmri_processed:
@@ -89,7 +89,7 @@ class SummaryAdapter(TabularAdapter):
 class Summary(HasTraits):
     summary_table = List(Data)
     subject = Instance(Data)
-    
+
     view = QtView(
         Item('summary_table',
              editor=TableEditor(editable=False,
@@ -109,12 +109,12 @@ class Summary(HasTraits):
 if __name__ == '__main__':
     subjects = ['sub-A006',
                 'sub-A007']
-    
+
     sessions = [['ses-20180730', 'ses-20160520161029', 'ses-20170523161523'],
                 ['ses-20180730']]
-    
+
     summary_table = []
-    
+
     for sub, sub_sessions in zip(subjects, sessions):
         if len(sub_sessions) > 0:
             for ses in sub_sessions:
@@ -127,14 +127,14 @@ if __name__ == '__main__':
                             anat_processed=True,
                             dmri_processed=True,
                             fmri_processed=False)
-                
+
                 # summary_table.append(("%s_%s"%(sub,ses),True,True,False))
                 summary_table.append(data)
         # else:
         #     print("Process subject %s - no session "%(sub))
-    print summary_table
+    print(summary_table)
     # summary_table = [('i','index'),('Subject/Session Id', 'label'), ('Anatomical Pipeline', 'anatomical_processed'), ('Diffusion Pipeline', 'diffusion_processed'), ('fMRI Pipeline', 'fmri_processed')]
-    
+
     test = Summary(summary_table=summary_table)
     test.configure_traits(view='view')
     # --[Tabular Editor Definition]--------------------------------------------------

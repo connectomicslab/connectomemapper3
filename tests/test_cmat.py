@@ -2,7 +2,8 @@ from os import path as op
 import nipype.pipeline.engine as pe
 from cmp.stages.connectome.connectome import CMTK_cmat
 
-cmtk_cmat = pe.Node(interface=CMTK_cmat(), name="compute_matrice", base_dir='/home/localadmin/Desktop')
+cmtk_cmat = pe.Node(interface=CMTK_cmat(), name="compute_matrice",
+                    base_dir='/home/localadmin/Desktop')
 
 dir = '/media/localadmin/HagmannHDD/Seb/ds-newtest5'
 

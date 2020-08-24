@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2020, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
 #
@@ -19,7 +19,8 @@ class Dipy_tracking_configUI(Dipy_tracking_config):
             Item('seed_density', label="Seed density"),
             Item('step_size', label="Step size"),
             Item('max_angle', label="Max angle (degree)"),
-            Item('fa_thresh', label="FA threshold (classifier)", visible_when='seed_from_gmwmi == False'),
+            Item('fa_thresh', label="FA threshold (classifier)",
+                 visible_when='seed_from_gmwmi is False'),
             label='Streamlines settings',
             orientation='vertical'
         ),
@@ -51,7 +52,8 @@ class MRtrix_tracking_configUI(MRtrix_tracking_config):
         Group(
             Item('use_act', label='Use ACT'),
             Item('crop_at_gmwmi', visible_when='use_act'),
-            Item('backtrack', visible_when='use_act', enabled_when='tracking_mode=="Probabilistic"'),
+            Item('backtrack', visible_when='use_act',
+                 enabled_when='tracking_mode=="Probabilistic"'),
             Item('seed_from_gmwmi', visible_when='use_act'),
             label='Anatomically-Constrained Tractography (ACT)',
             orientation='vertical'

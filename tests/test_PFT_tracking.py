@@ -8,7 +8,8 @@ from nibabel.orientations import aff2axcodes
 
 import numpy as np
 
-streamlines = np.load('/media/localadmin/HagmannHDD/Seb/testPFT/diffusion_preproc_resampled_streamlines.npy')
+streamlines = np.load(
+    '/media/localadmin/HagmannHDD/Seb/testPFT/diffusion_preproc_resampled_streamlines.npy')
 
 imref = nb.load('/media/localadmin/HagmannHDD/Seb/testPFT/shore_gfa.nii.gz')
 

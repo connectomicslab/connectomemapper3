@@ -6,7 +6,7 @@ Sample dataset
 ==============
 
 To get you started, we provide one sample dataset structured following the `Brain Imaging Data Structure standard <https://bids-specification.readthedocs.io/en/stable/>`. The dataset structure is as follow::
-		
+
 		├── myproject  <------ Your selected folder (base directory)
 		│   ├── sub-001
 		│   │       ├── anat
@@ -21,7 +21,7 @@ To get you started, we provide one sample dataset structured following the `Brai
 		│   │       |    ├── sub-001_acq-multishell_dwi.json
 		│   │       ├── func
 		│   │       |    ├── sub-001_task-rest_bold.nii.gz
-		│   │       |    ├── sub-001_task-rest_bold.json 
+		│   │       |    ├── sub-001_task-rest_bold.json
 
 
 
@@ -49,7 +49,7 @@ Project configuration (folder structure)
 
 Running the Connectome Mapper opens the main window as well as a menu toolbar on the top of the screen. The only enabled button is in the toolbar: the "Load BIDS Dataset..." in the File menu. If necessary, Copy the diffusion (DSI, DTI, Multi-Shell) and morphological T1 images (.nii.gz + .json files as specified by BIDS) in the corresponding folders.
 
-* Click the "Load BIDS Dataset..." button. and select the base directory of the bids dataset 
+* Click the "Load BIDS Dataset..." button. and select the base directory of the bids dataset
   Selecting a folder will create the following folder structure::
 
 		├── myproject  <------ Your selected folder (base directory)
@@ -86,7 +86,7 @@ Running the Connectome Mapper opens the main window as well as a menu toolbar on
 
   You can also create the folder structure manually before selecting the base directory (existing folders won't be overwritten).
 
-  
+
 
 * Now you can click on "Check input data" button in the main window.
 
@@ -96,7 +96,7 @@ Running the Connectome Mapper opens the main window as well as a menu toolbar on
   DICOM sequences will be converted to nifti format and nifti files copied into the NIFTI folder. A dialog box will appear to confirm the successful conversion. If several diffusion modalities are available, you'll be asked to choose which modality to process.
 
   .. image:: images/checkInputs.png
-  
+
 * Once the diffusion modality is set, configuration of the pipeline is enabled. You can :doc:`configure the processing stages <stages>` by clicking on the respective buttons on the left. Pipeline information as base directory and last processing information are displayed on the right. You can also set the number of cores for multithreading the pipeline processing.
 
   .. image:: images/mainWindow_inputsChecked.png
@@ -118,10 +118,10 @@ Configure the pipeline as described previously, and instead of running it, save 
 To run the analysis for a single subject, type::
 
 	connectomemapper input_folder config_file
-	
+
 To batch over a set of subject, you can make a bash script like this one::
 
-	#!/bin/bash   
+	#!/bin/bash
 	subjects_folders=(path/to/subject1/folder path/to/subject2/folder path/to/subject3/folder)
 	config_file = path/to/configfile.ini
 	for subject in "${subjects_folders[@]}"; do
@@ -137,15 +137,15 @@ Save the file as `batch.sh` and run it from the terminal::
 	=================================
 	You can start the pipeline also from IPython or in a script. You can find an map_connectome.py example file
 	in the source code repository in /example/default_project/map_connectome.py.
-	
+
 	You can start to modify this script to loop over subjects and/or load the "pickle" file automatically, add::
-	
+
 		from cmp.gui import CMPGUI
 		cmpgui = CMPGUI()
 		cmpgui.load_state('/path/to/your/pickle/state/LOG/cmp.pkl')
-	
+
 	You can set the attributes of the cmpgui configuration object in the script and directly call the pipeline execution engine::
-	
+
 		cmpgui.active_dicomconverter = True
 		cmpgui.project_name = '...'
 		cmpgui.project_dir = '.../'
@@ -153,5 +153,5 @@ Save the file as `batch.sh` and run it from the terminal::
 		cmpgui.subject_timepoint = '...'
 		cmpgui.subject_workingdir = '.../'
 		cmp.connectome.mapit(cmpgui)
-	
+
 	For a full list of field names, refer to the `source code <http://github.com/LTS5/cmp/blob/master/cmp/configuration.py>`_.

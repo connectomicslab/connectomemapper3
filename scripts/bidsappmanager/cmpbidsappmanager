@@ -20,13 +20,13 @@ print("Graphical Backend : {}".format(ETSConfig.toolkit))
 #CMP imports
 from cmp.bidsappmanager import gui
 
-from cmp.info import __version__,__copyright__ 
+from cmp.info import __version__,__copyright__
 
 
 def info():
     print("\nConnectome Mapper {} - BIDS App Manager ".format(__version__))
     print("""{}""".format(__copyright__ ))
-    
+
 def usage():
     print("Usage : cmpbidsappmanager ")
 
@@ -42,7 +42,7 @@ def dep_check():
     # TODO try import all dependencies
 
     if error != "":
-        print error
+        print(error)
         sys.exit(2)
 
 if __name__ == "__main__":

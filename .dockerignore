@@ -7,7 +7,7 @@ atom-config.txt
 
 .DS_Store
 
-python3 
+python3
 
 docs
 docs/*
@@ -26,3 +26,6 @@ _static
 _templates
 
 *.ipynb_checkpoints
+
+.git
+.git/*

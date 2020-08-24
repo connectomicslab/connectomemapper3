@@ -1,26 +1,30 @@
-## Connectome Mapper 3 BIDS App (Beta release)
+## Connectome Mapper 3 BIDS App
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 
-![Docker Image Version (latest by date)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3) [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) 
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/connectomicslab/connectomemapper3) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3?color=orange) [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?color=orange&label=docker%20version) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Code Coverage](https://app.codacy.com/project/badge/Coverage/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Coverage) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest) [![Code Quality Review](https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade)
 
 ### Description
-Connectome Mapper 3 implements full anatomical/diffusion/functional MRI processing pipeline using Connectome Mapper (CMP) 3,
-from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
+Connectome Mapper 3 is an open-source Python3 image processing pipeline software that implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
 ![Image not found](https://connectome-mapper-3.readthedocs.io/en/latest/_images/flowchart_bidsapp.png)
 
-Connectome Mapper 3 is distributed as a BIDS App, a container image which takes BIDS datasets as inputs.
+Connectome Mapper 3 pipelines use a combination of tools from well-known software packages, including [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki), [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferWiki), [ANTs](http://stnava.github.io/ANTs/), [MRtrix3](http://www.mrtrix.org/), [Dipy](https://nipy.org/dipy/) and [AFNI](https://afni.nimh.nih.gov/), orchestrated by the [Nipype](https://nipype.readthedocs.io/en/latest/) dataflow library. These pipelines were designed to provide the best software implementation for each state of processing, and will be updated as newer and better neuroimaging software become available.
 
-### Documentation
+This tool allows you to easily do the following:
 
-More information and documentation can be found at [https://connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io)
+  * Take T1 / Diffusion / resting-state MRI data from raw to multi-resolution connection matrices.
+  * Implement tools from different software packages.
+  * Achieve optimal data processing quality by using the best tools available
+  * Automate and parallelize processing steps, providing a significant speed-up from typical linear, manual processing.
 
-### License
-This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
+Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which takes BIDS datasets as inputs and which provides a frozen environment where versions of all external softwares and libraries are fixed.
 
-All trademarks referenced herein are property of their respective holders.
+### Resources
 
-Copyright (C) 2009-2020, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
+  * **Documentation:** [https://connectome-mapper-3.readthedocs.io](https://connectome-mapper-3.readthedocs.io)
+  * **Mailing list:** [https://groups.google.com/forum/#!forum/cmtk-users](https://groups.google.com/forum/#!forum/cmtk-users)
+  * **Source:** [https://github.com/connectomicslab/connectomemapper3](https://github.com/connectomicslab/connectomemapper3)
+  * **Bug reports:** [https://github.com/connectomicslab/connectomemapper3/issues](https://github.com/connectomicslab/connectomemapper3/issues)
 
 ### Usage
 This BIDS App has the following command line arguments:
@@ -37,7 +41,7 @@ This BIDS App has the following command line arguments:
               [--fs_license FS_LICENSE] [-v]
               bids_dir output_dir {participant,group}
 
-        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-beta-RC1
+        Entrypoint script of the Connectome Mapper BIDS-App
 
 
         positional arguments:
@@ -83,52 +87,43 @@ This BIDS App has the following command line arguments:
                                 Freesurfer license.txt
           -v, --version         show program's version number and exit
 
-<!-- #### Participant level
-To run it in participant level mode (for one participant):
-
-        docker run -it --rm \
-        -v /home/localadmin/data/ds001:/bids_dataset \
-        -v /media/localadmin/17646e81-4a2d-474e-9af6-31b511af858e/DS-Schizo2/derivatives:/outputs \
-        -v /home/localadmin/data/ds001/code:/code \
-        -v /usr/local/freesurfer/subjects/fsaverage:/bids_dataset/derivatives/freesurfer/fsaverage \
-        -v /usr/local/freesurfer/license.txt:/opt/freesurfer/license.txt \
-        sebastientourbier/connectomemapper3 \
-        /bids_dataset /outputs participant --participant_label 01 \
-        --anat_pipeline_config /code/ref_anatomical_config.ini \
-        --dwi_pipeline_config /code/ref_diffusion_config.ini \
-        --func_pipeline_config /code/ref_fMRI_config.ini -->
-
 ### Credits
 
-* Sebastien Tourbier (sebastientourbier)
-* Yasser Aleman-Gomez (yasseraleman)
-* Alessandra Griffa (agriffa)
-* Adrien Birbaumer (abirba)
-* Patric Hagmann (pahagman)
-* Meritxell Bach Cuadra (meribach)
+*   Sebastien Tourbier (sebastientourbier)
+*   Yasser Aleman-Gomez (yasseraleman)
+*   Alessandra Griffa (agriffa)
+*   Adrien Birbaumer (abirba)
+*   Patric Hagmann (pahagman)
+*   Meritxell Bach Cuadra (meribach)
 
 ### Collaborators
 
 Collaboration Signal Processing Laboratory (LTS5) EPFL Lausanne
 
-* Jean-Philippe Thiran
-* Xavier Gigandet
-* Leila Cammoun
-* Alia Lemkaddem (allem)
-* Alessandro Daducci (daducci)
-* David Romascano (davidrs06)
-* Stephan Gerhard (unidesigner)
-* Christophe Chênes (Cwis)
-* Oscar Esteban (oesteban)
-
+*   Jean-Philippe Thiran
+*   Xavier Gigandet
+*   Leila Cammoun
+*   Alia Lemkaddem (allem)
+*   Alessandro Daducci (daducci)
+*   David Romascano (davidrs06)
+*   Stephan Gerhard (unidesigner)
+*   Christophe Chênes (Cwis)
+*   Oscar Esteban (oesteban)
 
 Collaboration Children's Hospital Boston
 
-* Ellen Grant
-* Daniel Ginsburg (danginsburg)
-* Rudolph Pienaar (rudolphpienaar)
-* Nicolas Rannou (NicolasRannou)
+*   Ellen Grant
+*   Daniel Ginsburg (danginsburg)
+*   Rudolph Pienaar (rudolphpienaar)
+*   Nicolas Rannou (NicolasRannou)
 
 ### Funding
 
 Work supported by the [Sinergia SNFNS-170873 Grant](http://p3.snf.ch/Project-170873).
+
+### License
+This software is distributed under the open-source license Modified BSD. See [license](docs/LICENSE) for more details.
+
+All trademarks referenced herein are property of their respective holders.
+
+Copyright (C) 2009-2020, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.

@@ -1,33 +1,43 @@
 
-Connectome Mapper 3 (Beta release)
-============================================
+Connectome Mapper 3
+===================
 
 **Latest released version:** |release|
 
-This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution.
+This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the `SNF Sinergia Project 170873 <http://p3.snf.ch/project-170873>`_, as well as for open-source software distribution. Source code is hosted on `GitHub <https://github.com/connectomicslab/connectomemapper3>`_.
 
-.. image:: https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp  
-  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp 
-  :alt: Docker Image Version (latest by date)
-.. image:: https://img.shields.io/github/release-date/connectomicslab/connectomemapper3   
+
+.. image:: https://img.shields.io/github/v/release/connectomicslab/connectomemapper3?include_prereleases
+  :target: https://github.com/connectomicslab/connectomemapper3/releases
+  :alt: GitHub release (latest by date including pre-releases)
+.. image:: https://img.shields.io/github/release-date/connectomicslab/connectomemapper3
   :alt: GitHub Release Date
 .. image:: https://zenodo.org/badge/183162514.svg
   :target: https://zenodo.org/badge/latestdoi/183162514
   :alt: Digital Object Identifier
-.. image:: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=svg
+.. image:: https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?label=docker
+  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
+  :alt: Docker Image Version (latest by date)
+.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp
+  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
+  :alt: Docker Pulls
+.. image:: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master.svg?style=shield
   :target: https://circleci.com/gh/connectomicslab/connectomemapper3/tree/master
   :alt: Continuous Integration Status
+.. image:: https://app.codacy.com/project/badge/Coverage/658266303c3046e8896769670e6988eb
+  :target: https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Coverage
+  :alt: Code Coverage
 .. image:: https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest
   :target: https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
-.. image:: https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp   
-  :target: https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp
-  :alt: Docker Pulls
-  
+.. image:: https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb
+  :target: https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade
+  :alt: Code Quality Review Status
+
 
 .. warning:: THIS SOFTWARE IS FOR RESEARCH PURPOSES ONLY AND SHALL NOT BE USED FOR ANY CLINICAL USE. THIS SOFTWARE HAS NOT BEEN REVIEWED OR APPROVED BY THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE PROVISION OF PATIENT CARE.
-  
-  
+
+
 *********
 About
 *********
@@ -36,9 +46,9 @@ About
 	:width: 1000
 	:align: center
 
-``Connectome Mapper 3``, part of the Connectome Mapping Toolkit (CMTK), implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
+``Connectome Mapper 3`` implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
 
-The ``Connectome Mapper 3`` pipelines uses a combination of tools from well-known software packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy_ and AFNI_. These pipelines were designed to provide the best software implementation for each state of processing, and will be updated as newer and better neuroimaging software become available.
+``Connectome Mapper 3`` pipelines use a combination of tools from well-known software packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy_ and AFNI_, orchestrated by the Nipype_ dataflow library. These pipelines were designed to provide the best software implementation for each state of processing, and will be updated as newer and better neuroimaging software become available.
 
 This tool allows you to easily do the following:
 
@@ -61,12 +71,8 @@ Reproducibility and replicatibility is achieved through the distribution of a BI
 
 .. _AFNI: https://afni.nimh.nih.gov/
 
+.. _Nipype: https://nipype.readthedocs.io/en/latest/
 
-*********
-Funding
-*********
-
-Work supported by the SNF Sinergia Grant 170873 (http://p3.snf.ch/Project-170873).
 
 *******************
 License information
@@ -80,7 +86,7 @@ All trademarks referenced herein are property of their respective holders.
 Aknowledgment
 *******************
 
-If your are using the Connectome Mapper 3 in your work, please acknowledge this software and its dependencies. See :ref:`Citing <citing>` for more details.
+If your are using the Connectome Mapper 3 in your work, please acknowledge this software. See :ref:`Citing <citing>` for more details.
 
 Help/Questions
 --------------
@@ -91,7 +97,7 @@ If you run into any problems or have any questions, you can post to the `CMTK-us
 Eager to contribute?
 ***********************
 
-See :ref:`Contributing to Connectome Mapper <contributing>` for more details.
+Connectome Mapper 3 is open-source and all kind of contributions (bug reporting, documentation, code,...) are welcome! See :ref:`Contributing to Connectome Mapper <contributing>` for more details.
 
 ***********************
 Contents
@@ -136,3 +142,9 @@ Contents
    citing
    contributing
    support
+
+*********
+Funding
+*********
+
+Work supported by the SNF Sinergia Grant 170873 (http://p3.snf.ch/Project-170873).

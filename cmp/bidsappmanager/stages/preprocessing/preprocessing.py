@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2020, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
 #
@@ -6,10 +6,6 @@
 
 """ CMP preprocessing Stage (not used yet!)
 """
-
-import os
-import pickle
-import gzip
 
 from traits.api import *
 from traitsui.api import *
@@ -34,17 +30,21 @@ class PreprocessingConfigUI(PreprocessingConfig):
             VGroup(
                 HGroup(
                     Item('denoising'),
-                    Item('denoising_algo', label='Tool:', visible_when='denoising==True'),
-                    Item('dipy_noise_model', label='Noise model (Dipy):', visible_when='denoising_algo=="Dipy (NLM)"')
+                    Item('denoising_algo', label='Tool:',
+                         visible_when='denoising==True'),
+                    Item('dipy_noise_model', label='Noise model (Dipy):',
+                         visible_when='denoising_algo=="Dipy (NLM)"')
                 ),
                 HGroup(
                     Item('bias_field_correction'),
-                    Item('bias_field_algo', label='Tool:', visible_when='bias_field_correction==True')
+                    Item('bias_field_algo', label='Tool:',
+                         visible_when='bias_field_correction==True')
                 ),
                 VGroup(
                     HGroup(
                         Item('eddy_current_and_motion_correction'),
-                        Item('eddy_correction_algo', visible_when='eddy_current_and_motion_correction==True'),
+                        Item('eddy_correction_algo',
+                             visible_when='eddy_current_and_motion_correction==True'),
                     ),
                     Item('eddy_correct_motion_correction', label='Motion correction',
                          visible_when='eddy_current_and_motion_correction==True and eddy_correction_algo=="FSL eddy_correct"'),
@@ -54,13 +54,14 @@ class PreprocessingConfigUI(PreprocessingConfig):
                 label='Preprocessing steps'),
             VGroup(
                 VGroup(
-                    Item('resampling', label='Voxel size (x,y,z)', editor=TupleEditor(cols=3)),
+                    Item('resampling', label='Voxel size (x,y,z)',
+                         editor=TupleEditor(cols=3)),
                     'interpolation'
                 ),
                 label='Final resampling')
         ),
         width=0.5, height=0.5)
-    
+
     # def _max_vol_changed(self,new):
     #     self.max_str = '(max: %d)' % new
     #     #self.end_vol = new
@@ -76,7 +77,7 @@ class PreprocessingConfigUI(PreprocessingConfig):
 
 class PreprocessingStageUI(PreprocessingStage):
     inspect_output_button = Button('View')
-    
+
     inspect_outputs_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -88,7 +89,7 @@ class PreprocessingStageUI(PreprocessingStage):
     ),
         scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK', 'Cancel']
     )
-    
+
     config_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -99,11 +100,11 @@ class PreprocessingStageUI(PreprocessingStage):
         scrollable=True, resizable=True, height=350, width=650, kind='livemodal', title='Edit stage configuration',
         buttons=['OK', 'Cancel']
     )
-    
+
     # General and UI members
-    def __init__(self):
-        PreprocessingStage.__init__(self)
+    def __init__(self, bids_dir, output_dir):
+        PreprocessingStage.__init__(self, bids_dir, output_dir)
         self.config = PreprocessingConfigUI()
-    
+
     def _inspect_output_button_fired(self, info):
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

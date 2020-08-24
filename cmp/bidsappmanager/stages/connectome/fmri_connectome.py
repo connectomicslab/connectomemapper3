@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2017, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Copyright (C) 2009-2020, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
 # All rights reserved.
 #
@@ -8,9 +8,6 @@
 """
 
 # Global imports
-import os
-import pickle
-import gzip
 
 from traits.api import *
 from traitsui.api import *
@@ -23,8 +20,9 @@ from cmp.stages.connectome.fmri_connectome import ConnectomeConfig, ConnectomeSt
 
 
 class ConnectomeConfigUI(ConnectomeConfig):
-    output_types = List(['gPickle'], editor=CheckListEditor(values=['gPickle', 'mat', 'cff', 'graphml'], cols=4))
-    
+    output_types = List(['gPickle'], editor=CheckListEditor(
+        values=['gPickle', 'mat', 'cff', 'graphml'], cols=4))
+
     traits_view = View(VGroup('apply_scrubbing',
                               VGroup(Item('FD_thr', label='FD threshold'), Item('DVARS_thr', label='DVARS threshold'),
                                      visible_when="apply_scrubbing==True")),
@@ -34,9 +32,9 @@ class ConnectomeConfigUI(ConnectomeConfig):
 class ConnectomeStageUI(ConnectomeStage):
     log_visualization = Bool(True)
     circular_layout = Bool(False)
-    
+
     inspect_output_button = Button('View')
-    
+
     inspect_outputs_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -53,7 +51,7 @@ class ConnectomeStageUI(ConnectomeStage):
     ),
         scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK', 'Cancel']
     )
-    
+
     config_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
@@ -64,18 +62,18 @@ class ConnectomeStageUI(ConnectomeStage):
         scrollable=True, resizable=True, height=200, width=408, kind='livemodal', title='Edit stage configuration',
         buttons=['OK', 'Cancel']
     )
-    
-    def __init__(self):
-        ConnectomeStage.__init__(self)
+
+    def __init__(self, bids_dir, output_dir):
+        ConnectomeStage.__init__(self, bids_dir, output_dir)
         self.config = ConnectomeConfigUI()
-    
+
     def _log_visualization_changed(self, new):
         self.config.log_visualization = new
         self.define_inspect_outputs()
-    
+
     def _circular_layout_changed(self, new):
         self.config.circular_layout = new
         self.define_inspect_outputs()
-    
+
     def _inspect_output_button_fired(self, info):
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

@@ -2,7 +2,7 @@
 Stage output inspection
 ************************
 
-Stage outputs can be visually checked once the stage processing has finished via the Quality Control Window where each pipeline has a tab panel. 
+Stage outputs can be visually checked once the stage processing has finished via the Quality Control Window where each pipeline has a tab panel.
 
 .. image:: images/quality_window.png
 	:align: center
@@ -84,10 +84,10 @@ Connectome stage
 *View outputs*
 
 	Extracts and displays different metrics and scalar maps from the connectivity matrices stored in gpickle format:
-	* mean/median/std fiber length 
-	* mean/median/std number of fibers 
+	* mean/median/std fiber length
+	* mean/median/std number of fibers
 	* mean/median/std FA/gFA (depending on the reconstruction model)
 	* mean/median/std RTOP (if SHORE or MAP-MRI reconstruction models are used)
-	* mean/median/std MSD 
+	* mean/median/std MSD
 	* ...
 

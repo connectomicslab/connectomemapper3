@@ -5,19 +5,16 @@
 
 """ The ANTs module provides functions for interfacing with ANTs registration toolbox missing in nipype or modified
 """
-from traits.api import *
-
-
 import os
 import glob
 
-from nipype.interfaces.base import traits, isdefined, CommandLine, CommandLineInputSpec, \
-    TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
+from traits.api import *
+
+from nipype.interfaces.base import traits, \
+    TraitedSpec, InputMultiPath, OutputMultiPath, \
+    BaseInterface, BaseInterfaceInputSpec
 
 from nipype.interfaces.ants.resampling import ApplyTransforms
-
-import multiprocessing as mp
-
 
 # class RegistrationSyNInputSpec(BaseInterfaceInputSpec):
 #     input_image = File(desc='image to be registered')
@@ -41,7 +38,8 @@ import multiprocessing as mp
 #         return outputs
 
 class MultipleANTsApplyTransformsInputSpec(BaseInterfaceInputSpec):
-    input_images = InputMultiPath(File(desc='files to be registered', mandatory=True, exists=True))
+    input_images = InputMultiPath(
+        File(desc='files to be registered', mandatory=True, exists=True))
     transforms = InputMultiPath(File(exists=True), mandatory=True,
                                 desc='transform files: will be applied in reverse order. For '
                                      'example, the last specified transform will be applied first.')
@@ -67,7 +65,7 @@ class MultipleANTsApplyTransformsOutputSpec(TraitedSpec):
 class MultipleANTsApplyTransforms(BaseInterface):
     input_spec = MultipleANTsApplyTransformsInputSpec
     output_spec = MultipleANTsApplyTransformsOutputSpec
-    
+
     def _run_interface(self, runtime):
         for input_image in self.inputs.input_images:
             ax = ApplyTransforms(input_image=input_image, reference_image=self.inputs.reference_image,
@@ -75,7 +73,7 @@ class MultipleANTsApplyTransforms(BaseInterface):
                                  out_postfix=self.inputs.out_postfix, default_value=self.inputs.default_value)
             ax.run()
         return runtime
-    
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['output_images'] = glob.glob(os.path.abspath("*.nii.gz"))

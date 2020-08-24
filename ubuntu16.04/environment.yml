@@ -1,4 +1,4 @@
-name: py27cmp-core
+name: py37cmp-core
 
 channels:
 - anaconda
@@ -7,35 +7,40 @@ channels:
 - defaults
 
 dependencies:
-- python=2.7.15
-- pip=19.0.3
+- python=3.7
+- pip=20.1.1
 - ants=2.2.0
-- numpy=1.15.4
-- matplotlib=2.2.3
+- numpy=1.18.5
+- matplotlib=3.2.2 #2.2.3
 - graphviz=2.40.1
-- traits=5.1.1
-- nipype=1.1.8
+- traits=6.0.0
+- configparser=5.0.0
+- nipype=1.5.0
 - pyside2=5.9.0a1
-- vtk=7.0.0
-- git-annex=7.20190219
+- git-annex=8.20200617 #7.20190219
+- pydotplus=2.0.2
+- dipy=1.1.0
+#- fury=0.5.1 #0.1.4 in pip/ vtk=7.0.0 in dependencies (should come with vtk 8.2.0 for dipy viz)
+#- libnetcdf=4.7.3
 
 - pip:
-    - git+https://github.com/LTS5/cfflib.git
-    - duecredit==0.7.0
-    - dipy==0.15.0
-    - mne==0.17.1
-    - obspy==1.1.1
-    - datalad[full]==0.11.3
+    # - git+https://github.com/LTS5/cfflib.git
+    - coverage==5.2
+    - duecredit==0.8.0 #0.7.0
+    #- dipy==1.1.1 #0.15.0
+    - mne==0.20.7 #0.17.1
+    - obspy==1.2.1 #1.1.1
+    - datalad[full]==0.13.0 #0.11.3
     - datalad-revolution==0.6.0
     - datalad-container==0.3.1
     - datalad_neuroimaging==0.2.0
-    - pybids==0.9.1
-    - apptools==4.4.0
-    - statsmodels==0.9.0
+    - pybids==0.10.2 #0.9.1
+    - apptools==4.5.0
+    - statsmodels==0.11.1 #0.9.0
     - networkx==2.2
-    - sphinx==1.5.1
-    - sphinx_rtd_theme==0.4.3
+    - sphinx==3.1.1 #1.5.1
+    - sphinx_rtd_theme==0.5.0 #0.4.3
     - sphinx-argparse==0.2.5
-    - recommonmark==0.5.0
-    - fury==0.1.4
-    - pydicom==1.4.2
+    - recommonmark==0.6.0 #0.5.0
+    - pydicom==2.0.0 #1.4.2
+    #- fury==0.5.0
