@@ -737,7 +737,7 @@ workflows:
             # - build_docs
             - test_dsi_mrtrix
             - test_dsi_dipy
-            # - test_parcellation
+            - test_parcellation
           filters:
             # ignore any commit on any branch by default
             branches:
@@ -752,7 +752,7 @@ workflows:
             # - build_docs
             - test_dsi_mrtrix
             - test_dsi_dipy
-            # - test_parcellation
+            - test_parcellation
           filters:
             # ignore any commit on any branch by default
             branches:
