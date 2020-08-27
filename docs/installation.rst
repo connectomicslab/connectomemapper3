@@ -96,11 +96,11 @@ The Connectome Mapper 3 BIDSApp Manager (GUI)
 Prerequisites
 ---------------
 
-* Installed miniconda2 (Python 2.7) from the web page::
+* Installed miniconda3 (Python 3) from the web page::
 
   $ firefox https://conda.io/miniconda.html
 
-  Download the Python 2.7 installer corresponding to your 32/64bits MacOSX/Linux/Win system.
+  Download the Python 3 installer corresponding to your 32/64bits MacOSX/Linux/Win system.
 
 
 .. _manual-install-cmpbidsappmanager:
@@ -126,17 +126,13 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
     $ git fetch
     $ git checkout tags/|release| -b |release|
 
-* Create a miniconda2 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
+* Create a miniconda3 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
 
 	$ conda env create -f connectomemapper3/environment.yml
 
 .. important::
   It seems there is no conda package for `git-annex` available on Mac.
-  Git-annex should be installed on MacOSX using brew (https://brew.sh/index_fr):
-
-    ```
-    $ brew install git-annex
-    ```
+  Git-annex should be installed on MacOSX using brew (https://brew.sh/index_fr) i.e. ``brew install git-annex``.
 
   Note that `git-annex` is only necessary if you wish to use BIDS datasets managed by Datalad (https://www.datalad.org/), a very experimental feature. For the moment, I would not recommend to use right now as it has been a long time it has not been tested.
 
@@ -144,16 +140,16 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * Activate the conda environment::
 
-  $ source activate py27cmp-gui
+  $ source activate py37cmp-gui
 
   or::
 
-  $ conda activate py27cmp-gui
+  $ conda activate py37cmp-gui
 
 * Install the Connectome Mapper BIDS App Manager from the Bash Shell using following commands::
 
-	(py27cmp-gui)$ cd connectomemapper3/
-	(py27cmp-gui)$ python setup_gui.py install
+	(py37cmp-gui)$ cd connectomemapper3/
+	(py37cmp-gui)$ python setup_gui.py install
 
 * You are ready to use the Connectome Mapper 3 BIDS App Manager. See the `dedicated user guide <bidsappmanager.html>`_.
 
