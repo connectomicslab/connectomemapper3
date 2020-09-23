@@ -68,7 +68,7 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=
         print("INFO: functional pipeline not performed")
 
     cmd.append('--number_of_threads')
-    cmd.append(number_of_threads)
+    cmd.append(str(number_of_threads))
 
     return ' '.join(cmd)
 
