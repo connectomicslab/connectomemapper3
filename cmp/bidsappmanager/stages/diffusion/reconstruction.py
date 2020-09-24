@@ -41,8 +41,8 @@ class Dipy_recon_configUI(Dipy_recon_config):
         Group(
             Item('shore_radial_order', label='Radial order'),
             Item('shore_zeta', label='Scale factor (zeta)'),
-            Item('shore_lambdaN', label='Radial regularization constant'),
-            Item('shore_lambdaL', label='Angular regularization constant'),
+            Item('shore_lambda_n', label='Radial regularization constant'),
+            Item('shore_lambda_l', label='Angular regularization constant'),
             Item('shore_tau', label='Diffusion time (s)'),
             Item('shore_constrain_e0',
                  label='Constrain the optimization such that E(0) = 1.'),
