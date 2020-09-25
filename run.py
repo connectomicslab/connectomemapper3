@@ -461,7 +461,7 @@ if args.analysis_level == "participant":
                                                project.dmri_config_file,
                                                None,
                                                number_of_threads=number_of_threads)
-                            if not run_dmri and run_fmri:
+                            elif not run_dmri and run_fmri:
                                 run_individual(project.base_directory,
                                                project.output_directory,
                                                project.subject,
@@ -470,7 +470,7 @@ if args.analysis_level == "participant":
                                                None,
                                                project.fmri_config_file,
                                                number_of_threads=number_of_threads)
-                            if run_dmri and run_fmri:
+                            elif run_dmri and run_fmri:
                                 run_individual(project.base_directory,
                                                project.output_directory,
                                                project.subject,
