@@ -78,7 +78,7 @@ class MRtrix_recon_configUI(MRtrix_recon_config):
         # Item('b0_volumes'),
         Item('local_model', editor=EnumEditor(name='local_model_editor')),
         Group(Item('lmax_order'),
-              Item('normalize_to_B0'),
+              # Item('normalize_to_B0'),
               Item('single_fib_thr', label='FA threshold'), visible_when='local_model'),
     )
 
