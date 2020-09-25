@@ -563,6 +563,7 @@ class CMP_BIDSAppWindow(HasTraits):
     project_info = Instance(CMP_Project_Info)
 
     bids_root = Directory()
+    output_dir = Directory()
     subjects = List(Str)
 
     # multiproc_number_of_cores = Int(1)
@@ -617,7 +618,8 @@ class CMP_BIDSAppWindow(HasTraits):
     traits_view = QtView(Group(
         Group(
             Group(
-                Item('bids_root', style='readonly', label='Location'),
+                Item('bids_root', style='readonly', label='Input directory'),
+                Item('output_dir', style='simple', label='Output directory'),
                 label='BIDS dataset'),
             Group(
                 HGroup(
@@ -718,6 +720,10 @@ class CMP_BIDSAppWindow(HasTraits):
 
         self.project_info = project_info
         self.bids_root = bids_root
+
+        # Initialize ouput directory to be /bids_dir/derivatives
+        self.output_dir = os.path.join(bids_root, 'derivatives')
+
         self.subjects = subjects
         # self.list_of_subjects_to_be_processed = list_of_subjects_to_be_processed
         self.anat_config = anat_config
@@ -797,6 +803,12 @@ class CMP_BIDSAppWindow(HasTraits):
             print("Error: BIDS root invalid!")
             self.settings_checked = False
 
+        if os.path.exists(os.path.join(self.output_dir, 'cmp')):
+            print('Output directory (existing) : {}'.format(self.output_dir))
+        else:
+            os.makedirs(os.path.join(self.output_dir, 'cmp'))
+            print('Output directory (created) : {}'.format(self.output_dir))
+
         if len(self.list_of_subjects_to_be_processed) > 0:
             print("Participant labels to be processed : {}".format(
                 self.list_of_subjects_to_be_processed))
@@ -856,7 +868,7 @@ class CMP_BIDSAppWindow(HasTraits):
                ##'-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
                ##'-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)
                '-v', '{}:/bids_dir'.format(self.bids_root),
-               '-v', '{}/derivatives:/output_dir'.format(self.bids_root),
+               '-v', '{}:/output_dir'.format(self.output_dir),
                '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
                # '-v', '{}:/tmp/derivatives'.format(os.path.join(self.bids_root,'derivatives')),
                ]
