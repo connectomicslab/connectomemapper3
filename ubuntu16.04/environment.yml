@@ -20,6 +20,8 @@ dependencies:
 - git-annex=8.20200617 #7.20190219
 - pydotplus=2.0.2
 - dipy=1.1.0
+- cvxpy-base=1.1.5
+- cvxpy=1.1.5
 #- fury=0.5.1 #0.1.4 in pip/ vtk=7.0.0 in dependencies (should come with vtk 8.2.0 for dipy viz)
 #- libnetcdf=4.7.3
 
