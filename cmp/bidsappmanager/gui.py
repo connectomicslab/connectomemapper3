@@ -567,8 +567,16 @@ class CMP_BIDSAppWindow(HasTraits):
     subjects = List(Str)
 
     # multiproc_number_of_cores = Int(1)
-    number_of_participants_processed_in_parallel = Enum(
-        1, list(range(1, multiprocessing.cpu_count())))
+    number_of_participants_processed_in_parallel = Range(low=1,
+                                                         high=multiprocessing.cpu_count()-1,
+                                                         desc='Number of participants to be processed in parallel')
+
+    number_of_threads_max = Int(4)
+
+    number_of_threads = Range(low=1,
+                              high='number_of_threads_max',
+                              desc='Number of threads used by ANTs registration'
+                                   'and Freesurfer recon-all')
 
     # handler = Instance(project.CMP_BIDSAppWindowHandler)
 
@@ -640,8 +648,10 @@ class CMP_BIDSAppWindow(HasTraits):
                 ),
                 label='Participant labels to be processed'),
             Group(Item('number_of_participants_processed_in_parallel',
-                       label='Number of participants processed in parallel')
-                  ),
+                        label='Number of participants processed in parallel'),
+                  Item('number_of_threads',
+                       label='Number of threads used by ANTs and Freesurfer'),
+                  label='Parallel processing and multithreading'),
             Group(
                 Group(Item('anat_config', label='Configuration file', visible_when='run_anat_pipeline'),
                       label='Anatomical pipeline'),
@@ -718,6 +728,9 @@ class CMP_BIDSAppWindow(HasTraits):
     def __init__(self, project_info=None, bids_root='', subjects=None, list_of_subjects_to_be_processed=None,
                  anat_config='', dmri_config='', fmri_config=''):
 
+        if multiprocessing.cpu_count() < 4:
+            number_of_threads_max = multiprocessing.cpu_count()
+
         self.project_info = project_info
         self.bids_root = bids_root
 
@@ -754,6 +767,9 @@ class CMP_BIDSAppWindow(HasTraits):
         self.on_trait_change(
             self.update_run_fmri_pipeline, 'run_fmri_pipeline')
 
+        self.on_trait_change(self.number_of_parallel_procs_updated,
+                             'number_of_participants_processed_in_parallel')
+
         self.on_trait_change(self.update_checksettings,
                              'list_of_subjects_to_be_processed')
         self.on_trait_change(self.update_checksettings, 'anat_config')
@@ -763,6 +779,17 @@ class CMP_BIDSAppWindow(HasTraits):
         self.on_trait_change(self.update_checksettings, 'fmri_config')
         self.on_trait_change(self.update_checksettings, 'fs_license')
         # self.on_trait_change(self.update_checksettings, 'fs_average')
+
+    def number_of_parallel_procs_updated(self, new):
+        number_of_threads_max = int((multiprocessing.cpu_count() - 1) / new)
+
+        if number_of_threads_max > 4:
+            self.number_of_threads_max = 4
+        else:
+            self.number_of_threads_max = number_of_threads_max
+
+        print('Set number of threads max to : {}'.format(self.number_of_threads_max))
+
 
     def update_run_anat_pipeline(self, new):
         # print('Update run anat: %s'%new)
@@ -857,6 +884,7 @@ class CMP_BIDSAppWindow(HasTraits):
             self.datalad_update_environment))
         print("Number of participant processed in parallel : {}".format(
             self.number_of_participants_processed_in_parallel))
+        print("Number of threads / participant : {}".format(self.number_of_threads))
 
         return True
 
@@ -910,13 +938,12 @@ class CMP_BIDSAppWindow(HasTraits):
         cmd.append('--number_of_participants_processed_in_parallel {}'.format(
             self.number_of_participants_processed_in_parallel))
 
+        cmd.append('--number_of_threads {}'.format(self.number_of_threads))
+
         print('... BIDS App execution command: {}'.format(cmd))
 
         # log_filename = os.path.join(
         #     self.bids_root, 'derivatives', 'cmp', 'main_log-cmpbidsapp.txt')
-
-        if not os.path.exists(os.path.join(self.bids_root, 'derivatives', 'cmp')):
-            os.makedirs(os.path.join(self.bids_root, 'derivatives', 'cmp'))
 
         # with open(log_filename, 'w+') as log:
         #     proc = Popen(cmd, stdout=log, stderr=log)
