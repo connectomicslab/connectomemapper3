@@ -1062,8 +1062,8 @@ class CMP_BIDSAppWindow(HasTraits):
     def start_bids_app(self):
         print("Start BIDS App")
 
-        # Copy freesurfer license into dataset/code directory where the BIDS app
-        # is looking for.
+        # Copy freesurfer license into dataset/code directory at the location
+        # the BIDS app expects to find it.
 
         license_dst = os.path.join(self.bids_root, 'code', 'license.txt')
 
@@ -1274,8 +1274,8 @@ class CMP_BIDSAppWindow(HasTraits):
                                                                              self.list_of_subjects_to_be_processed)
 
         else:
-            proc = self.start_bidsapp_participant_level_process(
-                self.bidsapp_tag, self.list_of_subjects_to_be_processed)
+            proc = self.start_bidsapp_participant_level_process(self.bidsapp_tag,
+                                                                self.list_of_subjects_to_be_processed)
 
         processes.append(proc)
 
