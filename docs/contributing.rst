@@ -33,6 +33,8 @@ If you have contributed to ``CMP3`` and are not listed as contributor, please ad
 
 This also means that further development, typically additions of other tools and configuration options should go in this direction.
 
+Contribution Types
+-------------------
 
 Report Bugs
 ~~~~~~~~~~~
