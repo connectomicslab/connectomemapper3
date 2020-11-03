@@ -184,7 +184,6 @@ ENV PYTHONPATH=/opt/mrtrix3/lib:$PYTHONPATH
 ##################################################################
 WORKDIR /opt
 RUN echo "Downloading FSL ..." \
-    && apt-get install -qq -y bc \
     && curl -sSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.3-centos6_64.tar.gz \
     | tar zx -C /opt \
     && /bin/bash /opt/fsl/etc/fslconf/fslpython_install.sh -q -f /opt/fsl \
