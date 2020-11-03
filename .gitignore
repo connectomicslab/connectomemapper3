@@ -23,3 +23,5 @@ _build
 scripts/runGource.sh
 
 *.ipynb_checkpoints
+
+.idea/
