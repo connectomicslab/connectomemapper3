@@ -16,7 +16,7 @@ RUN apt-get update && \
     # apt-add-repository ppa:saiarcot895/myppa -y && \
     # apt-get update && \
     # apt-get -y install apt-fast \
-    apt-get install -qq -y bc dc\
+    apt-get install -qq -y bc \
     locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
@@ -184,6 +184,7 @@ ENV PYTHONPATH=/opt/mrtrix3/lib:$PYTHONPATH
 ##################################################################
 WORKDIR /opt
 RUN echo "Downloading FSL ..." \
+    && apt-get install -qq -y bc \
     && curl -sSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.3-centos6_64.tar.gz \
     | tar zx -C /opt \
     && /bin/bash /opt/fsl/etc/fslconf/fslpython_install.sh -q -f /opt/fsl \
