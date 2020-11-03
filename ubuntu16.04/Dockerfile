@@ -16,7 +16,7 @@ RUN apt-get update && \
     # apt-add-repository ppa:saiarcot895/myppa -y && \
     # apt-get update && \
     # apt-get -y install apt-fast \
-    apt-get install -qq -y bc \
+    apt-get install -qq -y bc dc\
     locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
@@ -167,7 +167,7 @@ RUN apt-get update && \
     #&& \
     #apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-WORKDIR /opt/mrtrix3    
+WORKDIR /opt/mrtrix3
 RUN git checkout -f 3.0_RC3_latest && \
     #git checkout 3.0_RC3 && \
     python configure -nogui && \
