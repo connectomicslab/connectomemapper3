@@ -110,7 +110,7 @@ ENV PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BI
 
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget afni=16.2.07~dfsg.1-5~nd16.04+1 && \
+    apt-get install -y --no-install-recommends dc wget afni=16.2.07~dfsg.1-5~nd16.04+1 && \
     # rm -r /var/cache/apt/archives/apt-fast && \
     apt-get clean && \
     # apt-fast clean && \
