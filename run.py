@@ -20,6 +20,11 @@ from glob import glob
 import numpy
 # import nibabel
 
+# import http.client
+# import urllib
+import requests
+from datetime import datetime
+
 # Own imports
 from cmtklib.util import bcolors
 from cmp import parser
@@ -31,6 +36,32 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 # __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                 'version')).read()
+
+# def report_app_run_to_google_analytics():
+#     params = urllib.parse.urlencode({'v': 1,
+#                                'tid': '247732290',
+#                                'cid': '555',
+#                                'an' : 'ConnectomeMapper3',
+#                                'av' : __version__,
+#                                't': 'event',
+#                                'ec': 'run',
+#                                'ea': 'start'})
+
+#     connection = http.client.HTTPConnection('www.google-analytics.com')
+#     connection.request('POST', '/collect', params)
+#     response = connection.getresponse()
+#     print("{}, {}".format(response.status, response.reason))
+
+def report_usage(event_category, event_action, event_label):
+    tracking_id = 'UA-124877585-4'
+    clientid_str = str(datetime.now())
+    tracking_url = 'https://www.google-analytics.com/collect?v=1&t=event&tid={}&cid={}&ec={}&ea={}&el={}&aip=1'.format(tracking_id,
+                                                                                                                 clientid_str,
+                                                                                                                 event_category,
+                                                                                                                 event_action,
+                                                                                                                 event_label)
+    r = requests.post(tracking_url)
+    print('HTTP post to Google Analytics: {}'.format(r.text))
 
 
 def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=1):
@@ -349,6 +380,10 @@ print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OM
 
 # running participant level
 if args.analysis_level == "participant":
+
+    # report_app_run_to_google_analytics()
+    if args.notrack is not True:
+        report_usage('BIDS App', 'Run', __version__)
 
     maxprocs = parallel_number_of_subjects
     processes = []
