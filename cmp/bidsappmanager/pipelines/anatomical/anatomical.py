@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Anatomical pipeline Class definition
-"""
+"""Anatomical pipeline Class definition."""
 
 import datetime
 import os
@@ -24,8 +23,6 @@ from pyface.qt.QtGui import *
 from bids import BIDSLayout
 
 # Own import
-# import cmp.bidsappmanager.pipelines.common as cmp_common
-
 from cmp.bidsappmanager.stages.segmentation.segmentation import SegmentationStageUI
 from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStageUI
 
@@ -45,17 +42,38 @@ class Check_Input_NotificationUI(Check_Input_Notification):
 
 
 class AnatomicalPipelineUI(AnatomicalPipeline):
+    """Class used to represent the GUI of the Anatomical pipeline.
+
+    Attributes
+    ----------
+    segmentation <Button>
+        Button to open the window for configuration or quality inspection
+        of the segmentation stage depending on the ``view_mode``
+
+    parcellation <Button>
+        Button to open the window for configuration or quality inspection
+        of the segmentation stage depending on the ``view_mode``
+
+    view_mode <['config_view', 'inspect_outputs_view']>
+        Variable used to control the display of either (1) the configuration
+        or (2) the quality inspection of stage of the pipeline
+
+    pipeline_group <traitsUI panel>
+        Panel defining the layout of the buttons of the stages with corresponding images
+
+    traits_view <QtView>
+        QtView that includes the ``pipeline_group`` panel
+
+    See also
+    ---------
+    cmp.pipelines.anatomical.AnatomicalPipeline
+    """
+
     segmentation = Button()
-    # segmentation.setIcon(QIcon(QPixmap("segmentation.png")))
 
     parcellation = Button()
 
     view_mode = Enum('config_view', ['config_view', 'inspect_outputs_view'])
-
-    # parcellation.setIcon(QIcon(QPixmap("parcellation.png")))
-
-    # custom_run = Button('Custom...')
-    # run = Button('Run...')
 
     pipeline_group = VGroup(
         HGroup(spring, UItem('segmentation', style='custom', width=450, height=170, resizable=True,
@@ -72,16 +90,26 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
     traits_view = QtView(Include('pipeline_group'))
 
     def __init__(self, project_info):
+        """Constructor of the AnatomicalPipelineUI class.
 
+        Parameters
+        -----------
+        project_info <cmp.project.CMP_Project_Info>
+            CMP_Project_Info object that stores general information
+            such as the BIDS root and output directories (see
+            :class_`cmp.project.CMP_Project_Info` for more details)
+
+        See also
+        ---------
+        cmp.pipelines.anatomical.AnatomicalPipeline.__init__
+        """
         AnatomicalPipeline.__init__(self, project_info)
 
-        self.stages = {
-            'Segmentation': SegmentationStageUI(bids_dir=project_info.base_directory,
-                                output_dir=project_info.output_directory),
-            'Parcellation': ParcellationStageUI(pipeline_mode="Diffusion",
-                                bids_dir=project_info.base_directory,
-                                output_dir=project_info.output_directory)
-            }
+        self.stages = {'Segmentation': SegmentationStageUI(bids_dir=project_info.base_directory,
+                                                           output_dir=project_info.output_directory),
+                       'Parcellation': ParcellationStageUI(pipeline_mode="Diffusion",
+                                                           bids_dir=project_info.base_directory,
+                                                           output_dir=project_info.output_directory)}
 
         for stage in list(self.stages.keys()):
             if project_info.subject_session != '':
@@ -93,12 +121,44 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                                                             self.pipeline_name, self.stages[stage].name)
 
     def _segmentation_fired(self, info):
+        """Method that displays the window for the segmentation stage.
+
+        The window changed accordingly to the value of ``view_mode`` to be 
+        in configuration or quality inspection mode.
+
+        Parameters
+        -----------
+        info <Button>
+            The segmentation button object
+        """
         self.stages['Segmentation'].configure_traits(view=self.view_mode)
 
     def _parcellation_fired(self, info):
+        """Method that displays the window for the parcellation stage.
+
+        The window changed accordingly to the value of ``view_mode`` to be 
+        in configuration or quality inspection mode.
+
+        Parameters
+        -----------
+        info <Button>
+            The parcellation button object
+        """
         self.stages['Parcellation'].configure_traits(view=self.view_mode)
 
     def check_input(self, layout, gui=True):
+        """Method that checks if inputs of the anatomical pipeline are available in the datasets.
+
+        Parameters
+        -----------
+        layout <pybids.BIDSLayout>
+            BIDSLayout object used to query
+
+        Returns
+        -------
+        valid_inputs <Boolean>
+            True in all inputs of the anatomical pipeline are available
+        """
         print('**** Check Inputs  ****')
         t1_available = False
         valid_inputs = False
@@ -175,6 +235,16 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         return valid_inputs
 
     def check_output(self):
+        """Method that checks if outputs of the anatomical pipeline are available.
+
+        Returns
+        --------
+        valid_output <Boolean>
+            True is all outputs are found
+
+        error_message <string>
+            Message in case there is an error
+        """
         t1_available = False
         brain_available = False
         brainmask_available = False

@@ -4,10 +4,10 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Functional pipeline Class definition
-"""
+"""Functional pipeline Class definition."""
 
 import os
+import shutil
 
 from traits.api import *
 from traitsui.api import *
@@ -16,19 +16,13 @@ from traitsui.qt4.extra.qt_view import QtView
 # from pyface.ui.qt4.image_resource import ImageResource
 from pyface.qt.QtCore import *
 from pyface.qt.QtGui import *
-
 from pyface.api import ImageResource
 
-import shutil
-
-# from bids import BIDSLayout
-
-# from cmp.bidsappmanager.pipelines.common import *
+# Own imports
 from cmp.bidsappmanager.stages.preprocessing.fmri_preprocessing import PreprocessingStageUI
 from cmp.bidsappmanager.stages.registration.registration import RegistrationStageUI
 from cmp.bidsappmanager.stages.functional.functionalMRI import FunctionalMRIStageUI
 from cmp.bidsappmanager.stages.connectome.fmri_connectome import ConnectomeStageUI
-
 from cmp.pipelines.functional.fMRI import Check_Input_Notification, fMRIPipeline
 
 
@@ -42,6 +36,41 @@ class Check_Input_NotificationUI(Check_Input_Notification):
 
 
 class fMRIPipelineUI(fMRIPipeline):
+    """Class used to represent the GUI of the fMRI pipeline.
+
+    Attributes
+    ----------
+    preprocessing <Button>
+        Button to open the window for configuration or quality inspection
+        of the preprocessing stage depending on the ``view_mode``
+
+    registration <Button>
+        Button to open the window for configuration or quality inspection
+        of the registration stage depending on the ``view_mode``
+
+    functionalMRI <Button>
+        Button to open the window for configuration or quality inspection
+        of the extra preprocessing stage stage depending on the ``view_mode``
+
+    connectome <Button>
+        Button to open the window for configuration or quality inspection
+        of the connectome stage depending on the ``view_mode``
+
+    view_mode <['config_view', 'inspect_outputs_view']>
+        Variable used to control the display of either (1) the configuration
+        or (2) the quality inspection of stage of the pipeline
+
+    pipeline_group <traitsUI panel>
+        Panel defining the layout of the buttons of the stages with corresponding images
+
+    traits_view <QtView>
+        QtView that includes the ``pipeline_group`` panel
+
+    See also
+    ---------
+    cmp.pipelines.functional.fMRIPipeline
+    """
+
     view_mode = Enum('config_view', ['config_view', 'inspect_outputs_view'])
 
     preprocessing = Button('Preprocessing')
@@ -69,7 +98,19 @@ class fMRIPipelineUI(fMRIPipeline):
     traits_view = QtView(Include('pipeline_group'))
 
     def __init__(self, project_info):
+        """Constructor of the fMRIPipelineUI class.
 
+        Parameters
+        -----------
+        project_info <cmp.project.CMP_Project_Info>
+            CMP_Project_Info object that stores general information
+            such as the BIDS root and output directories (see
+            :class_`cmp.project.CMP_Project_Info` for more details)
+
+        See also
+        ---------
+        cmp.pipelines.functional.fMRIPipeline.__init__
+        """
         fMRIPipeline.__init__(self, project_info)
 
         self.stages = {'Preprocessing': PreprocessingStageUI(bids_dir=project_info.base_directory,
@@ -95,14 +136,42 @@ class fMRIPipelineUI(fMRIPipeline):
                                                             self.pipeline_name, self.stages[stage].name)
 
     def _preprocessing_fired(self, info):
-        # print("preproc fired")
+        """Method that displays the window for the preprocessing stage.
+
+        The window changed accordingly to the value of ``view_mode`` to be 
+        in configuration or quality inspection mode.
+
+        Parameters
+        -----------
+        info <Button>
+            The preprocessing button object
+        """
         self.stages['Preprocessing'].configure_traits(view=self.view_mode)
 
     def _functionalMRI_fired(self, info):
-        # print("func fired")
+        """Method that displays the window for the extra preprocessing stage.
+
+        The window changed accordingly to the value of ``view_mode`` to be 
+        in configuration or quality inspection mode.
+
+        Parameters
+        -----------
+        info <Button>
+            The extra preprocessing button object
+        """
         self.stages['FunctionalMRI'].configure_traits(view=self.view_mode)
 
     def _registration_fired(self, info):
+        """Method that displays the window for the registration stage.
+
+        The window changed accordingly to the value of ``view_mode`` to be 
+        in configuration or quality inspection mode.
+
+        Parameters
+        -----------
+        info <Button>
+            The registration button object
+        """
         if self.view_mode == 'config_view':
             self.stages['Registration'].configure_traits(
                 view='config_view_fmri')
@@ -110,9 +179,31 @@ class fMRIPipelineUI(fMRIPipeline):
             self.stages['Registration'].configure_traits(view=self.view_mode)
 
     def _connectome_fired(self, info):
+        """Method that displays the window for the connectome stage.
+
+        The window changed accordingly to the value of ``view_mode`` to be 
+        in configuration or quality inspection mode.
+
+        Parameters
+        -----------
+        info <Button>
+            The connectome button object
+        """
         self.stages['Connectome'].configure_traits(view=self.view_mode)
 
     def check_input(self, layout, gui=True):
+        """Method that checks if inputs of the fMRI pipeline are available in the datasets.
+
+        Parameters
+        -----------
+        layout <pybids.BIDSLayout>
+            BIDSLayout object used to query
+
+        Returns
+        -------
+        valid_inputs <Boolean>
+            True in all inputs of the fMRI pipeline are available
+        """
         print('**** Check Inputs ****')
         fMRI_available = False
         fMRI_json_available = False
@@ -237,10 +328,6 @@ class fMRIPipelineUI(fMRIPipeline):
         if os.path.isfile(json_file):
             # print("%s available" % typ)
             fMRI_json_available = True
-
-        # print('fMRI :',fMRI_available)
-        # print('t1 :',t1_available)
-        # print('t2 :',t2_available)
 
         if fMRI_available:
             if self.global_conf.subject_session == '':

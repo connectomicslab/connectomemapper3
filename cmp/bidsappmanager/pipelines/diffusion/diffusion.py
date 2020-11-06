@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Diffusion pipeline Class definition
-"""
+"""Diffusion pipeline Class definition."""
 
 import os
 import datetime
@@ -15,7 +14,6 @@ from pyface.qt.QtGui import *
 
 from traitsui.api import *
 from traits.api import *
-
 from traitsui.qt4.extra.qt_view import QtView
 from traitsui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
 
@@ -24,15 +22,15 @@ import shutil
 
 import nibabel as nib
 
-# from cmp.bidsappmanager.pipelines.common import *
+from bids import BIDSLayout
+
+# Own imports
 from cmp.bidsappmanager.pipelines.anatomical.anatomical import AnatomicalPipelineUI
 
 from cmp.bidsappmanager.stages.preprocessing.preprocessing import PreprocessingStageUI
 from cmp.bidsappmanager.stages.diffusion.diffusion import DiffusionStageUI
 from cmp.bidsappmanager.stages.registration.registration import RegistrationStageUI
 from cmp.bidsappmanager.stages.connectome.connectome import ConnectomeStageUI
-
-from bids import BIDSLayout
 
 from cmp.pipelines.common import Pipeline
 from cmp.pipelines.diffusion.diffusion import Global_Configuration, Check_Input_Notification, DiffusionPipeline
@@ -50,6 +48,42 @@ class Check_Input_NotificationUI(Check_Input_Notification):
 
 
 class DiffusionPipelineUI(DiffusionPipeline):
+    """Class used to represent the GUI of the Diffusion pipeline.
+
+    Attributes
+    ----------
+    preprocessing <Button>
+        Button to open the window for configuration or quality inspection
+        of the preprocessing stage depending on the ``view_mode``
+
+    registration <Button>
+        Button to open the window for configuration or quality inspection
+        of the registration stage depending on the ``view_mode``
+
+    diffusion <Button>
+        Button to open the window for configuration or quality inspection
+        of the diffusion reconstruction and tractography stage depending 
+        on the ``view_mode``
+
+    connectome <Button>
+        Button to open the window for configuration or quality inspection
+        of the connectome stage depending on the ``view_mode``
+
+    view_mode <['config_view', 'inspect_outputs_view']>
+        Variable used to control the display of either (1) the configuration
+        or (2) the quality inspection of stage of the pipeline
+
+    pipeline_group <traitsUI panel>
+        Panel defining the layout of the buttons of the stages with corresponding images
+
+    traits_view <QtView>
+        QtView that includes the ``pipeline_group`` panel
+
+    See also
+    ---------
+    cmp.pipelines.diffusion.DiffusionPipeline
+    """
+
     view_mode = Enum('config_view', ['config_view', 'inspect_outputs_view'])
 
     preprocessing = Button('Preprocessing')
@@ -83,7 +117,19 @@ class DiffusionPipelineUI(DiffusionPipeline):
     traits_view = QtView(Include('pipeline_group'))
 
     def __init__(self, project_info):
+        """Constructor of the DiffusionPipelineUI class.
 
+        Parameters
+        -----------
+        project_info <cmp.project.CMP_Project_Info>
+            CMP_Project_Info object that stores general information
+            such as the BIDS root and output directories (see
+            :class_`cmp.project.CMP_Project_Info` for more details)
+
+        See also
+        ---------
+        cmp.pipelines.diffusion.DiffusionPipeline.__init__
+        """
         DiffusionPipeline.__init__(self, project_info)
 
         self.stages = {
@@ -110,19 +156,70 @@ class DiffusionPipelineUI(DiffusionPipeline):
                                                             self.pipeline_name, self.stages[stage].name)
 
     def _preprocessing_fired(self, info):
+        """Method that displays the window for the preprocessing stage.
+
+        The window changed accordingly to the value of ``view_mode`` to be 
+        in configuration or quality inspection mode.
+
+        Parameters
+        -----------
+        info <Button>
+            The preprocessing button object
+        """
         self.stages['Preprocessing'].configure_traits(view=self.view_mode)
 
     def _diffusion_fired(self, info):
+        """Method that displays the window for the diffusion stage.
+
+        The window changed accordingly to the value of ``view_mode`` to be 
+        in configuration or quality inspection mode.
+
+        Parameters
+        -----------
+        info <Button>
+            The diffusion button object
+        """
         self.stages['Diffusion'].configure_traits(view=self.view_mode)
 
     def _registration_fired(self, info):
+        """Method that displays the window for the registration stage.
+
+        The window changed accordingly to the value of ``view_mode`` to be 
+        in configuration or quality inspection mode.
+
+        Parameters
+        -----------
+        info <Button>
+            The registration button object
+        """
         self.stages['Registration'].configure_traits(view=self.view_mode)
 
     def _connectome_fired(self, info):
-        # self.stages['MRTrixConnectome'].configure_traits()
+        """Method that displays the window for the connectome stage.
+
+        The window changed accordingly to the value of ``view_mode`` to be 
+        in configuration or quality inspection mode.
+
+        Parameters
+        -----------
+        info <Button>
+            The connectome button object
+        """
         self.stages['Connectome'].configure_traits(view=self.view_mode)
 
     def check_input(self, layout, gui=True):
+        """Method that checks if inputs of the diffusion pipeline are available in the datasets.
+
+        Parameters
+        -----------
+        layout <pybids.BIDSLayout>
+            BIDSLayout object used to query
+
+        Returns
+        -------
+        valid_inputs <Boolean>
+            True in all inputs of the anatomical pipeline are available
+        """
         print('**** Check Inputs  ****')
         diffusion_available = False
         bvecs_available = False
@@ -287,32 +384,17 @@ class DiffusionPipelineUI(DiffusionPipeline):
             else:
                 input_message = 'Error during inputs check. No diffusion data available in folder ' + os.path.join(
                     self.base_directory, self.subject, self.global_conf.subject_session, 'dwi') + '!'
-        # diffusion_imaging_model = diffusion_imaging_model[0]
 
         if gui:
             # input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
             # input_notification.configure_traits()
             print(input_message)
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
-
-            # if diffusion_available:
-            #     n_vol = nib.load(dwi_file).shape[3]
-            #     if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
-            #         self.stages['Preprocessing'].config.end_vol = n_vol-1
-            #     self.stages['Preprocessing'].config.max_vol = n_vol-1
-
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
         else:
             print(input_message)
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
-
-            # if diffusion_available:
-            #     n_vol = nib.load(dwi_file).shape[3]
-            #     if self.stages['Preprocessing'].config.end_vol == 0 or self.stages['Preprocessing'].config.end_vol == self.stages['Preprocessing'].config.max_vol or self.stages['Preprocessing'].config.end_vol >= n_vol-1:
-            #         self.stages['Preprocessing'].config.end_vol = n_vol-1
-            #     self.stages['Preprocessing'].config.max_vol = n_vol-1
-
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
 

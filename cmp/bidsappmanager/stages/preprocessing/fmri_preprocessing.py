@@ -4,25 +4,55 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP preprocessing Stage (not used yet!)
-"""
+"""CMP functional MRI preprocessing stage."""
 
+# General imports
+import subprocess
 from traits.api import *
 from traitsui.api import *
 
-import subprocess
-
-# from cmp.bidsappmanager.stages.common import Stage
-
+# Own imports
 from cmp.stages.preprocessing.fmri_preprocessing import PreprocessingConfig, PreprocessingStage
 
 
 class PreprocessingConfigUI(PreprocessingConfig):
+    """Class used to represent the GUI for the configuration of the fMRI preprocessing stage.
+
+    Attributes
+    ----------
+    traits_view <View>
+        TraitsUI view that displays the attributes of this class, e.g.
+        the parameters for the stage
+
+    See also
+    ---------
+    cmp.stages.preprocessing.fmri_preprocessing.PreprocessingConfig
+    """
+
     traits_view = View('discard_n_volumes', 'despiking', 'slice_timing',
                        Item('repetition_time', visible_when='slice_timing!="none"'), 'motion_correction')
 
 
 class PreprocessingStageUI(PreprocessingStage):
+    """Class used to represent the GUIs for the fMRI preprocessing stage.
+
+    Attributes
+    ----------
+    inspect_output_button <Button>
+        Button that displays the selected output in an appropriate viewer
+        (present only in the window for quality inspection)
+
+    inspect_outputs_view <View>
+        TraitsUI view that displays the quality inspection window of this stage
+
+    config_view <View>
+        TraitsUI view that displays the configuration window of this stage
+
+    See also
+    ---------
+    cmp.stages.preprocessing.fmri_preprocessing.PreprocessingStage
+    """
+
     inspect_output_button = Button('View')
 
     inspect_outputs_view = View(Group(
@@ -31,27 +61,44 @@ class PreprocessingStageUI(PreprocessingStage):
             Item('inspect_outputs_enum', show_label=False),
             Item('inspect_output_button', enabled_when='inspect_outputs_enum!="Outputs not available"',
                  show_label=False),
-            label='View outputs', show_border=True
-        )
-    ),
-        scrollable=True, resizable=True, kind='livemodal', title='Inspect stage outputs', buttons=['OK', 'Cancel']
-    )
+            label='View outputs', show_border=True)),
+        scrollable=True,
+        resizable=True,
+        kind='livemodal',
+        title='Inspect stage outputs',
+        buttons=['OK', 'Cancel'])
 
     config_view = View(Group(
         Item('name', editor=TitleEditor(), show_label=False),
         Group(
             Item('config', style='custom', show_label=False),
-            label='Configuration', show_border=True
-        ),
-    ),
-        scrollable=True, resizable=True, height=280, width=350, kind='livemodal', title='Edit stage configuration',
-        buttons=['OK', 'Cancel']
-    )
+            label='Configuration', show_border=True)),
+        scrollable=True,
+        resizable=True,
+        height=280,
+        width=350,
+        kind='livemodal',
+        title='Edit stage configuration',
+        buttons=['OK', 'Cancel'])
 
     # General and UI members
     def __init__(self, bids_dir, output_dir):
+        """Constructor of the functional PreprocessingStageUI class.
+
+        See also
+        ---------
+        cmp.stages.preprocessing.fmri_preprocessing.PreprocessingStage.__init_
+        cmp.cmpbidsappmanager.stages.preprocessing.fmri_preprocessing.PreprocessingStageUI
+        """
         PreprocessingStage.__init__(self, bids_dir, output_dir)
         self.config = PreprocessingConfigUI()
 
     def _inspect_output_button_fired(self, info):
+        """Display the selected output when ``inspect_output_button`` is clicked.
+
+        Parameters
+        ----------
+        info <Button>
+            Button object
+        """
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])
