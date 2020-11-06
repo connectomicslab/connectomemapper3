@@ -4,8 +4,27 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Connectome Mapper Controler for handling GUI and non GUI general events
-"""
+"""Connectome Mapper Controler for handling GUI and non GUI general events."""
+
+# Global imports
+import os
+import fnmatch
+import glob
+import shutil
+import multiprocessing
+from subprocess import Popen
+
+from traitsui.api import *
+from traits.api import *
+import warnings
+
+from bids import BIDSLayout
+from pyface.api import FileDialog, OK
+
+warnings.filterwarnings(
+    "ignore", message="No valid root directory found for domain 'derivatives'.")
+
+# Own imports
 from . import core
 from . import gui
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as Anatomical_pipeline
@@ -14,35 +33,7 @@ from cmp.bidsappmanager.pipelines.functional import fMRI as FMRI_pipeline
 from cmtklib.config import anat_load_config_ini, anat_save_config, \
     dmri_load_config_ini, dmri_save_config, fmri_load_config_ini, fmri_save_config, \
     get_anat_process_detail_ini, get_dmri_process_detail_ini, get_fmri_process_detail_ini
-# from cmtklib.util import fix_dataset_directory_in_pickles
-# import nibabel as nib
-from bids import BIDSLayout
-from pyface.api import FileDialog, OK
-# import gzip
-# import pickle
-import multiprocessing
-from subprocess import Popen
-import fnmatch
-import glob
-import os
-# import ast
-import shutil
-from traitsui.api import *
-from traits.api import *
-import warnings
 
-warnings.filterwarnings(
-    "ignore", message="No valid root directory found for domain 'derivatives'.")
-
-# Global imports
-
-
-# Own imports
-# import pipelines.diffusion.diffusion as Diffusion_pipeline
-
-
-# import CMP_MainWindow
-# import pipelines.egg.eeg as EEG_pipeline
 
 def clean_cache(bids_root):
     print('> Clean docker image cache stored in /tmp')
@@ -111,8 +102,6 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
         for in_f in input_folders:
             paths.append(os.path.join(
                 derivatives_directory, 'cmp', subject, in_f))
-            # paths.append(os.path.join(derivatives_directory,'nipype',subject,in_f))
-
     else:
         paths.append(os.path.join(derivatives_directory,
                                   'freesurfer', '%s_%s' % (subject, session)))
@@ -124,7 +113,6 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
         for in_f in input_folders:
             paths.append(os.path.join(derivatives_directory,
                                       'cmp', subject, session, in_f))
-            # paths.append(os.path.join(derivatives_directory,'nipype',subject,session,in_f))
 
     for full_p in paths:
         if not os.path.exists(full_p):
@@ -152,7 +140,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
     dmri_inputs_checked = dmri_pipeline.check_input(
         layout=bids_layout, gui=gui)
     if dmri_inputs_checked:
-        if is_new_project and dmri_pipeline is not None:  # and dmri_pipelineis not None:
+        if is_new_project and dmri_pipeline is not None:
             print("Initialize dmri project")
             if not os.path.exists(derivatives_directory):
                 try:
@@ -184,17 +172,11 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
                       project_info.dmri_config_file)
                 dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
         else:
-            # print("int_project dmri_pipeline.global_config.subjects : ")
-            # print(dmri_pipeline.global_conf.subjects)
-
-            dmri_conf_loaded = dmri_load_config_ini(
-                dmri_pipeline, project_info.dmri_config_file)
+            dmri_conf_loaded = dmri_load_config_ini(dmri_pipeline, project_info.dmri_config_file)
 
             if not dmri_conf_loaded:
                 return None
 
-        # print(dmri_pipeline)
-        # print(dmri_pipeline.global_conf.dmri_bids_acq)
         dmri_pipeline.config_file = project_info.dmri_config_file
     else:
         print("Missing diffusion inputs")
@@ -218,7 +200,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
     fmri_inputs_checked = fmri_pipeline.check_input(
         layout=bids_layout, gui=gui)
     if fmri_inputs_checked:
-        if is_new_project and fmri_pipeline is not None:  # and fmri_pipelineis not None:
+        if is_new_project and fmri_pipeline is not None:
             print("Initialize fmri project")
             if not os.path.exists(derivatives_directory):
                 try:
@@ -250,16 +232,12 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
                       project_info.fmri_config_file)
                 fmri_save_config(fmri_pipeline, project_info.fmri_config_file)
         else:
-            # print("int_project fmri_pipeline.global_config.subjects : ")
-            # print(fmri_pipeline.global_conf.subjects)
-
             fmri_conf_loaded = fmri_load_config_ini(
                 fmri_pipeline, project_info.fmri_config_file)
 
             if not fmri_conf_loaded:
                 return None
 
-        # print(fmri_pipeline)
         fmri_pipeline.config_file = project_info.fmri_config_file
     else:
         print("Missing fmri inputs")
@@ -268,23 +246,9 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
 
 
 def init_anat_project(project_info, is_new_project):
-    # print('Init anat pipeline project_info :')
-    # print(project_info.base_directory)
-    # print(project_info.subject)
-    # print(project_info.subject_session)
-
     anat_pipeline = Anatomical_pipeline.AnatomicalPipelineUI(project_info)
-    # dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info,anat_pipeline.flow)
-    # fmri_pipeline = FMRI_pipeline.fMRIPipeline
-    # egg_pipeline = None
 
-    # if project_info.process_type == 'diffusion':
-    #     pipeline = diffusion_pipeline.DiffusionPipeline(project_info)
-    # elif project_info.process_type == 'fMRI':
-    #     pipeline = fMRI_pipeline.fMRIPipeline(project_info)
-
-    derivatives_directory = os.path.join(
-        project_info.base_directory, 'derivatives')
+    derivatives_directory = os.path.join(project_info.base_directory, 'derivatives')
 
     if is_new_project and anat_pipeline is not None:  # and dmri_pipelineis not None:
         if not os.path.exists(derivatives_directory):
@@ -301,7 +265,6 @@ def init_anat_project(project_info, is_new_project):
         else:
             project_info.anat_config_file = os.path.join(derivatives_directory,
                                                          '%s_anatomical_config.ini' % (project_info.subject))
-        # project_info.dmri_config_file = os.path.join(derivatives_directory,'%s_diffusion_config.ini' % (project_info.subject))
 
         if os.path.exists(project_info.anat_config_file):
             warn_res = project_info.configure_traits(view='anat_warning_view')
@@ -312,30 +275,13 @@ def init_anat_project(project_info, is_new_project):
         else:
             anat_save_config(anat_pipeline, project_info.anat_config_file)
 
-        # if os.path.exists(project_info.dmri_config_file):
-        #     warn_res = project_info.configure_traits(view='warning_view')
-        #     if warn_res:
-        #         save_config(dmri_pipeline, project_info.dmri_config_file)
-        #     else:
-        #         return None
-        # else:
-        #     save_config(dmri_pipeline, project_info.dmri_config_file)
     else:
-        # print("int_project anat_pipeline.global_config.subjects : ")
-        # print(anat_pipeline.global_conf.subjects)
-
         anat_conf_loaded = anat_load_config_ini(
             anat_pipeline, project_info.anat_config_file)
-        # dmri_conf_loaded = load_config(dmri_pipeline, project_info.dmri_config_file)
 
         if not anat_conf_loaded:
             return None
 
-        # if not dmri_conf_loaded:
-        #    return None
-
-    # print(anat_pipeline)
-    # print dmri_pipeline
     if (project_info.subject_session != '') and (project_info.subject_session is not None):
         refresh_folder(derivatives_directory, project_info.subject, anat_pipeline.input_folders,
                        session=project_info.subject_session)
@@ -343,10 +289,9 @@ def init_anat_project(project_info, is_new_project):
         refresh_folder(derivatives_directory,
                        project_info.subject, anat_pipeline.input_folders)
 
-    # refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders)
     anat_pipeline.config_file = project_info.anat_config_file
-    # dmri_pipeline.config_file = project_info.dmri_config_file
-    return anat_pipeline  # , dmri_pipeline
+
+    return anat_pipeline
 
 
 def update_anat_last_processed(project_info, pipeline):
@@ -476,10 +421,6 @@ class ProjectHandler(Handler):
                 for subj in bids_layout.get_subjects():
                     if 'sub-' + str(subj) not in new_project.subjects:
                         new_project.subjects.append('sub-' + str(subj))
-                # new_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
-
-                # new_project.configure_traits(subject=Enum(*subjects))
-                # print new_project.subjects
 
                 print("Available subjects : ")
                 print(new_project.subjects)
@@ -514,16 +455,13 @@ class ProjectHandler(Handler):
                 return
 
             self.anat_pipeline = init_anat_project(new_project, True)
-            if self.anat_pipeline is not None:  # and self.dmri_pipeline is not None:
+            if self.anat_pipeline is not None:
                 anat_inputs_checked = self.anat_pipeline.check_input(
                     bids_layout)
                 if anat_inputs_checked:
-                    # update_last_processed(new_project, self.pipeline) # Not required as the project is new, so no update should be done on processing status
                     ui_info.ui.context["object"].project_info = new_project
                     self.anat_pipeline.number_of_cores = new_project.number_of_cores
-                    # self.anat_pipeline.flow = self.anat_pipeline.create_pipeline_flow()
                     ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
-                    # ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                     self.anat_inputs_checked = anat_inputs_checked
                     ui_info.ui.context["object"].project_info.t1_available = self.anat_inputs_checked
 
@@ -542,28 +480,21 @@ class ProjectHandler(Handler):
                         new_project, 'segmentation_stage', 'freesurfer_subjects_dir')
                     ui_info.ui.context["object"].project_info.freesurfer_subject_id = get_anat_process_detail_ini(
                         new_project, 'segmentation_stage', 'freesurfer_subject_id')
-                    # ui_info.ui.context["object"].project_info.atlas_info = get_anat_process_detail_ini(new_project,'parcellation_stage','atlas_info')
-
+                    
                     dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
                         new_project, bids_layout, True)
-                    if self.dmri_pipeline is not None:  # and self.dmri_pipeline is not None:
+                    if self.dmri_pipeline is not None:
                         if dmri_inputs_checked:
-                            # new_project.configure_traits(view='diffusion_imaging_model_select_view')
-                            # self.dmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
                             self.dmri_pipeline.number_of_cores = new_project.number_of_cores
                             print("number of cores (pipeline): %s" %
                                   self.dmri_pipeline.number_of_cores)
-                            # print "diffusion_imaging_model (pipeline): %s" % self.dmri_pipeline.diffusion_imaging_model
-                            # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
                             self.dmri_pipeline.parcellation_scheme = ui_info.ui.context[
                                 "object"].project_info.parcellation_scheme
-                            # self.dmri_pipeline.atlas_info = ui_info.ui.context["object"].project_info.atlas_info
                             ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                             ui_info.ui.context["object"].project_info.on_trait_change(
                                 ui_info.ui.context["object"].update_subject_dmri_pipeline, 'subject')
                             ui_info.ui.context["object"].project_info.on_trait_change(
                                 ui_info.ui.context["object"].update_session_dmri_pipeline, 'subject_session')
-                            # self.diffusion_ready = True
                             dmri_save_config(self.dmri_pipeline,
                                              ui_info.ui.context["object"].project_info.dmri_config_file)
                             self.dmri_inputs_checked = dmri_inputs_checked
@@ -574,24 +505,18 @@ class ProjectHandler(Handler):
 
                     fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
                         new_project, bids_layout, True)
-                    if self.fmri_pipeline is not None:  # and self.fmri_pipeline is not None:
+                    if self.fmri_pipeline is not None:
                         if fmri_inputs_checked:
-                            # new_project.configure_traits(view='diffusion_imaging_model_select_view')
-                            # self.fmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
                             self.fmri_pipeline.number_of_cores = new_project.number_of_cores
                             print("number of cores (pipeline): %s" %
                                   self.fmri_pipeline.number_of_cores)
-                            # print "diffusion_imaging_model (pipeline): %s" % self.fmri_pipeline.diffusion_imaging_model
-                            # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
                             self.fmri_pipeline.parcellation_scheme = ui_info.ui.context[
                                 "object"].project_info.parcellation_scheme
                             self.fmri_pipeline.subjects_dir = ui_info.ui.context[
                                 "object"].project_info.freesurfer_subjects_dir
                             self.fmri_pipeline.subject_id = ui_info.ui.context[
                                 "object"].project_info.freesurfer_subject_id
-                            # self.fmri_pipeline.atlas_info = ui_info.ui.context["object"].project_info.atlas_info
                             ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
-                            # self.diffusion_ready = True
                             ui_info.ui.context["object"].project_info.on_trait_change(
                                 ui_info.ui.context["object"].update_subject_fmri_pipeline, 'subject')
                             ui_info.ui.context["object"].project_info.on_trait_change(
@@ -607,8 +532,6 @@ class ProjectHandler(Handler):
         np_res = loaded_project.configure_traits(view='open_view')
         ui_info.ui.context["object"].handler = self
 
-        # print "Default subject : "+loaded_project.subject
-
         print("Base dir: %s" % loaded_project.base_directory)
         try:
             bids_layout = BIDSLayout(loaded_project.base_directory)
@@ -619,7 +542,6 @@ class ProjectHandler(Handler):
                 print("sub: %s" % subj)
                 if 'sub-' + str(subj) not in loaded_project.subjects:
                     loaded_project.subjects.append('sub-' + str(subj))
-            # loaded_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
             loaded_project.subjects.sort()
 
             print("Available subjects : ")
@@ -632,17 +554,10 @@ class ProjectHandler(Handler):
             return
 
         self.anat_inputs_checked = False
-        # self.dmri_inputs_checked = False
 
         print(loaded_project.subjects)
 
         if np_res and os.path.exists(loaded_project.base_directory):
-            # # Retrocompatibility with v2.1.0 where only one config.ini file was created
-            # if os.path.exists(os.path.join(loaded_project.base_directory,'derivatives','config.ini')):
-            #     loaded_project.config_file = os.path.join(loaded_project.base_directory,'derivatives','config.ini')
-            # # Load new format: <process_type>_config.ini
-            # else:
-
             sessions = []
             for subj in bids_layout.get_subjects():
                 subj_sessions = bids_layout.get(
@@ -720,7 +635,7 @@ class ProjectHandler(Handler):
                                                                            'freesurfer_subject_id')
 
             self.anat_pipeline = init_anat_project(loaded_project, False)
-            if self.anat_pipeline is not None:  # and self.dmri_pipeline is not None:
+            if self.anat_pipeline is not None:
                 anat_inputs_checked = self.anat_pipeline.check_input(
                     bids_layout)
                 if anat_inputs_checked:
@@ -734,7 +649,6 @@ class ProjectHandler(Handler):
                     ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
                     ui_info.ui.context["object"].anat_pipeline.number_of_cores = ui_info.ui.context[
                         "object"].project_info.number_of_cores
-                    # ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                     self.anat_inputs_checked = anat_inputs_checked
                     ui_info.ui.context["object"].project_info.t1_available = self.anat_inputs_checked
                     anat_save_config(
@@ -743,7 +657,6 @@ class ProjectHandler(Handler):
                     self.anat_outputs_checked, _ = self.anat_pipeline.check_output()
                     print("anat_outputs_checked : %s" %
                           self.anat_outputs_checked)
-                    # ui_info.ui.context["object"].anat_pipeline.flow = ui_info.ui.context["object"].anat_pipeline.create_pipeline_flow()
 
             loaded_project.dmri_available_config = []
 
@@ -799,7 +712,7 @@ class ProjectHandler(Handler):
 
                 dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
                     loaded_project, bids_layout, False)
-                if self.dmri_pipeline is not None:  # and self.dmri_pipeline is not None:
+                if self.dmri_pipeline is not None:
                     if dmri_inputs_checked:
                         update_dmri_last_processed(
                             loaded_project, self.dmri_pipeline)
@@ -813,8 +726,6 @@ class ProjectHandler(Handler):
                         ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                         ui_info.ui.context["object"].dmri_pipeline.number_of_cores = ui_info.ui.context[
                             "object"].project_info.number_of_cores
-                        # ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                        # self.diffusion_ready = True
                         self.dmri_inputs_checked = dmri_inputs_checked
                         ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
                         dmri_save_config(
@@ -834,17 +745,12 @@ class ProjectHandler(Handler):
                             ui_info.ui.context["object"].update_subject_dmri_pipeline, 'subject')
                         ui_info.ui.context["object"].project_info.on_trait_change(
                             ui_info.ui.context["object"].update_session_dmri_pipeline, 'subject_session')
-                        # new_project.configure_traits(view='diffusion_imaging_model_select_view')
-                        # self.dmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
                         self.dmri_pipeline.number_of_cores = loaded_project.number_of_cores
                         print("number of cores (pipeline): %s" %
                               self.dmri_pipeline.number_of_cores)
-                        # print "diffusion_imaging_model (pipeline): %s" % self.dmri_pipeline.diffusion_imaging_model
-                        # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
                         self.dmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
                         self.dmri_pipeline.atlas_info = loaded_project.atlas_info
                         ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                        # self.diffusion_ready = True
                         dmri_save_config(
                             self.dmri_pipeline, ui_info.ui.context["object"].project_info.dmri_config_file)
                         self.dmri_inputs_checked = dmri_inputs_checked
@@ -897,7 +803,7 @@ class ProjectHandler(Handler):
 
                 fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
                     loaded_project, bids_layout, False)
-                if self.fmri_pipeline is not None:  # and self.fmri_pipeline is not None:
+                if self.fmri_pipeline is not None:
                     if fmri_inputs_checked:
                         update_fmri_last_processed(
                             loaded_project, self.fmri_pipeline)
@@ -913,8 +819,6 @@ class ProjectHandler(Handler):
                         ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
                         ui_info.ui.context["object"].fmri_pipeline.number_of_cores = ui_info.ui.context[
                             "object"].project_info.number_of_cores
-                        # ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
-                        # self.diffusion_ready = True
                         self.fmri_inputs_checked = fmri_inputs_checked
                         ui_info.ui.context["object"].project_info.fmri_available = self.fmri_inputs_checked
                         fmri_save_config(
@@ -925,26 +829,21 @@ class ProjectHandler(Handler):
                     loaded_project, bids_layout, True)
                 print(
                     "No existing config for fMRI pipeline found - Created new fMRI pipeline with default parameters")
-                if self.fmri_pipeline is not None:  # and self.fmri_pipeline is not None:
+                if self.fmri_pipeline is not None:
                     if fmri_inputs_checked:
                         ui_info.ui.context["object"].project_info = loaded_project
                         ui_info.ui.context["object"].project_info.on_trait_change(
                             ui_info.ui.context["object"].update_subject_fmri_pipeline, 'subject')
                         ui_info.ui.context["object"].project_info.on_trait_change(
                             ui_info.ui.context["object"].update_session_fmri_pipeline, 'subject_session')
-                        # new_project.configure_traits(view='diffusion_imaging_model_select_view')
-                        # self.fmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
                         self.fmri_pipeline.number_of_cores = loaded_project.number_of_cores
                         print("number of cores (pipeline): %s" %
                               self.fmri_pipeline.number_of_cores)
-                        # print "diffusion_imaging_model (pipeline): %s" % self.fmri_pipeline.diffusion_imaging_model
-                        # print "diffusion_imaging_model ui_info: %s" % ui_info.ui.context["object"].project_info.diffusion_imaging_model
                         self.fmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
                         self.fmri_pipeline.atlas_info = loaded_project.atlas_info
                         self.fmri_pipeline.subjects_dir = loaded_project.freesurfer_subjects_dir
                         self.fmri_pipeline.subject_id = loaded_project.freesurfer_subject_id
                         ui_info.ui.context["object"].fmri_pipeline = self.fmri_pipeline
-                        # self.diffusion_ready = True
                         fmri_save_config(
                             self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
                         self.fmri_inputs_checked = fmri_inputs_checked
@@ -992,7 +891,7 @@ class ProjectHandler(Handler):
                                                                             'freesurfer_subject_id')
 
             self.anat_pipeline = init_anat_project(updated_project, False)
-            if self.anat_pipeline is not None:  # and self.dmri_pipeline is not None:
+            if self.anat_pipeline is not None:
                 anat_inputs_checked = self.anat_pipeline.check_input(
                     bids_layout)
                 if anat_inputs_checked:
@@ -1005,7 +904,6 @@ class ProjectHandler(Handler):
                         ui_info.update_session_anat_pipeline, 'subject_session')
                     ui_info.anat_pipeline = self.anat_pipeline
                     ui_info.anat_pipeline.number_of_cores = ui_info.project_info.number_of_cores
-                    # ui_info.dmri_pipeline = self.dmri_pipeline
                     self.anat_inputs_checked = anat_inputs_checked
                     ui_info.project_info.t1_available = self.anat_inputs_checked
                     anat_save_config(self.anat_pipeline,
@@ -1014,7 +912,7 @@ class ProjectHandler(Handler):
                     self.anat_outputs_checked, msg = self.anat_pipeline.check_output()
                     print("anat_outputs_checked : %s" %
                           self.anat_outputs_checked)
-                    # ui_info.anat_pipeline.flow = ui_info.anat_pipeline.create_pipeline_flow()
+
         else:
             print("Unprocessed anatomical data for subject %s" %
                   updated_project.subject)
@@ -1023,16 +921,13 @@ class ProjectHandler(Handler):
                 anat_inputs_checked = self.anat_pipeline.check_input(
                     bids_layout)
                 if anat_inputs_checked:
-                    # update_last_processed(new_project, self.pipeline) # Not required as the project is new, so no update should be done on processing status
                     ui_info.project_info = updated_project
                     ui_info.project_info.on_trait_change(
                         ui_info.update_subject_anat_pipeline, 'subject')
                     ui_info.project_info.on_trait_change(
                         ui_info.update_session_anat_pipeline, 'subject_session')
                     self.anat_pipeline.number_of_cores = updated_project.number_of_cores
-                    # self.anat_pipeline.flow = self.anat_pipeline.create_pipeline_flow()
                     ui_info.anat_pipeline = self.anat_pipeline
-                    # ui_info.dmri_pipeline = self.dmri_pipeline
                     self.anat_inputs_checked = anat_inputs_checked
                     ui_info.project_info.t1_available = self.anat_inputs_checked
                     anat_save_config(self.anat_pipeline,
@@ -1045,7 +940,6 @@ class ProjectHandler(Handler):
                                                                                    'freesurfer_subjects_dir')
             ui_info.project_info.freesurfer_subject_id = get_anat_process_detail_ini(updated_project, 'segmentation_stage',
                                                                                  'freesurfer_subject_id')
-            # ui_info.project_info.atlas_info = get_anat_process_detail_ini(new_project,'parcellation_stage','atlas_info')
 
         return ui_info
 
@@ -1096,8 +990,6 @@ class ProjectHandler(Handler):
                     self.dmri_pipeline.atlas_info = updated_project.atlas_info
                     ui_info.dmri_pipeline = self.dmri_pipeline
                     ui_info.dmri_pipeline.number_of_cores = ui_info.project_info.number_of_cores
-                    # ui_info.dmri_pipeline = self.dmri_pipeline
-                    # self.diffusion_ready = True
                     self.dmri_inputs_checked = dmri_inputs_checked
                     ui_info.project_info.dmri_available = self.dmri_inputs_checked
                     dmri_save_config(self.dmri_pipeline,
@@ -1116,17 +1008,12 @@ class ProjectHandler(Handler):
                         ui_info.update_subject_dmri_pipeline, 'subject')
                     ui_info.project_info.on_trait_change(
                         ui_info.update_session_dmri_pipeline, 'subject_session')
-                    # new_project.configure_traits(view='diffusion_imaging_model_select_view')
-                    # self.dmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
                     self.dmri_pipeline.number_of_cores = updated_project.number_of_cores
                     print("number of cores (pipeline): %s" %
                           self.dmri_pipeline.number_of_cores)
-                    # print "diffusion_imaging_model (pipeline): %s" % self.dmri_pipeline.diffusion_imaging_model
-                    # print "diffusion_imaging_model ui_info: %s" % ui_info.project_info.diffusion_imaging_model
                     self.dmri_pipeline.parcellation_scheme = updated_project.parcellation_scheme
                     self.dmri_pipeline.atlas_info = updated_project.atlas_info
                     ui_info.dmri_pipeline = self.dmri_pipeline
-                    # self.diffusion_ready = True
                     dmri_save_config(self.dmri_pipeline,
                                      ui_info.project_info.dmri_config_file)
                     self.dmri_inputs_checked = dmri_inputs_checked
@@ -1184,7 +1071,7 @@ class ProjectHandler(Handler):
 
             fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
                 updated_project, bids_layout, False)
-            if self.fmri_pipeline is not None:  # and self.fmri_pipeline is not None:
+            if self.fmri_pipeline is not None:
                 if fmri_inputs_checked:
                     update_fmri_last_processed(
                         updated_project, self.fmri_pipeline)
@@ -1200,8 +1087,6 @@ class ProjectHandler(Handler):
                     ui_info.fmri_pipeline = self.fmri_pipeline
 
                     ui_info.fmri_pipeline.number_of_cores = ui_info.project_info.number_of_cores
-                    # ui_info.fmri_pipeline = self.fmri_pipeline
-                    # self.diffusion_ready = True
                     self.fmri_inputs_checked = fmri_inputs_checked
                     ui_info.project_info.fmri_available = self.fmri_inputs_checked
                     fmri_save_config(self.fmri_pipeline,
@@ -1211,26 +1096,21 @@ class ProjectHandler(Handler):
             fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
                 updated_project, bids_layout, True)
             print("No existing config for fMRI pipeline found but available fMRI data- Created new fMRI pipeline with default parameters")
-            if self.fmri_pipeline is not None:  # and self.fmri_pipeline is not None:
+            if self.fmri_pipeline is not None:
                 if fmri_inputs_checked:
                     ui_info.project_info = updated_project
                     ui_info.project_info.on_trait_change(
                         ui_info.update_subject_fmri_pipeline, 'subject')
                     ui_info.project_info.on_trait_change(
                         ui_info.update_session_fmri_pipeline, 'subject_session')
-                    # new_project.configure_traits(view='diffusion_imaging_model_select_view')
-                    # self.fmri_pipeline.diffusion_imaging_model = new_project.diffusion_imaging_model
                     self.fmri_pipeline.number_of_cores = updated_project.number_of_cores
                     print("number of cores (pipeline): %s" %
                           self.fmri_pipeline.number_of_cores)
-                    # print "diffusion_imaging_model (pipeline): %s" % self.fmri_pipeline.diffusion_imaging_model
-                    # print "diffusion_imaging_model ui_info: %s" % ui_info.project_info.diffusion_imaging_model
                     self.fmri_pipeline.parcellation_scheme = updated_project.parcellation_scheme
                     self.fmri_pipeline.atlas_info = updated_project.atlas_info
                     self.fmri_pipeline.subjects_dir = updated_project.freesurfer_subjects_dir
                     self.fmri_pipeline.subject_id = updated_project.freesurfer_subject_id
                     ui_info.fmri_pipeline = self.fmri_pipeline
-                    # self.diffusion_ready = True
                     fmri_save_config(self.fmri_pipeline,
                                      ui_info.project_info.fmri_config_file)
                     self.fmri_inputs_checked = fmri_inputs_checked
@@ -1326,10 +1206,8 @@ class ProjectHandlerV2(Handler):
     fmri_inputs_checked = Bool(False)
     fmri_processed = Bool(False)
 
-    def load_dataset(self, ui_info, debug=False):
+    def load_dataset(self, ui_info, debug=True):
         # print('Load dataset')
-
-        debug = True
 
         loaded_project = gui.CMP_Project_Info()
         np_res = loaded_project.configure_traits(view='open_view')
@@ -1502,26 +1380,6 @@ class ProjectHandlerV2(Handler):
                             print("BOLD available: {}".format(query_files))
                         fmri_available = True
 
-                # types = bids_layout.get_types()
-                # print(types)
-                # for typ in sorted(types):
-                #
-                #     if typ == 'dwi':
-                #         print "%s available" % typ
-                #         diffusion_available = True
-                #
-                #     if typ == 'T1w':
-                #         print "%s available" % typ
-                #         t1_available = True
-                #
-                #     if typ == 'T2w':
-                #         print "%s available" % typ
-                #         t2_available = True
-                #
-                #     if typ == 'bold':
-                #         print "%s available" % typ
-                #         fmri_available = True
-
             except Exception:
                 error(message="Invalid BIDS dataset. Please see documentation for more details.",
                       title="BIDS error")
@@ -1594,7 +1452,6 @@ class ProjectHandlerV2(Handler):
 
                 self.anat_pipeline.config_file = loaded_project.anat_config_file
 
-                # update_last_processed(loaded_project, self.pipeline) # Not required as the project is new, so no update should be done on processing status
                 ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
                 loaded_project.t1_available = self.anat_inputs_checked
 
@@ -1606,7 +1463,6 @@ class ProjectHandlerV2(Handler):
                                                                                'freesurfer_subject_id')
 
                 ui_info.ui.context["object"].project_info = loaded_project
-                # ui_info.ui.context["object"].handler = self
 
                 self.project_loaded = True
 
@@ -1626,7 +1482,6 @@ class ProjectHandlerV2(Handler):
 
                     self.dmri_pipeline.config_file = dmri_config_file
 
-                    # and dmri_pipelineis not None:
                     if not os.path.isfile(dmri_config_file) and self.dmri_pipeline is not None:
 
                         # Look for diffusion acquisition model information from filename (acq-*)
@@ -1709,31 +1564,6 @@ class ProjectHandlerV2(Handler):
                                 loaded_project.configure_traits(
                                     view='diffusion_imaging_model_select_view')
 
-                            # #Retrieve dwi file based on acq-<keyword> if provided (used for debugging)
-                            # files = [f.filename for f in
-                            #          bids_layout.get(subject=subject, suffix='dwi', extensions=['nii', 'nii.gz'])]
-
-                            # dwi_file = ''
-                            # if (loaded_project.dmri_bids_acq != ''):
-                            #     for file in files:
-                            #         if (loaded_project.dmri_bids_acq in file):
-                            #             dwi_file = file
-                            #             break
-                            # else:
-                            #     dwi_file = files[0]
-
-                        # img = nib.load(dwi_file)
-                        # print('#####################')
-                        # print(dwi_file)
-                        # print(img)
-                        # print('#####################')
-                        # print(img.shape)
-                        # print('#####################')
-                        #
-                        # max_volume_idx = nib.load(dwi_file).shape[3] - 1
-                        # self.dmri_pipeline.stages["Preprocessing"].end_vol = max_volume_idx
-                        # self.dmri_pipeline.stages["Preprocessing"].max_vol = max_volume_idx
-
                         self.dmri_pipeline.diffusion_imaging_model = loaded_project.diffusion_imaging_model
                         self.dmri_pipeline.global_conf.diffusion_imaging_model = loaded_project.diffusion_imaging_model
                         self.dmri_pipeline.global_conf.dmri_bids_acq = loaded_project.dmri_bids_acq
@@ -1763,11 +1593,10 @@ class ProjectHandlerV2(Handler):
                     loaded_project.dmri_available = self.dmri_inputs_checked
 
                     ui_info.ui.context["object"].project_info = loaded_project
-                    # ui_info.ui.context["object"].handler = self
 
                     self.project_loaded = True
 
-                if fmri_inputs_checked:  # and self.fmri_pipeline is not None:
+                if fmri_inputs_checked:
                     self.fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(
                         loaded_project)
                     self.fmri_pipeline.number_of_cores = loaded_project.number_of_cores
@@ -1788,7 +1617,6 @@ class ProjectHandlerV2(Handler):
 
                     self.fmri_pipeline.config_file = fmri_config_file
 
-                    # and fmri_pipelineis not None:
                     if not os.path.isfile(fmri_config_file) and self.fmri_pipeline is not None:
                         fmri_save_config(self.fmri_pipeline, fmri_config_file)
                         print("Created reference fMRI config file :  %s" %
@@ -1813,7 +1641,6 @@ class ProjectHandlerV2(Handler):
                     loaded_project.fmri_available = self.fmri_inputs_checked
 
                     ui_info.ui.context["object"].project_info = loaded_project
-                    # ui_info.ui.context["object"].handler = self
 
                     self.project_loaded = True
 
@@ -1831,11 +1658,6 @@ class CMP_BIDSAppWindowHandler(Handler):
         else:
             print("Error: BIDS root invalid!")
             ui_info.ui.context["object"].settings_checked = False
-
-        # if not ui_info.ui.context["object"].list_of_subjects_to_be_processed.empty():
-        #     print("List of subjects to be processed : {}".format(ui_info.ui.context["object"].list_of_subjects_to_be_processed))
-        # else:
-        #     print("Warning: List of subjects empty!")
 
         if os.path.isfile(ui_info.ui.context["object"].anat_config):
             print("Anatomical configuration file : {}".format(
@@ -1863,12 +1685,6 @@ class CMP_BIDSAppWindowHandler(Handler):
             print("Error: Invalid Freesurfer license ({})!".format(
                 ui_info.ui.context["object"].fs_license))
             ui_info.ui.context["object"].settings_checked = False
-
-        # if os.path.isdir(ui_info.ui.context["object"].fs_average):
-        #     print("fsaverage directory : {}".format(ui_info.ui.context["object"].fs_average))
-        # else:
-        #     print("Error: fsaverage directory ({}) not existing!".format(ui_info.ui.context["object"].fs_average))
-        #     ui_info.ui.context["object"].settings_checked = False
 
         print("Valid inputs for BIDS App : {}".format(
             ui_info.ui.context["object"].settings_checked))
@@ -1927,7 +1743,6 @@ class CMP_BIDSAppWindowHandler(Handler):
 
         with open(log_filename, 'w+') as log:
             proc = Popen(cmd, stdout=log, stderr=log)
-            # docker_process.communicate()
 
         return proc
 
@@ -1965,7 +1780,6 @@ class CMP_BIDSAppWindowHandler(Handler):
 
         ui_info.ui.context["object"].docker_running = False
 
-        # cmd = ['docke
         return True
 
     @classmethod
