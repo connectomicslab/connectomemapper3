@@ -408,7 +408,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
     fmri_processed = Bool(False)
 
     def new_project(self, ui_info):
-        new_project = gui.CMP_Project_Info()
+        new_project = gui.CMP_Project_InfoUI()
         np_res = new_project.configure_traits(view='create_view')
         ui_info.ui.context["object"].handler = self
 
@@ -528,7 +528,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                             self.project_loaded = True
 
     def load_project(self, ui_info):
-        loaded_project = gui.CMP_Project_Info()
+        loaded_project = gui.CMP_Project_InfoUI()
         np_res = loaded_project.configure_traits(view='open_view')
         ui_info.ui.context["object"].handler = self
 
@@ -1209,7 +1209,7 @@ class CMP_MainWindowHandler(Handler):
     def load_dataset(self, ui_info, debug=True):
         # print('Load dataset')
 
-        loaded_project = gui.CMP_Project_Info()
+        loaded_project = gui.CMP_Project_InfoUI()
         np_res = loaded_project.configure_traits(view='open_view')
         loaded_project.output_directory = os.path.join(
             loaded_project.base_directory, 'derivatives')

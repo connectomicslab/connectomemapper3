@@ -4,20 +4,10 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Connectome Mapper GUI
-"""
+"""Connectome Mapper GUI."""
 
-# Remove warnings visible whenever you import scipy (or another package) that was compiled against an older numpy than is installed.
-import cmp.bidsappmanager.project as project
-from cmp.info import __version__
-from bids import BIDSLayout
-from pyface.api import ImageResource
-from traitsui.qt4.extra.qt_view import QtView
-from traitsui.tabular_adapter import TabularAdapter
-from traitsui.api import *
-from traits.api import *
-# import pickle
-# import gzip
+# General imports
+import os
 import pkg_resources
 from subprocess import Popen
 import subprocess
@@ -25,16 +15,26 @@ import multiprocessing
 import shutil
 import time
 import glob
-import os
+
+from pyface.api import ImageResource
+from traitsui.qt4.extra.qt_view import QtView
+from traitsui.tabular_adapter import TabularAdapter
+from traitsui.api import *
+from traits.api import *
+
+from bids import BIDSLayout
+
 import warnings
 
+# Own imports
+import cmp.bidsappmanager.project as project
+from cmp.project import CMP_Project_Info
+from cmp.info import __version__
+
+# Remove warnings visible whenever you import scipy (or another package) 
+# that was compiled against an older numpy than is installed.
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
-
-# Libraries imports
-
-
-# CMP imports
 
 # global modal_width
 modal_width = 400
@@ -121,69 +121,237 @@ style_sheet = '''
             '''
 
 
-# QDockWidget {
-#     border: 1px solid lightgray;
-#     titlebar-close-icon: url(close.png);
-#     titlebar-normal-icon: url(undock.png);
-# }
-#
-# QDockWidget::title {
-#     text-align: left; /* align the text to the left */
-#     background: lightgray;
-#     padding-left: 5px;
-# }
-#
-# QDockWidget::close-button, QDockWidget::float-button {
-#     border: 1px solid transparent;
-#     background: darkgray;
-#     padding: 0px;
-# }
-#
-# QDockWidget::close-button:hover, QDockWidget::float-button:hover {
-#     background: gray;
-# }
-#
-# QDockWidget::close-button:pressed, QDockWidget::float-button:pressed {
-#     padding: 1px -1px -1px 1px;
-# }
+class CMP_Project_InfoUI(CMP_Project_Info):
+    """Class that extends the :class:`CMP_Project_Info` with graphical components.
 
-class CMP_Project_Info(HasTraits):
+    It supports graphically the setting of all processing properties / attributes
+    of the project.
+
+    Attributes
+    -----------
+    creation_mode
+
+    base_directory
+
+    install_datalad_dataset_via_ssh
+
+    ssh_user
+
+    ssh_pwd
+
+    ssh_remote
+
+    datalad_dataset_path
+
+    summary_view_button <Button>
+        ('Pipeline processing summary')
+
+    pipeline_processing_summary_view <VGroup>
+        TraitsUI VGroup that contains``Item('pipeline_processing_summary')``
+
+    dataset_view <View>
+        TraitsUI View that
+
+    traits_view = QtView(Include('dataset_view'))
+
+    create_view = View(
+        # Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
+        Item('creation_mode', style='custom'),
+        Group(
+            Group(
+                Item('base_directory', label='BIDS Dataset'),
+                visible_when='creation_mode=="Load BIDS dataset"'),
+            Group(
+                Item('install_datalad_dataset_via_ssh'),
+                visible_when='creation_mode=="Install Datalad/BIDS dataset"'),
+            Group(
+                Item('ssh_remote', label='Remote ssh server',
+                     visible_when='install_datalad_dataset_via_ssh'),
+                Item('ssh_user', label='Remote username',
+                     visible_when='install_datalad_dataset_via_ssh'),
+                Item('ssh_pwd', label='Remote password',
+                     visible_when='install_datalad_dataset_via_ssh'),
+                Item('datalad_dataset_path',
+                     label='Datalad/BIDS Dataset Path/URL to be installed'),
+                Item('base_directory', label='Installation directory'),
+                visible_when='creation_mode=="Install Datalad/BIDS dataset"'),
+        ),
+        kind='livemodal',
+        title='Data creation: BIDS dataset selection',
+        # style_sheet=style_sheet,
+        width=modal_width,
+        buttons=['OK', 'Cancel'])
+
+    subject_view = View(
+        Group(
+            Item('subject', label='Selected Subject'),
+            # Item('session',label='Session to be processed'),
+            # Item('diffusion_imaging_model',style='custom'),
+        ),
+        kind='modal',
+        title='Subject and session selection',
+        # style_sheet=style_sheet,
+        width=modal_width,
+        buttons=['OK', 'Cancel'])
+
+    subject_session_view = View(
+        Group(
+            Item('subject', style='readonly', label='Selected Subject'),
+            Item('subject_session', label='Selected Session'),
+        ),
+        kind='modal',
+        title='Session selection',
+        # style_sheet=style_sheet,
+        width=modal_width,
+        buttons=['OK', 'Cancel'])
+
+    dmri_bids_acq_view = View(
+        Group(
+            Item('dmri_bids_acq', label='Selected model'),
+        ),
+        kind='modal',
+        title='Selection of diffusion acquisition model',
+        # style_sheet=style_sheet,
+        width=modal_width,
+        buttons=['OK', 'Cancel'])
+
+    anat_warning_view = View(
+        Group(
+            Item('anat_warning_msg', style='readonly', show_label=False),
+        ),
+        title='Warning : Anatomical T1w data',
+        kind='modal',
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=['OK', 'Cancel'])
+
+    anat_config_error_view = View(
+        Group(
+            Item('anat_config_error_msg', style='readonly', show_label=False),
+        ),
+        title='Error',
+        kind='modal',
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=['OK', 'Cancel'])
+
+    dmri_warning_view = View(
+        Group(
+            Item('dmri_warning_msg', style='readonly', show_label=False),
+        ),
+        title='Warning : Diffusion MRI data',
+        kind='modal',
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=['OK', 'Cancel'])
+
+    dmri_config_error_view = View(
+        Group(
+            Item('dmri_config_error_msg', style='readonly', show_label=False),
+        ),
+        title='Error',
+        kind='modal',
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=['OK', 'Cancel'])
+
+    fmri_warning_view = View(
+        Group(
+            Item('fmri_warning_msg', style='readonly', show_label=False),
+        ),
+        title='Warning : fMRI data',
+        kind='modal',
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=['OK', 'Cancel'])
+
+    fmri_config_error_view = View(
+        Group(
+            Item('fmri_config_error_msg', style='readonly', show_label=False),
+        ),
+        title='Error',
+        kind='modal',
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=['OK', 'Cancel'])
+
+    open_view = View(
+        # Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
+        Item('creation_mode', label='Mode'),
+        Group(
+            Item('install_datalad_dataset_via_ssh'),
+            Item('ssh_remote', label='Remote ssh server',
+                 visible_when='install_datalad_dataset_via_ssh'),
+            Item('ssh_user', label='Remote username',
+                 visible_when='install_datalad_dataset_via_ssh'),
+            Item('ssh_pwd', label='Remote password',
+                 visible_when='install_datalad_dataset_via_ssh'),
+            Item('datalad_dataset_path',
+                 label='Datalad/BIDS Dataset Path/URL to be installed'),
+            Item('base_directory', label='Installation directory'),
+            visible_when='creation_mode=="Install Datalad BIDS dataset"'),
+        Group(
+            Item('base_directory', label='BIDS Dataset'),
+            visible_when='creation_mode=="Load BIDS dataset"'),
+        kind='livemodal',
+        title='BIDS Dataset Creation/Loading',
+        # style_sheet=style_sheet,
+        width=600,
+        height=250,
+        buttons=['OK', 'Cancel'])
+
+    anat_select_config_to_load = View(
+        Group(
+            Item('anat_config_to_load_msg', style='readonly', show_label=False),
+            Item('anat_config_to_load', style='custom', editor=EnumEditor(name='anat_available_config'),
+                 show_label=False),
+        ),
+        title='Select configuration for anatomical pipeline',
+        kind='modal',
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=['OK', 'Cancel'])
+
+    diffusion_imaging_model_select_view = View(
+        Group(
+            Item('diffusion_imaging_model', label='Diffusion MRI modality'),
+        ),
+        title='Please select diffusion MRI modality',
+        kind='modal',
+        width=modal_width,
+        buttons=['OK', 'Cancel'])
+
+    dmri_select_config_to_load = View(
+        Group(
+            Item('dmri_config_to_load_msg', style='readonly', show_label=False),
+        ),
+        Item('dmri_config_to_load', style='custom', editor=EnumEditor(
+            name='dmri_available_config'), show_label=False),
+        title='Select configuration for diffusion pipeline',
+        kind='modal',
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=['OK', 'Cancel'])
+
+    fmri_select_config_to_load = View(
+        Group(
+            Item('fmri_config_to_load_msg', style='readonly', show_label=False),
+        ),
+        Item('fmri_config_to_load', style='custom', editor=EnumEditor(
+            name='fmri_available_config'), show_label=False),
+        title='Select configuration for fMRI pipeline',
+        kind='modal',
+        width=modal_width,
+        # style_sheet=style_sheet,
+        buttons=['OK', 'Cancel'])
+    """
     creation_mode = Enum('Load BIDS dataset', 'Install Datalad BIDS dataset')
-    base_directory = Directory
     install_datalad_dataset_via_ssh = Bool(True)
     ssh_user = String('remote_username')
     ssh_pwd = Password('')
     ssh_remote = String('IP address/ Machine name')
     datalad_dataset_path = Directory(
         '/shared/path/to/existing/datalad/dataset')
-
-    bids_layout = Instance(BIDSLayout)
-    subjects = List([])
-    subject = Enum(values='subjects')
-
-    number_of_subjects = Int()
-
-    subject_sessions = List([])
-    subject_session = Enum(values='subject_sessions')
-
-    # current_subj = Str()
-    anat_warning_msg = Str(
-        '\nWarning: selected directory is already configured'
-        'for anatomical data processing.\n\n'
-        'Do you want to reset the configuration to default parameters ?\n')
-    dmri_warning_msg = Str(
-        '\nWarning: selected directory is already configured'
-        'for diffusion data processing.\n\n'
-        'Do you want to reset the configuration to default parameters ?\n')
-    fmri_warning_msg = Str(
-        '\nWarning: selected directory is already configured'
-        'for resting-state data processing.\n\n'
-        'Do you want to reset the configuration to default parameters ?\n')
-
-    # process_type = Enum('diffusion',['diffusion','fMRI'])
-    diffusion_imaging_model = Enum('DTI', ['DSI', 'DTI', 'multi-shell'])
-    dmri_bids_acqs = List()
-    dmri_bids_acq = Enum(values='dmri_bids_acqs')
 
     anat_runs = List()
     anat_run = Enum(values='anat_runs')
@@ -193,52 +361,6 @@ class CMP_Project_Info(HasTraits):
 
     fmri_runs = List()
     fmri_run = Enum(values='fmri_runs')
-
-    parcellation_scheme = Str('Lausanne2008')
-    atlas_info = Dict()
-    freesurfer_subjects_dir = Str('')
-    freesurfer_subject_id = Str('')
-
-    pipeline_processing_summary = List()
-
-    t1_available = Bool(False)
-    dmri_available = Bool(False)
-    fmri_available = Bool(False)
-
-    anat_config_error_msg = Str('')
-    anat_config_to_load = Str()
-    anat_available_config = List()
-    anat_config_to_load_msg = Str(
-        'Several configuration files available. Select which one to load:\n')
-    anat_last_date_processed = Str('Not yet processed')
-    anat_last_stage_processed = Str('Not yet processed')
-
-    anat_stage_names = List
-    anat_custom_last_stage = Str
-
-    dmri_config_error_msg = Str('')
-    dmri_config_to_load = Str()
-    dmri_available_config = List()
-    dmri_config_to_load_msg = Str(
-        'Several configuration files available. Select which one to load:\n')
-    dmri_last_date_processed = Str('Not yet processed')
-    dmri_last_stage_processed = Str('Not yet processed')
-
-    dmri_stage_names = List
-    dmri_custom_last_stage = Str
-
-    fmri_config_error_msg = Str('')
-    fmri_config_to_load = Str()
-    fmri_available_config = List()
-    fmri_config_to_load_msg = Str(
-        'Several configuration files available. Select which one to load:\n')
-    fmri_last_date_processed = Str('Not yet processed')
-    fmri_last_stage_processed = Str('Not yet processed')
-
-    fmri_stage_names = List
-    fmri_custom_last_stage = Str
-
-    number_of_cores = Enum(1, list(range(1, multiprocessing.cpu_count())))
 
     summary_view_button = Button('Pipeline processing summary')
 
@@ -253,19 +375,15 @@ class CMP_Project_Info(HasTraits):
                      style='readonly', label="", resizable=True),
                 Item('number_of_subjects', width=-0.3, style='readonly', label="Number of participants",
                      resizable=True),
-                'summary_view_button',
-            ),
+                'summary_view_button'),
             # HGroup(subj
-            #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)
-            #     ),
-            label='BIDS Dataset',
-        ),
+            #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)),
+            label='BIDS Dataset'),
         spring,
         HGroup(
             Group(
                 Item('subject', style='simple',
-                     show_label=True, resizable=True),
-            ),
+                     show_label=True, resizable=True)),
             Group(
                 Item('subject_session', style='simple',
                      label="Session", resizable=True),
