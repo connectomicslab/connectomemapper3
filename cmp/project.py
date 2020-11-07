@@ -4,8 +4,9 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Connectome Mapper Controler for handling non GUI general events
-"""
+"""Connectome Mapper Controler for handling non GUI general events."""
+
+# General imports
 import multiprocessing
 import fnmatch
 
@@ -17,6 +18,7 @@ from traits.api import *
 
 from bids import BIDSLayout
 
+# Own imports
 from cmtklib.bids.utils import write_derivative_description
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
@@ -24,6 +26,7 @@ from cmp.pipelines.functional import fMRI as FMRI_pipeline
 from cmtklib.config import anat_load_config_ini, anat_save_config, \
     dmri_load_config_ini, dmri_save_config, fmri_load_config_ini, fmri_save_config
 
+# Ignore some warnings
 warnings.filterwarnings("ignore",
                         message="UserWarning: No valid root directory found for domain 'derivatives'."
                                 " Falling back on the Layout's root directory. If this isn't the intended behavior, "
@@ -31,23 +34,146 @@ warnings.filterwarnings("ignore",
 
 # from cmtklib.util import remove_aborded_interface_pickles, fix_dataset_directory_in_pickles
 
-# import pickle
-# import gzip
-
-
-# Global imports
-
-
-# Own imports
-# import pipelines.diffusion.diffusion as Diffusion_pipeline
-
-
-# #from cmp.configurator.project import fix_dataset_directory_in_pickles, remove_aborded_interface_pickles
-
-# import CMP_MainWindow
-# import pipelines.egg.eeg as EEG_pipeline
 
 class CMP_Project_Info(HasTraits):
+    """Class used to store all properties of a processing project.
+
+    Attributes
+    -----------
+    creation_mode
+
+    base_directory
+
+    install_datalad_dataset_via_ssh
+
+    ssh_user
+
+    ssh_pwd
+
+    ssh_remote
+
+    datalad_dataset_path
+
+    bids_layout
+
+    subjects
+
+    subject
+
+    subject_sessions
+
+    subject_session
+
+    anat_warning_msg
+
+    dmri_warning_msg
+
+    fmri_warning_msg
+
+    diffusion_imaging_model
+        Enum('DTI', ['DSI', 'DTI', 'multi-shell'])
+
+    dmri_bids_acqs
+
+    dmri_bids_acq
+        Enum(values='dmri_bids_acqs')
+
+    anat_runs
+
+    anat_run
+        Enum(values='anat_runs')
+
+    dmri_runs
+
+    dmri_run
+        Enum(values='dmri_runs')
+
+    fmri_runs
+
+    fmri_run
+        Enum(values='fmri_runs')
+
+    parcellation_scheme
+        Str('Lausanne2008')
+
+    atlas_info <Dict>
+
+    freesurfer_subjects_dir <Str('')>
+
+    freesurfer_subject_id <Str('')>
+
+    pipeline_processing_summary <List>
+
+    t1_available <Bool>
+        (False)
+
+    dmri_available <Bool>
+        (False)
+
+    fmri_available <Bool>
+        (False)
+
+    anat_config_error_msg <Str>
+        ('')
+    anat_config_to_load <Str>
+
+    anat_available_config <List()>
+
+    anat_config_to_load_msg <Str>
+        'Several configuration files available. Select which one to load:\n'
+
+    anat_last_date_processed <Str>
+        ('Not yet processed')
+    anat_last_stage_processed <Str>
+        ('Not yet processed')
+
+    anat_stage_names <List>
+
+    anat_custom_last_stage <Str>
+
+    dmri_config_error_msg <Str>
+        ('')
+
+    dmri_config_to_load <Str()>
+
+    dmri_available_config <List()>
+
+    dmri_config_to_load_msg <Str>
+        ('Several configuration files available. Select which one to load:\n')
+
+    dmri_last_date_processed <Str>
+        ('Not yet processed')
+
+    dmri_last_stage_processed <Str>
+        ('Not yet processed')
+
+    dmri_stage_names <List>
+
+    dmri_custom_last_stage <Str>
+
+    fmri_config_error_msg <Str>
+        ('')
+
+    fmri_config_to_load <Str()>
+
+    fmri_available_config <List()>
+
+    fmri_config_to_load_msg <Str>
+        ('Several configuration files available. Select which one to load:\n')
+
+    fmri_last_date_processed <Str>
+        ('Not yet processed')
+
+    fmri_last_stage_processed <Str>
+        ('Not yet processed')
+
+    fmri_stage_names <List>
+    fmri_custom_last_stage <Str>
+
+    number_of_cores <int> 
+        Enum(1, list(range(1, multiprocessing.cpu_count())))
+    """
+
     base_directory = Directory
     output_directory = Directory
 
