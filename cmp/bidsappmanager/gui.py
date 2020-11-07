@@ -1413,7 +1413,7 @@ class CMP_ConfiguratorWindow(HasTraits):
                 ),
                 name='File'),
         ),
-        handler=project.ProjectHandler(),
+        handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
         # buttons = [anat_save_config, dmri_save_config, fmri_save_config,],
         buttons=[],
@@ -1524,7 +1524,7 @@ class CMP_InspectorWindow(HasTraits):
                 ),
                 name='File'),
     ),
-        handler=project.ProjectHandler(),
+        handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
         # buttons = [anat_save_config, dmri_save_config, fmri_save_config,],
         # buttons = [preprocessing, map_connectome, map_custom],
@@ -1783,201 +1783,7 @@ class CMP_MainWindow(HasTraits):
 
     project_info = Instance(CMP_Project_Info)
 
-    bidsapp = Instance(CMP_BIDSAppWindow)
-
-    handler = Instance(project.ProjectHandler)
-
-    new_project = Action(name='Load BIDS Dataset (New)...',
-                         action='new_project')
-    load_project = Action(
-        name='Load BIDS Dataset (Processed)...', action='load_project')
-    # process_anatomical = Action(name='Parcellate Brain!',action='process_anatomical',enabled_when='handler.anat_inputs_checked==True')
-    # map_dmri_connectome = Action(name='Map Strutural Connectome!',action='map_dmri_connectome',enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked')
-    # map_fmri_connectome = Action(name='Map Functional Connectome!',action='map_fmri_connectome',enabled_when='handler.anat_outputs_checked and handler.fmri_inputs_checked')
-
-    anat_save_config = Action(name='Save anatomical pipeline configuration as...', action='save_anat_config_file',
-                              enabled_when='handler.project_loaded==True')
-    anat_load_config = Action(name='Load anatomical pipeline configuration...', action='anat_load_config_file',
-                              enabled_when='handler.project_loaded==True')
-
-    dmri_save_config = Action(name='Save diffusion pipeline configuration as...', action='save_dmri_config_file',
-                              enabled_when='handler.project_loaded==True')
-    dmri_load_config = Action(name='Load diffusion pipeline configuration...', action='load_dmri_config_file',
-                              enabled_when='handler.project_loaded==True')
-
-    fmri_save_config = Action(name='Save fMRI pipeline configuration as...', action='save_fmri_config_file',
-                              enabled_when='handler.project_loaded==True')
-    fmri_load_config = Action(name='Load fMRI pipeline configuration...', action='load_fmri_config_file',
-                              enabled_when='handler.project_loaded==True')
-
-    show_bidsapp_window = Action(name='Show interface...', action='show_bidsapp_window',
-                                 enabled_when='handler.project_loaded==True')
-
-    project_info.style_sheet = style_sheet
-
-    traits_view = QtView(Group(
-        Group(
-            # Include('dataset_view'),label='Data manager',springy=True
-            Item('project_info', style='custom', show_label=False), label='Data manager', springy=True, dock='tab'
-        ),
-        Group(
-            Item('anat_pipeline', style='custom', show_label=False),
-            label='Anatomical pipeline', dock='tab'
-        ),
-        Group(
-            Item('dmri_pipeline', style='custom', show_label=False,
-                 enabled_when='handler.anat_outputs_checked and handler.dmri_inputs_checked'),
-            label='Diffusion pipeline', dock='tab'
-        ),
-        Group(
-            Item('fmri_pipeline', style='custom', show_label=False,
-                 enabled_when='handler.anat_outputs_checked and handler.fmri_inputs_checked'),
-            label='fMRI pipeline', dock='tab'
-        ),
-        orientation='horizontal', layout='tabbed', springy=True, enabled_when='handler.anat_inputs_checked==True'),
-        title='Connectome Mapper 3 Configurator',
-        menubar=MenuBar(
-            Menu(
-                ActionGroup(
-                    new_project,
-                    load_project,
-                ),
-                ActionGroup(
-                    Action(name='Quit', action='_on_close'),
-                ),
-                name='File'),
-            Menu(
-                anat_save_config,
-                dmri_save_config,
-                fmri_save_config,
-                name='Configuration'),
-            Menu(
-                show_bidsapp_window,
-                name='BIDS App'),
-            # Menu(
-            #     change_subject,
-            # name='Subjects'),
-    ),
-        handler=project.ProjectHandler(),
-        style_sheet=style_sheet,
-        # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
-        # buttons = [preprocessing, map_connectome, map_custom],
-        width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
-        icon=ImageResource('cmp.png')
-    )
-
-    def update_diffusion_imaging_model(self, new):
-        self.dmri_pipeline.diffusion_imaging_model = new
-
-    def update_subject_anat_pipeline(self, new):
-        try:
-            # print "update subject anat"
-            bids_layout = BIDSLayout(self.project_info.base_directory)
-            self.project_info.subject_sessions = ["ses-%s" % s for s in
-                                                  bids_layout.get(target='session', return_type='id',
-                                                                  subject=self.project_info.subject.split('-')[1])]
-            if len(self.project_info.subject_sessions) > 0:
-                self.project_info.subject_session = self.project_info.subject_sessions[0]
-            else:
-                self.project_info.subject_session = ''
-            self = self.handler.update_subject_anat_pipeline(self)
-        except AttributeError:
-            print("AttributeError: update subject anat")
-            return
-
-    def update_subject_dmri_pipeline(self, new):
-        try:
-            # print "update subject dmri"
-            bids_layout = BIDSLayout(self.project_info.base_directory)
-            self.project_info.subject_sessions = ["ses-%s" % s for s in
-                                                  bids_layout.get(target='session', return_type='id',
-                                                                  subject=self.project_info.subject.split('-')[1])]
-            if len(self.project_info.subject_sessions) > 0:
-                self.project_info.subject_session = self.project_info.subject_sessions[0]
-            else:
-                self.project_info.subject_session = ''
-            self = self.handler.update_subject_dmri_pipeline(self)
-        except AttributeError:
-            print("AttributeError: update subject dmri")
-            return
-
-    def update_subject_fmri_pipeline(self, new):
-        try:
-            # print "update subject fmri"
-            bids_layout = BIDSLayout(self.project_info.base_directory)
-            self.project_info.subject_sessions = ["ses-%s" % s for s in
-                                                  bids_layout.get(target='session', return_type='id',
-                                                                  subject=self.project_info.subject.split('-')[1])]
-            if len(self.project_info.subject_sessions) > 0:
-                self.project_info.subject_session = self.project_info.subject_sessions[0]
-            else:
-                self.project_info.subject_session = ''
-            self = self.handler.update_subject_fmri_pipeline(self)
-        except AttributeError:
-            print("AttributeError: update subject fmri")
-            return
-
-    def update_session_anat_pipeline(self, new):
-        try:
-            # print "update subject session anat"
-            self = self.handler.update_subject_anat_pipeline(self)
-        except AttributeError:
-            print("AttributeError: update subject anat")
-            return
-
-    def update_session_dmri_pipeline(self, new):
-        try:
-            # print "update subject session dmri"
-            self = self.handler.update_subject_dmri_pipeline(self)
-        except AttributeError:
-            print("AttributeError: update subject dmri")
-            return
-
-    def update_session_fmri_pipeline(self, new):
-        try:
-            # print "update subject session fmri"
-            self = self.handler.update_subject_fmri_pipeline(self)
-        except AttributeError:
-            print("AttributeError: update subject fmri")
-            return
-
-    def show_bidsapp_interface(self):
-        # print("list_of_subjects_to_be_processed:")
-        # print(self.project_info.subjects)
-
-        bids_layout = BIDSLayout(self.project_info.base_directory)
-        subjects = bids_layout.get_subjects()
-
-        # anat_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_anatomical_config.ini'%self.project_info.anat_config_to_load)
-        # dmri_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_diffusion_config.ini'%self.project_info.dmri_config_to_load)
-        # fmri_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_fMRI_config.ini'%self.project_info.fmri_config_to_load)
-
-        anat_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_anatomical_config.ini')
-        dmri_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_diffusion_config.ini')
-        fmri_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_fMRI_config.ini')
-
-        self.bidsapp = CMP_BIDSAppWindow(project_info=self.project_info,
-                                         bids_root=self.project_info.base_directory,
-                                         subjects=subjects,
-                                         list_of_subjects_to_be_processed=subjects,
-                                         anat_config=anat_config,
-                                         dmri_config=dmri_config,
-                                         fmri_config=fmri_config
-                                         )
-        self.bidsapp.configure_traits()
-
-
-class CMP_MainWindowV2(HasTraits):
-    anat_pipeline = Instance(HasTraits)
-    dmri_pipeline = Instance(HasTraits)
-    fmri_pipeline = Instance(HasTraits)
-
-    project_info = Instance(CMP_Project_Info)
-
-    # handler = project.ProjectHandlerV2()
+    # handler = project.CMP_MainWindowHandler()
 
     # configurator_ui = Instance(CMP_PipelineConfigurationWindow)
     bidsapp_ui = Instance(CMP_BIDSAppWindow)
@@ -2046,7 +1852,7 @@ class CMP_MainWindowV2(HasTraits):
                 ),
                 name='File'),
         ),
-        handler=project.ProjectHandlerV2(),
+        handler=project.CMP_MainWindowHandler(),
         style_sheet=style_sheet,
         width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
         icon=ImageResource('cmp.png')

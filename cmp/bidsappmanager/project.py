@@ -391,7 +391,7 @@ def update_fmri_last_processed(project_info, pipeline):
                 project_info.dmri_last_stage_processed = stage
 
 
-class ProjectHandler(Handler):
+class CMP_ConfigQualityWindowHandler(Handler):
     project_loaded = Bool(False)
 
     anat_pipeline = Instance(HasTraits)
@@ -1190,7 +1190,7 @@ class ProjectHandler(Handler):
                 self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
 
 
-class ProjectHandlerV2(Handler):
+class CMP_MainWindowHandler(Handler):
     project_loaded = Bool(False)
 
     anat_pipeline = Instance(HasTraits)
