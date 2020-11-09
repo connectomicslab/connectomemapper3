@@ -36,7 +36,7 @@ class Check_Input_NotificationUI(Check_Input_Notification):
 
 
 class fMRIPipelineUI(fMRIPipeline):
-    """Class used to represent the GUI of the fMRI pipeline.
+    """Class that extends the :class:`fMRIPipeline` with graphical components.
 
     Attributes
     ----------

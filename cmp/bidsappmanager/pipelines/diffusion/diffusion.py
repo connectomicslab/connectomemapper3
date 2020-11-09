@@ -48,7 +48,7 @@ class Check_Input_NotificationUI(Check_Input_Notification):
 
 
 class DiffusionPipelineUI(DiffusionPipeline):
-    """Class used to represent the GUI of the Diffusion pipeline.
+    """Class that extends the :class:`DiffusionPipeline` with graphical components.
 
     Attributes
     ----------

@@ -18,7 +18,7 @@ from cmp.stages.diffusion.diffusion import DiffusionConfig, DiffusionStage
 
 
 class DiffusionConfigUI(DiffusionConfig):
-    """Class used to represent the GUI for the configuration of the diffusion stage.
+    """Class that extends the :class:`DiffusionConfig` with graphical components.
 
     It includes the graphical components defining the configuration of the diffusion
     reconstruction and tractography sub-stages.
@@ -96,7 +96,7 @@ class DiffusionConfigUI(DiffusionConfig):
 
 
 class DiffusionStageUI(DiffusionStage):
-    """Class used to represent the GUI for the diffusion reconstruction and tractography stage.
+    """Class that extends the :class:`DiffusionStage` with graphical components.
 
     Attributes
     ----------

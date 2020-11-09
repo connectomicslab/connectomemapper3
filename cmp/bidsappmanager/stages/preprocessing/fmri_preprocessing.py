@@ -16,7 +16,7 @@ from cmp.stages.preprocessing.fmri_preprocessing import PreprocessingConfig, Pre
 
 
 class PreprocessingConfigUI(PreprocessingConfig):
-    """Class used to represent the GUI for the configuration of the fMRI preprocessing stage.
+    """Class that extends the (functional) :class:`PreprocessingConfig` with graphical components.
 
     Attributes
     ----------
@@ -34,7 +34,7 @@ class PreprocessingConfigUI(PreprocessingConfig):
 
 
 class PreprocessingStageUI(PreprocessingStage):
-    """Class used to represent the GUIs for the fMRI preprocessing stage.
+    """Class that extends the (functional) :class:`PreprocessingStage` with graphical components.
 
     Attributes
     ----------

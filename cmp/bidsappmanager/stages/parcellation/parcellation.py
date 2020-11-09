@@ -18,7 +18,7 @@ from cmp.stages.parcellation.parcellation import ParcellationConfig, Parcellatio
 
 
 class ParcellationConfigUI(ParcellationConfig):
-    """Class used to represent the GUI for the configuration of the parcellation stage.
+    """Class that extends the :class:`ParcellationConfig` with graphical components.
 
     Attributes
     ----------
@@ -53,7 +53,7 @@ class ParcellationConfigUI(ParcellationConfig):
 
 
 class ParcellationStageUI(ParcellationStage):
-    """Class used to represent the GUIs for the parcellation stage.
+    """Class that extends the :class:`ParcellationStage` with graphical components.
 
     Attributes
     ----------

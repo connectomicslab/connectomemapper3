@@ -16,7 +16,7 @@ from cmp.stages.connectome.fmri_connectome import ConnectomeConfig, ConnectomeSt
 
 
 class ConnectomeConfigUI(ConnectomeConfig):
-    """Class used to represent the GUI for the configuration of the fMRI connectome stage.
+    """Class that extends the :class:`ConnectomeConfig` with graphical components.
 
     Attributes
     ----------
@@ -43,7 +43,7 @@ class ConnectomeConfigUI(ConnectomeConfig):
 
 
 class ConnectomeStageUI(ConnectomeStage):
-    """Class used to represent the GUI for the fMRIconnectome stage.
+    """Class that extends the :class:`ConnectomeStage` with graphical components.
 
     Attributes
     ----------

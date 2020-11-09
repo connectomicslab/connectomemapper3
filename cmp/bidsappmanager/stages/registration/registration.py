@@ -20,7 +20,7 @@ from cmp.stages.registration.registration import RegistrationConfig, Registratio
 
 
 class RegistrationConfigUI(RegistrationConfig):
-    """Class used to represent the GUI for the configuration of the registration stage.
+    """Class that extends the :class:`RegistrationConfig` with graphical components.
 
     Attributes
     ----------
@@ -105,7 +105,7 @@ class RegistrationConfigUI(RegistrationConfig):
 
 
 class RegistrationStageUI(RegistrationStage):
-    """Class used to represent the GUIs for the registration stage.
+    """Class that extends the :class:`RegistrationStage` with graphical components.
 
     Attributes
     ----------

@@ -42,7 +42,7 @@ class Check_Input_NotificationUI(Check_Input_Notification):
 
 
 class AnatomicalPipelineUI(AnatomicalPipeline):
-    """Class used to represent the GUI of the Anatomical pipeline.
+    """Class that extends the :class:`AnatomicalPipeline` with graphical components.
 
     Attributes
     ----------

@@ -16,7 +16,7 @@ from cmp.stages.functional.functionalMRI import FunctionalMRIConfig, FunctionalM
 
 
 class FunctionalMRIConfigUI(FunctionalMRIConfig):
-    """Class used to represent the GUI for the configuration of the fMRI extra preprocessing stage.
+    """Class that extends the :class:`FunctionalMRIConfig` with graphical components.
 
     Attributes
     ----------
@@ -48,7 +48,7 @@ class FunctionalMRIConfigUI(FunctionalMRIConfig):
 
 
 class FunctionalMRIStageUI(FunctionalMRIStage):
-    """Class used to represent the GUI for the fMRI extra preprocessing stage.
+    """Class that extends the :class:`FunctionalMRIStage` with graphical components.
 
     Attributes
     ----------

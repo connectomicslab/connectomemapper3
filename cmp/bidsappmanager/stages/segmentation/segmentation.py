@@ -16,7 +16,7 @@ from cmp.stages.segmentation.segmentation import SegmentationConfig, Segmentatio
 
 
 class SegmentationConfigUI(SegmentationConfig):
-    """Class used to represent the GUI for the configuration of the segmentation stage.
+    """Class that extends the :class:`SegmentationConfig` with graphical components.
 
     Attributes
     ----------
@@ -54,7 +54,7 @@ class SegmentationConfigUI(SegmentationConfig):
 
 
 class SegmentationStageUI(SegmentationStage):
-    """Class used to represent the GUIs for the segmentation stage.
+    """Class that extends the :class:`SegmentationStage` with graphical components.
 
     Attributes
     ----------

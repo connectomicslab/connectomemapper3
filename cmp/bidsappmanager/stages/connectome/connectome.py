@@ -17,7 +17,7 @@ from cmp.stages.connectome.connectome import ConnectomeConfig, ConnectomeStage
 
 
 class ConnectomeConfigUI(ConnectomeConfig):
-    """Class used to represent the GUI for the configuration of the connectome stage.
+    """Class that extends the :class:`ConnectomeConfig` with graphical components.
 
     Attributes
     ----------
@@ -57,7 +57,7 @@ class ConnectomeConfigUI(ConnectomeConfig):
 
 
 class ConnectomeStageUI(ConnectomeStage):
-    """Class used to represent the GUI for the connectome stage.
+    """Class that extends the :class:`ConnectomeStage` with graphical components.
 
     Attributes
     ----------

@@ -17,7 +17,7 @@ from cmp.stages.preprocessing.preprocessing import PreprocessingConfig, Preproce
 
 
 class PreprocessingConfigUI(PreprocessingConfig):
-    """Class used to represent the GUI for the configuration of the diffusion preprocessing stage.
+    """Class that extends the (diffusion) :class:`PreprocessingConfig` with graphical components.
 
     Attributes
     ----------
@@ -66,7 +66,7 @@ class PreprocessingConfigUI(PreprocessingConfig):
 
 
 class PreprocessingStageUI(PreprocessingStage):
-    """Class used to represent the GUIs for the diffusion preprocessing stage.
+    """Class that extends the (diffusion) :class:`PreprocessingStage` with graphical components.
 
     Attributes
     ----------

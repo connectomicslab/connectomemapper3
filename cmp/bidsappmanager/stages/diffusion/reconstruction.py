@@ -20,7 +20,7 @@ from cmp.stages.diffusion.reconstruction import Dipy_recon_config, MRtrix_recon_
 
 # Reconstruction configuration
 class Dipy_recon_configUI(Dipy_recon_config):
-    """Class used to represent the GUI for the configuration of the diffusion reconstruction substage for Dipy.
+    """Class that extends the :class:`Dipy_recon_config` with graphical components.
 
     Attributes
     ----------
@@ -84,7 +84,7 @@ class Dipy_recon_configUI(Dipy_recon_config):
 
 
 class MRtrix_recon_configUI(MRtrix_recon_config):
-    """Class used to represent the GUI for the configuration of the diffusion reconstruction substage for MRtrix.
+    """Class that extends the :class:`MRtrix_recon_config` with graphical components.
 
     Attributes
     ----------
@@ -94,7 +94,7 @@ class MRtrix_recon_configUI(MRtrix_recon_config):
 
     traits_view <View>
         TraitsUI view that displays the attributes of this class, e.g.
-        the parameters for diffusion reconstruction
+        the parameters for diffusion reconstruction using MRtrix
 
     See also
     ---------

@@ -13,7 +13,7 @@ from cmp.stages.diffusion.tracking import Dipy_tracking_config, MRtrix_tracking_
 
 
 class Dipy_tracking_configUI(Dipy_tracking_config):
-    """Class used to represent the GUI for the configuration of the tractography substage for Dipy.
+    """Class that extends the :class:`Dipy_tracking_config` with graphical components.
 
     Attributes
     ----------
@@ -49,7 +49,7 @@ class Dipy_tracking_configUI(Dipy_tracking_config):
 
 
 class MRtrix_tracking_configUI(MRtrix_tracking_config):
-    """Class used to represent the GUI for the configuration of the tractography substage for MRtrix.
+    """Class that extends the :class:`MRtrix_tracking_config` with graphical components.
 
     Attributes
     ----------
