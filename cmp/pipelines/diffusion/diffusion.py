@@ -49,6 +49,9 @@ class Check_Input_Notification(HasTraits):
 
 
 class DiffusionPipeline(Pipeline):
+    """
+
+    """
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("diffusion_pipeline")
     # input_folders = ['DSI','DTI','HARDI','T1','T2']
@@ -120,16 +123,40 @@ class DiffusionPipeline(Pipeline):
         # self.anat_flow = anat_flow
 
     def update_outputs_recon(self, new):
+        """
+
+        Parameters
+        ----------
+        new
+        """
         self.stages['Diffusion'].define_inspect_outputs()
 
     def update_outputs_tracking(self, new):
+        """
+
+        Parameters
+        ----------
+        new
+        """
         self.stages['Diffusion'].define_inspect_outputs()
 
     def update_vizualization_layout(self, new):
+        """
+
+        Parameters
+        ----------
+        new
+        """
         self.stages['Connectome'].define_inspect_outputs()
         self.stages['Connectome'].config.subject = self.subject
 
     def update_vizualization_logscale(self, new):
+        """
+
+        Parameters
+        ----------
+        new
+        """
         self.stages['Connectome'].define_inspect_outputs()
         self.stages['Connectome'].config.subject = self.subject
 
@@ -141,6 +168,12 @@ class DiffusionPipeline(Pipeline):
         self.stages['Diffusion'].config.diffusion_imaging_model = new
 
     def check_config(self):
+        """
+
+        Returns
+        -------
+
+        """
         # if self.stages['MRTrixConnectome'].config.output_types == []:
         #     return('\n\tNo output type selected for the connectivity matrices.\t\n\t'
         #            'Please select at least one output type in the connectome configuration window.\t\n')
@@ -151,6 +184,12 @@ class DiffusionPipeline(Pipeline):
         return ''
 
     def define_custom_mapping(self, custom_last_stage):
+        """
+
+        Parameters
+        ----------
+        custom_last_stage
+        """
         # start by disabling all stages
         for stage in self.ordered_stage_list:
             self.stages[stage].enabled = False
@@ -167,6 +206,17 @@ class DiffusionPipeline(Pipeline):
         # print new
 
     def check_input(self, layout, gui=True):
+        """
+
+        Parameters
+        ----------
+        layout
+        gui
+
+        Returns
+        -------
+
+        """
         print('**** Check Inputs  ****')
         diffusion_available = False
         diffusion_json_available = False
@@ -459,7 +509,17 @@ class DiffusionPipeline(Pipeline):
         return valid_inputs
 
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
+        """
 
+        Parameters
+        ----------
+        cmp_deriv_subject_directory
+        nipype_deriv_subject_directory
+
+        Returns
+        -------
+
+        """
         acquisition_model = self.stages['Diffusion'].config.diffusion_imaging_model
         recon_tool = self.stages['Diffusion'].config.recon_processing_tool
 
@@ -918,6 +978,16 @@ class DiffusionPipeline(Pipeline):
             interface=Merge(5), name='merge_roi_graphmls')
 
         def remove_non_existing_scales(roi_volumes):
+            """
+
+            Parameters
+            ----------
+            roi_volumes
+
+            Returns
+            -------
+
+            """
             out_roi_volumes = []
             for vol in roi_volumes:
                 if vol is not None:
@@ -1138,6 +1208,12 @@ class DiffusionPipeline(Pipeline):
         return diffusion_flow
 
     def process(self):
+        """
+
+        Returns
+        -------
+
+        """
         # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 

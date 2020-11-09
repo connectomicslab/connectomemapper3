@@ -66,11 +66,24 @@ class SegmentationConfig(HasTraits):
 
 
 def extract_base_directory(file):
+    """
+
+    Parameters
+    ----------
+    file
+
+    Returns
+    -------
+
+    """
     # print("Extract reconall base dir : %s" % file[:-17])
     return str(file[:-17])
 
 
 class SegmentationStage(Stage):
+    """
+
+    """
     # General and UI members
     def __init__(self, bids_dir, output_dir):
         self.name = 'segmentation_stage'
@@ -91,6 +104,18 @@ class SegmentationStage(Stage):
                         "custom_wm_mask", "brain_mask", "brain"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """
+
+        Parameters
+        ----------
+        flow
+        inputnode
+        outputnode
+
+        Returns
+        -------
+
+        """
         if self.config.seg_tool == "Freesurfer":
             if self.config.use_existing_freesurfer_data is False:
                 # Converting to .mgz format
@@ -124,6 +149,16 @@ class SegmentationStage(Stage):
                     # fs_reconall.inputs.brainstem = self.config.segment_brainstem
 
                     def isavailable(file):
+                        """
+
+                        Parameters
+                        ----------
+                        file
+
+                        Returns
+                        -------
+
+                        """
                         # print "T1 is available"
                         return file
 
@@ -151,6 +186,16 @@ class SegmentationStage(Stage):
                     fs_autorecon1.inputs.subjects_dir = self.config.freesurfer_subjects_dir
 
                     def isavailable(file):
+                        """
+
+                        Parameters
+                        ----------
+                        file
+
+                        Returns
+                        -------
+
+                        """
                         # print "Is available"
                         return file
 
@@ -243,6 +288,16 @@ class SegmentationStage(Stage):
                     #             ])
 
                     def get_freesurfer_subject_id(file):
+                        """
+
+                        Parameters
+                        ----------
+                        file
+
+                        Returns
+                        -------
+
+                        """
                         # print("Extract reconall base dir : %s" % file[:-18])
                         return file[:-18]
 
@@ -284,6 +339,9 @@ class SegmentationStage(Stage):
         #     outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
 
     def define_inspect_outputs(self):
+        """
+
+        """
         # print "stage_dir : %s" % self.stage_dir
 
         if self.config.seg_tool == "Freesurfer":
@@ -337,6 +395,12 @@ class SegmentationStage(Stage):
                                       key=str.lower)
 
     def has_run(self):
+        """
+
+        Returns
+        -------
+
+        """
         if self.config.use_existing_freesurfer_data:
             return True
         else:

@@ -91,11 +91,23 @@ class RegistrationConfig(HasTraits):
 
 
 def unicode2str(text):
+    """
+
+    Parameters
+    ----------
+    text
+
+    Returns
+    -------
+
+    """
     return str(text)
 
 
 class RegistrationStage(Stage):
+    """
 
+    """
     # Freesurfer informations (for BBregister)
     fs_subjects_dir = Directory(exists=False, resolve=False, mandatory=False)
     fs_subject_id = Str(mandatory=False)
@@ -130,6 +142,18 @@ class RegistrationStage(Stage):
                                            "eroded_brain_registered_crop"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """
+
+        Parameters
+        ----------
+        flow
+        inputnode
+        outputnode
+
+        Returns
+        -------
+
+        """
         # Extract first volume and resample it to 1x1x1mm3
         if self.config.pipeline == "Diffusion":
             extract_first = pe.Node(interface=fsl.ExtractROI(t_min=0, t_size=1, roi_file='first.nii.gz'),
@@ -161,6 +185,16 @@ class RegistrationStage(Stage):
             concatnode = pe.Node(interface=util.Merge(2), name='concatnode')
 
             def convertList2Tuple(lists):
+                """
+
+                Parameters
+                ----------
+                lists
+
+                Returns
+                -------
+
+                """
                 return tuple(lists)
 
             flow.connect([
@@ -437,6 +471,16 @@ class RegistrationStage(Stage):
             concatnode = pe.Node(interface=util.Merge(2), name='concatnode')
 
             def convertList2Tuple(lists):
+                """
+
+                Parameters
+                ----------
+                lists
+
+                Returns
+                -------
+
+                """
                 # print "******************************************",tuple(lists)
                 return tuple(lists)
 
@@ -757,14 +801,44 @@ class RegistrationStage(Stage):
             ants_applywarp_gmwmi.inputs.float = True
 
             def reverse_order_transforms(transforms):
+                """
+
+                Parameters
+                ----------
+                transforms
+
+                Returns
+                -------
+
+                """
                 return transforms[::-1]
 
             def extract_affine_transform(transforms):
+                """
+
+                Parameters
+                ----------
+                transforms
+
+                Returns
+                -------
+
+                """
                 for t in transforms:
                     if 'Affine' in t:
                         return t
 
             def extract_warp_field(transforms):
+                """
+
+                Parameters
+                ----------
+                transforms
+
+                Returns
+                -------
+
+                """
                 for t in transforms:
                     if 'Warp' in t:
                         return t
@@ -1210,6 +1284,9 @@ class RegistrationStage(Stage):
         #                     ])
 
     def define_inspect_outputs(self):
+        """
+
+        """
         # print("stage_dir : %s" % self.stage_dir)
         if self.config.pipeline == "Diffusion":
             dwi_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'diffusion_sinker')
@@ -1307,7 +1384,12 @@ class RegistrationStage(Stage):
         print(self.inspect_outputs)
 
     def has_run(self):
+        """
 
+        Returns
+        -------
+
+        """
         if self.config.registration_mode == 'ANTs':
             if self.config.ants_perform_syn:
                 return os.path.exists(os.path.join(self.stage_dir, "SyN_registration", "result_SyN_registration.pklz"))

@@ -25,6 +25,9 @@ from .tracking import *
 
 
 class DiffusionConfig(HasTraits):
+    """
+
+    """
     diffusion_imaging_model_editor = List(['DSI', 'DTI', 'HARDI'])
     diffusion_imaging_model = Str('DTI')
     dilate_rois = Bool(True)
@@ -170,15 +173,33 @@ class DiffusionConfig(HasTraits):
         # self.update_camino_tracking_model()
 
     def update_dipy_tracking_sh_order(self, new):
+        """
+
+        Parameters
+        ----------
+        new
+        """
         if new != 'Auto':
             self.dipy_tracking_config.sh_order = new
         else:
             self.dipy_tracking_config.sh_order = 8
 
     def update_mrtrix_tracking_SD(self, new):
+        """
+
+        Parameters
+        ----------
+        new
+        """
         self.mrtrix_tracking_config.SD = new
 
     def update_dipy_tracking_SD(self, new):
+        """
+
+        Parameters
+        ----------
+        new
+        """
         self.dipy_tracking_config.SD = new
 
     # def update_camino_tracking_model(self):
@@ -198,6 +219,17 @@ class DiffusionConfig(HasTraits):
 
 
 def strip_suffix(file_input, prefix):
+    """
+
+    Parameters
+    ----------
+    file_input
+    prefix
+
+    Returns
+    -------
+
+    """
     import os
     from nipype.utils.filemanip import split_filename
     path, _, _ = split_filename(file_input)
@@ -205,7 +237,9 @@ def strip_suffix(file_input, prefix):
 
 
 class DiffusionStage(Stage):
+    """
 
+    """
     def __init__(self, bids_dir, output_dir):
         self.name = 'diffusion_stage'
         self.bids_dir = bids_dir
@@ -217,7 +251,14 @@ class DiffusionStage(Stage):
                         "P0", "roi_volumes", "shore_maps", "mapmri_maps"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """
 
+        Parameters
+        ----------
+        flow
+        inputnode
+        outputnode
+        """
         if self.config.dilate_rois:
 
             dilate_rois = pe.MapNode(interface=fsl.DilateImage(), iterfield=[
@@ -534,6 +575,9 @@ class DiffusionStage(Stage):
         #             "Invalid tractography input format. Valid formats are .tck (MRtrix) and .trk (DTK/Trackvis)")
 
     def define_inspect_outputs(self):
+        """
+
+        """
         # print "stage_dir : %s" % self.stage_dir
 
         self.inspect_outputs_dict = {}
@@ -670,6 +714,12 @@ class DiffusionStage(Stage):
                                       key=str.lower)
 
     def has_run(self):
+        """
+
+        Returns
+        -------
+
+        """
         if self.config.tracking_processing_tool == 'Dipy':
             if self.config.diffusion_model == 'Deterministic':
                 return os.path.exists(os.path.join(self.stage_dir, "tracking", "dipy_deterministic_tracking",

@@ -490,6 +490,13 @@ def init_anat_project(project_info, is_new_project, debug=False):
 
 
 def update_anat_last_processed(project_info, pipeline):
+    """
+
+    Parameters
+    ----------
+    project_info
+    pipeline
+    """
     # last date
     if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
         # out_dirs = os.listdir(os.path.join(
@@ -524,6 +531,13 @@ def update_anat_last_processed(project_info, pipeline):
 
 
 def update_dmri_last_processed(project_info, pipeline):
+    """
+
+    Parameters
+    ----------
+    project_info
+    pipeline
+    """
     # last date
     if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
         # out_dirs = os.listdir(os.path.join(
@@ -554,6 +568,13 @@ def update_dmri_last_processed(project_info, pipeline):
 
 
 def update_fmri_last_processed(project_info, pipeline):
+    """
+
+    Parameters
+    ----------
+    project_info
+    pipeline
+    """
     # last date
     if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
         # out_dirs = os.listdir(os.path.join(

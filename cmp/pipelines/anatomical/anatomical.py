@@ -50,6 +50,9 @@ class Check_Input_Notification(HasTraits):
 
 
 class AnatomicalPipeline(cmp_common.Pipeline):
+    """
+
+    """
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("anatomical_pipeline")
     # input_folders = ['DSI','DTI','HARDI','T1','T2']
@@ -110,6 +113,12 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.update_parcellation_scheme, 'parcellation_scheme')
 
     def check_config(self):
+        """
+
+        Returns
+        -------
+
+        """
         if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation':
             if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
                 return (
@@ -129,22 +138,37 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return ''
 
     def update_parcellation_scheme(self):
+        """
+
+        """
         self.parcellation_scheme = self.stages['Parcellation'].config.parcellation_scheme
         self.atlas_info = self.stages['Parcellation'].config.atlas_info
 
     def update_parcellation(self):
+        """
+
+        """
         if self.stages['Segmentation'].config.seg_tool == "Custom segmentation":
             self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
         else:
             self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.pre_custom
 
     def update_segmentation(self):
+        """
+
+        """
         if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
             self.stages['Segmentation'].config.seg_tool = "Custom segmentation"
         else:
             self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
 
     def define_custom_mapping(self, custom_last_stage):
+        """
+
+        Parameters
+        ----------
+        custom_last_stage
+        """
         # start by disabling all stages
         for stage in self.ordered_stage_list:
             self.stages[stage].enabled = False
@@ -156,6 +180,17 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 break
 
     def check_input(self, layout, gui=True):
+        """
+
+        Parameters
+        ----------
+        layout
+        gui
+
+        Returns
+        -------
+
+        """
         print('**** Check Inputs  ****')
         t1_available = False
         t1_json_available = False
@@ -285,6 +320,12 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return valid_inputs
 
     def check_output(self):
+        """
+
+        Returns
+        -------
+
+        """
         t1_available = False
         brain_available = False
         brainmask_available = False
@@ -363,6 +404,17 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return valid_output, error_message
 
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
+        """
+
+        Parameters
+        ----------
+        cmp_deriv_subject_directory
+        nipype_deriv_subject_directory
+
+        Returns
+        -------
+
+        """
         # subject_directory = self.subject_directory
 
         # Data import
@@ -754,6 +806,12 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return anat_flow
 
     def process(self):
+        """
+
+        Returns
+        -------
+
+        """
         # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 

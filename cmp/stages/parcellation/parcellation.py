@@ -49,6 +49,9 @@ class ParcellationConfig(HasTraits):
     atlas_info = Dict()
 
     def update_atlas_info(self):
+        """
+
+        """
         atlas_name = os.path.basename(self.atlas_nifti_file)
         atlas_name = os.path.splitext(os.path.splitext(atlas_name)[0])[
             0].encode('ascii')
@@ -70,7 +73,9 @@ class ParcellationConfig(HasTraits):
 
 
 class ParcellationStage(Stage):
+    """
 
+    """
     def __init__(self, pipeline_mode, bids_dir, output_dir):
         self.name = 'parcellation_stage'
         self.bids_dir = bids_dir
@@ -98,11 +103,33 @@ class ParcellationStage(Stage):
             "parcellation_scheme", "atlas_info"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """
+
+        Parameters
+        ----------
+        flow
+        inputnode
+        outputnode
+
+        Returns
+        -------
+
+        """
         # from nipype.interfaces.fsl.maths import MathsCommand
 
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
 
         def get_basename(path):
+            """
+
+            Parameters
+            ----------
+            path
+
+            Returns
+            -------
+
+            """
             import os
             path = os.path.basename(path)
             print(path)
@@ -455,6 +482,9 @@ class ParcellationStage(Stage):
         #             ])
 
     def define_inspect_outputs(self):
+        """
+
+        """
         print("stage_dir : %s" % self.stage_dir)
         print("parcellation scheme : %s" % self.config.parcellation_scheme)
 
@@ -524,6 +554,12 @@ class ParcellationStage(Stage):
                                       key=str.lower)
 
     def has_run(self):
+        """
+
+        Returns
+        -------
+
+        """
         if self.config.parcellation_scheme != "Custom":
             if self.config.parcellation_scheme == 'Lausanne2018':
                 return os.path.exists(os.path.join(self.stage_dir, "parcCombiner", "result_parcCombiner.pklz"))

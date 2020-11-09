@@ -38,7 +38,9 @@ class ConnectomeConfig(HasTraits):
 
 
 class ConnectomeStage(Stage):
+    """
 
+    """
     def __init__(self, bids_dir, output_dir):
         self.name = 'connectome_stage'
         self.bids_dir = bids_dir
@@ -50,6 +52,14 @@ class ConnectomeStage(Stage):
         self.outputs = ["connectivity_matrices", "avg_timeseries"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """
+
+        Parameters
+        ----------
+        flow
+        inputnode
+        outputnode
+        """
         cmtk_cmat = pe.Node(interface=cmtklib.connectome.rsfmri_conmat(), name='compute_matrice')
         cmtk_cmat.inputs.output_types = self.config.output_types
         cmtk_cmat.inputs.apply_scrubbing = self.config.apply_scrubbing
@@ -66,6 +76,9 @@ class ConnectomeStage(Stage):
         ])
 
     def define_inspect_outputs(self):
+        """
+
+        """
         func_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'bold_sinker')
         func_sinker_report = os.path.join(func_sinker_dir, '_report', 'report.rst')
 
@@ -112,4 +125,10 @@ class ConnectomeStage(Stage):
                                           key=str.lower)
 
     def has_run(self):
+        """
+
+        Returns
+        -------
+
+        """
         return os.path.exists(os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"))

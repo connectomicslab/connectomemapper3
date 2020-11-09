@@ -40,7 +40,9 @@ class ConnectomeConfig(HasTraits):
 
 
 class ConnectomeStage(Stage):
+    """
 
+    """
     def __init__(self, bids_dir, output_dir):
         self.name = 'connectome_stage'
         self.bids_dir = bids_dir
@@ -58,6 +60,14 @@ class ConnectomeStage(Stage):
                         "streamline_final_file", "connectivity_matrices"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """
+
+        Parameters
+        ----------
+        flow
+        inputnode
+        outputnode
+        """
         cmtk_cmat = pe.Node(interface=cmtklib.connectome.CMTK_cmat(), name='compute_matrice')
         cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
         cmtk_cmat.inputs.output_types = self.config.output_types
@@ -100,6 +110,9 @@ class ConnectomeStage(Stage):
         ])
 
     def define_inspect_outputs(self):
+        """
+
+        """
         # print('inspect outputs connectome stage')
         dwi_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'diffusion_sinker')
         dwi_sinker_report = os.path.join(dwi_sinker_dir, '_report', 'report.rst')
@@ -173,4 +186,10 @@ class ConnectomeStage(Stage):
             # print(self.inspect_outputs)
 
     def has_run(self):
+        """
+
+        Returns
+        -------
+
+        """
         return os.path.exists(os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"))

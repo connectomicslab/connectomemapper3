@@ -114,6 +114,9 @@ class splitBvecBval(BaseInterface):
 
 
 class PreprocessingStage(Stage):
+    """
+
+    """
     # General and UI members
     def __init__(self, bids_dir, output_dir):
         self.name = 'preprocessing_stage'
@@ -128,6 +131,18 @@ class PreprocessingStage(Stage):
                         "roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """
+
+        Parameters
+        ----------
+        flow
+        inputnode
+        outputnode
+
+        Returns
+        -------
+
+        """
         # print inputnode
         processing_input = pe.Node(interface=util.IdentityInterface(
             fields=['diffusion', 'aparc_aseg', 'aseg', 'bvecs', 'bvals', 'grad', 'acqp', 'index', 'T1', 'brain',
@@ -176,6 +191,16 @@ class PreprocessingStage(Stage):
         concatnode = pe.Node(interface=util.Merge(2), name='concatnode')
 
         def convertList2Tuple(lists):
+            """
+
+            Parameters
+            ----------
+            lists
+
+            Returns
+            -------
+
+            """
             # print "******************************************",tuple(lists)
             return tuple(lists)
 
@@ -831,6 +856,9 @@ class PreprocessingStage(Stage):
         ])
 
     def define_inspect_outputs(self):
+        """
+
+        """
         # print "stage_dir : %s" % self.stage_dir
 
         if self.config.denoising:
@@ -885,6 +913,12 @@ class PreprocessingStage(Stage):
                                       key=str.lower)
 
     def has_run(self):
+        """
+
+        Returns
+        -------
+
+        """
         if not self.config.eddy_current_and_motion_correction:
             if not self.config.denoising and not self.config.bias_field_correction:
                 return True

@@ -39,6 +39,9 @@ class Check_Input_Notification(HasTraits):
 
 
 class fMRIPipeline(Pipeline):
+    """
+
+    """
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("fMRI_pipeline")
     input_folders = ['anat', 'func']
@@ -117,6 +120,9 @@ class fMRIPipeline(Pipeline):
         self.stages['Connectome'].config.subject = new
 
     def update_registration(self):
+        """
+
+        """
         # if self.seg_tool == "Custom segmentation":
         #     if self.stages['Registration'].config.registration_mode == 'BBregister (FS)':
         #         self.stages['Registration'].config.registration_mode = 'Linear (FSL)'
@@ -135,14 +141,26 @@ class fMRIPipeline(Pipeline):
                 'Linear (FSL)', 'BBregister (FS)']
 
     def update_nuisance_requirements(self):
+        """
+
+        """
         self.stages['Registration'].config.apply_to_eroded_brain = self.stages['FunctionalMRI'].config.global_nuisance
         self.stages['Registration'].config.apply_to_eroded_csf = self.stages['FunctionalMRI'].config.csf
         self.stages['Registration'].config.apply_to_eroded_wm = self.stages['FunctionalMRI'].config.wm
 
     def update_scrubbing(self):
+        """
+
+        """
         self.stages['FunctionalMRI'].config.scrubbing = self.stages['Connectome'].config.apply_scrubbing
 
     def define_custom_mapping(self, custom_last_stage):
+        """
+
+        Parameters
+        ----------
+        custom_last_stage
+        """
         # start by disabling all stages
         for stage in self.ordered_stage_list:
             self.stages[stage].enabled = False
@@ -154,6 +172,18 @@ class fMRIPipeline(Pipeline):
                 break
 
     def check_input(self, layout, gui=True, debug=False):
+        """
+
+        Parameters
+        ----------
+        layout
+        gui
+        debug
+
+        Returns
+        -------
+
+        """
         print('**** Check Inputs ****')
         fMRI_available = False
         fMRI_json_available = False
@@ -334,6 +364,12 @@ class fMRIPipeline(Pipeline):
         return valid_inputs
 
     def check_config(self):
+        """
+
+        Returns
+        -------
+
+        """
         if self.stages['FunctionalMRI'].config.motion is True and self.stages[
                 'Preprocessing'].config.motion_correction is False:
             return (
@@ -349,6 +385,12 @@ class fMRIPipeline(Pipeline):
         return ''
 
     def process(self):
+        """
+
+        Returns
+        -------
+
+        """
         # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 
@@ -445,7 +487,17 @@ class fMRIPipeline(Pipeline):
         # return True,'Processing sucessful'
 
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
+        """
 
+        Parameters
+        ----------
+        cmp_deriv_subject_directory
+        nipype_deriv_subject_directory
+
+        Returns
+        -------
+
+        """
         # subject_directory = self.subject_directory
 
         # datasource.inputs.subject = self.subject
@@ -640,6 +692,16 @@ class fMRIPipeline(Pipeline):
             interface=Merge(5), name='merge_roi_graphmls')
 
         def remove_non_existing_scales(roi_volumes):
+            """
+
+            Parameters
+            ----------
+            roi_volumes
+
+            Returns
+            -------
+
+            """
             out_roi_volumes = []
             for vol in roi_volumes:
                 if vol is not None:

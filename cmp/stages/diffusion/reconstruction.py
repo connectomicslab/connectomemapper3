@@ -138,6 +138,16 @@ class MRtrix_recon_config(HasTraits):
 
 
 def create_dipy_recon_flow(config):
+    """
+
+    Parameters
+    ----------
+    config
+
+    Returns
+    -------
+
+    """
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion",
                                                                  "diffusion_resampled",

@@ -33,6 +33,9 @@ class ProgressThread(threading.Thread):
     pw = Instance(ProgressWindow)
 
     def run(self):
+        """
+
+        """
         c = 0
 
         while (c < len(self.stage_names)):
@@ -60,6 +63,9 @@ class ProcessThread(threading.Thread):
     pipeline = Instance(Any)
 
     def run(self):
+        """
+
+        """
         self.pipeline.process()
 
 
@@ -117,6 +123,9 @@ class ProcessThread(threading.Thread):
 
 
 class Pipeline(HasTraits):
+    """
+
+    """
     # informations common to project_info
     base_directory = Directory
     output_directory = Directory
@@ -164,6 +173,12 @@ class Pipeline(HasTraits):
             #                                                 'cmp',self.subject,'tmp','nipype',self.pipeline_name,self.stages[stage].name)
 
     def check_config(self):
+        """
+
+        Returns
+        -------
+
+        """
         # if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation':
         #     if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
         #         return (
@@ -187,6 +202,16 @@ class Pipeline(HasTraits):
         return ''
 
     def create_stage_flow(self, stage_name):
+        """
+
+        Parameters
+        ----------
+        stage_name
+
+        Returns
+        -------
+
+        """
         stage = self.stages[stage_name]
         flow = pe.Workflow(name=stage.name)
         inputnode = pe.Node(interface=util.IdentityInterface(
@@ -198,11 +223,17 @@ class Pipeline(HasTraits):
         return flow
 
     def fill_stages_outputs(self):
+        """
+
+        """
         for stage in list(self.stages.values()):
             if stage.enabled:
                 stage.define_inspect_outputs()
 
     def clear_stages_outputs(self):
+        """
+
+        """
         for stage in list(self.stages.values()):
             if stage.enabled:
                 stage.inspect_outputs_dict = {}
@@ -215,6 +246,9 @@ class Pipeline(HasTraits):
                 #    os.remove(stage_res)
 
     def launch_process(self):
+        """
+
+        """
         pt = ProcessThread()
         pt.pipeline = self
         pt.start()

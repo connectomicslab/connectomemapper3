@@ -28,6 +28,12 @@ class Stage(HasTraits):
     config = Instance(HasTraits)
 
     def is_running(self):
+        """
+
+        Returns
+        -------
+
+        """
         unfinished_files = [os.path.join(dirpath, f)
                             for dirpath, dirnames, files in os.walk(self.stage_dir)
                             for f in files if f.endswith('_unfinished.json')]

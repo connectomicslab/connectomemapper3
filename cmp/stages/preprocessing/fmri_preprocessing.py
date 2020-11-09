@@ -34,6 +34,9 @@ class PreprocessingConfig(HasTraits):
 
 
 class PreprocessingStage(Stage):
+    """
+
+    """
     # General and UI members
     def __init__(self, bids_dir, output_dir):
         self.name = 'preprocessing_stage'
@@ -45,6 +48,14 @@ class PreprocessingStage(Stage):
         self.outputs = ["functional_preproc", "par_file", "mean_vol"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """
+
+        Parameters
+        ----------
+        flow
+        inputnode
+        outputnode
+        """
         discard_output = pe.Node(interface=util.IdentityInterface(
             fields=["discard_output"]), name="discard_output")
         if self.config.discard_n_volumes > 0:
@@ -145,6 +156,9 @@ class PreprocessingStage(Stage):
                 ])
 
     def define_inspect_outputs(self):
+        """
+
+        """
         # print('Stage (inspect_outputs): '.format(self.stage_dir))
         if self.config.despiking:
             despike_dir = os.path.join(self.stage_dir, "converter")
@@ -179,6 +193,12 @@ class PreprocessingStage(Stage):
         print(self.inspect_outputs)
 
     def has_run(self):
+        """
+
+        Returns
+        -------
+
+        """
         if self.config.motion_correction:
             return os.path.exists(os.path.join(self.stage_dir, "motion_correction", "result_motion_correction.pklz"))
         elif self.config.slice_timing:

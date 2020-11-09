@@ -42,7 +42,9 @@ class FunctionalMRIConfig(HasTraits):
 
 
 class FunctionalMRIStage(Stage):
+    """
 
+    """
     def __init__(self, bids_dir, output_dir):
         self.name = 'functional_stage'
         self.bids_dir = bids_dir
@@ -54,7 +56,14 @@ class FunctionalMRIStage(Stage):
         self.outputs = ["func_file", "FD", "DVARS"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """
 
+        Parameters
+        ----------
+        flow
+        inputnode
+        outputnode
+        """
         # smoothing_output = pe.Node(interface=util.IdentityInterface(fields=["smoothing_output"]),name="smoothing_output")
         # if self.config.smoothing > 0.0:
         #     smoothing = pe.Node(interface=fsl.SpatialFilter(operation='mean',kernel_shape = 'gauss'),name="smoothing")
@@ -197,7 +206,9 @@ class FunctionalMRIStage(Stage):
         ])
 
     def define_inspect_outputs(self):
+        """
 
+        """
         if self.config.wm or self.config.global_nuisance or self.config.csf or self.config.motion:
             res_dir = os.path.join(self.stage_dir, "nuisance_regression")
             nuis = os.path.join(res_dir, "fMRI_nuisance.nii.gz")
@@ -223,6 +234,12 @@ class FunctionalMRIStage(Stage):
                                       key=str.lower)
 
     def has_run(self):
+        """
+
+        Returns
+        -------
+
+        """
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             return os.path.exists(os.path.join(self.stage_dir, "temporal_filter", "result_temporal_filter.pklz"))
         elif self.config.detrending:

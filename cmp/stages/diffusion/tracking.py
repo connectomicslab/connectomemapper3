@@ -128,6 +128,16 @@ class MRtrix_tracking_config(HasTraits):
 
 
 def create_dipy_tracking_flow(config):
+    """
+
+    Parameters
+    ----------
+    config
+
+    Returns
+    -------
+
+    """
     flow = pe.Workflow(name="tracking")
     # inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(
@@ -295,11 +305,31 @@ def create_dipy_tracking_flow(config):
 
 
 def get_freesurfer_parcellation(roi_files):
+    """
+
+    Parameters
+    ----------
+    roi_files
+
+    Returns
+    -------
+
+    """
     print("%s" % roi_files[0])
     return roi_files[0]
 
 
 def create_mrtrix_tracking_flow(config):
+    """
+
+    Parameters
+    ----------
+    config
+
+    Returns
+    -------
+
+    """
     flow = pe.Workflow(name="tracking")
     # inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(
