@@ -125,226 +125,99 @@ class CMP_Project_InfoUI(CMP_Project_Info):
     """Class that extends the :class:`CMP_Project_Info` with graphical components.
 
     It supports graphically the setting of all processing properties / attributes
-    of the project.
+    of an :class:`CMP_Project_Info` instance.
 
     Attributes
     -----------
-    creation_mode
+    creation_mode <traits.Enum>
+        Mode for loading the dataset. Valid values are
+        'Load BIDS dataset', 'Install Datalad BIDS dataset'
 
-    base_directory
+    install_datalad_dataset_via_ssh <traits.Bool>
+        If set to True install the datalad dataset from a remote server
+        via ssh.(True by default)
 
-    install_datalad_dataset_via_ssh
+    ssh_user <traits.String>
+        Remote server username.
+        (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    ssh_user
+    ssh_pwd <traits.Password>
+        Remote server password.
+        (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    ssh_pwd
+    ssh_remote <traits.String>
+        Remote server IP or URL.
+        (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    ssh_remote
+    datalad_dataset_path <traits.Directory>
+        Path to the datalad dataset on the remote server. 
+        (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    datalad_dataset_path
+    summary_view_button <traitsui.Button>
+        Button that shows the pipeline processing summary table
 
-    summary_view_button <Button>
-        ('Pipeline processing summary')
+    pipeline_processing_summary_view <traits.ui.VGroup>
+        TraitsUI VGroup that contains ``Item('pipeline_processing_summary')``
 
-    pipeline_processing_summary_view <VGroup>
-        TraitsUI VGroup that contains``Item('pipeline_processing_summary')``
+    dataset_view <traits.ui.View>
+        TraitsUI View that shows a summary of project settings and
+        modality available for a given subject
 
-    dataset_view <View>
-        TraitsUI View that
+    traits_view <QtView>
+        TraitsUI QtView that includes the View 'dataset_view'
 
-    traits_view = QtView(Include('dataset_view'))
+    create_view <traits.ui.View>
+        Dialog view to create a BIDS Dataset
 
-    create_view = View(
-        # Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
-        Item('creation_mode', style='custom'),
-        Group(
-            Group(
-                Item('base_directory', label='BIDS Dataset'),
-                visible_when='creation_mode=="Load BIDS dataset"'),
-            Group(
-                Item('install_datalad_dataset_via_ssh'),
-                visible_when='creation_mode=="Install Datalad/BIDS dataset"'),
-            Group(
-                Item('ssh_remote', label='Remote ssh server',
-                     visible_when='install_datalad_dataset_via_ssh'),
-                Item('ssh_user', label='Remote username',
-                     visible_when='install_datalad_dataset_via_ssh'),
-                Item('ssh_pwd', label='Remote password',
-                     visible_when='install_datalad_dataset_via_ssh'),
-                Item('datalad_dataset_path',
-                     label='Datalad/BIDS Dataset Path/URL to be installed'),
-                Item('base_directory', label='Installation directory'),
-                visible_when='creation_mode=="Install Datalad/BIDS dataset"'),
-        ),
-        kind='livemodal',
-        title='Data creation: BIDS dataset selection',
-        # style_sheet=style_sheet,
-        width=modal_width,
-        buttons=['OK', 'Cancel'])
+    subject_view <traits.ui.View>
+        Dialog view to select of subject
 
-    subject_view = View(
-        Group(
-            Item('subject', label='Selected Subject'),
-            # Item('session',label='Session to be processed'),
-            # Item('diffusion_imaging_model',style='custom'),
-        ),
-        kind='modal',
-        title='Subject and session selection',
-        # style_sheet=style_sheet,
-        width=modal_width,
-        buttons=['OK', 'Cancel'])
+    subject_session_view <traits.ui.View>
+        Dialog view to select the subject session
 
-    subject_session_view = View(
-        Group(
-            Item('subject', style='readonly', label='Selected Subject'),
-            Item('subject_session', label='Selected Session'),
-        ),
-        kind='modal',
-        title='Session selection',
-        # style_sheet=style_sheet,
-        width=modal_width,
-        buttons=['OK', 'Cancel'])
+    dmri_bids_acq_view <traits.ui.View>
+        Dialog view to select the diffusion acquisition model
 
-    dmri_bids_acq_view = View(
-        Group(
-            Item('dmri_bids_acq', label='Selected model'),
-        ),
-        kind='modal',
-        title='Selection of diffusion acquisition model',
-        # style_sheet=style_sheet,
-        width=modal_width,
-        buttons=['OK', 'Cancel'])
+    anat_warning_view <traits.ui.View>
+        View that displays a warning message regarding
+        the anatomical T1w data
 
-    anat_warning_view = View(
-        Group(
-            Item('anat_warning_msg', style='readonly', show_label=False),
-        ),
-        title='Warning : Anatomical T1w data',
-        kind='modal',
-        width=modal_width,
-        # style_sheet=style_sheet,
-        buttons=['OK', 'Cancel'])
+    anat_config_error_view <traits.ui.View>
+        Error view that displays an error message regarding
+        the configuration of the anatomical pipeline
 
-    anat_config_error_view = View(
-        Group(
-            Item('anat_config_error_msg', style='readonly', show_label=False),
-        ),
-        title='Error',
-        kind='modal',
-        width=modal_width,
-        # style_sheet=style_sheet,
-        buttons=['OK', 'Cancel'])
+    dmri_warning_view <traits.ui.View>
+        View that displays a warning message regarding
+        the diffusion MRI data
 
-    dmri_warning_view = View(
-        Group(
-            Item('dmri_warning_msg', style='readonly', show_label=False),
-        ),
-        title='Warning : Diffusion MRI data',
-        kind='modal',
-        width=modal_width,
-        # style_sheet=style_sheet,
-        buttons=['OK', 'Cancel'])
+    dmri_config_error_view <traits.ui.View>
+        View that displays an error message regarding
+        the configuration of the diffusion pipeline
 
-    dmri_config_error_view = View(
-        Group(
-            Item('dmri_config_error_msg', style='readonly', show_label=False),
-        ),
-        title='Error',
-        kind='modal',
-        width=modal_width,
-        # style_sheet=style_sheet,
-        buttons=['OK', 'Cancel'])
+    fmri_warning_view <traits.ui.View>
+        View that displays a warning message regarding
+        the functional MRI data
 
-    fmri_warning_view = View(
-        Group(
-            Item('fmri_warning_msg', style='readonly', show_label=False),
-        ),
-        title='Warning : fMRI data',
-        kind='modal',
-        width=modal_width,
-        # style_sheet=style_sheet,
-        buttons=['OK', 'Cancel'])
+    fmri_config_error_view <traits.ui.View>
+        View that displays an error message regarding
+        the configuration of the fMRI pipeline
 
-    fmri_config_error_view = View(
-        Group(
-            Item('fmri_config_error_msg', style='readonly', show_label=False),
-        ),
-        title='Error',
-        kind='modal',
-        width=modal_width,
-        # style_sheet=style_sheet,
-        buttons=['OK', 'Cancel'])
+    open_view <traits.ui.View>
+        Dialog view to load a BIDS Dataset
 
-    open_view = View(
-        # Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
-        Item('creation_mode', label='Mode'),
-        Group(
-            Item('install_datalad_dataset_via_ssh'),
-            Item('ssh_remote', label='Remote ssh server',
-                 visible_when='install_datalad_dataset_via_ssh'),
-            Item('ssh_user', label='Remote username',
-                 visible_when='install_datalad_dataset_via_ssh'),
-            Item('ssh_pwd', label='Remote password',
-                 visible_when='install_datalad_dataset_via_ssh'),
-            Item('datalad_dataset_path',
-                 label='Datalad/BIDS Dataset Path/URL to be installed'),
-            Item('base_directory', label='Installation directory'),
-            visible_when='creation_mode=="Install Datalad BIDS dataset"'),
-        Group(
-            Item('base_directory', label='BIDS Dataset'),
-            visible_when='creation_mode=="Load BIDS dataset"'),
-        kind='livemodal',
-        title='BIDS Dataset Creation/Loading',
-        # style_sheet=style_sheet,
-        width=600,
-        height=250,
-        buttons=['OK', 'Cancel'])
+    anat_select_config_to_load <traits.ui.View>
+        Dialog view to load the configuration file of the anatomical pipeline
 
-    anat_select_config_to_load = View(
-        Group(
-            Item('anat_config_to_load_msg', style='readonly', show_label=False),
-            Item('anat_config_to_load', style='custom', editor=EnumEditor(name='anat_available_config'),
-                 show_label=False),
-        ),
-        title='Select configuration for anatomical pipeline',
-        kind='modal',
-        width=modal_width,
-        # style_sheet=style_sheet,
-        buttons=['OK', 'Cancel'])
-
-    diffusion_imaging_model_select_view = View(
-        Group(
-            Item('diffusion_imaging_model', label='Diffusion MRI modality'),
-        ),
-        title='Please select diffusion MRI modality',
-        kind='modal',
-        width=modal_width,
-        buttons=['OK', 'Cancel'])
+    diffusion_imaging_model_select_view <traits.ui.View>
+        Dialog view to select the diffusion acquisition model
 
     dmri_select_config_to_load = View(
-        Group(
-            Item('dmri_config_to_load_msg', style='readonly', show_label=False),
-        ),
-        Item('dmri_config_to_load', style='custom', editor=EnumEditor(
-            name='dmri_available_config'), show_label=False),
-        title='Select configuration for diffusion pipeline',
-        kind='modal',
-        width=modal_width,
-        # style_sheet=style_sheet,
-        buttons=['OK', 'Cancel'])
+        Dialog view to load the configuration file of the diffusion MRI pipeline
 
     fmri_select_config_to_load = View(
-        Group(
-            Item('fmri_config_to_load_msg', style='readonly', show_label=False),
-        ),
-        Item('fmri_config_to_load', style='custom', editor=EnumEditor(
-            name='fmri_available_config'), show_label=False),
-        title='Select configuration for fMRI pipeline',
-        kind='modal',
-        width=modal_width,
-        # style_sheet=style_sheet,
-        buttons=['OK', 'Cancel'])
+        Dialog view to load the configuration file of the fMRI pipeline
     """
+
     creation_mode = Enum('Load BIDS dataset', 'Install Datalad BIDS dataset')
     install_datalad_dataset_via_ssh = Bool(True)
     ssh_user = String('remote_username')
@@ -364,20 +237,19 @@ class CMP_Project_InfoUI(CMP_Project_Info):
 
     summary_view_button = Button('Pipeline processing summary')
 
-    pipeline_processing_summary_view = VGroup(
-        Item('pipeline_processing_summary'),
-    )
+    pipeline_processing_summary_view = VGroup(Item('pipeline_processing_summary'))
+
     dataset_view = VGroup(
         VGroup(
             HGroup(
-                # '20',Item('base_directory',width=-0.3,height=-0.2, style='custom',show_label=False,resizable=True),
                 Item('base_directory', width=-0.3,
                      style='readonly', label="", resizable=True),
-                Item('number_of_subjects', width=-0.3, style='readonly', label="Number of participants",
+                Item('number_of_subjects',
+                     width=-0.3,
+                     style='readonly',
+                     label="Number of participants",
                      resizable=True),
                 'summary_view_button'),
-            # HGroup(subj
-            #     '20',Item('root',editor=TreeEditor(editable=False, auto_open=1),show_label=False,resizable=True)),
             label='BIDS Dataset'),
         spring,
         HGroup(
@@ -388,8 +260,7 @@ class CMP_Project_InfoUI(CMP_Project_Info):
                 Item('subject_session', style='simple',
                      label="Session", resizable=True),
                 visible_when='subject_session!=""'),
-            springy=True
-        ),
+            springy=True),
         spring,
         Group(
             Item('t1_available', style='readonly', label='T1', resizable=True),
@@ -397,32 +268,26 @@ class CMP_Project_InfoUI(CMP_Project_Info):
                 Item('dmri_available', style='readonly',
                      label='Diffusion', resizable=True),
                 Item('diffusion_imaging_model', label='Model',
-                     resizable=True, enabled_when='dmri_available'),
-            ),
+                     resizable=True, enabled_when='dmri_available')),
             Item('fmri_available', style='readonly',
                  label='BOLD', resizable=True),
-            # Item('t1_available',style='readonly',label='T1',resizable=True),
-            label='Modalities'
-        ),
+            label='Modalities'),
         spring,
         Group(
-
-            Item('anat_last_date_processed', label="Anatomical pipeline", style='readonly', resizable=True,
+            Item('anat_last_date_processed', label="Anatomical pipeline",
+                 style='readonly', resizable=True,
                  enabled_when='t1_available'),
-
-            Item('dmri_last_date_processed', label="Diffusion pipeline", style='readonly', resizable=True,
+            Item('dmri_last_date_processed', label="Diffusion pipeline",
+                 style='readonly', resizable=True,
                  enabled_when='dmri_available'),
-
-            Item('fmri_last_date_processed', label="fMRI pipeline", style='readonly', resizable=True,
+            Item('fmri_last_date_processed', label="fMRI pipeline",
+                 style='readonly', resizable=True,
                  enabled_when='fmri_available'),
-
-            label="Last date processed"
-        ),
+            label="Last date processed"),
         spring,
         Group(
             Item('number_of_cores', resizable=True),
-            label='Processing configuration'
-        ),
+            label='Processing configuration'),
         '550',
         spring,
         springy=True)
@@ -430,7 +295,6 @@ class CMP_Project_InfoUI(CMP_Project_Info):
     traits_view = QtView(Include('dataset_view'))
 
     create_view = View(
-        # Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
         Item('creation_mode', style='custom'),
         Group(
             Group(
@@ -459,9 +323,7 @@ class CMP_Project_InfoUI(CMP_Project_Info):
 
     subject_view = View(
         Group(
-            Item('subject', label='Selected Subject'),
-            # Item('session',label='Session to be processed'),
-            # Item('diffusion_imaging_model',style='custom'),
+            Item('subject', label='Selected Subject')
         ),
         kind='modal',
         title='Subject and session selection',
@@ -551,7 +413,6 @@ class CMP_Project_InfoUI(CMP_Project_Info):
         buttons=['OK', 'Cancel'])
 
     open_view = View(
-        # Item('process_type',style='custom'),Item('diffusion_imaging_model',style='custom',visible_when='process_type=="diffusion"'),
         Item('creation_mode', label='Mode'),
         Group(
             Item('install_datalad_dataset_via_ssh'),
@@ -579,7 +440,7 @@ class CMP_Project_InfoUI(CMP_Project_Info):
         Group(
             Item('anat_config_to_load_msg', style='readonly', show_label=False),
             Item('anat_config_to_load', style='custom', editor=EnumEditor(name='anat_available_config'),
-                 show_label=False),
+                 show_label=False)
         ),
         title='Select configuration for anatomical pipeline',
         kind='modal',
@@ -658,8 +519,7 @@ class CMP_Project_InfoUI(CMP_Project_Info):
 
 
 class MultiSelectAdapter(TabularAdapter):
-    """ This adapter is used by both the left and right tables
-    """
+    """This adapter is used by both the left and right tables."""
 
     # Titles and column names for each column of a table.
     # In this example, each table has only one column.
@@ -670,14 +530,96 @@ class MultiSelectAdapter(TabularAdapter):
     # 'myvalue'. This is done using a Traits Property and its getter:
     myvalue_text = Property
 
-    # The getter for Property 'myvalue_text' simply takes the value of the
-    # corresponding item in the list being displayed in this table.
-    # A more complicated example could format the item before displaying it.
     def _get_myvalue_text(self):
+        """The getter for Property 'myvalue_text'.
+
+        It simply takes the value of the corresponding item in the list
+        being displayed in this table. A more complicated example could
+        format the item before displaying it.
+        """
         return 'sub-%s' % self.item
 
 
 class CMP_BIDSAppWindow(HasTraits):
+    """Class that defines the Window of the BIDS App Interface.
+
+    Attributes
+    ----------
+    project_info <CMP_Project_Info>
+        Instance of :class:`CMP_Project_Info` that represents the processing project
+
+    bids_root <traits.Directory>
+        BIDS root dataset directory
+
+    output_dir <traits.Directory>
+        Output directory
+
+    subjects <traits.List(Str)>
+        List of subjects (in the form ``sub-XX``) present in the dataset
+
+    number_of_participants_processed_in_parallel <traits.Range>
+        Number of participants / subjects to be processed in parallel that
+        takes values in the [1, # of CPUs - 1] range
+
+    number_threads_max <traits.Int>
+        Maximal number of threads to be used by OpenMP programs
+        (4 by default)
+
+    number_of_threads <traits.Range>
+        Number of threads to be used by OpenMP programs that takes values
+        in the [1, ``number_threads_max``] range
+
+    fs_file <traits.File>
+        Path to Freesurfer license file
+
+    list_of_subjects_to_be_processed <List(Str)>
+        Selection of subjects to be processed from the ``subjects`` list
+
+    anat_config <traits.File>
+        Configuration file for the anatomical MRI pipeline
+
+    dmri_config <traits.File>
+        Configuration file for the diffusion MRI pipeline
+
+    fmri_config <traits.File>
+        Configuration file for the functional MRI pipeline
+
+    run_anat_pipeline <traits.Bool>
+        If True, run the anatomical pipeline
+
+    run_dmri_pipeline <traits.Bool>
+        If True, run the diffusion pipeline
+
+    run_fmri_pipeline <traits.Bool>
+        If True, run the functional pipeline
+
+    bidsapp_tag <traits.Enum>
+        Selection of BIDS App version to use
+
+    data_provenance_tracking <traits.Bool>
+        If set and if ``datalad_is_available`` is True run the BIDS App
+        using datalad (False by default)
+
+    datalad_update_environment <traits.Bool>
+        If True and ``data_provenance_tracking`` is True, tell to datalad
+        to update the BIDS App container image if there was a previous 
+        execution (True by default)
+
+    datalad_is_available <traits.Bool>
+        Boolean used to store if datalad is available in the computing 
+        environment (False by default)
+
+    check <traits.ui.Button>
+        Button to check if all parameters are properly set for execution
+        of the BIDS App
+
+    start_bidsapp <traits.ui.Button>
+        Button to run the BIDS App
+
+    traits_view <QtView>
+        TraitsUI QtView that describes the content of the window
+    """
+
     project_info = Instance(CMP_Project_Info)
 
     bids_root = Directory()
@@ -695,8 +637,6 @@ class CMP_BIDSAppWindow(HasTraits):
                               high='number_of_threads_max',
                               desc='Number of threads used by ANTs registration'
                                    'and Freesurfer recon-all')
-
-    # handler = Instance(project.CMP_BIDSAppWindowHandler)
 
     fs_license = File()
     # fs_average = Directory(os.path.join(os.environ['FREESURFER_HOME'],'subjects','fsaverage'))
@@ -845,7 +785,31 @@ class CMP_BIDSAppWindow(HasTraits):
 
     def __init__(self, project_info=None, bids_root='', subjects=None, list_of_subjects_to_be_processed=None,
                  anat_config='', dmri_config='', fmri_config=''):
+        """Constructor of an :class:``CMP_BIDSAppWindow`` instance.
 
+        Parameters
+        ----------
+        project_info
+            :class:`CMP_Project_Info` object (Default: None)
+
+        bids_root <traits.Directory>
+            BIDS dataset root directory (Default: \'\')
+
+        subjects
+            List of subjects in the dataset (Default: None)
+
+        list_of_subjects_to_be_processed <traits.List(traits.Str)>
+            List of subjects to be processed (Default: None)
+
+        anat_config
+            Path to anatomical pipeline configuration file (Default: \'\')
+
+        dmri_config
+            Path to diffusion pipeline configuration file (Default: \'\')
+
+        fmri_config
+            Path to functional pipeline configuration file (Default: \'\')
+        """
         if multiprocessing.cpu_count() < 4:
             number_of_threads_max = multiprocessing.cpu_count()
 
@@ -871,15 +835,6 @@ class CMP_BIDSAppWindow(HasTraits):
 
         self.datalad_is_available = project.is_tool('datalad')
 
-        # print(self.list_of_subjects_to_be_processed)
-        # print(self.bids_root)
-        # print(self.anat_config)
-        # print(self.dmri_config)
-        # print(self.fmri_config)
-        # print(self.fs_license)
-        # print(self.fs_average)
-
-        # self.on_trait_change(self.update_run_anat_pipeline,'run_anat_pipeline')
         self.on_trait_change(
             self.update_run_dmri_pipeline, 'run_dmri_pipeline')
         self.on_trait_change(
@@ -899,6 +854,7 @@ class CMP_BIDSAppWindow(HasTraits):
         # self.on_trait_change(self.update_checksettings, 'fs_average')
 
     def number_of_parallel_procs_updated(self, new):
+        """Callback function when ``number_of_parallel_procs`` is updated."""
         number_of_threads_max = int((multiprocessing.cpu_count() - 1) / new)
 
         if number_of_threads_max > 4:
@@ -908,38 +864,38 @@ class CMP_BIDSAppWindow(HasTraits):
 
         print('Set number of threads max to : {}'.format(self.number_of_threads_max))
 
-
     def update_run_anat_pipeline(self, new):
-        # print('Update run anat: %s'%new)
-        # print('Update run anat: %s'%self.run_anat_pipeline)
+        """Callback function when ``run_anat_pipeline`` is updated."""
         if new is False:
             print('At least anatomical pipeline should be run!')
             self.run_anat_pipeline = True
 
     def update_run_dmri_pipeline(self, new):
-        # print('Update run diffusion: %s'%new)
-        # print('Update run diffusion: %s'%self.run_dmri_pipeline)
+        """Callback function when ``run_dmri_pipeline`` is updated."""
         self.run_anat_pipeline = True
 
     def update_run_fmri_pipeline(self, new):
-        # print('Update run fmri: %s'%new)
-        # print('Update run fmri: %s'%self.run_fmri_pipeline)
+        """Callback function when ``run_fmri_pipeline`` is updated."""
         self.run_anat_pipeline = True
 
     def update_checksettings(self, new):
-        # print("RESET Check BIDS App Settings")
+        """Function that reset ``settings_checked`` attribute to False."""
         self.settings_checked = False
 
     def _update_selection_fired(self):
+        """Callback function when the list of selected subjects has been updated."""
         self.configure_traits(view='select_subjects_to_be_processed_view')
 
     def _check_fired(self):
+        """Callback function when the Check Setting button is clicked."""
         self.check_settings()
 
     def _start_bidsapp_fired(self):
+        """Callback function when the Run BIDS App button is clicked."""
         self.start_bids_app()
 
     def check_settings(self):
+        """Checks if all the parameters of the BIDS App run are properly set before execution."""
         self.settings_checked = True
 
         if os.path.isdir(self.bids_root):
@@ -1007,6 +963,17 @@ class CMP_BIDSAppWindow(HasTraits):
         return True
 
     def start_bidsapp_participant_level_process(self, bidsapp_tag, participant_labels):
+        """Create and run the BIDS App command.
+
+        Parameters
+        ----------
+        bidsapp_tag <traits.Str>
+            Version tag of the CMP 3 BIDS App
+
+        participants_labels <traits.List(Str)>
+            List of participants labels in the form ["01", "03", "04", ...]
+        """
+
         cmd = ['docker', 'run', '-it', '--rm',
                ##'-v', '{}:/bids_dataset'.format(self.bids_root),
                ##'-v', '{}/derivatives:/outputs'.format(self.bids_root),
@@ -1073,6 +1040,16 @@ class CMP_BIDSAppWindow(HasTraits):
         return proc
 
     def start_bidsapp_participant_level_process_with_datalad(self, bidsapp_tag, participant_labels):
+        """Create and run the BIDS App command with Datalad.
+
+        Parameters
+        ----------
+        bidsapp_tag <traits.Str>
+            Version tag of the CMP 3 BIDS App
+
+        participants_labels <traits.List(Str)>
+            List of participants labels in the form ["01", "03", "04", ...]
+        """
         cmd = ['datalad', 'containers-run', ]
 
         cmd.append('--container-name')
@@ -1156,12 +1133,40 @@ class CMP_BIDSAppWindow(HasTraits):
 
     @classmethod
     def manage_bidsapp_procs(self, proclist):
+        """Manage parallelized process at the participant level
+
+        Parameters
+        ----------
+        proclist <traits.List(subprocess.Popen)>
+            List of Popen processes
+        """
         for proc in proclist:
             if proc.poll() is not None:
                 proclist.remove(proc)
 
     @classmethod
     def run(self, command, env=None, cwd=os.getcwd()):
+        """Function to run datalad commands.
+
+        It runs the command specified as input via ``subprocess.run()``.
+
+        Parameters
+        ----------
+        command <string>
+            String containing the command to be executed (required)
+
+        env <os.environ>
+            Specify a custom os.environ
+
+        cwd <Directory>
+            Specify a custom current working directory
+
+        Examples
+        --------
+        >>> cmd = 'data save - 'Save the state of the dataset'
+        >>> run(cmd)
+
+        """
         merged_env = os.environ
         if env is not None:
             merged_env.update(env)
@@ -1178,6 +1183,11 @@ class CMP_BIDSAppWindow(HasTraits):
             raise Exception("Non zero return code: %d" % process.returncode)
 
     def start_bids_app(self):
+        """Function executed when the Run BIDS App button is clicked.
+
+        It implements all steps in the creation and execution of the BIDS App
+        with or without datalad.
+        """
         print("Start BIDS App")
 
         # Copy freesurfer license into dataset/code directory at the location
@@ -1376,16 +1386,6 @@ class CMP_BIDSAppWindow(HasTraits):
 
         self.docker_running = True
 
-        # for label in self.list_of_subjects_to_be_processed:
-        #     while len(processes) == maxprocs:
-        #         self.manage_bidsapp_procs(processes)
-        #
-        #     proc = self.start_bidsapp_participant_level_process(self.bidsapp_tag,label)
-        #     processes.append(proc)
-        #
-        # while len(processes) > 0:
-        #     self.manage_bidsapp_procs(processes)
-
         if self.datalad_is_available and self.data_provenance_tracking:
 
             proc = self.start_bidsapp_participant_level_process_with_datalad(self.bidsapp_tag,
@@ -1443,30 +1443,57 @@ class CMP_BIDSAppWindow(HasTraits):
     #     self.docker_running = False
     #     return True
 
-    # def __init__(self,ui_info):
-    #
-    #     print ui_info.ui.context["object"].project_info
-    #
-    #     self.anat_config = ui_info.ui.context["object"].project_info.anat_config_to_load
-    #
-    #     if ui_info.ui.context["object"].project_info.dmri_config_to_load is not None:
-    #         self.dmri_config = ui_info.ui.context["object"].project_info.dmri_config_to_load
-    #     if ui_info.ui.context["object"].project_info.fmri_config_to_load is not None:
-    #         self.fmri_config = ui_info.ui.context["object"].project_info.fmri_config_to_load
-    #
-    #     self.bids_root = ui_info.ui.context["object"].project_info.base_directory
-    #     self.subjects = ui_info.ui.context["object"].project_info.subjects
-    #     self.list_of_subjects_to_be_processed = ui_info.ui.context["object"].project_info.subjects
 
-
-# Main window class of the ConnectomeMapper_Pipeline Configurator
-#
 class CMP_ConfiguratorWindow(HasTraits):
+    """Class that defines the Configurator Window.
+
+    Attributes
+    ----------
+    project_info <CMP_Project_Info>
+        Instance of :class:`CMP_Project_Info` that represents the processing project
+
+    anat_pipeline <HasTraits>
+        Instance of anatomical MRI pipeline UI
+
+    dmri_pipeline <HasTraits>
+        Instance of diffusion MRI pipeline UI
+
+    fmri_pipeline <HasTraits>
+        Instance of functional MRI pipeline UI
+
+    anat_inputs_checked <traits.Bool>
+            Boolean that indicates if anatomical pipeline inputs are available
+            (Default: False)
+
+        dmri_inputs_checked = <traits.Bool>
+            Boolean that indicates if diffusion pipeline inputs are available
+            (Default: False)
+
+        fmri_inputs_checked <traits.Bool>
+            Boolean that indicates if functional pipeline inputs are available
+            (Default: False)
+
+    anat_save_config <traits.ui.Action>
+        TraitsUI Action to save the anatomical pipeline configuration
+
+    dmri_save_config = Action(
+        TraitsUI Action to save the diffusion pipeline configuration
+
+    fmri_save_config = Action(
+        TraitsUI Action to save the functional pipeline configuration
+
+    save_all_config <traits.ui.Button>
+        Button to save all configuration files at once
+
+    traits_view = QtView
+        TraitsUI QtView that describes the content of the window
+    """
+
+    project_info = Instance(CMP_Project_Info)
+
     anat_pipeline = Instance(HasTraits)
     dmri_pipeline = Instance(HasTraits)
     fmri_pipeline = Instance(HasTraits)
-
-    project_info = Instance(CMP_Project_Info)
 
     anat_inputs_checked = Bool(False)
     dmri_inputs_checked = Bool(False)
@@ -1487,62 +1514,85 @@ class CMP_ConfiguratorWindow(HasTraits):
 
     traits_view = QtView(
         Group(
-            # Group(
-            #     # Include('dataset_view'),label='Data manager',springy=True
-            #     Item('project_info',style='custom',show_label=False),label='Data manager',springy=True, dock='tab'
-            # ),
             Group(
                 Item('anat_pipeline', style='custom', show_label=False),
-                label='Anatomical pipeline', dock='tab'
-            ),
+                label='Anatomical pipeline', dock='tab'),
             Group(
                 Item('dmri_pipeline', style='custom', show_label=False,
                      enabled_when='dmri_inputs_checked'),
-                label='Diffusion pipeline', dock='tab'
-            ),
+                label='Diffusion pipeline', dock='tab'),
             Group(
                 Item('fmri_pipeline', style='custom', show_label=False,
                      enabled_when='fmri_inputs_checked'),
-                label='fMRI pipeline', dock='tab'
-            ),
-            orientation='horizontal', layout='tabbed', springy=True, enabled_when='anat_inputs_checked'),
+                label='fMRI pipeline', dock='tab'),
+            orientation='horizontal', layout='tabbed',
+            springy=True, enabled_when='anat_inputs_checked'),
         spring,
-        HGroup(spring, Item('save_all_config', style='custom', width=160, height=20, resizable=False, label='',
+        HGroup(spring, Item('save_all_config',
+                            style='custom',
+                            width=160, height=20,
+                            resizable=False,
+                            label='',
                             show_label=False,
                             editor_args={
-                                'image': ImageResource(pkg_resources.resource_filename('resources',
-                                                                                       os.path.join('buttons',
-                                                                                                    'configurator-saveall.png'))),
+                                'image': ImageResource(
+                                    pkg_resources.resource_filename(
+                                        'resources',
+                                        os.path.join('buttons','configurator-saveall.png'))),
                                 'label': "", 'label_value': ""},
                             enabled_when='anat_inputs_checked==True'),
                spring,
                show_labels=False, label=""),
-
         title='Connectome Mapper 3 Configurator',
         menubar=MenuBar(
             Menu(
                 ActionGroup(
                     anat_save_config,
                     dmri_save_config,
-                    fmri_save_config,
-                ),
+                    fmri_save_config),
                 ActionGroup(
-                    Action(name='Quit', action='_on_close'),
-                ),
-                name='File'),
-        ),
+                    Action(name='Quit', action='_on_close')),
+                name='File')),
         handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
-        # buttons = [anat_save_config, dmri_save_config, fmri_save_config,],
         buttons=[],
-        # buttons = [preprocessing, map_connectome, map_custom],
         width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
         icon=ImageResource('configurator.png')
     )
 
     def __init__(self, project_info=None, anat_pipeline=None, dmri_pipeline=None, fmri_pipeline=None,
                  anat_inputs_checked=False, dmri_inputs_checked=False, fmri_inputs_checked=False):
+        """Constructor of an :class:``CMP_ConfiguratorWindow`` instance.
 
+        Parameters
+        ----------
+        project_info
+            :class:`CMP_Project_Info` object (Default: None)
+
+        anat_pipeline <cmp.bidsappmanager.pipelines.anatomical.AnatomicalPipelineUI>
+            Instance of :class:`cmp.bidsappmanager.pipelines.anatomical.AnatomicalPipelineUI`
+            (Default: None)
+
+        dmri_pipeline <cmp.bidsappmanager.pipelines.diffusion.DiffusionPipelineUI>
+            Instance of :class:`cmp.bidsappmanager.pipelines.diffusion.DiffusionPipelineUI`
+            (Default: None)
+
+        fmri_pipeline <cmp.bidsappmanager.pipelines.functional.fMRIPipelineUI>
+            Instance of :class:`cmp.bidsappmanager.pipelines.functional.fMRIPipelineUI`
+            (Default: None)
+
+        anat_inputs_checked <traits.Bool>
+            Boolean that indicates if anatomical pipeline inputs are available
+            (Default: False)
+
+        dmri_inputs_checked = <traits.Bool>
+            Boolean that indicates if diffusion pipeline inputs are available
+            (Default: False)
+
+        fmri_inputs_checked <traits.Bool>
+            Boolean that indicates if functional pipeline inputs are available
+            (Default: False)
+        """
         self.project_info = project_info
 
         self.anat_pipeline = anat_pipeline
@@ -1561,8 +1611,6 @@ class CMP_ConfiguratorWindow(HasTraits):
         self.anat_inputs_checked = anat_inputs_checked
         self.dmri_inputs_checked = dmri_inputs_checked
         self.fmri_inputs_checked = fmri_inputs_checked
-
-        # self.on_trait_change(self.update_run_anat_pipeline,'run_anat_pipeline')
 
     def update_diffusion_imaging_model(self, new):
         self.dmri_pipeline.diffusion_imaging_model = new
@@ -1592,11 +1640,55 @@ class CMP_ConfiguratorWindow(HasTraits):
 # Window class of the ConnectomeMapper_Pipeline Quality Inspector
 #
 class CMP_InspectorWindow(HasTraits):
+    """Class that defines the Configurator Window.
+
+    Attributes
+    ----------
+    project_info <CMP_Project_Info>
+        Instance of :class:`CMP_Project_Info` that represents the processing project
+
+    anat_pipeline <HasTraits>
+        Instance of anatomical MRI pipeline
+
+    dmri_pipeline <HasTraits>
+        Instance of diffusion MRI pipeline
+
+    fmri_pipeline <HasTraits>
+        Instance of functional MRI pipeline
+
+    anat_inputs_checked <traits.Bool>
+        Indicates if inputs of anatomical pipeline are available 
+        (Default: False)
+
+    dmri_inputs_checked = <traits.Bool>
+        Indicates if inputs of diffusion pipeline are available 
+        (Default: False)
+
+    fmri_inputs_checked <traits.Bool>
+        Indicates if inputs of functional pipeline are available 
+        (Default: False)
+
+    output_anat_available <traits.Bool>
+        Indicates if outputs of anatomical pipeline are available 
+        (Default: False)
+
+    output_dmri_available = <traits.Bool>
+        Indicates if outputs of diffusion pipeline are available 
+        (Default: False)
+
+    output_fmri_available <traits.Bool>
+        Indicates if outputs of functional pipeline are available 
+        (Default: False)
+
+    traits_view = QtView
+        TraitsUI QtView that describes the content of the window
+    """
+
+    project_info = Instance(CMP_Project_Info)
+
     anat_pipeline = Instance(HasTraits)
     dmri_pipeline = Instance(HasTraits)
     fmri_pipeline = Instance(HasTraits)
-
-    project_info = Instance(CMP_Project_Info)
 
     anat_inputs_checked = Bool(False)
     dmri_inputs_checked = Bool(False)
@@ -1605,14 +1697,6 @@ class CMP_InspectorWindow(HasTraits):
     output_anat_available = Bool(False)
     output_dmri_available = Bool(False)
     output_fmri_available = Bool(False)
-
-    # anat_save_config = Action(name='Save anatomical pipeline configuration as...',action='save_anat_config_file')
-    # dmri_save_config = Action(name='Save diffusion pipeline configuration as...',action='save_dmri_config_file')
-    # fmri_save_config = Action(name='Save fMRI pipeline configuration as...',action='save_fmri_config_file')
-    #
-    # anat_load_config = Action(name='Load anatomical pipeline configuration...',action='anat_load_config_file')
-    # dmri_load_config = Action(name='Load diffusion pipeline configuration...',action='load_dmri_config_file')
-    # fmri_load_config = Action(name='Load fMRI pipeline configuration...',action='load_fmri_config_file')
 
     traits_view = QtView(Group(
         # Group(
@@ -1644,8 +1728,6 @@ class CMP_InspectorWindow(HasTraits):
     ),
         handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
-        # buttons = [anat_save_config, dmri_save_config, fmri_save_config,],
-        # buttons = [preprocessing, map_connectome, map_custom],
         width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
         icon=ImageResource('qualitycontrol.png')
     )
@@ -1662,7 +1744,25 @@ class CMP_InspectorWindow(HasTraits):
 
     def __init__(self, project_info=None, anat_inputs_checked=False, dmri_inputs_checked=False,
                  fmri_inputs_checked=False):
+        """Constructor of an :class:``CMP_ConfiguratorWindow`` instance.
 
+        Parameters
+        ----------
+        project_info
+            :class:`CMP_Project_Info` object (Default: None)
+
+        anat_inputs_checked <traits.Bool>
+            Boolean that indicates if anatomical pipeline inputs are available
+            (Default: False)
+
+        dmri_inputs_checked = <traits.Bool>
+            Boolean that indicates if diffusion pipeline inputs are available
+            (Default: False)
+
+        fmri_inputs_checked <traits.Bool>
+            Boolean that indicates if functional pipeline inputs are available
+            (Default: False)
+        """
         self.project_info = project_info
 
         self.anat_inputs_checked = anat_inputs_checked
@@ -1671,6 +1771,7 @@ class CMP_InspectorWindow(HasTraits):
 
         print('Fix BIDS root directory to {}'.format(
             self.project_info.base_directory))
+
         # project.fix_dataset_directory_in_pickles(
         #     local_dir=self.project_info.base_directory, mode='newlocal')
 
@@ -1678,11 +1779,11 @@ class CMP_InspectorWindow(HasTraits):
 
         if aborded:
             raise Exception(
-                'ABORDED: The quality control window will not be displayed. Selection of subject/session was cancelled at initialization.')
-
-        # self.on_trait_change(self.update_run_anat_pipeline,'run_anat_pipeline')
+                'ABORDED: The quality control window will not be displayed.'
+                'Selection of subject/session was cancelled at initialization.')
 
     def select_subject(self):
+        """Function to select the subject and session for which to inspect outputs."""
         valid_selected_subject = False
         select = True
         aborded = False
@@ -1884,32 +1985,65 @@ class CMP_InspectorWindow(HasTraits):
                 select = error(message=self.error_msg,
                                title='Error', buttons=['OK', 'Cancel'])
                 aborded = not select
-                # self.configure_traits(view='error_view')
 
         return aborded
 
     def update_diffusion_imaging_model(self, new):
+        """Function called when ``diffusion_imaging_model`` is updated."""
         self.dmri_pipeline.diffusion_imaging_model = new
 
 
-# Main window class of the ConnectomeMapper_Pipeline
-#
 class CMP_MainWindow(HasTraits):
-    anat_pipeline = Instance(HasTraits)
-    dmri_pipeline = Instance(HasTraits)
-    fmri_pipeline = Instance(HasTraits)
+    """Class that defines the Main window of the Connectome Mapper 3 GUI.
+
+    Attributes
+    ----------
+    project_info <CMP_Project_InfoUI>
+        Instance of :class:`CMP_Project_InfoUI` that represents the processing project
+
+    anat_pipeline <HasTraits>
+        Instance of anatomical MRI pipeline UI
+
+    dmri_pipeline <HasTraits>
+        Instance of diffusion MRI pipeline UI
+
+    fmri_pipeline <HasTraits>
+        Instance of functional MRI pipeline UI
+
+    bidsapp_ui <CMP_Project_Info>
+        Instance of :class:`CMP_BIDSAppWindow`
+
+    load_dataset <traits.ui.Action>
+        TraitsUI Action to load a BIDS dataset
+
+    bidsapp <traits.ui.Button>
+        Button that displays the BIDS App Interface window
+
+    configurator <traits.ui.Button>
+        Button thats displays the pipeline Configurator window
+
+    quality_control <traits.ui.Button>
+        Button that displays the pipeline Quality Control / Inspector window
+
+    manager_group <traits.ui.View>
+        TraitsUI View that describes the content of the main window
+
+    traits_view = QtView
+        TraitsUI QtView that includes ``manager_group`` and parameterize 
+        the window with menu
+    """
 
     project_info = Instance(CMP_Project_Info)
 
-    # handler = project.CMP_MainWindowHandler()
+    anat_pipeline = Instance(HasTraits)
+    dmri_pipeline = Instance(HasTraits)
+    fmri_pipeline = Instance(HasTraits)
 
     # configurator_ui = Instance(CMP_PipelineConfigurationWindow)
     bidsapp_ui = Instance(CMP_BIDSAppWindow)
     # quality_control_ui = Instance(CMP_QualityControlWindow)
 
     load_dataset = Action(name='Load BIDS Dataset...', action='load_dataset')
-
-    # show_bidsapp_window = Action(name='Show interface...',action='show_bidsapp_window',enabled_when='handler.project_loaded==True')
 
     project_info.style_sheet = style_sheet
 
@@ -1938,7 +2072,7 @@ class CMP_MainWindow(HasTraits):
                             'image': ImageResource(pkg_resources.resource_filename('cmp',
                                                                                    os.path.join('bidsappmanager/images',
                                                                                                 'bidsapp.png'))),
-                            'label': ""}
+                             'label': ""}
                         ),
                    show_labels=False, label=""),
             spring,
@@ -1947,7 +2081,7 @@ class CMP_MainWindow(HasTraits):
                             'image': ImageResource(pkg_resources.resource_filename('cmp',
                                                                                    os.path.join('bidsappmanager/images',
                                                                                                 'qualitycontrol.png'))),
-                            'label': ""}
+                             'label': ""}
                         ),
                    show_labels=False, label=""),
             spring,
@@ -1977,11 +2111,7 @@ class CMP_MainWindow(HasTraits):
     )
 
     def _bidsapp_fired(self):
-        """ Callback of the "bidsapp" button. This displays the BIDS APP GUI.
-        """
-        # print("list_of_subjects_to_be_processed:")
-        # print(self.project_info.subjects)
-
+        """ Callback of the "bidsapp" button. This displays the BIDS App Interface window."""
         bids_layout = BIDSLayout(self.project_info.base_directory)
         subjects = bids_layout.get_subjects()
 
@@ -2006,8 +2136,7 @@ class CMP_MainWindow(HasTraits):
         self.bidsapp_ui.configure_traits()
 
     def _configurator_fired(self):
-        """ Callback of the "configurator" button. This displays the Configurator GUI.
-        """
+        """Callback of the "configurator" button. This displays the Configurator Window."""
         if self.project_info.t1_available:
             if os.path.isfile(self.project_info.anat_config_file):
                 print("Anatomical config file : %s" %
@@ -2022,14 +2151,6 @@ class CMP_MainWindow(HasTraits):
             if os.path.isfile(self.project_info.fmri_config_file):
                 print("fMRI config file : %s" %
                       self.project_info.fmri_config_file)
-
-        # print(self.anat_pipeline)
-        # print(self.dmri_pipeline)
-        # print(self.fmri_pipeline)
-        #
-        # print(self.project_info.t1_available)
-        # print(self.project_info.dmri_available)
-        # print(self.project_info.fmri_available)
 
         self.configurator_ui = CMP_ConfiguratorWindow(project_info=self.project_info,
                                                       anat_pipeline=self.anat_pipeline,
@@ -2043,8 +2164,7 @@ class CMP_MainWindow(HasTraits):
         self.configurator_ui.configure_traits()
 
     def _quality_control_fired(self):
-        """ Callback of the "configurator" button. This displays the Configurator GUI.
-        """
+        """Callback of the "Inspector" button. This displays the Quality Control (Inspector) Window."""
         if self.project_info.t1_available:
             if os.path.isfile(self.project_info.anat_config_file):
                 print("Anatomical config file : %s" %
@@ -2060,14 +2180,6 @@ class CMP_MainWindow(HasTraits):
                 print("fMRI config file : %s" %
                       self.project_info.fmri_config_file)
 
-        # print(self.anat_pipeline)
-        # print(self.dmri_pipeline)
-        # print(self.fmri_pipeline)
-        #
-        # print(self.project_info.t1_available)
-        # print(self.project_info.dmri_available)
-        # print(self.project_info.fmri_available)
-
         try:
             self.quality_control_ui = CMP_InspectorWindow(project_info=self.project_info,
                                                           anat_inputs_checked=self.project_info.t1_available,
@@ -2079,15 +2191,9 @@ class CMP_MainWindow(HasTraits):
             print(e)
 
     def show_bidsapp_interface(self):
-        # print("list_of_subjects_to_be_processed:")
-        # print(self.project_info.subjects)
-
+        """Callback of the "BIDS App" button. This displays the BIDS App Interface Window."""
         bids_layout = BIDSLayout(self.project_info.base_directory)
         subjects = bids_layout.get_subjects()
-
-        # anat_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_anatomical_config.ini'%self.project_info.anat_config_to_load)
-        # dmri_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_diffusion_config.ini'%self.project_info.dmri_config_to_load)
-        # fmri_config = os.path.join(self.project_info.base_directory,'derivatives/','%s_fMRI_config.ini'%self.project_info.fmri_config_to_load)
 
         anat_config = os.path.join(
             self.project_info.base_directory, 'code/', 'ref_anatomical_config.ini')

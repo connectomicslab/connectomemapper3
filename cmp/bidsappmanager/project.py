@@ -36,12 +36,17 @@ from cmtklib.config import anat_load_config_ini, anat_save_config, \
 
 
 def clean_cache(bids_root):
-    print('> Clean docker image cache stored in /tmp')
-    # Clean cache (issue related that the dataset directory is mounted into /tmp,
-    # which is used for caching by java/matlab/matplotlib/xvfb-run in the docker image)
+    """Clean cache stored in /tmp.
 
-    # Folder can be code/ derivatives/ sub-*/ .datalad/ .git/
-    # File can be README.txt CHANGES.txt participants.tsv project_description.json
+    Target issue related to that a dataset directory is mounted into /tmp and 
+    used for caching by java/matlab/matplotlib/xvfb-run in the container image.
+
+    Parameters
+    ----------
+    bids_root <string>
+        BIDS root dataset directory
+    """
+    print('> Clean docker image cache stored in /tmp')
 
     for d in glob.glob(os.path.join(bids_root, ' hsperfdata_cmp')):
         print('... DEL: {}'.format(d))
@@ -88,9 +93,22 @@ def is_tool(name):
     return find_executable(name) is not None
 
 
-# Creates (if needed) the folder hierarchy
+# 
 #
 def refresh_folder(derivatives_directory, subject, input_folders, session=None):
+    """Creates (if needed) the folder hierarchy.
+
+    Parameters
+    ----------
+    derivatives_directory <string>
+
+    subject <string>
+        Subject label (``sub-XX``) for which we create the output folder hierarchy 
+
+    input_folders <List<string>>
+        List of folders to create in ``derivative_directory/sub-XX/(ses-YY)/`` folder
+        for the given ``subject``
+    """
     paths = []
 
     if session is None or session == '':
@@ -125,6 +143,19 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
 
 
 def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
+    """Create and initialize a :class:`DiffusionPipelineUI` instance
+
+    Parameters
+    ----------
+    project_info <CMP_Project_InfoUI>
+        Instance of :class:`CMP_Project_InfoUI` class
+
+    bids_layout <BIDSLayout>
+        PyBIDS BIDS Layout object describing the BIDS dataset
+
+    is_new_project <Boolean>
+        If True, this is a new project which has been never processed
+    """
     dmri_pipeline = Diffusion_pipeline.DiffusionPipelineUI(project_info)
 
     derivatives_directory = os.path.join(
@@ -185,6 +216,19 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
 
 
 def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
+    """Create and initialize a :class:`fMRIPipelineUI` instance
+
+    Parameters
+    ----------
+    project_info <CMP_Project_InfoUI>
+        Instance of :class:`CMP_Project_InfoUI` class
+
+    bids_layout <BIDSLayout>
+        PyBIDS BIDS Layout object describing the BIDS dataset
+
+    is_new_project <Boolean>
+        If True, this is a new project which has been never processed
+    """
     fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(project_info)
 
     derivatives_directory = os.path.join(
@@ -246,6 +290,19 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
 
 
 def init_anat_project(project_info, is_new_project):
+    """Create and initialize a :class:`AnatomicalPipelineUI` instance
+
+    Parameters
+    ----------
+    project_info <CMP_Project_InfoUI>
+        Instance of :class:`CMP_Project_InfoUI` class
+
+    bids_layout <BIDSLayout>
+        PyBIDS BIDS Layout object describing the BIDS dataset
+
+    is_new_project <Boolean>
+        If True, this is a new project which has been never processed
+    """
     anat_pipeline = Anatomical_pipeline.AnatomicalPipelineUI(project_info)
 
     derivatives_directory = os.path.join(project_info.base_directory, 'derivatives')
@@ -295,6 +352,16 @@ def init_anat_project(project_info, is_new_project):
 
 
 def update_anat_last_processed(project_info, pipeline):
+    """Update anatomical pipeline processing information 
+
+    Parameters
+    ----------
+    project_info <CMP_Project_InfoUI>
+        Instance of :class:`CMP_Project_InfoUI` class
+
+    pipeline <AnatomicalPipelineUI>
+        Instance of :class:`AnatomicalPipelineUI`
+    """
     # last date
     if os.path.exists(os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject)):
         # out_dirs = os.listdir(os.path.join(
@@ -330,6 +397,16 @@ def update_anat_last_processed(project_info, pipeline):
 
 
 def update_dmri_last_processed(project_info, pipeline):
+    """Update diffusion pipeline processing information 
+
+    Parameters
+    ----------
+    project_info <CMP_Project_InfoUI>
+        Instance of :class:`CMP_Project_InfoUI` class
+
+    pipeline <DiffusionPipelineUI>
+        Instance of :class:`DiffusionPipelineUI`
+    """
     # last date
     if os.path.exists(os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject)):
         # out_dirs = os.listdir(os.path.join(
@@ -361,6 +438,16 @@ def update_dmri_last_processed(project_info, pipeline):
 
 
 def update_fmri_last_processed(project_info, pipeline):
+    """Update functional MRI pipeline processing information 
+
+    Parameters
+    ----------
+    project_info <CMP_Project_InfoUI>
+        Instance of :class:`CMP_Project_InfoUI` class
+
+    pipeline <fMRIPipelineUI>
+        Instance of :class:`fMRIPipelineUI`
+    """
     # last date
     if os.path.exists(os.path.join(project_info.base_directory, 'derivatives', 'cmp', project_info.subject)):
         # out_dirs = os.listdir(os.path.join(
@@ -392,6 +479,51 @@ def update_fmri_last_processed(project_info, pipeline):
 
 
 class CMP_ConfigQualityWindowHandler(Handler):
+    """Event handler of the Configurator and Inspector (Quality Control) windows.
+
+    Attributes
+    ----------
+    project_loaded <Bool>
+        Indicate if project has been successfully loaded
+        (Default: False)
+
+    anat_pipeline <Instance(HasTraits)>
+        Instance of :class:`AnatomicalPipelineUI` class
+
+    anat_inputs_checked <Bool>
+        Indicate if anatomical pipeline inputs are available
+        (Default: False)
+
+    anat_outputs_checked <Bool>
+        Indicate if anatomical pipeline outputs are available
+        (Default: False)
+
+    anatomical_processed <Bool>
+        Indicate if anatomical pipeline was run
+        (Default: False)
+
+    dmri_pipeline <Instance(HasTraits)>
+        Instance of :class:`DiffusionPipelineUI` class
+
+    dmri_inputs_checked <Bool>
+        Indicate if diffusion pipeline inputs are available
+        (Default: False)
+
+    dmri_processed <Bool>
+        Indicate if diffusion pipeline was run
+        (Default: False)
+
+    fmri_pipeline <Instance>(HasTraits)
+        Instance of :class:`fMRIPipelineUI` class
+
+    fmri_inputs_checked <Bool>
+        Indicate if fMRI pipeline inputs are available
+        (Default: False)
+
+    fmri_processed <Bool>
+        Indicate if fMRI pipeline was run
+        (Default: False)
+    """
     project_loaded = Bool(False)
 
     anat_pipeline = Instance(HasTraits)
@@ -408,6 +540,13 @@ class CMP_ConfigQualityWindowHandler(Handler):
     fmri_processed = Bool(False)
 
     def new_project(self, ui_info):
+        """Function that creates a new :class:`CMP_Project_InfoUI` instance.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         new_project = gui.CMP_Project_InfoUI()
         np_res = new_project.configure_traits(view='create_view')
         ui_info.ui.context["object"].handler = self
@@ -528,6 +667,13 @@ class CMP_ConfigQualityWindowHandler(Handler):
                             self.project_loaded = True
 
     def load_project(self, ui_info):
+        """Function that creates a new :class:`CMP_Project_InfoUI` instance from an existing project.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         loaded_project = gui.CMP_Project_InfoUI()
         np_res = loaded_project.configure_traits(view='open_view')
         ui_info.ui.context["object"].handler = self
@@ -851,6 +997,13 @@ class CMP_ConfigQualityWindowHandler(Handler):
                         self.project_loaded = True
 
     def update_subject_anat_pipeline(self, ui_info):
+        """Function that updates attributes of the :class:`AnatomicalPipelineUI` instance.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         ui_info.handler = self
 
         self.anat_pipeline.subject = ui_info.project_info.subject
@@ -944,6 +1097,13 @@ class CMP_ConfigQualityWindowHandler(Handler):
         return ui_info
 
     def update_subject_dmri_pipeline(self, ui_info):
+        """Function that updates attributes of the :class:`DiffusionPipelineUI` instance.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         self.dmri_pipeline.subject = ui_info.project_info.subject
         self.dmri_pipeline.global_conf.subject = ui_info.project_info.subject
 
@@ -1024,12 +1184,14 @@ class CMP_ConfigQualityWindowHandler(Handler):
 
         return ui_info
 
-    @classmethod
-    def show_bidsapp_window(ui_info):
-        print("Show BIDS App interface")
-        ui_info.ui.context["object"].show_bidsapp_interface()
-
     def update_subject_fmri_pipeline(self, ui_info):
+        """Function that updates attributes of the :class:`fMRIPipelineUI` instance.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         ui_info.handler = self
 
         print(ui_info)
@@ -1120,7 +1282,26 @@ class CMP_ConfigQualityWindowHandler(Handler):
         return ui_info
 
     @classmethod
+    def show_bidsapp_window(ui_info):
+        """Function that shows the BIDS App Interface Window.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with this handler
+        """
+        print("Show BIDS App interface")
+        ui_info.ui.context["object"].show_bidsapp_interface()
+
+    @classmethod
     def save_anat_config_file(self, ui_info):
+        """Function that saves the anatomical pipeline configuration file.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         dialog = FileDialog(action="save as",
                             default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
                                                           'code', 'ref_anatomical_config.ini'))
@@ -1133,6 +1314,13 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     ui_info.ui.context["object"].project_info.anat_config_file, dialog.path)
 
     def load_anat_config_file(self, ui_info):
+        """Function that loads the anatomical pipeline configuration file.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         dialog = FileDialog(action="open", wildcard="*anatomical_config.ini")
         dialog.open()
         if dialog.return_code == OK:
@@ -1145,6 +1333,13 @@ class CMP_ConfigQualityWindowHandler(Handler):
 
     @classmethod
     def save_dmri_config_file(self, ui_info):
+        """Function that saves the diffusion pipeline configuration file.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         dialog = FileDialog(action="save as",
                             default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
                                                           'code', 'ref_diffusion_config.ini'))
@@ -1157,6 +1352,13 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     ui_info.ui.context["object"].project_info.dmri_config_file, dialog.path)
 
     def load_dmri_config_file(self, ui_info):
+        """Function that loads the diffusion pipeline configuration file.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         dialog = FileDialog(action="open", wildcard="*diffusion_config.ini")
         dialog.open()
         if dialog.return_code == OK:
@@ -1168,6 +1370,13 @@ class CMP_ConfigQualityWindowHandler(Handler):
 
     @classmethod
     def save_fmri_config_file(self, ui_info):
+        """Function that saves the fMRI pipeline configuration file.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         dialog = FileDialog(action="save as",
                             default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
                                                           'code', 'ref_fMRI_config.ini'))
@@ -1180,6 +1389,13 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     ui_info.ui.context["object"].project_info.fmri_config_file, dialog.path)
 
     def load_fmri_config_file(self, ui_info):
+        """Function that loads the fMRI pipeline configuration file.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         dialog = FileDialog(action="open", wildcard="*diffusion_config.ini")
         dialog.open()
         if dialog.return_code == OK:
@@ -1191,6 +1407,52 @@ class CMP_ConfigQualityWindowHandler(Handler):
 
 
 class CMP_MainWindowHandler(Handler):
+    """Event handler of the Configurator and Inspector (Quality Control) windows.
+
+    Attributes
+    ----------
+    project_loaded <Bool>
+        Indicate if project has been successfully loaded
+        (Default: False)
+
+    anat_pipeline <Instance(HasTraits)>
+        Instance of :class:`AnatomicalPipelineUI` class
+
+    anat_inputs_checked <Bool>
+        Indicate if anatomical pipeline inputs are available
+        (Default: False)
+
+    anat_outputs_checked <Bool>
+        Indicate if anatomical pipeline outputs are available
+        (Default: False)
+
+    anatomical_processed <Bool>
+        Indicate if anatomical pipeline was run
+        (Default: False)
+
+    dmri_pipeline <Instance(HasTraits)>
+        Instance of :class:`DiffusionPipelineUI` class
+
+    dmri_inputs_checked <Bool>
+        Indicate if diffusion pipeline inputs are available
+        (Default: False)
+
+    dmri_processed <Bool>
+        Indicate if diffusion pipeline was run
+        (Default: False)
+
+    fmri_pipeline <Instance>(HasTraits)
+        Instance of :class:`fMRIPipelineUI` class
+
+    fmri_inputs_checked <Bool>
+        Indicate if fMRI pipeline inputs are available
+        (Default: False)
+
+    fmri_processed <Bool>
+        Indicate if fMRI pipeline was run
+        (Default: False)
+    """
+
     project_loaded = Bool(False)
 
     anat_pipeline = Instance(HasTraits)
@@ -1207,8 +1469,13 @@ class CMP_MainWindowHandler(Handler):
     fmri_processed = Bool(False)
 
     def load_dataset(self, ui_info, debug=True):
-        # print('Load dataset')
+        """Function that creates a new :class:`CMP_Project_InfoUI` instance from an existing project.
 
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         loaded_project = gui.CMP_Project_InfoUI()
         np_res = loaded_project.configure_traits(view='open_view')
         loaded_project.output_directory = os.path.join(
@@ -1646,9 +1913,24 @@ class CMP_MainWindowHandler(Handler):
 
 
 class CMP_BIDSAppWindowHandler(Handler):
+    """Event handler of the BIDS App Interface window.
+
+    Attributes
+    ----------
+    docker_process <Popen>
+        Instance of ``subprocess.Popen`` where BIDS App docker image is run
+    """
+
     docker_process = Instance(Popen)
 
     def check_settings(self, ui_info):
+        """Function that checks if all parameters are properly set before execution of the BIDS App.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with ``self``
+        """
         ui_info.ui.context["object"].settings_checked = True
         ui_info.ui.context["object"].handler = self
 
@@ -1694,6 +1976,15 @@ class CMP_BIDSAppWindowHandler(Handler):
 
     @classmethod
     def start_bidsapp_process(ui_info, participant_label):
+        """Function that runs the BIDS App on a single subject.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with this handler
+        participant_label <string>
+            Label of the participant / subject (e.g. ``"01"``, no "sub-" prefix)
+        """
         cmd = ['docker', 'run', '-it', '--rm',
                '-v', '{}:/bids_dataset'.format(
                    ui_info.ui.context["object"].bids_root),
@@ -1748,11 +2039,25 @@ class CMP_BIDSAppWindowHandler(Handler):
 
     @classmethod
     def manage_bidsapp_procs(self, proclist):
+        """Function that managed the parallelized BIDS App Popen process.
+
+        Parameters
+        ----------
+        proclist
+            List of ``Popen`` processes running the BIDS App on a single subject
+        """
         for proc in proclist:
             if proc.poll() is not None:
                 proclist.remove(proc)
 
     def start_bids_app(self, ui_info):
+        """Main function that runs the BIDS App on a set or sub-set of participants.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with this handler
+        """
         print("Start BIDS App")
 
         maxprocs = multiprocessing.cpu_count()
@@ -1784,6 +2089,13 @@ class CMP_BIDSAppWindowHandler(Handler):
 
     @classmethod
     def stop_bids_app(ui_info):
+        """Function that stops the BIDS execution.
+
+        Parameters
+        ----------
+        ui_info <QtView>
+            TraitsUI QtView associated with this handler
+        """
         print("Stop BIDS App")
         # self.docker_process.kill()
         ui_info.ui.context["object"].docker_running = False
