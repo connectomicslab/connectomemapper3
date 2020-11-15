@@ -247,7 +247,17 @@ class CMP_Project_Info(HasTraits):
 
 
 def refresh_folder(bids_directory, derivatives_directory, subject, input_folders, session=None):
-    '''Creates (if needed) the folder hierarchy.'''
+    """Creates (if needed) the folder hierarchy.
+
+    Parameters
+    ----------
+    bids_directory
+    derivatives_directory
+    subject
+    input_folders
+    session
+
+    """
     paths = []
 
     if session is None or session == '':
@@ -291,7 +301,16 @@ def refresh_folder(bids_directory, derivatives_directory, subject, input_folders
 
 
 def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
-    '''Initialize the diffusion processing pipeline'''
+    """Initialize the diffusion processing pipeline.
+
+    Parameters
+    ----------
+    project_info
+    bids_layout
+    is_new_project
+    gui
+    debug
+    """
     dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
 
     bids_directory = os.path.abspath(project_info.base_directory)
@@ -360,7 +379,16 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
 
 def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
-    '''Initialize the fMRI processing pipeline'''
+    """Initialize the fMRI processing pipeline.
+
+    Parameters
+    ----------
+    project_info
+    bids_layout
+    is_new_project
+    gui
+    debug
+    """
     fmri_pipeline = FMRI_pipeline.fMRIPipeline(project_info)
 
     bids_directory = os.path.abspath(project_info.base_directory)
@@ -428,7 +456,18 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
 
 def init_anat_project(project_info, is_new_project, debug=False):
-    '''Initialize the anatomical processing pipeline'''
+    """Initialize the anatomical processing pipeline
+
+    Parameters
+    ----------
+    project_info
+    is_new_project
+    debug
+
+    Returns
+    -------
+    object
+    """
     anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
 
     bids_directory = os.path.abspath(project_info.base_directory)
@@ -490,7 +529,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
 
 
 def update_anat_last_processed(project_info, pipeline):
-    """
+    """Update last processing information of an :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline`.
 
     Parameters
     ----------
@@ -531,7 +570,7 @@ def update_anat_last_processed(project_info, pipeline):
 
 
 def update_dmri_last_processed(project_info, pipeline):
-    """
+    """Update last processing information of an :class:`~cmp.pipelines.diffusion.diffusion.DiffusionPipeline`.
 
     Parameters
     ----------
@@ -568,7 +607,7 @@ def update_dmri_last_processed(project_info, pipeline):
 
 
 def update_fmri_last_processed(project_info, pipeline):
-    """
+    """Update last processing information of an :class:`~cmp.pipelines.functional.fMRI.fMRIPipeline`.
 
     Parameters
     ----------
@@ -605,7 +644,19 @@ def update_fmri_last_processed(project_info, pipeline):
 
 def run_individual(bids_dir, output_dir, participant_label, session_label, anat_pipeline_config,
                    dwi_pipeline_config, func_pipeline_config, number_of_threads=1):
-    '''Function that create the processing pipeline for complete coverage'''
+    """Function that creates the processing pipeline for complete coverage.
+
+    Parameters
+    ----------
+    bids_dir
+    output_dir
+    participant_label
+    session_label
+    anat_pipeline_config
+    dwi_pipeline_config
+    func_pipeline_config
+    number_of_threads
+    """
     project = CMP_Project_Info()
     project.base_directory = os.path.abspath(bids_dir)
     project.output_directory = os.path.abspath(output_dir)
