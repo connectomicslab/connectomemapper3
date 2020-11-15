@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Tracking methods and workflows of the diffusion stage
-"""
+"""Tracking methods and workflows of the diffusion stage."""
 
 from traits.api import *
 
@@ -16,8 +15,6 @@ from nipype import logging
 
 # import matplotlib.pyplot as plt
 
-#  import nipype.interfaces.camino2trackvis as camino2trackvis
-# import cmtklib.interfaces.camino2trackvis as camino2trackvis
 from cmtklib.interfaces.mrtrix3 import Erode, StreamlineTrack
 from cmtklib.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
 from cmtklib.interfaces.misc import Tck2Trk, extractHeaderVoxel2WorldMatrix, \
@@ -25,11 +22,60 @@ from cmtklib.interfaces.misc import Tck2Trk, extractHeaderVoxel2WorldMatrix, \
 
 # from cmtklib.diffusion import filter_fibers
 
-
 iflogger = logging.getLogger('nipype.interface')
 
 
 class Dipy_tracking_config(HasTraits):
+    """Class used to store Dipy diffusion reconstruction sub-workflow configuration parameters.
+
+    Attributes
+    ----------
+    imaging_model : traits.Str
+        Diffusion imaging model
+        (For example 'DTI')
+
+    tracking_mode : traits.Str
+        Type of local tractography algorithm
+        (Can be "Deterministic" or "Probabilistic")
+
+    SD : traits.Bool
+        If `True`, inputs are coming from Constrained Spherical Deconvolution reconstruction
+
+    number_of_seeds : traits.Int
+        Number of seeds
+        (Default: 1000)
+
+    seed_density : traits.Float
+        Number of seeds to place along each direction where a density of 2 is the same as [2, 2, 2]
+        and will result in a total of 8 seeds per voxel
+        (Default: 1.0)
+
+    fa_thresh : traits.Float
+        Fractional Anisotropy (FA) threshold
+        (Default: 0.2)
+
+    step_size : traits.traits.Float
+        Tractography algorithm step size
+        (Default: 0.5)
+
+    max_angle : traits.Float
+        Maximum streamline angle allowed
+        (Default: 25.0)
+
+    sh_order : traits.Int
+        Order used for Constrained Spherical Deconvolution reconstruction
+        (Default: 8)
+
+    use_act : traits.Bool
+        Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier
+        (Default: False)
+
+    seed_from_gmwmi : traits.Bool
+        Seed from Grey Matter / White Matter interface
+        (requires Anatomically-Constrained Tractography (ACT))
+        (Default: False)
+    """
+
     imaging_model = Str
     tracking_mode = Str
     SD = Bool
@@ -50,6 +96,13 @@ class Dipy_tracking_config(HasTraits):
     # fast_number_of_classes = Int(3)
 
     def _SD_changed(self, new):
+        """Update ``curvature`` when ``SD`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value of ``SD``
+        """
         if self.tracking_mode == "Deterministic" and not new:
             self.curvature = 2.0
         elif self.tracking_mode == "Deterministic" and new:
@@ -58,6 +111,13 @@ class Dipy_tracking_config(HasTraits):
             self.curvature = 1.0
 
     def _tracking_mode_changed(self, new):
+        """Update ``curvature``, ``use_act`` and ``seed_from_gmwmi`` when ``tracking_mode`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value of ``tracking_mode``
+        """
         if new == "Deterministic" and not self.SD:
             self.curvature = 2.0
             self.use_act = False
@@ -70,15 +130,83 @@ class Dipy_tracking_config(HasTraits):
             self.curvature = 1.0
 
     def _curvature_changed(self, new):
+        """Set ``curvature`` to 0 if ``curvature`` is updated to a value <= 0.000001.
+
+        Parameters
+        ----------
+        new
+            New value of ``curvature``
+        """
         if new <= 0.000001:
             self.curvature = 0.0
 
     def _use_act_changed(self, new):
+        """Set ``seed_from_gmwmi`` if ``use_act`` has been updated to `False`.
+
+        Parameters
+        ----------
+        new
+            New value of ``use_act``
+        """
         if new is False:
             self.seed_from_gmwmi = False
 
 
 class MRtrix_tracking_config(HasTraits):
+    """Class used to store Dipy diffusion reconstruction sub-workflow configuration parameters.
+
+    Attributes
+    ----------
+    tracking_mode : traits.Str
+        Type of local tractography algorithm
+        (Can be "Deterministic" or "Probabilistic")
+
+    SD : traits.Bool
+        If `True`, inputs are coming from Constrained Spherical Deconvolution reconstruction
+
+    desired_number_of_tracks : traits.Int
+        Desired number of output streamlines in the tractogram
+        (Default: 1M)
+
+    curvature = Float
+        Maximum streamline curvature
+        (Default: 2.0)
+
+    min_length = Float
+        Minimal streamline length
+        (Default: 5)
+
+    max_length = Float
+        Maximal streamline length
+        (Default: 500)
+
+    angle : traits.Float
+        Maximum streamline angle allowed
+        (Default: 45.0)
+
+    cutoff_value : traits.Float
+        Cut-off value to terminate streamline
+        (Default: 0.05)
+
+    use_act : traits.Bool
+        Use `5ttgen` for brain tissue types estimation and Anatomically-Constrained Tractography (ACT) tissue classifier
+        (Default: False)
+
+    seed_from_gmwmi : traits.Bool
+        Seed from Grey Matter / White Matter interface
+        (requires Anatomically-Constrained Tractography (ACT))
+        (Default: False)
+
+    crop_at_gmwmi : traits.Bool
+        Crop streamline endpoints more precisely as they cross the GM-WM interface
+        (requires Anatomically-Constrained Tractography (ACT))
+        (Default: True)
+
+    backtrack : traits.Bool
+        Allow tracks to be truncated (requires Anatomically-Constrained Tractography (ACT))
+        (Default: True)
+    """
+
     tracking_mode = Str
     SD = Bool
     desired_number_of_tracks = Int(1000000)
@@ -101,6 +229,13 @@ class MRtrix_tracking_config(HasTraits):
                             desc="Allow tracks to be truncated (requires Anatomically-Constrained Tractography (ACT))")
 
     def _SD_changed(self, new):
+        """Update ``curvature`` when ``SD`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value of ``SD``
+        """
         if self.tracking_mode == "Deterministic" and not new:
             self.curvature = 2.0
         elif self.tracking_mode == "Deterministic" and new:
@@ -115,6 +250,13 @@ class MRtrix_tracking_config(HasTraits):
             self.backtrack = False
 
     def _tracking_mode_changed(self, new):
+        """Update ``curvature`` when ``tracking_mode`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value of ``tracking_mode``
+        """
         if new == "Deterministic" and not self.SD:
             self.curvature = 2.0
         elif new == "Deterministic" and self.SD:
@@ -123,20 +265,29 @@ class MRtrix_tracking_config(HasTraits):
             self.curvature = 1.0
 
     def _curvature_changed(self, new):
+        """Set ``curvature`` to 0 if ``curvature`` is updated to a value <= 0.000001.
+
+        Parameters
+        ----------
+        new
+            New value of ``curvature``
+        """
         if new <= 0.000001:
             self.curvature = 0.0
 
 
 def create_dipy_tracking_flow(config):
-    """
+    """Create the tractography sub-workflow of the `DiffusionStage` using Dipy.
 
     Parameters
     ----------
-    config
+    config : Dipy_tracking_config
+        Sub-workflow configuration object
 
     Returns
     -------
-
+    flow : nipype.pipeline.engine.Workflow
+        Built tractography sub-workflow
     """
     flow = pe.Workflow(name="tracking")
     # inputnode
@@ -305,30 +456,29 @@ def create_dipy_tracking_flow(config):
 
 
 def get_freesurfer_parcellation(roi_files):
-    """
+    """Return the first file in the list of parcellation files
 
     Parameters
     ----------
-    roi_files
-
-    Returns
-    -------
-
+    roi_files : list of traits.File
+        List of parcellation files
     """
     print("%s" % roi_files[0])
     return roi_files[0]
 
 
 def create_mrtrix_tracking_flow(config):
-    """
+    """Create the tractography sub-workflow of the `DiffusionStage` using MRtrix3.
 
     Parameters
     ----------
-    config
+    config : MRtrix_tracking_config
+        Sub-workflow configuration object
 
     Returns
     -------
-
+    flow : nipype.pipeline.engine.Workflow
+        Built tractography sub-workflow
     """
     flow = pe.Workflow(name="tracking")
     # inputnode

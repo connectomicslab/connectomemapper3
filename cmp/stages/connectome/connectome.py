@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP Stage for building connectivity matrices and resulting CFF file
-"""
+"""Definition of config and stage classes for building structural connectivity matrices."""
 
 # Global imports
 import os
@@ -19,15 +18,42 @@ import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
 
 # Own imports
-# from nipype.interfaces.mrtrix3.connectivity import BuildConnectome
-# from cmtklib.interfaces.mrtrix3 import FilterTractogram
 from cmp.stages.common import Stage
 import cmtklib.connectome
 from cmtklib.util import get_pipeline_dictionary_outputs
-# import cmtklib as cmtk
 
 
 class ConnectomeConfig(HasTraits):
+    """Class used to store configuration parameters of an :class:`~cmp.stages.connectome.connectome.ConnectomeStage` instance.
+
+    Attributes
+    ----------
+    compute_curvature : traits.Bool
+        Compute fiber curvature (Default: False)
+
+    output_types : ['gPickle', 'mat', 'cff', 'graphml']
+        Output connectome format
+
+    connectivity_metrics : ['Fiber number', 'Fiber length', 'Fiber density', 'Fiber proportion', 'Normalized fiber density', 'ADC', 'gFA']
+        Set of connectome maps to compute
+
+    log_visualization : traits.Bool
+        Log visualization that might be obsolete as this has been detached
+        after creation of the bidsappmanager (Default: True)
+
+    circular_layout : traits.Bool
+        Visualization of the connectivity matrix using a circular layout
+        that might be obsolete as this has been detached after creation
+        of the bidsappmanager (Default: False)
+
+    subject : traits.Str
+        BIDS subject ID (in the form ``sub-XX``)
+
+    See Also
+    --------
+    cmp.stages.connectome.connectome.ConnectomeStage
+    """
+
     # modality = List(['Deterministic','Probabilistic'])
     probtrackx = Bool(False)
     compute_curvature = Bool(False)
@@ -40,10 +66,15 @@ class ConnectomeConfig(HasTraits):
 
 
 class ConnectomeStage(Stage):
-    """
+    """Class that represents the connectome building stage of a :class:`~cmp.pipelines.diffusion.diffusion.DiffusionPipeline`.
 
+    See Also
+    --------
+    cmp.pipelines.diffusion.diffusion.DiffusionPipeline
+    cmp.stages.connectome.connectome.ConnectomeConfig
     """
     def __init__(self, bids_dir, output_dir):
+        """Constructor of a :class:`~cmp.stages.connectome.connectome.Connectome` instance."""
         self.name = 'connectome_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
@@ -60,13 +91,18 @@ class ConnectomeStage(Stage):
                         "streamline_final_file", "connectivity_matrices"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        """
+        """Create the stage worflow.
 
         Parameters
         ----------
-        flow
-        inputnode
-        outputnode
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
         """
         cmtk_cmat = pe.Node(interface=cmtklib.connectome.CMTK_cmat(), name='compute_matrice')
         cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
@@ -110,8 +146,9 @@ class ConnectomeStage(Stage):
         ])
 
     def define_inspect_outputs(self):
-        """
+        """Update the `inspect_outputs' class attribute.
 
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
         # print('inspect outputs connectome stage')
         dwi_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'diffusion_sinker')
@@ -186,10 +223,10 @@ class ConnectomeStage(Stage):
             # print(self.inspect_outputs)
 
     def has_run(self):
-        """
+        """Function that returns `True` if the stage has been run successfully.
 
         Returns
         -------
-
+        `True` if the stage has been run successfully
         """
         return os.path.exists(os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"))
