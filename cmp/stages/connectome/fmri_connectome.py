@@ -81,6 +81,7 @@ class ConnectomeStage(Stage):
     """
 
     def __init__(self, bids_dir, output_dir):
+        """Constructor of a :class:`~cmp.stages.connectome.fmri_connectome.Connectome` instance."""
         self.name = 'connectome_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
