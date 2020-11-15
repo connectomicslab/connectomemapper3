@@ -26,6 +26,23 @@ from cmp.stages.parcellation.parcellation import ParcellationStage
 
 
 class Global_Configuration(HasTraits):
+    """Global pipeline configurations.
+
+    Attributes
+    ----------
+    process_type: 'fMRI'
+        Processing pipeline type
+
+    subjects : traits.List
+       List of subjects ID (in the form ``sub-XX``)
+
+    subject : traits.Str
+       Subject to be processed (in the form ``sub-XX``)
+
+    subject_session : traits.Str
+       Subject session to be processed (in the form ``ses-YY``)
+    """
+
     process_type = Str('anatomical')
     subjects = List(trait=Str)
     subject = Str

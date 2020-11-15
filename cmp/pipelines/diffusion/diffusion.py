@@ -24,6 +24,30 @@ from cmp.stages.registration.registration import RegistrationStage
 
 
 class Global_Configuration(HasTraits):
+    """Global pipeline configurations.
+
+    Attributes
+    ----------
+    process_type: 'fMRI'
+        Processing pipeline type
+
+    subjects : traits.List
+       List of subjects ID (in the form ``sub-XX``)
+
+    subject : traits.Str
+       Subject to be processed (in the form ``sub-XX``)
+
+    subject_session : traits.Str
+       Subject session to be processed (in the form ``ses-YY``)
+
+    modalities : traits.List
+       List of available diffusion modalities red from
+       the ``acq-<modality>`` filename keyword
+
+    dmri_bids_acq : traits.Str
+       Diffusion modality to be processed
+    """
+
     process_type = Str('diffusion')
     diffusion_imaging_model = Str
     subjects = List(trait=Str)
