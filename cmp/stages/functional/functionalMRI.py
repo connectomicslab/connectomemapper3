@@ -231,8 +231,11 @@ class FunctionalMRIStage(Stage):
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             res_dir = os.path.join(self.stage_dir, "converter")
             filt = os.path.join(res_dir, "fMRI_bandpass.nii.gz")
-            if (os.path.exists(filt)):
-                self.inspect_outputs_dict['Filter output'] = ['fsleyes', '-sdefault', filt, '-cm',
+            if os.path.exists(filt):
+                self.inspect_outputs_dict['Filter output'] = ['fsleyes',
+                                                              '-sdefault',
+                                                              filt,
+                                                              '-cm',
                                                               'brain_colours_blackbdy_iso']
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
