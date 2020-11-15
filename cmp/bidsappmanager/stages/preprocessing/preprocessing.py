@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""CMP diffusion preprocessing stage."""
+"""Definition of  diffusion preprocessing config and stage UI classes."""
 
 from traits.api import *
 from traitsui.api import *

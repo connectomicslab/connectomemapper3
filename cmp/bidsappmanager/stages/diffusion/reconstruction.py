@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""Reconstruction methods and workflows."""
+"""Definition of diffusion reconstruction config UI classes."""
 
 # General imports
 import re

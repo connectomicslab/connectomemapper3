@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""CMP registration stage."""
+"""Definition of registration config and stage UI classes."""
 
 # General imports
 import os

@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license ModifFied BSD.
 
-"""CMP Stage for extra preprocessing of functional MRI (post-registration)."""
+"""Definition of extra preprocessing of functional MRI (post-registration) config and stage UI classes."""
 
 # General imports
 import subprocess

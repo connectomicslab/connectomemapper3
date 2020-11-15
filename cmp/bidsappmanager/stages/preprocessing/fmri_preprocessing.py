@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""CMP functional MRI preprocessing stage."""
+"""Definition of fMRI preprocessing config and stage UI classes."""
 
 # General imports
 import subprocess

@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP Stage for building connectivity matrices and resulting files."""
+"""Definition of structural connectome config and stage UI classes."""
 
 # Global imports
 import subprocess

@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""Anatomical pipeline Class definition."""
+"""Anatomical pipeline UI Class definition."""
 
 import datetime
 import os
@@ -42,7 +42,7 @@ class Check_Input_NotificationUI(Check_Input_Notification):
 
 
 class AnatomicalPipelineUI(AnatomicalPipeline):
-    """Class that extends the :class:`AnatomicalPipeline` with graphical components.
+    """Class that extends the :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline` with graphical components.
 
     Attributes
     ----------
@@ -66,7 +66,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
     See also
     ---------
-    cmp.pipelines.anatomical.AnatomicalPipeline
+    cmp.pipelines.anatomical.anatomical.AnatomicalPipeline
     """
 
     segmentation = Button()

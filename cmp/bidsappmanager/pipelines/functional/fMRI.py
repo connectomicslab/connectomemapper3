@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""Functional pipeline Class definition."""
+"""Functional pipeline UI Class definition."""
 
 import os
 import shutil
@@ -36,7 +36,7 @@ class Check_Input_NotificationUI(Check_Input_Notification):
 
 
 class fMRIPipelineUI(fMRIPipeline):
-    """Class that extends the :class:`fMRIPipeline` with graphical components.
+    """Class that extends the :class:`~cmp.pipelines.functional.fMRI.fMRIPipeline` with graphical components.
 
     Attributes
     ----------
@@ -68,7 +68,7 @@ class fMRIPipelineUI(fMRIPipeline):
 
     See also
     ---------
-    cmp.pipelines.functional.fMRIPipeline
+    cmp.pipelines.functional.fMRI.fMRIPipeline
     """
 
     view_mode = Enum('config_view', ['config_view', 'inspect_outputs_view'])

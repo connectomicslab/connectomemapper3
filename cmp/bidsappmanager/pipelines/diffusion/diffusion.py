@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""Diffusion pipeline Class definition."""
+"""Diffusion pipeline UI Class definition."""
 
 import os
 import datetime
@@ -48,7 +48,7 @@ class Check_Input_NotificationUI(Check_Input_Notification):
 
 
 class DiffusionPipelineUI(DiffusionPipeline):
-    """Class that extends the :class:`DiffusionPipeline` with graphical components.
+    """Class that extends the :class:`~cmp.pipelines.diffusion.diffusion.DiffusionPipeline` with graphical components.
 
     Attributes
     ----------
@@ -81,7 +81,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
     See also
     ---------
-    cmp.pipelines.diffusion.DiffusionPipeline
+    cmp.pipelines.diffusion.diffusion.DiffusionPipeline
     """
 
     view_mode = Enum('config_view', ['config_view', 'inspect_outputs_view'])

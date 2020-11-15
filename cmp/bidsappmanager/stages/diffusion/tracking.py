@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""Tracking methods and workflows of the diffusion stage."""
+"""Definition of diffusion tracking config UI classes."""
 
 from traits.api import *
 from traitsui.api import *

@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""CMP segmentation stage."""
+"""Definition of segmentation config and stage UI classes."""
 
 # General imports
 import subprocess
