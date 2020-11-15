@@ -41,7 +41,7 @@ class Check_Input_Notification(HasTraits):
 
 
 class AnatomicalPipeline(cmp_common.Pipeline):
-    """Class that represents the processing pipeline for structural MRI.
+    """Class that extends a :class:`Pipeline` and represents the processing pipeline for structural MRI.
 
     It is composed of the segmentation stage that performs FreeSurfer recon-all
     and the parcellation stage that creates the Lausanne brain parcellations.
@@ -117,7 +117,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         Returns
         -------
-        message <string>
+        message : string
             String empty if all the checks pass, otherwise it contains the error message
         """
         message = ''
@@ -165,7 +165,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         Parameters
         ----------
-        custom_last_stage
+        custom_last_stage : string
             Last stage to execute. Valid values are
             "Segmentation" and "Parcellation"
         """
@@ -184,10 +184,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         Parameters
         ----------
-        layout <bids.BIDSLayout>
+        layout : bids.BIDSLayout
             Instance of BIDSLayout
 
-        gui <Bool>
+        gui : traits.Bool
             Boolean used to display different messages
             but not really meaningful anymore since the GUI
             components have been migrated to ``cmp.bidsappmanager``
@@ -195,7 +195,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         Returns
         -------
 
-        valid_inputs <Bool>
+        valid_inputs : traits.Bool
             True if inputs are available
         """
         print('**** Check Inputs  ****')

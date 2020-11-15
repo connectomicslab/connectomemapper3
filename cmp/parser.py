@@ -16,7 +16,7 @@ def get():
 
     Returns
     -------
-    p <object>
+    p : object
        Instance of :class:`argparse.ArgumentParser` class
     """
 

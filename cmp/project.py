@@ -40,137 +40,141 @@ class CMP_Project_Info(HasTraits):
 
     Attributes
     -----------
-    creation_mode
+    creation_mode : ''
 
-    base_directory
+    base_directory : traits.Directory
 
-    install_datalad_dataset_via_ssh
+    install_datalad_dataset_via_ssh : traits.Bool
 
-    ssh_user
+    ssh_user : traits.Str
 
-    ssh_pwd
+    ssh_pwd : traits.Password
 
-    ssh_remote
+    ssh_remote : traits.Str
 
-    datalad_dataset_path
+    datalad_dataset_path : traits.Str
 
-    bids_layout
+    bids_layout : bids.BIDSLayout
 
-    subjects
+    subjects : traits.List
 
-    subject
+    subject :
 
-    subject_sessions
+    subject_sessions : traits.List
 
-    subject_session
+    subject_session :
 
-    anat_warning_msg
+    anat_warning_msg :
 
-    dmri_warning_msg
+    dmri_warning_msg :
 
-    fmri_warning_msg
+    fmri_warning_msg :
 
-    diffusion_imaging_model
+    diffusion_imaging_model : string
         Enum('DTI', ['DSI', 'DTI', 'multi-shell'])
 
-    dmri_bids_acqs
+    dmri_bids_acqs : traits.List
 
-    dmri_bids_acq
+    dmri_bids_acq :
         Enum(values='dmri_bids_acqs')
 
-    anat_runs
+    anat_runs : traits.List
 
-    anat_run
+    anat_run :
         Enum(values='anat_runs')
 
-    dmri_runs
+    dmri_runs : traits.List
 
-    dmri_run
+    dmri_run :
         Enum(values='dmri_runs')
 
-    fmri_runs
+    fmri_runs : traits.List
 
-    fmri_run
+    fmri_run :
         Enum(values='fmri_runs')
 
-    parcellation_scheme
+    parcellation_scheme : traits.Str
         Str('Lausanne2008')
 
-    atlas_info <Dict>
+    atlas_info : traits.Dict
 
-    freesurfer_subjects_dir <Str('')>
-
-    freesurfer_subject_id <Str('')>
-
-    pipeline_processing_summary <List>
-
-    t1_available <Bool>
-        (False)
-
-    dmri_available <Bool>
-        (False)
-
-    fmri_available <Bool>
-        (False)
-
-    anat_config_error_msg <Str>
+    freesurfer_subjects_dir : traits.Str
         ('')
-    anat_config_to_load <Str>
 
-    anat_available_config <List()>
+    freesurfer_subject_id  : traits.Str
+        ('')
 
-    anat_config_to_load_msg <Str>
+    pipeline_processing_summary : List
+
+    t1_available : Bool
+        (False)
+
+    dmri_available : Bool
+        (False)
+
+    fmri_available : Bool
+        (False)
+
+    anat_config_error_msg : traits.Str
+        ('')
+
+    anat_config_to_load : traits.Str
+
+    anat_available_config : traits.List()
+
+    anat_config_to_load_msg : traits.Str
         'Several configuration files available. Select which one to load:\n'
 
-    anat_last_date_processed <Str>
+    anat_last_date_processed : traits.Str
         ('Not yet processed')
-    anat_last_stage_processed <Str>
+    anat_last_stage_processed : traits.Str
         ('Not yet processed')
 
-    anat_stage_names <List>
+    anat_stage_names : traits.List
 
-    anat_custom_last_stage <Str>
+    anat_custom_last_stage : traits.Str
 
-    dmri_config_error_msg <Str>
+    dmri_config_error_msg : traits.Str
         ('')
 
-    dmri_config_to_load <Str()>
+    dmri_config_to_load : traits.Str
 
-    dmri_available_config <List()>
+    dmri_available_config : traits.List
 
-    dmri_config_to_load_msg <Str>
+    dmri_config_to_load_msg: traits.Str
         ('Several configuration files available. Select which one to load:\n')
 
-    dmri_last_date_processed <Str>
+    dmri_last_date_processed : traits.Str
         ('Not yet processed')
 
-    dmri_last_stage_processed <Str>
+    dmri_last_stage_processed : traits.Str
         ('Not yet processed')
 
-    dmri_stage_names <List>
+    dmri_stage_names : traits.List
 
-    dmri_custom_last_stage <Str>
+    dmri_custom_last_stage : traits.Str
 
-    fmri_config_error_msg <Str>
+    fmri_config_error_msg : traits.Str
         ('')
 
-    fmri_config_to_load <Str()>
+    fmri_config_to_load : traits.Str
 
-    fmri_available_config <List()>
+    fmri_available_config : traits.List
 
-    fmri_config_to_load_msg <Str>
+    fmri_config_to_load_msg : traits.Str
         ('Several configuration files available. Select which one to load:\n')
 
-    fmri_last_date_processed <Str>
+    fmri_last_date_processed : traits.Str
         ('Not yet processed')
 
-    fmri_last_stage_processed <Str>
+    fmri_last_stage_processed : traits.Str
         ('Not yet processed')
 
-    fmri_stage_names <List>
-    fmri_custom_last_stage <Str>
+    fmri_stage_names : traits.List
 
-    number_of_cores <int> 
+    fmri_custom_last_stage : traits.Str
+
+    number_of_cores : int
         Enum(1, list(range(1, multiprocessing.cpu_count())))
     """
 

@@ -42,7 +42,7 @@ class Check_Input_Notification(HasTraits):
 
 
 class DiffusionPipeline(Pipeline):
-    """Class that represents the processing pipeline for diffusion MRI.
+    """Class that extends a :class:`Pipeline` and represents the processing pipeline for diffusion MRI.
 
     It is composed of the preprocessing stage that preprocesses dMRI,
     the registration stage that co-registers T1w to the diffusion B0 and
@@ -199,7 +199,7 @@ class DiffusionPipeline(Pipeline):
 
         Returns
         -------
-        message <string>
+        message : string
             String that is empty if success, otherwise it contains the error message
         """
         message = ''
@@ -219,7 +219,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        custom_last_stage
+        custom_last_stage : string
             Last stage to execute. Valid values are: "Preprocessing",
             "Registration", "Diffusion" and "Connectome".
         """
@@ -243,18 +243,18 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        layout <bids.BIDSLayout>
+        layout : bids.BIDSLayout
             Instance of BIDSLayout
 
-        gui <Bool>
+        gui : traits.Bool
             Boolean used to display different messages
             but not really meaningful anymore since the GUI
-            components have been migrated to ``cmp.bidsappmanager``
+            components have been migrated to `cmp.bidsappmanager`
 
         Returns
         -------
 
-        valid_inputs <Bool>
+        valid_inputs : traits.Bool
             True if inputs are available
         """
         print('**** Check Inputs  ****')
