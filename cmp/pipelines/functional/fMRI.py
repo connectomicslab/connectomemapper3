@@ -4,30 +4,34 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Functional pipeline Class definition
-"""
+"""Functional pipeline Class definition."""
 
-import os
 import datetime
 import shutil
 
-import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
-from nipype.interfaces.utility import Merge
 from nipype import config, logging
-
-from traits.api import *
-
-# from bids import BIDSLayout
+from nipype.interfaces.utility import Merge
 
 from cmp.pipelines.common import *
+from cmp.stages.connectome.fmri_connectome import ConnectomeStage
+from cmp.stages.functional.functionalMRI import FunctionalMRIStage
 from cmp.stages.preprocessing.fmri_preprocessing import PreprocessingStage
 from cmp.stages.registration.registration import RegistrationStage
-from cmp.stages.functional.functionalMRI import FunctionalMRIStage
-from cmp.stages.connectome.fmri_connectome import ConnectomeStage
 
 
 class Global_Configuration(HasTraits):
+    """Global pipeline configurations.
+
+    Attributes
+    ----------
+    process_type: 'fMRI'
+        Processing pipeline type
+
+    imaging_model : 'fMRI'
+        Imaging model used by `RegistrationStage`
+    """
+
     process_type = Str('fMRI')
     imaging_model = Str
 
@@ -39,9 +43,26 @@ class Check_Input_Notification(HasTraits):
 
 
 class fMRIPipeline(Pipeline):
+    """Class that extends a :class:`Pipeline` and represents the processing pipeline for structural MRI.
+
+    It is composed of:
+    * the preprocessing stage that can perform slice timing correction, deskiping and motion correction
+    * the registration stage that co-registered the anatomical T1w scan to the mean BOLD image
+      and projects the parcellations to the native fMRI space
+    * the extra-preprocessing stage (FunctionalMRIStage) that can perform nuisance regression
+      and bandpass filtering
+    * the connectome stage that extracts the time-series of each parcellation ROI and
+      computes the Pearson's correlation coefficient between ROI time-series to create
+      the functional connectome.
+
+    See Also
+    --------
+    cmp.stages.preprocessing.fmri_preprocessing.PreprocessingStage
+    cmp.stages.registration.registration.RegistrationStage
+    cmp.stages.functional.functionalMRI.FunctionalMRIStage
+    cmp.stages.connectome.fmri_connectome.ConnectomeStage
     """
 
-    """
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("fMRI_pipeline")
     input_folders = ['anat', 'func']
@@ -65,7 +86,7 @@ class fMRIPipeline(Pipeline):
     subject_id = Str
 
     def __init__(self, project_info):
-
+        """Constructor."""
         self.subjects_dir = project_info.freesurfer_subjects_dir
         self.subject_id = project_info.freesurfer_subject_id
 
@@ -117,12 +138,17 @@ class fMRIPipeline(Pipeline):
             self.update_scrubbing, 'apply_scrubbing')
 
     def _subject_changed(self, new):
+        """"Update subject in the connectome stage configuration when ``subject`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value.
+        """
         self.stages['Connectome'].config.subject = new
 
     def update_registration(self):
-        """
-
-        """
+        """Configure the list of registration tools."""
         # if self.seg_tool == "Custom segmentation":
         #     if self.stages['Registration'].config.registration_mode == 'BBregister (FS)':
         #         self.stages['Registration'].config.registration_mode = 'Linear (FSL)'
@@ -141,25 +167,29 @@ class fMRIPipeline(Pipeline):
                 'Linear (FSL)', 'BBregister (FS)']
 
     def update_nuisance_requirements(self):
-        """
+        """Update nuisance requirements.
 
+        Configure the registration to apply the estimated transformation to multiple segmentation masks
+        depending on the Nuisance correction steps performed.
         """
         self.stages['Registration'].config.apply_to_eroded_brain = self.stages['FunctionalMRI'].config.global_nuisance
         self.stages['Registration'].config.apply_to_eroded_csf = self.stages['FunctionalMRI'].config.csf
         self.stages['Registration'].config.apply_to_eroded_wm = self.stages['FunctionalMRI'].config.wm
 
     def update_scrubbing(self):
-        """
-
-        """
+        """Update to precompute or inputs for scrubbing during the FunctionalMRI stage."""
         self.stages['FunctionalMRI'].config.scrubbing = self.stages['Connectome'].config.apply_scrubbing
 
     def define_custom_mapping(self, custom_last_stage):
-        """
+        """Define the pipeline to be executed until a specific stages.
+
+        Not used yet by CMP3.
 
         Parameters
         ----------
-        custom_last_stage
+        custom_last_stage : string
+            Last stage to execute. Valid values are: "Preprocessing",
+            "Registration", "FunctionalMRI" and "Connectome".
         """
         # start by disabling all stages
         for stage in self.ordered_stage_list:
@@ -172,17 +202,23 @@ class fMRIPipeline(Pipeline):
                 break
 
     def check_input(self, layout, gui=True, debug=False):
-        """
+        """Check if input of the diffusion pipeline are available.
 
         Parameters
         ----------
-        layout
-        gui
-        debug
+        layout : bids.BIDSLayout
+            Instance of BIDSLayout
+
+        gui : traits.Bool
+            Boolean used to display different messages
+            but not really meaningful anymore since the GUI
+            components have been migrated to `cmp.bidsappmanager`
 
         Returns
         -------
 
+        valid_inputs : traits.Bool
+            True if inputs are available
         """
         print('**** Check Inputs ****')
         fMRI_available = False
@@ -487,16 +523,22 @@ class fMRIPipeline(Pipeline):
         # return True,'Processing sucessful'
 
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
-        """
+        """Create the pipeline workflow.
 
         Parameters
         ----------
-        cmp_deriv_subject_directory
-        nipype_deriv_subject_directory
+        cmp_deriv_subject_directory <Directory>
+            Main CMP output directory of a subject
+            e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
+
+        nipype_deriv_subject_directory <Directory>
+            Intermediate Nipype output directory of a subject
+            e.g. ``/output_dir/nipype/sub-XX/(ses-YY)``
 
         Returns
         -------
-
+        fMRI_flow <nipype.pipeline.engine.Workflow>
+            An instance of :class:`nipype.pipeline.engine.Workflow`
         """
         # subject_directory = self.subject_directory
 
