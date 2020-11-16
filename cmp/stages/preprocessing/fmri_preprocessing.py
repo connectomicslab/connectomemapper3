@@ -4,10 +4,9 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP fmri first preprocessing Stage
-"""
+"""Definition of config and stage classes for pre-registration fMRI preprocessing."""
 
-
+# General imports
 import os
 from glob import glob
 
@@ -18,12 +17,44 @@ import nipype.interfaces.fsl as fsl
 from nipype.interfaces import afni
 import nipype.interfaces.utility as util
 
+# Own imports
 from cmtklib.interfaces.afni import Despike
 from cmp.stages.common import Stage
 from cmtklib.functionalMRI import discard_tp
 
 
 class PreprocessingConfig(HasTraits):
+    """Class used to store configuration parameters of a :class:`~cmp.stages.preprocessing.fmri_preprocessing.PreprocessingStage` object.
+
+    Attributes
+    ----------
+    discard_n_volumes : traits.Int
+
+        (Default: '5')
+
+    despiking : traits.Bool
+
+        (Default: True)
+
+    slice_timing : traits.Enum
+        Slice acquisition order for slice timing correction that can be:
+        "bottom-top interleaved", "bottom-top interleaved", "top-bottom interleaved",
+        "bottom-top", and "top-bottom"
+        (Default: "none")
+
+    repetition_time : traits.Float
+        Repetition time
+        (Default: 1.92)
+
+    motion_correction : traits.Bool
+        Perform motion correction
+        (Default: True)
+
+    See Also
+    --------
+    cmp.stages.preprocessing.fmri_preprocessing.PreprocessingStage
+    """
+
     discard_n_volumes = Int('5')
     despiking = Bool(True)
     slice_timing = Enum("none",
@@ -34,10 +65,14 @@ class PreprocessingConfig(HasTraits):
 
 
 class PreprocessingStage(Stage):
+    """Class that represents the pre-registration preprocessing stage of a :class:`~cmp.pipelines.functional.fMRI.fMRIPipeline`.
+
+    See Also
+    --------
+    cmp.pipelines.functional.fMRI.fMRIPipeline
+    cmp.stages.preprocessing.fmri_preprocessing.PreprocessingConfig
     """
 
-    """
-    # General and UI members
     def __init__(self, bids_dir, output_dir):
         self.name = 'preprocessing_stage'
         self.bids_dir = bids_dir
@@ -48,13 +83,18 @@ class PreprocessingStage(Stage):
         self.outputs = ["functional_preproc", "par_file", "mean_vol"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        """
+        """Create the stage worflow.
 
         Parameters
         ----------
-        flow
-        inputnode
-        outputnode
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the fMRI pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
         """
         discard_output = pe.Node(interface=util.IdentityInterface(
             fields=["discard_output"]), name="discard_output")
@@ -156,8 +196,9 @@ class PreprocessingStage(Stage):
                 ])
 
     def define_inspect_outputs(self):
-        """
+        """Update the `inspect_outputs' class attribute.
 
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
         # print('Stage (inspect_outputs): '.format(self.stage_dir))
         if self.config.despiking:
@@ -193,11 +234,11 @@ class PreprocessingStage(Stage):
         print(self.inspect_outputs)
 
     def has_run(self):
-        """
+        """Function that returns `True` if the stage has been run successfully.
 
         Returns
         -------
-
+        `True` if the stage has been run successfully
         """
         if self.config.motion_correction:
             return os.path.exists(os.path.join(self.stage_dir, "motion_correction", "result_motion_correction.pklz"))
