@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP registration stage
-"""
+"""Definition of config and stage classes for MRI co-registration"""
 
 # General imports
 import os
@@ -18,17 +17,11 @@ import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.mrtrix3.utils import TensorMetrics
 import nipype.interfaces.ants as ants
-# from nipype.interfaces.ants.registration import ANTS
-# from nipype.interfaces.ants.resampling import ApplyTransforms, WarpImageMultiTransform
 
 # Own imports
 from cmp.stages.common import Stage
-
-# from cmp.pipelines.common import MRThreshold, MRCrop, ExtractMRTrixGrad, FSLCreateHD
 from cmtklib.interfaces.mrtrix3 import DWI2Tensor, MRConvert, ExtractMRTrixGrad
 from cmtklib.interfaces.fsl import ApplymultipleXfm, ApplymultipleWarp
-
-# from cmtklib.interfaces.fsl import  FSLCreateHD,
 import cmtklib.interfaces.freesurfer as cmp_fs
 import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.ants import MultipleANTsApplyTransforms
@@ -36,6 +29,152 @@ from cmtklib.util import get_pipeline_dictionary_outputs
 
 
 class RegistrationConfig(HasTraits):
+    """Class used to store configuration parameters of a :class:`~cmp.stages.registration.registration.RegistrationStage` instance.
+
+    Attributes
+    ----------
+    pipeline : traits.Enum(["Diffusion", "fMRI"])
+        Pipeline type
+        (Default: "Diffusion")
+
+    registration_mode_trait : traits.List(['FSL', 'ANTs', 'BBregister (FS)'])
+        Choices of registration tools updated depending on the ``pipeline`` type.
+        (Default: ['FSL', 'ANTs'] if "Diffusion", ['FSL', 'BBregister (FS)'] if "fMRI")
+
+    registration_mode : traits.Str
+        Registration tool used from the `registration_mode_trait` list
+        (Default: 'ANTs')
+
+    diffusion_imaging_model : traits.Str
+        Diffusion imaging model
+        ('DTI' for instance)
+
+    use_float_precision : traits.Bool
+        Use 'single' instead of 'double' float representation to reduce memory usage of ANTs
+        (Default: False)
+
+    ants_interpolation : traits.Enum
+        Interpolation type used by ANTs that can be:
+        'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
+        'HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline', 'MultiLabel',
+        or 'Gaussian'
+        (Default: 'Linear')
+
+    ants_bspline_interpolation_parameters : traits.Tuple
+        ANTs BSpline interpolation parameters
+        (Default: traits.Tuple(Int(3)))
+
+    ants_gauss_interpolation_parameters : traits.Tuple
+        ANTs Gaussian interpolation parameters
+        (Default: traits.Tuple(Float(5), Float(5)))
+
+    ants_multilab_interpolation_parameters : traits.Tuple
+        ANTs Multi-label interpolation parameters
+        (Default: traits.Tuple(Float(5), Float(5)))
+
+    ants_lower_quantile : traits.Float
+        ANTs lower quantile
+        (Default: 0.005)
+
+    ants_upper_quantile : traits.Float
+        ANTs upper quantile
+        (Default: 0.995)
+
+    ants_convergence_thresh : traits.Float
+        ANTs convergence threshold
+        (Default: 1e-06)
+
+    ants_convergence_winsize : traits.Int
+        ANTs convergence window size
+        (Default: 10)
+
+    ants_linear_gradient_step : traits.Float
+        ANTS linear gradient step size
+        (Default: 0.1)
+
+    ants_linear_cost : traits.Enum
+        Metric used by ANTs linear registration phase that can be
+        'CC', 'MeanSquares', 'Demons', 'GC', 'MI', or 'Mattes'
+        (Default: 'MI')
+
+    ants_linear_sampling_strategy : traits.Enum
+        ANTS sampling strategy for the linear registration phase that can be
+        'None', 'Regular', or 'Random'
+        (Default: 'Regular')
+
+    ants_linear_sampling_perc : traits.Float
+        Percentage used if random sampling strategy is employed in
+        the linear registration phase
+        (Default: 0.25)
+
+    ants_perform_syn : traits.Bool
+        (Default: True)
+
+    ants_nonlinear_gradient_step : traits.Float
+        (Default: 0.1)
+
+    ants_nonlinear_cost : traits.Enum
+        Metric used by ANTs nonlinear (SyN) registration phase that can be
+        'CC', 'MeanSquares', 'Demons', 'GC', 'MI', or 'Mattes'
+        (Default: 'CC')
+
+    ants_nonlinear_update_field_variance : traits.Float
+        Weight to update field variance in ANTs nonlinear (SyN) registration phase
+        (Default: 3.0)
+
+    ants_nonlinear_total_field_variance : traits.Float
+        Weight to give to total field variance in ANTs nonlinear (SyN) registration phase
+        (Default: 0.0)
+
+    flirt_args : traits.Str
+        FLIRT extra arguments that will be append to the FSL FLIRT command
+        (Default: None)
+
+    uses_qform : traits.Bool
+        FSL FLIRT uses qform
+        (Default: True)
+
+    dof : traits.Int
+        Specify number of degree-of-freedom to FSL FLIRT
+        (Default: 6)
+
+    fsl_cost : traits.Enum
+        Metric used by FSL registration that can be
+        'mutualinfo', 'corratio', 'normcorr', 'normmi',
+        'leastsq', or 'labeldiff'
+        (Default: 'normmi')
+
+    no_search : traits.Bool
+        Enable FSL FLIRT "no search" option
+        (Default: True)
+
+    init : traits.Enum('header', ['spm', 'fsl', 'header'])
+        Initialization type of FSL registration:
+        'spm', 'fsl', or 'header'
+        (Default: 'smp')
+
+    contrast_type : traits.Enum('dti', ['t1', 't2', 'dti'])
+        Contrast type specified to BBRegister:
+        't1', 't2', or 'dti'
+        (Default: 'dti')
+
+    apply_to_eroded_wm : traits.Bool
+        Apply estimated transform to eroded white-matter mask
+        (Default: True)
+
+    apply_to_eroded_csf : traits.Bool
+        Apply estimated transform to eroded cortico spinal fluid mask
+        (Default: True)
+
+    apply_to_eroded_brain : traits.Bool
+        Apply estimated transform to eroded brain mask
+        (Default: False)
+
+    See Also
+    --------
+    cmp.stages.registration.registration.RegistrationStage
+    """
+
     # Pipeline mode
     pipeline = Enum(["Diffusion", "fMRI"])
 
@@ -91,28 +230,55 @@ class RegistrationConfig(HasTraits):
 
 
 def unicode2str(text):
-    """
+    """Convert a unicode to a string using system's encoding.
+
+    (This methods should be moved to utils in the upcoming future.)
 
     Parameters
     ----------
-    text
+    text : bytes
+        Unicode bytes representation of a string
 
     Returns
     -------
-
+    out_str : str
+        Output string
     """
-    return str(text)
+    out_str = str(text)
+    return out_str
 
 
 class RegistrationStage(Stage):
+    """Class that represents the registration stage of both `DiffusionPipeline` and `fMRIPipeline`.
+
+    Attributes
+    ----------
+    fs_subjects_dir : traits.Directory
+        Freesurfer subjects directory
+        (needed by BBRegister)
+
+    fs_subject_id : traits.Str
+        Freesurfer subject (being processed) directory
+        (needed by BBRegister)
+
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `RegistrationStage`
+
+    See Also
+    --------
+    cmp.pipelines.diffusion.diffusion.DiffusionPipeline
+    cmp.pipelines.functional.fMRI.fMRIPipeline
+    cmp.stages.registration.registration.RegistrationConfig
     """
 
-    """
     # Freesurfer informations (for BBregister)
     fs_subjects_dir = Directory(exists=False, resolve=False, mandatory=False)
     fs_subject_id = Str(mandatory=False)
 
     def __init__(self, pipeline_mode, fs_subjects_dir=None, fs_subject_id=None, bids_dir="", output_dir=""):
+        """Constructor of a :class:`~cmp.stages.registration.registration.RegistrationStage` instance."""
         self.name = 'registration_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
@@ -142,17 +308,19 @@ class RegistrationStage(Stage):
                                            "eroded_brain_registered_crop"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        """
+        """Create the stage worflow.
 
         Parameters
         ----------
-        flow
-        inputnode
-        outputnode
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of either the
+            Diffusion pipeline or the fMRI pipeline
 
-        Returns
-        -------
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
 
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
         """
         # Extract first volume and resample it to 1x1x1mm3
         if self.config.pipeline == "Diffusion":
@@ -185,17 +353,21 @@ class RegistrationStage(Stage):
             concatnode = pe.Node(interface=util.Merge(2), name='concatnode')
 
             def convertList2Tuple(lists):
-                """
+                """Convert list of files to tuple of files.
+
+                (Duplicated with preprocessing, could be moved to utils in the future)
 
                 Parameters
                 ----------
-                lists
-
+                lists : [bvecs, bvals]
+                    List of files containing bvecs and bvals
                 Returns
                 -------
-
+                out_tuple : (bvecs, bvals)
+                    Tuple of files containing bvecs and bvals
                 """
-                return tuple(lists)
+                out_tuple = tuple(lists)
+                return out_tuple
 
             flow.connect([
                 (inputnode, concatnode, [('bvecs', 'in1')]),
@@ -471,15 +643,19 @@ class RegistrationStage(Stage):
             concatnode = pe.Node(interface=util.Merge(2), name='concatnode')
 
             def convertList2Tuple(lists):
-                """
+                """Convert list of files to tuple of files.
+
+                (Duplicated with preprocessing, and here line 355;
+                could be moved to utils in the future)
 
                 Parameters
                 ----------
-                lists
-
+                lists : [bvecs, bvals]
+                    List of files containing bvecs and bvals
                 Returns
                 -------
-
+                out_tuple : (bvecs, bvals)
+                    Tuple of files containing bvecs and bvals
                 """
                 # print "******************************************",tuple(lists)
                 return tuple(lists)
@@ -801,43 +977,51 @@ class RegistrationStage(Stage):
             ants_applywarp_gmwmi.inputs.float = True
 
             def reverse_order_transforms(transforms):
-                """
+                """Reverse the order of the transformations estimated by linear and SyN registration.
 
                 Parameters
                 ----------
-                transforms
+                transforms : list of File
+                    List of transformation files
 
                 Returns
                 -------
-
+                out_transforms : list of File
+                    Reversed list of transformation files
+                    (``transforms[::-1]``)
                 """
-                return transforms[::-1]
+                out_transforms = transforms[::-1]
+                return out_transforms
 
             def extract_affine_transform(transforms):
-                """
+                """Extract affine transformation file from a list a transformation files generated by linear and SyN registration.
 
                 Parameters
                 ----------
-                transforms
+                transforms : list of File
+                    List of transformation files
 
                 Returns
                 -------
-
+                t : File
+                    Affine transformation file
                 """
                 for t in transforms:
                     if 'Affine' in t:
                         return t
 
             def extract_warp_field(transforms):
-                """
+                """Extract the warpfield file from a list a transformation files generated by linear and SyN registration.
 
                 Parameters
                 ----------
-                transforms
+                transforms : list of File
+                    List of transformation files
 
                 Returns
                 -------
-
+                t : File
+                    Warp field (Non-linear transformation) file
                 """
                 for t in transforms:
                     if 'Warp' in t:
@@ -1284,8 +1468,9 @@ class RegistrationStage(Stage):
         #                     ])
 
     def define_inspect_outputs(self):
-        """
+        """Update the `inspect_outputs' class attribute.
 
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
         # print("stage_dir : %s" % self.stage_dir)
         if self.config.pipeline == "Diffusion":
@@ -1384,11 +1569,11 @@ class RegistrationStage(Stage):
         print(self.inspect_outputs)
 
     def has_run(self):
-        """
+        """Function that returns `True` if the stage has been run successfully.
 
         Returns
         -------
-
+        `True` if the stage has been run successfully
         """
         if self.config.registration_mode == 'ANTs':
             if self.config.ants_perform_syn:
