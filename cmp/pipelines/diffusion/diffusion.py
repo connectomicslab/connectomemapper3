@@ -131,8 +131,7 @@ class DiffusionPipeline(Pipeline):
             self.global_conf.subject_session = ''
             self.subject_directory = os.path.join(project_info.base_directory, project_info.subject)
 
-        self.derivatives_directory = os.path.abspath(
-            project_info.output_directory)
+        self.derivatives_directory = os.path.abspath(project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
 
         self.stages = {
@@ -155,14 +154,10 @@ class DiffusionPipeline(Pipeline):
         self.diffusion_imaging_model = project_info.diffusion_imaging_model
         # self.stages['Connectome'].config.subject = self.subject
 
-        self.stages['Connectome'].config.on_trait_change(
-            self.update_vizualization_layout, 'circular_layout')
-        self.stages['Connectome'].config.on_trait_change(
-            self.update_vizualization_logscale, 'log_visualization')
-        self.stages['Diffusion'].config.on_trait_change(
-            self.update_outputs_recon, 'recon_processing_tool')
-        self.stages['Diffusion'].config.on_trait_change(
-            self.update_outputs_tracking, 'tracking_processing_tool')
+        self.stages['Connectome'].config.on_trait_change(self.update_vizualization_layout, 'circular_layout')
+        self.stages['Connectome'].config.on_trait_change(self.update_vizualization_logscale, 'log_visualization')
+        self.stages['Diffusion'].config.on_trait_change(self.update_outputs_recon, 'recon_processing_tool')
+        self.stages['Diffusion'].config.on_trait_change(self.update_outputs_tracking, 'tracking_processing_tool')
         # self.anat_flow = anat_flow
 
     def update_outputs_recon(self, new):

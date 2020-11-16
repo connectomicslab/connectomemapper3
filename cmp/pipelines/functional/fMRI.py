@@ -135,14 +135,10 @@ class fMRIPipeline(Pipeline):
 
         self.subject = project_info.subject
 
-        self.stages['FunctionalMRI'].config.on_trait_change(
-            self.update_nuisance_requirements, 'global_nuisance')
-        self.stages['FunctionalMRI'].config.on_trait_change(
-            self.update_nuisance_requirements, 'csf')
-        self.stages['FunctionalMRI'].config.on_trait_change(
-            self.update_nuisance_requirements, 'wm')
-        self.stages['Connectome'].config.on_trait_change(
-            self.update_scrubbing, 'apply_scrubbing')
+        self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements, 'global_nuisance')
+        self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements, 'csf')
+        self.stages['FunctionalMRI'].config.on_trait_change(self.update_nuisance_requirements, 'wm')
+        self.stages['Connectome'].config.on_trait_change(self.update_scrubbing, 'apply_scrubbing')
 
     def _subject_changed(self, new):
         """"Update subject in the connectome stage configuration when ``subject`` is updated.
