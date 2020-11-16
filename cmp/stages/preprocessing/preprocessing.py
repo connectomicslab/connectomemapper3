@@ -33,6 +33,76 @@ from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeedi
 
 
 class PreprocessingConfig(HasTraits):
+    """Class used to store configuration parameters of a :class:`~cmp.stages.preprocessing.preprocessing.PreprocessingStage` instance.
+
+    Attributes
+    ----------
+    total_readout : traits.Float
+        Acquisition total readout time used by FSL Eddy
+        (Default: 0.0)
+
+    description : traits.Str
+        Description
+        (Default: 'description')
+
+    denoising : traits.Bool
+        Perform diffusion MRI denoising
+        (Default: False)
+
+    denoising_algo : traits.Enum(['MRtrix (MP-PCA)', 'Dipy (NLM)'])
+        Type of denoising algorithm
+        (Default: 'MRtrix (MP-PCA)')
+
+    dipy_noise_model : traits.Enum
+        Type of noise model when Dipy denoising is performed that can be:
+        'Rician' or 'Gaussian'
+        (Default: 'Rician')
+
+    bias_field_correction : traits.Bool
+        Perform diffusion MRI bias field correction
+        (Default: False)
+
+    bias_field_algo : traits.Enum, ['ANTS N4', 'FSL FAST'])
+        Type of bias field correction algorithm that can be:
+        'ANTS N4' or 'FSL FAST'
+        (Default: 'ANTS N4')
+
+    eddy_current_and_motion_correction : traits.Bool
+        Perform eddy current and motion correction
+        (Default: True)
+
+    eddy_correction_algo : traits.Enum
+        Algorithm used for eddy current correction that can be:
+        'FSL eddy_correct' or 'FSL eddy'
+        (Default: 'FSL eddy_correct')
+
+    eddy_correct_motion_correction : traits.Bool
+        Perform eddy current and motion correction
+        MIGHT BE OBSOLETE
+        (Default: True)
+
+    partial_volume_estimation : traits.Bool
+        Estimate partial volume maps from brain tissues segmentation
+        (Default: True)
+
+    fast_use_priors : traits.Bool
+        Use priors when FAST is used for partial volume estimation
+        (Default: True)
+
+    resampling : traits.Tuple
+        Tuple describing the target resolution
+        (Default: (1, 1, 1))
+
+    interpolation : traits.Enum
+        Type of interpolation used when resampling that can be:
+        'interpolate', 'weighted', 'nearest', 'sinc', or 'cubic'
+        (Default: 'interpolate')
+
+    See Also
+    --------
+    cmp.stages.preprocessing.preprocessing.PreprocessingStage
+    """
+
     total_readout = Float(0.0)
     description = Str('description')
     denoising = Bool(False)
