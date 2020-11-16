@@ -23,7 +23,7 @@ from cmtklib.functionalMRI import Scrubbing, Detrending, nuisance_regression
 
 
 class FunctionalMRIConfig(HasTraits):
-    """Class used to store configuration parameters of a :class:`~cmp.stages.functional.function.FunctionalMRI` object.
+    """Class used to store configuration parameters of a :class:`~cmp.stages.functional.functional.FunctionalMRIStage` object.
 
     Attributes
     ----------
