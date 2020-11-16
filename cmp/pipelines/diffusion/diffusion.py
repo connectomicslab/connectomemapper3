@@ -114,12 +114,12 @@ class DiffusionPipeline(Pipeline):
 
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
-            self.subject_directory = os.path.join(
-               project_info.base_directory, project_info.subject, project_info.subject_session)
+            self.subject_directory = os.path.join(project_info.base_directory,
+                                                  project_info.subject,
+                                                  project_info.subject_session)
         else:
             self.global_conf.subject_session = ''
-            self.subject_directory = os.path.join(
-                project_info.base_directory, project_info.subject)
+            self.subject_directory = os.path.join(project_info.base_directory, project_info.subject)
 
         self.derivatives_directory = os.path.abspath(
             project_info.output_directory)

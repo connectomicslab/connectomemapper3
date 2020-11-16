@@ -94,21 +94,19 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     def __init__(self, project_info):
         """Constructor."""
         # super(Pipeline, self).__init__(project_info)
-
-        self.subject = project_info.subject
-        self.last_date_processed = project_info.anat_last_date_processed
+        # self.last_date_processed = project_info.anat_last_date_processed
 
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = self.subject
 
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
-            self.subject_directory = os.path.join(
-                self.base_directory, self.subject, self.global_conf.subject_session)
+            self.subject_directory = os.path.join(project_info.base_directory,
+                                                  project_info.subject,
+                                                  project_info.global_conf.subject_session)
         else:
             self.global_conf.subject_session = ''
-            self.subject_directory = os.path.join(
-                self.base_directory, self.subject)
+            self.subject_directory = os.path.join(project_info.base_directory, project_info.subject)
 
         self.derivatives_directory = os.path.abspath(
             project_info.output_directory)
@@ -120,6 +118,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                          bids_dir=project_info.base_directory,
                                                          output_dir=self.output_directory)}
         cmp_common.Pipeline.__init__(self, project_info)
+
+        self.subject = project_info.subject
 
         self.stages['Segmentation'].config.on_trait_change(
             self.update_parcellation, 'seg_tool')
