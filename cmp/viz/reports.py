@@ -3,7 +3,13 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Connectome Mapper reports builder (based on fMRIprep v1.3.2 reports builder)
+"""Definitions of classes and functions for building Connectome Mapper reports
+
+Ongoing...
+
+References
+----------
+Based on fMRIprep v1.3.2 report builder.
 """
 
 try:
