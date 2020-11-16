@@ -65,7 +65,12 @@ class PreprocessingConfig(HasTraits):
 
 
 class PreprocessingStage(Stage):
-    """Class that represents the pre-registration preprocessing stage of a :class:`~cmp.pipelines.functional.fMRI.fMRIPipeline`.
+    """Class that represents the pre-registration preprocessing stage of a :class:`~cmp.pipelines.functional.fMRI.fMRIPipeline` instance.
+
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `PreprocessingStage`
 
     See Also
     --------
@@ -74,6 +79,7 @@ class PreprocessingStage(Stage):
     """
 
     def __init__(self, bids_dir, output_dir):
+        """Constructor of a :class:`~cmp.stages.preprocessing.fmri_preprocessing.PreprocessingStage` instance."""
         self.name = 'preprocessing_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
