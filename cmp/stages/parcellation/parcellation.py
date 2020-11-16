@@ -139,6 +139,7 @@ class ParcellationStage(Stage):
     cmp.stages.parcellation.parcellation.ParcellationConfig
     """
     def __init__(self, pipeline_mode, bids_dir, output_dir):
+        """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
         self.name = 'parcellation_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
@@ -165,17 +166,18 @@ class ParcellationStage(Stage):
             "parcellation_scheme", "atlas_info"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        """
+        """Create the stage worflow.
 
         Parameters
         ----------
-        flow
-        inputnode
-        outputnode
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the anatomical pipeline
 
-        Returns
-        -------
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
 
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
         """
         # from nipype.interfaces.fsl.maths import MathsCommand
 
