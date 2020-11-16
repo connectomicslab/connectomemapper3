@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""Connectome Mapper Controler for handling non GUI general events."""
+"""Definition of classes and functions for handling non-GUI general events."""
 
 # General imports
 import multiprocessing
@@ -40,142 +40,132 @@ class CMP_Project_Info(HasTraits):
 
     Attributes
     -----------
-    creation_mode : ''
+    base_directory: traits.Directory
+        BIDS dataset root directory
 
-    base_directory : traits.Directory
-
-    install_datalad_dataset_via_ssh : traits.Bool
-
-    ssh_user : traits.Str
-
-    ssh_pwd : traits.Password
-
-    ssh_remote : traits.Str
-
-    datalad_dataset_path : traits.Str
+    output_directory: traits.Directory
+        Output directory
 
     bids_layout : bids.BIDSLayout
+        Instance of pybids `BIDSLayout`
 
     subjects : traits.List
+        List of subjects in the dataset
 
     subject :
+        Subject being processed
+        in the form ``sub-XX``
 
     subject_sessions : traits.List
+        List of sessions for the subject being processed
 
-    subject_session :
+    subject_session : trait.Str
+        Session of the subject being processed
+        in the form ``ses-YY``
 
-    anat_warning_msg :
-
-    dmri_warning_msg :
-
-    fmri_warning_msg :
-
-    diffusion_imaging_model : string
-        Enum('DTI', ['DSI', 'DTI', 'multi-shell'])
+    diffusion_imaging_model : traits.Str
+        Diffusion imaging model that can be
+        'DSI', 'DTI', or 'multi-shell'
 
     dmri_bids_acqs : traits.List
+        List diffusion imaging models extracted from ``acq-<label>`` filename part.
 
     dmri_bids_acq :
-        Enum(values='dmri_bids_acqs')
+        Diffusion imaging model being processed
 
     anat_runs : traits.List
+        List of run labels for T1w scans with multiple runs
 
-    anat_run :
-        Enum(values='anat_runs')
+    anat_run : traits.Str
+        Run being processed for T1w scans with multiple runs
 
     dmri_runs : traits.List
+        List of run labels for DWI scans with multiple runs
 
-    dmri_run :
-        Enum(values='dmri_runs')
+    dmri_run : traits.Str
+        Run being processed for DWI scans with multiple runs
 
     fmri_runs : traits.List
+        List of run labels for fMRI scans with multiple runs
 
-    fmri_run :
-        Enum(values='fmri_runs')
+    fmri_run : traits.Str
+        Run being processed for fMRI scans with multiple runs
 
     parcellation_scheme : traits.Str
-        Str('Lausanne2008')
+        Parcellation scheme used
+        (Default: 'Lausanne2008')
 
     atlas_info : traits.Dict
+        Dictionary storing parcellation atlas information
+        See :class:`~cmp.parcellation.parcellation.ParcellationStage` for more details
 
     freesurfer_subjects_dir : traits.Str
-        ('')
+        Freesurfer subjects directory
 
     freesurfer_subject_id  : traits.Str
-        ('')
-
-    pipeline_processing_summary : List
+        Freesurfer subject ID
 
     t1_available : Bool
-        (False)
+        True if T1w scans were found
+        (Default: False)
 
     dmri_available : Bool
-        (False)
+        True if DWI scans were found
+        (Default: False)
 
     fmri_available : Bool
-        (False)
+        True if fMRI scans were found
+        (Default: False)
 
     anat_config_error_msg : traits.Str
-        ('')
+        Error message for the anatomical pipeline configuration file
 
     anat_config_to_load : traits.Str
+        Path to a configuration file for the anatomical pipeline
 
-    anat_available_config : traits.List()
-
-    anat_config_to_load_msg : traits.Str
-        'Several configuration files available. Select which one to load:\n'
-
-    anat_last_date_processed : traits.Str
-        ('Not yet processed')
-    anat_last_stage_processed : traits.Str
-        ('Not yet processed')
+    anat_available_config : traits.List
+        List of configuration files for the anatomical pipeline
 
     anat_stage_names : traits.List
+        List of anatomical pipeline stage names
 
     anat_custom_last_stage : traits.Str
+        Custom last anatomical pipeline stage to be processed
 
     dmri_config_error_msg : traits.Str
-        ('')
+        Error message for the diffusion pipeline configuration file
 
     dmri_config_to_load : traits.Str
+        Path to a configuration file for the diffusion pipeline
 
     dmri_available_config : traits.List
-
-    dmri_config_to_load_msg: traits.Str
-        ('Several configuration files available. Select which one to load:\n')
-
-    dmri_last_date_processed : traits.Str
-        ('Not yet processed')
-
-    dmri_last_stage_processed : traits.Str
-        ('Not yet processed')
+        List of configuration files for the anatomical pipeline
 
     dmri_stage_names : traits.List
+        List of diffusion pipeline stage names
 
     dmri_custom_last_stage : traits.Str
+        Custom last diffusion pipeline stage to be processed
 
     fmri_config_error_msg : traits.Str
-        ('')
+        Error message for the fMRI pipeline configuration file
 
     fmri_config_to_load : traits.Str
+        Path to a configuration file for the fMRI pipeline
 
     fmri_available_config : traits.List
-
-    fmri_config_to_load_msg : traits.Str
-        ('Several configuration files available. Select which one to load:\n')
-
-    fmri_last_date_processed : traits.Str
-        ('Not yet processed')
-
-    fmri_last_stage_processed : traits.Str
-        ('Not yet processed')
+        List of configuration files for the fMRI pipeline
 
     fmri_stage_names : traits.List
+        List of fMRI pipeline stage names
 
     fmri_custom_last_stage : traits.Str
+        Custom last fMRI pipeline stage to be processed
 
     number_of_cores : int
-        Enum(1, list(range(1, multiprocessing.cpu_count())))
+        Number of cores used by Nipype workflow execution engine
+        to distribute independent processing nodes
+        (Must be in the range of your local resources)
     """
 
     base_directory = Directory
@@ -255,12 +245,20 @@ def refresh_folder(bids_directory, derivatives_directory, subject, input_folders
 
     Parameters
     ----------
-    bids_directory
-    derivatives_directory
-    subject
-    input_folders
-    session
+    bids_directory : os.path
+        BIDS dataset root directory
 
+    derivatives_directory : os.path
+        Output (derivatives) directory
+
+    subject : string
+        BIDS subject label (``sub-XX``)
+
+    input_folders : List of string
+        List of folder to be created in ``derivatives_directory``/'cmp'/``subject``
+
+    session : string
+        BIDS session label (``ses-YY``)
     """
     paths = []
 
@@ -309,11 +307,26 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
     Parameters
     ----------
-    project_info
-    bids_layout
-    is_new_project
-    gui
-    debug
+    project_info : cmp.project.CMP_Project_Info
+        Instance of ``cmp.project.CMP_Project_Info`` object
+
+    bids_layout : bids.BIDSLayout
+        Instance of ``BIDSLayout`` object
+
+    is_new_project : bool
+        Specify if it corresponds or not to a new project.
+        If `True`, it will create initial pipeline configuration files.
+
+    gui : bool
+        Might be obsolete and removed in future versions
+
+    debug : bool
+        If `True`, display extra prints to support debugging
+
+    Returns
+    -------
+    dmri_pipeline : Instance(cmp.pipelines.diffusion.diffusion.DiffusionPipeline)
+        `DiffusionPipeline` object instance
     """
     dmri_pipeline = Diffusion_pipeline.DiffusionPipeline(project_info)
 
@@ -387,11 +400,26 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
     Parameters
     ----------
-    project_info
-    bids_layout
-    is_new_project
-    gui
-    debug
+    project_info : cmp.project.CMP_Project_Info
+        Instance of ``cmp.project.CMP_Project_Info`` object
+
+    bids_layout : bids.BIDSLayout
+        Instance of ``BIDSLayout`` object
+
+    is_new_project : bool
+        Specify if it corresponds or not to a new project.
+        If `True`, it will create initial pipeline configuration files.
+
+    gui : bool
+        Might be obsolete and removed in future versions
+
+    debug : bool
+        If `True`, display extra prints to support debugging
+
+    Returns
+    -------
+    fmri_pipeline : Instance(cmp.pipelines.functional.fMRI.fMRIPipeline)
+        `fMRIPipeline` object instance
     """
     fmri_pipeline = FMRI_pipeline.fMRIPipeline(project_info)
 
@@ -460,17 +488,30 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
 
 
 def init_anat_project(project_info, is_new_project, debug=False):
-    """Initialize the anatomical processing pipeline
+    """Initialize the anatomical processing pipeline.
 
     Parameters
     ----------
-    project_info
-    is_new_project
-    debug
+    project_info : cmp.project.CMP_Project_Info
+        Instance of ``cmp.project.CMP_Project_Info`` object
+
+    bids_layout : bids.BIDSLayout
+        Instance of ``BIDSLayout`` object
+
+    is_new_project : bool
+        Specify if it corresponds or not to a new project.
+        If `True`, it will create initial pipeline configuration files.
+
+    gui : bool
+        Might be obsolete and removed in future versions
+
+    debug : bool
+        If `True`, display extra prints to support debugging
 
     Returns
     -------
-    object
+    anat_pipeline : Instance(cmp.pipelines.anatomical.anatomical.AnatomicalPipeline)
+        `AnatomicalPipeline` object instance
     """
     anat_pipeline = Anatomical_pipeline.AnatomicalPipeline(project_info)
 
@@ -533,12 +574,15 @@ def init_anat_project(project_info, is_new_project, debug=False):
 
 
 def update_anat_last_processed(project_info, pipeline):
-    """Update last processing information of an :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline`.
+    """Update last processing information of a :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline`.
 
     Parameters
     ----------
-    project_info
-    pipeline
+    project_info : cmp.project.CMP_Project_Info
+        Instance of `CMP_Project_Info` object
+
+    pipeline : cmp.pipelines.anatomical.anatomical.AnatomicalPipeline
+        Instance of `AnatomicalPipeline` object
     """
     # last date
     if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
@@ -578,8 +622,11 @@ def update_dmri_last_processed(project_info, pipeline):
 
     Parameters
     ----------
-    project_info
-    pipeline
+    project_info : cmp.project.CMP_Project_Info
+        Instance of `CMP_Project_Info` object
+
+    pipeline : cmp.pipelines.diffusion.diffusion.DiffusionPipeline
+        Instance of `DiffusionPipeline` object
     """
     # last date
     if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
@@ -615,8 +662,11 @@ def update_fmri_last_processed(project_info, pipeline):
 
     Parameters
     ----------
-    project_info
-    pipeline
+    project_info : cmp.project.CMP_Project_Info
+        Instance of `CMP_Project_Info` object
+
+    pipeline : cmp.pipelines.functional.fMRI.fMRIPipeline
+        Instance of `fMRIPipeline` object
     """
     # last date
     if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
@@ -652,14 +702,29 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
 
     Parameters
     ----------
-    bids_dir
-    output_dir
-    participant_label
-    session_label
-    anat_pipeline_config
-    dwi_pipeline_config
-    func_pipeline_config
-    number_of_threads
+    bids_dir : string
+        BIDS dataset root directory
+
+    output_dir : string
+        Output (derivatives) directory
+
+    participant_label : string
+        BIDS participant / subject label (``sub-XX``)
+
+    session_label : string
+        BIDS session label (``ses-XX``)
+
+    anat_pipeline_config : string
+        Path to anatomical pipeline configuration file
+
+    dwi_pipeline_config : string
+        Path to diffusion pipeline configuration file
+
+    func_pipeline_config : string
+        Path to fMRI pipeline configuration file
+
+    number_of_threads : int
+        Number of threads used by programs relying on the OpenMP library
     """
     project = CMP_Project_Info()
     project.base_directory = os.path.abspath(bids_dir)
