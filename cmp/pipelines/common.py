@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""Common functions for CMP pipelines."""
+"""Definition of common parent classes for pipelines."""
 
 import os
 # import fnmatch
@@ -132,7 +132,9 @@ class ProcessThread(threading.Thread):
 
 
 class Pipeline(HasTraits):
-    """Parent class that represents a processing pipeline.
+    """Parent class that extends `HasTraits` and represents a processing pipeline.
+
+    It is extended by the various pipeline classes.
 
     See Also
     --------
