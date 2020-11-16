@@ -17,20 +17,19 @@ def run(command, env=None, cwd=None):
 
     Parameters
     ----------
-    command <string>
+    command : string
         String containing the command to be executed (required)
 
-    env <os.environ>
+    env : os.environ
         Specify a custom os.environ
 
-    cwd <Directory>
+    cwd : os.path
         Specify a custom current working directory
 
     Examples
     --------
     >>> cmd = 'data save - 'Save the state of the dataset'
-    >>> run(cmd)
-
+    >>> run(cmd) # doctest: +SKIP
     """
     if (cwd is None) or (cwd == {}):
         cwd = os.getcwd()
