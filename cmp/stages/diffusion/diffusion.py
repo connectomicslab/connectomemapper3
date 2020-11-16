@@ -20,7 +20,7 @@ from .tracking import *
 
 
 class DiffusionConfig(HasTraits):
-    """Class used to store configuration parameters of an :class:`~cmp.stages.diffusion.diffusion.DiffusionStage` instance.
+    """Class used to store configuration parameters of a :class:`~cmp.stages.diffusion.diffusion.DiffusionStage` instance.
 
     Attributes
     ----------

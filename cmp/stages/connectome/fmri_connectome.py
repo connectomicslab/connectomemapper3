@@ -27,7 +27,7 @@ from cmtklib.util import get_pipeline_dictionary_outputs
 
 
 class ConnectomeConfig(HasTraits):
-    """Class used to store configuration parameters of an :class:`~cmp.stages.connectome.fmri_connectome.ConnectomeStage` instance.
+    """Class used to store configuration parameters of a :class:`~cmp.stages.connectome.fmri_connectome.ConnectomeStage` instance.
 
     Attributes
     ----------
