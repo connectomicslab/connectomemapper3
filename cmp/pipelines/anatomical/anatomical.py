@@ -92,7 +92,17 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     flow = Instance(pe.Workflow)
 
     def __init__(self, project_info):
-        """Constructor."""
+        """Constructor of an `AnatomicalPipeline` object.
+
+        Parameters
+        ----------
+        project_info: cmp.project.CMP_Project_Info
+            Instance of `CMP_Project_Info` object.
+
+        See Also
+        --------
+        cmp.project.CMP_Project_Info
+        """
         # super(Pipeline, self).__init__(project_info)
         # self.last_date_processed = project_info.anat_last_date_processed
 

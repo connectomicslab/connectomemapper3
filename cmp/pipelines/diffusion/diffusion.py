@@ -106,7 +106,17 @@ class DiffusionPipeline(Pipeline):
     # anat_flow = Instance(pe.Workflow)
 
     def __init__(self, project_info):
-        """Constructor."""
+        """Constructor of a `DiffusionPipeline` object.
+
+        Parameters
+        ----------
+        project_info: cmp.project.CMP_Project_Info
+            Instance of `CMP_Project_Info` object.
+
+        See Also
+        --------
+        cmp.project.CMP_Project_Info
+        """
         print('{}'.format(project_info.base_directory))
 
         self.global_conf.subjects = project_info.subjects

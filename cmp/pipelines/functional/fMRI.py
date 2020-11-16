@@ -86,7 +86,17 @@ class fMRIPipeline(Pipeline):
     subject_id = Str
 
     def __init__(self, project_info):
-        """Constructor."""
+        """Constructor of a `fMRIPipeline` object.
+
+        Parameters
+        ----------
+        project_info: cmp.project.CMP_Project_Info
+            Instance of `CMP_Project_Info` object.
+
+        See Also
+        --------
+        cmp.project.CMP_Project_Info
+        """
         self.subjects_dir = project_info.freesurfer_subjects_dir
         self.subject_id = project_info.freesurfer_subject_id
 
@@ -95,22 +105,19 @@ class fMRIPipeline(Pipeline):
 
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
-            self.subject_directory = os.path.join(
-                self.base_directory,  project_info.subject, project_info.subject_session)
+            self.subject_directory = os.path.join(project_info.base_directory,
+                                                  project_info.subject,
+                                                  project_info.subject_session)
         else:
             self.global_conf.subject_session = ''
-            self.subject_directory = os.path.join(
-                project_info.base_directory,  project_info.subject)
+            self.subject_directory = os.path.join(project_info.base_directory,  project_info.subject)
 
-        self.derivatives_directory = os.path.abspath(
-            project_info.output_directory)
+        self.derivatives_directory = os.path.abspath(project_info.output_directory)
 
         if project_info.output_directory is not None:
-            self.output_directory = os.path.abspath(
-                project_info.output_directory)
+            self.output_directory = os.path.abspath(project_info.output_directory)
         else:
-            self.output_directory = os.path.join(
-                self.base_directory, "derivatives")
+            self.output_directory = os.path.join(self.base_directory, "derivatives")
 
         self.stages = {'Preprocessing': PreprocessingStage(bids_dir=project_info.base_directory,
                                                            output_dir=self.output_directory),
