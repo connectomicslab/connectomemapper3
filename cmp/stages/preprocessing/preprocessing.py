@@ -184,11 +184,22 @@ class splitBvecBval(BaseInterface):
 
 
 class PreprocessingStage(Stage):
+    """Class that represents the pre-registration preprocessing stage of a :class:`~cmp.pipelines.diffusion.diffusion.DiffusionPipeline` instance.
+
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `PreprocessingStage`
+
+    See Also
+    --------
+    cmp.pipelines.diffusion.diffusion.DiffusionPipeline
+    cmp.stages.preprocessing.preprocessing.PreprocessingConfig
     """
 
-    """
     # General and UI members
     def __init__(self, bids_dir, output_dir):
+        """Constructor of a :class:`~cmp.stages.preprocessing.preprocessing.PreprocessingStage` instance."""
         self.name = 'preprocessing_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
@@ -201,17 +212,18 @@ class PreprocessingStage(Stage):
                         "roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        """
+        """Create the stage worflow.
 
         Parameters
         ----------
-        flow
-        inputnode
-        outputnode
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
 
-        Returns
-        -------
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
 
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
         """
         # print inputnode
         processing_input = pe.Node(interface=util.IdentityInterface(
@@ -261,18 +273,20 @@ class PreprocessingStage(Stage):
         concatnode = pe.Node(interface=util.Merge(2), name='concatnode')
 
         def convertList2Tuple(lists):
-            """
+            """Convert list of files to tuple of files.
 
             Parameters
             ----------
-            lists
-
+            lists : [bvecs, bvals]
+                List of files containing bvecs and bvals
             Returns
             -------
-
+            out_tuple : (bvecs, bvals)
+                Tuple of files containing bvecs and bvals
             """
             # print "******************************************",tuple(lists)
-            return tuple(lists)
+            out_tuple = tuple(lists)
+            return out_tuple
 
         flow.connect([
             # (processing_input,concatnode,[('bvecs','in1'),('bvals','in2')]),
@@ -926,8 +940,9 @@ class PreprocessingStage(Stage):
         ])
 
     def define_inspect_outputs(self):
-        """
+        """Update the `inspect_outputs' class attribute.
 
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
         # print "stage_dir : %s" % self.stage_dir
 
@@ -983,11 +998,11 @@ class PreprocessingStage(Stage):
                                       key=str.lower)
 
     def has_run(self):
-        """
+        """Function that returns `True` if the stage has been run successfully.
 
         Returns
         -------
-
+        `True` if the stage has been run successfully
         """
         if not self.config.eddy_current_and_motion_correction:
             if not self.config.denoising and not self.config.bias_field_correction:
