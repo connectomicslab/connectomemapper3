@@ -46,22 +46,22 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
     Attributes
     ----------
-    segmentation <Button>
+    segmentation : traits.ui.Button
         Button to open the window for configuration or quality inspection
         of the segmentation stage depending on the ``view_mode``
 
-    parcellation <Button>
+    parcellation : traits.ui.Button
         Button to open the window for configuration or quality inspection
         of the segmentation stage depending on the ``view_mode``
 
-    view_mode <['config_view', 'inspect_outputs_view']>
+    view_mode : ['config_view', 'inspect_outputs_view']
         Variable used to control the display of either (1) the configuration
         or (2) the quality inspection of stage of the pipeline
 
-    pipeline_group <traitsUI panel>
+    pipeline_group : traitsUI panel
         Panel defining the layout of the buttons of the stages with corresponding images
 
-    traits_view <QtView>
+    traits_view : QtView
         QtView that includes the ``pipeline_group`` panel
 
     See also
@@ -94,7 +94,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
         Parameters
         -----------
-        project_info <cmp.project.CMP_Project_Info>
+        project_info : cmp.project.CMP_Project_Info
             CMP_Project_Info object that stores general information
             such as the BIDS root and output directories (see
             :class_`cmp.project.CMP_Project_Info` for more details)
@@ -128,7 +128,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
         Parameters
         -----------
-        info <Button>
+        info : traits.ui.Button
             The segmentation button object
         """
         self.stages['Segmentation'].configure_traits(view=self.view_mode)
@@ -141,7 +141,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
         Parameters
         -----------
-        info <Button>
+        info : traits.ui.Button
             The parcellation button object
         """
         self.stages['Parcellation'].configure_traits(view=self.view_mode)
@@ -151,12 +151,12 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
         Parameters
         -----------
-        layout <pybids.BIDSLayout>
+        layout : bids.BIDSLayout
             BIDSLayout object used to query
 
         Returns
         -------
-        valid_inputs <Boolean>
+        valid_inputs : bool
             True in all inputs of the anatomical pipeline are available
         """
         print('**** Check Inputs  ****')
@@ -239,10 +239,10 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
         Returns
         --------
-        valid_output <Boolean>
+        valid_output : bool
             True is all outputs are found
 
-        error_message <string>
+        error_message : string
             Message in case there is an error
         """
         t1_available = False

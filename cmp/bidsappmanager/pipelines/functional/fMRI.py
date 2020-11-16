@@ -40,30 +40,30 @@ class fMRIPipelineUI(fMRIPipeline):
 
     Attributes
     ----------
-    preprocessing <Button>
+    preprocessing : traits.ui.Button
         Button to open the window for configuration or quality inspection
         of the preprocessing stage depending on the ``view_mode``
 
-    registration <Button>
+    registration : traits.ui.Button
         Button to open the window for configuration or quality inspection
         of the registration stage depending on the ``view_mode``
 
-    functionalMRI <Button>
+    functionalMRI : traits.ui.Button
         Button to open the window for configuration or quality inspection
         of the extra preprocessing stage stage depending on the ``view_mode``
 
-    connectome <Button>
+    connectome : traits.ui.Button
         Button to open the window for configuration or quality inspection
         of the connectome stage depending on the ``view_mode``
 
-    view_mode <['config_view', 'inspect_outputs_view']>
+    view_mode : ['config_view', 'inspect_outputs_view']
         Variable used to control the display of either (1) the configuration
         or (2) the quality inspection of stage of the pipeline
 
-    pipeline_group <traitsUI panel>
+    pipeline_group : traitsUI panel
         Panel defining the layout of the buttons of the stages with corresponding images
 
-    traits_view <QtView>
+    traits_view : QtView
         QtView that includes the ``pipeline_group`` panel
 
     See also
@@ -102,7 +102,7 @@ class fMRIPipelineUI(fMRIPipeline):
 
         Parameters
         -----------
-        project_info <cmp.project.CMP_Project_Info>
+        project_info : cmp.project.CMP_Project_Info
             CMP_Project_Info object that stores general information
             such as the BIDS root and output directories (see
             :class_`cmp.project.CMP_Project_Info` for more details)
@@ -143,7 +143,7 @@ class fMRIPipelineUI(fMRIPipeline):
 
         Parameters
         -----------
-        info <Button>
+        info : traits.ui.Button
             The preprocessing button object
         """
         self.stages['Preprocessing'].configure_traits(view=self.view_mode)
@@ -156,7 +156,7 @@ class fMRIPipelineUI(fMRIPipeline):
 
         Parameters
         -----------
-        info <Button>
+        info : traits.ui.Button
             The extra preprocessing button object
         """
         self.stages['FunctionalMRI'].configure_traits(view=self.view_mode)
@@ -169,7 +169,7 @@ class fMRIPipelineUI(fMRIPipeline):
 
         Parameters
         -----------
-        info <Button>
+        info : traits.ui.Button
             The registration button object
         """
         if self.view_mode == 'config_view':
@@ -186,7 +186,7 @@ class fMRIPipelineUI(fMRIPipeline):
 
         Parameters
         -----------
-        info <Button>
+        info : traits.ui.Button
             The connectome button object
         """
         self.stages['Connectome'].configure_traits(view=self.view_mode)
@@ -196,12 +196,12 @@ class fMRIPipelineUI(fMRIPipeline):
 
         Parameters
         -----------
-        layout <pybids.BIDSLayout>
+        layout : bids.BIDSLayout
             BIDSLayout object used to query
 
         Returns
         -------
-        valid_inputs <Boolean>
+        valid_inputs : bool
             True in all inputs of the fMRI pipeline are available
         """
         print('**** Check Inputs ****')

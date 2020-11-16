@@ -129,15 +129,15 @@ class CMP_Project_InfoUI(CMP_Project_Info):
 
     Attributes
     -----------
-    creation_mode <traits.Enum>
+    creation_mode : traits.Enum
         Mode for loading the dataset. Valid values are
         'Load BIDS dataset', 'Install Datalad BIDS dataset'
 
-    install_datalad_dataset_via_ssh <traits.Bool>
+    install_datalad_dataset_via_ssh : traits.Bool
         If set to True install the datalad dataset from a remote server
         via ssh.(True by default)
 
-    ssh_user <traits.String>
+    ssh_user : traits.Str
         Remote server username.
         (Required if ``install_datalad_dataset_via_ssh`` is True)
 
@@ -145,76 +145,76 @@ class CMP_Project_InfoUI(CMP_Project_Info):
         Remote server password.
         (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    ssh_remote <traits.String>
+    ssh_remote : traits.Str
         Remote server IP or URL.
         (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    datalad_dataset_path <traits.Directory>
+    datalad_dataset_path : traits.Directory
         Path to the datalad dataset on the remote server. 
         (Required if ``install_datalad_dataset_via_ssh`` is True)
 
-    summary_view_button <traitsui.Button>
+    summary_view_button : traits.ui.Button
         Button that shows the pipeline processing summary table
 
-    pipeline_processing_summary_view <traits.ui.VGroup>
+    pipeline_processing_summary_view : traits.ui.VGroup
         TraitsUI VGroup that contains ``Item('pipeline_processing_summary')``
 
-    dataset_view <traits.ui.View>
+    dataset_view : traits.ui.View
         TraitsUI View that shows a summary of project settings and
         modality available for a given subject
 
-    traits_view <QtView>
+    traits_view : QtView
         TraitsUI QtView that includes the View 'dataset_view'
 
-    create_view <traits.ui.View>
+    create_view : traits.ui.View
         Dialog view to create a BIDS Dataset
 
-    subject_view <traits.ui.View>
+    subject_view : traits.ui.View
         Dialog view to select of subject
 
-    subject_session_view <traits.ui.View>
+    subject_session_view : traits.ui.View
         Dialog view to select the subject session
 
-    dmri_bids_acq_view <traits.ui.View>
+    dmri_bids_acq_view : traits.ui.View
         Dialog view to select the diffusion acquisition model
 
-    anat_warning_view <traits.ui.View>
+    anat_warning_view : traits.ui.View
         View that displays a warning message regarding
         the anatomical T1w data
 
-    anat_config_error_view <traits.ui.View>
+    anat_config_error_view : traits.ui.View
         Error view that displays an error message regarding
         the configuration of the anatomical pipeline
 
-    dmri_warning_view <traits.ui.View>
+    dmri_warning_view : traits.ui.View
         View that displays a warning message regarding
         the diffusion MRI data
 
-    dmri_config_error_view <traits.ui.View>
+    dmri_config_error_view : traits.ui.View
         View that displays an error message regarding
         the configuration of the diffusion pipeline
 
-    fmri_warning_view <traits.ui.View>
+    fmri_warning_view : traits.ui.View
         View that displays a warning message regarding
         the functional MRI data
 
-    fmri_config_error_view <traits.ui.View>
+    fmri_config_error_view : traits.ui.View
         View that displays an error message regarding
         the configuration of the fMRI pipeline
 
-    open_view <traits.ui.View>
+    open_view : traits.ui.View
         Dialog view to load a BIDS Dataset
 
-    anat_select_config_to_load <traits.ui.View>
+    anat_select_config_to_load : traits.ui.View
         Dialog view to load the configuration file of the anatomical pipeline
 
-    diffusion_imaging_model_select_view <traits.ui.View>
+    diffusion_imaging_model_select_view : traits.ui.View
         Dialog view to select the diffusion acquisition model
 
-    dmri_select_config_to_load = View(
+    dmri_select_config_to_load : traits.ui.View
         Dialog view to load the configuration file of the diffusion MRI pipeline
 
-    fmri_select_config_to_load = View(
+    fmri_select_config_to_load : traits.ui.View
         Dialog view to load the configuration file of the fMRI pipeline
     """
 
@@ -545,78 +545,78 @@ class CMP_BIDSAppWindow(HasTraits):
 
     Attributes
     ----------
-    project_info <CMP_Project_Info>
+    project_info : CMP_Project_Info
         Instance of :class:`CMP_Project_Info` that represents the processing project
 
-    bids_root <traits.Directory>
+    bids_root : traits.Directory
         BIDS root dataset directory
 
-    output_dir <traits.Directory>
+    output_dir : traits.Directory
         Output directory
 
-    subjects <traits.List(Str)>
+    subjects : traits.List
         List of subjects (in the form ``sub-XX``) present in the dataset
 
-    number_of_participants_processed_in_parallel <traits.Range>
+    number_of_participants_processed_in_parallel : traits.Range
         Number of participants / subjects to be processed in parallel that
         takes values in the [1, # of CPUs - 1] range
 
-    number_threads_max <traits.Int>
+    number_threads_max : traits.Int
         Maximal number of threads to be used by OpenMP programs
         (4 by default)
 
-    number_of_threads <traits.Range>
+    number_of_threads : traits.Range
         Number of threads to be used by OpenMP programs that takes values
         in the [1, ``number_threads_max``] range
 
-    fs_file <traits.File>
+    fs_file : traits.File
         Path to Freesurfer license file
 
     list_of_subjects_to_be_processed <List(Str)>
         Selection of subjects to be processed from the ``subjects`` list
 
-    anat_config <traits.File>
+    anat_config : traits.File
         Configuration file for the anatomical MRI pipeline
 
-    dmri_config <traits.File>
+    dmri_config : traits.File
         Configuration file for the diffusion MRI pipeline
 
-    fmri_config <traits.File>
+    fmri_config : traits.File
         Configuration file for the functional MRI pipeline
 
-    run_anat_pipeline <traits.Bool>
+    run_anat_pipeline : traits.Bool
         If True, run the anatomical pipeline
 
-    run_dmri_pipeline <traits.Bool>
+    run_dmri_pipeline : traits.Bool
         If True, run the diffusion pipeline
 
-    run_fmri_pipeline <traits.Bool>
+    run_fmri_pipeline : traits.Bool
         If True, run the functional pipeline
 
-    bidsapp_tag <traits.Enum>
+    bidsapp_tag : traits.Enum
         Selection of BIDS App version to use
 
-    data_provenance_tracking <traits.Bool>
+    data_provenance_tracking : traits.Bool
         If set and if ``datalad_is_available`` is True run the BIDS App
         using datalad (False by default)
 
-    datalad_update_environment <traits.Bool>
+    datalad_update_environment : traits.Bool
         If True and ``data_provenance_tracking`` is True, tell to datalad
         to update the BIDS App container image if there was a previous 
         execution (True by default)
 
-    datalad_is_available <traits.Bool>
+    datalad_is_available : traits.Bool
         Boolean used to store if datalad is available in the computing 
         environment (False by default)
 
-    check <traits.ui.Button>
+    check : traits.ui.Button
         Button to check if all parameters are properly set for execution
         of the BIDS App
 
-    start_bidsapp <traits.ui.Button>
+    start_bidsapp : traits.ui.Button
         Button to run the BIDS App
 
-    traits_view <QtView>
+    traits_view : QtView
         TraitsUI QtView that describes the content of the window
     """
 
@@ -789,25 +789,25 @@ class CMP_BIDSAppWindow(HasTraits):
 
         Parameters
         ----------
-        project_info
+        project_info : cmp.project.CMP_Project_Info
             :class:`CMP_Project_Info` object (Default: None)
 
-        bids_root <traits.Directory>
+        bids_root : traits.Directory
             BIDS dataset root directory (Default: \'\')
 
-        subjects
+        subjects : List of string
             List of subjects in the dataset (Default: None)
 
-        list_of_subjects_to_be_processed <traits.List(traits.Str)>
+        list_of_subjects_to_be_processed : List of string
             List of subjects to be processed (Default: None)
 
-        anat_config
+        anat_config : string
             Path to anatomical pipeline configuration file (Default: \'\')
 
-        dmri_config
+        dmri_config : string
             Path to diffusion pipeline configuration file (Default: \'\')
 
-        fmri_config
+        fmri_config : string
             Path to functional pipeline configuration file (Default: \'\')
         """
         if multiprocessing.cpu_count() < 4:
@@ -967,10 +967,10 @@ class CMP_BIDSAppWindow(HasTraits):
 
         Parameters
         ----------
-        bidsapp_tag <traits.Str>
+        bidsapp_tag : traits.Str
             Version tag of the CMP 3 BIDS App
 
-        participants_labels <traits.List(Str)>
+        participants_labels : traits.List
             List of participants labels in the form ["01", "03", "04", ...]
         """
 
@@ -1044,10 +1044,10 @@ class CMP_BIDSAppWindow(HasTraits):
 
         Parameters
         ----------
-        bidsapp_tag <traits.Str>
+        bidsapp_tag : traits.Str
             Version tag of the CMP 3 BIDS App
 
-        participants_labels <traits.List(Str)>
+        participants_labels : traits.List
             List of participants labels in the form ["01", "03", "04", ...]
         """
         cmd = ['datalad', 'containers-run', ]
@@ -1137,7 +1137,7 @@ class CMP_BIDSAppWindow(HasTraits):
 
         Parameters
         ----------
-        proclist <traits.List(subprocess.Popen)>
+        proclist : List of subprocess.Popen
             List of Popen processes
         """
         for proc in proclist:
@@ -1152,20 +1152,19 @@ class CMP_BIDSAppWindow(HasTraits):
 
         Parameters
         ----------
-        command <string>
+        command : string
             String containing the command to be executed (required)
 
-        env <os.environ>
+        env : os.environ
             Specify a custom os.environ
 
-        cwd <Directory>
+        cwd : os.path
             Specify a custom current working directory
 
         Examples
         --------
         >>> cmd = 'data save - 'Save the state of the dataset'
-        >>> run(cmd)
-
+        >>> run(cmd) # doctest: +SKIP
         """
         merged_env = os.environ
         if env is not None:
@@ -1449,43 +1448,43 @@ class CMP_ConfiguratorWindow(HasTraits):
 
     Attributes
     ----------
-    project_info <CMP_Project_Info>
+    project_info : CMP_Project_Info
         Instance of :class:`CMP_Project_Info` that represents the processing project
 
-    anat_pipeline <HasTraits>
+    anat_pipeline : Instance(HasTraits)
         Instance of anatomical MRI pipeline UI
 
-    dmri_pipeline <HasTraits>
+    dmri_pipeline : Instance(HasTraits)
         Instance of diffusion MRI pipeline UI
 
-    fmri_pipeline <HasTraits>
+    fmri_pipeline : Instance(HasTraits)
         Instance of functional MRI pipeline UI
 
-    anat_inputs_checked <traits.Bool>
+    anat_inputs_checked : traits.Bool
             Boolean that indicates if anatomical pipeline inputs are available
             (Default: False)
 
-        dmri_inputs_checked = <traits.Bool>
+        dmri_inputs_checked = : traits.Bool
             Boolean that indicates if diffusion pipeline inputs are available
             (Default: False)
 
-        fmri_inputs_checked <traits.Bool>
+        fmri_inputs_checked : traits.Bool
             Boolean that indicates if functional pipeline inputs are available
             (Default: False)
 
-    anat_save_config <traits.ui.Action>
+    anat_save_config : traits.ui.Action
         TraitsUI Action to save the anatomical pipeline configuration
 
-    dmri_save_config = Action(
+    dmri_save_config : traits.ui.Action
         TraitsUI Action to save the diffusion pipeline configuration
 
-    fmri_save_config = Action(
+    fmri_save_config : traits.ui.Action
         TraitsUI Action to save the functional pipeline configuration
 
-    save_all_config <traits.ui.Button>
+    save_all_config : traits.ui.Button
         Button to save all configuration files at once
 
-    traits_view = QtView
+    traits_view : QtView
         TraitsUI QtView that describes the content of the window
     """
 
@@ -1566,7 +1565,7 @@ class CMP_ConfiguratorWindow(HasTraits):
 
         Parameters
         ----------
-        project_info
+        project_info : cmp.project.CMP_Project_Info
             :class:`CMP_Project_Info` object (Default: None)
 
         anat_pipeline <cmp.bidsappmanager.pipelines.anatomical.AnatomicalPipelineUI>
@@ -1581,15 +1580,15 @@ class CMP_ConfiguratorWindow(HasTraits):
             Instance of :class:`cmp.bidsappmanager.pipelines.functional.fMRIPipelineUI`
             (Default: None)
 
-        anat_inputs_checked <traits.Bool>
+        anat_inputs_checked : traits.Bool
             Boolean that indicates if anatomical pipeline inputs are available
             (Default: False)
 
-        dmri_inputs_checked = <traits.Bool>
+        dmri_inputs_checked = : traits.Bool
             Boolean that indicates if diffusion pipeline inputs are available
             (Default: False)
 
-        fmri_inputs_checked <traits.Bool>
+        fmri_inputs_checked : traits.Bool
             Boolean that indicates if functional pipeline inputs are available
             (Default: False)
         """
@@ -1644,43 +1643,43 @@ class CMP_InspectorWindow(HasTraits):
 
     Attributes
     ----------
-    project_info <CMP_Project_Info>
+    project_info : CMP_Project_Info
         Instance of :class:`CMP_Project_Info` that represents the processing project
 
-    anat_pipeline <HasTraits>
+    anat_pipeline : Instance(HasTraits)
         Instance of anatomical MRI pipeline
 
-    dmri_pipeline <HasTraits>
+    dmri_pipeline : Instance(HasTraits)
         Instance of diffusion MRI pipeline
 
-    fmri_pipeline <HasTraits>
+    fmri_pipeline : Instance(HasTraits)
         Instance of functional MRI pipeline
 
-    anat_inputs_checked <traits.Bool>
+    anat_inputs_checked : traits.Bool
         Indicates if inputs of anatomical pipeline are available 
         (Default: False)
 
-    dmri_inputs_checked = <traits.Bool>
+    dmri_inputs_checked : traits.Bool
         Indicates if inputs of diffusion pipeline are available 
         (Default: False)
 
-    fmri_inputs_checked <traits.Bool>
+    fmri_inputs_checked : traits.Bool
         Indicates if inputs of functional pipeline are available 
         (Default: False)
 
-    output_anat_available <traits.Bool>
+    output_anat_available : traits.Bool
         Indicates if outputs of anatomical pipeline are available 
         (Default: False)
 
-    output_dmri_available = <traits.Bool>
+    output_dmri_available : traits.Bool
         Indicates if outputs of diffusion pipeline are available 
         (Default: False)
 
-    output_fmri_available <traits.Bool>
+    output_fmri_available : traits.Bool
         Indicates if outputs of functional pipeline are available 
         (Default: False)
 
-    traits_view = QtView
+    traits_view : QtView
         TraitsUI QtView that describes the content of the window
     """
 
@@ -1748,18 +1747,18 @@ class CMP_InspectorWindow(HasTraits):
 
         Parameters
         ----------
-        project_info
+        project_info : cmp.project.CMP_Project_Info
             :class:`CMP_Project_Info` object (Default: None)
 
-        anat_inputs_checked <traits.Bool>
+        anat_inputs_checked : traits.Bool
             Boolean that indicates if anatomical pipeline inputs are available
             (Default: False)
 
-        dmri_inputs_checked = <traits.Bool>
+        dmri_inputs_checked = : traits.Bool
             Boolean that indicates if diffusion pipeline inputs are available
             (Default: False)
 
-        fmri_inputs_checked <traits.Bool>
+        fmri_inputs_checked : traits.Bool
             Boolean that indicates if functional pipeline inputs are available
             (Default: False)
         """
@@ -1998,37 +1997,37 @@ class CMP_MainWindow(HasTraits):
 
     Attributes
     ----------
-    project_info <CMP_Project_InfoUI>
+    project_info : CMP_Project_InfoUI
         Instance of :class:`CMP_Project_InfoUI` that represents the processing project
 
-    anat_pipeline <HasTraits>
+    anat_pipeline : Instance(HasTraits)
         Instance of anatomical MRI pipeline UI
 
-    dmri_pipeline <HasTraits>
+    dmri_pipeline : Instance(HasTraits)
         Instance of diffusion MRI pipeline UI
 
-    fmri_pipeline <HasTraits>
+    fmri_pipeline : Instance(HasTraits)
         Instance of functional MRI pipeline UI
 
-    bidsapp_ui <CMP_Project_Info>
+    bidsapp_ui : CMP_Project_Info
         Instance of :class:`CMP_BIDSAppWindow`
 
-    load_dataset <traits.ui.Action>
+    load_dataset : traits.ui.Action
         TraitsUI Action to load a BIDS dataset
 
-    bidsapp <traits.ui.Button>
+    bidsapp : traits.ui.Button
         Button that displays the BIDS App Interface window
 
-    configurator <traits.ui.Button>
+    configurator : traits.ui.Button
         Button thats displays the pipeline Configurator window
 
-    quality_control <traits.ui.Button>
+    quality_control : traits.ui.Button
         Button that displays the pipeline Quality Control / Inspector window
 
-    manager_group <traits.ui.View>
+    manager_group : traits.ui.View
         TraitsUI View that describes the content of the main window
 
-    traits_view = QtView
+    traits_view : QtView
         TraitsUI QtView that includes ``manager_group`` and parameterize 
         the window with menu
     """

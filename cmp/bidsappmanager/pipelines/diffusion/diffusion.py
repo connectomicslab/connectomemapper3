@@ -52,31 +52,31 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
     Attributes
     ----------
-    preprocessing <Button>
+    preprocessing : traits.ui.Button
         Button to open the window for configuration or quality inspection
         of the preprocessing stage depending on the ``view_mode``
 
-    registration <Button>
+    registration : traits.ui.Button
         Button to open the window for configuration or quality inspection
         of the registration stage depending on the ``view_mode``
 
-    diffusion <Button>
+    diffusion : traits.ui.Button
         Button to open the window for configuration or quality inspection
         of the diffusion reconstruction and tractography stage depending 
         on the ``view_mode``
 
-    connectome <Button>
+    connectome : traits.ui.Button
         Button to open the window for configuration or quality inspection
         of the connectome stage depending on the ``view_mode``
 
-    view_mode <['config_view', 'inspect_outputs_view']>
+    view_mode : ['config_view', 'inspect_outputs_view']
         Variable used to control the display of either (1) the configuration
         or (2) the quality inspection of stage of the pipeline
 
-    pipeline_group <traitsUI panel>
+    pipeline_group : traitsUI panel
         Panel defining the layout of the buttons of the stages with corresponding images
 
-    traits_view <QtView>
+    traits_view : QtView
         QtView that includes the ``pipeline_group`` panel
 
     See also
@@ -121,12 +121,12 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
         Parameters
         -----------
-        project_info <cmp.project.CMP_Project_Info>
+        project_info : cmp.project.CMP_Project_Info
             CMP_Project_Info object that stores general information
             such as the BIDS root and output directories (see
             :class_`cmp.project.CMP_Project_Info` for more details)
 
-        See also
+        See Also
         ---------
         cmp.pipelines.diffusion.DiffusionPipeline.__init__
         """
@@ -163,7 +163,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
         Parameters
         -----------
-        info <Button>
+        info : traits.ui.Button
             The preprocessing button object
         """
         self.stages['Preprocessing'].configure_traits(view=self.view_mode)
@@ -176,7 +176,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
         Parameters
         -----------
-        info <Button>
+        info : traits.ui.Button
             The diffusion button object
         """
         self.stages['Diffusion'].configure_traits(view=self.view_mode)
@@ -189,7 +189,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
         Parameters
         -----------
-        info <Button>
+        info : traits.ui.Button
             The registration button object
         """
         self.stages['Registration'].configure_traits(view=self.view_mode)
@@ -202,7 +202,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
         Parameters
         -----------
-        info <Button>
+        info : traits.ui.Button
             The connectome button object
         """
         self.stages['Connectome'].configure_traits(view=self.view_mode)
@@ -212,12 +212,12 @@ class DiffusionPipelineUI(DiffusionPipeline):
 
         Parameters
         -----------
-        layout <pybids.BIDSLayout>
+        layout : bids.BIDSLayout
             BIDSLayout object used to query
 
         Returns
         -------
-        valid_inputs <Boolean>
+        valid_inputs : bool
             True in all inputs of the anatomical pipeline are available
         """
         print('**** Check Inputs  ****')
