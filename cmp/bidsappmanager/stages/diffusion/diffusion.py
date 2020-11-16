@@ -25,7 +25,7 @@ class DiffusionConfigUI(DiffusionConfig):
 
     Attributes
     ----------
-    traits_view <View>
+    traits_view : traits.ui.View
         TraitsUI view that displays the Diffusion Stage Parameter Attributes
         of this class
 
@@ -100,14 +100,14 @@ class DiffusionStageUI(DiffusionStage):
 
     Attributes
     ----------
-    inspect_output_button <Button>
+    inspect_output_button : traits.ui.Button
         Button that displays the selected output in an appropriate viewer
         (present only in the window for quality inspection)
 
-    inspect_outputs_view <View>
+    inspect_outputs_view : traits.ui.View
         TraitsUI view that displays the quality inspection window of this stage
 
-    config_view <View>
+    config_view : traits.ui.View
         TraitsUI view that displays the configuration window of this stage
 
     See also
@@ -148,6 +148,14 @@ class DiffusionStageUI(DiffusionStage):
     def __init__(self, bids_dir, output_dir):
         """Constructor of the DiffusionStageUI class.
 
+        Parameters
+        -----------
+        bids_dir : path
+            BIDS root directory
+
+        output_dir : path
+            Output directory
+
         See also
         ---------
         cmp.stages.diffusion.diffusion.DiffusionStage.__init_
@@ -161,7 +169,7 @@ class DiffusionStageUI(DiffusionStage):
 
         Parameters
         ----------
-        info <Button>
+        info : traits.ui.Button
             Button object
         """
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

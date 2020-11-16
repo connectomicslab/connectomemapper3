@@ -17,7 +17,7 @@ class Dipy_tracking_configUI(Dipy_tracking_config):
 
     Attributes
     ----------
-    traits_view <View>
+    traits_view : traits.ui.View
         TraitsUI view that displays the attributes of this class, e.g. 
         the parameters for diffusion tractography using Dipy
 
@@ -53,7 +53,7 @@ class MRtrix_tracking_configUI(MRtrix_tracking_config):
 
     Attributes
     ----------
-    traits_view <View>
+    traits_view : traits.ui.View
         TraitsUI view that displays the attributes of this class, e.g.
         the parameters for tractography using MRtrix
 

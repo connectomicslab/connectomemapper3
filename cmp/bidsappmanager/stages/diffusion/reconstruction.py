@@ -24,11 +24,11 @@ class Dipy_recon_configUI(Dipy_recon_config):
 
     Attributes
     ----------
-    flip_table_axis list<<View>>
+    flip_table_axis : list of string
         List of axis to flip in the gradient table. Valid values are
         'x', 'y', 'z'
 
-    traits_view <View>
+    traits_view : traits.ui.View
         TraitsUI view that displays the attributes of this class, e.g. 
         the parameters for diffusion reconstruction using Dipy
 
@@ -88,11 +88,11 @@ class MRtrix_recon_configUI(MRtrix_recon_config):
 
     Attributes
     ----------
-    flip_table_axis list<<View>>
+    flip_table_axis : list of string
         List of axis to flip in the gradient table. Valid values are
         'x', 'y', 'z'
 
-    traits_view <View>
+    traits_view : traits.ui.View
         TraitsUI view that displays the attributes of this class, e.g.
         the parameters for diffusion reconstruction using MRtrix
 

@@ -20,11 +20,11 @@ class ConnectomeConfigUI(ConnectomeConfig):
 
     Attributes
     ----------
-    output_types list<<string>>
+    output_types : list of string
         A list of ``output_types``. Valid ``output_types`` are
         'gPickle', 'mat', 'cff', 'graphml'
 
-    traits_view <View>
+    traits_view : traits.ui.View
         TraitsUI view that displays the Attributes of this class
 
     See also
@@ -47,20 +47,20 @@ class ConnectomeStageUI(ConnectomeStage):
 
     Attributes
     ----------
-    log_visualization <Boolean>
+    log_visualization : traits.Bool
         If True, display with a log transformation 
 
-    circular_layout <Boolean>
+    circular_layout : traits.Bool
         If True, display the connectivity matrix using a circular layout
 
-    inspect_output_button <Button>
+    inspect_output_button : traits.ui.Button
         Button that displays the selected connectivity matrix
         in the graphical component for quality inspection
 
-    inspect_outputs_view <View>
+    inspect_outputs_view : traits.ui.View
         TraitsUI view that displays the quality inspection window of this stage
 
-    config_view <View>
+    config_view : traits.ui.View
         TraitsUI view that displays the configuration window of this stage
 
     See also
@@ -109,10 +109,10 @@ class ConnectomeStageUI(ConnectomeStage):
 
         Parameters
         ----------
-        bids_dir <Directory>
+        bids_dir : traits.Directory
             BIDS root directory
 
-        output_dir <Directory>
+        output_dir : traits.Directory
             Output directory
 
         See also
@@ -127,7 +127,7 @@ class ConnectomeStageUI(ConnectomeStage):
 
         Parameters
         ----------
-        new <Boolean>
+        new : traits.Bool
             New value
         """
         self.config.log_visualization = new
@@ -138,7 +138,7 @@ class ConnectomeStageUI(ConnectomeStage):
 
         Parameters
         ----------
-        new <Boolean>
+        new : traits.Bool
             New value
         """
         self.config.circular_layout = new
@@ -149,7 +149,7 @@ class ConnectomeStageUI(ConnectomeStage):
 
         Parameters
         ----------
-        info <Button>
+        info : traits.ui.Button
             Button object
         """
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])

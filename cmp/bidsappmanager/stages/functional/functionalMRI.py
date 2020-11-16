@@ -20,7 +20,7 @@ class FunctionalMRIConfigUI(FunctionalMRIConfig):
 
     Attributes
     ----------
-    traits_view <View>
+    traits_view : traits.ui.View
         TraitsUI view that displays the attributes of this class, e.g.
         the parameters for the stage
 
@@ -52,14 +52,14 @@ class FunctionalMRIStageUI(FunctionalMRIStage):
 
     Attributes
     ----------
-    inspect_output_button <Button>
+    inspect_output_button : traits.ui.Button
         Button that displays the selected output in an appropriate viewer
         (present only in the window for quality inspection)
 
-    inspect_outputs_view <View>
+    inspect_outputs_view : traits.ui.View
         TraitsUI view that displays the quality inspection window of this stage
 
-    config_view <View>
+    config_view : traits.ui.View
         TraitsUI view that displays the configuration window of this stage
 
     See also
@@ -99,6 +99,14 @@ class FunctionalMRIStageUI(FunctionalMRIStage):
     def __init__(self, bids_dir, output_dir):
         """Constructor of the FunctionalMRIStageUI class.
 
+        Parameters
+        -----------
+        bids_dir : path
+            BIDS root directory
+
+        output_dir : path
+            Output directory
+
         See also
         ---------
         cmp.stages.functional.functionalMRI.FunctionalMRIStage.__init_
@@ -112,7 +120,7 @@ class FunctionalMRIStageUI(FunctionalMRIStage):
 
         Parameters
         ----------
-        info <Button>
+        info : traits.ui.Button
             Button object
         """
         subprocess.Popen(self.inspect_outputs_dict[self.inspect_outputs_enum])
