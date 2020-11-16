@@ -88,6 +88,11 @@ class FunctionalMRIConfig(HasTraits):
 class FunctionalMRIStage(Stage):
     """Class that represents the post-registration preprocessing stage of the `fMRIPipeline`.
 
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `FunctionalMRIStage`
+
     See Also
     --------
     cmp.pipelines.functional.fMRI.fMRIPipeline

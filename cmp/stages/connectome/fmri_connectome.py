@@ -74,6 +74,11 @@ class ConnectomeConfig(HasTraits):
 class ConnectomeStage(Stage):
     """Class that represents the connectome building stage of a :class:`~cmp.pipelines.functional.fMRI.fMRIPipeline`.
 
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the fMRI `ConnectomeStage`
+
     See Also
     --------
     cmp.pipelines.functional.fMRI.fMRIPipeline

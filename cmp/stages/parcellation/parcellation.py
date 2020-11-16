@@ -128,6 +128,11 @@ class ParcellationConfig(HasTraits):
 class ParcellationStage(Stage):
     """Class that represents the parcellation stage of a :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline`.
 
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `ParcellationStage`
+
     See Also
     --------
     cmp.pipelines.anatomical.anatomical.AnatomicalPipeline

@@ -68,6 +68,11 @@ class ConnectomeConfig(HasTraits):
 class ConnectomeStage(Stage):
     """Class that represents the connectome building stage of a :class:`~cmp.pipelines.diffusion.diffusion.DiffusionPipeline`.
 
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the diffusion `ConnectomeStage`
+
     See Also
     --------
     cmp.pipelines.diffusion.diffusion.DiffusionPipeline
