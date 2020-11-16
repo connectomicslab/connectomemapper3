@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP Stage for Parcellation
-"""
+"""Definition of config and stage classes for computing brain parcellation."""
 
 # General imports
 import os
@@ -13,34 +12,73 @@ from traits.api import *
 import pkg_resources
 
 # Nipype imports
-import nipype.pipeline.engine as pe  # pypeline engine
-# import nipype.interfaces.cmtk as cmtk
+import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 
+# Own imports
+from cmp.stages.common import Stage
 from cmtklib.parcellation import Parcellate, ParcellateBrainstemStructures, \
     ParcellateHippocampalSubfields, ParcellateThalamus, \
     CombineParcellations, ComputeParcellationRoiVolumes
 from cmtklib.util import get_pipeline_dictionary_outputs
 
-# Own imports
-from cmp.stages.common import Stage
-
 
 class ParcellationConfig(HasTraits):
+    """Class used to store configuration parameters of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` object.
+
+    Attributes
+    ----------
+    pipeline_mode : traits.Enum(["Diffusion", "fMRI"])
+        Distinguish if a parcellation is run in a "Diffusion" or
+        in a fMRI pipeline
+
+    parcellation_scheme : traits.Str
+        Parcellation scheme used
+        (Default: 'Lausanne2008')
+
+    parcellation_scheme_editor : traits.List(['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018'])
+        Choice of parcellation schemes
+
+    include_thalamic_nuclei_parcellation : traits.Bool
+        Perform and include thalamic nuclei segmentation in
+        'Lausanne2018' parcellation
+        (Default: True)
+
+    ants_precision_type : traits.Enum(['double', 'float'])
+        Specify ANTs used by thalamic nuclei segmentation to adopt
+        single / double precision float representation to reduce
+        memory usage.
+        (Default: 'double')
+
+    segment_hippocampal_subfields : traits.Bool
+        Perform and include FreeSurfer hippocampal subfields segmentation in
+        'Lausanne2018' parcellation
+        (Default: True)
+
+    segment_brainstem : traits.Bool
+        Perform and include FreeSurfer brainstem segmentation in
+        'Lausanne2018' parcellation
+        (Default: True)
+
+    atlas_info : traits.Dict
+        Dictionary storing information of atlases in the form
+        >>> atlas_info = {atlas_name: {'number_of_regions': number_of_regions,
+        >>>               'node_information_graphml': graphml_file}} # doctest: +SKIP
+
+    See Also
+    --------
+    cmp.stages.parcellation.parcellation.ParcellationStage
+    """
+
     pipeline_mode = Enum(["Diffusion", "fMRI"])
     parcellation_scheme = Str('Lausanne2008')
-    # parcellation_scheme_editor = List(
-    #     ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018', 'Custom'])
     parcellation_scheme_editor = List(
         ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018'])
     include_thalamic_nuclei_parcellation = Bool(True)
     ants_precision_type = Enum(['double', 'float'])
-    # template_thalamus = File()
-    # thalamic_nuclei_maps = File()
     segment_hippocampal_subfields = Bool(True)
     segment_brainstem = Bool(True)
     pre_custom = Str('Lausanne2008')
-    # atlas_name = Str()
     number_of_regions = Int()
     atlas_nifti_file = File(exists=True)
     csf_file = File(exists=True)
@@ -49,9 +87,7 @@ class ParcellationConfig(HasTraits):
     atlas_info = Dict()
 
     def update_atlas_info(self):
-        """
-
-        """
+        """Update `atlas_info` class attribute."""
         atlas_name = os.path.basename(self.atlas_nifti_file)
         atlas_name = os.path.splitext(os.path.splitext(atlas_name)[0])[
             0].encode('ascii')
@@ -59,22 +95,43 @@ class ParcellationConfig(HasTraits):
             atlas_name: {'number_of_regions': self.number_of_regions, 'node_information_graphml': self.graphml_file}}
 
     def _atlas_nifti_file_changed(self, new):
+        """Calls `update_atlas_info()` when ``atlas_nifti_file`` is changed.
+
+        Parameters
+        ----------
+        new : string
+            New value of ``atlas_nifti_file``
+        """
         self.update_atlas_info()
 
     def _number_of_regions_changed(self, new):
+        """Calls `update_atlas_info()` when ``number_of_regions`` is changed.
+
+        Parameters
+        ----------
+        new : string
+            New value of ``number_of_regions``
+        """
         self.update_atlas_info()
 
     def _graphml_file_changed(self, new):
-        self.update_atlas_info()
+        """Calls `update_atlas_info()` when ``graphml_file`` is changed.
 
-    # def _parcellation_scheme_changed(self, old, new):
-    #     if new == 'Custom':
-    #         self.pre_custom = old
+        Parameters
+        ----------
+        new : string
+            New value of ``graphml_file``
+        """
+        self.update_atlas_info()
 
 
 class ParcellationStage(Stage):
-    """
+    """Class that represents the parcellation stage of a :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline`.
 
+    See Also
+    --------
+    cmp.pipelines.anatomical.anatomical.AnatomicalPipeline
+    cmp.stages.parcellation.parcellation.ParcellationConfig
     """
     def __init__(self, pipeline_mode, bids_dir, output_dir):
         self.name = 'parcellation_stage'
@@ -120,15 +177,17 @@ class ParcellationStage(Stage):
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
 
         def get_basename(path):
-            """
+            """Return ``os.path.basename()`` of a ``path``.
 
             Parameters
             ----------
-            path
+            path : os.path
+                Path to extract the containing directory
 
             Returns
             -------
-
+            path : os.path
+                Path to the containing directory
             """
             import os
             path = os.path.basename(path)
@@ -322,12 +381,6 @@ class ParcellationStage(Stage):
                 parc_files.inputs.roi_graphMLs = [
                     '{}'.format(p) for p in roi_graphMLs]
 
-                # print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-                # print("^^^^ Lausanne2008 color LUT / graphML ^^^^")
-                # print(outputnode.outputs.roi_colorLUTs)
-                # print(outputnode.outputs.roi_graphMLs)
-                # print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-
                 flow.connect([
                     (parc_node, outputnode, [
                      ("gray_matter_mask_file", "gm_mask_file")]),
@@ -432,62 +485,12 @@ class ParcellationStage(Stage):
             #         flow.connect([
             #                     (erode_brain,outputnode,[("out_file","brain_eroded")])
             #                     ])
-        # Custom parcellation (CMP2)
-        # else:
-        #     temp_node = pe.Node(interface=util.IdentityInterface(fields=["roi_volumes", "atlas_info"]),
-        #                         name="custom_parcellation")
-        #     temp_node.inputs.roi_volumes = self.config.atlas_nifti_file
-        #     temp_node.inputs.atlas_info = self.config.atlas_info
-        #     flow.connect([
-        #         (temp_node, outputnode, [("roi_volumes", "roi_volumes")]),
-        #         (temp_node, outputnode, [("atlas_info", "atlas_info")]),
-        #         (inputnode, outputnode, [("custom_wm_mask", "wm_mask_file")])
-        #     ])
-
-        #     threshold_roi = pe.Node(
-        #         interface=fsl.BinaryThreshold(
-        #             thresh=0.0, binarize=True, out_file='T1w_class-GM.nii.gz'),
-        #         name='threshold_roi_bin')
-
-        #     def get_first(roi_volumes):
-        #         if len(roi_volumes) > 1:
-        #             return roi_volumes[0]
-        #         else:
-        #             return roi_volumes
-
-        #     flow.connect([
-        #         (temp_node, threshold_roi, [
-        #          (("roi_volumes", get_first), "in_file")]),
-        #         (threshold_roi, outputnode, [("out_file", "gm_mask_file")]),
-        #     ])
-
-        #     if self.config.pipeline_mode == "fMRI":
-        #         erode_wm = pe.Node(interface=cmtk.Erode(), name="erode_wm")
-        #         flow.connect([
-        #             (inputnode, erode_wm, [("custom_wm_mask", "in_file")]),
-        #             (erode_wm, outputnode, [("out_file", "wm_eroded")]),
-        #         ])
-        #         if os.path.exists(self.config.csf_file):
-        #             erode_csf = pe.Node(interface=cmtk.Erode(
-        #                 in_file=self.config.csf_file), name="erode_csf")
-        #             flow.connect([
-        #                 (erode_csf, outputnode, [("out_file", "csf_eroded")])
-        #             ])
-        #         if os.path.exists(self.config.brain_file):
-        #             erode_brain = pe.Node(interface=cmtk.Erode(
-        #                 in_file=self.config.brain_file), name="erode_brain")
-        #             flow.connect([
-        #                 (erode_brain, outputnode, [
-        #                  ("out_file", "brain_eroded")])
-        #             ])
 
     def define_inspect_outputs(self):
-        """
+        """Update the `inspect_outputs' class attribute.
 
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """
-        print("stage_dir : %s" % self.stage_dir)
-        print("parcellation scheme : %s" % self.config.parcellation_scheme)
-
         anat_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'anatomical_sinker')
         anat_sinker_report = os.path.join(anat_sinker_dir, '_report', 'report.rst')
         # print "atlas info : "
@@ -554,11 +557,11 @@ class ParcellationStage(Stage):
                                       key=str.lower)
 
     def has_run(self):
-        """
+        """Function that returns `True` if the stage has been run successfully.
 
         Returns
         -------
-
+        `True` if the stage has been run successfully
         """
         if self.config.parcellation_scheme != "Custom":
             if self.config.parcellation_scheme == 'Lausanne2018':
