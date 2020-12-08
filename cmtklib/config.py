@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMTK Config file function
-"""
+""" Module that defines CMTK Config file function."""
 import os
 import configparser
 import json
@@ -13,6 +12,23 @@ from collections.abc import Iterable
 
 
 def get_process_detail_ini(project_info, section, detail):
+    """Get the value for a parameter key (detail) in the Global section of the INI config file.
+
+    Parameters
+    ----------
+    project_info : Instance(cmp.project.CMP_Project_Info)
+        Instance of :class:`cmp.project.CMP_Project_Info` class
+
+    section : string
+        Stage name
+
+    detail : string
+        Parameter key
+
+    Returns
+    -------
+    The parameter value
+    """
     config = configparser.ConfigParser()
     # print('Loading config from file: %s' % project_info.config_file)
     config.read(project_info.config_file)
@@ -20,6 +36,23 @@ def get_process_detail_ini(project_info, section, detail):
 
 
 def get_anat_process_detail_ini(project_info, section, detail):
+    """Get the value for a parameter key (detail) in the stage section of the anatomical INI config file.
+
+    Parameters
+    ----------
+    project_info : Instance(cmp.project.CMP_Project_Info)
+        Instance of :class:`cmp.project.CMP_Project_Info` class
+
+    section : string
+        Stage section name
+
+    detail : string
+        Parameter key
+
+    Returns
+    -------
+    The parameter value
+    """
     config = configparser.ConfigParser()
     # print('Loading config from file: %s' % project_info.config_file)
     config.read(project_info.anat_config_file)
@@ -32,6 +65,23 @@ def get_anat_process_detail_ini(project_info, section, detail):
 
 
 def get_dmri_process_detail_ini(project_info, section, detail):
+    """Get the value for a parameter key (detail) in the stage section of the diffusion INI config file.
+
+    Parameters
+    ----------
+    project_info : Instance(cmp.project.CMP_Project_Info)
+        Instance of :class:`cmp.project.CMP_Project_Info` class
+
+    section : string
+        Stage section name
+
+    detail : string
+        Parameter key
+
+    Returns
+    -------
+    The parameter value
+    """
     config = configparser.ConfigParser()
     # print('Loading config from file: %s' % project_info.config_file)
     config.read(project_info.dmri_config_file)
@@ -39,6 +89,23 @@ def get_dmri_process_detail_ini(project_info, section, detail):
 
 
 def get_fmri_process_detail_ini(project_info, section, detail):
+    """Get the value for a parameter key (detail) in the stage section of the fMRI INI config file.
+
+    Parameters
+    ----------
+    project_info : Instance(cmp.project.CMP_Project_Info)
+        Instance of :class:`cmp.project.CMP_Project_Info` class
+
+    section : string
+        Stage section name
+
+    detail : string
+        Parameter key
+
+    Returns
+    -------
+    The parameter value
+    """
     config = configparser.ConfigParser()
     # print('Loading config from file: %s' % project_info.config_file)
     config.read(project_info.fmri_config_file)
@@ -46,12 +113,46 @@ def get_fmri_process_detail_ini(project_info, section, detail):
 
 
 def get_process_detail_json(project_info, section, detail):
+    """Get the value for a parameter key (detail) in the global section of the JSON config file.
+
+    Parameters
+    ----------
+    project_info : Instance(cmp.project.CMP_Project_Info)
+        Instance of :class:`cmp.project.CMP_Project_Info` class
+
+    section : string
+        Stage section name
+
+    detail : string
+        Parameter key
+
+    Returns
+    -------
+    The parameter value
+    """
     with open(project_info.config_file, 'r') as f:
         config = json.load(f)
     return config[section][detail]
 
 
 def get_anat_process_detail_json(project_info, section, detail):
+    """Get the value for a parameter key (detail) in the stage section of the anatomical JSON config file.
+
+    Parameters
+    ----------
+    project_info : Instance(cmp.project.CMP_Project_Info)
+        Instance of :class:`cmp.project.CMP_Project_Info` class
+
+    section : string
+        Stage section name
+
+    detail : string
+        Parameter key
+
+    Returns
+    -------
+    The parameter value
+    """
     with open(project_info.anat_config_file, 'r') as f:
         config = json.load(f)
     res = None
@@ -63,18 +164,62 @@ def get_anat_process_detail_json(project_info, section, detail):
 
 
 def get_dmri_process_detail_json(project_info, section, detail):
+    """Get the value for a parameter key (detail) in the stage section of the diffusion JSON config file.
+
+    Parameters
+    ----------
+    project_info : Instance(cmp.project.CMP_Project_Info)
+        Instance of :class:`cmp.project.CMP_Project_Info` class
+
+    section : string
+        Stage section name
+
+    detail : string
+        Parameter key
+
+    Returns
+    -------
+    The parameter value
+    """
     with open(project_info.dmri_config_file, 'r') as f:
         config = json.load(f)
     return config[section][detail]
 
 
 def get_fmri_process_detail_json(project_info, section, detail):
+    """Get the value for a parameter key (detail) in the stage section of the fMRI JSON config file.
+
+    Parameters
+    ----------
+    project_info : Instance(cmp.project.CMP_Project_Info)
+        Instance of :class:`cmp.project.CMP_Project_Info` class
+
+    section : string
+        Stage section name
+
+    detail : string
+        Parameter key
+
+    Returns
+    -------
+    The parameter value
+    """
     with open(project_info.fmri_config_file, 'r') as f:
         config = json.load(f)
     return config[section][detail]
 
 
 def anat_save_config(pipeline, config_path):
+    """Save the configuration file of an anatomical pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.anatomical.anatomical.AnatomicalPipeline)
+        Instance of AnatomicalPipeline
+
+    config_path : string
+        Path of the configuration file
+    """
     config = configparser.RawConfigParser()
     config.add_section('Global')
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
@@ -131,6 +276,16 @@ def anat_save_config(pipeline, config_path):
 
 
 def anat_load_config_ini(pipeline, config_path):
+    """Load the configuration file of an anatomical pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.anatomical.anatomical.AnatomicalPipeline)
+        Instance of AnatomicalPipeline
+
+    config_path : string
+        Path of the configuration file
+    """
     print('>> Load anatomical config file : {}'.format(config_path))
     config = configparser.ConfigParser()
 
@@ -186,6 +341,16 @@ def anat_load_config_ini(pipeline, config_path):
 
 
 def anat_load_config_json(pipeline, config_path):
+    """Load the JSON configuration file of an anatomical pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.anatomical.anatomical.AnatomicalPipeline)
+        Instance of AnatomicalPipeline
+
+    config_path : string
+        Path of the JSON configuration file
+    """
     print('>> Load anatomical config file : {}'.format(config_path))
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
@@ -233,6 +398,16 @@ def anat_load_config_json(pipeline, config_path):
 
 
 def dmri_save_config(pipeline, config_path):
+    """Save the INI configuration file of a diffusion pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.diffusion.diffusion.DiffusionPipeline)
+        Instance of DiffusionPipeline
+
+    config_path : string
+        Path of the INI configuration file
+    """
     config = configparser.RawConfigParser()
     config.add_section('Global')
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
@@ -290,6 +465,16 @@ def dmri_save_config(pipeline, config_path):
 
 
 def dmri_load_config_ini(pipeline, config_path):
+    """Load the INI configuration file of a diffusion pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.diffusion.diffusion.DiffusionPipeline)
+        Instance of DiffusionPipeline
+
+    config_path : string
+        Path of the INI configuration file
+    """
     print('>> Load diffusion config file : {}'.format(config_path))
     config = configparser.ConfigParser()
 
@@ -342,6 +527,16 @@ def dmri_load_config_ini(pipeline, config_path):
 
 
 def dmri_load_config_json(pipeline, config_path):
+    """Load the JSON configuration file of a diffusion pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.diffusion.diffusion.DiffusionPipeline)
+        Instance of DiffusionPipeline
+
+    config_path : string
+        Path of the JSON configuration file
+    """
     print('>> Load diffusion config file : {}'.format(config_path))
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
@@ -389,6 +584,16 @@ def dmri_load_config_json(pipeline, config_path):
 
 
 def fmri_save_config(pipeline, config_path):
+    """Save the INI configuration file of a fMRI pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.functional.fMRI.fMRIPipeline)
+        Instance of fMRIPipeline
+
+    config_path : string
+        Path of the INI configuration file
+    """
     config = configparser.RawConfigParser()
     config.add_section('Global')
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
@@ -445,6 +650,16 @@ def fmri_save_config(pipeline, config_path):
 
 
 def fmri_load_config_ini(pipeline, config_path):
+    """Load the INI configuration file of a fMRI pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.functional.fMRI.fMRIPipeline)
+        Instance of fMRIPipeline
+
+    config_path : string
+        Path of the INI configuration file
+    """
     print('>> Load fMRI config file : {}'.format(config_path))
     config = configparser.ConfigParser()
 
@@ -498,6 +713,16 @@ def fmri_load_config_ini(pipeline, config_path):
 
 
 def fmri_load_config_json(pipeline, config_path):
+    """Load the JSON configuration file of a fMRI pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.functional.fMRI.fMRIPipeline)
+        Instance of fMRIPipeline
+
+    config_path : string
+        Path of the INI configuration file
+    """
     print('>> Load fMRI config file : {}'.format(config_path))
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
