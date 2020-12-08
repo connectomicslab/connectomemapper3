@@ -22,9 +22,8 @@ import numpy as np
 warnings.simplefilter("ignore")
 
 
-class bcolors:
-    """ Utility class for color unicode
-    """
+class BColors:
+    """Utility class for color unicode."""
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
