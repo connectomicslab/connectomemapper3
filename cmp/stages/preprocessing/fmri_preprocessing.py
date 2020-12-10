@@ -20,7 +20,7 @@ import nipype.interfaces.utility as util
 # Own imports
 from cmtklib.interfaces.afni import Despike
 from cmp.stages.common import Stage
-from cmtklib.functionalMRI import discard_tp
+from cmtklib.functionalMRI import Discard_tp
 
 
 class PreprocessingConfig(HasTraits):
@@ -105,7 +105,7 @@ class PreprocessingStage(Stage):
         discard_output = pe.Node(interface=util.IdentityInterface(
             fields=["discard_output"]), name="discard_output")
         if self.config.discard_n_volumes > 0:
-            discard = pe.Node(interface=discard_tp(
+            discard = pe.Node(interface=Discard_tp(
                 n_discard=self.config.discard_n_volumes), name='discard_volumes')
             flow.connect([
                 (inputnode, discard, [("functional", "in_file")]),

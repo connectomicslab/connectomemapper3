@@ -9,20 +9,18 @@
 # General imports
 from traits.api import *
 import os
-
 import numpy as np
 import nibabel as nib
-
-# Nipype imports
+import scipy.io as sio
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
 
 
-class discard_tp_InputSpec(BaseInterfaceInputSpec):
+class Discard_tp_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
     n_discard = Int(mandatory=True)
 
 
-class discard_tp_OutputSpec(TraitedSpec):
+class Discard_tp_OutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
@@ -64,7 +62,7 @@ class Discard_tp(BaseInterface):
         return outputs
 
 
-class nuisance_InputSpec(BaseInterfaceInputSpec):
+class Nuisance_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True)
     brainfile = File(desc='Eroded brain mask registered to fMRI space')
     csf_file = File(desc='Eroded CSF mask registered to fMRI space')
@@ -81,7 +79,7 @@ class nuisance_InputSpec(BaseInterfaceInputSpec):
         desc='Number of volumes discarded from the fMRI sequence during preprocessing')
 
 
-class nuisance_OutputSpec(TraitedSpec):
+class Nuisance_OutputSpec(TraitedSpec):
     out_file = File(exists=True)
     averageGlobal_npy = File()
     averageCSF_npy = File()
@@ -117,8 +115,10 @@ class Nuisance_regression(BaseInterface):
     >>> nuisance.run() # doctest: +SKIP
     """
 
-        import scipy.io as sio
+    input_spec = Nuisance_InputSpec
+    output_spec = Nuisance_OutputSpec
 
+    def _run_interface(self, runtime):
         # Output from previous preprocessing step
         ref_path = self.inputs.in_file
 
@@ -282,14 +282,14 @@ class Nuisance_regression(BaseInterface):
         return outputs
 
 
-class detrending_InputSpec(BaseInterfaceInputSpec):
+class Detrending_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to detrend")
     gm_file = InputMultiPath(
         File(exists=True), desc="ROI files registered to fMRI space")
     mode = Enum(["linear", "quadratic", "cubic"])
 
 
-class detrending_OutputSpec(TraitedSpec):
+class Detrending_OutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
@@ -311,6 +311,10 @@ class Detrending(BaseInterface):
     >>> detrend.run() # doctest: +SKIP
     """
 
+    input_spec = Detrending_InputSpec
+    output_spec = Detrending_OutputSpec
+
+    def _run_interface(self, runtime):
         print("Linear detrending")
         print("=================")
 
@@ -383,7 +387,7 @@ class Detrending(BaseInterface):
         return outputs
 
 
-class scrubbing_InputSpec(BaseInterfaceInputSpec):
+class Scrubbing_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to scrubb")
     wm_mask = File(exists=True, desc='WM mask registered to fMRI space')
     gm_file = InputMultiPath(
@@ -392,7 +396,7 @@ class scrubbing_InputSpec(BaseInterfaceInputSpec):
         exists=True, desc='Motion parameters from preprocessing stage')
 
 
-class scrubbing_OutputSpec(TraitedSpec):
+class Scrubbing_OutputSpec(TraitedSpec):
     fd_mat = File(exists=True)
     dvars_mat = File(exists=True)
     fd_npy = File(exists=True)
@@ -418,6 +422,9 @@ class Scrubbing(BaseInterface):
     >>> scrub.inputs.mode = 'quadratic'
     >>> scrub.run() # doctest: +SKIP
     """
+
+    input_spec = Scrubbing_InputSpec
+    output_spec = Scrubbing_OutputSpec
 
     def _run_interface(self, runtime):
         print("Precompute FD and DVARS for scrubbing")
