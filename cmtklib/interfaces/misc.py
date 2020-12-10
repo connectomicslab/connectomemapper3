@@ -7,6 +7,7 @@ import os
 import subprocess
 
 import numpy as np
+import nibabel as nib
 from traits.api import *
 
 from nipype.utils.filemanip import split_filename
@@ -14,79 +15,6 @@ from nipype.interfaces.mrtrix.convert import get_vox_dims, get_data_dims
 from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec, \
     TraitedSpec, File, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 import nipype.pipeline.engine as pe
-
-import nibabel as nib
-
-
-class match_orientationInputSpec(BaseInterfaceInputSpec):
-    trackvis_file = File(exists=True, mandatory=True,
-                         desc="Trackvis file outputed by gibbs miniapp, with the LPS orientation set as default")
-    ref_image_file = File(exists=True, mandatory=True,
-                          desc="File used as input for the gibbs tracking (wm mask)")
-
-
-class match_orientationOutputSpec(TraitedSpec):
-    out_file = File(
-        exists=True, desc='Trackvis file with orientation matching gibbs input')
-
-
-class match_orientations(BaseInterface):
-    input_spec = match_orientationInputSpec
-    output_spec = match_orientationOutputSpec
-
-    def _run_interface(self, runtime):
-        # filename = os.path.basename(self.inputs.trackvis_file)
-
-        _, name, _ = split_filename(self.inputs.trackvis_file)
-        filename = name + '_orcor.trk'
-
-        dx, dy, dz = get_data_dims(self.inputs.ref_image_file)
-        vx, vy, vz = get_vox_dims(self.inputs.ref_image_file)
-        image_file = nib.load(self.inputs.ref_image_file)
-        affine = image_file.get_affine()
-
-        # Reads MITK tracks
-        fib, hdr = nib.trackvis.read(self.inputs.trackvis_file)
-        trk_header = nib.trackvis.empty_header()
-        trk_header['dim'] = [dx, dy, dz]
-        trk_header['voxel_size'] = [vx, vy, vz]
-        trk_header['origin'] = [0, 0, 0]
-        axcode = nib.orientations.aff2axcodes(affine)
-        if axcode[0] != str(hdr['voxel_order'])[0]:
-            flip_x = -1
-        else:
-            flip_x = 1
-        if axcode[1] != str(hdr['voxel_order'])[1]:
-            flip_y = -1
-        else:
-            flip_y = 1
-        if axcode[2] != str(hdr['voxel_order'])[2]:
-            flip_z = -1
-        else:
-            flip_z = 1
-        trk_header['voxel_order'] = axcode[0] + axcode[1] + axcode[2]
-        new_fib = []
-        for i in enumerate(fib):
-            temp_fib = fib[i][0].copy()
-            for j in range(len(fib[i][0])):
-                temp_fib[j] = [flip_x * (fib[i][0][j][0] - hdr['origin'][0]) + vx / 2,
-                               flip_y * (fib[i][0][j][1] -
-                                         hdr['origin'][1]) + vy / 2,
-                               flip_z * (fib[i][0][j][2] - hdr['origin'][2]) + vz / 2]
-            new_fib.append((temp_fib, None, None))
-        nib.trackvis.write(os.path.abspath(filename), new_fib,
-                           trk_header, points_space='voxmm')
-        print('file written to %s' % os.path.abspath(filename))
-        return runtime
-
-    def _list_outputs(self):
-        # filename = os.path.basename(self.inputs.trackvis_file)
-        _, name, _ = split_filename(self.inputs.trackvis_file)
-        filename = name + '_orcor.trk'
-
-        outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(filename)
-        return outputs
 
 
 class extractHeaderVoxel2WorldMatrixInputSpec(BaseInterfaceInputSpec):
