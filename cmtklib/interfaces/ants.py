@@ -3,8 +3,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" The ANTs module provides functions for interfacing with ANTs registration toolbox missing in nipype or modified
-"""
+"""The ANTs module provides Nipype interfaces for the ANTs registration toolbox missing in nipype or modified."""
 import os
 import glob
 
@@ -15,6 +14,7 @@ from nipype.interfaces.base import traits, \
     BaseInterface, BaseInterfaceInputSpec
 
 from nipype.interfaces.ants.resampling import ApplyTransforms
+
 
 # class RegistrationSyNInputSpec(BaseInterfaceInputSpec):
 #     input_image = File(desc='image to be registered')
@@ -36,6 +36,7 @@ from nipype.interfaces.ants.resampling import ApplyTransforms
 #         outputs = self._outputs().get()
 #         outputs['output_images'] = glob.glob(os.path.abspath("*.nii.gz"))
 #         return outputs
+
 
 class MultipleANTsApplyTransformsInputSpec(BaseInterfaceInputSpec):
     input_images = InputMultiPath(
@@ -63,6 +64,27 @@ class MultipleANTsApplyTransformsOutputSpec(TraitedSpec):
 
 
 class MultipleANTsApplyTransforms(BaseInterface):
+    """Apply linear and deformable transforms estimated by ANTS to a list of images.
+
+    It calls the `antsApplyTransform` on a series of images.
+
+    Examples
+    --------
+    >>> apply_tf = MultipleANTsApplyTransforms()
+    >>> apply_tf.inputs.input_images = ['/path/to/sub-01_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                                 '/path/to/sub-01_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                                 '/path/to/sub-01_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                                 '/path/to/sub-01_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                                 '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> apply_tf.inputs.transforms = ['/path/to/final1Warp.nii.gz',
+    >>>                               '/path/to/final0GenericAffine.mat']
+    >>> apply_tf.inputs.reference_image = File(mandatory=True, exists=True)
+    >>> apply_tf.inputs.interpolation = 'NearestNeighbor'
+    >>> apply_tf.inputs.default_value = 0.0
+    >>> apply_tf.inputs.out_postfix = "_transformed"
+    >>> apply_tf.run() # doctest: +SKIP
+    """
+
     input_spec = MultipleANTsApplyTransformsInputSpec
     output_spec = MultipleANTsApplyTransformsOutputSpec
 
