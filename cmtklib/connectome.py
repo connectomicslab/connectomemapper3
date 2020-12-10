@@ -760,11 +760,11 @@ class CMTK_cmat(BaseInterface):
     >>> cmat = CMTK_cmat()
     >>> cmat.inputs.base_dir = '/my_directory'
     >>> cmat.inputs.track_file = '/path/to/sub-01_tractogram.trk'
-    >>> cmat.inputs.roi_volumes = ['/path/to/sub-01_atlas-L2018_desc-scale1_dseg.nii.gz',
-    >>>                            '/path/to/sub-01_atlas-L2018_desc-scale2_dseg.nii.gz',
-    >>>                            '/path/to/sub-01_atlas-L2018_desc-scale3_dseg.nii.gz',
-    >>>                            '/path/to/sub-01_atlas-L2018_desc-scale4_dseg.nii.gz',
-    >>>                            '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> cmat.inputs.roi_volumes = ['/path/to/sub-01_space-DWI_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-DWI_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-DWI_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-DWI_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-DWI_atlas-L2018_desc-scale5_dseg.nii.gz']
     >>> cmat.inputs.roi_graphmls = ['/path/to/sub-01_atlas-L2018_desc-scale1_dseg.graphml',
     >>>                             '/path/to/sub-01_atlas-L2018_desc-scale2_dseg.graphml',
     >>>                             '/path/to/sub-01_atlas-L2018_desc-scale3_dseg.graphml',
@@ -865,12 +865,12 @@ class rsfmri_conmat(BaseInterface):
     >>> from cmtklib.connectome import rsfmri_conmat
     >>> cmat = rsfmri_conmat()
     >>> cmat.inputs.base_dir = '/my_directory'
-    >>> cmat.inputs.func_file = '/path/to/sub-01_task-rest_desc-preproc_bold.trk'
-    >>> cmat.inputs.roi_volumes = ['/path/to/sub-01_atlas-L2018_desc-scale1_dseg.nii.gz',
-    >>>                            '/path/to/sub-01_atlas-L2018_desc-scale2_dseg.nii.gz',
-    >>>                            '/path/to/sub-01_atlas-L2018_desc-scale3_dseg.nii.gz',
-    >>>                            '/path/to/sub-01_atlas-L2018_desc-scale4_dseg.nii.gz',
-    >>>                            '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> cmat.inputs.func_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> cmat.inputs.roi_volumes = ['/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale5_dseg.nii.gz']
     >>> cmat.inputs.roi_graphmls = ['/path/to/sub-01_atlas-L2018_desc-scale1_dseg.graphml',
     >>>                             '/path/to/sub-01_atlas-L2018_desc-scale2_dseg.graphml',
     >>>                             '/path/to/sub-01_atlas-L2018_desc-scale3_dseg.graphml',
