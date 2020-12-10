@@ -27,6 +27,16 @@ class extractHeaderVoxel2WorldMatrixOutputSpec(TraitedSpec):
 
 
 class extractHeaderVoxel2WorldMatrix(BaseInterface):
+    """Write in a text file the voxel-to-world transform matrix from the heaer of a Nifti image.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import extractHeaderVoxel2WorldMatrix
+    >>> extract_mat = extractHeaderVoxel2WorldMatrix()
+    >>> extract_mat.inputs.in_file = 'sub-01_T1w.nii.gz'
+    >>> extract_mat.run() # doctest: +SKIP
+    """
+
     input_spec = extractHeaderVoxel2WorldMatrixInputSpec
     output_spec = extractHeaderVoxel2WorldMatrixOutputSpec
 
@@ -58,6 +68,19 @@ class flipTableOutputSpec(TraitedSpec):
 
 
 class flipTable(BaseInterface):
+    """Flip axis and rewrite a gradient table.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import flipTable
+    >>> flip_table = extractHeaderVoxel2WorldMatrix()
+    >>> flip_table.inputs.table = 'sub-01_mod-dwi_gradient.txt'
+    >>> flip_table.inputs.flipping_axis = ['x']
+    >>> flip_table.inputs.orientation = 'v'
+    >>> flip_table.inputs.delimiter = ','
+    >>> flip_table.run() # doctest: +SKIP
+    """
+
     input_spec = flipTableInputSpec
     output_spec = flipTableOutputSpec
 
