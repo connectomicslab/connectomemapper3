@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMTK Diffusion functions
-"""
+"""Module that defines CMTK utility functions for the diffusion pipeline."""
 
 import os
 import numpy as np
@@ -15,6 +14,24 @@ from .util import length
 
 
 def compute_length_array(trkfile=None, streams=None, savefname='lengths.npy'):
+    """Computes the length of the fibers in a tractogram and returns an array of length.
+
+    Parameters
+    ----------
+    trkfile : TRK file
+        Path to the tractogram in TRK format
+
+    streams : the fibers data
+        The fibers from which we want to compute the length
+
+    savefname : string
+        Output filename to write the length array
+
+    Returns
+    -------
+    leng : numpy.array
+        Array of fiber lengths
+    """
     if streams is None and trkfile is not None:
         print("Compute length array for fibers in %s" % trkfile)
         streams, hdr = tv.read(trkfile, as_generator=True)
@@ -38,6 +55,22 @@ def compute_length_array(trkfile=None, streams=None, savefname='lengths.npy'):
 
 
 def filter_fibers(intrk, outtrk='', fiber_cutoff_lower=20, fiber_cutoff_upper=500):
+    """Filters a tractogram based on lower / upper cutoffs.
+
+    Parameters
+    ----------
+    intrk : TRK file
+        Path to a tractogram file in TRK format
+
+    outtrk : TRK file
+        Output path for the filtered tractogram
+
+    fiber_cutoff_lower : int
+        Lower number of fibers cutoff (Default: 20)
+
+    fiber_cutoff_upper : int
+        Upper number of fibers cutoff (Default: 500)
+    """
     print("Cut Fiber Filtering")
     print("===================")
 
