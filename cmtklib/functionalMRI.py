@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMTK Functional MRI functions
-"""
+"""Module that defines CMTK Nipype interfaces for the Functional MRI pipeline."""
 
 # General imports
 from traits.api import *
@@ -27,9 +26,21 @@ class discard_tp_OutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class discard_tp(BaseInterface):
-    input_spec = discard_tp_InputSpec
-    output_spec = discard_tp_OutputSpec
+class Discard_tp(BaseInterface):
+    """Discards the n first time frame in functional MRI data.
+
+    Examples
+    --------
+    >>> from cmtklib.functionalMRI import Discard_tp
+    >>> discard = Discard_tp()
+    >>> discard.inputs.base_dir = '/my_directory'
+    >>> discard.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> discard.inputs.n_discard = 5
+    >>> discard.run() # doctest: +SKIP
+    """
+
+    input_spec = Discard_tp_InputSpec
+    output_spec = Discard_tp_OutputSpec
 
     def _run_interface(self, runtime):
         dataimg = nib.load(self.inputs.in_file)
@@ -80,13 +91,31 @@ class nuisance_OutputSpec(TraitedSpec):
     averageWM_mat = File()
 
 
-class nuisance_regression(BaseInterface):
-    input_spec = nuisance_InputSpec
-    output_spec = nuisance_OutputSpec
+class Nuisance_regression(BaseInterface):
+    """Regress out nuisance signals (WM, CSF, movements) through GLM.
 
-    def _run_interface(self, runtime):
-        ''' Regress out nuisance signals (WM, CSF, movements) through GLM
-        '''
+    Examples
+    --------
+    >>> from cmtklib.functionalMRI import Nuisance_regression
+    >>> nuisance = Nuisance_regression()
+    >>> nuisance.inputs.base_dir = '/my_directory'
+    >>> nuisance.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> nuisance.inputs.wm_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> nuisance.inputs.csf_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> nuisance.inputs.motion_file = '/path/to/sub-01_motions.par'
+    >>> nuisance.inputs.gm_file = ['/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> nuisance.inputs.global_nuisance = False
+    >>> nuisance.inputs.csf_nuisance = True
+    >>> nuisance.inputs.wm_nuisance = True
+    >>> nuisance.inputs.motion_nuisance = True
+    >>> nuisance.inputs.nuisance_motion_nb_reg = 36
+    >>> nuisance.inputs.n_discard = 5
+    >>> nuisance.run() # doctest: +SKIP
+    """
 
         import scipy.io as sio
 
@@ -265,12 +294,22 @@ class detrending_OutputSpec(TraitedSpec):
 
 
 class Detrending(BaseInterface):
-    input_spec = detrending_InputSpec
-    output_spec = detrending_OutputSpec
+    """Apply linear, quadratic or cubic detrending on the Functional MRI signal.
 
-    def _run_interface(self, runtime):
-        """ linear/quadratic detrending
-        """
+    Examples
+    --------
+    >>> from cmtklib.functionalMRI import Detrending
+    >>> detrend = Detrending()
+    >>> detrend.inputs.base_dir = '/my_directory'
+    >>> detrend.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> detrend.inputs.gm_file = ['/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> detrend.inputs.mode = 'quadratic'
+    >>> detrend.run() # doctest: +SKIP
+    """
 
         print("Linear detrending")
         print("=================")
@@ -361,12 +400,26 @@ class scrubbing_OutputSpec(TraitedSpec):
 
 
 class Scrubbing(BaseInterface):
-    input_spec = scrubbing_InputSpec
-    output_spec = scrubbing_OutputSpec
+    """Computes scrubbing parameters: `FD` and `DVARS`.
+
+    Examples
+    --------
+    >>> from cmtklib.functionalMRI import Scrubbing
+    >>> scrub = Scrubbing()
+    >>> scrub.inputs.base_dir = '/my_directory'
+    >>> scrub.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> scrub.inputs.gm_file = ['/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                         '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                         '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                         '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                         '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> scrub.inputs.wm_mask = '/path/to/sub-01_space-meanBOLD_label-WM_dseg.nii.gz'
+    >>> scrub.inputs.gm_file = '/path/to/sub-01_space-meanBOLD_label-GM_dseg.nii.gz'
+    >>> scrub.inputs.mode = 'quadratic'
+    >>> scrub.run() # doctest: +SKIP
+    """
 
     def _run_interface(self, runtime):
-        """ compute scrubbing parameters: FD and DVARS
-        """
         print("Precompute FD and DVARS for scrubbing")
         print("=====================================")
         import scipy.io as sio
