@@ -23,7 +23,7 @@ from cmtklib.interfaces.mrtrix3 import Erode, MRtrix_mul, MRThreshold, \
     ConstrainedSphericalDeconvolution, DWI2Tensor, Tensor2Vector
 
 # from nipype.interfaces.mrtrix3.preprocess import ResponseSD
-from cmtklib.interfaces.misc import flipBvec, flipTable
+from cmtklib.interfaces.misc import FlipBvec, FlipTable
 from cmtklib.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE, MAPMRI
 # from nipype.interfaces.dipy import CSD
 
@@ -300,7 +300,7 @@ def create_dipy_recon_flow(config):
                 "mapmri_maps"], mandatory_inputs=True), name="outputnode")
 
     # Flip gradient table
-    flip_bvecs = pe.Node(interface=flipBvec(), name='flip_bvecs')
+    flip_bvecs = pe.Node(interface=FlipBvec(), name='flip_bvecs')
 
     flip_bvecs.inputs.flipping_axis = config.flip_table_axis
     flip_bvecs.inputs.delimiter = ' '
@@ -503,7 +503,7 @@ def create_mrtrix_recon_flow(config):
                                                           mandatory_inputs=True), name="outputnode")
 
     # Flip gradient table
-    flip_table = pe.Node(interface=flipTable(), name='flip_table')
+    flip_table = pe.Node(interface=FlipTable(), name='flip_table')
 
     flip_table.inputs.flipping_axis = config.flip_table_axis
     flip_table.inputs.delimiter = ' '

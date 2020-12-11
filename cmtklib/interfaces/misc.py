@@ -14,28 +14,28 @@ from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import traits, TraitedSpec, File, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 
 
-class extractHeaderVoxel2WorldMatrixInputSpec(BaseInterfaceInputSpec):
+class ExtractHeaderVoxel2WorldMatrixInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input image file')
 
 
-class extractHeaderVoxel2WorldMatrixOutputSpec(TraitedSpec):
+class ExtractHeaderVoxel2WorldMatrixOutputSpec(TraitedSpec):
     out_matrix = File(
         exists=true, desc='Output voxel to world affine transform file')
 
 
-class extractHeaderVoxel2WorldMatrix(BaseInterface):
+class ExtractHeaderVoxel2WorldMatrix(BaseInterface):
     """Write in a text file the voxel-to-world transform matrix from the heaer of a Nifti image.
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import extractHeaderVoxel2WorldMatrix
-    >>> extract_mat = extractHeaderVoxel2WorldMatrix()
+    >>> from cmtklib.interfaces.misc import ExtractHeaderVoxel2WorldMatrix
+    >>> extract_mat = ExtractHeaderVoxel2WorldMatrix()
     >>> extract_mat.inputs.in_file = 'sub-01_T1w.nii.gz'
     >>> extract_mat.run() # doctest: +SKIP
     """
 
-    input_spec = extractHeaderVoxel2WorldMatrixInputSpec
-    output_spec = extractHeaderVoxel2WorldMatrixOutputSpec
+    input_spec = ExtractHeaderVoxel2WorldMatrixInputSpec
+    output_spec = ExtractHeaderVoxel2WorldMatrixOutputSpec
 
     def _run_interface(self, runtime):
         im = nib.load(self.inputs.in_file)
@@ -52,7 +52,7 @@ class extractHeaderVoxel2WorldMatrix(BaseInterface):
         return outputs
 
 
-class flipTableInputSpec(BaseInterfaceInputSpec):
+class FlipTableInputSpec(BaseInterfaceInputSpec):
     table = File(exists=True)
     flipping_axis = List()
     delimiter = Str()
@@ -60,17 +60,17 @@ class flipTableInputSpec(BaseInterfaceInputSpec):
     orientation = Enum(['v', 'h'])
 
 
-class flipTableOutputSpec(TraitedSpec):
+class FlipTableOutputSpec(TraitedSpec):
     table = File(exists=True)
 
 
-class flipTable(BaseInterface):
+class FlipTable(BaseInterface):
     """Flip axis and rewrite a gradient table.
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import flipTable
-    >>> flip_table = extractHeaderVoxel2WorldMatrix()
+    >>> from cmtklib.interfaces.misc import FlipTable
+    >>> flip_table = ExtractHeaderVoxel2WorldMatrix()
     >>> flip_table.inputs.table = 'sub-01_mod-dwi_gradient.txt'
     >>> flip_table.inputs.flipping_axis = ['x']
     >>> flip_table.inputs.orientation = 'v'
@@ -78,8 +78,8 @@ class flipTable(BaseInterface):
     >>> flip_table.run() # doctest: +SKIP
     """
 
-    input_spec = flipTableInputSpec
-    output_spec = flipTableOutputSpec
+    input_spec = FlipTableInputSpec
+    output_spec = FlipTableOutputSpec
 
     def _run_interface(self, runtime):
         axis_dict = {'x': 0, 'y': 1, 'z': 2}
@@ -362,7 +362,7 @@ class Tck2Trk(BaseInterface):
         return outputs
 
 
-class flipBvecInputSpec(BaseInterfaceInputSpec):
+class FlipBvecInputSpec(BaseInterfaceInputSpec):
     bvecs = File(exists=True)
     flipping_axis = traits.List()
     delimiter = traits.Str()
@@ -370,17 +370,17 @@ class flipBvecInputSpec(BaseInterfaceInputSpec):
     orientation = traits.Enum(['v', 'h'])
 
 
-class flipBvecOutputSpec(TraitedSpec):
+class FlipBvecOutputSpec(TraitedSpec):
     bvecs_flipped = File(exists=True)
 
 
-class flipBvec(BaseInterface):
+class FlipBvec(BaseInterface):
     """Return a diffusion bvec file with flipped axis as specified by `flipping_axis` input.
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import flipBvec
-    >>> flip_bvec = flipBvec()
+    >>> from cmtklib.interfaces.misc import FlipBvec
+    >>> flip_bvec = FlipBvec()
     >>> flip_bvec.inputs.bvecs = 'sub-01_dwi.bvecs'
     >>> flip_bvec.inputs.flipping_axis = ['x']
     >>> flip_bvec.inputs.delimiter = ' '
@@ -389,8 +389,8 @@ class flipBvec(BaseInterface):
     >>> flip_bvec.run() # doctest: +SKIP
     """
 
-    input_spec = flipBvecInputSpec
-    output_spec = flipBvecOutputSpec
+    input_spec = FlipBvecInputSpec
+    output_spec = FlipBvecOutputSpec
 
     def _run_interface(self, runtime):
         axis_dict = {'x': 0, 'y': 1, 'z': 2}
