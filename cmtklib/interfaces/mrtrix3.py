@@ -3,61 +3,17 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" The MRTrix3 module provides functions for interfacing with MRTrix3 functions missing in nipype or modified
-"""
+"""The MRTrix3 module provides Nipype interfaces for MRTrix3 tools missing in Nipype or modified."""
+
+import os
+import os.path as op
+import glob
 
 import nipype.interfaces.base as nibase
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, CommandLineInputSpec, \
     CommandLine, traits, TraitedSpec, File, Directory, InputMultiPath, OutputMultiPath, isdefined
 from nipype.utils import logger
 from nipype.utils.filemanip import split_filename, fname_presuffix
-import os
-import os.path as op
-import glob
-
-
-# class MRTrixInfoInputSpec(CommandLineInputSpec):
-#     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-#         desc='Input images to be read')
-#     _xor_inputs = ('out_grad_mrtrix','out_grad_fsl')
-#     out_grad_mrtrix = File(argstr='-export_grad_mrtrix %s',
-#                            desc='export the DWI gradient table to file in MRtrix format',
-#                            xor=_xor_inputs)
-#     out_grad_fsl =  traits.Tuple(File(),File(), argstr='-export_grad_fsl %s %s',
-#                                                 desc='export the DWI gradient table to files in FSL (bvecs / bvals) format',
-#                                                 xor=_xor_inputs)
-
-# class MRTrixInfoOutputSpec(TraitedSpec):
-#     out_grad_mrtrix = traits.Tuple(File(exists=True),File(exists=True),
-#                                    desc='Outputs [bvecs, bvals] DW gradient scheme (FSL format) if set')
-#     out_grad_fsl = File(exits=True,desc='Output MRtrix gradient text file if set')
-
-# class MRTrixInfo(CommandLine):
-#     """
-#     Prints out relevant header information found in the image specified.
-
-#     Example
-#     -------
-
-#     >>> import nipype.interfaces.mrtrix as mrt
-#     >>> MRinfo = mrt.MRTrixInfo()
-#     >>> MRinfo.inputs.in_file = 'dwi.mif'
-#     >>> MRinfo.run()                                    # doctest: +SKIP
-#     """
-
-#     _cmd = 'mrinfo'
-#     input_spec=MRTrixInfoInputSpec
-#     output_spec=MRTrixInfoOutputSpec
-
-#     def _list_outputs(self):
-#         outputs = self.output_spec().get()
-#         outputs['out_grad_mrtrix'] = op.abspath(self.inputs.out_grad_mrtrix)
-#         if isdefined(self.inputs.out_grad_mrtrix):
-#             outputs['out_grad_mrtrix'] = op.abspath(self.inputs.out_grad_mrtrix)
-#         if isdefined(self.inputs.out_grad_fsl):
-#             outputs['out_grad_fsl'] =
-#                 (op.abspath(self.inputs.out_grad_fsl[0]),op.abspath(self.inputs.out_grad_mrtrix[1]))
-#         return outputs
 
 
 class MRtrix_mul_InputSpec(CommandLineInputSpec):
@@ -74,6 +30,18 @@ class MRtrix_mul_OutputSpec(TraitedSpec):
 
 
 class MRtrix_mul(CommandLine):
+    """Multiply two images together using `mrcalc` tool.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.mrtrix3 import MRtrix_mul
+    >>> multiply = MRtrix_mul()
+    >>> multiply.inputs.input1  = 'image1.nii.gz'
+    >>> multiply.inputs.input2  = 'image2.nii.gz'
+    >>> multiply.inputs.out_filename = 'result.nii.gz'
+    >>> multiply.run() # doctest: +SKIP
+    """
+
     _cmd = 'mrcalc'
     input_spec = MRtrix_mul_InputSpec
     output_spec = MRtrix_mul_OutputSpec
@@ -116,17 +84,16 @@ class ErodeOutputSpec(TraitedSpec):
 
 
 class Erode(CommandLine):
-    """
-    Erode (or dilates) a mask (i.e. binary) image
+    """Erode (or dilates) a mask (i.e. binary) image using the `maskfilter` tool.
 
     Example
     -------
-
-    >>> import nipype.interfaces.mrtrix as mrt
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
     >>> erode = mrt.Erode()
     >>> erode.inputs.in_file = 'mask.mif'
-    >>> erode.run()                                     # doctest: +SKIP
+    >>> erode.run() # doctest: +SKIP
     """
+
     _cmd = 'maskfilter'
     input_spec = ErodeInputSpec
     output_spec = ErodeOutputSpec
@@ -178,6 +145,18 @@ class DWIDenoiseOutputSpec(TraitedSpec):
 
 
 class DWIDenoise(CommandLine):
+    """Denoise diffusion MRI data using the `dwidenoise` tool.
+
+    Example
+    -------
+    >>> from cmtklib.interfaces.mrtrix3 import DWIDenoise
+    >>> dwi_denoise = DWIDenoise()
+    >>> dwi_denoise.inputs.in_file = 'sub-01_dwi.nii.gz'
+    >>> dwi_denoise.inputs.out_file = 'sub-01_desc-denoised_dwi.nii.gz'
+    >>> dwi_denoise.inputs.out_noisemap = 'sub-01_mod-dwi_noisemap.nii.gz'
+    >>> dwi_denoise.run() # doctest: +SKIP
+    """
+
     _cmd = 'dwidenoise'
     input_spec = DWIDenoiseInputSpec
     output_spec = DWIDenoiseOutputSpec
@@ -215,7 +194,6 @@ class DWIDenoise(CommandLine):
         -------
         fname : str
             New filename based on given parameters.
-
         """
 
         if basename == '':
@@ -285,6 +263,17 @@ class DWIBiasCorrectOutputSpec(TraitedSpec):
 
 
 class DWIBiasCorrect(CommandLine):
+    """Correct for bias field in diffusion MRI data using the `dwibiascorrect` tool.
+
+    Example
+    -------
+    >>> from cmtklib.interfaces.mrtrix3 import DWIBiasCorrect
+    >>> dwi_biascorr = DWIBiasCorrect()
+    >>> dwi_biascorr.inputs.in_file = 'sub-01_dwi.nii.gz'
+    >>> dwi_biascorr.inputs.use_ants = True
+    >>> dwi_biascorr.run() # doctest: +SKIP
+    """
+
     _cmd = 'dwibiascorrect'
     input_spec = DWIBiasCorrectInputSpec
     output_spec = DWIBiasCorrectOutputSpec
@@ -420,8 +409,7 @@ class MRConvertOutputSpec(TraitedSpec):
 
 
 class MRConvert(CommandLine):
-    """
-    Perform conversion between different file types and optionally extract a subset of the input image.
+    """Perform conversion with `mrconvert` between different file types and optionally extract a subset of the input image.
 
     If used correctly, this program can be a very useful workhorse.
     In addition to converting images between different formats, it can
@@ -430,8 +418,7 @@ class MRConvert(CommandLine):
 
     Example
     -------
-
-    >>> import nipype.interfaces.mrtrix as mrt
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
     >>> mrconvert = mrt.MRConvert()
     >>> mrconvert.inputs.in_file = 'dwi_FA.mif'
     >>> mrconvert.inputs.out_filename = 'dwi_FA.nii'
@@ -489,6 +476,17 @@ class ApplymultipleMRConvertOutputSpec(TraitedSpec):
 
 
 class ApplymultipleMRConvert(BaseInterface):
+    """Apply ``mrconvert` tool to multiple images.
+
+    Example
+    -------
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
+    >>> mrconvert = mrt.ApplymultipleMRConvert()
+    >>> mrconvert.inputs.in_files = ['dwi_FA.mif','dwi_MD.mif']
+    >>> mrconvert.inputs.extension = 'nii'
+    >>> mrconvert.run() # doctest: +SKIP
+    """
+
     input_spec = ApplymultipleMRConvertInputSpec
     output_spec = ApplymultipleMRConvertOutputSpec
 
@@ -525,13 +523,16 @@ class MRCropOutputSpec(TraitedSpec):
 
 
 class MRCrop(CommandLine):
-    """
-    Crops a NIFTI image.
+    """Crops a NIFTI image using the `mrcrop` tool.
 
     Example
     -------
-
-    >>>
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
+    >>> mrcrop = mrt.MRCrop()
+    >>> mrcrop.inputs.in_file = 'sub-01_dwi.nii.gz'
+    >>> mrcrop.inputs.in_mask_file = 'sub-01_mod-dwi_desc-brain_mask.nii.gz'
+    >>> mrcrop.inputs.out_filename = 'sub-01_desc-cropped_dwi.nii.gz'
+    >>> mrcrop.run() # doctest: +SKIP
     """
 
     _cmd = 'mrcrop'
@@ -577,6 +578,17 @@ class MRThresholdOutputSpec(TraitedSpec):
 
 
 class MRThreshold(CommandLine):
+    """Threshold an image using the `mrthreshold` tool.
+
+    Example
+    -------
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
+    >>> mrthresh = mrt.MRCrop()
+    >>> mrthresh.inputs.in_file = 'sub-01_dwi.nii.gz'
+    >>> mrthresh.inputs.out_file = 'sub-01_desc-thresholded_dwi.nii.gz'
+    >>> mrthresh.run() # doctest: +SKIP
+    """
+
     _cmd = 'mrthreshold'
     input_spec = MRThresholdInputSpec
     output_spec = MRThresholdOutputSpec
@@ -621,15 +633,15 @@ class MRTransformOutputSpec(TraitedSpec):
 
 
 class MRTransform(CommandLine):
-    """
-    Apply spatial transformations or reslice images
+    """Apply spatial transformations or reslice images using the `mrtransform` tool.
 
     Example
     -------
-
+    >>> from cmtklib.interfaces.mrtrix3 import MRTransform
     >>> MRxform = MRTransform()
     >>> MRxform.inputs.in_files = 'anat_coreg.mif'
-    >>> MRxform.run()                                   # doctest: +SKIP
+    >>> MRxform.inputs.interp = 'cubic'
+    >>> MRxform.run() # doctest: +SKIP
     """
 
     _cmd = 'mrtransform'
@@ -666,6 +678,25 @@ class ApplymultipleMRCropOutputSpec(TraitedSpec):
 
 
 class ApplymultipleMRCrop(BaseInterface):
+    """Apply MRCrop to a list of images.
+
+    Example
+    -------
+    >>> from cmtklib.interfaces.mrtrix3 import ApplymultipleMRCrop
+    >>> multi_crop = ApplymultipleMRCrop()
+    >>> multi_crop.inputs.in_files = ['/sub-01_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                               'sub-01_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                               'sub-01_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                               'sub-01_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                               'sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> multi_crop.inputs.template_image = 'sub-01_T1w.nii.gz'
+    >>> multi_crop.run() # doctest: +SKIP
+
+    See Also
+    --------
+    cmtklib.interfaces.mrtrix3.MRCrop
+    """
+
     input_spec = ApplymultipleMRCropInputSpec
     output_spec = ApplymultipleMRCropOutputSpec
 
@@ -693,6 +724,25 @@ class ApplymultipleMRTransformsOutputSpec(TraitedSpec):
 
 
 class ApplymultipleMRTransforms(BaseInterface):
+    """Apply MRTransform to a list of images.
+
+    Example
+    -------
+    >>> from cmtklib.interfaces.mrtrix3 import ApplymultipleMRTransforms
+    >>> multi_transform = ApplymultipleMRTransforms()
+    >>> multi_transform.inputs.in_files = ['/sub-01_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                                    'sub-01_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                                    'sub-01_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                                    'sub-01_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                                    'sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> multi_transform.inputs.template_image = 'sub-01_T1w.nii.gz'
+    >>> multi_transform.run() # doctest: +SKIP
+
+    See Also
+    --------
+    cmtklib.interfaces.mrtrix3.MRTransform
+    """
+
     input_spec = ApplymultipleMRTransformsInputSpec
     output_spec = ApplymultipleMRTransformsOutputSpec
 
@@ -722,16 +772,15 @@ class ExtractFSLGradOutputSpec(TraitedSpec):
 
 
 class ExtractFSLGrad(CommandLine):
-    """
-    Prints out relevant header information found in the image specified.
+    """Use `mrinfo` to extract FSL gradient.
 
     Example
     -------
-
-    >>> import nipype.interfaces.mrtrix as mrt
-    >>> MRinfo = mrt.MRTrixInfo()
-    >>> MRinfo.inputs.in_file = 'dwi.mif'
-    >>> MRinfo.run()                                    # doctest: +SKIP
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
+    >>> fsl_grad = mrt.ExtractFSLGrad()
+    >>> fsl_grad.inputs.in_file = 'sub-01_dwi.mif'
+    >>> fsl_grad.inputs.out_grad_fsl = ['sub-01_dwi.bvecs', 'sub-01_dwi.bvals']
+    >>> fsl_grad.run() # doctest: +SKIP
     """
 
     _cmd = 'mrinfo'
@@ -760,16 +809,15 @@ class ExtractMRTrixGradOutputSpec(TraitedSpec):
 
 
 class ExtractMRTrixGrad(CommandLine):
-    """
-    Prints out relevant header information found in the image specified.
+    """Use `mrinfo` to extract mrtrix gradient text file.
 
     Example
     -------
-
-    >>> import nipype.interfaces.mrtrix as mrt
-    >>> MRinfo = mrt.MRTrixInfo()
-    >>> MRinfo.inputs.in_file = 'dwi.mif'
-    >>> MRinfo.run()                                    # doctest: +SKIP
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
+    >>> mrtrix_grad = mrt.ExtractMRTrixGrad()
+    >>> mrtrix_grad.inputs.in_file = 'sub-01_dwi.mif'
+    >>> mrtrix_grad.inputs.out_grad_mrtrix = 'sub-01_gradient.txt'
+    >>> mrtrix_grad.run() # doctest: +SKIP
     """
 
     _cmd = 'mrinfo'
@@ -813,17 +861,15 @@ class DWI2TensorOutputSpec(TraitedSpec):
 
 
 class DWI2Tensor(CommandLine):
-    """
-    Converts diffusion-weighted images to tensor images.
+    """Converts diffusion-weighted images to tensor images using `dwi2tensor`.
 
     Example
     -------
-
-    >>> import nipype.interfaces.mrtrix as mrt
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
     >>> dwi2tensor = mrt.DWI2Tensor()
     >>> dwi2tensor.inputs.in_file = 'dwi.mif'
     >>> dwi2tensor.inputs.encoding_file = 'encoding.txt'
-    >>> dwi2tensor.run()                                   # doctest: +SKIP
+    >>> dwi2tensor.run() # doctest: +SKIP
     """
 
     _cmd = 'dwi2tensor'
@@ -866,13 +912,11 @@ class Tensor2VectorOutputSpec(TraitedSpec):
 
 
 class Tensor2Vector(CommandLine):
-    """
-    Generates a map of the major eigenvectors of the tensors in each voxel.
+    """Generates a map of the major eigenvectors of the tensors in each voxel using `tensor2metric`.
 
     Example
     -------
-
-    >>> import nipype.interfaces.mrtrix as mrt
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
     >>> tensor2vector = mrt.Tensor2Vector()
     >>> tensor2vector.inputs.in_file = 'dwi_tensor.mif'
     >>> tensor2vector.run()                             # doctest: +SKIP
@@ -928,19 +972,18 @@ class EstimateResponseForSHOutputSpec(TraitedSpec):
 
 
 class EstimateResponseForSH(CommandLine):
-    """
-    Estimates the fibre response function for use in spherical deconvolution.
+    """Estimates the fibre response function for use in spherical deconvolution using `dwi2response`.
 
     Example
     -------
-
-    >>> import nipype.interfaces.mrtrix as mrt
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
     >>> estresp = mrt.EstimateResponseForSH()
     >>> estresp.inputs.in_file = 'dwi.mif'
     >>> estresp.inputs.mask_image = 'dwi_WMProb.mif'
     >>> estresp.inputs.encoding_file = 'encoding.txt'
     >>> estresp.run()                                   # doctest: +SKIP
     """
+
     _cmd = 'dwi2response'
     input_spec = EstimateResponseForSHInputSpec
     output_spec = EstimateResponseForSHOutputSpec
@@ -1005,8 +1048,7 @@ class ConstrainedSphericalDeconvolutionOutputSpec(TraitedSpec):
 
 
 class ConstrainedSphericalDeconvolution(CommandLine):
-    """
-    Perform non-negativity constrained spherical deconvolution.
+    """Perform non-negativity constrained spherical deconvolution using `dwi2fod`.
 
     Note that this program makes use of implied symmetries in the diffusion profile.
     First, the fact the signal attenuation profile is real implies that it has conjugate symmetry,
@@ -1028,8 +1070,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
 
     Example
     -------
-
-    >>> import nipype.interfaces.mrtrix as mrt
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
     >>> csdeconv = mrt.ConstrainedSphericalDeconvolution()
     >>> csdeconv.inputs.in_file = 'dwi.mif'
     >>> csdeconv.inputs.encoding_file = 'encoding.txt'
@@ -1082,11 +1123,11 @@ class Generate5ttOutputSpec(TraitedSpec):
 
 
 class Generate5tt(CommandLine):
-    """
-    Generate a 5TT image suitable for ACT using the selected algorithm
+    """Generate a 5TT image suitable for ACT using the selected algorithm using `5ttgen`.
+
     Example
     -------
-    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
     >>> gen5tt = mrt.Generate5tt()
     >>> gen5tt.inputs.in_file = 'T1.nii.gz'
     >>> gen5tt.inputs.algorithm = 'fsl'
@@ -1122,9 +1163,7 @@ class GenerateGMWMInterfaceOutputSpec(TraitedSpec):
 
 
 class GenerateGMWMInterface(CommandLine):
-    """
-     Generate a mask image appropriate for seeding streamlines on the grey
-     matter-white matter interface
+    """Generate a grey matter-white matter interface mask from the 5TT image using `5tt2gmwmi`.
 
     Example
     -------
@@ -1252,22 +1291,25 @@ class StreamlineTrackOutputSpec(TraitedSpec):
 
 
 class StreamlineTrack(CommandLine):
-    """
-    Performs tractography using one of the following models:
-    'dt_prob', 'dt_stream', 'sd_prob', 'sd_stream',
-    Where 'dt' stands for diffusion tensor, 'sd' stands for spherical
-    deconvolution, and 'prob' stands for probabilistic.
+    """Performs tractography using `tckgen`.
+
+    It can use one of the following models::
+        'dt_prob', 'dt_stream', 'sd_prob', 'sd_stream'
+
+    where 'dt' stands for diffusion tensor,
+    'sd' stands for spherical deconvolution, and
+    'prob' stands for probabilistic.
 
     Example
     -------
-
-    >>> import nipype.interfaces.mrtrix as mrt
+    >>> import cmtklib.interfaces.mrtrix3 as mrt
     >>> strack = mrt.StreamlineTrack()
     >>> strack.inputs.inputmodel = 'SD_PROB'
     >>> strack.inputs.in_file = 'data.Bfloat'
     >>> strack.inputs.seed_file = 'seed_mask.nii'
     >>> strack.run()                                    # doctest: +SKIP
     """
+
     _cmd = 'tckgen'
     input_spec = StreamlineTrackInputSpec
     output_spec = StreamlineTrackOutputSpec
@@ -1292,6 +1334,7 @@ class StreamlineTrack(CommandLine):
 
 
 class MRTrix3Base(CommandLine):
+    """"MRtrix3Base base class inherited by FilterTractogram class."""
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'nthreads' and value == 0:
@@ -1346,6 +1389,22 @@ class FilterTractogramOutputSpec(TraitedSpec):
 
 
 class FilterTractogram(MRTrix3Base):
+    """Determine an appropriate cross-sectional area multiplier for each streamline using `tcksift2` [Smith2015SIFT2]_.
+
+    References
+    ----------
+    .. [Smith2015SIFT2] Smith RE et al., Neuroimage, 2015, 119:338-51. <https://doi.org/10.1016/j.neuroimage.2015.06.092>.
+
+    Example
+    -------
+    >>> import cmtklib.interfaces.mrtrix3 as cmp_mrt
+    >>> mrtrix_sift2 = cmp_mrt.FilterTractogram()
+    >>> mrtrix_sift2.inputs.in_tracks = 'tractogram.tck'
+    >>> mrtrix_sift2.inputs.in_fod = 'spherical_harmonics_image.nii.gz'
+    >>> mrtrix_sift2.inputs.out_file = 'sift2_fiber_weights.txt'
+    >>> mrtrix_sift2.run()                               # doctest: +SKIP
+    """
+
     _cmd = 'tcksift2'
     input_spec = FilterTractogramInputSpec
     output_spec = FilterTractogramOutputSpec
@@ -1359,3 +1418,46 @@ class FilterTractogram(MRTrix3Base):
             outputs['out_weights'] = op.abspath(self.inputs.out_file)
 
         return outputs
+
+# class MRTrixInfoInputSpec(CommandLineInputSpec):
+#     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+#         desc='Input images to be read')
+#     _xor_inputs = ('out_grad_mrtrix','out_grad_fsl')
+#     out_grad_mrtrix = File(argstr='-export_grad_mrtrix %s',
+#                            desc='export the DWI gradient table to file in MRtrix format',
+#                            xor=_xor_inputs)
+#     out_grad_fsl =  traits.Tuple(File(),File(), argstr='-export_grad_fsl %s %s',
+#                                                 desc='export the DWI gradient table to files in FSL (bvecs / bvals) format',
+#                                                 xor=_xor_inputs)
+
+# class MRTrixInfoOutputSpec(TraitedSpec):
+#     out_grad_mrtrix = traits.Tuple(File(exists=True),File(exists=True),
+#                                    desc='Outputs [bvecs, bvals] DW gradient scheme (FSL format) if set')
+#     out_grad_fsl = File(exits=True,desc='Output MRtrix gradient text file if set')
+
+# class MRTrixInfo(CommandLine):
+#     """
+#     Prints out relevant header information found in the image specified.
+
+#     Example
+#     -------
+
+#     >>> import nipype.interfaces.mrtrix as mrt
+#     >>> MRinfo = mrt.MRTrixInfo()
+#     >>> MRinfo.inputs.in_file = 'dwi.mif'
+#     >>> MRinfo.run()                                    # doctest: +SKIP
+#     """
+
+#     _cmd = 'mrinfo'
+#     input_spec=MRTrixInfoInputSpec
+#     output_spec=MRTrixInfoOutputSpec
+
+#     def _list_outputs(self):
+#         outputs = self.output_spec().get()
+#         outputs['out_grad_mrtrix'] = op.abspath(self.inputs.out_grad_mrtrix)
+#         if isdefined(self.inputs.out_grad_mrtrix):
+#             outputs['out_grad_mrtrix'] = op.abspath(self.inputs.out_grad_mrtrix)
+#         if isdefined(self.inputs.out_grad_fsl):
+#             outputs['out_grad_fsl'] =
+#                 (op.abspath(self.inputs.out_grad_fsl[0]),op.abspath(self.inputs.out_grad_mrtrix[1]))
+#         return outputs
