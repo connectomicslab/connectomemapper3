@@ -134,6 +134,20 @@ class ExtractPVEsFrom5TTOutputSpec(TraitedSpec):
 
 
 class ExtractPVEsFrom5TT(BaseInterface):
+    """Create Partial Volume Estimation maps for CSF, GM, WM tissues from `mrtrix3` 5TT image.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import ExtractPVEsFrom5TT
+    >>> pves = ExtractPVEsFrom5TT()
+    >>> pves.inputs.in_5tt = 'sub-01_desc-5tt_dseg.nii.gz'
+    >>> pves.inputs.ref_image = 'sub-01_T1w.nii.gz'
+    >>> pves.inputs.pve_csf_file = '/path/to/output_csf_pve.nii.gz'
+    >>> pves.inputs.pve_gm_file = '/path/to/output_gm_pve.nii.gz'
+    >>> pves.inputs.pve_wm_file = '/path/to/output_wm_pve.nii.gz'
+    >>> pves.run() # doctest: +SKIP
+    """
+
     input_spec = ExtractPVEsFrom5TTInputSpec
     output_spec = ExtractPVEsFrom5TTOutputSpec
 
@@ -262,35 +276,6 @@ class ExtractPVEsFrom5TT(BaseInterface):
         return outputs
 
 
-class ComputeSphereRadiusInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True)
-    dilation_radius = traits.Float(mandatory=True)
-
-
-class ComputeSphereRadiusOutputSpec(TraitedSpec):
-    sphere_radius = traits.Float
-
-
-class ComputeSphereRadius(BaseInterface):
-    input_spec = ComputeSphereRadiusInputSpec
-    output_spec = ComputeSphereRadiusOutputSpec
-
-    def _run_interface(self, runtime):
-        img = nib.load(self.inputs.in_file)
-        voxel_sizes = img.get_header().get_zooms()[:3]
-        min_size = 100
-        for voxel_size in voxel_sizes:
-            if voxel_size < min_size:
-                min_size = voxel_size
-        self.sphere_radius = 0.5 * min_size + self.inputs.dilation_radius * min_size
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['sphere_radius'] = self.sphere_radius
-        return outputs
-
-
 class ExtractImageVoxelSizesInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
 
@@ -300,6 +285,16 @@ class ExtractImageVoxelSizesOutputSpec(TraitedSpec):
 
 
 class ExtractImageVoxelSizes(BaseInterface):
+    """Returns a list of voxel sizes from an image.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import ExtractImageVoxelSizes
+    >>> extract_voxel_sizes = ExtractImageVoxelSizes()
+    >>> extract_voxel_sizes.inputs.in_file = 'sub-01_T1w.nii.gz'
+    >>> extract_voxel_sizes.run() # doctest: +SKIP
+    """
+
     input_spec = ExtractImageVoxelSizesInputSpec
     output_spec = ExtractImageVoxelSizesOutputSpec
 
@@ -329,6 +324,18 @@ class Tck2TrkOutputSpec(TraitedSpec):
 
 
 class Tck2Trk(BaseInterface):
+    """Convert a tractogram in `mrtrix` TCK format to `trackvis` TRK format.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import Tck2Trk
+    >>> tck_to_trk = Tck2Trk()
+    >>> tck_to_trk.inputs.in_tracks = 'sub-01_tractogram.tck'
+    >>> tck_to_trk.inputs.in_image = 'sub-01_desc-preproc_dwi.nii.gz'
+    >>> tck_to_trk.inputs.out_tracks = 'sub-01_tractogram.trk'
+    >>> tck_to_trk.run() # doctest: +SKIP
+    """
+
     input_spec = Tck2TrkInputSpec
     output_spec = Tck2TrkOutputSpec
 
@@ -339,11 +346,8 @@ class Tck2Trk(BaseInterface):
         print('-> Load nifti and copy header')
         nii = nib.load(self.inputs.in_image)
 
-        header = {}
-        header[Field.VOXEL_TO_RASMM] = nii.affine.copy()
-        header[Field.VOXEL_SIZES] = nii.header.get_zooms()[:3]
-        header[Field.DIMENSIONS] = nii.shape[:3]
-        header[Field.VOXEL_ORDER] = "".join(aff2axcodes(nii.affine))
+        header = {Field.VOXEL_TO_RASMM: nii.affine.copy(), Field.VOXEL_SIZES: nii.header.get_zooms()[:3],
+                  Field.DIMENSIONS: nii.shape[:3], Field.VOXEL_ORDER: "".join(aff2axcodes(nii.affine))}
 
         if nib.streamlines.detect_format(self.inputs.in_tracks) is not nib.streamlines.TckFile:
             print("Skipping non TCK file: '{}'".format(self.inputs.in_tracks))
@@ -374,6 +378,20 @@ class flipBvecOutputSpec(TraitedSpec):
 
 
 class flipBvec(BaseInterface):
+    """Return a diffusion bvec file with flipped axis as specified by `flipping_axis` input.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import flipBvec
+    >>> flip_bvec = flipBvec()
+    >>> flip_bvec.inputs.bvecs = 'sub-01_dwi.bvecs'
+    >>> flip_bvec.inputs.flipping_axis = ['x']
+    >>> flip_bvec.inputs.delimiter = ' '
+    >>> flip_bvec.inputs.header_lines = 0
+    >>> flip_bvec.inputs.orientation = 'h'
+    >>> flip_bvec.run() # doctest: +SKIP
+    """
+
     input_spec = flipBvecInputSpec
     output_spec = flipBvecOutputSpec
 
@@ -434,6 +452,22 @@ class UpdateGMWMInterfaceSeedingOutputSpec(TraitedSpec):
 
 
 class UpdateGMWMInterfaceSeeding(BaseInterface):
+    """Add extra Lausanne2018 structures to the Gray-matter/White-matter interface for tractography seeding.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import UpdateGMWMInterfaceSeeding
+    >>> update_gmwmi = UpdateGMWMInterfaceSeeding()
+    >>> update_gmwmi.inputs.in_gmwmi_file = 'sub-01_label-gmwmi_desc-orig_dseg.nii.gz'
+    >>> update_gmwmi.inputs.out_gmwmi_file = 'sub-01_label-gmwmi_desc-modif_dseg.nii.gz'
+    >>> update_gmwmi.inputs.in_roi_volumes = ['sub-01_space-DWI_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                                       'sub-01_space-DWI_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                                       'sub-01_space-DWI_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                                       'sub-01_space-DWI_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                                       'sub-01_space-DWI_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> update_gmwmi.run() # doctest: +SKIP
+    """
+
     input_spec = UpdateGMWMInterfaceSeedingInputSpec
     output_spec = UpdateGMWMInterfaceSeedingOutputSpec
 
@@ -515,97 +549,7 @@ class UpdateGMWMInterfaceSeeding(BaseInterface):
         return outputs
 
 
-class getCRS2XYZtkRegTransformInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=1,
-                   desc="File used as input for getting CRS to XYZtkReg transform (DWI data)")
-    crs2ras_tkr = traits.Bool(argstr='--crs2ras-tk', mandatory=True, position=2,
-                              desc='return the crs2ras-tkr transform to output console')
-
-
-class getCRS2XYZtkRegTransformOutputSpec(TraitedSpec):
-    pass
-
-
-class getCRS2XYZtkRegTransform(CommandLine):
-    _cmd = 'mri_info'
-    input_spec = getCRS2XYZtkRegTransformInputSpec
-    output_spec = getCRS2XYZtkRegTransformOutputSpec
-
-    def _run_interface(self, runtime):
-        runtime = super(getCRS2XYZtkRegTransform, self)._run_interface(runtime)
-        print('CMD: ', runtime.cmdline)
-        print(runtime.stdout)
-
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_transform'] = os.path.abspath(self._gen_outfilename())
-
-    def _gen_outfilename(self):
-        _, name, _ = split_filename(self.inputs.in_file)
-        return name + '_crs2ras_tk_transform.txt'
-
-
-class transform_trk_CRS2XYZtkRegInputSpec(CommandLineInputSpec):
-    trackvis_file = File(exists=True, mandatory=True,
-                         desc="Trackvis file output from MRtricToTrackvis converter, with the LAS orientation set as default")
-    ref_image_file = File(exists=True, mandatory=True,
-                          desc="File used as input for getting CRS to XYZtkReg transform (DWI data)")
-
-
-class transform_trk_CRS2XYZtkRegOutputSpec(TraitedSpec):
-    out_file = File(
-        exists=True, desc='Trackvis file in the same space than Freesurfer data')
-    out_transform = File(exists=True, desc='CRS to XYZtkReg transform file')
-
-
-class transform_trk_CRS2XYZtkReg(BaseInterface):
-    input_spec = transform_trk_CRS2XYZtkRegInputSpec
-    output_spec = transform_trk_CRS2XYZtkRegOutputSpec
-
-    def _run_interface(self, runtime):
-        _, name, _ = split_filename(self.inputs.trackvis_file)
-        # transform_filename = 'CRS2XYZtkReg.txt'
-        out_trackvis_filename = name + '_tkreg.trk'
-
-        # Load original Trackvis file
-        fib, hdr = nib.trackvis.read(self.inputs.trackvis_file)
-
-        # Load reference image file
-        # ref_image = nib.load(self.inputs.ref_image_file)
-
-        CRS2XYZtkRegtransform = pe.Node(interface=getCRS2XYZtkRegTransform(crs2ras_tkr=True),
-                                        name='CRS2XYZtkRegtransform')
-        CRS2XYZtkRegtransform.inputs.in_file = self.inputs.ref_image_file
-
-        CRS2XYZtkRegtransform.run()
-
-        # print "STDOUT:",runtime.stdout
-        # Run "mrinfo path-to-ref_image_file --crs2ras-tkr" command to get 'CRS' to 'XYZtkReg' transform
-        # cmd = 'mrinfo  --crs2ras-tkr' + ' ' + self.inputs.ref_image_file
-        # cmd = ['mrinfo',self.inputs.ref_image_file,'--crs2ras-tkr']
-
-        # transform_file = open(transform_filename,'w')
-        # mrinfo_process = subprocess.call(cmd,stdout=transform_file,shell=True)
-
-        nib.trackvis.write(out_trackvis_filename, fib, hdr)
-
-        return runtime
-
-    def _list_outputs(self):
-        # filename = os.path.basename(self.inputs.trackvis_file)
-        _, name, _ = split_filename(self.inputs.trackvis_file)
-        transform_filename = 'CRS2XYZtkReg.txt'
-        out_trackvis_filename = name + '_tkreg.trk'
-
-        outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(out_trackvis_filename)
-        outputs['out_transform'] = os.path.abspath(transform_filename)
-        return outputs
-
-
-class make_seedsInputSpec(BaseInterfaceInputSpec):
+class Make_SeedsInputSpec(BaseInterfaceInputSpec):
     ROI_files = InputMultiPath(
         File(exists=True), desc='ROI files registered to diffusion space')
     WM_file = File(
@@ -613,22 +557,35 @@ class make_seedsInputSpec(BaseInterfaceInputSpec):
     # DWI = File(mandatory=True,desc='Diffusion data file for probabilistic tractography')
 
 
-class make_seedsOutputSpec(TraitedSpec):
+class Make_SeedsOutputSpec(TraitedSpec):
     seed_files = OutputMultiPath(
         File(exists=True), desc='Seed files for probabilistic tractography')
 
 
-class make_seeds(BaseInterface):
-    """ - Creates seeding ROIs by intersecting dilated ROIs with WM mask
+class Make_Seeds(BaseInterface):
+    """Creates seeding ROIs by intersecting dilated ROIs with WM mask for `Dipy`.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import Make_Seeds
+    >>> make_dipy_seeds = Make_Seeds()
+    >>> make_dipy_seeds.inputs.ROI_files  = ['sub-01_space-DWI_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> make_dipy_seeds.inputs.WM_file = 'sub-01_space-DWI_label-WM_dseg.nii.gz'
+    >>> make_dipy_seeds.run() # doctest: +SKIP
     """
-    input_spec = make_seedsInputSpec
-    output_spec = make_seedsOutputSpec
+
+    input_spec = Make_SeedsInputSpec
+    output_spec = Make_SeedsOutputSpec
     ROI_idx = []
     base_name = ''
 
     def _run_interface(self, runtime):
-        print(
-            "Computing seed files for probabilistic tractography\n===================================================")
+        print("Computing seed files for probabilistic tractography\n"
+              "===================================================")
         # Load ROI file
         txt_file = open(self.base_name + '_seeds.txt', 'w')
 
@@ -682,11 +639,24 @@ class make_seeds(BaseInterface):
         return output_list
 
 
-class make_mrtrix_seeds(BaseInterface):
-    """ - Creates seeding ROIs by intersecting dilated ROIs with WM mask
+class Make_Mrtrix_Seeds(BaseInterface):
+    """Creates seeding ROIs by intersecting dilated ROIs with WM mask for `mrtrix`.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import Make_Mrtrix_Seeds
+    >>> make_mrtrix_seeds = Make_Mrtrix_Seeds()
+    >>> make_mrtrix_seeds.inputs.ROI_files  = ['sub-01_space-DWI_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> make_mrtrix_seeds.inputs.WM_file = 'sub-01_space-DWI_label-WM_dseg.nii.gz'
+    >>> make_mrtrix_seeds.run() # doctest: +SKIP
     """
-    input_spec = make_seedsInputSpec
-    output_spec = make_seedsOutputSpec
+
+    input_spec = Make_SeedsInputSpec
+    output_spec = Make_SeedsOutputSpec
     ROI_idx = []
     base_name = ''
 
@@ -730,21 +700,33 @@ class make_mrtrix_seeds(BaseInterface):
         return outputs
 
 
-class splitDiffusion_InputSpec(BaseInterfaceInputSpec):
+class SplitDiffusion_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True)
     start = Int(0)
     end = Int()
 
 
-class splitDiffusion_OutputSpec(TraitedSpec):
+class SplitDiffusion_OutputSpec(TraitedSpec):
     data = File(exists=True)
     padding1 = File(exists=False)
     padding2 = File(exists=False)
 
 
-class splitDiffusion(BaseInterface):
-    input_spec = splitDiffusion_InputSpec
-    output_spec = splitDiffusion_OutputSpec
+class SplitDiffusion(BaseInterface):
+    """Extract volumes from diffusion MRI data given a start and end index.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import SplitDiffusion
+    >>> split_dwi = SplitDiffusion()
+    >>> split_dwi.inputs.in_file  = 'sub-01_dwi.nii.gz'
+    >>> split_dwi.inputs.start  = 5
+    >>> split_dwi.inputs.in_file  = 30
+    >>> split_dwi.run() # doctest: +SKIP
+    """
+
+    input_spec = SplitDiffusion_InputSpec
+    output_spec = SplitDiffusion_OutputSpec
 
     def _run_interface(self, runtime):
         diffusion_file = nib.load(self.inputs.in_file)
@@ -788,6 +770,19 @@ class CreateAcqpFileOutputSpec(TraitedSpec):
 
 
 class CreateAcqpFile(BaseInterface):
+    """Create an acquisition `Acqp` file for FSL `eddy`.
+
+    .. note::
+        This value can be extracted from dMRI data acquired on Siemens scanner
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import CreateAcqpFile
+    >>> create_acqp = CreateAcqpFile()
+    >>> create_acqp.inputs.total_readout  = 0.28
+    >>> create_acqp.run() # doctest: +SKIP
+    """
+
     input_spec = CreateAcqpFileInputSpec
     output_spec = CreateAcqpFileOutputSpec
 
@@ -813,7 +808,7 @@ class CreateAcqpFile(BaseInterface):
 
 class CreateIndexFileInputSpec(BaseInterfaceInputSpec):
     in_grad_mrtrix = File(exists=True, mandatory=True,
-                          desc='Input DWI gradient table in MRTric format')
+                          desc='Input DWI gradient table in MRTrix format')
 
 
 class CreateIndexFileOutputSpec(TraitedSpec):
@@ -821,6 +816,16 @@ class CreateIndexFileOutputSpec(TraitedSpec):
 
 
 class CreateIndexFile(BaseInterface):
+    """Create an index file for FSL `eddy` from a `mrtrix` diffusion gradient table.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import CreateIndexFile
+    >>> create_index = CreateIndexFile()
+    >>> create_index.inputs.in_grad_mrtrix  = 'grad.txt'
+    >>> create_index.run() # doctest: +SKIP
+    """
+
     input_spec = CreateIndexFileInputSpec
     output_spec = CreateIndexFileOutputSpec
 
@@ -856,6 +861,17 @@ class ConcatOutputsAsTupleOutputSpec(TraitedSpec):
 
 
 class ConcatOutputsAsTuple(BaseInterface):
+    """Concatenate 2 different output file as a Tuple of 2 files.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import ConcatOutputsAsTuple
+    >>> concat_outputs = ConcatOutputsAsTuple()
+    >>> concat_outputs.inputs.input1  = 'output_interface1.nii.gz'
+    >>> concat_outputs.inputs.input1  = 'output_interface2.nii.gz'
+    >>> concat_outputs.run() # doctest: +SKIP
+    """
+
     input_spec = ConcatOutputsAsTupleInputSpec
     output_spec = ConcatOutputsAsTupleOutputSpec
 
