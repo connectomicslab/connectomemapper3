@@ -3,14 +3,26 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMTK Utility functions to handle BIDS inputs
-"""
+"""This modules provides CMTK Utility functions to handle BIDS datasets."""
 
 import os
 import json
 
 
 def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
+    """Write a dataset_description.json in each type of CMP derivatives.
+
+    Parameters
+    ----------
+    bids_dir : string
+        BIDS root directory
+
+    deriv_dir : string
+        Output/derivatives directory
+
+    pipeline_name : string
+        Type of derivatives (`['cmp', 'freesurfer', 'nipype']`)
+    """
     from cmp.info import __version__, __url__, DOWNLOAD_URL
 
     bids_dir = os.path.abspath(bids_dir)
@@ -91,4 +103,15 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
 
 
 def _get_shub_version(singularity_url):
+    """Get singularity_md5 from URL.
+
+    .. note::
+        Not implemented yet
+
+    Parameters
+    ----------
+    singularity_url : url
+        URL to image on singularity hub
+
+    """
     return NotImplemented
