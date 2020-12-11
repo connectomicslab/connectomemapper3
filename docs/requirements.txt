@@ -6,3 +6,4 @@ traits
 grabbit
 pybids
 nipype
+matplotlib
