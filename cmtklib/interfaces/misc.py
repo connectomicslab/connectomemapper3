@@ -100,7 +100,7 @@ class ConcatOutputsAsTuple(BaseInterface):
     >>> from cmtklib.interfaces.misc import ConcatOutputsAsTuple
     >>> concat_outputs = ConcatOutputsAsTuple()
     >>> concat_outputs.inputs.input1  = 'output_interface1.nii.gz'
-    >>> concat_outputs.inputs.input1  = 'output_interface2.nii.gz'
+    >>> concat_outputs.inputs.input2  = 'output_interface2.nii.gz'
     >>> concat_outputs.run() # doctest: +SKIP
     """
 
