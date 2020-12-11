@@ -56,8 +56,7 @@ extensions = ['sphinx.ext.autosectionlabel',
               'nipype.sphinxext.documenter',
               ]
 
-autodoc_mock_imports = ['nipype',
-                        'numpy',
+autodoc_mock_imports = ['numpy',
                         'matplotlib',
                         'traits',
                         'traitsui',
