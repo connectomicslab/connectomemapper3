@@ -122,6 +122,15 @@ Contents
    bidsappmanager
    outputs
 
+.. _api-doc:
+
+.. toctree::
+   :maxdepth: 4
+   :caption: API
+
+   api/generated/cmp
+   api/generated/cmtklib
+
 .. _user-usecases:
 
 .. toctree::
