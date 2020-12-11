@@ -18,7 +18,7 @@ from nipype import logging
 from cmtklib.interfaces.mrtrix3 import Erode, StreamlineTrack
 from cmtklib.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
 from cmtklib.interfaces.misc import Tck2Trk, extractHeaderVoxel2WorldMatrix, \
-    make_mrtrix_seeds
+    Make_Mrtrix_Seeds
 
 # from cmtklib.diffusion import filter_fibers
 
@@ -504,7 +504,7 @@ def create_mrtrix_tracking_flow(config):
 
     if config.tracking_mode == 'Deterministic':
         mrtrix_seeds = pe.Node(
-            interface=make_mrtrix_seeds(), name='mrtrix_seeds')
+            interface=Make_Mrtrix_Seeds(), name='mrtrix_seeds')
         mrtrix_tracking = pe.Node(
             interface=StreamlineTrack(), name='mrtrix_deterministic_tracking')
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
@@ -603,7 +603,7 @@ def create_mrtrix_tracking_flow(config):
 
     elif config.tracking_mode == 'Probabilistic':
         mrtrix_seeds = pe.Node(
-            interface=make_mrtrix_seeds(), name='mrtrix_seeds')
+            interface=Make_Mrtrix_Seeds(), name='mrtrix_seeds')
         mrtrix_tracking = pe.Node(
             interface=StreamlineTrack(), name='mrtrix_probabilistic_tracking')
         mrtrix_tracking.inputs.desired_number_of_tracks = config.desired_number_of_tracks
