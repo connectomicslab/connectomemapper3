@@ -126,7 +126,7 @@ Contents
 
 .. toctree::
    :maxdepth: 4
-   :caption: API
+   :caption: API Documentation
 
    api/generated/cmp
    api/generated/cmtklib
