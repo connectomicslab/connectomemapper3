@@ -13,9 +13,9 @@ import nibabel as nib
 import numpy as np
 import nibabel.trackvis as tv
 
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, File, TraitedSpec, OutputMultiPath, InputMultiPath
+from nipype.interfaces.base import traits, BaseInterface, BaseInterfaceInputSpec, File, TraitedSpec, OutputMultiPath, InputMultiPath
 from nipype.utils.filemanip import split_filename
-from traits import api
+
 from traits.trait_types import List, Str, Int, Enum
 
 from .util import length
