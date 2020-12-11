@@ -2,9 +2,9 @@ sphinx-argparse
 nbsphinx
 sphinxcontrib-apidoc
 sphinxcontrib-napoleon
-traits
-traitsui
+traits==6.0.0
+traitsui==6.1.3
 grabbit
-pybids
-nipype
+pybids==0.10.2
+nipype==1.5.0
 matplotlib
