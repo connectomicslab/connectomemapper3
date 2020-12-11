@@ -17,8 +17,8 @@ from nipype import logging
 
 from cmtklib.interfaces.mrtrix3 import Erode, StreamlineTrack
 from cmtklib.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
-from cmtklib.interfaces.misc import Tck2Trk, ExtractHeaderVoxel2WorldMatrix, \
-    Make_Mrtrix_Seeds
+from cmtklib.interfaces.misc import ExtractHeaderVoxel2WorldMatrix
+from cmtklib.diffusion import Tck2Trk, Make_Mrtrix_Seeds
 
 # from cmtklib.diffusion import filter_fibers
 

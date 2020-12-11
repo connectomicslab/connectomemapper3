@@ -28,7 +28,7 @@ import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, \
     MRThreshold, ExtractMRTrixGrad, Generate5tt, \
     GenerateGMWMInterface, ApplymultipleMRConvert
-from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
+from cmtklib.diffusion import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
 from cmtklib.interfaces.fsl import CreateAcqpFile, CreateIndexFile
 
 

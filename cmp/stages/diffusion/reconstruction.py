@@ -23,7 +23,7 @@ from cmtklib.interfaces.mrtrix3 import Erode, MRtrix_mul, MRThreshold, \
     ConstrainedSphericalDeconvolution, DWI2Tensor, Tensor2Vector
 
 # from nipype.interfaces.mrtrix3.preprocess import ResponseSD
-from cmtklib.interfaces.misc import FlipBvec, FlipTable
+from cmtklib.diffusion import FlipTable, FlipBvec
 from cmtklib.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE, MAPMRI
 # from nipype.interfaces.dipy import CSD
 
