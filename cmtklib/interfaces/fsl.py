@@ -9,14 +9,12 @@ import os
 from glob import glob
 import warnings
 
-from nipype import BaseInterface
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 from nipype.interfaces.base import (traits, BaseInterface, BaseInterfaceInputSpec,
                                     TraitedSpec, CommandLineInputSpec, CommandLine,
-                                    InputMultiPath, OutputMultiPath, File, Directory,
+                                    InputMultiPath, OutputMultiPath, File,
                                     isdefined)
 import nipype.interfaces.fsl as fsl
-from nipype.utils.filemanip import split_filename, copyfile
 from traits.trait_types import Float
 
 warn = warnings.warn

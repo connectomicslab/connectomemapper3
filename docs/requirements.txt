@@ -8,3 +8,4 @@ grabbit
 pybids==0.10.2
 nipype==1.5.0
 matplotlib
+dipy==1.1.0
