@@ -28,8 +28,8 @@ import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, \
     MRThreshold, ExtractMRTrixGrad, Generate5tt, \
     GenerateGMWMInterface, ApplymultipleMRConvert
-from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding, \
-    CreateIndexFile, CreateAcqpFile
+from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
+from cmtklib.interfaces.fsl import CreateAcqpFile, CreateIndexFile
 
 
 class PreprocessingConfig(HasTraits):
@@ -233,7 +233,7 @@ class PreprocessingStage(Stage):
         # For DSI acquisition: extract the hemisphere that contains the data
         # if self.config.start_vol > 0 or self.config.end_vol < self.config.max_vol:
         #
-        #     split_vol = pe.Node(interface=splitDiffusion(),name='split_vol')
+        #     split_vol = pe.Node(interface=SplitDiffusion(),name='split_vol')
         #     split_vol.inputs.start = self.config.start_vol
         #     split_vol.inputs.end = self.config.end_vol
         #

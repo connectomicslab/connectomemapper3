@@ -9,6 +9,7 @@ import os
 from glob import glob
 import warnings
 
+from nipype import BaseInterface
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 from nipype.interfaces.base import (traits, BaseInterface, BaseInterfaceInputSpec,
                                     TraitedSpec, CommandLineInputSpec, CommandLine,
@@ -16,7 +17,7 @@ from nipype.interfaces.base import (traits, BaseInterface, BaseInterfaceInputSpe
                                     isdefined)
 import nipype.interfaces.fsl as fsl
 from nipype.utils.filemanip import split_filename, copyfile
-
+from traits.trait_types import Float
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -477,4 +478,94 @@ class ApplymultipleWarp(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['out_files'] = glob(os.path.abspath("*.nii.gz"))
+        return outputs
+
+
+class CreateAcqpFileInputSpec(BaseInterfaceInputSpec):
+    total_readout = Float(0.0)
+
+
+class CreateAcqpFileOutputSpec(TraitedSpec):
+    acqp = File(exists=True)
+
+
+class CreateAcqpFile(BaseInterface):
+    """Create an acquisition `Acqp` file for FSL `eddy`.
+
+    .. note::
+        This value can be extracted from dMRI data acquired on Siemens scanner
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import CreateAcqpFile
+    >>> create_acqp = CreateAcqpFile()
+    >>> create_acqp.inputs.total_readout  = 0.28
+    >>> create_acqp.run() # doctest: +SKIP
+    """
+
+    input_spec = CreateAcqpFileInputSpec
+    output_spec = CreateAcqpFileOutputSpec
+
+    def _run_interface(self, runtime):
+        import numpy as np
+
+        # Matrix giving phase-encoding direction (3 first columns) and total read out time (4th column)
+        # For phase encoding A << P <=> y-direction
+        # Total readout time = Echo spacing x EPI factor x 0.001 [s]
+        mat = np.array([['0', '1', '0', str(self.inputs.total_readout)],
+                        ['0', '-1', '0', str(self.inputs.total_readout)]])
+
+        with open(os.path.abspath('acqp.txt'), 'a') as out_f:
+            np.savetxt(out_f, mat, fmt="%s", delimiter=' ')
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["acqp"] = os.path.abspath('acqp.txt')
+        return outputs
+
+
+class CreateIndexFileInputSpec(BaseInterfaceInputSpec):
+    in_grad_mrtrix = File(exists=True, mandatory=True,
+                          desc='Input DWI gradient table in MRTrix format')
+
+
+class CreateIndexFileOutputSpec(TraitedSpec):
+    index = File(exists=True)
+
+
+class CreateIndexFile(BaseInterface):
+    """Create an index file for FSL `eddy` from a `mrtrix` diffusion gradient table.
+
+    Examples
+    --------
+    >>> from cmtklib.interfaces.misc import CreateIndexFile
+    >>> create_index = CreateIndexFile()
+    >>> create_index.inputs.in_grad_mrtrix  = 'grad.txt'
+    >>> create_index.run() # doctest: +SKIP
+    """
+
+    input_spec = CreateIndexFileInputSpec
+    output_spec = CreateIndexFileOutputSpec
+
+    def _run_interface(self, runtime):
+        import numpy as np
+
+        with open(self.inputs.in_grad_mrtrix, 'r') as f:
+            for i, _ in enumerate(f):
+                pass
+
+        lines = i + 1
+
+        mat = np.ones((1, lines))
+
+        with open(os.path.abspath('index.txt'), 'a') as out_f:
+            np.savetxt(out_f, mat, delimiter=' ', fmt="%1.0g")
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["index"] = os.path.abspath('index.txt')
         return outputs

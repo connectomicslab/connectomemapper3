@@ -11,10 +11,7 @@ import nibabel as nib
 from traits.api import *
 
 from nipype.utils.filemanip import split_filename
-from nipype.interfaces.mrtrix.convert import get_vox_dims, get_data_dims
-from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec, \
-    TraitedSpec, File, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
-import nipype.pipeline.engine as pe
+from nipype.interfaces.base import traits, TraitedSpec, File, InputMultiPath, OutputMultiPath, BaseInterface, BaseInterfaceInputSpec
 
 
 class extractHeaderVoxel2WorldMatrixInputSpec(BaseInterfaceInputSpec):
@@ -758,96 +755,6 @@ class SplitDiffusion(BaseInterface):
             outputs["padding1"] = os.path.abspath('padding1.nii.gz')
         if os.path.exists(os.path.abspath('padding2.nii.gz')):
             outputs["padding2"] = os.path.abspath('padding2.nii.gz')
-        return outputs
-
-
-class CreateAcqpFileInputSpec(BaseInterfaceInputSpec):
-    total_readout = Float(0.0)
-
-
-class CreateAcqpFileOutputSpec(TraitedSpec):
-    acqp = File(exists=True)
-
-
-class CreateAcqpFile(BaseInterface):
-    """Create an acquisition `Acqp` file for FSL `eddy`.
-
-    .. note::
-        This value can be extracted from dMRI data acquired on Siemens scanner
-
-    Examples
-    --------
-    >>> from cmtklib.interfaces.misc import CreateAcqpFile
-    >>> create_acqp = CreateAcqpFile()
-    >>> create_acqp.inputs.total_readout  = 0.28
-    >>> create_acqp.run() # doctest: +SKIP
-    """
-
-    input_spec = CreateAcqpFileInputSpec
-    output_spec = CreateAcqpFileOutputSpec
-
-    def _run_interface(self, runtime):
-        import numpy as np
-
-        # Matrix giving phase-encoding direction (3 first columns) and total read out time (4th column)
-        # For phase encoding A << P <=> y-direction
-        # Total readout time = Echo spacing x EPI factor x 0.001 [s]
-        mat = np.array([['0', '1', '0', str(self.inputs.total_readout)],
-                        ['0', '-1', '0', str(self.inputs.total_readout)]])
-
-        with open(os.path.abspath('acqp.txt'), 'a') as out_f:
-            np.savetxt(out_f, mat, fmt="%s", delimiter=' ')
-
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["acqp"] = os.path.abspath('acqp.txt')
-        return outputs
-
-
-class CreateIndexFileInputSpec(BaseInterfaceInputSpec):
-    in_grad_mrtrix = File(exists=True, mandatory=True,
-                          desc='Input DWI gradient table in MRTrix format')
-
-
-class CreateIndexFileOutputSpec(TraitedSpec):
-    index = File(exists=True)
-
-
-class CreateIndexFile(BaseInterface):
-    """Create an index file for FSL `eddy` from a `mrtrix` diffusion gradient table.
-
-    Examples
-    --------
-    >>> from cmtklib.interfaces.misc import CreateIndexFile
-    >>> create_index = CreateIndexFile()
-    >>> create_index.inputs.in_grad_mrtrix  = 'grad.txt'
-    >>> create_index.run() # doctest: +SKIP
-    """
-
-    input_spec = CreateIndexFileInputSpec
-    output_spec = CreateIndexFileOutputSpec
-
-    def _run_interface(self, runtime):
-        import numpy as np
-
-        with open(self.inputs.in_grad_mrtrix, 'r') as f:
-            for i, _ in enumerate(f):
-                pass
-
-        lines = i + 1
-
-        mat = np.ones((1, lines))
-
-        with open(os.path.abspath('index.txt'), 'a') as out_f:
-            np.savetxt(out_f, mat, delimiter=' ', fmt="%1.0g")
-
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["index"] = os.path.abspath('index.txt')
         return outputs
 
 
