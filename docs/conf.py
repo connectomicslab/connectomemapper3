@@ -56,6 +56,7 @@ extensions = ['sphinx.ext.autosectionlabel',
               ]
 
 autodoc_mock_imports = ['graphviz',
+                        'traitsui',
                         'PySide2',
                         'pyface',
                         'fslpy',
