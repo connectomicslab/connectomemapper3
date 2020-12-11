@@ -3,6 +3,7 @@ nbsphinx
 sphinxcontrib-apidoc
 sphinxcontrib-napoleon
 traits
+traitsui
 grabbit
 pybids
 nipype

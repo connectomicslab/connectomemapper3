@@ -55,11 +55,7 @@ extensions = ['sphinx.ext.autosectionlabel',
               'nipype.sphinxext.documenter',
               ]
 
-autodoc_mock_imports = ['numpy',
-                        'matplotlib',
-                        'traits',
-                        'traitsui',
-                        'graphviz',
+autodoc_mock_imports = ['graphviz',
                         'pyside2',
                         'pyface',
                         'fslpy',
