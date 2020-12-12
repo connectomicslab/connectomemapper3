@@ -427,7 +427,7 @@ class EddyOpenMP(FSLCommand):
 
 class ApplymultipleXfmInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(
-        File(desc="files to be registered", mandatory=True, exists=True))
+        File(mandatory=True, exists=True), desc="Files to be registered")
 
     xfm_file = File(desc="Transform file", mandatory=True, exists=True)
 
@@ -436,7 +436,7 @@ class ApplymultipleXfmInputSpec(BaseInterfaceInputSpec):
 
 
 class ApplymultipleXfmOutputSpec(TraitedSpec):
-    out_files = OutputMultiPath(File(desc="Transformed files"))
+    out_files = OutputMultiPath(File(), desc="Transformed files")
 
 
 class ApplymultipleXfm(BaseInterface):
@@ -474,7 +474,7 @@ class ApplymultipleXfm(BaseInterface):
 
 class ApplymultipleWarpInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(
-        File(desc="files to be registered", mandatory=True, exists=True))
+        File(mandatory=True, exists=True), desc="Files to be registered")
 
     field_file = File(desc="Deformation field", mandatory=True, exists=True)
 
@@ -482,11 +482,11 @@ class ApplymultipleWarpInputSpec(BaseInterfaceInputSpec):
 
     interp = traits.Enum(
         'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s', position=-2,
-        desc="interpolation method")
+        desc="Interpolation method")
 
 
 class ApplymultipleWarpOutputSpec(TraitedSpec):
-    out_files = OutputMultiPath(File(desc="Warped files"))
+    out_files = OutputMultiPath(File(), desc="Warped files")
 
 
 class ApplymultipleWarp(BaseInterface):
