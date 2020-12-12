@@ -335,5 +335,10 @@ apidoc_excluded_paths = [".circleci/*",
                          "get_version.py",
                          "cmp/info.py"]
 apidoc_separate_modules = True
-apidoc_extra_args = ["--module-first", "-d 1", "-T"]
+apidoc_extra_args = ["--module-first",
+                     "-d 1",
+                     "-T",
+                     "-e",
+                     "-E",
+                     "-f"]
 
