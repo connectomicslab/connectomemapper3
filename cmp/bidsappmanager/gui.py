@@ -134,13 +134,14 @@ def get_icon(path):
     icon : ImageResource
         Return an instance of `ImageResource` or None is there is not graphical backend.
     """
+    icon = None
     try:
         icon = ImageResource(path)
-        return icon
-    except Exception:
-        print('Graphical backend not available. Return None for icon')
-        icon = None
-        return icon
+    except:
+        print('Problem in creating ImageResource instance. Return None for icon')
+        pass
+
+    return icon
 
 
 class CMP_Project_InfoUI(CMP_Project_Info):
