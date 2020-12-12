@@ -128,19 +128,19 @@ def filter_fibers(intrk, outtrk='', fiber_cutoff_lower=20, fiber_cutoff_upper=50
 
 
 class FlipTableInputSpec(BaseInterfaceInputSpec):
-    table = File(exists=True)
+    table = File(exists=True, desc="Input diffusion gradient table")
 
-    flipping_axis = List()
+    flipping_axis = List(desc="List of axis to be flipped")
 
-    delimiter = Str()
+    delimiter = Str(desc="Delimiter used in the table")
 
-    header_lines = Int(0)
+    header_lines = Int(0, desc="Line number of table header")
 
-    orientation = Enum(['v', 'h'])
+    orientation = Enum(['v', 'h'], desc="Orientation of the table")
 
 
 class FlipTableOutputSpec(TraitedSpec):
-    table = File(exists=True)
+    table = File(exists=True, desc="Output table with flipped axis")
 
 
 class FlipTable(BaseInterface):
@@ -209,7 +209,8 @@ class ExtractPVEsFrom5TTInputSpec(BaseInterfaceInputSpec):
 
 
 class ExtractPVEsFrom5TTOutputSpec(TraitedSpec):
-    partial_volume_files = OutputMultiPath(File, desc="CSF/GM/WM Partial Volume Estimation images estimated from",
+    partial_volume_files = OutputMultiPath(File,
+                                           desc="CSF/GM/WM Partial Volume Estimation images estimated from",
                                            exists=True)
 
 
@@ -415,19 +416,19 @@ class Tck2Trk(BaseInterface):
 
 
 class FlipBvecInputSpec(BaseInterfaceInputSpec):
-    bvecs = File(exists=True)
+    bvecs = File(exists=True, desc="Input diffusion gradient bvec file")
 
-    flipping_axis = traits.List()
+    flipping_axis = List(desc="List of axis to be flipped")
 
-    delimiter = traits.Str()
+    delimiter = Str(desc="Delimiter used in the table")
 
-    header_lines = traits.Int(0)
+    header_lines = Int(0, desc="Line number of table header")
 
-    orientation = traits.Enum(['v', 'h'])
+    orientation = Enum(['v', 'h'], desc="Orientation of the table")
 
 
 class FlipBvecOutputSpec(TraitedSpec):
-    bvecs_flipped = File(exists=True)
+    bvecs_flipped = File(exists=True, desc="Output bvec file with flipped axis")
 
 
 class FlipBvec(BaseInterface):
@@ -757,19 +758,19 @@ class Make_Mrtrix_Seeds(BaseInterface):
 
 
 class SplitDiffusion_InputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True)
+    in_file = File(exists=True, desc="Input diffusion MRI file")
 
-    start = Int(0)
+    start = Int(0, desc="Volume index to start the split")
 
-    end = Int()
+    end = Int(desc="Volume index to end the split")
 
 
 class SplitDiffusion_OutputSpec(TraitedSpec):
-    data = File(exists=True)
+    data = File(exists=True, desc="Extracted volumes")
 
-    padding1 = File(exists=False)
+    padding1 = File(exists=False, desc="Extracted volumes with padding 1")
 
-    padding2 = File(exists=False)
+    padding2 = File(exists=False, desc="Extracted volumes with padding 2")
 
 
 class SplitDiffusion(BaseInterface):

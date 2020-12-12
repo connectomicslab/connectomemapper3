@@ -484,7 +484,7 @@ class MRConvert(CommandLine):
 
 class ApplymultipleMRConvertInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(
-        File(desc='files to be registered', mandatory=True, exists=True))
+        File(mandatory=True, exists=True), desc='Files to be registered')
 
     stride = traits.List(traits.Int, argstr='-stride %s', sep=',',
                          position=3, minlen=3, maxlen=4,
@@ -508,7 +508,7 @@ class ApplymultipleMRConvertInputSpec(BaseInterfaceInputSpec):
 
 
 class ApplymultipleMRConvertOutputSpec(TraitedSpec):
-    converted_files = OutputMultiPath(File())
+    converted_files = OutputMultiPath(File(), desc='Output files')
 
 
 class ApplymultipleMRConvert(BaseInterface):
@@ -720,14 +720,14 @@ class MRTransform(CommandLine):
 
 
 class ApplymultipleMRCropInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(
-        File(desc='files to be cropped', mandatory=True, exists=True))
+    in_files = InputMultiPath(File(mandatory=True, exists=True),
+                              desc='Files to be cropped')
 
-    template_image = File(mandatory=True, exists=True)
+    template_image = File(mandatory=True, exists=True, desc='Template image')
 
 
 class ApplymultipleMRCropOutputSpec(TraitedSpec):
-    out_files = OutputMultiPath(File())
+    out_files = OutputMultiPath(File(), desc='Cropped files')
 
 
 class ApplymultipleMRCrop(BaseInterface):
@@ -768,13 +768,13 @@ class ApplymultipleMRCrop(BaseInterface):
 
 class ApplymultipleMRTransformsInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(
-        File(desc='files to be cropped', mandatory=True, exists=True))
+        File(mandatory=True, exists=True), desc='Files to be transformed')
 
-    template_image = File(mandatory=True, exists=True)
+    template_image = File(mandatory=True, exists=True, desc='Template image)
 
 
 class ApplymultipleMRTransformsOutputSpec(TraitedSpec):
-    out_files = OutputMultiPath(File())
+    out_files = OutputMultiPath(File(), desc='Transformed files')
 
 
 class ApplymultipleMRTransforms(BaseInterface):

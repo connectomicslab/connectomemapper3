@@ -16,13 +16,13 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, Traite
 
 
 class Discard_tp_InputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True)
+    in_file = File(exists=True, mandatory=True, desc="Input 4D fMRI image")
 
-    n_discard = Int(mandatory=True)
+    n_discard = Int(mandatory=True, desc="Number of n first frames to discard")
 
 
 class Discard_tp_OutputSpec(TraitedSpec):
-    out_file = File(exists=True)
+    out_file = File(exists=True, desc="Output 4D fMRI image with discarded frames")
 
 
 class Discard_tp(BaseInterface):
@@ -306,11 +306,11 @@ class Detrending_InputSpec(BaseInterfaceInputSpec):
     gm_file = InputMultiPath(
         File(exists=True), desc="ROI files registered to fMRI space")
 
-    mode = Enum(["linear", "quadratic", "cubic"])
+    mode = Enum(["linear", "quadratic", "cubic"], desc="Detrending order")
 
 
 class Detrending_OutputSpec(TraitedSpec):
-    out_file = File(exists=True)
+    out_file = File(exists=True, desc="Detrended fMRI volume")
 
 
 class Detrending(BaseInterface):
@@ -420,13 +420,13 @@ class Scrubbing_InputSpec(BaseInterfaceInputSpec):
 
 
 class Scrubbing_OutputSpec(TraitedSpec):
-    fd_mat = File(exists=True)
+    fd_mat = File(exists=True, desc="FD matrix for scrubbing")
 
-    dvars_mat = File(exists=True)
+    dvars_mat = File(exists=True, desc="DVARS matrix for scrubbing")
 
-    fd_npy = File(exists=True)
+    fd_npy = File(exists=True, desc="FD in .npy format")
 
-    dvars_npy = File(exists=True)
+    dvars_npy = File(exists=True, desc="DVARS in .npy format")
 
 
 class Scrubbing(BaseInterface):

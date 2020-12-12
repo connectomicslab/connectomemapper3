@@ -50,9 +50,15 @@ class ComputeParcellationRoiVolumesInputSpec(BaseInterfaceInputSpec):
     """
     roi_volumes = InputMultiPath(File(
         exists=True), desc='ROI volumes registered to diffusion space', mandatory=True)
+
     parcellation_scheme = traits.Enum(
-        'Lausanne2018', ['NativeFreesurfer','Lausanne2008','Lausanne2018'], usedefault=True, mandatory=True)
-    roi_graphMLs = InputMultiPath(File(exists=True), desc='GraphML description of ROI volumes (Lausanne2018)',
+            'Lausanne2018',
+            ['NativeFreesurfer','Lausanne2008','Lausanne2018'],
+            usedefault=True, mandatory=True,
+            desc="Parcellation scheme")
+
+    roi_graphMLs = InputMultiPath(File(exists=True),
+                                  desc='GraphML description of ROI volumes (Lausanne2018)',
                                   mandatory=True)
 
 
@@ -64,7 +70,7 @@ class ComputeParcellationRoiVolumesOutputSpec(TraitedSpec):
     roi_volumes_stats (files): list
         TSV files with volumes of ROIs for each scale
     """
-    roi_volumes_stats = OutputMultiPath(File())
+    roi_volumes_stats = OutputMultiPath(File(), desc="TSV files with computed parcellation ROI volumes")
 
 
 class ComputeParcellationRoiVolumes(BaseInterface):
@@ -241,11 +247,11 @@ def erode_mask(fsdir, maskFile):
 
 
 class Erode_inputspec(BaseInterfaceInputSpec):
-    in_file = File(exists=True)
+    in_file = File(exists=True, desc="Input mask to erode")
 
 
 class Erode_outputspec(TraitedSpec):
-    out_file = File(exists=True)
+    out_file = File(exists=True, desc="Eroded mask")
 
 
 class Erode(BaseInterface):
@@ -450,19 +456,19 @@ class ParcellateBrainstemStructures(BaseInterface):
 
 
 class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
-    input_rois = InputMultiPath(File(exists=True))
+    input_rois = InputMultiPath(File(exists=True), desc="Input parcellation files")
 
-    lh_hippocampal_subfields = File(' ')
+    lh_hippocampal_subfields = File(' ', desc="Input hippocampal subfields file for left hemisphere")
 
-    rh_hippocampal_subfields = File(' ')
+    rh_hippocampal_subfields = File(' ', desc="Input hippocampal subfields file for right hemisphere")
 
-    brainstem_structures = File(' ')
+    brainstem_structures = File(' ', desc="Brainstem segmentation file")
 
-    thalamus_nuclei = File(' ')
+    thalamus_nuclei = File(' ', desc="Thalamic nuclei segmentation file")
 
-    create_colorLUT = traits.Bool(True)
+    create_colorLUT = traits.Bool(True, desc="If `True`, create the color lookup table in Freesurfer format")
 
-    create_graphml = traits.Bool(True)
+    create_graphml = traits.Bool(True, desc="If `True`, create the parcellation node description files in `graphml` format")
 
     subjects_dir = Directory(desc='Freesurfer subjects dir')
 
@@ -473,13 +479,13 @@ class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
 
 
 class CombineParcellationsOutputSpec(TraitedSpec):
-    aparc_aseg = File()
+    aparc_aseg = File(desc="Modified Freesurfer aparc+aseg file")
 
-    output_rois = OutputMultiPath(File(exists=True))
+    output_rois = OutputMultiPath(File(exists=True), desc="Output parcellation with all structures combined")
 
-    colorLUT_files = OutputMultiPath(File(exists=True))
+    colorLUT_files = OutputMultiPath(File(exists=True), desc="Color lookup table files in Freesurfer format")
 
-    graphML_files = OutputMultiPath(File(exists=True))
+    graphML_files = OutputMultiPath(File(exists=True), desc="Parcellation node description files in `graphml` format")
 
 
 class CombineParcellations(BaseInterface):
@@ -1693,7 +1699,7 @@ class ParcellateThalamusInputSpec(BaseInterfaceInputSpec):
 
     subject_id = traits.String(mandatory=True, desc='Subject ID')
 
-    ants_precision_type = traits.Enum(['double', 'float'])
+    ants_precision_type = traits.Enum(['double', 'float'], desc="Precision type used during computation")
 
 
 class ParcellateThalamusOutputSpec(TraitedSpec):
@@ -2104,9 +2110,10 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
     subject_id = traits.String(mandatory=True, desc='Subject ID')
 
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer'],
+                                      desc="Parcellation scheme",
                                       usedefault=True)
 
-    erode_masks = traits.Bool(False)
+    erode_masks = traits.Bool(False, desc="If `True` erode the masks")
 
 
 class ParcellateOutputSpec(TraitedSpec):
@@ -2119,8 +2126,8 @@ class ParcellateOutputSpec(TraitedSpec):
     # cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
     #                exists=True)
 
-    ribbon_file = File(
-        desc='Image file detailing the cortical ribbon', exists=True)
+    ribbon_file = File(desc='Image file detailing the cortical ribbon',
+                       exists=True)
     # aseg_file = File(desc='Automated segmentation file converted from Freesurfer "subjects" directory',
     #                exists=True)
 
