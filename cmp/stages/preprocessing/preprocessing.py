@@ -126,63 +126,6 @@ class PreprocessingConfig(HasTraits):
         ['interpolate', 'weighted', 'nearest', 'sinc', 'cubic'])
 
 
-class splitBvecBvalInputSpec(BaseInterfaceInputSpec):
-    bvecs = File(exists=True)
-    bvals = File(exists=True)
-    start = Int(0)
-    end = Int(300)
-    delimiter = Str()
-    orientation = Enum(['v', 'h'])
-
-
-class splitBvecBvalOutputSpec(TraitedSpec):
-    bvecs_split = File(exists=True)
-    bvals_split = File(exists=True)
-
-
-class splitBvecBval(BaseInterface):
-    input_spec = splitBvecBvalInputSpec
-    output_spec = splitBvecBvalOutputSpec
-
-    def _run_interface(self, runtime):
-        import numpy as np
-
-        f_bvecs = open(self.inputs.bvecs, 'r')
-        if self.inputs.delimiter == ' ':
-            bvecs = np.loadtxt(f_bvecs)
-        else:
-            bvecs = np.loadtxt(f_bvecs, delimiter=self.inputs.delimiter)
-        f_bvecs.close()
-
-        f_bvals = open(self.inputs.bvals, 'r')
-        if self.inputs.delimiter == ' ':
-            bvals = np.loadtxt(f_bvals)
-        else:
-            bvals = np.loadtxt(f_bvals, delimiter=self.inputs.delimiter)
-        f_bvals.close()
-
-        if self.inputs.orientation == 'v':
-            bvecs = bvecs[self.inputs.start:self.inputs.end + 1, :]
-            bvals = bvals[self.inputs.start:self.inputs.end + 1]
-        elif self.inputs.orientation == 'h':
-            bvecs = bvecs[:, self.inputs.start:self.inputs.end + 1]
-            bvals = bvals[self.inputs.start:self.inputs.end + 1]
-
-        with open(os.path.abspath('dwi_split.bvec'), 'a') as out_f:
-            np.savetxt(out_f, bvecs, delimiter=self.inputs.delimiter)
-
-        with open(os.path.abspath('dwi_split.bval'), 'a') as out_f:
-            np.savetxt(out_f, bvals.T, newline=self.inputs.delimiter)
-
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["bvecs_split"] = os.path.abspath('dwi_split.bvec')
-        outputs["bvals_split"] = os.path.abspath('dwi_split.bval')
-        return outputs
-
-
 class PreprocessingStage(Stage):
     """Class that represents the pre-registration preprocessing stage of a :class:`~cmp.pipelines.diffusion.diffusion.DiffusionPipeline` instance.
 
