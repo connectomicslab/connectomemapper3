@@ -121,6 +121,27 @@ style_sheet = '''
             '''
 
 
+def get_icon(path):
+    """Return an instance of `ImageResource` or None is there is not graphical backend.
+
+    Parameters
+    ----------
+    path : string
+        Path to an image file
+
+    Returns
+    -------
+    icon : ImageResource
+        Return an instance of `ImageResource` or None is there is not graphical backend.
+    """
+    try:
+        icon = ImageResource(path)
+    except TypeError:
+        print('Graphical backend not available. Return None for icon')
+        icon = None
+    return icon
+
+
 class CMP_Project_InfoUI(CMP_Project_Info):
     """Class that extends the :class:`CMP_Project_Info` with graphical components.
 
@@ -665,13 +686,13 @@ class CMP_BIDSAppWindow(HasTraits):
 
     # check = Action(name='Check settings!',
     #                action='check_settings',
-    #                image=ImageResource(
+    #                image=get_icon(
     #                           pkg_resources.resource_filename('resources',
     #                               os.path.join('buttons', 'bidsapp-check-settings.png'))))
     # start_bidsapp = Action(name='Start BIDS App!',
     # action='start_bids_app',
     # enabled_when='settings_checked==True and docker_running==False',
-    # image=ImageResource(
+    # image=get_icon(
     #         pkg_resources.resource_filename('resources',
     #             os.path.join('buttons', 'bidsapp-run.png'))))
 
@@ -739,7 +760,7 @@ class CMP_BIDSAppWindow(HasTraits):
         spring,
         HGroup(spring, Item('check', style='custom', width=80, height=20, resizable=False, label='', show_label=False,
                             editor_args={
-                                'image': ImageResource(pkg_resources.resource_filename('resources',
+                                'image': get_icon(pkg_resources.resource_filename('resources',
                                                                                        os.path.join('buttons',
                                                                                                     'bidsapp-check-settings.png'))),
                                 'label': "", 'label_value': ""}
@@ -747,7 +768,7 @@ class CMP_BIDSAppWindow(HasTraits):
                spring,
                Item('start_bidsapp', style='custom', width=80, height=20, resizable=False, label='', show_label=False,
                     editor_args={
-                        'image': ImageResource(
+                        'image': get_icon(
                             pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))),
                         'label': "", 'label_value': ""},
                     enabled_when='settings_checked==True and docker_running==False'),
@@ -764,7 +785,7 @@ class CMP_BIDSAppWindow(HasTraits):
         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
         # buttons = [preprocessing, map_connectome, map_custom],
         width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
-        icon=ImageResource('bidsapp.png')
+        icon=get_icon('bidsapp.png')
     )
 
     log_view = QtView(Group(
@@ -780,7 +801,7 @@ class CMP_BIDSAppWindow(HasTraits):
         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
         # buttons = [preprocessing, map_connectome, map_custom],
         width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
-        icon=ImageResource('bidsapp.png')
+        icon=get_icon('bidsapp.png')
     )
 
     def __init__(self, project_info=None, bids_root='', subjects=None, list_of_subjects_to_be_processed=None,
@@ -1534,7 +1555,7 @@ class CMP_ConfiguratorWindow(HasTraits):
                             label='',
                             show_label=False,
                             editor_args={
-                                'image': ImageResource(
+                                'image': get_icon(
                                     pkg_resources.resource_filename(
                                         'resources',
                                         os.path.join('buttons','configurator-saveall.png'))),
@@ -1556,7 +1577,7 @@ class CMP_ConfiguratorWindow(HasTraits):
         style_sheet=style_sheet,
         buttons=[],
         width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
-        icon=ImageResource('configurator.png')
+        icon=get_icon('configurator.png')
     )
 
     def __init__(self, project_info=None, anat_pipeline=None, dmri_pipeline=None, fmri_pipeline=None,
@@ -1728,7 +1749,7 @@ class CMP_InspectorWindow(HasTraits):
         handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
         width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
-        icon=ImageResource('qualitycontrol.png')
+        icon=get_icon('qualitycontrol.png')
     )
 
     error_msg = Str('')
@@ -2059,7 +2080,7 @@ class CMP_MainWindow(HasTraits):
             HGroup(
                 Item('configurator', style='custom', width=240, height=240, resizable=False, label='', show_label=False,
                      editor_args={
-                         'image': ImageResource(pkg_resources.resource_filename('cmp',
+                         'image': get_icon(pkg_resources.resource_filename('cmp',
                                                                                 os.path.join('bidsappmanager/images',
                                                                                              'configurator.png'))),
                          'label': "", 'label_value': ""}
@@ -2068,7 +2089,7 @@ class CMP_MainWindow(HasTraits):
             spring,
             HGroup(Item('bidsapp', style='custom', width=240, height=240, resizable=False,
                         editor_args={
-                            'image': ImageResource(pkg_resources.resource_filename('cmp',
+                            'image': get_icon(pkg_resources.resource_filename('cmp',
                                                                                    os.path.join('bidsappmanager/images',
                                                                                                 'bidsapp.png'))),
                              'label': ""}
@@ -2077,7 +2098,7 @@ class CMP_MainWindow(HasTraits):
             spring,
             HGroup(Item('quality_control', style='custom', width=240, height=240, resizable=False,
                         editor_args={
-                            'image': ImageResource(pkg_resources.resource_filename('cmp',
+                            'image': get_icon(pkg_resources.resource_filename('cmp',
                                                                                    os.path.join('bidsappmanager/images',
                                                                                                 'qualitycontrol.png'))),
                              'label': ""}
@@ -2106,7 +2127,7 @@ class CMP_MainWindow(HasTraits):
         handler=project.CMP_MainWindowHandler(),
         style_sheet=style_sheet,
         width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
-        icon=ImageResource('cmp.png')
+        icon=get_icon('cmp.png')
     )
 
     def _bidsapp_fired(self):
