@@ -137,6 +137,7 @@ def get_icon(path):
     icon = None
     try:
         icon = ImageResource(path)
+        print(icon)
     except:
         print('Problem in creating ImageResource instance. Return None for icon')
         pass
