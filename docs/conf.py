@@ -337,8 +337,6 @@ apidoc_excluded_paths = [".circleci/*",
 apidoc_separate_modules = True
 apidoc_extra_args = ["--module-first",
                      "-d 1",
-                     "-T",
                      "-e",
-                     "-E",
                      "-f"]
 

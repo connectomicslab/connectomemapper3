@@ -130,6 +130,7 @@ Contents
 
    api/generated/cmp
    api/generated/cmtklib
+   api/generated/modules
 
 .. _user-usecases:
 
