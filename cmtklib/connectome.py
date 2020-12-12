@@ -723,31 +723,45 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     track_file = InputMultiPath(
         File(exists=True), desc='Tractography result', mandatory=True)
+
     roi_volumes = InputMultiPath(
         File(exists=True), desc='ROI volumes registered to diffusion space')
+
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer', 'Custom'],
                                       usedefault=True)
     roi_graphmls = InputMultiPath(
         File(exists=True), desc='GraphML description of ROI volumes (Lausanne2018)')
+
     atlas_info = Dict(mandatory=False, desc="custom atlas information")
+
     compute_curvature = traits.Bool(
         True, desc='Compute curvature', usedefault=True)
+
     additional_maps = traits.List(
         File, desc='Additional calculated maps (ADC, gFA, ...)')
+
     output_types = traits.List(
         Str, desc='Output types of the connectivity matrices')
+
     probtrackx = traits.Bool(False)
+
     voxel_connectivity = InputMultiPath(File(exists=True),
                                         desc="ProbtrackX connectivity matrices (# seed voxels x # target ROIs)")
 
 
 class CMTK_cmatOutputSpec(TraitedSpec):
     endpoints_file = File()
+
     endpoints_mm_file = File()
+
     final_fiberslength_files = OutputMultiPath(File())
+
     filtered_fiberslabel_files = OutputMultiPath(File())
+
     final_fiberlabels_files = OutputMultiPath(File())
+
     streamline_final_file = File()
+
     connectivity_matrices = OutputMultiPath(File())
 
 
@@ -831,18 +845,28 @@ class CMTK_cmat(BaseInterface):
 
 class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
     func_file = File(exists=True, mandatory=True, desc="fMRI volume")
+
     roi_volumes = InputMultiPath(
         File(exists=True), desc='ROI volumes registered to functional space')
+
     roi_graphmls = InputMultiPath(File(exists=True),
                                   desc='GraphML description file for ROI volumes (used only if parcellation_scheme == Lausanne2018)')
+
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer', 'Custom'],
                                       usedefault=True)
+
     atlas_info = Dict(mandatory=False, desc="custom atlas information")
+
     apply_scrubbing = Bool(False)
+
     FD = File(exists=True)
+
     FD_th = Float()
+
     DVARS = File(exists=True)
+
     DVARS_th = Float()
+
     output_types = traits.List(
         Str, desc='Output types of the connectivity matrices')
 
@@ -850,7 +874,9 @@ class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
 class rsfmri_conmat_OutputSpec(TraitedSpec):
     avg_timeseries = OutputMultiPath(
         File(exists=True), desc="ROI average timeseries")
+
     scrubbed_idx = File(exists=True)
+
     connectivity_matrices = OutputMultiPath(File(exists=True))
 
 

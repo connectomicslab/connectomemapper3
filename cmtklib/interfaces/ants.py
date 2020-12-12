@@ -41,10 +41,13 @@ from nipype.interfaces.ants.resampling import ApplyTransforms
 class MultipleANTsApplyTransformsInputSpec(BaseInterfaceInputSpec):
     input_images = InputMultiPath(
         File(desc='files to be registered', mandatory=True, exists=True))
+
     transforms = InputMultiPath(File(exists=True), mandatory=True,
                                 desc='transform files: will be applied in reverse order. For '
                                      'example, the last specified transform will be applied first.')
+
     reference_image = File(mandatory=True, exists=True)
+
     interpolation = traits.Enum('Linear',
                                 'NearestNeighbor',
                                 'CosineWindowedSinc',
@@ -55,7 +58,9 @@ class MultipleANTsApplyTransformsInputSpec(BaseInterfaceInputSpec):
                                 'Gaussian',
                                 'BSpline',
                                 usedefault=True)
+
     default_value = traits.Float(0)
+
     out_postfix = traits.Str("_transformed", usedefault=True)
 
 

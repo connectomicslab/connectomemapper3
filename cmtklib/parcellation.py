@@ -274,11 +274,13 @@ class Erode(BaseInterface):
 
 class ParcellateHippocampalSubfieldsInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
+
     subject_id = traits.Str(mandatory=True, desc='Subject ID')
 
 
 class ParcellateHippocampalSubfieldsOutputSpec(TraitedSpec):
     lh_hipposubfields = File(desc='Left hemisphere hippocampal subfields file')
+
     rh_hipposubfields = File(
         desc='Right hemisphere hippocampal subfields  file')
 
@@ -378,6 +380,7 @@ class ParcellateHippocampalSubfields(BaseInterface):
 
 class ParcellateBrainstemStructuresInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
+
     subject_id = traits.String(mandatory=True, desc='Subject ID')
 
 
@@ -448,22 +451,34 @@ class ParcellateBrainstemStructures(BaseInterface):
 
 class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
     input_rois = InputMultiPath(File(exists=True))
+
     lh_hippocampal_subfields = File(' ')
+
     rh_hippocampal_subfields = File(' ')
+
     brainstem_structures = File(' ')
+
     thalamus_nuclei = File(' ')
+
     create_colorLUT = traits.Bool(True)
+
     create_graphml = traits.Bool(True)
+
     subjects_dir = Directory(desc='Freesurfer subjects dir')
+
     subject_id = traits.Str(desc='Freesurfer subject id')
+
     verbose_level = traits.Enum(
         1, 2, desc='verbose level (1: partial (default) / 2: full)')
 
 
 class CombineParcellationsOutputSpec(TraitedSpec):
     aparc_aseg = File()
+
     output_rois = OutputMultiPath(File(exists=True))
+
     colorLUT_files = OutputMultiPath(File(exists=True))
+
     graphML_files = OutputMultiPath(File(exists=True))
 
 
@@ -1662,25 +1677,39 @@ class CombineParcellations(BaseInterface):
 
 class ParcellateThalamusInputSpec(BaseInterfaceInputSpec):
     T1w_image = File(mandatory=True, desc='T1w image to be parcellated')
+
     bids_dir = Directory(desc='BIDS root directory')
+
     subject = traits.Str(desc='Subject id')
+
     session = traits.Str('', desc='Session id')
+
     template_image = File(mandatory=True, desc='Template T1w')
+
     thalamic_nuclei_maps = File(
         mandatory=True, desc='Probability maps of thalamic nuclei (4D image) in template space')
+
     subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
+
     subject_id = traits.String(mandatory=True, desc='Subject ID')
+
     ants_precision_type = traits.Enum(['double', 'float'])
 
 
 class ParcellateThalamusOutputSpec(TraitedSpec):
     warped_image = File(desc='Template registered to T1w image (native)')
+
     inverse_warped_image = File(desc='Inverse warped template')
+
     max_prob_registered = File(desc='Max probability label image (native)')
+
     prob_maps_registered = File(
         desc='Probabilistic map of thalamus nuclei (native)')
+
     transform_file = File(desc='Transform file')
+
     warp_file = File(desc='Deformation file')
+
     thalamus_mask = File(desc='Thalamus mask')
 
 
@@ -2071,32 +2100,47 @@ class ParcellateThalamus(BaseInterface):
 
 class ParcellateInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(desc='Freesurfer main directory')
+
     subject_id = traits.String(mandatory=True, desc='Subject ID')
+
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer'],
                                       usedefault=True)
+
     erode_masks = traits.Bool(False)
 
 
 class ParcellateOutputSpec(TraitedSpec):
     # roi_files = OutputMultiPath(File(exists=True),desc='Region of Interest files for connectivity mapping')
     white_matter_mask_file = File(desc='White matter (WM) mask file')
+
     gray_matter_mask_file = File(desc='Cortical gray matter (GM) mask file')
+
     csf_mask_file = File(desc='Cerebrospinal fluid (CSF) mask file')
     # cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
     #                exists=True)
+
     ribbon_file = File(
         desc='Image file detailing the cortical ribbon', exists=True)
     # aseg_file = File(desc='Automated segmentation file converted from Freesurfer "subjects" directory',
     #                exists=True)
+
     wm_eroded = File(desc="Eroded wm file in original space")
+
     csf_eroded = File(desc="Eroded csf file in original space")
+
     brain_eroded = File(desc="Eroded brain file in original space")
+
     roi_files_in_structural_space = OutputMultiPath(File(exists=True),
                                                     desc='ROI image resliced to the dimensions of the original structural image')
+
     T1 = File(desc="T1 image file")
+
     brain = File(desc="Brain-masked T1 image file")
+
     brain_mask = File(desc="Brain mask file")
+
     aseg = File(desc="ASeg image file (in native space)")
+
     aparc_aseg = File(desc="APArc+ASeg image file (in native space)")
 
 

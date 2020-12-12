@@ -85,6 +85,7 @@ class ExtractImageVoxelSizes(BaseInterface):
 
 class ConcatOutputsAsTupleInputSpec(BaseInterfaceInputSpec):
     input1 = File(exists=True)
+
     input2 = File(exists=True)
 
 

@@ -129,9 +129,13 @@ def filter_fibers(intrk, outtrk='', fiber_cutoff_lower=20, fiber_cutoff_upper=50
 
 class FlipTableInputSpec(BaseInterfaceInputSpec):
     table = File(exists=True)
+
     flipping_axis = List()
+
     delimiter = Str()
+
     header_lines = Int(0)
+
     orientation = Enum(['v', 'h'])
 
 
@@ -190,12 +194,16 @@ class FlipTable(BaseInterface):
 
 class ExtractPVEsFrom5TTInputSpec(BaseInterfaceInputSpec):
     in_5tt = File(desc="Input 5TT (4D) image", exists=True, mandatory=True)
+
     ref_image = File(
         desc="Reference 3D image to be used to save 3D PVE volumes", exists=True, mandatory=True)
+
     pve_csf_file = File(
         desc="CSF Partial Volume Estimation volume estimated from", mandatory=True)
+
     pve_gm_file = File(
         desc="GM Partial Volume Estimation volume estimated from", mandatory=True)
+
     pve_wm_file = File(
         desc="WM Partial Volume Estimation volume estimated from", mandatory=True)
 
@@ -351,8 +359,10 @@ class ExtractPVEsFrom5TT(BaseInterface):
 class Tck2TrkInputSpec(BaseInterfaceInputSpec):
     in_tracks = File(exists=True, mandatory=True,
                      desc='Input track file in MRtrix .tck format')
+
     in_image = File(exists=True, mandatory=True,
                     desc='Input image used to extract the header')
+
     out_tracks = File(
         mandatory=True, desc='Output track file in Trackvis .trk format')
 
@@ -406,9 +416,13 @@ class Tck2Trk(BaseInterface):
 
 class FlipBvecInputSpec(BaseInterfaceInputSpec):
     bvecs = File(exists=True)
+
     flipping_axis = traits.List()
+
     delimiter = traits.Str()
+
     header_lines = traits.Int(0)
+
     orientation = traits.Enum(['v', 'h'])
 
 
@@ -479,8 +493,10 @@ class FlipBvec(BaseInterface):
 class UpdateGMWMInterfaceSeedingInputSpec(BaseInterfaceInputSpec):
     in_gmwmi_file = File(exists=True, mandatory=True,
                          desc='Input GMWM interface image used for streamline seeding')
+
     out_gmwmi_file = File(
         mandatory=True, desc='Output GM WM interface used for streamline seeding')
+
     in_roi_volumes = InputMultiPath(
         File(exists=True), mandatory=True, desc='Input parcellation images')
 
@@ -591,6 +607,7 @@ class UpdateGMWMInterfaceSeeding(BaseInterface):
 class Make_SeedsInputSpec(BaseInterfaceInputSpec):
     ROI_files = InputMultiPath(
         File(exists=True), desc='ROI files registered to diffusion space')
+
     WM_file = File(
         mandatory=True, desc='WM mask file registered to diffusion space')
     # DWI = File(mandatory=True,desc='Diffusion data file for probabilistic tractography')
@@ -741,13 +758,17 @@ class Make_Mrtrix_Seeds(BaseInterface):
 
 class SplitDiffusion_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True)
+
     start = Int(0)
+
     end = Int()
 
 
 class SplitDiffusion_OutputSpec(TraitedSpec):
     data = File(exists=True)
+
     padding1 = File(exists=False)
+
     padding2 = File(exists=False)
 
 

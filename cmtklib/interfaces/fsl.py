@@ -24,6 +24,7 @@ warnings.filterwarnings('always', category=UserWarning)
 class BinaryThresholdInputSpec(FSLCommandInputSpec):
     in_file = File(position=2, argstr="%s", exists=True, mandatory=True,
                    desc="image to operate on")
+
     thresh = traits.Float(mandatory=True, position=3, argstr="-thr %s",
                           desc="threshold value")
 
@@ -73,11 +74,15 @@ class BinaryThreshold(FSLCommand):
 class MathsInput(FSLCommandInputSpec):
     in_file = File(position=2, argstr="%s", exists=True, mandatory=True,
                    desc="image to operate on")
+
     out_file = File(genfile=True, position=-2, argstr="%s",
                     desc="image to write", hash_files=False)
+
     _dtypes = ["float", "char", "int", "short", "double", "input"]
+
     internal_datatype = traits.Enum(*_dtypes, position=1, argstr="-dt %s",
                                     desc="datatype to use for calculations (default is float)")
+
     output_datatype = traits.Enum(*_dtypes,
                                   position=-1, argstr="-odt %s",
                                   desc="datatype to use for output (default uses input type)")
@@ -126,13 +131,18 @@ class MathsCommand(FSLCommand):
 class FSLCreateHDInputSpec(CommandLineInputSpec):
     im_size = traits.List(traits.Int, argstr='%s', mandatory=True, position=1, minlen=4, maxlen=4,
                           desc='Image size : xsize , ysize, zsize, tsize ')
+
     vox_size = traits.List(traits.Int, argstr='%s', mandatory=True, position=2, minlen=3, maxlen=3,
                            desc='Voxel size : xvoxsize, yvoxsize, zvoxsize')
+
     tr = traits.Int(argstr='%s', mandatory=True, position=3, desc='<tr>')
+
     origin = traits.List(traits.Int, argstr='%s', mandatory=True, position=4, minlen=3, maxlen=3,
                          desc='Origin coordinates : xorig, yorig, zorig')
+
     datatype = traits.Enum('2', '4', '8', '16', '32', '64', argstr='%s', mandatory=True, position=5,
                            desc='Datatype values: 2=char, 4=short, 8=int, 16=float, 64=double')
+
     out_filename = File(gen=True, mandatory=True, position=6, argstr='%s',
                         desc=' the output temp reference image created.')
 
@@ -178,44 +188,63 @@ class OrientInputSpec(FSLCommandInputSpec):
 
     get_orient = traits.Bool(argstr="-getorient", position="1", xor=_options_xor,
                              desc="gets FSL left-right orientation")
+
     get_sform = traits.Bool(argstr="-getsform", position="1", xor=_options_xor,
                             desc="gets the 16 elements of the sform matrix")
+
     get_qform = traits.Bool(argstr="-getqform", position="1", xor=_options_xor,
                             desc="gets the 16 elements of the qform matrix")
+
     set_sform = traits.List(traits.Float(), minlen=16, maxlen=16, position="1", argstr="-setsform %f",
                             xor=_options_xor, desc="<m11 m12 ... m44> sets the 16 elements of the sform matrix")
+
     set_qform = traits.List(traits.Float(), minlen=16, maxlen=16, position="1", argstr="-setqform %f",
                             xor=_options_xor, desc="<m11 m12 ... m44> sets the 16 elements of the qform matrix")
+
     get_sformcode = traits.Bool(argstr="-getsformcode", position="1", xor=_options_xor,
                                 desc="gets the sform integer code")
+
     get_qformcode = traits.Bool(argstr="-getqformcode", position="1", xor=_options_xor,
                                 desc="gets the qform integer code")
+
     set_sformcode = traits.Int(argstr="-setformcode %d", position="1", xor=_options_xor,
                                desc="<code> sets sform integer code")
+
     set_qformcode = traits.Int(argstr="-setqormcode %d", position="1", xor=_options_xor,
                                desc="<code> sets qform integer code")
+
     copy_sform2qform = traits.Bool(argstr="-copysform2qform", position="1", xor=_options_xor,
                                    desc="sets the qform equal to the sform - code and matrix")
+
     copy_qform2sform = traits.Bool(argstr="-copyqform2sform", position="1", xor=_options_xor,
                                    desc="sets the sform equal to the qform - code and matrix")
+
     delete_orient = traits.Bool(argstr="-deleteorient", position="1", xor=_options_xor,
                                 desc="removes orient info from header")
+
     force_radiological = traits.Bool(argstr="-forceradiological", position="1", xor=_options_xor,
                                      desc="makes FSL radiological header")
+
     force_neurological = traits.Bool(argstr="-forceneurological", position="1", xor=_options_xor,
                                      desc="makes FSL neurological header - not Analyze")
+
     swap_orient = traits.Bool(argstr="-swaporient", position="1", xor=_options_xor,
                               desc="swaps FSL radiological and FSL neurological")
 
 
 class OrientOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="image with modified orientation")
+
     orient = traits.Str(desc="FSL left-right orientation")
+
     sform = traits.List(traits.Float(), minlen=16, maxlen=16,
                         desc="the 16 elements of the sform matrix")
+
     qform = traits.List(traits.Float(), minlen=16, maxlen=16,
                         desc="the 16 elements of the qform matrix")
+
     sformcode = traits.Int(desc="sform integer code")
+
     qformcode = traits.Int(desc="qform integer code")
 
 
@@ -271,18 +300,25 @@ class Orient(FSLCommand):
 class EddyInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, desc='File containing all the images to estimate distortions for', argstr='--imain=%s',
                    position=0, mandatory=True)
+
     mask = File(exists=True, desc='Mask to indicate brain',
                 argstr='--mask=%s', position=1, mandatory=True)
+
     index = File(exists=True, desc='File containing indices for all volumes in --imain into --acqp and --topup',
                  argstr='--index=%s', position=2, mandatory=True)
+
     acqp = File(exists=True, desc='File containing acquisition parameters', argstr='--acqp=%s', position=3,
                 mandatory=True)
+
     bvecs = File(exists=True, desc='File containing the b-vectors for all volumes in --imain', argstr='--bvecs=%s',
                  position=4, mandatory=True)
+
     bvals = File(exists=True, desc='File containing the b-values for all volumes in --imain', argstr='--bvals=%s',
                  position=5, mandatory=True)
+
     out_file = File(desc='Basename for output', argstr='--out=%s',
                     position=6, genfile=True, hash_files=False)
+
     verbose = traits.Bool(argstr='--verbose', position=7,
                           desc="Display debugging messages.")
 
@@ -290,6 +326,7 @@ class EddyInputSpec(FSLCommandInputSpec):
 class EddyOutputSpec(TraitedSpec):
     eddy_corrected = File(
         exists=True, desc='path/name of 4D eddy corrected DWI file')
+
     bvecs_rotated = File(
         exists=True, desc='path/name of rotated DWI gradient bvecs file')
 
@@ -391,7 +428,9 @@ class EddyOpenMP(FSLCommand):
 class ApplymultipleXfmInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(
         File(desc='files to be registered', mandatory=True, exists=True))
+
     xfm_file = File(mandatory=True, exists=True)
+
     reference = File(mandatory=True, exists=True)
 
 
@@ -435,8 +474,11 @@ class ApplymultipleXfm(BaseInterface):
 class ApplymultipleWarpInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(
         File(desc='files to be registered', mandatory=True, exists=True))
+
     field_file = File(mandatory=True, exists=True)
+
     ref_file = File(mandatory=True, exists=True)
+
     interp = traits.Enum(
         'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s', position=-2,
         desc='interpolation method')

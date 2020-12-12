@@ -17,6 +17,7 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, Traite
 
 class Discard_tp_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
+
     n_discard = Int(mandatory=True)
 
 
@@ -64,28 +65,45 @@ class Discard_tp(BaseInterface):
 
 class Nuisance_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True)
+
     brainfile = File(desc='Eroded brain mask registered to fMRI space')
+
     csf_file = File(desc='Eroded CSF mask registered to fMRI space')
+
     wm_file = File(desc='Eroded WM mask registered to fMRI space')
+
     motion_file = File(desc='motion nuisance effect')
+
     gm_file = InputMultiPath(
         File(), desc='GM atlas files registered to fMRI space')
+
     global_nuisance = Bool()
+
     csf_nuisance = Bool()
+
     wm_nuisance = Bool()
+
     motion_nuisance = Bool()
+
     nuisance_motion_nb_reg = Int('36')
+
     n_discard = Int(
         desc='Number of volumes discarded from the fMRI sequence during preprocessing')
 
 
 class Nuisance_OutputSpec(TraitedSpec):
     out_file = File(exists=True)
+
     averageGlobal_npy = File()
+
     averageCSF_npy = File()
+
     averageWM_npy = File()
+
     averageGlobal_mat = File()
+
     averageCSF_mat = File()
+
     averageWM_mat = File()
 
 
@@ -284,8 +302,10 @@ class Nuisance_regression(BaseInterface):
 
 class Detrending_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to detrend")
+
     gm_file = InputMultiPath(
         File(exists=True), desc="ROI files registered to fMRI space")
+
     mode = Enum(["linear", "quadratic", "cubic"])
 
 
@@ -389,17 +409,23 @@ class Detrending(BaseInterface):
 
 class Scrubbing_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to scrubb")
+
     wm_mask = File(exists=True, desc='WM mask registered to fMRI space')
+
     gm_file = InputMultiPath(
         File(exists=True), desc='ROI volumes registered to fMRI space')
+
     motion_parameters = File(
         exists=True, desc='Motion parameters from preprocessing stage')
 
 
 class Scrubbing_OutputSpec(TraitedSpec):
     fd_mat = File(exists=True)
+
     dvars_mat = File(exists=True)
+
     fd_npy = File(exists=True)
+
     dvars_npy = File(exists=True)
 
 
