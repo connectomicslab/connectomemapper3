@@ -46,14 +46,17 @@ class fMRIPipeline(Pipeline):
     """Class that extends a :class:`Pipeline` and represents the processing pipeline for structural MRI.
 
     It is composed of:
-    * the preprocessing stage that can perform slice timing correction, deskiping and motion correction
-    * the registration stage that co-registered the anatomical T1w scan to the mean BOLD image
-      and projects the parcellations to the native fMRI space
-    * the extra-preprocessing stage (FunctionalMRIStage) that can perform nuisance regression
-      and bandpass filtering
-    * the connectome stage that extracts the time-series of each parcellation ROI and
-      computes the Pearson's correlation coefficient between ROI time-series to create
-      the functional connectome.
+        * the preprocessing stage that can perform slice timing correction, deskiping and motion correction
+
+        * the registration stage that co-registered the anatomical T1w scan to the mean BOLD image
+          and projects the parcellations to the native fMRI space
+
+        * the extra-preprocessing stage (FunctionalMRIStage) that can perform nuisance regression
+          and bandpass filtering
+
+        * the connectome stage that extracts the time-series of each parcellation ROI and
+          computes the Pearson's correlation coefficient between ROI time-series to create
+          the functional connectome.
 
     See Also
     --------
