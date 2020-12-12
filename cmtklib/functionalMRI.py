@@ -64,7 +64,7 @@ class Discard_tp(BaseInterface):
 
 
 class Nuisance_InputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True)
+    in_file = File(exists=True, desc="Input fMRI volume")
 
     brainfile = File(desc='Eroded brain mask registered to fMRI space')
 
@@ -74,37 +74,37 @@ class Nuisance_InputSpec(BaseInterfaceInputSpec):
 
     motion_file = File(desc='motion nuisance effect')
 
-    gm_file = InputMultiPath(
-        File(), desc='GM atlas files registered to fMRI space')
+    gm_file = InputMultiPath(File(),
+                             desc='GM atlas files registered to fMRI space')
 
-    global_nuisance = Bool()
+    global_nuisance = Bool(desc='If `True` perform global nuisance regression')
 
-    csf_nuisance = Bool()
+    csf_nuisance = Bool(desc='If `True` perform CSF nuisance regression')
 
-    wm_nuisance = Bool()
+    wm_nuisance = Bool(desc='If `True` perform WM nuisance regression')
 
-    motion_nuisance = Bool()
+    motion_nuisance = Bool(desc='If `True` perform motion nuisance regression')
 
-    nuisance_motion_nb_reg = Int('36')
+    nuisance_motion_nb_reg = Int('36', desc="Number of reg to use in motion nuisance regression")
 
     n_discard = Int(
         desc='Number of volumes discarded from the fMRI sequence during preprocessing')
 
 
 class Nuisance_OutputSpec(TraitedSpec):
-    out_file = File(exists=True)
+    out_file = File(exists=True, desc="Output fMRI Volume")
 
-    averageGlobal_npy = File()
+    averageGlobal_npy = File(desc="Output of global regression in `.npy` format")
 
-    averageCSF_npy = File()
+    averageCSF_npy = File(desc="Output of CSF regression in `.npy` format")
 
-    averageWM_npy = File()
+    averageWM_npy = File(desc="Output of WM regression in `.npy` format")
 
-    averageGlobal_mat = File()
+    averageGlobal_mat = File(desc="Output matrix of global regression")
 
-    averageCSF_mat = File()
+    averageCSF_mat = File(desc="Output matrix of CSF regression")
 
-    averageWM_mat = File()
+    averageWM_mat = File(desc="Output matrix of WM regression")
 
 
 class Nuisance_regression(BaseInterface):

@@ -728,9 +728,10 @@ class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
         File(exists=True), desc='ROI volumes registered to diffusion space')
 
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer', 'Custom'],
+                                      desc="Parcellation scheme",
                                       usedefault=True)
-    roi_graphmls = InputMultiPath(
-        File(exists=True), desc='GraphML description of ROI volumes (Lausanne2018)')
+    roi_graphmls = InputMultiPath(File(exists=True),
+                                  desc='GraphML description of ROI volumes (Lausanne2018)')
 
     atlas_info = Dict(mandatory=False, desc="custom atlas information")
 
@@ -743,26 +744,27 @@ class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     output_types = traits.List(
         Str, desc='Output types of the connectivity matrices')
 
-    probtrackx = traits.Bool(False)
+    probtrackx = traits.Bool(False, desc="MUST be set to True if probtrackx was used (Not used anymore in CMP3)")
 
     voxel_connectivity = InputMultiPath(File(exists=True),
                                         desc="ProbtrackX connectivity matrices (# seed voxels x # target ROIs)")
 
 
 class CMTK_cmatOutputSpec(TraitedSpec):
-    endpoints_file = File()
+    endpoints_file = File(desc="Numpy files storing the list of fiber endpoint")
 
-    endpoints_mm_file = File()
+    endpoints_mm_file = File(desc="Numpy files storing the list of fiber endpoint in mm")
 
-    final_fiberslength_files = OutputMultiPath(File())
+    final_fiberslength_files = OutputMultiPath(File(),
+                                               desc="List of fiber length")
 
-    filtered_fiberslabel_files = OutputMultiPath(File())
+    filtered_fiberslabel_files = OutputMultiPath(File(), desc="List of fiber start end ROI parcellation label after filtering")
 
-    final_fiberlabels_files = OutputMultiPath(File())
+    final_fiberlabels_files = OutputMultiPath(File(), desc="List of fiber start end ROI parcellation label")
 
-    streamline_final_file = File()
+    streamline_final_file = File(desc="Final tractogram of fibers considered in the creation of connectivity matrices")
 
-    connectivity_matrices = OutputMultiPath(File())
+    connectivity_matrices = OutputMultiPath(File(), desc="Connectivity matrices")
 
 
 class CMTK_cmat(BaseInterface):
