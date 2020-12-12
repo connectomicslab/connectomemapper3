@@ -848,38 +848,41 @@ class CMTK_cmat(BaseInterface):
 class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
     func_file = File(exists=True, mandatory=True, desc="fMRI volume")
 
-    roi_volumes = InputMultiPath(
-        File(exists=True), desc='ROI volumes registered to functional space')
+    roi_volumes = InputMultiPath(File(exists=True),
+                                 desc='ROI volumes registered to functional space')
 
     roi_graphmls = InputMultiPath(File(exists=True),
                                   desc='GraphML description file for ROI volumes (used only if parcellation_scheme == Lausanne2018)')
 
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer', 'Custom'],
+                                      desc="Parcellation scheme",
                                       usedefault=True)
 
     atlas_info = Dict(mandatory=False, desc="custom atlas information")
 
-    apply_scrubbing = Bool(False)
+    apply_scrubbing = Bool(False, desc="Apply scrubbing")
 
-    FD = File(exists=True)
+    FD = File(exists=True, desc="FD file if scrubbing is performed")
 
-    FD_th = Float()
+    FD_th = Float(desc="FD threshold")
 
-    DVARS = File(exists=True)
+    DVARS = File(exists=True, desc="DVARS file if scrubbing is performed")
 
-    DVARS_th = Float()
+    DVARS_th = Float(desc="DVARS threshold")
 
-    output_types = traits.List(
-        Str, desc='Output types of the connectivity matrices')
+    output_types = traits.List(Str,
+                               desc='Output types of the connectivity matrices')
 
 
 class rsfmri_conmat_OutputSpec(TraitedSpec):
-    avg_timeseries = OutputMultiPath(
-        File(exists=True), desc="ROI average timeseries")
+    avg_timeseries = OutputMultiPath(File(exists=True),
+                                     desc="ROI average timeseries")
 
-    scrubbed_idx = File(exists=True)
+    scrubbed_idx = File(exists=True,
+                        desc="Scrubbed indices")
 
-    connectivity_matrices = OutputMultiPath(File(exists=True))
+    connectivity_matrices = OutputMultiPath(File(exists=True),
+                                            desc="Functional connectivity matrices")
 
 
 class rsfmri_conmat(BaseInterface):
