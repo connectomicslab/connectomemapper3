@@ -134,14 +134,12 @@ def get_icon(path):
     icon : ImageResource
         Return an instance of `ImageResource` or None is there is not graphical backend.
     """
-    icon = None
-    try:
+    on_rtd = os.environ.get("READTHEDOCS") == "True"
+    if on_rtd:
+        print('READTHEDOCS: Return None for icon')
+        icon = None
+    else:
         icon = ImageResource(path)
-        print(icon)
-    except:
-        print('Problem in creating ImageResource instance. Return None for icon')
-        pass
-
     return icon
 
 
