@@ -136,10 +136,11 @@ def get_icon(path):
     """
     try:
         icon = ImageResource(path)
+        return icon
     except TypeError:
         print('Graphical backend not available. Return None for icon')
         icon = None
-    return icon
+        return icon
 
 
 class CMP_Project_InfoUI(CMP_Project_Info):
