@@ -137,7 +137,7 @@ def get_icon(path):
     try:
         icon = ImageResource(path)
         return icon
-    except TypeError:
+    except Exception:
         print('Graphical backend not available. Return None for icon')
         icon = None
         return icon
