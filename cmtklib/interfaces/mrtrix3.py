@@ -770,7 +770,7 @@ class ApplymultipleMRTransformsInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(
         File(mandatory=True, exists=True), desc='Files to be transformed')
 
-    template_image = File(mandatory=True, exists=True, desc='Template image)
+    template_image = File(mandatory=True, exists=True, desc='Template image')
 
 
 class ApplymultipleMRTransformsOutputSpec(TraitedSpec):
