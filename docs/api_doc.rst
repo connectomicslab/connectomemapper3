@@ -11,7 +11,7 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
 
    api/generated/cmp.parser
    api/generated/cmp.project
@@ -20,7 +20,7 @@ Pipelines and stages modules
 ----------------------------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 5
 
    api/generated/cmp.pipelines
    api/generated/cmp.stages
@@ -29,7 +29,7 @@ GUI modules
 ------------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 5
 
    api/generated/cmp.bidsappmanager.core
    api/generated/cmp.bidsappmanager.gui
@@ -50,7 +50,7 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
 
    api/generated/cmtklib.bids
    api/generated/cmtklib.interfaces
@@ -59,7 +59,7 @@ Submodules
 ----------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
 
    api/generated/cmtklib.config
    api/generated/cmtklib.connectome
