@@ -128,9 +128,7 @@ Contents
    :maxdepth: 4
    :caption: API Documentation
 
-   api/generated/cmp
-   api/generated/cmtklib
-   api/generated/modules
+   api_doc
 
 .. _user-usecases:
 
