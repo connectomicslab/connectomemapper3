@@ -135,8 +135,11 @@ def save_fibers(oldhdr, oldfib, fname, indices):
 
 
 def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvature=True, additional_maps={},
-         output_types=['gPickle'], atlas_info={}):
+         output_types=['gPickle'], atlas_info={}, fiber_weights=None):
     """ Create the connection matrix for each resolution using fibers and ROIs. """
+
+    if fiber_weights is not None:
+        print('Load input fiber weights in a numpy array')
 
     print("========================")
     print("> Creation of connectome maps")
@@ -679,10 +682,12 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
 
 class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
-    track_file = InputMultiPath(
-        File(exists=True), desc='Tractography result', mandatory=True)
-    roi_volumes = InputMultiPath(
-        File(exists=True), desc='ROI volumes registered to diffusion space')
+    track_file = InputMultiPath(File(exists=True),
+                                desc='Tractography result',
+                                mandatory=True)
+    fiber_weights = File(None, exists=True, desc='Tractography result')
+    roi_volumes = InputMultiPath(File(exists=True),
+                                 desc='ROI volumes registered to diffusion space')
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer', 'Custom'],
                                       usedefault=True)
     roi_graphmls = InputMultiPath(
@@ -733,7 +738,9 @@ class CMTK_cmat(BaseInterface):
              roi_graphmls=self.inputs.roi_graphmls,
              parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
              compute_curvature=self.inputs.compute_curvature,
-             additional_maps=additional_maps, output_types=self.inputs.output_types)
+             additional_maps=additional_maps,
+             output_types=self.inputs.output_types,
+             fiber_weights=self.inputs.fiber_weights)
 
         if 'cff' in self.inputs.output_types:
             cvt = cmtk.CFFConverter()

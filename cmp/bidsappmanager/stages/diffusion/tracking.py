@@ -57,7 +57,12 @@ class MRtrix_tracking_configUI(MRtrix_tracking_config):
             Item('seed_from_gmwmi', visible_when='use_act'),
             label='Anatomically-Constrained Tractography (ACT)',
             orientation='vertical'
-        )
+        ),
+        Group(
+            Item('sift2', label="Perform SIFT2 to compute fiber weights"),
+            label='Streamline filtering',
+            orientation='vertical'
+        ),
     ),
     )
 

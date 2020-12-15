@@ -1333,7 +1333,7 @@ class MRTrix3Base(CommandLine):
 
 class FilterTractogramInputSpec(CommandLineInputSpec):
     in_tracks = File(exists=True, mandatory=True, argstr='%s',
-                     position=-3, desc='Input track file')
+                     position=-3, desc='Input track file in TCK format')
     in_fod = File(exists=True, mandatory=True, argstr='%s', position=-2,
                   desc='Input image containing the spherical harmonics of the fibre orientation distributions')
     out_file = File(argstr='%s', position=-1,

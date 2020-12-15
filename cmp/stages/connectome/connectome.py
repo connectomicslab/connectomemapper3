@@ -48,7 +48,7 @@ class ConnectomeStage(Stage):
 
         self.config = ConnectomeConfig()
         self.inputs = ["roi_volumes_registered", "roi_graphMLs",
-                       "track_file",
+                       "track_file", "fiber_weights",
                        "parcellation_scheme", "atlas_info",
                        "FA", "ADC", "AD", "RD",
                        "skewness", "kurtosis", "P0",
@@ -82,6 +82,7 @@ class ConnectomeStage(Stage):
 
         flow.connect([
             (inputnode, cmtk_cmat, [('track_file', 'track_file'),
+                                    ('fiber_weights', 'fiber_weights'),
                                     ('roi_graphMLs', 'roi_graphmls'),
                                     ('parcellation_scheme', 'parcellation_scheme'),
                                     ('atlas_info', 'atlas_info'),

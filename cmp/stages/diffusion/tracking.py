@@ -18,7 +18,7 @@ from nipype import logging
 
 #  import nipype.interfaces.camino2trackvis as camino2trackvis
 # import cmtklib.interfaces.camino2trackvis as camino2trackvis
-from cmtklib.interfaces.mrtrix3 import Erode, StreamlineTrack
+from cmtklib.interfaces.mrtrix3 import Erode, StreamlineTrack, FilterTractogram
 from cmtklib.interfaces.dipy import DirectionGetterTractography, TensorInformedEudXTractography
 from cmtklib.interfaces.misc import Tck2Trk, extractHeaderVoxel2WorldMatrix, \
     make_mrtrix_seeds
@@ -99,6 +99,9 @@ class MRtrix_tracking_config(HasTraits):
                                 '(requires Anatomically-Constrained Tractography (ACT))')
     backtrack = traits.Bool(True,
                             desc="Allow tracks to be truncated (requires Anatomically-Constrained Tractography (ACT))")
+
+    sift2 = traits.Bool(True,
+                        desc="Compute and generate the tractogram fiber weights file using mrtrix3 SIFT2")
 
     def _SD_changed(self, new):
         if self.tracking_mode == "Deterministic" and not new:
@@ -310,11 +313,10 @@ def create_mrtrix_tracking_flow(config):
     # CRS2XYZtkReg = subprocess.check_output
 
     outputnode = pe.Node(interface=util.IdentityInterface(
-        fields=["track_file"]), name='outputnode')
+        fields=["track_file", "sift2_weights"]), name='outputnode')
 
     # Compute single fiber voxel mask
-    wm_erode = pe.Node(interface=Erode(
-        out_filename="wm_mask_resampled.nii.gz"), name='wm_erode')
+    wm_erode = pe.Node(interface=Erode(out_filename="wm_mask_resampled.nii.gz"), name='wm_erode')
     wm_erode.inputs.number_of_passes = 3
     wm_erode.inputs.filtertype = 'erode'
 
@@ -388,6 +390,26 @@ def create_mrtrix_tracking_flow(config):
             flow.connect([
                 (inputnode, mrtrix_tracking, [
                  ('wm_mask_resampled', 'seed_file')]),
+            ])
+
+        if config.sift2:
+
+            filter_tractogram = pe.Node(interface=FilterTractogram(), name='sift2_node')
+            filter_tractogram.inputs.out_file = 'streamlines_weights.txt'
+
+            flow.connect([
+                    (mrtrix_tracking, filter_tractogram, [('tracked', 'in_tracks')]),
+                    (inputnode, filter_tractogram, [('DWI', 'in_fod')])
+            ])
+
+            if config.use_act:
+                flow.connect([
+                        (inputnode, filter_tractogram, [
+                                ('act_5tt_registered', 'act_file')]),
+                ])
+
+            flow.connect([
+                    (filter_tractogram, outputnode, [('out_weights', 'sift2_weights')])
             ])
 
         # converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
@@ -472,6 +494,25 @@ def create_mrtrix_tracking_flow(config):
             flow.connect([
                 (inputnode, mrtrix_tracking, [
                  ('wm_mask_resampled', 'seed_file')]),
+            ])
+
+        if config.sift2:
+
+            filter_tractogram = pe.Node(interface=FilterTractogram(), name='sift2_node')
+            filter_tractogram.inputs.out_file = 'streamlines_weights.txt'
+
+            flow.connect([
+                    (mrtrix_tracking, filter_tractogram, [('tracked', 'in_tracks')]),
+                    (inputnode, filter_tractogram, [('DWI', 'in_fod')])
+            ])
+
+            if config.use_act:
+                flow.connect([
+                        (inputnode, filter_tractogram, [('act_5tt_registered', 'act_file')]),
+                ])
+
+            flow.connect([
+                    (filter_tractogram, outputnode, [('out_weights', 'sift2_weights')])
             ])
 
         flow.connect([

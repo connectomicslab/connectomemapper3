@@ -213,7 +213,7 @@ class DiffusionStage(Stage):
         self.config = DiffusionConfig()
         self.inputs = ["diffusion", "partial_volumes", "wm_mask_registered", "brain_mask_registered",
                        "act_5tt_registered", "gmwmi_registered", "roi_volumes", "grad", "bvals", "bvecs"]
-        self.outputs = ["diffusion_model", "track_file", "fod_file", "FA", "ADC", "RD", "AD", "skewness", "kurtosis",
+        self.outputs = ["diffusion_model", "track_file", "sift2_weights", "fod_file", "FA", "ADC", "RD", "AD", "skewness", "kurtosis",
                         "P0", "roi_volumes", "shore_maps", "mapmri_maps"]
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -420,9 +420,14 @@ class DiffusionStage(Stage):
                  ('outputnode.track_file', 'track_file')])
             ])
 
+            if self.config.mrtrix_tracking_config.sift2:
+                flow.connect([
+                        (track_flow, outputnode, [
+                                ('outputnode.sift2_weights', 'sift2_weights')])
+                ])
+
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'Dipy':
-            track_flow = create_mrtrix_tracking_flow(
-                self.config.mrtrix_tracking_config)
+            track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
             # print "MRtrix tracking"
 
             if self.config.diffusion_imaging_model != 'DSI':
@@ -471,6 +476,12 @@ class DiffusionStage(Stage):
                 (track_flow, outputnode, [
                  ('outputnode.track_file', 'track_file')])
             ])
+
+            if self.config.mrtrix_tracking_config.sift2:
+                flow.connect([
+                        (track_flow, outputnode, [
+                                ('outputnode.sift2_weights', 'sift2_weights')])
+                ])
 
         # elif self.config.tracking_processing_tool == 'Camino':
         #     track_flow = create_camino_tracking_flow(self.config.camino_tracking_config)

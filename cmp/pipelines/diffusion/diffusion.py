@@ -1085,6 +1085,12 @@ class DiffusionPipeline(Pipeline):
             self.stages['Connectome'].config.probtrackx = False
             self.stages['Connectome'].config.subject = self.global_conf.subject
             con_flow = self.create_stage_flow("Connectome")
+
+            if self.stages['Diffusion'].config.mrtrix_tracking_config.sift2:
+                diffusion_flow.connect([
+                    (diff_flow, con_flow, [('outputnode.sift2_weights', 'inputnode.fiber_weights')]),
+                ])
+
             diffusion_flow.connect([
                 (diffusion_inputnode, con_flow, [('parcellation_scheme', 'inputnode.parcellation_scheme'),
                                                  ('atlas_info',
