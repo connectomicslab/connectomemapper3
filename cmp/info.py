@@ -1,4 +1,4 @@
-""" This file contains cmp package information """
+"""This file contains cmp package information."""
 
 _version_major = 3
 _version_minor = 0

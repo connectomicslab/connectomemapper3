@@ -3,7 +3,13 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Connectome Mapper reports builder (based on fMRIprep v1.3.2 reports builder)
+"""Definitions of classes and functions for building Connectome Mapper reports
+
+Ongoing...
+
+References
+----------
+Based on fMRIprep v1.3.2 report builder.
 """
 
 try:
@@ -84,6 +90,12 @@ class Report(object):
         self.index(config['sections'])
 
     def index(self, config):
+        """
+
+        Parameters
+        ----------
+        config
+        """
         fig_dir = 'figures'
         subject_dir = self.root.split('/')[-1]
         subject = re.search(
@@ -210,6 +222,12 @@ class Report(object):
             self.errors.append(crash_info)
 
     def generate_report(self):
+        """
+
+        Returns
+        -------
+
+        """
         logs_path = self.out_dir / 'cmp' / 'logs'
 
         boilerplate = []
@@ -257,6 +275,16 @@ class Report(object):
 
 
 def order_by_run(subreport):
+    """
+
+    Parameters
+    ----------
+    subreport
+
+    Returns
+    -------
+
+    """
     ordered = []
     run_reps = {}
 
@@ -292,6 +320,16 @@ def order_by_run(subreport):
 
 
 def generate_name_title(filename):
+    """
+
+    Parameters
+    ----------
+    filename
+
+    Returns
+    -------
+
+    """
     fname = Path(filename).name
     expr = re.compile('^sub-(?P<subject_id>[a-zA-Z0-9]+)(_ses-(?P<session_id>[a-zA-Z0-9]+))?'
                       '(_task-(?P<task_id>[a-zA-Z0-9]+))?(_acq-(?P<acq_id>[a-zA-Z0-9]+))?'

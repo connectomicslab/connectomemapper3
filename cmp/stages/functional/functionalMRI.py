@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license ModifFied BSD.
 
-""" CMP second functional preprocessing stage
-"""
+"""Definition of config and stage classes for the extra functional preprocessing stage."""
 
 # General imports
 import os
@@ -20,10 +19,55 @@ from nipype.interfaces import afni
 
 # Own imports
 from cmp.stages.common import Stage
-from cmtklib.functionalMRI import Scrubbing, Detrending, nuisance_regression
+from cmtklib.functionalMRI import Scrubbing, Detrending, Nuisance_regression
 
 
 class FunctionalMRIConfig(HasTraits):
+    """Class used to store configuration parameters of a :class:`~cmp.stages.functional.functional.FunctionalMRIStage` object.
+
+    Attributes
+    ----------
+    global_nuisance : traits.Bool
+        Perform global nuisance regression
+        (Default: False)
+
+    csf : traits.Bool
+        Perform CSF nuisance regression
+        (Default: True)
+
+    wm : traits.Bool
+        Perform White-Matter nuisance regression
+        (Default: True)
+
+    motion : traits.Bool
+        Perform motion nuisance regression
+        (Default: True)
+
+    detrending = Bool
+        Perform detrending
+        (Default: True)
+
+    detrending_mode = Enum("linear", "quadratic")
+        Detrending mode
+        (Default: "Linear")
+
+    lowpass_filter = Float
+        Lowpass filter frequency
+        (Default: 0.01)
+
+    highpass_filter = Float
+        Highpass filter frequency
+        (Default: 0.1)
+
+    scrubbing = Bool
+        Perform scrubbing
+        (Default: True)
+
+    See Also
+    --------
+    cmp.stages.functional.functionalMRI.FunctionalMRIStage
+    """
+
     smoothing = Float(0.0)
     discard_n_volumes = Int(5)
     # Nuisance factors
@@ -42,8 +86,21 @@ class FunctionalMRIConfig(HasTraits):
 
 
 class FunctionalMRIStage(Stage):
+    """Class that represents the post-registration preprocessing stage of the `fMRIPipeline`.
+
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `FunctionalMRIStage`
+
+    See Also
+    --------
+    cmp.pipelines.functional.fMRI.fMRIPipeline
+    cmp.stages.functional.functionalMRI.FunctionalMRIConfig
+    """
 
     def __init__(self, bids_dir, output_dir):
+        """Constructor of a :class:`~cmp.stages.functional.functionalMRI.FunctionalMRIStage` instance."""
         self.name = 'functional_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
@@ -54,32 +111,19 @@ class FunctionalMRIStage(Stage):
         self.outputs = ["func_file", "FD", "DVARS"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """Create the stage worflow.
 
-        # smoothing_output = pe.Node(interface=util.IdentityInterface(fields=["smoothing_output"]),name="smoothing_output")
-        # if self.config.smoothing > 0.0:
-        #     smoothing = pe.Node(interface=fsl.SpatialFilter(operation='mean',kernel_shape = 'gauss'),name="smoothing")
-        #     smoothing.inputs.kernel_size = self.config.smoothing
-        #     flow.connect([
-        #                 (inputnode,smoothing,[("preproc_file","in_file")]),
-        #                 (smoothing,smoothing_output,[("out_file","smoothing_output")])
-        #                 ])
-        # else:
-        #     flow.connect([
-        #                 (inputnode,smoothing_output,[("preproc_file","smoothing_output")])
-        #                 ])
-        #
-        # discard_output = pe.Node(interface=util.IdentityInterface(fields=["discard_output"]),name="discard_output")
-        # if self.config.discard_n_volumes > 0:
-        #     discard = pe.Node(interface=discard_tp(n_discard=self.config.discard_n_volumes),name='discard_volumes')
-        #     flow.connect([
-        #                 (smoothing_output,discard,[("smoothing_output","in_file")]),
-        #                 (discard,discard_output,[("out_file","discard_output")])
-        #                 ])
-        # else:
-        #     flow.connect([
-        #                 (smoothing_output,discard_output,[("smoothing_output","discard_output")])
-        #                 ])
-        # scrubbing_output = pe.Node(interface=util.IdentityInterface(fields=["scrubbing_output"]),name="scrubbing_output")
+        Parameters
+        ----------
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the fMRI pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
+        """
         if self.config.scrubbing:
             scrubbing = pe.Node(interface=Scrubbing(), name='scrubbing')
             flow.connect([
@@ -114,7 +158,7 @@ class FunctionalMRIStage(Stage):
         nuisance_output = pe.Node(interface=util.IdentityInterface(
             fields=["nuisance_output"]), name="nuisance_output")
         if self.config.wm or self.config.global_nuisance or self.config.csf or self.config.motion:
-            nuisance = pe.Node(interface=nuisance_regression(),
+            nuisance = pe.Node(interface=Nuisance_regression(),
                                name="nuisance_regression")
             nuisance.inputs.global_nuisance = self.config.global_nuisance
             nuisance.inputs.csf_nuisance = self.config.csf
@@ -166,38 +210,15 @@ class FunctionalMRIStage(Stage):
                  ("nuisance_output", "filter_output")])
             ])
 
-        # OLD version using FSL
-        # filter_output = pe.Node(interface=util.IdentityInterface(fields=["filter_output"]),name="filter_output")
-        # if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
-        #     filtering = pe.Node(interface=fsl.TemporalFilter(),name='temporal_filter')
-        #     filtering.inputs.lowpass_sigma = self.config.lowpass_filter
-        #     filtering.inputs.highpass_sigma = self.config.highpass_filter
-        #     flow.connect([
-        #                 (detrending_output,filtering,[("detrending_output","in_file")]),
-        #                 (filtering,filter_output,[("out_file","filter_output")])
-        #                 ])
-        # else:
-        #     flow.connect([
-        #                 (detrending_output,filter_output,[("detrending_output","filter_output")])
-        #                 ])
-
-        # if self.config.scrubbing:
-        #     scrubbing = pe.Node(interface=Scrubbing(),name='scrubbing')
-        #     flow.connect([
-        #                 (filter_output,scrubbing,[("filter_output","in_file")]),
-        #                 (inputnode,scrubbing,[("registered_wm","wm_mask")]),
-        #                 (inputnode,scrubbing,[("registered_roi_volumes","gm_file")]),
-        #                 (inputnode,scrubbing,[("motion_par_file","motion_parameters")]),
-        #                 (scrubbing,outputnode,[("fd_npy","FD")]),
-        #                 (scrubbing,outputnode,[("dvars_npy","DVARS")])
-        #                 ])
-
         flow.connect([
             (filter_output, outputnode, [("filter_output", "func_file")])
         ])
 
     def define_inspect_outputs(self):
+        """Update the `inspect_outputs' class attribute.
 
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
+        """
         if self.config.wm or self.config.global_nuisance or self.config.csf or self.config.motion:
             res_dir = os.path.join(self.stage_dir, "nuisance_regression")
             nuis = os.path.join(res_dir, "fMRI_nuisance.nii.gz")
@@ -215,14 +236,23 @@ class FunctionalMRIStage(Stage):
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             res_dir = os.path.join(self.stage_dir, "converter")
             filt = os.path.join(res_dir, "fMRI_bandpass.nii.gz")
-            if (os.path.exists(filt)):
-                self.inspect_outputs_dict['Filter output'] = ['fsleyes', '-sdefault', filt, '-cm',
+            if os.path.exists(filt):
+                self.inspect_outputs_dict['Filter output'] = ['fsleyes',
+                                                              '-sdefault',
+                                                              filt,
+                                                              '-cm',
                                                               'brain_colours_blackbdy_iso']
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
 
     def has_run(self):
+        """Function that returns `True` if the stage has been run successfully.
+
+        Returns
+        -------
+        `True` if the stage has been run successfully
+        """
         if self.config.lowpass_filter > 0 or self.config.highpass_filter > 0:
             return os.path.exists(os.path.join(self.stage_dir, "temporal_filter", "result_temporal_filter.pklz"))
         elif self.config.detrending:

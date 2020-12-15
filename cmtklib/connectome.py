@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMTK Connectome functions
-"""
+"""Module that defines CMTK functions and Nipype interfaces for connectome mapping."""
 
 from os import path as op
 import csv
@@ -33,12 +32,12 @@ from .parcellation import get_parcellation
 
 
 def group_analysis_sconn(output_dir, subjects_to_be_analyzed):
-    """ Perform group level analysis of structural connectivity matrices """
+    """Perform group level analysis of structural connectivity matrices."""
     print("Perform group level analysis ...")
 
 
 def compute_curvature_array(fib):
-    """ Computes the curvature array """
+    """Computes the curvature array."""
     print("Compute curvature ...")
 
     n = len(fib)
@@ -56,12 +55,14 @@ def compute_curvature_array(fib):
 
 
 def create_endpoints_array(fib, voxelSize, print_info):
-    """ Create the endpoints arrays for each fiber
+    """Create the endpoints arrays for each fiber.
 
     Parameters
     ----------
     fib: the fibers data
-    voxelSize: 3-tuple containing the voxel size of the ROI image
+
+    voxelSize: 3-tuple
+        It contains the voxel size of the ROI image
 
     Returns
     -------
@@ -119,7 +120,22 @@ def create_endpoints_array(fib, voxelSize, print_info):
 
 
 def save_fibers(oldhdr, oldfib, fname, indices):
-    """ Stores a new trackvis file fname using only given indices """
+    """Stores a new trackvis file fname using only given indices.
+
+    Parameters
+    ----------
+    oldhdr : the tractogram header
+        Tractogram header to use as reference
+
+    oldfib : the fibers data
+        Input fibers
+
+    fname : string
+        Output tractogram filename
+
+    indices : list
+        Indices of fibers included
+    """
 
     hdrnew = oldhdr.copy()
 
@@ -136,7 +152,33 @@ def save_fibers(oldhdr, oldfib, fname, indices):
 
 def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvature=True, additional_maps={},
          output_types=['gPickle'], atlas_info={}):
-    """ Create the connection matrix for each resolution using fibers and ROIs. """
+    """Create the connection matrix for each resolution using fibers and ROIs.
+
+    Parameters
+    ----------
+    intrk : TRK file
+        Reconstructed tractogram
+
+    roi_volumes : list
+        List of parcellation files for a given parcellation scheme
+
+    roi_graphmls : list
+        List of graphmls files that describes parcellation nodes
+
+    parcellation_scheme : ['NativeFreesurfer','Lausanne2008','Lausanne2018']
+
+    compute_curvature : Boolean
+
+    additional_maps : dict
+        A dictionary of key/value for each additional map where the value
+        is the path to the map
+
+    output_types : ['gPickle','mat','graphml']
+
+    atlas_info : dict
+        Dictionary storing information such as path to files related to a
+        parcellation atlas / scheme.
+    """
 
     print("========================")
     print("> Creation of connectome maps")
@@ -681,35 +723,74 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     track_file = InputMultiPath(
         File(exists=True), desc='Tractography result', mandatory=True)
+
     roi_volumes = InputMultiPath(
         File(exists=True), desc='ROI volumes registered to diffusion space')
+
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer', 'Custom'],
+                                      desc="Parcellation scheme",
                                       usedefault=True)
-    roi_graphmls = InputMultiPath(
-        File(exists=True), desc='GraphML description of ROI volumes (Lausanne2018)')
+    roi_graphmls = InputMultiPath(File(exists=True),
+                                  desc='GraphML description of ROI volumes (Lausanne2018)')
+
     atlas_info = Dict(mandatory=False, desc="custom atlas information")
+
     compute_curvature = traits.Bool(
         True, desc='Compute curvature', usedefault=True)
+
     additional_maps = traits.List(
         File, desc='Additional calculated maps (ADC, gFA, ...)')
+
     output_types = traits.List(
         Str, desc='Output types of the connectivity matrices')
-    probtrackx = traits.Bool(False)
+
+    probtrackx = traits.Bool(False, desc="MUST be set to True if probtrackx was used (Not used anymore in CMP3)")
+
     voxel_connectivity = InputMultiPath(File(exists=True),
                                         desc="ProbtrackX connectivity matrices (# seed voxels x # target ROIs)")
 
 
 class CMTK_cmatOutputSpec(TraitedSpec):
-    endpoints_file = File()
-    endpoints_mm_file = File()
-    final_fiberslength_files = OutputMultiPath(File())
-    filtered_fiberslabel_files = OutputMultiPath(File())
-    final_fiberlabels_files = OutputMultiPath(File())
-    streamline_final_file = File()
-    connectivity_matrices = OutputMultiPath(File())
+    endpoints_file = File(desc="Numpy files storing the list of fiber endpoint")
+
+    endpoints_mm_file = File(desc="Numpy files storing the list of fiber endpoint in mm")
+
+    final_fiberslength_files = OutputMultiPath(File(),
+                                               desc="List of fiber length")
+
+    filtered_fiberslabel_files = OutputMultiPath(File(), desc="List of fiber start end ROI parcellation label after filtering")
+
+    final_fiberlabels_files = OutputMultiPath(File(), desc="List of fiber start end ROI parcellation label")
+
+    streamline_final_file = File(desc="Final tractogram of fibers considered in the creation of connectivity matrices")
+
+    connectivity_matrices = OutputMultiPath(File(), desc="Connectivity matrices")
 
 
 class CMTK_cmat(BaseInterface):
+    """Creates the structural connectivity matrices for a given parcellation scheme.
+
+    Examples
+    --------
+    >>> from cmtklib.connectome import CMTK_cmat
+    >>> cmat = CMTK_cmat()
+    >>> cmat.inputs.base_dir = '/my_directory'
+    >>> cmat.inputs.track_file = '/path/to/sub-01_tractogram.trk'
+    >>> cmat.inputs.roi_volumes = ['/path/to/sub-01_space-DWI_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-DWI_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-DWI_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-DWI_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-DWI_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> cmat.inputs.roi_graphmls = ['/path/to/sub-01_atlas-L2018_desc-scale1_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale2_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale3_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale4_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.graphml']
+    >>> cmat.inputs.parcellation scheme = 'Lausanne2018'
+    >>> cmat.inputs.output_types = ['gPickle','mat','graphml']
+    >>> cmat.run() # doctest: +SKIP
+    """
+
     input_spec = CMTK_cmatInputSpec
     output_spec = CMTK_cmatOutputSpec
 
@@ -766,36 +847,76 @@ class CMTK_cmat(BaseInterface):
 
 class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
     func_file = File(exists=True, mandatory=True, desc="fMRI volume")
-    roi_volumes = InputMultiPath(
-        File(exists=True), desc='ROI volumes registered to functional space')
+
+    roi_volumes = InputMultiPath(File(exists=True),
+                                 desc='ROI volumes registered to functional space')
+
     roi_graphmls = InputMultiPath(File(exists=True),
                                   desc='GraphML description file for ROI volumes (used only if parcellation_scheme == Lausanne2018)')
+
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer', 'Custom'],
+                                      desc="Parcellation scheme",
                                       usedefault=True)
+
     atlas_info = Dict(mandatory=False, desc="custom atlas information")
-    apply_scrubbing = Bool(False)
-    FD = File(exists=True)
-    FD_th = Float()
-    DVARS = File(exists=True)
-    DVARS_th = Float()
-    output_types = traits.List(
-        Str, desc='Output types of the connectivity matrices')
+
+    apply_scrubbing = Bool(False, desc="Apply scrubbing")
+
+    FD = File(exists=True, desc="FD file if scrubbing is performed")
+
+    FD_th = Float(desc="FD threshold")
+
+    DVARS = File(exists=True, desc="DVARS file if scrubbing is performed")
+
+    DVARS_th = Float(desc="DVARS threshold")
+
+    output_types = traits.List(Str,
+                               desc='Output types of the connectivity matrices')
 
 
 class rsfmri_conmat_OutputSpec(TraitedSpec):
-    avg_timeseries = OutputMultiPath(
-        File(exists=True), desc="ROI average timeseries")
-    scrubbed_idx = File(exists=True)
-    connectivity_matrices = OutputMultiPath(File(exists=True))
+    avg_timeseries = OutputMultiPath(File(exists=True),
+                                     desc="ROI average timeseries")
+
+    scrubbed_idx = File(exists=True,
+                        desc="Scrubbed indices")
+
+    connectivity_matrices = OutputMultiPath(File(exists=True),
+                                            desc="Functional connectivity matrices")
 
 
 class rsfmri_conmat(BaseInterface):
+    """Creates the functional connectivity matrices for a given parcellation scheme.
+
+    It applies scrubbing (if enabled), computes the average GM ROI time-series and computes
+    the Pearson's correlation coefficient between each GM ROI time-series poir.
+
+    Examples
+    --------
+    >>> from cmtklib.connectome import rsfmri_conmat
+    >>> cmat = rsfmri_conmat()
+    >>> cmat.inputs.base_dir = '/my_directory'
+    >>> cmat.inputs.func_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> cmat.inputs.roi_volumes = ['/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> cmat.inputs.roi_graphmls = ['/path/to/sub-01_atlas-L2018_desc-scale1_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale2_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale3_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale4_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.graphml']
+    >>> cmat.inputs.parcellation scheme = 'Lausanne2018'
+    >>> cmat.inputs.apply_scrubbing = False
+    >>> cmat.inputs.output_types = ['gPickle','mat','graphml']
+    >>> cmat.run() # doctest: +SKIP
+    """
+
     input_spec = rsfmri_conmat_InputSpec
     output_spec = rsfmri_conmat_OutputSpec
 
     def _run_interface(self, runtime):
-        """ compute the average signal for each GM ROI.
-        """
         print("Compute average rs-fMRI signal for each cortical ROI")
         print("====================================================")
 
@@ -1293,288 +1414,3 @@ class rsfmri_conmat(BaseInterface):
 #     ])
 
 #     conflow.run()
-
-
-# # CMP2
-# def prob_cmat(intrk, roi_volumes, parcellation_scheme, output_types=['gPickle'], atlas_info={}):
-#     print("Filling probabilistic connectivity matrices:")
-
-#     if parcellation_scheme != "Custom":
-#         resolutions = get_parcellation(parcellation_scheme)
-#     else:
-#         resolutions = atlas_info
-
-#     firstROIFile = roi_volumes[0]
-#     firstROI = nib.load(firstROIFile)
-#     roiVoxelSize = firstROI.get_header().get_zooms()
-
-#     for parkey, parval in resolutions.items():
-#         print("Resolution = " + parkey)
-
-#         # Open the corresponding ROI
-#         print("Open the corresponding ROI")
-#         for vol in roi_volumes:
-#             if parkey in vol:
-#                 roi_fname = vol
-#                 print roi_fname
-#         roi = nib.load(roi_fname)
-#         roiData = roi.get_data()
-
-#         # Create the matrix
-#         nROIs = parval['number_of_regions']
-#         print("Create the connection matrix (%s rois)" % nROIs)
-#         G = nx.Graph()
-
-#         # add node information from parcellation
-#         gp = nx.read_graphml(parval['node_information_graphml'])
-#         for u, d in gp.nodes(data=True):
-#             G.add_node(int(u))
-#             for key in d:
-#                 G.nodes[int(u)][key] = d[key]
-#             # compute a position for the node based on the mean position of the
-#             # ROI in voxel coordinates (segmentation volume )
-#             G.nodes[int(u)]['dn_position'] = tuple(np.mean(np.where(roiData == int(d["dn_correspondence_id"])), axis=1))
-
-#         graph_matrix = np.zeros((nROIs, nROIs), dtype=int)
-
-#         pc = -1
-
-#         for intrk_i in range(0, len(intrk)):
-#             pcN = int(round(float(100 * intrk_i) / len(intrk)))
-#             if pcN > pc and pcN % 20 == 0:
-#                 pc = pcN
-#                 print('%4.0f%%' % (pc))
-#             fib, hdr = nib.trackvis.read(intrk[intrk_i], False)
-#             (endpoints, endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
-#             n = len(fib)
-
-#             dis = 0
-
-#             pc = -1
-#             for i in range(n):  # n: number of fibers
-
-#                 # ROI start => ROI end
-#                 try:
-#                     startROI = int(roiData[endpoints[i, 0, 0], endpoints[i, 0, 1], endpoints[
-#                         i, 0, 2]])  # endpoints from create_endpoints_array
-#                     endROI = int(roiData[endpoints[i, 1, 0], endpoints[i, 1, 1], endpoints[i, 1, 2]])
-#                 except IndexError:
-#                     print(
-#                                 "An index error occured for fiber %s. This means that the fiber start or endpoint is outside the volume. Continue." % i)
-#                     continue
-
-#                 # Filter
-#                 if startROI == 0 or endROI == 0:
-#                     dis += 1
-#                     # fiberlabels[i,0] = -1
-#                     continue
-
-#                 if startROI > nROIs or endROI > nROIs:
-#                     #                print("Start or endpoint of fiber terminate in a voxel which is labeled higher")
-#                     #                print("than is expected by the parcellation node information.")
-#                     #                print("Start ROI: %i, End ROI: %i" % (startROI, endROI))
-#                     #                print("This needs bugfixing!")
-#                     continue
-
-#                 # Update fiber label
-#                 # switch the rois in order to enforce startROI < endROI
-#                 if endROI < startROI:
-#                     tmp = startROI
-#                     startROI = endROI
-#                     endROI = tmp
-
-#                 # Add edge to graph
-#                 if G.has_edge(startROI, endROI):
-#                     G[startROI][endROI]['n_tracks'] += 1
-#                 else:
-#                     G.add_edge(startROI, endROI, n_tracks=1)
-
-#                 graph_matrix[startROI - 1][endROI - 1] += 1
-
-#         tot_tracks = graph_matrix.sum()
-
-#         for u, v, d in G.edges(data=True):
-#             G.remove_edge(u, v)
-#             di = {'number_of_fibers': (float(d['n_tracks']) / tot_tracks.astype(float))}
-#             G.add_edge(u, v)
-#             for key in di:
-#                 G[u][v][key] = di[key]
-
-#         # storing network
-#         if 'gPickle' in output_types:
-#             nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
-#         if 'mat' in output_types:
-#             # edges
-#             size_edges = (parval['number_of_regions'], parval['number_of_regions'])
-#             edge_keys = G.edges(data=True)[0][2].keys()
-
-#             edge_struct = {}
-#             for edge_key in edge_keys:
-#                 edge_struct[edge_key] = nx.to_numpy_matrix(G, weight=edge_key)
-
-#             # nodes
-#             size_nodes = parval['number_of_regions']
-#             node_keys = G.nodes(data=True)[0][1].keys()
-
-#             node_struct = {}
-#             for node_key in node_keys:
-#                 if node_key == 'dn_position':
-#                     node_arr = np.zeros([size_nodes, 3], dtype=np.float)
-#                 else:
-#                     node_arr = np.zeros(size_nodes, dtype=np.object_)
-#                 node_n = 0
-#                 for _, node_data in G.nodes(data=True):
-#                     node_arr[node_n] = node_data[node_key]
-#                     node_n += 1
-#                 node_struct[node_key] = node_arr
-
-#             sio.savemat('connectome_%s.mat' % parkey, mdict={'sc': edge_struct, 'nodes': node_struct})
-#         if 'graphml' in output_types:
-#             g2 = nx.Graph()
-#             for u_gml, v_gml, d_gml in G.edges(data=True):
-#                 g2.add_edge(u_gml, v_gml)
-#                 for key in d_gml:
-#                     g2[u_gml][v_gml][key] = d_gml[key]
-#             for u_gml, d_gml in G.nodes(data=True):
-#                 g2.add_node(u_gml)
-#                 g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
-#                 g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
-#                 g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
-#                 g2.node[u_gml]['dn_name'] = d_gml['dn_name']
-#                 g2.node[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
-#                 g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
-#                 g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
-#                 g2.node[u_gml]['dn_region'] = d_gml['dn_region']
-#             nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
-
-
-# def probtrackx_cmat(voxel_connectivity_files, roi_volumes, parcellation_scheme, output_types=['gPickle'],
-#                     atlas_info={}):
-#     print("Filling probabilistic connectivity matrices:")
-
-#     if parcellation_scheme != "Custom":
-#         resolutions = get_parcellation(parcellation_scheme)
-#     else:
-#         resolutions = atlas_info
-
-#     # firstROIFile = roi_volumes[0]
-#     # firstROI = nib.load(firstROIFile)
-#     # roiVoxelSize = firstROI.get_header().get_zooms()
-
-#     for parkey, parval in resolutions.items():
-#         print("Resolution = " + parkey)
-
-#         # Open the corresponding ROI
-#         print("Open the corresponding ROI")
-#         for vol in roi_volumes:
-#             if parkey in vol:
-#                 roi_fname = vol
-#                 print roi_fname
-#         roi = nib.load(roi_fname)
-#         roiData = roi.get_data()
-
-#         # Create the matrix
-#         nROIs = parval['number_of_regions']
-#         print("Create the connection matrix (%s rois)" % nROIs)
-#         G = nx.Graph()
-
-#         # Match ROI indexes to matrix indexes
-#         ROI_idx = np.unique(roiData[roiData != 0]).astype('int32')
-
-#         # add node information from parcellation
-#         gp = nx.read_graphml(parval['node_information_graphml'])
-#         for u, d in gp.nodes(data=True):
-#             G.add_node(int(u))
-#             for key in d:
-#                 G.nodes[int(u)][key] = d[key]
-#             # compute a position for the node based on the mean position of the
-#             # ROI in voxel coordinates (segmentation volume )
-#             G.nodes[int(u)]['dn_position'] = tuple(np.mean(np.where(roiData == int(d["dn_correspondence_id"])), axis=1))
-
-#         tot_tracks = 0
-
-#         pc = -1
-
-#         for voxmat_i in range(0, len(voxel_connectivity_files)):
-#             pcN = int(round(float(100 * voxmat_i) / len(voxel_connectivity_files)))
-#             if pcN > pc and pcN % 20 == 0:
-#                 pc = pcN
-#                 print('%4.0f%%' % (pc))
-#             # fib, hdr    = nib.trackvis.read(voxel_connectivity[voxmat_i], False)
-#             # (endpoints,endpointsmm) = create_endpoints_array(fib, roiVoxelSize, False)
-#             # n = len(fib)
-
-#             startROI = int(ROI_idx[voxmat_i])
-
-#             voxmat = np.loadtxt(voxel_connectivity_files[voxmat_i]).astype('int32')
-#             if len(voxmat.shape) > 1:
-#                 ROImat = np.sum(voxmat, 0)
-#             else:
-#                 ROImat = voxmat
-
-#             for target in range(0, len(ROI_idx)):
-
-#                 endROI = int(ROI_idx[target])
-
-#                 if startROI != endROI:  # Excludes loops (connections within the same ROI)
-#                     # Add edge to graph
-#                     if G.has_edge(startROI, endROI):
-#                         G[startROI][endROI]['n_tracks'] += ROImat[target]
-#                     else:
-#                         G.add_edge(startROI, endROI, n_tracks=ROImat[target])
-
-#                     tot_tracks += ROImat[target]
-
-#         for u, v, d in G.edges(data=True):
-#             G.remove_edge(u, v)
-#             di = {'number_of_fibers': (float(d['n_tracks']) / tot_tracks.astype(float))}
-#             G.add_edge(u, v)
-#             for key in di:
-#                 G[u][v][key] = di[key]
-
-#         # storing network
-#         if 'gPickle' in output_types:
-#             nx.write_gpickle(G, 'connectome_%s.gpickle' % parkey)
-#         if 'mat' in output_types:
-#             # edges
-#             size_edges = (parval['number_of_regions'], parval['number_of_regions'])
-#             edge_keys = G.edges(data=True)[0][2].keys()
-
-#             edge_struct = {}
-#             for edge_key in edge_keys:
-#                 edge_struct[edge_key] = nx.to_numpy_matrix(G, weight=edge_key)
-
-#             # nodes
-#             size_nodes = parval['number_of_regions']
-#             node_keys = G.nodes(data=True)[0][1].keys()
-
-#             node_struct = {}
-#             for node_key in node_keys:
-#                 if node_key == 'dn_position':
-#                     node_arr = np.zeros([size_nodes, 3], dtype=np.float)
-#                 else:
-#                     node_arr = np.zeros(size_nodes, dtype=np.object_)
-#                 node_n = 0
-#                 for _, node_data in G.nodes(data=True):
-#                     node_arr[node_n] = node_data[node_key]
-#                     node_n += 1
-#                 node_struct[node_key] = node_arr
-
-#             sio.savemat('connectome_%s.mat' % parkey, mdict={'sc': edge_struct, 'nodes': node_struct})
-#         if 'graphml' in output_types:
-#             g2 = nx.Graph()
-#             for u_gml, v_gml, d_gml in G.edges(data=True):
-#                 g2.add_edge(u_gml, v_gml)
-#                 for key in d_gml:
-#                     g2[u_gml][v_gml][key] = d_gml[key]
-#             for u_gml, d_gml in G.nodes(data=True):
-#                 g2.add_node(u_gml)
-#                 g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
-#                 g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
-#                 g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
-#                 g2.node[u_gml]['dn_name'] = d_gml['dn_name']
-#                 g2.node[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
-#                 g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
-#                 g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
-#                 g2.node[u_gml]['dn_region'] = d_gml['dn_region']
-#             nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)

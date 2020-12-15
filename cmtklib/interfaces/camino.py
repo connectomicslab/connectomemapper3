@@ -3,14 +3,17 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" The Camino module provides functions for interfacing with Camino functions missing in nipype or modified
+"""The Camino module provides Nipype interfaces for Camino functions missing in nipype or modified.
+
+.. note:
+    Module not used anymore by CMP3.
 """
 
+import os
 from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
                                     TraitedSpec, File, StdOutCommandLine,
                                     StdOutCommandLineInputSpec, InputMultiPath)
 from nipype.utils.filemanip import split_filename
-import os
 
 
 class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
@@ -65,8 +68,7 @@ class DTLUTGenOutputSpec(TraitedSpec):
 
 
 class DTLUTGen(StdOutCommandLine):
-    """
-    Calibrates the PDFs for PICo probabilistic tractography.
+    """Calibrates the PDFs for PICo probabilistic tractography.
 
     This program needs to be run once for every acquisition scheme.
     It outputs a lookup table that is used by the dtpicoparams program to find PICo PDF parameters for an image.
@@ -79,13 +81,13 @@ class DTLUTGen(StdOutCommandLine):
 
     Example
     -------
-
-    >>> import nipype.interfaces.camino as cmon
+    >>> import cmtklib.interfaces.camino as cmon
     >>> dtl = cmon.DTLUTGen()
     >>> dtl.inputs.snr = 16
     >>> dtl.inputs.scheme_file = 'A.scheme'
     >>> dtl.run()                  # doctest: +SKIP
     """
+
     _cmd = 'dtlutgen'
     input_spec = DTLUTGenInputSpec
     output_spec = DTLUTGenOutputSpec
@@ -150,19 +152,18 @@ class PicoPDFsOutputSpec(TraitedSpec):
 
 
 class PicoPDFs(StdOutCommandLine):
-    """
-    Constructs a spherical PDF in each voxel for probabilistic tractography.
+    """Constructs a spherical PDF in each voxel for probabilistic tractography.
 
     Example
     -------
-
-    >>> import nipype.interfaces.camino as cmon
+    >>> import cmtklib.interfaces.camino as cmon
     >>> pdf = cmon.PicoPDFs()
     >>> pdf.inputs.inputmodel = 'dt'
     >>> pdf.inputs.luts = 'lut_file'
     >>> pdf.inputs.in_file = 'voxel-order_data.Bfloat'
     >>> pdf.run()                  # doctest: +SKIP
     """
+
     _cmd = 'picopdfs'
     input_spec = PicoPDFsInputSpec
     output_spec = PicoPDFsOutputSpec
@@ -199,19 +200,18 @@ class Voxel2ImageOutputSpec(TraitedSpec):
 
 
 class Voxel2Image(StdOutCommandLine):
-    """
-    Converts voxel order image to NIFTI / MHA files.
+    """Converts voxel order image to NIFTI / MHA files.
 
     Converts voxel-order data to scanner-order data in a supported image format.
 
     Examples
     --------
-
-    >>> import nipype.interfaces.camino as cmon
+    >>> import cmtklib.interfaces.camino as cmon
     >>> vox2img = cmon.Voxel2Image()
     >>> vox2img.inputs.in_file = 'fa.img'
     >>> vox2img.run()                  # doctest: +SKIP
     """
+
     _cmd = 'voxel2image'
     input_spec = Voxel2ImageInputSpec
     output_spec = Voxel2ImageOutputSpec

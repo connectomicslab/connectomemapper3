@@ -3,12 +3,15 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Provides interfaces for functions provided by Camino-Tackvis missing in nipype or modified
+"""Provides interfaces for functions provided by Camino-Tackvis missing in nipype or modified.
+
+.. note:
+    Module not used anymore by CMP3.
 """
 
+import os
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from nipype.utils.filemanip import split_filename
-import os
 
 
 class Camino2TrackvisInputSpec(CommandLineInputSpec):
@@ -52,14 +55,13 @@ class Camino2TrackvisOutputSpec(TraitedSpec):
 
 
 class Camino2Trackvis(CommandLine):
-    """ Wraps camino_to_trackvis from Camino-Trackvis
+    """Wraps camino_to_trackvis from Camino-Trackvis.
 
     Convert files from camino .Bfloat format to trackvis .trk format.
 
     Example
     -------
-
-    >>> import nipype.interfaces.camino2trackvis as cam2trk
+    >>> import cmtklib.interfaces.camino2trackvis as cam2trk
     >>> c2t = cam2trk.Camino2Trackvis()
     >>> c2t.inputs.in_file = 'data.Bfloat'
     >>> c2t.inputs.out_file = 'streamlines.trk'
