@@ -1,3 +1,7 @@
+*****************
+API Documentation
+*****************
+
 ===========
 cmp package
 ===========
@@ -18,11 +22,29 @@ Submodules
 
 Pipelines and stages modules
 ----------------------------
+.. toctree::
+   :maxdepth: 5
+
+   api/generated/cmp.pipelines.common
 
 .. toctree::
    :maxdepth: 5
 
-   api/generated/cmp.pipelines
+   api/generated/cmp.pipelines.anatomical
+
+.. toctree::
+   :maxdepth: 5
+
+   api/generated/cmp.pipelines.diffusion
+
+.. toctree::
+   :maxdepth: 5
+
+   api/generated/cmp.pipelines.functional
+
+.. toctree::
+   :maxdepth: 5
+
    api/generated/cmp.stages
 
 GUI modules
@@ -34,8 +56,32 @@ GUI modules
    api/generated/cmp.bidsappmanager.core
    api/generated/cmp.bidsappmanager.gui
    api/generated/cmp.bidsappmanager.project
-   api/generated/cmp.bidsappmanager.pipelines
+
+.. toctree::
+   :maxdepth: 5
+
+   api/generated/cmp.bidsappmanager.pipelines.common
+
+.. toctree::
+   :maxdepth: 5
+
+   api/generated/cmp.bidsappmanager.pipelines.anatomical
+
+.. toctree::
+   :maxdepth: 5
+
+   api/generated/cmp.bidsappmanager.pipelines.diffusion
+
+.. toctree::
+   :maxdepth: 5
+
+   api/generated/cmp.bidsappmanager.pipelines.functional
+
+.. toctree::
+   :maxdepth: 5
+
    api/generated/cmp.bidsappmanager.stages
+
 
 ===============
 cmtklib package
@@ -50,7 +96,7 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 5
 
    api/generated/cmtklib.bids
    api/generated/cmtklib.interfaces
