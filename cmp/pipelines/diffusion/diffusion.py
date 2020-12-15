@@ -4,33 +4,50 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Diffusion pipeline Class definition
-"""
+"""Diffusion pipeline Class definition."""
 
-import os
-import shutil
+# Own imports
 import datetime
+import shutil
 
-from traits.api import *
-
-import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
-from nipype.interfaces.utility import Merge
-from nipype import config, logging
-
-# import nibabel as nib
-
-from cmp.pipelines.common import *
-
-from cmp.stages.preprocessing.preprocessing import PreprocessingStage
-from cmp.stages.diffusion.diffusion import DiffusionStage
-from cmp.stages.registration.registration import RegistrationStage
-from cmp.stages.connectome.connectome import ConnectomeStage
-
 from bids import BIDSLayout
+from nipype import config, logging
+from nipype.interfaces.utility import Merge
+
+# Own imports
+from cmp.pipelines.common import *
+from cmp.stages.connectome.connectome import ConnectomeStage
+from cmp.stages.diffusion.diffusion import DiffusionStage
+from cmp.stages.preprocessing.preprocessing import PreprocessingStage
+from cmp.stages.registration.registration import RegistrationStage
 
 
 class Global_Configuration(HasTraits):
+    """Global pipeline configurations.
+
+    Attributes
+    ----------
+    process_type: 'fMRI'
+        Processing pipeline type
+
+    subjects : traits.List
+       List of subjects ID (in the form ``sub-XX``)
+
+    subject : traits.Str
+       Subject to be processed (in the form ``sub-XX``)
+
+    subject_session : traits.Str
+       Subject session to be processed (in the form ``ses-YY``)
+
+    modalities : traits.List
+       List of available diffusion modalities red from
+       the ``acq-<modality>`` filename keyword
+
+    dmri_bids_acq : traits.Str
+       Diffusion modality to be processed
+    """
+
     process_type = Str('diffusion')
     diffusion_imaging_model = Str
     subjects = List(trait=Str)
@@ -49,6 +66,24 @@ class Check_Input_Notification(HasTraits):
 
 
 class DiffusionPipeline(Pipeline):
+    """Class that extends a :class:`Pipeline` and represents the processing pipeline for diffusion MRI.
+
+    It is composed of the preprocessing stage that preprocesses dMRI,
+    the registration stage that co-registers T1w to the diffusion B0 and
+    projects the parcellations to the native diffusion space, the diffusion
+    stage that estimates tensors or fiber orientation distributions functions
+    from the diffusion signal and reconstructs fiber using tractography, and
+    finally the connectome stage that combines the output tractogram with
+    the parcellations to create the structural connectivity matrices.
+
+    See Also
+    --------
+    cmp.stages.preprocessing.preprocessing.PreprocessingStage
+    cmp.stages.registration.registration.RegistrationStage
+    cmp.stages.diffusion.diffusion.DiffusionStage
+    cmp.stages.connectome.connectome.ConnectomeStage
+    """
+
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("diffusion_pipeline")
     # input_folders = ['DSI','DTI','HARDI','T1','T2']
@@ -71,6 +106,17 @@ class DiffusionPipeline(Pipeline):
     # anat_flow = Instance(pe.Workflow)
 
     def __init__(self, project_info):
+        """Constructor of a `DiffusionPipeline` object.
+
+        Parameters
+        ----------
+        project_info: cmp.project.CMP_Project_Info
+            Instance of `CMP_Project_Info` object.
+
+        See Also
+        --------
+        cmp.project.CMP_Project_Info
+        """
         print('{}'.format(project_info.base_directory))
 
         self.global_conf.subjects = project_info.subjects
@@ -78,15 +124,14 @@ class DiffusionPipeline(Pipeline):
 
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
-            self.subject_directory = os.path.join(
-               project_info.base_directory, project_info.subject, project_info.subject_session)
+            self.subject_directory = os.path.join(project_info.base_directory,
+                                                  project_info.subject,
+                                                  project_info.subject_session)
         else:
             self.global_conf.subject_session = ''
-            self.subject_directory = os.path.join(
-                project_info.base_directory, project_info.subject)
+            self.subject_directory = os.path.join(project_info.base_directory, project_info.subject)
 
-        self.derivatives_directory = os.path.abspath(
-            project_info.output_directory)
+        self.derivatives_directory = os.path.abspath(project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
 
         self.stages = {
@@ -109,48 +154,104 @@ class DiffusionPipeline(Pipeline):
         self.diffusion_imaging_model = project_info.diffusion_imaging_model
         # self.stages['Connectome'].config.subject = self.subject
 
-        self.stages['Connectome'].config.on_trait_change(
-            self.update_vizualization_layout, 'circular_layout')
-        self.stages['Connectome'].config.on_trait_change(
-            self.update_vizualization_logscale, 'log_visualization')
-        self.stages['Diffusion'].config.on_trait_change(
-            self.update_outputs_recon, 'recon_processing_tool')
-        self.stages['Diffusion'].config.on_trait_change(
-            self.update_outputs_tracking, 'tracking_processing_tool')
+        self.stages['Connectome'].config.on_trait_change(self.update_vizualization_layout, 'circular_layout')
+        self.stages['Connectome'].config.on_trait_change(self.update_vizualization_logscale, 'log_visualization')
+        self.stages['Diffusion'].config.on_trait_change(self.update_outputs_recon, 'recon_processing_tool')
+        self.stages['Diffusion'].config.on_trait_change(self.update_outputs_tracking, 'tracking_processing_tool')
         # self.anat_flow = anat_flow
 
     def update_outputs_recon(self, new):
+        """Update list of of outputs of the diffusion stage when ``recon_processing_tool`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value.
+        """
         self.stages['Diffusion'].define_inspect_outputs()
 
     def update_outputs_tracking(self, new):
+        """Update list of of outputs of the diffusion stage when ``tracking_processing_tool`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value.
+        """
         self.stages['Diffusion'].define_inspect_outputs()
 
     def update_vizualization_layout(self, new):
+        """Update list of of outputs of the connectome stage when ``circular_layout`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value.
+        """
         self.stages['Connectome'].define_inspect_outputs()
         self.stages['Connectome'].config.subject = self.subject
 
     def update_vizualization_logscale(self, new):
+        """Update list of of outputs of the connectome stage when ``log_visualization`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value.
+        """
         self.stages['Connectome'].define_inspect_outputs()
         self.stages['Connectome'].config.subject = self.subject
 
     def _subject_changed(self, new):
+        """Update subject in the connectome stage configuration when ``subject`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value.
+        """
         self.stages['Connectome'].config.subject = new
 
     def _diffusion_imaging_model_changed(self, new):
+        """Update ``self.stages['Diffusion'].config.diffusion_imaging_model`` when ``diffusion_imaging_model`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value.
+        """
         # print "diffusion model changed"
         self.stages['Diffusion'].config.diffusion_imaging_model = new
 
     def check_config(self):
+        """Check if the list output formats in the configuration of the connectome stage is not empty.
+
+        Returns
+        -------
+        message : string
+            String that is empty if success, otherwise it contains the error message
+        """
+        message = ''
         # if self.stages['MRTrixConnectome'].config.output_types == []:
         #     return('\n\tNo output type selected for the connectivity matrices.\t\n\t'
         #            'Please select at least one output type in the connectome configuration window.\t\n')
         if self.stages['Connectome'].config.output_types == []:
-            return (
+            message = (
                 '\n\tNo output type selected for the connectivity matrices.\t\n\t'
                 'Please select at least one output type in the connectome configuration window.\t\n')
-        return ''
+        return message
 
     def define_custom_mapping(self, custom_last_stage):
+        """Define the pipeline to be executed until a specific stages.
+
+        Not used yet by CMP3.
+
+        Parameters
+        ----------
+        custom_last_stage : string
+            Last stage to execute. Valid values are: "Preprocessing",
+            "Registration", "Diffusion" and "Connectome".
+        """
         # start by disabling all stages
         for stage in self.ordered_stage_list:
             self.stages[stage].enabled = False
@@ -167,6 +268,24 @@ class DiffusionPipeline(Pipeline):
         # print new
 
     def check_input(self, layout, gui=True):
+        """Check if input of the diffusion pipeline are available.
+
+        Parameters
+        ----------
+        layout : bids.BIDSLayout
+            Instance of BIDSLayout
+
+        gui : traits.Bool
+            Boolean used to display different messages
+            but not really meaningful anymore since the GUI
+            components have been migrated to `cmp.bidsappmanager`
+
+        Returns
+        -------
+
+        valid_inputs : traits.Bool
+            True if inputs are available
+        """
         print('**** Check Inputs  ****')
         diffusion_available = False
         diffusion_json_available = False
@@ -459,7 +578,23 @@ class DiffusionPipeline(Pipeline):
         return valid_inputs
 
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
+        """Create the pipeline workflow.
 
+        Parameters
+        ----------
+        cmp_deriv_subject_directory <Directory>
+            Main CMP output directory of a subject
+            e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
+
+        nipype_deriv_subject_directory <Directory>
+            Intermediate Nipype output directory of a subject
+            e.g. ``/output_dir/nipype/sub-XX/(ses-YY)``
+
+        Returns
+        -------
+        diffusion_flow <nipype.pipeline.engine.Workflow>
+            An instance of :class:`nipype.pipeline.engine.Workflow`
+        """
         acquisition_model = self.stages['Diffusion'].config.diffusion_imaging_model
         recon_tool = self.stages['Diffusion'].config.recon_processing_tool
 
@@ -918,6 +1053,18 @@ class DiffusionPipeline(Pipeline):
             interface=Merge(5), name='merge_roi_graphmls')
 
         def remove_non_existing_scales(roi_volumes):
+            """Returns a list which do not contained any empty element.
+
+            Parameters
+            ----------
+            roi_volumes
+                A list of output parcellations that might contain empty element
+                in the case of the monoscale Desikan scheme for instance
+
+            Returns
+            -------
+                The list with no empty element
+            """
             out_roi_volumes = []
             for vol in roi_volumes:
                 if vol is not None:
@@ -1144,6 +1291,7 @@ class DiffusionPipeline(Pipeline):
         return diffusion_flow
 
     def process(self):
+        """Executes the pipeline workflow and returns True if successful."""
         # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 

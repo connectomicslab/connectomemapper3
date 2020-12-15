@@ -4,14 +4,11 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMTK Parcellation functions
-"""
+"""Module that defines CMTK utility functions and Nipype interfaces for anatomical parcellation."""
 
 # Common libraries import
 import os
-import sys
-from time import time, localtime, strftime
-import re
+from time import localtime, strftime
 import os.path as op
 import pkg_resources
 import subprocess
@@ -38,37 +35,64 @@ iflogger = logging.getLogger('nipype.interface')
 
 
 class ComputeParcellationRoiVolumesInputSpec(BaseInterfaceInputSpec):
-    """
-    This is a class for the definition of inputs of the ComputeParcellationRoiVolumes nipype interface.
+    """This is a class for the definition of inputs of the `ComputeParcellationRoiVolumes` Nipype interface.
 
-    Attributes:
-        roi_volumes (files): ROI volumes registered to diffusion space
-        parcellation_scheme (files): Parcellation scheme being used (only Lausanne2018)
-        roi_graphMLs (files): GraphML description of ROI volumes (Lausanne2018)
+    Attributes
+    ----------
+    roi_volumes (files): list
+        ROI volumes registered to diffusion space
+
+    parcellation_scheme (files): list
+        Parcellation scheme being used (only Lausanne2018)
+
+    roi_graphMLs (files): list
+        GraphML description of ROI volumes (Lausanne2018)
     """
     roi_volumes = InputMultiPath(File(
         exists=True), desc='ROI volumes registered to diffusion space', mandatory=True)
+
     parcellation_scheme = traits.Enum(
-        'Lausanne2018', ['NativeFreesurfer','Lausanne2008','Lausanne2018'], usedefault=True, mandatory=True)
-    roi_graphMLs = InputMultiPath(File(exists=True), desc='GraphML description of ROI volumes (Lausanne2018)',
+            'Lausanne2018',
+            ['NativeFreesurfer','Lausanne2008','Lausanne2018'],
+            usedefault=True, mandatory=True,
+            desc="Parcellation scheme")
+
+    roi_graphMLs = InputMultiPath(File(exists=True),
+                                  desc='GraphML description of ROI volumes (Lausanne2018)',
                                   mandatory=True)
 
 
 class ComputeParcellationRoiVolumesOutputSpec(TraitedSpec):
-    """
-    This is a class for the definition of outputs of the ComputeParcellationRoiVolumes nipype interface.
+    """This is a class for the definition of outputs of the `ComputeParcellationRoiVolumes` Nipype interface.
 
-    Attributes:
-        roi_volumes_stats (files): TSV files with volumes of ROIs for each scale
+    Attributes
+    ----------
+    roi_volumes_stats (files): list
+        TSV files with volumes of ROIs for each scale
     """
-    roi_volumes_stats = OutputMultiPath(File())
+    roi_volumes_stats = OutputMultiPath(File(), desc="TSV files with computed parcellation ROI volumes")
 
 
 class ComputeParcellationRoiVolumes(BaseInterface):
+    """Computes the volumes of each ROI for each parcellation scale.
+
+    Examples
+    --------
+    >>> compute_vol = ComputeParcellationRoiVolumes()
+    >>> compute_vol.inputs.roi_volumes = ['/path/to/sub-01_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                                   '/path/to/sub-01_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                                   '/path/to/sub-01_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                                   '/path/to/sub-01_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                                   '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> compute_vol.inputs.roi_graphmls = ['/path/to/sub-01_atlas-L2018_desc-scale1_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale2_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale3_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale4_dseg.graphml',
+    >>>                             '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.graphml']
+    >>> compute_vol.inputs.parcellation_scheme = ['Lausanne2018']
+    >>> compute_vol.run() # doctest: +SKIP
     """
-    This is a class for the definition of the ComputeParcellationRoiVolumes nipype interface.
-    It computes the volumes of each ROI for each parcellation scale.
-    """
+
     input_spec = ComputeParcellationRoiVolumesInputSpec
     output_spec = ComputeParcellationRoiVolumesOutputSpec
 
@@ -181,7 +205,16 @@ class ComputeParcellationRoiVolumes(BaseInterface):
 
 
 def erode_mask(fsdir, maskFile):
-    """ Erodes the mask """
+    """Erodes the mask and saves it the Freesurfer subject directory.
+
+    Parameters
+    ----------
+    fsdir : string
+        Freesurfer subject directory
+
+    maskFile : string
+        Path to mask file
+    """
     # Define erosion mask
     imerode = nd.binary_erosion
     se = np.zeros((3, 3, 3))
@@ -214,14 +247,23 @@ def erode_mask(fsdir, maskFile):
 
 
 class Erode_inputspec(BaseInterfaceInputSpec):
-    in_file = File(exists=True)
+    in_file = File(exists=True, desc="Input mask to erode")
 
 
 class Erode_outputspec(TraitedSpec):
-    out_file = File(exists=True)
+    out_file = File(exists=True, desc="Eroded mask")
 
 
 class Erode(BaseInterface):
+    """Erodes a mask.
+
+    Examples
+    --------
+    >>> erode = Erode()
+    >>> erode.inputs.in_file = '/path/to/sub-01_desc-brain_mask.nii.gz'
+    >>> erode.run() # doctest: +SKIP
+    """
+
     input_spec = Erode_inputspec
     output_spec = Erode_outputspec
 
@@ -238,16 +280,32 @@ class Erode(BaseInterface):
 
 class ParcellateHippocampalSubfieldsInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
+
     subject_id = traits.Str(mandatory=True, desc='Subject ID')
 
 
 class ParcellateHippocampalSubfieldsOutputSpec(TraitedSpec):
     lh_hipposubfields = File(desc='Left hemisphere hippocampal subfields file')
+
     rh_hipposubfields = File(
         desc='Right hemisphere hippocampal subfields  file')
 
 
 class ParcellateHippocampalSubfields(BaseInterface):
+    """Parcellates the hippocampal subfields using Freesurfer [Iglesias2015Hippo]_.
+
+    References
+    ----------
+    .. [Iglesias2015Hippo] Iglesias et al., Neuroimage, 115, July 2015, 117-137. <http://www.nmr.mgh.harvard.edu/~iglesias/pdf/subfieldsNeuroimage2015preprint.pdf>
+
+    Examples
+    --------
+    >>> parc_hippo = ParcellateHippocampalSubfields()
+    >>> parc_hippo.inputs.subjects_dir = '/path/to/derivatives/freesurfer'
+    >>> parc_hippo.inputs.subject_id = 'sub-01'
+    >>> parc_hippo.run() # doctest: +SKIP
+    """
+
     input_spec = ParcellateHippocampalSubfieldsInputSpec
     output_spec = ParcellateHippocampalSubfieldsOutputSpec
 
@@ -328,6 +386,7 @@ class ParcellateHippocampalSubfields(BaseInterface):
 
 class ParcellateBrainstemStructuresInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
+
     subject_id = traits.String(mandatory=True, desc='Subject ID')
 
 
@@ -336,6 +395,20 @@ class ParcellateBrainstemStructuresOutputSpec(TraitedSpec):
 
 
 class ParcellateBrainstemStructures(BaseInterface):
+    """Parcellates the brainstem sub-structures using Freesurfer [Iglesias2015Brainstem]_.
+
+    References
+    ----------
+    .. [Iglesias2015Brainstem] Iglesias et al., NeuroImage, 113, June 2015, 184-195. <http://www.nmr.mgh.harvard.edu/~iglesias/pdf/Neuroimage_2015_brainstem.pdf>
+
+    Examples
+    --------
+    >>> parc_bstem = ParcellateBrainstemStructures()
+    >>> parc_bstem.inputs.subjects_dir = '/path/to/derivatives/freesurfer'
+    >>> parc_bstem.inputs.subject_id = 'sub-01'
+    >>> parc_bstem.run() # doctest: +SKIP
+    """
+
     input_spec = ParcellateBrainstemStructuresInputSpec
     output_spec = ParcellateBrainstemStructuresOutputSpec
 
@@ -383,27 +456,69 @@ class ParcellateBrainstemStructures(BaseInterface):
 
 
 class CombineParcellationsInputSpec(BaseInterfaceInputSpec):
-    input_rois = InputMultiPath(File(exists=True))
-    lh_hippocampal_subfields = File(' ')
-    rh_hippocampal_subfields = File(' ')
-    brainstem_structures = File(' ')
-    thalamus_nuclei = File(' ')
-    create_colorLUT = traits.Bool(True)
-    create_graphml = traits.Bool(True)
+    input_rois = InputMultiPath(File(exists=True), desc="Input parcellation files")
+
+    lh_hippocampal_subfields = File(' ', desc="Input hippocampal subfields file for left hemisphere")
+
+    rh_hippocampal_subfields = File(' ', desc="Input hippocampal subfields file for right hemisphere")
+
+    brainstem_structures = File(' ', desc="Brainstem segmentation file")
+
+    thalamus_nuclei = File(' ', desc="Thalamic nuclei segmentation file")
+
+    create_colorLUT = traits.Bool(True, desc="If `True`, create the color lookup table in Freesurfer format")
+
+    create_graphml = traits.Bool(True, desc="If `True`, create the parcellation node description files in `graphml` format")
+
     subjects_dir = Directory(desc='Freesurfer subjects dir')
+
     subject_id = traits.Str(desc='Freesurfer subject id')
+
     verbose_level = traits.Enum(
         1, 2, desc='verbose level (1: partial (default) / 2: full)')
 
 
 class CombineParcellationsOutputSpec(TraitedSpec):
-    aparc_aseg = File()
-    output_rois = OutputMultiPath(File(exists=True))
-    colorLUT_files = OutputMultiPath(File(exists=True))
-    graphML_files = OutputMultiPath(File(exists=True))
+    aparc_aseg = File(desc="Modified Freesurfer aparc+aseg file")
+
+    output_rois = OutputMultiPath(File(exists=True), desc="Output parcellation with all structures combined")
+
+    colorLUT_files = OutputMultiPath(File(exists=True), desc="Color lookup table files in Freesurfer format")
+
+    graphML_files = OutputMultiPath(File(exists=True), desc="Parcellation node description files in `graphml` format")
 
 
 class CombineParcellations(BaseInterface):
+    """Creates the final parcellation.
+
+    It combines the original cortico sub-cortical parcellation with
+    the following extra segmented structures:
+    * Segmentation of the 8 thalamic nuclei per hemisphere
+    * Segmentation of 14 hippocampal subfields per hemisphere
+    * Segmentation of 3 brainstem sub-structures
+
+    It also generates by defaults the corresponding (1) description of the nodes in `graphml`
+    format and (2) color lookup tables in FreeSurfer format that can be displayed in `freeview`.
+
+    Examples
+    --------
+    >>> parc_combine = CombineParcellations()
+    >>> parc_combine.inputs.input_rois = ['/path/to/sub-01_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                                  '/path/to/sub-01_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                                  '/path/to/sub-01_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                                  '/path/to/sub-01_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                                  '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> parc_combine.inputs.lh_hippocampal_subfields = '/path/to/lh_hippocampal_subfields.nii.gz'
+    >>> parc_combine.inputs.rh_hippocampal_subfields = '/path/to/rh_hippocampal_subfields.nii.gz'
+    >>> parc_combine.inputs.brainstem_structures = '/path/to/brainstem_structures.nii.gz'
+    >>> parc_combine.inputs.thalamus_nuclei = '/path/to/thalamus_nuclei.nii.gz'
+    >>> parc_combine.inputs.create_colorLUT = True
+    >>> parc_combine.inputs.create_graphml = True
+    >>> parc_combine.inputs.subjects_dir = '/path/to/output_dir/freesurfer')
+    >>> parc_combine.inputs.subject_id = 'sub-01'
+    >>> parc_combine.run() # doctest: +SKIP
+    """
+
     input_spec = CombineParcellationsInputSpec
     output_spec = CombineParcellationsOutputSpec
 
@@ -1568,29 +1683,63 @@ class CombineParcellations(BaseInterface):
 
 class ParcellateThalamusInputSpec(BaseInterfaceInputSpec):
     T1w_image = File(mandatory=True, desc='T1w image to be parcellated')
+
     bids_dir = Directory(desc='BIDS root directory')
+
     subject = traits.Str(desc='Subject id')
+
     session = traits.Str('', desc='Session id')
+
     template_image = File(mandatory=True, desc='Template T1w')
+
     thalamic_nuclei_maps = File(
         mandatory=True, desc='Probability maps of thalamic nuclei (4D image) in template space')
+
     subjects_dir = Directory(mandatory=True, desc='Freesurfer main directory')
+
     subject_id = traits.String(mandatory=True, desc='Subject ID')
-    ants_precision_type = traits.Enum(['double', 'float'])
+
+    ants_precision_type = traits.Enum(['double', 'float'], desc="Precision type used during computation")
 
 
 class ParcellateThalamusOutputSpec(TraitedSpec):
     warped_image = File(desc='Template registered to T1w image (native)')
+
     inverse_warped_image = File(desc='Inverse warped template')
+
     max_prob_registered = File(desc='Max probability label image (native)')
+
     prob_maps_registered = File(
         desc='Probabilistic map of thalamus nuclei (native)')
+
     transform_file = File(desc='Transform file')
+
     warp_file = File(desc='Deformation file')
+
     thalamus_mask = File(desc='Thalamus mask')
 
 
 class ParcellateThalamus(BaseInterface):
+    """Parcellates the thalamus into 8 nuclei using an atlas-based method [Najdenovska18]_.
+
+    References
+    ----------
+    .. [Najdenovska18] Najdenovska et al., Sci Data 5, 180270 (2018). <https://doi.org/10.1038/sdata.2018.270>
+
+    Examples
+    --------
+    >>> parc_thal = ParcellateThalamus()
+    >>> parc_thal.inputs.T1w_image = File(mandatory=True, desc='T1w image to be parcellated')
+    >>> parc_thal.inputs.bids_dir = Directory(desc='BIDS root directory')
+    >>> parc_thal.inputs.subject = '01'
+    >>> parc_thal.inputs.template_image = '/path/to/atlas/T1w.nii.gz'
+    >>> parc_thal.inputs.thalamic_nuclei_maps = '/path/to/atlas/nuclei/probability/map.nii.gz'
+    >>> parc_thal.inputs.subjects_dir = '/path/to/output_dir/freesurfer'
+    >>> parc_thal.inputs.subject_id = 'sub-01'
+    >>> parc_thal.inputs.ants_precision_type = 'float'
+    >>> parc_thal.run() # doctest: +SKIP
+    """
+
     input_spec = ParcellateThalamusInputSpec
     output_spec = ParcellateThalamusOutputSpec
 
@@ -1957,49 +2106,65 @@ class ParcellateThalamus(BaseInterface):
 
 class ParcellateInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(desc='Freesurfer main directory')
+
     subject_id = traits.String(mandatory=True, desc='Subject ID')
+
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer'],
+                                      desc="Parcellation scheme",
                                       usedefault=True)
-    erode_masks = traits.Bool(False)
+
+    erode_masks = traits.Bool(False, desc="If `True` erode the masks")
 
 
 class ParcellateOutputSpec(TraitedSpec):
     # roi_files = OutputMultiPath(File(exists=True),desc='Region of Interest files for connectivity mapping')
     white_matter_mask_file = File(desc='White matter (WM) mask file')
+
     gray_matter_mask_file = File(desc='Cortical gray matter (GM) mask file')
+
     csf_mask_file = File(desc='Cerebrospinal fluid (CSF) mask file')
     # cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
     #                exists=True)
-    ribbon_file = File(
-        desc='Image file detailing the cortical ribbon', exists=True)
+
+    ribbon_file = File(desc='Image file detailing the cortical ribbon',
+                       exists=True)
     # aseg_file = File(desc='Automated segmentation file converted from Freesurfer "subjects" directory',
     #                exists=True)
+
     wm_eroded = File(desc="Eroded wm file in original space")
+
     csf_eroded = File(desc="Eroded csf file in original space")
+
     brain_eroded = File(desc="Eroded brain file in original space")
+
     roi_files_in_structural_space = OutputMultiPath(File(exists=True),
                                                     desc='ROI image resliced to the dimensions of the original structural image')
+
     T1 = File(desc="T1 image file")
+
     brain = File(desc="Brain-masked T1 image file")
+
     brain_mask = File(desc="Brain mask file")
+
     aseg = File(desc="ASeg image file (in native space)")
+
     aparc_aseg = File(desc="APArc+ASeg image file (in native space)")
 
 
 class Parcellate(BaseInterface):
-    """Subdivides segmented ROI file into smaller subregions
+    """Subdivides segmented ROI file into smaller subregions.
 
-    This interface interfaces with the ConnectomeMapper Toolkit library
-    parcellation functions (cmtklib/parcellation.py) for all
-    parcellation resolutions of a given scheme.
+    This interface interfaces with the CMTK parcellation functions
+    available in `cmtklib.parcellation` module for all parcellation
+    resolutions of a given scheme.
 
     Example
     -------
-
-    >>> import nipype.interfaces.cmtk as cmtk
-    >>> parcellate = cmtk.Parcellate()
-    >>> parcellate.inputs.subjects_dir = '.'
-    >>> parcellate.inputs.subject_id = 'subj1'
+    >>> from cmtklib.parcellation import Parcellate
+    >>> parcellate = Parcellate()
+    >>> parcellate.inputs.subjects_dir = '/path/to/output_dir/freesurfer'
+    >>> parcellate.inputs.subject_id = 'sub-01'
+    >>> parcellate.inputs.parcellation_scheme = 'Lausanne2018'
     >>> parcellate.run()                 # doctest: +SKIP
     """
 
@@ -2104,6 +2269,16 @@ class Parcellate(BaseInterface):
 
 
 def get_parcellation(parcel="NativeFreesurfer"):
+    """Returns a dictionary containing atlas information.
+
+    .. note::
+        `atlas_info` often used in the code refers to such a dictionary.
+
+    Parameters
+    ----------
+    parcel : parcellation scheme
+        It can be: 'NativeFreesurfer', 'Lausanne2008' or 'Lausanne2018'
+    """
     if parcel == "Lausanne2008":
         return {
             'scale1': {'number_of_regions': 83,
@@ -2244,16 +2419,26 @@ def get_parcellation(parcel="NativeFreesurfer"):
 
 
 def extract(Z, shape, position, fill):
-    """ Extract voxel neighbourhood
+    """ Extract voxel neighbourhood.
+
     Parameters
     ----------
-    Z: the original data
-    shape: tuple containing neighbourhood dimensions
-    position: tuple containing central point indexes
-    fill: value for the padding of Z
+    Z: numpy.array
+        The original data
+
+    shape: tuple
+        Tuple containing neighbourhood dimensions
+
+    position: tuple
+        Tuple containing central point indexes
+
+    fill: value
+        Value for the padding of Z
+
     Returns
     -------
-    R: the neighbourhood of the specified point in Z
+    R: numpy.array
+        The output neighbourhood of the specified point in Z
     """
     R = np.ones(shape, dtype=Z.dtype) * \
         fill  # initialize output block to the fill value
@@ -2281,6 +2466,17 @@ def extract(Z, shape, position, fill):
 
 
 def create_T1_and_Brain(subject_id, subjects_dir):
+    """Generates T1, T1 masked and aseg+aparc Freesurfer images in NIFTI format.
+
+    Parameters
+    ----------
+    subject_id : string
+        Freesurfer subject id
+
+    subjects_dir : string
+        Freesurfer subjects dir
+        (Typically ``/path/to/output_dir/freesurfer``)
+    """
     fs_dir = op.join(subjects_dir, subject_id)
 
     # Convert T1 image
@@ -2315,6 +2511,17 @@ def create_T1_and_Brain(subject_id, subjects_dir):
 
 
 def create_annot_label(subject_id, subjects_dir):
+    """Creates annotation labels for the Lausanne2008 parcellation scheme.
+
+    Parameters
+    ----------
+    subject_id : string
+        Freesurfer subject id
+
+    subjects_dir : string
+        Freesurfer subjects dir
+        (Typically ``/path/to/output_dir/freesurfer``)
+    """
     print("Create the cortical labels necessary for our ROIs")
     print("=================================================")
 
@@ -2418,8 +2625,17 @@ def create_annot_label(subject_id, subjects_dir):
 
 
 def create_roi(subject_id, subjects_dir):
-    """ Creates the ROI_%s.nii.gz files using the given parcellation information
-    from networks. Iteratively create volume. """
+    """ Iteratively creates the ROI_%s.nii.gz files using the given Lausanne2008 parcellation information from networks.
+
+    Parameters
+    ----------
+    subject_id : string
+        Freesurfer subject id
+
+    subjects_dir : string
+        Freesurfer subjects dir
+        (Typically ``/path/to/output_dir/freesurfer``)
+    """
 
     print("Create the ROIs:")
     fs_dir = op.join(subjects_dir, subject_id)
@@ -2606,6 +2822,11 @@ def create_roi(subject_id, subjects_dir):
 
 
 def define_atlas_variables():
+    """Returns a dictionary containing atlas information for the Lausanne2018 parcellation scheme.
+
+    .. note::
+        `atlas_info` often used in the code refers to such a dictionary.
+    """
     print("Define atlas variables")
     print("=================================================")
 
@@ -2718,6 +2939,26 @@ def define_atlas_variables():
 
 
 def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id, w):
+    """Generates the volumetric parcellation from the annotation file for one scale of Lausanne2018 parcellation.
+
+    Parameters
+    ----------
+    v : Boolean
+        Verbose mode
+
+    i : int
+        Parcellation scale index
+
+    fs_string : string
+        Command executed before running Freesurfer tool
+
+    subject_id : string
+        Freesurfer subject id
+
+    subjects_dir : string
+        Freesurfer subjects dir
+        (Typically ``/path/to/output_dir/freesurfer``)
+    """
     # Multiscale parcellation - define annotation and segmentation variables
     rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot',
                       'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
@@ -2830,8 +3071,20 @@ def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id, w):
 
 
 def create_roi_v2(subject_id, subjects_dir, v=True):
-    """ Creates the ROI_%s.nii.gz files using the given parcellation information
-    from networks. Iteratively create volume. """
+    """Iteratively creates the ROI_%s.nii.gz files using the given Lausanne2018 parcellation information from networks.
+
+    Parameters
+    ----------
+    subject_id : string
+        Freesurfer subject id
+
+    subjects_dir : string
+        Freesurfer subjects dir
+        (Typically ``/path/to/output_dir/freesurfer``)
+
+    v : Boolean
+        Verbose mode
+    """
 
     freesurfer_subj = os.path.abspath(subjects_dir)
     subject_dir = os.path.join(freesurfer_subj, subject_id)
@@ -2902,146 +3155,6 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
         this_dir = os.path.join(subject_dir, 'tmp')
         if not (os.path.isdir(this_dir)):
             os.makedirs(this_dir)
-
-    # def generate_single_parcellation(v,i,fs_string,subject_dir,subject_id):
-    # 	# Multiscale parcellation - define annotation and segmentation variables
-    # 	rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot', 'rh.lausanne2008.scale5.annot']
-    # 	lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot', 'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot', 'lh.lausanne2008.scale5.annot']
-    # 	annot = ['lausanne2008.scale1', 'lausanne2008.scale2', 'lausanne2008.scale3', 'lausanne2008.scale4', 'lausanne2008.scale5']
-    # 	aseg_output = ['ROIv_scale1.nii.gz', 'ROIv_scale2.nii.gz', 'ROIv_scale3.nii.gz', 'ROIv_scale4.nii.gz', 'ROIv_scale5.nii.gz']
-    #
-    #     FNULL = open(os.devnull, 'w')
-    #
-    #     if v:
-    #         print(' ... working on multiscale parcellation, SCALE {}'.format(i+1))
-    #
-    #     # 1. Resample fsaverage CorticalSurface onto SUBJECT_ID CorticalSurface and map annotation for current scale
-    #     # Left hemisphere
-    #     if v:
-    #         print('     > resample fsaverage CorticalSurface to individual CorticalSurface')
-    #     mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi lh --sval-annot %s --tval %s' % (
-    #                 subject_id,
-    #                 pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', lh_annot_files[i])),
-    #                 os.path.join(subject_dir, 'label', lh_annot_files[i]))
-    #     if v == 2:
-    #         status = subprocess.call(mri_cmd, shell=True)
-    #     else:
-    #         status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-    #     # Right hemisphere
-    #     mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi rh --sval-annot %s --tval %s' % (
-    #                 subject_id,
-    #                 pkg_resources.resource_filename('cmtklib',op.join('data','parcellation','lausanne2018', rh_annot_files[i])),
-    #                 os.path.join(subject_dir, 'label', rh_annot_files[i]))
-    #     if v == 2:
-    #         status = subprocess.call(mri_cmd, shell=True)
-    #     else:
-    #         status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-    #
-    #     # 2. Generate Nifti volume from annotation
-    #     #    Note: change here --wmparc-dmax (FS default 5mm) to dilate cortical regions toward the WM
-    #     if v:
-    #         print('     > generate Nifti volume from annotation')
-    #     mri_cmd = fs_string + '; mri_aparc2aseg --s %s --annot %s --wmparc-dmax 0 --labelwm --hypo-as-wm --new-ribbon --o %s' % (
-    #                 subject_id,
-    #                 annot[i],
-    #                 os.path.join(subject_dir, 'tmp', aseg_output[i]))
-    #     if v == 2:
-    #         status = subprocess.call(mri_cmd, shell=True)
-    #     else:
-    #         status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-    #
-    #     # 3. Update numerical IDs of cortical and subcortical regions
-    #     # Load Nifti volume
-    #     if v:
-    #         print('     > relabel cortical and subcortical regions')
-    #     this_nifti = ni.load(os.path.join(subject_dir, 'tmp', aseg_output[i]))
-    #     vol = this_nifti.get_data()	# numpy.ndarray
-    #     hdr = this_nifti.header
-    #     # Initialize output
-    #     hdr2 = hdr.copy()
-    #     hdr2.set_data_dtype(np.uint16)
-    #     # vol2 = np.zeros( this_nifti.shape, dtype=np.int16 )
-    #     # # Relabelling Right hemisphere (2000+)
-    #     # ii = np.where((vol > 2000) & (vol < 3000))
-    #     # vol2[ii] = vol[ii] - 2000
-    #     # nlabel = np.amax(vol2)	# keep track of the number of assigned labels
-    #     # # Relabelling Subcortical Right hemisphere
-    #     # # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
-    #     # newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
-    #     # for j in range(0, len(rh_sub)):
-    #     # 	ii = np.where(vol == rh_sub[j])
-    #     # 	vol2[ii] = newLabels[j]
-    #     # nlabel = np.amax(vol2)
-    #     # # Relabelling Left hemisphere (1000+)
-    #     # ii = np.where((vol > 1000) & (vol < 2000))
-    #     # vol2[ii] = vol[ii] - 1000 + nlabel
-    #     # nlabel = np.amax(vol2)	# n cortical label in right hemisphere
-    #     # # Relabelling Subcortical Right hemisphere
-    #     # # NOTE: skip numerical IDs which are used for the thalamic subcortical nuclei
-    #     # newLabels = np.concatenate((np.array([nlabel+1]), np.arange(nlabel+8, nlabel+len(rh_sub)+7)), axis=0)
-    #     # for j in range(0, len(lh_sub)):
-    #     # 	ii = np.where(vol == lh_sub[j])
-    #     # 	vol2[ii] = newLabels[j]
-    #     # nlabel = np.amax(vol2)
-    #     # # Relabelling Brain Stem
-    #     # ii = np.where(vol == brain_stem)
-    #     # vol2[ii] = nlabel + 1
-    #
-    #     # 4. Dilate cortical regions
-    #     print("Dilating cortical regions...")
-    #     #dilatestart = time()
-    #     # loop throughout all the voxels belonging to the aseg GM volume
-    #     newvol = vol.copy()
-    #     for j in range(xx.size):
-    #         if newvol[xx[j],yy[j],zz[j]] == 0:
-    #             local = extract(vol, shape, position=(xx[j],yy[j],zz[j]), fill=0)
-    #             mask = local.copy()
-    #             mask[np.nonzero(local>0)] = 1
-    #             thisdist = np.multiply(dist,mask)
-    #             thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
-    #             value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
-    #             if value.size > 1:
-    #                 counts = np.bincount(value)
-    #                 value = np.argmax(counts)
-    #             newvol[xx[j],yy[j],zz[j]] = value
-    #
-    #     # 5. Save Nifti and mgz volumes
-    #     if v:
-    #         print('     > save output volumes')
-    #     this_out = os.path.join(subject_dir, 'mri', aseg_output[i])
-    #     img = ni.Nifti1Image(newvol, this_nifti.affine, hdr2)
-    #     ni.save(img, this_out)
-    #
-    #     mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
-    #                 this_out,
-    #                 os.path.join(subject_dir, 'mri', aseg_output[i][0:-4]+'.mgz'))
-    #     if v == 2:
-    #         status = subprocess.call(mri_cmd, shell=True)
-    #     else:
-    #         status = subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
-    #     os.remove(os.path.join(subject_dir, 'tmp', aseg_output[i]))
-    #
-    #     return 1
-    #
-    # # Loop over parcellation scales
-    # if v:
-    #     print('Generate MULTISCALE PARCELLATION for input subject')
-    #
-    # fs_string = 'export SUBJECTS_DIR=' + freesurfer_subj
-    #
-    # import multiprocessing as mp
-    # jobs = []
-    # for i in range(0, nscales):
-    #     thread = mp.Process(
-    #                         target=generate_single_parcellation,
-    #                         args=(v,i,fs_string,subject_dir,subject_id,)
-    #                         )
-    #     jobs.append(thread)
-    #     thread.start()
-    #
-    # # Ensure all of the processes have finished
-    # for j in jobs:
-    # 	j.join()
 
     # Loop over parcellation scales
     if v:
@@ -3221,6 +3334,17 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
 
 
 def create_wm_mask(subject_id, subjects_dir):
+    """Creates the white-matter mask using the Freesurfer ribbon as basis in the Lausanne2008 framework.
+
+    Parameters
+    ----------
+    subject_id : string
+        Freesurfer subject id
+
+    subjects_dir : string
+        Freesurfer subjects dir
+        (Typically ``/path/to/output_dir/freesurfer``)
+    """
     print("Create white matter mask")
 
     fs_dir = op.join(subjects_dir, subject_id)
@@ -3427,6 +3551,20 @@ def create_wm_mask(subject_id, subjects_dir):
 
 
 def create_wm_mask_v2(subject_id, subjects_dir, v=True):
+    """Creates the white-matter mask using the Freesurfer ribbon as basis in the Lausanne2018 framework.
+
+    Parameters
+    ----------
+    subject_id : string
+        Freesurfer subject id
+
+    subjects_dir : string
+        Freesurfer subjects dir
+        (Typically ``/path/to/output_dir/freesurfer``)
+
+    v : Boolean
+        Verbose mode
+    """
     if v:
         iflogger.info("  > Create white matter mask")
 
@@ -3663,6 +3801,20 @@ def create_wm_mask_v2(subject_id, subjects_dir, v=True):
 
 
 def crop_and_move_datasets(parcellation_scheme, subject_id, subjects_dir):
+    """Convert Freesurfer images back to original native space when Lausanne20XX parcellation schemes are used.
+
+    Parameters
+    ----------
+    parcellation_scheme : string
+        Parcellation scheme: 'Lausanne2008', 'Lausanne2018'
+
+    subject_id : string
+        Freesurfer subject id
+
+    subjects_dir : string
+        Freesurfer subjects dir
+        (Typically ``/path/to/output_dir/freesurfer``)
+    """
     fs_dir = op.join(subjects_dir, subject_id)
 
     print("Cropping datasets")
@@ -3742,6 +3894,17 @@ def crop_and_move_datasets(parcellation_scheme, subject_id, subjects_dir):
 
 
 def generate_WM_and_GM_mask(subject_id, subjects_dir):
+    """Generates the white-matter and gray-matter masks when NativeFreesurfer parcellation is used.
+
+    Parameters
+    ----------
+    subject_id : string
+        Freesurfer subject id
+
+    subjects_dir : string
+        Freesurfer subjects dir
+        (Typically ``/path/to/output_dir/freesurfer``)
+    """
     fs_dir = op.join(subjects_dir, subject_id)
 
     print("Create the WM and GM mask")
@@ -3899,6 +4062,17 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
 
 
 def crop_and_move_WM_and_GM(subject_id, subjects_dir):
+    """Convert Freesurfer images back to original native space when NativeFreesurfer parcellation scheme is used.
+
+    Parameters
+    ----------
+    subject_id : string
+        Freesurfer subject id
+
+    subjects_dir : string
+        Freesurfer subjects dir
+        (Typically ``/path/to/output_dir/freesurfer``)
+    """
     fs_dir = op.join(subjects_dir, subject_id)
 
     #    print("Cropping and moving datasets to %s" % reg_path)

@@ -3,7 +3,10 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" The Diffusion Toolkit module provides functions for interfacing with Diffusion Toolkit functions missing in nipype or modified
+"""The Diffusion Toolkit module provides Nipype interfaces for the Diffusion Toolkit missing in nipype or modified.
+
+.. note:
+    Module not used anymore by CMP3.
 """
 
 import re
@@ -60,8 +63,20 @@ class HARDIMatOutputSpec(TraitedSpec):
 
 
 class HARDIMat(CommandLine):
-    """Use hardi_mat to calculate a reconstruction matrix from a gradient table
+    """Use hardi_mat to calculate a reconstruction matrix from a gradient table.
+
+    Examples
+    --------
+    >>> hardi_mat = HARDIMat()
+    >>> hardi_mat.inputs.bvecs = 'sub-01_dwi.bvec'
+    >>> hardi_mat.inputs.bvals = 'sub-01_dwi.bval'
+    >>> hardi_mat.inputs.gradient_table = 'sub-01_grad.txt'
+    >>> hardi_mat.inputs.out_file = 'recon_mat.dat'
+    >>> hardi_mat.inputs.order = 8
+    >>> hardi_mat.inputs.reference_file = 'sub-01_dwi.nii.gz'
+    >>> hardi_mat.run() # doctest: +SKIP
     """
+
     input_spec = HARDIMatInputSpec
     output_spec = HARDIMatOutputSpec
 
@@ -114,6 +129,17 @@ class DiffUnpackOutputSpec(TraitedSpec):
 
 
 class DiffUnpack(CommandLine):
+    """Use `diff_unpack` to convert dicom files to multiple formats.
+
+    Examples
+    --------
+    >>> convert = DiffUnpack()
+    >>> convert.inputs.input_dicom = '/path/to/sub-01_dwi.dcm'
+    >>> convert.inputs.out_prefix = 'output'
+    >>> convert.inputs.output_type = 'nii.gz'
+    >>> convert.run() # doctest: +SKIP
+    """
+
     input_spec = DiffUnpackInputSpec
     output_spec = DiffUnpackOutputSpec
 
@@ -177,7 +203,11 @@ class DTIReconOutputSpec(TraitedSpec):
 
 
 class DTIRecon(CommandLine):
-    """Use dti_recon to generate tensors and other maps
+    """Use dti_recon to generate tensors and other maps.
+
+    .. note::
+        Not used anymore by CMP3
+
     """
 
     input_spec = DTIReconInputSpec

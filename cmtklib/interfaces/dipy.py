@@ -3,28 +3,21 @@
 # All rights reserved.
 #
 #  This software is distributed under the open-source license Modified BSD.
-"""
-Interfaces to the algorithms in dipy
+"""The Dipy module provides Nipype interfaces to the algorithms in dipy."""
 
-"""
+import os.path as op
+from future import standard_library
+import time
+import gzip
+import nibabel as nib
+import numpy as np
 
 from nipype.interfaces.dipy.base import DipyDiffusionInterface, DipyBaseInterface, DipyBaseInterfaceInputSpec
 from nipype.interfaces.base import TraitedSpec, File, traits, isdefined, BaseInterfaceInputSpec, InputMultiPath
 from nipype import logging
-# import nipype.pipeline.engine as pe
-import gzip
-import nibabel as nib
-import numpy as np
-import time
-import os.path as op
-from future import standard_library
+
 
 standard_library.install_aliases()
-# from builtins import str, open
-
-
-# Nipype imports
-
 IFLOGGER = logging.getLogger('nipype.interface')
 
 
@@ -55,24 +48,21 @@ class DTIEstimateResponseSHOutputSpec(TraitedSpec):
 
 
 class DTIEstimateResponseSH(DipyDiffusionInterface):
-    """
-    Uses dipy to compute the single fiber response to be used in spherical
-    deconvolution methods, in a similar way to MRTrix's command
-    ``estimate_response``.
+    """Uses dipy to compute the single fiber response to be used by spherical deconvolution methods.
 
+    The single fiber response is computed in a similar way to MRTrix's command
+    ``estimate_response``.
 
     Example
     -------
-
-    >>> from cmtklib.interfaces import dipy as ndp
-    >>> dti = ndp.EstimateResponseSH()
+    >>> from cmtklib.interfaces.dipy import DTIEstimateResponseSH
+    >>> dti = DTIEstimateResponseSH()
     >>> dti.inputs.in_file = '4d_dwi.nii'
     >>> dti.inputs.in_bval = 'bvals'
     >>> dti.inputs.in_bvec = 'bvecs'
     >>> res = dti.run() # doctest: +SKIP
-
-
     """
+
     input_spec = DTIEstimateResponseSHInputSpec
     output_spec = DTIEstimateResponseSHOutputSpec
 
@@ -207,26 +197,27 @@ class CSDOutputSpec(TraitedSpec):
 
 
 class CSD(DipyDiffusionInterface):
-    """
-    Uses CSD [Tournier2007]_ to generate the fODF of DWIs. The interface uses
-    :py:mod:`dipy`, as explained in `dipy's CSD example
+    """Uses CSD [Tournier2007]_ to generate the fODF of DWIs.
+
+    The interface uses :py:mod:`dipy`, as explained in `dipy's CSD example
     <http://nipy.org/dipy/examples_built/reconst_csd.html>`_.
 
+    References
+    ----------
     .. [Tournier2007] Tournier, J.D., et al. NeuroImage 2007.
       Robust determination of the fibre orientation distribution in diffusion
       MRI: Non-negativity constrained super-resolved spherical deconvolution
 
-
     Example
     -------
-
-    >>> from nipype.interfaces import dipy as ndp
-    >>> csd = ndp.CSD()
+    >>> from cmtklib.interfaces.dipy import CSD
+    >>> csd = CSD()
     >>> csd.inputs.in_file = '4d_dwi.nii'
     >>> csd.inputs.in_bval = 'bvals'
     >>> csd.inputs.in_bvec = 'bvecs'
     >>> res = csd.run() # doctest: +SKIP
     """
+
     input_spec = CSDInputSpec
     output_spec = CSDOutputSpec
 
@@ -241,8 +232,7 @@ class CSD(DipyDiffusionInterface):
         imref = nib.four_to_three(img)[0]
 
         def clipMask(mask):
-            """This is a hack until we fix the behaviour of the tracking objects
-            around the edge of the image"""
+            """This is a hack until we fix the behaviour of the tracking objects around the edge of the image."""
             out = mask.copy()
             index = [slice(None)] * out.ndim
             for i in range(len(index)):
@@ -382,18 +372,18 @@ class SHOREOutputSpec(TraitedSpec):
 
 
 class SHORE(DipyDiffusionInterface):
-    """
-    Uses SHORE [Merlet13]_ to generate the fODF of DWIs. The interface uses
-    :py:mod:`dipy`, as explained in `dipy's SHORE example
+    """Uses SHORE [Merlet13]_ to generate the fODF of DWIs.
+
+    The interface uses :py:mod:`dipy`, as explained in `dipy's SHORE example
     <http://nipy.org/dipy/examples_built/reconst_shore.html#merlet2013>`_.
 
+    References
+    ----------
     .. [Merlet2013]	Merlet S. et. al, Medical Image Analysis, 2013.
     “Continuous diffusion signal, EAP and ODF estimation via Compressive Sensing in diffusion MRI”
 
-
     Example
     -------
-
     >>> from cmtklib.interfaces.dipy import SHORE
     >>> asm = SHORE(radial_order=radial_order,zeta=zeta, lambda_n=lambdaN, lambda_l=lambdaL)
     >>> asm.inputs.in_file = '4d_dwi.nii'
@@ -401,6 +391,7 @@ class SHORE(DipyDiffusionInterface):
     >>> asm.inputs.in_bvec = 'bvecs'
     >>> res = asm.run() # doctest: +SKIP
     """
+
     input_spec = SHOREInputSpec
     output_spec = SHOREOutputSpec
 
@@ -423,8 +414,7 @@ class SHORE(DipyDiffusionInterface):
         affine = img.affine
 
         def clipMask(mask):
-            """This is a hack until we fix the behaviour of the tracking objects
-            around the edge of the image"""
+            """This is a hack until we fix the behaviour of the tracking objects around the edge of the image."""
             out = mask.copy()
             index = [slice(None)] * out.ndim
             for i in range(len(index)):
@@ -550,12 +540,10 @@ class TensorInformedEudXTractographyOutputSpec(TraitedSpec):
 
 
 class TensorInformedEudXTractography(DipyBaseInterface):
-    """
-    Streamline tractography using Deterrministic Maximum Direction Getter
+    """Streamline tractography using Dipy Deterministic Maximum Direction Getter.
 
     Example
     -------
-
     >>> from cmtklib.interfaces import dipy as ndp
     >>> track = ndp.TensorInformedEudXTractography()
     >>> track.inputs.in_file = '4d_dwi.nii'
@@ -563,6 +551,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
     >>> track.inputs.tracking_mask = 'dilated_wm_mask.nii'
     >>> res = track.run() # doctest: +SKIP
     """
+
     input_spec = TensorInformedEudXTractographyInputSpec
     output_spec = TensorInformedEudXTractographyOutputSpec
 
@@ -597,8 +586,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         sphere = get_sphere('repulsion724')
 
         def clipMask(mask):
-            """This is a hack until we fix the behaviour of the tracking objects
-            around the edge of the image"""
+            """This is a hack until we fix the behaviour of the tracking objects around the edge of the image."""
             out = mask.copy()
             index = [slice(None)] * out.ndim
             for i in range(len(index)):
@@ -788,12 +776,10 @@ class DirectionGetterTractographyOutputSpec(TraitedSpec):
 
 
 class DirectionGetterTractography(DipyBaseInterface):
-    """
-    Streamline tractography using Deterministic Maximum Direction Getter
+    """Streamline tractography using Dipy Deterministic Maximum Direction Getter.
 
     Example
     -------
-
     >>> from cmtklib.interfaces import dipy as ndp
     >>> track = ndp.DirectionGetterTractography()
     >>> track.inputs.in_file = '4d_dwi.nii'
@@ -801,6 +787,7 @@ class DirectionGetterTractography(DipyBaseInterface):
     >>> track.inputs.tracking_mask = 'dilated_wm_mask.nii'
     >>> res = track.run() # doctest: +SKIP
     """
+
     input_spec = DirectionGetterTractographyInputSpec
     output_spec = DirectionGetterTractographyOutputSpec
 
@@ -1129,22 +1116,21 @@ class MAPMRIOutputSpec(TraitedSpec):
 
 
 class MAPMRI(DipyDiffusionInterface):
-    '''MAP MRI settings
+    """Computes the MAP MRI model.
 
     .. check http://nipy.org/dipy/examples_built/reconst_mapmri.html#example-reconst-mapmri
     for reference on the settings
 
-
     Example
     -------
-
     >>> from cmtklib.interfaces.dipy import MAPMRI
     >>> mapmri = MAPMRI()
     >>> mapmri.inputs.in_file = '4d_dwi.nii'
     >>> mapmri.inputs.in_bval = 'bvals'
     >>> mapmri.inputs.in_bvec = 'bvecs'
     >>> res = mapmri.run() # doctest: +SKIP
-    '''
+    """
+
     input_spec = MAPMRIInputSpec
     output_spec = MAPMRIOutputSpec
 

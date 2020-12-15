@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP Stage for building connectivity matrices and resulting CFF file
-"""
+"""Definition of config and stage classes for building functional connectivity matrices."""
 
 # Global imports
 import os
@@ -28,6 +27,41 @@ from cmtklib.util import get_pipeline_dictionary_outputs
 
 
 class ConnectomeConfig(HasTraits):
+    """Class used to store configuration parameters of a :class:`~cmp.stages.connectome.fmri_connectome.ConnectomeStage` instance.
+
+    Attributes
+    ----------
+    apply_scrubbing : traits.Bool
+        Apply scrubbing before mapping the functional connectome if True
+        (Default: False)
+
+    FD_thr : traits.Float
+        Framewise displacement threshold
+        (Default: 0.2)
+
+    DVARS_thr : traits.Float
+        DVARS (RMS of variance over voxels) threshold
+        (Default: 4.0)
+
+    output_types : ['gPickle', 'mat', 'cff', 'graphml']
+        Output connectome format
+
+    log_visualization : traits.Bool
+        Log visualization that might be obsolete as this has been detached
+        after creation of the bidsappmanager (Default: True)
+
+    circular_layout : traits.Bool
+        Visualization of the connectivity matrix using a circular layout
+        that might be obsolete as this has been detached after creation
+        of the bidsappmanager (Default: False)
+
+    subject : traits.Str
+        BIDS subject ID (in the form ``sub-XX``)
+
+    See Also
+    --------
+    cmp.stages.connectome.fmri_connectome.ConnectomeStage
+    """
     apply_scrubbing = Bool(False)
     FD_thr = Float(0.2)
     DVARS_thr = Float(4.0)
@@ -38,8 +72,21 @@ class ConnectomeConfig(HasTraits):
 
 
 class ConnectomeStage(Stage):
+    """Class that represents the connectome building stage of a :class:`~cmp.pipelines.functional.fMRI.fMRIPipeline`.
+
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the fMRI `ConnectomeStage`
+
+    See Also
+    --------
+    cmp.pipelines.functional.fMRI.fMRIPipeline
+    cmp.stages.connectome.fmri_connectome.ConnectomeConfig
+    """
 
     def __init__(self, bids_dir, output_dir):
+        """Constructor of a :class:`~cmp.stages.connectome.fmri_connectome.Connectome` instance."""
         self.name = 'connectome_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
@@ -50,6 +97,19 @@ class ConnectomeStage(Stage):
         self.outputs = ["connectivity_matrices", "avg_timeseries"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """Create the stage worflow.
+
+        Parameters
+        ----------
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the fMRI pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
+        """
         cmtk_cmat = pe.Node(interface=cmtklib.connectome.rsfmri_conmat(), name='compute_matrice')
         cmtk_cmat.inputs.output_types = self.config.output_types
         cmtk_cmat.inputs.apply_scrubbing = self.config.apply_scrubbing
@@ -66,6 +126,10 @@ class ConnectomeStage(Stage):
         ])
 
     def define_inspect_outputs(self):
+        """Update the `inspect_outputs' class attribute.
+
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
+        """
         func_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'bold_sinker')
         func_sinker_report = os.path.join(func_sinker_dir, '_report', 'report.rst')
 
@@ -112,4 +176,10 @@ class ConnectomeStage(Stage):
                                           key=str.lower)
 
     def has_run(self):
+        """Function that returns `True` if the stage has been run successfully.
+
+        Returns
+        -------
+        `True` if the stage has been run successfully
+        """
         return os.path.exists(os.path.join(self.stage_dir, "compute_matrice", "result_compute_matrice.pklz"))

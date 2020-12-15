@@ -8,6 +8,9 @@ atom*.txt
 
 .DS_Store
 
+docs/api
+docs/api/*
+
 debian
 debian/*
 

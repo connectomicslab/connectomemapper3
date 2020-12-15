@@ -4,8 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Reconstruction methods and workflows
-"""
+"""Reconstruction methods and workflows."""
 
 # General imports
 
@@ -24,7 +23,7 @@ from cmtklib.interfaces.mrtrix3 import Erode, MRtrix_mul, MRThreshold, \
     ConstrainedSphericalDeconvolution, DWI2Tensor, Tensor2Vector
 
 # from nipype.interfaces.mrtrix3.preprocess import ResponseSD
-from cmtklib.interfaces.misc import flipBvec, flipTable
+from cmtklib.diffusion import FlipTable, FlipBvec
 from cmtklib.interfaces.dipy import DTIEstimateResponseSH, CSD, SHORE, MAPMRI
 # from nipype.interfaces.dipy import CSD
 
@@ -33,7 +32,94 @@ iflogger = logging.getLogger('nipype.interface')
 
 
 class Dipy_recon_config(HasTraits):
-    ''' Reconstruction configuration '''
+    """Class used to store Dipy diffusion reconstruction sub-workflow configuration parameters.
+
+    Attributes
+    ----------
+    imaging_model : Str
+        Diffusion imaging model
+        (For instance 'DTI')
+
+    flip_table_axis : traits.List(['x', 'y', 'z'])
+        Axis to be flipped in the gradient table.
+
+    local_model_editor : {False: '1:Tensor', True: '2:Constrained Spherical Deconvolution'}
+        List of reconstruction models
+
+    local_model : traits.Bool
+        Reconstruction model selected (See `local_model_editor`)
+        (Default: True, meaning Tensor is performed)
+
+    lmax_order : traits.Enum([2, 4, 6, 8, 10, 12, 14, 16])
+        Choices of maximal order to use for Constrained Spherical Deconvolution
+
+    single_fib_thr : traits.Float(0.7, min=0, max=1)
+        FA threshold
+
+    recon_mode : traits.Str
+        Can be "Probabilistic" or "Deterministic"
+
+    mapmri : traits.Bool(False)
+
+    tracking_processing_tool : traits.Enum('MRtrix', 'Dipy')
+
+    laplacian_regularization : traits.Bool
+        Apply laplacian regularization in MAP-MRI if `True`
+        (Default: True)
+
+    laplacian_weighting : traits.Float
+        Laplacian regularization weight in MAP-MRI
+        (Default: 0.05)
+
+    positivity_constraint : traits.Bool
+        Apply positivity constraint in MAP-MRI if `True`
+        (Default: True)
+
+    radial_order : traits.Int
+        MAP-MRI radial order
+        (Default: 8)
+
+    small_delta : traits.Float
+        Small data for gradient table (pulse duration) used by MAP-MRI
+        (Default: 0.02)
+
+    big_delta : traits.Float
+        Big data for gradient table (time interval) used by MAP-MRI
+        (Default: 0.5)
+
+    radial_order_values : traits.List([2, 4, 6, 8, 10, 12])
+        Choices of radial order values used by SHORE
+
+    shore_radial_order : traits.Str
+        Even number that represents the order of the basis
+        (Default: 6)
+
+    shore_zeta : traits.Int
+        Scale factor in SHORE
+        (Default: 700)
+
+    shore_lambda_n : traits.Float
+        Radial regularisation constant in SHORE
+        (Default: 1e-8)
+
+    shore_lambda_l : traits.Float
+        Angular regularisation constant in SHORE
+        (Default: 1e-8)
+
+    shore_tau : traits.Float
+        Diffusion time used by SHORE. By default the value that makes *q* equal
+        to the square root of the b-value
+        (Default: 0.025330295910584444)
+
+    shore_constrain_e0 : traits.Bool
+        Constrain SHORE optimization such that E(0) = 1
+        (Default: False)
+
+    shore_positive_constraint : traits.Bool
+        Constrain the SHORE propagator to be positive
+        (Default: False)
+    """
+
     imaging_model = Str
     # flip_table_axis = List(editor=CheckListEditor(values=['x','y','z'],cols=3))
     flip_table_axis = List(['x', 'y', 'z'])
@@ -85,6 +171,13 @@ class Dipy_recon_config(HasTraits):
         False, usedefault=True, desc=('Constrain the propagator to be positive.'))
 
     def _imaging_model_changed(self, new):
+        """Update ``local_model_editor`` and ``self.local_model`` when ``imaging_model`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value of ``imaging_model``
+        """
         if new == 'DSI':
             pass
         elif new == 'DTI':
@@ -96,6 +189,13 @@ class Dipy_recon_config(HasTraits):
             self.local_model = True
 
     def _recon_mode_changed(self, new):
+        """Update ``local_model_editor`` and ``self.local_model`` when ``recon_mode`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value of ``recon_mode``
+        """
         if new == 'Probabilistic' and self.imaging_model != 'DSI':
             self.local_model_editor = {
                 True: 'Constrained Spherical Deconvolution'}
@@ -108,6 +208,29 @@ class Dipy_recon_config(HasTraits):
 
 
 class MRtrix_recon_config(HasTraits):
+    """Class used to store Dipy diffusion reconstruction sub-workflow configuration parameters.
+
+    Attributes
+    ----------
+    flip_table_axis : traits.List(['x', 'y', 'z'])
+        Axis to be flipped in the gradient table.
+
+    local_model_editor : {False: '1:Tensor', True: '2:Constrained Spherical Deconvolution'}
+        List of reconstruction models
+
+    local_model : traits.Bool
+        Reconstruction model selected (See `local_model_editor`)
+        (Default: True, meaning Tensor is performed)
+
+    lmax_order : traits.Enum([2, 4, 6, 8, 10, 12, 14, 16])
+        Choices of maximal order to use for Constrained Spherical Deconvolution
+
+    single_fib_thr : traits.Float(0.7, min=0, max=1)
+        FA threshold
+
+    recon_mode : traits.Str
+        Can be "Probabilistic" or "Deterministic"
+    """
     # gradient_table = File
     flip_table_axis = List(['x', 'y', 'z'])
     local_model_editor = Dict(
@@ -119,6 +242,13 @@ class MRtrix_recon_config(HasTraits):
     recon_mode = Str
 
     def _imaging_model_changed(self, new):
+        """Update ``local_model_editor`` and ``self.local_model`` when ``imaging_model`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value of ``imaging_model``
+        """
         if new == 'DTI':
             self.local_model_editor = {
                 False: '1:Tensor', True: '2:Constrained Spherical Deconvolution'}
@@ -128,6 +258,13 @@ class MRtrix_recon_config(HasTraits):
             self.local_model = True
 
     def _recon_mode_changed(self, new):
+        """Update ``local_model_editor`` and ``self.local_model`` when ``recon_mode`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value of ``recon_mode``
+        """
         if new == 'Probabilistic':
             self.local_model_editor = {
                 True: 'Constrained Spherical Deconvolution'}
@@ -138,6 +275,18 @@ class MRtrix_recon_config(HasTraits):
 
 
 def create_dipy_recon_flow(config):
+    """Create the reconstruction sub-workflow of the `DiffusionStage` using Dipy.
+
+    Parameters
+    ----------
+    config : Dipy_recon_config
+        Workflow configuration
+
+    Returns
+    -------
+    flow : nipype.pipeline.engine.Workflow
+        Built reconstruction sub-workflow
+    """
     flow = pe.Workflow(name="reconstruction")
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["diffusion",
                                                                  "diffusion_resampled",
@@ -151,7 +300,7 @@ def create_dipy_recon_flow(config):
                 "mapmri_maps"], mandatory_inputs=True), name="outputnode")
 
     # Flip gradient table
-    flip_bvecs = pe.Node(interface=flipBvec(), name='flip_bvecs')
+    flip_bvecs = pe.Node(interface=FlipBvec(), name='flip_bvecs')
 
     flip_bvecs.inputs.flipping_axis = config.flip_table_axis
     flip_bvecs.inputs.delimiter = ' '
@@ -331,13 +480,18 @@ def create_dipy_recon_flow(config):
 
 
 def create_mrtrix_recon_flow(config):
-    '''Create the diffusion reconstruction workflow.
-
-    It estimates the tensors or the fiber orientation distribution functions.
+    """Create the reconstruction sub-workflow of the `DiffusionStage` using MRtrix3.
 
     Parameters
     ----------
-    config '''
+    config : Dipy_recon_config
+        Workflow configuration
+
+    Returns
+    -------
+    flow : nipype.pipeline.engine.Workflow
+        Built reconstruction sub-workflow
+    """
 
     # TODO: Add AD and RD maps
     flow = pe.Workflow(name="reconstruction")
@@ -349,7 +503,7 @@ def create_mrtrix_recon_flow(config):
                                                           mandatory_inputs=True), name="outputnode")
 
     # Flip gradient table
-    flip_table = pe.Node(interface=flipTable(), name='flip_table')
+    flip_table = pe.Node(interface=FlipTable(), name='flip_table')
 
     flip_table.inputs.flipping_axis = config.flip_table_axis
     flip_table.inputs.delimiter = ' '

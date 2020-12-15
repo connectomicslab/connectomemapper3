@@ -4,32 +4,42 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMTK Functional MRI functions
-"""
+"""Module that defines CMTK Nipype interfaces for the Functional MRI pipeline."""
 
 # General imports
 from traits.api import *
 import os
-
 import numpy as np
 import nibabel as nib
-
-# Nipype imports
+import scipy.io as sio
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
 
 
-class discard_tp_InputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True)
-    n_discard = Int(mandatory=True)
+class Discard_tp_InputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc="Input 4D fMRI image")
+
+    n_discard = Int(mandatory=True, desc="Number of n first frames to discard")
 
 
-class discard_tp_OutputSpec(TraitedSpec):
-    out_file = File(exists=True)
+class Discard_tp_OutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="Output 4D fMRI image with discarded frames")
 
 
-class discard_tp(BaseInterface):
-    input_spec = discard_tp_InputSpec
-    output_spec = discard_tp_OutputSpec
+class Discard_tp(BaseInterface):
+    """Discards the n first time frame in functional MRI data.
+
+    Examples
+    --------
+    >>> from cmtklib.functionalMRI import Discard_tp
+    >>> discard = Discard_tp()
+    >>> discard.inputs.base_dir = '/my_directory'
+    >>> discard.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> discard.inputs.n_discard = 5
+    >>> discard.run() # doctest: +SKIP
+    """
+
+    input_spec = Discard_tp_InputSpec
+    output_spec = Discard_tp_OutputSpec
 
     def _run_interface(self, runtime):
         dataimg = nib.load(self.inputs.in_file)
@@ -53,43 +63,80 @@ class discard_tp(BaseInterface):
         return outputs
 
 
-class nuisance_InputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True)
+class Nuisance_InputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, desc="Input fMRI volume")
+
     brainfile = File(desc='Eroded brain mask registered to fMRI space')
+
     csf_file = File(desc='Eroded CSF mask registered to fMRI space')
+
     wm_file = File(desc='Eroded WM mask registered to fMRI space')
+
     motion_file = File(desc='motion nuisance effect')
-    gm_file = InputMultiPath(
-        File(), desc='GM atlas files registered to fMRI space')
-    global_nuisance = Bool()
-    csf_nuisance = Bool()
-    wm_nuisance = Bool()
-    motion_nuisance = Bool()
-    nuisance_motion_nb_reg = Int('36')
+
+    gm_file = InputMultiPath(File(),
+                             desc='GM atlas files registered to fMRI space')
+
+    global_nuisance = Bool(desc='If `True` perform global nuisance regression')
+
+    csf_nuisance = Bool(desc='If `True` perform CSF nuisance regression')
+
+    wm_nuisance = Bool(desc='If `True` perform WM nuisance regression')
+
+    motion_nuisance = Bool(desc='If `True` perform motion nuisance regression')
+
+    nuisance_motion_nb_reg = Int('36', desc="Number of reg to use in motion nuisance regression")
+
     n_discard = Int(
         desc='Number of volumes discarded from the fMRI sequence during preprocessing')
 
 
-class nuisance_OutputSpec(TraitedSpec):
-    out_file = File(exists=True)
-    averageGlobal_npy = File()
-    averageCSF_npy = File()
-    averageWM_npy = File()
-    averageGlobal_mat = File()
-    averageCSF_mat = File()
-    averageWM_mat = File()
+class Nuisance_OutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="Output fMRI Volume")
+
+    averageGlobal_npy = File(desc="Output of global regression in `.npy` format")
+
+    averageCSF_npy = File(desc="Output of CSF regression in `.npy` format")
+
+    averageWM_npy = File(desc="Output of WM regression in `.npy` format")
+
+    averageGlobal_mat = File(desc="Output matrix of global regression")
+
+    averageCSF_mat = File(desc="Output matrix of CSF regression")
+
+    averageWM_mat = File(desc="Output matrix of WM regression")
 
 
-class nuisance_regression(BaseInterface):
-    input_spec = nuisance_InputSpec
-    output_spec = nuisance_OutputSpec
+class Nuisance_regression(BaseInterface):
+    """Regress out nuisance signals (WM, CSF, movements) through GLM.
+
+    Examples
+    --------
+    >>> from cmtklib.functionalMRI import Nuisance_regression
+    >>> nuisance = Nuisance_regression()
+    >>> nuisance.inputs.base_dir = '/my_directory'
+    >>> nuisance.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> nuisance.inputs.wm_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> nuisance.inputs.csf_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> nuisance.inputs.motion_file = '/path/to/sub-01_motions.par'
+    >>> nuisance.inputs.gm_file = ['/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> nuisance.inputs.global_nuisance = False
+    >>> nuisance.inputs.csf_nuisance = True
+    >>> nuisance.inputs.wm_nuisance = True
+    >>> nuisance.inputs.motion_nuisance = True
+    >>> nuisance.inputs.nuisance_motion_nb_reg = 36
+    >>> nuisance.inputs.n_discard = 5
+    >>> nuisance.run() # doctest: +SKIP
+    """
+
+    input_spec = Nuisance_InputSpec
+    output_spec = Nuisance_OutputSpec
 
     def _run_interface(self, runtime):
-        ''' Regress out nuisance signals (WM, CSF, movements) through GLM
-        '''
-
-        import scipy.io as sio
-
         # Output from previous preprocessing step
         ref_path = self.inputs.in_file
 
@@ -253,25 +300,41 @@ class nuisance_regression(BaseInterface):
         return outputs
 
 
-class detrending_InputSpec(BaseInterfaceInputSpec):
+class Detrending_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to detrend")
+
     gm_file = InputMultiPath(
         File(exists=True), desc="ROI files registered to fMRI space")
-    mode = Enum(["linear", "quadratic", "cubic"])
+
+    mode = Enum(["linear", "quadratic", "cubic"], desc="Detrending order")
 
 
-class detrending_OutputSpec(TraitedSpec):
-    out_file = File(exists=True)
+class Detrending_OutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="Detrended fMRI volume")
 
 
 class Detrending(BaseInterface):
-    input_spec = detrending_InputSpec
-    output_spec = detrending_OutputSpec
+    """Apply linear, quadratic or cubic detrending on the Functional MRI signal.
+
+    Examples
+    --------
+    >>> from cmtklib.functionalMRI import Detrending
+    >>> detrend = Detrending()
+    >>> detrend.inputs.base_dir = '/my_directory'
+    >>> detrend.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> detrend.inputs.gm_file = ['/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> detrend.inputs.mode = 'quadratic'
+    >>> detrend.run() # doctest: +SKIP
+    """
+
+    input_spec = Detrending_InputSpec
+    output_spec = Detrending_OutputSpec
 
     def _run_interface(self, runtime):
-        """ linear/quadratic detrending
-        """
-
         print("Linear detrending")
         print("=================")
 
@@ -344,29 +407,52 @@ class Detrending(BaseInterface):
         return outputs
 
 
-class scrubbing_InputSpec(BaseInterfaceInputSpec):
+class Scrubbing_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to scrubb")
+
     wm_mask = File(exists=True, desc='WM mask registered to fMRI space')
+
     gm_file = InputMultiPath(
         File(exists=True), desc='ROI volumes registered to fMRI space')
+
     motion_parameters = File(
         exists=True, desc='Motion parameters from preprocessing stage')
 
 
-class scrubbing_OutputSpec(TraitedSpec):
-    fd_mat = File(exists=True)
-    dvars_mat = File(exists=True)
-    fd_npy = File(exists=True)
-    dvars_npy = File(exists=True)
+class Scrubbing_OutputSpec(TraitedSpec):
+    fd_mat = File(exists=True, desc="FD matrix for scrubbing")
+
+    dvars_mat = File(exists=True, desc="DVARS matrix for scrubbing")
+
+    fd_npy = File(exists=True, desc="FD in .npy format")
+
+    dvars_npy = File(exists=True, desc="DVARS in .npy format")
 
 
 class Scrubbing(BaseInterface):
-    input_spec = scrubbing_InputSpec
-    output_spec = scrubbing_OutputSpec
+    """Computes scrubbing parameters: `FD` and `DVARS`.
+
+    Examples
+    --------
+    >>> from cmtklib.functionalMRI import Scrubbing
+    >>> scrub = Scrubbing()
+    >>> scrub.inputs.base_dir = '/my_directory'
+    >>> scrub.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
+    >>> scrub.inputs.gm_file = ['/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale1_dseg.nii.gz',
+    >>>                         '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale2_dseg.nii.gz',
+    >>>                         '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale3_dseg.nii.gz',
+    >>>                         '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale4_dseg.nii.gz',
+    >>>                         '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale5_dseg.nii.gz']
+    >>> scrub.inputs.wm_mask = '/path/to/sub-01_space-meanBOLD_label-WM_dseg.nii.gz'
+    >>> scrub.inputs.gm_file = '/path/to/sub-01_space-meanBOLD_label-GM_dseg.nii.gz'
+    >>> scrub.inputs.mode = 'quadratic'
+    >>> scrub.run() # doctest: +SKIP
+    """
+
+    input_spec = Scrubbing_InputSpec
+    output_spec = Scrubbing_OutputSpec
 
     def _run_interface(self, runtime):
-        """ compute scrubbing parameters: FD and DVARS
-        """
         print("Precompute FD and DVARS for scrubbing")
         print("=====================================")
         import scipy.io as sio

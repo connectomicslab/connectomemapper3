@@ -3,8 +3,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Multi-scale Brain Parcellator Commandline Parser
-"""
+"""Connectome Mapper 3 Commandline Parser."""
 
 import argparse
 
@@ -13,7 +12,13 @@ from .info import __release_date__
 
 
 def get():
-    '''Return the argparse parser of the BIDS App'''
+    """Return the argparse parser of the BIDS App.
+
+    Returns
+    -------
+    p : object
+       Instance of :class:`argparse.ArgumentParser` class
+    """
 
     p = argparse.ArgumentParser(
         description='Entrypoint script of the BIDS-App Connectome Mapper version {}'.format(__version__))
