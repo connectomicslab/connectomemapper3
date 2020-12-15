@@ -45,44 +45,12 @@ ENV LD_LIBRARY_PATH /opt/conda/envs/$CONDA_ENV/lib:$LD_LIBRARY_PATH
 # Make dipy.viz (fury/vtk) happy
 RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.13"
 
-# Create entrypoint script that simulated a X server - required by traitsui?
-# try to change freesurfer home permission to copy the license
-#RUN echo '#! /bin/bash \n chown "$(id -u):$(id -g)" /opt/freesurfer \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
-
-#Previous for Docker
-#RUN echo '#! /bin/bash \n . activate $CONDA_ENV \n xvfb-run -a python /app/connectomemapper3/run.py $@ \n rm -f -R /tmp/.X99-lock /tmp/.X11-unix /tmp/.xvfb-run.*' > /app/run_connectomemapper3.sh
-
-#Current for singularity
-
-# Create content of entrypoint script
-ENV content="#! /bin/bash\n"
-ENV content="${content}echo User: \$(id -un \$USER) && echo Group: \$(id -gn \$USER) &&"
-ENV content="$content . \"$FSLDIR/etc/fslconf/fsl.sh\" &&"
-ENV content="$content . activate \"${CONDA_ENV}\" &&"
-ENV content="$content xvfb-run -s \"-screen 0 900x900x24 -ac +extension GLX -noreset\" \
--a python /app/connectomemapper3/run.py \$@"
-
-# Write content to BIDSapp entrypoint script
-RUN printf "$content" > /app/run_cmp3.sh
+# Copy primary BIDSapp entrypoint script
+COPY scripts/bidsapp/run_cmp3.sh /app/run_cmp3.sh
 RUN cat /app/run_cmp3.sh
 
-# Create content of entrypoint script with coverage
-ENV content_cov="#! /bin/bash\n"
-ENV content_cov="${content_cov}echo User: \$(id -un \$USER) && echo Group: \$(id -gn \$USER) &&"
-ENV content_cov="${content_cov} . \"$FSLDIR/etc/fslconf/fsl.sh\" &&"
-ENV content_cov="${content_cov} . activate \"${CONDA_ENV}\" &&"
-ENV content_cov="${content_cov} xvfb-run -s \"-screen 0 900x900x24 -ac +extension GLX -noreset\" \
--a coverage run --source=cmp,cmtklib --omit=*/bidsappmanager/*,*/viz/* /app/connectomemapper3/run.py \$@ \
-|& tee /bids_dir/code/log.txt &&"
-# ENV content_cov="${content_cov} xvfb-run -s \"-screen 0 900x900x24 -ac +extension GLX -noreset\" \
-# -a coverage run --source=/opt/conda/envs/${CONDA_ENV}/lib/python3.7/site-packages/cmp,/opt/conda/envs/py27cmp-core/lib/python3.7/site-packages/cmtklib --omit=*/bidsappmanager/*,*/viz/* /app/connectomemapper3/run.py \$@ &&"
-
-ENV content_cov="${content_cov} coverage html -d /bids_dir/code/coverage_html &&"
-ENV content_cov="${content_cov} coverage xml -o /bids_dir/code/coverage.xml &&"
-ENV content_cov="${content_cov} coverage json -o /bids_dir/code/coverage.json"
-
-# Write content to BIDSapp entrypoint script
-RUN printf "$content_cov" > /app/run_coverage_cmp3.sh
+# Copy secondary BIDSapp entrypoint script with code coverage
+COPY scripts/bidsapp/run_coverage_cmp3.sh /app/run_coverage_cmp3.sh
 RUN cat /app/run_coverage_cmp3.sh
 
 # Set the working directory back to /app
