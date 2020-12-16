@@ -1475,15 +1475,63 @@ class FilterTractogramInputSpec(CommandLineInputSpec):
     act_file = File(exists=True, argstr='-act %s',
                     position=-4, desc='ACT 5TT image file')
     out_file = File(argstr='%s', position=-1,
-                    desc='Output text file containing the weighting factor for each streamline')
+                    desc='Output filtered tractogram')
 
 
 class FilterTractogramOutputSpec(TraitedSpec):
-    out_weights = File(
-        exists=True, desc='Output text file containing the weighting factor for each streamline')
+    out_tracks = File(
+        exists=True, desc='Output filtered tractogram')
 
 
 class FilterTractogram(MRTrix3Base):
+    """Spherical-deconvolution informed filtering of tractograms using `tcksift` [Smith2013SIFT]_.
+
+    References
+    ----------
+    .. [Smith2013SIFT] R.E. Smith et al., NeuroImage 67 (2013), pp. 298–312, <https://www.ncbi.nlm.nih.gov/pubmed/23238430>.
+
+    Example
+    -------
+    >>> import cmtklib.interfaces.mrtrix3 as cmp_mrt
+    >>> mrtrix_sift = cmp_mrt.FilterTractogram()
+    >>> mrtrix_sift.inputs.in_tracks = 'tractogram.tck'
+    >>> mrtrix_sift.inputs.in_fod = 'spherical_harmonics_image.nii.gz'
+    >>> mrtrix_sift.inputs.out_file = 'sift_tractogram.tck'
+    >>> mrtrix_sift.run()                               # doctest: +SKIP
+    """
+
+    _cmd = 'tcksift'
+    input_spec = FilterTractogramInputSpec
+    output_spec = FilterTractogramOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if not isdefined(self.inputs.out_file):
+            outputs['out_tracks'] = op.abspath('SIFT-filtered_tractogram.tck')
+        else:
+            outputs['out_tracks'] = op.abspath(self.inputs.out_file)
+
+        return outputs
+
+
+class SIFT2InputSpec(CommandLineInputSpec):
+    in_tracks = File(exists=True, mandatory=True, argstr='%s',
+                     position=-3, desc='Input track file in TCK format')
+    in_fod = File(exists=True, mandatory=True, argstr='%s', position=-2,
+                  desc='Input image containing the spherical harmonics of the fibre orientation distributions')
+    act_file = File(exists=True, argstr='-act %s',
+                    position=-4, desc='ACT 5TT image file')
+    out_file = File(argstr='%s', position=-1,
+                    desc='Output text file containing the weighting factor for each streamline')
+
+
+class SIFT2OutputSpec(TraitedSpec):
+    out_weights = File(
+            exists=True, desc='Output text file containing the weighting factor for each streamline')
+
+
+class SIFT2(MRTrix3Base):
     """Determine an appropriate cross-sectional area multiplier for each streamline using `tcksift2` [Smith2015SIFT2]_.
 
     References
@@ -1493,7 +1541,7 @@ class FilterTractogram(MRTrix3Base):
     Example
     -------
     >>> import cmtklib.interfaces.mrtrix3 as cmp_mrt
-    >>> mrtrix_sift2 = cmp_mrt.FilterTractogram()
+    >>> mrtrix_sift2 = cmp_mrt.SIFT2()
     >>> mrtrix_sift2.inputs.in_tracks = 'tractogram.tck'
     >>> mrtrix_sift2.inputs.in_fod = 'spherical_harmonics_image.nii.gz'
     >>> mrtrix_sift2.inputs.out_file = 'sift2_fiber_weights.txt'
