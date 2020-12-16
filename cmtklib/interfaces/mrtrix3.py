@@ -1472,7 +1472,8 @@ class FilterTractogramInputSpec(CommandLineInputSpec):
                      position=-3, desc='Input track file in TCK format')
     in_fod = File(exists=True, mandatory=True, argstr='%s', position=-2,
                   desc='Input image containing the spherical harmonics of the fibre orientation distributions')
-
+    act_file = File(exists=True, argstr='-act %s',
+                    position=-4, desc='ACT 5TT image file')
     out_file = File(argstr='%s', position=-1,
                     desc='Output text file containing the weighting factor for each streamline')
 
