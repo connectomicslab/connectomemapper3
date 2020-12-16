@@ -80,16 +80,16 @@ class fMRIPipelineUI(fMRIPipeline):
     connectome = Button('Connectome')
 
     pipeline_group = VGroup(
-        HGroup(spring, UItem('preprocessing', style='custom', width=450, height=130, resizable=True,
+        HGroup(spring, UItem('preprocessing', style='custom', width=222, height=129, resizable=False,
                              style_sheet=return_button_style_sheet(ImageResource('preprocessing').absolute_path, 222)), spring,
                show_labels=False, label=""),
-        HGroup(spring, UItem('registration', style='custom', width=500, height=110, resizable=True,
+        HGroup(spring, UItem('registration', style='custom', width=222, height=129, resizable=False,
                              style_sheet=return_button_style_sheet(ImageResource('registration').absolute_path, 222)), spring,
                show_labels=False, label=""),
-        HGroup(spring, UItem('functionalMRI', style='custom', width=450, height=240, resizable=True,
+        HGroup(spring, UItem('functionalMRI', style='custom', width=222, height=168, resizable=False,
                              style_sheet=return_button_style_sheet(ImageResource('functionalMRI').absolute_path, 222)), spring,
                show_labels=False, label=""),
-        HGroup(spring, UItem('connectome', style='custom', width=450, height=130, resizable=True,
+        HGroup(spring, UItem('connectome', style='custom', width=222, height=129, resizable=False,
                              style_sheet=return_button_style_sheet(ImageResource('connectome').absolute_path, 222)), spring,
                show_labels=False, label=""),
         spring,

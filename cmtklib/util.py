@@ -60,7 +60,6 @@ def return_button_style_sheet(image, icon_size, verbose=False):
                 border-image: url({image}) 0 0 0 0;
                 color: transparent;
                 background-color: transparent;
-                icon-size: {icon_size}px;
                 font: 12pt "Verdana";
                 margin: 0px 0px 0px 0px;
                 padding:0px 0px;

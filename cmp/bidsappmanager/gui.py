@@ -761,19 +761,26 @@ class CMP_BIDSAppWindow(HasTraits):
             label='Data Provenance Tracking / Data Lineage',
             enabled_when='datalad_is_available'),
         spring,
-        HGroup(spring, Item('check', style='custom', width=80, height=20, resizable=False, label='', show_label=False,
-                            editor_args={
-                                'image': get_icon(pkg_resources.resource_filename('resources',
-                                                                                       os.path.join('buttons',
-                                                                                                    'bidsapp-check-settings.png'))),
-                                'label': "", 'label_value': ""}
+        HGroup(spring, Item('check', style='custom',
+                            width=152, height=35, resizable=False,
+                            label='', show_label=False,
+                            style_sheet=return_button_style_sheet(
+                                    ImageResource(
+                                            pkg_resources.resource_filename(
+                                                    'resources',
+                                                    os.path.join('buttons', 'bidsapp-check-settings.png'))).absolute_path,
+                                    152)
                             ),
                spring,
-               Item('start_bidsapp', style='custom', width=80, height=20, resizable=False, label='', show_label=False,
-                    editor_args={
-                        'image': get_icon(
-                            pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))),
-                        'label': "", 'label_value': ""},
+               Item('start_bidsapp', style='custom',
+                    width=152, height=35, resizable=False,
+                    label='', show_label=False,
+                    style_sheet=return_button_style_sheet(
+                            ImageResource(
+                                    pkg_resources.resource_filename(
+                                            'resources',
+                                            os.path.join('buttons', 'bidsapp-run.png'))).absolute_path,
+                            152),
                     enabled_when='settings_checked==True and docker_running==False'),
                spring,
                show_labels=False, label=""),
@@ -782,7 +789,7 @@ class CMP_BIDSAppWindow(HasTraits):
         title='Connectome Mapper 3 BIDS App GUI',
         # kind='modal',
         handler=project.CMP_BIDSAppWindowHandler(),
-        style_sheet=style_sheet,
+        # style_sheet=style_sheet,
         buttons=[],
         # buttons = [check,start_bidsapp],
         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
@@ -798,7 +805,7 @@ class CMP_BIDSAppWindow(HasTraits):
         title='Connectome Mapper 3 BIDS App Progress',
         # kind='modal',
         # handler=project.CMP_BIDSAppWindowHandler(),
-        style_sheet=style_sheet,
+        # style_sheet=style_sheet,
         buttons=[],
         # buttons = [check,start_bidsapp],
         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
@@ -1542,27 +1549,27 @@ class CMP_ConfiguratorWindow(HasTraits):
                 label='Anatomical pipeline', dock='tab'),
             Group(
                 Item('dmri_pipeline', style='custom', show_label=False,
-                     enabled_when='dmri_inputs_checked'),
+                     enabled_when='dmri_inputs_checked', visible_when='dmri_inputs_checked'),
                 label='Diffusion pipeline', dock='tab'),
             Group(
                 Item('fmri_pipeline', style='custom', show_label=False,
-                     enabled_when='fmri_inputs_checked'),
+                     enabled_when='fmri_inputs_checked', visible_when='fmri_inputs_checked'),
                 label='fMRI pipeline', dock='tab'),
             orientation='horizontal', layout='tabbed',
             springy=True, enabled_when='anat_inputs_checked'),
         spring,
         HGroup(spring, Item('save_all_config',
                             style='custom',
-                            width=160, height=20,
+                            width=315, height=35,
                             resizable=False,
                             label='',
                             show_label=False,
-                            editor_args={
-                                'image': get_icon(
+                            style_sheet=return_button_style_sheet(
+                                ImageResource(
                                     pkg_resources.resource_filename(
                                         'resources',
-                                        os.path.join('buttons','configurator-saveall.png'))),
-                                'label': "", 'label_value': ""},
+                                        os.path.join('buttons', 'configurator-saveall.png'))).absolute_path,
+                                315),
                             enabled_when='anat_inputs_checked==True'),
                spring,
                show_labels=False, label=""),
@@ -1579,7 +1586,7 @@ class CMP_ConfiguratorWindow(HasTraits):
         handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
         buttons=[],
-        width=0.5, height=0.8, scrollable=True, resizable=True,
+        width=0.5, height=0.8, resizable=True, # scrollable=True,
         icon=get_icon('configurator.png')
     )
 
@@ -1751,7 +1758,7 @@ class CMP_InspectorWindow(HasTraits):
     ),
         handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
-        width=0.5, height=0.8, scrollable=True, resizable=True,
+        width=0.5, height=0.8, resizable=True,  # scrollable=True,
         icon=get_icon('qualitycontrol.png')
     )
 
