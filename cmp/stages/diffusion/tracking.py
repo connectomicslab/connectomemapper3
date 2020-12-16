@@ -205,6 +205,10 @@ class MRtrix_tracking_config(HasTraits):
     backtrack : traits.Bool
         Allow tracks to be truncated (requires Anatomically-Constrained Tractography (ACT))
         (Default: True)
+
+    sift2 : traits.Bool
+        Compute and generate the tractogram fiber weights file using mrtrix3 SIFT2
+        (Default: True)
     """
 
     tracking_mode = Str
