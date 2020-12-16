@@ -24,6 +24,7 @@ from cmp.bidsappmanager.stages.registration.registration import RegistrationStag
 from cmp.bidsappmanager.stages.functional.functionalMRI import FunctionalMRIStageUI
 from cmp.bidsappmanager.stages.connectome.fmri_connectome import ConnectomeStageUI
 from cmp.pipelines.functional.fMRI import Check_Input_Notification, fMRIPipeline
+from cmtklib.util import return_button_style_sheet
 
 
 class Check_Input_NotificationUI(Check_Input_Notification):
@@ -80,16 +81,16 @@ class fMRIPipelineUI(fMRIPipeline):
 
     pipeline_group = VGroup(
         HGroup(spring, UItem('preprocessing', style='custom', width=450, height=130, resizable=True,
-                             editor_args={'image': ImageResource('preprocessing'), 'label': ""}), spring,
+                             style_sheet=return_button_style_sheet(ImageResource('preprocessing').absolute_path, 222)), spring,
                show_labels=False, label=""),
         HGroup(spring, UItem('registration', style='custom', width=500, height=110, resizable=True,
-                             editor_args={'image': ImageResource('registration'), 'label': ""}), spring,
+                             style_sheet=return_button_style_sheet(ImageResource('registration').absolute_path, 222)), spring,
                show_labels=False, label=""),
         HGroup(spring, UItem('functionalMRI', style='custom', width=450, height=240, resizable=True,
-                             editor_args={'image': ImageResource('functionalMRI'), 'label': ""}), spring,
+                             style_sheet=return_button_style_sheet(ImageResource('functionalMRI').absolute_path, 222)), spring,
                show_labels=False, label=""),
         HGroup(spring, UItem('connectome', style='custom', width=450, height=130, resizable=True,
-                             editor_args={'image': ImageResource('connectome'), 'label': ""}), spring,
+                             style_sheet=return_button_style_sheet(ImageResource('connectome').absolute_path, 222)), spring,
                show_labels=False, label=""),
         spring,
         springy=True

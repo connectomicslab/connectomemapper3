@@ -31,6 +31,8 @@ import cmp.bidsappmanager.project as project
 from cmp.project import CMP_Project_Info
 from cmp.info import __version__
 
+from cmtklib.util import return_button_style_sheet
+
 # Remove warnings visible whenever you import scipy (or another package) 
 # that was compiled against an older numpy than is installed.
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
@@ -51,11 +53,11 @@ style_sheet = '''
                 border-radius: 4px;
                 color: transparent;
                 background-color: transparent;
-                min-width: 5px;
-                icon-size: 415px;
+                min-width: 222px;
+                icon-size: 222px;
                 font: 12pt "Verdana";
-                margin: 5px 5px 5px 5px;
-                padding:1px 1px;
+                margin: 0px 0px 0px 0px;
+                padding:0px 0px;
             }
             QPushButton:pressed {
                 background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
@@ -84,8 +86,8 @@ style_sheet = '''
             }
             QMainWindow::separator {
                 background: yellow;
-                width: 10px; /* when vertical */
-                height: 10px; /* when horizontal */
+                width: 1px; /* when vertical */
+                height: 1px; /* when horizontal */
             }
             QMainWindow::separator:hover {
                 background: red;
@@ -1185,7 +1187,7 @@ class CMP_BIDSAppWindow(HasTraits):
 
         Examples
         --------
-        >>> cmd = 'data save - 'Save the state of the dataset'
+        >>> cmd = 'datalad save -m my dataset change message'
         >>> run(cmd) # doctest: +SKIP
         """
         merged_env = os.environ
@@ -1577,7 +1579,7 @@ class CMP_ConfiguratorWindow(HasTraits):
         handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
         buttons=[],
-        width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
+        width=0.5, height=0.8, scrollable=True, resizable=True,
         icon=get_icon('configurator.png')
     )
 
@@ -1749,7 +1751,7 @@ class CMP_InspectorWindow(HasTraits):
     ),
         handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
-        width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
+        width=0.5, height=0.8, scrollable=True, resizable=True,
         icon=get_icon('qualitycontrol.png')
     )
 
@@ -2079,30 +2081,38 @@ class CMP_MainWindow(HasTraits):
         HGroup(
             spring,
             HGroup(
-                Item('configurator', style='custom', width=240, height=240, resizable=False, label='', show_label=False,
-                     editor_args={
-                         'image': get_icon(pkg_resources.resource_filename('cmp',
-                                                                                os.path.join('bidsappmanager/images',
-                                                                                             'configurator.png'))),
-                         'label': "", 'label_value': ""}
+                Item('configurator', style='custom', width=200, height=200, resizable=True, label='', show_label=False,
+                     # editor_args={
+                     #     'image': get_icon(pkg_resources.resource_filename('cmp',
+                     #                                                       os.path.join('bidsappmanager/images',
+                     #                                                                    'configurator_200x200.png'))),
+                     #     'label': "", 'label_value': ""},
+                     style_sheet=return_button_style_sheet(
+                             ImageResource(
+                                     pkg_resources.resource_filename('cmp',
+                                                                     os.path.join('bidsappmanager/images',
+                                                                                  'configurator_200x200.png'))).absolute_path,
+                             200)
                      ),
                 show_labels=False, label=""),
             spring,
-            HGroup(Item('bidsapp', style='custom', width=240, height=240, resizable=False,
-                        editor_args={
-                            'image': get_icon(pkg_resources.resource_filename('cmp',
-                                                                                   os.path.join('bidsappmanager/images',
-                                                                                                'bidsapp.png'))),
-                             'label': ""}
+            HGroup(Item('bidsapp', style='custom', width=200, height=200, resizable=True,
+                        style_sheet=return_button_style_sheet(
+                                ImageResource(
+                                        pkg_resources.resource_filename('cmp',
+                                                                        os.path.join('bidsappmanager/images',
+                                                                                     'bidsapp_200x200.png'))).absolute_path,
+                                200)
                         ),
                    show_labels=False, label=""),
             spring,
-            HGroup(Item('quality_control', style='custom', width=240, height=240, resizable=False,
-                        editor_args={
-                            'image': get_icon(pkg_resources.resource_filename('cmp',
-                                                                                   os.path.join('bidsappmanager/images',
-                                                                                                'qualitycontrol.png'))),
-                             'label': ""}
+            HGroup(Item('quality_control', style='custom', width=120, height=120, resizable=True,
+                        style_sheet=return_button_style_sheet(
+                                ImageResource(
+                                        pkg_resources.resource_filename('cmp',
+                                                                        os.path.join('bidsappmanager/images',
+                                                                                     'qualitycontrol_200x200.png'))).absolute_path,
+                                200)
                         ),
                    show_labels=False, label=""),
             spring,
@@ -2127,7 +2137,7 @@ class CMP_MainWindow(HasTraits):
         ),
         handler=project.CMP_MainWindowHandler(),
         style_sheet=style_sheet,
-        width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
+        width=0.5, height=0.8, resizable=True, # , scrollable=True , resizable=True
         icon=get_icon('cmp.png')
     )
 
