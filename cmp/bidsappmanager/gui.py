@@ -784,7 +784,8 @@ class CMP_BIDSAppWindow(HasTraits):
                     enabled_when='settings_checked==True and docker_running==False'),
                spring,
                show_labels=False, label=""),
-        orientation='vertical', springy=True),
+        orientation='vertical',
+        springy=True),
 
         title='Connectome Mapper 3 BIDS App GUI',
         # kind='modal',
