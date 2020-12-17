@@ -24,7 +24,7 @@ This version corresponds to the second release candidate of Connectome Mapper 3.
 
 *Documentation*
 
-* Full code documentation with numpydoc-style docstrings.
+* Full code documentation with *numpydoc*-style docstrings.
 
 * API documentation page at `readthedocs <https://connectome-mapper-3.readthedocs.io/en/latest/api_doc.html>`_.
 
@@ -36,15 +36,15 @@ This version corresponds to the second release candidate of Connectome Mapper 3.
 
 * Review statements for creating contents of BIDS App entrypoint scripts to fix issue with Singularity converted images reported in `#47 <https://github.com/connectomicslab/connectomemapper3/issues/47>`_.
 
-* Install dc package inside the BIDS App. This will fix the issue with FSL BET reported in `#50 <https://github.com/connectomicslab/connectomemapper3/issues/50>`_.
+* Install `dc` package inside the BIDS App to fix the issue with FSL BET reported in `#50 <https://github.com/connectomicslab/connectomemapper3/issues/50>`_.
 
-* Install libopenblas package inside the BIDS App. This will fix the issue with FSL EDDY_OPENMP reported in `#49 <https://github.com/connectomicslab/connectomemapper3/issues/49>`_.
+* Install `libopenblas` package inside the BIDS App to fix the issue with FSL EDDY_OPENMP reported in `#49 <https://github.com/connectomicslab/connectomemapper3/issues/49>`_.
 
 *Software development life cycle*
 
 * Add a new job `test_docker_fmri` that test the fMRI pipeline.
 
-* Add jobs to build, test and deploy the Singularity image in CircleCI (PR `#56 <https://github.com/connectomicslab/connectomemapper3/pull/56>`_).
+* Add `build_singularity`, `test_singularity_parcellation`, `deploy_singularity_latest`, and `deploy_singularity_release` jobs to build, test and deploy the Singularity image in CircleCI (PR `#56 <https://github.com/connectomicslab/connectomemapper3/pull/56>`_).
 
 Please check the `main pull request 45 page <https://github.com/connectomicslab/connectomemapper3/pull/45>`_ for more details.
 
