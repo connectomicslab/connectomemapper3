@@ -27,6 +27,7 @@ from bids import BIDSLayout
 # Own imports
 from cmp.bidsappmanager.pipelines.anatomical.anatomical import AnatomicalPipelineUI
 
+from cmtklib.util import return_button_style_sheet
 from cmp.bidsappmanager.stages.preprocessing.preprocessing import PreprocessingStageUI
 from cmp.bidsappmanager.stages.diffusion.diffusion import DiffusionStageUI
 from cmp.bidsappmanager.stages.registration.registration import RegistrationStageUI
@@ -99,19 +100,21 @@ class DiffusionPipelineUI(DiffusionPipeline):
     # connectome.setIcon(QIcon(QPixmap("connectome.png")))
 
     pipeline_group = VGroup(
-        HGroup(spring, UItem('preprocessing', style='custom', width=444, height=196,
-                             editor_args={'image': ImageResource('preprocessing'), 'label': ""}), spring,
-               show_labels=False, label=""),
-        HGroup(spring, UItem('registration', style='custom', width=444, height=196,
-                             editor_args={'image': ImageResource('registration'), 'label': ""}), spring,
-               show_labels=False, label=""),
-        HGroup(spring, UItem('diffusion', style='custom', width=460, height=374,
-                             editor_args={'image': ImageResource('diffusion'), 'label': ""}), spring, show_labels=False,
-               label=""),
-        HGroup(spring, UItem('connectome', style='custom', width=444, height=184,
-                             editor_args={'image': ImageResource('connectome'), 'label': ""}), spring,
-               show_labels=False, label=""),
-        springy=True
+        HGroup(spring, UItem('preprocessing', style='custom', width=222, height=129, resizable=False,
+                             style_sheet=return_button_style_sheet(ImageResource('preprocessing').absolute_path, 222)), spring,
+               show_labels=False, label="", padding=0),
+        HGroup(spring, UItem('registration', style='custom', width=222, height=129, resizable=False,
+                             style_sheet=return_button_style_sheet(ImageResource('registration').absolute_path, 222)), spring,
+               show_labels=False, label="", padding=0),
+        HGroup(spring, UItem('diffusion', style='custom', width=222, height=244, resizable=False,
+                             style_sheet=return_button_style_sheet(ImageResource('diffusion').absolute_path, 222)), spring,
+               show_labels=False, label="", padding=0),
+        HGroup(spring, UItem('connectome', style='custom', width=222, height=129, resizable=False,
+                             style_sheet=return_button_style_sheet(ImageResource('connectome').absolute_path, 222)), spring,
+               show_labels=False, label="", padding=0),
+        padding=0,
+        # layout='split',
+        # springy=True
     )
 
     traits_view = QtView(Include('pipeline_group'))

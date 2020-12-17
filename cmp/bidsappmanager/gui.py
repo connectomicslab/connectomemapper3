@@ -31,6 +31,8 @@ import cmp.bidsappmanager.project as project
 from cmp.project import CMP_Project_Info
 from cmp.info import __version__
 
+from cmtklib.util import return_button_style_sheet
+
 # Remove warnings visible whenever you import scipy (or another package) 
 # that was compiled against an older numpy than is installed.
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
@@ -51,11 +53,11 @@ style_sheet = '''
                 border-radius: 4px;
                 color: transparent;
                 background-color: transparent;
-                min-width: 5px;
-                icon-size: 415px;
+                min-width: 222px;
+                icon-size: 222px;
                 font: 12pt "Verdana";
-                margin: 5px 5px 5px 5px;
-                padding:1px 1px;
+                margin: 0px 0px 0px 0px;
+                padding:0px 0px;
             }
             QPushButton:pressed {
                 background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
@@ -84,8 +86,8 @@ style_sheet = '''
             }
             QMainWindow::separator {
                 background: yellow;
-                width: 10px; /* when vertical */
-                height: 10px; /* when horizontal */
+                width: 1px; /* when vertical */
+                height: 1px; /* when horizontal */
             }
             QMainWindow::separator:hover {
                 background: red;
@@ -759,28 +761,36 @@ class CMP_BIDSAppWindow(HasTraits):
             label='Data Provenance Tracking / Data Lineage',
             enabled_when='datalad_is_available'),
         spring,
-        HGroup(spring, Item('check', style='custom', width=80, height=20, resizable=False, label='', show_label=False,
-                            editor_args={
-                                'image': get_icon(pkg_resources.resource_filename('resources',
-                                                                                       os.path.join('buttons',
-                                                                                                    'bidsapp-check-settings.png'))),
-                                'label': "", 'label_value': ""}
+        HGroup(spring, Item('check', style='custom',
+                            width=152, height=35, resizable=False,
+                            label='', show_label=False,
+                            style_sheet=return_button_style_sheet(
+                                    ImageResource(
+                                            pkg_resources.resource_filename(
+                                                    'resources',
+                                                    os.path.join('buttons', 'bidsapp-check-settings.png'))).absolute_path,
+                                    152)
                             ),
                spring,
-               Item('start_bidsapp', style='custom', width=80, height=20, resizable=False, label='', show_label=False,
-                    editor_args={
-                        'image': get_icon(
-                            pkg_resources.resource_filename('resources', os.path.join('buttons', 'bidsapp-run.png'))),
-                        'label': "", 'label_value': ""},
+               Item('start_bidsapp', style='custom',
+                    width=152, height=35, resizable=False,
+                    label='', show_label=False,
+                    style_sheet=return_button_style_sheet(
+                            ImageResource(
+                                    pkg_resources.resource_filename(
+                                            'resources',
+                                            os.path.join('buttons', 'bidsapp-run.png'))).absolute_path,
+                            152),
                     enabled_when='settings_checked==True and docker_running==False'),
                spring,
                show_labels=False, label=""),
-        orientation='vertical', springy=True),
+        orientation='vertical',
+        springy=True),
 
         title='Connectome Mapper 3 BIDS App GUI',
         # kind='modal',
         handler=project.CMP_BIDSAppWindowHandler(),
-        style_sheet=style_sheet,
+        # style_sheet=style_sheet,
         buttons=[],
         # buttons = [check,start_bidsapp],
         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
@@ -796,7 +806,7 @@ class CMP_BIDSAppWindow(HasTraits):
         title='Connectome Mapper 3 BIDS App Progress',
         # kind='modal',
         # handler=project.CMP_BIDSAppWindowHandler(),
-        style_sheet=style_sheet,
+        # style_sheet=style_sheet,
         buttons=[],
         # buttons = [check,start_bidsapp],
         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
@@ -1185,7 +1195,7 @@ class CMP_BIDSAppWindow(HasTraits):
 
         Examples
         --------
-        >>> cmd = 'data save - 'Save the state of the dataset'
+        >>> cmd = 'datalad save -m my dataset change message'
         >>> run(cmd) # doctest: +SKIP
         """
         merged_env = os.environ
@@ -1540,27 +1550,27 @@ class CMP_ConfiguratorWindow(HasTraits):
                 label='Anatomical pipeline', dock='tab'),
             Group(
                 Item('dmri_pipeline', style='custom', show_label=False,
-                     enabled_when='dmri_inputs_checked'),
+                     enabled_when='dmri_inputs_checked', visible_when='dmri_inputs_checked'),
                 label='Diffusion pipeline', dock='tab'),
             Group(
                 Item('fmri_pipeline', style='custom', show_label=False,
-                     enabled_when='fmri_inputs_checked'),
+                     enabled_when='fmri_inputs_checked', visible_when='fmri_inputs_checked'),
                 label='fMRI pipeline', dock='tab'),
             orientation='horizontal', layout='tabbed',
             springy=True, enabled_when='anat_inputs_checked'),
         spring,
         HGroup(spring, Item('save_all_config',
                             style='custom',
-                            width=160, height=20,
+                            width=315, height=35,
                             resizable=False,
                             label='',
                             show_label=False,
-                            editor_args={
-                                'image': get_icon(
+                            style_sheet=return_button_style_sheet(
+                                ImageResource(
                                     pkg_resources.resource_filename(
                                         'resources',
-                                        os.path.join('buttons','configurator-saveall.png'))),
-                                'label': "", 'label_value': ""},
+                                        os.path.join('buttons', 'configurator-saveall.png'))).absolute_path,
+                                315),
                             enabled_when='anat_inputs_checked==True'),
                spring,
                show_labels=False, label=""),
@@ -1577,7 +1587,7 @@ class CMP_ConfiguratorWindow(HasTraits):
         handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
         buttons=[],
-        width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
+        width=0.5, height=0.8, resizable=True, # scrollable=True,
         icon=get_icon('configurator.png')
     )
 
@@ -1749,7 +1759,7 @@ class CMP_InspectorWindow(HasTraits):
     ),
         handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
-        width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
+        width=0.5, height=0.8, resizable=True,  # scrollable=True,
         icon=get_icon('qualitycontrol.png')
     )
 
@@ -2079,30 +2089,38 @@ class CMP_MainWindow(HasTraits):
         HGroup(
             spring,
             HGroup(
-                Item('configurator', style='custom', width=240, height=240, resizable=False, label='', show_label=False,
-                     editor_args={
-                         'image': get_icon(pkg_resources.resource_filename('cmp',
-                                                                                os.path.join('bidsappmanager/images',
-                                                                                             'configurator.png'))),
-                         'label': "", 'label_value': ""}
+                Item('configurator', style='custom', width=200, height=200, resizable=True, label='', show_label=False,
+                     # editor_args={
+                     #     'image': get_icon(pkg_resources.resource_filename('cmp',
+                     #                                                       os.path.join('bidsappmanager/images',
+                     #                                                                    'configurator_200x200.png'))),
+                     #     'label': "", 'label_value': ""},
+                     style_sheet=return_button_style_sheet(
+                             ImageResource(
+                                     pkg_resources.resource_filename('cmp',
+                                                                     os.path.join('bidsappmanager/images',
+                                                                                  'configurator_200x200.png'))).absolute_path,
+                             200)
                      ),
                 show_labels=False, label=""),
             spring,
-            HGroup(Item('bidsapp', style='custom', width=240, height=240, resizable=False,
-                        editor_args={
-                            'image': get_icon(pkg_resources.resource_filename('cmp',
-                                                                                   os.path.join('bidsappmanager/images',
-                                                                                                'bidsapp.png'))),
-                             'label': ""}
+            HGroup(Item('bidsapp', style='custom', width=200, height=200, resizable=True,
+                        style_sheet=return_button_style_sheet(
+                                ImageResource(
+                                        pkg_resources.resource_filename('cmp',
+                                                                        os.path.join('bidsappmanager/images',
+                                                                                     'bidsapp_200x200.png'))).absolute_path,
+                                200)
                         ),
                    show_labels=False, label=""),
             spring,
-            HGroup(Item('quality_control', style='custom', width=240, height=240, resizable=False,
-                        editor_args={
-                            'image': get_icon(pkg_resources.resource_filename('cmp',
-                                                                                   os.path.join('bidsappmanager/images',
-                                                                                                'qualitycontrol.png'))),
-                             'label': ""}
+            HGroup(Item('quality_control', style='custom', width=120, height=120, resizable=True,
+                        style_sheet=return_button_style_sheet(
+                                ImageResource(
+                                        pkg_resources.resource_filename('cmp',
+                                                                        os.path.join('bidsappmanager/images',
+                                                                                     'qualitycontrol_200x200.png'))).absolute_path,
+                                200)
                         ),
                    show_labels=False, label=""),
             spring,
@@ -2127,7 +2145,7 @@ class CMP_MainWindow(HasTraits):
         ),
         handler=project.CMP_MainWindowHandler(),
         style_sheet=style_sheet,
-        width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
+        width=0.5, height=0.8, resizable=True, # , scrollable=True , resizable=True
         icon=get_icon('cmp.png')
     )
 

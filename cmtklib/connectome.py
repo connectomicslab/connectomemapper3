@@ -721,12 +721,11 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
 
 class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
-    track_file = InputMultiPath(
-        File(exists=True), desc='Tractography result', mandatory=True)
-
-    roi_volumes = InputMultiPath(
-        File(exists=True), desc='ROI volumes registered to diffusion space')
-
+    track_file = InputMultiPath(File(exists=True),
+                                desc='Tractography result',
+                                mandatory=True)
+    roi_volumes = InputMultiPath(File(exists=True),
+                                 desc='ROI volumes registered to diffusion space')
     parcellation_scheme = traits.Enum('Lausanne2008', ['Lausanne2008', 'Lausanne2018', 'NativeFreesurfer', 'Custom'],
                                       desc="Parcellation scheme",
                                       usedefault=True)
@@ -814,7 +813,8 @@ class CMTK_cmat(BaseInterface):
              roi_graphmls=self.inputs.roi_graphmls,
              parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
              compute_curvature=self.inputs.compute_curvature,
-             additional_maps=additional_maps, output_types=self.inputs.output_types)
+             additional_maps=additional_maps,
+             output_types=self.inputs.output_types)
 
         if 'cff' in self.inputs.output_types:
             cvt = cmtk.CFFConverter()
