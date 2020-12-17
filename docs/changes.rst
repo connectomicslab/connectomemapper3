@@ -8,7 +8,7 @@ Version 3.0.0-RC2
 
 Date: December XX, 2020
 
-This version corresponds to the second release candidate of Connectome Mapper 3. In particular, it integrates Pull Request #45 which includes in particular:
+This version corresponds to the second release candidate of Connectome Mapper 3. In particular, it integrates `Pull Request #45 <https://github.com/connectomicslab/connectomemapper3/pull/45>`_ which includes:
 
 *New feature*
 
