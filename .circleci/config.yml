@@ -932,41 +932,41 @@ jobs:
           command: |
             singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
 
-    deploy_singularity_release:
-      machine:
-        # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-        image: ubuntu-1604:201903-01
-      working_directory: /tmp/src/connectomemapper3
-      steps:
-        - checkout:
-            path: /home/circleci/src/connectomemapper3
-        - run:
-            name: "Check whether test should be skipped"
-            command: |
-              cd /home/circleci/src/connectomemapper3
-              if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?deploy_singularity]' )" != "" ]]; then
-                echo "Skipping singularity deployment"
-                circleci step halt
-              fi
-        - attach_workspace:
-            at: /tmp
-        - singularity/install-go:
-            go-version: '1.13'
-        - singularity/debian-install-3:
-            singularity-version: 3.5.1
-        - run:
-            name: 'Write Sylabs.io TOKEN'
-            command: |
-              echo "${SINGULARITY_TOKEN}" > ~/.singularity/sylabs-token
-              cat ~/.singularity/sylabs-token
-        - run:
-            name: 'Deploy simg with version tag to Sylabs.io'
-            command: |
-              # Get version, update files.
-              THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-              echo "THISVERSION : ${THISVERSION}"
-              echo "CIRCLE_TAG : ${CIRCLE_TAG}"
-              singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:"${CIRCLE_TAG}"
+  deploy_singularity_release:
+    machine:
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
+    working_directory: /tmp/src/connectomemapper3
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: "Check whether test should be skipped"
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?deploy_singularity]' )" != "" ]]; then
+              echo "Skipping singularity deployment"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - singularity/install-go:
+          go-version: '1.13'
+      - singularity/debian-install-3:
+          singularity-version: 3.5.1
+      - run:
+          name: 'Write Sylabs.io TOKEN'
+          command: |
+            echo "${SINGULARITY_TOKEN}" > ~/.singularity/sylabs-token
+            cat ~/.singularity/sylabs-token
+      - run:
+          name: 'Deploy simg with version tag to Sylabs.io'
+          command: |
+            # Get version, update files.
+            THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
+            echo "THISVERSION : ${THISVERSION}"
+            echo "CIRCLE_TAG : ${CIRCLE_TAG}"
+            singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:"${CIRCLE_TAG}"
 
 workflows:
   version: 2.1
