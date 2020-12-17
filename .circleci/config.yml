@@ -932,7 +932,7 @@ jobs:
           command: |
             singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
 
-    deploy-singularity-release:
+    deploy_singularity_release:
       machine:
         # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
         image: ubuntu-1604:201903-01
