@@ -536,8 +536,8 @@ class DiffusionStage(Stage):
             ])
 
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'Dipy':
-            track_flow = create_mrtrix_tracking_flow(
-                self.config.mrtrix_tracking_config)
+
+            track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
 
             if self.config.diffusion_imaging_model != 'DSI':
                 flow.connect([
@@ -673,7 +673,6 @@ class DiffusionStage(Stage):
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
                                 'mrview', fa_res, '-odf.load_sh', shm_coeff_res]
                         else:
-                            shm_coeff_res = recon_results.outputs.out_shm_coeff
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
                                 'mrview', shm_coeff_res, '-odf.load_sh', shm_coeff_res]
 
