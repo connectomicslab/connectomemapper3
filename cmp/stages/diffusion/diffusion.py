@@ -585,7 +585,7 @@ class DiffusionStage(Stage):
                 (track_flow, outputnode, [
                  ('outputnode.track_file', 'track_file')])
             ])
-       
+
         temp_node = pe.Node(interface=util.IdentityInterface(
             fields=["diffusion_model"]), name='diffusion_model')
         temp_node.inputs.diffusion_model = self.config.diffusion_model
@@ -673,7 +673,6 @@ class DiffusionStage(Stage):
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
                                 'mrview', fa_res, '-odf.load_sh', shm_coeff_res]
                         else:
-                            shm_coeff_res = recon_results.outputs.out_shm_coeff
                             self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
                                 'mrview', shm_coeff_res, '-odf.load_sh', shm_coeff_res]
 
