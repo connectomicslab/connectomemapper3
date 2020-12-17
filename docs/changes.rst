@@ -3,6 +3,53 @@ Changes
 ========
 
 ****************************
+Version 3.0.0-RC2
+****************************
+
+Date: December XX, 2020
+
+This version corresponds to the second release candidate of Connectome Mapper 3. In particular, it integrates Pull Request #45 which includes in particular:
+
+*New feature*
+
+* Add SIFT2 tractogram filtering (requested in `#48 <https://github.com/connectomicslab/connectomemapper3/issues/48>`_, PR `#52 <https://github.com/connectomicslab/connectomemapper3/pull/52>`_).
+
+* Add a tracker to support us in finding new funds. User is still free to opt-out and disable it with the new option flag `--notrack`.
+
+*Code refactoring*
+
+* A number of classes describing interfaces to `fsl` and `mrtrix3` have been moved from ``cmtklib/interfaces/util.py`` to ``cmtklib/interfaces/fsl.py`` and ``cmtklib/interfaces/mrtrix3.py``.
+
+* Capitalize the first letter of a number of class names.
+
+*Documentation*
+
+* Full code documentation with numpydoc-style docstrings.
+
+* API documentation page at `readthedocs <https://connectome-mapper-3.readthedocs.io/en/latest/api_doc.html>`_.
+
+*Bug fixes*
+
+* Fix display of qpushbuttons with images in the GUI (PR `#52 <https://github.com/connectomicslab/connectomemapper3/pull/52>`_).
+
+* Fix the error reported in `#17 <https://github.com/connectomicslab/connectomemapper3/issues/17>`_ if it is still occuring.
+
+* Review statements for creating contents of BIDS App entrypoint scripts to fix issue with Singularity converted images reported in `#47 <https://github.com/connectomicslab/connectomemapper3/issues/47>`_.
+
+* Install dc package inside the BIDS App. This will fix the issue with FSL BET reported in `#50 <https://github.com/connectomicslab/connectomemapper3/issues/50>`_.
+
+* Install libopenblas package inside the BIDS App. This will fix the issue with FSL EDDY_OPENMP reported in `#49 <https://github.com/connectomicslab/connectomemapper3/issues/49>`_.
+
+*Software development life cycle*
+
+* Add a new job `test_docker_fmri` that test the fMRI pipeline.
+
+* Add jobs to build, test and deploy the Singularity image in CircleCI (PR `#56 <https://github.com/connectomicslab/connectomemapper3/pull/56>`_).
+
+Please check the `main pull request 45 page <https://github.com/connectomicslab/connectomemapper3/pull/45>`_ for more details.
+
+
+****************************
 Version 3.0.0-RC1
 ****************************
 
