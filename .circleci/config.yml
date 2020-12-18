@@ -124,6 +124,7 @@ jobs:
               sudo apt-get update && sudo apt-get -y install pigz
               pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
               docker images
+              sudo rm /tmp/cache/docker.tar.gz
             fi
       - singularity/install-go:
           go-version: '1.13'
