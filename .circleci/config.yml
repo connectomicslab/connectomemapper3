@@ -138,6 +138,7 @@ jobs:
             export SINGULARITY_CACHEDIR=~/.singularity/tmp
             export SINGULARITY_TMPDIR=~/.singularity/tmp
             export TMPDIR=~/.singularity/tmp
+            export SINGULARITY_DISABLE_CACHE=true
             export
       - run:
           name: "Building Singularity image from Docker image"
@@ -147,7 +148,7 @@ jobs:
             docker images -a | grep "sebastientourbier/connectomemapper3"
             SINGULARITY_NOHTTPS=1 SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
             SINGULARITY_CACHEDIR=~/.singularity/tmp SINGULARITY_TMPDIR=~/.singularity/tmp \
-            TMPDIR=~/.singularity/tmp \
+            TMPDIR=~/.singularity/tmp SINGULARITY_DISABLE_CACHE=true \
             singularity --debug -v build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
           no_output_timeout: 5h
       - persist_to_workspace:
