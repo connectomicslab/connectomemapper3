@@ -1050,12 +1050,14 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('--func_pipeline_config')
             cmd.append('/bids_dir/code/ref_fMRI_config.ini')
 
-        cmd.append('--fs_license {}'.format('/bids_dir/code/license.txt'))
+        cmd.append('--fs_license')
+        cmd.append('{}'.format('/bids_dir/code/license.txt'))
 
-        cmd.append('--number_of_participants_processed_in_parallel {}'.format(
-            self.number_of_participants_processed_in_parallel))
+        cmd.append('--number_of_participants_processed_in_parallel')
+        cmd.append('{}'.format(self.number_of_participants_processed_in_parallel))
 
-        cmd.append('--number_of_threads {}'.format(self.number_of_threads))
+        cmd.append('--number_of_threads')
+        cmd.append('{}'.format(self.number_of_threads))
 
         print('... BIDS App execution command: {}'.format(cmd))
 
