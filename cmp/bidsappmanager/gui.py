@@ -2114,7 +2114,7 @@ class CMP_MainWindow(HasTraits):
                         ),
                    show_labels=False, label=""),
             spring,
-            HGroup(Item('quality_control', style='custom', width=120, height=120, resizable=False,
+            HGroup(Item('quality_control', style='custom', width=200, height=200, resizable=False,
                         style_sheet=return_button_style_sheet(
                                 ImageResource(
                                         pkg_resources.resource_filename('cmp',
