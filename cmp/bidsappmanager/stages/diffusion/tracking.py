@@ -83,7 +83,7 @@ class MRtrix_tracking_configUI(MRtrix_tracking_config):
             orientation='vertical'
         ),
         Group(
-            Item('sift2', label="Perform SIFT2 to compute fiber weights"),
+            Item('sift', label="Perform SIFT2 to compute fiber weights"),
             label='Streamline filtering',
             orientation='vertical'
         ),
