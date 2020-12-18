@@ -130,6 +130,14 @@ jobs:
       - singularity/debian-install-3:
           singularity-version: 3.5.1
       - run:
+          name: "Set SINGULARITY TMP and CACHEDIR to prevent overflowing the /tmp folder"
+          command: |
+            mkdir -p ~/.singularity/tmp
+            export SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp
+            export SINGULARITY_CACHEDIR=~/.singularity/tmp
+            export SINGULARITY_TMPDIR=~/.singularity/tmp
+            export
+      - run:
           name: "Building Singularity image from Docker image"
           command: |
             docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
