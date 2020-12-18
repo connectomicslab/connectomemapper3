@@ -2089,7 +2089,7 @@ class CMP_MainWindow(HasTraits):
         HGroup(
             spring,
             HGroup(
-                Item('configurator', style='custom', width=200, height=200, resizable=True, label='', show_label=False,
+                Item('configurator', style='custom', width=200, height=200, resizable=False, label='', show_label=False,
                      # editor_args={
                      #     'image': get_icon(pkg_resources.resource_filename('cmp',
                      #                                                       os.path.join('bidsappmanager/images',
@@ -2104,7 +2104,7 @@ class CMP_MainWindow(HasTraits):
                      ),
                 show_labels=False, label=""),
             spring,
-            HGroup(Item('bidsapp', style='custom', width=200, height=200, resizable=True,
+            HGroup(Item('bidsapp', style='custom', width=200, height=200, resizable=False,
                         style_sheet=return_button_style_sheet(
                                 ImageResource(
                                         pkg_resources.resource_filename('cmp',
@@ -2114,7 +2114,7 @@ class CMP_MainWindow(HasTraits):
                         ),
                    show_labels=False, label=""),
             spring,
-            HGroup(Item('quality_control', style='custom', width=120, height=120, resizable=True,
+            HGroup(Item('quality_control', style='custom', width=120, height=120, resizable=False,
                         style_sheet=return_button_style_sheet(
                                 ImageResource(
                                         pkg_resources.resource_filename('cmp',
