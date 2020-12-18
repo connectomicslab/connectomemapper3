@@ -145,7 +145,10 @@ jobs:
             docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
             docker push localhost:5000/sebastientourbier/connectomemapper3:latest
             docker images -a | grep "sebastientourbier/connectomemapper3"
-            SINGULARITY_NOHTTPS=1 singularity build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
+            SINGULARITY_NOHTTPS=1 SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
+            SINGULARITY_CACHEDIR=~/.singularity/tmp SINGULARITY_TMPDIR=~/.singularity/tmp \
+            TMPDIR=~/.singularity/tmp \
+            singularity build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
           no_output_timeout: 5h
       - persist_to_workspace:
           root: /tmp
