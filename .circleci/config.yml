@@ -137,6 +137,7 @@ jobs:
             export SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp
             export SINGULARITY_CACHEDIR=~/.singularity/tmp
             export SINGULARITY_TMPDIR=~/.singularity/tmp
+            export TMPDIR=~/.singularity/tmp
             export
       - run:
           name: "Building Singularity image from Docker image"
