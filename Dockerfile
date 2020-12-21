@@ -17,7 +17,7 @@ ARG VERSION
 ##################################################################
 
 # Pre-cache neurodebian key
-COPY files/neurodebian.gpg /root/.neurodebian.gpg
+COPY ubuntu16.04/files/neurodebian.gpg /root/.neurodebian.gpg
 
 # Install system library dependencies
 RUN apt-get update && \
@@ -153,7 +153,7 @@ FROM builder_afni as builder_conda_env
 
 ENV CONDA_ENV py37cmp-core
 # Pull the environment name out of the environment.yml
-COPY environment.yml /app/environment.yml
+COPY ubuntu16.04/environment.yml /app/environment.yml
 RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_ENV &&\
      conda clean -v --all --yes"
 
