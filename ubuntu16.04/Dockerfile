@@ -30,6 +30,9 @@ RUN apt-get update && \
 # Set local enccoding
 ENV LANG en_US.UTF-8
 
+# Add conda to $PATH
+ENV PATH /opt/conda/bin:$PATH
+
 # Install Miniconda3
 RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends curl && \
@@ -41,9 +44,6 @@ RUN apt-get update && \
     conda clean --all --yes && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# Add conda to $PATH
-ENV PATH /opt/conda/bin:$PATH
 
 ##################################################################
 ## Install freesurfer 6.0.1
