@@ -64,7 +64,7 @@ RUN apt-get update && \
     --exclude='freesurfer/average/mult-comp-cor' \
     --exclude='freesurfer/lib/cuda' \
     --exclude='freesurfer/lib/qt' && \
-    apt-get remove curl && \
+    apt-get remove -y curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -75,7 +75,7 @@ WORKDIR /opt/freesurfer
 RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends curl && \
     curl "http://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" -o "runtime2012b.tar.gz" && \
-    apt-get remove curl && \
+    apt-get remove -y curl && \
     rm -rf /var/lib/apt/lists/* && \
     tar xvf runtime2012b.tar.gz && \
     apt-get clean && \
@@ -193,7 +193,7 @@ RUN apt-get update && \
     && rm -rf /opt/fsl/data/atlases/JHU \
     && rm -rf /opt/fsl/data/atlases/Juelich \
     && rm -rf /opt/fsl/doc \
-    && apt-get remove curl \
+    && apt-get remove -y curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
