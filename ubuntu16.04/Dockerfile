@@ -64,6 +64,9 @@ RUN apt-get update && \
     --exclude='freesurfer/average/mult-comp-cor' \
     --exclude='freesurfer/lib/cuda' \
     --exclude='freesurfer/lib/qt' && \
+    --exclude='freesurfer/lib/vtk' && \
+    --exclude='freesurfer/bin/freeview' && \
+    --exclude='freesurfer/bin/qt.conf' && \
     apt-get remove -y curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
