@@ -141,15 +141,24 @@ jobs:
             export SINGULARITY_DISABLE_CACHE=true
             export
       - run:
+          name: "Display storage information"
+          command: |
+            du -xm ~/ | sort -rn > ~/usage.txt
+            echo "/home directory:"
+            du -sh ~/
+            echo "/tmp directory:"
+            du -sh /tmp
+      - run:
           name: "Building Singularity image from Docker image"
           command: |
-            docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
-            docker push localhost:5000/sebastientourbier/connectomemapper3:latest
-            docker images -a | grep "sebastientourbier/connectomemapper3"
-            SINGULARITY_NOHTTPS=1 SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
+            # docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
+            # docker push localhost:5000/sebastientourbier/connectomemapper3:latest
+            # docker images -a | grep "sebastientourbier/connectomemapper3"
+            # SINGULARITY_NOHTTPS=1 \
+            SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
             SINGULARITY_CACHEDIR=~/.singularity/tmp SINGULARITY_TMPDIR=~/.singularity/tmp \
             TMPDIR=~/.singularity/tmp SINGULARITY_DISABLE_CACHE=true \
-            singularity --debug -v build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
+            singularity --debug -v build /tmp/cache/connectomemapper3.simg docker-deamon://sebastientourbier/connectomemapper3:latest
           no_output_timeout: 5h
       - persist_to_workspace:
           root: /tmp
@@ -157,6 +166,8 @@ jobs:
             - cache/connectomemapper3.simg
       - store_artifacts:
           path: /tmp/cache/connectomemapper3.simg
+      - store_artifacts:
+          path: ~/usage.txt
 
   get_data:
     machine:
