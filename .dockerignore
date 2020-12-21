@@ -21,9 +21,6 @@ dist/*
 build
 build/*
 
-resources
-resource/*
-
 tests
 tests/*
 
