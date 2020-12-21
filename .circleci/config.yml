@@ -162,15 +162,18 @@ jobs:
       - run:
           name: "Building Singularity image from Docker image"
           command: |
-            # docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
-            # docker push localhost:5000/sebastientourbier/connectomemapper3:latest
+            docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
+            docker push localhost:5000/sebastientourbier/connectomemapper3:latest
             docker images -a | grep "sebastientourbier/connectomemapper3"
-            # SINGULARITY_NOHTTPS=1 \
+            SINGULARITY_NOHTTPS=1 \
             SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
             SINGULARITY_CACHEDIR=~/.singularity/tmp SINGULARITY_TMPDIR=~/.singularity/tmp \
             TMPDIR=~/.singularity/tmp SINGULARITY_DISABLE_CACHE=true \
-            singularity --debug -v build /tmp/cache/connectomemapper3.simg docker-deamon://sebastientourbier/connectomemapper3
+            singularity --debug -v build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
           no_output_timeout: 5h
+      - run:
+          name: Display storage information
+          command: df -h
       - persist_to_workspace:
           root: /tmp
           paths:
