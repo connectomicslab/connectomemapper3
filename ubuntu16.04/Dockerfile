@@ -24,7 +24,7 @@ RUN apt-get update && \
     localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
     apt-get update && \
     apt-get clean && \
-    apt-get remove curl && \
+    apt-get remove -y curl && \
     rm -rf /var/lib/apt/lists/*
 
 # Set local enccoding
@@ -36,7 +36,7 @@ RUN apt-get update && \
     curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
     bash /tmp/miniconda.sh -bfp /opt/conda && \
     rm -rf /tmp/miniconda.sh && \
-    apt-get remove curl && \
+    apt-get remove -y curl && \
     conda update conda && \
     conda clean --all --yes && \
     apt-get clean && \
