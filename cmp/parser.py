@@ -26,7 +26,7 @@ def get():
                                     'formatted according to the BIDS standard.')
     p.add_argument('output_dir', help='The directory where the output files '
                                       'should be stored. If you are running group level analysis '
-                                      'this folder should be prepopulated with the results of the'
+                                      'this folder should be prepopulated with the results of the '
                                       'participant level analysis.')
     p.add_argument('analysis_level', help='Level of the analysis that will be performed. '
                                           'Multiple participant level analyses can be run independently '
@@ -54,12 +54,33 @@ def get():
     p.add_argument('--func_pipeline_config',
                    help='Configuration .txt file for processing stages of the fMRI processing pipeline')
 
-    p.add_argument('--number_of_threads', type=int, help='The number of OpenMP threads used for multi-threading by'
-                                                         'Freesurfer, FSL, MRtrix3, Dipy, AFNI'
-                                                         '(Set to [Number of available CPUs -1] by default).')
+    p.add_argument('--number_of_threads',
+                   type=int,
+                   help='The number of OpenMP threads used for multi-threading by '
+                        'Freesurfer, FSL, MRtrix3, Dipy, AFNI '
+                        '(Set to [Number of available CPUs -1] by default).')
 
-    p.add_argument('--number_of_participants_processed_in_parallel', type=int, help='The number of subjects '
-                                                                                    'to be processed in parallel (One by default).')
+    p.add_argument('--number_of_participants_processed_in_parallel',
+                   type=int,
+                   help='The number of subjects to be processed in parallel (One by default).')
+
+    p.add_argument('--set_mrtrix_rng_seed',
+                   type=int,
+                   help='Fix MRtrix3 random number generator seed')
+
+    p.add_argument('--set_ants_random_seed',
+                   type=int,
+                   help='Fix ANTS random number generator seed ')
+
+    p.add_argument('--set_itk_global_default_number_of_threads',
+                   default=1,
+                   type=int,
+                   help='Fix number of threads used by ANTs')
+
+    p.add_argument('--set_mkl_num_threads',
+                   type=int,
+                   default=1,
+                   help='Fix number of MKL threads')
 
     p.add_argument('--fs_license', help='Freesurfer license.txt')
 
