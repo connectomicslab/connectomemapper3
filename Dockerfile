@@ -16,6 +16,8 @@ ARG VERSION
 # exfat-fuse exfat-utils Neurodebian
 ##################################################################
 
+WORKDIR /opt
+
 # Pre-cache neurodebian key
 COPY ubuntu16.04/files/neurodebian.gpg /root/.neurodebian.gpg
 
@@ -40,6 +42,8 @@ ENV LANG="en_US.UTF-8"
 # Install Miniconda3
 ##################################################################
 FROM builder as builder_conda
+
+WORKDIR /opt
 
 # Add conda to $PATH
 ENV PATH="/opt/conda/bin:$PATH"
@@ -123,6 +127,8 @@ ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
 ##################################################################
 FROM builder_fs as builder_afni
 
+WORKDIR /opt
+
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -151,6 +157,13 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
     PATH="/usr/lib/fsl/5.0:$PATH" \
     LD_LIBRARY_PATH="/usr/lib/fsl/5.0:$LD_LIBRARY_PATH"
 
+# Patch from NDMG
+WORKDIR /tmp
+RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.gz \
+    && tar -zxvf fsl-5.0.10-python3.tar.gz \
+    && cp fsl/bin/* "$FSLDIR/bin/" \
+    && rm -r fsl*
+
 # Mark a package as being manually installed, which will
 # prevent the package from being automatically removed if no other packages
 # depend on it
@@ -160,6 +173,8 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
 ## Install conda environment, including ANTs 2.2.0
 ##################################################################
 FROM builder_afni as builder_conda_env
+
+WORKDIR /opt
 
 ENV CONDA_ENV py37cmp-core
 # Pull the environment name out of the environment.yml
@@ -176,10 +191,11 @@ ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
 ##################################################################
 FROM builder_conda_env as builder_mrtrix
 
+WORKDIR /opt
+
 # Additional dependencies for MRtrix3 compilation
 # Get the latest version of MRtrix3
 # MRtrix3 setup
-WORKDIR /opt
 RUN apt-get update && \
     apt-get install -y git && \
     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
