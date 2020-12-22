@@ -157,7 +157,8 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
     PATH="/usr/lib/fsl/5.0:$PATH" \
     LD_LIBRARY_PATH="/usr/lib/fsl/5.0:$LD_LIBRARY_PATH"
 
-# Patch from NDMG
+# Patch that replaces replace aff2rigid fsl_abspath fsladd imglob
+# for python3 compatibility
 WORKDIR /tmp
 RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.gz \
     && tar -zxvf fsl-5.0.10-python3.tar.gz \
