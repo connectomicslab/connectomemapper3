@@ -213,7 +213,7 @@ RUN apt-get update && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
     git describe --tags > /mrtrix3_version && \
-    apt-get -y remove git g++ && \
+    apt-get -y remove build-essential git g++ && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
