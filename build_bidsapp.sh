@@ -1,8 +1,9 @@
-#! /bin/sh
+#!/bin/sh
+
 CMP_BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 echo "$CMP_BUILD_DATE"
 
-VERSION=$(python get_version.py)
+VERSION=v$(python get_version.py)
 echo "$VERSION"
 
 VCS_REF=$(git rev-parse --verify HEAD)
