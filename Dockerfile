@@ -22,9 +22,6 @@ COPY ubuntu16.04/files/neurodebian.gpg /root/.neurodebian.gpg
 # Install system library dependencies
 RUN apt-get update && \
     apt-get install software-properties-common -y && \
-    # apt-add-repository ppa:saiarcot895/myppa -y && \
-    # apt-get update && \
-    # apt-get -y install apt-fast \
     apt-get install -qq -y --no-install-recommends bc \
     locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
@@ -34,10 +31,10 @@ RUN apt-get update && \
     apt-get update && \
     apt-get clean && \
     apt-get remove -y curl && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Set local enccoding
-ENV LANG en_US.UTF-8
+ENV LANG="en_US.UTF-8"
 
 ##################################################################
 # Install Miniconda3
@@ -45,7 +42,7 @@ ENV LANG en_US.UTF-8
 FROM builder as builder_conda
 
 # Add conda to $PATH
-ENV PATH /opt/conda/bin:$PATH
+ENV PATH="/opt/conda/bin:$PATH"
 
 # Install
 RUN apt-get update && \
@@ -56,8 +53,9 @@ RUN apt-get update && \
     apt-get remove -y curl && \
     conda update conda && \
     conda clean --all --yes && \
+    rm -rf ~/.conda ~/.cache/pip/* && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ##################################################################
 ## Install freesurfer 6.0.1
@@ -66,10 +64,13 @@ FROM builder_conda as builder_fs
 
 WORKDIR /opt/freesurfer
 
-# Download
+# Download and install
 RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends curl && \
     curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
+    --exclude='freesurfer/diffusion' \
+    --exclude='freesurfer/docs' \
+    --exclude='freesurfer/fsfast' \
     --exclude='freesurfer/trctrain' \
     --exclude='freesurfer/subjects/fsaverage_sym' \
     --exclude='freesurfer/subjects/fsaverage3' \
@@ -79,11 +80,14 @@ RUN apt-get update && \
     --exclude='freesurfer/subjects/bert' \
     --exclude='freesurfer/subjects/V1_average' \
     --exclude='freesurfer/average/mult-comp-cor' \
+    --exclude='freesurfer/subjects/lh.EC_average' \
+    --exclude='freesurfer/subjects/rh.EC_average' \
+    --exclude='freesurfer/subjects/sample-*.mgz' \
     --exclude='freesurfer/lib/cuda' \
     --exclude='freesurfer/lib/qt' && \
     apt-get remove -y curl && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Installing the Matlab R2012b (v8.0) runtime // http://ssd.mathworks.com/supportfiles/MCR_Runtime/R2012b/MCR_R2012b_glnxa64_installer.zip
 # Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
@@ -97,49 +101,55 @@ RUN apt-get update && \
     rm runtime2012b.tar.gz && \
     rm -rf /var/lib/apt/lists/*
 
-# Make FreeSurfer happy
-ENV OS=Linux
-ENV FS_OVERRIDE=0
-ENV FIX_VERTEX_AREA=""
-ENV FSF_OUTPUT_FORMAT=nii.gz
-ENV FREESURFER_HOME=/opt/freesurfer
-
-ENV SUBJECTS_DIR=$FREESURFER_HOME/subjects
-ENV FUNCTIONALS_DIR=$FREESURFER_HOME/sessions
-ENV MNI_DIR=$FREESURFER_HOME/mni
-ENV LOCAL_DIR=$FREESURFER_HOME/local
-ENV FSFAST_HOME=$FREESURFER_HOME/fsfast
-ENV MINC_BIN_DIR=$FREESURFER_HOME/mni/bin
-ENV MINC_LIB_DIR=$FREESURFER_HOME/mni/lib
-ENV MNI_DATAPATH=$FREESURFER_HOME/mni/data
-ENV FMRI_ANALYSIS_DIR=$FREESURFER_HOME/fsfast
-
-ENV PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5
-ENV MNI_PERL5LIB=$MINC_LIB_DIR/perl5/5.8.5
-ENV PATH=$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH
+# Simulate SetUpFreeSurfer.sh
+ENV OS="Linux" \
+    FS_OVERRIDE=0 \
+    FIX_VERTEX_AREA="" \
+    FSF_OUTPUT_FORMAT="nii.gz" \
+    FREESURFER_HOME="/opt/freesurfer"
+ENV SUBJECTS_DIR="$FREESURFER_HOME/subjects" \
+    FUNCTIONALS_DIR="$FREESURFER_HOME/sessions" \
+    MNI_DIR="$FREESURFER_HOME/mni" \
+    LOCAL_DIR="$FREESURFER_HOME/local" \
+    MINC_BIN_DIR="$FREESURFER_HOME/mni/bin" \
+    MINC_LIB_DIR="$FREESURFER_HOME/mni/lib" \
+    MNI_DATAPATH="$FREESURFER_HOME/mni/data"
+ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
+    MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
+    PATH="$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH"
 
 ##################################################################
-## Install AFNI
+## Install FSL and AFNI
 ##################################################################
 FROM builder_fs as builder_afni
 
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    dc wget afni=16.2.07~dfsg.1-5~nd16.04+1 && \
-    # rm -r /var/cache/apt/archives/apt-fast && \
+    dc wget \
+    fsl-core=5.0.9-5~nd16.04+1 \
+    fsl-mni152-templates=5.0.7-2 \
+    fsl-5.0-eddy-nonfree \
+    afni=16.2.07~dfsg.1-5~nd16.04+1 && \
     apt-get clean && \
-    # apt-fast clean && \
-    rm -rf /var/lib/apt/lists/*
-                                               # fsl-core=5.0.9-5~nd16.04+1 \
-                                               # fsl-mni152-templates=5.0.7-2 \
-                                               # fsl-5.0-eddy-nonfree \
-# Make AFNI happy
-ENV PATH /usr/lib/afni/bin:$PATH
-ENV AFNI_MODELPATH /usr/lib/afni/models
-ENV AFNI_IMSAVE_WARNINGS NO
-ENV AFNI_TTATLAS_DATASET /usr/share/afni/atlases
-ENV AFNI_PLUGINPATH /usr/lib/afni/plugins
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Setting AFNI envvars
+ENV PATH="/usr/lib/afni/bin:$PATH" \
+    AFNI_MODELPATH="/usr/lib/afni/models" \
+    AFNI_IMSAVE_WARNINGS="NO" \
+    AFNI_TTATLAS_DATASET="/usr/share/afni/atlases" \
+    AFNI_PLUGINPATH="/usr/lib/afni/plugins"
+
+# Setting FSL envvars
+ENV FSLDIR="/usr/share/fsl/5.0" \
+    FSLOUTPUTTYPE="NIFTI_GZ" \
+    FSLMULTIFILEQUIT="TRUE" \
+    POSSUMDIR="/usr/share/fsl/5.0" \
+    FSLTCLSH="/usr/bin/tclsh" \
+    FSLWISH="/usr/bin/wish" \
+    PATH="/usr/lib/fsl/5.0:$PATH" \
+    LD_LIBRARY_PATH="/usr/lib/fsl/5.0:$LD_LIBRARY_PATH"
 
 # Mark a package as being manually installed, which will
 # prevent the package from being automatically removed if no other packages
@@ -155,11 +165,11 @@ ENV CONDA_ENV py37cmp-core
 # Pull the environment name out of the environment.yml
 COPY ubuntu16.04/environment.yml /app/environment.yml
 RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_ENV &&\
-     conda clean -v --all --yes"
+     conda clean -v --all --yes && rm -rf ~/.conda ~/.cache/pip/*"
 
 # Make ANTs happy
-ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin
-ENV PATH $ANTSPATH:$PATH
+ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
+    PATH="$ANTSPATH:$PATH"
 
 ##################################################################
 ## Install MRTRIX
@@ -175,7 +185,7 @@ RUN apt-get update && \
     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
     apt-get -y remove git && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /opt/mrtrix3
 RUN apt-get update && \
@@ -190,51 +200,52 @@ RUN apt-get update && \
     git describe --tags > /mrtrix3_version && \
     apt-get -y remove git g++ && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Setup environment variables for MRtrix3
-ENV PATH=/opt/mrtrix3/bin:$PATH
-ENV PYTHONPATH=/opt/mrtrix3/lib:$PYTHONPATH
+ENV PATH="/opt/mrtrix3/bin:$PATH" \
+    PYTHONPATH="/opt/mrtrix3/lib:$PYTHONPATH"
 
 ##################################################################
 ## Install FSL 6.0.0
 ##################################################################
-FROM builder_mrtrix as builder_fsl
+# FROM builder_mrtrix as builder_fsl
 
-WORKDIR /opt
-RUN apt-get update && \
-    apt-get install -qq -y --no-install-recommends curl && \
-    echo "Downloading FSL ..." \
-    && curl -sSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.3-centos6_64.tar.gz \
-    | tar zx -C /opt \
-    && /bin/bash /opt/fsl/etc/fslconf/fslpython_install.sh -q -f /opt/fsl \
-    && rm -rf /opt/fsl/data/first \
-    && rm -rf /opt/fsl/data/possum \
-    && rm -rf /opt/fsl/data/atlases/HarvardOxford \
-    && rm -rf /opt/fsl/data/atlases/JHU \
-    && rm -rf /opt/fsl/data/atlases/Juelich \
-    && rm -rf /opt/fsl/doc \
-    && apt-get remove -y curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# WORKDIR /opt
+# RUN apt-get update && \
+#     apt-get install -qq -y --no-install-recommends curl && \
+#     echo "Downloading FSL ..." \
+#     && curl -sSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.3-centos6_64.tar.gz \
+#     | tar zx -C /opt \
+#     && /bin/bash /opt/fsl/etc/fslconf/fslpython_install.sh -q -f /opt/fsl \
+#     && rm -rf /opt/fsl/data/first \
+#     && rm -rf /opt/fsl/data/possum \
+#     && rm -rf /opt/fsl/data/atlases/HarvardOxford \
+#     && rm -rf /opt/fsl/data/atlases/JHU \
+#     && rm -rf /opt/fsl/data/atlases/Juelich \
+#     && rm -rf /opt/fsl/doc \
+#     && apt-get remove -y curl \
+#     && apt-get clean \
+#     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENV FSLDIR=/opt/fsl \
-    PATH=/opt/fsl/bin:$PATH
+# ENV FSLDIR=/opt/fsl \
+#     PATH=/opt/fsl/bin:$PATH
 
 ##################################################################
 # Install BIDS validator
 ##################################################################
-# RUN npm install -g bids-validator
+# RUN npm install -g bids-validator && \
+#     rm -rf ~/.npm ~/.empty
 
 ##################################################################
 # Last environmment setup
 ##################################################################
-ENV LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH"
 
 ##################################################################
 # Installation of Connectome Mapper 3 packages
 ##################################################################
-FROM builder_fsl as builder_cmp3
+FROM builder_mrtrix as builder_cmp3
 
 # Set the working directory to /app/connectomemapper3
 WORKDIR /app/connectomemapper3
@@ -246,13 +257,13 @@ COPY . /app/connectomemapper3
 # ENV CONDA_ENV py37cmp-core
 # RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
 RUN /bin/bash -c ". activate ${CONDA_ENV} && pip install networkx==2.4 &&\
-    python setup.py install"
+    python setup.py install && conda clean -v --all --yes && rm -rf ~/.conda ~/.cache/pip/*"
 
 # Environmment setup
-ENV ANTSPATH /opt/conda/envs/$CONDA_ENV/bin
-ENV PYTHONPATH /opt/conda/envs/$CONDA_ENV/bin
-ENV PATH $ANTSPATH:$PATH
-ENV LD_LIBRARY_PATH /opt/conda/envs/$CONDA_ENV/lib:$LD_LIBRARY_PATH
+ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
+    PYTHONPATH="/opt/conda/envs/$CONDA_ENV/bin" \
+    PATH="$ANTSPATH:$PATH" \
+    LD_LIBRARY_PATH="/opt/conda/envs/$CONDA_ENV/lib:$LD_LIBRARY_PATH"
 
 # Make dipy.viz (fury/vtk) happy
 # RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.13"
@@ -273,49 +284,55 @@ RUN cat /app/run_coverage_cmp3.sh
 # Set the working directory back to /app
 # Acquire script to be executed
 ##################################################################
-RUN chmod 775 /app/connectomemapper3/run.py
-RUN chmod 775 /app/run_cmp3.sh
-RUN chmod 775 /app/run_coverage_cmp3.sh
-RUN chmod 777 /opt/freesurfer
+RUN chmod 775 /app/connectomemapper3/run.py && \
+    chmod 775 /app/run_cmp3.sh && \
+    chmod 775 /app/run_coverage_cmp3.sh && \
+    chmod 777 /opt/freesurfer && \
 
 ##################################################################
 # Temporary tmp folder
 ##################################################################
 RUN /bin/bash -c "mkdir -p /var/tmp"
-ENV TMPDIR /var/tmp
-ENV TMP /var/tmp
-ENV TEMP /var/tmp
+ENV TMPDIR="/var/tmp" \
+    TMP="/var/tmp" \
+    TEMP="/var/tmp"
 
 ##################################################################
 # Create input and output directories for BIDS App
 ##################################################################
 RUN mkdir /bids_dir && \
-    chmod -R 777 /bids_dir
-
-RUN mkdir /output_dir && \
+    mkdir /output_dir && \
+    chmod -R 777 /bids_dir && \
     chmod -R 777 /output_dir
 
 ##################################################################
 # Define Freesurfer license
 ##################################################################
-ENV FS_LICENSE /bids_dir/code/license.txt
+ENV FS_LICENSE="/bids_dir/code/license.txt"
 
 ##################################################################
 # Set locale settings
 ##################################################################
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
+ENV LANG="C.UTF-8" \
+    LC_ALL="C.UTF-8"
+
+##################################################################
+# Unless otherwise specified each process should only use one
+# thread - nipype will handle parallelization
+##################################################################
+# ENV MKL_NUM_THREADS=1 \
+#     OMP_NUM_THREADS=1
 
 ##################################################################
 # Control random number generation
 ##################################################################
 # Control MRTrix random number generation (RDG) for replicatable probabilistic tractography
 # See https://community.mrtrix.org/t/random-number-generator/2063 for more details
-ENV MRTRIX_RNG_SEED 1234
+# ENV MRTRIX_RNG_SEED=1234
 
 # Control ANTs random number generation (RDG) and multithreading
 # See https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues for more details
-ENV ANTS_RANDOM_SEED 1234
+# ENV ANTS_RANDOM_SEED=1234
 # ENV ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS
 
 ##################################################################
@@ -327,8 +344,6 @@ RUN ldconfig
 # Show all environment variables
 ##################################################################
 RUN export
-RUN df -h
-RUN du -xm ~/ | sort -rn
 
 ##################################################################
 # Define primary entryppoint script
@@ -348,14 +363,14 @@ ENTRYPOINT ["/app/run_cmp3.sh"]
 ##################################################################
 # Metadata
 ##################################################################
-LABEL org.label-schema.build-date=$BUILD_DATE
-LABEL org.label-schema.name="Connectome Mapper BIDS App"
-LABEL org.label-schema.description="Connectome Mapper BIDS App - the processing core of Connectome Mapper 3"
-LABEL org.label-schema.url="https://connectome-mapper-3.readthedocs.io"
-LABEL org.label-schema.vcs-ref=$VCS_REF
-LABEL org.label-schema.vcs-url="https://github.com/connectomicslab/connectomemapper3"
-LABEL org.label-schema.version=$VERSION
-LABEL org.label-schema.maintainer="Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>"
-LABEL org.label-schema.vendor="Connectomics Lab, Centre Hospitalier Universitaire Vaudois (CHUV), Lausanne, Switzerland"
-LABEL org.label-schema.schema-version="1.0"
-LABEL org.label-schema.docker.cmd="docker run --rm -v ~/data/bids_dataset:/bids_dir -t sebastientourbier/connectomemapper-bidsapp:${VERSION} /bids_dir /bids_dir/derivatives participant [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]] [-session_label SESSION_LABEL [SESSION_LABEL ...]] [--anat_pipeline_config ANAT_PIPELINE_CONFIG] [--dwi_pipeline_config DWI_PIPELINE_CONFIG] [--func_pipeline_config FUNC_PIPELINE_CONFIG]  [--number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL] [--fs_license FS_LICENSE]"
+LABEL org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name="Connectome Mapper BIDS App" \
+      org.label-schema.description="Connectome Mapper BIDS App - the processing core of Connectome Mapper 3" \
+      org.label-schema.url="https://connectome-mapper-3.readthedocs.io" \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/connectomicslab/connectomemapper3" \
+      org.label-schema.version=$VERSION \
+      org.label-schema.maintainer="Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>" \
+      org.label-schema.vendor="Connectomics Lab, Centre Hospitalier Universitaire Vaudois (CHUV), Lausanne, Switzerland" \
+      org.label-schema.schema-version="1.0" \
+      org.label-schema.docker.cmd="docker run --rm -v ~/data/bids_dataset:/bids_dir -t sebastientourbier/connectomemapper-bidsapp:${VERSION} /bids_dir /bids_dir/derivatives participant [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]] [-session_label SESSION_LABEL [SESSION_LABEL ...]] [--anat_pipeline_config ANAT_PIPELINE_CONFIG] [--dwi_pipeline_config DWI_PIPELINE_CONFIG] [--func_pipeline_config FUNC_PIPELINE_CONFIG]  [--number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL] [--fs_license FS_LICENSE]" \
