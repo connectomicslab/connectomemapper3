@@ -389,7 +389,7 @@ os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = f'{args.set_itk_global_defa
 print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
 
 # Set number of MKL threads (1 by default)
-os.environ['MKL_NUM_THREADS'] = f'{args.set_ants_random_seed}'
+os.environ['MKL_NUM_THREADS'] = f'{args.set_mkl_num_threads}'
 print(f'  * MKL_NUM_THREADS set to {os.environ["MKL_NUM_THREADS"]}')
 
 # TODO: Implement log for subject(_session)
