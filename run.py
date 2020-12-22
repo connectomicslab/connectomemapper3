@@ -61,7 +61,8 @@ def report_usage(event_category, event_action, event_label):
                                                                                                                  event_action,
                                                                                                                  event_label)
     r = requests.post(tracking_url)
-    print('HTTP post to Google Analytics: {}'.format(r.text))
+    print('Report execution to Google Analytics. \n'
+          'Thanks to support us in the task of finding new funds for CMP3 development!')
 
 
 def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=1):
