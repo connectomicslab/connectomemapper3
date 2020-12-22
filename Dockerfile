@@ -287,7 +287,7 @@ RUN cat /app/run_coverage_cmp3.sh
 RUN chmod 775 /app/connectomemapper3/run.py && \
     chmod 775 /app/run_cmp3.sh && \
     chmod 775 /app/run_coverage_cmp3.sh && \
-    chmod 777 /opt/freesurfer && \
+    chmod 777 /opt/freesurfer
 
 ##################################################################
 # Temporary tmp folder
