@@ -853,17 +853,19 @@ class CMP_BIDSAppWindow(HasTraits):
             Path to functional pipeline configuration file (Default: \'\')
         """
         if multiprocessing.cpu_count() < 4:
-            number_of_threads_max = multiprocessing.cpu_count()
+            self.number_of_threads_max = multiprocessing.cpu_count()
 
         self.project_info = project_info
         self.bids_root = bids_root
 
+        # Create a BIDSLayout for checking availability of dMRI and fMRI data
         try:
             bids_layout = BIDSLayout(self.bids_root)
         except Exception:
             print("Exception : Raised at BIDSLayout")
             sys.exit(1)
 
+        # Check if dMRI data is available in the dataset
         dmri_pipeline = DiffusionPipeline(project_info)
         dmri_inputs_checked = dmri_pipeline.check_input(layout=bids_layout,
                                                         gui=False)
@@ -873,6 +875,7 @@ class CMP_BIDSAppWindow(HasTraits):
         else:
             self.dmri_inputs_checked = False
 
+        # Check if fMRI data is available in the dataset
         fmri_pipeline = fMRIPipeline(project_info)
         fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout,
                                                         gui=False,
