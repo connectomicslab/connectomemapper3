@@ -194,7 +194,6 @@ RUN apt-get update && \
     libeigen3-dev zlib1g-dev libqt4-opengl-dev \
     libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev && \
     git checkout -f 3.0_RC3_latest && \
-    #git checkout 3.0_RC3 && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
     git describe --tags > /mrtrix3_version && \
