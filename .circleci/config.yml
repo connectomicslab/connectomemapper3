@@ -1109,10 +1109,10 @@ workflows:
 
       - codacy_coverage_report:
           requires:
+            - test_singularity_parcellation
             - test_docker_dsi_mrtrix
             - test_docker_dsi_dipy
             - test_docker_parcellation
-            - test_singularity_parcellation
             - test_docker_fmri
           filters:
               branches:
@@ -1154,11 +1154,11 @@ workflows:
       - deploy_singularity_release:
           requires:
             # - build_docs
+            - test_singularity_parcellation
             - test_docker_dsi_mrtrix
             - test_docker_dsi_dipy
             - test_docker_parcellation
             - test_docker_fmri
-            - test_singularity_parcellation
             - codacy_coverage_report
           filters:
             # ignore any commit on any branch by default
@@ -1172,11 +1172,11 @@ workflows:
       - deploy_singularity_latest:
           requires:
             # - build_docs
+            - test_singularity_parcellation
             - test_docker_dsi_mrtrix
             - test_docker_dsi_dipy
             - test_docker_parcellation
             - test_docker_fmri
-            - test_singularity_parcellation
             - codacy_coverage_report
           filters:
             # ignore any commit on any branch by default
