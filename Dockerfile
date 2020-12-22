@@ -207,8 +207,8 @@ WORKDIR /opt/mrtrix3
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
     build-essential git g++ \
-    libeigen3-dev zlib1g-dev libqt4-opengl-dev \
-    libgl1-mesa-dev libfftw3-dev libtiff5-dev libssl-dev && \
+    libeigen3-dev zlib1g-dev \
+    libfftw3-dev libtiff5-dev libssl-dev && \
     git checkout -f 3.0_RC3_latest && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
