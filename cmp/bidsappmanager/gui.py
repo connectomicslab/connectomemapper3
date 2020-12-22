@@ -8,6 +8,8 @@
 
 # General imports
 import os
+import sys
+
 import pkg_resources
 from subprocess import Popen
 import subprocess
@@ -30,6 +32,9 @@ import warnings
 import cmp.bidsappmanager.project as project
 from cmp.project import CMP_Project_Info
 from cmp.info import __version__
+
+from cmp.pipelines.diffusion.diffusion import DiffusionPipeline
+from cmp.pipelines.functional.fMRI import fMRIPipeline
 
 from cmtklib.util import return_button_style_sheet
 
@@ -677,6 +682,9 @@ class CMP_BIDSAppWindow(HasTraits):
     run_dmri_pipeline = Bool(True)
     run_fmri_pipeline = Bool(True)
 
+    dmri_inputs_checked = Bool(False)
+    fmri_inputs_checked = Bool(False)
+
     settings_checked = Bool(False)
     docker_running = Bool(False)
 
@@ -707,6 +715,9 @@ class CMP_BIDSAppWindow(HasTraits):
 
     traits_view = QtView(Group(
         Group(
+            Group(
+                Item('bidsapp_tag', style='readonly', label='Tag'),
+                label='BIDS App Version'),
             Group(
                 Item('bids_root', style='readonly', label='Input directory'),
                 Item('output_dir', style='simple', label='Output directory'),
@@ -740,20 +751,19 @@ class CMP_BIDSAppWindow(HasTraits):
                 Group(Item('run_dmri_pipeline', label='Run processing stages'),
                       Item('dmri_config', label='Configuration file',
                            visible_when='run_dmri_pipeline'),
-                      label='Diffusion pipeline'),
+                      label='Diffusion pipeline',
+                      visible_when='dmri_inputs_checked==True'),
                 Group(Item('run_fmri_pipeline', label='Run processing stages'),
                       Item('fmri_config', label='Configuration file',
                            visible_when='run_fmri_pipeline'),
-                      label='fMRI pipeline'),
+                      label='fMRI pipeline',
+                      visible_when='fmri_inputs_checked==True'),
                 label='Configuration of processing pipelines'),
             Group(
                 Item('fs_license', label='LICENSE'),
                 # Item('fs_average', label='FSaverage directory'),
                 label='Freesurfer configuration'),
             orientation='vertical', springy=True),
-        Group(
-            Item('bidsapp_tag', label='Release tag'),
-            label='BIDS App Version'),
         Group(
             Item('data_provenance_tracking', label='Use Datalad'),
             Item('datalad_update_environment', visible_when='data_provenance_tracking',
@@ -795,7 +805,7 @@ class CMP_BIDSAppWindow(HasTraits):
         # buttons = [check,start_bidsapp],
         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
         # buttons = [preprocessing, map_connectome, map_custom],
-        width=0.5, height=0.8, resizable=True,  # , scrollable=True, resizable=True
+        width=0.5, height=0.8, scrollable=True,  # , resizable=True
         icon=get_icon('bidsapp.png')
     )
 
@@ -848,7 +858,31 @@ class CMP_BIDSAppWindow(HasTraits):
         self.project_info = project_info
         self.bids_root = bids_root
 
-        # Initialize ouput directory to be /bids_dir/derivatives
+        try:
+            bids_layout = BIDSLayout(self.bids_root)
+        except Exception:
+            print("Exception : Raised at BIDSLayout")
+            sys.exit(1)
+
+        dmri_pipeline = DiffusionPipeline(project_info)
+        dmri_inputs_checked = dmri_pipeline.check_input(layout=bids_layout,
+                                                        gui=False)
+
+        if dmri_inputs_checked is not None:
+            self.dmri_inputs_checked = dmri_inputs_checked
+        else:
+            self.dmri_inputs_checked = False
+
+        fmri_pipeline = fMRIPipeline(project_info)
+        fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout,
+                                                        gui=False,
+                                                        debug=False)
+        if fmri_inputs_checked is not None:
+            self.fmri_inputs_checked = fmri_inputs_checked
+        else:
+            self.fmri_inputs_checked = False
+
+        # Initialize output directory to be /bids_dir/derivatives
         self.output_dir = os.path.join(bids_root, 'derivatives')
 
         self.subjects = subjects
