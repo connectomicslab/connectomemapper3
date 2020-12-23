@@ -394,8 +394,7 @@ elif args.fs_license:
     # print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
     # shutil.copyfile(src=os.environ['FS_LICENSE'],dst=os.path.join('/opt','freesurfer','license.txt'))
 else:
-    print(
-        "ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
+    print("ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
     sys.exit(1)
 
 print('  ... $FS_LICENSE : {}'.format(os.environ['FS_LICENSE']))
