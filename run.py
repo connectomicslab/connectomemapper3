@@ -374,6 +374,24 @@ else:
 os.environ['OMP_NUM_THREADS'] = '{}'.format(number_of_threads)
 print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'], max_number_of_cores))
 
+# Set random generator seed of MRtrix if specified
+if args.set_mrtrix_rng_seed is not None:
+    os.environ['MRTRIX_RNG_SEED'] = f'{args.set_mrtrix_rng_seed}'
+    print(f'  * MRTRIX_RNG_SEED set to {os.environ["MRTRIX_RNG_SEED"]}')
+
+# Set random generator seed of ANTs if specified
+if args.set_ants_random_seed is not None:
+    os.environ['ANTS_RANDOM_SEED'] = f'{args.set_ants_random_seed}'
+    print(f'  * ANTS_RANDOM_SEED set to {os.environ["ANTS_RANDOM_SEED"]}')
+
+# Set number of threads used by ITK (1 by default)
+os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = f'{args.set_itk_global_default_number_of_threads}'
+print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
+
+# Set number of MKL threads (1 by default)
+os.environ['MKL_NUM_THREADS'] = f'{args.set_mkl_num_threads}'
+print(f'  * MKL_NUM_THREADS set to {os.environ["MKL_NUM_THREADS"]}')
+
 # TODO: Implement log for subject(_session)
 # with open(log_filename, 'w+') as log:
 #     proc = Popen(cmd, stdout=log, stderr=log, cwd=os.path.join(self.bids_root,'derivatives'))
