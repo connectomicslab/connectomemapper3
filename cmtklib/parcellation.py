@@ -1879,19 +1879,19 @@ class ParcellateThalamus(BaseInterface):
 
             # Left Hemisphere
             # Removing isolated points
-            tempI = np.zeros(img_data_atlas.shape)
-            tempI[indl] = 1
-            tempI = filter_isolated_cells(tempI, struct=struct)
-            indl = np.where(tempI == 1)
+            temp_i = np.zeros(img_data_atlas.shape)
+            temp_i[indl] = 1
+            temp_i = filter_isolated_cells(temp_i, struct=struct)
+            indl = np.where(temp_i == 1)
 
             # Right Hemisphere
             # Removing isolated points
-            tempI = np.zeros(img_data_atlas.shape)
-            tempI[indr] = 1
-            tempI = filter_isolated_cells(tempI, struct=struct)
-            indr = np.where(tempI == 1)
+            temp_i = np.zeros(img_data_atlas.shape)
+            temp_i[indr] = 1
+            temp_i = filter_isolated_cells(temp_i, struct=struct)
+            indr = np.where(temp_i == 1)
 
-            del struct, tempI
+            del struct, temp_i
 
         # Creating Thalamic Mask (1: Left, 2:Right)
         img_data_thal = np.zeros(img_data_atlas.shape)
