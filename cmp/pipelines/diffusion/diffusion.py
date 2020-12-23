@@ -235,7 +235,7 @@ class DiffusionPipeline(Pipeline):
         # if self.stages['MRTrixConnectome'].config.output_types == []:
         #     return('\n\tNo output type selected for the connectivity matrices.\t\n\t'
         #            'Please select at least one output type in the connectome configuration window.\t\n')
-        if not self.stages['Connectome'].config.output_types:
+        if self.stages['Connectome'].config.output_types == []:
             message = (
                 '\n\tNo output type selected for the connectivity matrices.\t\n\t'
                 'Please select at least one output type in the connectome configuration window.\t\n')
