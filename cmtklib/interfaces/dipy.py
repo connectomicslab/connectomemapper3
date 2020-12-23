@@ -310,7 +310,7 @@ class CSD(DipyDiffusionInterface):
             # IFLOGGER.info(fods)
             # IFLOGGER.info(fods.shape)
             IFLOGGER.info('Save Spherical Harmonics image')
-            nib.Nifti1Image(csd_peaks.shm_coeff, img.affine, None).to_filename(
+            nib.Nifti1Image(csd_peaks.shm_coeffs, img.affine, None).to_filename(
                 self._gen_filename('shm_coeff'))
 
             # FIXME: dipy 1.1.0 and fury 0.5.1 with vtk 8.2.0 -> error:
@@ -982,10 +982,10 @@ class DirectionGetterTractography(DipyBaseInterface):
                                    parallel=True)
 
             if self.inputs.algo == 'deterministic':
-                dg = DeterministicMaximumDirectionGetter.from_shcoeff(pfm.shm_coeff, max_angle=self.inputs.max_angle,
+                dg = DeterministicMaximumDirectionGetter.from_shcoeff(pfm.shm_coeffs, max_angle=self.inputs.max_angle,
                                                                       sphere=sphere)
             else:
-                dg = ProbabilisticDirectionGetter.from_shcoeff(pfm.shm_coeff, max_angle=self.inputs.max_angle,
+                dg = ProbabilisticDirectionGetter.from_shcoeff(pfm.shm_coeffs, max_angle=self.inputs.max_angle,
                                                                sphere=sphere)
 
         else:
