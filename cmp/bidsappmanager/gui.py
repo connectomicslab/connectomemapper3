@@ -1100,7 +1100,7 @@ class CMP_BIDSAppWindow(HasTraits):
                '-v', '{}:/bids_dir'.format(self.bids_root),
                '-v', '{}:/output_dir'.format(self.output_dir),
                '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
-               '-v', '{}:/code/ref_diffusion_config.ini'.format(self.anat_config),
+               '-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config),
                # '-v', '{}:/tmp/derivatives'.format(os.path.join(self.bids_root,'derivatives')),
                ]
 
@@ -1126,15 +1126,15 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('{}'.format(label))
 
         cmd.append('--anat_pipeline_config')
-        cmd.append('/bids_dir/code/ref_anatomical_config.ini')
+        cmd.append('/code/ref_anatomical_config.ini')
 
         if self.run_dmri_pipeline:
             cmd.append('--dwi_pipeline_config')
-            cmd.append('/bids_dir/code/ref_diffusion_config.ini')
+            cmd.append('/code/ref_diffusion_config.ini')
 
         if self.run_fmri_pipeline:
             cmd.append('--func_pipeline_config')
-            cmd.append('/bids_dir/code/ref_fMRI_config.ini')
+            cmd.append('/code/ref_fMRI_config.ini')
 
         cmd.append('--fs_license')
         cmd.append('{}'.format('/bids_dir/code/license.txt'))
