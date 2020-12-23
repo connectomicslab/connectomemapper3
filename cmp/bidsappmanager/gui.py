@@ -601,8 +601,14 @@ class CMP_BIDSAppWindow(HasTraits):
     fs_file : traits.File
         Path to Freesurfer license file
 
-    list_of_subjects_to_be_processed <List(Str)>
+    list_of_subjects_to_be_processed : List(Str)
         Selection of subjects to be processed from the ``subjects`` list
+
+    dmri_inputs_checked : traits.Bool
+        True if dMRI data is available in the dataset
+
+    fmri_inputs_checked : traits.Bool
+        rue if fMRI data is available in the dataset
 
     anat_config : traits.File
         Configuration file for the anatomical MRI pipeline
@@ -660,27 +666,40 @@ class CMP_BIDSAppWindow(HasTraits):
                                                          high=multiprocessing.cpu_count()-1,
                                                          desc='Number of participants to be processed in parallel')
 
-    number_of_threads_max = Int(4)
+    number_of_threads_max = Int(multiprocessing.cpu_count()-1)
 
     number_of_threads = Range(low=1,
                               high='number_of_threads_max',
-                              desc='Number of threads used by ANTs registration'
+                              mode='spinner',
+                              desc='Number of OpenMP threads used by Dipy, FSL, MRtrix, '
                                    'and Freesurfer recon-all')
 
-    fs_license = File()
+    fix_ants_random_seed = Bool(False, desc='Fix MRtrix3 random generator seed for tractography')
+    ants_random_seed = Int(1234, desc='MRtrix random generator seed value')
+
+    fix_mrtrix_random_seed = Bool(False, desc='Fix ANTs random generator seed for registration')
+    mrtrix_random_seed = Int(1234, desc='ANTs random generator seed value')
+
+    fix_ants_number_of_threads = Bool(False, desc='Fix independently number of threads used by ANTs registration')
+    ants_number_of_threads = Range(low=1,
+                              high='number_of_threads_max',
+                              mode='spinner',
+                              desc='Number of ITK threads used by ANTs registration')
+
+    fs_license = File(desc='Path to your FREESURFER license.txt')
     # fs_average = Directory(os.path.join(os.environ['FREESURFER_HOME'],'subjects','fsaverage'))
 
     list_of_subjects_to_be_processed = List(Str)
 
     list_of_processing_logfiles = List(File)
 
-    anat_config = File()
-    dmri_config = File()
-    fmri_config = File()
+    anat_config = File(desc='Path to the configuration file of the anatomical pipeline')
+    dmri_config = File(desc='Path to the configuration file of the diffusion pipeline')
+    fmri_config = File(desc='Path to the configuration file of the fMRI pipeline')
 
-    run_anat_pipeline = Bool(True)
-    run_dmri_pipeline = Bool(True)
-    run_fmri_pipeline = Bool(True)
+    run_anat_pipeline = Bool(True, desc='Run the anatomical pipeline')
+    run_dmri_pipeline = Bool(True, desc='Run the diffusion pipeline')
+    run_fmri_pipeline = Bool(True, desc='Run the fMRI pipeline')
 
     dmri_inputs_checked = Bool(False)
     fmri_inputs_checked = Bool(False)
@@ -691,9 +710,14 @@ class CMP_BIDSAppWindow(HasTraits):
     bidsapp_tag = Enum('{}'.format(__version__), [
                        'latest', '{}'.format(__version__)])
 
-    data_provenance_tracking = Bool(False)
-    datalad_update_environment = Bool(True)
-    datalad_is_available = Bool(False)
+    data_provenance_tracking = Bool(False,
+                                    desc='Use datalad to execute CMP3 and record dataset changes')
+
+    datalad_update_environment = Bool(True,
+                                      desc='Update the container if datalad run-container has been run already once')
+
+    datalad_is_available = Bool(False,
+                                desc='True if datalad is available')
 
     # check = Action(name='Check settings!',
     #                action='check_settings',
@@ -714,15 +738,15 @@ class CMP_BIDSAppWindow(HasTraits):
     # stop_bidsapp = Action(name='Stop BIDS App!',action='stop_bids_app',enabled_when='handler.settings_checked and handler.docker_running')
 
     traits_view = QtView(Group(
-        Group(
-            Group(
+        VGroup(
+            VGroup(
                 Item('bidsapp_tag', style='readonly', label='Tag'),
                 label='BIDS App Version'),
-            Group(
+            VGroup(
                 Item('bids_root', style='readonly', label='Input directory'),
                 Item('output_dir', style='simple', label='Output directory'),
                 label='BIDS dataset'),
-            Group(
+            VGroup(
                 HGroup(
                     UItem('subjects',
                           editor=TabularEditor(
@@ -740,12 +764,36 @@ class CMP_BIDSAppWindow(HasTraits):
                           ),
                 ),
                 label='Participant labels to be processed'),
-            Group(Item('number_of_participants_processed_in_parallel',
-                        label='Number of participants processed in parallel'),
-                  Item('number_of_threads',
-                       label='Number of threads used by ANTs and Freesurfer'),
-                  label='Parallel processing and multithreading'),
-            Group(
+            HGroup(
+                Item('number_of_participants_processed_in_parallel',
+                     label='Number of participants processed in parallel'),
+                label='Parallel processing'
+            ),
+            VGroup(
+                HGroup(
+                    VGroup(Item('number_of_threads',
+                                label='Number of OpenMP threads'),
+                           Item('fix_ants_number_of_threads',
+                                label='Set number of threads used by ANTs'),
+                           Item('ants_number_of_threads',
+                                label='Number of ITK threads used by ANTs registration',
+                                enabled_when='fix_ants_number_of_threads'),
+                           label='Multithreading'),
+                    VGroup(Item('fix_ants_random_seed',
+                                label='Set seed of ANTS random number generator'),
+                           Item('ants_random_seed',
+                                label='Seed',
+                                enabled_when='fix_ants_random_seed'),
+                           Item('fix_mrtrix_random_seed',
+                                label='Set seed of MRtrix random number generator'),
+                           Item('mrtrix_random_seed',
+                                label='Seed',
+                                enabled_when='fix_mrtrix_random_seed'),
+                           label='Random number generators'),
+                ),
+                label='Advanced execution settings for each participant process'
+            ),
+            VGroup(
                 Group(Item('anat_config', label='Configuration file', visible_when='run_anat_pipeline'),
                       label='Anatomical pipeline'),
                 Group(Item('run_dmri_pipeline', label='Run processing stages'),
@@ -759,17 +807,17 @@ class CMP_BIDSAppWindow(HasTraits):
                       label='fMRI pipeline',
                       visible_when='fmri_inputs_checked==True'),
                 label='Configuration of processing pipelines'),
-            Group(
+            VGroup(
                 Item('fs_license', label='LICENSE'),
                 # Item('fs_average', label='FSaverage directory'),
                 label='Freesurfer configuration'),
+            VGroup(
+                Item('data_provenance_tracking', label='Use Datalad'),
+                Item('datalad_update_environment', visible_when='data_provenance_tracking',
+                     label='Update the computing environment (if existing)'),
+                label='Data Provenance Tracking / Data Lineage',
+                enabled_when='datalad_is_available'),
             orientation='vertical', springy=True),
-        Group(
-            Item('data_provenance_tracking', label='Use Datalad'),
-            Item('datalad_update_environment', visible_when='data_provenance_tracking',
-                 label='Update the computing environment (if existing)'),
-            label='Data Provenance Tracking / Data Lineage',
-            enabled_when='datalad_is_available'),
         spring,
         HGroup(spring, Item('check', style='custom',
                             width=152, height=35, resizable=False,
@@ -805,7 +853,7 @@ class CMP_BIDSAppWindow(HasTraits):
         # buttons = [check,start_bidsapp],
         # buttons = [process_anatomical,map_dmri_connectome,map_fmri_connectome],
         # buttons = [preprocessing, map_connectome, map_custom],
-        width=0.5, height=0.8, scrollable=True,  # , resizable=True
+        width=0.6, height=0.8, scrollable=True,  # , resizable=True
         icon=get_icon('bidsapp.png')
     )
 
