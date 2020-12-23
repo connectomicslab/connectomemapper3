@@ -541,36 +541,32 @@ class CombineParcellations(BaseInterface):
         print("Freesurfer subject directory: {}".format(fs_dir))
 
         # Freesurfer IDs for subcortical structures
-        left_subcIds = np.array([10, 11, 12, 13, 26, 18, 17])
-        left_subcIds_colors_r = np.array([0, 122, 236, 12, 255, 103, 220])
-        left_subcIds_colors_g = np.array([118, 186, 13, 48, 165, 255, 216])
-        left_subcIds_colors_b = np.array([14, 220, 176, 255, 0, 255, 20])
+        left_subc_ids = np.array([10, 11, 12, 13, 26, 18, 17])
+        left_subc_ids_2018_colors_r = np.array([0, 122, 236, 12, 255, 103, 220])
+        left_subc_ids_2018_colors_g = np.array([118, 186, 13, 48, 165, 255, 216])
+        left_subc_ids_2018_colors_b = np.array([14, 220, 176, 255, 0, 255, 20])
         left_subcort_names = ["Left-Thalamus_Proper", "Left-Caudate", "Left-Putamen", "Left-Pallidum",
                               "Left-Accumbens_area", "Left-Amygdala", "Left-Hippocampus"]
 
-        right_subcIds = np.array([49, 50, 51, 52, 58, 54, 53])
-        right_subcIds_colors_r = np.array([0, 122, 236, 12, 255, 103, 220])
-        right_subcIds_colors_g = np.array([118, 186, 13, 48, 165, 255, 216])
-        right_subcIds_colors_b = np.array([14, 220, 176, 255, 0, 255, 20])
+        right_subc_ids = np.array([49, 50, 51, 52, 58, 54, 53])
+        right_subc_ids_2018_colors_r = np.array([0, 122, 236, 12, 255, 103, 220])
+        right_subc_ids_2018_colors_g = np.array([118, 186, 13, 48, 165, 255, 216])
+        right_subc_ids_2018_colors_b = np.array([14, 220, 176, 255, 0, 255, 20])
         right_subcort_names = ["Right-Thalamus_Proper", "Right-Caudate", "Right-Putamen", "Right-Pallidum",
                                "Right-Accumbens_area", "Right-Amygdala", "Right-Hippocampus"]
 
         # Amygdala and hippocampus swapped between Lausanne2008 and Lausanne2018
-        left_subcIds_2008 = np.array([10, 11, 12, 13, 26, 17, 18])
-        left_subcIds_2008_colors_r = np.array([0, 122, 236, 12, 255, 220, 103])
-        left_subcIds_2008_colors_g = np.array(
-            [118, 186, 13, 48, 165, 216, 255])
-        left_subcIds_2008_colors_b = np.array([14, 220, 176, 255, 0, 20, 255])
+        left_subc_ids_2008 = np.array([10, 11, 12, 13, 26, 17, 18])
+        # left_subc_ids_2008_colors_r = np.array([0, 122, 236, 12, 255, 220, 103])
+        # left_subc_ids_2008_colors_g = np.array([118, 186, 13, 48, 165, 216, 255])
+        # left_subc_ids_2008_colors_b = np.array([14, 220, 176, 255, 0, 20, 255])
         left_subcort_2008_names = ["Left-Thalamus_Proper", "Left-Caudate", "Left-Putamen", "Left-Pallidum",
                                    "Left-Accumbens_area", "Left-Hippocampus", "Left-Amygdala"]
 
-        right_subcIds_2008 = np.array([49, 50, 51, 52, 58, 53, 54])
-        right_subcIds_2008_colors_r = np.array(
-            [0, 122, 236, 12, 255, 220, 103])
-        right_subcIds_2008_colors_g = np.array(
-            [118, 186, 13, 48, 165, 216, 255])
-        right_subcIds_2008_colCombineParcellationsors_b = np.array(
-            [14, 220, 176, 255, 0, 20, 255])
+        right_subc_ids_2008 = np.array([49, 50, 51, 52, 58, 53, 54])
+        # right_subc_ids_2008_colors_r = np.array([0, 122, 236, 12, 255, 220, 103])
+        # right_subc_ids_2008_colors_g = np.array([118, 186, 13, 48, 165, 216, 255])
+        # right_subc_ids_2008_colors_b = np.array([14, 220, 176, 255, 0, 20, 255])
         right_subcort_2008_names = ["Right-Thalamus_Proper", "Right-Caudate", "Right-Putamen", "Right-Pallidum",
                                     "Right-Accumbens_area", "Right-Hippocampus", "Right-Amygdala"]
 
@@ -593,14 +589,10 @@ class CombineParcellations(BaseInterface):
                                   "Right-Ventral_Anterior", "Right-Ventral_Latero_Ventral"]
 
         # Hippocampus subfields
-        hippo_subf = np.array(
-            [203, 204, 205, 206, 208, 209, 210, 211, 212, 214, 215, 226])
-        hippo_subf_colors_r = np.array(
-            [255, 64, 0, 255, 0, 196, 32, 128, 204, 128, 128, 170])
-        hippo_subf_colors_g = np.array(
-            [255, 0, 0, 0, 128, 160, 200, 255, 153, 0, 32, 170])
-        hippo_subf_colors_b = np.array(
-            [0, 64, 255, 0, 0, 128, 255, 128, 204, 0, 255, 255])
+        hippo_subf = np.array([203, 204, 205, 206, 208, 209, 210, 211, 212, 214, 215, 226])
+        hippo_subf_colors_r = np.array([255, 64, 0, 255, 0, 196, 32, 128, 204, 128, 128, 170])
+        hippo_subf_colors_g = np.array([255, 0, 0, 0, 128, 160, 200, 255, 153, 0, 32, 170])
+        hippo_subf_colors_b = np.array([0, 64, 255, 0, 0, 128, 255, 128, 204, 0, 255, 255])
         left_hippo_subf_names = ["Left-Hippocampus_Parasubiculum", "Left-Hippocampus_Presubiculum",
                                  "Left-Hippocampus_Subiculum", "Left-Hippocampus_CA1", "Left-Hippocampus_CA3",
                                  "Left-Hippocampus_CA4",
@@ -684,20 +676,20 @@ class CombineParcellations(BaseInterface):
             print('Brain stem image not provided')
 
         if not (thalamus_nuclei_defined and brainstem_defined and (lh_subfield_defined and rh_subfield_defined)):
-            left_subc_labels = left_subcIds_2008
+            left_subc_labels = left_subc_ids_2008
             left_subcort_names = left_subcort_2008_names
-            right_subc_labels = right_subcIds_2008
+            right_subc_labels = right_subc_ids_2008
             right_subcort_names = right_subcort_2008_names
 
         elif thalamus_nuclei_defined:
-            left_subc_labels = left_subcIds[1:]
+            left_subc_labels = left_subc_ids[1:]
             left_subcort_names = left_subcort_names[1:]
-            right_subc_labels = right_subcIds[1:]
+            right_subc_labels = right_subc_ids[1:]
             right_subcort_names = right_subcort_names[1:]
 
         else:
-            left_subc_labels = left_subcIds
-            right_subc_labels = right_subcIds
+            left_subc_labels = left_subc_ids
+            right_subc_labels = right_subc_ids
 
         # Get the first parcellation scale for ventricule image
         roi1_fname = None
@@ -731,6 +723,9 @@ class CombineParcellations(BaseInterface):
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
+
+        if self.inputs.verbose_level == 2:
+            print(proc_stdout)
 
         tmp = ni.load(third_vent_dil).get_data()
         indrhypothal = np.where((tmp == 1) & (img_data == right_ventral))
@@ -877,7 +872,6 @@ class CombineParcellations(BaseInterface):
                 roi_names = rh_annot[2][1:]
                 # roi_labels = rh_annot[0][1:]
 
-                lines = []
                 for label, name in enumerate(roi_names):
                     name = 'ctx-rh-{}'.format(name.decode())
                     if self.inputs.create_colorLUT:
@@ -975,9 +969,9 @@ class CombineParcellations(BaseInterface):
                         "  > Update right subcortical label ({} -> {})".format(lab, new_labels[i]))
 
                 if self.inputs.create_colorLUT:
-                    r = right_subcIds_colors_r[i]
-                    g = right_subcIds_colors_g[i]
-                    b = right_subcIds_colors_b[i]
+                    r = right_subc_ids_2018_colors_r[i]
+                    g = right_subc_ids_2018_colors_g[i]
+                    b = right_subc_ids_2018_colors_b[i]
                     f_color_lut.write(
                         '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[i]), right_subcort_names[i], r, g,
                                                                      b))
@@ -1153,7 +1147,6 @@ class CombineParcellations(BaseInterface):
                 rgb_table = lh_annot[1][1:, 0:3]
                 roi_names = lh_annot[2][1:]
 
-                lines = []
                 for label, name in enumerate(roi_names):
                     name = 'ctx-lh-{}'.format(name.decode())
 
@@ -1251,9 +1244,9 @@ class CombineParcellations(BaseInterface):
                         "  > Update left subcortical label ({} -> {})".format(lab, new_labels[i]))
 
                 if self.inputs.create_colorLUT:
-                    r = left_subcIds_colors_r[i]
-                    g = left_subcIds_colors_g[i]
-                    b = left_subcIds_colors_b[i]
+                    r = left_subc_ids_2018_colors_r[i]
+                    g = left_subc_ids_2018_colors_g[i]
+                    b = left_subc_ids_2018_colors_b[i]
                     f_color_lut.write(
                         '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[i]), left_subcort_names[i], r, g, b))
 
@@ -1325,7 +1318,7 @@ class CombineParcellations(BaseInterface):
                     img_data_out[ind] = new_labels[i]
                     i += 1
                 nlabel = img_data_out.max()
-                newIds_LH_subFields = new_labels
+                # newIds_LH_subFields = new_labels
 
                 if self.inputs.create_colorLUT:
                     f_color_lut.write("\n")
@@ -1339,7 +1332,7 @@ class CombineParcellations(BaseInterface):
                 ind = np.where(img_data == left_ventral)
                 img_data_out[ind] = new_labels[0]
                 nlabel = img_data_out.max()
-                newIds_LH_ventralDC = new_labels
+                # newIds_LH_ventralDC = new_labels
 
                 # ColorLUT (left ventral DC)
                 if self.inputs.create_colorLUT:
@@ -1447,7 +1440,7 @@ class CombineParcellations(BaseInterface):
                     ind = np.where(img_data_stem == lab)
                     img_data_out[ind] = new_labels[i]
                     i += 1
-                nlabel = img_data_out.max()
+                # nlabel = img_data_out.max()
 
                 if self.inputs.create_colorLUT:
                     f_color_lut.write("\n")
@@ -1486,7 +1479,7 @@ class CombineParcellations(BaseInterface):
                                       '{} \n'.format('    </node>')]
                         f_graphml.writelines(node_lines)
 
-                nlabel = img_data_out.max()
+                # nlabel = img_data_out.max()
 
                 if self.inputs.create_colorLUT:
                     f_color_lut.write("\n")
@@ -1534,6 +1527,9 @@ class CombineParcellations(BaseInterface):
         else:
             status = subprocess.call(
                 cmd, shell=True, stdout=fnull, stderr=subprocess.STDOUT)
+
+        if self.inputs.verbose_level == 2:
+            print(status)
 
         img_aparcaseg = ni.load(aparcaseg_native)
         img_data_aparcaseg = img_aparcaseg.get_data()
@@ -1716,7 +1712,7 @@ class ParcellateThalamus(BaseInterface):
         iflogger.info("=============================================")
 
         # fs_string = 'export ANTSPATH=/usr/lib/ants/'
-        fs_string = ''
+        # fs_string = ''
         iflogger.info(
             '- Input T1w image:\n  {}\n'.format(self.inputs.T1w_image))
         iflogger.info(
@@ -1860,7 +1856,7 @@ class ParcellateThalamus(BaseInterface):
 
         iflogger.info('Creating Thalamus mask from FreeSurfer aparc+aseg ')
 
-        fs_string = 'export SUBJECTS_DIR=' + self.inputs.subjects_dir
+        # fs_string = 'export SUBJECTS_DIR=' + self.inputs.subjects_dir
         iflogger.info(
             '- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
 
@@ -2010,8 +2006,7 @@ class ParcellateThalamus(BaseInterface):
 
         # Save Maxprob
         # update the header
-        max_prob = op.abspath(
-            '{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefix_name))
+        max_prob_fn = op.abspath('{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefix_name))
         hdr = img_atlas.get_header()
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.uint16)
@@ -2040,7 +2035,7 @@ class ParcellateThalamus(BaseInterface):
 
         print("Save output image to %s" % max_prob)
         img = ni.Nifti1Image(max_prob, img_atlas.get_affine(), hdr2)
-        ni.save(img, max_prob)
+        ni.save(img, max_prob_fn)
 
         del hdr2, img, max_prob
 
@@ -2956,10 +2951,9 @@ def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id):
             'data', 'parcellation', 'lausanne2018', lh_annot_files[i])),
         os.path.join(subject_dir, 'label', lh_annot_files[i]))
     if v == 2:
-        status = subprocess.call(mri_cmd, shell=True)
+        subprocess.call(mri_cmd, shell=True)
     else:
-        status = subprocess.call(
-            mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+        subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
     # Right hemisphere
     mri_cmd = fs_string + '; mri_surf2surf --srcsubject fsaverage --trgsubject %s --hemi rh --sval-annot %s --tval %s' % (
         subject_id,
@@ -2967,10 +2961,9 @@ def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id):
             'data', 'parcellation', 'lausanne2018', rh_annot_files[i])),
         os.path.join(subject_dir, 'label', rh_annot_files[i]))
     if v == 2:
-        status = subprocess.call(mri_cmd, shell=True)
+        subprocess.call(mri_cmd, shell=True)
     else:
-        status = subprocess.call(
-            mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+        subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
     # 2. Generate Nifti volume from annotation
     #    Note: change here --wmparc-dmax (FS default 5mm) to dilate cortical regions toward the WM
@@ -2981,10 +2974,9 @@ def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id):
         annot[i],
         os.path.join(subject_dir, 'tmp', aseg_output[i]))
     if v == 2:
-        status = subprocess.call(mri_cmd, shell=True)
+        subprocess.call(mri_cmd, shell=True)
     else:
-        status = subprocess.call(
-            mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+        subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
     # 3. Update numerical IDs of cortical and subcortical regions
     # Load Nifti volume
@@ -3033,10 +3025,9 @@ def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id):
         this_out,
         os.path.join(subject_dir, 'mri', aseg_output[i][0:-4] + '.mgz'))
     if v == 2:
-        status = subprocess.call(mri_cmd, shell=True)
+        subprocess.call(mri_cmd, shell=True)
     else:
-        status = subprocess.call(
-            mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+        subprocess.call(mri_cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
     os.remove(os.path.join(subject_dir, 'tmp', aseg_output[i]))
 
     return 1
@@ -3092,12 +3083,8 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
             print('- Freesurfer subject id:\n  {}\n'.format(subject_id))
             print('- Freesurfer subject directory:\n  {}\n'.format(subject_dir))
 
-        # Number of scales in multiscale parcellation
-        nscales = 5
-        # Freesurfer IDs for subcortical structures and brain stem
-        lh_sub = np.array([10, 11, 12, 13, 26, 17, 18])
-        rh_sub = np.array([49, 50, 51, 52, 58, 53, 54])
-        brain_stem = np.array([16])
+    # Number of scales in multiscale parcellation
+    nscales = 5
 
     # # load aseg volume
     aseg = ni.load(op.join(subject_dir, 'mri', 'aseg.nii.gz'))
