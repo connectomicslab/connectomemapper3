@@ -698,8 +698,8 @@ class CMP_BIDSAppWindow(HasTraits):
     fmri_config = File(desc='Path to the configuration file of the fMRI pipeline')
 
     run_anat_pipeline = Bool(True, desc='Run the anatomical pipeline')
-    run_dmri_pipeline = Bool(True, desc='Run the diffusion pipeline')
-    run_fmri_pipeline = Bool(True, desc='Run the fMRI pipeline')
+    run_dmri_pipeline = Bool(False, desc='Run the diffusion pipeline')
+    run_fmri_pipeline = Bool(False, desc='Run the fMRI pipeline')
 
     dmri_inputs_checked = Bool(False)
     fmri_inputs_checked = Bool(False)
@@ -920,8 +920,10 @@ class CMP_BIDSAppWindow(HasTraits):
 
         if dmri_inputs_checked is not None:
             self.dmri_inputs_checked = dmri_inputs_checked
+            self.run_dmri_pipeline = dmri_inputs_checked
         else:
             self.dmri_inputs_checked = False
+            self.run_dmri_pipeline = False
 
         # Check if fMRI data is available in the dataset
         fmri_pipeline = fMRIPipeline(project_info)
@@ -930,10 +932,12 @@ class CMP_BIDSAppWindow(HasTraits):
                                                         debug=False)
         if fmri_inputs_checked is not None:
             self.fmri_inputs_checked = fmri_inputs_checked
+            self.run_fmri_pipeline = fmri_inputs_checked
         else:
             self.fmri_inputs_checked = False
+            self.run_fmri_pipeline = False
 
-        # Initialize output directory to be /bids_dir/derivatives
+            # Initialize output directory to be /bids_dir/derivatives
         self.output_dir = os.path.join(bids_root, 'derivatives')
 
         self.subjects = subjects
