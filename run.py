@@ -370,10 +370,29 @@ else:
     print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
     number_of_threads = 1
 
-# Set number of threads used by programs based on OpenMP mult-threading library
-# This includes AFNI, ANTs, Dipy, Freesurfer, FSL, MRtrix3.
+# Set number of threads used by programs based on OpenMP multi-threading library
+# This includes AFNI, Dipy, Freesurfer, FSL, MRtrix3.
 os.environ['OMP_NUM_THREADS'] = '{}'.format(number_of_threads)
 print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'], max_number_of_cores))
+
+# Set number of threads used by ANTs if specified.
+# Otherwise use the same as the number of OpenMP threads
+if args.ants_number_of_threads is not None:
+    os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = f'{args.ants_number_of_threads}'
+    print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
+else:
+    os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = os.environ['OMP_NUM_THREADS']
+    print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
+
+# Set random generator seed of MRtrix if specified
+if args.mrtrix_random_seed is not None:
+    os.environ['MRTRIX_RNG_SEED'] = f'{args.mrtrix_random_seed}'
+    print(f'  * MRTRIX_RNG_SEED set to {os.environ["MRTRIX_RNG_SEED"]}')
+
+# Set random generator seed of ANTs if specified
+if args.ants_random_seed is not None:
+    os.environ['ANTS_RANDOM_SEED'] = f'{args.ants_random_seed}'
+    print(f'  * ANTS_RANDOM_SEED set to {os.environ["ANTS_RANDOM_SEED"]}')
 
 # TODO: Implement log for subject(_session)
 # with open(log_filename, 'w+') as log:
