@@ -200,6 +200,9 @@ class fMRIPipelineUI(fMRIPipeline):
         layout : bids.BIDSLayout
             BIDSLayout object used to query
 
+        gui : bool
+            If True, display message in GUI
+
         Returns
         -------
         valid_inputs : bool

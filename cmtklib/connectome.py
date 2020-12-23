@@ -64,6 +64,9 @@ def create_endpoints_array(fib, voxelSize, print_info):
     voxelSize: 3-tuple
         It contains the voxel size of the ROI image
 
+    print_info : bool
+        If True, print extra information
+
     Returns
     -------
     (endpoints: matrix of size [#fibers, 2, 3] containing for each fiber the

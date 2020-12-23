@@ -2910,7 +2910,7 @@ def define_atlas_variables():
     return paths, comp, pardic, parkeys
 
 
-def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id, w):
+def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id):
     """Generates the volumetric parcellation from the annotation file for one scale of Lausanne2018 parcellation.
 
     Parameters
@@ -2927,9 +2927,9 @@ def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id, w):
     subject_id : string
         Freesurfer subject id
 
-    subjects_dir : string
-        Freesurfer subjects dir
-        (Typically ``/path/to/output_dir/freesurfer``)
+    subject_dir : string
+        Freesurfer subject dir
+        (Typically ``/path/to/output_dir/freesurfer/<subject_id>``)
     """
     # Multiscale parcellation - define annotation and segmentation variables
     rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot', 'rh.lausanne2008.scale3.annot',

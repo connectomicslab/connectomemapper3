@@ -495,15 +495,9 @@ def init_anat_project(project_info, is_new_project, debug=False):
     project_info : cmp.project.CMP_Project_Info
         Instance of ``cmp.project.CMP_Project_Info`` object
 
-    bids_layout : bids.BIDSLayout
-        Instance of ``BIDSLayout`` object
-
     is_new_project : bool
         Specify if it corresponds or not to a new project.
         If `True`, it will create initial pipeline configuration files.
-
-    gui : bool
-        Might be obsolete and removed in future versions
 
     debug : bool
         If `True`, display extra prints to support debugging

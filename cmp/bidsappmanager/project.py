@@ -104,7 +104,10 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
     derivatives_directory : string
 
     subject : string
-        Subject label (``sub-XX``) for which we create the output folder hierarchy 
+        Subject label (``sub-XX``) for which we create the output folder hierarchy
+
+    session : string
+        Subject session label (``ses-YY``)
 
     input_folders : list of string
         List of folders to create in ``derivative_directory/sub-XX/(ses-YY)/`` folder
@@ -156,6 +159,9 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
 
     is_new_project : bool
         If True, this is a new project which has been never processed
+
+    gui : bool
+        If True, display messages in GUI
     """
     dmri_pipeline = Diffusion_pipeline.DiffusionPipelineUI(project_info)
 
@@ -229,6 +235,9 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
 
     is_new_project : bool
         If True, this is a new project which has been never processed
+
+    gui : bool
+        If True, display messgae in GUI
     """
     fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(project_info)
 
@@ -297,9 +306,6 @@ def init_anat_project(project_info, is_new_project):
     ----------
     project_info : CMP_Project_InfoUI
         Instance of :class:`CMP_Project_InfoUI` class
-
-    bids_layout : bids.BIDSLayout
-        PyBIDS BIDS Layout object describing the BIDS dataset
 
     is_new_project : bool
         If True, this is a new project which has been never processed
@@ -1469,6 +1475,9 @@ class CMP_MainWindowHandler(Handler):
         ----------
         ui_info : QtView
             TraitsUI QtView associated with ``self``
+
+        debug : bool
+            If True, print more information for debugging
         """
         loaded_project = gui.CMP_Project_InfoUI()
         np_res = loaded_project.configure_traits(view='open_view')

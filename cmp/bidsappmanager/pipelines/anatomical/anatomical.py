@@ -155,6 +155,9 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         layout : bids.BIDSLayout
             BIDSLayout object used to query
 
+        gui : Boolean
+            If `True` display messages and errors in graphical window
+
         Returns
         -------
         valid_inputs : bool

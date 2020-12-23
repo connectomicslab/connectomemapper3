@@ -1087,7 +1087,7 @@ class CMP_BIDSAppWindow(HasTraits):
         bidsapp_tag : traits.Str
             Version tag of the CMP 3 BIDS App
 
-        participants_labels : traits.List
+        participant_labels : traits.List
             List of participants labels in the form ["01", "03", "04", ...]
         """
 
@@ -1179,7 +1179,7 @@ class CMP_BIDSAppWindow(HasTraits):
         bidsapp_tag : traits.Str
             Version tag of the CMP 3 BIDS App
 
-        participants_labels : traits.List
+        participant_labels : traits.List
             List of participants labels in the form ["01", "03", "04", ...]
         """
         cmd = ['datalad', 'containers-run', ]

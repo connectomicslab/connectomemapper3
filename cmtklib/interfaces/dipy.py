@@ -385,7 +385,7 @@ class SHORE(DipyDiffusionInterface):
     Example
     -------
     >>> from cmtklib.interfaces.dipy import SHORE
-    >>> asm = SHORE(radial_order=radial_order,zeta=zeta, lambda_n=lambdaN, lambda_l=lambdaL)
+    >>> asm = SHORE(radial_order=6,zeta=700, lambda_n=1e-8, lambda_l=1e-8)
     >>> asm.inputs.in_file = '4d_dwi.nii'
     >>> asm.inputs.in_bval = 'bvals'
     >>> asm.inputs.in_bvec = 'bvecs'

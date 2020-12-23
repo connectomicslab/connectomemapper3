@@ -13,7 +13,7 @@ import nibabel as nib
 import numpy as np
 import nibabel.trackvis as tv
 
-from nipype.interfaces.base import traits, BaseInterface, BaseInterfaceInputSpec, File, TraitedSpec, OutputMultiPath, InputMultiPath
+from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, File, TraitedSpec, OutputMultiPath, InputMultiPath
 from nipype.utils.filemanip import split_filename
 
 from traits.trait_types import List, Str, Int, Enum
@@ -148,8 +148,8 @@ class FlipTable(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import FlipTable
-    >>> flip_table = ExtractHeaderVoxel2WorldMatrix()
+    >>> from cmtklib.diffusion import FlipTable
+    >>> flip_table = FlipTable()
     >>> flip_table.inputs.table = 'sub-01_mod-dwi_gradient.txt'
     >>> flip_table.inputs.flipping_axis = ['x']
     >>> flip_table.inputs.orientation = 'v'
@@ -219,7 +219,7 @@ class ExtractPVEsFrom5TT(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import ExtractPVEsFrom5TT
+    >>> from cmtklib.diffusion import ExtractPVEsFrom5TT
     >>> pves = ExtractPVEsFrom5TT()
     >>> pves.inputs.in_5tt = 'sub-01_desc-5tt_dseg.nii.gz'
     >>> pves.inputs.ref_image = 'sub-01_T1w.nii.gz'
@@ -378,7 +378,7 @@ class Tck2Trk(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import Tck2Trk
+    >>> from cmtklib.diffusion import Tck2Trk
     >>> tck_to_trk = Tck2Trk()
     >>> tck_to_trk.inputs.in_tracks = 'sub-01_tractogram.tck'
     >>> tck_to_trk.inputs.in_image = 'sub-01_desc-preproc_dwi.nii.gz'
@@ -436,7 +436,7 @@ class FlipBvec(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import FlipBvec
+    >>> from cmtklib.diffusion import FlipBvec
     >>> flip_bvec = FlipBvec()
     >>> flip_bvec.inputs.bvecs = 'sub-01_dwi.bvecs'
     >>> flip_bvec.inputs.flipping_axis = ['x']
@@ -512,7 +512,7 @@ class UpdateGMWMInterfaceSeeding(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import UpdateGMWMInterfaceSeeding
+    >>> from cmtklib.diffusion import UpdateGMWMInterfaceSeeding
     >>> update_gmwmi = UpdateGMWMInterfaceSeeding()
     >>> update_gmwmi.inputs.in_gmwmi_file = 'sub-01_label-gmwmi_desc-orig_dseg.nii.gz'
     >>> update_gmwmi.inputs.out_gmwmi_file = 'sub-01_label-gmwmi_desc-modif_dseg.nii.gz'
@@ -624,7 +624,7 @@ class Make_Seeds(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import Make_Seeds
+    >>> from cmtklib.diffusion import Make_Seeds
     >>> make_dipy_seeds = Make_Seeds()
     >>> make_dipy_seeds.inputs.ROI_files  = ['sub-01_space-DWI_atlas-L2018_desc-scale1_dseg.nii.gz',
     >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale2_dseg.nii.gz',
@@ -701,7 +701,7 @@ class Make_Mrtrix_Seeds(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import Make_Mrtrix_Seeds
+    >>> from cmtklib.diffusion import Make_Mrtrix_Seeds
     >>> make_mrtrix_seeds = Make_Mrtrix_Seeds()
     >>> make_mrtrix_seeds.inputs.ROI_files  = ['sub-01_space-DWI_atlas-L2018_desc-scale1_dseg.nii.gz',
     >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale2_dseg.nii.gz',
@@ -778,7 +778,7 @@ class SplitDiffusion(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import SplitDiffusion
+    >>> from cmtklib.diffusion import SplitDiffusion
     >>> split_dwi = SplitDiffusion()
     >>> split_dwi.inputs.in_file  = 'sub-01_dwi.nii.gz'
     >>> split_dwi.inputs.start  = 5
