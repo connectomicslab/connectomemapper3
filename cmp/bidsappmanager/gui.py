@@ -1145,6 +1145,18 @@ class CMP_BIDSAppWindow(HasTraits):
         cmd.append('--number_of_threads')
         cmd.append('{}'.format(self.number_of_threads))
 
+        if self.fix_ants_number_of_threads:
+            cmd.append('--ants_number_of_threads')
+            cmd.append('{}'.format(self.ants_number_of_threads))
+
+        if self.fix_ants_random_seed:
+            cmd.append('--ants_random_seed')
+            cmd.append('{}'.format(self.ants_random_seed))
+
+        if self.fix_mrtrix_random_seed:
+            cmd.append('--mrtrix_random_seed')
+            cmd.append('{}'.format(self.mrtrix_random_seed))
+
         print('... BIDS App execution command: {}'.format(cmd))
 
         # log_filename = os.path.join(
