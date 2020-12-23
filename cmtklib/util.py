@@ -358,7 +358,7 @@ def create_results_plkz_local(plkz_file, local_output_dir, encoding='latin-1', d
     if debug:
         print("Processing pickle {} ".format(plkz_file))
 
-    pick = gzip.open(plkz_file,'rb')
+    pick = gzip.open(plkz_file, 'rb')
     cont = pick.read()
     # cont = "".join( chr(x) for x in bytearray(cont))
     print(cont)
@@ -434,13 +434,13 @@ def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None):
             if "* subject_id : " in line:
                 fs_subject_dir = line.strip()
                 prefix = '* subject_id : '
-                fs_subject_dir = str.replace(fs_subject_dir,prefix,"")
+                fs_subject_dir = str.replace(fs_subject_dir, prefix, "")
                 print(fs_subject_dir)
 
                 # Update from BIDS App /output_dir to local output directory
                 # specified by local_output_dir
                 if local_output_dir is not None:
-                    fs_subject_dir = str.replace(fs_subject_dir,"/output_dir",local_output_dir)
+                    fs_subject_dir = str.replace(fs_subject_dir, "/output_dir", local_output_dir)
                 break
 
             line = fp.readline()
@@ -476,14 +476,14 @@ def get_pipeline_dictionary_outputs(datasink_report, local_output_dir=None):
             if "_outputs :" in line:
                 str_outputs = line.strip()
                 prefix = '* _outputs : '
-                str_outputs = str.replace(str_outputs,prefix,"")
-                str_outputs = str.replace(str_outputs,"\'","\"")
-                str_outputs = str.replace(str_outputs,"<undefined>","\"\"")
+                str_outputs = str.replace(str_outputs, prefix, "")
+                str_outputs = str.replace(str_outputs, "\'", "\"")
+                str_outputs = str.replace(str_outputs, "<undefined>", "\"\"")
 
                 # Update from BIDS App /output_dir to local output directory
                 # specified by local_output_dir
                 if local_output_dir is not None:
-                    str_outputs = str.replace(str_outputs,"/output_dir",local_output_dir)
+                    str_outputs = str.replace(str_outputs, "/output_dir", local_output_dir)
                 break
 
     # Convert the extracted JSON-structured string to a dictionary
@@ -519,13 +519,13 @@ def get_node_dictionary_outputs(node_report, local_output_dir=None):
             if "_outputs :" in line:
                 str_outputs = line.strip()
                 prefix = '* _outputs : '
-                str_outputs = str.replace(str_outputs,prefix,"")
-                str_outputs = str.replace(str_outputs,"\'","\"")
+                str_outputs = str.replace(str_outputs, prefix, "")
+                str_outputs = str.replace(str_outputs, "\'", "\"")
 
                 # Update from BIDS App /output_dir to local output directory
                 # specified by local_output_dir
                 if local_output_dir is not None:
-                    str_outputs = str.replace(str_outputs,"/output_dir",local_output_dir)
+                    str_outputs = str.replace(str_outputs, "/output_dir", local_output_dir)
                 break
 
     # Convert the extracted JSON-structured string to a dictionary

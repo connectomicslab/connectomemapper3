@@ -212,7 +212,9 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         # diffusion_imaging_model = diffusion_imaging_model[0]
 
         if gui:
-            # input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
+            # input_notification = Check_Input_Notification(message=input_message,
+            #                                               diffusion_imaging_model_options=diffusion_imaging_model,
+            #                                               diffusion_imaging_model=diffusion_imaging_model)
             # input_notification.configure_traits()
             print(input_message)
 

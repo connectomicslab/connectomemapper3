@@ -398,9 +398,9 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 endvox[1] = np.int(endpoints[i, 1, 1])
                 endvox[2] = np.int(endpoints[i, 1, 2])
 
-                ##print "start point : ",startvox
-                ##print "end point : ",endvox
-                ##print "roi data shape : ",roiData.shape
+                # print "start point : ",startvox
+                # print "end point : ",endvox
+                # print "roi data shape : ",roiData.shape
 
                 # endpoints from create_endpoints_array
                 startROI = int(roiData[startvox[0], startvox[1], startvox[2]])

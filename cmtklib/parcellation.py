@@ -53,7 +53,7 @@ class ComputeParcellationRoiVolumesInputSpec(BaseInterfaceInputSpec):
 
     parcellation_scheme = traits.Enum(
             'Lausanne2018',
-            ['NativeFreesurfer','Lausanne2008','Lausanne2018'],
+            ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018'],
             usedefault=True, mandatory=True,
             desc="Parcellation scheme")
 
@@ -296,7 +296,8 @@ class ParcellateHippocampalSubfields(BaseInterface):
 
     References
     ----------
-    .. [Iglesias2015Hippo] Iglesias et al., Neuroimage, 115, July 2015, 117-137. <http://www.nmr.mgh.harvard.edu/~iglesias/pdf/subfieldsNeuroimage2015preprint.pdf>
+    .. [Iglesias2015Hippo] Iglesias et al., Neuroimage, 115, July 2015, 117-137.
+                           <http://www.nmr.mgh.harvard.edu/~iglesias/pdf/subfieldsNeuroimage2015preprint.pdf>
 
     Examples
     --------
@@ -399,7 +400,8 @@ class ParcellateBrainstemStructures(BaseInterface):
 
     References
     ----------
-    .. [Iglesias2015Brainstem] Iglesias et al., NeuroImage, 113, June 2015, 184-195. <http://www.nmr.mgh.harvard.edu/~iglesias/pdf/Neuroimage_2015_brainstem.pdf>
+    .. [Iglesias2015Brainstem] Iglesias et al., NeuroImage, 113, June 2015, 184-195.
+                               <http://www.nmr.mgh.harvard.edu/~iglesias/pdf/Neuroimage_2015_brainstem.pdf>
 
     Examples
     --------
@@ -647,16 +649,16 @@ class CombineParcellations(BaseInterface):
         lh_subfield_defined = False
         # Reading Subfields Images
         try:
-            Vsublh = ni.load(self.inputs.lh_hippocampal_subfields)
-            Isublh = Vsublh.get_data()
+            img_sublh = ni.load(self.inputs.lh_hippocampal_subfields)
+            img_data_sublh = img_sublh.get_data()
             lh_subfield_defined = True
         except TypeError:
             print('Subfields image (Left hemisphere) not provided')
 
         rh_subfield_defined = False
         try:
-            Vsubrh = ni.load(self.inputs.rh_hippocampal_subfields)
-            Isubrh = Vsubrh.get_data()
+            img_subrh = ni.load(self.inputs.rh_hippocampal_subfields)
+            img_data_subrh = img_subrh.get_data()
             rh_subfield_defined = True
         except TypeError:
             print('Subfields image (Right hemisphere) not provided')
@@ -665,7 +667,7 @@ class CombineParcellations(BaseInterface):
         # Reading  Nuclei
         try:
             Vthal = ni.load(self.inputs.thalamus_nuclei)
-            Ithal = Vthal.get_data()
+            img_data_thal = Vthal.get_data()
 
             thalamus_nuclei_defined = True
         except TypeError:
@@ -674,9 +676,9 @@ class CombineParcellations(BaseInterface):
         brainstem_defined = False
         # Reading Stem Image
         try:
-            Vstem = ni.load(self.inputs.brainstem_structures)
-            Istem = Vstem.get_data()
-            indstem = np.where(Istem > 0)
+            img_stem = ni.load(self.inputs.brainstem_structures)
+            img_data_stem = img_stem.get_data()
+            indstem = np.where(img_data_stem > 0)
             brainstem_defined = True
         except TypeError:
             print('Brain stem image not provided')
@@ -697,82 +699,77 @@ class CombineParcellations(BaseInterface):
             left_subc_labels = left_subcIds
             right_subc_labels = right_subcIds
 
-        # Annot files for creating colorLUT and graphml files
-        rh_annot_files = ['rh.lausanne2008.scale1.annot', 'rh.lausanne2008.scale2.annot',
-                          'rh.lausanne2008.scale3.annot', 'rh.lausanne2008.scale4.annot',
-                          'rh.lausanne2008.scale5.annot']
-        lh_annot_files = ['lh.lausanne2008.scale1.annot', 'lh.lausanne2008.scale2.annot',
-                          'lh.lausanne2008.scale3.annot', 'lh.lausanne2008.scale4.annot',
-                          'lh.lausanne2008.scale5.annot']
-
-        # Dilate third ventricle and intersect with right and left ventral DC to get voxels of left and right hypothalamus
-
+        # Get the first parcellation scale for ventricule image
+        roi1_fname = None
         for roi_fname in self.inputs.input_rois:
             if 'scale1' in roi_fname:
                 roi1_fname = roi_fname
                 break
 
+        # Dilate third ventricle and intersect with right and left ventral DC
+        # to get voxels of left and right hypothalamus
         iflogger.info("  > Create ventricule image")
-        V = ni.load(roi1_fname)
-        I = V.get_data()
-        tmp = np.zeros(I.shape)
-        indV = np.where(I == ventricle3)
-        tmp[indV] = 1
+        img_v = ni.load(roi1_fname)
+        img_data = img_v.get_data()
+        tmp = np.zeros(img_data.shape)
+        ind_v = np.where(img_data == ventricle3)
+        tmp[ind_v] = 1
 
-        thirdV = op.abspath('{}.nii.gz'.format("ventricle3"))
-        hdr = V.get_header()
+        third_vent_fn = op.abspath('{}.nii.gz'.format("ventricle3"))
+        hdr = img_v.get_header()
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.int16)
-        iflogger.info("    ... Image saved to {}".format(thirdV))
-        img = ni.Nifti1Image(tmp, V.get_affine(), hdr2)
-        ni.save(img, thirdV)
+        iflogger.info("    ... Image saved to {}".format(third_vent_fn))
+        img = ni.Nifti1Image(tmp, img_v.get_affine(), hdr2)
+        ni.save(img, third_vent_fn)
 
         iflogger.info("  > Dilate the ventricule image")
-        thirdV_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
+        third_vent_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
         fslmaths_cmd = 'fslmaths -dt char {} -mas {} -kernel sphere 5 -dilD {}'.format(
-            thirdV, thirdV, thirdV_dil)
+            third_vent_fn, third_vent_fn, third_vent_dil)
         iflogger.info("    ... Command: {}".format(fslmaths_cmd))
         process = subprocess.Popen(
             fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
 
-        tmp = ni.load(thirdV_dil).get_data()
-        indrhypothal = np.where((tmp == 1) & (I == right_ventral))
-        indlhypothal = np.where((tmp == 1) & (I == left_ventral))
+        tmp = ni.load(third_vent_dil).get_data()
+        indrhypothal = np.where((tmp == 1) & (img_data == right_ventral))
+        indlhypothal = np.where((tmp == 1) & (img_data == left_ventral))
         del (tmp)
 
-        f_colorLUT = None
-        f_graphML = None
+        f_color_lut = None
+        f_graphml = None
 
         print("create color look up table : ", self.inputs.create_colorLUT)
 
         for roi_index, roi in enumerate(self.inputs.input_rois):
             # colorLUT creation if enabled
             if self.inputs.create_colorLUT:
-                outprefixName = roi.split(".")[0]
-                outprefixName = outprefixName.split("/")[-1:][0]
-                colorLUT_file = op.abspath(
-                    '{}_FreeSurferColorLUT.txt'.format(outprefixName))
-                print("Create colorLUT file as %s" % colorLUT_file)
-                f_colorLUT = open(colorLUT_file, 'w+')
+                outprefix_name = roi.split(".")[0]
+                outprefix_name = outprefix_name.split("/")[-1:][0]
+                color_lut_file = op.abspath(
+                    '{}_FreeSurferColorLUT.txt'.format(outprefix_name))
+                print("Create colorLUT file as %s" % color_lut_file)
+                f_color_lut = open(color_lut_file, 'w+')
                 time_now = strftime("%a, %d %b %Y %H:%M:%S", localtime())
-                hdr_lines = ['#$Id: {}_FreeSurferColorLUT.txt {} \n \n'.format(outprefixName, time_now),
+                hdr_lines = ['#$Id: {}_FreeSurferColorLUT.txt {} \n \n'.format(outprefix_name, time_now),
                              '{:<4} {:<55} {:>3} {:>3} {:>3} {} \n \n'.format("#No.", "Label Name:", "R", "G", "B",
                                                                               "A")]
-                f_colorLUT.writelines(hdr_lines)
+                f_color_lut.writelines(hdr_lines)
                 del hdr_lines
 
             # Create GraphML if enabled
             if self.inputs.create_graphml:
-                outprefixName = roi.split(".")[0]
-                outprefixName = outprefixName.split("/")[-1:][0]
-                graphML_file = op.abspath('{}.graphml'.format(outprefixName))
-                print("Create graphML_file as %s" % graphML_file)
-                f_graphML = open(graphML_file, 'w+')
+                outprefix_name = roi.split(".")[0]
+                outprefix_name = outprefix_name.split("/")[-1:][0]
+                graphml_file = op.abspath('{}.graphml'.format(outprefix_name))
+                print("Create graphml_file as %s" % graphml_file)
+                f_graphml = open(graphml_file, 'w+')
 
                 hdr_lines = ['{} \n'.format('<?xml version="1.0" encoding="utf-8"?>'),
                              '{} \n'.format(
-                                 '<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">'),
+                                 '<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+                                 'xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">'),
                              '{} \n'.format(
                                  '  <key attr.name="dn_region" attr.type="string" for="node" id="d0" />'),
                              '{} \n'.format(
@@ -786,46 +783,50 @@ class CombineParcellations(BaseInterface):
                              '{} \n'.format(
                                  '  <key attr.name="dn_fsID" attr.type="int" for="node" id="d5" />'),
                              '{} \n'.format('  <graph edgedefault="undirected" id="">'), ]
-                f_graphML.writelines(hdr_lines)
+                f_graphml.writelines(hdr_lines)
                 del hdr_lines
 
             # Reading Cortical Parcellation
-            V = ni.load(roi)
-            I = V.get_data()
+            img_v = ni.load(roi)
+            img_data = img_v.get_data()
 
-            # Replacing the brain stem (Stem is replaced by its own parcellation. Mismatch between both global volumes, mainly due to partial volume effect in the global stem parcellation)
-            indrep = np.where(I == 16)
-            I[indrep] = 0
-
+            # Replacing the brain stem (Stem is replaced by its own parcellation.
+            # Mismatch between both global volumes, mainly due to partial volume
+            # effect in the global stem parcellation)
+            indrep = np.where(img_data == 16)
+            img_data[indrep] = 0
 
         for roi_index, roi in sorted(enumerate(self.inputs.input_rois)):
             # colorLUT creation if enabled
             if self.inputs.create_colorLUT:
-                outprefixName = roi.split(".")[0]
-                outprefixName = outprefixName.split("/")[-1:][0]
-                colorLUT_file = op.abspath(
-                    '{}_FreeSurferColorLUT.txt'.format(outprefixName))
-                iflogger.info("  > Create colorLUT file as %s" % colorLUT_file)
-                f_colorLUT = open(colorLUT_file, 'w+')
+                outprefix_name = roi.split(".")[0]
+                outprefix_name = outprefix_name.split("/")[-1:][0]
+                color_lut_file = op.abspath(
+                    '{}_FreeSurferColorLUT.txt'.format(outprefix_name))
+                iflogger.info("  > Create colorLUT file as %s" % color_lut_file)
+                f_color_lut = open(color_lut_file, 'w+')
                 time_now = strftime("%a, %d %b %Y %H:%M:%S", localtime())
-                hdr_lines = ['#$Id: {}_FreeSurferColorLUT.txt {} \n \n'.format(outprefixName, time_now),
+                hdr_lines = ['#$Id: {}_FreeSurferColorLUT.txt {} \n \n'.format(outprefix_name, time_now),
                              '{:<4} {:<55} {:>3} {:>3} {:>3} {} \n \n'.format("#No.", "Label Name:", "R", "G", "B",
                                                                               "A")]
-                f_colorLUT.writelines(hdr_lines)
+                f_color_lut.writelines(hdr_lines)
                 del hdr_lines
 
             # Create GraphML if enabled
             if self.inputs.create_graphml:
-                outprefixName = roi.split(".")[0]
-                outprefixName = outprefixName.split("/")[-1:][0]
-                graphML_file = op.abspath('{}.graphml'.format(outprefixName))
+                outprefix_name = roi.split(".")[0]
+                outprefix_name = outprefix_name.split("/")[-1:][0]
+                graphml_file = op.abspath('{}.graphml'.format(outprefix_name))
                 iflogger.info(
-                    "  > Create graphML_file as {}".format(graphML_file))
-                f_graphML = open(graphML_file, 'w+')
+                    "  > Create graphml_file as {}".format(graphml_file))
+                f_graphml = open(graphml_file, 'w+')
 
                 hdr_lines = ['{} \n'.format('<?xml version="1.0" encoding="utf-8"?>'),
                              '{} \n'.format(
-                                 '<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">'),
+                                 '<graphml xmlns="http://graphml.graphdrawing.org/xmlns" '
+                                 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+                                 'xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns '
+                                 'http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">'),
                              '{} \n'.format(
                                  '  <key attr.name="dn_region" attr.type="string" for="node" id="d0" />'),
                              '{} \n'.format(
@@ -839,31 +840,33 @@ class CombineParcellations(BaseInterface):
                              '{} \n'.format(
                                  '  <key attr.name="dn_fsID" attr.type="int" for="node" id="d5" />'),
                              '{} \n'.format('  <graph edgedefault="undirected" id="">'), ]
-                f_graphML.writelines(hdr_lines)
+                f_graphml.writelines(hdr_lines)
                 del hdr_lines
 
             # Reading Cortical Parcellation
-            V = ni.load(roi)
-            I = V.get_data()
+            img_v = ni.load(roi)
+            img_data = img_v.get_data()
 
-            # Replacing the brain stem (Stem is replaced by its own parcellation. Mismatch between both global volumes, mainly due to partial volume effect in the global stem parcellation)
-            indrep = np.where(I == 16)
-            I[indrep] = 0
+            # Replacing the brain stem (Stem is replaced by its own parcellation.
+            # Mismatch between both global volumes, mainly due to partial volume
+            # effect in the global stem parcellation)
+            indrep = np.where(img_data == 16)
+            img_data[indrep] = 0
 
             # Processing Right Hemisphere
 
             # Relabelling Right hemisphere
-            It = np.zeros(I.shape, dtype=np.int16)
-            ind = np.where((I >= 2000) & (I < 3000))
-            It[ind] = (I[ind] - 2000)
-            nlabel = It.max()
+            img_data_out = np.zeros(img_data.shape, dtype=np.int16)
+            ind = np.where((img_data >= 2000) & (img_data < 3000))
+            img_data_out[ind] = (img_data[ind] - 2000)
+            nlabel = img_data_out.max()
 
             # ColorLUT (cortical)
             if self.inputs.create_colorLUT or self.inputs.create_graphml:
-                f_colorLUT.write("# Right Hemisphere. Cortical Structures \n")
-                outprefixName = roi.split(".")[0]
-                outprefixName = outprefixName.split("/")[-1:][0]
-                for elem in outprefixName.split("_"):
+                f_color_lut.write("# Right Hemisphere. Cortical Structures \n")
+                outprefix_name = roi.split(".")[0]
+                outprefix_name = outprefix_name.split("/")[-1:][0]
+                for elem in outprefix_name.split("_"):
                     if "scale" in elem:
                         scale = elem
                 rh_annot_file = 'rh.lausanne2008.%s.annot' % scale
@@ -887,7 +890,7 @@ class CombineParcellations(BaseInterface):
                             g = 0
                             b = 0
 
-                        f_colorLUT.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(
+                        f_color_lut.write('{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(
                             label + 1, name, r, g, b))
 
                     if self.inputs.create_graphml:
@@ -905,36 +908,36 @@ class CombineParcellations(BaseInterface):
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(label + 2000 + 1))),
                                       '{} \n'.format('    </node>')]
-                        f_graphML.writelines(node_lines)
+                        f_graphml.writelines(node_lines)
 
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
 
             # Relabelling Thalamic Nuclei
             if thalamus_nuclei_defined:
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write(
+                    f_color_lut.write(
                         "# Right Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
 
-                newLabels = np.arange(
+                new_labels = np.arange(
                     nlabel + 1, nlabel + 1 + right_thalNuclei.shape[0])
 
                 i = 0
                 for lab in right_thalNuclei:
                     if self.inputs.verbose_level == 2:
                         iflogger.info(
-                            "  > Update right thalamic nucleus label ({} -> {})".format(lab, newLabels[i]))
+                            "  > Update right thalamic nucleus label ({} -> {})".format(lab, new_labels[i]))
 
                     if self.inputs.create_colorLUT:
                         r = right_thalNuclei_colors_r[i]
                         g = right_thalNuclei_colors_g[i]
                         b = right_thalNuclei_colors_b[i]
-                        f_colorLUT.write(
-                            '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]), right_thalNuclei_names[i],
+                        f_color_lut.write(
+                            '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[i]), right_thalNuclei_names[i],
                                                                          r, g, b))
 
                     if self.inputs.create_graphml:
-                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[i]))),
+                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                       '{} \n'.format(
                                           '      <data key="d0">%s</data>' % ("subcortical")),
                                       '{} \n'.format(
@@ -942,46 +945,45 @@ class CombineParcellations(BaseInterface):
                                       '{} \n'.format(
                                           '      <data key="d2">%s</data>' % ("right")),
                                       '{} \n'.format(
-                                          '      <data key="d3">%i</data>' % (int(newLabels[i]))),
+                                          '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                       '{} \n'.format(
                                           '      <data key="d4">%s</data>' % (right_thalNuclei_names[i])),
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(49))),
                                       '{} \n'.format('    </node>')]
-                        f_graphML.writelines(node_lines)
+                        f_graphml.writelines(node_lines)
 
-                    ind = np.where(Ithal == lab)
-                    It[ind] = newLabels[i]
+                    ind = np.where(img_data_thal == lab)
+                    img_data_out[ind] = new_labels[i]
                     i += 1
-                nlabel = It.max()
+                nlabel = img_data_out.max()
 
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
 
             # Relabelling Subcortical Structures
             if self.inputs.create_colorLUT:
-                f_colorLUT.write(
+                f_color_lut.write(
                     "# Right Hemisphere. Subcortical Structures \n")
 
-            newLabels = np.arange(nlabel + 1, nlabel +
-                                  1 + left_subc_labels.shape[0])
+            new_labels = np.arange(nlabel + 1, nlabel + 1 + left_subc_labels.shape[0])
 
             i = 0
             for lab in right_subc_labels:
                 if self.inputs.verbose_level == 2:
                     iflogger.info(
-                        "  > Update right subcortical label ({} -> {})".format(lab, newLabels[i]))
+                        "  > Update right subcortical label ({} -> {})".format(lab, new_labels[i]))
 
                 if self.inputs.create_colorLUT:
                     r = right_subcIds_colors_r[i]
                     g = right_subcIds_colors_g[i]
                     b = right_subcIds_colors_b[i]
-                    f_colorLUT.write(
-                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]), right_subcort_names[i], r, g,
+                    f_color_lut.write(
+                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[i]), right_subcort_names[i], r, g,
                                                                      b))
 
                 if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[i]))),
+                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                   '{} \n'.format(
                                       '      <data key="d0">%s</data>' % ("subcortical")),
                                   '{} \n'.format(
@@ -989,47 +991,47 @@ class CombineParcellations(BaseInterface):
                                   '{} \n'.format(
                                       '      <data key="d2">%s</data>' % ("right")),
                                   '{} \n'.format(
-                                      '      <data key="d3">%i</data>' % (int(newLabels[i]))),
+                                      '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                   '{} \n'.format(
                                       '      <data key="d4">%s</data>' % (right_subcort_names[i])),
                                   '{} \n'.format(
                                       '      <data key="d5">%i</data>' % (int(lab))),
                                   '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
+                    f_graphml.writelines(node_lines)
 
-                ind = np.where(I == lab)
-                It[ind] = newLabels[i]
+                ind = np.where(img_data == lab)
+                img_data_out[ind] = new_labels[i]
                 i += 1
-            nlabel = It.max()
+            nlabel = img_data_out.max()
 
             if self.inputs.create_colorLUT:
-                f_colorLUT.write("\n")
+                f_color_lut.write("\n")
 
             # Relabelling Subfields
             if rh_subfield_defined:
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write(
+                    f_color_lut.write(
                         "# Right Hemisphere. Subcortical Structures (Hippocampal Subfields) \n")
 
-                newLabels = np.arange(
+                new_labels = np.arange(
                     nlabel + 1, nlabel + 1 + hippo_subf.shape[0])
                 i = 0
                 for lab in hippo_subf:
                     if self.inputs.verbose_level == 2:
                         iflogger.info(
-                            "  > Update right hippo subfield label ({} -> {})".format(lab, newLabels[i]))
+                            "  > Update right hippo subfield label ({} -> {})".format(lab, new_labels[i]))
 
                     if self.inputs.create_colorLUT:
                         # if len(ind) > 0:
                         r = hippo_subf_colors_r[i]
                         g = hippo_subf_colors_g[i]
                         b = hippo_subf_colors_b[i]
-                        f_colorLUT.write(
-                            '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]), right_hippo_subf_names[i],
+                        f_color_lut.write(
+                            '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[i]), right_hippo_subf_names[i],
                                                                          r, g, b))
 
                     if self.inputs.create_graphml:
-                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[i]))),
+                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                       '{} \n'.format(
                                           '      <data key="d0">%s</data>' % ("subcortical")),
                                       '{} \n'.format(
@@ -1037,46 +1039,46 @@ class CombineParcellations(BaseInterface):
                                       '{} \n'.format(
                                           '      <data key="d2">%s</data>' % ("right")),
                                       '{} \n'.format(
-                                          '      <data key="d3">%i</data>' % (int(newLabels[i]))),
+                                          '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                       '{} \n'.format(
                                           '      <data key="d4">%s</data>' % (right_hippo_subf_names[i])),
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(lab))),
                                       '{} \n'.format('    </node>')]
-                        f_graphML.writelines(node_lines)
+                        f_graphml.writelines(node_lines)
 
-                    ind = np.where(Isubrh == lab)
-                    It[ind] = newLabels[i]
+                    ind = np.where(img_data_subrh == lab)
+                    img_data_out[ind] = new_labels[i]
                     i += 1
-                nlabel = It.max()
+                nlabel = img_data_out.max()
 
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
 
             if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
                 # Relabelling Right VentralDC
-                newLabels = np.arange(nlabel + 1, nlabel + 2)
+                new_labels = np.arange(nlabel + 1, nlabel + 2)
                 if self.inputs.verbose_level == 2:
                     iflogger.info(
-                        "  > Update right ventral DC label ({} -> {})".format(right_ventral, newLabels[0]))
-                ind = np.where(I == right_ventral)
-                It[ind] = newLabels[0]
-                nlabel = It.max()
+                        "  > Update right ventral DC label ({} -> {})".format(right_ventral, new_labels[0]))
+                ind = np.where(img_data == right_ventral)
+                img_data_out[ind] = new_labels[0]
+                nlabel = img_data_out.max()
 
                 # ColorLUT (right ventral DC)
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write(
+                    f_color_lut.write(
                         "# Right Hemisphere. Ventral Diencephalon \n")
                     r = right_ventral_colors_r
                     g = right_ventral_colors_g
                     b = right_ventral_colors_b
-                    f_colorLUT.write(
-                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]), right_ventral_names[0], r, g,
+                    f_color_lut.write(
+                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[0]), right_ventral_names[0], r, g,
                                                                      b))
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
 
                 if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[0]))),
+                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[0]))),
                                   '{} \n'.format(
                                       '      <data key="d0">%s</data>' % ("subcortical")),
                                   '{} \n'.format(
@@ -1084,36 +1086,36 @@ class CombineParcellations(BaseInterface):
                                   '{} \n'.format(
                                       '      <data key="d2">%s</data>' % ("right")),
                                   '{} \n'.format(
-                                      '      <data key="d3">%i</data>' % (int(newLabels[0]))),
+                                      '      <data key="d3">%i</data>' % (int(new_labels[0]))),
                                   '{} \n'.format(
                                       '      <data key="d4">%s</data>' % (right_ventral_names[0])),
                                   '{} \n'.format(
                                       '      <data key="d5">%i</data>' % (int(right_ventral))),
                                   '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
+                    f_graphml.writelines(node_lines)
 
             if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
                 # Relabelling Right Hypothalamus
-                newLabels = np.arange(nlabel + 1, nlabel + 2)
+                new_labels = np.arange(nlabel + 1, nlabel + 2)
                 if self.inputs.verbose_level == 2:
                     iflogger.info(
-                        "  > Update right hypothalamus label ({} -> {})".format(right_ventral, newLabels[0]))
-                It[indrhypothal] = newLabels[0]
-                nlabel = It.max()
+                        "  > Update right hypothalamus label ({} -> {})".format(right_ventral, new_labels[0]))
+                img_data_out[indrhypothal] = new_labels[0]
+                nlabel = img_data_out.max()
 
                 # ColorLUT (right hypothalamus)
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("# Right Hemisphere. Hypothalamus \n")
+                    f_color_lut.write("# Right Hemisphere. Hypothalamus \n")
                     r = hypothal_colors_r
                     g = hypothal_colors_g
                     b = hypothal_colors_b
-                    f_colorLUT.write(
-                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]), right_hypothal_names[0], r, g,
+                    f_color_lut.write(
+                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[0]), right_hypothal_names[0], r, g,
                                                                      b))
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
 
                 if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[0]))),
+                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[0]))),
                                   '{} \n'.format(
                                       '      <data key="d0">%s</data>' % ("subcortical")),
                                   '{} \n'.format(
@@ -1121,27 +1123,27 @@ class CombineParcellations(BaseInterface):
                                   '{} \n'.format(
                                       '      <data key="d2">%s</data>' % ("right")),
                                   '{} \n'.format(
-                                      '      <data key="d3">%i</data>' % (int(newLabels[0]))),
+                                      '      <data key="d3">%i</data>' % (int(new_labels[0]))),
                                   '{} \n'.format(
                                       '      <data key="d4">%s</data>' % (right_hypothal_names[0])),
                                   '{} \n'.format(
                                       '      <data key="d5">%i</data>' % (-1)),
                                   '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
+                    f_graphml.writelines(node_lines)
 
             # Processing Left Hemisphere
             # Relabelling Left hemisphere
-            ind = np.where((I > 1000) & (I < 2000))
-            It[ind] = (I[ind] - 1000 + nlabel)
+            ind = np.where((img_data > 1000) & (img_data < 2000))
+            img_data_out[ind] = (img_data[ind] - 1000 + nlabel)
             old_nlabel = nlabel
-            nlabel = It.max()
+            nlabel = img_data_out.max()
 
             # ColorLUT (cortical)
             if self.inputs.create_colorLUT or self.inputs.create_graphml:
-                f_colorLUT.write("# Left Hemisphere. Cortical Structures \n")
-                outprefixName = roi.split(".")[0]
-                outprefixName = outprefixName.split("/")[-1:][0]
-                for elem in outprefixName.split("_"):
+                f_color_lut.write("# Left Hemisphere. Cortical Structures \n")
+                outprefix_name = roi.split(".")[0]
+                outprefix_name = outprefix_name.split("/")[-1:][0]
+                for elem in outprefix_name.split("_"):
                     if "scale" in elem:
                         scale = elem
                 lh_annot_file = 'lh.lausanne2008.%s.annot' % scale
@@ -1165,7 +1167,7 @@ class CombineParcellations(BaseInterface):
                             g = 0
                             b = 0
 
-                        f_colorLUT.write(
+                        f_color_lut.write(
                             '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(label + old_nlabel + 1), name, r, g, b))
 
                     if self.inputs.create_graphml:
@@ -1183,35 +1185,35 @@ class CombineParcellations(BaseInterface):
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(label + 1000 - old_nlabel))),
                                       '{} \n'.format('    </node>')]
-                        f_graphML.writelines(node_lines)
+                        f_graphml.writelines(node_lines)
 
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
 
             # Relabelling Thalamic Nuclei
             if thalamus_nuclei_defined:
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write(
+                    f_color_lut.write(
                         "# Left Hemisphere. Subcortical Structures (Thalamic Nuclei) \n")
 
-                newLabels = np.arange(
+                new_labels = np.arange(
                     nlabel + 1, nlabel + 1 + left_thalNuclei.shape[0])
                 i = 0
                 for lab in left_thalNuclei:
                     if self.inputs.verbose_level == 2:
                         iflogger.info(
-                            "  > Update left thalamic nucleus label ({} -> {})".format(lab, newLabels[i]))
+                            "  > Update left thalamic nucleus label ({} -> {})".format(lab, new_labels[i]))
 
                     if self.inputs.create_colorLUT:
                         r = left_thalNuclei_colors_r[i]
                         g = left_thalNuclei_colors_g[i]
                         b = left_thalNuclei_colors_b[i]
-                        f_colorLUT.write(
-                            '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]), left_thalNuclei_names[i], r,
+                        f_color_lut.write(
+                            '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[i]), left_thalNuclei_names[i], r,
                                                                          g, b))
 
                     if self.inputs.create_graphml:
-                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[i]))),
+                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                       '{} \n'.format(
                                           '      <data key="d0">%s</data>' % ("subcortical")),
                                       '{} \n'.format(
@@ -1219,45 +1221,44 @@ class CombineParcellations(BaseInterface):
                                       '{} \n'.format(
                                           '      <data key="d2">%s</data>' % ("left")),
                                       '{} \n'.format(
-                                          '      <data key="d3">%i</data>' % (int(newLabels[i]))),
+                                          '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                       '{} \n'.format(
                                           '      <data key="d4">%s</data>' % (left_thalNuclei_names[i])),
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(10))),
                                       '{} \n'.format('    </node>')]
-                        f_graphML.writelines(node_lines)
+                        f_graphml.writelines(node_lines)
 
-                    ind = np.where(Ithal == lab)
-                    It[ind] = newLabels[i]
+                    ind = np.where(img_data_thal == lab)
+                    img_data_out[ind] = new_labels[i]
                     i += 1
-                nlabel = It.max()
+                nlabel = img_data_out.max()
 
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
 
             # Relabelling Subcortical Structures
             if self.inputs.create_colorLUT:
-                f_colorLUT.write(
+                f_color_lut.write(
                     "# Left Hemisphere. Subcortical Structures \n")
 
-            newLabels = np.arange(nlabel + 1, nlabel +
-                                  1 + left_subc_labels.shape[0])
+            new_labels = np.arange(nlabel + 1, nlabel + 1 + left_subc_labels.shape[0])
 
             i = 0
             for lab in left_subc_labels:
                 if self.inputs.verbose_level == 2:
                     iflogger.info(
-                        "  > Update left subcortical label ({} -> {})".format(lab, newLabels[i]))
+                        "  > Update left subcortical label ({} -> {})".format(lab, new_labels[i]))
 
                 if self.inputs.create_colorLUT:
                     r = left_subcIds_colors_r[i]
                     g = left_subcIds_colors_g[i]
                     b = left_subcIds_colors_b[i]
-                    f_colorLUT.write(
-                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]), left_subcort_names[i], r, g, b))
+                    f_color_lut.write(
+                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[i]), left_subcort_names[i], r, g, b))
 
                 if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[i]))),
+                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                   '{} \n'.format(
                                       '      <data key="d0">%s</data>' % ("subcortical")),
                                   '{} \n'.format(
@@ -1265,46 +1266,46 @@ class CombineParcellations(BaseInterface):
                                   '{} \n'.format(
                                       '      <data key="d2">%s</data>' % ("left")),
                                   '{} \n'.format(
-                                      '      <data key="d3">%i</data>' % (int(newLabels[i]))),
+                                      '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                   '{} \n'.format(
                                       '      <data key="d4">%s</data>' % (left_subcort_names[i])),
                                   '{} \n'.format(
                                       '      <data key="d5">%i</data>' % (int(lab))),
                                   '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
+                    f_graphml.writelines(node_lines)
 
-                ind = np.where(I == lab)
-                It[ind] = newLabels[i]
+                ind = np.where(img_data == lab)
+                img_data_out[ind] = new_labels[i]
                 i += 1
-            nlabel = It.max()
+            nlabel = img_data_out.max()
 
             if self.inputs.create_colorLUT:
-                f_colorLUT.write("\n")
+                f_color_lut.write("\n")
 
             # Relabelling Subfields
             if lh_subfield_defined:
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write(
+                    f_color_lut.write(
                         "# Left Hemisphere. Subcortical Structures (Hippocampal Subfields) \n")
 
-                newLabels = np.arange(
+                new_labels = np.arange(
                     nlabel + 1, nlabel + 1 + hippo_subf.shape[0])
                 i = 0
                 for lab in hippo_subf:
                     if self.inputs.verbose_level == 2:
                         iflogger.info(
-                            "  > Update left hippo subfield label ({} -> {})".format(lab, newLabels[i]))
+                            "  > Update left hippo subfield label ({} -> {})".format(lab, new_labels[i]))
 
                     if self.inputs.create_colorLUT:
                         r = hippo_subf_colors_r[i]
                         g = hippo_subf_colors_g[i]
                         b = hippo_subf_colors_b[i]
-                        f_colorLUT.write(
-                            '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]), left_hippo_subf_names[i], r,
+                        f_color_lut.write(
+                            '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[i]), left_hippo_subf_names[i], r,
                                                                          g, b))
 
                     if self.inputs.create_graphml:
-                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[i]))),
+                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                       '{} \n'.format(
                                           '      <data key="d0">%s</data>' % ("subcortical")),
                                       '{} \n'.format(
@@ -1312,47 +1313,47 @@ class CombineParcellations(BaseInterface):
                                       '{} \n'.format(
                                           '      <data key="d2">%s</data>' % ("left")),
                                       '{} \n'.format(
-                                          '      <data key="d3">%i</data>' % (int(newLabels[i]))),
+                                          '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                       '{} \n'.format(
                                           '      <data key="d4">%s</data>' % (left_hippo_subf_names[i])),
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(lab))),
                                       '{} \n'.format('    </node>')]
-                        f_graphML.writelines(node_lines)
+                        f_graphml.writelines(node_lines)
 
-                    ind = np.where(Isublh == lab)
-                    It[ind] = newLabels[i]
+                    ind = np.where(img_data_sublh == lab)
+                    img_data_out[ind] = new_labels[i]
                     i += 1
-                nlabel = It.max()
-                newIds_LH_subFields = newLabels
+                nlabel = img_data_out.max()
+                newIds_LH_subFields = new_labels
 
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
 
             if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
                 # Relabelling Left VentralDC
-                newLabels = np.arange(nlabel + 1, nlabel + 2)
+                new_labels = np.arange(nlabel + 1, nlabel + 2)
                 if self.inputs.verbose_level == 2:
                     iflogger.info(
-                        "  > Update left ventral DC label ({} -> {})".format(left_ventral, newLabels[0]))
-                ind = np.where(I == left_ventral)
-                It[ind] = newLabels[0]
-                nlabel = It.max()
-                newIds_LH_ventralDC = newLabels
+                        "  > Update left ventral DC label ({} -> {})".format(left_ventral, new_labels[0]))
+                ind = np.where(img_data == left_ventral)
+                img_data_out[ind] = new_labels[0]
+                nlabel = img_data_out.max()
+                newIds_LH_ventralDC = new_labels
 
                 # ColorLUT (left ventral DC)
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write(
+                    f_color_lut.write(
                         "# Left Hemisphere. Ventral Diencephalon \n")
                     r = left_ventral_colors_r
                     g = left_ventral_colors_g
                     b = left_ventral_colors_b
-                    f_colorLUT.write(
-                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]), left_ventral_names[0], r, g, b))
-                    f_colorLUT.write("\n")
+                    f_color_lut.write(
+                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[0]), left_ventral_names[0], r, g, b))
+                    f_color_lut.write("\n")
 
                 if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[0]))),
+                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[0]))),
                                   '{} \n'.format(
                                       '      <data key="d0">%s</data>' % ("subcortical")),
                                   '{} \n'.format(
@@ -1360,36 +1361,36 @@ class CombineParcellations(BaseInterface):
                                   '{} \n'.format(
                                       '      <data key="d2">%s</data>' % ("left")),
                                   '{} \n'.format(
-                                      '      <data key="d3">%i</data>' % (int(newLabels[0]))),
+                                      '      <data key="d3">%i</data>' % (int(new_labels[0]))),
                                   '{} \n'.format(
                                       '      <data key="d4">%s</data>' % (left_ventral_names[0])),
                                   '{} \n'.format(
                                       '      <data key="d5">%i</data>' % (int(left_ventral))),
                                   '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
+                    f_graphml.writelines(node_lines)
 
             if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
                 # Relabelling Left Hypothalamus
-                newLabels = np.arange(nlabel + 1, nlabel + 2)
+                new_labels = np.arange(nlabel + 1, nlabel + 2)
                 if self.inputs.verbose_level == 2:
                     iflogger.info(
-                        "  > Update left hypothalamus label ({} -> {})".format(-1, newLabels[0]))
-                It[indlhypothal] = newLabels[0]
-                nlabel = It.max()
+                        "  > Update left hypothalamus label ({} -> {})".format(-1, new_labels[0]))
+                img_data_out[indlhypothal] = new_labels[0]
+                nlabel = img_data_out.max()
 
                 # ColorLUT (right hypothalamus)
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("# Left Hemisphere. Hypothalamus \n")
+                    f_color_lut.write("# Left Hemisphere. Hypothalamus \n")
                     r = hypothal_colors_r
                     g = hypothal_colors_g
                     b = hypothal_colors_b
-                    f_colorLUT.write(
-                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]), left_hypothal_names[0], r, g,
+                    f_color_lut.write(
+                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[0]), left_hypothal_names[0], r, g,
                                                                      b))
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
 
                 if self.inputs.create_graphml:
-                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[0]))),
+                    node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[0]))),
                                   '{} \n'.format(
                                       '      <data key="d0">%s</data>' % ("subcortical")),
                                   '{} \n'.format(
@@ -1397,37 +1398,37 @@ class CombineParcellations(BaseInterface):
                                   '{} \n'.format(
                                       '      <data key="d2">%s</data>' % ("left")),
                                   '{} \n'.format(
-                                      '      <data key="d3">%i</data>' % (int(newLabels[0]))),
+                                      '      <data key="d3">%i</data>' % (int(new_labels[0]))),
                                   '{} \n'.format(
                                       '      <data key="d4">%s</data>' % (left_hypothal_names[0])),
                                   '{} \n'.format(
                                       '      <data key="d5">%i</data>' % (-1)),
                                   '{} \n'.format('    </node>')]
-                    f_graphML.writelines(node_lines)
+                    f_graphml.writelines(node_lines)
 
             # Relabelling Brain Stem
             if brainstem_defined:
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("# Brain Stem Structures \n")
+                    f_color_lut.write("# Brain Stem Structures \n")
 
-                newLabels = np.arange(
+                new_labels = np.arange(
                     nlabel + 1, nlabel + 1 + brainstem.shape[0])
                 i = 0
                 for lab in brainstem:
                     if self.inputs.verbose_level == 2:
                         iflogger.info(
-                            "  > Update brainstem parcellation label ({} -> {})".format(lab, newLabels[i]))
+                            "  > Update brainstem parcellation label ({} -> {})".format(lab, new_labels[i]))
 
                     if self.inputs.create_colorLUT:
                         r = brainstem_colors_r[i]
                         g = brainstem_colors_g[i]
                         b = brainstem_colors_b[i]
-                        f_colorLUT.write(
-                            '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[i]), brainstem_names[i], r, g,
+                        f_color_lut.write(
+                            '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[i]), brainstem_names[i], r, g,
                                                                          b))
 
                     if self.inputs.create_graphml:
-                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[i]))),
+                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                       '{} \n'.format(
                                           '      <data key="d0">%s</data>' % ("subcortical")),
                                       '{} \n'.format(
@@ -1435,41 +1436,41 @@ class CombineParcellations(BaseInterface):
                                       '{} \n'.format(
                                           '      <data key="d2">%s</data>' % ("central")),
                                       '{} \n'.format(
-                                          '      <data key="d3">%i</data>' % (int(newLabels[i]))),
+                                          '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                       '{} \n'.format(
                                           '      <data key="d4">%s</data>' % (brainstem_names[i])),
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(lab))),
                                       '{} \n'.format('    </node>')]
-                        f_graphML.writelines(node_lines)
+                        f_graphml.writelines(node_lines)
 
-                    ind = np.where(Istem == lab)
-                    It[ind] = newLabels[i]
+                    ind = np.where(img_data_stem == lab)
+                    img_data_out[ind] = new_labels[i]
                     i += 1
-                nlabel = It.max()
+                nlabel = img_data_out.max()
 
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
             else:
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("# Brain Stem \n")
+                    f_color_lut.write("# Brain Stem \n")
 
-                newLabels = np.arange(nlabel + 1, nlabel + 2)
-                It[indrep] = newLabels[0]
+                new_labels = np.arange(nlabel + 1, nlabel + 2)
+                img_data_out[indrep] = new_labels[0]
 
                 if self.inputs.verbose_level == 2:
                     iflogger.info(
-                        "  > Update brainstem parcellation label ({} -> {})".format(lab, newLabels[0]))
+                        "  > Update brainstem parcellation label ({} -> {})".format(lab, new_labels[0]))
 
                 if self.inputs.create_colorLUT:
                     r = 119
                     g = 159
                     b = 176
-                    f_colorLUT.write(
-                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(newLabels[0]), 'brainstem', r, g, b))
+                    f_color_lut.write(
+                        '{:<4} {:<55} {:>3} {:>3} {:>3} 0 \n'.format(int(new_labels[0]), 'brainstem', r, g, b))
 
                     if self.inputs.create_graphml:
-                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(newLabels[0]))),
+                        node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[0]))),
                                       '{} \n'.format(
                                           '      <data key="d0">%s</data>' % ("subcortical")),
                                       '{} \n'.format(
@@ -1477,41 +1478,41 @@ class CombineParcellations(BaseInterface):
                                       '{} \n'.format(
                                           '      <data key="d2">%s</data>' % ("central")),
                                       '{} \n'.format(
-                                          '      <data key="d3">%i</data>' % (int(newLabels[0]))),
+                                          '      <data key="d3">%i</data>' % (int(new_labels[0]))),
                                       '{} \n'.format(
                                           '      <data key="d4">%s</data>' % ("brainstem")),
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(lab))),
                                       '{} \n'.format('    </node>')]
-                        f_graphML.writelines(node_lines)
+                        f_graphml.writelines(node_lines)
 
-                nlabel = It.max()
+                nlabel = img_data_out.max()
 
                 if self.inputs.create_colorLUT:
-                    f_colorLUT.write("\n")
+                    f_color_lut.write("\n")
 
             # Fix negative values
-            It[It < 0] = 0
+            img_data_out[img_data_out < 0] = 0
 
             # Saving the new parcellation
-            outprefixName = roi.split(".")[0]
-            outprefixName = outprefixName.split("/")[-1:][0]
-            output_roi = op.abspath('{}_final.nii.gz'.format(outprefixName))
-            hdr = V.get_header()
+            outprefix_name = roi.split(".")[0]
+            outprefix_name = outprefix_name.split("/")[-1:][0]
+            output_roi = op.abspath('{}_final.nii.gz'.format(outprefix_name))
+            hdr = img_v.get_header()
             hdr2 = hdr.copy()
             hdr2.set_data_dtype(np.int16)
             iflogger.info("  > Save output image to {}".format(output_roi))
-            img = ni.Nifti1Image(It, V.get_affine(), hdr2)
+            img = ni.Nifti1Image(img_data_out, img_v.get_affine(), hdr2)
             ni.save(img, output_roi)
 
             if self.inputs.create_colorLUT:
-                f_colorLUT.close()
+                f_color_lut.close()
 
             if self.inputs.create_graphml:
                 bottom_lines = ['{} \n'.format('  </graph>'),
                                 '{} \n'.format('</graphml>'), ]
-                f_graphML.writelines(bottom_lines)
-                f_graphML.close()
+                f_graphml.writelines(bottom_lines)
+                f_graphml.close()
 
         orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
         aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
@@ -1522,7 +1523,7 @@ class CombineParcellations(BaseInterface):
         shutil.copyfile(aparcaseg_fs, tmp_aparcaseg_fs)
 
         # Redirect ouput if low verbose
-        FNULL = open(os.devnull, 'w')
+        fnull = open(os.devnull, 'w')
 
         iflogger.info("    ... Transform to native space")
         cmd = 'mri_vol2vol --mov "{}" --targ "{}" --regheader --o "{}" --no-save-reg --interp nearest'.format(
@@ -1532,100 +1533,76 @@ class CombineParcellations(BaseInterface):
             status = subprocess.call(cmd, shell=True)
         else:
             status = subprocess.call(
-                cmd, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+                cmd, shell=True, stdout=fnull, stderr=subprocess.STDOUT)
 
-        # mri_cmd = ['mri_convert', '-rl', orig, '-rt', 'nearest', tmp_aparcaseg_fs, '-nc', aparcaseg_native]
-        # subprocess.check_call(mri_cmd)
-
-        Vaparcaseg = ni.load(aparcaseg_native)
-        Iaparcaseg = Vaparcaseg.get_data()
+        img_aparcaseg = ni.load(aparcaseg_native)
+        img_data_aparcaseg = img_aparcaseg.get_data()
 
         # Refine aparc+aseg.mgz with new subcortical and/or structures (if any)
         if thalamus_nuclei_defined or brainstem_defined or (lh_subfield_defined and rh_subfield_defined):
             iflogger.info(
                 "  > Correct and save Freesurfer-generated aparc+aseg.mgz in native space...")
 
-            Iaparcaseg_new = Iaparcaseg.astype(np.int32)
+            img_data_aparcaseg_new = img_data_aparcaseg.astype(np.int32)
 
             # Thalamus (aparc+aseg labels: 10 and 49)
             if thalamus_nuclei_defined:
 
-                ind = np.where(Iaparcaseg == 10)
-                mask_aparc_lh = np.zeros(Iaparcaseg.shape)
+                ind = np.where(img_data_aparcaseg == 10)
+                mask_aparc_lh = np.zeros(img_data_aparcaseg.shape)
                 mask_aparc_lh[ind] = 1
 
-                ind = np.where(Iaparcaseg == 49)
-                mask_aparc_rh = np.zeros(Iaparcaseg.shape)
+                ind = np.where(img_data_aparcaseg == 49)
+                mask_aparc_rh = np.zeros(img_data_aparcaseg.shape)
                 mask_aparc_rh[ind] = 1
 
-                mask_thal_lh = np.zeros(Iaparcaseg.shape)
+                mask_thal_lh = np.zeros(img_data_aparcaseg.shape)
                 for lab in left_thalNuclei:
-                    ind = np.where(Ithal == lab)
+                    ind = np.where(img_data_thal == lab)
                     mask_thal_lh[ind] = 1
 
                 # Identify voxels not included by thalamic Nuclei - should set to 2 (Gm) or 0
                 tmp = mask_aparc_lh - mask_thal_lh
                 ind = np.where(tmp > 0)
-                Iaparcaseg_new[ind] = 2
+                img_data_aparcaseg_new[ind] = 2
 
                 # Identify voxels not included by freesurfer thalamic mask
                 tmp = mask_aparc_lh - mask_thal_lh
                 ind = np.where(tmp < 0)
-                Iaparcaseg_new[ind] = 10
+                img_data_aparcaseg_new[ind] = 10
 
                 out_tmp = op.join(fs_dir, 'tmp', 'aparc-thal.lh.native.nii.gz')
                 iflogger.info("    ... Save tmp image to {}".format(out_tmp))
                 img_tmp = ni.Nifti1Image(
-                    tmp, Vaparcaseg.get_affine(), Vaparcaseg.get_header())
+                    tmp, img_aparcaseg.get_affine(), img_aparcaseg.get_header())
                 ni.save(img_tmp, out_tmp)
 
-                mask_thal_rh = np.zeros(Iaparcaseg.shape)
+                mask_thal_rh = np.zeros(img_data_aparcaseg.shape)
                 for lab in right_thalNuclei:
-                    ind = np.where(Ithal == lab)
+                    ind = np.where(img_data_thal == lab)
                     mask_thal_rh[ind] = 1
 
                 # Identify voxels not included by thalamic Nuclei - should set to 41 (Gm) or 0
                 tmp = mask_aparc_rh - mask_thal_rh
                 ind = np.where(tmp > 0)
-                Iaparcaseg_new[ind] = 41
+                img_data_aparcaseg_new[ind] = 41
 
                 # Identify voxels not included by freesurfer thalamic mask
                 tmp = mask_aparc_rh - mask_thal_rh
                 ind = np.where(tmp < 0)
-                Iaparcaseg_new[ind] = 49
+                img_data_aparcaseg_new[ind] = 49
 
                 out_tmp = op.join(fs_dir, 'tmp', 'aparc-thal.rh.native.nii.gz')
                 iflogger.info("    ... Save tmp image to {}".format(out_tmp))
                 img_tmp = ni.Nifti1Image(
-                    tmp, Vaparcaseg.get_affine(), Vaparcaseg.get_header())
+                    tmp, img_aparcaseg.get_affine(), img_aparcaseg.get_header())
                 ni.save(img_tmp, out_tmp)
-
-            # # Hippocampal subfields (aparc+aseg labels: 17 and 53)
-            # if (lh_subfield_defined and rh_subfield_defined):
-            #
-            #     ind = np.where(Iaparcaseg==17)
-            #     mask_aparc_lh = np.zeros(Iaparcaseg.shape)
-            #     mask_aparc_lh[ind] = 1
-            #
-            #     ind = np.where(Iaparcaseg==53)
-            #     mask_aparc_rh = np.zeros(Iaparcaseg.shape)
-            #     mask_aparc_rh[ind] = 1
-            #
-            #     for lab in hippo_subf:
-            #         ind = np.where(Isublh==lab)
-            #         mask_subf_lh = np.zeros(Iaparcaseg.shape)
-            #         mask_subf_lh[ind] = 1
-            #
-            #     for lab in hippo_subf:
-            #         ind = np.where(Isubrh==lab)
-            #         mask_subf_rh = np.zeros(Iaparcaseg.shape)
-            #         mask_subf_rh[ind] = 1
 
             # Brainstem (aparc+aseg labels: 16)
             if brainstem_defined:
-                ind = np.where(Iaparcaseg == 16)
-                Iaparcaseg_new[ind] = 0
-                Iaparcaseg_new[indstem] = 16
+                ind = np.where(img_data_aparcaseg == 16)
+                img_data_aparcaseg_new[ind] = 0
+                img_data_aparcaseg_new[indstem] = 16
 
             # new_aparcaseg_native = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.native.nii.gz')
             new_aparcaseg_native = op.join(
@@ -1633,18 +1610,9 @@ class CombineParcellations(BaseInterface):
             iflogger.info("    ... Save relabeled image to {}".format(
                 new_aparcaseg_native))
             img = ni.Nifti1Image(
-                Iaparcaseg_new, Vaparcaseg.get_affine(), Vaparcaseg.get_header())
+                img_data_aparcaseg_new, img_aparcaseg.get_affine(), img_aparcaseg.get_header())
             ni.save(img, new_aparcaseg_native)
 
-            # new_aparcaseg_fs = op.join(fs_dir, 'tmp', 'aparc+aseg.Lausanne2018.mgz')
-            # aparcaseg_fs = op.join(fs_dir, 'mri', 'aparc+aseg.mgz')
-
-            # iflogger.info("    Transform back to Freesurfer space and replace aparc+aseg.mgz file")
-            # mri_cmd = ['mri_convert', '-rl', aparcaseg_fs, '-rt', 'nearest', new_aparcaseg_native, '-nc', new_aparcaseg_fs]
-            # subprocess.check_call(mri_cmd)
-
-            # iflogger.info("    Replace aparc+aseg.mgz file {} by {}".format(aparcaseg_fs,new_aparcaseg_fs))
-            # shutil.copyfile(new_aparcaseg_fs,aparcaseg_fs)
         else:
             iflogger.info(
                 "  > Save Freesurfer-generated aparc+aseg.mgz in native space...")
@@ -1654,7 +1622,7 @@ class CombineParcellations(BaseInterface):
             iflogger.info(
                 "    ... Save relabeled image to {}".format(aparcaseg_native))
             img = ni.Nifti1Image(
-                Iaparcaseg, Vaparcaseg.get_affine(), Vaparcaseg.get_header())
+                img_data_aparcaseg, img_aparcaseg.get_affine(), img_aparcaseg.get_header())
             ni.save(img, aparcaseg_native)
 
         return runtime
@@ -1773,19 +1741,20 @@ class ParcellateThalamus(BaseInterface):
         iflogger.info(proc_stdout)
 
         # Load aparc+aseg file in native space
-        Vatlas_fn = out
-        Vatlas = ni.load(Vatlas_fn)
-        Ia = Vatlas.get_data()
-        hdr = Vatlas.get_header()
+        atlas_fn = out
+        img_atlas = ni.load(atlas_fn)
+        img_data_atlas = img_atlas.get_data()
+        hdr = img_atlas.get_header()
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.uint16)
 
-        outprefixName = self.inputs.T1w_image.split(".")[0]
-        outprefixName = outprefixName.split("/")[-1:][0]
-        outprefixName = op.abspath('{}_Ind2temp'.format(outprefixName))
+        outprefix_name = self.inputs.T1w_image.split(".")[0]
+        outprefix_name = outprefix_name.split("/")[-1:][0]
+        outprefix_name = op.abspath('{}_Ind2temp'.format(outprefix_name))
 
         # Register the template image image to the subject T1w image
-        # cmd = fs_string + '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefixName)
+        # cmd = fs_string +
+        #   '; antsRegistrationSyN.sh -d 3 -f "%s" -m "%s" -t s -n "%i" -o "%s"' % (self.inputs.T1w_image,self.inputs.template_image,12,outprefix_name)
 
         if self.inputs.ants_precision_type == 'float':
             precision_type = 'f'
@@ -1796,7 +1765,7 @@ class ParcellateThalamus(BaseInterface):
                                                                                            self.inputs.T1w_image,
                                                                                            self.inputs.template_image,
                                                                                            12,
-                                                                                           outprefixName)
+                                                                                           outprefix_name)
 
         iflogger.info('Processing cmd: %s' % cmd)
 
@@ -1805,17 +1774,17 @@ class ParcellateThalamus(BaseInterface):
         proc_stdout = process.communicate()[0].strip()
         iflogger.info(proc_stdout)
 
-        outprefixName = self.inputs.T1w_image.split(".")[0]
-        outprefixName = outprefixName.split("/")[-1:][0]
+        outprefix_name = self.inputs.T1w_image.split(".")[0]
+        outprefix_name = outprefix_name.split("/")[-1:][0]
         transform_file = op.abspath(
-            '{}_Ind2temp0GenericAffine.mat'.format(outprefixName))
-        warp_file = op.abspath('{}_Ind2temp1Warp.nii.gz'.format(outprefixName))
+            '{}_Ind2temp0GenericAffine.mat'.format(outprefix_name))
+        warp_file = op.abspath('{}_Ind2temp1Warp.nii.gz'.format(outprefix_name))
         # transform_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_Ind2temp0GenericAffine.mat'
         # warp_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_Ind2temp1Warp.nii.gz'
         output_maps = op.abspath(
-            '{}_class-thalamus_probtissue.nii.gz'.format(outprefixName))
+            '{}_class-thalamus_probtissue.nii.gz'.format(outprefix_name))
         jacobian_file = op.abspath(
-            '{}_class-thalamus_probtissue_jacobian.nii.gz'.format(outprefixName))
+            '{}_class-thalamus_probtissue_jacobian.nii.gz'.format(outprefix_name))
 
         # Compute and save jacobian
         # cmd = fs_string + '; CreateJacobianDeterminantImage 3 "%s" "%s" ' % (warp_file,jacobian_file)
@@ -1829,7 +1798,9 @@ class ParcellateThalamus(BaseInterface):
         iflogger.info(proc_stdout)
 
         # Propagate nuclei probability maps to subject T1w space using estimated transforms and deformation
-        # cmd = fs_string + '; antsApplyTransforms --float -d 3 -e 3 -i "%s" -o "%s" -r "%s" -t "%s" -t "%s" -n BSpline[3]' % (self.inputs.thalamic_nuclei_maps,output_maps,self.inputs.T1w_image,warp_file,transform_file)
+        # cmd = fs_string +
+        #   '; antsApplyTransforms --float -d 3 -e 3 -i "%s" -o "%s" -r "%s" -t "%s" -t "%s" -n BSpline[3]' %
+        #   (self.inputs.thalamic_nuclei_maps,output_maps,self.inputs.T1w_image,warp_file,transform_file)
         cmd = 'antsApplyTransforms --float -d 3 -e 3 -i "%s" -o "%s" -r "%s" -t "%s" -t "%s" -n BSpline[3]' % (
             self.inputs.thalamic_nuclei_maps, output_maps, self.inputs.T1w_image, warp_file, transform_file)
 
@@ -1841,50 +1812,50 @@ class ParcellateThalamus(BaseInterface):
 
         iflogger.info('Correcting the volumes after the interpolation ')
         # Load jacobian file
-        Ij = ni.load(jacobian_file).get_data()  # numpy.ndarray
+        img_data_jacob = ni.load(jacobian_file).get_data()  # numpy.ndarray
 
         # Load probability maps in native space after applying estimated transform and deformation
-        imgVspams = ni.load(output_maps)
-        Vspams = imgVspams.get_data()  # numpy.ndarray
-        Vspams[Vspams < 0] = 0
-        Vspams[Vspams > 1] = 1
+        img_spams = ni.load(output_maps)
+        img_data_spams = img_spams.get_data()  # numpy.ndarray
+        img_data_spams[img_data_spams < 0] = 0
+        img_data_spams[img_data_spams > 1] = 1
 
-        Thresh = 0.05
-        # Creating MaxProb
-        Ispams = Vspams.copy()
-        Ispams[Ispams < Thresh] = 0
-        ind = np.where(np.sum(Ispams, axis=3) == 0)
-        MaxProb = Ispams.argmax(axis=3) + 1
-        MaxProb[ind] = 0
-        # ?MaxProb = imfill(MaxProb,'holes');
+        thresh = 0.05
+        # Creating max_prob
+        img_data_spams = img_data_spams.copy()
+        img_data_spams[img_data_spams < thresh] = 0
+        ind = np.where(np.sum(img_data_spams, axis=3) == 0)
+        max_prob = img_data_spams.argmax(axis=3) + 1
+        max_prob[ind] = 0
+        # ?max_prob = imfill(max_prob,'holes');
 
-        del Ispams
+        del img_data_spams
 
         debug_file = op.abspath(
-            '{}_class-thalamus_dtissue_after_ants.nii.gz'.format(outprefixName))
+            '{}_class-thalamus_dtissue_after_ants.nii.gz'.format(outprefix_name))
         print("Save output image to %s" % debug_file)
-        img = ni.Nifti1Image(MaxProb, Vatlas.get_affine(), hdr2)
+        img = ni.Nifti1Image(max_prob, img_atlas.get_affine(), hdr2)
         ni.save(img, debug_file)
 
         # Take into account jacobian to correct the probability maps after interpolation
-        Ispams = np.zeros(Vspams.shape)
-        for nuc in np.arange(Vspams.shape[3]):
-            tempImage = Vspams[:, :, :, nuc]
-            T = np.multiply(tempImage, Ij)
-            Ispams[:, :, :, nuc] = T / T.max()
-        del tempImage, T, Vspams, Ij
+        img_data_spams = np.zeros(img_data_spams.shape)
+        for nuc in np.arange(img_data_spams.shape[3]):
+            temp_image = img_data_spams[:, :, :, nuc]
+            t = np.multiply(temp_image, img_data_jacob)
+            img_data_spams[:, :, :, nuc] = t / t.max()
+        del temp_image, t, img_data_spams, img_data_jacob
 
-        # Creating MaxProb
-        Ispams[Ispams < Thresh] = 0
-        ind = np.where(np.sum(Ispams, axis=3) == 0)
-        MaxProb = Ispams.argmax(axis=3) + 1
-        MaxProb[ind] = 0
-        # ?MaxProb = imfill(MaxProb,'holes');
+        # Creating max_prob
+        img_data_spams[img_data_spams < thresh] = 0
+        ind = np.where(np.sum(img_data_spams, axis=3) == 0)
+        max_prob = img_data_spams.argmax(axis=3) + 1
+        max_prob[ind] = 0
+        # ?max_prob = imfill(max_prob,'holes');
 
         debug_file = op.abspath(
-            '{}_class-thalamus_dtissue_after_jacobiancorr.nii.gz'.format(outprefixName))
+            '{}_class-thalamus_dtissue_after_jacobiancorr.nii.gz'.format(outprefix_name))
         print("Save output image to %s" % debug_file)
-        img = ni.Nifti1Image(MaxProb, Vatlas.get_affine(), hdr2)
+        img = ni.Nifti1Image(max_prob, img_atlas.get_affine(), hdr2)
         ni.save(img, debug_file)
 
         iflogger.info('Creating Thalamus mask from FreeSurfer aparc+aseg ')
@@ -1894,8 +1865,8 @@ class ParcellateThalamus(BaseInterface):
             '- New FreeSurfer SUBJECTS_DIR:\n  {}\n'.format(self.inputs.subjects_dir))
 
         # Extract indices of left/right thalamus mask from aparc+aseg volume
-        indl = np.where(Ia == 10)
-        indr = np.where(Ia == 49)
+        indl = np.where(img_data_atlas == 10)
+        indr = np.where(img_data_atlas == 49)
 
         def filter_isolated_cells(array, struct):
             """ Return array with completely isolated single cells removed
@@ -1921,14 +1892,14 @@ class ParcellateThalamus(BaseInterface):
 
             # Left Hemisphere
             # Removing isolated points
-            tempI = np.zeros(Ia.shape)
+            tempI = np.zeros(img_data_atlas.shape)
             tempI[indl] = 1
             tempI = filter_isolated_cells(tempI, struct=struct)
             indl = np.where(tempI == 1)
 
             # Right Hemisphere
             # Removing isolated points
-            tempI = np.zeros(Ia.shape)
+            tempI = np.zeros(img_data_atlas.shape)
             tempI[indr] = 1
             tempI = filter_isolated_cells(tempI, struct=struct)
             indr = np.where(tempI == 1)
@@ -1936,138 +1907,139 @@ class ParcellateThalamus(BaseInterface):
             del struct, tempI
 
         # Creating Thalamic Mask (1: Left, 2:Right)
-        Ithal = np.zeros(Ia.shape)
-        Ithal[indl] = 1
-        Ithal[indr] = 2
+        img_data_thal = np.zeros(img_data_atlas.shape)
+        img_data_thal[indl] = 1
+        img_data_thal[indr] = 2
 
         del indl, indr
 
         # TODO: Masking according to csf
         # unzip_nifti([freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii.gz']);
-        # Outfiles = Extract_brain([freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii'],[freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii']);
+        # Outfiles = Extract_brain([freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii'],
+        #                          [freesDir filesep subjId filesep 'tmp' filesep 'T1native.nii']);
         #
         # csfFilename = deblank(Outfiles(4,:));
         # Vcsf = spm_vol_gzip(csfFilename);
         # Icsf = spm_read_vols_gzip(Vcsf);
         # ind = find(Icsf > csfThresh);
-        # Ithal(ind) = 0;
+        # img_data_thal(ind) = 0;
 
         # update the header and save thalamus mask
         thalamus_mask = op.abspath(
-            '{}_class-thalamus_dtissue.nii.gz'.format(outprefixName))
-        hdr = Vatlas.get_header()
+            '{}_class-thalamus_dtissue.nii.gz'.format(outprefix_name))
+        hdr = img_atlas.get_header()
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.uint16)
         print("Save output image to %s" % thalamus_mask)
-        Vthal = ni.Nifti1Image(Ithal, Vatlas.get_affine(), hdr2)
-        ni.save(Vthal, thalamus_mask)
+        img_thal = ni.Nifti1Image(img_data_thal, img_atlas.get_affine(), hdr2)
+        ni.save(img_thal, thalamus_mask)
 
-        del hdr, hdr2, Vthal
+        del hdr, hdr2, img_thal
 
-        Nspams = Ispams.shape[3]
-        Thresh = 0.05
+        nb_spams = img_data_spams.shape[3]
+        thresh = 0.05
 
         use_thalamus_mask = True
         if use_thalamus_mask:
-            IthalL = np.zeros(Ithal.shape)
-            indl = np.where(Ithal == 1)
-            IthalL[indl] = 1
+            img_data_thal_lh = np.zeros(img_data_thal.shape)
+            indl = np.where(img_data_thal == 1)
+            img_data_thal_lh[indl] = 1
             del indl
 
-            IthalR = np.zeros(Ithal.shape)
-            indr = np.where(Ithal == 2)
-            IthalR[indr] = 1
+            img_data_thal_rh = np.zeros(img_data_thal.shape)
+            indr = np.where(img_data_thal == 2)
+            img_data_thal_rh[indr] = 1
 
-            del Ithal
+            del img_data_thal
 
             # Mask probability maps using the left-hemisphere thalamus mask
-            tmpIthalL = np.zeros(
-                (IthalL.shape[0], IthalL.shape[1], IthalL.shape[2], 1))
-            tmpIthalL[:, :, :, 0] = IthalL
-            tempM = np.repeat(tmpIthalL, int(Nspams / 2), axis=3)
-            del tmpIthalL
-            IspamL = np.multiply(Ispams[:, :, :, 0:int(Nspams / 2)], tempM)
-            # print('IspamL shape:', IspamL.shape)
-            del tempM
+            tmp_thal_lh = np.zeros(
+                (img_data_thal_lh.shape[0], img_data_thal_lh.shape[1], img_data_thal_lh.shape[2], 1))
+            tmp_thal_lh[:, :, :, 0] = img_data_thal_lh
+            temp_m = np.repeat(tmp_thal_lh, int(nb_spams / 2), axis=3)
+            del tmp_thal_lh
+            img_data_spam_lh = np.multiply(img_data_spams[:, :, :, 0:int(nb_spams / 2)], temp_m)
+            # print('img_data_spam_lh shape:', img_data_spam_lh.shape)
+            del temp_m
 
-            # Creating MaxProb
-            IspamL[IspamL < Thresh] = 0
-            ind = np.where(np.sum(IspamL, axis=3) == 0)
-            # MaxProbL = IspamL.max(axis=3)
-            MaxProbL = np.argmax(IspamL, axis=3) + 1
-            MaxProbL[ind] = 0
-            # MaxProbL[ind] = 0
-            # ?MaxProbL = ndimage.binary_fill_holes(MaxProbL)
-            # ?MaxProbL = Atlas_Corr(IthalL,MaxProbL)
+            # Creating max_prob
+            img_data_spam_lh[img_data_spam_lh < thresh] = 0
+            ind = np.where(np.sum(img_data_spam_lh, axis=3) == 0)
+            # max_prob_l = img_data_spam_lh.max(axis=3)
+            max_prob_l = np.argmax(img_data_spam_lh, axis=3) + 1
+            max_prob_l[ind] = 0
+            # max_prob_l[ind] = 0
+            # ?max_prob_l = ndimage.binary_fill_holes(max_prob_l)
+            # ?max_prob_l = Atlas_Corr(img_data_thal_lh,max_prob_l)
 
             # Mask probability maps using the right-hemisphere thalamus mask
-            tmpIthalR = np.zeros(
-                (IthalR.shape[0], IthalR.shape[1], IthalR.shape[2], 1))
-            tmpIthalR[:, :, :, 0] = IthalR
-            tempM = np.repeat(tmpIthalR, int(Nspams / 2), axis=3)
-            del tmpIthalR
-            IspamR = np.multiply(Ispams[:, :, :, int(Nspams / 2):int(Nspams)], tempM)
-            # print('IspamR shape:', IspamR.shape)
-            del tempM
+            tmp_thal_rh = np.zeros(
+                (img_data_thal_rh.shape[0], img_data_thal_rh.shape[1], img_data_thal_rh.shape[2], 1))
+            tmp_thal_rh[:, :, :, 0] = img_data_thal_rh
+            temp_m = np.repeat(tmp_thal_rh, int(nb_spams / 2), axis=3)
+            del tmp_thal_rh
+            img_data_spam_rh = np.multiply(img_data_spams[:, :, :, int(nb_spams / 2):int(nb_spams)], temp_m)
+            # print('img_data_spam_rh shape:', img_data_spam_rh.shape)
+            del temp_m
 
-            # Creating MaxProb
-            IspamR[IspamR < Thresh] = 0
-            ind = np.where(np.sum(IspamR, axis=3) == 0)
-            # MaxProbR = IspamR.max(axis=3)
-            MaxProbR = np.argmax(IspamR, axis=3) + 1
-            # ?MaxProbR = imfill(MaxProbR,'holes');
-            # ?MaxProbR = Atlas_Corr(IthalR,MaxProbR);
-            MaxProbR[indr] = MaxProbR[indr] + int(Nspams / 2)
-            MaxProbR[ind] = 0
+            # Creating max_prob
+            img_data_spam_rh[img_data_spam_rh < thresh] = 0
+            ind = np.where(np.sum(img_data_spam_rh, axis=3) == 0)
+            # max_prob_r = img_data_spam_rh.max(axis=3)
+            max_prob_r = np.argmax(img_data_spam_rh, axis=3) + 1
+            # ?max_prob_r = imfill(max_prob_r,'holes');
+            # ?max_prob_r = Atlas_Corr(img_data_thal_rh,max_prob_r);
+            max_prob_r[indr] = max_prob_r[indr] + int(nb_spams / 2)
+            max_prob_r[ind] = 0
 
             del indr
 
-            Ispams[:, :, :, 0:int(Nspams / 2)] = IspamL
-            Ispams[:, :, :, int(Nspams / 2):Nspams] = IspamR
+            img_data_spams[:, :, :, 0:int(nb_spams / 2)] = img_data_spam_lh
+            img_data_spams[:, :, :, int(nb_spams / 2):nb_spams] = img_data_spam_rh
 
         # Save corrected probability maps of thalamic nuclei
         # update the header
-        hdr = imgVspams.get_header()
+        hdr = img_spams.get_header()
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.uint16)
         print("Save output image to %s" % output_maps)
-        img = ni.Nifti1Image(Ispams, imgVspams.get_affine(), hdr2)
+        img = ni.Nifti1Image(img_data_spams, img_spams.get_affine(), hdr2)
         ni.save(img, output_maps)
 
-        del hdr, img, imgVspams
+        del hdr, img, img_spams
 
         # Save Maxprob
         # update the header
         max_prob = op.abspath(
-            '{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefixName))
-        hdr = Vatlas.get_header()
+            '{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefix_name))
+        hdr = img_atlas.get_header()
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.uint16)
 
         if use_thalamus_mask:
-            MaxProb = MaxProbL + MaxProbR
+            max_prob = max_prob_l + max_prob_r
         else:
-            # Creating MaxProb
-            Ispams[Ispams < Thresh] = 0
-            ind = np.where(np.sum(Ispams, axis=3) == 0)
-            MaxProb = Ispams.argmax(axis=3) + 1
-            MaxProb[ind] = 0
-            # ?MaxProb = imfill(MaxProb,'holes');
+            # Creating max_prob
+            img_data_spams[img_data_spams < thresh] = 0
+            ind = np.where(np.sum(img_data_spams, axis=3) == 0)
+            max_prob = img_data_spams.argmax(axis=3) + 1
+            max_prob[ind] = 0
+            # ?max_prob = imfill(max_prob,'holes');
 
-        del Ispams
+        del img_data_spams
 
         # debug_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_maxprobL.nii.gz'
         # print("Save output image to %s" % debug_file)
-        # img = ni.Nifti1Image(MaxProbL, Vatlas.get_affine(), hdr2)
+        # img = ni.Nifti1Image(max_prob_l, img_atlas.get_affine(), hdr2)
         # ni.save(img, debug_file)
         #
         # debug_file = '/home/localadmin/~/Desktop/parcellation_tests/sub-A006_ses-20160520161029_T1w_brain_class-thalamus_maxprobR.nii.gz'
         # print("Save output image to %s" % debug_file)
-        # img = ni.Nifti1Image(MaxProbR, Vatlas.get_affine(), hdr2)
+        # img = ni.Nifti1Image(max_prob_r, img_atlas.get_affine(), hdr2)
         # ni.save(img, debug_file)
 
         print("Save output image to %s" % max_prob)
-        img = ni.Nifti1Image(MaxProb, Vatlas.get_affine(), hdr2)
+        img = ni.Nifti1Image(max_prob, img_atlas.get_affine(), hdr2)
         ni.save(img, max_prob)
 
         del hdr2, img, max_prob
@@ -2078,26 +2050,26 @@ class ParcellateThalamus(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outprefixName = self.inputs.T1w_image.split(".")[0]
-        outprefixName = outprefixName.split("/")[-1:][0]
+        outprefix_name = self.inputs.T1w_image.split(".")[0]
+        outprefix_name = outprefix_name.split("/")[-1:][0]
 
         outputs['prob_maps_registered'] = op.abspath(
-            '{}_class-thalamus_probtissue.nii.gz'.format(outprefixName))
+            '{}_class-thalamus_probtissue.nii.gz'.format(outprefix_name))
         outputs['max_prob_registered'] = op.abspath(
-            '{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefixName))
+            '{}_class-thalamus_probtissue_maxprob.nii.gz'.format(outprefix_name))
         outputs['thalamus_mask'] = op.abspath(
-            '{}_class-thalamus_dtissue.nii.gz'.format(outprefixName))
+            '{}_class-thalamus_dtissue.nii.gz'.format(outprefix_name))
 
-        outprefixName = op.abspath('{}_Ind2temp'.format(outprefixName))
+        outprefix_name = op.abspath('{}_Ind2temp'.format(outprefix_name))
 
         outputs['warped_image'] = op.abspath(
-            '{}Warped.nii.gz'.format(outprefixName))
+            '{}Warped.nii.gz'.format(outprefix_name))
         outputs['inverse_warped_image'] = op.abspath(
-            '{}InverseWarped.nii.gz'.format(outprefixName))
+            '{}InverseWarped.nii.gz'.format(outprefix_name))
         outputs['transform_file'] = op.abspath(
-            '{}0GenericAffine.mat'.format(outprefixName))
+            '{}0GenericAffine.mat'.format(outprefix_name))
         outputs['warp_file'] = op.abspath(
-            '{}1Warp.nii.gz'.format(outprefixName))
+            '{}1Warp.nii.gz'.format(outprefix_name))
 
         # outputs['lh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','lh_subFields.nii.gz')
         # outputs['rh_hipposubfields'] = op.join(self.inputs.subjects_dir,self.inputs.subject_id,'tmp','rh_subFields.nii.gz')
@@ -3907,7 +3879,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     """
     fs_dir = op.join(subjects_dir, subject_id)
 
-    print("Create the WM and GM mask")
+    print("Create the wm_labels and GM mask")
 
     # need to convert
     mri_cmd = ['mri_convert', '-i', op.join(fs_dir, 'mri', 'aparc+aseg.mgz'), '-o',
@@ -3915,11 +3887,11 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     subprocess.check_call(mri_cmd)
 
     fout = op.join(fs_dir, 'mri', 'aparc+aseg.nii.gz')
-    niiAPARCimg = ni.load(fout)
-    niiAPARCdata = niiAPARCimg.get_data()
+    nii_apar_cimg = ni.load(fout)
+    nii_apar_cdata = nii_apar_cimg.get_data()
 
     # mri_convert aparc+aseg.mgz aparc+aseg.nii.gz
-    WMout = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
+    wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
 
     # %% label mapping
     # Using FreesurferColorLUT.txt
@@ -3935,7 +3907,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     #    OTHER = {1:[16],
     #             2:[83]}
 
-    MAPPING = [[1, 2012], [2, 2019], [3, 2032], [4, 2014], [5, 2020], [6, 2018], [7, 2027], [8, 2028], [9, 2003],
+    mapping = [[1, 2012], [2, 2019], [3, 2032], [4, 2014], [5, 2020], [6, 2018], [7, 2027], [8, 2028], [9, 2003],
                [10, 2024], [11, 2017], [12, 2026],
                [13, 2002], [14, 2023], [15, 2010], [16, 2022], [
                    17, 2031], [18, 2029], [19, 2008], [20, 2025],
@@ -3957,73 +3929,78 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
                [79, 13], [80, 26], [81, 17],
                [82, 18], [83, 16]]
 
-    WM = [2, 29, 32, 41, 61, 64, 59, 60, 27, 28] + list(range(77, 86 + 1)) + list(range(100, 117 + 1)) + list(range(155,
-                                                                                                                    158 + 1)) + list(range(195,
-                                                                                                                                           196 + 1)) + list(range(
-                                                                                                                                               199, 200 + 1)) + list(range(203, 204 + 1)) + [212, 219, 223] + list(range(250, 255 + 1))
+    wm_labels = [2, 29, 32, 41, 61, 64, 59, 60, 27, 28] + \
+        list(range(77, 86 + 1)) + \
+        list(range(100, 117 + 1)) + \
+        list(range(155, 158 + 1)) + \
+        list(range(195, 196 + 1)) + \
+        list(range(199, 200 + 1)) + \
+        list(range(203, 204 + 1)) + \
+        [212, 219, 223] + \
+        list(range(250, 255 + 1))
     # add
     # 59  Right-Substancia-Nigra
     # 60  Right-VentralDC
     # 27  Left-Substancia-Nigra
     # 28  Left-VentralDC
 
-    print("WM mask....")
-    # %% create WM mask
-    niiWM = np.zeros(niiAPARCdata.shape, dtype=np.uint8)
+    print("wm_labels mask....")
+    # %% create wm_labels mask
+    nii_wm = np.zeros(nii_apar_cdata.shape, dtype=np.uint8)
 
-    for i in WM:
-        niiWM[niiAPARCdata == i] = 1
+    for i in wm_labels:
+        nii_wm[nii_apar_cdata == i] = 1
 
     # we do not add subcortical regions
     #    for i in SUBCORTICAL[1]:
-    #         niiWM[niiAPARCdata == i] = 1
+    #         nii_wm[nii_apar_cdata == i] = 1
 
-    img = ni.Nifti1Image(niiWM, niiAPARCimg.get_affine(),
-                         niiAPARCimg.get_header())
-    print("Save to: " + WMout)
-    ni.save(img, WMout)
+    img = ni.Nifti1Image(nii_wm, nii_apar_cimg.get_affine(),
+                         nii_apar_cimg.get_header())
+    print("Save to: " + wm_out)
+    ni.save(img, wm_out)
 
     print("GM mask....")
     # %% create GM parcellation (CORTICAL+SUBCORTICAL)
     # %  -------------------------------------
     for park in list(get_parcellation('NativeFreesurfer').keys()):
         print("Parcellation: " + park)
-        GMout = op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % park)
+        gm_out = op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' % park)
 
-        niiGM = np.zeros(niiAPARCdata.shape, dtype=np.uint8)
+        nii_gm = np.zeros(nii_apar_cdata.shape, dtype=np.uint8)
 
-        for ma in MAPPING:
-            niiGM[niiAPARCdata == ma[1]] = ma[0]
+        for ma in mapping:
+            nii_gm[nii_apar_cdata == ma[1]] = ma[0]
 
         #        # % 33 cortical regions (stored in the order of "parcel33")
         #        for idx,i in enumerate(CORTICAL[1]):
-        #            niiGM[ niiAPARCdata == (2000+i)] = CORTICAL[2][idx] # RIGHT
-        #            niiGM[ niiAPARCdata == (1000+i)] = CORTICAL[2][idx] + 41 # LEFT
+        #            nii_gm[ nii_apar_cdata == (2000+i)] = CORTICAL[2][idx] # RIGHT
+        #            nii_gm[ nii_apar_cdata == (1000+i)] = CORTICAL[2][idx] + 41 # LEFT
         #
         #        #% subcortical nuclei
         #        for idx,i in enumerate(SUBCORTICAL[1]):
-        #            niiGM[ niiAPARCdata == i ] = SUBCORTICAL[2][idx]
+        #            nii_gm[ nii_apar_cdata == i ] = SUBCORTICAL[2][idx]
         #
         #        # % other region to account for in the GM
         #        for idx, i in enumerate(OTHER[1]):
-        #            niiGM[ niiAPARCdata == i ] = OTHER[2][idx]
+        #            nii_gm[ nii_apar_cdata == i ] = OTHER[2][idx]
 
-        print("Save to: " + GMout)
-        img = ni.Nifti1Image(niiGM, niiAPARCimg.get_affine(),
-                             niiAPARCimg.get_header())
-        ni.save(img, GMout)
+        print("Save to: " + gm_out)
+        img = ni.Nifti1Image(nii_gm, nii_apar_cimg.get_affine(),
+                             nii_apar_cimg.get_header())
+        ni.save(img, gm_out)
 
         # Create GM mask
-        GMmaskout = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
-        niiGMmask = niiGM.copy()
+        gm_maskout = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
+        nii_gm_mask = nii_gm.copy()
         # Remove brainstem (supposed to be the last label 83)
-        niiGMmask[niiGMmask == niiGMmask.max()] = 0
-        niiGMmask[niiGMmask > 0] = 1
+        nii_gm_mask[nii_gm_mask == nii_gm_mask.max()] = 0
+        nii_gm_mask[nii_gm_mask > 0] = 1
 
-        print("GM mask saved to: " + GMmaskout)
+        print("GM mask saved to: " + gm_maskout)
         img = ni.Nifti1Image(
-            niiGMmask, niiAPARCimg.get_affine(), niiAPARCimg.get_header())
-        ni.save(img, GMmaskout)
+            nii_gm_mask, nii_apar_cimg.get_affine(), nii_apar_cimg.get_header())
+        ni.save(img, gm_maskout)
 
     # Create CSF mask
     mri_cmd = ['mri_convert', '-i',

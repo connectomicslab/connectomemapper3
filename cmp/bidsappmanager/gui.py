@@ -682,9 +682,9 @@ class CMP_BIDSAppWindow(HasTraits):
 
     fix_ants_number_of_threads = Bool(False, desc='Fix independently number of threads used by ANTs registration')
     ants_number_of_threads = Range(low=1,
-                              high='number_of_threads_max',
-                              mode='spinner',
-                              desc='Number of ITK threads used by ANTs registration')
+                                   high='number_of_threads_max',
+                                   mode='spinner',
+                                   desc='Number of ITK threads used by ANTs registration')
 
     fs_license = File(desc='Path to your FREESURFER license.txt')
     # fs_average = Directory(os.path.join(os.environ['FREESURFER_HOME'],'subjects','fsaverage'))
@@ -1092,11 +1092,11 @@ class CMP_BIDSAppWindow(HasTraits):
         """
 
         cmd = ['docker', 'run', '-it', '--rm',
-               ##'-v', '{}:/bids_dataset'.format(self.bids_root),
-               ##'-v', '{}/derivatives:/outputs'.format(self.bids_root),
+               # '-v', '{}:/bids_dataset'.format(self.bids_root),
+               # '-v', '{}/derivatives:/outputs'.format(self.bids_root),
                # '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(self.fs_average),
-               ##'-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
-               ##'-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)
+               # '-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
+               # '-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)
                '-v', '{}:/bids_dir'.format(self.bids_root),
                '-v', '{}:/output_dir'.format(self.output_dir),
                '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
@@ -1687,7 +1687,7 @@ class CMP_ConfiguratorWindow(HasTraits):
         handler=project.CMP_ConfigQualityWindowHandler(),
         style_sheet=style_sheet,
         buttons=[],
-        width=0.5, height=0.8, resizable=True, # scrollable=True,
+        width=0.5, height=0.8, resizable=True,  # scrollable=True,
         icon=get_icon('configurator.png')
     )
 
@@ -2245,7 +2245,7 @@ class CMP_MainWindow(HasTraits):
         ),
         handler=project.CMP_MainWindowHandler(),
         style_sheet=style_sheet,
-        width=0.5, height=0.8, resizable=True, # , scrollable=True , resizable=True
+        width=0.5, height=0.8, resizable=True,  # , scrollable=True , resizable=True
         icon=get_icon('cmp.png')
     )
 

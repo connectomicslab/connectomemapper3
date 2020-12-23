@@ -347,9 +347,9 @@ class SHOREInputSpec(DipyBaseInterfaceInputSpec):
         'Even number that represents the order of the basis'))
     zeta = traits.Int(700, usedefault=True, desc=('Scale factor'))
     lambda_n = traits.Float(1e-8, usedefault=True,
-                           desc=('radial regularisation constant'))
+                            desc=('radial regularisation constant'))
     lambda_l = traits.Float(1e-8, usedefault=True,
-                           desc=('angular regularisation constant'))
+                            desc=('angular regularisation constant'))
     tau = traits.Float(0.025330295910584444, desc=(
         'Diffusion time. By default the value that makes q equal to the square root of the b-value.'))
     tracking_processing_tool = traits.Enum("mrtrix", "dipy")
@@ -559,7 +559,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         from dipy.tracking import utils
         from dipy.direction import peaks_from_model
         # from dipy.tracking.stopping_criterion import ThresholdStoppingCriterion, BinaryStoppingCriterion
-        from dipy.tracking.eudx import EuDX #FIXME: see changes in Dipy 1.0
+        from dipy.tracking.eudx import EuDX  # FIXME: see changes in Dipy 1.0
         from dipy.data import get_sphere
         from dipy.io.streamline import save_trk
         # import marshal as pickle
@@ -852,15 +852,13 @@ class DirectionGetterTractography(DipyBaseInterface):
             voxel_size = np.average(img_pve_wm.header['pixdim'][1:4])
             step_size = self.inputs.step_size
 
-
-
             IFLOGGER.info('Building CMC Tissue Classifier')
 
             cmc_classifier = CmcStoppingCriterion.from_pve(img_pve_wm.get_data(),
-                                                          img_pve_gm.get_data(),
-                                                          img_pve_csf.get_data(),
-                                                          step_size=step_size,
-                                                          average_voxel_size=voxel_size)
+                                                           img_pve_gm.get_data(),
+                                                           img_pve_csf.get_data(),
+                                                           step_size=step_size,
+                                                           average_voxel_size=voxel_size)
 
             if self.inputs.recon_model == 'CSD':
                 IFLOGGER.info('Creating mask used by CSD model from partial volume maps of GM and WM')
@@ -1030,7 +1028,6 @@ class DirectionGetterTractography(DipyBaseInterface):
                                                                  return_all=False)
 
             # streamlines = list(pft_streamline_generator)
-
 
             IFLOGGER.info('Saving tracks')
             from dipy.tracking.streamline import Streamlines

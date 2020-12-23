@@ -541,8 +541,8 @@ class ParcellationStage(Stage):
                                                                                                    scale] + '_LUT.txt'))
                             if (os.path.exists(white_matter_file) and os.path.exists(roi_v)):
                                 self.inspect_outputs_dict[roi_basename] = ['freeview', '-v',
-                                                                            white_matter_file + ':colormap=GEColor',
-                                                                            roi_v + ":colormap=lut:lut=" + lut_file]
+                                                                           white_matter_file + ':colormap=GEColor',
+                                                                           roi_v + ":colormap=lut:lut=" + lut_file]
                     elif self.config.parcellation_scheme == 'Lausanne2018':
                         # resolution = {'1':'resolution1','2':'resolution2','3':'resolution3','4':'resolution4','5':'resolution5'}
 
@@ -552,8 +552,8 @@ class ParcellationStage(Stage):
 
                             if (os.path.exists(white_matter_file) and os.path.exists(roi_v)):
                                 self.inspect_outputs_dict[roi_basename] = ['freeview', '-v',
-                                                                            white_matter_file + ':colormap=GEColor',
-                                                                            roi_v + ":colormap=lut:lut=" + lut_file]
+                                                                           white_matter_file + ':colormap=GEColor',
+                                                                           roi_v + ":colormap=lut:lut=" + lut_file]
 
                 # self.inspect_outputs = self.inspect_outputs_dict.keys()
         # else:

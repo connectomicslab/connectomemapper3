@@ -268,7 +268,7 @@ def anat_save_config(pipeline, config_path):
             elif len(config_json[section][name]) == 0:
                 config_json[section][name] = ''
 
-    config_json_path = '.'.join([os.path.splitext(config_path)[0],'json'])
+    config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
     with open(config_json_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
 
@@ -457,7 +457,7 @@ def dmri_save_config(pipeline, config_path):
             elif len(config_json[section][name]) == 0:
                 config_json[section][name] = ''
 
-    config_json_path = '.'.join([os.path.splitext(config_path)[0],'json'])
+    config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
     with open(config_json_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
 
@@ -642,7 +642,7 @@ def fmri_save_config(pipeline, config_path):
             elif len(config_json[section][name]) == 0:
                 config_json[section][name] = ''
 
-    config_json_path = '.'.join([os.path.splitext(config_path)[0],'json'])
+    config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
     with open(config_json_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
 

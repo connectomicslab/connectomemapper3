@@ -83,7 +83,7 @@ class ConnectomeStageUI(ConnectomeStage):
                                             Item('inspect_output_button',
                                                  enabled_when='inspect_outputs_enum!="Outputs not available"',
                                                  show_label=False),
-                                        label='View outputs', show_border=True)),
+                                      label='View outputs', show_border=True)),
                                 scrollable=True,
                                 resizable=True,
                                 kind='livemodal',

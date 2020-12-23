@@ -232,8 +232,7 @@ class MRtrix_tracking_config(HasTraits):
     backtrack = traits.Bool(True,
                             desc="Allow tracks to be truncated (requires Anatomically-Constrained Tractography (ACT))")
 
-    sift = traits.Bool(True,
-                        desc="Filter tractogram using mrtrix3 SIFT")
+    sift = traits.Bool(True, desc="Filter tractogram using mrtrix3 SIFT")
 
     def _SD_changed(self, new):
         """Update ``curvature`` when ``SD`` is updated.
