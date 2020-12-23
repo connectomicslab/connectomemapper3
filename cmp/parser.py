@@ -61,26 +61,26 @@ def get():
                         '(Set to [Number of available CPUs -1] by default).')
 
     p.add_argument('--number_of_participants_processed_in_parallel',
+                   default=1,
                    type=int,
                    help='The number of subjects to be processed in parallel (One by default).')
 
-    p.add_argument('--set_mrtrix_rng_seed',
+    p.add_argument('--mrtrix_random_seed',
+                   default=None,
                    type=int,
-                   help='Fix MRtrix3 random number generator seed')
+                   help='Fix MRtrix3 random number generator seed to the specified value')
 
-    p.add_argument('--set_ants_random_seed',
+    p.add_argument('--ants_random_seed',
+                   default=None,
                    type=int,
-                   help='Fix ANTS random number generator seed ')
+                   help='Fix ANTS random number generator seed to the specified value')
 
-    p.add_argument('--set_itk_global_default_number_of_threads',
-                   default=1,
+    p.add_argument('--ants_number_of_threads',
+                   default=None,
                    type=int,
-                   help='Fix number of threads used by ANTs')
-
-    p.add_argument('--set_mkl_num_threads',
-                   type=int,
-                   default=1,
-                   help='Fix number of MKL threads')
+                   help='Fix number of threads in ANTs. If not specified ANTs will '
+                        'use the same number as the number of OpenMP threads '
+                        '(see `----number_of_threads` option flag)')
 
     p.add_argument('--fs_license', help='Freesurfer license.txt')
 
