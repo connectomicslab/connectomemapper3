@@ -338,7 +338,7 @@ class DiffusionPipeline(Pipeline):
                         # print(dwi_file)
                 else:
                     print(
-                        "ERROR : Diffusion image not found for subject %s." % (subjid))
+                        "ERROR : Diffusion image not found for subject %s." % subjid)
                     return
 
                 files = layout.get(
@@ -357,7 +357,7 @@ class DiffusionPipeline(Pipeline):
                 else:
                     json_file = 'NotFound'
                     print(
-                        "WARNING : Diffusion json sidecar not found for subject %s." % (subjid))
+                        "WARNING : Diffusion json sidecar not found for subject %s." % subjid)
 
                 files = layout.get(
                     subject=subjid, suffix='dwi', extensions='.bval')
@@ -374,7 +374,7 @@ class DiffusionPipeline(Pipeline):
                         # print(bval_file)
                 else:
                     print(
-                        "ERROR : Diffusion bval image not found for subject %s." % (subjid))
+                        "ERROR : Diffusion bval image not found for subject %s." % subjid)
                     return
 
                 files = layout.get(
@@ -392,7 +392,7 @@ class DiffusionPipeline(Pipeline):
                         # print(bvec_file)
                 else:
                     print(
-                        "ERROR : Diffusion bvec image not found for subject %s." % (subjid))
+                        "ERROR : Diffusion bvec image not found for subject %s." % subjid)
                     return
             else:
                 sessid = self.global_conf.subject_session.split("-")[1]
@@ -557,7 +557,7 @@ class DiffusionPipeline(Pipeline):
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
 
-        if (diffusion_available):
+        if diffusion_available:
             valid_inputs = True
         else:
             print(

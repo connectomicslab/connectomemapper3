@@ -242,7 +242,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
                 print(fmri_file)
             else:
-                error(message="BOLD image not found for subject %s." % (subjid), title="Error",
+                error(message="BOLD image not found for subject %s." % subjid, title="Error",
                       buttons=['OK', 'Cancel'], parent=None)
                 return
 
@@ -252,7 +252,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 json_file = os.path.join(files[0].dirname, files[0].filename)
                 print(json_file)
             else:
-                error(message="BOLD json sidecar not found for subject %s." % (subjid), title="Warning",
+                error(message="BOLD json sidecar not found for subject %s." % subjid, title="Warning",
                       buttons=['OK', 'Cancel'], parent=None)
 
             files = layout.get(subject=subjid, suffix='T1w',
@@ -261,7 +261,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
                 print(t1_file)
             else:
-                error(message="T1w image not found for subject %s." % (subjid), title="Error", buttons=['OK', 'Cancel'],
+                error(message="T1w image not found for subject %s." % subjid, title="Error", buttons=['OK', 'Cancel'],
                       parent=None)
                 return
 
@@ -271,7 +271,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 t2_file = os.path.join(files[0].dirname, files[0].filename)
                 print(t2_file)
             else:
-                error(message="T2w image not found for subject %s." % (subjid), title="Warning",
+                error(message="T2w image not found for subject %s." % subjid, title="Warning",
                       buttons=['OK', 'Cancel'], parent=None)
 
         else:

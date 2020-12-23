@@ -451,7 +451,7 @@ class SegmentationStage(Stage):
                 reconall_report_path = os.path.join(
                     self.stage_dir, "reconall", "_report", "report.rst")
                 fs_path = self.config.freesurfer_subject_id
-                if (os.path.exists(reconall_report_path)):
+                if os.path.exists(reconall_report_path):
                     # print('Load pickle content')
                     print("Read {}".format(reconall_report_path))
                     fs_path = extract_freesurfer_subject_dir(reconall_report_path, self.output_dir)

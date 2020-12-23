@@ -329,7 +329,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             print(input_message)
 
-        if (t1_available):
+        if t1_available:
             valid_inputs = True
         else:
             print(
@@ -902,7 +902,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         anat_flow.write_graph(graph2use='colored',
                               format='svg', simple_form=True)
 
-        if (self.number_of_cores != 1):
+        if self.number_of_cores != 1:
             anat_flow.run(plugin='MultiProc', plugin_args={
                           'n_procs': self.number_of_cores})
         else:

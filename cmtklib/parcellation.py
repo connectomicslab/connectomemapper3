@@ -163,7 +163,7 @@ class ComputeParcellationRoiVolumes(BaseInterface):
                 pcN = int(round(float(100 * cnt) / n_nodes))
                 if pcN > pc and pcN % 10 == 0:
                     pc = pcN
-                    iflogger.info('%4.0f%%' % (pc))
+                    iflogger.info('%4.0f%%' % pc)
 
                 # Get the label number
                 if self.inputs.parcellation_scheme == 'Lausanne2018':
@@ -735,7 +735,7 @@ class CombineParcellations(BaseInterface):
         tmp = ni.load(third_vent_dil).get_data()
         indrhypothal = np.where((tmp == 1) & (img_data == right_ventral))
         indlhypothal = np.where((tmp == 1) & (img_data == left_ventral))
-        del (tmp)
+        del tmp
 
         f_color_lut = None
         f_graphml = None
@@ -896,15 +896,15 @@ class CombineParcellations(BaseInterface):
                     if self.inputs.create_graphml:
                         node_lines = ['{} \n'.format('    <node id="%i">' % (label + 1)),
                                       '{} \n'.format(
-                                          '      <data key="d0">%s</data>' % ("cortical")),
+                                          '      <data key="d0">%s</data>' % "cortical"),
                                       '{} \n'.format(
-                                          '      <data key="d1">%s</data>' % (name)),
+                                          '      <data key="d1">%s</data>' % name),
                                       '{} \n'.format(
-                                          '      <data key="d2">%s</data>' % ("right")),
+                                          '      <data key="d2">%s</data>' % "right"),
                                       '{} \n'.format(
                                           '      <data key="d3">%i</data>' % (label + 1)),
                                       '{} \n'.format(
-                                          '      <data key="d4">%s</data>' % (name)),
+                                          '      <data key="d4">%s</data>' % name),
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(label + 2000 + 1))),
                                       '{} \n'.format('    </node>')]
@@ -939,11 +939,11 @@ class CombineParcellations(BaseInterface):
                     if self.inputs.create_graphml:
                         node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                       '{} \n'.format(
-                                          '      <data key="d0">%s</data>' % ("subcortical")),
+                                          '      <data key="d0">%s</data>' % "subcortical"),
                                       '{} \n'.format(
-                                          '      <data key="d1">%s</data>' % ("thalamus")),
+                                          '      <data key="d1">%s</data>' % "thalamus"),
                                       '{} \n'.format(
-                                          '      <data key="d2">%s</data>' % ("right")),
+                                          '      <data key="d2">%s</data>' % "right"),
                                       '{} \n'.format(
                                           '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                       '{} \n'.format(
@@ -985,11 +985,11 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_graphml:
                     node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                   '{} \n'.format(
-                                      '      <data key="d0">%s</data>' % ("subcortical")),
+                                      '      <data key="d0">%s</data>' % "subcortical"),
                                   '{} \n'.format(
-                                      '      <data key="d1">%s</data>' % ("subcortical")),
+                                      '      <data key="d1">%s</data>' % "subcortical"),
                                   '{} \n'.format(
-                                      '      <data key="d2">%s</data>' % ("right")),
+                                      '      <data key="d2">%s</data>' % "right"),
                                   '{} \n'.format(
                                       '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                   '{} \n'.format(
@@ -1033,11 +1033,11 @@ class CombineParcellations(BaseInterface):
                     if self.inputs.create_graphml:
                         node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                       '{} \n'.format(
-                                          '      <data key="d0">%s</data>' % ("subcortical")),
+                                          '      <data key="d0">%s</data>' % "subcortical"),
                                       '{} \n'.format(
-                                          '      <data key="d1">%s</data>' % ("hippocampus")),
+                                          '      <data key="d1">%s</data>' % "hippocampus"),
                                       '{} \n'.format(
-                                          '      <data key="d2">%s</data>' % ("right")),
+                                          '      <data key="d2">%s</data>' % "right"),
                                       '{} \n'.format(
                                           '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                       '{} \n'.format(
@@ -1080,11 +1080,11 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_graphml:
                     node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[0]))),
                                   '{} \n'.format(
-                                      '      <data key="d0">%s</data>' % ("subcortical")),
+                                      '      <data key="d0">%s</data>' % "subcortical"),
                                   '{} \n'.format(
-                                      '      <data key="d1">%s</data>' % ("ventral-diencephalon")),
+                                      '      <data key="d1">%s</data>' % "ventral-diencephalon"),
                                   '{} \n'.format(
-                                      '      <data key="d2">%s</data>' % ("right")),
+                                      '      <data key="d2">%s</data>' % "right"),
                                   '{} \n'.format(
                                       '      <data key="d3">%i</data>' % (int(new_labels[0]))),
                                   '{} \n'.format(
@@ -1117,11 +1117,11 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_graphml:
                     node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[0]))),
                                   '{} \n'.format(
-                                      '      <data key="d0">%s</data>' % ("subcortical")),
+                                      '      <data key="d0">%s</data>' % "subcortical"),
                                   '{} \n'.format(
-                                      '      <data key="d1">%s</data>' % ("hypothalamus")),
+                                      '      <data key="d1">%s</data>' % "hypothalamus"),
                                   '{} \n'.format(
-                                      '      <data key="d2">%s</data>' % ("right")),
+                                      '      <data key="d2">%s</data>' % "right"),
                                   '{} \n'.format(
                                       '      <data key="d3">%i</data>' % (int(new_labels[0]))),
                                   '{} \n'.format(
@@ -1173,15 +1173,15 @@ class CombineParcellations(BaseInterface):
                     if self.inputs.create_graphml:
                         node_lines = ['{} \n'.format('    <node id="%i">' % (int(label + old_nlabel + 1))),
                                       '{} \n'.format(
-                                          '      <data key="d0">%s</data>' % ("cortical")),
+                                          '      <data key="d0">%s</data>' % "cortical"),
                                       '{} \n'.format(
-                                          '      <data key="d1">%s</data>' % (name)),
+                                          '      <data key="d1">%s</data>' % name),
                                       '{} \n'.format(
-                                          '      <data key="d2">%s</data>' % ("left")),
+                                          '      <data key="d2">%s</data>' % "left"),
                                       '{} \n'.format(
                                           '      <data key="d3">%i</data>' % (int(label + old_nlabel + 1))),
                                       '{} \n'.format(
-                                          '      <data key="d4">%s</data>' % (name)),
+                                          '      <data key="d4">%s</data>' % name),
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(label + 1000 - old_nlabel))),
                                       '{} \n'.format('    </node>')]
@@ -1215,11 +1215,11 @@ class CombineParcellations(BaseInterface):
                     if self.inputs.create_graphml:
                         node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                       '{} \n'.format(
-                                          '      <data key="d0">%s</data>' % ("subcortical")),
+                                          '      <data key="d0">%s</data>' % "subcortical"),
                                       '{} \n'.format(
-                                          '      <data key="d1">%s</data>' % ("thalamus")),
+                                          '      <data key="d1">%s</data>' % "thalamus"),
                                       '{} \n'.format(
-                                          '      <data key="d2">%s</data>' % ("left")),
+                                          '      <data key="d2">%s</data>' % "left"),
                                       '{} \n'.format(
                                           '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                       '{} \n'.format(
@@ -1260,11 +1260,11 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_graphml:
                     node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                   '{} \n'.format(
-                                      '      <data key="d0">%s</data>' % ("subcortical")),
+                                      '      <data key="d0">%s</data>' % "subcortical"),
                                   '{} \n'.format(
-                                      '      <data key="d1">%s</data>' % ("subcortical")),
+                                      '      <data key="d1">%s</data>' % "subcortical"),
                                   '{} \n'.format(
-                                      '      <data key="d2">%s</data>' % ("left")),
+                                      '      <data key="d2">%s</data>' % "left"),
                                   '{} \n'.format(
                                       '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                   '{} \n'.format(
@@ -1307,11 +1307,11 @@ class CombineParcellations(BaseInterface):
                     if self.inputs.create_graphml:
                         node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                       '{} \n'.format(
-                                          '      <data key="d0">%s</data>' % ("subcortical")),
+                                          '      <data key="d0">%s</data>' % "subcortical"),
                                       '{} \n'.format(
-                                          '      <data key="d1">%s</data>' % ("hippocampus")),
+                                          '      <data key="d1">%s</data>' % "hippocampus"),
                                       '{} \n'.format(
-                                          '      <data key="d2">%s</data>' % ("left")),
+                                          '      <data key="d2">%s</data>' % "left"),
                                       '{} \n'.format(
                                           '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                       '{} \n'.format(
@@ -1355,11 +1355,11 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_graphml:
                     node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[0]))),
                                   '{} \n'.format(
-                                      '      <data key="d0">%s</data>' % ("subcortical")),
+                                      '      <data key="d0">%s</data>' % "subcortical"),
                                   '{} \n'.format(
-                                      '      <data key="d1">%s</data>' % ("ventral-diencephalon")),
+                                      '      <data key="d1">%s</data>' % "ventral-diencephalon"),
                                   '{} \n'.format(
-                                      '      <data key="d2">%s</data>' % ("left")),
+                                      '      <data key="d2">%s</data>' % "left"),
                                   '{} \n'.format(
                                       '      <data key="d3">%i</data>' % (int(new_labels[0]))),
                                   '{} \n'.format(
@@ -1392,11 +1392,11 @@ class CombineParcellations(BaseInterface):
                 if self.inputs.create_graphml:
                     node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[0]))),
                                   '{} \n'.format(
-                                      '      <data key="d0">%s</data>' % ("subcortical")),
+                                      '      <data key="d0">%s</data>' % "subcortical"),
                                   '{} \n'.format(
-                                      '      <data key="d1">%s</data>' % ("hypothalamus")),
+                                      '      <data key="d1">%s</data>' % "hypothalamus"),
                                   '{} \n'.format(
-                                      '      <data key="d2">%s</data>' % ("left")),
+                                      '      <data key="d2">%s</data>' % "left"),
                                   '{} \n'.format(
                                       '      <data key="d3">%i</data>' % (int(new_labels[0]))),
                                   '{} \n'.format(
@@ -1430,11 +1430,11 @@ class CombineParcellations(BaseInterface):
                     if self.inputs.create_graphml:
                         node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[i]))),
                                       '{} \n'.format(
-                                          '      <data key="d0">%s</data>' % ("subcortical")),
+                                          '      <data key="d0">%s</data>' % "subcortical"),
                                       '{} \n'.format(
-                                          '      <data key="d1">%s</data>' % ("brainstem")),
+                                          '      <data key="d1">%s</data>' % "brainstem"),
                                       '{} \n'.format(
-                                          '      <data key="d2">%s</data>' % ("central")),
+                                          '      <data key="d2">%s</data>' % "central"),
                                       '{} \n'.format(
                                           '      <data key="d3">%i</data>' % (int(new_labels[i]))),
                                       '{} \n'.format(
@@ -1472,15 +1472,15 @@ class CombineParcellations(BaseInterface):
                     if self.inputs.create_graphml:
                         node_lines = ['{} \n'.format('    <node id="%i">' % (int(new_labels[0]))),
                                       '{} \n'.format(
-                                          '      <data key="d0">%s</data>' % ("subcortical")),
+                                          '      <data key="d0">%s</data>' % "subcortical"),
                                       '{} \n'.format(
-                                          '      <data key="d1">%s</data>' % ("brainstem")),
+                                          '      <data key="d1">%s</data>' % "brainstem"),
                                       '{} \n'.format(
-                                          '      <data key="d2">%s</data>' % ("central")),
+                                          '      <data key="d2">%s</data>' % "central"),
                                       '{} \n'.format(
                                           '      <data key="d3">%i</data>' % (int(new_labels[0]))),
                                       '{} \n'.format(
-                                          '      <data key="d4">%s</data>' % ("brainstem")),
+                                          '      <data key="d4">%s</data>' % "brainstem"),
                                       '{} \n'.format(
                                           '      <data key="d5">%i</data>' % (int(lab))),
                                       '{} \n'.format('    </node>')]
@@ -2724,11 +2724,11 @@ def create_roi(subject_id, subjects_dir):
             zzRois = idxRois[2]
             # correct voxels labeled in current resolution, but not labeled in highest resolution
             for j in range(xxRois.size):
-                if (roisMax[xxRois[j], yyRois[j], zzRois[j]] == 0):
+                if roisMax[xxRois[j], yyRois[j], zzRois[j]] == 0:
                     newrois[xxRois[j], yyRois[j], zzRois[j]] = 0
             # correct voxels not labeled in current resolution, but labeled in highest resolution
             for j in range(xxMax.size):
-                if (newrois[xxMax[j], yyMax[j], zzMax[j]] == 0):
+                if newrois[xxMax[j], yyMax[j], zzMax[j]] == 0:
                     local = extract(rois, shape, position=(
                         xxMax[j], yyMax[j], zzMax[j]), fill=0)
                     mask = local.copy()
@@ -3226,11 +3226,11 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
             zzRois = idxRois[2]
             # correct voxels labeled in current resolution, but not labeled in highest resolution
             for j in range(xxRois.size):
-                if (roisMax[xxRois[j], yyRois[j], zzRois[j]] == 0):
+                if roisMax[xxRois[j], yyRois[j], zzRois[j]] == 0:
                     newrois[xxRois[j], yyRois[j], zzRois[j]] = 0
             # correct voxels not labeled in current resolution, but labeled in highest resolution
             for j in range(xxMax.size):
-                if (newrois[xxMax[j], yyMax[j], zzMax[j]] == 0):
+                if newrois[xxMax[j], yyMax[j], zzMax[j]] == 0:
                     local = extract(vol, shape, position=(
                         xxMax[j], yyMax[j], zzMax[j]), fill=0)
                     mask = local.copy()

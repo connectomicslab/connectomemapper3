@@ -193,7 +193,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
                     project_info.subject, project_info.subject_session))
             else:
                 project_info.dmri_config_file = os.path.join(derivatives_directory,
-                                                             '%s_diffusion_config.ini' % (project_info.subject))
+                                                             '%s_diffusion_config.ini' % project_info.subject)
 
             if os.path.exists(project_info.dmri_config_file):
                 warn_res = project_info.configure_traits(
@@ -269,7 +269,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
                     project_info.subject, project_info.subject_session))
             else:
                 project_info.fmri_config_file = os.path.join(derivatives_directory,
-                                                             '%s_fMRI_config.ini' % (project_info.subject))
+                                                             '%s_fMRI_config.ini' % project_info.subject)
 
             if os.path.exists(project_info.fmri_config_file):
                 warn_res = project_info.configure_traits(
@@ -328,7 +328,7 @@ def init_anat_project(project_info, is_new_project):
                 project_info.subject, project_info.subject_session))
         else:
             project_info.anat_config_file = os.path.join(derivatives_directory,
-                                                         '%s_anatomical_config.ini' % (project_info.subject))
+                                                         '%s_anatomical_config.ini' % project_info.subject)
 
         if os.path.exists(project_info.anat_config_file):
             warn_res = project_info.configure_traits(view='anat_warning_view')
@@ -735,10 +735,10 @@ class CMP_ConfigQualityWindowHandler(Handler):
                                 "sub-%s_ses-%s" % (subj, subj_session))
                 else:
                     config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                               "sub-%s_anatomical_config.ini" % (subj))
+                                               "sub-%s_anatomical_config.ini" % subj)
                     if os.path.isfile(config_file):
                         loaded_project.anat_available_config.append(
-                            "sub-%s" % (subj))
+                            "sub-%s" % subj)
                         print("no session")
 
             print("loaded_project.anat_available_config : ")
@@ -828,10 +828,10 @@ class CMP_ConfigQualityWindowHandler(Handler):
                             "%s_ses-%s" % (loaded_project.subject, subj_session))
             else:
                 config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                           "sub-%s_diffusion_config.ini" % (loaded_project.subject))
+                                           "sub-%s_diffusion_config.ini" % loaded_project.subject)
                 if os.path.isfile(config_file):
                     loaded_project.dmri_available_config.append(
-                        "%s" % (loaded_project.subject))
+                        "%s" % loaded_project.subject)
                     print("no session")
 
             print("loaded_project.dmri_available_config:")
@@ -921,10 +921,10 @@ class CMP_ConfigQualityWindowHandler(Handler):
                             "%s_ses-%s" % (loaded_project.subject, subj_session))
             else:
                 config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                           "sub-%s_fMRI_config.ini" % (loaded_project.subject))
+                                           "sub-%s_fMRI_config.ini" % loaded_project.subject)
                 if os.path.isfile(config_file):
                     loaded_project.fmri_available_config.append(
-                        "sub-%s" % (loaded_project.subject))
+                        "sub-%s" % loaded_project.subject)
                     print("no session")
 
             print("loaded_project.fmri_available_config:")
@@ -1029,7 +1029,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
             self.anat_pipeline.subject_directory = os.path.join(
                 updated_project.base_directory, updated_project.subject)
             updated_project.anat_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_anatomical_config.ini' % (updated_project.subject))
+                                                            '%s_anatomical_config.ini' % updated_project.subject)
 
         self.anat_pipeline.derivatives_directory = os.path.join(
             updated_project.base_directory, 'derivatives')
@@ -1125,7 +1125,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
             self.dmri_pipeline.subject_directory = os.path.join(
                 updated_project.base_directory, updated_project.subject)
             updated_project.dmri_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_diffusion_config.ini' % (updated_project.subject))
+                                                            '%s_diffusion_config.ini' % updated_project.subject)
 
         self.dmri_pipeline.derivatives_directory = os.path.join(
             updated_project.base_directory, 'derivatives')
@@ -1217,7 +1217,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
             self.fmri_pipeline.subject_directory = os.path.join(updated_project.base_directory,
                                                                 ui_info.project_info.subject)
             updated_project.fmri_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_fMRI_config.ini' % (updated_project.subject))
+                                                            '%s_fMRI_config.ini' % updated_project.subject)
 
         self.fmri_pipeline.derivatives_directory = os.path.join(
             updated_project.base_directory, 'derivatives')
@@ -1799,9 +1799,9 @@ class CMP_MainWindowHandler(Handler):
                                 print(files)
                                 print('****************************************')
 
-                            if (loaded_project.dmri_bids_acq != ''):
+                            if loaded_project.dmri_bids_acq != '':
                                 for file in files:
-                                    if (loaded_project.dmri_bids_acq in file):
+                                    if loaded_project.dmri_bids_acq in file:
                                         dwi_file = file
                                         print('Loaded DWI file: {}'.format(dwi_file))
                                         break

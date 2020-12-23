@@ -224,7 +224,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         else:
             print(input_message)
 
-        if (t1_available):
+        if t1_available:
             valid_inputs = True
         else:
             print("Missing required inputs.")

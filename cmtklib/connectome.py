@@ -48,7 +48,7 @@ def compute_curvature_array(fib):
         pcN = int(round(float(100 * i) / n))
         if pcN > pc and pcN % 1 == 0:
             pc = pcN
-            print('%4.0f%%' % (pc))
+            print('%4.0f%%' % pc)
         meancurv[i, 0] = mean_curvature(fi[0])
 
     return meancurv
@@ -92,7 +92,7 @@ def create_endpoints_array(fib, voxelSize, print_info):
             pcN = int(round(float(100 * i) / n))
             if pcN > pc and pcN % 20 == 0:
                 pc = pcN
-                print('%4.0f%%' % (pc))
+                print('%4.0f%%' % pc)
 
         f = fi[0]
 
@@ -119,7 +119,7 @@ def create_endpoints_array(fib, voxelSize, print_info):
         # print 'endpoints : ',endpoints[i, 0, :],' ; ',endpoints[i, 1, :]
 
     # Return the matrices
-    return (endpoints, endpointsmm)
+    return endpoints, endpointsmm
 
 
 def save_fibers(oldhdr, oldfib, fname, indices):
@@ -322,7 +322,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             pcN = int(round(float(100 * cnt) / n_nodes))
             if pcN > pc and pcN % 10 == 0:
                 pc = pcN
-                print('%4.0f%%' % (pc))
+                print('%4.0f%%' % pc)
 
             G.add_node(int(u))
             for key in d:
@@ -387,7 +387,7 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             pcN = int(round(float(100 * i) / n))
             if pcN > pc and pcN % 10 == 0:
                 pc = pcN
-                print('%4.0f%%' % (pc))
+                print('%4.0f%%' % pc)
 
             # ROI start => ROI end
             try:

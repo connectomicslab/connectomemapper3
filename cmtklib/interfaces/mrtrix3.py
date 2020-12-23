@@ -1366,13 +1366,13 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
 
     crop_at_gmwmi = traits.Bool(
         argstr='-crop_at_gmwmi',
-        desc=('crop streamline endpoints more precisely as they cross the GM-WM interface'))
+        desc='crop streamline endpoints more precisely as they cross the GM-WM interface')
 
     seed_gmwmi = File(
         exists=True,
         argstr='-seed_gmwmi %s',
         requires=['act_file'],
-        desc=('seed from the grey matter - white matter interface (only valid if using ACT framework)'))
+        desc='seed from the grey matter - white matter interface (only valid if using ACT framework)')
 
     out_file = File(argstr='%s', position=-1,
                     genfile=True, desc='output data file')

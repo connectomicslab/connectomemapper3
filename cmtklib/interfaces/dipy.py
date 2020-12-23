@@ -23,24 +23,24 @@ IFLOGGER = logging.getLogger('nipype.interface')
 
 class DTIEstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(
-        exists=True, desc=('input mask in which we find single fibers'))
+        exists=True, desc='input mask in which we find single fibers')
     fa_thresh = traits.Float(
-        0.7, usedefault=True, desc=('FA threshold'))
+        0.7, usedefault=True, desc='FA threshold')
     roi_radius = traits.Int(
-        10, usedefault=True, desc=('ROI radius to be used in auto_response'))
+        10, usedefault=True, desc='ROI radius to be used in auto_response')
     auto = traits.Bool(
         xor=['recursive'], desc='use the auto_response estimator from dipy')
     recursive = traits.Bool(
         xor=['auto'], desc='use the recursive response estimator from dipy')
     response = File(
-        'response.txt', usedefault=True, desc=('the output response file'))
+        'response.txt', usedefault=True, desc='the output response file')
     out_mask = File('wm_mask.nii.gz', usedefault=True, desc='computed wm mask')
 
 
 class DTIEstimateResponseSHOutputSpec(TraitedSpec):
-    response = File(exists=True, desc=('the response file'))
-    dti_model = File(exists=True, desc=('DTI model object'))
-    out_mask = File(exists=True, desc=('output wm mask'))
+    response = File(exists=True, desc='the response file')
+    dti_model = File(exists=True, desc='DTI model object')
+    out_mask = File(exists=True, desc='output wm mask')
     fa_file = File(exists=True)
     md_file = File(exists=True)
     rd_file = File(exists=True)
@@ -129,9 +129,9 @@ class DTIEstimateResponseSH(DipyDiffusionInterface):
         elif ratio < 1.e-5 or np.any(np.isnan(response)):
             response = np.array([1.8e-3, 3.6e-4, 3.6e-4, S0])
             IFLOGGER.warn(
-                ('Estimated response is not valid, using a default one'))
+                    'Estimated response is not valid, using a default one')
         else:
-            IFLOGGER.info(('Estimated response: %s') % str(response[:3]))
+            IFLOGGER.info('Estimated response: %s' % str(response[:3]))
 
         np.savetxt(op.abspath(self.inputs.response), response)
 
@@ -173,27 +173,27 @@ class DTIEstimateResponseSH(DipyDiffusionInterface):
 
 
 class CSDInputSpec(DipyBaseInterfaceInputSpec):
-    in_mask = File(exists=True, desc=('input mask in which compute tensors'))
-    response = File(exists=True, desc=('single fiber estimated response'))
+    in_mask = File(exists=True, desc='input mask in which compute tensors')
+    response = File(exists=True, desc='single fiber estimated response')
     fa_thresh = traits.Float(0.7, usedefault=True,
-                             desc=('FA threshold used for response estimation'))
+                             desc='FA threshold used for response estimation')
     sh_order = traits.Int(8, usedefault=True,
-                          desc=('maximal shperical harmonics order'))
+                          desc='maximal shperical harmonics order')
     save_fods = traits.Bool(True, usedefault=True,
-                            desc=('save fODFs in file'))
+                            desc='save fODFs in file')
     save_shm_coeff = traits.Bool(True, usedefault=True,
-                                 desc=('save Spherical Harmonics Coefficients in file'))
+                                 desc='save Spherical Harmonics Coefficients in file')
     tracking_processing_tool = traits.Enum("mrtrix", "dipy")
-    out_fods = File(desc=('fODFs output file name'))
+    out_fods = File(desc='fODFs output file name')
     out_shm_coeff = File(
-        desc=('Spherical Harmonics Coefficients output file name'))
+        desc='Spherical Harmonics Coefficients output file name')
 
 
 class CSDOutputSpec(TraitedSpec):
     model = File(desc='Python pickled object of the CSD model fitted.')
-    out_fods = File(desc=('fODFs output file name'))
+    out_fods = File(desc='fODFs output file name')
     out_shm_coeff = File(
-        desc=('Spherical Harmonics Coefficients output file name'))
+        desc='Spherical Harmonics Coefficients output file name')
 
 
 class CSD(DipyDiffusionInterface):
@@ -342,14 +342,14 @@ class CSD(DipyDiffusionInterface):
 class SHOREInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(exists=True, desc=(
         'input mask in which compute SHORE solution'))
-    response = File(exists=True, desc=('single fiber estimated response'))
+    response = File(exists=True, desc='single fiber estimated response')
     radial_order = traits.Int(6, usedefault=True, desc=(
         'Even number that represents the order of the basis'))
-    zeta = traits.Int(700, usedefault=True, desc=('Scale factor'))
+    zeta = traits.Int(700, usedefault=True, desc='Scale factor')
     lambda_n = traits.Float(1e-8, usedefault=True,
-                            desc=('radial regularisation constant'))
+                            desc='radial regularisation constant')
     lambda_l = traits.Float(1e-8, usedefault=True,
-                            desc=('angular regularisation constant'))
+                            desc='angular regularisation constant')
     tau = traits.Float(0.025330295910584444, desc=(
         'Diffusion time. By default the value that makes q equal to the square root of the b-value.'))
     tracking_processing_tool = traits.Enum("mrtrix", "dipy")
@@ -363,12 +363,12 @@ class SHOREInputSpec(DipyBaseInterfaceInputSpec):
 class SHOREOutputSpec(TraitedSpec):
     model = File(desc='Python pickled object of the SHORE model fitted.')
     fodf = File(
-        desc=('Fiber Orientation Distribution Function output file name'))
+        desc='Fiber Orientation Distribution Function output file name')
     dodf = File(
-        desc=('Fiber Orientation Distribution Function output file name'))
-    GFA = File(desc=('Generalized Fractional Anisotropy output file name'))
-    MSD = File(desc=('Mean Square Displacement output file name'))
-    RTOP = File(desc=('Return To Origin Probability output file name'))
+        desc='Fiber Orientation Distribution Function output file name')
+    GFA = File(desc='Generalized Fractional Anisotropy output file name')
+    MSD = File(desc='Mean Square Displacement output file name')
+    RTOP = File(desc='Return To Origin Probability output file name')
 
 
 class SHORE(DipyDiffusionInterface):
@@ -510,27 +510,27 @@ class SHORE(DipyDiffusionInterface):
 
 
 class TensorInformedEudXTractographyInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
-    in_fa = File(exists=True, mandatory=True, desc=('input FA'))
+    in_file = File(exists=True, mandatory=True, desc='input diffusion data')
+    in_fa = File(exists=True, mandatory=True, desc='input FA')
     in_model = File(exists=True, mandatory=True, desc=(
         'input Tensor model extracted from.'))
     tracking_mask = File(exists=True, mandatory=True,
-                         desc=('input mask within which perform tracking'))
+                         desc='input mask within which perform tracking')
     seed_mask = InputMultiPath(File(
         exists=True), mandatory=True, desc='ROI files registered to diffusion space')
     fa_thresh = traits.Float(0.2, mandatory=True, usedefault=True,
-                             desc=('FA threshold to build the tissue classifier'))
+                             desc='FA threshold to build the tissue classifier')
     max_angle = traits.Float(25.0, mandatory=True, usedefault=True,
-                             desc=('Maximum angle'))
+                             desc='Maximum angle')
     step_size = traits.Float(0.5, mandatory=True, usedefault=True,
-                             desc=('Step size'))
+                             desc='Step size')
     multiprocess = traits.Bool(True, mandatory=True, usedefault=True,
-                               desc=('use multiprocessing'))
+                               desc='use multiprocessing')
     save_seeds = traits.Bool(False, mandatory=True, usedefault=True,
-                             desc=('save seeding voxels coordinates'))
+                             desc='save seeding voxels coordinates')
     num_seeds = traits.Int(10000, mandatory=True, usedefault=True,
-                           desc=('desired number of tracks in tractography'))
-    out_prefix = traits.Str(desc=('output prefix for file names'))
+                           desc='desired number of tracks in tractography')
+    out_prefix = traits.Str(desc='output prefix for file names')
 
 
 class TensorInformedEudXTractographyOutputSpec(TraitedSpec):
@@ -728,7 +728,7 @@ class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
                        desc=(
                            'Use either deterministic maximum (default) or probabilistic direction getter tractography'))
     recon_model = traits.Enum(["CSD", "SHORE"], usedefault=True,
-                              desc=('Use either fODFs from CSD (default) or SHORE models'))
+                              desc='Use either fODFs from CSD (default) or SHORE models')
     recon_order = traits.Int(8)
     use_act = traits.Bool(False, desc=(
         'Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier'))
@@ -737,33 +737,33 @@ class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
     gmwmi_file = File(exists=True, desc=(
         'input Gray Matter / White Matter interface image'))
     # fast_number_of_classes = traits.Int(3, desc=('Number of tissue classes used by FAST for Anatomically-Constrained Tractography (ACT)'))
-    in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
-    fod_file = File(exists=True, desc=('input fod file (if SHORE)'))
-    in_fa = File(exists=True, mandatory=True, desc=('input FA'))
+    in_file = File(exists=True, mandatory=True, desc='input diffusion data')
+    fod_file = File(exists=True, desc='input fod file (if SHORE)')
+    in_fa = File(exists=True, mandatory=True, desc='input FA')
     in_partial_volume_files = InputMultiPath(File(exists=True),
                                              desc='Partial volume estimation result files (required if performing ACT)')
     # in_t1 = File(exists=True, desc=('input T1w (required if performing ACT)'))
     in_model = File(exists=True, mandatory=True, desc=(
         'input f/d-ODF model extracted from.'))
     tracking_mask = File(exists=True, mandatory=True,
-                         desc=('input mask within which perform tracking'))
+                         desc='input mask within which perform tracking')
     seed_mask = InputMultiPath(File(
         exists=True), mandatory=True, desc='ROI files registered to diffusion space')
     seed_density = traits.Float(1, usedefault=True,
-                                desc=('Density of seeds'))
+                                desc='Density of seeds')
     fa_thresh = traits.Float(0.2, mandatory=True, usedefault=True,
-                             desc=('FA threshold to build the tissue classifier'))
+                             desc='FA threshold to build the tissue classifier')
     max_angle = traits.Float(25.0, mandatory=True, usedefault=True,
-                             desc=('Maximum angle'))
+                             desc='Maximum angle')
     step_size = traits.Float(0.5, mandatory=True, usedefault=True,
-                             desc=('Step size'))
+                             desc='Step size')
     multiprocess = traits.Bool(True, mandatory=True, usedefault=True,
-                               desc=('use multiprocessing'))
+                               desc='use multiprocessing')
     save_seeds = traits.Bool(False, mandatory=True, usedefault=True,
-                             desc=('save seeding voxels coordinates'))
+                             desc='save seeding voxels coordinates')
     num_seeds = traits.Int(10000, mandatory=True, usedefault=True,
-                           desc=('desired number of tracks in tractography'))
-    out_prefix = traits.Str(desc=('output prefix for file names'))
+                           desc='desired number of tracks in tractography')
+    out_prefix = traits.Str(desc='output prefix for file names')
 
 
 class DirectionGetterTractographyOutputSpec(TraitedSpec):
@@ -806,8 +806,8 @@ class DirectionGetterTractography(DipyBaseInterface):
         import pickle
         import gzip
 
-        if (not (isdefined(self.inputs.in_model))):
-            raise RuntimeError(('in_model should be supplied'))
+        if not (isdefined(self.inputs.in_model)):
+            raise RuntimeError('in_model should be supplied')
 
         img = nib.load(self.inputs.in_file)
         imref = nib.four_to_three(img)[0]
@@ -1003,7 +1003,7 @@ class DirectionGetterTractography(DipyBaseInterface):
 
         if not self.inputs.use_act:
 
-            IFLOGGER.info(('Performing %s tractography') % (self.inputs.algo))
+            IFLOGGER.info('Performing %s tractography' % self.inputs.algo)
 
             streamlines = LocalTracking(
                 dg, classifier, tseeds, affine, step_size=self.inputs.step_size, max_cross=1)
@@ -1082,34 +1082,34 @@ class DirectionGetterTractography(DipyBaseInterface):
 
 class MAPMRIInputSpec(DipyBaseInterfaceInputSpec):
     laplacian_regularization = traits.Bool(
-        True, usedefault=True, desc=('Apply laplacian regularization'))
+        True, usedefault=True, desc='Apply laplacian regularization')
 
     laplacian_weighting = traits.Float(
-        0.05, usedefault=True, desc=('Regularization weight'))
+        0.05, usedefault=True, desc='Regularization weight')
 
     positivity_constraint = traits.Bool(
-        True, usedefault=True, desc=('Apply positivity constraint'))
+        True, usedefault=True, desc='Apply positivity constraint')
 
     radial_order = traits.Int(8, usedefault=True,
-                              desc=('maximal shperical harmonics order'))
+                              desc='maximal shperical harmonics order')
 
     small_delta = traits.Float(0.02, mandatory=True,
-                               desc=('Small data for gradient table'))
+                               desc='Small data for gradient table')
 
     big_delta = traits.Float(0.5, mandatory=True,
-                             desc=('Small data for gradient table'))
+                             desc='Small data for gradient table')
 
 
 class MAPMRIOutputSpec(TraitedSpec):
     model = File(desc='Python pickled object of the MAP-MRI model fitted.')
-    rtop_file = File(desc=('rtop output file name'))
-    rtap_file = File(desc=('rtap output file name'))
-    rtpp_file = File(desc=('rtpp output file name'))
-    msd_file = File(desc=('msd output file name'))
-    qiv_file = File(desc=('qiv output file name'))
-    ng_file = File(desc=('ng output file name'))
-    ng_perp_file = File(desc=('ng perpendicular output file name'))
-    ng_para_file = File(desc=('ng parallel output file name'))
+    rtop_file = File(desc='rtop output file name')
+    rtap_file = File(desc='rtap output file name')
+    rtpp_file = File(desc='rtpp output file name')
+    msd_file = File(desc='msd output file name')
+    qiv_file = File(desc='qiv output file name')
+    ng_file = File(desc='ng output file name')
+    ng_perp_file = File(desc='ng perpendicular output file name')
+    ng_para_file = File(desc='ng parallel output file name')
 
 
 class MAPMRI(DipyDiffusionInterface):

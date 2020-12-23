@@ -694,7 +694,7 @@ class DiffusionStage(Stage):
                 recon_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_make_tensor")
 
                 tensor_res = os.path.join(recon_dir, 'diffusion_preproc_resampled_tensor.mif')
-                if (os.path.exists(fa_res) and os.path.exists(tensor_res)):
+                if os.path.exists(fa_res) and os.path.exists(tensor_res):
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                                   '-odf.load_tensor',
                                                                                                   tensor_res]
@@ -703,20 +703,20 @@ class DiffusionStage(Stage):
 
                 RF_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_rf")
                 RF_resp = os.path.join(RF_dir, 'diffusion_preproc_resampled_ER.mif')
-                if (os.path.exists(RF_resp)):
+                if os.path.exists(RF_resp):
                     self.inspect_outputs_dict['MRTRIX Response function'] = ['shview', '-response',
                                                                              RF_resp]
 
                 recon_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_CSD")
                 shm_coeff_res = os.path.join(recon_dir, 'diffusion_preproc_resampled_CSD.mif')
-                if (os.path.exists(fa_res) and os.path.exists(shm_coeff_res)):
+                if os.path.exists(fa_res) and os.path.exists(shm_coeff_res):
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                                   '-odf.load_sh',
                                                                                                   shm_coeff_res]
 
         # Tracking outputs
         # Dipy
-        if (self.config.tracking_processing_tool == 'Dipy'):
+        if self.config.tracking_processing_tool == 'Dipy':
             # print('Dipy tracking: true')
             if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
 

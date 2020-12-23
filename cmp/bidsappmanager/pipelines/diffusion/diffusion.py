@@ -271,7 +271,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                         files[0].dirname, files[0].filename)
                     print(dwi_file)
                 else:
-                    error(message="Diffusion image not found for subject %s." % (subjid), title="Error",
+                    error(message="Diffusion image not found for subject %s." % subjid, title="Error",
                           buttons=['OK', 'Cancel'], parent=None)
                     return
 
@@ -282,7 +282,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                         files[0].dirname, files[0].filename)
                     print(bval_file)
                 else:
-                    error(message="Diffusion bval image not found for subject %s." % (subjid), title="Error",
+                    error(message="Diffusion bval image not found for subject %s." % subjid, title="Error",
                           buttons=['OK', 'Cancel'], parent=None)
                     return
 
@@ -293,7 +293,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                         files[0].dirname, files[0].filename)
                     print(bvec_file)
                 else:
-                    error(message="Diffusion bvec image not found for subject %s." % (subjid), title="Error",
+                    error(message="Diffusion bvec image not found for subject %s." % subjid, title="Error",
                           buttons=['OK', 'Cancel'], parent=None)
                     return
             else:
@@ -406,7 +406,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
 
-        if (diffusion_available):
+        if diffusion_available:
             valid_inputs = True
         else:
             print("Missing required inputs.")
