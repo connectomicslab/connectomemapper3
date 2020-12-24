@@ -61,6 +61,6 @@ All bugs, concerns and enhancement requests for this software are managed on Git
 Not running on a local machine?
 ================================
 
-If you intend to run ``CMP3`` on a remote system such as a high-performance computing cluster where Docker is not available due to root privileges, a Singularity image is also built for your convenience and available on `Sylabs.io`_. Please see instructions at `Running on a cluster (HPC) <run-on-hpc>`_.
+If you intend to run ``CMP3`` on a remote system such as a high-performance computing cluster where Docker is not available due to root privileges, a Singularity image is also built for your convenience and available on `Sylabs.io`_. Please see instructions at :ref:`Running on a cluster (HPC) <run-on-hpc>`.
 
-Also, you will need to make your data available within that system first. Comprehensive solutions such as `Datalad <http://www.datalad.org/>`_ will handle data transfers with the appropriate settings and commands. Datalad also performs version control over your data. A tutorial is provided in `Adopting Datalad for collaboration <datalad-cmp>`_.
+Also, you will need to make your data available within that system first. Comprehensive solutions such as `Datalad <http://www.datalad.org/>`_ will handle data transfers with the appropriate settings and commands. Datalad also performs version control over your data. A tutorial is provided in :ref:`Adopting Datalad for collaboration <datalad-cmp>`.

@@ -11,9 +11,9 @@ For your convenience, the Singularity image is automatically built along the doc
 .. parsed-literal::
     $ singularity pull library://connectomicslab/default/connectomemapper-bidsapp:|release|
 
-If you prefer, you can still build the Singularity image on your side using one of the 2 methods described in `Conversion to a Singularity image <simg_conversion>`_.
+If you prefer, you can still build the Singularity image on your side using one of the 2 methods described in :ref:`Conversion to a Singularity image <simg_conversion>`.
 
-A list of useful singularity command can be found in `Useful singularity commands <singularity-cmds>`_. For more documentation about Singularity, please check the `official documentation website <https://sylabs.io/docs/>`_.
+A list of useful singularity command can be found in :ref:`Useful singularity commands <singularity-cmds>`. For more documentation about Singularity, please check the `official documentation website <https://sylabs.io/docs/>`_.
 
 
 .. _run_singularity:
