@@ -14,7 +14,7 @@ This version corresponds to the second release candidate of Connectome Mapper 3.
 
 * Add SIFT2 tractogram filtering (requested in `#48 <https://github.com/connectomicslab/connectomemapper3/issues/48>`_, PR `#52 <https://github.com/connectomicslab/connectomemapper3/pull/52>`_).
 * Add a tracker to support us seeking for new funding. User is still free to opt-out and disable it with the new option flag `--notrack`.
-* Add options suggested by `Theaud G et al. (2020) <https://doi.org/10.1016/j.neuroimage.2020.116889>`_ to better control execution. It includes:
+* Add options suggested by `Theaud G et al. (2020) <https://doi.org/10.1016/j.neuroimage.2020.116889>`_ to better control factors having impacts on reproducibility. It includes:
 
     * Set the number of ITK threads used by ANTs for registration (option flag `--ants_number_of_threads`).
     * Set the seed of the random number generator used by ANTs for registration (option flag `--ants_random_seed`).
