@@ -1,9 +1,44 @@
+.. _run-on-hpc:
+
 ============================================================
 Running on a cluster (HPC)
 ============================================================
 
-Before the Connectome Mapper 3 BIDS App can be run on a cluster, it first needs to be saved to an Singularity-compatible image file (Please check the `Singularity documentation website <https://sylabs.io/docs/>`_ for more details).
+Connectome Mapper 3 BIDS App can be run on a cluster using Singularity.
 
+For your convenience, the Singularity image is automatically built along the docker image using Singularity 3.5.1 and deployed to `Sylabs.io <https://sylabs.io/>`_  as (equivalent of DockerHub for Singularity) during continuous integration on CircleCI. It can be freely downloaded with the following command:
+
+.. parsed-literal::
+    $ singularity pull library://connectomicslab/default/connectomemapper-bidsapp:|release|
+
+If you prefer, you can still build the Singularity image on your side using one of the 2 methods described in :ref:`Conversion to a Singularity image <simg_conversion>`.
+
+A list of useful singularity command can be found in :ref:`Useful singularity commands <singularity-cmds>`. For more documentation about Singularity, please check the `official documentation website <https://sylabs.io/docs/>`_.
+
+
+.. _run_singularity:
+
+------------------------------------
+Running the singularity image
+------------------------------------
+
+The following example shows how to call from the terminal the Singularity image of the CMP3 BIDS App to perform both anatomical and diffusion pipelines for `sub-01`, `sub-02` and `sub-03` of a BIDS dataset whose root directory is located at ``${localDir}``:
+
+.. parsed-literal::
+	$ singularity run --containall \\
+            --bind ${localDir}:/bids_dir --bind ${localDir}/derivatives:/output_dir \\
+	        library://connectomicslab/default/connectomemapper-bidsapp:|release| \\
+	        /bids_dir /output_dir participant --participant_label 01 02 03 \\
+	        --anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \\
+	        --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \\
+	        --fs_license /bids_dir/code/license.txt \\
+	        --number_of_participants_processed_in_parallel 3
+
+.. note::
+    As you can see, the `singularity run` command is slightly different from the `docker run`. The docker option flag ``-v`` is replaced by the singularity ``--bind`` to map local folders inside the container. Last but not least, while docker containers are executed in total isolation, singularity images MUST run with the option flag `--containall`. Otherwise your $HOME and $TMP directories or your local environment variables might be shared inside the container.
+
+
+.. _simg_conversion:
 
 ------------------------------------
 Conversion to a Singularity image
@@ -16,14 +51,14 @@ It actually exists two options for Docker to Singularity container image convers
 Option 1 (recommended): Using the Docker image docker2singularity
 *********************************************************************
 
-1. Build locally in a `/tmp/test` folder:
+1. Build locally in a ``/tmp/test`` folder:
 
 	.. parsed-literal::
 		$ mkdir -p /tmp/test
 		$ docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/test:/output --privileged -t --rm singularityware/docker2singularity --name cmp-|release|.simg sebastientourbier/connectomemapper-bidsapp:|release|
 
 
-2. Move the converted image `cmp-|release|` to the `~/Softwares/singularity` folder on the cluster (via ssh using scp for instance)
+2. Move the converted image `cmp-|release|` to the ``~/Softwares/singularity`` folder on the cluster (via ssh using scp for instance)
 
 	.. parsed-literal::
 		$ scp -v /tmp/test/cmp-|release|.simg <your_cluster_user_login>@<cluster_url>:~/Softwares/singularity/cmp-|release|.simg
@@ -48,22 +83,7 @@ This command will directly download the latest version release of the Docker ima
 **Disadvantage(s):** Has shown to fail because of some docker/ singularity version uncompatibilities
 
 
-
-------------------------------------
-Running the singularity image
-------------------------------------
-
-The following example shows how to call from the terminal the Singularity image of the CMP3 BIDS App to perform both anatomical and diffusion pipelines for `sub-01`, `sub-02` and `sub-03` of a BIDS dataset whose root directory is located at ``${localDir}``:
-
-.. parsed-literal::
-	$ singularity run --bind ${localDir}:/bids_dir --bind ${localDir}/derivatives:/output_dir \\
-	~/Softwares/singularity/cmp-|release|.simg \\
-	/bids_dir /output_dir participant --participant_label 01 02 03 \\
-	--anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \\
-	--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \\
-	--fs_license /bids_dir/code/license.txt \\
-	--number_of_participants_processed_in_parallel 3
-
+.. _singularity-cmds:
 
 ------------------------------------
 Useful singularity commands
@@ -80,5 +100,5 @@ Useful singularity commands
 			$ singularity cache clean
 
 
-Created by Sebastien Tourbier - 2020 Mar 04 - Latest update: 2020 Jun 03
+Created by Sebastien Tourbier - 2020 Mar 04 - Latest update: 2020 Dec 24
 
