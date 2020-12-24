@@ -1,6 +1,8 @@
-*****************
-API Documentation
-*****************
+.. _api-doc:
+
+********************
+Packages and modules
+********************
 
 ===========
 cmp package
