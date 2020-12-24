@@ -1271,10 +1271,10 @@ class GenerateGMWMInterface(CommandLine):
 
 class StreamlineTrackInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=2,
-                    desc='the image containing the source data.'
-                         'The type of data required depends on the type of tracking as set in the preceeding argument.'
-                         'For DT methods, the base DWI are needed.'
-                         'For SD methods, the SH harmonic coefficients of the FOD are needed.')
+                   desc='the image containing the source data.'
+                        'The type of data required depends on the type of tracking as set in the preceeding argument.'
+                        'For DT methods, the base DWI are needed.'
+                        'For SD methods, the SH harmonic coefficients of the FOD are needed.')
 
     seed_file = File(exists=True, argstr='-seed_image %s', desc='seed file')
 
@@ -1330,7 +1330,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
                                          desc='Sets the maximum number of tracks to generate.'
                                          'The program will not generate more tracks than this number,'
                                          "even if the desired number of tracks hasn't yet been reached"
-                                          '(default is 1000 x number of streamlines).')
+                                         '(default is 1000 x number of streamlines).')
 
     rk4 = traits.Bool(argstr='-rk4',
                       desc='use 4th-order Runge-Kutta integration (slower, but eliminates curvature overshoot in 1st-order deterministic methods)')
@@ -1366,13 +1366,13 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
 
     crop_at_gmwmi = traits.Bool(
         argstr='-crop_at_gmwmi',
-        desc=('crop streamline endpoints more precisely as they cross the GM-WM interface'))
+        desc='crop streamline endpoints more precisely as they cross the GM-WM interface')
 
     seed_gmwmi = File(
         exists=True,
         argstr='-seed_gmwmi %s',
         requires=['act_file'],
-        desc=('seed from the grey matter - white matter interface (only valid if using ACT framework)'))
+        desc='seed from the grey matter - white matter interface (only valid if using ACT framework)')
 
     out_file = File(argstr='%s', position=-1,
                     genfile=True, desc='output data file')

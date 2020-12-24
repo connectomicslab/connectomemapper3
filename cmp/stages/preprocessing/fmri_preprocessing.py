@@ -210,7 +210,7 @@ class PreprocessingStage(Stage):
         if self.config.despiking:
             despike_dir = os.path.join(self.stage_dir, "converter")
             despike = os.path.join(despike_dir, "fMRI_despike.nii.gz")
-            if (os.path.exists(despike)):
+            if os.path.exists(despike):
                 self.inspect_outputs_dict['Spike corrected image'] = ['fsleyes', '-ad',
                                                                       despike, '-cm',
                                                                       'brain_colours_blackbdy_iso']
@@ -219,7 +219,7 @@ class PreprocessingStage(Stage):
             files = glob(os.path.join(slc_timing_dir, "*_st.nii.gz"))
             if len(files) > 0:
                 tcorr = files[0]
-                if (os.path.exists(tcorr)):
+                if os.path.exists(tcorr):
                     self.inspect_outputs_dict['Slice time corrected image'] = ['fsleyes', '-ad',
                                                                                tcorr,
                                                                                '-cm',
@@ -229,7 +229,7 @@ class PreprocessingStage(Stage):
             files = glob(os.path.join(motion_results_dir, "*_mcf.nii.gz"))
             if len(files) > 0:
                 mcorr = files[0]
-                if (os.path.exists(mcorr)):
+                if os.path.exists(mcorr):
                     self.inspect_outputs_dict['Slice time and motion corrected image'] = ['fsleyes', '-ad',
                                                                                           mcorr,
                                                                                           '-cm',

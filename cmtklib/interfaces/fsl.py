@@ -538,7 +538,7 @@ class CreateAcqpFile(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import CreateAcqpFile
+    >>> from cmtklib.interfaces.fsl import CreateAcqpFile
     >>> create_acqp = CreateAcqpFile()
     >>> create_acqp.inputs.total_readout  = 0.28
     >>> create_acqp.run() # doctest: +SKIP
@@ -581,7 +581,7 @@ class CreateIndexFile(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.interfaces.misc import CreateIndexFile
+    >>> from cmtklib.interfaces.fsl import CreateIndexFile
     >>> create_index = CreateIndexFile()
     >>> create_index.inputs.in_grad_mrtrix  = 'grad.txt'
     >>> create_index.run() # doctest: +SKIP

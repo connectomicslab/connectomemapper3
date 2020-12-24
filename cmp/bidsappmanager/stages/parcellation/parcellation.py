@@ -127,8 +127,16 @@ class ParcellationStageUI(ParcellationStage):
         self.config.thalamic_nuclei_maps = os.path.join('app', 'connectomemapper3', 'cmtklib', 'data', 'segmentation',
                                                         'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz')
         # FIXME Bids App / local
-        # self.config.template_thalamus = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz'))
-        # self.config.thalamic_nuclei_maps = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'segmentation', 'thalamus2018', 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz'))
+        # self.config.template_thalamus = pkg_resources.resource_filename('cmtklib',
+        #                                                                 os.path.join('data',
+        #                                                                              'segmentation',
+        #                                                                              'thalamus2018',
+        #                                                                              'mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz'))
+        # self.config.thalamic_nuclei_maps = pkg_resources.resource_filename('cmtklib',
+        #                                                                    os.path.join('data',
+        #                                                                                 'segmentation',
+        #                                                                                 'thalamus2018',
+        #                                                                                 'Thalamus_Nuclei-HCP-4DSPAMs.nii.gz'))
 
     def _inspect_output_button_fired(self, info):
         """Display the selected output when ``inspect_output_button`` is clicked.

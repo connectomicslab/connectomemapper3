@@ -117,10 +117,10 @@ class fMRIPipelineUI(fMRIPipeline):
         self.stages = {'Preprocessing': PreprocessingStageUI(bids_dir=project_info.base_directory,
                                                              output_dir=project_info.output_directory),
                        'Registration': RegistrationStageUI(pipeline_mode="fMRI",
-                                                         fs_subjects_dir=project_info.freesurfer_subjects_dir,
-                                                         fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
-                                                         bids_dir=project_info.base_directory,
-                                                         output_dir=self.output_directory),
+                                                           fs_subjects_dir=project_info.freesurfer_subjects_dir,
+                                                           fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
+                                                           bids_dir=project_info.base_directory,
+                                                           output_dir=self.output_directory),
                        'FunctionalMRI': FunctionalMRIStageUI(bids_dir=project_info.base_directory,
                                                              output_dir=project_info.output_directory),
                        'Connectome': ConnectomeStageUI(bids_dir=project_info.base_directory,
@@ -200,6 +200,9 @@ class fMRIPipelineUI(fMRIPipeline):
         layout : bids.BIDSLayout
             BIDSLayout object used to query
 
+        gui : bool
+            If True, display message in GUI
+
         Returns
         -------
         valid_inputs : bool
@@ -239,7 +242,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
                 print(fmri_file)
             else:
-                error(message="BOLD image not found for subject %s." % (subjid), title="Error",
+                error(message="BOLD image not found for subject %s." % subjid, title="Error",
                       buttons=['OK', 'Cancel'], parent=None)
                 return
 
@@ -249,7 +252,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 json_file = os.path.join(files[0].dirname, files[0].filename)
                 print(json_file)
             else:
-                error(message="BOLD json sidecar not found for subject %s." % (subjid), title="Warning",
+                error(message="BOLD json sidecar not found for subject %s." % subjid, title="Warning",
                       buttons=['OK', 'Cancel'], parent=None)
 
             files = layout.get(subject=subjid, suffix='T1w',
@@ -258,7 +261,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
                 print(t1_file)
             else:
-                error(message="T1w image not found for subject %s." % (subjid), title="Error", buttons=['OK', 'Cancel'],
+                error(message="T1w image not found for subject %s." % subjid, title="Error", buttons=['OK', 'Cancel'],
                       parent=None)
                 return
 
@@ -268,7 +271,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 t2_file = os.path.join(files[0].dirname, files[0].filename)
                 print(t2_file)
             else:
-                error(message="T2w image not found for subject %s." % (subjid), title="Warning",
+                error(message="T2w image not found for subject %s." % subjid, title="Warning",
                       buttons=['OK', 'Cancel'], parent=None)
 
         else:

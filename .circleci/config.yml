@@ -2,9 +2,10 @@ version: 2.1
 
 orbs:
   coverage-reporter: codacy/coverage-reporter@11.0.1
+  singularity: singularity/singularity@1.0.10
 
 jobs:
-  build:
+  build_docker:
     environment:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
       SCRATCH: "/scratch"
@@ -51,16 +52,10 @@ jobs:
               echo "the command ``git fetch --tags --verbose`` and push"
               echo "them to your fork with ``git push origin --tags``"
             fi
-            # Build main docker image
-            ls -la ./ubuntu16.04
-            e=1 && for i in {1..5}; do
-              docker build --cache-from sebastientourbier/connectomemapper-ubuntu16.04 --rm=true --build-arg BUILD_DATE=$CMP_BUILD_DATE --build-arg VCS_REF=$VCS_REF --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper-ubuntu16.04 ./ubuntu16.04 \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
             # Build CMP BIDS App docker image
             ls -la .
             e=1 && for i in {1..5}; do
-              docker build --cache-from sebastientourbier/connectomemapper3 --rm=true --build-arg MAIN_DOCKER="sebastientourbier/connectomemapper-ubuntu16.04" --build-arg MAIN_VERSION=latest --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 . \
+              docker build --cache-from sebastientourbier/connectomemapper3 --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
       - run:
@@ -90,6 +85,97 @@ jobs:
           paths:
             - cache/docker.tar.gz
             - src/connectomemapper3
+
+  build_singularity:
+    machine:
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
+    working_directory: /tmp/src/connectomemapper3
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: "Check whether build_singularity job should be skipped"
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?build_singularity]' )" != "" ]]; then
+              echo "Skipping singularity build step"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: "Starting local registry"
+          command: docker run -d -p 5000:5000 --restart=always --name registry registry:2
+      - run:
+          name: "Load Docker image layer cache"
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f /tmp/cache/docker.tar.gz ]; then
+              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+              sudo apt-get update && sudo apt-get -y install pigz
+              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+              docker images
+              sudo rm /tmp/cache/docker.tar.gz
+            fi
+      - singularity/install-go:
+          go-version: '1.13'
+      - singularity/debian-install-3:
+          singularity-version: 3.5.1
+      - run:
+          name: "Set SINGULARITY TMP and CACHEDIR to prevent overflowing the /tmp folder"
+          command: |
+            mkdir -p ~/.singularity/tmp
+            export SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp
+            export SINGULARITY_CACHEDIR=~/.singularity/tmp
+            export SINGULARITY_TMPDIR=~/.singularity/tmp
+            export TMPDIR=~/.singularity/tmp
+            export SINGULARITY_DISABLE_CACHE=true
+            export
+      - run:
+          name: "Display storage information"
+          command: |
+            du -xm ~/ | sort -rn > ~/usage.txt
+            echo "/home directory:"
+            du -sh ~/
+            echo "/tmp directory:"
+            du -sh /tmp
+      - run:
+          name: "Display storage information ALL"
+          command: |
+            df -h
+      - run:
+          name: "Display storage information (df -h)"
+          command: |
+            echo "/home directory:"
+            df -h ~/
+            echo "/tmp directory:"
+            df -h /tmp
+      - run:
+          name: "Building Singularity image from Docker image"
+          command: |
+            docker tag sebastientourbier/connectomemapper3 localhost:5000/sebastientourbier/connectomemapper3:latest
+            docker push localhost:5000/sebastientourbier/connectomemapper3:latest
+            docker images -a | grep "sebastientourbier/connectomemapper3"
+            SINGULARITY_NOHTTPS=1 \
+            SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
+            SINGULARITY_CACHEDIR=~/.singularity/tmp SINGULARITY_TMPDIR=~/.singularity/tmp \
+            TMPDIR=~/.singularity/tmp SINGULARITY_DISABLE_CACHE=true \
+            singularity --debug -v build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
+          no_output_timeout: 5h
+      - run:
+          name: Display storage information
+          command: df -h
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - cache/connectomemapper3.simg
+      - store_artifacts:
+          path: /tmp/cache/connectomemapper3.simg
+      - store_artifacts:
+          path: ~/usage.txt
 
   get_data:
     machine:
@@ -129,7 +215,7 @@ jobs:
          paths:
             - /tmp/data
 
-  test_dsi_mrtrix:
+  test_docker_dsi_mrtrix:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
@@ -141,11 +227,11 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether test_dsi_mrtrix should be skipped
+          name: Check whether test_docker_dsi_mrtrix should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_dsi_mrtrix\]' )" != "" ]]; then
-              echo "Skipping test_dsi_mrtrix job"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_dsi_mrtrix\]' )" != "" ]]; then
+              echo "Skipping test_docker_dsi_mrtrix job"
               circleci step halt
             fi
       - attach_workspace:
@@ -248,13 +334,13 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test_dsi_mrtrix/ds-sample/code
+          path: /tmp/data/test_docker_dsi_mrtrix/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test_dsi_mrtrix/ds-sample/derivatives/cmp
+          path: /tmp/data/test_docker_dsi_mrtrix/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/test_dsi_mrtrix/ds-sample/derivatives/nipype
+          path: /tmp/data/test_docker_dsi_mrtrix/ds-sample/derivatives/nipype
 
-  test_dsi_dipy:
+  test_docker_dsi_dipy:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
@@ -266,11 +352,11 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether test_dsi_dipy should be skipped
+          name: Check whether test_docker_dsi_dipy should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_dsi_dipy\]' )" != "" ]]; then
-              echo "Skipping test_dsi_dipy job"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_dsi_dipy\]' )" != "" ]]; then
+              echo "Skipping test_docker_dsi_dipy job"
               circleci step halt
             fi
       - attach_workspace:
@@ -373,13 +459,13 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test_dsi_dipy/ds-sample/code
+          path: /tmp/data/test_docker_dsi_dipy/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test_dsi_dipy/ds-sample/derivatives/cmp
+          path: /tmp/data/test_docker_dsi_dipy/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/test_dsi_dipy/ds-sample/derivatives/nipype
+          path: /tmp/data/test_docker_dsi_dipy/ds-sample/derivatives/nipype
 
-  test_parcellation:
+  test_docker_parcellation:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
@@ -391,11 +477,11 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether test_parcellation should be skipped
+          name: Check whether test_docker_parcellation should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_parcellation\]' )" != "" ]]; then
-              echo "Skipping test_parcellation job"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_parcellation\]' )" != "" ]]; then
+              echo "Skipping test_docker_parcellation job"
               circleci step halt
             fi
       - attach_workspace:
@@ -504,13 +590,13 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test_parcellation/ds-sample/code
+          path: /tmp/data/test_docker_parcellation/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test_parcellation/ds-sample/derivatives/cmp
+          path: /tmp/data/test_docker_parcellation/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/test_parcellation/ds-sample/derivatives/nipype
+          path: /tmp/data/test_docker_parcellation/ds-sample/derivatives/nipype
 
-  test_fmri:
+  test_docker_fmri:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
@@ -522,11 +608,11 @@ jobs:
       - checkout:
           path: /home/circleci/src/connectomemapper3
       - run:
-          name: Check whether test_fmri should be skipped
+          name: Check whether test_docker_fmri should be skipped
           command: |
             cd /home/circleci/src/connectomemapper3
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_fmri\]' )" != "" ]]; then
-              echo "Skipping test_fmri job"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_docker_fmri\]' )" != "" ]]; then
+              echo "Skipping test_docker_fmri job"
               circleci step halt
             fi
       - attach_workspace:
@@ -599,13 +685,13 @@ jobs:
       - store_artifacts:
           path: /tmp/data/ds-sample/test
       - store_artifacts:
-          path: /tmp/data/test_fmri/ds-sample/code
+          path: /tmp/data/test_docker_fmri/ds-sample/code
       - store_artifacts:
-          path: /tmp/data/test_fmri/ds-sample/derivatives/cmp
+          path: /tmp/data/test_docker_fmri/ds-sample/derivatives/cmp
       - store_artifacts:
-          path: /tmp/data/test_fmri/ds-sample/derivatives/nipype
+          path: /tmp/data/test_docker_fmri/ds-sample/derivatives/nipype
 
-  codacy-coverage-report:
+  codacy_coverage_report:
     docker:
       - image: 'circleci/openjdk:8-jdk'
 
@@ -619,6 +705,113 @@ jobs:
           coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml,/tmp/data/ds-sample/test/test-05_coverage.xml,/tmp/data/ds-sample/test/test-06_coverage.xml,/tmp/data/ds-sample/test/test-07_coverage.xml'
           # coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml'
           project-token: ${CODACY_PROJECT_TOKEN}
+
+  test_singularity_parcellation:
+    machine:
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
+    working_directory: /tmp/data
+    environment:
+      - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: Check whether test_singularity_parcellation should be skipped
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?test_singularity_parcellation\]' )" != "" ]]; then
+              echo "Skipping test_singularity_parcellation job"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - singularity/install-go:
+          go-version: '1.13'
+      - singularity/debian-install-3:
+          singularity-version: 3.5.1
+      - run:
+          name: Remove any config file present in ds-sample/code and create ds-sample/test
+          no_output_timeout: 1h
+          command: |
+            # Get version, update files.
+            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
+            #echo "THISVERSION : ${THISVERSION}"
+            ls -la  /tmp/data/ds-sample/code
+
+            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
+            rm -f /tmp/data/ds-sample/code/*.ini
+
+            # Create the test folder to store list of test output files
+            mkdir -p /tmp/data/ds-sample/test
+
+            # Create the dataset dedicated to this job and copy data into it
+            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
+            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
+            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
+      - run:
+          name: Run anatomical pipeline on ds-sample (test 5 bis - NativeFreesurfer)
+          no_output_timeout: 5h
+          command: |
+            # Execute BIDS App
+            singularity run --containall \
+                --bind /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
+                --bind /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
+                --bind /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
+                /tmp/cache/connectomemapper3.simg \
+                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
+                --anat_pipeline_config /config/ref_anatomical_config_2.ini \
+                --fs_license /bids_dir/code/license.txt
+      - run:
+          name: Checking outputs of Connectome Mapper run (test 5)
+          command: |
+            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
+            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
+            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-05-simg_outputs.out
+            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-05-simg_outputs.txt /tmp/data/ds-sample/test/test-05-simg_outputs.out
+            exit $?
+      - run:
+          name: Run anatomical pipeline on ds-sample (test 6 bis - Lausanne 2008)
+          no_output_timeout: 5h
+          command: |
+            # Execute BIDS App
+            singularity run --containall \
+                --bind /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
+                --bind /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
+                --bind /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
+                /tmp/cache/connectomemapper3.simg \
+                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
+                --anat_pipeline_config /config/ref_anatomical_config_3.ini \
+                --fs_license /bids_dir/code/license.txt \
+                --coverage
+      - run:
+          name: Checking outputs of Connectome Mapper run (test 6)
+          command: |
+            # Get all files in derivatives except the _*.json interface hash generated by nipype (find) /
+            # Remove the full path of the derivatives (sed) / sort the files and write it to a text file
+            sudo find /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives -path */figures -prune -o -not -name "_*.json" -type f -print | sed s+/tmp/data/${CIRCLE_JOB}/ds-sample/derivatives/++ | sort > /tmp/data/ds-sample/test/test-06-simg_outputs.out
+            diff /home/circleci/src/connectomemapper3/.circleci/tests/expected_outputs/ds-sample_test-06-simg_outputs.txt /tmp/data/ds-sample/test/test-06-simg_outputs.out
+            exit $?
+      - run:
+          name: Clean working directory
+          when: always
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/data/${CIRCLE_JOB}/ds-sample
+            find /tmp/data/ds-sample/derivatives -not -name "*.svg" -not -name "*.html" -not -name "*.rst" \
+                -not -name "*.mat" -not -name "*.gpickle" -not -name "*.lta" -not -name "*.json" -not -name "*.txt" \
+                -not -name "*.log" -not -name "*.pklz" -type f -delete
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - data/ds-sample/test
+      - store_artifacts:
+          path: /tmp/data/ds-sample/test
+      - store_artifacts:
+          path: /tmp/data/test_singularity_parcellation/ds-sample/code
+      - store_artifacts:
+          path: /tmp/data/test_singularity_parcellation/ds-sample/derivatives/cmp
+      - store_artifacts:
+          path: /tmp/data/test_singularity_parcellation/ds-sample/derivatives/nipype
 
   build_docs:
     machine:
@@ -741,11 +934,86 @@ jobs:
               docker push sebastientourbier/connectomemapper-bidsapp:latest
             fi
 
+  deploy_singularity_latest:
+    machine:
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
+    working_directory: /tmp/src/connectomemapper3
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: "Check whether test should be skipped"
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?deploy_singularity]' )" != "" ]]; then
+              echo "Skipping singularity deployment"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - singularity/install-go:
+          go-version: '1.13'
+      - singularity/debian-install-3:
+          singularity-version: 3.5.1
+      - run:
+          name: 'Write Sylabs.io TOKEN'
+          command: |
+            echo "${SINGULARITY_TOKEN}" > ~/.singularity/sylabs-token
+            cat ~/.singularity/sylabs-token
+      - run:
+          name: 'Deploy simg with latest tag to Sylabs.io'
+          command: |
+            singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
+
+  deploy_singularity_release:
+    machine:
+      # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-1604:201903-01
+    working_directory: /tmp/src/connectomemapper3
+    steps:
+      - checkout:
+          path: /home/circleci/src/connectomemapper3
+      - run:
+          name: "Check whether test should be skipped"
+          command: |
+            cd /home/circleci/src/connectomemapper3
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?deploy_singularity]' )" != "" ]]; then
+              echo "Skipping singularity deployment"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - singularity/install-go:
+          go-version: '1.13'
+      - singularity/debian-install-3:
+          singularity-version: 3.5.1
+      - run:
+          name: 'Write Sylabs.io TOKEN'
+          command: |
+            echo "${SINGULARITY_TOKEN}" > ~/.singularity/sylabs-token
+            cat ~/.singularity/sylabs-token
+      - run:
+          name: 'Deploy simg with version tag to Sylabs.io'
+          command: |
+            # Get version, update files.
+            THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
+            echo "THISVERSION : ${THISVERSION}"
+            echo "CIRCLE_TAG : ${CIRCLE_TAG}"
+            singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:"${CIRCLE_TAG}"
+
 workflows:
   version: 2.1
   build_test_cov_deploy:
     jobs:
-      - build:
+      - build_docker:
+          filters:
+            tags:
+              only: /.*/
+
+      - build_singularity:
+          requires:
+            - build_docker
           filters:
             tags:
               only: /.*/
@@ -760,7 +1028,7 @@ workflows:
 
       # - build_docs:
       #     requires:
-      #       - build
+      #       - build_docker
       #     filters:
       #       branches:
       #         ignore:
@@ -770,7 +1038,7 @@ workflows:
 
       # - update_cache:
       #     requires:
-      #       - build
+      #       - build_docker
       #     filters:
       #       branches:
       #         ignore:
@@ -778,11 +1046,11 @@ workflows:
       #       tags:
       #         only: /.*/
 
-      - test_dsi_mrtrix:
+      - test_docker_dsi_mrtrix:
           requires:
             - get_data
             # - update_cache
-            - build
+            - build_docker
           filters:
             branches:
               ignore:
@@ -790,11 +1058,11 @@ workflows:
             tags:
               only: /.*/
 
-      - test_dsi_dipy:
+      - test_docker_dsi_dipy:
           requires:
             - get_data
             # - update_cache
-            - build
+            - build_docker
           filters:
             branches:
               ignore:
@@ -803,11 +1071,12 @@ workflows:
               only: /.*/
 
       # JOB taking more than 5hours (CircleCI hard limit)
-      - test_parcellation:
+      - test_docker_parcellation:
           requires:
             - get_data
             # - update_cache
-            - build
+            - build_docker
+            - build_singularity  # delay this job as we are limited to 4 concurrent jobs
           filters:
             branches:
               ignore:
@@ -815,11 +1084,10 @@ workflows:
             tags:
               only: /.*/
 
-      - test_fmri:
+      - test_singularity_parcellation:
           requires:
             - get_data
-            # - update_cache
-            - build
+            - build_singularity
           filters:
             branches:
               ignore:
@@ -827,12 +1095,25 @@ workflows:
             tags:
               only: /.*/
 
-      - codacy-coverage-report:
+      - test_docker_fmri:
           requires:
-            - test_dsi_mrtrix
-            - test_dsi_dipy
-            - test_parcellation
-            - test_fmri
+            - get_data
+            # - update_cache
+            - build_docker
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+
+      - codacy_coverage_report:
+          requires:
+            - test_singularity_parcellation
+            - test_docker_dsi_mrtrix
+            - test_docker_dsi_dipy
+            - test_docker_parcellation
+            - test_docker_fmri
           filters:
               branches:
                 ignore:
@@ -843,10 +1124,11 @@ workflows:
       - deploy_docker_release:
           requires:
             # - build_docs
-            - test_dsi_mrtrix
-            - test_dsi_dipy
-            - test_parcellation
-            - test_fmri
+            - test_docker_dsi_mrtrix
+            - test_docker_dsi_dipy
+            - test_docker_parcellation
+            - test_docker_fmri
+            - codacy_coverage_report
           filters:
             # ignore any commit on any branch by default
             branches:
@@ -859,10 +1141,43 @@ workflows:
       - deploy_docker_latest:
           requires:
             # - build_docs
-            - test_dsi_mrtrix
-            - test_dsi_dipy
-            - test_parcellation
-            - test_fmri
+            - test_docker_dsi_mrtrix
+            - test_docker_dsi_dipy
+            - test_docker_parcellation
+            - test_docker_fmri
+            - codacy_coverage_report
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              only: master
+
+      - deploy_singularity_release:
+          requires:
+            # - build_docs
+            - test_singularity_parcellation
+            - test_docker_dsi_mrtrix
+            - test_docker_dsi_dipy
+            - test_docker_parcellation
+            - test_docker_fmri
+            - codacy_coverage_report
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+              # only: master
+            # only act on version tags
+            tags:
+              only: /^v.*/
+
+      - deploy_singularity_latest:
+          requires:
+            # - build_docs
+            - test_singularity_parcellation
+            - test_docker_dsi_mrtrix
+            - test_docker_dsi_dipy
+            - test_docker_parcellation
+            - test_docker_fmri
+            - codacy_coverage_report
           filters:
             # ignore any commit on any branch by default
             branches:

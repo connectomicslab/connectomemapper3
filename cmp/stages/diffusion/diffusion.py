@@ -157,7 +157,7 @@ class DiffusionConfig(HasTraits):
         self.dipy_tracking_config.imaging_model = new
 
         # Remove MRtrix from recon and tracking methods and Probabilistic from diffusion model if diffusion_imaging_model is DSI
-        if (new == 'DSI'): # and (self.recon_processing_tool != 'Custom'):
+        if new == 'DSI':  # and (self.recon_processing_tool != 'Custom'):
             self.recon_processing_tool = 'Dipy'
             self.recon_processing_tool_editor = ['Dipy']
             self.tracking_processing_tool_editor = ['Dipy', 'MRtrix']
@@ -652,29 +652,28 @@ class DiffusionStage(Stage):
                     if os.path.exists(dodf_res):
                         self.inspect_outputs_dict[
                             self.config.recon_processing_tool + ' Diffusion ODF (SHORE) image'] = ['mrview', gfa_res,
-                                                                                               '-odf.load_sh',
-                                                                                               dodf_res]
+                                                                                                   '-odf.load_sh',
+                                                                                                   dodf_res]
                     shm_coeff_res = os.path.join(recon_dir, 'shore_fodf.nii.gz')
                     if os.path.exists(shm_coeff_res):
-                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' Fiber ODF (SHORE) image'] = [
-                            'mrview', gfa_res, '-odf.load_sh', shm_coeff_res]
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' Fiber ODF (SHORE) image'] = ['mrview', gfa_res,
+                                                                                                                     '-odf.load_sh', shm_coeff_res]
                 else:
                     recon_tensor_dir = os.path.join(self.stage_dir, "reconstruction", "dipy_tensor")
 
-                    fa_res = os.path.join(recon_tensor_dir,'diffusion_preproc_resampled_fa.nii.gz')
+                    fa_res = os.path.join(recon_tensor_dir, 'diffusion_preproc_resampled_fa.nii.gz')
                     if os.path.exists(fa_res):
-                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',
-                                                                                                      fa_res]
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview', fa_res]
 
                     recon_dir = os.path.join(self.stage_dir, "reconstruction", "dipy_CSD")
                     shm_coeff_res = os.path.join(recon_dir, 'diffusion_shm_coeff.nii.gz')
                     if os.path.exists(shm_coeff_res):
                         if os.path.exists(fa_res):
-                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
-                                'mrview', fa_res, '-odf.load_sh', shm_coeff_res]
+                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = ['mrview', fa_res,
+                                                                                                                 '-odf.load_sh', shm_coeff_res]
                         else:
-                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
-                                'mrview', shm_coeff_res, '-odf.load_sh', shm_coeff_res]
+                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = ['mrview', shm_coeff_res,
+                                                                                                                 '-odf.load_sh', shm_coeff_res]
 
         # TODO: add Tensor image in case of DTI+Tensor modeling
         # MRtrix
@@ -688,15 +687,14 @@ class DiffusionStage(Stage):
 
             adc_res = os.path.join(metrics_dir, 'ADC.mif')
             if os.path.exists(adc_res):
-                self.inspect_outputs_dict[self.config.recon_processing_tool +
-                                      ' ADC image'] = ['mrview', adc_res]
+                self.inspect_outputs_dict[self.config.recon_processing_tool + ' ADC image'] = ['mrview', adc_res]
 
             # Tensor model (DTI)
             if not self.config.mrtrix_recon_config.local_model:
                 recon_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_make_tensor")
 
                 tensor_res = os.path.join(recon_dir, 'diffusion_preproc_resampled_tensor.mif')
-                if (os.path.exists(fa_res) and os.path.exists(tensor_res)):
+                if os.path.exists(fa_res) and os.path.exists(tensor_res):
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                                   '-odf.load_tensor',
                                                                                                   tensor_res]
@@ -705,54 +703,51 @@ class DiffusionStage(Stage):
 
                 RF_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_rf")
                 RF_resp = os.path.join(RF_dir, 'diffusion_preproc_resampled_ER.mif')
-                if (os.path.exists(RF_resp)):
+                if os.path.exists(RF_resp):
                     self.inspect_outputs_dict['MRTRIX Response function'] = ['shview', '-response',
                                                                              RF_resp]
 
                 recon_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_CSD")
                 shm_coeff_res = os.path.join(recon_dir, 'diffusion_preproc_resampled_CSD.mif')
-                if (os.path.exists(fa_res) and os.path.exists(shm_coeff_res)):
+                if os.path.exists(fa_res) and os.path.exists(shm_coeff_res):
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                                   '-odf.load_sh',
                                                                                                   shm_coeff_res]
 
         # Tracking outputs
         # Dipy
-        if (self.config.tracking_processing_tool == 'Dipy'):
+        if self.config.tracking_processing_tool == 'Dipy':
             # print('Dipy tracking: true')
             if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
 
                 if self.config.diffusion_model == 'Deterministic':
                     diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_deterministic_tracking")
-                    streamline_res = os.path.join(diff_dir,"tract.trk")
+                    streamline_res = os.path.join(diff_dir, "tract.trk")
                 else:
                     diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_probabilistic_tracking")
-                    streamline_res = os.path.join(diff_dir,"tract.trk")
+                    streamline_res = os.path.join(diff_dir, "tract.trk")
 
                 if os.path.exists(streamline_res):
                     self.inspect_outputs_dict[
-                        self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
-                        'trackvis', streamline_res]
+                        self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis', streamline_res]
 
             else:
 
                 diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_dtieudx_tracking")
-                streamline_res = os.path.join(diff_dir,"tract.trk")
+                streamline_res = os.path.join(diff_dir, "tract.trk")
                 if os.path.exists(streamline_res):
                     self.inspect_outputs_dict[
-                        self.config.tracking_processing_tool + ' Tensor-based EuDX streamline'] = ['trackvis',
-                                                                                                   streamline_res]
+                        self.config.tracking_processing_tool + ' Tensor-based EuDX streamline'] = ['trackvis', streamline_res]
 
         # MRtrix
         if self.config.tracking_processing_tool == 'MRtrix':
 
             diff_dir = os.path.join(self.stage_dir, "tracking", "trackvis")
-            streamline_res = os.path.join(diff_dir,"tract.trk")
+            streamline_res = os.path.join(diff_dir, "tract.trk")
 
             if os.path.exists(streamline_res):
-               self.inspect_outputs_dict[
-                    self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
-                    'trackvis', streamline_res]
+                self.inspect_outputs_dict[
+                    self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis', streamline_res]
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)

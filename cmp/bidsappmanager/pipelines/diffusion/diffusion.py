@@ -139,10 +139,10 @@ class DiffusionPipelineUI(DiffusionPipeline):
             'Preprocessing': PreprocessingStageUI(bids_dir=project_info.base_directory,
                                                   output_dir=project_info.output_directory),
             'Registration': RegistrationStageUI(pipeline_mode="Diffusion",
-                                              fs_subjects_dir=project_info.freesurfer_subjects_dir,
-                                              fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
-                                              bids_dir=project_info.base_directory,
-                                              output_dir=self.output_directory),
+                                                fs_subjects_dir=project_info.freesurfer_subjects_dir,
+                                                fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
+                                                bids_dir=project_info.base_directory,
+                                                output_dir=self.output_directory),
             'Diffusion': DiffusionStageUI(bids_dir=project_info.base_directory,
                                           output_dir=project_info.output_directory),
             'Connectome': ConnectomeStageUI(bids_dir=project_info.base_directory,
@@ -218,6 +218,9 @@ class DiffusionPipelineUI(DiffusionPipeline):
         layout : bids.BIDSLayout
             BIDSLayout object used to query
 
+        gui : bool
+            If True, display message in GUI
+
         Returns
         -------
         valid_inputs : bool
@@ -268,7 +271,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                         files[0].dirname, files[0].filename)
                     print(dwi_file)
                 else:
-                    error(message="Diffusion image not found for subject %s." % (subjid), title="Error",
+                    error(message="Diffusion image not found for subject %s." % subjid, title="Error",
                           buttons=['OK', 'Cancel'], parent=None)
                     return
 
@@ -279,7 +282,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                         files[0].dirname, files[0].filename)
                     print(bval_file)
                 else:
-                    error(message="Diffusion bval image not found for subject %s." % (subjid), title="Error",
+                    error(message="Diffusion bval image not found for subject %s." % subjid, title="Error",
                           buttons=['OK', 'Cancel'], parent=None)
                     return
 
@@ -290,7 +293,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                         files[0].dirname, files[0].filename)
                     print(bvec_file)
                 else:
-                    error(message="Diffusion bvec image not found for subject %s." % (subjid), title="Error",
+                    error(message="Diffusion bvec image not found for subject %s." % subjid, title="Error",
                           buttons=['OK', 'Cancel'], parent=None)
                     return
             else:
@@ -389,7 +392,9 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     self.base_directory, self.subject, self.global_conf.subject_session, 'dwi') + '!'
 
         if gui:
-            # input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
+            # input_notification = Check_Input_Notification(message=input_message,
+            #                                               diffusion_imaging_model_options=diffusion_imaging_model,
+            #                                               diffusion_imaging_model=diffusion_imaging_model)
             # input_notification.configure_traits()
             print(input_message)
             self.global_conf.diffusion_imaging_model = self.diffusion_imaging_model
@@ -401,7 +406,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
 
-        if (diffusion_available):
+        if diffusion_available:
             valid_inputs = True
         else:
             print("Missing required inputs.")
