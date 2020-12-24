@@ -1002,9 +1002,9 @@ jobs:
           command: |
             # Get version, update files.
             THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            echo "THISVERSION : ${THISVERSION}"
-            echo "CIRCLE_TAG : ${CIRCLE_TAG}"
-            singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:"${CIRCLE_TAG}"
+            echo 'THISVERSION : ${THISVERSION}'
+            echo 'CIRCLE_TAG : ${CIRCLE_TAG}'
+            singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:${CIRCLE_TAG}
 
 workflows:
   version: 2.1
