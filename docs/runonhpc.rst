@@ -4,10 +4,16 @@
 Running on a cluster (HPC)
 ============================================================
 
-Connectome Mapper 3 BIDS App can be run on a cluster using the Singularity image that is built along the docker image during continuous integration on CircleCI and deployed for your convenience to `Sylabs.io <https://sylabs.io/>`_, the equivalent of DockerHub for Singularity images.
+Connectome Mapper 3 BIDS App can be run on a cluster using Singularity.
+
+For your convenience, the Singularity image is automatically built along the docker image and deployed to `Sylabs.io <https://sylabs.io/>`_  as (equivalent of DockerHub for Singularity) during continuous integration on CircleCI. It can be freely downloaded with the following command:
+
+.. parsed-literal::
+    $ singularity pull library://connectomicslab/default/connectomemapper-bidsapp:|release|
 
 If you prefer, you can still build the Singularity image on your side using one of the 2 methods described in `Conversion to a Singularity image <simg_conversion>`_.
-If you want to learn more about Singularity, please check the `official documentation website <https://sylabs.io/docs/>`_.
+
+A list of useful singularity command can be found in `Useful singularity commands <singularity-cmds>`_. For more documentation about Singularity, please check the `official documentation website <https://sylabs.io/docs/>`_.
 
 
 .. _run_singularity:
@@ -76,6 +82,8 @@ This command will directly download the latest version release of the Docker ima
 
 **Disadvantage(s):** Has shown to fail because of some docker/ singularity version uncompatibilities
 
+
+.. _singularity-cmds:
 
 ------------------------------------
 Useful singularity commands
