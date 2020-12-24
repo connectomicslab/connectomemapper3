@@ -1,4 +1,13 @@
-sphinx-argparse==0.2.5
-traits==4.6.0
-grabbit==0.2.3
-pybids==0.6.5
+sphinx==3.4.0
+sphinx-argparse
+nbsphinx
+sphinxcontrib-apidoc
+sphinxcontrib-napoleon
+traits==6.0.0
+traitsui==6.1.3
+grabbit
+pybids==0.10.2
+nipype==1.5.0
+matplotlib
+dipy==1.1.0
+pyface[pyside2]==6.1.2

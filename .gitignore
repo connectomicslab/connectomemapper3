@@ -8,6 +8,9 @@ atom*.txt
 
 .DS_Store
 
+docs/api
+docs/api/*
+
 debian
 debian/*
 
@@ -23,3 +26,5 @@ _build
 scripts/runGource.sh
 
 *.ipynb_checkpoints
+
+.idea/

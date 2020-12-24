@@ -122,6 +122,14 @@ Contents
    bidsappmanager
    outputs
 
+.. _api-doc:
+
+.. toctree::
+   :maxdepth: 4
+   :caption: API Documentation
+
+   api_doc
+
 .. _user-usecases:
 
 .. toctree::

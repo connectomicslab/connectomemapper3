@@ -988,6 +988,12 @@ nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/mrtrix_seeds/su
 nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/mrtrix_seeds/sub-01_ses-01_label-L2018_desc-scale3_atlas_out_warped_dil_seeds.nii.gz
 nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/mrtrix_seeds/sub-01_ses-01_label-L2018_desc-scale4_atlas_out_warped_dil_seeds.nii.gz
 nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/mrtrix_seeds/sub-01_ses-01_label-L2018_desc-scale5_atlas_out_warped_dil_seeds.nii.gz
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/sift_node/command.txt
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/sift_node/_inputs.pklz
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/sift_node/_node.pklz
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/sift_node/_report/report.rst
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/sift_node/result_sift_node.pklz
+nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/sift_node/sift-filtered_tractogram.tck
 nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/trackvis/converted.trk
 nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/trackvis/_inputs.pklz
 nipype/sub-01/ses-01/diffusion_pipeline/diffusion_stage/tracking/trackvis/_node.pklz

@@ -4,18 +4,13 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP Stage for Diffusion reconstruction and tractography
-"""
+"""Definition of config and stage classes for diffusion reconstruction and tractography."""
 
 # General imports
 import os
 
-from traits.api import *
-
 # Nipype imports
-import nipype.pipeline.engine as pe
 import nipype.interfaces.fsl as fsl
-import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
@@ -25,14 +20,80 @@ from .tracking import *
 
 
 class DiffusionConfig(HasTraits):
+    """Class used to store configuration parameters of a :class:`~cmp.stages.diffusion.diffusion.DiffusionStage` instance.
+
+    Attributes
+    ----------
+    diffusion_imaging_model_editor : ['DSI', 'DTI', 'HARDI']
+        Available diffusion imaging models
+
+    diffusion_imaging_model : traits.Str
+        Selected diffusion imaging model
+        (Default: 'DTI')
+
+    dilate_rois : traits.Bool
+        Dilate parcellation regions-of-interest
+        (Default: True)
+
+    dilation_kernel : traits.Enum(['Box', 'Gauss', 'Sphere'])
+        Type of dilation kernel to used
+
+    dilation_radius : traits.Enum([1, 2, 3, 4])
+        Radius of the dilation kernel
+
+    recon_processing_tool_editor : ['Dipy', 'MRtrix']
+        List of processing tools available for diffusion signal reconstruction
+
+    tracking_processing_tool_editor : ['Dipy', 'MRtrix']
+        List of processing tools available for tractography
+
+    processing_tool_editor : ['Dipy', 'MRtrix']
+        List of processing tools available for diffusion signal reconstruction and tractography
+
+    recon_processing_tool : traits.Str
+        Processing tool to use for diffusion signal modeling
+        (Default: 'MRtrix')
+
+    tracking_processing_tool : traits.Str
+        Processing tool to use for tractography
+        (Default: 'MRtrix')
+
+    custom_track_file : traits.File
+        Custom tractogram file to used as input to the connectome stage (obsolete)
+
+    dipy_recon_config : Instance(HasTraits)
+        Configuration instance of the Dipy reconstruction stage
+
+    mrtrix_recon_config : Instance(HasTraits)
+        Configuration instance of the MRtrix3 reconstruction stage
+
+    dipy_tracking_config : Instance(HasTraits)
+        Configuration instance of the Dipy tracking (tractography) stage
+
+    mrtrix_tracking_config : Instance(HasTraits)
+        Configuration instance of the MRtrix3 tracking (tractography) stage
+
+    diffusion_model_editor : ['Deterministic', 'Probabilistic']
+        List of types of available local tractography algorithms.
+
+    diffusion_model : traits.Str
+        Type of local tractography algorithm to use.
+        (Default: 'Probabilistic')
+
+    See Also
+    --------
+    cmp.stages.diffusion.reconstruction.Dipy_recon_config
+    cmp.stages.diffusion.reconstruction.MRtrix_recon_config
+    cmp.stages.diffusion.tracking.Dipy_tracking_config
+    cmp.stages.diffusion.tracking.MRtrix_tracking_config
+    cmp.stages.diffusion.diffusion.DiffusionStage
+    """
+
     diffusion_imaging_model_editor = List(['DSI', 'DTI', 'HARDI'])
     diffusion_imaging_model = Str('DTI')
     dilate_rois = Bool(True)
     dilation_kernel = Enum(['Box', 'Gauss', 'Sphere'])
     dilation_radius = Enum([1, 2, 3, 4])
-    # recon_processing_tool_editor = List(['Dipy', 'MRtrix', 'Custom'])
-    # tracking_processing_tool_editor = List(['Dipy', 'MRtrix', 'Custom'])
-    # processing_tool_editor = List(['Dipy', 'MRtrix', 'Custom'])
     recon_processing_tool_editor = List(['Dipy', 'MRtrix'])
     tracking_processing_tool_editor = List(['Dipy', 'MRtrix'])
     processing_tool_editor = List(['Dipy', 'MRtrix'])
@@ -41,39 +102,25 @@ class DiffusionConfig(HasTraits):
     custom_track_file = File
     dipy_recon_config = Instance(HasTraits)
     mrtrix_recon_config = Instance(HasTraits)
-    # camino_recon_config = Instance(HasTraits)
-    # fsl_recon_config = Instance(HasTraits)
-    # gibbs_recon_config = Instance(HasTraits)
     dipy_tracking_config = Instance(HasTraits)
     mrtrix_tracking_config = Instance(HasTraits)
-    # camino_tracking_config = Instance(HasTraits)
-    # fsl_tracking_config = Instance(HasTraits)
-    # gibbs_tracking_config = Instance(HasTraits)
     diffusion_model_editor = List(['Deterministic', 'Probabilistic'])
     diffusion_model = Str('Probabilistic')
 
     # TODO import custom DWI and tractogram (need to register anatomical data to DWI to project parcellated ROIs onto the tractogram)
 
     def __init__(self):
-        # self.dtk_recon_config = DTK_recon_config(imaging_model=self.diffusion_imaging_model)
+        """Constructor of an :class:`cmp.stages.diffusion.diffusion.DiffusionConfig` object."""
         self.dipy_recon_config = Dipy_recon_config(imaging_model=self.diffusion_imaging_model,
                                                    recon_mode=self.diffusion_model,
                                                    tracking_processing_tool=self.tracking_processing_tool)
         self.mrtrix_recon_config = MRtrix_recon_config(imaging_model=self.diffusion_imaging_model,
                                                        recon_mode=self.diffusion_model)
-        # self.camino_recon_config = Camino_recon_config(imaging_model=self.diffusion_imaging_model)
-        # self.fsl_recon_config = FSL_recon_config()
-        # self.gibbs_recon_config = Gibbs_recon_config()
-        # self.dtk_tracking_config = DTK_tracking_config()
-        # self.dtb_tracking_config = DTB_tracking_config(imaging_model=self.diffusion_imaging_model)
         self.dipy_tracking_config = Dipy_tracking_config(imaging_model=self.diffusion_imaging_model,
                                                          tracking_mode=self.diffusion_model,
                                                          SD=self.mrtrix_recon_config.local_model)
         self.mrtrix_tracking_config = MRtrix_tracking_config(tracking_mode=self.diffusion_model,
                                                              SD=self.mrtrix_recon_config.local_model)
-        # self.camino_tracking_config = Camino_tracking_config(imaging_model=self.diffusion_imaging_model,tracking_mode=self.diffusion_model)
-        # self.fsl_tracking_config = FSL_tracking_config()
-        # self.gibbs_tracking_config = Gibbs_tracking_config()
 
         self.mrtrix_recon_config.on_trait_change(
             self.update_mrtrix_tracking_SD, 'local_model')
@@ -82,38 +129,40 @@ class DiffusionConfig(HasTraits):
         self.dipy_recon_config.on_trait_change(
             self.update_dipy_tracking_sh_order, 'lmax_order')
 
-        # self.camino_recon_config.on_trait_change(self.update_camino_tracking_model,'model_type')
-        # self.camino_recon_config.on_trait_change(self.update_camino_tracking_model,'local_model')
-        # self.camino_recon_config.on_trait_change(self.update_camino_tracking_inversion,'inversion')
-        # self.camino_recon_config.on_trait_change(self.update_camino_tracking_inversion,'fallback_index')
-
     def _tracking_processing_tool_changed(self, new):
+        """Update ``self.mrtrix_recon_config.tracking_processing_tool`` when ``tracking_processing_tool`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value of ``tracking_processing_tool``
+        """
         if new == 'MRtrix':
             self.mrtrix_recon_config.tracking_processing_tool = new
         elif new == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = new
 
     def _diffusion_imaging_model_changed(self, new):
-        # self.dtk_recon_config.imaging_model = new
+        """Update ``imaging_model`` of ``mrtrix_recon_config``,  ``dipy_recon_config``and ``dipy_tracking_config``.
+
+        Function called when `diffusion_imaging_model` is updated.
+
+        Parameters
+        ----------
+        new
+            New value of ``diffusion_imaging_model``
+        """
         self.mrtrix_recon_config.imaging_model = new
         self.dipy_recon_config.imaging_model = new
         self.dipy_tracking_config.imaging_model = new
-        # self.camino_recon_config.diffusion_imaging_model = new
-        # self.dtk_tracking_config.imaging_model = new
-        # self.dtb_tracking_config.imaging_model = new
+
         # Remove MRtrix from recon and tracking methods and Probabilistic from diffusion model if diffusion_imaging_model is DSI
-        if (new == 'DSI'): # and (self.recon_processing_tool != 'Custom'):
+        if new == 'DSI':  # and (self.recon_processing_tool != 'Custom'):
             self.recon_processing_tool = 'Dipy'
-            # self.recon_processing_tool_editor = ['Dipy', 'Custom']
-            # self.tracking_processing_tool_editor = ['Dipy', 'MRtrix', 'Custom']
             self.recon_processing_tool_editor = ['Dipy']
             self.tracking_processing_tool_editor = ['Dipy', 'MRtrix']
             self.diffusion_model_editor = ['Deterministic', 'Probabilistic']
         else:
-            # self.processing_tool_editor = ['DTK','MRtrix','Camino','FSL','Gibbs']
-            # self.processing_tool_editor = ['Dipy','MRtrix']
-            # self.recon_processing_tool_editor = ['Dipy', 'MRtrix', 'Custom']
-            # self.tracking_processing_tool_editor = ['Dipy', 'MRtrix', 'Custom']
             self.recon_processing_tool_editor = ['Dipy', 'MRtrix']
             self.tracking_processing_tool_editor = ['Dipy', 'MRtrix']
 
@@ -124,8 +173,15 @@ class DiffusionConfig(HasTraits):
                     'Deterministic', 'Probabilistic']
 
     def _recon_processing_tool_changed(self, new):
-        # print("recon_processing_tool_changed : %s"%new)
-        #
+        """Update ``self.tracking_processing_tool`` and ``self.tracking_processing_tool_editor``.
+
+        Function called when `recon_processing_tool` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value of ``recon_processing_tool``
+        """
         if new == 'Dipy' and self.diffusion_imaging_model != 'DSI':
             tracking_processing_tool = self.tracking_processing_tool
             self.tracking_processing_tool_editor = ['Dipy', 'MRtrix']
@@ -142,16 +198,31 @@ class DiffusionConfig(HasTraits):
         #     self.tracking_processing_tool_editor = ['Custom']
 
     def _tracking_processing_tool_changed(self, new):
-        # print("tracking_processing_tool changed: %s"%new)
+        """Update ``self.mrtrix_recon_config.tracking_processing_tool`` when ``tracking_processing_tool`` is updated.
+
+        Parameters
+        ----------
+        new
+            New value of ``tracking_processing_tool``
+        """
         if new == 'Dipy' and self.recon_processing_tool == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = 'Dipy'
         elif new == 'MRtrix' and self.recon_processing_tool == 'Dipy':
             self.dipy_recon_config.tracking_processing_tool = 'MRtrix'
 
     def _diffusion_model_changed(self, new):
+        """Update ``tracking_mode`` of ``self.mrtrix_tracking_config`` and ``self.dipy_tracking_config``.
+
+        Function called when `diffusion_model` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value of ``diffusion_model``
+        """
         print("diffusion model changed")
 
-        # self.mrtrix_recon_config.recon_mode = new # Probabilistic tracking only available for Spherical Deconvoluted data
+        # Probabilistic tracking only available for Spherical Deconvoluted data
         if self.tracking_processing_tool == 'MRtrix':
             self.mrtrix_tracking_config.tracking_mode = new
             print('tracking tool mrtrix')
@@ -166,47 +237,89 @@ class DiffusionConfig(HasTraits):
             print('tracking tool dipy')
             self.dipy_tracking_config.tracking_mode = new
 
-        # self.camino_tracking_config.tracking_mode = new
-        # self.update_camino_tracking_model()
-
     def update_dipy_tracking_sh_order(self, new):
+        """Update ``sh_order`` of ``dipy_tracking_config`` when ``lmax_order`` is updated.
+
+        Parameters
+        ----------
+        new: int
+            New value of ``lmax_order``
+        """
         if new != 'Auto':
             self.dipy_tracking_config.sh_order = new
         else:
             self.dipy_tracking_config.sh_order = 8
 
     def update_mrtrix_tracking_SD(self, new):
+        """Update ``SD`` of ``mrtrix_tracking_config`` when ``local_model`` is updated.
+
+        Parameters
+        ----------
+        new: string
+            New value of ``local_model``
+        """
         self.mrtrix_tracking_config.SD = new
 
     def update_dipy_tracking_SD(self, new):
-        self.dipy_tracking_config.SD = new
+        """Update ``SD`` of ``dipy_tracking_config`` when ``local_model`` is updated.
 
-    # def update_camino_tracking_model(self):
-    #     if self.diffusion_model == 'Probabilistic':
-    #         self.camino_tracking_config.tracking_model = 'pico'
-    #     elif (self.camino_recon_config.model_type == 'Single-Tensor' or
-    #           self.camino_recon_config.local_model == 'restore' or self.camino_recon_config.local_model == 'adc'):
-    #         self.camino_tracking_config.tracking_model = 'dt'
-    #     elif self.camino_recon_config.local_model == 'ball_stick':
-    #         self.camino_tracking_config.tracking_model = 'ballstick'
-    #     else:
-    #         self.camino_tracking_config.tracking_model = 'multitensor'
-    #
-    # def update_camino_tracking_inversion(self):
-    #     self.camino_tracking_config.inversion_index = self.camino_recon_config.inversion
-    #     self.camino_tracking_config.fallback_index = self.camino_recon_config.fallback_index
+        Parameters
+        ----------
+        new : string
+            New value of ``local_model``
+        """
+        self.dipy_tracking_config.SD = new
 
 
 def strip_suffix(file_input, prefix):
+    """Extract path of ``file_input`` and add `prefix` to generate a prefix path for outputs.
+
+    Parameters
+    ----------
+    file_input: os.path.abspath
+        Absolute path to an input file
+    prefix: os.path
+        Prefix to used in the generation of the output prefix path.
+    Returns
+    -------
+    out_prefix_path: os.path
+        The generated prefix path
+    """
     import os
     from nipype.utils.filemanip import split_filename
     path, _, _ = split_filename(file_input)
-    return os.path.join(path, prefix + '_')
+    out_prefix_path = os.path.join(path, prefix + '_')
+    return out_prefix_path
 
 
 class DiffusionStage(Stage):
+    """Class that represents the diffusion stage of a :class:`~cmp.pipelines.diffusion.diffusion.DiffusionPipeline`.
+
+    The diffusion stage workflow is composed of two sub-workflows:
+    1. `recon_flow` that estimates tensors or fiber orientation distribution functions from dMRI,
+    2. `track_flow` that runs tractography from the output of `recon_flow`.
+
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `DiffusionStage`
+
+    See Also
+    --------
+    cmp.pipelines.diffusion.diffusion.DiffusionPipeline
+    cmp.stages.diffusion.diffusion.DiffusionConfig
+    cmp.stages.diffusion.reconstruction.Dipy_recon_config
+    cmp.stages.diffusion.reconstruction.MRtrix_recon_config
+    cmp.stages.diffusion.tracking.Dipy_tracking_config
+    cmp.stages.diffusion.tracking.MRtrix_tracking_config
+    cmp.stages.diffusion.reconstruction.create_dipy_recon_flow
+    cmp.stages.diffusion.reconstruction.create_mrtrix_recon_flow
+    cmp.stages.diffusion.tracking.create_dipy_tracking_flow
+    cmp.stages.diffusion.tracking.create_mrtrix_tracking_flow
+    """
 
     def __init__(self, bids_dir, output_dir):
+        """Constructor of a :class:`~cmp.stages.diffusion.diffusion.DiffusionStage` instance."""
         self.name = 'diffusion_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
@@ -217,7 +330,26 @@ class DiffusionStage(Stage):
                         "P0", "roi_volumes", "shore_maps", "mapmri_maps"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """Create the stage worflow.
 
+        Parameters
+        ----------
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
+
+        See Also
+        --------
+        cmp.stages.diffusion.reconstruction.create_dipy_recon_flow
+        cmp.stages.diffusion.reconstruction.create_mrtrix_recon_flow
+        cmp.stages.diffusion.tracking.create_dipy_tracking_flow
+        cmp.stages.diffusion.tracking.create_mrtrix_tracking_flow
+        """
         if self.config.dilate_rois:
 
             dilate_rois = pe.MapNode(interface=fsl.DilateImage(), iterfield=[
@@ -306,22 +438,6 @@ class DiffusionStage(Stage):
                 # (recon_flow,outputnode,[("outputnode.RD","RD")]),
             ])
 
-        # elif self.config.recon_processing_tool == 'Camino':
-        #     recon_flow = create_camino_recon_flow(self.config.camino_recon_config)
-        #     flow.connect([
-        #                 (inputnode,recon_flow,[('diffusion','inputnode.diffusion')]),
-        #                 (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
-        #                 (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-        #                 (recon_flow,outputnode,[("outputnode.FA","FA")])
-        #                 ])
-        #
-        # elif self.config.recon_processing_tool == 'FSL':
-        #     recon_flow = create_fsl_recon_flow(self.config.fsl_recon_config)
-        #     flow.connect([
-        #                 (inputnode,recon_flow,[('diffusion','inputnode.diffusion_resampled')]),
-        #                 (inputnode, recon_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')])
-        #                 ])
-
         if self.config.tracking_processing_tool == 'Dipy':
             track_flow = create_dipy_tracking_flow(
                 self.config.dipy_tracking_config)
@@ -386,7 +502,6 @@ class DiffusionStage(Stage):
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'MRtrix':
             track_flow = create_mrtrix_tracking_flow(
                 self.config.mrtrix_tracking_config)
-            # print "MRtrix tracking"
 
             flow.connect([
                 (inputnode, track_flow, [
@@ -421,9 +536,8 @@ class DiffusionStage(Stage):
             ])
 
         elif self.config.tracking_processing_tool == 'MRtrix' and self.config.recon_processing_tool == 'Dipy':
-            track_flow = create_mrtrix_tracking_flow(
-                self.config.mrtrix_tracking_config)
-            # print "MRtrix tracking"
+
+            track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
 
             if self.config.diffusion_imaging_model != 'DSI':
                 flow.connect([
@@ -472,33 +586,6 @@ class DiffusionStage(Stage):
                  ('outputnode.track_file', 'track_file')])
             ])
 
-        # elif self.config.tracking_processing_tool == 'Camino':
-        #     track_flow = create_camino_tracking_flow(self.config.camino_tracking_config)
-        #     flow.connect([
-        #                 (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-        #                 (recon_flow, track_flow,[('outputnode.DWI','inputnode.DWI'), ('outputnode.grad','inputnode.grad')])
-        #                 ])
-        #     if self.config.diffusion_model == 'Probabilistic':
-        #         flow.connect([
-        #             (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')]),
-        #             ])
-        #     flow.connect([
-        #                 (track_flow,outputnode,[('outputnode.track_file','track_file')])
-        #                 ])
-        #
-        # elif self.config.tracking_processing_tool == 'FSL':
-        #     track_flow = create_fsl_tracking_flow(self.config.fsl_tracking_config)
-        #     flow.connect([
-        #                 (inputnode, track_flow,[('wm_mask_registered','inputnode.wm_mask_resampled')]),
-        #                 (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')]),
-        #                 (recon_flow,track_flow,[('outputnode.fsamples','inputnode.fsamples')]),
-        #                 (recon_flow,track_flow,[('outputnode.phsamples','inputnode.phsamples')]),
-        #                 (recon_flow,track_flow,[('outputnode.thsamples','inputnode.thsamples')]),
-        #                 ])
-        #     flow.connect([
-        #                 (track_flow,outputnode,[("outputnode.targets","track_file")]),
-        #                 ])
-
         temp_node = pe.Node(interface=util.IdentityInterface(
             fields=["diffusion_model"]), name='diffusion_model')
         temp_node.inputs.diffusion_model = self.config.diffusion_model
@@ -534,8 +621,10 @@ class DiffusionStage(Stage):
         #             "Invalid tractography input format. Valid formats are .tck (MRtrix) and .trk (DTK/Trackvis)")
 
     def define_inspect_outputs(self):
-        # print "stage_dir : %s" % self.stage_dir
+        """Update the `inspect_outputs' class attribute.
 
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
+        """
         self.inspect_outputs_dict = {}
 
         # RECON outputs
@@ -563,30 +652,28 @@ class DiffusionStage(Stage):
                     if os.path.exists(dodf_res):
                         self.inspect_outputs_dict[
                             self.config.recon_processing_tool + ' Diffusion ODF (SHORE) image'] = ['mrview', gfa_res,
-                                                                                               '-odf.load_sh',
-                                                                                               dodf_res]
+                                                                                                   '-odf.load_sh',
+                                                                                                   dodf_res]
                     shm_coeff_res = os.path.join(recon_dir, 'shore_fodf.nii.gz')
                     if os.path.exists(shm_coeff_res):
-                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' Fiber ODF (SHORE) image'] = [
-                            'mrview', gfa_res, '-odf.load_sh', shm_coeff_res]
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' Fiber ODF (SHORE) image'] = ['mrview', gfa_res,
+                                                                                                                     '-odf.load_sh', shm_coeff_res]
                 else:
                     recon_tensor_dir = os.path.join(self.stage_dir, "reconstruction", "dipy_tensor")
 
-                    fa_res = os.path.join(recon_tensor_dir,'diffusion_preproc_resampled_fa.nii.gz')
+                    fa_res = os.path.join(recon_tensor_dir, 'diffusion_preproc_resampled_fa.nii.gz')
                     if os.path.exists(fa_res):
-                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview',
-                                                                                                      fa_res]
+                        self.inspect_outputs_dict[self.config.recon_processing_tool + ' FA image'] = ['mrview', fa_res]
 
                     recon_dir = os.path.join(self.stage_dir, "reconstruction", "dipy_CSD")
                     shm_coeff_res = os.path.join(recon_dir, 'diffusion_shm_coeff.nii.gz')
                     if os.path.exists(shm_coeff_res):
                         if os.path.exists(fa_res):
-                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
-                                'mrview', fa_res, '-odf.load_sh', shm_coeff_res]
+                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = ['mrview', fa_res,
+                                                                                                                 '-odf.load_sh', shm_coeff_res]
                         else:
-                            shm_coeff_res = recon_results.outputs.out_shm_coeff
-                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = [
-                                'mrview', shm_coeff_res, '-odf.load_sh', shm_coeff_res]
+                            self.inspect_outputs_dict[self.config.recon_processing_tool + ' ODF (CSD) image'] = ['mrview', shm_coeff_res,
+                                                                                                                 '-odf.load_sh', shm_coeff_res]
 
         # TODO: add Tensor image in case of DTI+Tensor modeling
         # MRtrix
@@ -600,15 +687,14 @@ class DiffusionStage(Stage):
 
             adc_res = os.path.join(metrics_dir, 'ADC.mif')
             if os.path.exists(adc_res):
-                self.inspect_outputs_dict[self.config.recon_processing_tool +
-                                      ' ADC image'] = ['mrview', adc_res]
+                self.inspect_outputs_dict[self.config.recon_processing_tool + ' ADC image'] = ['mrview', adc_res]
 
             # Tensor model (DTI)
             if not self.config.mrtrix_recon_config.local_model:
                 recon_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_make_tensor")
 
                 tensor_res = os.path.join(recon_dir, 'diffusion_preproc_resampled_tensor.mif')
-                if (os.path.exists(fa_res) and os.path.exists(tensor_res)):
+                if os.path.exists(fa_res) and os.path.exists(tensor_res):
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                                   '-odf.load_tensor',
                                                                                                   tensor_res]
@@ -617,59 +703,62 @@ class DiffusionStage(Stage):
 
                 RF_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_rf")
                 RF_resp = os.path.join(RF_dir, 'diffusion_preproc_resampled_ER.mif')
-                if (os.path.exists(RF_resp)):
+                if os.path.exists(RF_resp):
                     self.inspect_outputs_dict['MRTRIX Response function'] = ['shview', '-response',
                                                                              RF_resp]
 
                 recon_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_CSD")
                 shm_coeff_res = os.path.join(recon_dir, 'diffusion_preproc_resampled_CSD.mif')
-                if (os.path.exists(fa_res) and os.path.exists(shm_coeff_res)):
+                if os.path.exists(fa_res) and os.path.exists(shm_coeff_res):
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                                   '-odf.load_sh',
                                                                                                   shm_coeff_res]
 
         # Tracking outputs
         # Dipy
-        if (self.config.tracking_processing_tool == 'Dipy'):
+        if self.config.tracking_processing_tool == 'Dipy':
             # print('Dipy tracking: true')
             if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
 
                 if self.config.diffusion_model == 'Deterministic':
                     diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_deterministic_tracking")
-                    streamline_res = os.path.join(diff_dir,"tract.trk")
+                    streamline_res = os.path.join(diff_dir, "tract.trk")
                 else:
                     diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_probabilistic_tracking")
-                    streamline_res = os.path.join(diff_dir,"tract.trk")
+                    streamline_res = os.path.join(diff_dir, "tract.trk")
 
                 if os.path.exists(streamline_res):
                     self.inspect_outputs_dict[
-                        self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
-                        'trackvis', streamline_res]
+                        self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis', streamline_res]
 
             else:
 
                 diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_dtieudx_tracking")
-                streamline_res = os.path.join(diff_dir,"tract.trk")
+                streamline_res = os.path.join(diff_dir, "tract.trk")
                 if os.path.exists(streamline_res):
                     self.inspect_outputs_dict[
-                        self.config.tracking_processing_tool + ' Tensor-based EuDX streamline'] = ['trackvis',
-                                                                                                   streamline_res]
+                        self.config.tracking_processing_tool + ' Tensor-based EuDX streamline'] = ['trackvis', streamline_res]
 
         # MRtrix
         if self.config.tracking_processing_tool == 'MRtrix':
 
             diff_dir = os.path.join(self.stage_dir, "tracking", "trackvis")
-            streamline_res = os.path.join(diff_dir,"tract.trk")
+            streamline_res = os.path.join(diff_dir, "tract.trk")
 
             if os.path.exists(streamline_res):
-               self.inspect_outputs_dict[
-                    self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = [
-                    'trackvis', streamline_res]
+                self.inspect_outputs_dict[
+                    self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis', streamline_res]
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
 
     def has_run(self):
+        """Function that returns `True` if the stage has been run successfully.
+
+        Returns
+        -------
+        `True` if the stage has been run successfully
+        """
         if self.config.tracking_processing_tool == 'Dipy':
             if self.config.diffusion_model == 'Deterministic':
                 return os.path.exists(os.path.join(self.stage_dir, "tracking", "dipy_deterministic_tracking",

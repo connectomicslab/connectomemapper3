@@ -21,6 +21,11 @@ dist/*
 build
 build/*
 
+tests
+tests/*
+
+*.png
+
 _build
 _static
 _templates
@@ -29,3 +34,9 @@ _templates
 
 .git
 .git/*
+
+.circleci
+.circleci/*
+
+cmp/bidsappmanager
+cmp/bidsappmanager/*

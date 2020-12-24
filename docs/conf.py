@@ -11,7 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-
+import os
 import sys
 
 sys.path.append('../cmp/')
@@ -32,7 +32,7 @@ source_suffix = ['.rst', '.md']
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-# sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('..'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -45,7 +45,48 @@ extensions = ['sphinx.ext.autosectionlabel',
               'sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
-              'sphinxarg.ext']
+              'sphinxarg.ext',
+              'sphinx.ext.inheritance_diagram',
+              'sphinxcontrib.apidoc',
+              'matplotlib.sphinxext.plot_directive',
+              'nbsphinx',
+              'nipype.sphinxext.plot_workflow',
+              'nipype.sphinxext.apidoc',
+              'nipype.sphinxext.documenter',
+              ]
+
+autodoc_mock_imports = ['graphviz',
+                        'PySide2',
+                        'pyface',
+                        'fslpy',
+                        'fsleyes',
+                        'mne',
+                        'obspy',
+                        'statsmodels',
+                        'pydicom',
+                        'networkx',
+                        'datalad']
+
+# Allow errors in notebooks for doc
+nbsphinx_allow_errors = True
+
+
+# Accept custom section names to be parsed for numpy-style docstrings
+# of parameters.
+# Requires pinning sphinxcontrib-napoleon to a specific commit while
+# https://github.com/sphinx-contrib/napoleon/pull/10 is merged.
+napoleon_use_param = True
+# napoleon_custom_sections = [
+#     ("Inputs", "Parameters"),
+#     ("Outputs", "Parameters"),
+#     ("Attributes", "Parameters"),
+#     ("Mandatory Inputs", "Parameters"),
+#     ("Optional Inputs", "Parameters"),
+# ]
+
+on_rtd = os.environ.get("READTHEDOCS") == "True"
+if on_rtd:
+    extensions.append("readthedocs_ext.readthedocs")
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -275,3 +316,27 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 # texinfo_show_urls = 'footnote'
+
+# -- apidoc extension configuration ------------------------------------------
+apidoc_module_dir = "../"
+apidoc_output_dir = "api/generated/"
+apidoc_excluded_paths = [".circleci/*",
+                         "build/*",
+                         "docs/*",
+                         "notebooks/*",
+                         "python3/*",
+                         "resources/*",
+                         "scripts/*",
+                         "tests/*",
+                         "ubuntu16.04/*",
+                         "run.py",
+                         "setup.py",
+                         "setup_gui.py",
+                         "get_version.py",
+                         "cmp/info.py"]
+apidoc_separate_modules = True
+apidoc_extra_args = ["--module-first",
+                     "-d 5",
+                     "-e",
+                     "-f"]
+

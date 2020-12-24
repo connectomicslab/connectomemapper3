@@ -28,11 +28,81 @@ import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.mrtrix3 import DWIDenoise, DWIBiasCorrect, MRConvert, \
     MRThreshold, ExtractMRTrixGrad, Generate5tt, \
     GenerateGMWMInterface, ApplymultipleMRConvert
-from cmtklib.interfaces.misc import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding, \
-    CreateIndexFile, CreateAcqpFile
+from cmtklib.diffusion import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
+from cmtklib.interfaces.fsl import CreateAcqpFile, CreateIndexFile
 
 
 class PreprocessingConfig(HasTraits):
+    """Class used to store configuration parameters of a :class:`~cmp.stages.preprocessing.preprocessing.PreprocessingStage` instance.
+
+    Attributes
+    ----------
+    total_readout : traits.Float
+        Acquisition total readout time used by FSL Eddy
+        (Default: 0.0)
+
+    description : traits.Str
+        Description
+        (Default: 'description')
+
+    denoising : traits.Bool
+        Perform diffusion MRI denoising
+        (Default: False)
+
+    denoising_algo : traits.Enum(['MRtrix (MP-PCA)', 'Dipy (NLM)'])
+        Type of denoising algorithm
+        (Default: 'MRtrix (MP-PCA)')
+
+    dipy_noise_model : traits.Enum
+        Type of noise model when Dipy denoising is performed that can be:
+        'Rician' or 'Gaussian'
+        (Default: 'Rician')
+
+    bias_field_correction : traits.Bool
+        Perform diffusion MRI bias field correction
+        (Default: False)
+
+    bias_field_algo : traits.Enum, ['ANTS N4', 'FSL FAST'])
+        Type of bias field correction algorithm that can be:
+        'ANTS N4' or 'FSL FAST'
+        (Default: 'ANTS N4')
+
+    eddy_current_and_motion_correction : traits.Bool
+        Perform eddy current and motion correction
+        (Default: True)
+
+    eddy_correction_algo : traits.Enum
+        Algorithm used for eddy current correction that can be:
+        'FSL eddy_correct' or 'FSL eddy'
+        (Default: 'FSL eddy_correct')
+
+    eddy_correct_motion_correction : traits.Bool
+        Perform eddy current and motion correction
+        MIGHT BE OBSOLETE
+        (Default: True)
+
+    partial_volume_estimation : traits.Bool
+        Estimate partial volume maps from brain tissues segmentation
+        (Default: True)
+
+    fast_use_priors : traits.Bool
+        Use priors when FAST is used for partial volume estimation
+        (Default: True)
+
+    resampling : traits.Tuple
+        Tuple describing the target resolution
+        (Default: (1, 1, 1))
+
+    interpolation : traits.Enum
+        Type of interpolation used when resampling that can be:
+        'interpolate', 'weighted', 'nearest', 'sinc', or 'cubic'
+        (Default: 'interpolate')
+
+    See Also
+    --------
+    cmp.stages.preprocessing.preprocessing.PreprocessingStage
+    """
+
     total_readout = Float(0.0)
     description = Str('description')
     denoising = Bool(False)
@@ -56,66 +126,23 @@ class PreprocessingConfig(HasTraits):
         ['interpolate', 'weighted', 'nearest', 'sinc', 'cubic'])
 
 
-class splitBvecBvalInputSpec(BaseInterfaceInputSpec):
-    bvecs = File(exists=True)
-    bvals = File(exists=True)
-    start = Int(0)
-    end = Int(300)
-    delimiter = Str()
-    orientation = Enum(['v', 'h'])
-
-
-class splitBvecBvalOutputSpec(TraitedSpec):
-    bvecs_split = File(exists=True)
-    bvals_split = File(exists=True)
-
-
-class splitBvecBval(BaseInterface):
-    input_spec = splitBvecBvalInputSpec
-    output_spec = splitBvecBvalOutputSpec
-
-    def _run_interface(self, runtime):
-        import numpy as np
-
-        f_bvecs = open(self.inputs.bvecs, 'r')
-        if self.inputs.delimiter == ' ':
-            bvecs = np.loadtxt(f_bvecs)
-        else:
-            bvecs = np.loadtxt(f_bvecs, delimiter=self.inputs.delimiter)
-        f_bvecs.close()
-
-        f_bvals = open(self.inputs.bvals, 'r')
-        if self.inputs.delimiter == ' ':
-            bvals = np.loadtxt(f_bvals)
-        else:
-            bvals = np.loadtxt(f_bvals, delimiter=self.inputs.delimiter)
-        f_bvals.close()
-
-        if self.inputs.orientation == 'v':
-            bvecs = bvecs[self.inputs.start:self.inputs.end + 1, :]
-            bvals = bvals[self.inputs.start:self.inputs.end + 1]
-        elif self.inputs.orientation == 'h':
-            bvecs = bvecs[:, self.inputs.start:self.inputs.end + 1]
-            bvals = bvals[self.inputs.start:self.inputs.end + 1]
-
-        with open(os.path.abspath('dwi_split.bvec'), 'a') as out_f:
-            np.savetxt(out_f, bvecs, delimiter=self.inputs.delimiter)
-
-        with open(os.path.abspath('dwi_split.bval'), 'a') as out_f:
-            np.savetxt(out_f, bvals.T, newline=self.inputs.delimiter)
-
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["bvecs_split"] = os.path.abspath('dwi_split.bvec')
-        outputs["bvals_split"] = os.path.abspath('dwi_split.bval')
-        return outputs
-
-
 class PreprocessingStage(Stage):
+    """Class that represents the pre-registration preprocessing stage of a :class:`~cmp.pipelines.diffusion.diffusion.DiffusionPipeline` instance.
+
+    Methods
+    -------
+    create_workflow()
+        Create the workflow of the `PreprocessingStage`
+
+    See Also
+    --------
+    cmp.pipelines.diffusion.diffusion.DiffusionPipeline
+    cmp.stages.preprocessing.preprocessing.PreprocessingConfig
+    """
+
     # General and UI members
     def __init__(self, bids_dir, output_dir):
+        """Constructor of a :class:`~cmp.stages.preprocessing.preprocessing.PreprocessingStage` instance."""
         self.name = 'preprocessing_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
@@ -128,6 +155,19 @@ class PreprocessingStage(Stage):
                         "roi_volumes"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        """Create the stage worflow.
+
+        Parameters
+        ----------
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the Diffusion pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the stage
+        """
         # print inputnode
         processing_input = pe.Node(interface=util.IdentityInterface(
             fields=['diffusion', 'aparc_aseg', 'aseg', 'bvecs', 'bvals', 'grad', 'acqp', 'index', 'T1', 'brain',
@@ -136,7 +176,7 @@ class PreprocessingStage(Stage):
         # For DSI acquisition: extract the hemisphere that contains the data
         # if self.config.start_vol > 0 or self.config.end_vol < self.config.max_vol:
         #
-        #     split_vol = pe.Node(interface=splitDiffusion(),name='split_vol')
+        #     split_vol = pe.Node(interface=SplitDiffusion(),name='split_vol')
         #     split_vol.inputs.start = self.config.start_vol
         #     split_vol.inputs.end = self.config.end_vol
         #
@@ -176,8 +216,20 @@ class PreprocessingStage(Stage):
         concatnode = pe.Node(interface=util.Merge(2), name='concatnode')
 
         def convertList2Tuple(lists):
+            """Convert list of files to tuple of files.
+
+            Parameters
+            ----------
+            lists : [bvecs, bvals]
+                List of files containing bvecs and bvals
+            Returns
+            -------
+            out_tuple : (bvecs, bvals)
+                Tuple of files containing bvecs and bvals
+            """
             # print "******************************************",tuple(lists)
-            return tuple(lists)
+            out_tuple = tuple(lists)
+            return out_tuple
 
         flow.connect([
             # (processing_input,concatnode,[('bvecs','in1'),('bvals','in2')]),
@@ -831,6 +883,10 @@ class PreprocessingStage(Stage):
         ])
 
     def define_inspect_outputs(self):
+        """Update the `inspect_outputs' class attribute.
+
+        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
+        """
         # print "stage_dir : %s" % self.stage_dir
 
         if self.config.denoising:
@@ -885,6 +941,12 @@ class PreprocessingStage(Stage):
                                       key=str.lower)
 
     def has_run(self):
+        """Function that returns `True` if the stage has been run successfully.
+
+        Returns
+        -------
+        `True` if the stage has been run successfully
+        """
         if not self.config.eddy_current_and_motion_correction:
             if not self.config.denoising and not self.config.bias_field_correction:
                 return True

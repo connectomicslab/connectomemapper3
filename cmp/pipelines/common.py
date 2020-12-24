@@ -4,38 +4,45 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Common functions for CMP pipelines
-"""
+"""Definition of common parent classes for pipelines."""
 
 import os
 # import fnmatch
-
 import threading
-
 import time
+
+from traits.api import *
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 
 from nipype.interfaces.base import File, Directory
 
-from traits.api import *
-
 
 class ProgressWindow(HasTraits):
+    """Progress window of stage execution
+
+    (Not used anymore by CMP3)
+    """
     main_status = Str("Processing launched...")
     stages_status = List([''])
 
 
 class ProgressThread(threading.Thread):
+    """Class use to monitor stage execution in a :class:`threading.Thread`.
+
+    Information is display in the ProgressWindow
+    (Not used anymore by CMP3)
+    """
     stages = {}
     stage_names = []
     pw = Instance(ProgressWindow)
 
     def run(self):
+        """Monitors stage execution a workflow."""
         c = 0
 
-        while (c < len(self.stage_names)):
+        while c < len(self.stage_names):
             time.sleep(5)
             c = 0
             statuses = []
@@ -57,9 +64,17 @@ class ProgressThread(threading.Thread):
 
 
 class ProcessThread(threading.Thread):
+    """Class use to represent the pipeline process as a :class:`threading.Thread`.
+
+    Attributes
+    ----------
+    pipeline <Instance>
+         Any Pipeline instance
+    """
     pipeline = Instance(Any)
 
     def run(self):
+        """Execute the pipeline."""
         self.pipeline.process()
 
 
@@ -117,6 +132,17 @@ class ProcessThread(threading.Thread):
 
 
 class Pipeline(HasTraits):
+    """Parent class that extends `HasTraits` and represents a processing pipeline.
+
+    It is extended by the various pipeline classes.
+
+    See Also
+    --------
+    cmp.pipelines.anatomical.anatomical.AnatomicalPipeline
+    cmp.pipelines.diffusion.diffusion.DiffusionPipeline
+    cmp.pipelines.functional.fMRI.fMRIPipeline
+    """
+
     # informations common to project_info
     base_directory = Directory
     output_directory = Directory
@@ -164,6 +190,12 @@ class Pipeline(HasTraits):
             #                                                 'cmp',self.subject,'tmp','nipype',self.pipeline_name,self.stages[stage].name)
 
     def check_config(self):
+        """Old method that was checking custom settings (obsolete).
+
+        Returns
+        -------
+
+        """
         # if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation':
         #     if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
         #         return (
@@ -180,13 +212,23 @@ class Pipeline(HasTraits):
         # if self.stages['MRTrixConnectome'].config.output_types == []:
         #     return('\n\tNo output type selected for the connectivity matrices.\t\n\t'
         #            'Please select at least one output type in the connectome configuration window.\t\n')
-        if self.stages['Connectome'].config.output_types == []:
+        if not self.stages['Connectome'].config.output_types:
             return (
                 '\n\tNo output type selected for the connectivity matrices.\t\n\t'
                 'Please select at least one output type in the connectome configuration window.\t\n')
         return ''
 
     def create_stage_flow(self, stage_name):
+        """Create the sub-workflow of a processing stage.
+
+        Parameters
+        ----------
+        stage_name
+
+        Returns
+        -------
+
+        """
         stage = self.stages[stage_name]
         flow = pe.Workflow(name=stage.name)
         inputnode = pe.Node(interface=util.IdentityInterface(
@@ -198,11 +240,13 @@ class Pipeline(HasTraits):
         return flow
 
     def fill_stages_outputs(self):
+        """Update processing stage output list for visual inspection."""
         for stage in list(self.stages.values()):
             if stage.enabled:
                 stage.define_inspect_outputs()
 
     def clear_stages_outputs(self):
+        """Clear processing stage outputs."""
         for stage in list(self.stages.values()):
             if stage.enabled:
                 stage.inspect_outputs_dict = {}
@@ -215,6 +259,7 @@ class Pipeline(HasTraits):
                 #    os.remove(stage_res)
 
     def launch_process(self):
+        """Launch the processing."""
         pt = ProcessThread()
         pt.pipeline = self
         pt.start()

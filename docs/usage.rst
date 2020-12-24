@@ -4,12 +4,15 @@
 Commandline Usage
 ***********************
 
-``Connectome Mapper 3`` is distributed as a BIDS App which adopts the :abbr:`BIDS (Brain Imaging Data Structure)` standard for data organization and takes as principal input the path of the dataset that is to be processed. The input dataset is required to be in valid `BIDS` format, and it must include at least a T1w or MPRAGE structural image and a DWI and/or resting-state fMRI image. See :ref:`cmpbids` page that provides links for more information about BIDS and BIDS-Apps as well as an example for dataset organization and naming.
+``Connectome Mapper 3 (CMP3)`` is distributed as a BIDS App which adopts the :abbr:`BIDS (Brain Imaging Data Structure)` standard for data organization and takes as principal input the path of the dataset that is to be processed. The input dataset is required to be in valid `BIDS` format, and it must include at least a T1w or MPRAGE structural image and a DWI and/or resting-state fMRI image. See :ref:`cmpbids` page that provides links for more information about BIDS and BIDS-Apps as well as an example for dataset organization and naming.
+
+.. warning::
+    As of ``CMP3 v3.0.0-RC2``, the BIDS App includes a **tracking** system that anonymously reports the run of the BIDS App. This feature has been introduced to support us in the task of fund finding for the development of CMP3 in the future. However, users are still free to opt-out using the ``--notrack`` commandline argument.
 
 Commandline Arguments
 =============================
 
-The command to run ``Connectome Mapper 3`` follows the `BIDS-Apps <https://github.com/BIDS-Apps>`_ definition standard with additional options for loading pipeline configuration files.
+The command to run ``CMP3`` follows the `BIDS-Apps <https://github.com/BIDS-Apps>`_ definition standard with additional options for loading pipeline configuration files.
 
 .. argparse::
 		:ref: cmp.parser.get
@@ -55,10 +58,9 @@ If you need any support or have any questions, you can post to the `CMTK-users g
 All bugs, concerns and enhancement requests for this software are managed on GitHub and can be submitted at `https://github.com/connectomicslab/connectomemapper3/issues <https://github.com/connectomicslab/connectomemapper3/issues>`_.
 
 
-Not running on a local machine? - Data transfer
-===============================================
+Not running on a local machine?
+================================
 
-If you intend to run ``connectomemapper3`` on a remote system, you will need to
-make your data available within that system first. Comprehensive solutions such as `Datalad
-<http://www.datalad.org/>`_ will handle data transfers with the appropriate
-settings and commands. Datalad also performs version control over your data.
+If you intend to run ``CMP3`` on a remote system such as a high-performance computing cluster where Docker is not available due to root privileges, a Singularity image is also built for your convenience and available on `Sylabs.io <https://sylabs.io/>`_. Please see instructions at :ref:`Running on a cluster (HPC) <run-on-hpc>`.
+
+Also, you will need to make your data available within that system first. Comprehensive solutions such as `Datalad <http://www.datalad.org/>`_ will handle data transfers with the appropriate settings and commands. Datalad also performs version control over your data. A tutorial is provided in :ref:`Adopting Datalad for collaboration <datalad-cmp>`.

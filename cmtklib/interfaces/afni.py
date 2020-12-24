@@ -3,8 +3,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" The AFNI module provides functions for interfacing with AFNI toolbox missing in nipype or modified
-"""
+"""The AFNI module provides Nipype interfaces for the AFNI toolbox missing in nipype or modified."""
 
 import os
 
@@ -108,12 +107,15 @@ class BandpassInputSpec(AFNICommandInputSpec):
 
 
 class Bandpass(AFNICommand):
-    """Program to lowpass and/or highpass each voxel time series in a
-    dataset, offering more/different options than Fourier
+    """Program to lowpass and/or highpass each voxel time series in a dataset.
+
+    Calls the `3dBandpass` tool from AFNI, offering more/different options than Fourier
+
     For complete details, see the `3dBandpass Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbandpass.html>`_
+
     Examples
-    ========
+    --------
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import  example_data
     >>> bandpass = afni.Bandpass()
@@ -145,7 +147,6 @@ class Bandpass(AFNICommand):
         return outputs
 
 
-
 class DespikeInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc="input file to 3dDespike",
@@ -164,9 +165,13 @@ class DespikeInputSpec(AFNICommandInputSpec):
 
 
 class Despike(AFNICommand):
-    """Removes 'spikes' from the 3D+time input dataset
+    """Removes 'spikes' from the 3D+time input dataset.
+
+    It calls the `3dDespike` tool from AFNI.
+
     For complete details, see the `3dDespike Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDespike.html>`_
+
     Examples
     --------
     >>> from nipype.interfaces import afni

@@ -1,8 +1,39 @@
+# Copyright (C) 2009-2020, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland
+# All rights reserved.
+#
+#  This software is distributed under the open-source license Modified BSD.
+
+"""Core module providing a `run()` command."""
+
 import os
 import subprocess
 
 
-def run(command, env=None, cwd=os.getcwd()):
+def run(command, env=None, cwd=None):
+    """Function calls by :class:`CMP_MainWindowHandler` to run datalad commands.
+
+    It runs the command specified as input via ``subprocess.run()``.
+
+    Parameters
+    ----------
+    command : string
+        String containing the command to be executed (required)
+
+    env : os.environ
+        Specify a custom os.environ
+
+    cwd : os.path
+        Specify a custom current working directory
+
+    Examples
+    --------
+    >>> cmd = 'datalad save'
+    >>> run(cmd) # doctest: +SKIP
+    """
+    if (cwd is None) or (cwd == {}):
+        cwd = os.getcwd()
+
     merged_env = os.environ
     if env is not None:
         merged_env.update(env)

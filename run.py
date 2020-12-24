@@ -18,10 +18,14 @@ import warnings
 
 from glob import glob
 import numpy
-# import nibabel
+
+# import http.client
+# import urllib
+import requests
+from datetime import datetime
 
 # Own imports
-from cmtklib.util import bcolors
+from cmtklib.util import BColors
 from cmp import parser
 from cmp.info import __version__
 from cmp.project import CMP_Project_Info, run_individual
@@ -32,8 +36,80 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 # __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                 'version')).read()
 
+# def report_app_run_to_google_analytics():
+#     params = urllib.parse.urlencode({'v': 1,
+#                                'tid': '247732290',
+#                                'cid': '555',
+#                                'an' : 'ConnectomeMapper3',
+#                                'av' : __version__,
+#                                't': 'event',
+#                                'ec': 'run',
+#                                'ea': 'start'})
+
+#     connection = http.client.HTTPConnection('www.google-analytics.com')
+#     connection.request('POST', '/collect', params)
+#     response = connection.getresponse()
+#     print("{}, {}".format(response.status, response.reason))
+
+
+def report_usage(event_category, event_action, event_label, verbose=False):
+    """Send HTTP POST event to Google Analytics
+
+    Parameters
+    ----------
+    event_category : string
+        Event category
+
+    event_action : string
+        Event action type
+
+    event_label : string
+        Event label
+
+    verbose : bool
+        If True, verbose mode
+    """
+    tracking_id = 'UA-124877585-4'
+    clientid_str = str(datetime.now())
+    tracking_url = 'https://www.google-analytics.com/collect?v=1&t=event&tid={}&cid={}&ec={}&ea={}&el={}&aip=1'.format(tracking_id,
+                                                                                                                 clientid_str,
+                                                                                                                 event_category,
+                                                                                                                 event_action,
+                                                                                                                 event_label)
+    r = requests.post(tracking_url)
+
+    if verbose:
+        print(r)
+
+    print('Report execution to Google Analytics. \n'
+          'Thanks to support us in the task of finding new funds for CMP3 development!')
+
 
 def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=1):
+    """Create the command to run the `connectomemapper3` python script.
+
+    Parameters
+    ----------
+    project : cmp.project.CMP_Project_Info
+        Instance of `cmp.project.CMP_Project_Info`
+
+    run_anat : bool
+        If True, append the anatomical configuration file to the command
+
+    run_dmri : bool
+        If True, append the diffusion configuration file to the command
+
+    run_fmri : bool
+        If True, append the fMRI configuration file to the command
+
+    number_of_threads : int
+        Number of threads used by Nipype
+
+    Returns
+    -------
+    Command : string
+        The command to execute the `connectomemapper3` python script
+    """
     cmd = []
 
     cmd.append("connectomemapper3")
@@ -74,6 +150,13 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=
 
 
 def readLineByLine(filename):
+    """Read a text file line by line.
+
+    Parameters
+    ----------
+    filename : string
+        Text file
+    """
     # Use with statement to correctly close the file when you read all the lines.
     with open(filename, 'r') as f:
         # Use implicit iterator over filehandler to minimize memory used
@@ -83,6 +166,27 @@ def readLineByLine(filename):
 
 
 def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type, multiproc_number_of_cores=1):
+    """Create the pipeline configuration file for an individual subject from a reference given as input.
+
+    Parameters
+    ----------
+    project : cmp.project.CMP_Project_Info
+        Instance of `cmp.project.CMP_Project_Info`
+
+    ref_conf_file : string
+        Reference configuration file
+
+    pipeline_type : 'anatomical', 'diffusion', 'fMRI'
+        Type of pipeline
+
+    multiproc_number_of_cores : int
+        Number of threads used by Nipype
+
+    Returns
+    -------
+    subject_conf_file : string
+        Configuration file of the individual subject
+    """
     subject_derivatives_dir = os.path.join(project.output_directory)
 
     # print('project.subject_session: {}'.format(project.subject_session))
@@ -126,12 +230,26 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type,
 
 
 def manage_processes(proclist):
+    """Manages parallel processes.
+
+    Parameters
+    ----------
+    proclist : list
+        List of processes
+    """
     for proc in proclist:
         if proc.poll() is not None:
             proclist.remove(proc)
 
 
 def clean_cache(bids_root):
+    """Clean cache generated by BIDS App execution.
+
+    Parameters
+    ----------
+    bids_root : string
+        BIDS dataset root directory
+    """
     print('> Clean docker image cache stored in /tmp')
     # Clean cache (issue related that the dataset directory is mounted into /tmp,
     # which is used for caching by java/matlab/matplotlib/xvfb-run in the docker image)
@@ -188,6 +306,24 @@ def clean_cache(bids_root):
 
 
 def run(command, env={}, log_filename={}):
+    """Execute a command via `subprocess.Popen`.
+
+    Parameters
+    ----------
+    command : string
+        Command to be executed
+
+    env : os.environ
+        Custom `os.environ`
+
+    log_filename : string
+        Execution log file
+
+    Returns
+    -------
+    process : `subprocess.Popen`
+        A `subprocess.Popen` process
+    """
     merged_env = os.environ
     merged_env.update(env)
 
@@ -258,8 +394,7 @@ elif args.fs_license:
     # print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
     # shutil.copyfile(src=os.environ['FS_LICENSE'],dst=os.path.join('/opt','freesurfer','license.txt'))
 else:
-    print(
-        "ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
+    print("ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
     sys.exit(1)
 
 print('  ... $FS_LICENSE : {}'.format(os.environ['FS_LICENSE']))
@@ -279,18 +414,18 @@ if args.number_of_participants_processed_in_parallel is not None:
             '  * Number of subjects to be processed in parallel set to the maximal number of available cores ({})'.format(
                 max_number_of_cores))
         print(
-            bcolors.WARNING +
+            BColors.WARNING +
             '    WARNING: the specified number of subjects to be processed in parallel ({})'.format(args.number_of_participants_processed_in_parallel) +
             ' exceeds the number of available cores ({})'.format(max_number_of_cores) +
-            bcolors.ENDC)
+            BColors.ENDC)
         parallel_number_of_subjects = max_number_of_cores
     elif parallel_number_of_subjects <= 0:
         print(
             '  * Number of subjects to be processed in parallel set to one (sequential run)')
         print(
-            bcolors.WARNING +
+            BColors.WARNING +
             '    WARNING: the specified number of subjects to be processed in parallel ({}) '.format(args.number_of_participants_processed_in_parallel) +
-            'should be greater to 0' + bcolors.ENDC)
+            'should be greater to 0' + BColors.ENDC)
         parallel_number_of_subjects = 1
     else:
         print('  * Number of subjects to be processed in parallel set to {} (Total of cores available: {})'.format(
@@ -306,15 +441,15 @@ if args.number_of_threads is not None:
         if number_of_threads > max_number_of_cores:
             print('  * Number of parallel threads set to the maximal number of available cores ({})'.format(
                 max_number_of_cores))
-            print(bcolors.WARNING +
+            print(BColors.WARNING +
                   '   WARNING: the specified number of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
                   'exceeds the number of available cores ({})'.format(max_number_of_cores) +
-                  bcolors.ENDC)
+                  BColors.ENDC)
             number_of_threads = max_number_of_cores
         elif number_of_threads <= 0:
             print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
-            print(bcolors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
-                  'should be greater to 0' + bcolors.ENDC)
+            print(BColors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
+                  'should be greater to 0' + BColors.ENDC)
             number_of_threads = 1
         else:
             print('  * Number of parallel threads set to {} (total of cores: {})'.format(
@@ -324,24 +459,43 @@ if args.number_of_threads is not None:
         # Otherwise parallelize only at the subject level
         total_number_of_threads = parallel_number_of_subjects * number_of_threads
         if total_number_of_threads > max_number_of_cores:
-            print(bcolors.WARNING +
+            print(BColors.WARNING +
                   '  * Total number of cores used (Subjects in parallel: {}, Threads in parallel: {}, Total: {})'.format(parallel_number_of_subjects,
                                                                                                                          number_of_threads,
                                                                                                                          total_number_of_threads) +
-                  'is greater than the number of available cores ({})'.format(max_number_of_cores) + bcolors.ENDC)
+                  'is greater than the number of available cores ({})'.format(max_number_of_cores) + BColors.ENDC)
             number_of_threads = 1
             parallel_number_of_subjects = max_number_of_cores
-            print(bcolors.WARNING +
+            print(BColors.WARNING +
                   '    Processing will be ONLY parallelized at the subject level using {} cores.'.format(parallel_number_of_subjects) +
-                  bcolors.ENDC)
+                  BColors.ENDC)
 else:
     print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
     number_of_threads = 1
 
-# Set number of threads used by programs based on OpenMP mult-threading library
-# This includes AFNI, ANTs, Dipy, Freesurfer, FSL, MRtrix3.
+# Set number of threads used by programs based on OpenMP multi-threading library
+# This includes AFNI, Dipy, Freesurfer, FSL, MRtrix3.
 os.environ['OMP_NUM_THREADS'] = '{}'.format(number_of_threads)
 print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'], max_number_of_cores))
+
+# Set number of threads used by ANTs if specified.
+# Otherwise use the same as the number of OpenMP threads
+if args.ants_number_of_threads is not None:
+    os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = f'{args.ants_number_of_threads}'
+    print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
+else:
+    os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = os.environ['OMP_NUM_THREADS']
+    print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
+
+# Set random generator seed of MRtrix if specified
+if args.mrtrix_random_seed is not None:
+    os.environ['MRTRIX_RNG_SEED'] = f'{args.mrtrix_random_seed}'
+    print(f'  * MRTRIX_RNG_SEED set to {os.environ["MRTRIX_RNG_SEED"]}')
+
+# Set random generator seed of ANTs if specified
+if args.ants_random_seed is not None:
+    os.environ['ANTS_RANDOM_SEED'] = f'{args.ants_random_seed}'
+    print(f'  * ANTS_RANDOM_SEED set to {os.environ["ANTS_RANDOM_SEED"]}')
 
 # TODO: Implement log for subject(_session)
 # with open(log_filename, 'w+') as log:
@@ -349,6 +503,10 @@ print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OM
 
 # running participant level
 if args.analysis_level == "participant":
+
+    # report_app_run_to_google_analytics()
+    if args.notrack is not True:
+        report_usage('BIDS App', 'Run', __version__)
 
     maxprocs = parallel_number_of_subjects
     processes = []
@@ -461,7 +619,7 @@ if args.analysis_level == "participant":
                                                project.dmri_config_file,
                                                None,
                                                number_of_threads=number_of_threads)
-                            if not run_dmri and run_fmri:
+                            elif not run_dmri and run_fmri:
                                 run_individual(project.base_directory,
                                                project.output_directory,
                                                project.subject,
@@ -470,7 +628,7 @@ if args.analysis_level == "participant":
                                                None,
                                                project.fmri_config_file,
                                                number_of_threads=number_of_threads)
-                            if run_dmri and run_fmri:
+                            elif run_dmri and run_fmri:
                                 run_individual(project.base_directory,
                                                project.output_directory,
                                                project.subject,

@@ -4,37 +4,35 @@
 import sys
 import os
 
-#Setup Qt5 backend for traitsui
-os.environ['ETS_TOOLKIT'] = 'qt4'
-#os.environ['QT_API'] = 'pyqt5'
-os.environ['QT_API'] = 'pyside2'
-
-import subprocess
-
-#BIDS import
-from bids import BIDSLayout
-
 from traits.etsconfig.api import ETSConfig
-print("Graphical Backend : {}".format(ETSConfig.toolkit))
 
-#CMP imports
+# CMP imports
 from cmp.bidsappmanager import gui
+from cmp.info import __version__, __copyright__
 
-from cmp.info import __version__,__copyright__
+# Setup Qt5 backend for traitsui
+os.environ['ETS_TOOLKIT'] = 'qt4'
+# os.environ['QT_API'] = 'pyqt5'
+os.environ['QT_API'] = 'pyside2'
+print("Graphical Backend : {}".format(ETSConfig.toolkit))
 
 
 def info():
+    """Print version and copyright information."""
     print("\nConnectome Mapper {} - BIDS App Manager ".format(__version__))
     print("""{}""".format(__copyright__ ))
 
+
 def usage():
+    """Display usage."""
     print("Usage : cmpbidsappmanager ")
+
 
 # Checks the needed dependencies. We call directly the functions instead
 # of just checking existence in $PATH in order to handl missing libraries.
 # Note that not all the commands give the awaited 1 exit code...
 def dep_check():
-
+    """Check if some dependencies are well installed."""
     nul = open(os.devnull, 'w')
 
     error = ""
@@ -44,6 +42,7 @@ def dep_check():
     if error != "":
         print(error)
         sys.exit(2)
+
 
 if __name__ == "__main__":
     # check dependencies
@@ -57,10 +56,8 @@ if __name__ == "__main__":
 
     argc = len(sys.argv)
     if argc==1: # no args, launch the GUI
-        #traitsui.wx.constants.WindowColor = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
-        mw = gui.CMP_MainWindowV2()
+        mw = gui.CMP_MainWindow()
         mw_res = mw.configure_traits()
-
     else:
         usage()
         sys.exit(2)

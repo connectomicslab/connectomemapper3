@@ -10,6 +10,7 @@ if os.path.exists('MANIFEST'):
     os.remove('MANIFEST')
 
 packages = ["cmtklib",
+            "cmtklib.bids",
             "cmtklib.interfaces",
             "cmp",
             "cmp.stages",

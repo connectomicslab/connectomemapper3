@@ -5,28 +5,19 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 
-""" Anatomical pipeline Class definition
-"""
+"""Anatomical pipeline Class definition."""
 
 import datetime
 import os
 import glob
 import shutil
 
-# from nipype.utils.filemanip import copyfile
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
-
-
-# from pyface.api import ImageResource
 import nipype.interfaces.io as nio
 from nipype import config, logging
 
-from nipype.interfaces.base import Directory
-
 from traits.api import *
-
-# from bids import BIDSLayout
 
 # Own import
 import cmp.pipelines.common as cmp_common
@@ -35,6 +26,23 @@ from cmp.stages.parcellation.parcellation import ParcellationStage
 
 
 class Global_Configuration(HasTraits):
+    """Global pipeline configurations.
+
+    Attributes
+    ----------
+    process_type: 'fMRI'
+        Processing pipeline type
+
+    subjects : traits.List
+       List of subjects ID (in the form ``sub-XX``)
+
+    subject : traits.Str
+       Subject to be processed (in the form ``sub-XX``)
+
+    subject_session : traits.Str
+       Subject session to be processed (in the form ``ses-YY``)
+    """
+
     process_type = Str('anatomical')
     subjects = List(trait=Str)
     subject = Str
@@ -50,6 +58,17 @@ class Check_Input_Notification(HasTraits):
 
 
 class AnatomicalPipeline(cmp_common.Pipeline):
+    """Class that extends a :class:`Pipeline` and represents the processing pipeline for structural MRI.
+
+    It is composed of the segmentation stage that performs FreeSurfer recon-all
+    and the parcellation stage that creates the Lausanne brain parcellations.
+
+    See Also
+    --------
+    cmp.stages.segmentation.segmentation.SegmentationStage
+    cmp.stages.parcellation.parcellation.ParcellationStage
+    """
+
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("anatomical_pipeline")
     # input_folders = ['DSI','DTI','HARDI','T1','T2']
@@ -73,25 +92,33 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     flow = Instance(pe.Workflow)
 
     def __init__(self, project_info):
-        # super(Pipeline, self).__init__(project_info)
+        """Constructor of an `AnatomicalPipeline` object.
 
-        self.subject = project_info.subject
-        self.last_date_processed = project_info.anat_last_date_processed
+        Parameters
+        ----------
+        project_info: cmp.project.CMP_Project_Info
+            Instance of `CMP_Project_Info` object.
+
+        See Also
+        --------
+        cmp.project.CMP_Project_Info
+        """
+        # super(Pipeline, self).__init__(project_info)
+        # self.last_date_processed = project_info.anat_last_date_processed
 
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = self.subject
 
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
-            self.subject_directory = os.path.join(
-                self.base_directory, self.subject, self.global_conf.subject_session)
+            self.subject_directory = os.path.join(project_info.base_directory,
+                                                  project_info.subject,
+                                                  project_info.subject_session)
         else:
             self.global_conf.subject_session = ''
-            self.subject_directory = os.path.join(
-                self.base_directory, self.subject)
+            self.subject_directory = os.path.join(project_info.base_directory, project_info.subject)
 
-        self.derivatives_directory = os.path.abspath(
-            project_info.output_directory)
+        self.derivatives_directory = os.path.abspath(project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
 
         self.stages = {'Segmentation': SegmentationStage(bids_dir=project_info.base_directory,
@@ -101,50 +128,69 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                          output_dir=self.output_directory)}
         cmp_common.Pipeline.__init__(self, project_info)
 
-        self.stages['Segmentation'].config.on_trait_change(
-            self.update_parcellation, 'seg_tool')
-        self.stages['Parcellation'].config.on_trait_change(
-            self.update_segmentation, 'parcellation_scheme')
+        self.subject = project_info.subject
 
-        self.stages['Parcellation'].config.on_trait_change(
-            self.update_parcellation_scheme, 'parcellation_scheme')
+        self.stages['Segmentation'].config.on_trait_change(self.update_parcellation, 'seg_tool')
+        self.stages['Parcellation'].config.on_trait_change(self.update_segmentation, 'parcellation_scheme')
+        self.stages['Parcellation'].config.on_trait_change(self.update_parcellation_scheme, 'parcellation_scheme')
 
     def check_config(self):
+        """Check if custom white matter mask and custom atlas files specified in the configuration exist.
+
+        Returns
+        -------
+        message : string
+            String empty if all the checks pass, otherwise it contains the error message
+        """
+        message = ''
         if self.stages['Segmentation'].config.seg_tool == 'Custom segmentation':
             if not os.path.exists(self.stages['Segmentation'].config.white_matter_mask):
-                return (
+                message = (
                     '\nCustom segmentation selected but no WM mask provided.\n'
                     'Please provide an existing WM mask file in the Segmentation configuration '
                     'window.\n')
             if not os.path.exists(self.stages['Parcellation'].config.atlas_nifti_file):
-                return (
+                message = (
                     '\n\tCustom segmentation selected but no atlas provided.\n'
                     'Please specify an existing atlas file in the '
                     'Parcellation configuration window.\t\n')
             if not os.path.exists(self.stages['Parcellation'].config.graphml_file):
-                return (
+                message = (
                     '\n\tCustom segmentation selected but no graphml info provided.\n'
                     'Please specify an existing graphml file in the '
                     'Parcellation configuration window.\t\n')
-        return ''
+        return message
 
     def update_parcellation_scheme(self):
+        """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
         self.parcellation_scheme = self.stages['Parcellation'].config.parcellation_scheme
         self.atlas_info = self.stages['Parcellation'].config.atlas_info
 
     def update_parcellation(self):
+        """Update self.stages['Parcellation'].config.parcellation_scheme when ``seg_tool`` is updated."""
         if self.stages['Segmentation'].config.seg_tool == "Custom segmentation":
             self.stages['Parcellation'].config.parcellation_scheme = 'Custom'
         else:
             self.stages['Parcellation'].config.parcellation_scheme = self.stages['Parcellation'].config.pre_custom
 
     def update_segmentation(self):
+        """Update self.stages['Segmentation'].config.seg_tool when ``parcellation_scheme`` is updated."""
         if self.stages['Parcellation'].config.parcellation_scheme == 'Custom':
             self.stages['Segmentation'].config.seg_tool = "Custom segmentation"
         else:
             self.stages['Segmentation'].config.seg_tool = 'Freesurfer'
 
     def define_custom_mapping(self, custom_last_stage):
+        """Define the pipeline to be executed until a specific stages.
+
+        Not used yet by CMP3.
+
+        Parameters
+        ----------
+        custom_last_stage : string
+            Last stage to execute. Valid values are
+            "Segmentation" and "Parcellation"
+        """
         # start by disabling all stages
         for stage in self.ordered_stage_list:
             self.stages[stage].enabled = False
@@ -156,6 +202,24 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 break
 
     def check_input(self, layout, gui=True):
+        """Check if input of the anatomical pipeline are available.
+
+        Parameters
+        ----------
+        layout : bids.BIDSLayout
+            Instance of BIDSLayout
+
+        gui : traits.Bool
+            Boolean used to display different messages
+            but not really meaningful anymore since the GUI
+            components have been migrated to ``cmp.bidsappmanager``
+
+        Returns
+        -------
+
+        valid_inputs : traits.Bool
+            True if inputs are available
+        """
         print('**** Check Inputs  ****')
         t1_available = False
         t1_json_available = False
@@ -265,7 +329,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             print(input_message)
 
-        if (t1_available):
+        if t1_available:
             valid_inputs = True
         else:
             print(
@@ -285,6 +349,18 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return valid_inputs
 
     def check_output(self):
+        """Check if outputs of an :class:`AnatomicalPipeline` are available.
+
+        Returns
+        -------
+
+        valid_output <Bool>
+            True if all outputs are found
+
+        error_message <string>
+            Error message if an output is not found.
+
+        """
         t1_available = False
         brain_available = False
         brainmask_available = False
@@ -363,6 +439,23 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return valid_output, error_message
 
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
+        """Create the pipeline workflow.
+
+        Parameters
+        ----------
+        cmp_deriv_subject_directory <Directory>
+            Main CMP output directory of a subject
+            e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
+
+        nipype_deriv_subject_directory <Directory>
+            Intermediate Nipype output directory of a subject
+            e.g. ``/output_dir/nipype/sub-XX/(ses-YY)``
+
+        Returns
+        -------
+        anat_flow <nipype.pipeline.engine.Workflow>
+            An instance of :class:`nipype.pipeline.engine.Workflow`
+        """
         # subject_directory = self.subject_directory
 
         # Data import
@@ -614,7 +707,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.clear_stages_outputs()
 
         # Create common_flow
-
         anat_flow = pe.Workflow(name='anatomical_pipeline', base_dir=os.path.abspath(
             nipype_deriv_subject_directory))
         anat_inputnode = pe.Node(interface=util.IdentityInterface(
@@ -754,6 +846,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return anat_flow
 
     def process(self):
+        """Executes the pipeline workflow and returns True if successful."""
         # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 
@@ -809,7 +902,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         anat_flow.write_graph(graph2use='colored',
                               format='svg', simple_form=True)
 
-        if (self.number_of_cores != 1):
+        if self.number_of_cores != 1:
             anat_flow.run(plugin='MultiProc', plugin_args={
                           'n_procs': self.number_of_cores})
         else:
