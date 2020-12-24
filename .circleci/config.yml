@@ -959,6 +959,8 @@ jobs:
       - run:
           name: 'Write Sylabs.io TOKEN'
           command: |
+            mkdir -p ~/.singularity
+            touch ~/.singularity/sylabs-token
             echo "${SINGULARITY_TOKEN}" > ~/.singularity/sylabs-token
             cat ~/.singularity/sylabs-token
       - run:
@@ -991,6 +993,8 @@ jobs:
       - run:
           name: 'Write Sylabs.io TOKEN'
           command: |
+            mkdir -p ~/.singularity
+            touch ~/.singularity/sylabs-token
             echo "${SINGULARITY_TOKEN}" > ~/.singularity/sylabs-token
             cat ~/.singularity/sylabs-token
       - run:
