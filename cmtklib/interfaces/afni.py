@@ -147,7 +147,6 @@ class Bandpass(AFNICommand):
         return outputs
 
 
-
 class DespikeInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc="input file to 3dDespike",

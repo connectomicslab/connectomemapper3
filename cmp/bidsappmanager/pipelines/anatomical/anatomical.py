@@ -28,6 +28,7 @@ from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStag
 
 from cmp.pipelines.common import Pipeline
 from cmp.pipelines.anatomical.anatomical import Global_Configuration, Check_Input_Notification, AnatomicalPipeline
+from cmtklib.util import return_button_style_sheet
 
 
 class Check_Input_NotificationUI(Check_Input_Notification):
@@ -76,12 +77,12 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
     view_mode = Enum('config_view', ['config_view', 'inspect_outputs_view'])
 
     pipeline_group = VGroup(
-        HGroup(spring, UItem('segmentation', style='custom', width=450, height=170, resizable=True,
-                             editor_args={'image': ImageResource('segmentation'), 'label': ""}), spring,
+        HGroup(spring, UItem('segmentation', style='custom', width=222, height=129, resizable=False,
+                             style_sheet=return_button_style_sheet(ImageResource('segmentation').absolute_path, 222)), spring,
                show_labels=False, label=""),
         # Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
-        HGroup(spring, UItem('parcellation', style='custom', width=450, height=200, resizable=True,
-                             editor_args={'image': ImageResource('parcellation'), 'label': ""}), spring,
+        HGroup(spring, UItem('parcellation', style='custom', width=222, height=129, resizable=False,
+                             style_sheet=return_button_style_sheet(ImageResource('parcellation').absolute_path, 222)), spring,
                show_labels=False, label=""),
         spring,
         springy=True
@@ -154,6 +155,9 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         layout : bids.BIDSLayout
             BIDSLayout object used to query
 
+        gui : Boolean
+            If `True` display messages and errors in graphical window
+
         Returns
         -------
         valid_inputs : bool
@@ -211,14 +215,16 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         # diffusion_imaging_model = diffusion_imaging_model[0]
 
         if gui:
-            # input_notification = Check_Input_Notification(message=input_message, diffusion_imaging_model_options=diffusion_imaging_model,diffusion_imaging_model=diffusion_imaging_model)
+            # input_notification = Check_Input_Notification(message=input_message,
+            #                                               diffusion_imaging_model_options=diffusion_imaging_model,
+            #                                               diffusion_imaging_model=diffusion_imaging_model)
             # input_notification.configure_traits()
             print(input_message)
 
         else:
             print(input_message)
 
-        if (t1_available):
+        if t1_available:
             valid_inputs = True
         else:
             print("Missing required inputs.")

@@ -28,7 +28,7 @@ def run(command, env=None, cwd=None):
 
     Examples
     --------
-    >>> cmd = 'data save - 'Save the state of the dataset'
+    >>> cmd = 'datalad save'
     >>> run(cmd) # doctest: +SKIP
     """
     if (cwd is None) or (cwd == {}):

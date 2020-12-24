@@ -259,7 +259,7 @@ class fMRIPipeline(Pipeline):
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
                 # print fmri_file
             else:
-                print("ERROR : BOLD image not found for subject %s." % (subjid))
+                print("ERROR : BOLD image not found for subject %s." % subjid)
                 return
 
             files = layout.get(
@@ -268,7 +268,7 @@ class fMRIPipeline(Pipeline):
                 json_file = os.path.join(files[0].dirname, files[0].filename)
                 # print json_file
             else:
-                print("WARNING : BOLD json sidecar not found for subject %s." % (subjid))
+                print("WARNING : BOLD json sidecar not found for subject %s." % subjid)
 
             files = layout.get(subject=subjid, suffix='T1w',
                                extensions='.nii.gz')
@@ -276,7 +276,7 @@ class fMRIPipeline(Pipeline):
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
                 # print t2_file
             else:
-                print("WARNING : T1w image not found for subject %s." % (subjid))
+                print("WARNING : T1w image not found for subject %s." % subjid)
 
             files = layout.get(subject=subjid, suffix='T2w',
                                extensions='.nii.gz')
@@ -284,7 +284,7 @@ class fMRIPipeline(Pipeline):
                 t2_file = os.path.join(files[0].dirname, files[0].filename)
                 # print t2_file
             else:
-                print("WARNING : T2w image not found for subject %s." % (subjid))
+                print("WARNING : T2w image not found for subject %s." % subjid)
 
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
@@ -490,7 +490,7 @@ class fMRIPipeline(Pipeline):
 
         # try:
 
-        if (self.number_of_cores != 1):
+        if self.number_of_cores != 1:
             flow.run(plugin='MultiProc', plugin_args={
                      'n_procs': self.number_of_cores})
         else:

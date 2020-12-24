@@ -235,7 +235,7 @@ class DiffusionPipeline(Pipeline):
         # if self.stages['MRTrixConnectome'].config.output_types == []:
         #     return('\n\tNo output type selected for the connectivity matrices.\t\n\t'
         #            'Please select at least one output type in the connectome configuration window.\t\n')
-        if self.stages['Connectome'].config.output_types == []:
+        if not self.stages['Connectome'].config.output_types:
             message = (
                 '\n\tNo output type selected for the connectivity matrices.\t\n\t'
                 'Please select at least one output type in the connectome configuration window.\t\n')
@@ -318,11 +318,6 @@ class DiffusionPipeline(Pipeline):
             # self.global_conf.subjects = ['sub-'+str(subj) for subj in layout.get_subjects()]
             self.global_conf.modalities = [
                 str(mod) for mod in layout.get_modalities()]
-            # mods = layout.get_modalities()
-            # types = layout.get_modalities()
-            # print "Available modalities :"
-            # for mod in mods:
-            #     print "-%s" % mod
 
             print("> Looking for....")
 
@@ -343,7 +338,7 @@ class DiffusionPipeline(Pipeline):
                         # print(dwi_file)
                 else:
                     print(
-                        "ERROR : Diffusion image not found for subject %s." % (subjid))
+                        "ERROR : Diffusion image not found for subject %s." % subjid)
                     return
 
                 files = layout.get(
@@ -362,7 +357,7 @@ class DiffusionPipeline(Pipeline):
                 else:
                     json_file = 'NotFound'
                     print(
-                        "WARNING : Diffusion json sidecar not found for subject %s." % (subjid))
+                        "WARNING : Diffusion json sidecar not found for subject %s." % subjid)
 
                 files = layout.get(
                     subject=subjid, suffix='dwi', extensions='.bval')
@@ -379,7 +374,7 @@ class DiffusionPipeline(Pipeline):
                         # print(bval_file)
                 else:
                     print(
-                        "ERROR : Diffusion bval image not found for subject %s." % (subjid))
+                        "ERROR : Diffusion bval image not found for subject %s." % subjid)
                     return
 
                 files = layout.get(
@@ -397,7 +392,7 @@ class DiffusionPipeline(Pipeline):
                         # print(bvec_file)
                 else:
                     print(
-                        "ERROR : Diffusion bvec image not found for subject %s." % (subjid))
+                        "ERROR : Diffusion bvec image not found for subject %s." % subjid)
                     return
             else:
                 sessid = self.global_conf.subject_session.split("-")[1]
@@ -562,7 +557,7 @@ class DiffusionPipeline(Pipeline):
             self.stages['Registration'].config.diffusion_imaging_model = self.diffusion_imaging_model
             self.stages['Diffusion'].config.diffusion_imaging_model = self.diffusion_imaging_model
 
-        if (diffusion_available):
+        if diffusion_available:
             valid_inputs = True
         else:
             print(
@@ -1020,18 +1015,6 @@ class DiffusionPipeline(Pipeline):
                                        name='outputnode')
         diffusion_flow.add_nodes([diffusion_inputnode, diffusion_outputnode])
 
-        # diffusion_flow.connect([
-        #               (datasource,diffusion_inputnode,[("diffusion","diffusion"),("bvecs","bvecs"),("bvals","bvals")]),
-        #               (self.anat_flow,diffusion_inputnode,[("outputnode.subjects_dir","subjects_dir"),("outputnode.subject_id","subject_id"),
-        #                                            ("outputnode.T1","T1"),
-        #                                            ("outputnode.brain","brain"),
-        #                                            ("outputnode.brain_mask","brain_mask"),
-        #                                            ("outputnode.wm_mask_file","wm_mask_file"),
-        #                                            ( "outputnode.roi_volumes","roi_volumes"),
-        #                                            ("outputnode.parcellation_scheme","parcellation_scheme"),
-        #                                            ("outputnode.atlas_info","atlas_info")]),
-        #               ])
-
         diffusion_flow.connect([
             (datasource, diffusion_inputnode, [("diffusion", "diffusion"),
                                                ("bvecs", "bvecs"),
@@ -1232,6 +1215,7 @@ class DiffusionPipeline(Pipeline):
             self.stages['Connectome'].config.probtrackx = False
             self.stages['Connectome'].config.subject = self.global_conf.subject
             con_flow = self.create_stage_flow("Connectome")
+
             diffusion_flow.connect([
                 (diffusion_inputnode, con_flow, [('parcellation_scheme', 'inputnode.parcellation_scheme'),
                                                  ('atlas_info',
@@ -1306,8 +1290,7 @@ class DiffusionPipeline(Pipeline):
             nipype_deriv_subject_directory = os.path.join(self.output_directory, "nipype", self.subject,
                                                           self.global_conf.subject_session)
 
-            self.subject = "_".join(
-                (self.subject, self.global_conf.subject_session))
+            self.subject = "_".join((self.subject, self.global_conf.subject_session))
 
         if not os.path.exists(os.path.join(nipype_deriv_subject_directory, "diffusion_pipeline")):
             try:
@@ -1339,7 +1322,8 @@ class DiffusionPipeline(Pipeline):
         flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory,
                                          nipype_deriv_subject_directory=nipype_deriv_subject_directory)
         flow.write_graph(graph2use='colored', format='svg', simple_form=True)
-        if (self.number_of_cores != 1):
+
+        if self.number_of_cores != 1:
             flow.run(plugin='MultiProc', plugin_args={
                      'n_procs': self.number_of_cores})
         else:

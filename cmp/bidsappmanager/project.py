@@ -21,9 +21,6 @@ import warnings
 from bids import BIDSLayout
 from pyface.api import FileDialog, OK
 
-warnings.filterwarnings(
-    "ignore", message="No valid root directory found for domain 'derivatives'.")
-
 # Own imports
 from . import core
 from . import gui
@@ -33,6 +30,10 @@ from cmp.bidsappmanager.pipelines.functional import fMRI as FMRI_pipeline
 from cmtklib.config import anat_load_config_ini, anat_save_config, \
     dmri_load_config_ini, dmri_save_config, fmri_load_config_ini, fmri_save_config, \
     get_anat_process_detail_ini, get_dmri_process_detail_ini, get_fmri_process_detail_ini
+
+
+warnings.filterwarnings(
+    "ignore", message="No valid root directory found for domain 'derivatives'.")
 
 
 def clean_cache(bids_root):
@@ -103,7 +104,10 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
     derivatives_directory : string
 
     subject : string
-        Subject label (``sub-XX``) for which we create the output folder hierarchy 
+        Subject label (``sub-XX``) for which we create the output folder hierarchy
+
+    session : string
+        Subject session label (``ses-YY``)
 
     input_folders : list of string
         List of folders to create in ``derivative_directory/sub-XX/(ses-YY)/`` folder
@@ -155,6 +159,9 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
 
     is_new_project : bool
         If True, this is a new project which has been never processed
+
+    gui : bool
+        If True, display messages in GUI
     """
     dmri_pipeline = Diffusion_pipeline.DiffusionPipelineUI(project_info)
 
@@ -186,7 +193,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
                     project_info.subject, project_info.subject_session))
             else:
                 project_info.dmri_config_file = os.path.join(derivatives_directory,
-                                                             '%s_diffusion_config.ini' % (project_info.subject))
+                                                             '%s_diffusion_config.ini' % project_info.subject)
 
             if os.path.exists(project_info.dmri_config_file):
                 warn_res = project_info.configure_traits(
@@ -228,6 +235,9 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
 
     is_new_project : bool
         If True, this is a new project which has been never processed
+
+    gui : bool
+        If True, display messgae in GUI
     """
     fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(project_info)
 
@@ -259,7 +269,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
                     project_info.subject, project_info.subject_session))
             else:
                 project_info.fmri_config_file = os.path.join(derivatives_directory,
-                                                             '%s_fMRI_config.ini' % (project_info.subject))
+                                                             '%s_fMRI_config.ini' % project_info.subject)
 
             if os.path.exists(project_info.fmri_config_file):
                 warn_res = project_info.configure_traits(
@@ -297,9 +307,6 @@ def init_anat_project(project_info, is_new_project):
     project_info : CMP_Project_InfoUI
         Instance of :class:`CMP_Project_InfoUI` class
 
-    bids_layout : bids.BIDSLayout
-        PyBIDS BIDS Layout object describing the BIDS dataset
-
     is_new_project : bool
         If True, this is a new project which has been never processed
     """
@@ -321,7 +328,7 @@ def init_anat_project(project_info, is_new_project):
                 project_info.subject, project_info.subject_session))
         else:
             project_info.anat_config_file = os.path.join(derivatives_directory,
-                                                         '%s_anatomical_config.ini' % (project_info.subject))
+                                                         '%s_anatomical_config.ini' % project_info.subject)
 
         if os.path.exists(project_info.anat_config_file):
             warn_res = project_info.configure_traits(view='anat_warning_view')
@@ -613,16 +620,15 @@ class CMP_ConfigQualityWindowHandler(Handler):
                         self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
                     self.project_loaded = True
 
-                    ui_info.ui.context["object"].project_info.parcellation_scheme = get_anat_process_detail_ini(new_project,
-                                                                                                            'parcellation_stage',
-                                                                                                            'parcellation_scheme')
+                    ui_info.ui.context["object"].project_info.parcellation_scheme = get_anat_process_detail_ini(
+                            new_project, 'parcellation_stage', 'parcellation_scheme')
                     ui_info.ui.context["object"].project_info.freesurfer_subjects_dir = get_anat_process_detail_ini(
-                        new_project, 'segmentation_stage', 'freesurfer_subjects_dir')
+                            new_project, 'segmentation_stage', 'freesurfer_subjects_dir')
                     ui_info.ui.context["object"].project_info.freesurfer_subject_id = get_anat_process_detail_ini(
-                        new_project, 'segmentation_stage', 'freesurfer_subject_id')
+                            new_project, 'segmentation_stage', 'freesurfer_subject_id')
                     
                     dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
-                        new_project, bids_layout, True)
+                            new_project, bids_layout, True)
                     if self.dmri_pipeline is not None:
                         if dmri_inputs_checked:
                             self.dmri_pipeline.number_of_cores = new_project.number_of_cores
@@ -729,10 +735,10 @@ class CMP_ConfigQualityWindowHandler(Handler):
                                 "sub-%s_ses-%s" % (subj, subj_session))
                 else:
                     config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                               "sub-%s_anatomical_config.ini" % (subj))
+                                               "sub-%s_anatomical_config.ini" % subj)
                     if os.path.isfile(config_file):
                         loaded_project.anat_available_config.append(
-                            "sub-%s" % (subj))
+                            "sub-%s" % subj)
                         print("no session")
 
             print("loaded_project.anat_available_config : ")
@@ -772,14 +778,14 @@ class CMP_ConfigQualityWindowHandler(Handler):
                 loaded_project.subject_session = ''
                 print("No session")
 
-            loaded_project.parcellation_scheme = get_anat_process_detail_ini(loaded_project, 'parcellation_stage',
-                                                                         'parcellation_scheme')
+            loaded_project.parcellation_scheme = get_anat_process_detail_ini(
+                    loaded_project, 'parcellation_stage', 'parcellation_scheme')
             loaded_project.atlas_info = get_anat_process_detail_ini(
-                loaded_project, 'parcellation_stage', 'atlas_info')
-            loaded_project.freesurfer_subjects_dir = get_anat_process_detail_ini(loaded_project, 'segmentation_stage',
-                                                                             'freesurfer_subjects_dir')
-            loaded_project.freesurfer_subject_id = get_anat_process_detail_ini(loaded_project, 'segmentation_stage',
-                                                                           'freesurfer_subject_id')
+                    loaded_project, 'parcellation_stage', 'atlas_info')
+            loaded_project.freesurfer_subjects_dir = get_anat_process_detail_ini(
+                    loaded_project, 'segmentation_stage', 'freesurfer_subjects_dir')
+            loaded_project.freesurfer_subject_id = get_anat_process_detail_ini(
+                    loaded_project, 'segmentation_stage', 'freesurfer_subject_id')
 
             self.anat_pipeline = init_anat_project(loaded_project, False)
             if self.anat_pipeline is not None:
@@ -822,10 +828,10 @@ class CMP_ConfigQualityWindowHandler(Handler):
                             "%s_ses-%s" % (loaded_project.subject, subj_session))
             else:
                 config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                           "sub-%s_diffusion_config.ini" % (loaded_project.subject))
+                                           "sub-%s_diffusion_config.ini" % loaded_project.subject)
                 if os.path.isfile(config_file):
                     loaded_project.dmri_available_config.append(
-                        "%s" % (loaded_project.subject))
+                        "%s" % loaded_project.subject)
                     print("no session")
 
             print("loaded_project.dmri_available_config:")
@@ -853,9 +859,9 @@ class CMP_ConfigQualityWindowHandler(Handler):
             if os.path.isfile(loaded_project.dmri_config_file):
                 print("Load existing diffusion config file")
                 loaded_project.process_type = get_dmri_process_detail_ini(
-                    loaded_project, 'Global', 'process_type')
-                loaded_project.diffusion_imaging_model = get_dmri_process_detail_ini(loaded_project, 'Global',
-                                                                                 'diffusion_imaging_model')
+                        loaded_project, 'Global', 'process_type')
+                loaded_project.diffusion_imaging_model = get_dmri_process_detail_ini(
+                        loaded_project, 'Global', 'diffusion_imaging_model')
 
                 dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
                     loaded_project, bids_layout, False)
@@ -871,8 +877,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                         self.dmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
                         self.dmri_pipeline.atlas_info = loaded_project.atlas_info
                         ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
-                        ui_info.ui.context["object"].dmri_pipeline.number_of_cores = ui_info.ui.context[
-                            "object"].project_info.number_of_cores
+                        ui_info.ui.context["object"].dmri_pipeline.number_of_cores = ui_info.ui.context["object"].project_info.number_of_cores
                         self.dmri_inputs_checked = dmri_inputs_checked
                         ui_info.ui.context["object"].project_info.dmri_available = self.dmri_inputs_checked
                         dmri_save_config(
@@ -916,10 +921,10 @@ class CMP_ConfigQualityWindowHandler(Handler):
                             "%s_ses-%s" % (loaded_project.subject, subj_session))
             else:
                 config_file = os.path.join(loaded_project.base_directory, 'derivatives',
-                                           "sub-%s_fMRI_config.ini" % (loaded_project.subject))
+                                           "sub-%s_fMRI_config.ini" % loaded_project.subject)
                 if os.path.isfile(config_file):
                     loaded_project.fmri_available_config.append(
-                        "sub-%s" % (loaded_project.subject))
+                        "sub-%s" % loaded_project.subject)
                     print("no session")
 
             print("loaded_project.fmri_available_config:")
@@ -948,8 +953,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                 loaded_project.process_type = get_fmri_process_detail_ini(
                     loaded_project, 'Global', 'process_type')
 
-                fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
-                    loaded_project, bids_layout, False)
+                fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(loaded_project, bids_layout, False)
                 if self.fmri_pipeline is not None:
                     if fmri_inputs_checked:
                         update_fmri_last_processed(
@@ -972,8 +976,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                             self.fmri_pipeline, ui_info.ui.context["object"].project_info.fmri_config_file)
                         self.project_loaded = True
             else:
-                fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
-                    loaded_project, bids_layout, True)
+                fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(loaded_project, bids_layout, True)
                 print(
                     "No existing config for fMRI pipeline found - Created new fMRI pipeline with default parameters")
                 if self.fmri_pipeline is not None:
@@ -1026,7 +1029,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
             self.anat_pipeline.subject_directory = os.path.join(
                 updated_project.base_directory, updated_project.subject)
             updated_project.anat_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_anatomical_config.ini' % (updated_project.subject))
+                                                            '%s_anatomical_config.ini' % updated_project.subject)
 
         self.anat_pipeline.derivatives_directory = os.path.join(
             updated_project.base_directory, 'derivatives')
@@ -1035,14 +1038,14 @@ class CMP_ConfigQualityWindowHandler(Handler):
             print("Existing anatomical config file for subject %s: %s" % (
                 updated_project.subject, updated_project.anat_config_file))
 
-            updated_project.parcellation_scheme = get_anat_process_detail_ini(updated_project, 'parcellation_stage',
-                                                                          'parcellation_scheme')
+            updated_project.parcellation_scheme = get_anat_process_detail_ini(
+                    updated_project, 'parcellation_stage', 'parcellation_scheme')
             updated_project.atlas_info = get_anat_process_detail_ini(
-                updated_project, 'parcellation_stage', 'atlas_info')
-            updated_project.freesurfer_subjects_dir = get_anat_process_detail_ini(updated_project, 'segmentation_stage',
-                                                                              'freesurfer_subjects_dir')
-            updated_project.freesurfer_subject_id = get_anat_process_detail_ini(updated_project, 'segmentation_stage',
-                                                                            'freesurfer_subject_id')
+                    updated_project, 'parcellation_stage', 'atlas_info')
+            updated_project.freesurfer_subjects_dir = get_anat_process_detail_ini(
+                    updated_project, 'segmentation_stage', 'freesurfer_subjects_dir')
+            updated_project.freesurfer_subject_id = get_anat_process_detail_ini(
+                    updated_project, 'segmentation_stage', 'freesurfer_subject_id')
 
             self.anat_pipeline = init_anat_project(updated_project, False)
             if self.anat_pipeline is not None:
@@ -1064,12 +1067,10 @@ class CMP_ConfigQualityWindowHandler(Handler):
                                      ui_info.project_info.anat_config_file)
                     self.project_loaded = True
                     self.anat_outputs_checked, msg = self.anat_pipeline.check_output()
-                    print("anat_outputs_checked : %s" %
-                          self.anat_outputs_checked)
+                    print("anat_outputs_checked : %s" % self.anat_outputs_checked)
 
         else:
-            print("Unprocessed anatomical data for subject %s" %
-                  updated_project.subject)
+            print("Unprocessed anatomical data for subject %s" % updated_project.subject)
             self.anat_pipeline = init_anat_project(updated_project, True)
             if self.anat_pipeline is not None:  # and self.dmri_pipeline is not None:
                 anat_inputs_checked = self.anat_pipeline.check_input(
@@ -1088,12 +1089,12 @@ class CMP_ConfigQualityWindowHandler(Handler):
                                      ui_info.project_info.anat_config_file)
                     self.project_loaded = True
 
-            ui_info.project_info.parcellation_scheme = get_anat_process_detail_ini(updated_project, 'parcellation_stage',
-                                                                               'parcellation_scheme')
-            ui_info.project_info.freesurfer_subjects_dir = get_anat_process_detail_ini(updated_project, 'segmentation_stage',
-                                                                                   'freesurfer_subjects_dir')
-            ui_info.project_info.freesurfer_subject_id = get_anat_process_detail_ini(updated_project, 'segmentation_stage',
-                                                                                 'freesurfer_subject_id')
+            ui_info.project_info.parcellation_scheme = get_anat_process_detail_ini(
+                    updated_project, 'parcellation_stage', 'parcellation_scheme')
+            ui_info.project_info.freesurfer_subjects_dir = get_anat_process_detail_ini(
+                    updated_project, 'segmentation_stage', 'freesurfer_subjects_dir')
+            ui_info.project_info.freesurfer_subject_id = get_anat_process_detail_ini(
+                    updated_project, 'segmentation_stage', 'freesurfer_subject_id')
 
         return ui_info
 
@@ -1124,7 +1125,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
             self.dmri_pipeline.subject_directory = os.path.join(
                 updated_project.base_directory, updated_project.subject)
             updated_project.dmri_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_diffusion_config.ini' % (updated_project.subject))
+                                                            '%s_diffusion_config.ini' % updated_project.subject)
 
         self.dmri_pipeline.derivatives_directory = os.path.join(
             updated_project.base_directory, 'derivatives')
@@ -1132,12 +1133,11 @@ class CMP_ConfigQualityWindowHandler(Handler):
         if os.path.isfile(updated_project.dmri_config_file):
             print("Load existing diffusion config file")
             updated_project.process_type = get_dmri_process_detail_ini(
-                updated_project, 'Global', 'process_type')
-            updated_project.diffusion_imaging_model = get_dmri_process_detail_ini(updated_project, 'diffusion_stage',
-                                                                              'diffusion_imaging_model')
+                    updated_project, 'Global', 'process_type')
+            updated_project.diffusion_imaging_model = get_dmri_process_detail_ini(
+                    updated_project, 'diffusion_stage', 'diffusion_imaging_model')
 
-            dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
-                updated_project, bids_layout, False)
+            dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(updated_project, bids_layout, False)
             if self.dmri_pipeline is not None:  # and self.dmri_pipeline is not None:
                 if dmri_inputs_checked:
                     update_dmri_last_processed(
@@ -1159,8 +1159,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     ui_info.project_info.on_trait_change(ui_info.update_diffusion_imaging_model,
                                                          'diffusion_imaging_model')
         else:
-            dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
-                updated_project, bids_layout, True)
+            dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(updated_project, bids_layout, True)
             print("No existing config for diffusion pipeline found - Created new diffusion pipeline with default parameters")
             if self.dmri_pipeline is not None:  # and self.dmri_pipeline is not None:
                 if dmri_inputs_checked:
@@ -1218,7 +1217,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
             self.fmri_pipeline.subject_directory = os.path.join(updated_project.base_directory,
                                                                 ui_info.project_info.subject)
             updated_project.fmri_config_file = os.path.join(updated_project.base_directory, 'derivatives',
-                                                            '%s_fMRI_config.ini' % (updated_project.subject))
+                                                            '%s_fMRI_config.ini' % updated_project.subject)
 
         self.fmri_pipeline.derivatives_directory = os.path.join(
             updated_project.base_directory, 'derivatives')
@@ -1476,6 +1475,9 @@ class CMP_MainWindowHandler(Handler):
         ----------
         ui_info : QtView
             TraitsUI QtView associated with ``self``
+
+        debug : bool
+            If True, print more information for debugging
         """
         loaded_project = gui.CMP_Project_InfoUI()
         np_res = loaded_project.configure_traits(view='open_view')
@@ -1723,12 +1725,12 @@ class CMP_MainWindowHandler(Handler):
                 ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
                 loaded_project.t1_available = self.anat_inputs_checked
 
-                loaded_project.parcellation_scheme = get_anat_process_detail_ini(loaded_project, 'parcellation_stage',
-                                                                             'parcellation_scheme')
-                loaded_project.freesurfer_subjects_dir = get_anat_process_detail_ini(loaded_project, 'segmentation_stage',
-                                                                                 'freesurfer_subjects_dir')
-                loaded_project.freesurfer_subject_id = get_anat_process_detail_ini(loaded_project, 'segmentation_stage',
-                                                                               'freesurfer_subject_id')
+                loaded_project.parcellation_scheme = get_anat_process_detail_ini(
+                        loaded_project, 'parcellation_stage', 'parcellation_scheme')
+                loaded_project.freesurfer_subjects_dir = get_anat_process_detail_ini(
+                        loaded_project, 'segmentation_stage', 'freesurfer_subjects_dir')
+                loaded_project.freesurfer_subject_id = get_anat_process_detail_ini(
+                        loaded_project, 'segmentation_stage', 'freesurfer_subject_id')
 
                 ui_info.ui.context["object"].project_info = loaded_project
 
@@ -1797,9 +1799,9 @@ class CMP_MainWindowHandler(Handler):
                                 print(files)
                                 print('****************************************')
 
-                            if (loaded_project.dmri_bids_acq != ''):
+                            if loaded_project.dmri_bids_acq != '':
                                 for file in files:
-                                    if (loaded_project.dmri_bids_acq in file):
+                                    if loaded_project.dmri_bids_acq in file:
                                         dwi_file = file
                                         print('Loaded DWI file: {}'.format(dwi_file))
                                         break
@@ -2073,7 +2075,7 @@ class CMP_BIDSAppWindowHandler(Handler):
             while len(processes) == maxprocs:
                 self.manage_bidsapp_procs(processes)
 
-            proc = self.start_bidsapp_process(ui_info, label)
+            proc = self.start_bidsapp_process(ui_info, label=label)
             processes.append(proc)
 
         while len(processes) > 0:

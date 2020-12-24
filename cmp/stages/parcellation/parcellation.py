@@ -504,7 +504,7 @@ class ParcellationStage(Stage):
         # print self.config.atlas_info
 
         if self.config.parcellation_scheme != "Custom":
-            if (os.path.exists(anat_sinker_report)):
+            if os.path.exists(anat_sinker_report):
                 anat_outputs = get_pipeline_dictionary_outputs(anat_sinker_report, self.output_dir)
 
                 white_matter_file = anat_outputs['anat.@wm_mask']
@@ -518,7 +518,7 @@ class ParcellationStage(Stage):
                     roi_v = anat_outputs['anat.@roivs']
 
                     # print "roi_v : %s" % os.path.basename(roi_v)
-                    if (os.path.exists(white_matter_file) and os.path.exists(roi_v)):
+                    if os.path.exists(white_matter_file) and os.path.exists(roi_v):
                         self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview', '-v',
                                                                               white_matter_file + ':colormap=GEColor',
                                                                               roi_v + ":colormap=lut:lut=" + lut_file]
@@ -539,10 +539,10 @@ class ParcellationStage(Stage):
                                                                                                resolution[scale],
                                                                                                resolution[
                                                                                                    scale] + '_LUT.txt'))
-                            if (os.path.exists(white_matter_file) and os.path.exists(roi_v)):
+                            if os.path.exists(white_matter_file) and os.path.exists(roi_v):
                                 self.inspect_outputs_dict[roi_basename] = ['freeview', '-v',
-                                                                            white_matter_file + ':colormap=GEColor',
-                                                                            roi_v + ":colormap=lut:lut=" + lut_file]
+                                                                           white_matter_file + ':colormap=GEColor',
+                                                                           roi_v + ":colormap=lut:lut=" + lut_file]
                     elif self.config.parcellation_scheme == 'Lausanne2018':
                         # resolution = {'1':'resolution1','2':'resolution2','3':'resolution3','4':'resolution4','5':'resolution5'}
 
@@ -550,10 +550,10 @@ class ParcellationStage(Stage):
                                                    anat_outputs['anat.@luts']):
                             roi_basename = os.path.basename(roi_v)
 
-                            if (os.path.exists(white_matter_file) and os.path.exists(roi_v)):
+                            if os.path.exists(white_matter_file) and os.path.exists(roi_v):
                                 self.inspect_outputs_dict[roi_basename] = ['freeview', '-v',
-                                                                            white_matter_file + ':colormap=GEColor',
-                                                                            roi_v + ":colormap=lut:lut=" + lut_file]
+                                                                           white_matter_file + ':colormap=GEColor',
+                                                                           roi_v + ":colormap=lut:lut=" + lut_file]
 
                 # self.inspect_outputs = self.inspect_outputs_dict.keys()
         # else:

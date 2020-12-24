@@ -24,6 +24,7 @@ from cmp.bidsappmanager.stages.registration.registration import RegistrationStag
 from cmp.bidsappmanager.stages.functional.functionalMRI import FunctionalMRIStageUI
 from cmp.bidsappmanager.stages.connectome.fmri_connectome import ConnectomeStageUI
 from cmp.pipelines.functional.fMRI import Check_Input_Notification, fMRIPipeline
+from cmtklib.util import return_button_style_sheet
 
 
 class Check_Input_NotificationUI(Check_Input_Notification):
@@ -79,17 +80,17 @@ class fMRIPipelineUI(fMRIPipeline):
     connectome = Button('Connectome')
 
     pipeline_group = VGroup(
-        HGroup(spring, UItem('preprocessing', style='custom', width=450, height=130, resizable=True,
-                             editor_args={'image': ImageResource('preprocessing'), 'label': ""}), spring,
+        HGroup(spring, UItem('preprocessing', style='custom', width=222, height=129, resizable=False,
+                             style_sheet=return_button_style_sheet(ImageResource('preprocessing').absolute_path, 222)), spring,
                show_labels=False, label=""),
-        HGroup(spring, UItem('registration', style='custom', width=500, height=110, resizable=True,
-                             editor_args={'image': ImageResource('registration'), 'label': ""}), spring,
+        HGroup(spring, UItem('registration', style='custom', width=222, height=129, resizable=False,
+                             style_sheet=return_button_style_sheet(ImageResource('registration').absolute_path, 222)), spring,
                show_labels=False, label=""),
-        HGroup(spring, UItem('functionalMRI', style='custom', width=450, height=240, resizable=True,
-                             editor_args={'image': ImageResource('functionalMRI'), 'label': ""}), spring,
+        HGroup(spring, UItem('functionalMRI', style='custom', width=222, height=168, resizable=False,
+                             style_sheet=return_button_style_sheet(ImageResource('functionalMRI').absolute_path, 222)), spring,
                show_labels=False, label=""),
-        HGroup(spring, UItem('connectome', style='custom', width=450, height=130, resizable=True,
-                             editor_args={'image': ImageResource('connectome'), 'label': ""}), spring,
+        HGroup(spring, UItem('connectome', style='custom', width=222, height=129, resizable=False,
+                             style_sheet=return_button_style_sheet(ImageResource('connectome').absolute_path, 222)), spring,
                show_labels=False, label=""),
         spring,
         springy=True
@@ -116,10 +117,10 @@ class fMRIPipelineUI(fMRIPipeline):
         self.stages = {'Preprocessing': PreprocessingStageUI(bids_dir=project_info.base_directory,
                                                              output_dir=project_info.output_directory),
                        'Registration': RegistrationStageUI(pipeline_mode="fMRI",
-                                                         fs_subjects_dir=project_info.freesurfer_subjects_dir,
-                                                         fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
-                                                         bids_dir=project_info.base_directory,
-                                                         output_dir=self.output_directory),
+                                                           fs_subjects_dir=project_info.freesurfer_subjects_dir,
+                                                           fs_subject_id=os.path.basename(project_info.freesurfer_subject_id),
+                                                           bids_dir=project_info.base_directory,
+                                                           output_dir=self.output_directory),
                        'FunctionalMRI': FunctionalMRIStageUI(bids_dir=project_info.base_directory,
                                                              output_dir=project_info.output_directory),
                        'Connectome': ConnectomeStageUI(bids_dir=project_info.base_directory,
@@ -199,6 +200,9 @@ class fMRIPipelineUI(fMRIPipeline):
         layout : bids.BIDSLayout
             BIDSLayout object used to query
 
+        gui : bool
+            If True, display message in GUI
+
         Returns
         -------
         valid_inputs : bool
@@ -238,7 +242,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
                 print(fmri_file)
             else:
-                error(message="BOLD image not found for subject %s." % (subjid), title="Error",
+                error(message="BOLD image not found for subject %s." % subjid, title="Error",
                       buttons=['OK', 'Cancel'], parent=None)
                 return
 
@@ -248,7 +252,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 json_file = os.path.join(files[0].dirname, files[0].filename)
                 print(json_file)
             else:
-                error(message="BOLD json sidecar not found for subject %s." % (subjid), title="Warning",
+                error(message="BOLD json sidecar not found for subject %s." % subjid, title="Warning",
                       buttons=['OK', 'Cancel'], parent=None)
 
             files = layout.get(subject=subjid, suffix='T1w',
@@ -257,7 +261,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
                 print(t1_file)
             else:
-                error(message="T1w image not found for subject %s." % (subjid), title="Error", buttons=['OK', 'Cancel'],
+                error(message="T1w image not found for subject %s." % subjid, title="Error", buttons=['OK', 'Cancel'],
                       parent=None)
                 return
 
@@ -267,7 +271,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 t2_file = os.path.join(files[0].dirname, files[0].filename)
                 print(t2_file)
             else:
-                error(message="T2w image not found for subject %s." % (subjid), title="Warning",
+                error(message="T2w image not found for subject %s." % subjid, title="Warning",
                       buttons=['OK', 'Cancel'], parent=None)
 
         else:

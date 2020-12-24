@@ -361,7 +361,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                     project_info.subject, project_info.subject_session))
             else:
                 project_info.dmri_config_file = os.path.join(derivatives_directory,
-                                                             '%s_diffusion_config.ini' % (project_info.subject))
+                                                             '%s_diffusion_config.ini' % project_info.subject)
 
             if os.path.exists(project_info.dmri_config_file):
                 warn_res = project_info.configure_traits(
@@ -453,7 +453,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                     project_info.subject, project_info.subject_session))
             else:
                 project_info.fmri_config_file = os.path.join(derivatives_directory,
-                                                             '%s_fMRI_config.ini' % (project_info.subject))
+                                                             '%s_fMRI_config.ini' % project_info.subject)
 
             if os.path.exists(project_info.fmri_config_file):
                 warn_res = project_info.configure_traits(
@@ -495,15 +495,9 @@ def init_anat_project(project_info, is_new_project, debug=False):
     project_info : cmp.project.CMP_Project_Info
         Instance of ``cmp.project.CMP_Project_Info`` object
 
-    bids_layout : bids.BIDSLayout
-        Instance of ``BIDSLayout`` object
-
     is_new_project : bool
         Specify if it corresponds or not to a new project.
         If `True`, it will create initial pipeline configuration files.
-
-    gui : bool
-        Might be obsolete and removed in future versions
 
     debug : bool
         If `True`, display extra prints to support debugging
@@ -546,7 +540,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
                 project_info.subject, project_info.subject_session))
         else:
             project_info.anat_config_file = os.path.join(derivatives_directory,
-                                                         '%s_anatomical_config.ini' % (project_info.subject))
+                                                         '%s_anatomical_config.ini' % project_info.subject)
 
         if os.path.exists(project_info.anat_config_file):
             warn_res = project_info.configure_traits(view='anat_warning_view')

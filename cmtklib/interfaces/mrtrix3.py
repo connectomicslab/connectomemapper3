@@ -1271,10 +1271,10 @@ class GenerateGMWMInterface(CommandLine):
 
 class StreamlineTrackInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=2,
-                    desc='the image containing the source data.'
-                         'The type of data required depends on the type of tracking as set in the preceeding argument.'
-                         'For DT methods, the base DWI are needed.'
-                         'For SD methods, the SH harmonic coefficients of the FOD are needed.')
+                   desc='the image containing the source data.'
+                        'The type of data required depends on the type of tracking as set in the preceeding argument.'
+                        'For DT methods, the base DWI are needed.'
+                        'For SD methods, the SH harmonic coefficients of the FOD are needed.')
 
     seed_file = File(exists=True, argstr='-seed_image %s', desc='seed file')
 
@@ -1330,7 +1330,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
                                          desc='Sets the maximum number of tracks to generate.'
                                          'The program will not generate more tracks than this number,'
                                          "even if the desired number of tracks hasn't yet been reached"
-                                          '(default is 1000 x number of streamlines).')
+                                         '(default is 1000 x number of streamlines).')
 
     rk4 = traits.Bool(argstr='-rk4',
                       desc='use 4th-order Runge-Kutta integration (slower, but eliminates curvature overshoot in 1st-order deterministic methods)')
@@ -1366,13 +1366,13 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
 
     crop_at_gmwmi = traits.Bool(
         argstr='-crop_at_gmwmi',
-        desc=('crop streamline endpoints more precisely as they cross the GM-WM interface'))
+        desc='crop streamline endpoints more precisely as they cross the GM-WM interface')
 
     seed_gmwmi = File(
         exists=True,
         argstr='-seed_gmwmi %s',
         requires=['act_file'],
-        desc=('seed from the grey matter - white matter interface (only valid if using ACT framework)'))
+        desc='seed from the grey matter - white matter interface (only valid if using ACT framework)')
 
     out_file = File(argstr='%s', position=-1,
                     genfile=True, desc='output data file')
@@ -1469,21 +1469,69 @@ class MRTrix3Base(CommandLine):
 
 class FilterTractogramInputSpec(CommandLineInputSpec):
     in_tracks = File(exists=True, mandatory=True, argstr='%s',
-                     position=-3, desc='Input track file')
-
+                     position=-3, desc='Input track file in TCK format')
     in_fod = File(exists=True, mandatory=True, argstr='%s', position=-2,
                   desc='Input image containing the spherical harmonics of the fibre orientation distributions')
+    act_file = File(exists=True, argstr='-act %s',
+                    position=-4, desc='ACT 5TT image file')
+    out_file = File(argstr='%s', position=-1,
+                    desc='Output filtered tractogram')
 
+
+class FilterTractogramOutputSpec(TraitedSpec):
+    out_tracks = File(
+        exists=True, desc='Output filtered tractogram')
+
+
+class FilterTractogram(MRTrix3Base):
+    """Spherical-deconvolution informed filtering of tractograms using `tcksift` [Smith2013SIFT]_.
+
+    References
+    ----------
+    .. [Smith2013SIFT] R.E. Smith et al., NeuroImage 67 (2013), pp. 298–312, <https://www.ncbi.nlm.nih.gov/pubmed/23238430>.
+
+    Example
+    -------
+    >>> import cmtklib.interfaces.mrtrix3 as cmp_mrt
+    >>> mrtrix_sift = cmp_mrt.FilterTractogram()
+    >>> mrtrix_sift.inputs.in_tracks = 'tractogram.tck'
+    >>> mrtrix_sift.inputs.in_fod = 'spherical_harmonics_image.nii.gz'
+    >>> mrtrix_sift.inputs.out_file = 'sift_tractogram.tck'
+    >>> mrtrix_sift.run()                               # doctest: +SKIP
+    """
+
+    _cmd = 'tcksift'
+    input_spec = FilterTractogramInputSpec
+    output_spec = FilterTractogramOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if not isdefined(self.inputs.out_file):
+            outputs['out_tracks'] = op.abspath('SIFT-filtered_tractogram.tck')
+        else:
+            outputs['out_tracks'] = op.abspath(self.inputs.out_file)
+
+        return outputs
+
+
+class SIFT2InputSpec(CommandLineInputSpec):
+    in_tracks = File(exists=True, mandatory=True, argstr='%s',
+                     position=-3, desc='Input track file in TCK format')
+    in_fod = File(exists=True, mandatory=True, argstr='%s', position=-2,
+                  desc='Input image containing the spherical harmonics of the fibre orientation distributions')
+    act_file = File(exists=True, argstr='-act %s',
+                    position=-4, desc='ACT 5TT image file')
     out_file = File(argstr='%s', position=-1,
                     desc='Output text file containing the weighting factor for each streamline')
 
 
-class FilterTractogramOutputSpec(TraitedSpec):
+class SIFT2OutputSpec(TraitedSpec):
     out_weights = File(
-        exists=True, desc='Output text file containing the weighting factor for each streamline')
+            exists=True, desc='Output text file containing the weighting factor for each streamline')
 
 
-class FilterTractogram(MRTrix3Base):
+class SIFT2(MRTrix3Base):
     """Determine an appropriate cross-sectional area multiplier for each streamline using `tcksift2` [Smith2015SIFT2]_.
 
     References
@@ -1493,7 +1541,7 @@ class FilterTractogram(MRTrix3Base):
     Example
     -------
     >>> import cmtklib.interfaces.mrtrix3 as cmp_mrt
-    >>> mrtrix_sift2 = cmp_mrt.FilterTractogram()
+    >>> mrtrix_sift2 = cmp_mrt.SIFT2()
     >>> mrtrix_sift2.inputs.in_tracks = 'tractogram.tck'
     >>> mrtrix_sift2.inputs.in_fod = 'spherical_harmonics_image.nii.gz'
     >>> mrtrix_sift2.inputs.out_file = 'sift2_fiber_weights.txt'
