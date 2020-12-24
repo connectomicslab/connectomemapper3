@@ -29,33 +29,36 @@ Reproducibility and replicatibility is achieved through the distribution of a BI
 ### Usage
 This BIDS App has the following command line arguments:
 
-        $connectomemapper3 --help
+        $ docker run -it sebastientourbier/connectomemapper-bidsapp -h
 
-        <!-- usage: usage: run.py [-h]
+        usage: run.py [-h]
               [--participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]]
               [--session_label SESSION_LABEL [SESSION_LABEL ...]]
               [--anat_pipeline_config ANAT_PIPELINE_CONFIG]
               [--dwi_pipeline_config DWI_PIPELINE_CONFIG]
               [--func_pipeline_config FUNC_PIPELINE_CONFIG]
+              [--number_of_threads NUMBER_OF_THREADS]
               [--number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL]
-              [--fs_license FS_LICENSE] [-v]
+              [--mrtrix_random_seed MRTRIX_RANDOM_SEED]
+              [--ants_random_seed ANTS_RANDOM_SEED]
+              [--ants_number_of_threads ANTS_NUMBER_OF_THREADS]
+              [--fs_license FS_LICENSE] [--coverage] [--notrack] [-v]
               bids_dir output_dir {participant,group}
 
-        Entrypoint script of the Connectome Mapper BIDS-App
-
+        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-RC2
 
         positional arguments:
           bids_dir              The directory with the input dataset formatted
                                 according to the BIDS standard.
           output_dir            The directory where the output files should be stored.
                                 If you are running group level analysis this folder
-                                should be prepopulated with the results of
-                                theparticipant level analysis.
+                                should be prepopulated with the results of the
+                                participant level analysis.
           {participant,group}   Level of the analysis that will be performed. Multiple
                                 participant level analyses can be run independently
                                 (in parallel) using the same output_dir.
 
-       optional arguments:
+        optional arguments:
           -h, --help            show this help message and exit
           --participant_label PARTICIPANT_LABEL [PARTICIPANT_LABEL ...]
                                 The label(s) of the participant(s) that should be
@@ -80,12 +83,30 @@ This BIDS App has the following command line arguments:
           --func_pipeline_config FUNC_PIPELINE_CONFIG
                                 Configuration .txt file for processing stages of the
                                 fMRI processing pipeline
+          --number_of_threads NUMBER_OF_THREADS
+                                The number of OpenMP threads used for multi-threading
+                                by Freesurfer, FSL, MRtrix3, Dipy, AFNI (Set to
+                                [Number of available CPUs -1] by default).
           --number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL
                                 The number of subjects to be processed in parallel
-                                (One core used by default).
+                                (One by default).
+          --mrtrix_random_seed MRTRIX_RANDOM_SEED
+                                Fix MRtrix3 random number generator seed to the
+                                specified value
+          --ants_random_seed ANTS_RANDOM_SEED
+                                Fix ANTS random number generator seed to the specified
+                                value
+          --ants_number_of_threads ANTS_NUMBER_OF_THREADS
+                                Fix number of threads in ANTs. If not specified ANTs
+                                will use the same number as the number of OpenMP
+                                threads (see `----number_of_threads` option flag)
           --fs_license FS_LICENSE
                                 Freesurfer license.txt
+          --coverage            Run connectomemapper3 with coverage
+          --notrack             Do not send event to Google analytics to report BIDS
+                                App execution, which is enabled by default.
           -v, --version         show program's version number and exit
+
 
 ### Credits
 
