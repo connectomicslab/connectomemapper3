@@ -9,7 +9,7 @@ Connectome Mapper 3 BIDS App can be run on a cluster using Singularity.
 For your convenience, the Singularity image is automatically built along the docker image using Singularity 3.5.1 and deployed to `Sylabs.io <https://sylabs.io/>`_  as (equivalent of DockerHub for Singularity) during continuous integration on CircleCI. It can be freely downloaded with the following command:
 
 .. parsed-literal::
-    $ singularity pull library://connectomicslab/default/connectomemapper-bidsapp:|release|
+    $ singularity pull library://connectomicslab/default/connectomemapper-bidsapp:latest
 
 If you prefer, you can still build the Singularity image on your side using one of the 2 methods described in :ref:`Conversion to a Singularity image <simg_conversion>`.
 
@@ -27,7 +27,7 @@ The following example shows how to call from the terminal the Singularity image 
 .. parsed-literal::
 	$ singularity run --containall \\
             --bind ${localDir}:/bids_dir --bind ${localDir}/derivatives:/output_dir \\
-	        library://connectomicslab/default/connectomemapper-bidsapp:|release| \\
+	        library://connectomicslab/default/connectomemapper-bidsapp:latest \\
 	        /bids_dir /output_dir participant --participant_label 01 02 03 \\
 	        --anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \\
 	        --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \\
@@ -100,5 +100,5 @@ Useful singularity commands
 			$ singularity cache clean
 
 
-Created by Sebastien Tourbier - 2020 Mar 04 - Latest update: 2020 Dec 24
+Created by Sebastien Tourbier - 2020 Mar 04 - Latest update: 2021 Jan 04
 
