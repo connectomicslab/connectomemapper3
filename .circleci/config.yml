@@ -966,6 +966,7 @@ jobs:
       - run:
           name: 'Deploy simg with latest tag to Sylabs.io'
           command: |
+            singularity delete --arch=amd64 library://connectomicslab/default/connectomemapper-bidsapp:latest
             singularity push -U /tmp/cache/connectomemapper3.simg library://connectomicslab/default/connectomemapper-bidsapp:latest
 
   deploy_singularity_release:
