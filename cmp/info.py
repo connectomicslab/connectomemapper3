@@ -15,7 +15,7 @@ __version__ = "v%s.%s.%s%s" % (_version_major,
                                _version_extra)
 
 # __current_year__ = datetime.datetime.now().strftime("%Y")
-__current_year__ = '2020'
+__current_year__ = '2021'
 
 __author__ = 'The CMP3 developers'
 
