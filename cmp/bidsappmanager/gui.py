@@ -1116,16 +1116,10 @@ class CMP_BIDSAppWindow(HasTraits):
         """
 
         cmd = ['docker', 'run', '-it', '--rm',
-               # '-v', '{}:/bids_dataset'.format(self.bids_root),
-               # '-v', '{}/derivatives:/outputs'.format(self.bids_root),
-               # '-v', '{}:/bids_dataset/derivatives/freesurfer/fsaverage'.format(self.fs_average),
-               # '-v', '{}:/opt/freesurfer/license.txt'.format(self.fs_license),
-               # '-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config)
                '-v', '{}:/bids_dir'.format(self.bids_root),
                '-v', '{}:/output_dir'.format(self.output_dir),
                '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
                '-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config),
-               # '-v', '{}:/tmp/derivatives'.format(os.path.join(self.bids_root,'derivatives')),
                ]
 
         if self.run_dmri_pipeline:
