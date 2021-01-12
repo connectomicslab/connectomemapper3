@@ -33,6 +33,7 @@ import cmp.bidsappmanager.project as project
 from cmp.project import CMP_Project_Info
 from cmp.info import __version__
 
+from cmp.pipelines.anatomical.anatomical import AnatomicalPipeline
 from cmp.pipelines.diffusion.diffusion import DiffusionPipeline
 from cmp.pipelines.functional.fMRI import fMRIPipeline
 
@@ -913,31 +914,50 @@ class CMP_BIDSAppWindow(HasTraits):
             print("Exception : Raised at BIDSLayout")
             sys.exit(1)
 
-        # Check if dMRI data is available in the dataset
-        dmri_pipeline = DiffusionPipeline(project_info)
-        dmri_inputs_checked = dmri_pipeline.check_input(layout=bids_layout,
-                                                        gui=False)
+        # Check if sMRI data is available in the dataset
+        smri_files = bids_layout.get(datatype='anat',
+                                     suffix='T1w',
+                                     extensions='nii.gz',
+                                     return_type='file')
 
-        if dmri_inputs_checked is not None:
-            self.dmri_inputs_checked = dmri_inputs_checked
-            self.run_dmri_pipeline = dmri_inputs_checked
+        if not smri_files:
+            anat_inputs_checked = False
         else:
+            anat_inputs_checked = True
+
+        print(f'T1w available: {anat_inputs_checked}')
+
+        # Check if dMRI data is available in the dataset
+        dmri_files = bids_layout.get(datatype='dwi',
+                                     suffix='dwi',
+                                     extensions='nii.gz',
+                                     return_type='file')
+
+        if not dmri_files:
             self.dmri_inputs_checked = False
             self.run_dmri_pipeline = False
+        else:
+            self.dmri_inputs_checked = True
+            self.run_dmri_pipeline = True
+
+        print(f'DWI available: {self.dmri_inputs_checked}')
 
         # Check if fMRI data is available in the dataset
-        fmri_pipeline = fMRIPipeline(project_info)
-        fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout,
-                                                        gui=False,
-                                                        debug=False)
-        if fmri_inputs_checked is not None:
-            self.fmri_inputs_checked = fmri_inputs_checked
-            self.run_fmri_pipeline = fmri_inputs_checked
-        else:
+        fmri_files = bids_layout.get(task='rest',
+                                     datatype='func',
+                                     suffix='bold',
+                                     extensions='nii.gz',
+                                     return_type='file')
+        if not fmri_files:
             self.fmri_inputs_checked = False
             self.run_fmri_pipeline = False
+        else:
+            self.fmri_inputs_checked = True
+            self.run_fmri_pipeline = True
 
-            # Initialize output directory to be /bids_dir/derivatives
+        print(f'rsfMRI available: {self.fmri_inputs_checked}')
+
+        # Initialize output directory to be /bids_dir/derivatives
         self.output_dir = os.path.join(bids_root, 'derivatives')
 
         self.subjects = subjects
