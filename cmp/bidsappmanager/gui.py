@@ -37,7 +37,7 @@ from cmp.pipelines.anatomical.anatomical import AnatomicalPipeline
 from cmp.pipelines.diffusion.diffusion import DiffusionPipeline
 from cmp.pipelines.functional.fMRI import fMRIPipeline
 
-from cmtklib.util import return_button_style_sheet
+from cmtklib.util import return_button_style_sheet, BColors
 
 # Remove warnings visible whenever you import scipy (or another package) 
 # that was compiled against an older numpy than is installed.
@@ -1040,24 +1040,28 @@ class CMP_BIDSAppWindow(HasTraits):
 
     def check_settings(self):
         """Checks if all the parameters of the BIDS App run are properly set before execution."""
+        print('\n-----------------------------------------')
+        print('BIDS App execution settings check summary')
+        print('-----------------------------------------')
+
         self.settings_checked = True
 
         if os.path.isdir(self.bids_root):
             print(f'BIDS root directory : {self.bids_root}')
         else:
-            print("Error: BIDS root invalid!")
+            print(BColors.FAIL + "Error: BIDS root invalid!" + BColors.ENDC)
             self.settings_checked = False
 
         if os.path.exists(os.path.join(self.output_dir, 'cmp')):
             print(f'Output directory (existing) : {self.output_dir}')
         else:
             os.makedirs(os.path.join(self.output_dir, 'cmp'))
-            print(f'Output directory (created) : {self.output_dir}')
+            print(BColors.WARNING + f'Output directory (created) : {self.output_dir}' + BColors.ENDC)
 
         if len(self.list_of_subjects_to_be_processed) > 0:
             print(f'Participant labels to be processed : {self.list_of_subjects_to_be_processed}')
         else:
-            print("Error: At least one participant label to be processed should selected!")
+            print(BColors.FAIL + "Error: At least one participant label to be processed should selected!" + BColors.ENDC)
             self.settings_checked = False
         # if not self.list_of_subjects_to_be_processed.empty():
         #     print("List of subjects to be processed : {}".format(self.list_of_subjects_to_be_processed))
@@ -1067,23 +1071,23 @@ class CMP_BIDSAppWindow(HasTraits):
         if os.path.isfile(self.anat_config):
             print(f'Anatomical configuration file : {self.anat_config}')
         else:
-            print("Error: Configuration file for anatomical pipeline not existing!")
+            print(BColors.FAIL + "Error: Configuration file for anatomical pipeline not existing!" + BColors.ENDC)
             self.settings_checked = False
 
         if os.path.isfile(self.dmri_config):
             print(f'Diffusion configuration file : {self.dmri_config}')
         else:
-            print("Warning: Configuration file for diffusion pipeline not existing!")
+            print(BColors.WARNING + "Warning: Configuration file for diffusion pipeline not existing!" + BColors.ENDC)
 
         if os.path.isfile(self.fmri_config):
             print(f'fMRI configuration file : {self.fmri_config}')
         else:
-            print("Warning: Configuration file for fMRI pipeline not existing!")
+            print(BColors.WARNING + "Warning: Configuration file for fMRI pipeline not existing!" + BColors.ENDC)
 
         if os.path.isfile(self.fs_license):
             print(f'Freesurfer license : {self.fs_license}')
         else:
-            print(f'Error: Invalid Freesurfer license ({self.fs_license})!')
+            print(BColors.FAIL + f'Error: Invalid Freesurfer license ({self.fs_license})!' + BColors.ENDC)
             self.settings_checked = False
 
         # if os.path.isdir(self.fs_average):
