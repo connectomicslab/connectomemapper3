@@ -1043,23 +1043,21 @@ class CMP_BIDSAppWindow(HasTraits):
         self.settings_checked = True
 
         if os.path.isdir(self.bids_root):
-            print("BIDS root directory : {}".format(self.bids_root))
+            print(f'BIDS root directory : {self.bids_root}')
         else:
             print("Error: BIDS root invalid!")
             self.settings_checked = False
 
         if os.path.exists(os.path.join(self.output_dir, 'cmp')):
-            print('Output directory (existing) : {}'.format(self.output_dir))
+            print(f'Output directory (existing) : {self.output_dir}')
         else:
             os.makedirs(os.path.join(self.output_dir, 'cmp'))
-            print('Output directory (created) : {}'.format(self.output_dir))
+            print(f'Output directory (created) : {self.output_dir}')
 
         if len(self.list_of_subjects_to_be_processed) > 0:
-            print("Participant labels to be processed : {}".format(
-                self.list_of_subjects_to_be_processed))
+            print(f'Participant labels to be processed : {self.list_of_subjects_to_be_processed}')
         else:
-            print(
-                "Error: At least one participant label to be processed should selected!")
+            print("Error: At least one participant label to be processed should selected!")
             self.settings_checked = False
         # if not self.list_of_subjects_to_be_processed.empty():
         #     print("List of subjects to be processed : {}".format(self.list_of_subjects_to_be_processed))
@@ -1067,25 +1065,25 @@ class CMP_BIDSAppWindow(HasTraits):
         #     print("Warning: List of subjects empty!")
 
         if os.path.isfile(self.anat_config):
-            print("Anatomical configuration file : {}".format(self.anat_config))
+            print(f'Anatomical configuration file : {self.anat_config}')
         else:
             print("Error: Configuration file for anatomical pipeline not existing!")
             self.settings_checked = False
 
         if os.path.isfile(self.dmri_config):
-            print("Diffusion configuration file : {}".format(self.dmri_config))
+            print(f'Diffusion configuration file : {self.dmri_config}')
         else:
             print("Warning: Configuration file for diffusion pipeline not existing!")
 
         if os.path.isfile(self.fmri_config):
-            print("fMRI configuration file : {}".format(self.fmri_config))
+            print(f'fMRI configuration file : {self.fmri_config}')
         else:
             print("Warning: Configuration file for fMRI pipeline not existing!")
 
         if os.path.isfile(self.fs_license):
-            print("Freesurfer license : {}".format(self.fs_license))
+            print(f'Freesurfer license : {self.fs_license}')
         else:
-            print("Error: Invalid Freesurfer license ({})!".format(self.fs_license))
+            print(f'Error: Invalid Freesurfer license ({self.fs_license})!')
             self.settings_checked = False
 
         # if os.path.isdir(self.fs_average):
@@ -1094,16 +1092,13 @@ class CMP_BIDSAppWindow(HasTraits):
         #     print("Error: fsaverage directory ({}) not existing!".format(self.fs_average))
         #     self.settings_checked = False
 
-        print("Valid inputs for BIDS App : {}".format(self.settings_checked))
-        print("BIDS App Version Tag: {}".format(self.bidsapp_tag))
-        print("Data provenance tracking (datalad) : {}".format(
-            self.data_provenance_tracking))
-        print("Update computing environment (datalad) : {}".format(
-            self.datalad_update_environment))
-        print("Number of participant processed in parallel : {}".format(
-            self.number_of_participants_processed_in_parallel))
-        print("Number of threads / participant : {}".format(self.number_of_threads))
-
+        print(f'Valid inputs for BIDS App : {self.settings_checked}')
+        print(f'BIDS App Version Tag: {self.bidsapp_tag}')
+        print(f'Data provenance tracking (datalad) : {self.data_provenance_tracking}')
+        print(f'Update computing environment (datalad) : {self.datalad_update_environment}')
+        print(f'Number of participant processed in parallel : {self.number_of_participants_processed_in_parallel}')
+        print(f'Number of OpenMP threads / participant : {self.number_of_threads}')
+        
         return True
 
     def start_bidsapp_participant_level_process(self, bidsapp_tag, participant_labels):
