@@ -128,15 +128,14 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * Create a miniconda3 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
 
-	$ conda env create -f connectomemapper3/environment.yml
+    $ cd connectomemapper3
+	$ conda env create -f environment.yml
 
 .. important::
-  It seems there is no conda package for `git-annex` available on Mac.
+  It seems there is no conda package for `git-annex` available on Mac. For your convenience, we created an additional `environment_macosx.yml` miniconda3 environment where the line `- git-annex=7.20190219` has been removed.
   Git-annex should be installed on MacOSX using brew (https://brew.sh/index_fr) i.e. ``brew install git-annex``.
 
-  Note that `git-annex` is only necessary if you wish to use BIDS datasets managed by Datalad (https://www.datalad.org/), a very experimental feature. For the moment, I would not recommend to use right now as it has been a long time it has not been tested.
-
-  So, you can without any problem delete or comment the line `- git-annex=7.20190219` and all other lines related to datalad packages in the `environment.yml` and it should then work!
+  Note that `git-annex` is only necessary if you wish to use BIDS datasets managed by Datalad (https://www.datalad.org/), a very experimental feature. For the moment, I would not recommend to use right now as it is still in a beta-testing phase.
 
 * Activate the conda environment::
 
