@@ -827,19 +827,22 @@ class CMP_BIDSAppWindow(HasTraits):
                                     ImageResource(
                                             pkg_resources.resource_filename(
                                                     'resources',
-                                                    os.path.join('buttons', 'bidsapp-check-settings.png'))).absolute_path,
-                                    152)
+                                                    os.path.join('buttons', 'bidsapp-check-settings.png'))).absolute_path)
                             ),
                spring,
                Item('start_bidsapp', style='custom',
                     width=152, height=35, resizable=False,
                     label='', show_label=False,
                     style_sheet=return_button_style_sheet(
-                            ImageResource(
-                                    pkg_resources.resource_filename(
-                                            'resources',
-                                            os.path.join('buttons', 'bidsapp-run.png'))).absolute_path,
-                            152),
+                        ImageResource(
+                                pkg_resources.resource_filename(
+                                        'resources',
+                                        os.path.join('buttons', 'bidsapp-run.png'))).absolute_path,
+                        ImageResource(
+                                pkg_resources.resource_filename(
+                                        'resources',
+                                        os.path.join('buttons', 'bidsapp-run-disabled.png'))).absolute_path
+                    ),
                     enabled_when='settings_checked==True and docker_running==False'),
                spring,
                show_labels=False, label=""),
@@ -1687,8 +1690,7 @@ class CMP_ConfiguratorWindow(HasTraits):
                                 ImageResource(
                                     pkg_resources.resource_filename(
                                         'resources',
-                                        os.path.join('buttons', 'configurator-saveall.png'))).absolute_path,
-                                315),
+                                        os.path.join('buttons', 'configurator-saveall.png'))).absolute_path),
                             enabled_when='anat_inputs_checked==True'),
                spring,
                show_labels=False, label=""),
@@ -2217,8 +2219,7 @@ class CMP_MainWindow(HasTraits):
                              ImageResource(
                                      pkg_resources.resource_filename('cmp',
                                                                      os.path.join('bidsappmanager/images',
-                                                                                  'configurator_200x200.png'))).absolute_path,
-                             200)
+                                                                                  'configurator_200x200.png'))).absolute_path)
                      ),
                 show_labels=False, label=""),
             spring,
@@ -2227,8 +2228,7 @@ class CMP_MainWindow(HasTraits):
                                 ImageResource(
                                         pkg_resources.resource_filename('cmp',
                                                                         os.path.join('bidsappmanager/images',
-                                                                                     'bidsapp_200x200.png'))).absolute_path,
-                                200)
+                                                                                     'bidsapp_200x200.png'))).absolute_path)
                         ),
                    show_labels=False, label=""),
             spring,
@@ -2237,8 +2237,7 @@ class CMP_MainWindow(HasTraits):
                                 ImageResource(
                                         pkg_resources.resource_filename('cmp',
                                                                         os.path.join('bidsappmanager/images',
-                                                                                     'qualitycontrol_200x200.png'))).absolute_path,
-                                200)
+                                                                                     'qualitycontrol_200x200.png'))).absolute_path)
                         ),
                    show_labels=False, label=""),
             spring,

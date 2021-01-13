@@ -34,16 +34,16 @@ class BColors:
     UNDERLINE = '\033[4m'
 
 
-def return_button_style_sheet(image, icon_size, verbose=False):
+def return_button_style_sheet(image, image_disabled=None, verbose=False):
     """Return Qt style sheet for QPushButton with image
 
     Parameters
     ----------
     image : string
-        Path to image to use as icon
+        Path to image to use as icon when button is enabled
 
-    icon_size : int
-        Image size
+    image_disabled : string
+        Path to image to use as icon when button is disabled
 
     verbose : Bool
         Print the style sheet if True
@@ -54,21 +54,47 @@ def return_button_style_sheet(image, icon_size, verbose=False):
     button_style_sheet : string
         Qt style sheet for QPushButton with image
     """
-    button_style_sheet = f"""
-        QPushButton {{
-                border-radius: 2px;
-                border-image: url({image}) 0 0 0 0;
-                color: transparent;
-                background-color: transparent;
-                font: 12pt "Verdana";
-                margin: 0px 0px 0px 0px;
-                padding:0px 0px;
-        }}
-        QPushButton:pressed {{
-            background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                              stop: 0 #dadbde, stop: 1 #f6f7fa);
-        }}
-        """
+    if image_disabled is None:
+        button_style_sheet = f"""
+            QPushButton {{
+                    border-radius: 2px;
+                    border-image: url({image}) 0 0 0 0;
+                    color: transparent;
+                    background-color: transparent;
+                    font: 12pt "Verdana";
+                    margin: 0px 0px 0px 0px;
+                    padding:0px 0px;
+            }}
+            QPushButton:pressed {{
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                                  stop: 0 #dadbde, stop: 1 #f6f7fa);
+            }}
+            """
+    else:
+        button_style_sheet = f"""
+                QPushButton {{
+                        border-radius: 2px;
+                        border-image: url({image}) 0 0 0 0;
+                        color: transparent;
+                        background-color: transparent;
+                        font: 12pt "Verdana";
+                        margin: 0px 0px 0px 0px;
+                        padding:0px 0px;
+                }}
+                QPushButton:disabled {{
+                        border-radius: 2px;
+                        border-image: url({image_disabled}) 0 0 0 0;
+                        color: transparent;
+                        background-color: transparent;
+                        font: 12pt "Verdana";
+                        margin: 0px 0px 0px 0px;
+                        padding:0px 0px;
+                }}
+                QPushButton:pressed {{
+                    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                                      stop: 0 #dadbde, stop: 1 #f6f7fa);
+                }}
+                """
     if verbose:
         print(button_style_sheet)
     return button_style_sheet

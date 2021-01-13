@@ -78,11 +78,11 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
     pipeline_group = VGroup(
         HGroup(spring, UItem('segmentation', style='custom', width=222, height=129, resizable=False,
-                             style_sheet=return_button_style_sheet(ImageResource('segmentation').absolute_path, 222)), spring,
+                             style_sheet=return_button_style_sheet(ImageResource('segmentation').absolute_path)), spring,
                show_labels=False, label=""),
         # Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
         HGroup(spring, UItem('parcellation', style='custom', width=222, height=129, resizable=False,
-                             style_sheet=return_button_style_sheet(ImageResource('parcellation').absolute_path, 222)), spring,
+                             style_sheet=return_button_style_sheet(ImageResource('parcellation').absolute_path)), spring,
                show_labels=False, label=""),
         spring,
         springy=True
