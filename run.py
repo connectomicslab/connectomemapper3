@@ -104,21 +104,17 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=
 
     number_of_threads : int
         Number of threads used by Nipype
+        (Default: 1)
 
     Returns
     -------
     Command : string
         The command to execute the `connectomemapper3` python script
     """
-    cmd = []
-
-    cmd.append("connectomemapper3")
-    cmd.append("--bids_dir")
-    cmd.append(project.base_directory)
-    cmd.append("--output_dir")
-    cmd.append(project.output_directory)
-    cmd.append("--participant_label")
-    cmd.append(project.subject)
+    cmd = ["connectomemapper3",
+           "--bids_dir", project.base_directory,
+           "--output_dir", project.output_directory,
+           "--participant_label", project.subject]
 
     if project.subject_session != '':
         cmd.append("--session_label")
