@@ -1098,7 +1098,21 @@ class CMP_BIDSAppWindow(HasTraits):
         print(f'Update computing environment (datalad) : {self.datalad_update_environment}')
         print(f'Number of participant processed in parallel : {self.number_of_participants_processed_in_parallel}')
         print(f'Number of OpenMP threads / participant : {self.number_of_threads}')
-        
+
+        print(f'Fix number of ITK threads : {self.fix_ants_number_of_threads}')
+        if self.fix_ants_number_of_threads:
+            print(f'Number of ITK threads (ANTs) / participant : {self.ants_number_of_threads}')
+
+        print(f'Fix seed in ANTS random number generator : {self.fix_ants_random_seed}')
+        if self.fix_ants_random_seed:
+            print(f'Seed value : {self.ants_random_seed}')
+
+        print(f'Fix seed in MRtrix random number generator : {self.fix_mrtrix_random_seed}')
+        if self.fix_ants_random_seed:
+            print(f'Seed value : {self.mrtrix_random_seed}')
+
+        print('-----------------------------------------\n')
+
         return True
 
     def start_bidsapp_participant_level_process(self, bidsapp_tag, participant_labels):
