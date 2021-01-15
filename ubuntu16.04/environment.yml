@@ -42,7 +42,7 @@ dependencies:
     - pybids==0.10.2 #0.9.1
     - apptools==4.5.0
     - statsmodels==0.11.1 #0.9.0
-    - networkx==2.2
+    - networkx==2.4
     - sphinx==3.1.1 #1.5.1
     - sphinx_rtd_theme==0.5.0 #0.4.3
     - sphinx-argparse==0.2.5

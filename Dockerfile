@@ -271,8 +271,8 @@ COPY . /app/connectomemapper3
 # Install cmp and cmtklib packages in the conda environment $CONDA_ENV
 # ENV CONDA_ENV py37cmp-core
 # RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
-RUN /bin/bash -c ". activate ${CONDA_ENV} && pip install networkx==2.4 &&\
-    python setup.py install && conda clean -v --all --yes && rm -rf ~/.conda ~/.cache/pip/*"
+RUN /bin/bash -c ". activate ${CONDA_ENV} &&\
+    python setup.py install
 
 # Environmment setup
 ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
