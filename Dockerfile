@@ -169,9 +169,9 @@ RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.
 # depend on it
 #RUN apt-mark manual package_name
 
-##################################################################
-## Install conda environment, including ANTs 2.2.0
-##################################################################
+###################################################################
+## Install conda environment, including ANTs 2.2.0 and MRtrix 3.0.3
+###################################################################
 FROM builder_afni as builder_conda_env
 
 WORKDIR /opt
@@ -189,37 +189,37 @@ ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
 ##################################################################
 ## Install MRTRIX
 ##################################################################
-FROM builder_conda_env as builder_mrtrix
+# FROM builder_conda_env as builder_mrtrix
 
-WORKDIR /opt
+# WORKDIR /opt
 
 # Additional dependencies for MRtrix3 compilation
 # Get the latest version of MRtrix3
 # MRtrix3 setup
-RUN apt-get update && \
-    apt-get install -y git && \
-    git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
-    apt-get -y remove git && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# RUN apt-get update && \
+#     apt-get install -y git && \
+#     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
+#     apt-get -y remove git && \
+#     apt-get clean && \
+#     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-WORKDIR /opt/mrtrix3
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y \
-    build-essential git g++ \
-    libeigen3-dev zlib1g-dev \
-    libfftw3-dev libtiff5-dev libssl-dev && \
-    git checkout -f 3.0.2 && \
-    python configure -nogui && \
-    python build -persistent -nopaginate && \
-    git describe --tags > /mrtrix3_version && \
-    apt-get -y remove build-essential git g++ && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# WORKDIR /opt/mrtrix3
+# RUN apt-get update && \
+#     apt-get install --no-install-recommends -y \
+#     build-essential git g++ \
+#     libeigen3-dev zlib1g-dev \
+#     libfftw3-dev libtiff5-dev libssl-dev && \
+#     git checkout -f 3.0.2 && \
+#     python configure -nogui && \
+#     python build -persistent -nopaginate && \
+#     git describe --tags > /mrtrix3_version && \
+#     apt-get -y remove build-essential git g++ && \
+#     apt-get clean && \
+#     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Setup environment variables for MRtrix3
-ENV PATH="/opt/mrtrix3/bin:$PATH" \
-    PYTHONPATH="/opt/mrtrix3/lib:$PYTHONPATH"
+# ENV PATH="/opt/mrtrix3/bin:$PATH" \
+#     PYTHONPATH="/opt/mrtrix3/lib:$PYTHONPATH"
 
 ##################################################################
 ## Install FSL 6.0.0
@@ -260,7 +260,7 @@ ENV LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_P
 ##################################################################
 # Installation of Connectome Mapper 3 packages
 ##################################################################
-FROM builder_mrtrix as builder_cmp3
+FROM builder_conda_env as builder_cmp3
 
 # Set the working directory to /app/connectomemapper3
 WORKDIR /app/connectomemapper3

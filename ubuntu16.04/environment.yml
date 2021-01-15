@@ -5,6 +5,7 @@ channels:
 - conda-forge
 - aramislab
 - defaults
+- mrtrix3
 
 dependencies:
 - python=3.7
@@ -23,6 +24,7 @@ dependencies:
 - cvxpy-base=1.1.7
 - cvxpy=1.1.7
 - obspy=1.2.2
+- mrtrix3=3.0.2
 #- fury=0.5.1 #0.1.4 in pip/ vtk=7.0.0 in dependencies (should come with vtk 8.2.0 for dipy viz)
 #- libnetcdf=4.7.3
 
