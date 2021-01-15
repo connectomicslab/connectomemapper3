@@ -209,7 +209,7 @@ RUN apt-get update && \
     build-essential git g++ \
     libeigen3-dev zlib1g-dev \
     libfftw3-dev libtiff5-dev libssl-dev && \
-    git checkout -f 3.0_RC3_latest && \
+    git checkout -f 3.0.2 && \
     python configure -nogui && \
     python build -persistent -nopaginate && \
     git describe --tags > /mrtrix3_version && \
