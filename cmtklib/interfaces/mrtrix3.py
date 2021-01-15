@@ -261,10 +261,10 @@ class DWIBiasCorrectInputSpec(CommandLineInputSpec):
 
     _xor_inputs = ('use_ants', 'use_fsl')
 
-    use_ants = traits.Bool(argstr='-ants', position=1, desc="Use ANTS N4 to estimate the inhomogeneity field",
+    use_ants = traits.Bool(argstr='ants', position=1, desc="Use ANTS N4 to estimate the inhomogeneity field",
                            xor=_xor_inputs)
 
-    use_fsl = traits.Bool(argstr='-fsl', position=1, desc="Use FSL FAST to estimate the inhomogeneity field",
+    use_fsl = traits.Bool(argstr='fsl', position=1, desc="Use FSL FAST to estimate the inhomogeneity field",
                           xor=_xor_inputs)
 
     force_writing = traits.Bool(
