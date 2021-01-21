@@ -559,9 +559,11 @@ class TensorInformedEudXTractography(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.tracking import utils
         from dipy.direction import peaks_from_model
-        # from dipy.tracking.stopping_criterion import ThresholdStoppingCriterion, BinaryStoppingCriterion
-        from dipy.tracking.eudx import EuDX  # FIXME: see changes in Dipy 1.0
+        # from dipy.tracking.stopping_criterion import BinaryStoppingCriterion
+        from dipy.tracking.stopping_criterion import ThresholdStoppingCriterion
+        from dipy.tracking.local_tracking import LocalTracking
         from dipy.data import get_sphere
+        from dipy.io.stateful_tractogram import Space, StatefulTractogram
         from dipy.io.streamline import save_trk
         # import marshal as pickle
         import pickle as pickle
@@ -584,7 +586,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         trkhdr['voxel_order'] = 'ras'
         # trackvis_affine = utils.affine_for_trackvis(trkhdr['voxel_size'])
 
-        sphere = get_sphere('repulsion724')
+        sphere = get_sphere('symmetric724')
 
         def clipMask(mask):
             """This is a hack until we fix the behaviour of the tracking objects around the edge of the image."""
@@ -630,7 +632,9 @@ class TensorInformedEudXTractography(DipyBaseInterface):
                 if self.inputs.save_seeds:
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
 
-            # tseeds = utils.seeds_from_mask(seedmsk, density=2, affine=affine)
+            tseeds = utils.seeds_from_mask(seedmsk,
+                                           density=nsperv,  # FIXME: density should be customizable
+                                           affine=affine)
 
         IFLOGGER.info('Loading and masking FA')
         img_fa = nib.load(self.inputs.in_fa)
@@ -643,7 +647,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
             self._gen_filename('fa_masked'))
 
         IFLOGGER.info('Building Tissue Classifier')
-        # classifier = ThresholdStoppingCriterion(fa,self.inputs.fa_thresh)
+        classifier = ThresholdStoppingCriterion(fa, self.inputs.fa_thresh)
         # classifier = BinaryStoppingCriterion(tmsk)
 
         IFLOGGER.info('Loading tensor model')
@@ -652,31 +656,26 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         f.close()
 
         IFLOGGER.info('Generating peaks from tensor model')
-        pfm = peaks_from_model(model=tensor_model,
-                               data=data,
-                               sphere=sphere,
-                               relative_peak_threshold=.2,
-                               min_separation_angle=25,
-                               mask=tmsk,
-                               return_sh=True,
-                               # sh_basis_type=args.basis,
-                               sh_order=8,
-                               normalize_peaks=False,  # changed
-                               parallel=True)
+        dti_peaks = peaks_from_model(model=tensor_model,
+                                     data=data,
+                                     sphere=sphere,
+                                     relative_peak_threshold=.2,
+                                     min_separation_angle=25,
+                                     mask=tmsk,
+                                     normalize_peaks=False,  # changed
+                                     parallel=True)
 
         IFLOGGER.info('Performing tensor-informed EuDX tractography')
-
-        streamlines = EuDX(pfm.peak_values,
-                           pfm.peak_indices,
-                           seeds=seeds,
-                           affine=affine,
-                           odf_vertices=sphere.vertices,
-                           step_sz=self.inputs.step_size,
-                           a_low=self.inputs.fa_thresh)
+        streamlines = LocalTracking(dti_peaks,
+                                    classifier,
+                                    tseeds,
+                                    affine,
+                                    step_size=self.inputs.step_size,
+                                    max_cross=1)
 
         IFLOGGER.info('Saving tracks')
-        save_trk(self._gen_filename('tracked', ext='.trk'),
-                 streamlines, affine, fa.shape)
+        sft = StatefulTractogram(streamlines, imref, Space.RASMM)
+        save_trk(sft, self._gen_filename('tracked', ext='.trk'))
 
         # IFLOGGER.info('Loading CSD model and fitting')
         # f = gzip.open(self.inputs.in_model, 'rb')
