@@ -247,8 +247,8 @@ class DWIDenoise(CommandLine):
 
 
 class DWIBiasCorrectInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True,
-                   position=-2, desc='The input image series to be corrected')
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+                   desc='The input image series to be corrected')
 
     out_file = File(genfile=True, argstr='%s', position=-1,
                     desc='The output corrected image series')
@@ -267,12 +267,12 @@ class DWIBiasCorrectInputSpec(CommandLineInputSpec):
     use_fsl = traits.Bool(argstr='fsl', position=1, desc="Use FSL FAST to estimate the inhomogeneity field",
                           xor=_xor_inputs)
 
-    force_writing = traits.Bool(
-        argstr='-force', position=4, desc="Force file overwriting.")
+    force_writing = traits.Bool(argstr='-force', position=4,
+                                desc="Force file overwriting.")
     # quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
 
-    # debug = traits.Bool(argstr='-debug', position=5,
-    #                    desc="Display debugging messages.")
+    debug = traits.Bool(argstr='-debug', position=5,
+                        desc="Display debugging messages.")
 
 
 class DWIBiasCorrectOutputSpec(TraitedSpec):

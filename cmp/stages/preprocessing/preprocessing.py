@@ -428,7 +428,7 @@ class PreprocessingStage(Stage):
                         use_fsl=True, out_bias='diffusion_denoised_biasfield.mif'),
                     name='dwi_biascorrect')
 
-            dwi_biascorrect.inputs.debug = True
+            dwi_biascorrect.inputs.debug = False
 
             if self.config.denoising:
                 if self.config.denoising_algo == "MRtrix (MP-PCA)":
