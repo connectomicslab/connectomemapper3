@@ -10,7 +10,7 @@ channels:
 dependencies:
 - python=3.7
 - pip=20.1.1
-- ants=2.2.0
+- ants=2.3.1
 - numpy=1.18.5
 - matplotlib=3.2.2 #2.2.3
 - graphviz=2.40.1
