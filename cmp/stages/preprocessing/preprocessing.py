@@ -437,8 +437,8 @@ class PreprocessingStage(Stage):
                          [('out_file', 'in_file')]),
                         (flirt_dwimask, dwi_biascorrect,
                          [('out_file', 'mask')]),
-                        (dwi_biascorrect, mr_convert_b,
-                         [('out_file', 'in_file')])
+                        # (dwi_biascorrect, mr_convert_b,
+                        #  [('out_file', 'in_file')])
                     ])
                 elif self.config.denoising_algo == "Dipy (NLM)":
                     flow.connect([
@@ -446,8 +446,8 @@ class PreprocessingStage(Stage):
                          [('converted', 'in_file')]),
                         (flirt_dwimask, dwi_biascorrect,
                          [('out_file', 'mask')]),
-                        (dwi_biascorrect, mr_convert_b,
-                         [('out_file', 'in_file')])
+                        # (dwi_biascorrect, mr_convert_b,
+                        #  [('out_file', 'in_file')])
                     ])
             else:
                 flow.connect([
@@ -456,6 +456,7 @@ class PreprocessingStage(Stage):
                 ])
 
             flow.connect([
+                (dwi_biascorrect, mr_convert_b, [('out_file', 'in_file')]),
                 (dwi_biascorrect, mr_convert_bias, [('out_file', 'in_file')]),
                 (mr_convert_bias, outputnode, [('converted', 'diffusion_biasfield')])
             ])
