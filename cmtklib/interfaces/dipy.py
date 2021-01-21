@@ -749,7 +749,8 @@ class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
                          desc='input mask within which perform tracking')
     seed_mask = InputMultiPath(File(
         exists=True), mandatory=True, desc='ROI files registered to diffusion space')
-    seed_density = traits.Float(1, usedefault=True,
+    seed_density = traits.Float(1,
+                                usedefault=True,
                                 desc='Density of seeds')
     fa_thresh = traits.Float(0.2, mandatory=True, usedefault=True,
                              desc='FA threshold to build the tissue classifier')
@@ -959,8 +960,9 @@ class DirectionGetterTractography(DipyBaseInterface):
                 if self.inputs.save_seeds:
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
 
-            tseeds = utils.seeds_from_mask(seedmsk, density=self.inputs.seed_density,
-                                           affine=affine)  # FIXME: density should be customizable
+            tseeds = utils.seeds_from_mask(seedmsk,
+                                           density=self.inputs.seed_density,  # FIXME: density should be customizable
+                                           affine=affine)
 
         if self.inputs.recon_model == 'CSD':
             IFLOGGER.info('Loading CSD model')
@@ -982,10 +984,12 @@ class DirectionGetterTractography(DipyBaseInterface):
                                    parallel=True)
 
             if self.inputs.algo == 'deterministic':
-                dg = DeterministicMaximumDirectionGetter.from_shcoeff(pfm.shm_coeffs, max_angle=self.inputs.max_angle,
+                dg = DeterministicMaximumDirectionGetter.from_shcoeff(pfm.shm_coeffs,
+                                                                      max_angle=self.inputs.max_angle,
                                                                       sphere=sphere)
             else:
-                dg = ProbabilisticDirectionGetter.from_shcoeff(pfm.shm_coeffs, max_angle=self.inputs.max_angle,
+                dg = ProbabilisticDirectionGetter.from_shcoeff(pfm.shm_coeffs,
+                                                               max_angle=self.inputs.max_angle,
                                                                sphere=sphere)
 
         else:
@@ -995,18 +999,24 @@ class DirectionGetterTractography(DipyBaseInterface):
             sh = np.nan_to_num(sh)
             IFLOGGER.info('Generating peaks from SHORE model')
             if self.inputs.algo == 'deterministic':
-                dg = DeterministicMaximumDirectionGetter.from_shcoeff(sh, max_angle=self.inputs.max_angle,
+                dg = DeterministicMaximumDirectionGetter.from_shcoeff(sh,
+                                                                      max_angle=self.inputs.max_angle,
                                                                       sphere=sphere)
             else:
-                dg = ProbabilisticDirectionGetter.from_shcoeff(
-                    sh, max_angle=self.inputs.max_angle, sphere=sphere)
+                dg = ProbabilisticDirectionGetter.from_shcoeff(sh,
+                                                               max_angle=self.inputs.max_angle,
+                                                               sphere=sphere)
 
         if not self.inputs.use_act:
 
             IFLOGGER.info('Performing %s tractography' % self.inputs.algo)
 
-            streamlines = LocalTracking(
-                dg, classifier, tseeds, affine, step_size=self.inputs.step_size, max_cross=1)
+            streamlines = LocalTracking(dg,
+                                        classifier,
+                                        tseeds,
+                                        affine,
+                                        step_size=self.inputs.step_size,
+                                        max_cross=1)
 
             IFLOGGER.info('Saving tracks')
             sft = StatefulTractogram(streamlines, imref, Space.RASMM)
