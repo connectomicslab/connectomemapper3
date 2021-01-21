@@ -436,9 +436,14 @@ Start the Connectome Mapper BIDS App GUI
 Run configuration
 -------------------
 
+* Select the output directory for data derivatives
+
+    .. image:: images/bidsapp_select_output.png
+        :align: center
+
 * Select the subject labels to be processed
 
-    .. image:: images/bidsapp_select.png
+    .. image:: images/bidsapp_select_subject.png
         :align: center
 
 * Tune the number of subjects to be processed in parallel
