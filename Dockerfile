@@ -275,10 +275,10 @@ RUN /bin/bash -c ". activate ${CONDA_ENV} &&\
     python setup.py install"
 
 # Environmment setup
-ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
-    PYTHONPATH="/opt/conda/envs/$CONDA_ENV/bin" \
+ENV ANTSPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
+    PYTHONPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
     PATH="$ANTSPATH:$PATH" \
-    LD_LIBRARY_PATH="/opt/conda/envs/$CONDA_ENV/lib:$LD_LIBRARY_PATH"
+    LD_LIBRARY_PATH="/opt/conda/envs/${CONDA_ENV}/lib:${LD_LIBRARY_PATH}"
 
 # Make dipy.viz (fury/vtk) happy
 # RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.13"
@@ -378,11 +378,11 @@ ENTRYPOINT ["/app/run_cmp3.sh"]
 ##################################################################
 # Metadata
 ##################################################################
-LABEL org.label-schema.build-date=$BUILD_DATE \
+LABEL org.label-schema.build-date=${BUILD_DATE} \
       org.label-schema.name="Connectome Mapper BIDS App" \
       org.label-schema.description="Connectome Mapper BIDS App - the processing core of Connectome Mapper 3" \
       org.label-schema.url="https://connectome-mapper-3.readthedocs.io" \
-      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-ref=${VCS_REF} \
       org.label-schema.vcs-url="https://github.com/connectomicslab/connectomemapper3" \
       org.label-schema.version=$VERSION \
       org.label-schema.maintainer="Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>" \
