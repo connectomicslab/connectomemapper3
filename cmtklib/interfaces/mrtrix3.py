@@ -271,8 +271,8 @@ class DWIBiasCorrectInputSpec(CommandLineInputSpec):
         argstr='-force', position=4, desc="Force file overwriting.")
     # quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
 
-    debug = traits.Bool(argstr='-debug', position=5,
-                        desc="Display debugging messages.")
+    # debug = traits.Bool(argstr='-debug', position=5,
+    #                    desc="Display debugging messages.")
 
 
 class DWIBiasCorrectOutputSpec(TraitedSpec):
