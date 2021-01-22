@@ -610,7 +610,9 @@ class TensorInformedEudXTractography(DipyBaseInterface):
 
         if isdefined(self.inputs.seed_mask[0]):
             IFLOGGER.info('Loading Seed Mask')
-            seedmsk = clipMask(nib.load(self.inputs.seed_mask[0]).get_data())
+            seedmsk = nib.load(self.inputs.seed_mask[0]).get_data()
+            IFLOGGER.info(f'  - Loaded Seed Mask Shape: {seedmsk.shape}')
+            # seedmsk = clipMask(nib.load(self.inputs.seed_mask[0]).get_data())
             # assert (seedmsk.shape == data.shape[:3])
             seedmsk[seedmsk > 0] = 1
             seedmsk[seedmsk < 1] = 0
@@ -624,12 +626,12 @@ class TensorInformedEudXTractography(DipyBaseInterface):
                 seedps = np.vstack(np.array([seedps] * nsperv))
                 voxcoord = seedps + np.random.uniform(-1, 1, size=seedps.shape)
                 nseeds = voxcoord.shape[0]
-                seeds = affine.dot(np.vstack((voxcoord.T,
-                                              np.ones((1, nseeds)))))[:3, :].T
+                seeds = affine.dot(np.vstack((voxcoord.T, np.ones((1, nseeds)))))[:3, :].T
 
                 if self.inputs.save_seeds:
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
 
+            IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {nsperv})')
             tseeds = utils.seeds_from_mask(seedmsk,
                                            density=nsperv,  # FIXME: density should be customizable
                                            affine=affine)
@@ -917,7 +919,7 @@ class DirectionGetterTractography(DipyBaseInterface):
                 seedmsk = nib.load(self.inputs.seed_mask[0]).get_data()
 
             # assert (seedmsk.shape == data.shape[:3])
-            seedmsk = clipMask(seedmsk)
+            # seedmsk = clipMask(seedmsk)
 
             print(f'seedmsk min: {seedmsk.min()}')
             print(f'seedmsk max: {seedmsk.max()}')
@@ -925,7 +927,7 @@ class DirectionGetterTractography(DipyBaseInterface):
             seedmsk[seedmsk > 0] = 1
             seedmsk[seedmsk < 1] = 0
 
-            IFLOGGER.info('Saving seed mask')
+            IFLOGGER.info(f'Saving seed mask (shape: {seedmsk.shape})')
             hdr.set_data_shape(seedmsk.shape)
             nib.Nifti1Image(seedmsk.astype(np.float32),
                             affine,
@@ -947,8 +949,8 @@ class DirectionGetterTractography(DipyBaseInterface):
                 if self.inputs.save_seeds:
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
 
-            IFLOGGER.info('Create seeds for fiber tracking from the binary seed mask '
-                          f'(density: {self.inputs.seed_density})')
+            IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {self.inputs.seed_density})')
+
             tseeds = utils.seeds_from_mask(seedmsk,
                                            density=self.inputs.seed_density,  # FIXME: density should be customizable
                                            affine=affine)
