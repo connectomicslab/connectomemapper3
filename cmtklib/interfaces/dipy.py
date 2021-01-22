@@ -633,7 +633,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
 
             IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {nsperv})')
             tseeds = utils.seeds_from_mask(seedmsk,
-                                           density=nsperv,  # FIXME: density should be customizable
+                                           density=[nsperv, nsperv, nsperv],  # FIXME: density should be customizable
                                            affine=affine)
 
         IFLOGGER.info('Loading and masking FA')
@@ -952,7 +952,9 @@ class DirectionGetterTractography(DipyBaseInterface):
             IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {self.inputs.seed_density})')
 
             tseeds = utils.seeds_from_mask(seedmsk,
-                                           density=self.inputs.seed_density,  # FIXME: density should be customizable
+                                           density=[self.inputs.seed_density,
+                                                    self.inputs.seed_density,
+                                                    self.inputs.seed_density],  # FIXME: density should be customizable
                                            affine=affine)
 
         if self.inputs.recon_model == 'CSD':
