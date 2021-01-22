@@ -1026,11 +1026,12 @@ class DirectionGetterTractography(DipyBaseInterface):
 
             IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {self.inputs.seed_density})')
 
-            tseeds = utils.seeds_from_mask(seedmsk,
-                                           density=[self.inputs.seed_density,
-                                                    self.inputs.seed_density,
-                                                    self.inputs.seed_density],  # FIXME: density should be customizable
-                                           affine=affine)
+            tseeds = seeds_from_mask(seedmsk,
+                                     affine=affine,
+                                     density=[self.inputs.seed_density,
+                                              self.inputs.seed_density,
+                                              self.inputs.seed_density]  # FIXME: density should be customizable
+                                     )
 
         if self.inputs.recon_model == 'CSD':
             IFLOGGER.info('Loading CSD model')
