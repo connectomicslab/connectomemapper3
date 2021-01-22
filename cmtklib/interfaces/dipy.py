@@ -294,7 +294,7 @@ class CSD(DipyDiffusionInterface):
     output_spec = CSDOutputSpec
 
     def _run_interface(self, runtime):
-        from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, auto_response
+        from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, auto_response_ssst
         from dipy.data import get_sphere
         # import marshal as pickle
         import pickle as pickle
@@ -336,19 +336,23 @@ class CSD(DipyDiffusionInterface):
                 IFLOGGER.warn(('Estimated response is not prolate enough. '
                                'Ratio=%0.3f.') % ratio)
         else:
-            response, ratio, counts = auto_response(
-                gtab, data, fa_thr=0.5, return_number_of_voxels=True)
+            response, ratio = auto_response_ssst(gtab,
+                                                         data,
+                                                         roi_radii=10,
+                                                         fa_thr=0.5)
             IFLOGGER.info("response: ")
             IFLOGGER.info(response)
             IFLOGGER.info("ratio: %g" % ratio)
-            IFLOGGER.info("nbr_voxel_used: %g" % counts)
 
             if abs(ratio - 0.2) > 0.1:
                 IFLOGGER.warn(('Estimated response is not prolate enough. '
                                'Ratio=%0.3f.') % ratio)
 
         sphere = get_sphere('symmetric724')
-        csd_model = ConstrainedSphericalDeconvModel(gtab, response, sh_order=self.inputs.sh_order, reg_sphere=sphere,
+        csd_model = ConstrainedSphericalDeconvModel(gtab,
+                                                    response,
+                                                    sh_order=self.inputs.sh_order,
+                                                    reg_sphere=sphere,
                                                     lambda_=np.sqrt(1. / 2))
         # IFLOGGER.info('Fitting CSD model')
         # csd_fit = csd_model.fit(data, msk)
@@ -382,8 +386,7 @@ class CSD(DipyDiffusionInterface):
             # IFLOGGER.info(fods)
             # IFLOGGER.info(fods.shape)
             IFLOGGER.info('Save Spherical Harmonics image')
-            nib.Nifti1Image(csd_peaks.shm_coeffs, img.affine, None).to_filename(
-                self._gen_filename('shm_coeff'))
+            nib.Nifti1Image(csd_peaks.shm_coeffs, img.affine, None).to_filename(self._gen_filename('shm_coeff'))
 
             # FIXME: dipy 1.1.0 and fury 0.5.1 with vtk 8.2.0 -> error:
             #
