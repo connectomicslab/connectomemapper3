@@ -82,7 +82,7 @@ def seeds_from_mask(mask, affine, density=[1, 1, 1]):
 
     # Add the grid of points to each voxel in mask
     seeds = where[:, np.newaxis, :] + grid[np.newaxis, :, :]
-    seeds = seeds.reshape((-1, 3))
+    seeds = asarray(seeds.reshape((-1, 3)), int)
 
     print(f'Seeds shape: {seeds.shape}')
 
