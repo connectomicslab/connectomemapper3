@@ -55,10 +55,12 @@ def seeds_from_mask(mask, affine, density=[1, 1, 1]):
     >>> seeds_from_mask(mask, np.eye(4), [1,1,1])
     array([[ 0.,  0.,  0.]])
     """
+    print('Test 1')
     mask = np.array(mask, dtype=bool, copy=False, ndmin=3)
     if mask.ndim != 3:
         raise ValueError('mask cannot be more than 3d')
 
+    print('Test 2')
     density = asarray(density, int)
     if density.size == 1:
         d = density
@@ -67,6 +69,7 @@ def seeds_from_mask(mask, affine, density=[1, 1, 1]):
     elif density.shape != (3,):
         raise ValueError("density should be in integer array of shape (3,)")
 
+    print('Test 3')
     # Grid of points between -.5 and .5, centered at 0, with given density
     grid = np.mgrid[0:density[0], 0:density[1], 0:density[2]]
     grid = grid.T.reshape((-1, 3))
@@ -74,6 +77,8 @@ def seeds_from_mask(mask, affine, density=[1, 1, 1]):
     grid += (.5 / density - .5)
 
     where = np.argwhere(mask)
+
+    print('Test 4')
 
     # Add the grid of points to each voxel in mask
     seeds = where[:, np.newaxis, :] + grid[np.newaxis, :, :]
@@ -86,6 +91,7 @@ def seeds_from_mask(mask, affine, density=[1, 1, 1]):
 
     # Apply the spatial transform
     if seeds.any():
+        print('Test 5')
         # Use affine to move seeds into real world coordinates
         seeds = np.dot(seeds, affine[:3, :3].T)
         seeds += affine[:3, 3]
