@@ -102,7 +102,7 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=
         If True, append the fMRI configuration file to the command
 
     number_of_threads : int
-        Number of threads used by Nipype
+        Number of threads used OpenMP-parallelized tools
         (Default: 1)
 
     Returns
