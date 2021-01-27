@@ -17,7 +17,6 @@ import os
 import warnings
 
 from glob import glob
-import numpy
 
 # import http.client
 # import urllib
@@ -339,9 +338,7 @@ def run(command, env={}, log_filename={}):
     #     raise Exception("Non zero return code: %d"%process.returncode)
 
 
-# Initialize random generator for enhanced reproducibility
-numpy.random.seed(1234)
-
+# Parse script arguments
 cmp_parser = parser.get()
 args = cmp_parser.parse_args()
 
@@ -482,6 +479,13 @@ if args.ants_number_of_threads is not None:
 else:
     os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = os.environ['OMP_NUM_THREADS']
     print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
+
+# Initialize random generator for enhanced reproducibility
+# Numpy needs to be imported after setting the different multi-threading environment variable
+# See https://stackoverflow.com/questions/30791550/limit-number-of-threads-in-numpy for more details
+# noinspection PyPep8
+import numpy
+numpy.random.seed(1234)
 
 # Set random generator seed of MRtrix if specified
 if args.mrtrix_random_seed is not None:
