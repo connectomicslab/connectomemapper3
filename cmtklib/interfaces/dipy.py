@@ -6,15 +6,12 @@
 #  This software is distributed under the open-source license Modified BSD.
 """The Dipy module provides Nipype interfaces to the algorithms in dipy."""
 
-import os
 import os.path as op
 from future import standard_library
 import time
 import gzip
 import nibabel as nib
-from threadpoolctl import threadpool_limits
 import numpy as np
-from numpy import asarray
 
 from nipype.interfaces.dipy.base import DipyDiffusionInterface, DipyBaseInterface, DipyBaseInterfaceInputSpec
 from nipype.interfaces.base import TraitedSpec, File, traits, isdefined, BaseInterfaceInputSpec, InputMultiPath
@@ -23,83 +20,6 @@ from nipype import logging
 
 standard_library.install_aliases()
 IFLOGGER = logging.getLogger('nipype.interface')
-
-
-def seeds_from_mask(mask, affine, density=[1, 1, 1]):
-    """Create seeds for fiber tracking from a binary mask.
-    Seeds points are placed evenly distributed in all voxels of ``mask`` which
-    are ``True``.
-    Parameters
-    ----------
-    mask : binary 3d array_like
-        A binary array specifying where to place the seeds for fiber tracking.
-    affine : array, (4, 4)
-        The mapping between voxel indices and the point space for seeds.
-        The voxel_to_rasmm matrix, typically from a NIFTI file.
-        A seed point at the center the voxel ``[i, j, k]``
-        will be represented as ``[x, y, z]`` where
-        ``[x, y, z, 1] == np.dot(affine, [i, j, k , 1])``.
-    density : int or array_like (3,)
-        Specifies the number of seeds to place along each dimension. A
-        ``density`` of `2` is the same as ``[2, 2, 2]`` and will result in a
-        total of 8 seeds per voxel.
-    See Also
-    --------
-    random_seeds_from_mask
-    Raises
-    ------
-    ValueError
-        When ``mask`` is not a three-dimensional array
-    Examples
-    --------
-    >>> mask = np.zeros((3,3,3), 'bool')
-    >>> mask[0,0,0] = 1
-    >>> seeds_from_mask(mask, np.eye(4), [1,1,1])
-    array([[ 0.,  0.,  0.]])
-    """
-    IFLOGGER.info('Test 1')
-    mask = np.array(mask, dtype=bool, copy=False, ndmin=3)
-    if mask.ndim != 3:
-        raise ValueError('mask cannot be more than 3d')
-
-    IFLOGGER.info('Test 2')
-    density = asarray(density, int)
-    if density.size == 1:
-        d = density
-        density = np.empty(3, dtype=int)
-        density.fill(d)
-    elif density.shape != (3,):
-        raise ValueError("density should be in integer array of shape (3,)")
-
-    IFLOGGER.info('Test 3')
-    # Grid of points between -.5 and .5, centered at 0, with given density
-    grid = np.mgrid[0:density[0], 0:density[1], 0:density[2]]
-    grid = grid.T.reshape((-1, 3))
-    grid = grid / density
-    grid += (.5 / density - .5)
-
-    where = np.argwhere(mask)
-
-    IFLOGGER.info('Test 4')
-
-    # Add the grid of points to each voxel in mask
-    seeds = where[:, np.newaxis, :] + grid[np.newaxis, :, :]
-    seeds = asarray(seeds.reshape((-1, 3)), float)
-
-    IFLOGGER.info(f'Seeds shape: {seeds.shape}')
-
-    IFLOGGER.info(f'affine shape: {affine.shape}')
-    IFLOGGER.info(f'affine[:3, :3].T shape: {affine[:3, :3].T.shape}')
-
-    # Apply the spatial transform
-    if seeds.any():
-        IFLOGGER.info('Test 5')
-        with threadpool_limits(limits=1, user_api='openmp'):
-            # Use affine to move seeds into real world coordinates
-            seeds = np.dot(seeds, affine[:3, :3].T)
-        seeds += affine[:3, 3]
-
-    return seeds
 
 
 class DTIEstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
@@ -716,10 +636,10 @@ class TensorInformedEudXTractography(DipyBaseInterface):
 
             IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {nsperv})')
 
-            tseeds = seeds_from_mask(seedmsk,
-                                     affine=affine,
-                                     density=[nsperv, nsperv, nsperv]  # FIXME: density should be customizable
-                                     )
+            tseeds = utils.seeds_from_mask(seedmsk,
+                                           affine=affine,
+                                           density=[nsperv, nsperv, nsperv]  # FIXME: density should be customizable
+                                           )
 
         IFLOGGER.info('Loading and masking FA')
         img_fa = nib.load(self.inputs.in_fa)
@@ -1035,12 +955,12 @@ class DirectionGetterTractography(DipyBaseInterface):
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
 
             IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {self.inputs.seed_density})')
-            tseeds = seeds_from_mask(seedmsk,
-                                     affine=affine,
-                                     density=[self.inputs.seed_density,
-                                              self.inputs.seed_density,
-                                              self.inputs.seed_density]  # FIXME: density should be customizable
-                                     )
+            tseeds = utils.seeds_from_mask(seedmsk,
+                                           affine=affine,
+                                           density=[self.inputs.seed_density,
+                                                    self.inputs.seed_density,
+                                                    self.inputs.seed_density]  # FIXME: density should be customizable
+                                           )
 
         if self.inputs.recon_model == 'CSD':
             IFLOGGER.info('Loading CSD model')
