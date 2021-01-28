@@ -335,8 +335,8 @@ ENV LANG="C.UTF-8" \
 # Unless otherwise specified each process should only use one
 # thread - nipype will handle parallelization
 ##################################################################
-# ENV MKL_NUM_THREADS=1 \
-#     OMP_NUM_THREADS=1
+ENV MKL_NUM_THREADS=1 \
+    OMP_NUM_THREADS=1
 
 ##################################################################
 # Control random number generation
