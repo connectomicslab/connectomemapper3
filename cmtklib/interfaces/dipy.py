@@ -6,6 +6,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 """The Dipy module provides Nipype interfaces to the algorithms in dipy."""
 
+import os
 import os.path as op
 from future import standard_library
 import time
@@ -712,10 +713,14 @@ class TensorInformedEudXTractography(DipyBaseInterface):
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
 
             IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {nsperv})')
-            tseeds = seeds_from_mask(seedmsk,
-                                     affine=affine,
-                                     density=[nsperv, nsperv, nsperv]  # FIXME: density should be customizable
-                                     )
+
+            omp_num_threads = os.environ['OMP_NUM_THREADS']
+            os.environ.update(OMP_NUM_THREADS='1')
+            tseeds = utils.seeds_from_mask(seedmsk,
+                                           affine=affine,
+                                           density=[nsperv, nsperv, nsperv]  # FIXME: density should be customizable
+                                           )
+            os.environ.update(OMP_NUM_THREADS=f'{omp_num_threads}')
 
         IFLOGGER.info('Loading and masking FA')
         img_fa = nib.load(self.inputs.in_fa)
@@ -1032,12 +1037,15 @@ class DirectionGetterTractography(DipyBaseInterface):
 
             IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {self.inputs.seed_density})')
 
-            tseeds = seeds_from_mask(seedmsk,
-                                     affine=affine,
-                                     density=[self.inputs.seed_density,
-                                              self.inputs.seed_density,
-                                              self.inputs.seed_density]  # FIXME: density should be customizable
-                                     )
+            omp_num_threads = os.environ['OMP_NUM_THREADS']
+            os.environ.update(OMP_NUM_THREADS='1')
+            tseeds = utils.seeds_from_mask(seedmsk,
+                                           affine=affine,
+                                           density=[self.inputs.seed_density,
+                                                    self.inputs.seed_density,
+                                                    self.inputs.seed_density]  # FIXME: density should be customizable
+                                           )
+            os.environ.update(OMP_NUM_THREADS=f'{omp_num_threads}')
 
         if self.inputs.recon_model == 'CSD':
             IFLOGGER.info('Loading CSD model')
