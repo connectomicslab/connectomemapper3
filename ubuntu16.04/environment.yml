@@ -48,4 +48,5 @@ dependencies:
     - sphinx-argparse==0.2.5
     - recommonmark==0.6.0  # 0.5.0
     - pydicom==2.0.0  # 1.4.2
+    - threadpoolctl==2.1.0
     # - fury==0.5.0
