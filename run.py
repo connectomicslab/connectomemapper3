@@ -471,8 +471,6 @@ else:
 os.environ.update(OMP_NUM_THREADS=f'{number_of_threads}')
 print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'], max_number_of_cores))
 
-os.environ.update(MKL_NUM_THREADS='1')
-
 # Set number of threads used by ANTs if specified.
 # Otherwise use the same as the number of OpenMP threads
 if args.ants_number_of_threads is not None:
