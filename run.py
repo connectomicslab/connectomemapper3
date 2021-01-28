@@ -427,7 +427,7 @@ else:
     print('  * Number of subjects to be processed in parallel set to one (sequential run)')
     parallel_number_of_subjects = 1
 
-# Setup number of threads to be used fro multithreading by OpenMP
+# Setup number of threads to be used for multithreading by OpenMP
 if args.number_of_threads is not None:
     number_of_threads = int(args.number_of_threads)
     if parallel_number_of_subjects == 1:
@@ -468,16 +468,13 @@ else:
 
 # Set number of threads used by programs based on OpenMP multi-threading library
 # This includes AFNI, Dipy, Freesurfer, FSL, MRtrix3.
-os.environ.update(OMP_NUM_THREADS=f'{number_of_threads}')
-print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'], max_number_of_cores))
+# os.environ.update(OMP_NUM_THREADS=f'{number_of_threads}')
+# print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'], max_number_of_cores))
 
 # Set number of threads used by ANTs if specified.
 # Otherwise use the same as the number of OpenMP threads
 if args.ants_number_of_threads is not None:
     os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = f'{args.ants_number_of_threads}'
-    print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
-else:
-    os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = os.environ['OMP_NUM_THREADS']
     print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
 
 # Initialize random generator for enhanced reproducibility
