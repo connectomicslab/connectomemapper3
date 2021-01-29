@@ -689,16 +689,16 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
             for u_gml, d_gml in G_out.nodes(data=True):
                 g2.add_node(u_gml)
                 if parcellation_scheme != "Lausanne2018":
-                    g2.node[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+                    g2.nodes[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
                 else:
-                    g2.node[u_gml]['dn_multiscaleID'] = d_gml['dn_multiscaleID']
-                g2.node[u_gml]['dn_fsname'] = d_gml['dn_fsname']
-                g2.node[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
-                g2.node[u_gml]['dn_name'] = d_gml['dn_name']
-                g2.node[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
-                g2.node[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
-                g2.node[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
-                g2.node[u_gml]['dn_region'] = d_gml['dn_region']
+                    g2.nodes[u_gml]['dn_multiscaleID'] = d_gml['dn_multiscaleID']
+                g2.nodes[u_gml]['dn_fsname'] = d_gml['dn_fsname']
+                g2.nodes[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
+                g2.nodes[u_gml]['dn_name'] = d_gml['dn_name']
+                g2.nodes[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
+                g2.nodes[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
+                g2.nodes[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
+                g2.nodes[u_gml]['dn_region'] = d_gml['dn_region']
                 print('    - connectome_%s.graphml' % parkey)
             nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
 
