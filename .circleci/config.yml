@@ -754,16 +754,12 @@ jobs:
   codacy_coverage_report:
     docker:
       - image: 'circleci/openjdk:8-jdk'
-
     working_directory: /tmp/data/ds-sample/code
-
     steps:
       - attach_workspace:
           at: /tmp
       - coverage-reporter/send_report:
-          # With parcellation tests
           coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml,/tmp/data/ds-sample/test/test-05_coverage.xml,/tmp/data/ds-sample/test/test-06_coverage.xml,/tmp/data/ds-sample/test/test-07_coverage.xml,/tmp/data/ds-sample/test/test-08_coverage.xml,/tmp/data/ds-sample/test/test-09_coverage.xml'
-          # coverage-reports: '/tmp/data/ds-sample/test/test-01_coverage.xml,/tmp/data/ds-sample/test/test-02_coverage.xml,/tmp/data/ds-sample/test/test-03_coverage.xml,/tmp/data/ds-sample/test/test-04_coverage.xml'
           project-token: ${CODACY_PROJECT_TOKEN}
 
   test_singularity_parcellation:
