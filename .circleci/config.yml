@@ -1174,17 +1174,3 @@ workflows:
             # only act on version tags
             tags:
               only: /^v.*/
-
-      - deploy_singularity_latest:
-          requires:
-            # - build_docs
-            - test_singularity_parcellation
-            - test_docker_dsi_mrtrix
-            - test_docker_dsi_dipy
-            - test_docker_parcellation
-            - test_docker_fmri
-            - codacy_coverage_report
-          filters:
-            # ignore any commit on any branch by default
-            branches:
-              only: master
