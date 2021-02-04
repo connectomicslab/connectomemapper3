@@ -3,6 +3,38 @@ Changes
 ========
 
 ****************************
+Version 3.0.0-RC2-patch1
+****************************
+
+Date: February 4, 2021
+
+This version fixes bugs in the second release candidate of Connectome Mapper 3 (v3.0.0-RC2).
+In particular, it includes:
+
+*Bug fixes*
+
+* Fix the error to save connectome in GraphML format reported in `#65 <https://github.com/connectomicslab/connectomemapper3/issues/65>`_ and
+  (`Pull Request #66 <https://github.com/connectomicslab/connectomemapper3/pull/66>`_).
+
+*Software development life cycle*
+
+* Remove publication of the Singularity image to sylabs.io when the master branch is updated for the sake of space (11GB limit)
+
+*Commits*
+
+* CI: remove publication of latest tag image on sylabs.io for space (2 days ago) - commit c765f79
+* Merge pull request #66 from connectomicslab/v3.0.0-RC2-hotfix1 (3 days ago) - commit 0a2603e
+* FIX: update g2.node to g2.nodes when saving connectomes as graphml (fix #65) (6 days ago) - commit d629eef
+* FIX: enabled/disabled gray-out button "Run BIDS App" with Qt Style sheet [skip ci] (3 weeks ago) - commit 10e78d9
+* MAINT: removed commented lines in cmpbidsappmanager/gui.py [skip ci] (3 weeks ago) - commit 4cc11e7
+* FIX: check availability of modalities in the BIDS App manager window [skip ci] (3 weeks ago) - commit 80fbee2
+* MAINT: update copyright year [skip ci] (3 weeks ago) - commit f7d0ffb
+* CI: delete previous container with latest TAG on sylabs.io [skip ci] (4 weeks ago) - commit 15c9b18
+* DOC: update tag to latest in runonhpc.rst [skip ci] (4 weeks ago) - commit 3165bcc
+* CI: comment lines related to version for singularity push (4 weeks ago) - commit 3952d46
+
+
+****************************
 Version 3.0.0-RC2
 ****************************
 
