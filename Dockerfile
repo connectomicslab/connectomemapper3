@@ -170,7 +170,7 @@ RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.
 #RUN apt-mark manual package_name
 
 ###################################################################
-## Install conda environment, including ANTs 2.2.0 and MRtrix 3.0.3
+## Install conda environment, including ANTs 2.2.0 and MRtrix 3.0.2
 ###################################################################
 FROM builder_afni as builder_conda_env
 
@@ -185,66 +185,6 @@ RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_
 # Make ANTs happy
 ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
     PATH="$ANTSPATH:$PATH"
-
-##################################################################
-## Install MRTRIX
-##################################################################
-# FROM builder_conda_env as builder_mrtrix
-
-# WORKDIR /opt
-
-# Additional dependencies for MRtrix3 compilation
-# Get the latest version of MRtrix3
-# MRtrix3 setup
-# RUN apt-get update && \
-#     apt-get install -y git && \
-#     git clone https://github.com/MRtrix3/mrtrix3.git mrtrix3 && \
-#     apt-get -y remove git && \
-#     apt-get clean && \
-#     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# WORKDIR /opt/mrtrix3
-# RUN apt-get update && \
-#     apt-get install --no-install-recommends -y \
-#     build-essential git g++ \
-#     libeigen3-dev zlib1g-dev \
-#     libfftw3-dev libtiff5-dev libssl-dev && \
-#     git checkout -f 3.0.2 && \
-#     python configure -nogui && \
-#     python build -persistent -nopaginate && \
-#     git describe --tags > /mrtrix3_version && \
-#     apt-get -y remove build-essential git g++ && \
-#     apt-get clean && \
-#     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Setup environment variables for MRtrix3
-# ENV PATH="/opt/mrtrix3/bin:$PATH" \
-#     PYTHONPATH="/opt/mrtrix3/lib:$PYTHONPATH"
-
-##################################################################
-## Install FSL 6.0.0
-##################################################################
-# FROM builder_mrtrix as builder_fsl
-
-# WORKDIR /opt
-# RUN apt-get update && \
-#     apt-get install -qq -y --no-install-recommends curl && \
-#     echo "Downloading FSL ..." \
-#     && curl -sSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.3-centos6_64.tar.gz \
-#     | tar zx -C /opt \
-#     && /bin/bash /opt/fsl/etc/fslconf/fslpython_install.sh -q -f /opt/fsl \
-#     && rm -rf /opt/fsl/data/first \
-#     && rm -rf /opt/fsl/data/possum \
-#     && rm -rf /opt/fsl/data/atlases/HarvardOxford \
-#     && rm -rf /opt/fsl/data/atlases/JHU \
-#     && rm -rf /opt/fsl/data/atlases/Juelich \
-#     && rm -rf /opt/fsl/doc \
-#     && apt-get remove -y curl \
-#     && apt-get clean \
-#     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# ENV FSLDIR=/opt/fsl \
-#     PATH=/opt/fsl/bin:$PATH
 
 ##################################################################
 # Install BIDS validator
