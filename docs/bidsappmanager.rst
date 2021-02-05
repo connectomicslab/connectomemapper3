@@ -365,8 +365,9 @@ Performs detrending, nuisance regression, bandpass filteringdiffusion reconstruc
         :align: center
 
     Detrending of BOLD signal using:
-    1. *linear* trend removal algorithm provided by the `scipy` library
-    2. *quadratic* trend removal algorithm provided by the `obspy` library
+
+        1. *linear* trend removal algorithm provided by the `scipy` library
+        2. *quadratic* trend removal algorithm provided by the `obspy` library
 
 *Nuisance regression*
 
@@ -374,10 +375,11 @@ Performs detrending, nuisance regression, bandpass filteringdiffusion reconstruc
         :align: center
 
     A number of options for removing nuisance signals is provided. They consist of:
-    1. *Global signal* regression
-    2. *CSF* regression
-    3. *WM* regression
-    4. *Motion parameters* regression
+
+        1. *Global signal* regression
+        2. *CSF* regression
+        3. *WM* regression
+        4. *Motion parameters* regression
 
 *Bandpass filtering*
 
@@ -403,7 +405,8 @@ Save the configuration files
 
 You can save the pipeline stage configuration files in two different way:
 
-    1. You can save all configuration files at once by clicking on the `Save All Pipeline Configuration Files`. This  will save automatically the configuration file of the anatomical / diffusion / fMRI pipeline to `<bids_dataset>/code/ref_anatomical_config.ini` / `<bids_dataset>/code/ref_diffusion_config.ini` / `<bids_dataset>/code/ref_fMRI_config.ini` respectively.
+    1. You can save all configuration files at once by clicking on the `Save All Pipeline Configuration Files`. This  will save automatically the configuration file of the anatomical / diffusion / fMRI pipeline to
+       ``<bids_dataset>/code/ref_anatomical_config.ini`` / ``<bids_dataset>/code/ref_diffusion_config.ini`` / ``<bids_dataset>/code/ref_fMRI_config.ini`` respectively.
 
     2. You can save individually each of the pipeline configuration files and edit its filename in the File menu (File -> Save anatomical/diffusion/fMRI configuration file as...)
 
