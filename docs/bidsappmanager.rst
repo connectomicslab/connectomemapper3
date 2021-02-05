@@ -413,9 +413,10 @@ You can save the pipeline stage configuration files in two different way:
 Nipype
 -------
 
-Connectome Mapper relies on Nipype. For each stage, a processing folder is created in `<bids_dataset/derivatives>/nipype/sub-<participant_label>/<pipeline_name>/<stage_name>`.
-
-All intermediate steps for the processing are saved in the corresponding stage folders.
+Connectome Mapper relies on Nipype.
+All intermediate steps for the processing are saved in the corresponding
+``<bids_dataset/derivatives>/nipype/sub-<participant_label>/<pipeline_name>/<stage_name>``
+stage folder (See `Nipype workflow outputs <nipype_outputs>`_ for more details).
 
 
 Run the BIDS App

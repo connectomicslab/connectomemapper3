@@ -216,6 +216,9 @@ A FreeSurfer subjects directory is created in ``<bids_dataset/derivatives>/frees
 
 The ``fsaverage`` subject distributed with the running version of FreeSurfer is copied into this directory.
 
+
+.. _nipype_outputs:
+
 Nipype Workflow Derivatives
 ==========================================
 
