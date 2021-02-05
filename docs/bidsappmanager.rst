@@ -416,7 +416,7 @@ Nipype
 Connectome Mapper relies on Nipype.
 All intermediate steps for the processing are saved in the corresponding
 ``<bids_dataset/derivatives>/nipype/sub-<participant_label>/<pipeline_name>/<stage_name>``
-stage folder (See `Nipype workflow outputs <nipype_outputs>`_ for more details).
+stage folder (See :ref:`Nipype workflow outputs <nipype_outputs>` for more details).
 
 
 Run the BIDS App
