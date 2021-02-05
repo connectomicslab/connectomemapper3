@@ -4,6 +4,30 @@ Outputs of Connectome Mapper 3
 
 Processed, or derivative, data are outputed to ``<bids_dataset/derivatives>/``.
 
+BIDS derivatives entities
+--------------------------
+
+.. tabularcolumns:: |l|p{5cm}|
+
++--------------------------+------------------------------------------------------------------------------------------------------------+
+| **Entity**               | **Description**                                                                                            |
++==========================+============================================================================================================+
+| ``sub-<label>``          | Distinguish different subjects                                                                             |
++--------------------------+------------------------------------------------------------------------------------------------------------+
+| ``ses-<label>``          | Distinguish different acquisition sessions                                                                 |
++--------------------------+------------------------------------------------------------------------------------------------------------+
+| ``label-<label>``        | Describe the type of brain tissue segmented (for _probseg/dseg) or the parcellation atlas (for _atlas)     |
++--------------------------+------------------------------------------------------------------------------------------------------------+
+| ``space-DWI``            | Distinguish anatomical MRI derivatives in the target diffusion MRI space                                   |
++--------------------------+------------------------------------------------------------------------------------------------------------+
+| ``model-<label>``        | Distinguish different diffusion signal models (DTI, CSD, SHORE, MAPMRI)                                    |
++--------------------------+------------------------------------------------------------------------------------------------------------+
+
+See `Original BIDS Entities Appendix <https://bids-specification.readthedocs.io/en/v1.4.1/99-appendices/09-entities.html>`_ for more description.
+
+.. note:: A new suffix `_atlas` has been introduced, that is used in combination with the ``label-<atlas_label>`` entity (where ``<atlas_label>``:``Desikan``/``L2008``/``L2018``) to distinguish different parcellation atlas outputs.
+
+
 Main Connectome Mapper Derivatives
 ==========================================
 
@@ -133,7 +157,7 @@ Diffusion derivatives in the individual ``DWI`` space are placed in each subject
     where:
 
     - ``<model_label>`` is the diffusion model used to drive tractography (DTI, CSD, SHORE)
-    - ``<model_label>`` is the type of tractography algorithm employed (DET for deterministic, PROB for probabilistic)
+    - ``<label>`` is the type of tractography algorithm employed (DET for deterministic, PROB for probabilistic)
 
 * The structural connectivity (SC) graphs:
 
@@ -215,6 +239,9 @@ A FreeSurfer subjects directory is created in ``<bids_dataset/derivatives>/frees
         ...
 
 The ``fsaverage`` subject distributed with the running version of FreeSurfer is copied into this directory.
+
+
+.. _nipype_outputs:
 
 Nipype Workflow Derivatives
 ==========================================

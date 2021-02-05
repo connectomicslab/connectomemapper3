@@ -29,7 +29,7 @@ def usage():
 
 
 # Checks the needed dependencies. We call directly the functions instead
-# of just checking existence in $PATH in order to handl missing libraries.
+# of just checking existence in $PATH in order to handle missing libraries.
 # Note that not all the commands give the awaited 1 exit code...
 def dep_check():
     """Check if some dependencies are well installed."""
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     info()
 
     argc = len(sys.argv)
-    if argc==1: # no args, launch the GUI
+    if argc == 1:  # no args, launch the GUI
         mw = gui.CMP_MainWindow()
         mw_res = mw.configure_traits()
     else:

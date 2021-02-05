@@ -58,8 +58,7 @@ def get():
     p.add_argument('--number_of_threads',
                    type=int,
                    help='The number of OpenMP threads used for multi-threading by '
-                        'Freesurfer, FSL, MRtrix3, Dipy, AFNI '
-                        '(Set to [Number of available CPUs -1] by default).')
+                        'Freesurfer (Set to [Number of available CPUs -1] by default).')
 
     p.add_argument('--number_of_participants_processed_in_parallel',
                    default=1,

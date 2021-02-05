@@ -3,6 +3,45 @@ Changes
 ========
 
 ****************************
+Version 3.0.0-RC3
+****************************
+
+Date: February 05, 2021
+
+This version corresponds to the third release candidate of Connectome Mapper 3.
+In particular, it integrates `Pull Request #62 <https://github.com/connectomicslab/connectomemapper3/pull/62>`_ which includes:
+
+*Updates*
+
+* MRtrix3 has been updated from `3.0_RC3_latest` to `3.0.2`.
+* Numpy has been updated from `1.18.5` to `1.19.2`.
+* Nipype has been updated to `1.5.0` to `1.5.1`.
+* Dipy has been updated from `1.0.0` to `1.3.0`.
+* CVXPY has been updated from `1.1.5` to `1.1.7`.
+
+*Documentation*
+
+* Update outdated screenshots for GUI documentation page at `readthedocs <https://connectome-mapper-3.readthedocs.io/en/latest/api_doc.html>`_ reported at `CMTK user-group <https://groups.google.com/g/cmtk-users/c/oSjqfjiTcmg/m/4PHLDpPSCwAJ>`_.
+* Correction of multiple typos.
+
+*Bug fixes*
+
+* Update code for Dipy tracking with DTI model following major changes in Dipy 1.0 (Fix reported issue `#54 <https://github.com/connectomicslab/connectomemapper3/issues/54>`_).
+* Update to Dipy 1.3.0 has removed the deprecated warnings related to CVXPY when using MAP_MRI (`#63 <https://github.com/connectomicslab/connectomemapper3/issues/63>`_)
+* Do not set anymore `OMP_NUM_THREADS` at execution due to allocation errors raised when using numpy function dot in Dipy.
+
+*Software development life cycle*
+
+* Add `Test 08` that runs anatomical and fMRI pipelines with:
+  Lausanne2018 parcellation, FSL FLIRT co-registration, all nuisance regression, linear detrending and scrubbing
+* Add `Test 09` that runs anatomical and dMRI pipelines with:
+  Lausanne2018 parcellation, FSL FLIRT, Dipy SHORE, MRtrix SD_Stream tracking, MRtrix SIFT tractogram filtering
+* Remove `deploy_singularity_latest` from the workflow for the sake of space on Sylabs.io.
+
+Please check the `main pull request 62 page <https://github.com/connectomicslab/connectomemapper3/pull/62>`_ for more details.
+
+
+****************************
 Version 3.0.0-RC2-patch1
 ****************************
 

@@ -107,19 +107,18 @@ def create_parser():
     return p
 
 
-
 if __name__ == "__main__":
-
+    # Parse script arguments
     parser = create_parser()
     args = parser.parse_args()
 
-    # check dependencies
+    # Check dependencies
     dep_check()
 
-    # add current directory to the path, useful if DTB_ bins not installed
+    # Add current directory to the path, useful if DTB_ bins not installed
     os.environ["PATH"] += os.pathsep + os.path.dirname(sys.argv[0])
 
-    # version and copyright message
+    # Version and copyright message
     info()
 
     project = cmp.project.CMP_Project_Info()
@@ -153,7 +152,7 @@ if __name__ == "__main__":
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
             
             if args.number_of_threads is not None:
-                print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(args.number_of_threads))
+                print(f'--- Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
                 anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
@@ -172,7 +171,7 @@ if __name__ == "__main__":
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             if args.number_of_threads is not None:
-                print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(args.number_of_threads))
+                print(f'--- Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
                 anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
@@ -191,7 +190,7 @@ if __name__ == "__main__":
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                #print sys.argv[offset+7]
+                # print sys.argv[offset+7]
                 if dmri_valid_inputs:
                     dmri_pipeline.process()
                 else:
@@ -211,7 +210,7 @@ if __name__ == "__main__":
             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
             
             if args.number_of_threads is not None:
-                print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(args.number_of_threads))
+                print(f'--- Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
                 anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
@@ -230,10 +229,10 @@ if __name__ == "__main__":
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                #fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                #fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                #print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
-                #print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
+                # fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+                # fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+                # print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
+                # print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
 
                 # print sys.argv[offset+9]
                 if fmri_valid_inputs:
@@ -257,7 +256,7 @@ if __name__ == "__main__":
             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
             
             if args.number_of_threads is not None:
-                print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(args.number_of_threads))
+                print(f'--- Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
                 anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
@@ -290,8 +289,8 @@ if __name__ == "__main__":
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
                 fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
                 fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
-                print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
+                print(f'Freesurfer subjects dir: {fmri_pipeline.subjects_dir}')
+                print(f'Freesurfer subject id: {fmri_pipeline.subject_id}')
 
                 # print sys.argv[offset+9]
                 if fmri_valid_inputs:
@@ -303,174 +302,3 @@ if __name__ == "__main__":
         else:
             print(msg)
             sys.exit(1)
-
-
-
-# Old version with sys.argv for managing script arguments
-#     argc = len(sys.argv)
-
-#     if (argc==6) or (argc==7): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical
-
-#         project = cmp.project.CMP_Project_Info()
-#         project.base_directory = os.path.abspath(sys.argv[1])
-#         project.output_directory = os.path.abspath(sys.argv[2])
-#         project.subjects = ['%s' % sys.argv[3]]
-#         project.subject = '%s' % sys.argv[3]
-
-#         try:
-#             bids_layout = BIDSLayout(project.base_directory)
-#         except:
-#             print("Exception : Raised at BIDSLayout")
-#             sys.exit(1)
-
-#         if "ses-" in sys.argv[4]:
-#             offset = 1
-#             project.subject_sessions = ['%s' % sys.argv[4]]
-#             project.subject_session = '%s' % sys.argv[4]
-#             print("INFO : Detected session(s)")
-#         else:
-#             print("INFO : No detected session")
-#             offset = 0
-#             project.subject_sessions = ['']
-#             project.subject_session = ''
-
-#         project.anat_config_file = os.path.abspath(sys.argv[offset+4])
-
-#         anat_pipeline = cmp.project.init_anat_project(project, False)
-#         if anat_pipeline is not None:
-#             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-#             if anat_valid_inputs and sys.argv[offset+5]:
-#                 anat_pipeline.process()
-#             elif anat_valid_inputs and sys.argv[offset+5]=='False':
-#                 pass
-#             else:
-#                 sys.exit(1)
-
-#     elif (argc==8) or (argc==9): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion
-
-#         project = cmp.project.CMP_Project_Info()
-#         project.base_directory = os.path.abspath(sys.argv[1])
-#         project.output_directory = os.path.abspath(sys.argv[2])
-#         project.subjects = ['%s' % sys.argv[3]]
-#         project.subject = '%s' % sys.argv[3]
-
-#         try:
-#             bids_layout = BIDSLayout(project.base_directory)
-#         except:
-#             sys.exit(1)
-
-#         if "ses-" in sys.argv[4]:
-#             offset = 1
-#             project.subject_sessions = ['%s' % sys.argv[4]]
-#             project.subject_session = '%s' % sys.argv[4]
-#         else:
-#             offset = 0
-#             project.subject_sessions = ['']
-#             project.subject_session = ''
-
-#         project.anat_config_file = os.path.abspath(sys.argv[offset+4])
-#         project.dmri_config_file = os.path.abspath(sys.argv[offset+6])
-
-#         anat_pipeline = cmp.project.init_anat_project(project, False)
-#         if anat_pipeline is not None:
-#             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
-
-#             if anat_valid_inputs and sys.argv[offset+5]=='True':
-#                 print(">> Process anatomical pipeline")
-#                 anat_pipeline.process()
-#             elif anat_valid_inputs and sys.argv[offset+5]=='False':
-#                 print(">> Collecting precomputed anatomical pipeline")
-#                 pass
-#             else:
-#                 print("ERROR : Invalid inputs")
-#                 sys.exit(1)
-
-#         anat_valid_outputs, msg = anat_pipeline.check_output()
-
-#         if anat_valid_outputs:
-#             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
-#             if dmri_pipeline is not None:
-#                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-#                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-#                 #print sys.argv[offset+7]
-#                 if dmri_valid_inputs and sys.argv[offset+7]=='True':
-#                     dmri_pipeline.process()
-#                 else:
-#                     sys.exit(1)
-#         else:
-#             print msg
-#             sys.exit(1)
-
-#     elif (argc==10) or (argc==11): # connectomemapper bids_folder output_dir sub-<label> (ses-<label>) anatomical_ini_file process_anatomical diffusion_ini_file process_diffusion fmri_ini_file process_fmri
-
-#         project = cmp.project.CMP_Project_Info()
-#         project.base_directory = os.path.abspath(sys.argv[1])
-#         project.output_directory = os.path.abspath(sys.argv[2])
-#         project.subjects = ['%s' % sys.argv[3]]
-#         project.subject = '%s' % sys.argv[3]
-
-#         try:
-#             bids_layout = BIDSLayout(project.base_directory)
-#         except:
-#             print("Exception : {}".format(project.base_directory))
-#             print("Exception : {}".format(bids_layout))
-#             sys.exit(1)
-
-#         if "ses-" in sys.argv[4]:
-#             offset = 1
-#             project.subject_sessions = ['%s' % sys.argv[4]]
-#             project.subject_session = '%s' % sys.argv[4]
-#         else:
-#             offset = 0
-#             project.subject_sessions = ['']
-#             project.subject_session = ''
-
-#         project.anat_config_file = os.path.abspath(sys.argv[offset+4])
-#         project.dmri_config_file = os.path.abspath(sys.argv[offset+6])
-#         project.fmri_config_file = os.path.abspath(sys.argv[offset+8])
-
-#         anat_pipeline = cmp.project.init_anat_project(project, False)
-#         if anat_pipeline is not None:
-#             anat_valid_inputs = anat_pipeline.check_input(bids_layout,gui=False)
-
-#             if anat_valid_inputs and sys.argv[offset+5]=='True':
-#                 print(">> Process anatomical pipeline")
-#                 anat_pipeline.process()
-#             elif anat_valid_inputs and sys.argv[offset+5]=='False':
-#                 print(">> Collecting precomputed anatomical pipeline")
-#                 pass
-#             else:
-#                 print("ERROR : Invalid inputs")
-#                 sys.exit(1)
-
-#         anat_valid_outputs, msg = anat_pipeline.check_output()
-
-#         if anat_valid_outputs:
-#             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(project, bids_layout, False)
-#             if dmri_pipeline is not None:
-#                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-#                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-#                 # print sys.argv[offset+7]
-#                 if dmri_valid_inputs and sys.argv[offset+7]=='True':
-#                     print(">> Process diffusion pipeline")
-#                     dmri_pipeline.process()
-#                 else:
-#                     print("WARNING: Diffusion pipeline set to not be executed")
-
-#             fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(project, bids_layout, False)
-#             if fmri_pipeline is not None:
-#                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
-#                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-#                 # print sys.argv[offset+9]
-#                 if fmri_valid_inputs and sys.argv[offset+9]=='True':
-#                     print(">> Process fmri pipeline")
-#                     fmri_pipeline.process()
-#                 else:
-#                     print("WARNING: Diffusion pipeline set to not be executed")
-#         else:
-#             print(msg)
-#             sys.exit(1)
-
-#     else:
-#         usage()
-#         sys.exit(2)

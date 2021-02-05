@@ -247,8 +247,8 @@ class DWIDenoise(CommandLine):
 
 
 class DWIBiasCorrectInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True,
-                   position=-2, desc='The input image series to be corrected')
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+                   desc='The input image series to be corrected')
 
     out_file = File(genfile=True, argstr='%s', position=-1,
                     desc='The output corrected image series')
@@ -261,14 +261,14 @@ class DWIBiasCorrectInputSpec(CommandLineInputSpec):
 
     _xor_inputs = ('use_ants', 'use_fsl')
 
-    use_ants = traits.Bool(argstr='-ants', position=1, desc="Use ANTS N4 to estimate the inhomogeneity field",
+    use_ants = traits.Bool(argstr='ants', position=1, desc="Use ANTS N4 to estimate the inhomogeneity field",
                            xor=_xor_inputs)
 
-    use_fsl = traits.Bool(argstr='-fsl', position=1, desc="Use FSL FAST to estimate the inhomogeneity field",
+    use_fsl = traits.Bool(argstr='fsl', position=1, desc="Use FSL FAST to estimate the inhomogeneity field",
                           xor=_xor_inputs)
 
-    force_writing = traits.Bool(
-        argstr='-force', position=4, desc="Force file overwriting.")
+    force_writing = traits.Bool(argstr='-force', position=4,
+                                desc="Force file overwriting.")
     # quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
 
     debug = traits.Bool(argstr='-debug', position=5,
@@ -302,8 +302,8 @@ class DWIBiasCorrect(CommandLine):
         """Generate a filename based on the given parameters.
 
         The filename will take the form: cwd/basename<suffix><ext>.
-        If change_ext is True, it will use the extentions specified in
-        <instance>intputs.output_type.
+        If change_ext is True, it will use the extensions specified in
+        <instance> inputs.output_type.
 
         Parameters
         ----------
