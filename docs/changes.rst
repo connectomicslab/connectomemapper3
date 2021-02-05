@@ -6,7 +6,7 @@ Changes
 Version 3.0.0-RC3
 ****************************
 
-Date: February 0X, 2021
+Date: February 05, 2021
 
 This version corresponds to the third release candidate of Connectome Mapper 3.
 In particular, it integrates `Pull Request #62 <https://github.com/connectomicslab/connectomemapper3/pull/62>`_ which includes:
