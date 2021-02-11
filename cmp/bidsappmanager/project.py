@@ -1768,11 +1768,9 @@ class CMP_MainWindowHandler(Handler):
                             if len(diffusion_imaging_models) > 0:
                                 if len(diffusion_imaging_models) > 1:
                                     loaded_project.dmri_bids_acqs = diffusion_imaging_models
-                                    loaded_project.configure_traits(
-                                        view='dmri_bids_acq_view')
+                                    loaded_project.configure_traits(view='dmri_bids_acq_view')
                                 else:
-                                    loaded_project.dmri_bids_acqs = [
-                                        '{}'.format(diffusion_imaging_models[0])]
+                                    loaded_project.dmri_bids_acqs = ['{}'.format(diffusion_imaging_models[0])]
                                     loaded_project.dmri_bids_acq = diffusion_imaging_models[0]
 
                                 if ('dsi' in loaded_project.dmri_bids_acq) or ('DSI' in loaded_project.dmri_bids_acq):
