@@ -114,9 +114,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.subject_directory = os.path.join(project_info.base_directory,
                                                   project_info.subject,
                                                   project_info.subject_session)
+            subject_id = "_".join((self.subject, self.global_conf.subject_session))
         else:
             self.global_conf.subject_session = ''
             self.subject_directory = os.path.join(project_info.base_directory, project_info.subject)
+            subject_id = self.subject
 
         self.derivatives_directory = os.path.abspath(project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
@@ -129,6 +131,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         cmp_common.Pipeline.__init__(self, project_info)
 
         self.subject = project_info.subject
+
+        self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.output_directory,
+                                                                                  'freesurfer')
+        self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.output_directory,
+                                                                                'freesurfer', subject_id)
+
+        print('freesurfer_subject_id: ' + self.stages['Segmentation'].config.freesurfer_subject_id)
 
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation, 'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation, 'parcellation_scheme')

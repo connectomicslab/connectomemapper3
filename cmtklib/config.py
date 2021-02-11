@@ -245,10 +245,10 @@ def anat_save_config(pipeline, config_path):
     config.add_section('Multi-processing')
     config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
 
-    with open(config_path, 'w') as configfile:
-        config.write(configfile)
+    # with open(config_path, 'w') as configfile:
+    #     config.write(configfile)
 
-    print('Config file (anat) saved as {}'.format(config_path))
+    # print('Config file (anat) saved as {}'.format(config_path))
 
     config_json = {}
 
@@ -273,11 +273,14 @@ def anat_save_config(pipeline, config_path):
             elif len(config_json[section][name]) == 0:
                 config_json[section][name] = ''
 
-    config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
-    with open(config_json_path, 'w') as outfile:
+            if config_json[section][name] == '':
+                del config_json[section][name]
+
+    # config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
+    with open(config_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
 
-    print('Config json file (anat) saved as {}'.format(config_json_path))
+    print('Config json file (anat) saved as {}'.format(config_path))
 
 
 def anat_load_config_ini(pipeline, config_path):
@@ -365,19 +368,22 @@ def anat_load_config_json(pipeline, config_path):
                    'trait' not in prop]  # possibly dangerous..?
     for key in global_keys:
         if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
-            conf_value = config['Global'][key]
-            setattr(pipeline.global_conf, key, conf_value)
+            if key in config['Global'].keys():
+                conf_value = config['Global'][key]
+                setattr(pipeline.global_conf, key, conf_value)
     for stage in list(pipeline.stages.values()):
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if 'trait' not in prop]  # possibly dangerous..?
+        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
+                      'trait' not in prop]  # possibly dangerous..?
         for key in stage_keys:
             if 'config' in key:  # subconfig
                 sub_config = getattr(stage.config, key)
-                stage_sub_keys = [prop for prop in list(
-                        sub_config.traits().keys()) if 'trait' not in prop]
+                stage_sub_keys = [prop for prop in list(sub_config.traits().keys()) if
+                                  'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     try:
-                        conf_value = config[stage.name][key + '.' + sub_key]
+                        tmp_key = key + '.' + sub_key
+                        if tmp_key in config[stage.name].keys():
+                            conf_value = config[stage.name][tmp_key]
                         try:
                             conf_value = eval(conf_value)
                         except Exception:
@@ -387,7 +393,7 @@ def anat_load_config_json(pipeline, config_path):
                         pass
             else:
                 try:
-                    if key != 'modalities':
+                    if key in config[stage.name].keys():
                         conf_value = config[stage.name][key]
                     try:
                         conf_value = eval(conf_value)
@@ -439,10 +445,10 @@ def dmri_save_config(pipeline, config_path):
     config.add_section('Multi-processing')
     config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
 
-    with open(config_path, 'w') as configfile:
-        config.write(configfile)
+    # with open(config_path, 'w') as configfile:
+    #     config.write(configfile)
 
-    print('Config file (dwi) saved as {}'.format(config_path))
+    # print('Config file (dwi) saved as {}'.format(config_path))
 
     config_json = {}
 
@@ -467,11 +473,14 @@ def dmri_save_config(pipeline, config_path):
             elif len(config_json[section][name]) == 0:
                 config_json[section][name] = ''
 
-    config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
-    with open(config_json_path, 'w') as outfile:
+            if config_json[section][name] == '':
+                del config_json[section][name]
+
+    # config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
+    with open(config_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
 
-    print('Config json file (dwi) saved as {}'.format(config_json_path))
+    print('Config json file (dwi) saved as {}'.format(config_path))
 
 
 def dmri_load_config_ini(pipeline, config_path):
@@ -556,19 +565,22 @@ def dmri_load_config_json(pipeline, config_path):
                    'trait' not in prop]  # possibly dangerous..?
     for key in global_keys:
         if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
-            conf_value = config['Global'][key]
-            setattr(pipeline.global_conf, key, conf_value)
+            if key in config['Global'].keys():
+                conf_value = config['Global'][key]
+                setattr(pipeline.global_conf, key, conf_value)
     for stage in list(pipeline.stages.values()):
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if 'trait' not in prop]  # possibly dangerous..?
+        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
+                      'trait' not in prop]  # possibly dangerous..?
         for key in stage_keys:
             if 'config' in key:  # subconfig
                 sub_config = getattr(stage.config, key)
-                stage_sub_keys = [prop for prop in list(
-                        sub_config.traits().keys()) if 'trait' not in prop]
+                stage_sub_keys = [prop for prop in list(sub_config.traits().keys()) if
+                                  'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     try:
-                        conf_value = config[stage.name][key + '.' + sub_key]
+                        tmp_key = key + '.' + sub_key
+                        if tmp_key in config[stage.name].keys():
+                            conf_value = config[stage.name][tmp_key]
                         try:
                             conf_value = eval(conf_value)
                         except Exception:
@@ -578,7 +590,7 @@ def dmri_load_config_json(pipeline, config_path):
                         pass
             else:
                 try:
-                    if key != 'modalities':
+                    if key in config[stage.name].keys():
                         conf_value = config[stage.name][key]
                     try:
                         conf_value = eval(conf_value)
@@ -629,10 +641,10 @@ def fmri_save_config(pipeline, config_path):
     config.add_section('Multi-processing')
     config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
 
-    with open(config_path, 'w') as configfile:
-        config.write(configfile)
+    # with open(config_path, 'w') as configfile:
+    #     config.write(configfile)
 
-    print('Config file (fMRI) saved as {}'.format(config_path))
+    # print('Config file (fMRI) saved as {}'.format(config_path))
 
     config_json = {}
 
@@ -657,11 +669,14 @@ def fmri_save_config(pipeline, config_path):
             elif len(config_json[section][name]) == 0:
                 config_json[section][name] = ''
 
-    config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
-    with open(config_json_path, 'w') as outfile:
+            if config_json[section][name] == '':
+                del config_json[section][name]
+
+    # config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
+    with open(config_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
 
-    print('Config json file (fMRI) saved as {}'.format(config_json_path))
+    print('Config json file (fMRI) saved as {}'.format(config_path))
 
 
 def fmri_load_config_ini(pipeline, config_path):
@@ -747,19 +762,22 @@ def fmri_load_config_json(pipeline, config_path):
                    'trait' not in prop]  # possibly dangerous..?
     for key in global_keys:
         if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
-            conf_value = config['Global'][key]
-            setattr(pipeline.global_conf, key, conf_value)
+            if key in config['Global'].keys():
+                conf_value = config['Global'][key]
+                setattr(pipeline.global_conf, key, conf_value)
     for stage in list(pipeline.stages.values()):
         stage_keys = [prop for prop in list(stage.config.traits().keys()) if
                       'trait' not in prop]  # possibly dangerous..?
         for key in stage_keys:
             if 'config' in key:  # subconfig
                 sub_config = getattr(stage.config, key)
-                stage_sub_keys = [prop for prop in list(
-                        sub_config.traits().keys()) if 'trait' not in prop]
+                stage_sub_keys = [prop for prop in list(sub_config.traits().keys()) if
+                                  'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     try:
-                        conf_value = config[stage.name][key + '.' + sub_key]
+                        tmp_key = key + '.' + sub_key
+                        if tmp_key in config[stage.name].keys():
+                            conf_value = config[stage.name][tmp_key]
                         try:
                             conf_value = eval(conf_value)
                         except Exception:
@@ -769,7 +787,7 @@ def fmri_load_config_json(pipeline, config_path):
                         pass
             else:
                 try:
-                    if key != 'modalities':
+                    if key in config[stage.name].keys():
                         conf_value = config[stage.name][key]
                     try:
                         conf_value = eval(conf_value)
