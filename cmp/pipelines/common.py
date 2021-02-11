@@ -245,6 +245,14 @@ class Pipeline(HasTraits):
             if stage.enabled:
                 stage.define_inspect_outputs()
 
+    def check_stages_execution(self):
+        """Check stage execution."""
+        for stage in list(self.stages.values()):
+            if stage.has_run():
+                print(f'{stage} stage finished!')
+            if stage.is_running():
+                print(f'{stage} stage running...')
+
     def clear_stages_outputs(self):
         """Clear processing stage outputs."""
         for stage in list(self.stages.values()):
