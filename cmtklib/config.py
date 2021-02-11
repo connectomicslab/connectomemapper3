@@ -11,6 +11,150 @@ import json
 from collections.abc import Iterable
 
 
+def check_configuration_format(config_path):
+    """Check format of the configuration file.
+
+    Parameters
+    ----------
+    config_path : string
+        Path to pipeline configuration file
+
+    Returns
+    -------
+    ext : '.ini' or '.json'
+        Format extension of the pipeline configuration file
+    """
+    ext = None
+    if '.ini' in config_path:
+        ext = '.ini'
+    elif '.json' in config_path:
+        ext = '.json'
+    return ext
+
+
+def convert_config_ini_2_json(config_ini_path):
+    """Convert a configuration file in old INI format to new JSON format.
+
+    Parameters
+    ----------
+    config_ini_path : string
+        Path to configuration file in old INI format
+
+    Returns
+    -------
+    config_json_path : string
+        Path to converted configuration file in new JSON format
+    """
+    print('>> Load config file : {}'.format(config_ini_path))
+    config = configparser.ConfigParser()
+
+    try:
+        config.read(config_ini_path)
+    except configparser.MissingSectionHeaderError:
+        print(
+                '... error : file is a datalad git annex but it has not been retrieved yet.' +
+                ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)'
+        )
+
+    config_json = {}
+
+    for section in config.sections():
+        config_json[section] = {}
+        for name, value in config.items(section):
+
+            if isinstance(value, Iterable) and not isinstance(value, str):
+                config_json[section][name] = [x for x in value if x]
+            elif isinstance(value, bool):
+                config_json[section][name] = [value]
+            elif value and not isinstance(value, str):
+                config_json[section][name] = [value]
+            elif value and isinstance(value, str):
+                config_json[section][name] = [value.strip()]
+            else:
+                print(f'Type: {type(value)} / value : {value}')
+                config_json[section][name] = []
+
+            if len(config_json[section][name]) == 1:
+                config_json[section][name] = config_json[section][name][0]
+            elif len(config_json[section][name]) == 0:
+                config_json[section][name] = ''
+
+            if config_json[section][name] == '':
+                del config_json[section][name]
+
+    config_json_path = '.'.join([os.path.splitext(config_ini_path)[0], 'json'])
+    with open(config_json_path, 'w') as outfile:
+        json.dump(config_json, outfile, indent=4)
+
+    print(f'   .. Config file converted to JSON and saved as {config_json_path}')
+
+    return config_json_path
+
+
+def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type, multiproc_number_of_cores=1):
+    """Create the pipeline configuration file for an individual subject from a reference given as input.
+
+    Parameters
+    ----------
+    project : cmp.project.CMP_Project_Info
+        Instance of `cmp.project.CMP_Project_Info`
+
+    ref_conf_file : string
+        Reference configuration file
+
+    pipeline_type : 'anatomical', 'diffusion', 'fMRI'
+        Type of pipeline
+
+    multiproc_number_of_cores : int
+        Number of threads used by Nipype
+
+    Returns
+    -------
+    subject_conf_file : string
+        Configuration file of the individual subject
+    """
+    subject_derivatives_dir = os.path.join(project.output_directory)
+
+    # print('project.subject_session: {}'.format(project.subject_session))
+
+    if project.subject_session != '':  # Session structure
+        # print('With session : {}'.format(project.subject_session))
+        subject_conf_file = os.path.join(subject_derivatives_dir, 'cmp', project.subject, project.subject_session,
+                                         "{}_{}_{}_config.json".format(project.subject, project.subject_session,
+                                                                      pipeline_type))
+    else:
+        # print('With NO session ')
+        subject_conf_file = os.path.join(subject_derivatives_dir, 'cmp', project.subject,
+                                         "{}_{}_config.json".format(project.subject, pipeline_type))
+
+    if os.path.isfile(subject_conf_file):
+        print("WARNING: rewriting config file {}".format(subject_conf_file))
+        os.remove(subject_conf_file)
+
+    # Change relative path to absolute path if needed (required when using singularity)
+    if not os.path.isabs(ref_conf_file):
+        ref_conf_file = os.path.abspath(ref_conf_file)
+
+    with open(ref_conf_file, 'r') as f:
+        config = json.load(f)
+
+    config['Global']['subject'] = project.subject
+    config['Global']['subjects'] = project.subjects
+
+    if 'subject_sessions' in config['Global'].keys():
+        config['Global']['subject_sessions'] = project.subject_sessions
+
+    if 'subject_session' in config['Global'].keys():
+        config['Global']['subject_session'] = project.subject_session
+
+    config['Multi-processing']['number_of_cores'] = multiproc_number_of_cores
+
+    with open(subject_conf_file, 'w') as outfile:
+        json.dump(config, outfile, indent=4)
+
+    return subject_conf_file
+
+
 def get_process_detail_json(project_info, section, detail):
     """Get the value for a parameter key (detail) in the global section of the JSON config file.
 
