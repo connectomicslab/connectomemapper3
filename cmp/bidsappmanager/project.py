@@ -1737,17 +1737,17 @@ class CMP_MainWindowHandler(Handler):
                 self.project_loaded = True
 
                 if dmri_inputs_checked:
-                    self.dmri_pipeline = Diffusion_pipeline.DiffusionPipelineUI(
-                        loaded_project)
+                    self.dmri_pipeline = \
+                        Diffusion_pipeline.DiffusionPipelineUI(loaded_project)
                     self.dmri_pipeline.number_of_cores = loaded_project.number_of_cores
-                    self.dmri_pipeline.parcellation_scheme = ui_info.ui.context[
-                        "object"].project_info.parcellation_scheme
+                    self.dmri_pipeline.parcellation_scheme = \
+                        ui_info.ui.context["object"].project_info.parcellation_scheme
 
-                    code_directory = os.path.join(
-                        loaded_project.base_directory, 'code')
+                    code_directory = os.path.join(loaded_project.base_directory,
+                                                  'code')
 
-                    dmri_config_file = os.path.join(
-                        code_directory, 'ref_diffusion_config.ini')
+                    dmri_config_file = os.path.join(code_directory,
+                                                    'ref_diffusion_config.ini')
                     loaded_project.dmri_config_file = dmri_config_file
 
                     self.dmri_pipeline.config_file = dmri_config_file
