@@ -24,7 +24,7 @@ class DiffusionConfig(HasTraits):
 
     Attributes
     ----------
-    diffusion_imaging_model_editor : ['DSI', 'DTI', 'HARDI']
+    diffusion_imaging_model_editor : ['DSI', 'DTI', 'HARDI', 'multishell']
         Available diffusion imaging models
 
     diffusion_imaging_model : traits.Str
@@ -89,7 +89,7 @@ class DiffusionConfig(HasTraits):
     cmp.stages.diffusion.diffusion.DiffusionStage
     """
 
-    diffusion_imaging_model_editor = List(['DSI', 'DTI', 'HARDI'])
+    diffusion_imaging_model_editor = List(['DSI', 'DTI', 'HARDI', 'multishell'])
     diffusion_imaging_model = Str('DTI')
     dilate_rois = Bool(True)
     dilation_kernel = Enum(['Box', 'Gauss', 'Sphere'])

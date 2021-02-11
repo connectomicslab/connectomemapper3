@@ -65,7 +65,7 @@ class CMP_Project_Info(HasTraits):
 
     diffusion_imaging_model : traits.Str
         Diffusion imaging model that can be
-        'DSI', 'DTI', or 'multi-shell'
+        'DSI', 'DTI', 'HARDI' or 'multishell'
 
     dmri_bids_acqs : traits.List
         List diffusion imaging models extracted from ``acq-<label>`` filename part.
@@ -192,7 +192,7 @@ class CMP_Project_Info(HasTraits):
         'Do you want to reset the configuration to default parameters ?\n')
 
     # process_type = Enum('diffusion',['diffusion','fMRI'])
-    diffusion_imaging_model = Enum('DTI', ['DSI', 'DTI', 'HARDI'])
+    diffusion_imaging_model = Enum('DTI', ['DSI', 'DTI', 'HARDI', 'multishell'])
     parcellation_scheme = Str('Lausanne2008')
     atlas_info = Dict()
     freesurfer_subjects_dir = Str('')

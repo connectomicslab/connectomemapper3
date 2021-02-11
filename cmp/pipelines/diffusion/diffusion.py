@@ -59,7 +59,7 @@ class Global_Configuration(HasTraits):
 
 class Check_Input_Notification(HasTraits):
     message = Str
-    diffusion_imaging_model_options = List(['DSI', 'DTI', 'HARDI'])
+    diffusion_imaging_model_options = List(['DSI', 'DTI', 'HARDI', 'multishell'])
     diffusion_imaging_model = Str
     diffusion_imaging_model_message = Str(
         '\nMultiple diffusion inputs available. Please select desired diffusion modality.')

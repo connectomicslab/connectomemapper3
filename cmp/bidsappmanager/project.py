@@ -1779,6 +1779,8 @@ class CMP_MainWindowHandler(Handler):
                                     loaded_project.diffusion_imaging_model = 'DTI'
                                 elif ('hardi' in loaded_project.dmri_bids_acq) or ('HARDI' in loaded_project.dmri_bids_acq):
                                     loaded_project.diffusion_imaging_model = 'HARDI'
+                                elif ('multishell' in loaded_project.dmri_bids_acq) or ('MULTISHELL' in loaded_project.dmri_bids_acq):
+                                    loaded_project.diffusion_imaging_model = 'multishell'
                                 else:
                                     loaded_project.diffusion_imaging_model = 'DTI'
                             else:
@@ -1813,8 +1815,7 @@ class CMP_MainWindowHandler(Handler):
                             if len(diffusion_imaging_models) > 0:
                                 if len(diffusion_imaging_models) > 1:
                                     loaded_project.dmri_bids_acqs = diffusion_imaging_models
-                                    loaded_project.configure_traits(
-                                        view='dmri_bids_acq_view')
+                                    loaded_project.configure_traits(view='dmri_bids_acq_view')
                                 else:
                                     loaded_project.dmri_bids_acq = diffusion_imaging_models[0]
 
@@ -1824,13 +1825,14 @@ class CMP_MainWindowHandler(Handler):
                                     loaded_project.diffusion_imaging_model = 'DTI'
                                 elif ('hardi' in loaded_project.dmri_bids_acq) or ('HARDI' in loaded_project.dmri_bids_acq):
                                     loaded_project.diffusion_imaging_model = 'HARDI'
+                                elif ('multishell' in loaded_project.dmri_bids_acq) or ('MULTISHELL' in loaded_project.dmri_bids_acq):
+                                    loaded_project.diffusion_imaging_model = 'multishell'
                                 else:
                                     loaded_project.diffusion_imaging_model = 'DTI'
                             else:
                                 loaded_project.dmri_bids_acqs = ['']
                                 loaded_project.dmri_bids_acq = ''
-                                loaded_project.configure_traits(
-                                    view='diffusion_imaging_model_select_view')
+                                loaded_project.configure_traits(view='diffusion_imaging_model_select_view')
 
                         self.dmri_pipeline.diffusion_imaging_model = loaded_project.diffusion_imaging_model
                         self.dmri_pipeline.global_conf.diffusion_imaging_model = loaded_project.diffusion_imaging_model
