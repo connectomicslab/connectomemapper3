@@ -375,7 +375,7 @@ class DiffusionStage(Stage):
                         min_size = voxel_size
 
                 print("voxel size (min): %g" % min_size)
-                if self.confi.dilation_kernel == 'Gauss':
+                if self.config.dilation_kernel == 'Gauss':
                     kernel_size = 2 * extract_sizes.outputs.voxel_sizes + 1
                     # FWHM criteria, i.e. sigma = FWHM / 2(sqrt(2ln(2)))
                     sigma = kernel_size / 2.355
