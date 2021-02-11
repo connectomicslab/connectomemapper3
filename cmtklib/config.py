@@ -235,7 +235,7 @@ def anat_save_config(pipeline, config_path):
             keyval = getattr(stage.config, key)
             if 'config' in key:  # subconfig
                 stage_sub_keys = [prop for prop in list(
-                    keyval.traits().keys()) if 'trait' not in prop]
+                        keyval.traits().keys()) if 'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     config.set(stage.name, key + '.' + sub_key,
                                getattr(keyval, sub_key))
@@ -255,14 +255,19 @@ def anat_save_config(pipeline, config_path):
     for section in config.sections():
         config_json[section] = {}
         for name, value in config.items(section):
+
             if isinstance(value, Iterable) and not isinstance(value, str):
                 config_json[section][name] = [x for x in value if x]
+            elif isinstance(value, bool):
+                config_json[section][name] = [value]
             elif value and not isinstance(value, str):
                 config_json[section][name] = [value]
             elif value and isinstance(value, str):
                 config_json[section][name] = [value.strip()]
             else:
+                print(f'Type: {type(value)} / value : {value}')
                 config_json[section][name] = []
+
             if len(config_json[section][name]) == 1:
                 config_json[section][name] = config_json[section][name][0]
             elif len(config_json[section][name]) == 0:
@@ -294,9 +299,9 @@ def anat_load_config_ini(pipeline, config_path):
         config.read(config_path)
     except configparser.MissingSectionHeaderError:
         print(
-            '... error : file is a datalad git annex but it has not been retrieved yet.' +
-            ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)'
-            )
+                '... error : file is a datalad git annex but it has not been retrieved yet.' +
+                ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)'
+        )
 
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
                    'trait' not in prop]  # possibly dangerous..?
@@ -311,11 +316,11 @@ def anat_load_config_ini(pipeline, config_path):
             if 'config' in key:  # subconfig
                 sub_config = getattr(stage.config, key)
                 stage_sub_keys = [prop for prop in list(
-                    sub_config.traits().keys()) if 'trait' not in prop]
+                        sub_config.traits().keys()) if 'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     try:
                         conf_value = config.get(
-                            stage.name, key + '.' + sub_key)
+                                stage.name, key + '.' + sub_key)
                         try:
                             conf_value = eval(conf_value)
                         except Exception:
@@ -335,7 +340,7 @@ def anat_load_config_ini(pipeline, config_path):
                 except Exception:
                     pass
     setattr(pipeline, 'number_of_cores', int(
-        config.get('Multi-processing', 'number_of_cores')))
+            config.get('Multi-processing', 'number_of_cores')))
 
     return True
 
@@ -369,7 +374,7 @@ def anat_load_config_json(pipeline, config_path):
             if 'config' in key:  # subconfig
                 sub_config = getattr(stage.config, key)
                 stage_sub_keys = [prop for prop in list(
-                    sub_config.traits().keys()) if 'trait' not in prop]
+                        sub_config.traits().keys()) if 'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     try:
                         conf_value = config[stage.name][key + '.' + sub_key]
@@ -392,7 +397,7 @@ def anat_load_config_json(pipeline, config_path):
                 except Exception:
                     pass
     setattr(pipeline, 'number_of_cores', int(
-        config['Multi-processing']['number_of_cores']))
+            config['Multi-processing']['number_of_cores']))
 
     return True
 
@@ -424,7 +429,7 @@ def dmri_save_config(pipeline, config_path):
             keyval = getattr(stage.config, key)
             if 'config' in key:  # subconfig
                 stage_sub_keys = [prop for prop in list(
-                    keyval.traits().keys()) if 'trait' not in prop]
+                        keyval.traits().keys()) if 'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     config.set(stage.name, key + '.' + sub_key,
                                getattr(keyval, sub_key))
@@ -444,14 +449,19 @@ def dmri_save_config(pipeline, config_path):
     for section in config.sections():
         config_json[section] = {}
         for name, value in config.items(section):
+
             if isinstance(value, Iterable) and not isinstance(value, str):
                 config_json[section][name] = [x for x in value if x]
+            elif isinstance(value, bool):
+                config_json[section][name] = [value]
             elif value and not isinstance(value, str):
                 config_json[section][name] = [value]
             elif value and isinstance(value, str):
                 config_json[section][name] = [value.strip()]
             else:
+                print(f'Type: {type(value)} / value : {value}')
                 config_json[section][name] = []
+
             if len(config_json[section][name]) == 1:
                 config_json[section][name] = config_json[section][name][0]
             elif len(config_json[section][name]) == 0:
@@ -498,11 +508,11 @@ def dmri_load_config_ini(pipeline, config_path):
             if 'config' in key:  # subconfig
                 sub_config = getattr(stage.config, key)
                 stage_sub_keys = [prop for prop in list(
-                    sub_config.traits().keys()) if 'trait' not in prop]
+                        sub_config.traits().keys()) if 'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     try:
                         conf_value = config.get(
-                            stage.name, key + '.' + sub_key)
+                                stage.name, key + '.' + sub_key)
                         try:
                             conf_value = eval(conf_value)
                         except Exception:
@@ -522,7 +532,7 @@ def dmri_load_config_ini(pipeline, config_path):
                 except Exception:
                     pass
     setattr(pipeline, 'number_of_cores', int(
-        config.get('Multi-processing', 'number_of_cores')))
+            config.get('Multi-processing', 'number_of_cores')))
     return True
 
 
@@ -555,7 +565,7 @@ def dmri_load_config_json(pipeline, config_path):
             if 'config' in key:  # subconfig
                 sub_config = getattr(stage.config, key)
                 stage_sub_keys = [prop for prop in list(
-                    sub_config.traits().keys()) if 'trait' not in prop]
+                        sub_config.traits().keys()) if 'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     try:
                         conf_value = config[stage.name][key + '.' + sub_key]
@@ -578,7 +588,7 @@ def dmri_load_config_json(pipeline, config_path):
                 except Exception:
                     pass
     setattr(pipeline, 'number_of_cores', int(
-        config['Multi-processing']['number_of_cores']))
+            config['Multi-processing']['number_of_cores']))
 
     return True
 
@@ -609,7 +619,7 @@ def fmri_save_config(pipeline, config_path):
             keyval = getattr(stage.config, key)
             if 'config' in key:  # subconfig
                 stage_sub_keys = [prop for prop in list(
-                    keyval.traits().keys()) if 'trait' not in prop]
+                        keyval.traits().keys()) if 'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     config.set(stage.name, key + '.' + sub_key,
                                getattr(keyval, sub_key))
@@ -629,14 +639,19 @@ def fmri_save_config(pipeline, config_path):
     for section in config.sections():
         config_json[section] = {}
         for name, value in config.items(section):
+
             if isinstance(value, Iterable) and not isinstance(value, str):
                 config_json[section][name] = [x for x in value if x]
+            elif isinstance(value, bool):
+                config_json[section][name] = [value]
             elif value and not isinstance(value, str):
                 config_json[section][name] = [value]
             elif value and isinstance(value, str):
                 config_json[section][name] = [value.strip()]
             else:
+                print(f'Type: {type(value)} / value : {value}')
                 config_json[section][name] = []
+
             if len(config_json[section][name]) == 1:
                 config_json[section][name] = config_json[section][name][0]
             elif len(config_json[section][name]) == 0:
@@ -668,8 +683,8 @@ def fmri_load_config_ini(pipeline, config_path):
         config.read(config_path)
     except configparser.MissingSectionHeaderError:
         print(
-            '... error : file is a datalad git annex but it has not been retrieved yet.'
-            ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)')
+                '... error : file is a datalad git annex but it has not been retrieved yet.'
+                ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)')
 
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
                    'trait' not in prop]  # possibly dangerous..?
@@ -684,11 +699,11 @@ def fmri_load_config_ini(pipeline, config_path):
             if 'config' in key:  # subconfig
                 sub_config = getattr(stage.config, key)
                 stage_sub_keys = [prop for prop in list(
-                    sub_config.traits().keys()) if 'trait' not in prop]
+                        sub_config.traits().keys()) if 'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     try:
                         conf_value = config.get(
-                            stage.name, key + '.' + sub_key)
+                                stage.name, key + '.' + sub_key)
                         try:
                             conf_value = eval(conf_value)
                         except Exception:
@@ -708,7 +723,7 @@ def fmri_load_config_ini(pipeline, config_path):
                 except Exception:
                     pass
     setattr(pipeline, 'number_of_cores', int(
-        config.get('Multi-processing', 'number_of_cores')))
+            config.get('Multi-processing', 'number_of_cores')))
     return True
 
 
@@ -735,13 +750,13 @@ def fmri_load_config_json(pipeline, config_path):
             conf_value = config['Global'][key]
             setattr(pipeline.global_conf, key, conf_value)
     for stage in list(pipeline.stages.values()):
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if 'trait' not in prop]  # possibly dangerous..?
+        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
+                      'trait' not in prop]  # possibly dangerous..?
         for key in stage_keys:
             if 'config' in key:  # subconfig
                 sub_config = getattr(stage.config, key)
                 stage_sub_keys = [prop for prop in list(
-                    sub_config.traits().keys()) if 'trait' not in prop]
+                        sub_config.traits().keys()) if 'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     try:
                         conf_value = config[stage.name][key + '.' + sub_key]
@@ -764,6 +779,6 @@ def fmri_load_config_json(pipeline, config_path):
                 except Exception:
                     pass
     setattr(pipeline, 'number_of_cores', int(
-        config['Multi-processing']['number_of_cores']))
+            config['Multi-processing']['number_of_cores']))
 
     return True
