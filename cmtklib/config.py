@@ -71,7 +71,6 @@ def convert_config_ini_2_json(config_ini_path):
             elif value and isinstance(value, str):
                 config_json[section][name] = [value.strip()]
             else:
-                print(f'Type: {type(value)} / value : {value}')
                 config_json[section][name] = []
 
             if len(config_json[section][name]) == 1:
