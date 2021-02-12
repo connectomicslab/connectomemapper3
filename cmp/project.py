@@ -760,6 +760,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 print("ERROR : Invalid inputs")
                 sys.exit(1)
 
+            anat_pipeline.check_stages_execution()
             anat_pipeline.fill_stages_outputs()
 
     # Perform the anatomical and the diffusion pipelines
@@ -782,6 +783,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
@@ -797,6 +799,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 else:
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
+                dmri_pipeline.check_stages_execution()
+                dmri_pipeline.fill_stages_outputs()
         else:
             print(msg)
             sys.exit(1)
@@ -821,6 +825,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
@@ -843,6 +848,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 else:
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
+                fmri_pipeline.check_stages_execution()
+                fmri_pipeline.fill_stages_outputs()
         else:
             print(msg)
             sys.exit(1)
@@ -868,6 +875,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
@@ -885,6 +893,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 else:
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
+                dmri_pipeline.check_stages_execution()
+                dmri_pipeline.fill_stages_outputs()
 
             fmri_valid_inputs, fmri_pipeline = init_fmri_project(project, bids_layout, False)
             if fmri_pipeline is not None:
@@ -902,6 +912,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 else:
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
+                fmri_pipeline.check_stages_execution()
+                fmri_pipeline.fill_stages_outputs()
         else:
             print(msg)
             sys.exit(1)
