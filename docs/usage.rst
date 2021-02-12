@@ -31,11 +31,11 @@ To run the docker image in participant level mode (for one participant):
             -v /home/localadmin/data/ds001:/bids_dir \\
             -v /media/localadmin/data/ds001/derivatives:/output_dir \\
             (-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \\)
-            sebastientourbier/connectomemapper3:|release| \\
+            sebastientourbier/connectomemapper-bidsapp:|release| \\
             /bids_dir /output_dir participant --participant_label 01 \\(--session_label 01 \\)
-          	--anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \\)
-            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \\)
-            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.ini \\)
+            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\)
+            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
+            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
             (--number_of_participants_processed_in_parallel 1)
 
 .. note:: The local directory of the input BIDS dataset (here: ``/home/localadmin/data/ds001``) and the output directory (here: ``/media/localadmin/data/ds001/derivatives``) used to process have to be mapped to the folders ``/bids_dir`` and ``/output_dir`` respectively using the ``-v`` docker run option.
@@ -43,6 +43,9 @@ To run the docker image in participant level mode (for one participant):
 .. important:: The user is requested to use its own Freesurfer license (`available here <https://surfer.nmr.mgh.harvard.edu/registration.html>`_). CMP expects by default to find a copy of the FreeSurfer ``license.txt`` in the ``code/`` folder of the BIDS directory. However, one can also mount with the ``-v`` docker run option a freesurfer ``license.txt``, which can be located anywhere on its computer (as in the example above, i.e. ``/usr/local/freesurfer/license.txt``) to the ``code/`` folder of the BIDS directory inside the docker container (i.e. ``/bids_dir/code/license.txt``).
 
 .. note:: At least a configuration file describing the processing stages of the anatomical pipeline should be provided. Diffusion and/or Functional MRI pipeline are performed only if a configuration file is set. The generation of such configuration files, the execution of the BIDS App docker image and output inpection are facilitated through the use of the Connectome Mapper GUI, i.e. cmpbidsappmanager (see `dedicated documentation page <bidsappmanager.html>`_)
+
+.. important:: Since ``v3.0.0-RC4``, configuration files adopt the `.json` format. If you have your configuration files still in the *old* ``.ini format,
+    do not worry, the CMP3 BIDS App will convert automatically them for you to the new `.json` format.
 
 Debugging
 =========
