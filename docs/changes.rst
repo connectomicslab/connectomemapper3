@@ -3,6 +3,37 @@ Changes
 ========
 
 ****************************
+Version 3.0.0-RC4
+****************************
+
+Date: February XX, 2021
+
+This version corresponds to the fourth release candidate of Connectome Mapper 3.
+In particular, it integrates `Pull Request #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ which includes:
+
+*Major changes*
+
+* Configuration files adopt now the `JSON` format. Configuration files in the old `INI` format are converted automatically
+  with the help of the two new methods `check_configuration_format()` and `convert_config_ini_2_json` to detect if
+  configuration files are in the `INI` format and to make the conversion. (`PR #76 <https://github.com/connectomicslab/connectomemapper3/pull/76>`_)
+
+*Documentation*
+
+*
+
+*Bug fixes*
+
+* Correct attributes related to the diffusion imaging model type `multishell`.
+
+*Software development life cycle*
+
+* Code coverage improvement by calling the methods `check_stages_execution()` and `fill_stages_outputs()`
+  on each pipeline when executed with coverage (`PR #75 <https://github.com/connectomicslab/connectomemapper3/pull/75>`_)
+
+Please check the `main pull request 74 page <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ for more details.
+
+
+****************************
 Version 3.0.0-RC3
 ****************************
 
