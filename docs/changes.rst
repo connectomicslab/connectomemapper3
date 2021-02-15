@@ -19,7 +19,7 @@ In particular, it integrates `Pull Request #74 <https://github.com/connectomicsl
 
 *Documentation*
 
-*
+* Review usage and add a note regarding the adoption of the new `JSON` format for configuration files
 
 *Bug fixes*
 
