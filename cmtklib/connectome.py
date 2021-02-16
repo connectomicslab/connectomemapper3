@@ -1179,33 +1179,23 @@ class rsfmri_conmat(BaseInterface):
 
                 sio.savemat('connectome_%s.mat' % parkey, mdict={
                             'sc': edge_struct, 'nodes': node_struct})
-            if 'graphml' in self.inputs.output_types and self.inputs.parcellation_scheme != "Lausanne2018":
+            if 'graphml' in self.inputs.output_types:
                 g2 = nx.Graph()
-                for u_gml, d_gml in G.nodes(data=True):
-                    g2.add_node(u_gml, {'dn_correspondence_id': d_gml['dn_correspondence_id'],
-                                        'dn_fsname': d_gml['dn_fsname'],
-                                        'dn_hemisphere': d_gml['dn_hemisphere'],
-                                        'dn_name': d_gml['dn_name'],
-                                        'dn_position_x': float(d_gml['dn_position'][0]),
-                                        'dn_position_y': float(d_gml['dn_position'][1]),
-                                        'dn_position_z': float(d_gml['dn_position'][2]),
-                                        'dn_region': d_gml['dn_region']})
-                for u_gml, v_gml, d_gml in G.edges(data=True):
-                    g2.add_edge(u_gml, v_gml, {'corr': float(d_gml['corr'])})
-                nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
 
-            if 'graphml' in self.inputs.output_types and (
-                    self.inputs.parcellation_scheme == "Lausanne2018" or self.inputs.parcellation_scheme == 'NativeFreesurfer'):
-                g2 = nx.Graph()
                 for u_gml, d_gml in G.nodes(data=True):
-                    g2.add_node(u_gml, {'dn_multiscaleID': d_gml['dn_multiscaleID'],
-                                        'dn_fsname': d_gml['dn_fsname'],
-                                        'dn_hemisphere': d_gml['dn_hemisphere'],
-                                        'dn_name': d_gml['dn_name'],
-                                        'dn_position_x': float(d_gml['dn_position'][0]),
-                                        'dn_position_y': float(d_gml['dn_position'][1]),
-                                        'dn_position_z': float(d_gml['dn_position'][2]),
-                                        'dn_region': d_gml['dn_region']})
+                    g2.add_node(u_gml)
+                    if self.inputs.parcellation_scheme != "Lausanne2018":
+                        g2.nodes[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+                    else:
+                        g2.nodes[u_gml]['dn_multiscaleID'] = d_gml['dn_multiscaleID']
+                    g2.nodes[u_gml]['dn_fsname'] = d_gml['dn_fsname']
+                    g2.nodes[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
+                    g2.nodes[u_gml]['dn_name'] = d_gml['dn_name']
+                    g2.nodes[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
+                    g2.nodes[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
+                    g2.nodes[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
+                    g2.nodes[u_gml]['dn_region'] = d_gml['dn_region']
+
                 for u_gml, v_gml, d_gml in G.edges(data=True):
                     g2.add_edge(u_gml, v_gml, {'corr': float(d_gml['corr'])})
                 nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
