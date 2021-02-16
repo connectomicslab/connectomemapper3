@@ -819,15 +819,6 @@ class CMTK_cmat(BaseInterface):
              additional_maps=additional_maps,
              output_types=self.inputs.output_types)
 
-        if 'cff' in self.inputs.output_types:
-            cvt = cmtk.CFFConverter()
-            cvt.inputs.title = 'Connectome mapper'
-            cvt.inputs.nifti_volumes = self.inputs.roi_volumes
-            cvt.inputs.tract_files = ['streamline_final.trk']
-            cvt.inputs.gpickled_networks = glob.glob(
-                os.path.abspath("connectome_*.gpickle"))
-            cvt.run()
-
         return runtime
 
     def _list_outputs(self):
@@ -1218,14 +1209,6 @@ class rsfmri_conmat(BaseInterface):
                 for u_gml, v_gml, d_gml in G.edges(data=True):
                     g2.add_edge(u_gml, v_gml, {'corr': float(d_gml['corr'])})
                 nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
-
-            if 'cff' in self.inputs.output_types:
-                cvt = cmtk.CFFConverter()
-                cvt.inputs.title = 'Connectome mapper'
-                cvt.inputs.nifti_volumes = self.inputs.roi_volumes
-                cvt.inputs.gpickled_networks = glob.glob(
-                    os.path.abspath("connectome_*.gpickle"))
-                cvt.run()
 
         print("[ DONE ]")
         return runtime

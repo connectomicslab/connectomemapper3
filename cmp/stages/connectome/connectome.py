@@ -31,7 +31,7 @@ class ConnectomeConfig(HasTraits):
     compute_curvature : traits.Bool
         Compute fiber curvature (Default: False)
 
-    output_types : ['gPickle', 'mat', 'cff', 'graphml']
+    output_types : ['gPickle', 'mat', 'graphml']
         Output connectome format
 
     connectivity_metrics : ['Fiber number', 'Fiber length', 'Fiber density', 'Fiber proportion', 'Normalized fiber density', 'ADC', 'gFA']
@@ -57,7 +57,7 @@ class ConnectomeConfig(HasTraits):
     # modality = List(['Deterministic','Probabilistic'])
     probtrackx = Bool(False)
     compute_curvature = Bool(False)
-    output_types = List(['gPickle', 'mat', 'cff', 'graphml'])
+    output_types = List(['gPickle', 'mat', 'graphml'])
     connectivity_metrics = List(
         ['Fiber number', 'Fiber length', 'Fiber density', 'Fiber proportion', 'Normalized fiber density', 'ADC', 'gFA'])
     log_visualization = Bool(True)
