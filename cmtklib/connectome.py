@@ -590,23 +590,17 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 G_out.add_edge(u, v)
                 for key in di:
                     G_out[u][v][key] = di[key]
-
                 # print('({}, {}): {}'.format(u, v, list(G[u][v].keys())))
 
         # print("  ************************************************************************")
-
         # for u, v, d in G.edges(data=True):
-
         #     print('({}, {}): {}'.format(u, v, list(d.keys())))
         #     if 'fiblist' in list(d.keys()):
         #         print(G[u][v]['fiblist'])
-
         del G
 
         print("  ************************************************")
-
         print("  >> Save connectome maps as :")
-
         # Get the edge attributes/keys/weights from the first edge and then break.
         # Change w.r.t networkx2
         edge_keys = []
@@ -658,7 +652,6 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
             # print "size_nodes : "
             # print size_nodes
-            #
             # print "Number of nodes : %i" % len(G)
 
             node_struct = {}
