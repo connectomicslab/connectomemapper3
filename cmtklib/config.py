@@ -276,13 +276,13 @@ def anat_save_config(pipeline, config_path):
         config.set('Global', key, getattr(pipeline.global_conf, key))
     for stage in list(pipeline.stages.values()):
         config.add_section(stage.name)
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if 'trait' not in prop]  # possibly dangerous..?
+        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
+                      'trait' not in prop]  # possibly dangerous..?
         for key in stage_keys:
             keyval = getattr(stage.config, key)
             if 'config' in key:  # subconfig
-                stage_sub_keys = [prop for prop in list(
-                        keyval.traits().keys()) if 'trait' not in prop]
+                stage_sub_keys = [prop for prop in list(keyval.traits().keys()) if
+                                  'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     config.set(stage.name, key + '.' + sub_key,
                                getattr(keyval, sub_key))
@@ -364,10 +364,14 @@ def anat_load_config_json(pipeline, config_path):
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
                    'trait' not in prop]  # possibly dangerous..?
     for key in global_keys:
-        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
+        if key != "subject" and \
+                key != "subjects" and \
+                key != "subject_session" and \
+                key != "subject_sessions":
             if key in config['Global'].keys():
                 conf_value = config['Global'][key]
                 setattr(pipeline.global_conf, key, conf_value)
+
     for stage in list(pipeline.stages.values()):
         stage_keys = [prop for prop in list(stage.config.traits().keys()) if
                       'trait' not in prop]  # possibly dangerous..?
@@ -431,8 +435,8 @@ def dmri_save_config(pipeline, config_path):
         for key in stage_keys:
             keyval = getattr(stage.config, key)
             if 'config' in key:  # subconfig
-                stage_sub_keys = [prop for prop in list(
-                        keyval.traits().keys()) if 'trait' not in prop]
+                stage_sub_keys = [prop for prop in list(keyval.traits().keys()) if
+                                  'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     config.set(stage.name, key + '.' + sub_key,
                                getattr(keyval, sub_key))
@@ -518,6 +522,7 @@ def dmri_load_config_json(pipeline, config_path):
             if key in config['Global'].keys():
                 conf_value = config['Global'][key]
                 setattr(pipeline.global_conf, key, conf_value)
+
     for stage in list(pipeline.stages.values()):
         stage_keys = [prop for prop in list(stage.config.traits().keys()) if
                       'trait' not in prop]  # possibly dangerous..?
@@ -549,6 +554,7 @@ def dmri_load_config_json(pipeline, config_path):
                     setattr(stage.config, key, conf_value)
                 except Exception:
                     pass
+
     setattr(pipeline, 'number_of_cores', int(
             config['Multi-processing']['number_of_cores']))
 
@@ -573,15 +579,16 @@ def fmri_save_config(pipeline, config_path):
     for key in global_keys:
         # if key != "subject" and key != "subjects":
         config.set('Global', key, getattr(pipeline.global_conf, key))
+
     for stage in list(pipeline.stages.values()):
         config.add_section(stage.name)
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if 'trait' not in prop]  # possibly dangerous..?
+        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
+                      'trait' not in prop]  # possibly dangerous..?
         for key in stage_keys:
             keyval = getattr(stage.config, key)
             if 'config' in key:  # subconfig
-                stage_sub_keys = [prop for prop in list(
-                        keyval.traits().keys()) if 'trait' not in prop]
+                stage_sub_keys = [prop for prop in list(keyval.traits().keys()) if
+                                  'trait' not in prop]
                 for sub_key in stage_sub_keys:
                     config.set(stage.name, key + '.' + sub_key,
                                getattr(keyval, sub_key))
@@ -667,6 +674,7 @@ def fmri_load_config_json(pipeline, config_path):
             if key in config['Global'].keys():
                 conf_value = config['Global'][key]
                 setattr(pipeline.global_conf, key, conf_value)
+
     for stage in list(pipeline.stages.values()):
         stage_keys = [prop for prop in list(stage.config.traits().keys()) if
                       'trait' not in prop]  # possibly dangerous..?
@@ -698,6 +706,7 @@ def fmri_load_config_json(pipeline, config_path):
                     setattr(stage.config, key, conf_value)
                 except Exception:
                     pass
+
     setattr(pipeline, 'number_of_cores', int(
             config['Multi-processing']['number_of_cores']))
 
