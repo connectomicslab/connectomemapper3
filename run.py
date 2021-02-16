@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*-coding:Latin-1 -*
 
 # Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
