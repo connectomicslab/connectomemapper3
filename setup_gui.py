@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-"""Connectome Mapper 3 BIDS App Manager
-"""
+"""`Setup.py` for Connectome Mapper 3 Graphical User Inerface (BIDS App Manager)."""
+
 import os
 import sys
 from glob import glob

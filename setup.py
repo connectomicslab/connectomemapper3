@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-"""Connectome Mapper and CMTKlib
-"""
+"""`Setup.py` for Connectome Mapper processing core and CMTKlib."""
+
 import os
 import sys
 from glob import glob
