@@ -746,7 +746,7 @@ class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     output_types = traits.List(
         Str, desc='Output types of the connectivity matrices')
 
-    probtrackx = traits.Bool(False, desc="MUST be set to True if probtrackx was used (Not used anymore in CMP3)")
+    # probtrackx = traits.Bool(False, desc="MUST be set to True if probtrackx was used (Not used anymore in CMP3)")
 
     voxel_connectivity = InputMultiPath(File(exists=True),
                                         desc="ProbtrackX connectivity matrices (# seed voxels x # target ROIs)")
@@ -803,15 +803,6 @@ class CMTK_cmat(BaseInterface):
         else:
             additional_maps = {}
 
-        # if self.inputs.probtrackx:
-        #     probtrackx_cmat(voxel_connectivity_files=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
-        #                     parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
-        #                     output_types=self.inputs.output_types)
-        # elif len(self.inputs.track_file) > 1:
-        #     prob_cmat(intrk=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
-        #               parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
-        #               output_types=self.inputs.output_types)
-        # else:
         cmat(intrk=self.inputs.track_file[0], roi_volumes=self.inputs.roi_volumes,
              roi_graphmls=self.inputs.roi_graphmls,
              parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,

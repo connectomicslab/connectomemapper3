@@ -55,7 +55,6 @@ class ConnectomeConfig(HasTraits):
     """
 
     # modality = List(['Deterministic','Probabilistic'])
-    probtrackx = Bool(False)
     compute_curvature = Bool(False)
     output_types = List(['gPickle', 'mat', 'graphml'])
     connectivity_metrics = List(
@@ -112,7 +111,6 @@ class ConnectomeStage(Stage):
         cmtk_cmat = pe.Node(interface=cmtklib.connectome.CMTK_cmat(), name='compute_matrice')
         cmtk_cmat.inputs.compute_curvature = self.config.compute_curvature
         cmtk_cmat.inputs.output_types = self.config.output_types
-        cmtk_cmat.inputs.probtrackx = self.config.probtrackx
 
         # Additional maps
         map_merge = pe.Node(interface=util.Merge(
