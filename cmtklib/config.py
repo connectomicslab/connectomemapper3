@@ -82,24 +82,30 @@ def save_configparser_as_json(config, config_json_path):
     """
     config_json = {}
 
+    # In the case of diffusion pipeline
+    if 'diffusion_stage' in config.sections():
+        recon_processing_tool = config['diffusion_stage'].get('recon_processing_tool')
+        tracking_processing_tool = config['diffusion_stage'].get('tracking_processing_tool')
+
     for section in config.sections():
         config_json[section] = {}
         for name, value in config.items(section):
-
             # Keep only parameters that are used by the diffusion stage
             # of the diffusion pipeline. This simplifies the reading of
             # its configuration file
             if 'diffusion_stage' in section:
-                if config_json[section]['recon_processing_tool'] == 'Dipy':
+                # Skip adding diffusion reconstruction parameters
+                if recon_processing_tool == 'Dipy':
                     if 'mrtrix_recon_config' in name:
                         continue
-                elif config_json[section]['recon_processing_tool'] == 'MRtrix':
+                elif recon_processing_tool == 'MRtrix':
                     if 'dipy_recon_config' in name:
                         continue
-                if config_json[section]['tracking_processing_tool'] == 'Dipy':
+                # Skip adding tracking parameters
+                if tracking_processing_tool == 'Dipy':
                     if 'mrtrix_tracking_config' in name:
                         continue
-                elif config_json[section]['tracking_processing_tool'] == 'MRtrix':
+                elif tracking_processing_tool == 'MRtrix':
                     if 'dipy_tracking_config' in name:
                         continue
 
