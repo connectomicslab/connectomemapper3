@@ -13,6 +13,41 @@ from collections.abc import Iterable
 from cmp.info import __version__
 from cmtklib.util import BColors
 
+
+def check_configuration_version(config):
+    """Check the version of CMP3 used to generate a configuration.
+
+    Parameters
+    ----------
+    config : Dict
+        Dictionary of configuration parameters loaded from JSON file
+
+    Returns
+    -------
+    is_same : bool
+        `True` if the version used to generate the
+        configuration matches the version currently used
+        (`cmp.info.__version__`).
+    """
+    is_same = False
+    if 'version' in config['Global'].keys():
+        if config['Global']['version'] == __version__:
+            print(BColors.OKGREEN +
+                  '  .. INFO: Generated with the same CMP3 version'
+                  + BColors.ENDC)
+            is_same = True
+        else:
+            conf_version = config['Global']['version']
+            print(BColors.WARNING +
+                  '  .. WARNING: CMP3 version used to generate the ' +
+                  f'configuration files ({conf_version}) ' +
+                  f' and version of CMP3 used ({__version__}) differ' +
+                  BColors.ENDC)
+            is_same = False
+    return is_same
+
+
+
 def check_configuration_format(config_path):
     """Check format of the configuration file.
 
@@ -32,6 +67,66 @@ def check_configuration_format(config_path):
     elif '.json' in config_path:
         ext = '.json'
     return ext
+
+
+def save_configparser_as_json(config, config_json_path):
+    """Save a ConfigParser to JSON file.
+
+    Parameters
+    ----------
+    config : Instance(configparser.ConfigParser)
+        Instance of ConfigParser
+
+    config_json_path : string
+        Output path of JSON configuration file
+    """
+    config_json = {}
+
+    for section in config.sections():
+        config_json[section] = {}
+        for name, value in config.items(section):
+
+            # Keep only parameters that are used by the diffusion stage
+            # of the diffusion pipeline. This simplifies the reading of
+            # its configuration file
+            if 'diffusion_stage' in section:
+                if config_json[section]['recon_processing_tool'] == 'Dipy':
+                    if 'mrtrix_recon_config' in name:
+                        continue
+                elif config_json[section]['recon_processing_tool'] == 'MRtrix':
+                    if 'dipy_recon_config' in name:
+                        continue
+                if config_json[section]['tracking_processing_tool'] == 'Dipy':
+                    if 'mrtrix_tracking_config' in name:
+                        continue
+                elif config_json[section]['tracking_processing_tool'] == 'MRtrix':
+                    if 'dipy_tracking_config' in name:
+                        continue
+
+            if isinstance(value, Iterable) and not isinstance(value, str):
+                config_json[section][name] = [x for x in value if x]
+            elif isinstance(value, bool):
+                config_json[section][name] = [value]
+            elif value and not isinstance(value, str):
+                config_json[section][name] = [value]
+            elif value and isinstance(value, str):
+                config_json[section][name] = [value.strip()]
+            else:
+                print(f'Type: {type(value)} / value : {value}')
+                config_json[section][name] = ''
+
+            if len(config_json[section][name]) == 1:
+                config_json[section][name] = config_json[section][name][0]
+            elif len(config_json[section][name]) == 0:
+                config_json[section][name] = ''
+
+            if config_json[section][name] == '':
+                del config_json[section][name]
+
+    config_json['Global']['version'] = __version__
+
+    with open(config_json_path, 'w') as outfile:
+        json.dump(config_json, outfile, indent=4)
 
 
 def convert_config_ini_2_json(config_ini_path):
@@ -58,38 +153,8 @@ def convert_config_ini_2_json(config_ini_path):
                 ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)'
         )
 
-    config_json = {}
-
-    for section in config.sections():
-        config_json[section] = {}
-        for name, value in config.items(section):
-
-            if isinstance(value, Iterable) and not isinstance(value, str):
-                config_json[section][name] = [x for x in value if x]
-            elif isinstance(value, bool):
-                config_json[section][name] = [value]
-            elif value and not isinstance(value, str):
-                config_json[section][name] = [value]
-            elif value and isinstance(value, str):
-                config_json[section][name] = [value.strip()]
-            else:
-                print(f'Type: {type(value)} / value : {value}')
-                config_json[section][name] = ''
-
-            if len(config_json[section][name]) == 1:
-                config_json[section][name] = config_json[section][name][0]
-            elif len(config_json[section][name]) == 0:
-                config_json[section][name] = ''
-
-            if config_json[section][name] == '':
-                del config_json[section][name]
-
-    config_json['Global']['version'] = __version__
-
     config_json_path = '.'.join([os.path.splitext(config_ini_path)[0], 'json'])
-    with open(config_json_path, 'w') as outfile:
-        json.dump(config_json, outfile, indent=4)
-
+    save_configparser_as_json(config, config_json_path)
     print(f'   .. Config file converted to JSON and saved as {config_json_path}')
 
     return config_json_path
@@ -256,111 +321,18 @@ def get_fmri_process_detail_json(project_info, section, detail):
     return config[section][detail]
 
 
-def anat_save_config(pipeline, config_path):
-    """Save the configuration file of an anatomical pipeline.
+def set_pipeline_attributes_from_config(pipeline, config):
+    """Set the pipeline stage attributes given a configuration.
 
     Parameters
     ----------
-    pipeline : Instance(cmp.pipelines.anatomical.anatomical.AnatomicalPipeline)
-        Instance of AnatomicalPipeline
+    pipeline : Instance(Pipeline)
+        Instance of pipeline
 
-    config_path : string
-        Path of the configuration file
+    config : Dict
+        Dictionary of configuration parameter loaded
+        from the JSON configuration file
     """
-    config = configparser.RawConfigParser()
-    config.add_section('Global')
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   'trait' not in prop]  # possibly dangerous..?
-    for key in global_keys:
-        # if key != "subject" and key != "subjects":
-        config.set('Global', key, getattr(pipeline.global_conf, key))
-    for stage in list(pipeline.stages.values()):
-        config.add_section(stage.name)
-        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
-                      'trait' not in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            keyval = getattr(stage.config, key)
-            if 'config' in key:  # subconfig
-                stage_sub_keys = [prop for prop in list(keyval.traits().keys()) if
-                                  'trait' not in prop]
-                for sub_key in stage_sub_keys:
-                    config.set(stage.name, key + '.' + sub_key,
-                               getattr(keyval, sub_key))
-            else:
-                config.set(stage.name, key, keyval)
-
-    config.add_section('Multi-processing')
-    config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
-
-    # with open(config_path, 'w') as configfile:
-    #     config.write(configfile)
-
-    # print('Config file (anat) saved as {}'.format(config_path))
-
-    config_json = {}
-
-    for section in config.sections():
-        config_json[section] = {}
-        for name, value in config.items(section):
-
-            if isinstance(value, Iterable) and not isinstance(value, str):
-                config_json[section][name] = [x for x in value if x]
-            elif isinstance(value, bool):
-                config_json[section][name] = [value]
-            elif value and not isinstance(value, str):
-                config_json[section][name] = [value]
-            elif value and isinstance(value, str):
-                config_json[section][name] = [value.strip()]
-            else:
-                print(f'Type: {type(value)} / value : {value}')
-                config_json[section][name] = ''
-
-            if len(config_json[section][name]) == 1:
-                config_json[section][name] = config_json[section][name][0]
-            elif len(config_json[section][name]) == 0:
-                config_json[section][name] = ''
-
-            if config_json[section][name] == '':
-                del config_json[section][name]
-
-    config_json['Global']['version'] = __version__
-
-    # config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
-    with open(config_path, 'w') as outfile:
-        json.dump(config_json, outfile, indent=4)
-
-    print('Config json file (anat) saved as {}'.format(config_path))
-
-
-def anat_load_config_json(pipeline, config_path):
-    """Load the JSON configuration file of an anatomical pipeline.
-
-    Parameters
-    ----------
-    pipeline : Instance(cmp.pipelines.anatomical.anatomical.AnatomicalPipeline)
-        Instance of AnatomicalPipeline
-
-    config_path : string
-        Path of the JSON configuration file
-    """
-    print('>> Load anatomical config file : {}'.format(config_path))
-    # datalad_is_available = is_tool('datalad')
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-
-    if 'version' in config['Global'].keys():
-        if config['Global']['version'] == __version__:
-            print(BColors.OKGREEN +
-                  '  .. INFO: Generated with the same CMP3 version'
-                  + BColors.ENDC)
-        else:
-            conf_version = config['Global']['version']
-            print(BColors.WARNING +
-                  '  .. WARNING: CMP3 version used to generate the ' +
-                  f'configuration files ({conf_version}) ' +
-                  f' and version of CMP3 used ({__version__}) differ' +
-                  BColors.ENDC)
-
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
                    'trait' not in prop]  # possibly dangerous..?
     for key in global_keys:
@@ -403,8 +375,90 @@ def anat_load_config_json(pipeline, config_path):
                     setattr(stage.config, key, conf_value)
                 except Exception:
                     pass
-    setattr(pipeline, 'number_of_cores', int(
-            config['Multi-processing']['number_of_cores']))
+    setattr(pipeline,
+            'number_of_cores',
+            int(config['Multi-processing']['number_of_cores']))
+
+
+def create_configparser_from_pipeline(pipeline):
+    """Create a `ConfigParser` object from a Pipeline instance.
+
+    Parameters
+    ----------
+    pipeline : Instance(Pipeline)
+        Instance of pipeline
+
+    Returns
+    -------
+    config : Instance(`configparser.ConfigParser`)
+        Instance of ConfigParser
+    """
+    config = configparser.RawConfigParser()
+    config.add_section('Global')
+    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
+                   'trait' not in prop]  # possibly dangerous..?
+    print(global_keys)
+    for key in global_keys:
+        # if key != "subject" and key != "subjects":
+        config.set('Global', key, getattr(pipeline.global_conf, key))
+    for stage in list(pipeline.stages.values()):
+        config.add_section(stage.name)
+        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
+                      'trait' not in prop]  # possibly dangerous..?
+        for key in stage_keys:
+            keyval = getattr(stage.config, key)
+            if 'config' in key:  # subconfig
+                stage_sub_keys = [prop for prop in list(keyval.traits().keys()) if
+                                  'trait' not in prop]
+                for sub_key in stage_sub_keys:
+                    config.set(stage.name, key + '.' + sub_key,
+                               getattr(keyval, sub_key))
+            else:
+                config.set(stage.name, key, keyval)
+
+    config.add_section('Multi-processing')
+    config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
+    return config
+
+
+def anat_save_config(pipeline, config_path):
+    """Save the configuration file of an anatomical pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.anatomical.anatomical.AnatomicalPipeline)
+        Instance of AnatomicalPipeline
+
+    config_path : string
+        Path of the configuration file
+    """
+    config = create_configparser_from_pipeline(pipeline)
+    # with open(config_path, 'w') as configfile:
+    #     config.write(configfile)
+    # print('Config file (anat) saved as {}'.format(config_path))
+
+    save_configparser_as_json(config, config_path)
+    print('Config json file (anat) saved as {}'.format(config_path))
+
+
+def anat_load_config_json(pipeline, config_path):
+    """Load the JSON configuration file of an anatomical pipeline.
+
+    Parameters
+    ----------
+    pipeline : Instance(cmp.pipelines.anatomical.anatomical.AnatomicalPipeline)
+        Instance of AnatomicalPipeline
+
+    config_path : string
+        Path of the JSON configuration file
+    """
+    print('>> Load anatomical config file : {}'.format(config_path))
+    # datalad_is_available = is_tool('datalad')
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+
+    check_configuration_version(config)
+    set_pipeline_attributes_from_config(config)
 
     return True
 
@@ -420,70 +474,13 @@ def dmri_save_config(pipeline, config_path):
     config_path : string
         Path of the INI configuration file
     """
-    config = configparser.RawConfigParser()
-    config.add_section('Global')
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   'trait' not in prop]  # possibly dangerous..?
-    print(global_keys)
-    for key in global_keys:
-        # if key != "subject" and key != "subjects":
-        config.set('Global', key, getattr(pipeline.global_conf, key))
-    for stage in list(pipeline.stages.values()):
-        config.add_section(stage.name)
-        stage_keys = [prop for prop in list(stage.config.traits(
-        ).keys()) if 'trait' not in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            keyval = getattr(stage.config, key)
-            if 'config' in key:  # subconfig
-                stage_sub_keys = [prop for prop in list(keyval.traits().keys()) if
-                                  'trait' not in prop]
-                for sub_key in stage_sub_keys:
-                    config.set(stage.name, key + '.' + sub_key,
-                               getattr(keyval, sub_key))
-            else:
-                config.set(stage.name, key, keyval)
-
-    config.add_section('Multi-processing')
-    config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
-
+    config = create_configparser_from_pipeline(pipeline)
     # with open(config_path, 'w') as configfile:
     #     config.write(configfile)
-
     # print('Config file (dwi) saved as {}'.format(config_path))
 
-    config_json = {}
-
-    for section in config.sections():
-        config_json[section] = {}
-        for name, value in config.items(section):
-
-            if isinstance(value, Iterable) and not isinstance(value, str):
-                config_json[section][name] = [x for x in value if x]
-            elif isinstance(value, bool):
-                config_json[section][name] = [value]
-            elif value and not isinstance(value, str):
-                config_json[section][name] = [value]
-            elif value and isinstance(value, str):
-                config_json[section][name] = [value.strip()]
-            else:
-                print(f'Type: {type(value)} / value : {value}')
-                config_json[section][name] = ''
-
-            if len(config_json[section][name]) == 1:
-                config_json[section][name] = config_json[section][name][0]
-            elif len(config_json[section][name]) == 0:
-                config_json[section][name] = ''
-
-            if config_json[section][name] == '':
-                del config_json[section][name]
-
-    config_json['Global']['version'] = __version__
-
-    # config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
-    with open(config_path, 'w') as outfile:
-        json.dump(config_json, outfile, indent=4)
-
-    print('Config json file (dwi) saved as {}'.format(config_path))
+    save_configparser_as_json(config, config_path)
+    print('Config json file (diffusion) saved as {}'.format(config_path))
 
 
 def dmri_load_config_json(pipeline, config_path):
@@ -502,61 +499,8 @@ def dmri_load_config_json(pipeline, config_path):
     with open(config_path, 'r') as f:
         config = json.load(f)
 
-    if 'version' in config['Global'].keys():
-        if config['Global']['version'] == __version__:
-            print(BColors.OKGREEN +
-                  '  .. INFO: Generated with the same CMP3 version'
-                  + BColors.ENDC)
-        else:
-            conf_version = config['Global']['version']
-            print(BColors.WARNING +
-                  '  .. WARNING: CMP3 version used to generate the ' +
-                  f'configuration files ({conf_version}) ' +
-                  f' and version of CMP3 used ({__version__}) differ' +
-                  BColors.ENDC)
-
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   'trait' not in prop]  # possibly dangerous..?
-    for key in global_keys:
-        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
-            if key in config['Global'].keys():
-                conf_value = config['Global'][key]
-                setattr(pipeline.global_conf, key, conf_value)
-
-    for stage in list(pipeline.stages.values()):
-        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
-                      'trait' not in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            if 'config' in key:  # subconfig
-                sub_config = getattr(stage.config, key)
-                stage_sub_keys = [prop for prop in list(sub_config.traits().keys()) if
-                                  'trait' not in prop]
-                for sub_key in stage_sub_keys:
-                    try:
-                        tmp_key = key + '.' + sub_key
-                        if tmp_key in config[stage.name].keys():
-                            conf_value = config[stage.name][tmp_key]
-                        try:
-                            conf_value = eval(conf_value)
-                        except Exception:
-                            pass
-                        setattr(sub_config, sub_key, conf_value)
-                    except Exception:
-                        pass
-            else:
-                try:
-                    if key in config[stage.name].keys():
-                        conf_value = config[stage.name][key]
-                    try:
-                        conf_value = eval(conf_value)
-                    except Exception:
-                        pass
-                    setattr(stage.config, key, conf_value)
-                except Exception:
-                    pass
-
-    setattr(pipeline, 'number_of_cores', int(
-            config['Multi-processing']['number_of_cores']))
+    check_configuration_version(config)
+    set_pipeline_attributes_from_config(config)
 
     return True
 
@@ -572,69 +516,12 @@ def fmri_save_config(pipeline, config_path):
     config_path : string
         Path of the INI configuration file
     """
-    config = configparser.RawConfigParser()
-    config.add_section('Global')
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   'trait' not in prop]  # possibly dangerous..?
-    for key in global_keys:
-        # if key != "subject" and key != "subjects":
-        config.set('Global', key, getattr(pipeline.global_conf, key))
-
-    for stage in list(pipeline.stages.values()):
-        config.add_section(stage.name)
-        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
-                      'trait' not in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            keyval = getattr(stage.config, key)
-            if 'config' in key:  # subconfig
-                stage_sub_keys = [prop for prop in list(keyval.traits().keys()) if
-                                  'trait' not in prop]
-                for sub_key in stage_sub_keys:
-                    config.set(stage.name, key + '.' + sub_key,
-                               getattr(keyval, sub_key))
-            else:
-                config.set(stage.name, key, keyval)
-
-    config.add_section('Multi-processing')
-    config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
-
+    config = create_configparser_from_pipeline(pipeline)
     # with open(config_path, 'w') as configfile:
     #     config.write(configfile)
-
     # print('Config file (fMRI) saved as {}'.format(config_path))
 
-    config_json = {}
-
-    for section in config.sections():
-        config_json[section] = {}
-        for name, value in config.items(section):
-
-            if isinstance(value, Iterable) and not isinstance(value, str):
-                config_json[section][name] = [x for x in value if x]
-            elif isinstance(value, bool):
-                config_json[section][name] = [value]
-            elif value and not isinstance(value, str):
-                config_json[section][name] = [value]
-            elif value and isinstance(value, str):
-                config_json[section][name] = [value.strip()]
-            else:
-                print(f'Type: {type(value)} / value : {value}')
-                config_json[section][name] = ''
-
-            if len(config_json[section][name]) == 1:
-                config_json[section][name] = config_json[section][name][0]
-            elif len(config_json[section][name]) == 0:
-                config_json[section][name] = ''
-
-            if config_json[section][name] == '':
-                del config_json[section][name]
-
-    config_json['Global']['version'] = __version__
-
-    # config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
-    with open(config_path, 'w') as outfile:
-        json.dump(config_json, outfile, indent=4)
-
+    save_configparser_as_json(config, config_path)
     print('Config json file (fMRI) saved as {}'.format(config_path))
 
 
@@ -654,60 +541,7 @@ def fmri_load_config_json(pipeline, config_path):
     with open(config_path, 'r') as f:
         config = json.load(f)
 
-    if 'version' in config['Global'].keys():
-        if config['Global']['version'] == __version__:
-            print(BColors.OKGREEN +
-                  '  .. INFO: Configuration file generated with the same CMP3 version'
-                  + BColors.ENDC)
-        else:
-            conf_version = config['Global']['version']
-            print(BColors.WARNING +
-                  '  .. WARNING: CMP3 version used to generate the ' +
-                  f'configuration file ({conf_version}) ' +
-                  f' and version of CMP3 used ({__version__}) differ!' +
-                  BColors.ENDC)
-
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   'trait' not in prop]  # possibly dangerous..?
-    for key in global_keys:
-        if key != "subject" and key != "subjects" and key != "subject_session" and key != "subject_sessions":
-            if key in config['Global'].keys():
-                conf_value = config['Global'][key]
-                setattr(pipeline.global_conf, key, conf_value)
-
-    for stage in list(pipeline.stages.values()):
-        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
-                      'trait' not in prop]  # possibly dangerous..?
-        for key in stage_keys:
-            if 'config' in key:  # subconfig
-                sub_config = getattr(stage.config, key)
-                stage_sub_keys = [prop for prop in list(sub_config.traits().keys()) if
-                                  'trait' not in prop]
-                for sub_key in stage_sub_keys:
-                    try:
-                        tmp_key = key + '.' + sub_key
-                        if tmp_key in config[stage.name].keys():
-                            conf_value = config[stage.name][tmp_key]
-                        try:
-                            conf_value = eval(conf_value)
-                        except Exception:
-                            pass
-                        setattr(sub_config, sub_key, conf_value)
-                    except Exception:
-                        pass
-            else:
-                try:
-                    if key in config[stage.name].keys():
-                        conf_value = config[stage.name][key]
-                    try:
-                        conf_value = eval(conf_value)
-                    except Exception:
-                        pass
-                    setattr(stage.config, key, conf_value)
-                except Exception:
-                    pass
-
-    setattr(pipeline, 'number_of_cores', int(
-            config['Multi-processing']['number_of_cores']))
+    check_configuration_version(config)
+    set_pipeline_attributes_from_config(config)
 
     return True
