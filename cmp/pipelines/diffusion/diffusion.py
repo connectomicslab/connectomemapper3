@@ -53,7 +53,7 @@ class Global_Configuration(HasTraits):
     subjects = List(trait=Str)
     subject = Str
     subject_session = Str
-    modalities = List(trait=Str)
+    # modalities = List(trait=Str)
     dmri_bids_acq = Str
 
 
@@ -316,8 +316,8 @@ class DiffusionPipeline(Pipeline):
             for subj in layout.get_subjects():
                 self.global_conf.subjects.append('sub-' + str(subj))
             # self.global_conf.subjects = ['sub-'+str(subj) for subj in layout.get_subjects()]
-            self.global_conf.modalities = [
-                str(mod) for mod in layout.get_modalities()]
+            # self.global_conf.modalities = [
+            #     str(mod) for mod in layout.get_modalities()]
 
             print("> Looking for....")
 
