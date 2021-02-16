@@ -10,6 +10,8 @@ import configparser
 import json
 from collections.abc import Iterable
 
+from cmp.info import __version__
+from cmtklib.util import BColors
 
 def check_configuration_format(config_path):
     """Check format of the configuration file.
@@ -81,6 +83,8 @@ def convert_config_ini_2_json(config_ini_path):
 
             if config_json[section][name] == '':
                 del config_json[section][name]
+
+    config_json['Global']['version'] = __version__
 
     config_json_path = '.'.join([os.path.splitext(config_ini_path)[0], 'json'])
     with open(config_json_path, 'w') as outfile:
@@ -319,6 +323,8 @@ def anat_save_config(pipeline, config_path):
             if config_json[section][name] == '':
                 del config_json[section][name]
 
+    config_json['Global']['version'] = __version__
+
     # config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
     with open(config_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
@@ -341,6 +347,19 @@ def anat_load_config_json(pipeline, config_path):
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
         config = json.load(f)
+
+    if 'version' in config['Global'].keys():
+        if config['Global']['version'] == __version__:
+            print(BColors.OKGREEN +
+                  '  .. INFO: Generated with the same CMP3 version'
+                  + BColors.ENDC)
+        else:
+            conf_version = config['Global']['version']
+            print(BColors.WARNING +
+                  '  .. WARNING: CMP3 version used to generate the ' +
+                  f'configuration files ({conf_version}) ' +
+                  f' and version of CMP3 used ({__version__}) differ' +
+                  BColors.ENDC)
 
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
                    'trait' not in prop]  # possibly dangerous..?
@@ -454,6 +473,8 @@ def dmri_save_config(pipeline, config_path):
             if config_json[section][name] == '':
                 del config_json[section][name]
 
+    config_json['Global']['version'] = __version__
+
     # config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
     with open(config_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
@@ -476,6 +497,19 @@ def dmri_load_config_json(pipeline, config_path):
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
         config = json.load(f)
+
+    if 'version' in config['Global'].keys():
+        if config['Global']['version'] == __version__:
+            print(BColors.OKGREEN +
+                  '  .. INFO: Generated with the same CMP3 version'
+                  + BColors.ENDC)
+        else:
+            conf_version = config['Global']['version']
+            print(BColors.WARNING +
+                  '  .. WARNING: CMP3 version used to generate the ' +
+                  f'configuration files ({conf_version}) ' +
+                  f' and version of CMP3 used ({__version__}) differ' +
+                  BColors.ENDC)
 
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
                    'trait' not in prop]  # possibly dangerous..?
@@ -588,6 +622,8 @@ def fmri_save_config(pipeline, config_path):
             if config_json[section][name] == '':
                 del config_json[section][name]
 
+    config_json['Global']['version'] = __version__
+
     # config_json_path = '.'.join([os.path.splitext(config_path)[0], 'json'])
     with open(config_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
@@ -610,6 +646,19 @@ def fmri_load_config_json(pipeline, config_path):
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
         config = json.load(f)
+
+    if 'version' in config['Global'].keys():
+        if config['Global']['version'] == __version__:
+            print(BColors.OKGREEN +
+                  '  .. INFO: Configuration file generated with the same CMP3 version'
+                  + BColors.ENDC)
+        else:
+            conf_version = config['Global']['version']
+            print(BColors.WARNING +
+                  '  .. WARNING: CMP3 version used to generate the ' +
+                  f'configuration file ({conf_version}) ' +
+                  f' and version of CMP3 used ({__version__}) differ!' +
+                  BColors.ENDC)
 
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
                    'trait' not in prop]  # possibly dangerous..?
