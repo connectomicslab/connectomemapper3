@@ -1441,6 +1441,7 @@ class CMP_BIDSAppWindow(HasTraits):
                                                  "-".join(self.bidsapp_tag.split("."))),
                                              'image')
             add_container = True
+            update_container = False
             if os.path.isdir(datalad_container):
                 if self.datalad_update_environment:
                     print(
@@ -1492,6 +1493,9 @@ class CMP_BIDSAppWindow(HasTraits):
                 cmd = " ".join(cmd)
                 docker_cmd = " ".join(docker_cmd)
                 cmd = f'{cmd} "{docker_cmd}"'
+
+                if self.datalad_update_environment:
+                    cmd = f'{cmd} --update'
                 try:
                     print('... cmd: {}'.format(cmd))
                     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
@@ -1499,20 +1503,6 @@ class CMP_BIDSAppWindow(HasTraits):
                 except Exception:
                     print(
                         "   DATALAD ERROR: Failed to link the container image to the dataset")
-
-            # Implementation with --upgrade available in latest version but not
-            # in stable version of datalad_container
-
-            # cmd = "datalad containers-add connectomemapper-bidsapp-{}"
-            # " --url dhub://sebastientourbier/connectomemapper-bidsapp:{} --update".format(
-            #                                                                       self.bidsapp_tag,
-            #                                                                       self.bidsapp_tag)
-            #
-            # try:
-            #     print('... cmd: {}'.format(cmd))
-            #     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
-            # except Exception:
-            #     print("   ERROR: Failed to link the container image to the datalad dataset")
 
             datalad_get_list = [self.anat_config]
 
