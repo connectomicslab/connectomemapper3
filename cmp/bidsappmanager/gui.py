@@ -1476,7 +1476,7 @@ class CMP_BIDSAppWindow(HasTraits):
                 docker_cmd.append('-u')
                 docker_cmd.append('{}:{}'.format(os.geteuid(), os.getegid()))
 
-                docker_cmd.append('{img}')
+                docker_cmd.append(f'sebastientourbier/connectomemapper-bidsapp:{self.bidsapp_tag}')
                 docker_cmd.append('{cmd}')
 
                 version_tag = "-".join(self.bidsapp_tag.split("."))
