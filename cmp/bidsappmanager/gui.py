@@ -1343,7 +1343,8 @@ class CMP_BIDSAppWindow(HasTraits):
                         env=merged_env, cwd=cwd)
         while True:
             line = process.stdout.readline()
-            line = str(line)[:-1]
+            # Remove the "b'" prefix and the "'" at the end return by datalad
+            line = str(line)[2:-1]
             print(line)
             if line == '' and process.poll() is not None:
                 break
