@@ -1405,7 +1405,7 @@ class CMP_BIDSAppWindow(HasTraits):
                        '-c',
                        'text2git',
                        '-d',
-                       '.']
+                       f'{self.bids_root}']
                 cmd = " ".join(cmd)
                 try:
                     print('... cmd: {}'.format(cmd))
