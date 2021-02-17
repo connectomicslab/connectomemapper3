@@ -1401,7 +1401,7 @@ class CMP_BIDSAppWindow(HasTraits):
                        'create',
                        '--force',
                        '-D',
-                       f'Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{self.bidsapp_tag})',
+                       f'"Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{self.bidsapp_tag})"',
                        '-c',
                        'text2git',
                        '-d',
