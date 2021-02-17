@@ -1165,7 +1165,7 @@ class rsfmri_conmat(BaseInterface):
                             'sc': edge_struct, 'nodes': node_struct})
             if 'graphml' in self.inputs.output_types:
                 g2 = nx.Graph()
-
+                # Create graph nodes
                 for u_gml, d_gml in G.nodes(data=True):
                     g2.add_node(u_gml)
                     if self.inputs.parcellation_scheme != "Lausanne2018":
@@ -1179,9 +1179,11 @@ class rsfmri_conmat(BaseInterface):
                     g2.nodes[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
                     g2.nodes[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
                     g2.nodes[u_gml]['dn_region'] = d_gml['dn_region']
-
+                # Create graph edges
                 for u_gml, v_gml, d_gml in G.edges(data=True):
-                    g2.add_edge(u_gml, v_gml, {'corr': float(d_gml['corr'])})
+                    g2.add_edge(u_gml, v_gml)
+                    g2[u_gml][v_gml]['corr'] = float(d_gml['corr'])
+                # Save the graph
                 nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
 
         print("[ DONE ]")
