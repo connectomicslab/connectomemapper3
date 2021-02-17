@@ -4,7 +4,7 @@
 Adopting Datalad for collaboration
 ===================================================
 
-Datalad is a powerful tool for the versioning and sharing raw and processed data as well as for the tracking of data provenance (i.e. the recording on how data was processed). This page was created with the intention to share with the user how we adopted the use of datalad datasets with the connectome mapper in in our lab at the time of creation of this document (2019 Jan 8). For more details and tutorials on Datalad,please check the recent `Datalad Handbook <http://handbook.datalad.org/en/latest/>`_
+Datalad is a powerful tool for the versioning and sharing of raw and processed data as well as for the tracking of data provenance (i.e. the recording on how data was processed). This page was created with the intention to share with the user how we adopted the use of datalad datasets with the connectome mapper in in our lab at the time of creation of this document (2019 Jan 8). For more details and tutorials on Datalad,please check the recent `Datalad Handbook <http://handbook.datalad.org/en/latest/>`_
 
 .. warning:: This was tested on ``Ubuntu 16.04`` with ``Datalad 0.11.3`` and its extensions ``datalad-container 0.3.1``, ``datalad_neuroimaging 0.2.0`` and ``datalad_revolution 0.6.0``. This example might not work with their latest versions as they are under intensive developement and a number of new versions with minor and major changes have been released in the meantime.
 
@@ -13,7 +13,7 @@ Move original BIDS dataset to server
 
 ::
 
-    rsync -P -v -avz -e 'ssh' --exclude 'derivatives' --exclude 'code' --exclude '.datalad' --exclude '.git' --exclude '.gitattributes' /media/localadmin/HagmannHDD/Seb/ds-newtest2/* tourbier@<SERVER_IP_ADDRESS>:/home/tourbier/Data/ds-newtest2
+    rsync -P -v -avz -e 'ssh' --exclude 'derivatives' --exclude 'code' --exclude '.datalad' --exclude '.git' --exclude '.gitattributes' /path/to/ds-example/* <SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/home/<SERVER_USERNAME>/Data/ds-example
 
 Datalad setup and dataset creation on Server (accessible via ssh)
 -----------------------------------------------------------------
@@ -23,7 +23,7 @@ Connect to server
 
 ::
 
-    ssh tourbier@<SERVER_IP_ADDRESS>
+    ssh <SERVER_USERNAME>@<SERVER_IP_ADDRESS>
 
 Install git-annex and liblzma-dev (datalad dependencies), Datalad and its extensions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,10 +31,9 @@ Install git-annex and liblzma-dev (datalad dependencies), Datalad and its extens
 ::
 
     sudo apt-get install git-annex liblzma-dev
-    pip install datalad[all]==0.11.3
-    pip install datalad-container==0.3.1
-    pip install datalad_neuroimaging==0.2.0
-    pip install datalad_revolution==0.6.0
+    pip install datalad[all]==0.14.0
+    pip install datalad-container==1.1.2
+    pip install datalad-neuroimaging==0.3.1
 
 .. note:: Tested using ``git-annex version 7.20190219-gad7c11b``
 
