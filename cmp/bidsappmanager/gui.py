@@ -745,7 +745,8 @@ class CMP_BIDSAppWindow(HasTraits):
                 label='BIDS App Version'),
             VGroup(
                 Item('bids_root', style='readonly', label='Input directory'),
-                Item('output_dir', style='simple', label='Output directory'),
+                Item('output_dir', style='simple', label='Output directory',
+                     enabled_when='not(data_provenance_tracking)'),
                 label='BIDS dataset'),
             VGroup(
                 HGroup(
@@ -1026,8 +1027,14 @@ class CMP_BIDSAppWindow(HasTraits):
         """Function that reset ``settings_checked`` attribute to False."""
         self.settings_checked = False
 
+    def _data_provenance_tracking_changed(self, new):
+        """Callback function `data_provenance_tracking` attribute is updated."""
+        if new is True:
+            self.output_dir = os.path.join(self.bids_root, 'derivatives')
+        self.data_provenance_tracking = new
+
     def _update_selection_fired(self):
-        """Callback function when the list of selected subjects has been updated."""
+        """Callback function when the list of selected subjects is updated."""
         self.configure_traits(view='select_subjects_to_be_processed_view')
 
     def _check_fired(self):
