@@ -439,10 +439,6 @@ def anat_save_config(pipeline, config_path):
         Path of the JSON configuration file
     """
     config = create_configparser_from_pipeline(pipeline)
-    # with open(config_path, 'w') as configfile:
-    #     config.write(configfile)
-    # print('Config file (anat) saved as {}'.format(config_path))
-
     save_configparser_as_json(config, config_path)
     print('Config json file (anat) saved as {}'.format(config_path))
 
@@ -481,10 +477,6 @@ def dmri_save_config(pipeline, config_path):
         Path of the JSON configuration file
     """
     config = create_configparser_from_pipeline(pipeline)
-    # with open(config_path, 'w') as configfile:
-    #     config.write(configfile)
-    # print('Config file (dwi) saved as {}'.format(config_path))
-
     save_configparser_as_json(config, config_path)
     print('Config json file (diffusion) saved as {}'.format(config_path))
 
@@ -523,10 +515,6 @@ def fmri_save_config(pipeline, config_path):
         Path of the JSON configuration file
     """
     config = create_configparser_from_pipeline(pipeline)
-    # with open(config_path, 'w') as configfile:
-    #     config.write(configfile)
-    # print('Config file (fMRI) saved as {}'.format(config_path))
-
     save_configparser_as_json(config, config_path)
     print('Config json file (fMRI) saved as {}'.format(config_path))
 
