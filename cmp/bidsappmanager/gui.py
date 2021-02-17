@@ -1425,7 +1425,7 @@ class CMP_BIDSAppWindow(HasTraits):
             # f = open(log_filename,"w+")
             # f.close()
 
-            cmd = 'datalad save -d . -m "Modified files in derivatives tracked by datalad. ' \
+            cmd = 'datalad save -d . -m "All files tracked by datalad. ' \
                   'Dataset ready to be linked with the BIDS App."'
             try:
                 print('... cmd: {}'.format(cmd))
