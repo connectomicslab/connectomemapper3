@@ -1216,15 +1216,14 @@ class CMP_BIDSAppWindow(HasTraits):
         participant_labels : traits.List
             List of participants labels in the form ["01", "03", "04", ...]
         """
-        cmd = ['datalad', 'containers-run', ]
-
-        cmd.append('--container-name')
-        cmd.append(
-            'connectomemapper-bidsapp-{}'.format("-".join(bidsapp_tag.split("."))))
-
-        cmd.append('-m')
-        cmd.append(
-            'Processing with connectomemapper-bidsapp {}'.format(bidsapp_tag))
+        cmd = ['datalad',
+               'containers-run',
+               '--container-name',
+               'connectomemapper-bidsapp-{}'.format("-".join(bidsapp_tag.split("."))),
+               '-m',
+               'Processing with connectomemapper-bidsapp {}'.format(bidsapp_tag),
+               '--input',
+               '/code/ref_anatomical_config.json']
 
         # for label in participant_labels:
         #     cmd.append('--input')
@@ -1241,25 +1240,22 @@ class CMP_BIDSAppWindow(HasTraits):
         #         cmd.append('--input')
         #         cmd.append('sub-{}/ses-*/func/sub-*_bold.*'.format(label))
 
-        cmd.append('--input')
-        cmd.append('code/ref_anatomical_config.ini')
-
         if self.run_dmri_pipeline:
             cmd.append('--input')
-            cmd.append('code/ref_diffusion_config.ini')
+            cmd.append('/code/ref_diffusion_config.ini')
 
         if self.run_fmri_pipeline:
             cmd.append('--input')
-            cmd.append('code/ref_fMRI_config.ini')
+            cmd.append('/code/ref_fMRI_config.ini')
 
         cmd.append('--output')
-        cmd.append('derivatives')
+        cmd.append(f'{self.output_dir}')
         # for label in participant_labels:
         #     cmd.append('--input')
         #     cmd.append('{}'.format(label))
 
-        cmd.append('/tmp')
-        cmd.append('/tmp/derivatives')
+        cmd.append('/bids_dir')
+        cmd.append('/output_dir')
         cmd.append('participant')
 
         cmd.append('--participant_label')
@@ -1394,11 +1390,20 @@ class CMP_BIDSAppWindow(HasTraits):
             #    >> cd derivatives
             #    >> datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}
             if not os.path.isdir(os.path.join(self.bids_root, '.datalad')):
-                cmd = 'datalad rev-create --force -D "Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{})"'.format(
-                    self.bidsapp_tag)
+                cmd = ['datalad',
+                       'create',
+                       '--force',
+                       '-D',
+                       f'Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{self.bidsapp_tag})',
+                       '-c',
+                       'text2git',
+                       '-d',
+                       '.']
+                cmd = " ".join(cmd)
                 try:
                     print('... cmd: {}'.format(cmd))
                     self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
+                    print("    INFO: A datalad dataset has been created with success at the root directory!")
                 except Exception:
                     print("    DATALAD ERROR: Failed to create the datalad dataset")
             else:
@@ -1413,17 +1418,20 @@ class CMP_BIDSAppWindow(HasTraits):
             # f = open(log_filename,"w+")
             # f.close()
 
-            cmd = 'datalad add -J {} -m "Modified configuration files tracked by datalad. Dataset ready to be linked with the BIDS App." .'.format(
-                multiprocessing.cpu_count())
+            cmd = 'datalad save -d . -m "Modified files in derivatives tracked by datalad. ' \
+                  'Dataset ready to be linked with the BIDS App."'
             try:
                 print('... cmd: {}'.format(cmd))
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
                 print("    DATALAD ERROR: Failed to add changes to dataset")
 
-            datalad_container = os.path.join(self.bids_root, '.datalad', 'environments',
+            datalad_container = os.path.join(self.bids_root,
+                                             '.datalad',
+                                             'environments',
                                              'connectomemapper-bidsapp-{}'.format(
-                                                 "-".join(self.bidsapp_tag.split("."))), 'image')
+                                                 "-".join(self.bidsapp_tag.split("."))),
+                                             'image')
             add_container = True
             if os.path.isdir(datalad_container):
                 if self.datalad_update_environment:
@@ -1441,11 +1449,45 @@ class CMP_BIDSAppWindow(HasTraits):
                     "    INFO: Add a new computing environment (container image) to the datalad dataset!")
 
             if add_container:
-                cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}".format(
-                    "-".join(self.bidsapp_tag.split(".")), self.bidsapp_tag)
+
+                docker_cmd = ['docker', 'run', '--rm',
+                              '-v', '{}:/bids_dir'.format(self.bids_root),
+                              '-v', '{}:/output_dir'.format(self.output_dir),
+                              '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
+                              '-v', '{}:/code/ref_anatomical_config.json'.format(self.anat_config),
+                              ]
+
+                if self.run_dmri_pipeline:
+                    docker_cmd.append('-v')
+                    docker_cmd.append('{}:/code/ref_diffusion_config.json'.format(self.dmri_config))
+
+                if self.run_fmri_pipeline:
+                    docker_cmd.append('-v')
+                    docker_cmd.append('{}:/code/ref_fMRI_config.json'.format(self.fmri_config))
+
+                docker_cmd.append('-u')
+                docker_cmd.append('{}:{}'.format(os.geteuid(), os.getegid()))
+
+                docker_cmd.append('{img}')
+                docker_cmd.append('{cmd}')
+
+                version_tag = "-".join(self.bidsapp_tag.split("."))
+                cmd = ['datalad',
+                       'containers-add',
+                       f'connectomemapper-bidsapp-{version_tag}',
+                       '--url',
+                       f'dhub://sebastientourbier/connectomemapper-bidsapp:{self.bidsapp_tag}',
+                       '-d',
+                       '.',
+                       '–call-fmt']
+
+                cmd = " ".join(cmd)
+                docker_cmd = " ".join(docker_cmd)
+                cmd = f'{cmd} "{docker_cmd}"'
                 try:
                     print('... cmd: {}'.format(cmd))
                     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
+                    print("    INFO: Container image has been linked to dataset with success!")
                 except Exception:
                     print(
                         "   DATALAD ERROR: Failed to link the container image to the dataset")
@@ -1464,15 +1506,13 @@ class CMP_BIDSAppWindow(HasTraits):
             # except Exception:
             #     print("   ERROR: Failed to link the container image to the datalad dataset")
 
-            datalad_get_list = []
-
-            datalad_get_list.append('code/ref_anatomical_config.ini')
+            datalad_get_list = [self.anat_config]
 
             if self.run_dmri_pipeline:
-                datalad_get_list.append('code/ref_diffusion_config.ini')
+                datalad_get_list.append(self.dmri_config)
 
             if self.run_dmri_pipeline:
-                datalad_get_list.append('code/ref_fMRI_config.ini')
+                datalad_get_list.append(self.fmri_config)
 
             if session_structure:
                 for label in self.list_of_subjects_to_be_processed:
@@ -1499,15 +1539,15 @@ class CMP_BIDSAppWindow(HasTraits):
                         datalad_get_list.append(
                             'sub-{}/func/sub-{}*_bold.*'.format(label, label))
 
-            cmd = 'datalad add -J {} -m "Existing files tracked by datalad. Dataset ready for getting files via datalad run." .'.format(
-                multiprocessing.cpu_count())
+            cmd = 'datalad save -d . -m "Existing files tracked by datalad. '\
+                  'Datasets ready for getting files via datalad run."'
             try:
                 print('... cmd: {}'.format(cmd))
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
                 print("    DATALAD ERROR: Failed to add existing files to dataset")
 
-            cmd = 'datalad run -m "Get files for sub-{}" bash -c "datalad get {}"'.format(
+            cmd = 'datalad run -d . -m "Get files for sub-{}" bash -c "datalad get {}"'.format(
                 self.list_of_subjects_to_be_processed, " ".join(datalad_get_list))
             try:
                 print('... cmd: {}'.format(cmd))
@@ -1516,16 +1556,8 @@ class CMP_BIDSAppWindow(HasTraits):
                 print("    DATALAD ERROR: Failed to get files (cmd: datalad get {})".format(
                     " ".join(datalad_get_list)))
 
-            cmd = 'datalad add --nosave -J {} .'.format(
-                multiprocessing.cpu_count())
-            try:
-                print('... cmd: {}'.format(cmd))
-                self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print("    DATALAD ERROR: Failed to add existing files to dataset")
-
-            cmd = 'datalad save -m "Existing files tracked by datalad. Dataset ready for connectome mapping." --version-tag ready4analysis-{}'.format(
-                time.strftime("%Y%m%d-%H%M%S"))
+            cmd = 'datalad save -d . -m "Existing files tracked by datalad. Dataset ready for connectome mapping." '\
+                  '--version-tag ready4analysis-{}'.format(time.strftime("%Y%m%d-%H%M%S"))
             try:
                 print('... cmd: {}'.format(cmd))
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
@@ -1539,7 +1571,7 @@ class CMP_BIDSAppWindow(HasTraits):
             # except Exception:
             #     print("    DATALAD ERROR: Failed to run datalad diff --revision HEAD~1")
 
-            cmd = 'datalad rev-status'
+            cmd = 'datalad status -d .'
             try:
                 print('... cmd: {}'.format(cmd))
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
@@ -1572,15 +1604,7 @@ class CMP_BIDSAppWindow(HasTraits):
             # Clean remaining cache files generated in tmp/ of the docker image
             project.clean_cache(self.bids_root)
 
-            cmd = 'datalad add --nosave -J {} .'.format(
-                multiprocessing.cpu_count())
-            try:
-                print('... cmd: {}'.format(cmd))
-                self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print("    ERROR: Failed to add changes to datalad dataset")
-
-            cmd = 'datalad save -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{}'.format(
+            cmd = 'datalad save -d . -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{}'.format(
                 self.bidsapp_tag, time.strftime("%Y%m%d-%H%M%S"))
             try:
                 print('... cmd: {}'.format(cmd))
