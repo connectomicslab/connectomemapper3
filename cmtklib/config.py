@@ -464,7 +464,7 @@ def anat_load_config_json(pipeline, config_path):
         config = json.load(f)
 
     check_configuration_version(config)
-    set_pipeline_attributes_from_config(config)
+    set_pipeline_attributes_from_config(pipeline, config)
 
     return True
 
@@ -506,7 +506,7 @@ def dmri_load_config_json(pipeline, config_path):
         config = json.load(f)
 
     check_configuration_version(config)
-    set_pipeline_attributes_from_config(config)
+    set_pipeline_attributes_from_config(pipeline, config)
 
     return True
 
@@ -548,6 +548,6 @@ def fmri_load_config_json(pipeline, config_path):
         config = json.load(f)
 
     check_configuration_version(config)
-    set_pipeline_attributes_from_config(config)
+    set_pipeline_attributes_from_config(pipeline, config)
 
     return True
