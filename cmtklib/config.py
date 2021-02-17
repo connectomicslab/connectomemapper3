@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" Module that defines CMTK Config file function."""
+""" Module that defines methods for handling CMP3 configuration files."""
 import os
 import configparser
 import json
@@ -436,7 +436,7 @@ def anat_save_config(pipeline, config_path):
         Instance of AnatomicalPipeline
 
     config_path : string
-        Path of the configuration file
+        Path of the JSON configuration file
     """
     config = create_configparser_from_pipeline(pipeline)
     # with open(config_path, 'w') as configfile:
@@ -478,7 +478,7 @@ def dmri_save_config(pipeline, config_path):
         Instance of DiffusionPipeline
 
     config_path : string
-        Path of the INI configuration file
+        Path of the JSON configuration file
     """
     config = create_configparser_from_pipeline(pipeline)
     # with open(config_path, 'w') as configfile:
@@ -520,7 +520,7 @@ def fmri_save_config(pipeline, config_path):
         Instance of fMRIPipeline
 
     config_path : string
-        Path of the INI configuration file
+        Path of the JSON configuration file
     """
     config = create_configparser_from_pipeline(pipeline)
     # with open(config_path, 'w') as configfile:
@@ -540,7 +540,7 @@ def fmri_load_config_json(pipeline, config_path):
         Instance of fMRIPipeline
 
     config_path : string
-        Path of the INI configuration file
+        Path of the JSON configuration file
     """
     print('>> Load fMRI config file : {}'.format(config_path))
     # datalad_is_available = is_tool('datalad')
