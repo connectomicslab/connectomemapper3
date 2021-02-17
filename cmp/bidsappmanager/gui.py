@@ -1486,7 +1486,7 @@ class CMP_BIDSAppWindow(HasTraits):
                        f'dhub://sebastientourbier/connectomemapper-bidsapp:{self.bidsapp_tag}',
                        '-d',
                        '.',
-                       '–call-fmt']
+                       '--call-fmt']
 
                 cmd = " ".join(cmd)
                 docker_cmd = " ".join(docker_cmd)
