@@ -16,7 +16,7 @@ dependencies:
 - traitsui=6.1.3 # =6.0.0
 - graphviz=2.40.1 # =2.40.1
 - nipype=1.5.0 # =1.5.0
-- git-annex=8.20200617 # =7.20190219
+- git-annex=8.20210127 # =7.20190219
 - pyside2=5.9.0a1 # =5.9.0a1
 - fslpy=3.2.1 # =1.13.2
 - fsleyes=0.33.0 # =0.27.3
