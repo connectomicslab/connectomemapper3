@@ -112,6 +112,17 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                                                            bids_dir=project_info.base_directory,
                                                            output_dir=project_info.output_directory)}
 
+        if len(project_info.subject_sessions) > 0:
+            subject_id = "_".join((self.subject, self.global_conf.subject_session))
+        else:
+            subject_id = self.subject
+
+        self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.output_directory,
+                                                                                  'freesurfer')
+        self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.output_directory,
+                                                                                'freesurfer', subject_id)
+
+        print('freesurfer_subject_id: ' + self.stages['Segmentation'].config.freesurfer_subject_id)
         for stage in list(self.stages.keys()):
             if project_info.subject_session != '':
                 self.stages[stage].stage_dir = os.path.join(self.base_directory, "derivatives", 'nipype', self.subject,

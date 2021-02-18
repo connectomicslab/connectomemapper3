@@ -87,8 +87,8 @@ cmp/sub-01/ses-01/dwi/sub-01_ses-01_model-SHORE_FOD.nii.gz
 cmp/sub-01/ses-01/dwi/sub-01_ses-01_model-SHORE_GFA.nii.gz
 cmp/sub-01/ses-01/dwi/sub-01_ses-01_model-SHORE_MSD.nii.gz
 cmp/sub-01/ses-01/dwi/sub-01_ses-01_model-SHORE_RTOP.nii.gz
-cmp/sub-01/ses-01/sub-01_ses-01_anatomical_config.ini
-cmp/sub-01/ses-01/sub-01_ses-01_diffusion_config.ini
+cmp/sub-01/ses-01/sub-01_ses-01_anatomical_config.json
+cmp/sub-01/ses-01/sub-01_ses-01_diffusion_config.json
 cmp/sub-01/ses-01/xfm/anat_masked_resampled_fieldwarp.nii.gz
 cmp/sub-01/ses-01/xfm/final0GenericAffine.mat
 cmp/sub-01/ses-01/xfm/final1Warp.nii.gz

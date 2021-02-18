@@ -1784,19 +1784,19 @@ class CMP_ConfiguratorWindow(HasTraits):
 
         if self.anat_inputs_checked:
             anat_config_file = os.path.join(
-                self.project_info.base_directory, 'code', 'ref_anatomical_config.ini')
+                self.project_info.base_directory, 'code', 'ref_anatomical_config.json')
             project.anat_save_config(self.anat_pipeline, anat_config_file)
             print('Anatomical config saved as  {}'.format(anat_config_file))
 
         if self.dmri_inputs_checked:
             dmri_config_file = os.path.join(
-                self.project_info.base_directory, 'code', 'ref_diffusion_config.ini')
+                self.project_info.base_directory, 'code', 'ref_diffusion_config.json')
             project.dmri_save_config(self.dmri_pipeline, dmri_config_file)
             print('Diffusion config saved as  {}'.format(dmri_config_file))
 
         if self.fmri_inputs_checked:
             fmri_config_file = os.path.join(
-                self.project_info.base_directory, 'code', 'ref_fMRI_config.ini')
+                self.project_info.base_directory, 'code', 'ref_fMRI_config.json')
             project.fmri_save_config(self.fmri_pipeline, fmri_config_file)
             print('fMRI config saved as  {}'.format(fmri_config_file))
 

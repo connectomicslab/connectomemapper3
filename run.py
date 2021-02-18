@@ -25,6 +25,8 @@ from datetime import datetime
 
 # Own imports
 from cmtklib.util import BColors
+from cmtklib.config import create_subject_configuration_from_ref,\
+    check_configuration_format, convert_config_ini_2_json
 from cmp import parser
 from cmp.info import __version__
 from cmp.project import CMP_Project_Info, run_individual
@@ -158,70 +160,6 @@ def readLineByLine(filename):
         for line in f:
             # Use generator, to minimize memory used, removing trailing carriage return as it is not part of the command.
             yield line.strip('\n')
-
-
-def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type, multiproc_number_of_cores=1):
-    """Create the pipeline configuration file for an individual subject from a reference given as input.
-
-    Parameters
-    ----------
-    project : cmp.project.CMP_Project_Info
-        Instance of `cmp.project.CMP_Project_Info`
-
-    ref_conf_file : string
-        Reference configuration file
-
-    pipeline_type : 'anatomical', 'diffusion', 'fMRI'
-        Type of pipeline
-
-    multiproc_number_of_cores : int
-        Number of threads used by Nipype
-
-    Returns
-    -------
-    subject_conf_file : string
-        Configuration file of the individual subject
-    """
-    subject_derivatives_dir = os.path.join(project.output_directory)
-
-    # print('project.subject_session: {}'.format(project.subject_session))
-
-    if project.subject_session != '':  # Session structure
-        # print('With session : {}'.format(project.subject_session))
-        subject_conf_file = os.path.join(subject_derivatives_dir, 'cmp', project.subject, project.subject_session,
-                                         "{}_{}_{}_config.ini".format(project.subject, project.subject_session,
-                                                                      pipeline_type))
-    else:
-        # print('With NO session ')
-        subject_conf_file = os.path.join(subject_derivatives_dir, 'cmp', project.subject,
-                                         "{}_{}_config.ini".format(project.subject, pipeline_type))
-
-    if os.path.isfile(subject_conf_file):
-        print("WARNING: rewriting config file {}".format(subject_conf_file))
-        os.remove(subject_conf_file)
-
-    # Change relative path to absolute path if needed (required when using singularity)
-    if not os.path.isabs(ref_conf_file):
-        ref_conf_file = os.path.abspath(ref_conf_file)
-
-    # Copy and edit appropriate fields/lines
-    f = open(subject_conf_file, 'w')
-    for line in readLineByLine(ref_conf_file):
-        if "subject = " in line:
-            f.write("subject = {}\n".format(project.subject))
-        elif "subjects = " in line:
-            f.write("subjects = {}\n".format(project.subjects))
-        elif "subject_sessions = " in line:
-            f.write("subject_sessions = {}\n".format(project.subject_sessions))
-        elif "subject_session = " in line:
-            f.write("subject_session = {}\n".format(project.subject_session))
-        elif "number_of_cores = " in line:
-            f.write("number_of_cores = {}\n".format(multiproc_number_of_cores))
-        else:
-            f.write("{}\n".format(line))
-    f.close()
-
-    return subject_conf_file
 
 
 def manage_processes(proclist):
@@ -576,19 +514,31 @@ if args.analysis_level == "participant":
                 run_fmri = False
 
                 if args.anat_pipeline_config is not None:
-                    project.anat_config_file = create_subject_configuration_from_ref(project, args.anat_pipeline_config,
+                    if check_configuration_format(args.anat_pipeline_config) == '.ini':
+                        anat_pipeline_config = convert_config_ini_2_json(args.anat_pipeline_config)
+                    else:
+                        anat_pipeline_config = args.anat_pipeline_config
+                    project.anat_config_file = create_subject_configuration_from_ref(project, anat_pipeline_config,
                                                                                      'anatomical')
                     run_anat = True
                     print("... Anatomical config created : {}".format(
                         project.anat_config_file))
                 if args.dwi_pipeline_config is not None:
-                    project.dmri_config_file = create_subject_configuration_from_ref(project, args.dwi_pipeline_config,
+                    if check_configuration_format(args.dwi_pipeline_config) == '.ini':
+                        dwi_pipeline_config = convert_config_ini_2_json(args.dwi_pipeline_config)
+                    else:
+                        dwi_pipeline_config = args.dwi_pipeline_config
+                    project.dmri_config_file = create_subject_configuration_from_ref(project, dwi_pipeline_config,
                                                                                      'diffusion')
                     run_dmri = True
                     print("... Diffusion config created : {}".format(
                         project.dmri_config_file))
                 if args.func_pipeline_config is not None:
-                    project.fmri_config_file = create_subject_configuration_from_ref(project, args.func_pipeline_config,
+                    if check_configuration_format(args.func_pipeline_config) == '.ini':
+                        func_pipeline_config = convert_config_ini_2_json(args.func_pipeline_config)
+                    else:
+                        func_pipeline_config = args.func_pipeline_config
+                    project.fmri_config_file = create_subject_configuration_from_ref(project, func_pipeline_config,
                                                                                      'fMRI')
                     run_fmri = True
                     print("... fMRI config created : {}".format(
@@ -685,19 +635,31 @@ if args.analysis_level == "participant":
             run_fmri = False
 
             if args.anat_pipeline_config is not None:
-                project.anat_config_file = create_subject_configuration_from_ref(project, args.anat_pipeline_config,
+                if check_configuration_format(args.anat_pipeline_config) == '.ini':
+                    anat_pipeline_config = convert_config_ini_2_json(args.anat_pipeline_config)
+                else:
+                    anat_pipeline_config = args.anat_pipeline_config
+                project.anat_config_file = create_subject_configuration_from_ref(project, anat_pipeline_config,
                                                                                  'anatomical')
                 run_anat = True
                 print("... Anatomical config created : {}".format(
                     project.anat_config_file))
             if args.dwi_pipeline_config is not None:
-                project.dmri_config_file = create_subject_configuration_from_ref(project, args.dwi_pipeline_config,
+                if check_configuration_format(args.dwi_pipeline_config) == '.ini':
+                    dwi_pipeline_config = convert_config_ini_2_json(args.dwi_pipeline_config)
+                else:
+                    dwi_pipeline_config = args.dwi_pipeline_config
+                project.dmri_config_file = create_subject_configuration_from_ref(project, dwi_pipeline_config,
                                                                                  'diffusion')
                 run_dmri = True
                 print("... Diffusion config created : {}".format(
                     project.dmri_config_file))
             if args.func_pipeline_config is not None:
-                project.fmri_config_file = create_subject_configuration_from_ref(project, args.func_pipeline_config,
+                if check_configuration_format(args.func_pipeline_config) == '.ini':
+                    func_pipeline_config = convert_config_ini_2_json(args.func_pipeline_config)
+                else:
+                    func_pipeline_config = args.func_pipeline_config
+                project.fmri_config_file = create_subject_configuration_from_ref(project, func_pipeline_config,
                                                                                  'fMRI')
                 run_fmri = True
                 print("... fMRI config created : {}".format(

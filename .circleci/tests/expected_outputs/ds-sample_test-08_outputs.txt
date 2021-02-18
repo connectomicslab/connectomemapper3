@@ -88,8 +88,8 @@ cmp/sub-01/ses-01/func/sub-01_ses-01_meanBOLD.nii.gz
 cmp/sub-01/ses-01/func/sub-01_ses-01_motion.tsv
 cmp/sub-01/ses-01/func/sub-01_ses-01_task-rest_desc-cmp_bold.json
 cmp/sub-01/ses-01/func/sub-01_ses-01_task-rest_desc-cmp_bold.nii.gz
-cmp/sub-01/ses-01/sub-01_ses-01_anatomical_config.ini
-cmp/sub-01/ses-01/sub-01_ses-01_fMRI_config.ini
+cmp/sub-01/ses-01/sub-01_ses-01_anatomical_config.json
+cmp/sub-01/ses-01/sub-01_ses-01_fMRI_config.json
 freesurfer/dataset_description.json
 freesurfer/fsaverage/label/lh.aparc.a2005s.annot
 freesurfer/fsaverage/label/lh.aparc.a2009s.annot
