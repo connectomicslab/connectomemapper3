@@ -67,7 +67,7 @@ Report on the state of dataset content
 
     datalad status -r
 
-Processing using the Connectome Mapper BIDS App on a local workstation
+Processing using the Connectome Mapper BIDS App on Alice's workstation
 ----------------------------------------------------------------------
 
 Dataset installation
@@ -75,9 +75,9 @@ Dataset installation
 
 ::
 
-    datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/home/<SERVER_USERNAME>/Data/ds-example \
-    /home/$USER/Data/ds-example
-    cd /home/$USER/Data/ds-example
+    datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/home/alice/Data/ds-example \
+    /home/alice/Data/ds-example
+    cd /home/alice/Data/ds-example
 
 Get T1w and Diffusion images to be processed, written in a bash script for reproducibility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -111,8 +111,8 @@ Add the container image of the connectome mapper to the dataset
     -d . \
     --call-fmt \
     "docker run --rm -t \
-        -v /home/$USER/Data/ds-example:/bids_dir \
-        -v /home/$USER/Data/ds-example/derivatives:/output_dir \
+        -v .:/bids_dir \
+        -v ./derivatives:/output_dir \
         -u "$(id -u)":"$(id -g)" \
         sebastientourbier/connectomemapper-bidsapp:<VERSION_TAG> {cmd}"
 
@@ -121,7 +121,7 @@ Save the state of the dataset prior to analysis
 
 ::
 
-    datalad save -m "Seb's test dataset on local \
+    datalad save -m "Alice's test dataset on local \
     workstation ready for analysis with connectomemapper-bidsapp:<VERSION_TAG>" \
     --version-tag ready4analysis-<date>-<time>
 
@@ -131,16 +131,19 @@ Run Connectome Mapper on all subjects
 ::
 
     datalad containers-run --container-name connectomemapper-bidsapp-<VERSION_TAG> \
-    '/bids_dir' '/output_dir' participant \
-    --anat_pipeline_config '/bids_dir/code/ref_anatomical_config.ini' \
-    --dwi_pipeline_config '/bids_dir/code/ref_diffusion_config.ini'
+    --input code/ref_anatomical_config.ini \
+    --input code/ref_fMRI_config.ini \
+    --output derivatives \
+    /bids_dir /output_dir participant \
+    --anat_pipeline_config '{inputs[0]}' \
+    --dwi_pipeline_config '{inputs[1]}'
 
 Save the state
 ~~~~~~~~~~~~~~
 
 ::
 
-    datalad save -m "Seb's test dataset on local \
+    datalad save -m "Alice's test dataset on local \
     workstation processed by connectomemapper-bidsapp:<VERSION_TAG>, {Date/Time}" \
     --version-tag processed-<date>-<time>
 
@@ -167,10 +170,10 @@ Processed dataset installation on Bob's workstation
 
 ::
 
-    datalad install -s (ssh://)localadmin@HOS51827:/home/localadmin/Data/ds-newtest2  \
-    /home/bob/Data/ds-newtest2
+    datalad install -s (ssh://)<USERNAME>@<ALICE_IP_ADDRESS>:/home/alice/Data/ds-example  \
+    /home/bob/Data/ds-example
 
-    cd /home/bob/Data/ds-newtest2
+    cd /home/bob/Data/ds-example
 
 Get connectome mapper output files (Brain Segmentation and Multi-scale Parcellation) used by Bob in his analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -197,16 +200,17 @@ Update derivatives
 
 ::
 
-    cd /home/bob/Data/ds-newtest2
-    mkdir derivatives/cartool ...
+    cd /home/bob/Data/ds-example
+    mkdir derivatives/cartool
+    [...]
 
 Save the state
 ~~~~~~~~~~~~~~
 
 ::
 
-    datalad rev-save -m "Bob's test dataset on local \
-    workstation processed by cartool:|release|, {Date/Time}" \
+    datalad save -m "Bob's test dataset on local \
+    workstation processed by cartool:<CARTOOL_VERSION>, {Date/Time}" \
     --version-tag processed-<date>-<time>
 
 Report on the state of dataset content
@@ -214,7 +218,7 @@ Report on the state of dataset content
 
 ::
 
-    datalad rev-status --recursive
+    datalad status -r
 
 With DataLad with don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -226,5 +230,4 @@ Let’s uninstall them – checking the size on disk before and after::
     datalad uninstall derivatives/freesurfer/*
     datalad uninstall derivatives/nipype/*
 
--  Created by Sebastien Tourbier - 2019 Jan 8
-
+-  Created by Sebastien Tourbier - Last modification: 2021 Feb 18
