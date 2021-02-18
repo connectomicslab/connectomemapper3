@@ -6,14 +6,30 @@ Adopting Datalad for collaboration
 
 Datalad is a powerful tool for the versioning and sharing of raw and processed data as well as for the tracking of data provenance (i.e. the recording on how data was processed). This page was created with the intention to share with the user how we adopted the use of datalad datasets with the connectome mapper in in our lab at the time of creation of this document (2019 Jan 8). For more details and tutorials on Datalad,please check the recent `Datalad Handbook <http://handbook.datalad.org/en/latest/>`_
 
-.. warning:: This was tested on ``Ubuntu 16.04`` with ``Datalad 0.11.3`` and its extensions ``datalad-container 0.3.1``, ``datalad_neuroimaging 0.2.0`` and ``datalad_revolution 0.6.0``. This example might not work with their latest versions as they are under intensive developement and a number of new versions with minor and major changes have been released in the meantime.
+.. note:: This was tested on ``Ubuntu 16.04`` with ``Datalad 0.14.0``, its extensions ``datalad-container 1.1.2``, ``datalad-neuroimaging 0.3.1``, and ``git-annex 8.20210127``.
 
-Move original BIDS dataset to server
+Copy BIDS dataset to server
 ------------------------------------
 
 ::
 
-    rsync -P -v -avz -e 'ssh' --exclude 'derivatives' --exclude 'code' --exclude '.datalad' --exclude '.git' --exclude '.gitattributes' /path/to/ds-example/* <SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/home/<SERVER_USERNAME>/Data/ds-example
+    rsync -P -avz -e 'ssh' \
+    --exclude 'derivatives' \
+    --exclude 'code' \
+    --exclude '.datalad' \
+    --exclude '.git' \
+    --exclude '.gitattributes' \
+    /path/to/ds-example/* \
+    <SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/home/<SERVER_USERNAME>/Data/ds-example
+
+where:
+
+    * `-P` is used to show progress during transfer.
+    * `-v` increases verbosity.
+    * `-e` specifies the remote shell to use (ssh).
+    * `-a` indicates archive mode.
+    * `-z` enables file data compression during the transfer.
+    * `--exclude DIR_NAME` exclude the specified DIR_NAME from the copy.
 
 Datalad setup and dataset creation on Server (accessible via ssh)
 -----------------------------------------------------------------
@@ -35,23 +51,21 @@ Install git-annex and liblzma-dev (datalad dependencies), Datalad and its extens
     pip install datalad-container==1.1.2
     pip install datalad-neuroimaging==0.3.1
 
-.. note:: Tested using ``git-annex version 7.20190219-gad7c11b``
-
 Go to source dataset directory, create a Datalad dataset and save all
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
-    cd /home/tourbier/Data/ds-newtest2
-    datalad rev-create -f -D "Original test dataset on lab server"
-    datalad rev-save -m 'Source (Origin) BIDS dataset' --version-tag origin
+    cd /home/<SERVER_USERNAME>/Data/ds-example
+    datalad create -f -c text2git -D "Original test dataset on lab server" -d .
+    datalad save -m "Source (Origin) BIDS dataset" --version-tag origin
 
 Report on the state of dataset content
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
-    datalad rev-status --recursive
+    datalad status -r
 
 Processing using the Connectome Mapper BIDS App on a local workstation
 ----------------------------------------------------------------------
@@ -61,10 +75,9 @@ Dataset installation
 
 ::
 
-    datalad install -s ssh://tourbier@<SERVER_IP_ADDRESS>:/home/tourbier/Data/ds-newtest2  \
-    /home/localadmin/Data/ds-newtest2
-
-    cd /home/localadmin/Data/ds-newtest2
+    datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/home/<SERVER_USERNAME>/Data/ds-example \
+    /home/$USER/Data/ds-example
+    cd /home/$USER/Data/ds-example
 
 Get T1w and Diffusion images to be processed, written in a bash script for reproducibility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,17 +106,23 @@ Add the container image of the connectome mapper to the dataset
 
 ::
 
-    datalad containers-add connectomemapper-bidsapp-|release| \
-    --url dhub://sebastientourbier/connectomemapper-bidsapp:|release| \
-    --update
+    datalad containers-add connectomemapper-bidsapp-<VERSION_TAG> \
+    --url dhub://sebastientourbier/connectomemapper-bidsapp:<VERSION_TAG> \
+    -d . \
+    --call-fmt \
+    "docker run --rm -t \
+        -v /home/$USER/Data/ds-example:/bids_dir \
+        -v /home/$USER/Data/ds-example/derivatives:/output_dir \
+        -u "$(id -u)":"$(id -g)" \
+        sebastientourbier/connectomemapper-bidsapp:<VERSION_TAG> {cmd}"
 
 Save the state of the dataset prior to analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
-    datalad rev-save -m "Seb's test dataset on local \
-    workstation ready for analysis with connectomemapper-bidsapp:|release|" \
+    datalad save -m "Seb's test dataset on local \
+    workstation ready for analysis with connectomemapper-bidsapp:<VERSION_TAG>" \
     --version-tag ready4analysis-<date>-<time>
 
 Run Connectome Mapper on all subjects
@@ -111,18 +130,18 @@ Run Connectome Mapper on all subjects
 
 ::
 
-    datalad containers-run --container-name connectomemapper-bidsapp-|release| \
-    '/tmp' '/tmp/derivatives' participant \
-    --anat_pipeline_config '/tmp/code/ref_anatomical_config.ini' \
-    --dwi_pipeline_config '/tmp/code/ref_diffusion_config.ini' \
+    datalad containers-run --container-name connectomemapper-bidsapp-<VERSION_TAG> \
+    '/bids_dir' '/output_dir' participant \
+    --anat_pipeline_config '/bids_dir/code/ref_anatomical_config.ini' \
+    --dwi_pipeline_config '/bids_dir/code/ref_diffusion_config.ini'
 
 Save the state
 ~~~~~~~~~~~~~~
 
 ::
 
-    datalad rev-save -m "Seb's test dataset on local \
-    workstation processed by connectomemapper-bidsapp:|release|, {Date/Time}" \
+    datalad save -m "Seb's test dataset on local \
+    workstation processed by connectomemapper-bidsapp:<VERSION_TAG>, {Date/Time}" \
     --version-tag processed-<date>-<time>
 
 Report on the state of dataset content
@@ -130,7 +149,7 @@ Report on the state of dataset content
 
 ::
 
-    datalad rev-status --recursive
+    datalad status -r
 
 With DataLad with don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
