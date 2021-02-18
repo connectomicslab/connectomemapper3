@@ -1464,7 +1464,7 @@ class CMP_BIDSAppWindow(HasTraits):
 
             if add_container:
 
-                docker_cmd = ['docker', 'run', '--rm',
+                docker_cmd = ['docker', 'run', '--rm', '-t',
                               '-v', '{}:/bids_dir'.format(self.bids_root),
                               '-v', '{}:/output_dir'.format(self.output_dir),
                               '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
