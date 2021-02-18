@@ -1432,8 +1432,7 @@ class CMP_BIDSAppWindow(HasTraits):
             # f = open(log_filename,"w+")
             # f.close()
 
-            cmd = 'datalad save -d . -m "All files tracked by datalad. ' \
-                  'Dataset ready to be linked with the BIDS App."'
+            cmd = f'datalad save -d . -m "{msg}"'
             try:
                 print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
@@ -1543,8 +1542,8 @@ class CMP_BIDSAppWindow(HasTraits):
                         datalad_get_list.append(
                             'sub-{}/func/sub-{}*_bold.*'.format(label, label))
 
-            cmd = 'datalad save -d . -m "Existing files tracked by datalad. '\
-                  'Datasets ready for getting files via datalad run."'
+            cmd = 'datalad save -d . -m "Dataset state after adding the container image. '\
+                  'Datasets ready to get files via datalad run."'
             try:
                 print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
@@ -1560,7 +1559,7 @@ class CMP_BIDSAppWindow(HasTraits):
                 print(BColors.FAIL + "    DATALAD ERROR: Failed to get files (cmd: datalad get {})".format(
                     " ".join(datalad_get_list)) + BColors.ENDC)
 
-            cmd = 'datalad save -d . -m "Existing files tracked by datalad. Dataset ready for connectome mapping." '\
+            cmd = 'datalad save -d . -m "Dataset state after getting the files. Dataset ready for connectome mapping." '\
                   '--version-tag ready4analysis-{}'.format(time.strftime("%Y%m%d-%H%M%S"))
             try:
                 print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
