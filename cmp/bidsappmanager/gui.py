@@ -1283,7 +1283,7 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('--func_pipeline_config')
             cmd.append('/{{inputs[{}]}}'.format(i))
 
-        print('... Datalad cmd : {}'.format(cmd))
+        print(BColors.OKBLUE + '... Datalad cmd : {}'.format(cmd) + BColors.ENDC)
 
         # log_filename = os.path.join(self.bids_root,'derivatives','cmp','main-datalad_log-cmpbidsapp.txt')
 
@@ -1409,12 +1409,18 @@ class CMP_BIDSAppWindow(HasTraits):
                        f'{self.bids_root}']
                 cmd = " ".join(cmd)
                 try:
-                    print('... cmd: {}'.format(cmd))
+                    print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                     self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
                     print("    INFO: A datalad dataset has been created with success at the root directory!")
+                    msg = 'Add all files to datalad. ' \
+                              'Dataset ready to be linked with the BIDS App.'
+
                 except Exception:
-                    print("    DATALAD ERROR: Failed to create the datalad dataset")
+                    msg = 'Save state after error at datalad dataset creation'
+                    print(BColors.FAIL + "    DATALAD ERROR: Failed to create the datalad dataset" + BColors.ENDC)
             else:
+                msg = 'All files tracked by datalad. '\
+                          'Datalad dataset up-to-date and ready to be linked with the BIDS App.'
                 print("    INFO: A datalad dataset already exists!")
 
             # log_filename = os.path.join(self.bids_root,'derivatives','cmp','main-datalad_log-cmpbidsapp.txt')
@@ -1429,10 +1435,10 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd = 'datalad save -d . -m "All files tracked by datalad. ' \
                   'Dataset ready to be linked with the BIDS App."'
             try:
-                print('... cmd: {}'.format(cmd))
+                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    DATALAD ERROR: Failed to add changes to dataset")
+                print(BColors.FAIL + "    DATALAD ERROR: Failed to add changes to dataset" + BColors.ENDC)
 
             datalad_container = os.path.join(self.bids_root,
                                              '.datalad',
@@ -1497,12 +1503,12 @@ class CMP_BIDSAppWindow(HasTraits):
                 if self.datalad_update_environment:
                     cmd = f'{cmd} --update'
                 try:
-                    print('... cmd: {}'.format(cmd))
+                    print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
                     print("    INFO: Container image has been linked to dataset with success!")
                 except Exception:
-                    print(
-                        "   DATALAD ERROR: Failed to link the container image to the dataset")
+                    print(BColors.FAIL +
+                          "   DATALAD ERROR: Failed to link the container image to the dataset" + BColors.ENDC)
 
             datalad_get_list = [self.anat_config]
 
@@ -1540,41 +1546,34 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd = 'datalad save -d . -m "Existing files tracked by datalad. '\
                   'Datasets ready for getting files via datalad run."'
             try:
-                print('... cmd: {}'.format(cmd))
+                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    DATALAD ERROR: Failed to add existing files to dataset")
+                print(BColors.FAIL + "    DATALAD ERROR: Failed to add existing files to dataset" + BColors.ENDC)
 
             cmd = 'datalad run -d . -m "Get files for sub-{}" bash -c "datalad get {}"'.format(
                 self.list_of_subjects_to_be_processed, " ".join(datalad_get_list))
             try:
-                print('... cmd: {}'.format(cmd))
+                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    DATALAD ERROR: Failed to get files (cmd: datalad get {})".format(
-                    " ".join(datalad_get_list)))
+                print(BColors.FAIL + "    DATALAD ERROR: Failed to get files (cmd: datalad get {})".format(
+                    " ".join(datalad_get_list)) + BColors.ENDC)
 
             cmd = 'datalad save -d . -m "Existing files tracked by datalad. Dataset ready for connectome mapping." '\
                   '--version-tag ready4analysis-{}'.format(time.strftime("%Y%m%d-%H%M%S"))
             try:
-                print('... cmd: {}'.format(cmd))
+                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    DATALAD ERROR: Failed to commit changes to dataset")
-
-            # cmd = 'datalad diff --revision HEAD~1'
-            # try:
-            #     print('... cmd: {}'.format(cmd))
-            #     self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            # except Exception:
-            #     print("    DATALAD ERROR: Failed to run datalad diff --revision HEAD~1")
+                print(BColors.FAIL + "    DATALAD ERROR: Failed to commit changes to dataset" + BColors.ENDC)
 
             cmd = 'datalad status -d .'
             try:
-                print('... cmd: {}'.format(cmd))
+                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    DATALAD ERROR: Failed to run datalad rev-status")
+                print(BColors.FAIL + "    DATALAD ERROR: Failed to run datalad rev-status" + BColors.ENDC)
 
         # maxprocs = multiprocessing.cpu_count()
         processes = []
@@ -1605,23 +1604,20 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd = 'datalad save -d . -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{}'.format(
                 self.bidsapp_tag, time.strftime("%Y%m%d-%H%M%S"))
             try:
-                print('... cmd: {}'.format(cmd))
+                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    ERROR: Failed to commit derivatives to datalad dataset")
+                print(BColors.FAIL + "    DATALAD ERROR: Failed to commit derivatives to datalad dataset" + BColors.ENDC)
 
-            cmd = 'datalad diff --revision HEAD~1'
+            cmd = 'datalad diff -t HEAD~1'
             try:
-                print('... cmd: {}'.format(cmd))
+                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    ERROR: Failed to run datalad diff --revision HEAD~1")
+                print(BColors.FAIL + "    DATALAD ERROR: Failed to run datalad diff -t HEAD~1" + BColors.ENDC)
 
         print('Processing with BIDS App Finished')
-
         self.docker_running = False
-
-        # cmd = ['docke datetime.datetime.now().strftime("%Y%m%d_%H%M")
         return True
 
     # def stop_bids_app(self, ui_info):
