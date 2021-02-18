@@ -111,8 +111,8 @@ Add the container image of the connectome mapper to the dataset
     -d . \
     --call-fmt \
     "docker run --rm -t \
-        -v .:/bids_dir \
-        -v ./derivatives:/output_dir \
+        -v "$(pwd)":/bids_dir \
+        -v "$(pwd)"/derivatives:/output_dir \
         -u "$(id -u)":"$(id -g)" \
         sebastientourbier/connectomemapper-bidsapp:<VERSION_TAG> {cmd}"
 
