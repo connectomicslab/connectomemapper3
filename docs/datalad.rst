@@ -33,7 +33,7 @@ Then install Datalad and its extensions::
 Copy BIDS dataset to server
 ------------------------------------
 
-::
+Copy the raw BIDS dataset using `rsync`::
 
     rsync -P -avz -e 'ssh' \
     --exclude 'derivatives' \
