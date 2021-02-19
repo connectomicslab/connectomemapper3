@@ -127,7 +127,8 @@ Add Connectome Mapper's container image to the dataset
         sebastientourbier/connectomemapper-bidsapp:<VERSION_TAG> {cmd}"
 
 where:
-* `--call-fmt` specifies a custom docker run command where the current directory
+
+* `--call-fmt` specifies a custom docker run command. The current directory
   is assumed to be the BIDS root directory and retrieve with `"$(pwd)"` and the
   output directory is inside the `derivatives/` folder.
 
