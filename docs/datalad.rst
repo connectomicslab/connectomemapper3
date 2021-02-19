@@ -141,7 +141,7 @@ Create the `derivatives` output directory:
 Raw BIDS dataset installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Install the remove datalad dataset `ds-example` in `/home/alice/data/ds-example-processed/input/``::
+Install the remove datalad dataset `ds-example` in `/home/alice/data/ds-example-processed/input/`::
 
     datalad install -d . -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/data/ds-example \
     /home/alice/data/ds-example-processed/input/
