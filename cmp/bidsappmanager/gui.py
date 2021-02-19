@@ -1516,6 +1516,7 @@ class CMP_BIDSAppWindow(HasTraits):
                     print(BColors.FAIL +
                           "   DATALAD ERROR: Failed to link the container image to the dataset" + BColors.ENDC)
 
+            # Create a list of files to be retrieved by datalad get
             datalad_get_list = [self.anat_config]
 
             if self.run_dmri_pipeline:
