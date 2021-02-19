@@ -22,10 +22,13 @@ A list of useful singularity command can be found in :ref:`Useful singularity co
 Running the singularity image
 ------------------------------------
 
-The following example shows how to call from the terminal the Singularity image of the CMP3 BIDS App to perform both anatomical and diffusion pipelines for `sub-01`, `sub-02` and `sub-03` of a BIDS dataset whose root directory is located at ``${localDir}``:
+The following example shows how to call from the
+terminal the Singularity image of the CMP3 BIDS App
+to perform both anatomical and diffusion pipelines for
+`sub-01`, `sub-02` and `sub-03` of a BIDS dataset whose
+root directory is located at ``${localDir}``::
 
-.. parsed-literal::
-	$ singularity run --containall \\
+    $ singularity run --containall \\
             --bind ${localDir}:/bids_dir --bind ${localDir}/derivatives:/output_dir \\
 	        library://connectomicslab/default/connectomemapper-bidsapp:latest \\
 	        /bids_dir /output_dir participant --participant_label 01 02 03 \\
@@ -34,7 +37,7 @@ The following example shows how to call from the terminal the Singularity image 
 	        --fs_license /bids_dir/code/license.txt \\
 	        --number_of_participants_processed_in_parallel 3
 
-**Happy Connectome Mapping!**
+**Happy Large-Scale Connectome Mapping!**
 
 .. note::
     As you can see, the `singularity run` command is slightly different from the `docker run`. The docker option flag ``-v`` is replaced by the singularity ``--bind`` to map local folders inside the container. Last but not least, while docker containers are executed in total isolation, singularity images MUST run with the option flag `--containall`. Otherwise your $HOME and $TMP directories or your local environment variables might be shared inside the container.

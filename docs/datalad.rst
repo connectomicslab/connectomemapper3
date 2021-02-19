@@ -19,7 +19,7 @@ For more details and tutorials on Datalad and YODA, please check the
 recent `Datalad Handbook <http://handbook.datalad.org/en/latest/>`_
 and the `YODA principles <https://handbook.datalad.org/en/latest/basics/101-127-yoda.html>`_.
 
-**Happy Collaborative and Reproducible Data Processing!**
+**Happy Collaborative and Reproducible Connectome Mapping!**
 
 .. note:: This was tested on ``Ubuntu 16.04`` with ``Datalad 0.14.0``, its extensions ``datalad-container 1.1.2``, ``datalad-neuroimaging 0.3.1``, and ``git-annex 8.20210127``.
 
@@ -132,7 +132,7 @@ Go to the created dataset directory::
 
     cd /home/alice/data/ds-example-processed
 
-Create the `derivatives` output directory:
+Create the `derivatives` output directory::
 
     mkdir derivatives
 
