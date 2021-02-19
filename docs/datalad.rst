@@ -111,10 +111,6 @@ Report on the state of dataset content::
 Processing using the Connectome Mapper BIDS App on Alice's workstation
 ----------------------------------------------------------------------
 
-To make the most of Datalad, we
-YODA-compliant data analysis project, you will not only have theoretical
-knowledge about the YODA principles, but also gain practical experience.
-
 Processed dataset creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
