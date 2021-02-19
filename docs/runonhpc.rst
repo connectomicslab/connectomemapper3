@@ -34,6 +34,8 @@ The following example shows how to call from the terminal the Singularity image 
 	        --fs_license /bids_dir/code/license.txt \\
 	        --number_of_participants_processed_in_parallel 3
 
+**Happy Connectome Mapping!**
+
 .. note::
     As you can see, the `singularity run` command is slightly different from the `docker run`. The docker option flag ``-v`` is replaced by the singularity ``--bind`` to map local folders inside the container. Last but not least, while docker containers are executed in total isolation, singularity images MUST run with the option flag `--containall`. Otherwise your $HOME and $TMP directories or your local environment variables might be shared inside the container.
 
@@ -99,6 +101,4 @@ Useful singularity commands
 		.. parsed-literal::
 			$ singularity cache clean
 
-
 Created by Sebastien Tourbier - 2020 Mar 04 - Latest update: 2021 Jan 04
-
