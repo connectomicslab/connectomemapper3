@@ -9,6 +9,9 @@ Commandline Usage
 .. warning::
     As of ``CMP3 v3.0.0-RC2``, the BIDS App includes a **tracking** system that anonymously reports the run of the BIDS App. This feature has been introduced to support us in the task of fund finding for the development of CMP3 in the future. However, users are still free to opt-out using the ``--notrack`` commandline argument.
 
+.. important:: Since ``v3.0.0-RC4``, configuration files adopt the `JSON` format. If you have your configuration files still in the *old* `INI` format,
+    do not worry, the CMP3 BIDS App will convert them to the new `JSON` format automatically for you.
+
 Commandline Arguments
 =============================
 
@@ -43,9 +46,6 @@ To run the docker image in participant level mode (for one participant):
 .. important:: The user is requested to use its own Freesurfer license (`available here <https://surfer.nmr.mgh.harvard.edu/registration.html>`_). CMP expects by default to find a copy of the FreeSurfer ``license.txt`` in the ``code/`` folder of the BIDS directory. However, one can also mount with the ``-v`` docker run option a freesurfer ``license.txt``, which can be located anywhere on its computer (as in the example above, i.e. ``/usr/local/freesurfer/license.txt``) to the ``code/`` folder of the BIDS directory inside the docker container (i.e. ``/bids_dir/code/license.txt``).
 
 .. note:: At least a configuration file describing the processing stages of the anatomical pipeline should be provided. Diffusion and/or Functional MRI pipeline are performed only if a configuration file is set. The generation of such configuration files, the execution of the BIDS App docker image and output inpection are facilitated through the use of the Connectome Mapper GUI, i.e. cmpbidsappmanager (see `dedicated documentation page <bidsappmanager.html>`_)
-
-.. important:: Since ``v3.0.0-RC4``, configuration files adopt the `.json` format. If you have your configuration files still in the *old* ``.ini format,
-    do not worry, the CMP3 BIDS App will convert automatically them for you to the new `.json` format.
 
 Debugging
 =========
