@@ -29,8 +29,8 @@ The following example shows how to call from the terminal the Singularity image 
             --bind ${localDir}:/bids_dir --bind ${localDir}/derivatives:/output_dir \\
 	        library://connectomicslab/default/connectomemapper-bidsapp:latest \\
 	        /bids_dir /output_dir participant --participant_label 01 02 03 \\
-	        --anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \\
-	        --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \\
+	        --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\
+	        --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\
 	        --fs_license /bids_dir/code/license.txt \\
 	        --number_of_participants_processed_in_parallel 3
 

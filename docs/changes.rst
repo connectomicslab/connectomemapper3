@@ -13,7 +13,10 @@ In particular, it integrates `Pull Request #74 <https://github.com/connectomicsl
 
 *Major changes*
 
-* Configuration files adopt now the `JSON` format. Configuration files in the old `INI` format are converted automatically
+* Configuration files adopt now the `JSON` format. This have involved a major refactoring
+  of the `cmtklib.config` module with the addition and replacement of a number of new methods
+  (See `full diff on GitHub <https://github.com/connectomicslab/connectomemapper3/pull/74/files#diff-00f63c128c86731f18ae0c51efca7f4fb097970c53b6016754efd91f2af581ad>`_).
+  Configuration files in the old `INI` format can be converted automatically
   with the help of the two new methods `check_configuration_format()` and `convert_config_ini_2_json` to detect if
   configuration files are in the `INI` format and to make the conversion. (`PR #76 <https://github.com/connectomicslab/connectomemapper3/pull/76>`_)
 
@@ -25,10 +28,18 @@ In particular, it integrates `Pull Request #74 <https://github.com/connectomicsl
 
 * Correct attributes related to the diffusion imaging model type `multishell`.
 
+* Review code in `cmtklib/connectome.py` for saving functional connectome files in GRAPHML format.
+
 *Software development life cycle*
 
 * Code coverage improvement by calling the methods `check_stages_execution()` and `fill_stages_outputs()`
   on each pipeline when executed with coverage (`PR #75 <https://github.com/connectomicslab/connectomemapper3/pull/75>`_)
+
+* Code coverage improvement by saving in test-01 structural connectome files in MAT and GRAPHML format
+
+* Code coverage improvement by saving in test-07 functional connectome files in GRAPHML format
+
+* Update the list of outputs for all tests
 
 Please check the `main pull request 74 page <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ for more details.
 
