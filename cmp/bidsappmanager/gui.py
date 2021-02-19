@@ -1463,21 +1463,27 @@ class CMP_BIDSAppWindow(HasTraits):
                     "    INFO: Add a new computing environment (container image) to the datalad dataset!")
 
             if add_container:
-
+                # Define the docker run command executed by Datalad.
+                # It makes the assumption that the license.txt and the configuration files
+                # are located in the code/ directory.
                 docker_cmd = ['docker', 'run', '--rm', '-t',
-                              '-v', '{}:/bids_dir'.format(self.bids_root),
-                              '-v', '{}:/output_dir'.format(self.output_dir),
-                              '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
-                              '-v', '{}:/code/ref_anatomical_config.json'.format(self.anat_config),
+                              '-v',
+                              '"$(pwd)":/bids_dir',
+                              '-v',
+                              '"$(pwd)"/derivatives:/output_dir',
+                              '-v',
+                              '"$(pwd)"/code/license.txt:/bids_dir/code/license.txt',
+                              '-v',
+                              f'"$(pwd)"/code/{os.path.basename(self.anat_config)}:/code/ref_anatomical_config.json',
                               ]
 
                 if self.run_dmri_pipeline:
                     docker_cmd.append('-v')
-                    docker_cmd.append('{}:/code/ref_diffusion_config.json'.format(self.dmri_config))
+                    docker_cmd.append(f'"$(pwd)"/code/{os.path.basename(self.dmri_config)}:/code/ref_diffusion_config.json')
 
                 if self.run_fmri_pipeline:
                     docker_cmd.append('-v')
-                    docker_cmd.append('{}:/code/ref_fMRI_config.json'.format(self.fmri_config))
+                    docker_cmd.append(f'"$(pwd)"/code/{os.path.basename(self.fmri_config)}:/code/ref_fMRI_config.json')
 
                 docker_cmd.append('-u')
                 docker_cmd.append('{}:{}'.format(os.geteuid(), os.getegid()))
@@ -1485,6 +1491,7 @@ class CMP_BIDSAppWindow(HasTraits):
                 docker_cmd.append(f'sebastientourbier/connectomemapper-bidsapp:{self.bidsapp_tag}')
                 docker_cmd.append('{cmd}')
 
+                # Define and run the command to add the container image to datalad
                 version_tag = "-".join(self.bidsapp_tag.split("."))
                 cmd = ['datalad',
                        'containers-add',
