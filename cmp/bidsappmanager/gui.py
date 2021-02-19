@@ -1606,7 +1606,7 @@ class CMP_BIDSAppWindow(HasTraits):
 
         if self.datalad_is_available and self.data_provenance_tracking:
             # Clean remaining cache files generated in tmp/ of the docker image
-            project.clean_cache(self.bids_root)
+            # project.clean_cache(self.bids_root)
 
             cmd = 'datalad save -d . -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{}'.format(
                 self.bidsapp_tag, time.strftime("%Y%m%d-%H%M%S"))
