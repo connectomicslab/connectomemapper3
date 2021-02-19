@@ -42,7 +42,7 @@ Copy BIDS dataset to server
     --exclude '.git' \
     --exclude '.gitattributes' \
     /path/to/ds-example/* \
-    <SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/Data/ds-example
+    <SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/data/ds-example
 
 where:
 
@@ -68,7 +68,7 @@ Creation of Datalad dataset
 
 Go to the source dataset directory::
 
-    cd /archive/Data/ds-example
+    cd /archive/data/ds-example
 
 Initialize the Datalad dataset::
 
@@ -102,10 +102,10 @@ Processing using the Connectome Mapper BIDS App on Alice's workstation
 Dataset installation
 ~~~~~~~~~~~~~~~~~~~~
 
-Install the remove datalad dataset `ds-example` in `/home/alice/Data/ds-example``::
+Install the remove datalad dataset `ds-example` in `/home/alice/data/ds-example``::
 
-    datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/Data/ds-example \
-    /home/alice/Data/ds-example
+    datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/data/ds-example \
+    /home/alice/data/ds-example
 
 
 where:
@@ -114,7 +114,7 @@ where:
 
 Go to into the datalad dataset clone directory::
 
-    cd /home/alice/Data/ds-example
+    cd /home/alice/data/ds-example
 
 Get T1w and Diffusion images to be processed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -198,7 +198,7 @@ Update the remote datalad dataset with data derivatives::
 
 
 .. note:: `--to origin` specifies the `origin` dataset sibling i.e.
-    ``ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/Data/ds-example``
+    ``ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/data/ds-example``
     from which it was cloned. An alternative sibling could be created with the help of
     `datalad create-sibling <http://docs.datalad.org/en/stable/generated/man/datalad-create-sibling.html>`_
     command.
@@ -217,14 +217,14 @@ Local collaboration with Bob for Electrical Source Imaging
 Processed dataset installation on Bob's workstation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Install the remove datalad dataset `ds-example` in `/home/bob/Data/ds-example``::
+Install the remove datalad dataset `ds-example` in `/home/bob/data/ds-example``::
 
-    datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/Data/ds-example  \
-    /home/bob/Data/ds-example
+    datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/data/ds-example  \
+    /home/bob/data/ds-example
 
 Go to datalad dataset clone directory::
 
-    cd /home/bob/Data/ds-example
+    cd /home/bob/data/ds-example
 
 Get connectome mapper output files (Brain Segmentation and Multi-scale Parcellation) used by Bob in his analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -252,7 +252,7 @@ Update derivatives
 
 Update derivatives with data produced by Cartool::
 
-    cd /home/bob/Data/ds-example
+    cd /home/bob/data/ds-example
     mkdir derivatives/cartool
     cp [...]
 
