@@ -9,7 +9,7 @@ and processed data as well as for the tracking of data provenance
 (i.e. the recording on how data was processed). This page was
 created with the intention to share with the user how we adopted
 datalad to manage and process datasets with Connectome Mapper 3
-in in our lab, following the our best the YODA principles.
+in in our lab, following the YODA principles to our best.
 
 You may ask "What are the YODA principles?". They are basic principles
 behind creating, sharing, and publishing reproducible, understandable,
