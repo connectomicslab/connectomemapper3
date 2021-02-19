@@ -14,7 +14,16 @@ For more details and tutorials on Datalad, please check the recent `Datalad Hand
 Install Datalad and all dependencies
 ------------------------------------
 
-::
+On Ubuntu/Debian install `git-annex` the proper dependencies::
+
+    sudo apt-get install git-annex liblzma-dev
+
+.. note:: If you are using Mac OS, start from `installing the Homebrew <https://brew.sh/>`_,
+    then install other dependencies::
+
+        brew install git-annex xz
+
+Then install Datalad and its extensions::
 
     sudo apt-get install git-annex liblzma-dev
     pip install datalad[all]==0.14.0
