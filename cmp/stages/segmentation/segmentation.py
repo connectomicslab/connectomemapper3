@@ -76,10 +76,6 @@ class SegmentationConfig(HasTraits):
         Freesurfer subjects directory path
         usually ``/output_dir/freesurfer``
 
-    freesurfer_subject_id_trait : traits.List
-        Freesurfer subject (being processed) directory path
-        usually ``/output_dir/freesurfer/sub-XX(_ses-YY)``
-
     freesurfer_subject_id : traits.Str
         Freesurfer subject (being processed) ID in the form
         ``sub-XX(_ses-YY)``
@@ -119,7 +115,6 @@ class SegmentationConfig(HasTraits):
     brain_mask_path = File
     use_existing_freesurfer_data = Bool(False)
     freesurfer_subjects_dir = Str
-    freesurfer_subject_id_trait = List
     freesurfer_subject_id = Str
     freesurfer_args = Str
 
@@ -127,17 +122,10 @@ class SegmentationConfig(HasTraits):
 
     number_of_threads = Int(1, desc="Number of threads used in the stage by Freesurfer and ANTs")
 
-    def _freesurfer_subjects_dir_changed(self, old, new):
-        """"Update ``freesurfer_subject_id_trait`` class attribute if ``freesurfer_subjects_dir`` changes."""
-        dirnames = [name for name in os.listdir(self.freesurfer_subjects_dir) if
-                    os.path.isdir(os.path.join(self.freesurfer_subjects_dir, name))]
-        self.freesurfer_subject_id_trait = dirnames
-
     def _use_existing_freesurfer_data_changed(self, new):
         """"Update ``custom_segmentation`` if ``use_existing_freesurfer_data`` changes."""
         if new is True:
             self.custom_segmentation = False
-
 
 def extract_base_directory(file):
     """Extract Recon-all base directory from a file.
