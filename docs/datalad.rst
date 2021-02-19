@@ -190,7 +190,7 @@ where:
   is assumed to be the BIDS root directory and retrieve with `"$(pwd)"/input` and the
   output directory is inside the `derivatives/` folder.
 
-.. important:: The name of the container-name registered to Datalad cannot have `.`
+.. important:: The name of the container-name registered to Datalad cannot have dot
     as character so that a `<VERSION_TAG>` of `v3.X.Y` would need to be rewritten as `v3-X-Y`
 
 Copy existing reference pipeline configuration files to `code` folder::
