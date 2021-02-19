@@ -4,9 +4,22 @@
 Adopting Datalad for collaboration
 ===================================================
 
-Datalad is a powerful tool for the versioning and sharing of raw and processed data as well as for the tracking of data provenance (i.e. the recording on how data was processed). This page was created with the intention to share with the user how we adopted the use of datalad datasets with the connectome mapper in in our lab at the time of creation of this document (2019 Jan 8). For more details and tutorials on Datalad,please check the recent `Datalad Handbook <http://handbook.datalad.org/en/latest/>`_
+Datalad is a powerful tool for the versioning and sharing of raw and processed data as well as for the tracking of data provenance (i.e. the recording on how data was processed).
+This page was created with the intention to share with the user how we adopted the use of datalad datasets with the connectome mapper in in our lab.
+
+For more details and tutorials on Datalad, please check the recent `Datalad Handbook <http://handbook.datalad.org/en/latest/>`_.
 
 .. note:: This was tested on ``Ubuntu 16.04`` with ``Datalad 0.14.0``, its extensions ``datalad-container 1.1.2``, ``datalad-neuroimaging 0.3.1``, and ``git-annex 8.20210127``.
+
+Install Datalad and all dependencies
+------------------------------------
+
+::
+
+    sudo apt-get install git-annex liblzma-dev
+    pip install datalad[all]==0.14.0
+    pip install datalad-container==1.1.2
+    pip install datalad-neuroimaging==0.3.1
 
 Copy BIDS dataset to server
 ------------------------------------
@@ -20,7 +33,7 @@ Copy BIDS dataset to server
     --exclude '.git' \
     --exclude '.gitattributes' \
     /path/to/ds-example/* \
-    <SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/home/<SERVER_USERNAME>/Data/ds-example
+    <SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/Data/ds-example
 
 where:
 
@@ -29,9 +42,9 @@ where:
     * `-e` specifies the remote shell to use (ssh).
     * `-a` indicates archive mode.
     * `-z` enables file data compression during the transfer.
-    * `--exclude DIR_NAME` exclude the specified DIR_NAME from the copy.
+    * `--exclude DIR_NAME` exclude the specified `DIR_NAME` from the copy.
 
-Datalad setup and dataset creation on Server (accessible via ssh)
+Remote datalad dataset creation on Server (accessible via ssh)
 -----------------------------------------------------------------
 
 Connect to server
@@ -41,31 +54,19 @@ Connect to server
 
     ssh <SERVER_USERNAME>@<SERVER_IP_ADDRESS>
 
-Install git-annex and liblzma-dev (datalad dependencies), Datalad and its extensions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Creation of Datalad dataset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-::
+Go to the source dataset directory, create a Datalad dataset and track all files with Datalad::
 
-    sudo apt-get install git-annex liblzma-dev
-    pip install datalad[all]==0.14.0
-    pip install datalad-container==1.1.2
-    pip install datalad-neuroimaging==0.3.1
-
-Go to source dataset directory, create a Datalad dataset and save all
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-::
-
-    cd /home/<SERVER_USERNAME>/Data/ds-example
+    cd /archive/Data/ds-example
     datalad create -f -c text2git -D "Original test dataset on lab server" -d .
     datalad save -m "Source (Origin) BIDS dataset" --version-tag origin
 
-Report on the state of dataset content
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-::
+Report on the state of dataset content::
 
     datalad status -r
+    git log
 
 Processing using the Connectome Mapper BIDS App on Alice's workstation
 ----------------------------------------------------------------------
@@ -75,7 +76,7 @@ Dataset installation
 
 ::
 
-    datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/home/alice/Data/ds-example \
+    datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/Data/ds-example \
     /home/alice/Data/ds-example
     cd /home/alice/Data/ds-example
 
@@ -101,8 +102,8 @@ Add all content in the code/ directory directly to git::
 
     datalad add --to-git code
 
-Add the container image of the connectome mapper to the dataset
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Add Connectome Mapper's container image to the dataset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -115,6 +116,14 @@ Add the container image of the connectome mapper to the dataset
         -v "$(pwd)"/derivatives:/output_dir \
         -u "$(id -u)":"$(id -g)" \
         sebastientourbier/connectomemapper-bidsapp:<VERSION_TAG> {cmd}"
+
+where:
+* `--call-fmt` specifies a custom docker run command where the current directory
+  is assumed to be the BIDS root directory and retrieve with `"$(pwd)"` and the
+  output directory is inside the `derivatives/` folder.
+
+.. important:: The name of the container-name registered to Datalad cannot have `.`
+    as character so that a `<VERSION_TAG>` of `v3.X.Y` would need to be rewritten as `v3-X-Y`
 
 Save the state of the dataset prior to analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -131,12 +140,12 @@ Run Connectome Mapper on all subjects
 ::
 
     datalad containers-run --container-name connectomemapper-bidsapp-<VERSION_TAG> \
-    --input code/ref_anatomical_config.ini \
-    --input code/ref_fMRI_config.ini \
+    --input code/ref_anatomical_config.json \
+    --input code/ref_diffusion_config.json \
     --output derivatives \
     /bids_dir /output_dir participant \
-    --anat_pipeline_config '{inputs[0]}' \
-    --dwi_pipeline_config '{inputs[1]}'
+    --anat_pipeline_config '/bids_dir/{inputs[0]}' \
+    --dwi_pipeline_config '/bids_dir/{inputs[1]}'
 
 Save the state
 ~~~~~~~~~~~~~~
@@ -147,17 +156,22 @@ Save the state
     workstation processed by connectomemapper-bidsapp:<VERSION_TAG>, {Date/Time}" \
     --version-tag processed-<date>-<time>
 
-Report on the state of dataset content
+Report on the state of dataset content::
+
+    datalad status -r
+    git log
+
+Update the remote datalad dataset
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
-    datalad status -r
+    datalad push -d . --to origin
 
-With DataLad with don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Uninstall all files accessible from the remote
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
+With DataLad we don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
 Let’s uninstall them – checking the size on disk before and after::
 
     datalad uninstall sub-*/*
@@ -170,7 +184,7 @@ Processed dataset installation on Bob's workstation
 
 ::
 
-    datalad install -s (ssh://)<USERNAME>@<ALICE_IP_ADDRESS>:/home/alice/Data/ds-example  \
+    datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/Data/ds-example  \
     /home/bob/Data/ds-example
 
     cd /home/bob/Data/ds-example
@@ -187,9 +201,12 @@ Get connectome mapper output files (Brain Segmentation and Multi-scale Parcellat
 Write datalad get commands to
 get\_required\_files\_for\_analysis\_by\_bob.sh for reproducibility::
 
-    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_mask.nii.gz" > code/get_required_files_for_analysis_by_bob.sh
-    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_class-*_dseg.nii.gz" >> code/get_required_files_for_analysis_by_bob.sh
-    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_scale*_atlas.nii.gz" >> code/get_required_files_for_analysis_by_bob.sh
+    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_mask.nii.gz" \
+    > code/get_required_files_for_analysis_by_bob.sh
+    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_class-*_dseg.nii.gz" \
+    >> code/get_required_files_for_analysis_by_bob.sh
+    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_scale*_atlas.nii.gz" \
+    >> code/get_required_files_for_analysis_by_bob.sh
 
 Add all content in the code/ directory directly to git::
 
@@ -213,16 +230,15 @@ Save the state
     workstation processed by cartool:<CARTOOL_VERSION>, {Date/Time}" \
     --version-tag processed-<date>-<time>
 
-Report on the state of dataset content
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-::
+Report on the state of dataset content::
 
     datalad status -r
+    git log
 
-With DataLad with don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Uninstall all files accessible from the remote
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+With DataLad we don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
 Let’s uninstall them – checking the size on disk before and after::
 
     datalad uninstall sub-*/*
@@ -230,4 +246,5 @@ Let’s uninstall them – checking the size on disk before and after::
     datalad uninstall derivatives/freesurfer/*
     datalad uninstall derivatives/nipype/*
 
--  Created by Sebastien Tourbier - Last modification: 2021 Feb 18
+-  Created by Sebastien Tourbier (2019 Jan 08)
+-  Last modification: 2021 Feb 18
