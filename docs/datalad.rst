@@ -46,20 +46,20 @@ Copy BIDS dataset to server
 
 where:
 
-    * `-P` is used to show progress during transfer.
-    * `-v` increases verbosity.
-    * `-e` specifies the remote shell to use (ssh).
-    * `-a` indicates archive mode.
-    * `-z` enables file data compression during the transfer.
-    * `--exclude DIR_NAME` exclude the specified `DIR_NAME` from the copy.
+    * `-P` is used to show progress during transfer
+    * `-v` increases verbosity
+    * `-e` specifies the remote shell to use (ssh)
+    * `-a` indicates archive mode
+    * `-z` enables file data compression during the transfer
+    * `--exclude DIR_NAME` exclude the specified `DIR_NAME` from the copy
 
 Remote datalad dataset creation on Server
 -----------------------------------------
 
-Connect to server accessible via ssh
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Connect to Server
+~~~~~~~~~~~~~~~~~
 
-::
+To connect with SSH::
 
     ssh <SERVER_USERNAME>@<SERVER_IP_ADDRESS>
 
@@ -88,7 +88,7 @@ Track all files contained in the dataset with Datalad::
 where:
 
     * `-m MESSAGE` is the description of the state or
-      the changes made to the dataset.
+      the changes made to the dataset
     * `--version-tag` tags the state of the Dataset
 
 Report on the state of dataset content::
@@ -100,7 +100,7 @@ Processing using the Connectome Mapper BIDS App on Alice's workstation
 ----------------------------------------------------------------------
 
 Dataset installation
-~~~~~~~~~~~~~~~~~~~~`
+~~~~~~~~~~~~~~~~~~~~
 
 Install the remove datalad dataset `ds-example` in `/home/alice/Data/ds-example``::
 
@@ -192,9 +192,16 @@ Report on the state of dataset content::
 Update the remote datalad dataset
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-::
+Update the remote datalad dataset with data derivatives::
 
     datalad push -d . --to origin
+
+
+.. note:: `--to origin` specifies the `origin` dataset sibling i.e.
+    ``ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/Data/ds-example``
+    from which it was cloned. An alternative sibling could be created with the help of
+    `datalad create-sibling <http://docs.datalad.org/en/stable/generated/man/datalad-create-sibling.html>`_
+    command.
 
 Uninstall all files accessible from the remote
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -215,7 +222,8 @@ Install the remove datalad dataset `ds-example` in `/home/bob/Data/ds-example``:
     datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/Data/ds-example  \
     /home/bob/Data/ds-example
 
-Go to datalad dataset clone directory
+Go to datalad dataset clone directory::
+
     cd /home/bob/Data/ds-example
 
 Get connectome mapper output files (Brain Segmentation and Multi-scale Parcellation) used by Bob in his analysis
@@ -246,7 +254,7 @@ Update derivatives with data produced by Cartool::
 
     cd /home/bob/Data/ds-example
     mkdir derivatives/cartool
-    [...]
+    cp [...]
 
 Save the state::
 
