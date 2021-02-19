@@ -119,7 +119,7 @@ Go to into the datalad dataset clone directory::
 Get T1w and Diffusion images to be processed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For reproducibility, write datalad get commands to get\_required\_files\_for\_analysis.sh::
+For reproducibility, write datalad get commands to `get_required_files_for_analysis.sh`::
 
     mkdir code
     echo "datalad get -J 4 sub-*/ses-*/anat/sub-*_T1w.nii.gz" > code/get_required_files_for_analysis.sh
@@ -229,8 +229,7 @@ Go to datalad dataset clone directory::
 Get connectome mapper output files (Brain Segmentation and Multi-scale Parcellation) used by Bob in his analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For reproducibility, write datalad get commands to
-get\_required\_files\_for\_analysis\_by\_bob.sh for reproducibility::
+For reproducibility, write datalad get commands to `get_required_files_for_analysis_by_bob.sh`::
 
     echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_mask.nii.gz" \
     > code/get_required_files_for_analysis_by_bob.sh
