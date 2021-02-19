@@ -1142,16 +1142,16 @@ class CMP_BIDSAppWindow(HasTraits):
                '-v', '{}:/bids_dir'.format(self.bids_root),
                '-v', '{}:/output_dir'.format(self.output_dir),
                '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
-               '-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config),
+               '-v', '{}:/code/ref_anatomical_config.json'.format(self.anat_config),
                ]
 
         if self.run_dmri_pipeline:
             cmd.append('-v')
-            cmd.append('{}:/code/ref_diffusion_config.ini'.format(self.dmri_config))
+            cmd.append('{}:/code/ref_diffusion_config.json'.format(self.dmri_config))
 
         if self.run_fmri_pipeline:
             cmd.append('-v')
-            cmd.append('{}:/code/ref_fMRI_config.ini'.format(self.fmri_config))
+            cmd.append('{}:/code/ref_fMRI_config.json'.format(self.fmri_config))
 
         cmd.append('-u')
         cmd.append('{}:{}'.format(os.geteuid(), os.getegid()))
@@ -1167,15 +1167,15 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('{}'.format(label))
 
         cmd.append('--anat_pipeline_config')
-        cmd.append('/code/ref_anatomical_config.ini')
+        cmd.append('/code/ref_anatomical_config.json')
 
         if self.run_dmri_pipeline:
             cmd.append('--dwi_pipeline_config')
-            cmd.append('/code/ref_diffusion_config.ini')
+            cmd.append('/code/ref_diffusion_config.json')
 
         if self.run_fmri_pipeline:
             cmd.append('--func_pipeline_config')
-            cmd.append('/code/ref_fMRI_config.ini')
+            cmd.append('/code/ref_fMRI_config.json')
 
         cmd.append('--fs_license')
         cmd.append('{}'.format('/bids_dir/code/license.txt'))
@@ -1468,16 +1468,16 @@ class CMP_BIDSAppWindow(HasTraits):
                               '-v', '{}:/bids_dir'.format(self.bids_root),
                               '-v', '{}:/output_dir'.format(self.output_dir),
                               '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
-                              '-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config),
+                              '-v', '{}:/code/ref_anatomical_config.json'.format(self.anat_config),
                               ]
 
                 if self.run_dmri_pipeline:
                     docker_cmd.append('-v')
-                    docker_cmd.append('{}:/code/ref_diffusion_config.ini'.format(self.dmri_config))
+                    docker_cmd.append('{}:/code/ref_diffusion_config.json'.format(self.dmri_config))
 
                 if self.run_fmri_pipeline:
                     docker_cmd.append('-v')
-                    docker_cmd.append('{}:/code/ref_fMRI_config.ini'.format(self.fmri_config))
+                    docker_cmd.append('{}:/code/ref_fMRI_config.json'.format(self.fmri_config))
 
                 docker_cmd.append('-u')
                 docker_cmd.append('{}:{}'.format(os.geteuid(), os.getegid()))
@@ -2009,7 +2009,7 @@ class CMP_InspectorWindow(HasTraits):
                                                                       self.project_info.subject),
                                                                   '{}'.format(
                                                                       self.project_info.subject_session),
-                                                                  '{}_{}_anatomical_config.ini'.format(
+                                                                  '{}_{}_anatomical_config.json'.format(
                                                                       self.project_info.subject,
                                                                       self.project_info.subject_session))
                 if os.access(self.project_info.anat_config_file, os.F_OK):
@@ -2025,7 +2025,7 @@ class CMP_InspectorWindow(HasTraits):
                                                                           self.project_info.subject),
                                                                       '{}'.format(
                                                                           self.project_info.subject_session),
-                                                                      '{}_{}_diffusion_config.ini'.format(
+                                                                      '{}_{}_diffusion_config.json'.format(
                                                                           self.project_info.subject,
                                                                           self.project_info.subject_session))
                     if os.access(self.project_info.dmri_config_file, os.F_OK):
@@ -2044,7 +2044,7 @@ class CMP_InspectorWindow(HasTraits):
                                                                           self.project_info.subject),
                                                                       '{}'.format(
                                                                           self.project_info.subject_session),
-                                                                      '{}_{}_fMRI_config.ini'.format(
+                                                                      '{}_{}_fMRI_config.json'.format(
                                                                           self.project_info.subject,
                                                                           self.project_info.subject_session))
                     if os.access(self.project_info.fmri_config_file, os.F_OK):
@@ -2076,7 +2076,7 @@ class CMP_InspectorWindow(HasTraits):
                 self.project_info.anat_config_file = os.path.join(self.project_info.base_directory, 'derivatives',
                                                                   'cmp', '{}'.format(
                                                                       self.project_info.subject),
-                                                                  '{}_anatomical_config.ini'.format(
+                                                                  '{}_anatomical_config.json'.format(
                                                                       self.project_info.subject))
                 if os.access(self.project_info.anat_config_file, os.F_OK):
                     self.anat_pipeline = project.init_anat_project(
@@ -2088,7 +2088,7 @@ class CMP_InspectorWindow(HasTraits):
                     self.project_info.dmri_config_file = os.path.join(self.project_info.base_directory, 'derivatives',
                                                                       'cmp', '{}'.format(
                                                                           self.project_info.subject),
-                                                                      '{}_diffusion_config.ini'.format(
+                                                                      '{}_diffusion_config.json'.format(
                                                                           self.project_info.subject))
                     if os.access(self.project_info.dmri_config_file, os.F_OK):
                         dmri_valid_inputs, self.dmri_pipeline = project.init_dmri_project(self.project_info,
@@ -2103,7 +2103,7 @@ class CMP_InspectorWindow(HasTraits):
                     self.project_info.fmri_config_file = os.path.join(self.project_info.base_directory, 'derivatives',
                                                                       'cmp', '{}'.format(
                                                                           self.project_info.subject),
-                                                                      '{}_fMRI_config.ini'.format(
+                                                                      '{}_fMRI_config.json'.format(
                                                                           self.project_info.subject))
                     if os.access(self.project_info.fmri_config_file, os.F_OK):
                         fmri_valid_inputs, self.fmri_pipeline = project.init_fmri_project(self.project_info,
@@ -2302,11 +2302,11 @@ class CMP_MainWindow(HasTraits):
         subjects = bids_layout.get_subjects()
 
         anat_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_anatomical_config.ini')
+            self.project_info.base_directory, 'code/', 'ref_anatomical_config.json')
         dmri_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_diffusion_config.ini')
+            self.project_info.base_directory, 'code/', 'ref_diffusion_config.json')
         fmri_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_fMRI_config.ini')
+            self.project_info.base_directory, 'code/', 'ref_fMRI_config.json')
 
         self.bidsapp_ui = CMP_BIDSAppWindow(project_info=self.project_info,
                                             bids_root=self.project_info.base_directory,
@@ -2382,11 +2382,11 @@ class CMP_MainWindow(HasTraits):
         subjects = bids_layout.get_subjects()
 
         anat_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_anatomical_config.ini')
+            self.project_info.base_directory, 'code/', 'ref_anatomical_config.json')
         dmri_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_diffusion_config.ini')
+            self.project_info.base_directory, 'code/', 'ref_diffusion_config.json')
         fmri_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_fMRI_config.ini')
+            self.project_info.base_directory, 'code/', 'ref_fMRI_config.json')
 
         self.bidsapp = CMP_BIDSAppWindow(project_info=self.project_info,
                                          bids_root=self.project_info.base_directory,
