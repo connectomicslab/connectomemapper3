@@ -11,6 +11,16 @@ Date: February XX, 2021
 This version corresponds to the fourth release candidate of Connectome Mapper 3.
 In particular, it integrates `Pull Request #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ which includes:
 
+*Update*
+
+* Update version of datalad and dependencies:
+
+  * `datalad[full]==0.13.0` to ``datalad[full]==0.14.0``.
+  * `datalad-container==0.3.1` to ``datalad-container==1.1.2``.
+  * `datalad_neuroimaging==0.2.0` to ``datalad-neuroimaging==0.3.1``.
+  * `git-annex=8.20200617` to ``git-annex=8.20210127``.
+  * `datalad-revolution` was removed.
+
 *Major changes*
 
 * Configuration files adopt now the `JSON` format. This have involved a major refactoring
@@ -18,28 +28,41 @@ In particular, it integrates `Pull Request #74 <https://github.com/connectomicsl
   (See `full diff on GitHub <https://github.com/connectomicslab/connectomemapper3/pull/74/files#diff-00f63c128c86731f18ae0c51efca7f4fb097970c53b6016754efd91f2af581ad>`_).
   Configuration files in the old `INI` format can be converted automatically
   with the help of the two new methods `check_configuration_format()` and `convert_config_ini_2_json` to detect if
-  configuration files are in the `INI` format and to make the conversion. (`PR #76 <https://github.com/connectomicslab/connectomemapper3/pull/76>`_)
+  configuration files are in the `INI` format and to make the conversion.
+  (`PR #76 <https://github.com/connectomicslab/connectomemapper3/pull/76>`_)
+
+* Update and review code in `cmp/bidsappmanager/gui.py`  for data versioning and provenance tracking with Datalad.
+  (`PR #77 <https://github.com/connectomicslab/connectomemapper3/pull/77>`_)
 
 *Documentation*
 
-* Review usage and add a note regarding the adoption of the new `JSON` format for configuration files
+* Review usage and add a note regarding the adoption of the new `JSON` format for configuration files.
+  (`PR #76 <https://github.com/connectomicslab/connectomemapper3/pull/76>`_)
+
+* Update tutorial on using CMP3 and Datalad for collaboration.
+  (`PR #77 <https://github.com/connectomicslab/connectomemapper3/pull/77>`_)
 
 *Bug fixes*
 
 * Correct attributes related to the diffusion imaging model type `multishell`.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
 
 * Review code in `cmtklib/connectome.py` for saving functional connectome files in GRAPHML format.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
 
 *Software development life cycle*
 
-* Code coverage improvement by calling the methods `check_stages_execution()` and `fill_stages_outputs()`
-  on each pipeline when executed with coverage (`PR #75 <https://github.com/connectomicslab/connectomemapper3/pull/75>`_)
+* Improve code coverage by calling the methods `check_stages_execution()` and `fill_stages_outputs()`
+  on each pipeline when executed with coverage (`PR #75 <https://github.com/connectomicslab/connectomemapper3/pull/75>`_).
 
-* Code coverage improvement by saving in test-01 structural connectome files in MAT and GRAPHML format
+* Improve code coverage by saving in test-01 structural connectome files in MAT and GRAPHML format.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
 
-* Code coverage improvement by saving in test-07 functional connectome files in GRAPHML format
+* Improve code coverage by saving in test-07 functional connectome files in GRAPHML format.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
 
-* Update the list of outputs for all tests
+* Update the list of outputs for all tests.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
 
 Please check the `main pull request 74 page <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ for more details.
 
