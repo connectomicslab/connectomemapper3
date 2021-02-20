@@ -15,6 +15,8 @@ If you prefer, you can still build the Singularity image on your side using one 
 
 A list of useful singularity command can be found in :ref:`Useful singularity commands <singularity-cmds>`. For more documentation about Singularity, please check the `official documentation website <https://sylabs.io/docs/>`_.
 
+**Happy Large-Scale Connectome Mapping!**
+
 
 .. _run_singularity:
 
@@ -22,16 +24,19 @@ A list of useful singularity command can be found in :ref:`Useful singularity co
 Running the singularity image
 ------------------------------------
 
-The following example shows how to call from the terminal the Singularity image of the CMP3 BIDS App to perform both anatomical and diffusion pipelines for `sub-01`, `sub-02` and `sub-03` of a BIDS dataset whose root directory is located at ``${localDir}``:
+The following example shows how to call from the
+terminal the Singularity image of the CMP3 BIDS App
+to perform both anatomical and diffusion pipelines for
+`sub-01`, `sub-02` and `sub-03` of a BIDS dataset whose
+root directory is located at ``${localDir}``::
 
-.. parsed-literal::
-	$ singularity run --containall \\
-            --bind ${localDir}:/bids_dir --bind ${localDir}/derivatives:/output_dir \\
-	        library://connectomicslab/default/connectomemapper-bidsapp:latest \\
-	        /bids_dir /output_dir participant --participant_label 01 02 03 \\
-	        --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\
-	        --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\
-	        --fs_license /bids_dir/code/license.txt \\
+    $ singularity run --containall \
+            --bind ${localDir}:/bids_dir --bind ${localDir}/derivatives:/output_dir \
+	        library://connectomicslab/default/connectomemapper-bidsapp:latest \
+	        /bids_dir /output_dir participant --participant_label 01 02 03 \
+	        --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \
+	        --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \
+	        --fs_license /bids_dir/code/license.txt \
 	        --number_of_participants_processed_in_parallel 3
 
 .. note::
@@ -99,6 +104,4 @@ Useful singularity commands
 		.. parsed-literal::
 			$ singularity cache clean
 
-
 Created by Sebastien Tourbier - 2020 Mar 04 - Latest update: 2021 Jan 04
-
