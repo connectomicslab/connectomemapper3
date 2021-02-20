@@ -8,7 +8,7 @@ Version 3.0.0-RC4
 
 Date: February XX, 2021
 
-This version corresponds to the fourth release candidate of Connectome Mapper 3.
+This version corresponds to the fourth release candidate of Connectome Mapper 3 (CMP3).
 In particular, it integrates `Pull Request #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ which includes:
 
 *Update*
@@ -23,11 +23,13 @@ In particular, it integrates `Pull Request #74 <https://github.com/connectomicsl
 
 *Major changes*
 
-* Configuration files adopt now the `JSON` format. This have involved a major refactoring
-  of the `cmtklib.config` module with the addition and replacement of a number of new methods
-  (See `full diff on GitHub <https://github.com/connectomicslab/connectomemapper3/pull/74/files#diff-00f63c128c86731f18ae0c51efca7f4fb097970c53b6016754efd91f2af581ad>`_).
+.. important:: CMP3 pipeline configuration files adopt the `JSON` format.
+
+* Major refactoring of the `cmtklib.config` module with the addition and replacement of a number of new methods
+  to handle `JSON` configuration files.
+  (See `full diff on GitHub <https://github.com/connectomicslab/connectomemapper3/pull/74/files#diff-00f63c128c86731f18ae0c51efca7f4fb097970c53b6016754efd91f2af581ad>`_)
   Configuration files in the old `INI` format can be converted automatically
-  with the help of the two new methods `check_configuration_format()` and `convert_config_ini_2_json` to detect if
+  with the help of the two new methods `check_configuration_format()` and `convert_config_ini_2_json()` to detect if
   configuration files are in the `INI` format and to make the conversion.
   (`PR #76 <https://github.com/connectomicslab/connectomemapper3/pull/76>`_)
 
