@@ -28,7 +28,7 @@ jobs:
       - run:
           name: "Test Install for main setup_cmp.py"
           command: |
-            python3 setup_cmp.py develop
+            sudo python3 setup_cmp.py develop
       - run:
           name: "Smoke Test Install for main setup_cmp.py"
           command: |
