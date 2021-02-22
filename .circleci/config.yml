@@ -39,6 +39,10 @@ jobs:
             python --version
             pip3 install cmp3
       - run:
+          name: "Smoke Test Install connectomemapper3"
+          command: |
+            connectomemapper3 -v
+      - run:
           name: "Smoke Test Uninstall for main setup.py"
           command: |
             pip3 uninstall -y cmp3
