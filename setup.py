@@ -28,7 +28,9 @@ directory = os.path.dirname(os.path.abspath(__file__))
 if os.path.exists('MANIFEST'):
     os.remove('MANIFEST')
 
-packages = ["cmp", "cmp.stages",
+packages = ["cmp",
+            "cmp.cli",
+            "cmp.stages",
             "cmp.stages.preprocessing",
             "cmp.stages.segmentation",
             "cmp.stages.parcellation",
