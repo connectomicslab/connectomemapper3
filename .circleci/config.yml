@@ -19,7 +19,7 @@ jobs:
           name: "Test Install Twine and PyBIDS"
           command: |
             python --version
-            pip3 install twine pybids==0.10.2
+            pip3 install twine
       - run:
           name: "Smoke Test Install Twine"
           command: |
