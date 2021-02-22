@@ -5,6 +5,7 @@ orbs:
   singularity: singularity/singularity@1.0.10
 
 jobs:
+
   test-python-install:
     parameters:
       version:
@@ -40,7 +41,7 @@ jobs:
       - run:
           name: "Smoke Test Uninstall for main setup.py"
           command: |
-            pip uninstall cmp3
+            pip3 uninstall cmp3
       - run:
           name: "Test Wheel Build for GUI setup_gui.py"
           command: |
@@ -54,35 +55,6 @@ jobs:
           command: |
             python --version
             pip3 install cmpbidsappmanager
-
-    deploy-pypi-release:
-      docker:
-        - image: circleci/python:3.7
-      steps:
-        - checkout
-        - run:
-            name: "Install dependencies"
-            command: |
-              python --version
-              pip3 install twine
-        - run:
-            name: "Verify git tag vs. version"
-            command: |
-              python3 setup_gui.py verify
-        - run:
-            name: "init .pypirc"
-            command: |
-              echo -e "[pypi]" >> ~/.pypirc
-              echo -e "username = $PYPI_USER" >> ~/.pypirc
-              echo -e "password = $PYPI_TOKEN" >> ~/.pypirc
-        - run:
-            name: "Create distribution wheel"
-            command: |
-              python3 setup_gui.py sdist bdist_wheel
-        - run:
-            name: "Upload to pypi"
-            command: |
-              twine upload dist/*
 
   build_docker:
     environment:
