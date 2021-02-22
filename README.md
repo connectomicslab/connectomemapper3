@@ -45,7 +45,7 @@ This BIDS App has the following command line arguments:
               [--fs_license FS_LICENSE] [--coverage] [--notrack] [-v]
               bids_dir output_dir {participant,group}
 
-        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-RC2
+        Entrypoint script of the BIDS-App Connectome Mapper version v3.0.0-RC3
 
         positional arguments:
           bids_dir              The directory with the input dataset formatted
@@ -85,8 +85,7 @@ This BIDS App has the following command line arguments:
                                 fMRI processing pipeline
           --number_of_threads NUMBER_OF_THREADS
                                 The number of OpenMP threads used for multi-threading
-                                by Freesurfer, FSL, MRtrix3, Dipy, AFNI (Set to
-                                [Number of available CPUs -1] by default).
+                                by Freesurfer (Set to [Number of available CPUs -1] by default).
           --number_of_participants_processed_in_parallel NUMBER_OF_PARTICIPANTS_PROCESSED_IN_PARALLEL
                                 The number of subjects to be processed in parallel
                                 (One by default).

@@ -223,7 +223,7 @@ class CSD(DipyDiffusionInterface):
     output_spec = CSDOutputSpec
 
     def _run_interface(self, runtime):
-        from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, auto_response
+        from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel, auto_response_ssst
         from dipy.data import get_sphere
         # import marshal as pickle
         import pickle as pickle
@@ -265,19 +265,23 @@ class CSD(DipyDiffusionInterface):
                 IFLOGGER.warn(('Estimated response is not prolate enough. '
                                'Ratio=%0.3f.') % ratio)
         else:
-            response, ratio, counts = auto_response(
-                gtab, data, fa_thr=0.5, return_number_of_voxels=True)
+            response, ratio = auto_response_ssst(gtab,
+                                                         data,
+                                                         roi_radii=10,
+                                                         fa_thr=0.5)
             IFLOGGER.info("response: ")
             IFLOGGER.info(response)
             IFLOGGER.info("ratio: %g" % ratio)
-            IFLOGGER.info("nbr_voxel_used: %g" % counts)
 
             if abs(ratio - 0.2) > 0.1:
                 IFLOGGER.warn(('Estimated response is not prolate enough. '
                                'Ratio=%0.3f.') % ratio)
 
         sphere = get_sphere('symmetric724')
-        csd_model = ConstrainedSphericalDeconvModel(gtab, response, sh_order=self.inputs.sh_order, reg_sphere=sphere,
+        csd_model = ConstrainedSphericalDeconvModel(gtab,
+                                                    response,
+                                                    sh_order=self.inputs.sh_order,
+                                                    reg_sphere=sphere,
                                                     lambda_=np.sqrt(1. / 2))
         # IFLOGGER.info('Fitting CSD model')
         # csd_fit = csd_model.fit(data, msk)
@@ -311,8 +315,7 @@ class CSD(DipyDiffusionInterface):
             # IFLOGGER.info(fods)
             # IFLOGGER.info(fods.shape)
             IFLOGGER.info('Save Spherical Harmonics image')
-            nib.Nifti1Image(csd_peaks.shm_coeffs, img.affine, None).to_filename(
-                self._gen_filename('shm_coeff'))
+            nib.Nifti1Image(csd_peaks.shm_coeff, img.affine, None).to_filename(self._gen_filename('shm_coeff'))
 
             # FIXME: dipy 1.1.0 and fury 0.5.1 with vtk 8.2.0 -> error:
             #
@@ -559,9 +562,11 @@ class TensorInformedEudXTractography(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.tracking import utils
         from dipy.direction import peaks_from_model
-        # from dipy.tracking.stopping_criterion import ThresholdStoppingCriterion, BinaryStoppingCriterion
-        from dipy.tracking.eudx import EuDX  # FIXME: see changes in Dipy 1.0
+        # from dipy.tracking.stopping_criterion import BinaryStoppingCriterion
+        from dipy.tracking.stopping_criterion import ThresholdStoppingCriterion
+        from dipy.tracking.local_tracking import LocalTracking
         from dipy.data import get_sphere
+        from dipy.io.stateful_tractogram import Space, StatefulTractogram
         from dipy.io.streamline import save_trk
         # import marshal as pickle
         import pickle as pickle
@@ -584,7 +589,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         trkhdr['voxel_order'] = 'ras'
         # trackvis_affine = utils.affine_for_trackvis(trkhdr['voxel_size'])
 
-        sphere = get_sphere('repulsion724')
+        sphere = get_sphere('symmetric724')
 
         def clipMask(mask):
             """This is a hack until we fix the behaviour of the tracking objects around the edge of the image."""
@@ -608,29 +613,33 @@ class TensorInformedEudXTractography(DipyBaseInterface):
 
         if isdefined(self.inputs.seed_mask[0]):
             IFLOGGER.info('Loading Seed Mask')
-            seedmsk = clipMask(nib.load(self.inputs.seed_mask[0]).get_data())
+            seedmsk = nib.load(self.inputs.seed_mask[0]).get_data()
+            IFLOGGER.info(f'  - Loaded Seed Mask Shape: {seedmsk.shape}')
+            # seedmsk = clipMask(nib.load(self.inputs.seed_mask[0]).get_data())
             # assert (seedmsk.shape == data.shape[:3])
             seedmsk[seedmsk > 0] = 1
             seedmsk[seedmsk < 1] = 0
             seedps = np.array(np.where(seedmsk == 1), dtype=np.float32).T
             vseeds = seedps.shape[0]
             nsperv = (seeds // vseeds) + 1
-            IFLOGGER.info(('Seed mask is provided (%d voxels inside '
-                           'mask), computing seeds (%d seeds/voxel).') %
-                          (vseeds, nsperv))
+            IFLOGGER.info(f'Seed mask is provided ({vseeds} voxels inside '
+                          f'mask), computing seeds ({nsperv} seeds/voxel).')
             if nsperv > 1:
-                IFLOGGER.info(('Needed %d seeds per selected voxel '
-                               '(total %d).') % (nsperv, vseeds))
+                IFLOGGER.info(f'Needed {nsperv} seeds per selected voxel (total {vseeds}).')
                 seedps = np.vstack(np.array([seedps] * nsperv))
                 voxcoord = seedps + np.random.uniform(-1, 1, size=seedps.shape)
                 nseeds = voxcoord.shape[0]
-                seeds = affine.dot(np.vstack((voxcoord.T,
-                                              np.ones((1, nseeds)))))[:3, :].T
+                seeds = affine.dot(np.vstack((voxcoord.T, np.ones((1, nseeds)))))[:3, :].T
 
                 if self.inputs.save_seeds:
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
 
-            # tseeds = utils.seeds_from_mask(seedmsk, density=2, affine=affine)
+            IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {nsperv})')
+
+            tseeds = utils.seeds_from_mask(seedmsk,
+                                           affine=affine,
+                                           density=[nsperv, nsperv, nsperv]  # FIXME: density should be customizable
+                                           )
 
         IFLOGGER.info('Loading and masking FA')
         img_fa = nib.load(self.inputs.in_fa)
@@ -643,7 +652,7 @@ class TensorInformedEudXTractography(DipyBaseInterface):
             self._gen_filename('fa_masked'))
 
         IFLOGGER.info('Building Tissue Classifier')
-        # classifier = ThresholdStoppingCriterion(fa,self.inputs.fa_thresh)
+        classifier = ThresholdStoppingCriterion(fa, self.inputs.fa_thresh)
         # classifier = BinaryStoppingCriterion(tmsk)
 
         IFLOGGER.info('Loading tensor model')
@@ -652,50 +661,26 @@ class TensorInformedEudXTractography(DipyBaseInterface):
         f.close()
 
         IFLOGGER.info('Generating peaks from tensor model')
-        pfm = peaks_from_model(model=tensor_model,
-                               data=data,
-                               sphere=sphere,
-                               relative_peak_threshold=.2,
-                               min_separation_angle=25,
-                               mask=tmsk,
-                               return_sh=True,
-                               # sh_basis_type=args.basis,
-                               sh_order=8,
-                               normalize_peaks=False,  # changed
-                               parallel=True)
+        dti_peaks = peaks_from_model(model=tensor_model,
+                                     data=data,
+                                     sphere=sphere,
+                                     relative_peak_threshold=.2,
+                                     min_separation_angle=25,
+                                     mask=tmsk,
+                                     normalize_peaks=False,  # changed
+                                     parallel=True)
 
         IFLOGGER.info('Performing tensor-informed EuDX tractography')
-
-        streamlines = EuDX(pfm.peak_values,
-                           pfm.peak_indices,
-                           seeds=seeds,
-                           affine=affine,
-                           odf_vertices=sphere.vertices,
-                           step_sz=self.inputs.step_size,
-                           a_low=self.inputs.fa_thresh)
+        streamlines = LocalTracking(dti_peaks,
+                                    classifier,
+                                    tseeds,
+                                    affine,
+                                    step_size=self.inputs.step_size,
+                                    max_cross=1)
 
         IFLOGGER.info('Saving tracks')
-        save_trk(self._gen_filename('tracked', ext='.trk'),
-                 streamlines, affine, fa.shape)
-
-        # IFLOGGER.info('Loading CSD model and fitting')
-        # f = gzip.open(self.inputs.in_model, 'rb')
-        # csd_model = pickle.load(f)
-        # f.close()
-
-        # csd_fit = csd_model.fit(data, mask=tmsk)
-
-        # if self.inputs.algo == 'deterministic':
-        #     dg = DeterministicMaximumDirectionGetter.from_shcoeff(csd_fit.shm_coeff, max_angle=self.inputs.max_angle, sphere=sphere)
-        # else:
-        #     dg = ProbabilisticDirectionGetter.from_shcoeff(csd_fit.shm_coeff, max_angle=self.inputs.max_angle, sphere=sphere)
-
-        # IFLOGGER.info(('Performing %s tractography') % (self.inputs.algo))
-
-        # streamlines = LocalTracking(dg, classifier, tseeds, affine, step_size=self.inputs.step_size)
-
-        # IFLOGGER.info('Saving tracks')
-        # save_trk(self._gen_filename('tracked', ext='.trk'), streamlines, affine, fa.shape)
+        sft = StatefulTractogram(streamlines, imref, Space.RASMM)
+        save_trk(sft, self._gen_filename('tracked', ext='.trk'))
 
         return runtime
 
@@ -725,44 +710,57 @@ class TensorInformedEudXTractography(DipyBaseInterface):
 
 
 class DirectionGetterTractographyInputSpec(BaseInterfaceInputSpec):
-    algo = traits.Enum(["deterministic", "probabilistic"], usedefault=True,
-                       desc=(
-                           'Use either deterministic maximum (default) or probabilistic direction getter tractography'))
-    recon_model = traits.Enum(["CSD", "SHORE"], usedefault=True,
+    algo = traits.Enum(["deterministic", "probabilistic"],
+                       usedefault=True,
+                       desc='Use either deterministic maximum (default) or probabilistic direction getter tractography')
+    recon_model = traits.Enum(["CSD", "SHORE"],
+                              usedefault=True,
                               desc='Use either fODFs from CSD (default) or SHORE models')
-    recon_order = traits.Int(8)
-    use_act = traits.Bool(False, desc=(
-        'Use FAST for partial volume estimation and Anatomically-Constrained Tractography (ACT) tissue classifier'))
-    seed_from_gmwmi = traits.Bool(False, desc=(
-        'Seed from the Gray Matter / White Matter interface'))
-    gmwmi_file = File(exists=True, desc=(
-        'input Gray Matter / White Matter interface image'))
+    recon_order = traits.Int(8,
+                             desc='Spherical harmonics order')
+    use_act = traits.Bool(False,
+                          desc='Use FAST for partial volume estimation and '
+                               'Anatomically-Constrained Tractography (ACT) tissue classifier')
+    seed_from_gmwmi = traits.Bool(False,
+                                  desc='Seed from the Gray Matter / White Matter interface')
+    gmwmi_file = File(exists=True,
+                      desc='input Gray Matter / White Matter interface image')
     # fast_number_of_classes = traits.Int(3, desc=('Number of tissue classes used by FAST for Anatomically-Constrained Tractography (ACT)'))
-    in_file = File(exists=True, mandatory=True, desc='input diffusion data')
-    fod_file = File(exists=True, desc='input fod file (if SHORE)')
-    in_fa = File(exists=True, mandatory=True, desc='input FA')
+    in_file = File(exists=True, mandatory=True,
+                   desc='input diffusion data')
+    fod_file = File(exists=True,
+                    desc='input fod file (if SHORE)')
+    in_fa = File(exists=True, mandatory=True,
+                 desc='input FA')
     in_partial_volume_files = InputMultiPath(File(exists=True),
                                              desc='Partial volume estimation result files (required if performing ACT)')
     # in_t1 = File(exists=True, desc=('input T1w (required if performing ACT)'))
-    in_model = File(exists=True, mandatory=True, desc=(
-        'input f/d-ODF model extracted from.'))
+    in_model = File(exists=True, mandatory=True,
+                    desc='input f/d-ODF model extracted from.')
     tracking_mask = File(exists=True, mandatory=True,
                          desc='input mask within which perform tracking')
-    seed_mask = InputMultiPath(File(
-        exists=True), mandatory=True, desc='ROI files registered to diffusion space')
-    seed_density = traits.Float(1, usedefault=True,
+    seed_mask = InputMultiPath(File(exists=True), mandatory=True,
+                               desc='ROI files registered to diffusion space')
+    seed_density = traits.Float(1,
+                                usedefault=True,
                                 desc='Density of seeds')
-    fa_thresh = traits.Float(0.2, mandatory=True, usedefault=True,
+    fa_thresh = traits.Float(0.2,
+                             mandatory=True, usedefault=True,
                              desc='FA threshold to build the tissue classifier')
-    max_angle = traits.Float(25.0, mandatory=True, usedefault=True,
+    max_angle = traits.Float(25.0,
+                             mandatory=True, usedefault=True,
                              desc='Maximum angle')
-    step_size = traits.Float(0.5, mandatory=True, usedefault=True,
+    step_size = traits.Float(0.5,
+                             mandatory=True, usedefault=True,
                              desc='Step size')
-    multiprocess = traits.Bool(True, mandatory=True, usedefault=True,
+    multiprocess = traits.Bool(True,
+                               mandatory=True, usedefault=True,
                                desc='use multiprocessing')
-    save_seeds = traits.Bool(False, mandatory=True, usedefault=True,
+    save_seeds = traits.Bool(False,
+                             mandatory=True, usedefault=True,
                              desc='save seeding voxels coordinates')
-    num_seeds = traits.Int(10000, mandatory=True, usedefault=True,
+    num_seeds = traits.Int(10000,
+                           mandatory=True, usedefault=True,
                            desc='desired number of tracks in tractography')
     out_prefix = traits.Str(desc='output prefix for file names')
 
@@ -794,16 +792,15 @@ class DirectionGetterTractography(DipyBaseInterface):
 
     def _run_interface(self, runtime):
         from dipy.tracking import utils
-        from dipy.direction import DeterministicMaximumDirectionGetter, \
-            ProbabilisticDirectionGetter
+        from dipy.direction import DeterministicMaximumDirectionGetter, ProbabilisticDirectionGetter
         # from dipy.tracking.local import ThresholdStoppingCriterion, ActStoppingCriterion
         from dipy.tracking.stopping_criterion import BinaryStoppingCriterion, CmcStoppingCriterion
         from dipy.tracking.local_tracking import LocalTracking, ParticleFilteringTracking
         from dipy.direction.peaks import peaks_from_model
         from dipy.data import get_sphere
+        from dipy.tracking.streamline import Streamlines
         from dipy.io.stateful_tractogram import Space, StatefulTractogram
         from dipy.io.streamline import save_trk
-        # import marshal as pickle
         import pickle
         import gzip
 
@@ -822,7 +819,7 @@ class DirectionGetterTractography(DipyBaseInterface):
         sphere = get_sphere('symmetric724')
 
         def clipMask(mask):
-            """This is a hack until we fix the behaviour of the tracking objects
+            """This is a hack until Dipy fixes the behaviour of the tracking objects
             around the edge of the image"""
             out = mask.copy()
             index = [slice(None)] * out.ndim
@@ -919,49 +916,51 @@ class DirectionGetterTractography(DipyBaseInterface):
 
             # Handle GMWM interface or seed mask
             if self.inputs.seed_from_gmwmi and isdefined(self.inputs.gmwmi_file):
-                IFLOGGER.info('Loading Seed Mask from {}'.format(
-                    self.inputs.gmwmi_file))
+                IFLOGGER.info(f'Loading Seed Mask from {self.inputs.gmwmi_file}')
                 seedmsk = nib.load(self.inputs.gmwmi_file).get_data()
                 seedmsk = np.squeeze(seedmsk)
             else:
-                IFLOGGER.info('Loading Seed Mask from {}'.format(
-                    self.inputs.seed_mask[0]))
+                IFLOGGER.info(f'Loading Seed Mask from {self.inputs.seed_mask[0]}')
                 seedmsk = nib.load(self.inputs.seed_mask[0]).get_data()
 
             # assert (seedmsk.shape == data.shape[:3])
-            seedmsk = clipMask(seedmsk)
+            # seedmsk = clipMask(seedmsk)
 
-            print('seedmsk min: {}'.format(seedmsk.min()))
-            print('seedmsk max: {}'.format(seedmsk.max()))
+            print(f'seedmsk min: {seedmsk.min()}')
+            print(f'seedmsk max: {seedmsk.max()}')
 
             seedmsk[seedmsk > 0] = 1
             seedmsk[seedmsk < 1] = 0
 
-            IFLOGGER.info('Saving seed mask')
+            IFLOGGER.info(f'Saving seed mask (shape: {seedmsk.shape})')
             hdr.set_data_shape(seedmsk.shape)
-            nib.Nifti1Image(seedmsk.astype(np.float32), affine, hdr).to_filename(
-                self._gen_filename('desc-seed_mask'))
+            nib.Nifti1Image(seedmsk.astype(np.float32),
+                            affine,
+                            hdr).to_filename(self._gen_filename('desc-seed_mask'))
 
             seedps = np.array(np.where(seedmsk == 1), dtype=np.float32).T
             vseeds = seedps.shape[0]
             nsperv = (seeds // vseeds) + 1
-            IFLOGGER.info(('Seed mask is provided (%d voxels inside '
-                           'mask), computing seeds (%d seeds/voxel).') %
-                          (vseeds, nsperv))
+            IFLOGGER.info(f'Seed mask is provided ({vseeds} voxels inside '
+                          f'mask), computing seeds ({nsperv} seeds/voxel).')
             if nsperv > 1:
-                IFLOGGER.info(('Needed %d seeds per selected voxel '
-                               '(total %d).') % (nsperv, vseeds))
+                IFLOGGER.info(f'Needed {nsperv} seeds per selected voxel '
+                              f'(total {vseeds}).')
                 seedps = np.vstack(np.array([seedps] * nsperv))
                 voxcoord = seedps + np.random.uniform(-1, 1, size=seedps.shape)
                 nseeds = voxcoord.shape[0]
-                seeds = affine.dot(np.vstack((voxcoord.T,
-                                              np.ones((1, nseeds)))))[:3, :].T
+                seeds = affine.dot(np.vstack((voxcoord.T, np.ones((1, nseeds)))))[:3, :].T
 
                 if self.inputs.save_seeds:
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
 
-            tseeds = utils.seeds_from_mask(seedmsk, density=self.inputs.seed_density,
-                                           affine=affine)  # FIXME: density should be customizable
+            IFLOGGER.info(f'Create seeds for fiber tracking from the binary seed mask (density: {self.inputs.seed_density})')
+            tseeds = utils.seeds_from_mask(seedmsk,
+                                           affine=affine,
+                                           density=[self.inputs.seed_density,
+                                                    self.inputs.seed_density,
+                                                    self.inputs.seed_density]  # FIXME: density should be customizable
+                                           )
 
         if self.inputs.recon_model == 'CSD':
             IFLOGGER.info('Loading CSD model')
@@ -983,36 +982,40 @@ class DirectionGetterTractography(DipyBaseInterface):
                                    parallel=True)
 
             if self.inputs.algo == 'deterministic':
-                dg = DeterministicMaximumDirectionGetter.from_shcoeff(pfm.shm_coeffs, max_angle=self.inputs.max_angle,
+                dg = DeterministicMaximumDirectionGetter.from_shcoeff(pfm.shm_coeff,
+                                                                      max_angle=self.inputs.max_angle,
                                                                       sphere=sphere)
             else:
-                dg = ProbabilisticDirectionGetter.from_shcoeff(pfm.shm_coeffs, max_angle=self.inputs.max_angle,
+                dg = ProbabilisticDirectionGetter.from_shcoeff(pfm.shm_coeff,
+                                                               max_angle=self.inputs.max_angle,
                                                                sphere=sphere)
-
         else:
-
             IFLOGGER.info('Loading SHORE FOD')
             sh = nib.load(self.inputs.fod_file).get_data()
             sh = np.nan_to_num(sh)
             IFLOGGER.info('Generating peaks from SHORE model')
             if self.inputs.algo == 'deterministic':
-                dg = DeterministicMaximumDirectionGetter.from_shcoeff(sh, max_angle=self.inputs.max_angle,
+                dg = DeterministicMaximumDirectionGetter.from_shcoeff(sh,
+                                                                      max_angle=self.inputs.max_angle,
                                                                       sphere=sphere)
             else:
-                dg = ProbabilisticDirectionGetter.from_shcoeff(
-                    sh, max_angle=self.inputs.max_angle, sphere=sphere)
+                dg = ProbabilisticDirectionGetter.from_shcoeff(sh,
+                                                               max_angle=self.inputs.max_angle,
+                                                               sphere=sphere)
 
         if not self.inputs.use_act:
-
             IFLOGGER.info('Performing %s tractography' % self.inputs.algo)
 
-            streamlines = LocalTracking(
-                dg, classifier, tseeds, affine, step_size=self.inputs.step_size, max_cross=1)
+            streamlines = LocalTracking(dg,
+                                        classifier,
+                                        tseeds,
+                                        affine,
+                                        step_size=self.inputs.step_size,
+                                        max_cross=1)
 
             IFLOGGER.info('Saving tracks')
             sft = StatefulTractogram(streamlines, imref, Space.RASMM)
             save_trk(sft, self._gen_filename('tracked', ext='.trk'))
-
         else:
             IFLOGGER.info('Performing PFT tractography')
             # Particle Filtering Tractography
@@ -1027,12 +1030,8 @@ class DirectionGetterTractography(DipyBaseInterface):
                                                                  pft_front_tracking_dist=1,
                                                                  particle_count=15,
                                                                  return_all=False)
-
-            # streamlines = list(pft_streamline_generator)
-
             IFLOGGER.info('Saving tracks')
-            from dipy.tracking.streamline import Streamlines
-
+            # streamlines = list(pft_streamline_generator)
             streamlines = Streamlines(pft_streamline_generator)
             sft = StatefulTractogram(streamlines, imref, Space.RASMM)
             save_trk(sft, self._gen_filename('tracked', ext='.trk'))

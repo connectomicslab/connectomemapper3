@@ -17,7 +17,6 @@ import os
 import warnings
 
 from glob import glob
-import numpy
 
 # import http.client
 # import urllib
@@ -103,22 +102,18 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=
         If True, append the fMRI configuration file to the command
 
     number_of_threads : int
-        Number of threads used by Nipype
+        Number of threads used OpenMP-parallelized tools
+        (Default: 1)
 
     Returns
     -------
     Command : string
         The command to execute the `connectomemapper3` python script
     """
-    cmd = []
-
-    cmd.append("connectomemapper3")
-    cmd.append("--bids_dir")
-    cmd.append(project.base_directory)
-    cmd.append("--output_dir")
-    cmd.append(project.output_directory)
-    cmd.append("--participant_label")
-    cmd.append(project.subject)
+    cmd = ["connectomemapper3",
+           "--bids_dir", project.base_directory,
+           "--output_dir", project.output_directory,
+           "--participant_label", project.subject]
 
     if project.subject_session != '':
         cmd.append("--session_label")
@@ -343,9 +338,7 @@ def run(command, env={}, log_filename={}):
     #     raise Exception("Non zero return code: %d"%process.returncode)
 
 
-# Initialize random generator for enhanced reproducibility
-numpy.random.seed(1234)
-
+# Parse script arguments
 cmp_parser = parser.get()
 args = cmp_parser.parse_args()
 
@@ -381,7 +374,7 @@ for tool in tools:
 # Make sure freesurfer is happy with the license
 print('> Set $FS_LICENSE which points to FreeSurfer license location (BIDS App)')
 
-if os.access(os.path.join('/bids_dir¨', 'code', 'license.txt'), os.F_OK):
+if os.access(os.path.join('/bids_dir', 'code', 'license.txt'), os.F_OK):
     os.environ['FS_LICENSE'] = os.path.join('/bids_dir', 'code', 'license.txt')
     # Not anymore needed as we are using the environment variable
     # print('... src : {}'.format(os.path.join('/tmp','code','license.txt')))
@@ -434,7 +427,7 @@ else:
     print('  * Number of subjects to be processed in parallel set to one (sequential run)')
     parallel_number_of_subjects = 1
 
-# Setup number of threads to be used fro multithreading by OpenMP
+# Setup number of threads to be used for multithreading by OpenMP
 if args.number_of_threads is not None:
     number_of_threads = int(args.number_of_threads)
     if parallel_number_of_subjects == 1:
@@ -475,17 +468,21 @@ else:
 
 # Set number of threads used by programs based on OpenMP multi-threading library
 # This includes AFNI, Dipy, Freesurfer, FSL, MRtrix3.
-os.environ['OMP_NUM_THREADS'] = '{}'.format(number_of_threads)
-print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'], max_number_of_cores))
+# os.environ.update(OMP_NUM_THREADS=f'{number_of_threads}')
+# print('  * OMP_NUM_THREADS set to {} (total of cores: {})'.format(os.environ['OMP_NUM_THREADS'], max_number_of_cores))
 
 # Set number of threads used by ANTs if specified.
 # Otherwise use the same as the number of OpenMP threads
 if args.ants_number_of_threads is not None:
     os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = f'{args.ants_number_of_threads}'
     print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
-else:
-    os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = os.environ['OMP_NUM_THREADS']
-    print(f'  * ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS set to {os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"]}')
+
+# Initialize random generator for enhanced reproducibility
+# Numpy needs to be imported after setting the different multi-threading environment variable
+# See https://stackoverflow.com/questions/30791550/limit-number-of-threads-in-numpy for more details
+# noinspection PyPep8
+import numpy
+numpy.random.seed(1234)
 
 # Set random generator seed of MRtrix if specified
 if args.mrtrix_random_seed is not None:
