@@ -401,7 +401,7 @@ def main():
             show()
         elif sys.argv[1] == 'circular':
             node_names = []
-            for u_gml, d_gml in a.nodes(data=True):
+            for _, d_gml in a.nodes(data=True):
                 # node_names.append(d_gml['dn_fsname'])
                 node_names.append(d_gml['dn_name'])
             _, _ = plot_connectivity_circle(b, node_names, title="%s" % (sys.argv[3]), colormap='inferno')
@@ -433,7 +433,7 @@ def main():
             show()
         elif sys.argv[1] == 'circular':
             node_names = []
-            for u_gml, d_gml in a.nodes(data=True):
+            for _, d_gml in a.nodes(data=True):
                 # node_names.append(d_gml['dn_fsname'])
                 node_names.append(d_gml['dn_name'])
             if sys.argv[3] == 'number_of_fibers':
@@ -477,7 +477,7 @@ def main():
             show()
         elif sys.argv[1] == 'circular':
             node_names = []
-            for u_gml, d_gml in a.nodes(data=True):
+            for _, d_gml in a.nodes(data=True):
                 # node_names.append(d_gml['dn_fsname'])
                 node_names.append(d_gml['dn_name'])
             if sys.argv[3] == 'number_of_fibers':
