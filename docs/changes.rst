@@ -36,6 +36,13 @@ In particular, it integrates `Pull Request #74 <https://github.com/connectomicsl
 * Update and review code in `cmp/bidsappmanager/gui.py`  for data versioning and provenance tracking with Datalad.
   (`PR #77 <https://github.com/connectomicslab/connectomemapper3/pull/77>`_)
 
+* Major refactoring of `setup.py` and `setup_gui.py`, as well as
+  creation of a new `cmp.cli module, migration of scripts `connectomemapper3`,
+  `showmatrix_gpickle`, and `cmpbidsappmanager` to `cmp.cli` module,
+  refactoring of scripts with correction of code style issues and
+  the addition of missing docstrings for compatibility with PyPI.
+  (`PR #78 <https://github.com/connectomicslab/connectomemapper3/pull/78>`_)
+
 *Documentation*
 
 * Review usage and add a note regarding the adoption of the new `JSON` format for configuration files.
