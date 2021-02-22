@@ -26,13 +26,9 @@ jobs:
             python --version
             twine upload -h
       - run:
-          name: "Test Wheel Build for main setup_cmp.py"
-          command: |
-            python3 setup.py sdist bdist_wheel
-      - run:
           name: "Test Install for main setup_cmp.py"
           command: |
-            pip install -e .
+            python3 setup_cmp.py develop
       - run:
           name: "Smoke Test Install for main setup_cmp.py"
           command: |
@@ -49,11 +45,11 @@ jobs:
       - run:
           name: "Test Wheel Build for GUI setup.py"
           command: |
-            python3 setup_gui.py sdist bdist_wheel
+            python3 setup.py sdist bdist_wheel
       - run:
           name: "Test Install for GUI setup.py"
           command: |
-            pip install -e .
+            pip install .
       - run:
           name: "Smoke Test Install for GUI setup.py"
           command: |
