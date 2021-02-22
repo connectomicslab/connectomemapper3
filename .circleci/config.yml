@@ -37,7 +37,7 @@ jobs:
           name: "Smoke Test Install for main setup.py"
           command: |
             python --version
-            pip3 install cmp3
+            pip3 install cmp
       - run:
           name: "Smoke Test Install connectomemapper3"
           command: |
@@ -45,7 +45,7 @@ jobs:
       - run:
           name: "Smoke Test Uninstall for main setup.py"
           command: |
-            pip3 uninstall -y cmp3
+            pip3 uninstall -y cmp
       - run:
           name: "Test Wheel Build for GUI setup_gui.py"
           command: |
