@@ -5,6 +5,85 @@ orbs:
   singularity: singularity/singularity@1.0.10
 
 jobs:
+  test-python-install:
+    parameters:
+      version:
+        type: string
+        default: latest
+    docker:
+      - image: circleci/python:<< parameters.version >>
+    steps:
+      - checkout
+      - run:
+          name: "Test Install Twine"
+          command: |
+            python --version
+            pip3 install twine
+      - run:
+          name: "Smoke Test Install Twine"
+          command: |
+            python --version
+            twine upload -h
+      - run:
+          name: "Test Wheel Build for main setup.py"
+          command: |
+            python3 setup.py sdist bdist_wheel
+      - run:
+          name: "Test Install for main setup.py"
+          command: |
+            pip install -e .
+      - run:
+          name: "Smoke Test Install for main setup.py"
+          command: |
+            python --version
+            pip3 install cmp3
+      - run:
+          name: "Smoke Test Uninstall for main setup.py"
+          command: |
+            pip uninstall cmp3
+      - run:
+          name: "Test Wheel Build for GUI setup_gui.py"
+          command: |
+            python3 setup_gui.py sdist bdist_wheel
+      - run:
+          name: "Test Install for GUI setup_gui.py"
+          command: |
+            pip install -e .
+      - run:
+          name: "Smoke Test Install for GUI setup_gui.py"
+          command: |
+            python --version
+            pip3 install cmpbidsappmanager
+
+    deploy-pypi-release:
+      docker:
+        - image: circleci/python:3.7
+      steps:
+        - checkout
+        - run:
+            name: "Install dependencies"
+            command: |
+              python --version
+              pip3 install twine
+        - run:
+            name: "Verify git tag vs. version"
+            command: |
+              python3 setup_gui.py verify
+        - run:
+            name: "init .pypirc"
+            command: |
+              echo -e "[pypi]" >> ~/.pypirc
+              echo -e "username = $PYPI_USER" >> ~/.pypirc
+              echo -e "password = $PYPI_TOKEN" >> ~/.pypirc
+        - run:
+            name: "Create distribution wheel"
+            command: |
+              python3 setup_gui.py sdist bdist_wheel
+        - run:
+            name: "Upload to pypi"
+            command: |
+              twine upload dist/*
+
   build_docker:
     environment:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
@@ -1090,7 +1169,15 @@ workflows:
   version: 2.1
   build_test_cov_deploy:
     jobs:
+      - test-python-install:
+          version: "3.7"
+          filters:
+            tags:
+              only: /.*/
+
       - build_docker:
+          requires:
+            - test-python-install
           filters:
             tags:
               only: /.*/
