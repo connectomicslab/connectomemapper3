@@ -4,7 +4,26 @@
 
 import os
 import sys
-from glob import glob
+import setuptools
+from setuptools.command.install import install
+
+from cmp.info import __version__
+
+
+class VerifyVersionCommand(install):
+    """Custom command to verify that the git tag matches our version"""
+    description = 'verify that the git tag matches our version'
+
+    def run(self):
+        tag = os.getenv('CIRCLE_TAG')
+        version = f'{__version__}'
+
+        if tag != version:
+            info = f'Git tag: {tag} does not match the version of this app: {version}'
+            sys.exit(info)
+
+
+directory = os.path.dirname(os.path.abspath(__file__))
 
 if os.path.exists('MANIFEST'):
     os.remove('MANIFEST')
@@ -57,55 +76,89 @@ package_data = {'cmp.bidsappmanager':
                      'data/segmentation/freesurfer/*.*']
                 }
 
-################################################################################
-# For some commands, use setuptools
+# Extract package requirements from Conda environment.yml
+include_conda_pip_dependencies = False
+install_requires = []
+dependency_links = []
+if include_conda_pip_dependencies:
+    path = os.path.join(directory, 'ubuntu16.04', 'environment.yml')
+    with open(path) as read_file:
+        state = "PREAMBLE"
+        for line in read_file:
+            line = line.rstrip().lstrip(" -")
+            if line == "dependencies:":
+                state = "CONDA_DEPS"
+            elif line == "pip:":
+                state = "PIP_DEPS"
+            elif state == "CONDA_DEPS":
+                line = '=='.join(line.split('='))
+                line = line.split('==')[0]
+                # Python is a valid dependency for Conda but not setuptools, so skip it
+                if "python" in line:
+                    pass
+                else:
+                    # Appends to dependencies
+                    install_requires.append(line)
+            elif state == "PIP_DEPS":
+                line = line.split('==')[0]
+                # Appends to dependency links
+                dependency_links.append(line)
+                # Adds package name to dependencies
+                install_requires.append(line)
+print(f'Install requires: {install_requires}')
+print(f'Dependency links: {dependency_links}')
 
-if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb',
-            'bdist_wininst', 'install_egg_info', 'egg_info', 'easy_install',
-            )).intersection(sys.argv)) > 0:
-    from setup_egg import extra_setuptools_args
 
-# extra_setuptools_args can be defined from the line above, but it can
-# also be defined here because setup.py has been exec'ed from
-# setup_egg.py.
-if not 'extra_setuptools_args' in globals():
-    extra_setuptools_args = dict()
-
-
-def main(**extra_args):
-    from distutils.core import setup
-    from cmp.info import __version__
-    setup(name='cmpbidsappmanager',
-          version=__version__,
-          description='Connectome Mapper 3 BIDS App Manager',
-          long_description="""Connectome Mapper 3 BIDS App Manager, part of the Connectome Mapping Toolkit, """+
-                           """allows you to easily interact with the BIDS App of the Connectome Mapper 3, """ +
-                           """which implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2 """ +
-                           """data to multi-resolution connection matrices. """ +
-                           """It also offers support for resting state fMRI data processing and multi-resolution """ +
-                           """functional connection matrices creation. """,
-          author='CHUV-EPFL',
-          author_email='info@connectomics.org',
-          url='http://www.connectomics.org/',
-          scripts=glob('scripts/bidsappmanager/*'),
-          license='Modified BSD License',
-          packages=packages,
-          classifiers=[c.strip() for c in """\
-            Development Status :: 1 - Beta
-            Intended Audience :: Developers
-            Intended Audience :: Science/Research
-            Operating System :: OS Independent
-            Programming Language :: Python
-            Topic :: Scientific/Engineering
-            Topic :: Software Development
-            """.splitlines() if len(c.split()) > 0],
-          maintainer='CIBM-CHUV Diffusion Group',
-          maintainer_email='info@connectomics.org',
-          package_data=package_data,
-          requires=["numpy (>=1.2)", "nibabel (>=1.1.0)", "pybids (>=0.7.0)"],
-          **extra_args
-          )
+def main():
+    """Main function of CMP3 ``setup_gui.py``"""
+    setuptools.setup(
+        name='cmpbidsappmanager',
+        version=__version__,
+        description='Connectome Mapper 3 BIDS App Manager',
+        long_description="""Connectome Mapper 3 BIDS App Manager, part of the Connectome Mapping Toolkit,
+                         allows you to easily interact with the BIDS App of the Connectome Mapper 3,
+                         which implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2
+                         data to multi-resolution connection matrices.
+                         It also offers support for resting state fMRI data processing and multi-resolution
+                         functional connection matrices creation. """,
+        author='Sebastien Tourbier',
+        author_email='sebastien.tourbier@alumni.epfl.ch',
+        url='https://github.com/connectomicslab/connectomemapper3',
+        entry_points={
+            "console_scripts": [
+                'cmpbidsappmanager = cmp.bidsappmanager.cli.cmpbidsappmanager:main',
+                'showmatrix_gpickle = cmp.bidsappmanager.cli.showmatrix_gpickle:main'
+            ]
+        },
+        license='BSD-3-Clause',
+        classifiers=[
+            'Development Status :: 4 - Beta',
+            'Intended Audience :: Science/Research',
+            'Intended Audience :: Developers',
+            'License :: OSI Approved',
+            'Programming Language :: Python',
+            'Topic :: Software Development',
+            'Topic :: Scientific/Engineering',
+            'Operating System :: Microsoft :: Windows',
+            'Operating System :: POSIX',
+            'Operating System :: Unix',
+            'Operating System :: MacOS',
+            'Programming Language :: Python :: 3.7',
+        ],
+        maintainer='Connectomics Lab, CHUV',
+        maintainer_email='info@connectomics.org',
+        packages=packages,
+        include_package_data=True,
+        package_data=package_data,
+        # requires=["numpy (>=1.18)", "nipype (>=1.5.0)", "pybids (>=0.10.2)"],
+        install_requires=install_requires,
+        dependency_links=dependency_links,
+        python_requires='>=3.7',
+        cmdclass={
+                'verify': VerifyVersionCommand,
+        }
+        )
 
 
 if __name__ == "__main__":
-    main(**extra_setuptools_args)
+    main()
