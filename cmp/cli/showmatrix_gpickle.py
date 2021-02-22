@@ -14,18 +14,12 @@ import networkx as nx
 import numpy as np
 import copy
 
-try:
-    import matplotlib.colors as colors
-    # import matplotlib
-    # matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
-    from matplotlib.pyplot import title, imshow, show, cm, figure, pcolor, colorbar, savefig, hist, plot
-except ImportError:
-    print("matplotlib not available. Can not plot matrix")
+import matplotlib.colors as colors
+# import matplotlib
+# matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
+from matplotlib.pyplot import title, imshow, show, cm, figure, pcolor, colorbar, savefig, hist, plot
 
-try:
-    from mne.viz.utils import plt_show
-except ImportError:
-    print("MNE not available. Can not plot matrix (circular layout)")
+from mne.viz.utils import plt_show
 
 
 def _plot_connectivity_circle_onpick(event,
