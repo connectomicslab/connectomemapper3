@@ -26,15 +26,15 @@ jobs:
             python --version
             twine upload -h
       - run:
-          name: "Test Wheel Build for main setup.py"
+          name: "Test Wheel Build for main setup_cmp.py"
           command: |
             python3 setup.py sdist bdist_wheel
       - run:
-          name: "Test Install for main setup.py"
+          name: "Test Install for main setup_cmp.py"
           command: |
             pip install -e .
       - run:
-          name: "Smoke Test Install for main setup.py"
+          name: "Smoke Test Install for main setup_cmp.py"
           command: |
             python --version
             pip3 install cmp
@@ -43,19 +43,19 @@ jobs:
           command: |
             connectomemapper3 -v
       - run:
-          name: "Smoke Test Uninstall for main setup.py"
+          name: "Smoke Test Uninstall for main setup_cmp.py"
           command: |
             pip3 uninstall -y cmp
       - run:
-          name: "Test Wheel Build for GUI setup_gui.py"
+          name: "Test Wheel Build for GUI setup.py"
           command: |
             python3 setup_gui.py sdist bdist_wheel
       - run:
-          name: "Test Install for GUI setup_gui.py"
+          name: "Test Install for GUI setup.py"
           command: |
             pip install -e .
       - run:
-          name: "Smoke Test Install for GUI setup_gui.py"
+          name: "Smoke Test Install for GUI setup.py"
           command: |
             python --version
             pip3 install cmpbidsappmanager
