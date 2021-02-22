@@ -41,7 +41,7 @@ jobs:
       - run:
           name: "Smoke Test Uninstall for main setup.py"
           command: |
-            pip3 uninstall cmp3
+            pip3 uninstall -y cmp3
       - run:
           name: "Test Wheel Build for GUI setup_gui.py"
           command: |
