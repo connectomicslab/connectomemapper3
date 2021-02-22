@@ -220,7 +220,6 @@ def main():
 
             if anat_valid_inputs:
                 anat_pipeline.process()
-                exit_code = 0
             else:
                 exit_code = 1
                 return exit_code
@@ -242,7 +241,6 @@ def main():
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-                exit_code = 0
             else:
                 print("ERROR : Invalid inputs")
                 exit_code = 1
@@ -260,7 +258,6 @@ def main():
                 # print sys.argv[offset+7]
                 if dmri_valid_inputs:
                     dmri_pipeline.process()
-                    exit_code = 0
                 else:
                     print("   ... ERROR : Invalid inputs")
                     exit_code = 1
@@ -286,7 +283,6 @@ def main():
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-                exit_code = 0
             else:
                 print("ERROR : Invalid inputs")
                 exit_code = 1
@@ -310,7 +306,6 @@ def main():
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
-                    exit_code = 0
                 else:
                     print("   ... ERROR : Invalid inputs")
                     exit_code = 1
@@ -337,7 +332,6 @@ def main():
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
-                exit_code = 0
             else:
                 print("   ... ERROR : Invalid inputs")
                 exit_code = 1
@@ -356,7 +350,6 @@ def main():
                 if dmri_valid_inputs:
                     print(">> Process diffusion pipeline")
                     dmri_pipeline.process()
-                    exit_code = 0
                 else:
                     print("   ... ERROR : Invalid inputs")
                     exit_code = 1
@@ -375,7 +368,6 @@ def main():
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
-                    exit_code = 0
                 else:
                     print("   ... ERROR : Invalid inputs")
                     exit_code = 1

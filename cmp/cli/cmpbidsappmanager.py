@@ -24,7 +24,7 @@ print("Graphical Backend : {}".format(ETSConfig.toolkit))
 def info():
     """Print version and copyright information."""
     print("\nConnectome Mapper {} - BIDS App Manager ".format(__version__))
-    print("""{}""".format(__copyright__ ))
+    print("""{}""".format(__copyright__))
 
 
 def usage():
@@ -37,7 +37,7 @@ def usage():
 # Note that not all the commands give the awaited 1 exit code...
 def dep_check():
     """Check if some dependencies are well installed."""
-    nul = open(os.devnull, 'w')
+    # nul = open(os.devnull, 'w')
 
     error = ""
 
@@ -72,7 +72,7 @@ def main():
     argc = len(sys.argv)
     if argc == 1:  # no args, launch the GUI
         mw = gui.CMP_MainWindow()
-        mw_res = mw.configure_traits()
+        _ = mw.configure_traits()
         exit_code = 0
     else:
         usage()

@@ -17,7 +17,10 @@ import copy
 import matplotlib.colors as colors
 # import matplotlib
 # matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
-from matplotlib.pyplot import title, imshow, show, cm, figure, pcolor, colorbar, savefig, hist, plot
+from matplotlib.pyplot import imshow, cm, show, figure, colorbar, hist
+import matplotlib.pyplot as plt
+import matplotlib.path as m_path
+import matplotlib.patches as m_patches
 
 from mne.viz.utils import plt_show
 
@@ -25,7 +28,7 @@ from mne.viz.utils import plt_show
 def _plot_connectivity_circle_onpick(event,
                                      fig=None, axes=None,
                                      indices=None,
-                                     n_nodes=0, node_angles=None,
+                                     node_angles=None,
                                      ylim=[9, 10]):
     """Isolate connections around a single node when user left clicks a node.
 
@@ -82,7 +85,7 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
 
     Parameters
     ----------
-    con : array
+    con : numpy.array
         Connectivity scores. Can be a square matrix, or a 1D array. If a 1D
         array is provided, "indices" has to be used to define the connection
         indices.
@@ -156,11 +159,6 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
     axes : instance of matplotlib.axes.PolarAxesSubplot
         The subplot handle.
     """
-    from matplotlib import cm
-    import matplotlib.pyplot as plt
-    import matplotlib.path as m_path
-    import matplotlib.patches as m_patches
-
     n_nodes = len(node_names)
 
     if node_angles is not None:
@@ -190,9 +188,6 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
         node_colors = [cmap(i / float(n_nodes)) for i in range(n_nodes)]
 
     # handle 1D and 2D connectivity information
-    con_t = con.T
-    new_con = []
-
     if con.ndim == 1:
         if indices is None:
             raise ValueError('indices has to be provided if con.ndim == 1')
@@ -251,7 +246,7 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
     # now sort them
     sort_idx = np.argsort(con_abs)
 
-    con_abs = con_abs[0, sort_idx]
+    # con_abs = con_abs[0, sort_idx]
     con = con[0, sort_idx]
     indices = [np.squeeze(ind[sort_idx].transpose()) for ind in indices]
 
@@ -409,7 +404,7 @@ def main():
             for u_gml, d_gml in a.nodes(data=True):
                 # node_names.append(d_gml['dn_fsname'])
                 node_names.append(d_gml['dn_name'])
-            fig, axes = plot_connectivity_circle(b, node_names, title="%s" % (sys.argv[3]), colormap='inferno')
+            _, _ = plot_connectivity_circle(b, node_names, title="%s" % (sys.argv[3]), colormap='inferno')
 
         else:
             print("Error: invalid layout mode ('matrix' or 'circular')")
@@ -431,9 +426,9 @@ def main():
         if sys.argv[1] == 'matrix':
             figure()
             if sys.argv[3] == 'number_of_fibers':
-                title("%s (#fibers: %i)" % (sys.argv[5], int(0.5*b.sum())))
+                plt.title("%s (#fibers: %i)" % (sys.argv[5], int(0.5*b.sum())))
             else:
-                title("%s" % (sys.argv[5]))
+                plt.title("%s" % (sys.argv[5]))
             imshow(b, interpolation='nearest', cmap=cm.inferno, vmin=b.min(), vmax=b.max())
             show()
         elif sys.argv[1] == 'circular':
@@ -445,7 +440,7 @@ def main():
                 title = "%s (#fibers: %i)" % (sys.argv[5], int(0.5*b.sum()))
             else:
                 title = "%s" % (sys.argv[5])
-            fig, axes = plot_connectivity_circle(b, node_names, title=title, colormap='inferno')
+            _, _ = plot_connectivity_circle(b, node_names, title=title, colormap='inferno')
         else:
             print("Error: invalid layout mode ('matrix' or 'circular')")
             return 1
@@ -466,9 +461,9 @@ def main():
         if sys.argv[1] == 'matrix':
             figure()
             if sys.argv[3] == 'number_of_fibers':
-                title("%s (#fibers: %i)" % (sys.argv[5], int(0.5*b.sum())))
+                plt.title("%s (#fibers: %i)" % (sys.argv[5], int(0.5*b.sum())))
             else:
-                title("%s" % (sys.argv[5]))
+                plt.title("%s" % (sys.argv[5]))
             print("sys.argv[5]==%s" % sys.argv[6])
             if sys.argv[6] == "log":
                 print("log scaling...")
@@ -493,7 +488,7 @@ def main():
             if sys.argv[6] == "log":
                 print("Warning: log scale not employed as circular layout used")
 
-            fig, axes = plot_connectivity_circle(b, node_names, title=title, colormap='inferno')
+            _, _ = plot_connectivity_circle(b, node_names, title=title, colormap='inferno')
         else:
             print("Error: invalid layout mode ('matrix' or 'circular')")
 
