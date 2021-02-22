@@ -100,13 +100,12 @@ print(f'Dependency links: {dependency_links}')
 def main():
     """Main function of CMP3 ``setup.py``"""
     setuptools.setup(
-        name='cmp3',
+        name='cmp',
         version=__version__,
-        description='Connectome Mapper 3: A software pipeline for multi-scale connectome mapping of multimodal MR data',
-        long_description="""Connectome Mapper 3, part of the Connectome Mapping Toolkit, implements
-                         a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2
-                         data to multi-resolution connection matrices. It also offers support
-                         for resting state fMRI data processing and multi-resolution functional
+        description='Connectome Mapper 3: A software pipeline for multi-scale connectome mapping of multimodal data',
+        long_description="""Connectome Mapper 3 implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2
+                         data to multi-resolution connection matrices, empowered by the Nipype workflow library.
+                         It also offers support for resting state fMRI data processing and multi-resolution functional
                          connection matrices creation. """,
         author='Sebastien Tourbier',
         author_email='sebastien.tourbier@alumni.epfl.ch',
