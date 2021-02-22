@@ -16,10 +16,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Test Install Twine"
+          name: "Test Install Twine and PyBIDS"
           command: |
             python --version
-            pip3 install twine
+            pip3 install twine pybids==0.10.2
       - run:
           name: "Smoke Test Install Twine"
           command: |
