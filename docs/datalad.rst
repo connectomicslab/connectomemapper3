@@ -37,7 +37,6 @@ On Ubuntu/Debian install `git-annex` the proper dependencies::
 
 Then install Datalad and its extensions::
 
-    sudo apt-get install git-annex liblzma-dev
     pip install datalad[all]==0.14.0
     pip install datalad-container==1.1.2
     pip install datalad-neuroimaging==0.3.1
@@ -198,6 +197,11 @@ Copy existing reference pipeline configuration files to `code` folder::
     cp /path/to/existing/ref_diffusion_config.json \
     code/ref_diffusion_config.json
 
+Copy FreeSurfer license file to `code` folder::
+
+    cp /path/to/freesurfer/license.txt \
+    code/license.txt
+
 Save the state of the dataset prior to analysis::
 
     datalad save -m "Alice's test dataset on local \
@@ -258,7 +262,7 @@ Uninstall all files accessible from the remote
 With DataLad we don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
 Let’s uninstall them – checking the size on disk before and after::
 
-    datalad uninstall sub-*/*
+    datalad uninstall input/sub-*/*
 
 Local collaboration with Bob for Electrical Source Imaging
 ---------------------------------------------------------------------------------------
@@ -266,7 +270,7 @@ Local collaboration with Bob for Electrical Source Imaging
 Processed dataset installation on Bob's workstation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Install the processed datalad dataset `ds-example-processed` in `/home/bob/data/ds-example-processed``::
+Install the processed datalad dataset `ds-example-processed` in `/home/bob/data/ds-example-processed`::
 
     datalad install -s ssh://<SERVER_USERNAME>@<SERVER_IP_ADDRESS>:/archive/data/ds-example-processed  \
     /home/bob/data/ds-example-processed
@@ -280,11 +284,11 @@ Get connectome mapper output files (Brain Segmentation and Multi-scale Parcellat
 
 For reproducibility, write datalad get commands to `get_required_files_for_analysis_by_bob.sh`::
 
-    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_mask.nii.gz" \
+    echo "datalad get derivatives/cmp/sub-*/ses-*/anat/sub-*_mask.nii.gz" \
     > code/get_required_files_for_analysis_by_bob.sh
-    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_class-*_dseg.nii.gz" \
+    echo "datalad get derivatives/cmp/sub-*/ses-*/anat/sub-*_class-*_dseg.nii.gz" \
     >> code/get_required_files_for_analysis_by_bob.sh
-    echo "datalad get -J 4 derivatives/cmp/sub-*/ses-*/anat/sub-*_scale*_atlas.nii.gz" \
+    echo "datalad get derivatives/cmp/sub-*/ses-*/anat/sub-*_scale*_atlas.nii.gz" \
     >> code/get_required_files_for_analysis_by_bob.sh
 
 Save the script to the dataset’s history::
@@ -339,4 +343,4 @@ Let’s uninstall them – checking the size on disk before and after::
     datalad uninstall derivatives/nipype/*
 
 -  Created by Sebastien Tourbier (2019 Jan 08)
--  Last modification: 2021 Feb 18
+-  Last modification: 2021 Feb 23
