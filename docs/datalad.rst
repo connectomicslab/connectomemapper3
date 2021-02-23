@@ -221,6 +221,9 @@ Run Connectome Mapper on all subjects::
     --anat_pipeline_config '/bids_dir/{inputs[0]}' \
     --dwi_pipeline_config '/bids_dir/{inputs[1]}'
 
+.. note:: `datalad containers-run` will take of replacing the `{inputs[i]}` by the value
+    specified by the *i* `--input` flag (Indexing start at 0).
+
 Save the state::
 
     datalad save -m "Alice's test dataset on local \
@@ -259,8 +262,8 @@ Push the datalad dataset with data derivatives to the server::
 Uninstall all files accessible from the remote
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-With DataLad we don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
-Let’s uninstall them – checking the size on disk before and after::
+With DataLad we don’t have to keep those inputs around so you can safely uninstall them
+without losing the ability to reproduce an analysis::
 
     datalad uninstall input/sub-*/*
 
@@ -334,10 +337,9 @@ Update the remote datalad dataset with data derivatives::
 Uninstall all files accessible from the remote
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Again, with DataLad we don’t have to keep those inputs around – without losing the ability to reproduce an analysis.
-Let’s uninstall them – checking the size on disk before and after::
+Again, with DataLad we don’t have to keep those inputs around so you can safely uninstall them
+without losing the ability to reproduce an analysis::
 
-    datalad uninstall sub-*/*
     datalad uninstall derivatives/cmp/*
     datalad uninstall derivatives/freesurfer/*
     datalad uninstall derivatives/nipype/*
