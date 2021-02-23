@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""`Setup.py` for Connectome Mapper 3 Graphical User Inerface (BIDS App Manager)."""
+"""`Setup.py` for Connectome Mapper processing core and CMTKlib."""
 
 import os
 import sys
@@ -28,10 +28,7 @@ directory = os.path.dirname(os.path.abspath(__file__))
 if os.path.exists('MANIFEST'):
     os.remove('MANIFEST')
 
-packages = ["cmtklib",
-            "cmtklib.bids",
-            "cmtklib.interfaces",
-            "cmp",
+packages = ["cmp",
             "cmp.cli",
             "cmp.stages",
             "cmp.stages.preprocessing",
@@ -45,36 +42,28 @@ packages = ["cmtklib",
             "cmp.pipelines.anatomical",
             "cmp.pipelines.diffusion",
             "cmp.pipelines.functional",
-            "cmp.bidsappmanager", "cmp.bidsappmanager.stages",
-            "cmp.bidsappmanager.stages.preprocessing",
-            "cmp.bidsappmanager.stages.segmentation",
-            "cmp.bidsappmanager.stages.parcellation",
-            "cmp.bidsappmanager.stages.registration",
-            "cmp.bidsappmanager.stages.diffusion",
-            "cmp.bidsappmanager.stages.functional",
-            "cmp.bidsappmanager.stages.connectome",
-            "cmp.bidsappmanager.pipelines",
-            "cmp.bidsappmanager.pipelines.anatomical",
-            "cmp.bidsappmanager.pipelines.diffusion",
-            "cmp.bidsappmanager.pipelines.functional",
+            "cmtklib", "cmtklib.bids",
+            "cmtklib.interfaces",
             "resources"]
 
-package_data = {'cmp.bidsappmanager':
-                ['images/*.png',
-                 'pipelines/anatomical/*.png',
-                 'pipelines/diffusion/*.png',
-                 'pipelines/functional/*.png'],
+package_data = {'cmp':
+                ['cmp3_icon.png'],
                 'resources':
-                    ['buttons/*.png',
-                     'icons/*png'],
+                    ['icons/*png'],
                 'cmtklib':
                     ['data/parcellation/lausanne2008/*/*.*',
+                     'data/parcellation/lausanne2018/*.*',
+                     'data/parcellation/lausanne2018/*/*.*',
                      'data/segmentation/ants_template_IXI/*/*.*',
                      'data/segmentation/ants_template_IXI/*.*',
+                     'data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*/*.*',
+                     'data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*.*',
                      'data/parcellation/nativefreesurfer/*/*.*',
+                     'data/colortable_and_gcs/*.*',
+                     'data/colortable_and_gcs/my_atlas_gcs/*.*',
+                     'data/diffusion/odf_directions/*.*',
                      'data/diffusion/gradient_tables/*.*',
-                     'data/segmentation/thalamus2018/*.*',
-                     'data/segmentation/freesurfer/*.*']
+                     'data/segmentation/thalamus2018/*.*']
                 }
 
 # Extract package requirements from Conda environment.yml
@@ -111,24 +100,21 @@ print(f'Dependency links: {dependency_links}')
 
 
 def main():
-    """Main function of CMP3 ``setup.py``"""
+    """Main function of CMP3 ``setup_cmp.py``"""
     setuptools.setup(
-        name='cmpbidsappmanager',
+        name='cmp',
         version=__version__,
-        description='Connectome Mapper 3 BIDS App Manager',
-        long_description="""Connectome Mapper 3 BIDS App Manager, part of the Connectome Mapping Toolkit,
-                         allows you to easily interact with the BIDS App of the Connectome Mapper 3,
-                         which implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2
-                         data to multi-resolution connection matrices.
-                         It also offers support for resting state fMRI data processing and multi-resolution
-                         functional connection matrices creation. """,
+        description='Connectome Mapper 3: A software pipeline for multi-scale connectome mapping of multimodal data',
+        long_description="""Connectome Mapper 3 implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2
+                         data to multi-resolution connection matrices, empowered by the Nipype workflow library.
+                         It also offers support for resting state fMRI data processing and multi-resolution functional
+                         connection matrices creation. """,
         author='Sebastien Tourbier',
         author_email='sebastien.tourbier@alumni.epfl.ch',
         url='https://github.com/connectomicslab/connectomemapper3',
         entry_points={
             "console_scripts": [
-                'cmpbidsappmanager = cmp.cli.cmpbidsappmanager:main',
-                'showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main'
+                'connectomemapper3 = cmp.cli.connectomemapper3:main',
             ]
         },
         license='BSD-3-Clause',

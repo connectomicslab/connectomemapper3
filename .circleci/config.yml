@@ -5,6 +5,53 @@ orbs:
   singularity: singularity/singularity@1.0.10
 
 jobs:
+
+  test-python-install:
+    parameters:
+      version:
+        type: string
+        default: latest
+    docker:
+      - image: circleci/python:<< parameters.version >>
+    steps:
+      - checkout
+      - run:
+          name: "Test Install Twine and PyBIDS"
+          command: |
+            python --version
+            pip3 install twine
+      - run:
+          name: "Smoke Test Install Twine"
+          command: |
+            python --version
+            twine upload -h
+      - run:
+          name: "Test Install for main setup_cmp.py"
+          command: |
+            sudo python3 setup_cmp.py develop
+      - run:
+          name: "Smoke Test Install for main setup_cmp.py"
+          command: |
+            python --version
+            pip3 install cmp
+      - run:
+          name: "Smoke Test Uninstall for main setup_cmp.py"
+          command: |
+            sudo pip3 uninstall -y cmp
+      - run:
+          name: "Test Wheel Build for GUI setup.py"
+          command: |
+            python3 setup.py sdist bdist_wheel
+      - run:
+          name: "Test Install for GUI setup.py"
+          command: |
+            pip install .
+      - run:
+          name: "Smoke Test Install for GUI setup.py"
+          command: |
+            python --version
+            pip3 install cmpbidsappmanager
+
   build_docker:
     environment:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
@@ -1090,7 +1137,15 @@ workflows:
   version: 2.1
   build_test_cov_deploy:
     jobs:
+      - test-python-install:
+          version: "3.7"
+          filters:
+            tags:
+              only: /.*/
+
       - build_docker:
+          requires:
+            - test-python-install
           filters:
             tags:
               only: /.*/

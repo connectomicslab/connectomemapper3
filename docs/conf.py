@@ -330,8 +330,8 @@ apidoc_excluded_paths = [".circleci/*",
                          "tests/*",
                          "ubuntu16.04/*",
                          "run.py",
+                         "setup_cmp.py",
                          "setup.py",
-                         "setup_gui.py",
                          "get_version.py",
                          "cmp/info.py"]
 apidoc_separate_modules = True

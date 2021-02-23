@@ -149,10 +149,10 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
   $ conda activate py37cmp-gui
 
-* Install the Connectome Mapper BIDS App Manager from the Bash Shell using following commands::
+* Install the Connectome Mapper BIDS App Manager from the Bash Shell using `pip`::
 
 	(py37cmp-gui)$ cd connectomemapper3/
-	(py37cmp-gui)$ python setup_gui.py install
+	(py37cmp-gui)$ pip install .
 
 * You are ready to use the Connectome Mapper 3 BIDS App Manager. See the `dedicated user guide <bidsappmanager.html>`_.
 
