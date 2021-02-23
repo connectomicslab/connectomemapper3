@@ -181,11 +181,9 @@ Add Connectome Mapper's container image to the datalad dataset::
         -u "$(id -u)":"$(id -g)" \
         sebastientourbier/connectomemapper-bidsapp:<VERSION_TAG> {cmd}"
 
-where:
-
-* `--call-fmt` specifies a custom docker run command. The current directory
-  is assumed to be the BIDS root directory and retrieve with `"$(pwd)"/input` and the
-  output directory is inside the `derivatives/` folder.
+.. note:: `--call-fmt` specifies a custom docker run command. The current directory
+    is assumed to be the BIDS root directory and retrieve with `"$(pwd)"/input` and the
+    output directory is inside the `derivatives/` folder.
 
 .. important:: The name of the container-name registered to Datalad cannot have dot
     as character so that a `<VERSION_TAG>` of `v3.X.Y` would need to be rewritten as `v3-X-Y`
