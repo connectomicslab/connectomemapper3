@@ -111,6 +111,10 @@ def save_configparser_as_json(config, config_json_path, debug=True):
                     if 'dipy_tracking_config' in name:
                         continue
 
+            if '_editor' in name:
+                print_warning(f' .. Skip parameter {section} / {name}')
+                continue
+
             if isinstance(value, Iterable) and not isinstance(value, str):
                 config_json[section][name] = [x for x in value if x]
             elif isinstance(value, bool):
