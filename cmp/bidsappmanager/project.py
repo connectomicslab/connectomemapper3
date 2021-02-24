@@ -1467,7 +1467,7 @@ class CMP_MainWindowHandler(Handler):
     fmri_inputs_checked = Bool(False)
     fmri_processed = Bool(False)
 
-    def load_dataset(self, ui_info, debug=True):
+    def load_dataset(self, ui_info, debug=False):
         """Function that creates a new :class:`CMP_Project_InfoUI` instance from an existing project.
 
         Parameters
