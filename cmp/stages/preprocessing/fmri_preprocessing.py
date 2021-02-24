@@ -58,7 +58,7 @@ class PreprocessingConfig(HasTraits):
     discard_n_volumes = Int('5')
     despiking = Bool(True)
     slice_timing = Enum("none",
-                        ["bottom-top interleaved", "bottom-top interleaved", "top-bottom interleaved", "bottom-top",
+                        ["none", "bottom-top interleaved", "bottom-top interleaved", "top-bottom interleaved", "bottom-top",
                          "top-bottom"])
     repetition_time = Float(1.92)
     motion_correction = Bool(True)
