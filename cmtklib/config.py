@@ -11,7 +11,7 @@ import json
 from collections.abc import Iterable
 
 from cmp.info import __version__
-from cmtklib.util import BColors
+from cmtklib.util import BColors, print_warning, print_error
 
 
 def check_configuration_version(config):
@@ -38,11 +38,10 @@ def check_configuration_version(config):
             is_same = True
         else:
             conf_version = config['Global']['version']
-            print(BColors.WARNING +
+            print_warning(
                   '  .. WARNING: CMP3 version used to generate the ' +
                   f'configuration files ({conf_version}) ' +
-                  f' and version of CMP3 used ({__version__}) differ' +
-                  BColors.ENDC)
+                  f' and version of CMP3 used ({__version__}) differ')
             is_same = False
     return is_same
 
@@ -158,8 +157,8 @@ def convert_config_ini_2_json(config_ini_path):
     try:
         config.read(config_ini_path)
     except configparser.MissingSectionHeaderError:
-        print(
-                '... error : file is a datalad git annex but it has not been retrieved yet.' +
+        print_error(
+                '... ERROR : file is a datalad git annex but it has not been retrieved yet.' +
                 ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)'
         )
 
@@ -214,7 +213,8 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type,
                                                                     pipeline_type))
 
     if os.path.isfile(subject_conf_file):
-        print("WARNING: rewriting config file {}".format(subject_conf_file))
+        print_warning(
+              "  .. WARNING: rewriting config file {}".format(subject_conf_file))
         os.remove(subject_conf_file)
 
     # Change relative path to absolute path if needed (required when using singularity)

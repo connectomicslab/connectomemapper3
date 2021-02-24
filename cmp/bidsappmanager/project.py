@@ -30,6 +30,7 @@ from cmp.bidsappmanager.pipelines.functional import fMRI as fMRI_pipeline
 from cmtklib.config import anat_load_config_json, anat_save_config, \
     dmri_load_config_json, dmri_save_config, fmri_load_config_json, fmri_save_config, \
     get_anat_process_detail_json, get_dmri_process_detail_json, get_fmri_process_detail_json
+from cmtklib.util import print_blue, print_warning, print_error
 
 
 warnings.filterwarnings(
@@ -47,42 +48,42 @@ def clean_cache(bids_root):
     bids_root : string
         BIDS root dataset directory
     """
-    print('> Clean docker image cache stored in /tmp')
+    print_warning('> Clean docker image cache stored in /tmp')
 
     for d in glob.glob(os.path.join(bids_root, ' hsperfdata_cmp')):
-        print('... DEL: {}'.format(d))
+        print_warning('... DEL: {}'.format(d))
         shutil.rmtree(d)
 
     for f in glob.glob(os.path.join(bids_root, '._java*')):
-        print('... DEL: {}'.format(f))
+        print_warning('... DEL: {}'.format(f))
         os.remove(f)
 
     for f in glob.glob(os.path.join(bids_root, 'mri_segstats.tmp*')):
-        print('... DEL: {}'.format(f))
+        print_warning('... DEL: {}'.format(f))
         os.remove(f)
 
     for d in glob.glob(os.path.join(bids_root, 'MCR_*')):
-        print('... DEL: {}'.format(d))
+        print_warning('... DEL: {}'.format(d))
         shutil.rmtree(d)
 
     for d in glob.glob(os.path.join(bids_root, 'matplotlib*')):
-        print('... DEL: {}'.format(d))
+        print_warning('... DEL: {}'.format(d))
         shutil.rmtree(d)
 
     for d in glob.glob(os.path.join(bids_root, 'xvfb-run.*')):
-        print('... DEL: {}'.format(d))
+        print_warning('... DEL: {}'.format(d))
         shutil.rmtree(d)
 
     for d in glob.glob(os.path.join(bids_root, '.X11*')):
-        print('... DEL: {}'.format(d))
+        print_warning('... DEL: {}'.format(d))
         shutil.rmtree(d)
 
     for d in glob.glob(os.path.join(bids_root, '.X11-unix')):
-        print('... DEL: {}'.format(d))
+        print_warning('... DEL: {}'.format(d))
         shutil.rmtree(d)
 
     for f in glob.glob(os.path.join(bids_root, '.X99*')):
-        print('... DEL: {}'.format(f))
+        print_warning('... DEL: {}'.format(f))
         os.remove(d)
 
 
@@ -141,7 +142,7 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
             try:
                 os.makedirs(full_p)
             except os.error:
-                print("%s was already existing" % full_p)
+                print_warning("%s was already existing" % full_p)
             finally:
                 print("Created directory %s" % full_p)
 
@@ -169,22 +170,25 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
         project_info.base_directory, 'derivatives')
 
     if (project_info.subject_session != '') and (project_info.subject_session is not None):
-        refresh_folder(derivatives_directory, project_info.subject, dmri_pipeline.input_folders,
+        refresh_folder(derivatives_directory,
+                       project_info.subject,
+                       dmri_pipeline.input_folders,
                        session=project_info.subject_session)
     else:
         refresh_folder(derivatives_directory,
-                       project_info.subject, dmri_pipeline.input_folders)
+                       project_info.subject,
+                       dmri_pipeline.input_folders)
 
     dmri_inputs_checked = dmri_pipeline.check_input(
         layout=bids_layout, gui=gui)
     if dmri_inputs_checked:
         if is_new_project and dmri_pipeline is not None:
-            print("Initialize dmri project")
+            print("Initialize dMRI project")
             if not os.path.exists(derivatives_directory):
                 try:
                     os.makedirs(derivatives_directory)
                 except os.error:
-                    print("%s was already existing" % derivatives_directory)
+                    print_warning("%s was already existing" % derivatives_directory)
                 finally:
                     print("Created directory %s" % derivatives_directory)
 
@@ -1507,7 +1511,7 @@ class CMP_MainWindowHandler(Handler):
                             loaded_project.datalad_dataset_path,
                             loaded_project.base_directory)
                     try:
-                        print('... cmd: {}'.format(cmd))
+                        print_blue('... cmd: {}'.format(cmd))
                         core.run(cmd, env={}, cwd=os.path.abspath(
                             loaded_project.base_directory))
                         del os.environ['REMOTEUSERPWD']
@@ -1521,7 +1525,7 @@ class CMP_MainWindowHandler(Handler):
                         loaded_project.datalad_dataset_path,
                         loaded_project.base_directory)
                     try:
-                        print('... cmd: {}'.format(cmd))
+                        print_blue('... cmd: {}'.format(cmd))
                         core.run(cmd, env={}, cwd=os.path.abspath(
                             loaded_project.base_directory))
                     except Exception:
@@ -1668,7 +1672,8 @@ class CMP_MainWindowHandler(Handler):
             fmri_inputs_checked = False
             if t1_available and fmri_available:
                 fmri_inputs_checked = True
-                print('fmri input check : {}'.format(fmri_inputs_checked))
+                if debug:
+                    print('fmri input check : {}'.format(fmri_inputs_checked))
 
             self.anat_inputs_checked = anat_inputs_checked
             self.dmri_inputs_checked = dmri_inputs_checked
@@ -1693,17 +1698,17 @@ class CMP_MainWindowHandler(Handler):
                         try:
                             os.makedirs(code_directory)
                         except os.error:
-                            print("%s was already existing" % code_directory)
+                            print_warning("%s was already existing" % code_directory)
                         finally:
                             print("Created directory %s" % code_directory)
 
                     anat_save_config(self.anat_pipeline,
                                      loaded_project.anat_config_file)
-                    print(">> Created reference anatomical config file :  %s" %
+                    print_blue(">> Created reference anatomical config file :  %s" %
                           loaded_project.anat_config_file)
 
                 else:
-                    print(">> Loaded reference anatomical config file :  %s" %
+                    print_blue(">> Loaded reference anatomical config file :  %s" %
                           loaded_project.anat_config_file)
                     # if datalad_is_available:
                     #     print('... Datalad get anatomical config file : {}'.format(loaded_project.anat_config_file))
@@ -1833,10 +1838,10 @@ class CMP_MainWindowHandler(Handler):
                         self.dmri_pipeline.stages[
                             "Diffusion"].diffusion_imaging_model = loaded_project.diffusion_imaging_model
                         dmri_save_config(self.dmri_pipeline, dmri_config_file)
-                        print(">> Created reference diffusion config file :  %s" %
+                        print_blue(">> Created reference diffusion config file :  %s" %
                               loaded_project.dmri_config_file)
                     else:
-                        print(">> Loaded reference diffusion config file :  %s" %
+                        print_blue(">> Loaded reference diffusion config file :  %s" %
                               loaded_project.dmri_config_file)
 
                         # if datalad_is_available:
@@ -1879,10 +1884,10 @@ class CMP_MainWindowHandler(Handler):
 
                     if not os.path.isfile(fmri_config_file) and self.fmri_pipeline is not None:
                         fmri_save_config(self.fmri_pipeline, fmri_config_file)
-                        print("Created reference fMRI config file :  %s" %
+                        print_blue("Created reference fMRI config file :  %s" %
                               loaded_project.fmri_config_file)
                     else:
-                        print("Loaded reference fMRI config file :  %s" %
+                        print_blue("Loaded reference fMRI config file :  %s" %
                               loaded_project.fmri_config_file)
 
                         # if datalad_is_available:
@@ -1930,38 +1935,42 @@ class CMP_BIDSAppWindowHandler(Handler):
             print("BIDS root directory : {}".format(
                 ui_info.ui.context["object"].bids_root))
         else:
-            print("Error: BIDS root invalid!")
+            print_error("Error: BIDS root invalid!")
             ui_info.ui.context["object"].settings_checked = False
 
         if os.path.isfile(ui_info.ui.context["object"].anat_config):
             print("Anatomical configuration file : {}".format(
                 ui_info.ui.context["object"].anat_config))
         else:
-            print("Error: Configuration file for anatomical pipeline not existing!")
+            print_error("Error: Configuration file for anatomical pipeline not existing!")
             ui_info.ui.context["object"].settings_checked = False
 
         if os.path.isfile(ui_info.ui.context["object"].dmri_config):
             print("Diffusion configuration file : {}".format(
                 ui_info.ui.context["object"].dmri_config))
         else:
-            print("Warning: Configuration file for diffusion pipeline not existing!")
+            print_warning("Warning: Configuration file for diffusion pipeline not existing!")
 
         if os.path.isfile(ui_info.ui.context["object"].fmri_config):
             print("fMRI configuration file : {}".format(
                 ui_info.ui.context["object"].fmri_config))
         else:
-            print("Warning: Configuration file for fMRI pipeline not existing!")
+            print_warning("Warning: Configuration file for fMRI pipeline not existing!")
 
         if os.path.isfile(ui_info.ui.context["object"].fs_license):
             print("Freesurfer license : {}".format(
                 ui_info.ui.context["object"].fs_license))
         else:
-            print("Error: Invalid Freesurfer license ({})!".format(
+            print_error("Error: Invalid Freesurfer license ({})!".format(
                 ui_info.ui.context["object"].fs_license))
             ui_info.ui.context["object"].settings_checked = False
 
-        print("Valid inputs for BIDS App : {}".format(
-            ui_info.ui.context["object"].settings_checked))
+        msg = f'Valid inputs for BIDS App : {ui_info.ui.context["object"].settings_checked}'
+        if ui_info.ui.context["object"].settings_checked:
+            print(msg)
+        else:
+            print_error(msg)
+
         print("Docker running ? {}".format(
             ui_info.ui.context["object"].docker_running))
         return True
@@ -2019,7 +2028,7 @@ class CMP_BIDSAppWindowHandler(Handler):
             cmd.append('--func_pipeline_config')
             cmd.append('/code/ref_fMRI_config.json')
 
-        print(cmd)
+        print_blue(' '.join(cmd))
 
         log_filename = os.path.join(ui_info.ui.context["object"].bids_root, 'derivatives/cmp',
                                     'sub-{}_log-cmpbidsapp.txt'.format(participant_label))

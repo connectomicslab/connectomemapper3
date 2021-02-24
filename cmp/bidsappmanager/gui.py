@@ -33,8 +33,8 @@ import cmp.bidsappmanager.project as project
 from cmp.project import CMP_Project_Info
 from cmp.info import __version__
 
-
-from cmtklib.util import return_button_style_sheet, BColors
+from cmtklib.util import return_button_style_sheet, \
+    print_blue, print_warning, print_error
 
 # Remove warnings visible whenever you import scipy (or another package) 
 # that was compiled against an older numpy than is installed.
@@ -920,7 +920,7 @@ class CMP_BIDSAppWindow(HasTraits):
         try:
             bids_layout = BIDSLayout(self.bids_root)
         except Exception:
-            print("Exception : Raised at BIDSLayout")
+            print_error("Exception : Raised at BIDSLayout")
             sys.exit(1)
 
         # Check if sMRI data is available in the dataset
@@ -979,9 +979,9 @@ class CMP_BIDSAppWindow(HasTraits):
             self.fs_license = os.path.join(
                 os.environ['FREESURFER_HOME'], 'license.txt')
         else:
-            print('Environment variable $FREESURFER_HOME not found')
+            print_error('Environment variable $FREESURFER_HOME not found')
             self.fs_license = ''
-            print('Freesurfer license unset ({})'.format(self.fs_license))
+            print_warning('Freesurfer license unset ({})'.format(self.fs_license))
 
         self.datalad_is_available = project.is_tool('datalad')
 
@@ -1052,28 +1052,28 @@ class CMP_BIDSAppWindow(HasTraits):
 
     def check_settings(self):
         """Checks if all the parameters of the BIDS App run are properly set before execution."""
-        print('\n-----------------------------------------')
-        print('BIDS App execution settings check summary')
-        print('-----------------------------------------')
+        print_warning('\n-----------------------------------------')
+        print_warning('BIDS App execution settings check summary')
+        print_warning('-----------------------------------------')
 
         self.settings_checked = True
 
         if os.path.isdir(self.bids_root):
             print(f'BIDS root directory : {self.bids_root}')
         else:
-            print(BColors.FAIL + "Error: BIDS root invalid!" + BColors.ENDC)
+            print_error("Error: BIDS root invalid!")
             self.settings_checked = False
 
         if os.path.exists(os.path.join(self.output_dir, 'cmp')):
             print(f'Output directory (existing) : {self.output_dir}')
         else:
             os.makedirs(os.path.join(self.output_dir, 'cmp'))
-            print(BColors.WARNING + f'Output directory (created) : {self.output_dir}' + BColors.ENDC)
+            print_warning(f'Output directory (created) : {self.output_dir}')
 
         if len(self.list_of_subjects_to_be_processed) > 0:
             print(f'Participant labels to be processed : {self.list_of_subjects_to_be_processed}')
         else:
-            print(BColors.FAIL + "Error: At least one participant label to be processed should selected!" + BColors.ENDC)
+            print_error("Error: At least one participant label to be processed should selected!")
             self.settings_checked = False
         # if not self.list_of_subjects_to_be_processed.empty():
         #     print("List of subjects to be processed : {}".format(self.list_of_subjects_to_be_processed))
@@ -1083,23 +1083,23 @@ class CMP_BIDSAppWindow(HasTraits):
         if os.path.isfile(self.anat_config):
             print(f'Anatomical configuration file : {self.anat_config}')
         else:
-            print(BColors.FAIL + "Error: Configuration file for anatomical pipeline not existing!" + BColors.ENDC)
+            print_error("Error: Configuration file for anatomical pipeline not existing!")
             self.settings_checked = False
 
         if os.path.isfile(self.dmri_config):
             print(f'Diffusion configuration file : {self.dmri_config}')
         else:
-            print(BColors.WARNING + "Warning: Configuration file for diffusion pipeline not existing!" + BColors.ENDC)
+            print_warning("Warning: Configuration file for diffusion pipeline not existing!")
 
         if os.path.isfile(self.fmri_config):
             print(f'fMRI configuration file : {self.fmri_config}')
         else:
-            print(BColors.WARNING + "Warning: Configuration file for fMRI pipeline not existing!" + BColors.ENDC)
+            print_warning("Warning: Configuration file for fMRI pipeline not existing!")
 
         if os.path.isfile(self.fs_license):
             print(f'Freesurfer license : {self.fs_license}')
         else:
-            print(BColors.FAIL + f'Error: Invalid Freesurfer license ({self.fs_license})!' + BColors.ENDC)
+            print_error(f'Error: Invalid Freesurfer license ({self.fs_license})!')
             self.settings_checked = False
 
         # if os.path.isdir(self.fs_average):
@@ -1203,7 +1203,7 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('--mrtrix_random_seed')
             cmd.append('{}'.format(self.mrtrix_random_seed))
 
-        print('... BIDS App execution command: {}'.format(cmd))
+        print_blue('... BIDS App execution command: {}'.format(' '.join(cmd)))
 
         # log_filename = os.path.join(
         #     self.bids_root, 'derivatives', 'cmp', 'main_log-cmpbidsapp.txt')
@@ -1288,7 +1288,7 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('--func_pipeline_config')
             cmd.append('/{{inputs[{}]}}'.format(i))
 
-        print(BColors.OKBLUE + '... Datalad cmd : {}'.format(cmd) + BColors.ENDC)
+        print_blue('... Datalad cmd : {}'.format(' '.join(cmd)))
 
         # log_filename = os.path.join(self.bids_root,'derivatives','cmp','main-datalad_log-cmpbidsapp.txt')
 
@@ -1365,7 +1365,7 @@ class CMP_BIDSAppWindow(HasTraits):
         It implements all steps in the creation and execution of the BIDS App
         with or without datalad.
         """
-        print("Start BIDS App")
+        print_blue("Start BIDS App")
 
         # Copy freesurfer license into dataset/code directory at the location
         # the BIDS app expects to find it.
@@ -1380,7 +1380,7 @@ class CMP_BIDSAppWindow(HasTraits):
             print('... dst : {}'.format(dst))
             shutil.copy2(src=self.fs_license, dst=dst)
         else:
-            print(
+            print_warning(
                 '> FreeSurfer license copy skipped as it already exists(BIDS App Manager) ')
 
         print("> Datalad available: {}".format(self.datalad_is_available))
@@ -1414,7 +1414,7 @@ class CMP_BIDSAppWindow(HasTraits):
                        f'{self.bids_root}']
                 cmd = " ".join(cmd)
                 try:
-                    print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
+                    print_blue(f'... cmd: {cmd}')
                     self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
                     print("    INFO: A datalad dataset has been created with success at the root directory!")
                     msg = 'Add all files to datalad. ' \
@@ -1422,7 +1422,7 @@ class CMP_BIDSAppWindow(HasTraits):
 
                 except Exception:
                     msg = 'Save state after error at datalad dataset creation'
-                    print(BColors.FAIL + "    DATALAD ERROR: Failed to create the datalad dataset" + BColors.ENDC)
+                    print_error("    DATALAD ERROR: Failed to create the datalad dataset")
             else:
                 msg = 'Datalad dataset up-to-date and ready to be linked with the BIDS App.'
                 print("    INFO: A datalad dataset already exists!")
@@ -1438,10 +1438,10 @@ class CMP_BIDSAppWindow(HasTraits):
 
             cmd = f'datalad save -d . -m "{msg}"'
             try:
-                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print(BColors.FAIL + "    DATALAD ERROR: Failed to add changes to dataset" + BColors.ENDC)
+                print_error("    DATALAD ERROR: Failed to add changes to dataset")
 
             datalad_container = os.path.join(self.bids_root,
                                              '.datalad',
@@ -1513,12 +1513,11 @@ class CMP_BIDSAppWindow(HasTraits):
                 if self.datalad_update_environment:
                     cmd = f'{cmd} --update'
                 try:
-                    print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
+                    print_blue(f'... cmd: {cmd}')
                     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
                     print("    INFO: Container image has been linked to dataset with success!")
                 except Exception:
-                    print(BColors.FAIL +
-                          "   DATALAD ERROR: Failed to link the container image to the dataset" + BColors.ENDC)
+                    print_error("   DATALAD ERROR: Failed to link the container image to the dataset")
 
             # Create a list of files to be retrieved by datalad get
             datalad_get_list = [self.anat_config]
@@ -1557,34 +1556,34 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd = 'datalad save -d . -m "Dataset state after adding the container image. '\
                   'Datasets ready to get files via datalad run."'
             try:
-                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print(BColors.FAIL + "    DATALAD ERROR: Failed to add existing files to dataset" + BColors.ENDC)
+                print_error("    DATALAD ERROR: Failed to add existing files to dataset")
 
             cmd = 'datalad run -d . -m "Get files for sub-{}" bash -c "datalad get {}"'.format(
                 self.list_of_subjects_to_be_processed, " ".join(datalad_get_list))
             try:
-                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print(BColors.FAIL + "    DATALAD ERROR: Failed to get files (cmd: datalad get {})".format(
-                    " ".join(datalad_get_list)) + BColors.ENDC)
+                print_error("    DATALAD ERROR: Failed to get files (cmd: datalad get {})".format(
+                    " ".join(datalad_get_list)))
 
             cmd = 'datalad save -d . -m "Dataset state after getting the files. Dataset ready for connectome mapping." '\
                   '--version-tag ready4analysis-{}'.format(time.strftime("%Y%m%d-%H%M%S"))
             try:
-                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print(BColors.FAIL + "    DATALAD ERROR: Failed to commit changes to dataset" + BColors.ENDC)
+                print_error("    DATALAD ERROR: Failed to commit changes to dataset")
 
             cmd = 'datalad status -d .'
             try:
-                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print(BColors.FAIL + "    DATALAD ERROR: Failed to run datalad rev-status" + BColors.ENDC)
+                print_error("    DATALAD ERROR: Failed to run datalad rev-status")
 
         # maxprocs = multiprocessing.cpu_count()
         processes = []
@@ -1605,7 +1604,6 @@ class CMP_BIDSAppWindow(HasTraits):
         while len(processes) > 0:
             self.manage_bidsapp_procs(processes)
 
-
         if self.datalad_is_available and self.data_provenance_tracking:
             # Clean remaining cache files generated in tmp/ of the docker image
             # project.clean_cache(self.bids_root)
@@ -1613,17 +1611,17 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd = 'datalad save -d . -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{}'.format(
                 self.bidsapp_tag, time.strftime("%Y%m%d-%H%M%S"))
             try:
-                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print(BColors.FAIL + "    DATALAD ERROR: Failed to commit derivatives to datalad dataset" + BColors.ENDC)
+                print_error("    DATALAD ERROR: Failed to commit derivatives to datalad dataset")
 
             cmd = 'datalad diff -t HEAD~1'
             try:
-                print(BColors.OKBLUE + f'... cmd: {cmd}' + BColors.ENDC)
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print(BColors.FAIL + "    DATALAD ERROR: Failed to run datalad diff -t HEAD~1" + BColors.ENDC)
+                print_error("    DATALAD ERROR: Failed to run datalad diff -t HEAD~1")
 
         print('Processing with BIDS App Finished')
         self.docker_running = False
@@ -2154,17 +2152,17 @@ class CMP_InspectorWindow(HasTraits):
                     if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         self.output_fmri_available = True
 
-            print("Anatomical output(s) available : %s" %
+            print_blue("Anatomical output(s) available : %s" %
                   self.output_anat_available)
-            print("Diffusion output(s) available : %s" %
+            print_blue("Diffusion output(s) available : %s" %
                   self.output_dmri_available)
-            print("fMRI output(s) available : %s" % self.output_fmri_available)
+            print_blue("fMRI output(s) available : %s" % self.output_fmri_available)
 
             if self.output_anat_available or self.output_dmri_available or self.output_fmri_available:
                 valid_selected_subject = True
             else:
                 self.error_msg = "No output available! Please select another subject (and session if any)!"
-
+                print_error(self.error_msg)
                 select = error(message=self.error_msg,
                                title='Error', buttons=['OK', 'Cancel'])
                 aborded = not select
@@ -2398,4 +2396,3 @@ class CMP_MainWindow(HasTraits):
                                          dmri_config=dmri_config,
                                          fmri_config=fmri_config
                                          )
-        # self.bidsapp.configure_traits()
