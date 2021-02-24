@@ -1733,12 +1733,18 @@ class CMP_MainWindowHandler(Handler):
                 ui_info.ui.context["object"].anat_pipeline = self.anat_pipeline
                 loaded_project.t1_available = self.anat_inputs_checked
 
-                loaded_project.parcellation_scheme = get_anat_process_detail_json(
-                        loaded_project, 'parcellation_stage', 'parcellation_scheme')
-                loaded_project.freesurfer_subjects_dir = get_anat_process_detail_json(
-                        loaded_project, 'segmentation_stage', 'freesurfer_subjects_dir')
-                loaded_project.freesurfer_subject_id = get_anat_process_detail_json(
-                        loaded_project, 'segmentation_stage', 'freesurfer_subject_id')
+                # loaded_project.parcellation_scheme = get_anat_process_detail_json(
+                #         loaded_project, 'parcellation_stage', 'parcellation_scheme')
+                # loaded_project.freesurfer_subjects_dir = get_anat_process_detail_json(
+                #         loaded_project, 'segmentation_stage', 'freesurfer_subjects_dir')
+                # loaded_project.freesurfer_subject_id = get_anat_process_detail_json(
+                #         loaded_project, 'segmentation_stage', 'freesurfer_subject_id')
+                loaded_project.parcellation_scheme = \
+                    self.anat_pipeline.stages['Parcellation'].config.parcellation_scheme
+                loaded_project.freesurfer_subjects_dir = \
+                    self.anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
+                loaded_project.freesurfer_subject_id = \
+                    self.anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
 
                 ui_info.ui.context["object"].project_info = loaded_project
 
