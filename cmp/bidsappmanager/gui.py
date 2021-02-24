@@ -33,9 +33,6 @@ import cmp.bidsappmanager.project as project
 from cmp.project import CMP_Project_Info
 from cmp.info import __version__
 
-from cmp.pipelines.anatomical.anatomical import AnatomicalPipeline
-from cmp.pipelines.diffusion.diffusion import DiffusionPipeline
-from cmp.pipelines.functional.fMRI import fMRIPipeline
 
 from cmtklib.util import return_button_style_sheet, BColors
 
@@ -549,7 +546,7 @@ class CMP_Project_InfoUI(CMP_Project_Info):
 
 
 class MultiSelectAdapter(TabularAdapter):
-    """This adapter is used by both the left and right tables."""
+    """This adapter is used by left and right tables for selection of subject to be processed."""
 
     # Titles and column names for each column of a table.
     # In this example, each table has only one column.
@@ -1015,7 +1012,7 @@ class CMP_BIDSAppWindow(HasTraits):
         else:
             self.number_of_threads_max = number_of_threads_max
 
-        print('Set number of threads max to : {}'.format(self.number_of_threads_max))
+        print('Update number of threads max to : {}'.format(self.number_of_threads_max))
 
     def update_run_anat_pipeline(self, new):
         """Callback function when ``run_anat_pipeline`` is updated."""
@@ -1346,9 +1343,12 @@ class CMP_BIDSAppWindow(HasTraits):
         merged_env = os.environ
         if env is not None:
             merged_env.update(env)
-        process = Popen(command, stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT, shell=True,
-                        env=merged_env, cwd=cwd)
+        process = Popen(command,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        shell=True,
+                        env=merged_env,
+                        cwd=cwd)
         while True:
             line = process.stdout.readline()
             # Remove the "b'" prefix and the "'" at the end return by datalad
@@ -1382,7 +1382,6 @@ class CMP_BIDSAppWindow(HasTraits):
         else:
             print(
                 '> FreeSurfer license copy skipped as it already exists(BIDS App Manager) ')
-
 
         print("> Datalad available: {}".format(self.datalad_is_available))
 
@@ -1425,8 +1424,7 @@ class CMP_BIDSAppWindow(HasTraits):
                     msg = 'Save state after error at datalad dataset creation'
                     print(BColors.FAIL + "    DATALAD ERROR: Failed to create the datalad dataset" + BColors.ENDC)
             else:
-                msg = 'All files tracked by datalad. '\
-                          'Datalad dataset up-to-date and ready to be linked with the BIDS App.'
+                msg = 'Datalad dataset up-to-date and ready to be linked with the BIDS App.'
                 print("    INFO: A datalad dataset already exists!")
 
             # log_filename = os.path.join(self.bids_root,'derivatives','cmp','main-datalad_log-cmpbidsapp.txt')
@@ -1962,10 +1960,6 @@ class CMP_InspectorWindow(HasTraits):
         self.dmri_inputs_checked = dmri_inputs_checked
         self.fmri_inputs_checked = fmri_inputs_checked
 
-        print('Fix BIDS root directory to {}'.format(
-            self.project_info.base_directory))
-
-
         aborded = self.select_subject()
 
         if aborded:
@@ -2129,8 +2123,6 @@ class CMP_InspectorWindow(HasTraits):
                     self.anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(
                         self.project_info.base_directory, 'derivatives', 'freesurfer',
                         '{}'.format(self.project_info.subject))
-
-            print("[PIPELINE INIT DONE]")
 
             if self.anat_pipeline is not None:
                 print("> Anatomical pipeline output inspection")

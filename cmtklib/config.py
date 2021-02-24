@@ -198,13 +198,20 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type,
 
     if project.subject_session != '':  # Session structure
         # print('With session : {}'.format(project.subject_session))
-        subject_conf_file = os.path.join(subject_derivatives_dir, 'cmp', project.subject, project.subject_session,
-                                         "{}_{}_{}_config.json".format(project.subject, project.subject_session,
-                                                                      pipeline_type))
+        subject_conf_file = os.path.join(subject_derivatives_dir,
+                                         'cmp',
+                                         project.subject,
+                                         project.subject_session,
+                                         "{}_{}_{}_config.json".format(project.subject,
+                                                                       project.subject_session,
+                                                                       pipeline_type))
     else:
         # print('With NO session ')
-        subject_conf_file = os.path.join(subject_derivatives_dir, 'cmp', project.subject,
-                                         "{}_{}_config.json".format(project.subject, pipeline_type))
+        subject_conf_file = os.path.join(subject_derivatives_dir,
+                                         'cmp',
+                                         project.subject,
+                                         "{}_{}_config.json".format(project.subject,
+                                                                    pipeline_type))
 
     if os.path.isfile(subject_conf_file):
         print("WARNING: rewriting config file {}".format(subject_conf_file))

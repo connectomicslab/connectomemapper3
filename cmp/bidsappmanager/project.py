@@ -196,13 +196,11 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
                                                              '%s_diffusion_config.json' % project_info.subject)
 
             if os.path.exists(project_info.dmri_config_file):
-                warn_res = project_info.configure_traits(
-                    view='dmri_warning_view')
+                warn_res = project_info.configure_traits(view='dmri_warning_view')
                 if warn_res:
                     print("Read diffusion config file (%s)" %
                           project_info.dmri_config_file)
-                    dmri_save_config(
-                        dmri_pipeline, project_info.dmri_config_file)
+                    dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
                 else:
                     return None
             else:
@@ -1532,7 +1530,7 @@ class CMP_MainWindowHandler(Handler):
                 print('    ERROR: Datalad is not installed!')
 
             # Install dataset via datalad
-            # datalad install -s ssh://tourbier@155.105.77.64:/home/tourbier/Data/ds-newtest /media/localadmin/HagmannHDD/Seb/ds-newtest5
+            # datalad install -s ssh://user@IP_ADDRESS:/remote/path/to/ds-example /local/path/to/ds-example
             #
 
         t1_available = False
@@ -1664,7 +1662,7 @@ class CMP_MainWindowHandler(Handler):
             if t1_available and diffusion_available:
                 dmri_inputs_checked = True
 
-            if t2_available:
+            if t2_available and debug:
                 print('T2 available')
 
             fmri_inputs_checked = False
@@ -1716,8 +1714,7 @@ class CMP_MainWindowHandler(Handler):
                     #     except Exception:
                     #         print("    ERROR: Failed to get file")
 
-                    anat_load_config_json(
-                        self.anat_pipeline, loaded_project.anat_config_file)
+                    anat_load_config_json(self.anat_pipeline, loaded_project.anat_config_file)
 
                 self.anat_pipeline.config_file = loaded_project.anat_config_file
 
@@ -1792,8 +1789,6 @@ class CMP_MainWindowHandler(Handler):
 
                             if debug:
                                 print('****************************************')
-                                print()
-                                print('****************************************')
                                 print(files)
                                 print('****************************************')
 
@@ -1853,9 +1848,8 @@ class CMP_MainWindowHandler(Handler):
                         #     except Exception:
                         #         print("    ERROR: Failed to get file")
 
-                        dmri_load_config_json(
-                            self.dmri_pipeline, loaded_project.dmri_config_file)
-                        # TODO: check if diffusion imaging model (DSI/DTI/HARDI) is correct/valid.
+                        dmri_load_config_json(self.dmri_pipeline, loaded_project.dmri_config_file)
+                        # TODO: check if diffusion imaging model (DSI/DTI/HARDI/multishell) is correct/valid.
 
                     ui_info.ui.context["object"].dmri_pipeline = self.dmri_pipeline
                     loaded_project.dmri_available = self.dmri_inputs_checked
