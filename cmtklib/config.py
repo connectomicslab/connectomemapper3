@@ -115,6 +115,9 @@ def save_configparser_as_json(config, config_json_path, debug=True):
                 print_warning(f' .. Skip parameter {section} / {name}')
                 continue
 
+            if debug:
+                print_warning(f'Processing {section} / {name} / {value}')
+
             if isinstance(value, Iterable) and not isinstance(value, str):
                 config_json[section][name] = [x for x in value if x]
             elif isinstance(value, bool):
