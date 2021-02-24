@@ -46,11 +46,7 @@ class SegmentationConfigUI(SegmentationConfig):
                            Item('brain_mask_path', label='Brain mask path',
                                 visible_when='brain_mask_extraction_tool == "Custom"'),
                            'freesurfer_args',
-                           visible_when="seg_tool=='Freesurfer'"),
-                       Group(
-                           'white_matter_mask',
-                           Item('brain_mask_path', label='Brain mask'),
-                           visible_when='seg_tool=="Custom segmentation"'))
+                           visible_when="seg_tool=='Freesurfer'"))
 
 
 class SegmentationStageUI(SegmentationStage):
