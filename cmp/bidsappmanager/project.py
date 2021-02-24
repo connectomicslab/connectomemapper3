@@ -24,9 +24,9 @@ from pyface.api import FileDialog, OK
 # Own imports
 from . import core
 from . import gui
-from cmp.bidsappmanager.pipelines.anatomical import anatomical as Anatomical_pipeline
-from cmp.bidsappmanager.pipelines.diffusion import diffusion as Diffusion_pipeline
-from cmp.bidsappmanager.pipelines.functional import fMRI as FMRI_pipeline
+from cmp.bidsappmanager.pipelines.anatomical import anatomical as anatomical_pipeline
+from cmp.bidsappmanager.pipelines.diffusion import diffusion as diffusion_pipeline
+from cmp.bidsappmanager.pipelines.functional import fMRI as fMRI_pipeline
 from cmtklib.config import anat_load_config_json, anat_save_config, \
     dmri_load_config_json, dmri_save_config, fmri_load_config_json, fmri_save_config, \
     get_anat_process_detail_json, get_dmri_process_detail_json, get_fmri_process_detail_json
@@ -163,7 +163,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
     gui : bool
         If True, display messages in GUI
     """
-    dmri_pipeline = Diffusion_pipeline.DiffusionPipelineUI(project_info)
+    dmri_pipeline = diffusion_pipeline.DiffusionPipelineUI(project_info)
 
     derivatives_directory = os.path.join(
         project_info.base_directory, 'derivatives')
@@ -239,7 +239,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
     gui : bool
         If True, display messgae in GUI
     """
-    fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(project_info)
+    fmri_pipeline = fMRI_pipeline.fMRIPipelineUI(project_info)
 
     derivatives_directory = os.path.join(
         project_info.base_directory, 'derivatives')
@@ -310,7 +310,7 @@ def init_anat_project(project_info, is_new_project):
     is_new_project : bool
         If True, this is a new project which has been never processed
     """
-    anat_pipeline = Anatomical_pipeline.AnatomicalPipelineUI(project_info)
+    anat_pipeline = anatomical_pipeline.AnatomicalPipelineUI(project_info)
 
     derivatives_directory = os.path.join(project_info.base_directory, 'derivatives')
 
@@ -1678,7 +1678,7 @@ class CMP_MainWindowHandler(Handler):
 
             if anat_inputs_checked:
 
-                self.anat_pipeline = Anatomical_pipeline.AnatomicalPipelineUI(
+                self.anat_pipeline = anatomical_pipeline.AnatomicalPipelineUI(
                     loaded_project)
                 self.anat_pipeline.number_of_cores = loaded_project.number_of_cores
 
@@ -1737,7 +1737,7 @@ class CMP_MainWindowHandler(Handler):
 
                 if dmri_inputs_checked:
                     self.dmri_pipeline = \
-                        Diffusion_pipeline.DiffusionPipelineUI(loaded_project)
+                        diffusion_pipeline.DiffusionPipelineUI(loaded_project)
                     self.dmri_pipeline.number_of_cores = loaded_project.number_of_cores
                     self.dmri_pipeline.parcellation_scheme = \
                         ui_info.ui.context["object"].project_info.parcellation_scheme
@@ -1865,8 +1865,7 @@ class CMP_MainWindowHandler(Handler):
                     self.project_loaded = True
 
                 if fmri_inputs_checked:
-                    self.fmri_pipeline = FMRI_pipeline.fMRIPipelineUI(
-                        loaded_project)
+                    self.fmri_pipeline = fMRI_pipeline.fMRIPipelineUI(loaded_project)
                     self.fmri_pipeline.number_of_cores = loaded_project.number_of_cores
                     self.fmri_pipeline.parcellation_scheme = ui_info.ui.context[
                         "object"].project_info.parcellation_scheme
