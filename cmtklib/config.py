@@ -397,7 +397,7 @@ def set_pipeline_attributes_from_config(pipeline, config):
             int(config['Multi-processing']['number_of_cores']))
 
 
-def create_configparser_from_pipeline(pipeline):
+def create_configparser_from_pipeline(pipeline, debug=False):
     """Create a `ConfigParser` object from a Pipeline instance.
 
     Parameters
@@ -405,19 +405,26 @@ def create_configparser_from_pipeline(pipeline):
     pipeline : Instance(Pipeline)
         Instance of pipeline
 
+    debug : bool
+        If `True`, show additional prints
+
     Returns
     -------
     config : Instance(`configparser.ConfigParser`)
         Instance of ConfigParser
     """
     config = configparser.RawConfigParser()
+    # Add global section and corresponding parameters
     config.add_section('Global')
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
                    'trait' not in prop]  # possibly dangerous..?
-    print(global_keys)
+    if debug:
+        print(global_keys)
     for key in global_keys:
         # if key != "subject" and key != "subjects":
         config.set('Global', key, getattr(pipeline.global_conf, key))
+
+    # Add stage section and corresponding parameters
     for stage in list(pipeline.stages.values()):
         config.add_section(stage.name)
         stage_keys = [prop for prop in list(stage.config.traits().keys()) if

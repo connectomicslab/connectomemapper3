@@ -1587,14 +1587,11 @@ class CMP_MainWindowHandler(Handler):
                 if len(sessions) > 0:
                     print(
                         '    ... Check for available input modalities in the first session...')
-
-                    import bids
-                    print(bids.__version__)
-                    print(subject)
-                    print(sessions[0])
+                    if debug:
+                        print(subject)
+                        print(sessions[0])
                     query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='bold',
                                                                        extensions=['nii', 'nii.gz'])]
-                    print(query_files)
                     if len(query_files) > 0:
                         if debug:
                             print("BOLD available: {}".format(query_files))
@@ -1652,8 +1649,9 @@ class CMP_MainWindowHandler(Handler):
                         fmri_available = True
 
             except Exception:
-                error(message="Invalid BIDS dataset. Please see documentation for more details.",
-                      title="BIDS error")
+                msg = "Invalid BIDS dataset. Please see documentation for more details."
+                print_error(msg)
+                error(message=msg, title="BIDS error")
                 return
 
             ui_info.ui.context["object"].project_info = loaded_project
@@ -1692,7 +1690,6 @@ class CMP_MainWindowHandler(Handler):
                     loaded_project.base_directory, 'code', 'ref_anatomical_config.json')
                 loaded_project.anat_config_file = anat_config_file
 
-                # and dmri_pipelineis not None:
                 if self.anat_pipeline is not None and not os.path.isfile(anat_config_file):
                     if not os.path.exists(code_directory):
                         try:

@@ -122,7 +122,9 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.output_directory,
                                                                                 'freesurfer', subject_id)
 
-        print('freesurfer_subject_id: ' + self.stages['Segmentation'].config.freesurfer_subject_id)
+        print('Freesurfer subjects directory: ' +
+              self.stages['Segmentation'].config.freesurfer_subjects_dir)
+
         for stage in list(self.stages.keys()):
             if project_info.subject_session != '':
                 self.stages[stage].stage_dir = os.path.join(self.base_directory, "derivatives", 'nipype', self.subject,

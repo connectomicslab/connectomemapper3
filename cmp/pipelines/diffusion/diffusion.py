@@ -117,8 +117,6 @@ class DiffusionPipeline(Pipeline):
         --------
         cmp.project.CMP_Project_Info
         """
-        print('{}'.format(project_info.base_directory))
-
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = project_info.subject
 
@@ -146,7 +144,6 @@ class DiffusionPipeline(Pipeline):
                                         output_dir=self.output_directory),
             'Connectome': ConnectomeStage(bids_dir=project_info.base_directory,
                                           output_dir=self.output_directory)}
-        print(self.stages)
 
         Pipeline.__init__(self, project_info)
 

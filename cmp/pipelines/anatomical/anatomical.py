@@ -137,7 +137,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.output_directory,
                                                                                 'freesurfer', subject_id)
 
-        print('freesurfer_subject_id: ' + self.stages['Segmentation'].config.freesurfer_subject_id)
+        # print('freesurfer_subject_id: ' + self.stages['Segmentation'].config.freesurfer_subject_id)
 
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation, 'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation, 'parcellation_scheme')
