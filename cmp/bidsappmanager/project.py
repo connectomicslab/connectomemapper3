@@ -29,7 +29,8 @@ from cmp.bidsappmanager.pipelines.diffusion import diffusion as diffusion_pipeli
 from cmp.bidsappmanager.pipelines.functional import fMRI as fMRI_pipeline
 from cmtklib.config import anat_load_config_json, anat_save_config, \
     dmri_load_config_json, dmri_save_config, fmri_load_config_json, fmri_save_config, \
-    get_anat_process_detail_json, get_dmri_process_detail_json, get_fmri_process_detail_json
+    get_anat_process_detail_json, get_dmri_process_detail_json, get_fmri_process_detail_json, \
+    convert_config_ini_2_json
 from cmtklib.util import print_blue, print_warning, print_error
 
 
@@ -1559,8 +1560,9 @@ class CMP_MainWindowHandler(Handler):
                 # loaded_project.subjects = ['sub-'+str(subj) for subj in bids_layout.get_subjects()]
                 loaded_project.subjects.sort()
 
-                print("Available subjects : ")
-                print(loaded_project.subjects)
+                if debug:
+                    print("Available subjects : ")
+                    print(loaded_project.subjects)
                 loaded_project.number_of_subjects = len(loaded_project.subjects)
 
                 loaded_project.subject = loaded_project.subjects[0]
@@ -1687,7 +1689,17 @@ class CMP_MainWindowHandler(Handler):
                     loaded_project.base_directory, 'code')
 
                 anat_config_file = os.path.join(
-                    loaded_project.base_directory, 'code', 'ref_anatomical_config.json')
+                    code_directory, 'ref_anatomical_config.json')
+
+                # Check for old configuration file with INI format
+                # when there is no existing json configuration file
+                # and convert it to JSON format if so
+                if not os.path.isfile(anat_config_file):
+                    anat_config_ini_file = os.path.join(
+                        code_directory, 'ref_anatomical_config.ini')
+                    if os.path.isfile(anat_config_ini_file):
+                        anat_config_file = convert_config_ini_2_json(anat_config_ini_file)
+
                 loaded_project.anat_config_file = anat_config_file
 
                 if self.anat_pipeline is not None and not os.path.isfile(anat_config_file):
@@ -1740,11 +1752,17 @@ class CMP_MainWindowHandler(Handler):
                         ui_info.ui.context["object"].project_info.parcellation_scheme
 
                     code_directory = os.path.join(loaded_project.base_directory, 'code')
-
                     dmri_config_file = os.path.join(code_directory, 'ref_diffusion_config.json')
 
-                    loaded_project.dmri_config_file = dmri_config_file
+                    # Check for old configuration file with INI format
+                    # when there is no existing json configuration file
+                    # and convert it to JSON format if so
+                    if not os.path.isfile(dmri_config_file):
+                        dmri_config_ini_file = os.path.join(code_directory, 'ref_diffusion_config.ini')
+                        if os.path.isfile(dmri_config_ini_file):
+                            dmri_config_file = convert_config_ini_2_json(dmri_config_ini_file)
 
+                    loaded_project.dmri_config_file = dmri_config_file
                     self.dmri_pipeline.config_file = dmri_config_file
 
                     if not os.path.isfile(dmri_config_file) and self.dmri_pipeline is not None:
@@ -1869,11 +1887,17 @@ class CMP_MainWindowHandler(Handler):
                         'FSL (Linear)', 'BBregister (FS)']
 
                     code_directory = os.path.join(loaded_project.base_directory, 'code')
-
                     fmri_config_file = os.path.join(code_directory, 'ref_fMRI_config.json')
 
-                    loaded_project.fmri_config_file = fmri_config_file
+                    # Check for old configuration file with INI format
+                    # when there is no existing json configuration file
+                    # and convert it to JSON format if so
+                    if not os.path.isfile(fmri_config_file):
+                        fmri_config_ini_file = os.path.join(code_directory, 'ref_fMRI_config.ini')
+                        if os.path.isfile(fmri_config_ini_file):
+                            fmri_config_file = convert_config_ini_2_json(fmri_config_ini_file)
 
+                    loaded_project.fmri_config_file = fmri_config_file
                     self.fmri_pipeline.config_file = fmri_config_file
 
                     if not os.path.isfile(fmri_config_file) and self.fmri_pipeline is not None:
