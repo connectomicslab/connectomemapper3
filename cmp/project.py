@@ -32,8 +32,6 @@ warnings.filterwarnings("ignore",
                                 " Falling back on the Layout's root directory. If this isn't the intended behavior, "
                                 "make sure the config file for this domain includes a 'root' key.")
 
-# from cmtklib.util import remove_aborded_interface_pickles, fix_dataset_directory_in_pickles
-
 
 class CMP_Project_Info(HasTraits):
     """Class used to store all properties of a processing project.

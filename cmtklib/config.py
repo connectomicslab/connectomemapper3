@@ -47,7 +47,6 @@ def check_configuration_version(config):
     return is_same
 
 
-
 def check_configuration_format(config_path):
     """Check format of the configuration file.
 
