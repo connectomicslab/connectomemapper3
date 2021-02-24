@@ -67,7 +67,7 @@ def check_configuration_format(config_path):
     return ext
 
 
-def save_configparser_as_json(config, config_json_path, debug=False):
+def save_configparser_as_json(config, config_json_path, debug=True):
     """Save a ConfigParser to JSON file.
 
     Parameters
@@ -79,7 +79,7 @@ def save_configparser_as_json(config, config_json_path, debug=False):
         Output path of JSON configuration file
 
     debug : bool
-        Extra print for debugging
+        If `True`, show additional prints
     """
     config_json = {}
 
@@ -133,6 +133,9 @@ def save_configparser_as_json(config, config_json_path, debug=False):
                 del config_json[section][name]
 
     config_json['Global']['version'] = __version__
+
+    if debug:
+        print(config_json)
 
     with open(config_json_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
@@ -338,7 +341,7 @@ def get_fmri_process_detail_json(project_info, section, detail):
     return config[section][detail]
 
 
-def set_pipeline_attributes_from_config(pipeline, config):
+def set_pipeline_attributes_from_config(pipeline, config, debug=True):
     """Set the pipeline stage attributes given a configuration.
 
     Parameters
@@ -349,6 +352,9 @@ def set_pipeline_attributes_from_config(pipeline, config):
     config : Dict
         Dictionary of configuration parameter loaded
         from the JSON configuration file
+
+    debug : bool
+        If `True`, show additional prints
     """
     global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
                    'trait' not in prop]  # possibly dangerous..?
@@ -378,6 +384,8 @@ def set_pipeline_attributes_from_config(pipeline, config):
                             conf_value = eval(conf_value)
                         except Exception:
                             pass
+                        if debug:
+                            print(f'Set {sub_config}.{sub_key} to {conf_value}')
                         setattr(sub_config, sub_key, conf_value)
                     except Exception:
                         pass
@@ -389,6 +397,8 @@ def set_pipeline_attributes_from_config(pipeline, config):
                         conf_value = eval(conf_value)
                     except Exception:
                         pass
+                    if debug:
+                        print(f'Set {stage.config}.{key} to {conf_value}')
                     setattr(stage.config, key, conf_value)
                 except Exception:
                     pass
@@ -397,7 +407,7 @@ def set_pipeline_attributes_from_config(pipeline, config):
             int(config['Multi-processing']['number_of_cores']))
 
 
-def create_configparser_from_pipeline(pipeline, debug=False):
+def create_configparser_from_pipeline(pipeline, debug=True):
     """Create a `ConfigParser` object from a Pipeline instance.
 
     Parameters
@@ -442,6 +452,10 @@ def create_configparser_from_pipeline(pipeline, debug=False):
 
     config.add_section('Multi-processing')
     config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
+
+    if debug:
+        print(config)
+
     return config
 
 
