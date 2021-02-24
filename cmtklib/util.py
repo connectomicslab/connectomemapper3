@@ -34,6 +34,39 @@ class BColors:
     UNDERLINE = '\033[4m'
 
 
+def print_warning(message):
+    """Print yellow-colored warning message
+
+    Parameters
+    ----------
+    message : string
+        The string of the message to be printed
+    """
+    print(BColors.WARNING + message + BColors.ENDC)
+
+
+def print_error(message):
+    """Print red-colored error message
+
+    Parameters
+    ----------
+    message : string
+        The string of the message to be printed
+    """
+    print(BColors.FAIL + message + BColors.ENDC)
+
+
+def print_blue(message):
+    """Print blue-colored message
+
+    Parameters
+    ----------
+    message : string
+        The string of the message to be printed
+    """
+    print(BColors.OKBLUE + message + BColors.ENDC)
+
+
 def return_button_style_sheet(image, image_disabled=None, verbose=False):
     """Return Qt style sheet for QPushButton with image
 
