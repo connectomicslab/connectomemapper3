@@ -1699,13 +1699,11 @@ class CMP_MainWindowHandler(Handler):
                         finally:
                             print("Created directory %s" % code_directory)
 
+                    print_blue(">> Create new reference anatomical config file...")
                     anat_save_config(self.anat_pipeline,
                                      loaded_project.anat_config_file)
-                    print_blue(">> Created reference anatomical config file :  %s" %
-                          loaded_project.anat_config_file)
-
                 else:
-                    print_blue(">> Loaded reference anatomical config file :  %s" %
+                    print_blue(">> Load reference anatomical config file :  %s" %
                           loaded_project.anat_config_file)
                     # if datalad_is_available:
                     #     print('... Datalad get anatomical config file : {}'.format(loaded_project.anat_config_file))
@@ -1834,11 +1832,10 @@ class CMP_MainWindowHandler(Handler):
                         self.dmri_pipeline.global_conf.dmri_bids_acq = loaded_project.dmri_bids_acq
                         self.dmri_pipeline.stages[
                             "Diffusion"].diffusion_imaging_model = loaded_project.diffusion_imaging_model
+                        print_blue(">> Create new reference diffusion config file...")
                         dmri_save_config(self.dmri_pipeline, dmri_config_file)
-                        print_blue(">> Created reference diffusion config file :  %s" %
-                              loaded_project.dmri_config_file)
                     else:
-                        print_blue(">> Loaded reference diffusion config file :  %s" %
+                        print_blue(">> Load reference diffusion config file :  %s" %
                               loaded_project.dmri_config_file)
 
                         # if datalad_is_available:
@@ -1880,11 +1877,10 @@ class CMP_MainWindowHandler(Handler):
                     self.fmri_pipeline.config_file = fmri_config_file
 
                     if not os.path.isfile(fmri_config_file) and self.fmri_pipeline is not None:
+                        print_blue("Create new reference fMRI config file...")
                         fmri_save_config(self.fmri_pipeline, fmri_config_file)
-                        print_blue("Created reference fMRI config file :  %s" %
-                              loaded_project.fmri_config_file)
                     else:
-                        print_blue("Loaded reference fMRI config file :  %s" %
+                        print_blue("Load reference fMRI config file :  %s" %
                               loaded_project.fmri_config_file)
 
                         # if datalad_is_available:
@@ -2056,7 +2052,7 @@ class CMP_BIDSAppWindowHandler(Handler):
         ui_info : QtView
             TraitsUI QtView associated with this handler
         """
-        print("Start BIDS App")
+        print("[Start BIDS App]")
 
         maxprocs = multiprocessing.cpu_count()
         processes = []
