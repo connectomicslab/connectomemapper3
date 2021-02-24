@@ -68,7 +68,7 @@ def check_configuration_format(config_path):
     return ext
 
 
-def save_configparser_as_json(config, config_json_path):
+def save_configparser_as_json(config, config_json_path, debug=False):
     """Save a ConfigParser to JSON file.
 
     Parameters
@@ -78,6 +78,9 @@ def save_configparser_as_json(config, config_json_path):
 
     config_json_path : string
         Output path of JSON configuration file
+
+    debug : bool
+        Extra print for debugging
     """
     config_json = {}
 
@@ -117,7 +120,9 @@ def save_configparser_as_json(config, config_json_path):
             elif value and isinstance(value, str):
                 config_json[section][name] = [value.strip()]
             else:
-                print(f'Type: {type(value)} / value : {value}')
+                if debug:
+                    print_warning(
+                          f'... DEBUG : Type: {type(value)} / value : {value}')
                 config_json[section][name] = ''
 
             if len(config_json[section][name]) == 1:
