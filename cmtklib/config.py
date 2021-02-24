@@ -376,32 +376,35 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                 stage_sub_keys = [prop for prop in list(sub_config.traits().keys()) if
                                   'trait' not in prop]
                 for sub_key in stage_sub_keys:
-                    try:
+                    if stage.name in config.keys():
                         tmp_key = key + '.' + sub_key
                         if tmp_key in config[stage.name].keys():
                             conf_value = config[stage.name][tmp_key]
                         try:
                             conf_value = eval(conf_value)
+                            if debug:
+                                print(f'Set {sub_config}.{sub_key} to {conf_value}')
+                            setattr(sub_config, sub_key, conf_value)
                         except Exception:
+                            if debug:
+                                print_warning(' .. EXCEPTION raised while setting ' +
+                                              f'{sub_config}.{sub_key} to {conf_value}')
                             pass
-                        if debug:
-                            print(f'Set {sub_config}.{sub_key} to {conf_value}')
-                        setattr(sub_config, sub_key, conf_value)
-                    except Exception:
-                        pass
             else:
-                try:
+                if stage.name in config.keys():
                     if key in config[stage.name].keys():
                         conf_value = config[stage.name][key]
                     try:
                         conf_value = eval(conf_value)
+                        if debug:
+                            print(f'Set {stage.config}.{key} to {conf_value}')
+                        setattr(stage.config, key, conf_value)
                     except Exception:
+                        if debug:
+                            print_warning(' .. EXCEPTION raised while setting ' +
+                                          f'{stage.config}.{key} to {conf_value}')
                         pass
-                    if debug:
-                        print(f'Set {stage.config}.{key} to {conf_value}')
-                    setattr(stage.config, key, conf_value)
-                except Exception:
-                    pass
+
     setattr(pipeline,
             'number_of_cores',
             int(config['Multi-processing']['number_of_cores']))
