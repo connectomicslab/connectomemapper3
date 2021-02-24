@@ -214,11 +214,16 @@ COPY . /app/connectomemapper3
 RUN /bin/bash -c ". activate ${CONDA_ENV} &&\
     python setup_cmp.py install"
 
+# Create cache directory for python eggs
+RUN mkdir -p /cache/python-eggs && \
+    chmod -R 777 /cache/python-eggs
+
 # Environmment setup
 ENV ANTSPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
     PYTHONPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
     PATH="$ANTSPATH:$PATH" \
-    LD_LIBRARY_PATH="/opt/conda/envs/${CONDA_ENV}/lib:${LD_LIBRARY_PATH}"
+    LD_LIBRARY_PATH="/opt/conda/envs/${CONDA_ENV}/lib:${LD_LIBRARY_PATH}" \
+    PYTHON_EGG_CACHE="/cache/python-eggs"
 
 # Make dipy.viz (fury/vtk) happy
 # RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.13"
@@ -236,7 +241,6 @@ COPY scripts/bidsapp/run_coverage_cmp3.sh /app/run_coverage_cmp3.sh
 RUN cat /app/run_coverage_cmp3.sh
 
 ##################################################################
-# Set the working directory back to /app
 # Acquire script to be executed
 ##################################################################
 RUN chmod 775 /app/connectomemapper3/run.py && \
