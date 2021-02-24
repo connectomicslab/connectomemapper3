@@ -133,9 +133,12 @@ def save_configparser_as_json(config, config_json_path, debug=True):
             elif value and isinstance(value, str):
                 value = value.strip()
                 if value.isnumeric():
-                    config_json[section][name] = [float(value)]
                     if debug:
                         print_warning(f'Processing {section} / {name} / {value} as number')
+                    value = float(value)
+                    if value.is_integer():
+                        value = int(value)
+                    config_json[section][name] = [value]
                 else:
                     if debug:
                         print_warning(f'Processing {section} / {name} / {value} as string')
