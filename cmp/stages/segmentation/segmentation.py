@@ -116,7 +116,7 @@ class SegmentationConfig(HasTraits):
     use_existing_freesurfer_data = Bool(False)
     freesurfer_subjects_dir = Str
     freesurfer_subject_id = Str
-    freesurfer_args = Str
+    freesurfer_args = Str("")
 
     white_matter_mask = File(exist=True)
 
@@ -395,11 +395,7 @@ class SegmentationStage(Stage):
                     fs_reconall23.inputs.args = self.config.freesurfer_args
                     fs_reconall23.inputs.flags = '-autorecon3'
 
-                    # fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
                     fs_reconall23.inputs.subjects_dir = self.config.freesurfer_subjects_dir
-
-                    # fs_reconall.inputs.hippocampal_subfields_T1 = self.config.segment_hippocampal_subfields
-                    # fs_reconall.inputs.brainstem = self.config.segment_brainstem
 
                     flow.connect([
                         (copy_brainmask_to_fs, fs_reconall23,
