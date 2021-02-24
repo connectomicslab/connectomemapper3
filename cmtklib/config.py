@@ -382,10 +382,9 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                         if tmp_key in config[stage.name].keys():
                             conf_value = config[stage.name][tmp_key]
                         try:
-                            conf_value = eval(f'{conf_value}')
+                            setattr(sub_config, sub_key, conf_value)
                             if debug:
                                 print(f'Set {sub_config}.{sub_key} to {conf_value}')
-                            setattr(sub_config, sub_key, conf_value)
                         except Exception:
                             if debug:
                                 print_warning(' .. EXCEPTION raised while setting ' +
@@ -395,13 +394,10 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                 if stage.name in config.keys():
                     if key in config[stage.name].keys():
                         conf_value = config[stage.name][key]
-                        if debug:
-                            print_blue(f'Read config[{stage.name}][{key}]: {conf_value}')
                     try:
-                        conf_value = eval(f'{conf_value}')
+                        setattr(stage.config, key, conf_value)
                         if debug:
                             print(f'Set {stage.config}.{key} to {conf_value}')
-                        setattr(stage.config, key, conf_value)
                     except Exception:
                         if debug:
                             print_warning(' .. EXCEPTION raised while setting ' +
