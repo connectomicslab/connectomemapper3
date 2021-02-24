@@ -68,7 +68,7 @@ def check_configuration_format(config_path):
     return ext
 
 
-def save_configparser_as_json(config, config_json_path, debug=True):
+def save_configparser_as_json(config, config_json_path, debug=False):
     """Save a ConfigParser to JSON file.
 
     Parameters
@@ -367,7 +367,7 @@ def get_fmri_process_detail_json(project_info, section, detail):
     return config[section][detail]
 
 
-def set_pipeline_attributes_from_config(pipeline, config, debug=True):
+def set_pipeline_attributes_from_config(pipeline, config, debug=False):
     """Set the pipeline stage attributes given a configuration.
 
     Parameters
@@ -438,7 +438,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
             int(config['Multi-processing']['number_of_cores']))
 
 
-def create_configparser_from_pipeline(pipeline, debug=True):
+def create_configparser_from_pipeline(pipeline, debug=False):
     """Create a `ConfigParser` object from a Pipeline instance.
 
     Parameters
