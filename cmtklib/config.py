@@ -119,24 +119,26 @@ def save_configparser_as_json(config, config_json_path, debug=True):
 
             if isinstance(value, Iterable) and not isinstance(value, str):
                 if debug:
-                    print_warning(f'Processing {section} / {name} / {value} (As iterable)')
+                    print_warning(f'Processing {section} / {name} / {value} as iterable')
                 config_json[section][name] = [x for x in value if x]
                 is_iterable = True
             elif isinstance(value, bool):
                 if debug:
-                    print_warning(f'Processing {section} / {name} / {value} (As a boolean)')
+                    print_warning(f'Processing {section} / {name} / {value} as boolean')
                 config_json[section][name] = [value]
             elif value and not isinstance(value, str):
                 if debug:
-                    print_warning(f'Processing {section} / {name} / {value} (As not a string)')
+                    print_warning(f'Processing {section} / {name} / {value} as not a string')
                 config_json[section][name] = [value]
             elif value and isinstance(value, str):
-                if debug:
-                    print_warning(f'Processing {section} / {name} / {value} (As str)')
                 value = value.strip()
                 if value.isnumeric():
                     config_json[section][name] = [float(value)]
+                    if debug:
+                        print_warning(f'Processing {section} / {name} / {value} as number')
                 else:
+                    if debug:
+                        print_warning(f'Processing {section} / {name} / {value} as string')
                     config_json[section][name] = [value]
             else:
                 if debug:
