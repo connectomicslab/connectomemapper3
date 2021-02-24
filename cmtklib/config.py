@@ -11,7 +11,8 @@ import json
 from collections.abc import Iterable
 
 from cmp.info import __version__
-from cmtklib.util import BColors, print_warning, print_error
+from cmtklib.util import BColors, print_warning, print_error, \
+    print_blue
 
 
 def check_configuration_version(config):
@@ -394,6 +395,8 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                 if stage.name in config.keys():
                     if key in config[stage.name].keys():
                         conf_value = config[stage.name][key]
+                        if debug:
+                            print_blue(f'Read config[{stage.name}][{key}]: {conf_value}')
                     try:
                         conf_value = eval(conf_value)
                         if debug:
