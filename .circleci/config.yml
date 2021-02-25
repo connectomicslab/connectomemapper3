@@ -26,31 +26,18 @@ jobs:
             python --version
             twine upload -h
       - run:
-          name: "Test Install for main setup_cmp.py"
-          command: |
-            sudo python3 setup_cmp.py develop
-      - run:
-          name: "Smoke Test Install for main setup_cmp.py"
-          command: |
-            python --version
-            pip3 install cmp
-      - run:
-          name: "Smoke Test Uninstall for main setup_cmp.py"
-          command: |
-            sudo pip3 uninstall -y cmp
-      - run:
-          name: "Test Wheel Build for GUI setup.py"
+          name: "Test Wheel Build for setup.py"
           command: |
             python3 setup.py sdist bdist_wheel
       - run:
-          name: "Test Install for GUI setup.py"
+          name: "Test Install for setup.py"
           command: |
             pip install .
       - run:
-          name: "Smoke Test Install for GUI setup.py"
+          name: "Smoke Test Install for setup.py"
           command: |
             python --version
-            pip3 install cmpbidsappmanager
+            pip3 install cmp
 
   build_docker:
     environment:
