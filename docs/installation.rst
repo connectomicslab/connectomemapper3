@@ -132,7 +132,7 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 .. note::
   If a few bugs related to the Graphical User Interface were fixed after releasing the version, you might want to use the code at its latest version on the master branch (i.e. ``git checkout master``).
 
-* Create a miniconda3 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
+* Create a miniconda3 environment where all python dependencies will be installed::
 
     $ cd connectomemapper3
     $ conda env create -f environment.yml
