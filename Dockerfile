@@ -19,7 +19,7 @@ ARG VERSION
 WORKDIR /opt
 
 # Pre-cache neurodebian key
-COPY ubuntu16.04/files/neurodebian.gpg /root/.neurodebian.gpg
+COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 
 # Install system library dependencies
 RUN apt-get update && \
@@ -178,13 +178,14 @@ WORKDIR /opt
 
 ENV CONDA_ENV py37cmp-core
 # Pull the environment name out of the environment.yml
-COPY ubuntu16.04/environment.yml /app/environment.yml
+COPY docker/environment.yml /app/environment.yml
 RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_ENV &&\
      conda clean -v --all --yes && rm -rf ~/.conda ~/.cache/pip/*"
 
 # Make ANTs happy
 ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
-    PATH="$ANTSPATH:$PATH"
+    PATH="$ANTSPATH:$PATH" \
+    PYTHON_EGG_CACHE="/cache/python-eggs"
 
 ##################################################################
 # Install BIDS validator
@@ -222,8 +223,7 @@ RUN mkdir -p /cache/python-eggs && \
 ENV ANTSPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
     PYTHONPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
     PATH="$ANTSPATH:$PATH" \
-    LD_LIBRARY_PATH="/opt/conda/envs/${CONDA_ENV}/lib:${LD_LIBRARY_PATH}" \
-    PYTHON_EGG_CACHE="/cache/python-eggs"
+    LD_LIBRARY_PATH="/opt/conda/envs/${CONDA_ENV}/lib:${LD_LIBRARY_PATH}"
 
 # Make dipy.viz (fury/vtk) happy
 # RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.13"
