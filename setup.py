@@ -22,16 +22,15 @@ class VerifyVersionCommand(install):
             info = f'Git tag: {tag} does not match the version of this app: {version}'
             sys.exit(info)
 
+# Get directory where this file is located
+directory = os.path.abspath(os.path.dirname(__file__))
 
-directory = os.path.dirname(os.path.abspath(__file__))
-
+# Remove any MANIFEST of a previous installation
 if os.path.exists('MANIFEST'):
     os.remove('MANIFEST')
 
-packages = ["cmtklib",
-            "cmtklib.bids",
-            "cmtklib.interfaces",
-            "cmp",
+# Define the packages to be installed
+packages = ["cmp",
             "cmp.cli",
             "cmp.stages",
             "cmp.stages.preprocessing",
@@ -45,7 +44,8 @@ packages = ["cmtklib",
             "cmp.pipelines.anatomical",
             "cmp.pipelines.diffusion",
             "cmp.pipelines.functional",
-            "cmp.bidsappmanager", "cmp.bidsappmanager.stages",
+            "cmp.bidsappmanager",
+            "cmp.bidsappmanager.stages",
             "cmp.bidsappmanager.stages.preprocessing",
             "cmp.bidsappmanager.stages.segmentation",
             "cmp.bidsappmanager.stages.parcellation",
@@ -57,24 +57,36 @@ packages = ["cmtklib",
             "cmp.bidsappmanager.pipelines.anatomical",
             "cmp.bidsappmanager.pipelines.diffusion",
             "cmp.bidsappmanager.pipelines.functional",
+            "cmtklib",
+            "cmtklib.bids",
+            "cmtklib.interfaces",
             "resources"]
 
-package_data = {'cmp.bidsappmanager':
+# Define the package data to be installed
+package_data = {'cmp':
+                ['cmp3_icon.png'],
+                'cmp.bidsappmanager':
                 ['images/*.png',
                  'pipelines/anatomical/*.png',
                  'pipelines/diffusion/*.png',
                  'pipelines/functional/*.png'],
                 'resources':
-                    ['buttons/*.png',
-                     'icons/*png'],
+                ['buttons/*.png',
+                 'icons/*png'],
                 'cmtklib':
-                    ['data/parcellation/lausanne2008/*/*.*',
-                     'data/segmentation/ants_template_IXI/*/*.*',
-                     'data/segmentation/ants_template_IXI/*.*',
-                     'data/parcellation/nativefreesurfer/*/*.*',
-                     'data/diffusion/gradient_tables/*.*',
-                     'data/segmentation/thalamus2018/*.*',
-                     'data/segmentation/freesurfer/*.*']
+                ['data/parcellation/lausanne2008/*/*.*',
+                 'data/parcellation/lausanne2018/*.*',
+                 'data/parcellation/lausanne2018/*/*.*',
+                 'data/segmentation/ants_template_IXI/*/*.*',
+                 'data/segmentation/ants_template_IXI/*.*',
+                 'data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*/*.*',
+                 'data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*.*',
+                 'data/parcellation/nativefreesurfer/*/*.*',
+                 'data/colortable_and_gcs/*.*',
+                 'data/colortable_and_gcs/my_atlas_gcs/*.*',
+                 'data/diffusion/odf_directions/*.*',
+                 'data/diffusion/gradient_tables/*.*',
+                 'data/segmentation/thalamus2018/*.*']
                 }
 
 # Extract package requirements from Conda environment.yml
@@ -110,23 +122,25 @@ print(f'Install requires: {install_requires}')
 print(f'Dependency links: {dependency_links}')
 
 
+# Read the contents of your README file
+with open(os.path.join(directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
+
 def main():
     """Main function of CMP3 ``setup.py``"""
+    # Setup configuration
     setuptools.setup(
-        name='cmpbidsappmanager',
+        name='cmp',
         version=__version__,
-        description='Connectome Mapper 3 BIDS App Manager',
-        long_description="""Connectome Mapper 3 BIDS App Manager, part of the Connectome Mapping Toolkit,
-                         allows you to easily interact with the BIDS App of the Connectome Mapper 3,
-                         which implements a full diffusion MRI processing pipeline, from raw Diffusion/T1/T2
-                         data to multi-resolution connection matrices.
-                         It also offers support for resting state fMRI data processing and multi-resolution
-                         functional connection matrices creation. """,
+        description='Connectome Mapper 3: A software pipeline for multi-scale connectome mapping of multimodal data',
+        long_description=long_description,
         author='Sebastien Tourbier',
         author_email='sebastien.tourbier@alumni.epfl.ch',
         url='https://github.com/connectomicslab/connectomemapper3',
         entry_points={
             "console_scripts": [
+                'connectomemapper3 = cmp.cli.connectomemapper3:main',
                 'cmpbidsappmanager = cmp.cli.cmpbidsappmanager:main',
                 'showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main'
             ]

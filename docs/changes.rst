@@ -38,12 +38,12 @@ In particular, it integrates `Pull Request #74 <https://github.com/connectomicsl
 
 * Major changes to make `cmp` and `cmpbidsappmanager` compatible with the
   Python Package Index (`pip`) for package distribution and installation.
-  This includes a major refactoring of `setup.py` and `setup_gui.py`, where
-  `setup.py` was renamed to `setup_cmp.py` and `setup_gui.py` to `setup.py`
-  - to make `pip` happy, as well as the creation of a new `cmp.cli` module,
-  migration to `cmp.cli` module and refactoring of the scripts `connectomemapper3`,
-  `showmatrix_gpickle`, and `cmpbidsappmanager` with correction of code
-  style issues and addition of missing docstrings.
+  This includes the merge of `setup.py` and `setup_gui.py`, which
+  have been merged into one `setup.py` and a major refactoring to make
+  `pip` happy, as well as the creation of a new `cmp.cli` module,
+  migration to `cmp.cli` module and refactoring of the scripts
+  `connectomemapper3`, `showmatrix_gpickle`, and `cmpbidsappmanager`
+  with correction of code style issues and addition of missing docstrings.
 
 
 *Documentation*
