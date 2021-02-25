@@ -80,13 +80,18 @@ Option 1 (recommended): Using the Docker image docker2singularity
 
 	.. parsed-literal::
 		$ mkdir -p /tmp/test
-		$ docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/test:/output --privileged -t --rm singularityware/docker2singularity --name cmp-|release|.simg sebastientourbier/connectomemapper-bidsapp:|release|
+		$ docker run -v /var/run/docker.sock:/var/run/docker.sock  \
+                     -v /tmp/test:/output --privileged -t --rm  \
+                     singularityware/docker2singularity  \
+                     --name cmp-|release|.simg  \
+                     sebastientourbier/connectomemapper-bidsapp:|release|
 
 
 2. Move the converted image `cmp-|release|` to the ``~/Softwares/singularity`` folder on the cluster (via ssh using scp for instance)
 
 	.. parsed-literal::
-		$ scp -v /tmp/test/cmp-|release|.simg <your_cluster_user_login>@<cluster_url>:~/Softwares/singularity/cmp-|release|.simg
+		$ scp -v /tmp/test/cmp-|release|.simg  \
+            <user>@<cluster_url>:~/Softwares/singularity/cmp-|release|.simg
 
 
 **Advantage(s):** Has never failed
@@ -99,7 +104,8 @@ Option 2 : Using singularity directly
 *********************************************************************
 
 .. parsed-literal::
-	$ singularity build ~/Softwares/singularity/cmp-|release|.simg docker://sebastientourbier/connectomemapper-bidsapp:|release|
+	$ singularity build ~/Softwares/singularity/cmp-|release|.simg  \
+        docker://sebastientourbier/connectomemapper-bidsapp:|release|
 
 This command will directly download the latest version release of the Docker image from the DockerHub and convert it to a Singularity image.
 
