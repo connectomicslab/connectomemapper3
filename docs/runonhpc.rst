@@ -133,7 +133,3 @@ Useful singularity commands
 
 :Authors: Sebastien Tourbier
 :Version: Revision: 2 (Last modification: 2021 Jan 04)
-:Copyright: Copyright (C) 2017-2021, Ecole Polytechnique Federale de Lausanne (EPFL)
-            the University Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland,
-            & Contributors,
-            All rights reserved.

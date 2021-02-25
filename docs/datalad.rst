@@ -361,7 +361,3 @@ without losing the ability to reproduce an analysis::
 
 :Authors: Sebastien Tourbier
 :Version: Revision: 2 (Last modification: 2021 Feb 23)
-:Copyright: Copyright (C) 2017-2021, Ecole Polytechnique Federale de Lausanne (EPFL)
-            the University Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland,
-            & Contributors,
-            All rights reserved.
