@@ -90,8 +90,7 @@ Option 1 (recommended): Using the Docker image docker2singularity
 2. Move the converted image `cmp-|release|` to the ``~/Softwares/singularity`` folder on the cluster (via ssh using scp for instance)
 
 	.. parsed-literal::
-		$ scp -v /tmp/test/cmp-|release|.simg  \\
-            <user>@<cluster_url>:~/Softwares/singularity/cmp-|release|.simg
+		$ scp -v /tmp/test/cmp-|release|.simg <user>@<cluster_url>:~/Softwares/singularity/cmp-|release|.simg
 
 
 **Advantage(s):** Has never failed
@@ -105,7 +104,7 @@ Option 2 : Using singularity directly
 
 .. parsed-literal::
 	$ singularity build ~/Softwares/singularity/cmp-|release|.simg  \\
-        docker://sebastientourbier/connectomemapper-bidsapp:|release|
+                docker://sebastientourbier/connectomemapper-bidsapp:|release|
 
 This command will directly download the latest version release of the Docker image from the DockerHub and convert it to a Singularity image.
 
