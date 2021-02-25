@@ -177,10 +177,10 @@ How to build the documentation locally
 
 :Authors: Sebastien Tourbier, Adrien Birbaumer
 :Version: Revision: 2
-:Copyright: Copyright (C) 2017-2020, Ecole Polytechnique Federale de Lausanne (EPFL)
+:Copyright: Copyright (C) 2017-2021, Ecole Polytechnique Federale de Lausanne (EPFL)
             the University Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland,
-            & Contributors
-            All rights reserved..
+            & Contributors,
+            All rights reserved.
 
 .. topic:: Acknowledgments
 
