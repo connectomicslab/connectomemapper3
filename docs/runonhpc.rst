@@ -6,16 +6,36 @@ Running on a cluster (HPC)
 
 Connectome Mapper 3 BIDS App can be run on a cluster using Singularity.
 
-For your convenience, the Singularity image is automatically built along the docker image using Singularity 3.5.1 and deployed to `Sylabs.io <https://sylabs.io/>`_  as (equivalent of DockerHub for Singularity) during continuous integration on CircleCI. It can be freely downloaded with the following command:
+For your convenience, the Singularity image is automatically built along
+the docker image using Singularity 3.5.1 and deployed to
+`Sylabs.io <https://sylabs.io/>`_  as (equivalent of DockerHub for Singularity)
+during continuous integration on CircleCI. It can be freely downloaded
+with the following command:
 
 .. parsed-literal::
     $ singularity pull library://connectomicslab/default/connectomemapper-bidsapp:latest
 
-If you prefer, you can still build the Singularity image on your side using one of the 2 methods described in :ref:`Conversion to a Singularity image <simg_conversion>`.
+If you prefer, you can still build the Singularity image on your side using
+one of the 2 methods described in :ref:`Conversion to a Singularity image <simg_conversion>`.
 
-A list of useful singularity command can be found in :ref:`Useful singularity commands <singularity-cmds>`. For more documentation about Singularity, please check the `official documentation website <https://sylabs.io/docs/>`_.
+A list of useful singularity command can be found in :ref:`Useful singularity commands <singularity-cmds>`.
+For more documentation about Singularity, please check the `official documentation website <https://sylabs.io/docs/>`_.
 
 **Happy Large-Scale Connectome Mapping!**
+
+
+--------------
+Prerequisites
+--------------
+
+* Singularity must be installed.
+  Check the `official documentation webpage <https://sylabs.io/guides/3.7/user-guide/quick_start.html#quick-installation-steps>`_
+  for installation instructions.
+
+.. note::If you wish to build the singularity image then you need to
+    have Docker installed.
+    See :ref:`Prerequisites of Connectome Mapper 3 <manual-install-docker>`
+    for more installation instructions.
 
 
 .. _run_singularity:

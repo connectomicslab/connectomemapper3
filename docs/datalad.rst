@@ -23,23 +23,37 @@ and the `YODA principles <https://handbook.datalad.org/en/latest/basics/101-127-
 
 .. note:: This was tested on ``Ubuntu 16.04`` with ``Datalad 0.14.0``, its extensions ``datalad-container 1.1.2``, ``datalad-neuroimaging 0.3.1``, and ``git-annex 8.20210127``.
 
-Install Datalad and all dependencies
-------------------------------------
+Prerequisites
+--------------
 
-On Ubuntu/Debian install `git-annex` the proper dependencies::
+* Python3 must be installed with Datalad and all dependencies.
+  You can use the conda environment `py37cmp-gui` for instance.
+  See :ref:`Installation of py37cmp-gui <manual-install-conda>` for
+  more installation details.
 
-    sudo apt-get install git-annex liblzma-dev
+* A recent version of `git-annex` and `liblzma` (included in
+  `py37cmp-gui` for Ubuntu/Debian).
 
-.. note:: If you are using Mac OS, start from `installing the Homebrew <https://brew.sh/>`_,
-    then install other dependencies::
+* Docker must be installed on systems running Connectome Mapper 3.
+  See :ref:`Prerequisites of Connectome Mapper 3 <manual-install-docker>`
+  for more installation instructions.
+
+.. note::On Ubuntu/Debian you can manually install
+    `git-annex` and `liblzma`::
+
+        sudo apt-get install git-annex liblzma-dev
+
+    If you are using Mac OS, start from `installing the Homebrew <https://brew.sh/>`_,
+    then run the following::
 
         brew install git-annex xz
 
-Then install Datalad and its extensions::
+    To manually install Datalad and its extensions,
+    run the following::
 
-    pip install datalad[all]==0.14.0
-    pip install datalad-container==1.1.2
-    pip install datalad-neuroimaging==0.3.1
+        pip install datalad[all]==0.14.0
+        pip install datalad-container==1.1.2
+        pip install datalad-neuroimaging==0.3.1
 
 Copy BIDS dataset to server
 ------------------------------------
