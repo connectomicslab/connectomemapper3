@@ -28,8 +28,8 @@ Prerequisites
 
 * Python3 must be installed with Datalad and all dependencies.
   You can use the conda environment `py37cmp-gui` for instance.
-  See :ref:`Installation of py37cmp-gui <manual-install-conda>` for
-  more installation details.
+  See :ref:`Installation of py37cmp-gui <manual-install-cmpbidsappmanager>`
+  for more installation details.
 
 * A recent version of `git-annex` and `liblzma` (included in
   `py37cmp-gui` for Ubuntu/Debian).
