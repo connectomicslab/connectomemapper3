@@ -18,9 +18,7 @@ The Connectome Mapper 3 is composed of a Docker image, namely the Connectome Map
 * Installation instructions for the Connectome mapper 3 BIDS App Manager are found in :ref:`manual-install-cmpbidsappmanager`.
 
 ..
-	The steps to add the NeuroDebian repository are explained here::
-
-		$ firefox http://neuro.debian.net/
+	The steps to add the NeuroDebian repository are explained at http://neuro.debian.net/ .
 
 Make sure that you have installed the following prerequisites.
 
@@ -32,24 +30,23 @@ The Connectome Mapper 3 BIDSApp
 Prerequisites
 -------------
 
-* Installed Docker Engine corresponding to your system:
+* Install Docker Engine depending of your system:
 
-  * For Ubuntu 14.04/16.04/18.04, follow the instructions from the web page::
+  * For Ubuntu 14.04/16.04/18.04, follow the instructions at
+    https://docs.docker.com/install/linux/docker-ce/ubuntu/
 
-    $ firefox https://docs.docker.com/install/linux/docker-ce/ubuntu/
+  * For Mac OSX (>=10.10.3), get the .dmg installer at
+    https://store.docker.com/editions/community/docker-ce-desktop-mac
 
-  * For Mac OSX (>=10.10.3), get the .dmg installer from the web page::
+  * For Windows (>=10), get the installer at
+    https://store.docker.com/editions/community/docker-ce-desktop-windows
 
-    $ firefox https://store.docker.com/editions/community/docker-ce-desktop-mac
-
-  * For Windows (>=10), get the installer from the web page::
-
-    $ firefox https://store.docker.com/editions/community/docker-ce-desktop-windows
-
-.. note:: Connectome Mapper 3 BIDSApp has been tested only on Ubuntu and MacOSX. For Windows users, it might be required to make few patches in the Dockerfile.
+.. note:: Connectome Mapper 3 BIDSApp has been tested only on Ubuntu and MacOSX.
+    In principles, it should also run on Windows but it might require a few patches
+    to make it work.
 
 
-* Docker managed as a non-root user
+* Manage Docker as a non-root user
 
   * Open a terminal
 
@@ -98,9 +95,7 @@ The Connectome Mapper 3 BIDSApp Manager (GUI)
 Prerequisites
 ---------------
 
-* Installed miniconda3 (Python 3) from the web page::
-
-  $ firefox https://conda.io/miniconda.html
+* Install miniconda3 (Python 3) from https://conda.io/miniconda.html
 
   Download the Python 3 installer corresponding to your 32/64bits MacOSX/Linux/Win system.
 
