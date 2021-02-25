@@ -209,15 +209,15 @@ WORKDIR /app/connectomemapper3
 # Copy contents of this repository.
 COPY . /app/connectomemapper3
 
+# Create cache directory for python eggs
+RUN mkdir -p /cache/python-eggs && \
+    chmod -R 777 /cache/python-eggs
+
 # Install cmp and cmtklib packages in the conda environment $CONDA_ENV
 # ENV CONDA_ENV py37cmp-core
 # RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
 RUN /bin/bash -c ". activate ${CONDA_ENV} &&\
     pip install ."
-
-# Create cache directory for python eggs
-RUN mkdir -p /cache/python-eggs && \
-    chmod -R 777 /cache/python-eggs
 
 # Environmment setup
 ENV ANTSPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
