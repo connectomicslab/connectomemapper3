@@ -118,7 +118,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Tr
 
             if '_editor' in name:
                 if debug:
-                    print_warning(f' .. DEBUG: Skip parameter {section} / {name}')
+                    print_warning(f'  .. DEBUG: Skip parameter {section} / {name}')
                 continue
 
             is_iterable = False
@@ -135,44 +135,44 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Tr
 
             if isinstance(value, dict):
                 if debug:
-                    print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as dict')
+                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as dict')
                 config_json[section][name] = value
                 is_iterable = True
             elif isinstance(value, list):
                 if debug:
-                    print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as list')
+                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as list')
                 config_json[section][name] = value
                 is_iterable = True
             elif isinstance(value, Iterable) and not isinstance(value, str):
                 if debug:
-                    print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as iterable')
+                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as iterable')
                 config_json[section][name] = [x for x in value if x]
                 is_iterable = True
             elif isinstance(value, bool):
                 if debug:
-                    print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as boolean')
+                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as boolean')
                 config_json[section][name] = [value]
             elif value and not isinstance(value, str):
                 if debug:
-                    print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as not a string')
+                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as not a string')
                 config_json[section][name] = [value]
             elif value and isinstance(value, str):
                 value = value.strip()
                 if value.isnumeric():
                     if debug:
-                        print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as number')
+                        print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as number')
                     value = float(value)
                     if value.is_integer():
                         value = int(value)
                     config_json[section][name] = [value]
                 else:
                     if debug:
-                        print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as string')
+                        print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as string')
                     config_json[section][name] = [value]
             else:
                 if debug:
                     print_warning(
-                          f'... DEBUG : Type: {type(value)} / value : {value}')
+                          f'  .. DEBUG : Type: {type(value)} / value : {value}')
                 config_json[section][name] = ''
 
             if not is_iterable:
@@ -213,13 +213,13 @@ def convert_config_ini_2_json(config_ini_path):
         config.read(config_ini_path)
     except configparser.MissingSectionHeaderError:
         print_error(
-                '... ERROR : file is a datalad git annex but it has not been retrieved yet.' +
+                '  .. ERROR : file is a datalad git annex but it has not been retrieved yet.' +
                 ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)'
         )
 
     config_json_path = '.'.join([os.path.splitext(config_ini_path)[0], 'json'])
     save_configparser_as_json(config, config_json_path, ini_mode=True)
-    print(f'   .. Config file converted to JSON and saved as {config_json_path}')
+    print(f'  .. Config file converted to JSON and saved as {config_json_path}')
 
     return config_json_path
 
@@ -451,9 +451,9 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                     print(f'Set {sub_config}.{sub_key} to {conf_value}')
                             except Exception as e:
                                 if debug:
-                                    print_warning(' .. EXCEPTION raised while setting ' +
+                                    print_warning('  .. EXCEPTION raised while setting ' +
                                                   f'{sub_config}.{sub_key} to {conf_value}')
-                                    print_error(f'   {e}')
+                                    print_error(f'    {e}')
                             pass
             else:
                 if stage.name in config.keys():
@@ -475,10 +475,10 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                 conf_value = float(conf_value)
                             setattr(stage.config, key, conf_value)
                             if debug:
-                                print(f'Set {stage.config}.{key} to {conf_value}')
+                                print(f' .. DEBUG: Set {stage.config}.{key} to {conf_value}')
                         except Exception as e:
                             if debug:
-                                print_warning(' .. EXCEPTION raised while setting ' +
+                                print_warning('  .. EXCEPTION raised while setting ' +
                                               f'{stage.config}.{key} to {conf_value}')
                                 print_error(f'   {e}')
                             pass
