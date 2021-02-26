@@ -411,7 +411,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                             try:
                                 # Convert parameter to proper expected type
                                 if isinstance(getattr(sub_config, sub_key), tuple):
-                                    conf_value = eval(conf_value)
+                                    conf_value = tuple(conf_value)
                                 elif isinstance(getattr(sub_config, sub_key), bool):
                                     conf_value = bool(conf_value)
                                 elif isinstance(getattr(sub_config, sub_key), list):
@@ -438,7 +438,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                         try:
                             # Convert parameter to proper expected type
                             if isinstance(getattr(stage.config, key), tuple):
-                                conf_value = eval(conf_value)
+                                conf_value = tuple(conf_value)
                             elif isinstance(getattr(stage.config, key), bool):
                                 conf_value = bool(conf_value)
                             elif isinstance(getattr(stage.config, key), list):
