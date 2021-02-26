@@ -367,7 +367,7 @@ def get_fmri_process_detail_json(project_info, section, detail):
     return config[section][detail]
 
 
-def set_pipeline_attributes_from_config(pipeline, config, debug=False):
+def set_pipeline_attributes_from_config(pipeline, config, debug=True):
     """Set the pipeline stage attributes given a configuration.
 
     Parameters
@@ -409,6 +409,12 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                             try:
                                 if isinstance(getattr(sub_config, sub_key), tuple):
                                     conf_value = tuple(conf_value)
+                                elif isinstance(getattr(sub_config, sub_key), bool):
+                                    conf_value = bool(conf_value)
+                                elif isinstance(getattr(sub_config, sub_key), list):
+                                    conf_value = eval(conf_value)
+                                elif conf_value.isnumeric():
+                                    conf_value = eval(conf_value)
                                 setattr(sub_config, sub_key, conf_value)
                                 if debug:
                                     print(f'Set {sub_config}.{sub_key} to {conf_value}')
@@ -424,6 +430,12 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                         try:
                             if isinstance(getattr(stage.config, key), tuple):
                                 conf_value = tuple(conf_value)
+                            elif isinstance(getattr(stage.config, key), bool):
+                                conf_value = bool(conf_value)
+                            elif isinstance(getattr(stage.config, key), list):
+                                conf_value = eval(conf_value)
+                            elif conf_value.isnumeric():
+                                conf_value = eval(conf_value)
                             setattr(stage.config, key, conf_value)
                             if debug:
                                 print(f'Set {stage.config}.{key} to {conf_value}')
