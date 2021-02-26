@@ -121,6 +121,16 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Tr
                     print_warning(f'  .. DEBUG: Skip parameter {section} / {name}')
                 continue
 
+            if 'log_visualization' in name:
+                if debug:
+                    print_warning(f'  .. DEBUG: Skip parameter {section} / {name}')
+                continue
+
+            if 'circular_layout' in name:
+                if debug:
+                    print_warning(f'  .. DEBUG: Skip parameter {section} / {name}')
+                continue
+
             is_iterable = False
 
             if ini_mode:
