@@ -70,7 +70,7 @@ def check_configuration_format(config_path):
     return ext
 
 
-def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=True):
+def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=False):
     """Save a ConfigParser to JSON file.
 
     Parameters
@@ -197,7 +197,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Tr
     config_json['Global']['version'] = __version__
 
     if debug:
-        print(f' .. DEBUG: {config_json}')
+        print_blue(f'  .. DEBUG: {config_json}')
 
     with open(config_json_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
@@ -403,7 +403,7 @@ def get_fmri_process_detail_json(project_info, section, detail):
     return config[section][detail]
 
 
-def set_pipeline_attributes_from_config(pipeline, config, debug=True):
+def set_pipeline_attributes_from_config(pipeline, config, debug=False):
     """Set the pipeline stage attributes given a configuration.
 
     Parameters
@@ -563,7 +563,7 @@ def anat_save_config(pipeline, config_path):
     """
     config = create_configparser_from_pipeline(pipeline)
     save_configparser_as_json(config, config_path)
-    print('  .. Config json file (anat) saved as {}'.format(config_path))
+    print_blue('  .. SAVE: Config json file (anat) saved as {}'.format(config_path))
 
 
 def anat_load_config_json(pipeline, config_path):
@@ -601,7 +601,7 @@ def dmri_save_config(pipeline, config_path):
     """
     config = create_configparser_from_pipeline(pipeline)
     save_configparser_as_json(config, config_path)
-    print('  .. Config json file (diffusion) saved as {}'.format(config_path))
+    print_blue('  .. SAVE: Config json file (diffusion) saved as {}'.format(config_path))
 
 
 def dmri_load_config_json(pipeline, config_path):
@@ -639,7 +639,7 @@ def fmri_save_config(pipeline, config_path):
     """
     config = create_configparser_from_pipeline(pipeline)
     save_configparser_as_json(config, config_path)
-    print('  .. Config json file (fMRI) saved as {}'.format(config_path))
+    print_blue('  .. SAVE: Config json file (fMRI) saved as {}'.format(config_path))
 
 
 def fmri_load_config_json(pipeline, config_path):
