@@ -423,10 +423,11 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                 setattr(sub_config, sub_key, conf_value)
                                 if debug:
                                     print(f'Set {sub_config}.{sub_key} to {conf_value}')
-                            except Exception:
+                            except TypeError as e:
                                 if debug:
                                     print_warning(' .. EXCEPTION raised while setting ' +
                                                   f'{sub_config}.{sub_key} to {conf_value}')
+                                    print_error(f'   {e}')
                             pass
             else:
                 if stage.name in config.keys():
@@ -447,10 +448,11 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                             setattr(stage.config, key, conf_value)
                             if debug:
                                 print(f'Set {stage.config}.{key} to {conf_value}')
-                        except Exception:
+                        except TypeError as e:
                             if debug:
                                 print_warning(' .. EXCEPTION raised while setting ' +
                                               f'{stage.config}.{key} to {conf_value}')
+                                print_error(f'   {e}')
                             pass
 
     setattr(pipeline,
