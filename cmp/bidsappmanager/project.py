@@ -49,7 +49,7 @@ def clean_cache(bids_root):
     bids_root : string
         BIDS root dataset directory
     """
-    print_warning('> Clean docker image cache stored in /tmp')
+    print_warning('> Clean generated docker image cache')
 
     for d in glob.glob(os.path.join(bids_root, ' hsperfdata_cmp')):
         print_warning('... DEL: {}'.format(d))
@@ -96,8 +96,6 @@ def is_tool(name):
     return find_executable(name) is not None
 
 
-# 
-#
 def refresh_folder(derivatives_directory, subject, input_folders, session=None):
     """Creates (if needed) the folder hierarchy.
 
@@ -143,9 +141,9 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
             try:
                 os.makedirs(full_p)
             except os.error:
-                print_warning("%s was already existing" % full_p)
+                print_warning("  .. INFO: %s was already existing" % full_p)
             finally:
-                print("Created directory %s" % full_p)
+                print("  .. INFO: Created directory %s" % full_p)
 
 
 def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
@@ -184,14 +182,14 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
         layout=bids_layout, gui=gui)
     if dmri_inputs_checked:
         if is_new_project and dmri_pipeline is not None:
-            print("Initialize dMRI project")
+            print("> Initialize dMRI project")
             if not os.path.exists(derivatives_directory):
                 try:
                     os.makedirs(derivatives_directory)
                 except os.error:
-                    print_warning("%s was already existing" % derivatives_directory)
+                    print_warning("  .. INFO: %s was already existing" % derivatives_directory)
                 finally:
-                    print("Created directory %s" % derivatives_directory)
+                    print("  .. INFO: Created directory %s" % derivatives_directory)
 
             if (project_info.subject_session != '') and (project_info.subject_session is not None):
                 project_info.dmri_config_file = os.path.join(derivatives_directory, '%s_%s_diffusion_config.json' % (
@@ -203,16 +201,17 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
             if os.path.exists(project_info.dmri_config_file):
                 warn_res = project_info.configure_traits(view='dmri_warning_view')
                 if warn_res:
-                    print("Read diffusion config file (%s)" %
+                    print("  .. INFO: Read diffusion config file (%s)" %
                           project_info.dmri_config_file)
                     dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
                 else:
                     return None
             else:
-                print("Create diffusion config file (%s)" %
+                print("  .. INFO: Create diffusion config file (%s)" %
                       project_info.dmri_config_file)
                 dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
         else:
+            print("> Load dMRI project")
             dmri_conf_loaded = dmri_load_config_json(dmri_pipeline, project_info.dmri_config_file)
 
             if not dmri_conf_loaded:
@@ -220,7 +219,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True):
 
         dmri_pipeline.config_file = project_info.dmri_config_file
     else:
-        print("Missing diffusion inputs")
+        print_error("  .. ERROR: Missing diffusion inputs")
 
     return dmri_inputs_checked, dmri_pipeline
 
@@ -258,14 +257,14 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
         layout=bids_layout, gui=gui)
     if fmri_inputs_checked:
         if is_new_project and fmri_pipeline is not None:
-            print("Initialize fmri project")
+            print("> Initialize fMRI project")
             if not os.path.exists(derivatives_directory):
                 try:
                     os.makedirs(derivatives_directory)
                 except os.error:
-                    print("%s was already existing" % derivatives_directory)
+                    print("  .. INFO: %s was already existing" % derivatives_directory)
                 finally:
-                    print("Created directory %s" % derivatives_directory)
+                    print("  .. INFO: Created directory %s" % derivatives_directory)
 
             if (project_info.subject_session != '') and (project_info.subject_session is not None):
                 project_info.fmri_config_file = os.path.join(derivatives_directory, '%s_%s_fMRI_config.json' % (
@@ -278,17 +277,18 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
                 warn_res = project_info.configure_traits(
                     view='fmri_warning_view')
                 if warn_res:
-                    print("Read fMRI config file (%s)" %
+                    print("  .. INFO: Read fMRI config file (%s)" %
                           project_info.fmri_config_file)
                     fmri_load_config_json(
                         fmri_pipeline, project_info.fmri_config_file)
                 else:
                     return None
             else:
-                print("Create fMRI config file (%s)" %
+                print("  .. INFO: Create fMRI config file (%s)" %
                       project_info.fmri_config_file)
                 fmri_save_config(fmri_pipeline, project_info.fmri_config_file)
         else:
+            print("> Load fMRI project")
             fmri_conf_loaded = fmri_load_config_json(
                 fmri_pipeline, project_info.fmri_config_file)
 
@@ -297,7 +297,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True):
 
         fmri_pipeline.config_file = project_info.fmri_config_file
     else:
-        print("Missing fmri inputs")
+        print("  .. INFO: Missing fMRI inputs")
 
     return fmri_inputs_checked, fmri_pipeline
 
@@ -318,13 +318,14 @@ def init_anat_project(project_info, is_new_project):
     derivatives_directory = os.path.join(project_info.base_directory, 'derivatives')
 
     if is_new_project and anat_pipeline is not None:  # and dmri_pipelineis not None:
+        print("> Initialize anatomical project")
         if not os.path.exists(derivatives_directory):
             try:
                 os.makedirs(derivatives_directory)
             except os.error:
-                print("%s was already existing" % derivatives_directory)
+                print("  .. INFO: %s was already existing" % derivatives_directory)
             finally:
-                print("Created directory %s" % derivatives_directory)
+                print("  .. INFO: Created directory %s" % derivatives_directory)
 
         if (project_info.subject_session != '') and (project_info.subject_session is not None):
             project_info.anat_config_file = os.path.join(derivatives_directory, '%s_%s_anatomical_config.json' % (
@@ -343,6 +344,7 @@ def init_anat_project(project_info, is_new_project):
             anat_save_config(anat_pipeline, project_info.anat_config_file)
 
     else:
+        print("> Load anatomical project")
         anat_conf_loaded = anat_load_config_json(anat_pipeline, project_info.anat_config_file)
 
         if not anat_conf_loaded:
@@ -557,6 +559,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
         ui_info : QtView
             TraitsUI QtView associated with ``self``
         """
+        print("> Load Project")
         new_project = gui.CMP_Project_InfoUI()
         np_res = new_project.configure_traits(view='create_view')
         ui_info.ui.context["object"].handler = self
@@ -571,24 +574,19 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     if 'sub-' + str(subj) not in new_project.subjects:
                         new_project.subjects.append('sub-' + str(subj))
 
-                print("Available subjects : ")
+                print("  .. INFO: Available subjects : ")
                 print(new_project.subjects)
                 new_project.number_of_subjects = len(new_project.subjects)
 
                 np_res = new_project.configure_traits(view='subject_view')
-                print("Selected subject : " + new_project.subject)
+                print("  .. INFO: Selected subject : " + new_project.subject)
 
                 subject = new_project.subject.split('-')[1]
-                print("Subject: %s" % subject)
-
                 new_project.subject_sessions = ['']
                 new_project.subject_session = ''
 
                 sessions = bids_layout.get(
                     target='session', return_type='id', subject=subject)
-
-                print("Sessions: ")
-                print(sessions)
 
                 if len(sessions) > 0:
                     print("Warning: multiple sessions")
@@ -596,11 +594,14 @@ class CMP_ConfigQualityWindowHandler(Handler):
                         new_project.subject_sessions.append('ses-' + str(ses))
                     np_res = new_project.configure_traits(
                         view='subject_session_view')
-                    print("Selected session : " + new_project.subject_session)
+                    print("  .. INFO: Selected session : " + new_project.subject_session)
 
-            except Exception:
+            except Exception as e:
+                msg = "Invalid BIDS dataset. Please see documentation for more details."
+                print_warning(f'  .. EXCEPTION: {msg}')
+                print_error(f'       : {e}')
                 error(
-                    message="Invalid BIDS dataset. Please see documentation for more details.", title="BIDS error")
+                    message=msg, title="BIDS error")
                 return
 
             self.anat_pipeline = init_anat_project(new_project, True)
@@ -634,7 +635,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     if self.dmri_pipeline is not None:
                         if dmri_inputs_checked:
                             self.dmri_pipeline.number_of_cores = new_project.number_of_cores
-                            print("number of cores (pipeline): %s" %
+                            print("  .. INFO: Number of cores (pipeline) = %s" %
                                   self.dmri_pipeline.number_of_cores)
                             self.dmri_pipeline.parcellation_scheme = ui_info.ui.context[
                                 "object"].project_info.parcellation_scheme
@@ -656,7 +657,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     if self.fmri_pipeline is not None:
                         if fmri_inputs_checked:
                             self.fmri_pipeline.number_of_cores = new_project.number_of_cores
-                            print("number of cores (pipeline): %s" %
+                            print("  .. INFO: Number of cores (pipeline) = %s" %
                                   self.fmri_pipeline.number_of_cores)
                             self.fmri_pipeline.parcellation_scheme = ui_info.ui.context[
                                 "object"].project_info.parcellation_scheme
@@ -683,23 +684,23 @@ class CMP_ConfigQualityWindowHandler(Handler):
         ui_info : QtView
             TraitsUI QtView associated with ``self``
         """
+        print("> Load Project")
         loaded_project = gui.CMP_Project_InfoUI()
         np_res = loaded_project.configure_traits(view='open_view')
         ui_info.ui.context["object"].handler = self
 
-        print("Base dir: %s" % loaded_project.base_directory)
+        print("  .. INFO: BIDS directory: %s" % loaded_project.base_directory)
         try:
             bids_layout = BIDSLayout(loaded_project.base_directory)
             loaded_project.bids_layout = bids_layout
 
             loaded_project.subjects = []
             for subj in bids_layout.get_subjects():
-                print("sub: %s" % subj)
                 if 'sub-' + str(subj) not in loaded_project.subjects:
                     loaded_project.subjects.append('sub-' + str(subj))
             loaded_project.subjects.sort()
 
-            print("Available subjects : ")
+            print("  .. INFO: Available subjects : ")
             print(loaded_project.subjects)
             loaded_project.number_of_subjects = len(loaded_project.subjects)
 
@@ -710,8 +711,6 @@ class CMP_ConfigQualityWindowHandler(Handler):
 
         self.anat_inputs_checked = False
 
-        print(loaded_project.subjects)
-
         if np_res and os.path.exists(loaded_project.base_directory):
             sessions = []
             for subj in bids_layout.get_subjects():
@@ -719,9 +718,6 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     target='session', return_type='id', subject=subj)
                 for subj_session in subj_sessions:
                     sessions.append(subj_session)
-
-            print("sessions:")
-            print(sessions)
 
             loaded_project.anat_available_config = []
 
@@ -741,10 +737,6 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     if os.path.isfile(config_file):
                         loaded_project.anat_available_config.append(
                             "sub-%s" % subj)
-                        print("no session")
-
-            print("loaded_project.anat_available_config : ")
-            print(loaded_project.anat_available_config)
 
             if len(loaded_project.anat_available_config) > 1:
                 loaded_project.anat_available_config.sort()
@@ -757,11 +749,11 @@ class CMP_ConfigQualityWindowHandler(Handler):
             else:
                 loaded_project.anat_config_to_load = loaded_project.anat_available_config[0]
 
-            print("Anatomical config to load: %s" %
+            print("  .. INFO: Anatomical config to load: %s" %
                   loaded_project.anat_config_to_load)
             loaded_project.anat_config_file = os.path.join(loaded_project.base_directory, 'derivatives',
                                                            '%s_anatomical_config.json' % loaded_project.anat_config_to_load)
-            print("Anatomical config file: %s" %
+            print("  .. INFO: Anatomical config file: %s" %
                   loaded_project.anat_config_file)
 
             loaded_project.subject = get_anat_process_detail_json(
@@ -769,16 +761,15 @@ class CMP_ConfigQualityWindowHandler(Handler):
             loaded_project.subject_sessions = ["ses-%s" % s for s in bids_layout.get(target='session', return_type='id',
                                                                                      subject=loaded_project.subject.split('-')[
                                                                                          1])]
-
             if len(loaded_project.subject_sessions) > 0:
-
+                print("  .. INFO: Dataset has session(s)")
                 loaded_project.subject_session = get_anat_process_detail_json(
                     loaded_project, 'Global', 'subject_session')
                 print("Selected session : " + loaded_project.subject_session)
             else:
                 loaded_project.subject_sessions = ['']
                 loaded_project.subject_session = ''
-                print("No session")
+                print("  .. INFO: Dataset has no session")
 
             loaded_project.parcellation_scheme = get_anat_process_detail_json(
                     loaded_project, 'parcellation_stage', 'parcellation_scheme')
@@ -810,8 +801,8 @@ class CMP_ConfigQualityWindowHandler(Handler):
                         self.anat_pipeline, ui_info.ui.context["object"].project_info.anat_config_file)
                     self.project_loaded = True
                     self.anat_outputs_checked, _ = self.anat_pipeline.check_output()
-                    print("anat_outputs_checked : %s" %
-                          self.anat_outputs_checked)
+                    if self.anat_outputs_checked:
+                        print("  .. INFO: Available outputs")
 
             loaded_project.dmri_available_config = []
 
@@ -824,7 +815,6 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     config_file = os.path.join(loaded_project.base_directory, 'derivatives',
                                                "%s_ses-%s_diffusion_config.json" % (
                                                    loaded_project.subject, subj_session))
-                    print("config_file: %s " % config_file)
                     if os.path.isfile(config_file) and subj_session == loaded_project.subject_session.split("-")[1]:
                         loaded_project.dmri_available_config.append(
                             "%s_ses-%s" % (loaded_project.subject, subj_session))
@@ -834,10 +824,6 @@ class CMP_ConfigQualityWindowHandler(Handler):
                 if os.path.isfile(config_file):
                     loaded_project.dmri_available_config.append(
                         "%s" % loaded_project.subject)
-                    print("no session")
-
-            print("loaded_project.dmri_available_config:")
-            print(loaded_project.dmri_available_config)
 
             if len(loaded_project.dmri_available_config) > 1:
                 loaded_project.dmri_available_config.sort()
@@ -851,15 +837,15 @@ class CMP_ConfigQualityWindowHandler(Handler):
             else:
                 loaded_project.dmri_config_to_load = loaded_project.dmri_available_config[0]
 
-            print("Diffusion config to load: %s" %
+            print("  .. INFO: Diffusion config to load: %s" %
                   loaded_project.dmri_config_to_load)
             loaded_project.dmri_config_file = os.path.join(loaded_project.base_directory, 'derivatives',
                                                            '%s_diffusion_config.json' % loaded_project.dmri_config_to_load)
-            print("Diffusion config file: %s" %
+            print("  .. INFO: Diffusion config file: %s" %
                   loaded_project.dmri_config_file)
 
             if os.path.isfile(loaded_project.dmri_config_file):
-                print("Load existing diffusion config file")
+                print("  .. INFO: Load existing diffusion config file")
                 loaded_project.process_type = get_dmri_process_detail_json(
                         loaded_project, 'Global', 'process_type')
                 loaded_project.diffusion_imaging_model = get_dmri_process_detail_json(
@@ -890,8 +876,9 @@ class CMP_ConfigQualityWindowHandler(Handler):
             else:
                 dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(
                     loaded_project, bids_layout, True)
-                print(
-                    "No existing config for diffusion pipeline found - Created new diffusion pipeline with default parameters")
+                print_warning(
+                    "  .. WARNING: No existing config for diffusion pipeline found - " +
+                    "Created new diffusion pipeline with default parameters")
                 if self.dmri_pipeline is not None:  # and self.dmri_pipeline is not None:
                     if dmri_inputs_checked:
                         ui_info.ui.context["object"].project_info = loaded_project
@@ -900,7 +887,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                         ui_info.ui.context["object"].project_info.on_trait_change(
                             ui_info.ui.context["object"].update_session_dmri_pipeline, 'subject_session')
                         self.dmri_pipeline.number_of_cores = loaded_project.number_of_cores
-                        print("number of cores (pipeline): %s" %
+                        print("  .. INFO: Number of cores (pipeline) = %s" %
                               self.dmri_pipeline.number_of_cores)
                         self.dmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
                         self.dmri_pipeline.atlas_info = loaded_project.atlas_info
@@ -917,7 +904,6 @@ class CMP_ConfigQualityWindowHandler(Handler):
                 for subj_session in subj_sessions:
                     config_file = os.path.join(loaded_project.base_directory, 'derivatives',
                                                "%s_ses-%s_fMRI_config.json" % (loaded_project.subject, subj_session))
-                    print("config_file: %s " % config_file)
                     if os.path.isfile(config_file) and subj_session == loaded_project.subject_session.split("-")[1]:
                         loaded_project.fmri_available_config.append(
                             "%s_ses-%s" % (loaded_project.subject, subj_session))
@@ -927,10 +913,6 @@ class CMP_ConfigQualityWindowHandler(Handler):
                 if os.path.isfile(config_file):
                     loaded_project.fmri_available_config.append(
                         "sub-%s" % loaded_project.subject)
-                    print("no session")
-
-            print("loaded_project.fmri_available_config:")
-            print(loaded_project.fmri_available_config)
 
             if len(loaded_project.fmri_available_config) > 1:
                 loaded_project.fmri_available_config.sort()
@@ -944,14 +926,14 @@ class CMP_ConfigQualityWindowHandler(Handler):
             else:
                 loaded_project.fmri_config_to_load = loaded_project.fmri_available_config[0]
 
-            print("fMRI config to load: %s" %
+            print("  .. INFO: fMRI config to load: %s" %
                   loaded_project.fmri_config_to_load)
             loaded_project.fmri_config_file = os.path.join(loaded_project.base_directory, 'derivatives',
                                                            '%s_fMRI_config.json' % loaded_project.fmri_config_to_load)
-            print("fMRI config file: %s" % loaded_project.fmri_config_file)
+            print("  .. INFO: fMRI config file: %s" % loaded_project.fmri_config_file)
 
             if os.path.isfile(loaded_project.fmri_config_file):
-                print("Load existing fmri config file")
+                print("  .. INFO: Load existing fmri config file")
                 loaded_project.process_type = get_fmri_process_detail_json(
                     loaded_project, 'Global', 'process_type')
 
@@ -979,8 +961,9 @@ class CMP_ConfigQualityWindowHandler(Handler):
                         self.project_loaded = True
             else:
                 fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(loaded_project, bids_layout, True)
-                print(
-                    "No existing config for fMRI pipeline found - Created new fMRI pipeline with default parameters")
+                print_warning(
+                    "  .. WARNING: No existing config for fMRI pipeline found - " +
+                    "Created new fMRI pipeline with default parameters")
                 if self.fmri_pipeline is not None:
                     if fmri_inputs_checked:
                         ui_info.ui.context["object"].project_info = loaded_project
@@ -989,7 +972,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                         ui_info.ui.context["object"].project_info.on_trait_change(
                             ui_info.ui.context["object"].update_session_fmri_pipeline, 'subject_session')
                         self.fmri_pipeline.number_of_cores = loaded_project.number_of_cores
-                        print("number of cores (pipeline): %s" %
+                        print("  .. INFO: Number of cores (pipeline) = %s" %
                               self.fmri_pipeline.number_of_cores)
                         self.fmri_pipeline.parcellation_scheme = loaded_project.parcellation_scheme
                         self.fmri_pipeline.atlas_info = loaded_project.atlas_info
@@ -1037,7 +1020,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
             updated_project.base_directory, 'derivatives')
 
         if os.path.isfile(updated_project.anat_config_file):
-            print("Existing anatomical config file for subject %s: %s" % (
+            print("  .. INFO: Existing anatomical config file for subject %s: %s" % (
                 updated_project.subject, updated_project.anat_config_file))
 
             updated_project.parcellation_scheme = get_anat_process_detail_json(
@@ -1069,10 +1052,11 @@ class CMP_ConfigQualityWindowHandler(Handler):
                                      ui_info.project_info.anat_config_file)
                     self.project_loaded = True
                     self.anat_outputs_checked, msg = self.anat_pipeline.check_output()
-                    print("anat_outputs_checked : %s" % self.anat_outputs_checked)
+                    if self.anat_outputs_checked:
+                        print("  .. INFO: Available outputs")
 
         else:
-            print("Unprocessed anatomical data for subject %s" % updated_project.subject)
+            print("  .. INFO: Unprocessed anatomical data for subject %s" % updated_project.subject)
             self.anat_pipeline = init_anat_project(updated_project, True)
             if self.anat_pipeline is not None:  # and self.dmri_pipeline is not None:
                 anat_inputs_checked = self.anat_pipeline.check_input(
@@ -1133,7 +1117,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
             updated_project.base_directory, 'derivatives')
 
         if os.path.isfile(updated_project.dmri_config_file):
-            print("Load existing diffusion config file")
+            print("  .. INFO: Load existing diffusion config file")
             updated_project.process_type = get_dmri_process_detail_json(
                     updated_project, 'Global', 'process_type')
             updated_project.diffusion_imaging_model = get_dmri_process_detail_json(
@@ -1162,7 +1146,8 @@ class CMP_ConfigQualityWindowHandler(Handler):
                                                          'diffusion_imaging_model')
         else:
             dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(updated_project, bids_layout, True)
-            print("No existing config for diffusion pipeline found - Created new diffusion pipeline with default parameters")
+            print_warning("  .. WARNING: No existing config for diffusion pipeline found - " +
+                  "Created new diffusion pipeline with default parameters")
             if self.dmri_pipeline is not None:  # and self.dmri_pipeline is not None:
                 if dmri_inputs_checked:
                     ui_info.project_info = updated_project
@@ -1171,7 +1156,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     ui_info.project_info.on_trait_change(
                         ui_info.update_session_dmri_pipeline, 'subject_session')
                     self.dmri_pipeline.number_of_cores = updated_project.number_of_cores
-                    print("number of cores (pipeline): %s" %
+                    print("  .. INFO: Number of cores (pipeline) = %s" %
                           self.dmri_pipeline.number_of_cores)
                     self.dmri_pipeline.parcellation_scheme = updated_project.parcellation_scheme
                     self.dmri_pipeline.atlas_info = updated_project.atlas_info
@@ -1195,9 +1180,6 @@ class CMP_ConfigQualityWindowHandler(Handler):
             TraitsUI QtView associated with ``self``
         """
         ui_info.handler = self
-
-        print(ui_info)
-        print(ui_info.project_info)
 
         self.fmri_pipeline.subject = ui_info.project_info.subject
         self.fmri_pipeline.global_conf.subject = ui_info.project_info.subject
@@ -1224,11 +1206,11 @@ class CMP_ConfigQualityWindowHandler(Handler):
         self.fmri_pipeline.derivatives_directory = os.path.join(
             updated_project.base_directory, 'derivatives')
 
-        print("fMRI config file loaded/created : %s" %
+        print("  .. INFO: fMRI config file loaded/created : %s" %
               updated_project.fmri_config_file)
 
         if os.path.isfile(updated_project.fmri_config_file):
-            print("Load existing fMRI config file for subject %s" %
+            print("  .. INFO: Load existing fMRI config file for subject %s" %
                   updated_project.subject)
             updated_project.process_type = get_fmri_process_detail_json(
                 updated_project, 'Global', 'process_type')
@@ -1259,7 +1241,8 @@ class CMP_ConfigQualityWindowHandler(Handler):
         else:
             fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
                 updated_project, bids_layout, True)
-            print("No existing config for fMRI pipeline found but available fMRI data- Created new fMRI pipeline with default parameters")
+            print_warning("  .. WARNING: No existing config for fMRI pipeline found but available fMRI data - " +
+                  "Created new fMRI pipeline with default parameters")
             if self.fmri_pipeline is not None:
                 if fmri_inputs_checked:
                     ui_info.project_info = updated_project
@@ -1268,7 +1251,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
                     ui_info.project_info.on_trait_change(
                         ui_info.update_session_fmri_pipeline, 'subject_session')
                     self.fmri_pipeline.number_of_cores = updated_project.number_of_cores
-                    print("number of cores (pipeline): %s" %
+                    print("  .. INFO: Number of cores (pipeline) = %s" %
                           self.fmri_pipeline.number_of_cores)
                     self.fmri_pipeline.parcellation_scheme = updated_project.parcellation_scheme
                     self.fmri_pipeline.atlas_info = updated_project.atlas_info
@@ -1304,6 +1287,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
         ui_info : QtView
             TraitsUI QtView associated with ``self``
         """
+        print_blue("[Save anatomical pipeline configuration]")
         dialog = FileDialog(action="save as",
                             default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
                                                           'code', 'ref_anatomical_config.json'))
@@ -1342,6 +1326,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
         ui_info : QtView
             TraitsUI QtView associated with ``self``
         """
+        print_blue("[Save anatomical pipeline configuration]")
         dialog = FileDialog(action="save as",
                             default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
                                                           'code', 'ref_diffusion_config.json'))
@@ -1379,6 +1364,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
         ui_info : QtView
             TraitsUI QtView associated with ``self``
         """
+        print_blue("[Save anatomical pipeline configuration]")
         dialog = FileDialog(action="save as",
                             default_filename=os.path.join(ui_info.ui.context["object"].project_info.base_directory,
                                                           'code', 'ref_fMRI_config.json'))
