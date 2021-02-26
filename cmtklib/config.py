@@ -70,7 +70,7 @@ def check_configuration_format(config_path):
     return ext
 
 
-def save_configparser_as_json(config, config_json_path, debug=True):
+def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=True):
     """Save a ConfigParser to JSON file.
 
     Parameters
@@ -80,6 +80,9 @@ def save_configparser_as_json(config, config_json_path, debug=True):
 
     config_json_path : string
         Output path of JSON configuration file
+
+    ini_mode : bool
+        If `True`, handles all content stored in strings
 
     debug : bool
         If `True`, show additional prints
@@ -114,46 +117,57 @@ def save_configparser_as_json(config, config_json_path, debug=True):
                         continue
 
             if '_editor' in name:
-                print_warning(f' .. Skip parameter {section} / {name}')
+                if debug:
+                    print_warning(f' .. DEBUG: Skip parameter {section} / {name}')
                 continue
 
             is_iterable = False
 
+            if ini_mode:
+                try:
+                    value = eval(value)
+                    if debug:
+                        print_warning(f'  .. DEBUG: String {value} evaluated')
+                except Exception:
+                    if debug:
+                        print_error(f'  .. EXCEPTION: String {value} COULD NOT BE evaluated')
+                    pass
+
             if isinstance(value, dict):
                 if debug:
-                    print_warning(f'Processing {section} / {name} / {value} as dict')
+                    print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as dict')
                 config_json[section][name] = value
                 is_iterable = True
             elif isinstance(value, list):
                 if debug:
-                    print_warning(f'Processing {section} / {name} / {value} as list')
+                    print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as list')
                 config_json[section][name] = value
                 is_iterable = True
             elif isinstance(value, Iterable) and not isinstance(value, str):
                 if debug:
-                    print_warning(f'Processing {section} / {name} / {value} as iterable')
+                    print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as iterable')
                 config_json[section][name] = [x for x in value if x]
                 is_iterable = True
             elif isinstance(value, bool):
                 if debug:
-                    print_warning(f'Processing {section} / {name} / {value} as boolean')
+                    print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as boolean')
                 config_json[section][name] = [value]
             elif value and not isinstance(value, str):
                 if debug:
-                    print_warning(f'Processing {section} / {name} / {value} as not a string')
+                    print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as not a string')
                 config_json[section][name] = [value]
             elif value and isinstance(value, str):
                 value = value.strip()
                 if value.isnumeric():
                     if debug:
-                        print_warning(f'Processing {section} / {name} / {value} as number')
+                        print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as number')
                     value = float(value)
                     if value.is_integer():
                         value = int(value)
                     config_json[section][name] = [value]
                 else:
                     if debug:
-                        print_warning(f'Processing {section} / {name} / {value} as string')
+                        print_warning(f' .. DEBUG: Processing {section} / {name} / {value} as string')
                     config_json[section][name] = [value]
             else:
                 if debug:
@@ -173,7 +187,7 @@ def save_configparser_as_json(config, config_json_path, debug=True):
     config_json['Global']['version'] = __version__
 
     if debug:
-        print(config_json)
+        print(f' .. DEBUG: {config_json}')
 
     with open(config_json_path, 'w') as outfile:
         json.dump(config_json, outfile, indent=4)
@@ -204,7 +218,7 @@ def convert_config_ini_2_json(config_ini_path):
         )
 
     config_json_path = '.'.join([os.path.splitext(config_ini_path)[0], 'json'])
-    save_configparser_as_json(config, config_json_path)
+    save_configparser_as_json(config, config_json_path, ini_mode=True)
     print(f'   .. Config file converted to JSON and saved as {config_json_path}')
 
     return config_json_path
