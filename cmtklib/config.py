@@ -121,7 +121,12 @@ def save_configparser_as_json(config, config_json_path, debug=True):
 
             if isinstance(value, dict):
                 if debug:
-                    print_warning(f'Processing {section} / {name} / {value} as iterable')
+                    print_warning(f'Processing {section} / {name} / {value} as dict')
+                config_json[section][name] = value
+                is_iterable = True
+            elif isinstance(value, list):
+                if debug:
+                    print_warning(f'Processing {section} / {name} / {value} as list')
                 config_json[section][name] = value
                 is_iterable = True
             elif isinstance(value, Iterable) and not isinstance(value, str):
