@@ -25,11 +25,10 @@ def info():
     """Print version and copyright information."""
     print('------------------------------------------------------')
     print("\nConnectome Mapper {} - BIDS App Manager ".format(__version__))
-    print('------------------------------------------------------')
+    print_warning('------------------------------------------------------')
     print_warning("""{}""".format(__copyright__))
-    print('------------------------------------------------------')
-    print('------------------------------------------------------')
-    print("\n  .. INFO: Use {} for graphical backend".format(ETSConfig.toolkit))
+    print_warning('------------------------------------------------------')
+    print("  .. INFO: Use {} for graphical backend".format(ETSConfig.toolkit))
     print('------------------------------------------------------\n')
 
 
