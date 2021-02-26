@@ -408,16 +408,11 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                             conf_value = config[stage.name][tmp_key]
                             try:
                                 if isinstance(getattr(sub_config, sub_key), tuple):
-                                    conf_value = tuple(conf_value)
+                                    conf_value = eval(conf_value)
                                 elif isinstance(getattr(sub_config, sub_key), bool):
                                     conf_value = bool(conf_value)
                                 elif isinstance(getattr(sub_config, sub_key), list):
                                     conf_value = eval(conf_value)
-                                elif conf_value.isnumeric():
-                                    if isinstance(getattr(sub_config, sub_key), int):
-                                        conf_value = int(conf_value)
-                                    if isinstance(getattr(sub_config, sub_key), float):
-                                        conf_value = float(conf_value)
                                 setattr(sub_config, sub_key, conf_value)
                                 if debug:
                                     print(f'Set {sub_config}.{sub_key} to {conf_value}')
@@ -432,16 +427,11 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                         conf_value = config[stage.name][key]
                         try:
                             if isinstance(getattr(stage.config, key), tuple):
-                                conf_value = tuple(conf_value)
+                                conf_value = eval(conf_value)
                             elif isinstance(getattr(stage.config, key), bool):
                                 conf_value = bool(conf_value)
                             elif isinstance(getattr(stage.config, key), list):
                                 conf_value = eval(conf_value)
-                            elif conf_value.isnumeric():
-                                if isinstance(getattr(stage.config, key), int):
-                                    conf_value = int(conf_value)
-                                if isinstance(getattr(stage.config, key), float):
-                                    conf_value = float(conf_value)
                             setattr(stage.config, key, conf_value)
                             if debug:
                                 print(f'Set {stage.config}.{key} to {conf_value}')
