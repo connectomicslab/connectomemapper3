@@ -415,7 +415,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                     conf_value = bool(conf_value)
                                 elif isinstance(getattr(sub_config, sub_key), list):
                                     conf_value = eval(conf_value)
-                                elif isinstance(getattr(stage.config, key), int):
+                                elif isinstance(getattr(sub_config, sub_key), int):
                                     conf_value = int(conf_value)
                                     if debug:
                                         print_warning('Converted to int')
