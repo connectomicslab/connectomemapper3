@@ -1147,7 +1147,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
         else:
             dmri_inputs_checked, self.dmri_pipeline = init_dmri_project(updated_project, bids_layout, True)
             print_warning("  .. WARNING: No existing config for diffusion pipeline found - " +
-                  "Created new diffusion pipeline with default parameters")
+                          "Created new diffusion pipeline with default parameters")
             if self.dmri_pipeline is not None:  # and self.dmri_pipeline is not None:
                 if dmri_inputs_checked:
                     ui_info.project_info = updated_project
@@ -1242,7 +1242,7 @@ class CMP_ConfigQualityWindowHandler(Handler):
             fmri_inputs_checked, self.fmri_pipeline = init_fmri_project(
                 updated_project, bids_layout, True)
             print_warning("  .. WARNING: No existing config for fMRI pipeline found but available fMRI data - " +
-                  "Created new fMRI pipeline with default parameters")
+                          "Created new fMRI pipeline with default parameters")
             if self.fmri_pipeline is not None:
                 if fmri_inputs_checked:
                     ui_info.project_info = updated_project
@@ -1697,12 +1697,11 @@ class CMP_MainWindowHandler(Handler):
                         finally:
                             print("Created directory %s" % code_directory)
 
-                    print_blue(">> Create new reference anatomical config file...")
+                    print(">> Create new reference anatomical config file...")
                     anat_save_config(self.anat_pipeline,
                                      loaded_project.anat_config_file)
                 else:
-                    print_blue(">> Load reference anatomical config file :  %s" %
-                          loaded_project.anat_config_file)
+                    print(">> Load reference anatomical config file...")
                     # if datalad_is_available:
                     #     print('... Datalad get anatomical config file : {}'.format(loaded_project.anat_config_file))
                     #     cmd = 'datalad run -m "Get reference anatomical config file" bash -c "datalad get code/ref_anatomical_config.json"'
@@ -1800,7 +1799,8 @@ class CMP_MainWindowHandler(Handler):
                                 for file in files:
                                     if loaded_project.dmri_bids_acq in file:
                                         dwi_file = file
-                                        print('Loaded DWI file: {}'.format(dwi_file))
+                                        if debug:
+                                            print('Loaded DWI file: {}'.format(dwi_file))
                                         break
                             else:
                                 dwi_file = files[0]
@@ -1836,11 +1836,10 @@ class CMP_MainWindowHandler(Handler):
                         self.dmri_pipeline.global_conf.dmri_bids_acq = loaded_project.dmri_bids_acq
                         self.dmri_pipeline.stages[
                             "Diffusion"].diffusion_imaging_model = loaded_project.diffusion_imaging_model
-                        print_blue(">> Create new reference diffusion config file...")
+                        print(">> Create new reference diffusion config file...")
                         dmri_save_config(self.dmri_pipeline, dmri_config_file)
                     else:
-                        print_blue(">> Load reference diffusion config file :  %s" %
-                              loaded_project.dmri_config_file)
+                        print(">> Load reference diffusion config file...")
 
                         # if datalad_is_available:
                         #     print('... Datalad get reference diffusion config file : {}'.format(loaded_project.anat_config_file))
@@ -1887,11 +1886,10 @@ class CMP_MainWindowHandler(Handler):
                     self.fmri_pipeline.config_file = fmri_config_file
 
                     if not os.path.isfile(fmri_config_file) and self.fmri_pipeline is not None:
-                        print_blue("Create new reference fMRI config file...")
+                        print(">> Create new reference fMRI config file...")
                         fmri_save_config(self.fmri_pipeline, fmri_config_file)
                     else:
-                        print_blue("Load reference fMRI config file :  %s" %
-                              loaded_project.fmri_config_file)
+                        print(">> Load reference fMRI config file...")
 
                         # if datalad_is_available:
                         #     print('... Datalad get reference fMRI config file : {}'.format(loaded_project.anat_config_file))

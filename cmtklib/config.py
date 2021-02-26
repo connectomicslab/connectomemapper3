@@ -577,7 +577,7 @@ def anat_load_config_json(pipeline, config_path):
     config_path : string
         Path of the JSON configuration file
     """
-    print('>> Load anatomical config file : {}'.format(config_path))
+    print_blue('  .. LOAD: Load anatomical config file : {}'.format(config_path))
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
         config = json.load(f)
@@ -615,7 +615,7 @@ def dmri_load_config_json(pipeline, config_path):
     config_path : string
         Path of the JSON configuration file
     """
-    print('>> Load diffusion config file : {}'.format(config_path))
+    print_blue('  .. LOAD: Load diffusion config file : {}'.format(config_path))
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
         config = json.load(f)
@@ -653,7 +653,7 @@ def fmri_load_config_json(pipeline, config_path):
     config_path : string
         Path of the JSON configuration file
     """
-    print('>> Load fMRI config file : {}'.format(config_path))
+    print_blue('  .. LOAD: Load fMRI config file : {}'.format(config_path))
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
         config = json.load(f)
