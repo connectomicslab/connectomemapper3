@@ -23,11 +23,11 @@ os.environ['QT_API'] = 'pyside2'
 
 def info():
     """Print version and copyright information."""
-    print('------------------------------------------------------')
     print("\nConnectome Mapper {} - BIDS App Manager ".format(__version__))
     print_warning('------------------------------------------------------')
     print_warning("""{}""".format(__copyright__))
     print_warning('------------------------------------------------------')
+    print('------------------------------------------------------\n')
     print("  .. INFO: Use {} for graphical backend".format(ETSConfig.toolkit))
     print('------------------------------------------------------\n')
 
