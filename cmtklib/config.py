@@ -70,7 +70,7 @@ def check_configuration_format(config_path):
     return ext
 
 
-def save_configparser_as_json(config, config_json_path, debug=False):
+def save_configparser_as_json(config, config_json_path, debug=True):
     """Save a ConfigParser to JSON file.
 
     Parameters
