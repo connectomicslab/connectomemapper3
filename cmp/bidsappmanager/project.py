@@ -1574,66 +1574,57 @@ class CMP_MainWindowHandler(Handler):
 
                 if len(sessions) > 0:
                     print(
-                        '    ... Check for available input modalities in the first session...')
-                    if debug:
-                        print(subject)
-                        print(sessions[0])
+                        f'    ... Check for available input modalities for subject {subject} of session {sessions[0]}...')
+
                     query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='bold',
                                                                        extensions=['nii', 'nii.gz'])]
                     if len(query_files) > 0:
-                        if debug:
-                            print("BOLD available: {}".format(query_files))
+                        print("        * Available BOLD(s): {}".format(query_files))
                         fmri_available = True
 
                     query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='T1w',
                                                                        extensions=['nii', 'nii.gz'])]
                     if len(query_files) > 0:
-                        if debug:
-                            print("T1w available: {}".format(query_files))
+                        print("        * Available T1w(s): {}".format(query_files))
                         t1_available = True
 
                     query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='T2w',
                                                                        extensions=['nii', 'nii.gz'])]
                     if len(query_files) > 0:
-                        if debug:
-                            print("T2w available: {}".format(query_files))
+                        print("        * Available T2w(s): {}".format(query_files))
                         t2_available = True
 
                     query_files = [f.filename for f in bids_layout.get(subject=subject, session=sessions[0], suffix='dwi',
                                                                        extensions=['nii', 'nii.gz'])]
                     if len(query_files) > 0:
-                        if debug:
-                            print("DWI available: {}".format(query_files))
+                        print("        * Available DWI(s): {}".format(query_files))
                         diffusion_available = True
 
                 else:
-                    print('    ... Check for available input modalities...')
+                    print(
+                        f'    ... Check for available input modalities for subject {subject}...')
                     query_files = [f.filename for f in
                                    bids_layout.get(subject=subject, suffix='T1w', extensions=['nii', 'nii.gz'])]
                     if len(query_files) > 0:
-                        if debug:
-                            print("T1w available: {}".format(query_files))
+                        print("        * Available T1w(s): {}".format(query_files))
                         t1_available = True
 
                     query_files = [f.filename for f in
                                    bids_layout.get(subject=subject, suffix='T2w', extensions=['nii', 'nii.gz'])]
                     if len(query_files) > 0:
-                        if debug:
-                            print("T2w available: {}".format(query_files))
+                        print("        * Available T2w(s): {}".format(query_files))
                         t2_available = True
 
                     query_files = [f.filename for f in
                                    bids_layout.get(subject=subject, suffix='dwi', extensions=['nii', 'nii.gz'])]
                     if len(query_files) > 0:
-                        if debug:
-                            print("DWI available: {}".format(query_files))
+                        print("        * Available DWI(s): {}".format(query_files))
                         diffusion_available = True
 
                     query_files = [f.filename for f in
                                    bids_layout.get(subject=subject, suffix='bold', extensions=['nii', 'nii.gz'])]
                     if len(query_files) > 0:
-                        if debug:
-                            print("BOLD available: {}".format(query_files))
+                        print("        * Available BOLD(s): {}".format(query_files))
                         fmri_available = True
 
             except Exception:
