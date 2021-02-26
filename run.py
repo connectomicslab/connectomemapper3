@@ -24,7 +24,7 @@ import requests
 from datetime import datetime
 
 # Own imports
-from cmtklib.util import BColors
+from cmtklib.util import BColors, print_error, print_blue
 from cmtklib.config import create_subject_configuration_from_ref,\
     check_configuration_format, convert_config_ini_2_json
 from cmp import parser
@@ -73,17 +73,19 @@ def report_usage(event_category, event_action, event_label, verbose=False):
     tracking_id = 'UA-124877585-4'
     clientid_str = str(datetime.now())
     tracking_url = 'https://www.google-analytics.com/collect?v=1&t=event&tid={}&cid={}&ec={}&ea={}&el={}&aip=1'.format(tracking_id,
-                                                                                                                 clientid_str,
-                                                                                                                 event_category,
-                                                                                                                 event_action,
-                                                                                                                 event_label)
+                                                                                                                       clientid_str,
+                                                                                                                       event_category,
+                                                                                                                       event_action,
+                                                                                                                       event_label)
     r = requests.post(tracking_url)
 
     if verbose:
         print(r)
 
-    print('Report execution to Google Analytics. \n'
-          'Thanks to support us in the task of finding new funds for CMP3 development!')
+    print(BColors.OKGREEN +
+          '  .. INFO: Report execution to Google Analytics. \n' +
+          'Thanks to support us in the task of finding new funds for CMP3 development!' +
+          BColors.ENDC)
 
 
 def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=1):
@@ -126,19 +128,19 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=
         cmd.append("--anat_pipeline_config")
         cmd.append(project.anat_config_file)
     else:
-        print("ERROR: anatomical pipeline is mandatory")
+        print_error("  .. ERROR: anatomical pipeline is mandatory")
 
     if run_dmri:
         cmd.append("--dwi_pipeline_config")
         cmd.append(project.dmri_config_file)
     else:
-        print("INFO: diffusion pipeline not performed")
+        print("  .. INFO: diffusion pipeline not performed")
 
     if run_fmri:
         cmd.append("--func_pipeline_config")
         cmd.append(project.fmri_config_file)
     else:
-        print("INFO: functional pipeline not performed")
+        print("  .. INFO: functional pipeline not performed")
 
     cmd.append('--number_of_threads')
     cmd.append(str(number_of_threads))
@@ -191,21 +193,21 @@ def clean_cache(bids_root):
     # File can be README.txt CHANGES.txt participants.tsv project_description.json
 
     for f in glob(os.path.join(bids_root, '._java*')):
-        print('... DEL: {}'.format(f))
+        print('  ... DEL: {}'.format(f))
         try:
             os.remove(f)
         except Exception:
             pass
 
     for f in glob(os.path.join(bids_root, 'mri_segstats.tmp*')):
-        print('... DEL: {}'.format(f))
+        print('  ... DEL: {}'.format(f))
         try:
             os.remove(f)
         except Exception:
             pass
 
     for d in glob(os.path.join(bids_root, 'MCR_*')):
-        print('... DEL: {}'.format(d))
+        print('  ... DEL: {}'.format(d))
         try:
             shutil.rmtree(d)
         except Exception:
@@ -231,7 +233,7 @@ def clean_cache(bids_root):
     #     shutil.rmtree(d)
 
     for f in glob(os.path.join(bids_root, '.X99*')):
-        print('... DEL: {}'.format(f))
+        print('  ... DEL: {}'.format(f))
         try:
             os.remove(f)
         except Exception:
@@ -325,10 +327,10 @@ elif args.fs_license:
     # print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
     # shutil.copyfile(src=os.environ['FS_LICENSE'],dst=os.path.join('/opt','freesurfer','license.txt'))
 else:
-    print("ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
+    print_error("  .. ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
     sys.exit(1)
 
-print('  ... $FS_LICENSE : {}'.format(os.environ['FS_LICENSE']))
+print('  .. INFO: $FS_LICENSE set to {}'.format(os.environ['FS_LICENSE']))
 
 # Get the number of available cores and keep one for light processes if possible
 max_number_of_cores = multiprocessing.cpu_count() - 1
@@ -346,7 +348,7 @@ if args.number_of_participants_processed_in_parallel is not None:
                 max_number_of_cores))
         print(
             BColors.WARNING +
-            '    WARNING: the specified number of subjects to be processed in parallel ({})'.format(args.number_of_participants_processed_in_parallel) +
+            '  .. WARNING: the specified number of subjects to be processed in parallel ({})'.format(args.number_of_participants_processed_in_parallel) +
             ' exceeds the number of available cores ({})'.format(max_number_of_cores) +
             BColors.ENDC)
         parallel_number_of_subjects = max_number_of_cores
@@ -355,7 +357,7 @@ if args.number_of_participants_processed_in_parallel is not None:
             '  * Number of subjects to be processed in parallel set to one (sequential run)')
         print(
             BColors.WARNING +
-            '    WARNING: the specified number of subjects to be processed in parallel ({}) '.format(args.number_of_participants_processed_in_parallel) +
+            '  .. WARNING: the specified number of subjects to be processed in parallel ({}) '.format(args.number_of_participants_processed_in_parallel) +
             'should be greater to 0' + BColors.ENDC)
         parallel_number_of_subjects = 1
     else:
@@ -373,13 +375,13 @@ if args.number_of_threads is not None:
             print('  * Number of parallel threads set to the maximal number of available cores ({})'.format(
                 max_number_of_cores))
             print(BColors.WARNING +
-                  '   WARNING: the specified number of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
+                  '  .. WARNING: the specified number of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
                   'exceeds the number of available cores ({})'.format(max_number_of_cores) +
                   BColors.ENDC)
             number_of_threads = max_number_of_cores
         elif number_of_threads <= 0:
             print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
-            print(BColors.WARNING + '    WARNING: the specified of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
+            print(BColors.WARNING + '  .. WARNING: The specified of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
                   'should be greater to 0' + BColors.ENDC)
             number_of_threads = 1
         else:
@@ -398,7 +400,7 @@ if args.number_of_threads is not None:
             number_of_threads = 1
             parallel_number_of_subjects = max_number_of_cores
             print(BColors.WARNING +
-                  '    Processing will be ONLY parallelized at the subject level using {} cores.'.format(parallel_number_of_subjects) +
+                  '  .. WARNING: Processing will be ONLY parallelized at the subject level using {} cores.'.format(parallel_number_of_subjects) +
                   BColors.ENDC)
 else:
     print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
@@ -468,13 +470,13 @@ if args.analysis_level == "participant":
                 session_path = os.path.join(
                     args.bids_dir, project.subject, session)
                 if not os.path.exists(session_path):
-                    print(
-                        "ERROR: The directory {} corresponding to the session {} specified by --session_label input flag DOES NOT exist.".format(
+                    print_error(
+                        "  .. ERROR: The directory {} corresponding to the session {} specified by --session_label input flag DOES NOT exist.".format(
                             session_path, session.split("-")[-1]))
                     sys.exit(1)
                 else:
                     print(
-                        "INFO: The directory {} corresponding to the session {} specified by --session_label input flag DOES exist.".format(
+                        "  .. INFO: The directory {} corresponding to the session {} specified by --session_label input flag DOES exist.".format(
                             session_path, session.split("-")[-1]))
         else:
             # Check if multiple session (sub-XX/ses-YY/anat/... structure or sub-XX/anat.. structure?)
@@ -521,7 +523,7 @@ if args.analysis_level == "participant":
                     project.anat_config_file = create_subject_configuration_from_ref(project, anat_pipeline_config,
                                                                                      'anatomical')
                     run_anat = True
-                    print("... Anatomical config created : {}".format(
+                    print("     ... Anatomical config created : {}".format(
                         project.anat_config_file))
                 if args.dwi_pipeline_config is not None:
                     if check_configuration_format(args.dwi_pipeline_config) == '.ini':
@@ -531,7 +533,7 @@ if args.analysis_level == "participant":
                     project.dmri_config_file = create_subject_configuration_from_ref(project, dwi_pipeline_config,
                                                                                      'diffusion')
                     run_dmri = True
-                    print("... Diffusion config created : {}".format(
+                    print("     ... Diffusion config created : {}".format(
                         project.dmri_config_file))
                 if args.func_pipeline_config is not None:
                     if check_configuration_format(args.func_pipeline_config) == '.ini':
@@ -541,11 +543,11 @@ if args.analysis_level == "participant":
                     project.fmri_config_file = create_subject_configuration_from_ref(project, func_pipeline_config,
                                                                                      'fMRI')
                     run_fmri = True
-                    print("... fMRI config created : {}".format(
+                    print("     ... fMRI config created : {}".format(
                         project.fmri_config_file))
 
                 if args.anat_pipeline_config is not None:
-                    print("... Running pipelines : ")
+                    print("  .. INFO: Running pipelines : ")
                     print("        - Anatomical MRI (segmentation and parcellation)")
 
                     if args.dwi_pipeline_config is not None:
@@ -600,7 +602,7 @@ if args.analysis_level == "participant":
                                                  run_dmri=run_dmri,
                                                  run_fmri=run_fmri,
                                                  number_of_threads=number_of_threads)
-                        print("... cmd : {}".format(cmd))
+                        print_blue("... cmd : {}".format(cmd))
 
                         proc = run(command=cmd, env={},
                                    log_filename=os.path.join(project.output_directory, 'cmp', project.subject,
@@ -642,7 +644,7 @@ if args.analysis_level == "participant":
                 project.anat_config_file = create_subject_configuration_from_ref(project, anat_pipeline_config,
                                                                                  'anatomical')
                 run_anat = True
-                print("... Anatomical config created : {}".format(
+                print("     ... Anatomical config created : {}".format(
                     project.anat_config_file))
             if args.dwi_pipeline_config is not None:
                 if check_configuration_format(args.dwi_pipeline_config) == '.ini':
@@ -652,7 +654,7 @@ if args.analysis_level == "participant":
                 project.dmri_config_file = create_subject_configuration_from_ref(project, dwi_pipeline_config,
                                                                                  'diffusion')
                 run_dmri = True
-                print("... Diffusion config created : {}".format(
+                print("     ... Diffusion config created : {}".format(
                     project.dmri_config_file))
             if args.func_pipeline_config is not None:
                 if check_configuration_format(args.func_pipeline_config) == '.ini':
@@ -662,11 +664,11 @@ if args.analysis_level == "participant":
                 project.fmri_config_file = create_subject_configuration_from_ref(project, func_pipeline_config,
                                                                                  'fMRI')
                 run_fmri = True
-                print("... fMRI config created : {}".format(
+                print("     ... fMRI config created : {}".format(
                     project.fmri_config_file))
 
             if args.anat_pipeline_config is not None:
-                print("... Running pipelines : ")
+                print("  .. INFO: Running pipelines : ")
                 print("        - Anatomical MRI (segmentation and parcellation)")
 
                 if args.dwi_pipeline_config is not None:
@@ -721,7 +723,7 @@ if args.analysis_level == "participant":
                                              run_dmri=run_dmri,
                                              run_fmri=run_fmri,
                                              number_of_threads=number_of_threads)
-                    print("... cmd : {}".format(cmd))
+                    print_blue("... cmd : {}".format(cmd))
 
                     proc = run(command=cmd, env={},
                                log_filename=os.path.join(project.output_directory,
@@ -730,8 +732,8 @@ if args.analysis_level == "participant":
                                )
                     processes.append(proc)
             else:
-                print(
-                    "... Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)")
+                print_error(
+                    "  .. Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)")
 
     if not args.coverage:
         while len(processes) > 0:
