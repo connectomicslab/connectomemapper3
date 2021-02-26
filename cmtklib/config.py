@@ -448,7 +448,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                     conf_value = float(conf_value)
                                 setattr(sub_config, sub_key, conf_value)
                                 if debug:
-                                    print(f'Set {sub_config}.{sub_key} to {conf_value}')
+                                    print(f' .. DEBUG: Set {sub_config}.{sub_key} to {conf_value}')
                             except Exception as e:
                                 if debug:
                                     print_warning('  .. EXCEPTION raised while setting ' +

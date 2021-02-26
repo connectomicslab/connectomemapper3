@@ -220,21 +220,12 @@ class DiffusionConfig(HasTraits):
         new : string
             New value of ``diffusion_model``
         """
-        print("diffusion model changed")
-
         # Probabilistic tracking only available for Spherical Deconvoluted data
         if self.tracking_processing_tool == 'MRtrix':
             self.mrtrix_tracking_config.tracking_mode = new
-            print('tracking tool mrtrix')
             if new == 'Deterministic':
-                print('det mode')
-                # Make sure backtrack is disable for MRtrix Deterministic (ACT) Tractography
-                print('Disable backtrack for deterministic ACT')
                 self.mrtrix_tracking_config.backtrack = False
-            else:
-                print('prob mode')
         elif self.tracking_processing_tool == 'Dipy':
-            print('tracking tool dipy')
             self.dipy_tracking_config.tracking_mode = new
 
     def update_dipy_tracking_sh_order(self, new):
