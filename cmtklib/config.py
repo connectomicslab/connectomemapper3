@@ -418,7 +418,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                 elif isinstance(getattr(sub_config, sub_key), dict):
                                     conf_value = eval(conf_value)
                                 elif isinstance(getattr(sub_config, sub_key), int):
-                                    conf_value = int(conf_value)
+                                    conf_value = int(float(conf_value))
                                     if debug:
                                         print_warning('Converted to int')
                                 elif isinstance(getattr(sub_config, sub_key), float):
@@ -448,7 +448,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                             elif isinstance(getattr(stage.config, key), dict):
                                 conf_value = eval(conf_value)
                             elif isinstance(getattr(stage.config, key), int):
-                                conf_value = int(conf_value)
+                                conf_value = int(float(conf_value))
                                 if debug:
                                     print_warning('Converted to int')
                             elif isinstance(getattr(stage.config, key), float):
