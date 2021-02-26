@@ -414,8 +414,8 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                     conf_value = eval(conf_value)
                                 elif isinstance(getattr(sub_config, sub_key), bool):
                                     conf_value = bool(conf_value)
-                                # elif isinstance(getattr(sub_config, sub_key), list):
-                                #     conf_value = eval(conf_value)
+                                elif isinstance(getattr(sub_config, sub_key), list):
+                                    conf_value = list(conf_value)
                                 elif isinstance(getattr(sub_config, sub_key), dict):
                                     conf_value = eval(conf_value)
                                 elif isinstance(getattr(sub_config, sub_key), int):
@@ -441,8 +441,8 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                 conf_value = eval(conf_value)
                             elif isinstance(getattr(stage.config, key), bool):
                                 conf_value = bool(conf_value)
-                            # elif isinstance(getattr(stage.config, key), list):
-                            #     conf_value = eval(conf_value)
+                            elif isinstance(getattr(stage.config, key), list):
+                                conf_value = list(conf_value)
                             elif isinstance(getattr(stage.config, key), dict):
                                 conf_value = eval(conf_value)
                             elif isinstance(getattr(stage.config, key), int):
