@@ -10,6 +10,8 @@ import configparser
 import json
 from collections.abc import Iterable
 
+from traits.api import Float, Int
+
 from cmp.info import __version__
 from cmtklib.util import BColors, print_warning, print_error, \
     print_blue
@@ -413,6 +415,11 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                     conf_value = bool(conf_value)
                                 elif isinstance(getattr(sub_config, sub_key), list):
                                     conf_value = eval(conf_value)
+                                elif conf_value.isnumeric():
+                                    if isinstance(getattr(sub_config, sub_key), int):
+                                        conf_value = Int(conf_value)
+                                    if isinstance(getattr(sub_config, sub_key), float):
+                                        conf_value = Float(conf_value)
                                 setattr(sub_config, sub_key, conf_value)
                                 if debug:
                                     print(f'Set {sub_config}.{sub_key} to {conf_value}')
@@ -432,6 +439,11 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                 conf_value = bool(conf_value)
                             elif isinstance(getattr(stage.config, key), list):
                                 conf_value = eval(conf_value)
+                            elif conf_value.isnumeric():
+                                if isinstance(getattr(stage.config, key), int):
+                                    conf_value = Int(conf_value)
+                                if isinstance(getattr(stage.config, key), float):
+                                    conf_value = Float(conf_value)
                             setattr(stage.config, key, conf_value)
                             if debug:
                                 print(f'Set {stage.config}.{key} to {conf_value}')
