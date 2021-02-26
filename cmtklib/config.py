@@ -418,12 +418,16 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                                 elif conf_value.isnumeric():
                                     if isinstance(getattr(sub_config, sub_key), int):
                                         conf_value = Int(conf_value)
+                                        if debug:
+                                            print_warning('Converted to Int')
                                     if isinstance(getattr(sub_config, sub_key), float):
                                         conf_value = Float(conf_value)
+                                        if debug:
+                                            print_warning('Converted to Float')
                                 setattr(sub_config, sub_key, conf_value)
                                 if debug:
                                     print(f'Set {sub_config}.{sub_key} to {conf_value}')
-                            except TypeError as e:
+                            except Exception as e:
                                 if debug:
                                     print_warning(' .. EXCEPTION raised while setting ' +
                                                   f'{sub_config}.{sub_key} to {conf_value}')
@@ -443,12 +447,16 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
                             elif conf_value.isnumeric():
                                 if isinstance(getattr(stage.config, key), int):
                                     conf_value = Int(conf_value)
+                                    if debug:
+                                        print_warning('Converted to Int')
                                 if isinstance(getattr(stage.config, key), float):
                                     conf_value = Float(conf_value)
+                                    if debug:
+                                        print_warning('Converted to Float')
                             setattr(stage.config, key, conf_value)
                             if debug:
                                 print(f'Set {stage.config}.{key} to {conf_value}')
-                        except TypeError as e:
+                        except Exception as e:
                             if debug:
                                 print_warning(' .. EXCEPTION raised while setting ' +
                                               f'{stage.config}.{key} to {conf_value}')
