@@ -17,6 +17,7 @@ from bids import BIDSLayout
 # CMP imports
 import cmp.project
 from cmp.info import __version__, __copyright__
+from cmtklib.util import print_error, print_blue, print_warning
 
 import warnings
 warnings.filterwarnings("ignore",
@@ -27,29 +28,8 @@ warnings.filterwarnings("ignore",
 
 def info():
     """Print version of copyright."""
-    print("\nConnectome Mapper {}".format(__version__))
-    print("""{}""".format(__copyright__))
-
-
-def usage():
-    """Show usage."""
-    print("Usage 1: connectomemapper3 bids_folder sub-<label> (ses-<label>) anatomical_ini_file process_anatomical")
-    print("""Usage 2: connectomemapper3 bids_folder sub-<label> (ses-<label>)
-          anatomical_ini_file process_anatomical
-          diffusion_ini_file process_diffusion""")
-    print("""Usage 3: connectomemapper3 bids_folder sub-<label> (ses-<label>)
-          anatomical_ini_file process_anatomical
-          diffusion_ini_file process_diffusion
-          fmri_ini_file process_fmri""")
-    print("")
-    print("bids_directory <Str> : full path of root directory of bids dataset")
-    print("sub-<label> <Str>: subject name")
-    print("anatomical_config_ini <Str>: full path of .ini configuration file for anatomical pipeline")
-    print("process_anatomical <Bool> : If True, process anatomical pipeline")
-    print("diffusion_config_ini_file <Str>: full path of .ini configuration file for diffusion pipeline")
-    print("process_diffusion <Bool> : If True, process diffusion pipeline")
-    print("fmri_config_ini_file <Str>: full path of .ini configuration file for fMRI pipeline")
-    print("process_fmri <Bool> : If True, process fMRI pipeline")
+    print_blue(f'\nConnectome Mapper {__version__}')
+    print_warning(f'{__copyright__}\n')
 
 
 # Checks the needed dependencies. We call directly the functions instead
@@ -68,12 +48,12 @@ def dep_check():
 
     # Check for FSL
     if subprocess.call("fslorient", stdout=nul, stderr=nul, shell=True) != 255:
-        error = """FSL not installed or not working correctly. Check that the
+        error = """  .. ERROR: FSL not installed or not working correctly. Check that the
 FSL_DIR variable is exported and the fsl.sh setup script is sourced."""
 
     # Check for Freesurfer
     if subprocess.call("mri_info", stdout=nul, stderr=nul, shell=True) != 1:
-        error = """FREESURFER not installed or not working correctly. Check that the
+        error = """  .. ERROR: FREESURFER not installed or not working correctly. Check that the
 FREESURFER_HOME variable is exported and the SetUpFreeSurfer.sh setup
 script is sourced."""
 
@@ -93,7 +73,7 @@ script is sourced."""
 # DTB binaries (e.g. DTB_dtk2dir) are in your path and don't give any error."""
 
     if error != "":
-        print(error)
+        print_error(error)
         sys.exit(2)
 
 
@@ -192,16 +172,16 @@ def main():
     try:
         bids_layout = BIDSLayout(project.base_directory)
     except Exception:
-        print("Exception : Raised at BIDSLayout")
+        print_error("  .. EXCEPTION: Raised at BIDSLayout")
         exit_code = 1
         return exit_code
 
     if args.session_label is not None:
         project.subject_sessions = ['{}'.format(args.session_label)]
         project.subject_session = '{}'.format(args.session_label)
-        print("INFO : Detected session(s)")
+        print("  .. INFO: Dataset has subject/session layout")
     else:
-        print("INFO : No detected session")
+        print("  .. INFO: Dataset has basic subject layout")
         project.subject_sessions = ['']
         project.subject_session = ''
 
@@ -215,12 +195,13 @@ def main():
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             if args.number_of_threads is not None:
-                print(f'--- Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
+                print(f'  .. INFO: Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
                 anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
                 anat_pipeline.process()
             else:
+                print_error("  .. ERROR: Invalid inputs")
                 exit_code = 1
                 return exit_code
 
@@ -235,14 +216,14 @@ def main():
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             if args.number_of_threads is not None:
-                print(f'--- Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
+                print(f'  .. INFO: Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
                 anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
             else:
-                print("ERROR : Invalid inputs")
+                print_error("  .. ERROR: Invalid inputs")
                 exit_code = 1
                 return exit_code
 
@@ -255,15 +236,16 @@ def main():
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                # print sys.argv[offset+7]
+
                 if dmri_valid_inputs:
                     dmri_pipeline.process()
                 else:
-                    print("   ... ERROR : Invalid inputs")
+                    print("  .. ERROR: Invalid inputs")
                     exit_code = 1
                     return exit_code
         else:
-            print(msg)
+            print_error(f'  .. ERROR: Invalid anatomical outputs for diffusion pipeline')
+            print_error(f'{msg}')
             exit_code = 1
             return exit_code
 
@@ -277,14 +259,14 @@ def main():
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             if args.number_of_threads is not None:
-                print(f'--- Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
+                print(f'  .. INFO: Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
                 anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
             else:
-                print("ERROR : Invalid inputs")
+                print_error("  .. ERROR: Invalid inputs")
                 exit_code = 1
                 return exit_code
 
@@ -297,21 +279,17 @@ def main():
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                # fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                # fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                # print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
-                # print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
 
-                # print sys.argv[offset+9]
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
                 else:
-                    print("   ... ERROR : Invalid inputs")
+                    print("  .. ERROR: Invalid inputs")
                     exit_code = 1
                     return exit_code
         else:
-            print(msg)
+            print_error(f'  .. ERROR: Invalid anatomical outputs for fMRI pipeline')
+            print_error(f'{msg}')
             exit_code = 1
             return exit_code
 
@@ -326,14 +304,14 @@ def main():
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             if args.number_of_threads is not None:
-                print(f'--- Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
+                print(f'  .. INFO: Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP')
                 anat_pipeline.stages['Segmentation'].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
                 anat_pipeline.process()
             else:
-                print("   ... ERROR : Invalid inputs")
+                print_error("  .. ERROR: Invalid inputs")
                 exit_code = 1
                 return exit_code
 
@@ -346,12 +324,12 @@ def main():
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                # print sys.argv[offset+7]
+
                 if dmri_valid_inputs:
                     print(">> Process diffusion pipeline")
                     dmri_pipeline.process()
                 else:
-                    print("   ... ERROR : Invalid inputs")
+                    print_error("  .. ERROR: Invalid inputs")
                     exit_code = 1
                     return exit_code
 
@@ -359,21 +337,17 @@ def main():
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                print(f'Freesurfer subjects dir: {fmri_pipeline.subjects_dir}')
-                print(f'Freesurfer subject id: {fmri_pipeline.subject_id}')
 
-                # print sys.argv[offset+9]
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
                 else:
-                    print("   ... ERROR : Invalid inputs")
+                    print_error("  .. ERROR: Invalid inputs")
                     exit_code = 1
                     return exit_code
         else:
-            print(msg)
+            print_error(f'  .. ERROR: Invalid anatomical outputs for diffusion and fMRI pipelines')
+            print_error(f'{msg}')
             exit_code = 1
             return exit_code
 

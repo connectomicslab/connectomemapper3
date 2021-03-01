@@ -23,6 +23,7 @@ from traits.api import *
 import cmp.pipelines.common as cmp_common
 from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
+from cmtklib.util import print_error
 
 
 class Global_Configuration(HasTraits):
@@ -407,26 +408,22 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if os.path.isfile(T1_file):
             t1_available = True
         else:
-            error_message = "ERROR : Missing anatomical output file %s . Please re-run the anatomical pipeline" % T1_file
-            print(error_message)
+            error_message += "  .. ERROR: Missing anatomical output T1w file %s . Please re-run the anatomical pipeline" % T1_file
 
         if os.path.isfile(brain_file):
             brain_available = True
         else:
-            error_message = "ERROR : Missing anatomical output file %s . Please re-run the anatomical pipeline" % brain_file
-            print(error_message)
+            error_message += "  .. ERROR: Missing output brain masked T1w file %s . Please re-run the anatomical pipeline" % brain_file
 
         if os.path.isfile(brainmask_file):
             brainmask_available = True
         else:
-            error_message = "ERROR : Missing anatomical output file %s . Please re-run the anatomical pipeline" % brainmask_file
-            print(error_message)
+            error_message += "  .. ERROR: Missing output brain mask file %s . Please re-run the anatomical pipeline" % brainmask_file
 
         if os.path.isfile(wm_mask_file):
             wm_available = True
         else:
-            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % wm_mask_file
-            print(error_message)
+            error_message += "  .. ERROR: Missing output white-matter mask file %s . Please re-run the anatomical pipeline" % wm_mask_file
 
         cnt1 = 0
         cnt2 = 0
@@ -437,12 +434,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if cnt1 == cnt2:
             roivs_available = True
         else:
-            error_message = "ERROR : Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline" % (
+            error_message += "  .. ERROR : Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline" % (
                 cnt1 - cnt2, cnt1)
-            print(error_message)
 
         if t1_available is True and brain_available is True and brainmask_available is True and wm_available is True and roivs_available is True:
-            print("INFO : Valid derivatives for anatomical pipeline")
+            print("  .. INFO: Valid derivatives for anatomical pipeline")
             valid_output = True
 
         return valid_output, error_message
