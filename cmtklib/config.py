@@ -408,7 +408,7 @@ def get_fmri_process_detail_json(project_info, section, detail):
     return config[section][detail]
 
 
-def set_pipeline_attributes_from_config(pipeline, config, debug=False):
+def set_pipeline_attributes_from_config(pipeline, config, debug=True):
     """Set the pipeline stage attributes given a configuration.
 
     Parameters
