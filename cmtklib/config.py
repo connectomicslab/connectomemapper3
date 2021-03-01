@@ -135,9 +135,13 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Tr
 
             if ini_mode:
                 try:
-                    value = eval(value)
-                    if debug:
-                        print_warning(f'  .. DEBUG: String {value} evaluated')
+                    if not(section == 'Global' and name == 'ants_precision_type'):
+                        value = eval(value)
+                        if debug:
+                            print_warning(f'  .. DEBUG: String {value} evaluated')
+                    else:
+                        if debug:
+                            print_warning(f'  .. DEBUG: String {value} not evaluated')
                 except Exception:
                     if debug:
                         print_error(f'  .. EXCEPTION: String {value} COULD NOT BE evaluated')
@@ -162,11 +166,6 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Tr
                 if debug:
                     print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as boolean')
                 config_json[section][name] = [value]
-            elif isinstance(value, float):
-                value = 'float'
-                if debug:
-                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as float')
-                config_json[section][name] = ['float']
             elif value and not isinstance(value, str):
                 if debug:
                     print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as not a string')
