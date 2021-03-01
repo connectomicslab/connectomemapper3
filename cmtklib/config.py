@@ -135,7 +135,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Tr
 
             if ini_mode:
                 try:
-                    if not(section == 'Global' and name == 'ants_precision_type'):
+                    if not(section == 'parcellation_stage' and name == 'ants_precision_type'):
                         value = eval(value)
                         if debug:
                             print_warning(f'  .. DEBUG: String {value} evaluated')
