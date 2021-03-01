@@ -34,24 +34,6 @@ from cmp.project import CMP_Project_Info, run_individual
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
-# __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-#                                 'version')).read()
-
-# def report_app_run_to_google_analytics():
-#     params = urllib.parse.urlencode({'v': 1,
-#                                'tid': '247732290',
-#                                'cid': '555',
-#                                'an' : 'ConnectomeMapper3',
-#                                'av' : __version__,
-#                                't': 'event',
-#                                'ec': 'run',
-#                                'ea': 'start'})
-
-#     connection = http.client.HTTPConnection('www.google-analytics.com')
-#     connection.request('POST', '/collect', params)
-#     response = connection.getresponse()
-#     print("{}, {}".format(response.status, response.reason))
-
 
 def report_usage(event_category, event_action, event_label, verbose=False):
     """Send HTTP POST event to Google Analytics
@@ -266,14 +248,6 @@ def run(command, env={}, log_filename={}):
                                    env=merged_env)
 
     return process
-    # while True:
-    #     line = process.stdout.readline()
-    #     line = str(line)[:-1]
-    #     print(line)
-    #     if line == '' and process.poll() is not None:
-    #         break
-    # if process.returncode != 0:
-    #     raise Exception("Non zero return code: %d"%process.returncode)
 
 
 # Parse script arguments
@@ -314,16 +288,8 @@ print('> Set $FS_LICENSE which points to FreeSurfer license location (BIDS App)'
 
 if os.access(os.path.join('/bids_dir', 'code', 'license.txt'), os.F_OK):
     os.environ['FS_LICENSE'] = os.path.join('/bids_dir', 'code', 'license.txt')
-    # Not anymore needed as we are using the environment variable
-    # print('... src : {}'.format(os.path.join('/tmp','code','license.txt')))
-    # print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
-    # shutil.copyfile(src=os.path.join('/tmp','code','license.txt'),dst=os.path.join('/opt','freesurfer','license.txt'))
 elif args.fs_license:
     os.environ['FS_LICENSE'] = os.path.abspath(args.fs_license)
-    # Not anymore needed as we are using the environment variable
-    # print('... src : {}'.format(os.environ['FS_LICENSE']))
-    # print('... dst : {}'.format(os.path.join('/opt','freesurfer','license.txt')))
-    # shutil.copyfile(src=os.environ['FS_LICENSE'],dst=os.path.join('/opt','freesurfer','license.txt'))
 else:
     print_error("  .. ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
     sys.exit(1)
@@ -332,6 +298,7 @@ print('  .. INFO: $FS_LICENSE set to {}'.format(os.environ['FS_LICENSE']))
 
 # Get the number of available cores and keep one for light processes if possible
 max_number_of_cores = multiprocessing.cpu_count() - 1
+
 # handles case with one CPU available
 if max_number_of_cores < 1:
     max_number_of_cores = 1
@@ -497,7 +464,7 @@ if args.analysis_level == "participant":
                     project.subject, session))
                 project.subject_session = session
 
-                # Derivatives folder creation (Folder is first deleted if it already exists)
+                # Derivatives folder creation
                 for tool in tools:
                     if tool == 'freesurfer':
                         session_derivatives_dir = os.path.join(args.output_dir, tool,
@@ -613,7 +580,6 @@ if args.analysis_level == "participant":
                         "... Error: at least anatomical configuration file has to be specified (--anat_pipeline_config)")
 
         else:  # No session structure
-
             print('> Process subject {}'.format(project.subject))
 
             if not args.coverage:
@@ -623,7 +589,7 @@ if args.analysis_level == "participant":
             project.subject_sessions = ['']
             project.subject_session = ''
 
-            # Derivatives folder creation (Folder is first deleted if it already exists)
+            # Derivatives folder creation
             for tool in tools:
                 subject_derivatives_dir = os.path.join(
                     args.output_dir, tool, project.subject)
