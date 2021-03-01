@@ -24,7 +24,7 @@ __current_year__ = '2021'
 
 __author__ = 'The CMP3 developers'
 
-__copyright__ = f'Copyright (C) 2009-{__current_year__}, ' +\
+__copyright__ = 'Copyright (C) 2009-{}, '.format(__current_year__) +\
                 'Ecole Polytechnique Federale de Lausanne (EPFL) ' +\
                 'the University Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, ' +\
                 'and Contributors, All rights reserved.'
