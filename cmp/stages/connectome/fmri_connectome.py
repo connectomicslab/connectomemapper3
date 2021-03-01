@@ -158,7 +158,6 @@ class ConnectomeStage(Stage):
                             "showmatrix_gpickle", layout, mat, "corr", "False",
                             self.config.subject + ' - ' + con_name + ' - Correlation', map_scale]
             else:
-                print("multi scale")
                 for mat in func_outputs['func.@connectivity_matrices']:
                     if 'gpickle' in mat:
                         con_name = os.path.basename(mat).split(".")[
