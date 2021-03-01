@@ -147,11 +147,8 @@ class ConnectomeStage(Stage):
                 layout = 'matrix'
 
             mat = func_outputs['func.@connectivity_matrices']
-            # print('con_results_path : ',con_results_path)
 
             if isinstance(mat, str):
-                print("single scale")
-                # print(mat)
                 if 'gpickle' in mat:
                     con_name = os.path.basename(mat).split(".")[
                         0].split("_")[-1]
@@ -163,7 +160,6 @@ class ConnectomeStage(Stage):
             else:
                 print("multi scale")
                 for mat in func_outputs['func.@connectivity_matrices']:
-                    # print(mat)
                     if 'gpickle' in mat:
                         con_name = os.path.basename(mat).split(".")[
                             0].split("_")[-1]

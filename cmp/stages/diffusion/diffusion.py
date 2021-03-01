@@ -689,9 +689,7 @@ class DiffusionStage(Stage):
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                                   '-odf.load_tensor',
                                                                                                   tensor_res]
-
             else:  # CSD model
-
                 RF_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_rf")
                 RF_resp = os.path.join(RF_dir, 'diffusion_preproc_resampled_ER.mif')
                 if os.path.exists(RF_resp):
@@ -708,9 +706,7 @@ class DiffusionStage(Stage):
         # Tracking outputs
         # Dipy
         if self.config.tracking_processing_tool == 'Dipy':
-            # print('Dipy tracking: true')
             if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
-
                 if self.config.diffusion_model == 'Deterministic':
                     diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_deterministic_tracking")
                     streamline_res = os.path.join(diff_dir, "tract.trk")
@@ -721,9 +717,7 @@ class DiffusionStage(Stage):
                 if os.path.exists(streamline_res):
                     self.inspect_outputs_dict[
                         self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis', streamline_res]
-
             else:
-
                 diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_dtieudx_tracking")
                 streamline_res = os.path.join(diff_dir, "tract.trk")
                 if os.path.exists(streamline_res):

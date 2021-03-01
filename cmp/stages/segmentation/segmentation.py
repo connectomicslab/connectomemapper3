@@ -422,10 +422,15 @@ class SegmentationStage(Stage):
         #     outputnode.inputs.brain_mask = self.config.brain_mask_path
         #     outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
 
-    def define_inspect_outputs(self):
+    def define_inspect_outputs(self, debug=False):
         """Update the `inspect_outputs' class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
+
+        Parameters
+        ----------
+        debug : bool
+            If `True`, show printed output
         """
         # print "stage_dir : %s" % self.stage_dir
 
@@ -437,13 +442,15 @@ class SegmentationStage(Stage):
                 fs_path = self.config.freesurfer_subject_id
                 if os.path.exists(reconall_report_path):
                     # print('Load pickle content')
-                    print("Read {}".format(reconall_report_path))
-                    fs_path = extract_freesurfer_subject_dir(reconall_report_path, self.output_dir)
+                    if debug:
+                        print("Read {}".format(reconall_report_path))
+                    fs_path = extract_freesurfer_subject_dir(reconall_report_path, self.output_dir, debug=debug)
             else:
                 fs_path = os.path.join(
                     self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
 
-            print("fs_path : %s" % fs_path)
+            if debug:
+                print("fs_path : %s" % fs_path)
 
             if 'FREESURFER_HOME' not in os.environ:
                 colorLUT_file = pkg_resources.resource_filename('cmtklib',
@@ -471,10 +478,6 @@ class SegmentationStage(Stage):
                                                            '-segmentation', os.path.join(
                                                                fs_path, 'mri', 'aseg.mgz'),
                                                            colorLUT_file]
-
-        # elif self.config.seg_tool == "Custom segmentation":
-        #     self.inspect_outputs_dict['WM mask'] = [
-        #         'fsleyes', self.config.white_matter_mask]
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)

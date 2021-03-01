@@ -323,7 +323,7 @@ def mean_curvature(xyz):
     return np.mean(k)
 
 
-def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None):
+def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None, debug=False):
     """Extract Freesurfer subject directory from the report created by Nipype Freesurfer Recon-all node.
 
     Parameters
@@ -333,6 +333,9 @@ def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None):
 
     local_output_dir : string
         Local output / derivatives directory
+
+    debug : bool
+        If `True`, show printed outputs
 
     Returns
     -------
@@ -344,14 +347,16 @@ def extract_freesurfer_subject_dir(reconall_report, local_output_dir=None):
         line = fp.readline()
         cnt = 1
         while line:
-            print("Line {}: {}".format(cnt, line.strip()))
+            if debug:
+                print("Line {}: {}".format(cnt, line.strip()))
 
             # Extract line containing listing of node outputs
             if "* subject_id : " in line:
                 fs_subject_dir = line.strip()
                 prefix = '* subject_id : '
                 fs_subject_dir = str.replace(fs_subject_dir, prefix, "")
-                print(fs_subject_dir)
+                if debug:
+                    print(fs_subject_dir)
 
                 # Update from BIDS App /output_dir to local output directory
                 # specified by local_output_dir
