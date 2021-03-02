@@ -25,7 +25,7 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 RUN apt-get update && \
     apt-get install software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
-    locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
+    locales libstdc++6 npm curl perl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
@@ -70,7 +70,7 @@ WORKDIR /opt/freesurfer
 
 # Download and install
 RUN apt-get update && \
-    apt-get install -qq -y --no-install-recommends perl curl && \
+    apt-get install -qq -y --no-install-recommends curl && \
     curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
     --exclude='freesurfer/diffusion' \
     --exclude='freesurfer/docs' \
