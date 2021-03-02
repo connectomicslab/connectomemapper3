@@ -10,8 +10,6 @@ import configparser
 import json
 from collections.abc import Iterable
 
-from traits.api import Float, Int
-
 from cmp.info import __version__
 from cmtklib.util import BColors, print_warning, print_error, \
     print_blue

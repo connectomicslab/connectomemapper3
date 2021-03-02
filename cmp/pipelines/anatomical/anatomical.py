@@ -23,7 +23,6 @@ from traits.api import *
 import cmp.pipelines.common as cmp_common
 from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
-from cmtklib.util import print_error
 
 
 class Global_Configuration(HasTraits):
