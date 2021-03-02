@@ -5,10 +5,11 @@
 #  This software is distributed under the open-source license Modified BSD.
 """This module defines the `cmpbidsappmanager` script that launches the Graphical User Interface."""
 
+from traits.etsconfig.api import ETSConfig
+ETSConfig.toolkit = 'qt'
+
 import sys
 import os
-
-from traits.etsconfig.api import ETSConfig
 
 # CMP imports
 from cmp.bidsappmanager import gui
