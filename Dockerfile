@@ -70,7 +70,7 @@ WORKDIR /opt/freesurfer
 
 # Download and install
 RUN apt-get update && \
-    apt-get install -qq -y --no-install-recommends curl && \
+    apt-get install -qq -y --no-install-recommends perl curl && \
     curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
     --exclude='freesurfer/diffusion' \
     --exclude='freesurfer/docs' \
