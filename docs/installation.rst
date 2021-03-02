@@ -156,7 +156,12 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
 * You are ready to use the Connectome Mapper 3 BIDS App Manager. See the `dedicated user guide <bidsappmanager.html>`_.
 
+.. note::In the future, if you wish to update Connectome Mapper 3 and the Connectome Mapper 3 BIDS App Manager,
+    this could be easily done by (1) updating the git repository to a new tag with `git fetch` and
+    `git checkout tags/|release| -b |release|` and (2) running `pip install .`.
+
 Help/Questions
 --------------
 
-If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_. Code bugs can be reported by creating a "New Issue" on the `source code repository <https://github.com/connectomicslab/connectomemapper3/issues>`_.
+If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_.
+Code bugs can be reported by creating a "New Issue" on the `source code repository <https://github.com/connectomicslab/connectomemapper3/issues>`_.
