@@ -1,7 +1,7 @@
 ##################################################################
-# Use Ubuntu 16.04 LTS as base image
+# Use Ubuntu 20.04 LTS as base image
 ##################################################################
-FROM ubuntu:xenial-20181218 as builder
+FROM ubuntu:focal-20210119 as builder
 
 ##################################################################
 # Docker build command arguments
@@ -23,7 +23,7 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 
 # Install system library dependencies
 RUN apt-get update && \
-    apt-get install python2.7 python2.7-minimal software-properties-common -y && \
+    apt-get install software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
     locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
