@@ -6,7 +6,7 @@ Changes
 Version 3.0.0-RC4
 ****************************
 
-Date: February XX, 2021
+Date: March XX, 2021
 
 This version corresponds to the fourth release candidate of Connectome Mapper 3 (CMP3).
 In particular, it integrates `Pull Request #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ which includes:
@@ -45,6 +45,24 @@ In particular, it integrates `Pull Request #74 <https://github.com/connectomicsl
   `connectomemapper3`, `showmatrix_gpickle`, and `cmpbidsappmanager`
   with correction of code style issues and addition of missing docstrings.
 
+* Remove a number of commented lines
+
+*Improvements*
+
+* Clean parameters to be saved in configuration files with the new API.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+* Clean output printed by the cmpbidsappmanager Graphical User Interface.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+* Add in `cmtklib.config` the three new functions `print_error`, `print_blue`,
+  and `print_warning`  to use different colors to differentiate general info
+  (default color), error (red), command or action (blue), and highlight or
+  warning (yellow).
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+* Clean code and remove a number of commented lines that are now obsolete.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
 
 *Documentation*
 
