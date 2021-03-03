@@ -70,21 +70,17 @@ class fMRIPipeline(Pipeline):
     pipeline_name = Str("fMRI_pipeline")
     input_folders = ['anat', 'func']
     seg_tool = Str
-
     subject = Str
     subject_directory = Directory
     derivatives_directory = Directory
-
     ordered_stage_list = ['Preprocessing',
-                          'Registration', 'FunctionalMRI', 'Connectome']
-
+                          'Registration',
+                          'FunctionalMRI',
+                          'Connectome']
     global_conf = Global_Configuration()
-
     config_file = Str
-
     parcellation_scheme = Str
     atlas_info = Dict()
-
     subjects_dir = Str
     subject_id = Str
 
@@ -113,7 +109,8 @@ class fMRIPipeline(Pipeline):
                                                   project_info.subject_session)
         else:
             self.global_conf.subject_session = ''
-            self.subject_directory = os.path.join(project_info.base_directory,  project_info.subject)
+            self.subject_directory = os.path.join(project_info.base_directory,
+                                                  project_info.subject)
 
         self.derivatives_directory = os.path.abspath(project_info.output_directory)
 
@@ -155,16 +152,6 @@ class fMRIPipeline(Pipeline):
 
     def update_registration(self):
         """Configure the list of registration tools."""
-        # if self.seg_tool == "Custom segmentation":
-        #     if self.stages['Registration'].config.registration_mode == 'BBregister (FS)':
-        #         self.stages['Registration'].config.registration_mode = 'Linear (FSL)'
-        #     if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
-        #         self.stages['Registration'].config.registration_mode_trait = [
-        #             'Linear (FSL)', 'Nonlinear (FSL)']
-        #     else:
-        #         self.stages['Registration'].config.registration_mode_trait = [
-        #             'Linear (FSL)']
-        # else:
         if 'Nonlinear (FSL)' in self.stages['Registration'].config.registration_mode_trait:
             self.stages['Registration'].config.registration_mode_trait = ['Linear (FSL)', 'BBregister (FS)',
                                                                           'Nonlinear (FSL)']
@@ -207,7 +194,7 @@ class fMRIPipeline(Pipeline):
             if stage == custom_last_stage:
                 break
 
-    def check_input(self, layout, gui=True, debug=False):
+    def check_input(self, layout, gui=True):
         """Check if input of the diffusion pipeline are available.
 
         Parameters
@@ -257,7 +244,6 @@ class fMRIPipeline(Pipeline):
                                extensions='.nii.gz')
             if len(files) > 0:
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
-                # print fmri_file
             else:
                 print("ERROR : BOLD image not found for subject %s." % subjid)
                 return
@@ -266,7 +252,6 @@ class fMRIPipeline(Pipeline):
                 subject=subjid, suffix='bold', extensions='.json')
             if len(files) > 0:
                 json_file = os.path.join(files[0].dirname, files[0].filename)
-                # print json_file
             else:
                 print("WARNING : BOLD json sidecar not found for subject %s." % subjid)
 
@@ -274,7 +259,6 @@ class fMRIPipeline(Pipeline):
                                extensions='.nii.gz')
             if len(files) > 0:
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
-                # print t2_file
             else:
                 print("WARNING : T1w image not found for subject %s." % subjid)
 
@@ -282,7 +266,6 @@ class fMRIPipeline(Pipeline):
                                extensions='.nii.gz')
             if len(files) > 0:
                 t2_file = os.path.join(files[0].dirname, files[0].filename)
-                # print t2_file
             else:
                 print("WARNING : T2w image not found for subject %s." % subjid)
 
@@ -293,7 +276,6 @@ class fMRIPipeline(Pipeline):
                                extensions='.nii.gz', session=sessid)
             if len(files) > 0:
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
-                # print fmri_file
             else:
                 print("ERROR : BOLD image not found for subject %s, session %s." % (
                     subjid, self.global_conf.subject_session))
@@ -303,7 +285,6 @@ class fMRIPipeline(Pipeline):
                                extensions='.json', session=sessid)
             if len(files) > 0:
                 json_file = os.path.join(files[0].dirname, files[0].filename)
-                # print json_file
             else:
                 print("WARNING : BOLD json sidecar not found for subject %s, session %s." % (
                     subjid, self.global_conf.subject_session))
@@ -312,7 +293,6 @@ class fMRIPipeline(Pipeline):
                                extensions='.nii.gz', session=sessid)
             if len(files) > 0:
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
-                # print t2_file
             else:
                 print("WARNING : T1w image not found for subject %s, session %s." % (
                     subjid, self.global_conf.subject_session))
@@ -321,7 +301,6 @@ class fMRIPipeline(Pipeline):
                                extensions='.nii.gz', session=sessid)
             if len(files) > 0:
                 t2_file = os.path.join(files[0].dirname, files[0].filename)
-                # print t2_file
             else:
                 print("WARNING : T2w image not found for subject %s, session %s." % (
                     subjid, self.global_conf.subject_session))
@@ -331,11 +310,6 @@ class fMRIPipeline(Pipeline):
         print("... fmri_file : %s" % fmri_file)
         print("... json_file : %s" % json_file)
 
-        # mods = layout.get_modalities()
-        # types = layout.get_modalities()
-        # print("Available modalities :")
-        # for typ in types:
-        #     print("-%s" % typ)
         if os.path.isfile(t1_file):
             t1_available = True
         if os.path.isfile(t2_file):
@@ -344,10 +318,6 @@ class fMRIPipeline(Pipeline):
             fMRI_available = True
         if os.path.isfile(json_file):
             fMRI_json_available = True
-
-        # print('fMRI :',fMRI_available)
-        # print('t1 :',t1_available)
-        # print('t2 :',t2_available)
 
         if fMRI_available:
             if self.global_conf.subject_session == '':
@@ -381,15 +351,6 @@ class fMRIPipeline(Pipeline):
             input_message = 'Error during inputs check. \nfMRI data not available (fMRI).'
 
         print(input_message)
-
-        # if gui:
-        #     # input_notification = Check_Input_Notification(message=input_message, imaging_model='fMRI')
-        #     # input_notification.configure_traits()
-        #     self.global_conf.imaging_model = input_notification.imaging_model
-        #     self.stages['Registration'].config.imaging_model = input_notification.imaging_model
-        # else:
-        #     self.global_conf.imaging_model = 'fMRI'
-        #     self.stages['Registration'].config.imaging_model = 'fMRI'
 
         self.global_conf.imaging_model = 'fMRI'
         self.stages['Registration'].config.imaging_model = 'fMRI'
@@ -442,21 +403,22 @@ class fMRIPipeline(Pipeline):
         if '_' in self.subject:
             self.subject = self.subject.split('_')[0]
 
-        # old_subject = self.subject
-
         if self.global_conf.subject_session == '':
             cmp_deriv_subject_directory = os.path.join(
                 self.output_directory, "cmp", self.subject)
             nipype_deriv_subject_directory = os.path.join(
                 self.output_directory, "nipype", self.subject)
         else:
-            cmp_deriv_subject_directory = os.path.join(self.output_directory, "cmp", self.subject,
+            cmp_deriv_subject_directory = os.path.join(self.output_directory,
+                                                       "cmp",
+                                                       self.subject,
                                                        self.global_conf.subject_session)
-            nipype_deriv_subject_directory = os.path.join(self.output_directory, "nipype", self.subject,
+            nipype_deriv_subject_directory = os.path.join(self.output_directory,
+                                                          "nipype",
+                                                          self.subject,
                                                           self.global_conf.subject_session)
 
-            self.subject = "_".join(
-                (self.subject, self.global_conf.subject_session))
+            self.subject = "_".join((self.subject, self.global_conf.subject_session))
 
         if not os.path.exists(os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline")):
             try:
@@ -471,7 +433,8 @@ class fMRIPipeline(Pipeline):
             os.unlink(os.path.join(nipype_deriv_subject_directory,
                                    "fMRI_pipeline", "pypeline.log"))
         config.update_config(
-            {'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline"),
+            {'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory,
+                                                       "fMRI_pipeline"),
                          'log_to_file': True},
              'execution': {'remove_unnecessary_outputs': False,
                            'stop_on_first_crash': True,
@@ -479,6 +442,7 @@ class fMRIPipeline(Pipeline):
                            'use_relative_paths': True,
                            'crashfile_format': "txt"}
              })
+
         logging.update_logging(config)
         iflogger = logging.getLogger('nipype.interface')
 
@@ -488,15 +452,11 @@ class fMRIPipeline(Pipeline):
                                          nipype_deriv_subject_directory=nipype_deriv_subject_directory)
         flow.write_graph(graph2use='colored', format='svg', simple_form=False)
 
-        # try:
-
         if self.number_of_cores != 1:
-            flow.run(plugin='MultiProc', plugin_args={
-                     'n_procs': self.number_of_cores})
+            flow.run(plugin='MultiProc',
+                     plugin_args={'n_procs': self.number_of_cores})
         else:
             flow.run()
-
-        # self.fill_stages_outputs()
 
         iflogger.info("**** Processing finished ****")
 
@@ -520,10 +480,6 @@ class fMRIPipeline(Pipeline):
         fMRI_flow <nipype.pipeline.engine.Workflow>
             An instance of :class:`nipype.pipeline.engine.Workflow`
         """
-        # subject_directory = self.subject_directory
-
-        # datasource.inputs.subject = self.subject
-
         if self.parcellation_scheme == 'Lausanne2008':
             bids_atlas_label = 'L2008'
         elif self.parcellation_scheme == 'Lausanne2018':
@@ -532,14 +488,13 @@ class fMRIPipeline(Pipeline):
             bids_atlas_label = 'Desikan'
 
         # Data sinker for output
-        sinker = pe.Node(nio.DataSink(), name="bold_sinker")
-        sinker.inputs.base_directory = os.path.join(
-            cmp_deriv_subject_directory)
+        sinker = pe.Node(nio.DataSink(), name="func_sinker")
+        sinker.inputs.base_directory = os.path.join(cmp_deriv_subject_directory)
 
         if self.parcellation_scheme == 'NativeFreesurfer':
             sinker.inputs.substitutions = [
-                (
-                    'eroded_brain_registered.nii.gz', self.subject + '_space-meanBOLD_desc-eroded_label-brain_dseg.nii.gz'),
+                ('eroded_brain_registered.nii.gz', self.subject +
+                 '_space-meanBOLD_desc-eroded_label-brain_dseg.nii.gz'),
                 ('eroded_csf_registered.nii.gz', self.subject +
                  '_space-meanBOLD_desc-eroded_label-CSF_dseg.nii.gz'),
                 ('wm_mask_registered.nii.gz', self.subject +
@@ -553,20 +508,17 @@ class fMRIPipeline(Pipeline):
                 ('DVARS.npy', self.subject + '_desc-scrubbing_DVARS.npy'),
                 ('fMRI_bandpass.nii.gz', self.subject +
                  '_desc-bandpass_task-rest_bold.nii.gz'),
-
-                (self.subject + '_label-' + bids_atlas_label + '_atlas_flirt.nii.gz',
-                 self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_atlas.nii.gz'),
-                # (self.subject+'_T1w_parc_freesurferaparc_flirt.nii.gz',self.subject+'_space-meanBOLD_label-Desikan_atlas.nii.gz'),
-                ('connectome_freesurferaparc', self.subject + \
-                 '_label-Desikan_conndata-network_connectivity'),
+                (self.subject + '_atlas-' + bids_atlas_label + '_dseg_flirt.nii.gz',
+                 self.subject + '_space-meanBOLD_atlas-' + bids_atlas_label + '_dseg.nii.gz'),
+                ('connectome_freesurferaparc', self.subject +
+                 '_atlas-Desikan_conndata-network_connectivity'),
                 ('averageTimeseries_freesurferaparc',
                  self.subject + '_atlas-Desikan_timeseries'),
-
             ]
         else:
             sinker.inputs.substitutions = [
-                (
-                    'eroded_brain_registered.nii.gz', self.subject + '_space-meanBOLD_desc-eroded_label-brain_dseg.nii.gz'),
+                ('eroded_brain_registered.nii.gz', self.subject +
+                 '_space-meanBOLD_desc-eroded_label-brain_dseg.nii.gz'),
                 ('wm_mask_registered.nii.gz', self.subject +
                  '_space-meanBOLD_label-WM_dseg.nii.gz'),
                 ('eroded_csf_registered.nii.gz', self.subject +
@@ -576,49 +528,44 @@ class fMRIPipeline(Pipeline):
                 ('fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz',
                  self.subject + '_meanBOLD.nii.gz'),
                 ('fMRI_despike_st_mcf.nii.gz.par', self.subject + '_motion.tsv'),
-
                 ('FD.npy', self.subject + '_desc-scrubbing_FD.npy'),
                 ('DVARS.npy', self.subject + '_desc-scrubbing_DVARS.npy'),
                 ('fMRI_bandpass.nii.gz', self.subject +
                  '_desc-bandpass_task-rest_bold.nii.gz'),
-
-                (self.subject + '_label-' + bids_atlas_label + '_atlas_flirt.nii.gz',
-                 self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_atlas.nii.gz'),
-
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale1_atlas_flirt.nii.gz',
-                 self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale1_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale2_atlas_flirt.nii.gz',
-                 self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale2_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale3_atlas_flirt.nii.gz',
-                 self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale3_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale4_atlas_flirt.nii.gz',
-                 self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale4_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale5_atlas_flirt.nii.gz',
-                 self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale5_atlas.nii.gz'),
-
+                (self.subject + '_atlas-' + bids_atlas_label + '_dseg_flirt.nii.gz',
+                 self.subject + '_space-meanBOLD_atlas-' + bids_atlas_label + '_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label + '_res-scale1_dseg_flirt.nii.gz',
+                 self.subject + '_space-meanBOLD_atlas-' + bids_atlas_label + '_res-scale1_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label + '_res-scale2_dseg_flirt.nii.gz',
+                 self.subject + '_space-meanBOLD_atlas-' + bids_atlas_label + '_res-scale2_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label + '_res-scale3_dseg_flirt.nii.gz',
+                 self.subject + '_space-meanBOLD_atlas-' + bids_atlas_label + '_res-scale3_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label + '_res-scale4_dseg_flirt.nii.gz',
+                 self.subject + '_space-meanBOLD_atlas-' + bids_atlas_label + '_res-scale4_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label + '_res-scale5_dseg_flirt.nii.gz',
+                 self.subject + '_space-meanBOLD_atlas-' + bids_atlas_label + '_res-scale5_dseg.nii.gz'),
                 ('connectome_freesurferaparc', self.subject +
                  '_label-Desikan_conndata-network_connectivity'),
                 ('connectome_scale1',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale1_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label + '_res-scale1_conndata-network_connectivity'),
                 ('connectome_scale2',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale2_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label + '_res-scale2_conndata-network_connectivity'),
                 ('connectome_scale3',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale3_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label + '_res-scale3_conndata-network_connectivity'),
                 ('connectome_scale4',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale4_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label + '_res-scale4_conndata-network_connectivity'),
                 ('connectome_scale5',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale5_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label + '_res-scale5_conndata-network_connectivity'),
                 ('averageTimeseries_scale1', self.subject + '_atlas-' +
-                 bids_atlas_label + '_desc-scale1_timeseries'),
+                 bids_atlas_label + '_res-scale1_timeseries'),
                 ('averageTimeseries_scale2', self.subject + '_atlas-' +
-                 bids_atlas_label + '_desc-scale2_timeseries'),
+                 bids_atlas_label + '_res-scale2_timeseries'),
                 ('averageTimeseries_scale3', self.subject + '_atlas-' +
-                 bids_atlas_label + '_desc-scale3_timeseries'),
+                 bids_atlas_label + '_res-scale3_timeseries'),
                 ('averageTimeseries_scale4', self.subject + '_atlas-' +
-                 bids_atlas_label + '_desc-scale4_timeseries'),
+                 bids_atlas_label + '_res-scale4_timeseries'),
                 ('averageTimeseries_scale5', self.subject + '_atlas-' +
-                 bids_atlas_label + '_desc-scale5_timeseries'),
-
+                 bids_atlas_label + '_res-scale5_timeseries'),
             ]
 
         # Data import
@@ -633,56 +580,59 @@ class fMRIPipeline(Pipeline):
         # datasource.inputs.field_template = dict(fMRI='fMRI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
 
         if self.parcellation_scheme == 'NativeFreesurfer':
-            datasource.inputs.field_template = dict(fMRI='func/' + self.subject + '_task-rest_desc-cmp_bold.nii.gz',
-                                                    T1='anat/' + self.subject + '_desc-head_T1w.nii.gz',
-                                                    T2='anat/' + self.subject + '_T2w.nii.gz',
-                                                    aseg='anat/' + self.subject + '_desc-aseg_desg.nii.gz',
-                                                    brain='anat/' + self.subject + '_desc-brain_T1w.nii.gz',
-                                                    brain_mask='anat/' + self.subject + '_desc-brain_mask.nii.gz',
-                                                    wm_mask_file='anat/' + self.subject + '_label-WM_dseg.nii.gz',
-                                                    wm_eroded='anat/' + self.subject + '_label-WM_desc-eroded_dseg.nii.gz',
-                                                    brain_eroded='anat/' + self.subject + '_label-brain_desc-eroded_dseg.nii.gz',
-                                                    csf_eroded='anat/' + self.subject + '_label-CSF_desc-eroded_dseg.nii.gz',
-                                                    roi_volume_s1='anat/' + self.subject + '_label-Desikan_atlas.nii.gz',
-                                                    roi_volume_s2='anat/irrelevant.nii.gz',
-                                                    roi_volume_s3='anat/irrelevant.nii.gz',
-                                                    roi_volume_s4='anat/irrelevant.nii.gz',
-                                                    roi_volume_s5='anat/irrelevant.nii.gz',
-                                                    roi_graphml_s1='anat/' + self.subject + '_label-Desikan_atlas.graphml',
-                                                    roi_graphml_s2='anat/irrelevant.graphml',
-                                                    roi_graphml_s3='anat/irrelevant.graphml',
-                                                    roi_graphml_s4='anat/irrelevant.graphml',
-                                                    roi_graphml_s5='anat/irrelevant.graphml')
+            datasource.inputs.field_template = dict(
+                    fMRI='func/' + self.subject + '_task-rest_desc-cmp_bold.nii.gz',
+                    T1='anat/' + self.subject + '_desc-head_T1w.nii.gz',
+                    T2='anat/' + self.subject + '_T2w.nii.gz',
+                    aseg='anat/' + self.subject + '_desc-aseg_desg.nii.gz',
+                    brain='anat/' + self.subject + '_desc-brain_T1w.nii.gz',
+                    brain_mask='anat/' + self.subject + '_desc-brain_mask.nii.gz',
+                    wm_mask_file='anat/' + self.subject + '_label-WM_dseg.nii.gz',
+                    wm_eroded='anat/' + self.subject + '_label-WM_desc-eroded_dseg.nii.gz',
+                    brain_eroded='anat/' + self.subject + '_label-brain_desc-eroded_dseg.nii.gz',
+                    csf_eroded='anat/' + self.subject + '_label-CSF_desc-eroded_dseg.nii.gz',
+                    roi_volume_s1='anat/' + self.subject + '_atlas-Desikan_dseg.nii.gz',
+                    roi_volume_s2='anat/irrelevant.nii.gz',
+                    roi_volume_s3='anat/irrelevant.nii.gz',
+                    roi_volume_s4='anat/irrelevant.nii.gz',
+                    roi_volume_s5='anat/irrelevant.nii.gz',
+                    roi_graphml_s1='anat/' + self.subject + '_atlas-Desikan_dseg.graphml',
+                    roi_graphml_s2='anat/irrelevant.graphml',
+                    roi_graphml_s3='anat/irrelevant.graphml',
+                    roi_graphml_s4='anat/irrelevant.graphml',
+                    roi_graphml_s5='anat/irrelevant.graphml')
         else:
-            datasource.inputs.field_template = dict(fMRI='func/' + self.subject + '_task-rest_desc-cmp_bold.nii.gz',
-                                                    T1='anat/' + self.subject + '_desc-head_T1w.nii.gz',
-                                                    T2='anat/' + self.subject + '_T2w.nii.gz',
-                                                    aseg='anat/' + self.subject + '_desc-aseg_desg.nii.gz',
-                                                    brain='anat/' + self.subject + '_desc-brain_T1w.nii.gz',
-                                                    brain_mask='anat/' + self.subject + '_desc-brain_mask.nii.gz',
-                                                    wm_mask_file='anat/' + self.subject + '_label-WM_dseg.nii.gz',
-                                                    wm_eroded='anat/' + self.subject + '_label-WM_desc-eroded_dseg.nii.gz',
-                                                    brain_eroded='anat/' + self.subject + '_label-brain_desc-eroded_dseg.nii.gz',
-                                                    csf_eroded='anat/' + self.subject + '_label-CSF_desc-eroded_dseg.nii.gz',
-                                                    roi_volume_s1='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale1_atlas.nii.gz',
-                                                    roi_volume_s2='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale2_atlas.nii.gz',
-                                                    roi_volume_s3='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale3_atlas.nii.gz',
-                                                    roi_volume_s4='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale4_atlas.nii.gz',
-                                                    roi_volume_s5='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale5_atlas.nii.gz',
-                                                    roi_graphml_s1='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale1_atlas.graphml',
-                                                    roi_graphml_s2='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale2_atlas.graphml',
-                                                    roi_graphml_s3='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale3_atlas.graphml',
-                                                    roi_graphml_s4='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale4_atlas.graphml',
-                                                    roi_graphml_s5='anat/' + self.subject + '_label-' + bids_atlas_label + '_desc-scale5_atlas.graphml')
+            datasource.inputs.field_template = dict(
+                    fMRI='func/' + self.subject + '_task-rest_desc-cmp_bold.nii.gz',
+                    T1='anat/' + self.subject + '_desc-head_T1w.nii.gz',
+                    T2='anat/' + self.subject + '_T2w.nii.gz',
+                    aseg='anat/' + self.subject + '_desc-aseg_desg.nii.gz',
+                    brain='anat/' + self.subject + '_desc-brain_T1w.nii.gz',
+                    brain_mask='anat/' + self.subject + '_desc-brain_mask.nii.gz',
+                    wm_mask_file='anat/' + self.subject + '_label-WM_dseg.nii.gz',
+                    wm_eroded='anat/' + self.subject + '_label-WM_desc-eroded_dseg.nii.gz',
+                    brain_eroded='anat/' + self.subject + '_label-brain_desc-eroded_dseg.nii.gz',
+                    csf_eroded='anat/' + self.subject + '_label-CSF_desc-eroded_dseg.nii.gz',
+                    roi_volume_s1='anat/' + self.subject + '_atlas-' +
+                    bids_atlas_label + '_res-scale1_dseg.nii.gz',
+                    roi_volume_s2='anat/' + self.subject + '_atlas-' +
+                    bids_atlas_label + '_res-scale2_dseg.nii.gz',
+                    roi_volume_s3='anat/' + self.subject + '_atlas-' +
+                    bids_atlas_label + '_res-scale3_dseg.nii.gz',
+                    roi_volume_s4='anat/' + self.subject + '_atlas-' +
+                    bids_atlas_label + '_res-scale4_dseg.nii.gz',
+                    roi_volume_s5='anat/' + self.subject + '_atlas-' +
+                    bids_atlas_label + '_res-scale5_dseg.nii.gz',
+                    roi_graphml_s1='anat/' + self.subject + '_atlas-' +
+                    bids_atlas_label + '_res-scale1_dseg.graphml',
+                    roi_graphml_s2='anat/' + self.subject + '_atlas-' +
+                    bids_atlas_label + '_res-scale2_dseg.graphml',
+                    roi_graphml_s3='anat/' + self.subject + '_atlas-' +
+                    bids_atlas_label + '_res-scale3_dseg.graphml',
+                    roi_graphml_s4='anat/' + self.subject + '_atlas-' +
+                    bids_atlas_label + '_res-scale4_dseg.graphml',
+                    roi_graphml_s5='anat/' + self.subject + '_atlas-' +
+                    bids_atlas_label + '_res-scale5_dseg.graphml')
 
         datasource.inputs.sort_filelist = False
 
@@ -693,19 +643,19 @@ class fMRIPipeline(Pipeline):
         fMRI_flow = pe.Workflow(name='fMRI_pipeline', base_dir=os.path.abspath(
             nipype_deriv_subject_directory))
         fMRI_inputnode = pe.Node(interface=util.IdentityInterface(
-            fields=["fMRI", "T1", "T2", "subjects_dir", "subject_id", "wm_mask_file", "roi_volumes", "roi_graphMLs",
-                    "wm_eroded", "brain_eroded", "csf_eroded"]), name="inputnode")
+            fields=["fMRI", "T1", "T2", "subjects_dir", "subject_id",
+                    "wm_mask_file", "roi_volumes", "roi_graphMLs",
+                    "wm_eroded", "brain_eroded", "csf_eroded"]),
+            name="inputnode")
         fMRI_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         fMRI_inputnode.inputs.atlas_info = self.atlas_info
         fMRI_inputnode.subjects_dir = self.subjects_dir
-        # fMRI_inputnode.subject_id = self.subject_id
         fMRI_inputnode.subject_id = os.path.basename(self.subject_id)
 
-        # print('fMRI_inputnode.subjects_dir : {}'.format(fMRI_inputnode.subjects_dir))
-        # print('fMRI_inputnode.subject_id : {}'.format(fMRI_inputnode.subject_id))
-
         fMRI_outputnode = pe.Node(interface=util.IdentityInterface(
-            fields=["connectivity_matrices"]), name="outputnode")
+            fields=["connectivity_matrices"]),
+            name="outputnode")
+
         fMRI_flow.add_nodes([fMRI_inputnode, fMRI_outputnode])
 
         merge_roi_volumes = pe.Node(
@@ -732,8 +682,8 @@ class fMRIPipeline(Pipeline):
 
         fMRI_flow.connect([
             (datasource, merge_roi_volumes,
-             [("roi_volume_s1", "in1"), ("roi_volume_s2", "in2"), ("roi_volume_s3", "in3"), ("roi_volume_s4", "in4"),
-              ("roi_volume_s5", "in5")])
+             [("roi_volume_s1", "in1"), ("roi_volume_s2", "in2"), ("roi_volume_s3", "in3"),
+              ("roi_volume_s4", "in4"), ("roi_volume_s5", "in5")])
         ])
 
         fMRI_flow.connect([
@@ -744,9 +694,9 @@ class fMRIPipeline(Pipeline):
 
         fMRI_flow.connect([
             (datasource, fMRI_inputnode,
-             [("fMRI", "fMRI"), ("T1", "T1"), ("T2", "T2"), ("aseg", "aseg"), ("wm_mask_file", "wm_mask_file"),
-              ("brain_eroded", "brain_eroded"), ("wm_eroded", "wm_eroded"), ("csf_eroded", "csf_eroded")]),
-            # ,( "roi_volumes","roi_volumes")])
+             [("fMRI", "fMRI"), ("T1", "T1"), ("T2", "T2"), ("aseg", "aseg"),
+              ("wm_mask_file", "wm_mask_file"), ("brain_eroded", "brain_eroded"),
+              ("wm_eroded", "wm_eroded"), ("csf_eroded", "csf_eroded")]),
             (merge_roi_volumes, fMRI_inputnode, [(("out", remove_non_existing_scales), "roi_volumes")]),
             (merge_roi_graphmls, fMRI_inputnode, [(("out", remove_non_existing_scales), "roi_graphMLs")]),
         ])
@@ -765,9 +715,10 @@ class fMRIPipeline(Pipeline):
                 (fMRI_inputnode, reg_flow, [('T2', 'inputnode.T2')]),
                 (preproc_flow, reg_flow, [('outputnode.mean_vol', 'inputnode.target')]),
                 (fMRI_inputnode, reg_flow,
-                 [('wm_mask_file', 'inputnode.wm_mask'), ('roi_volumes', 'inputnode.roi_volumes'),
-                  ('brain_eroded', 'inputnode.eroded_brain'), ('wm_eroded',
-                                                               'inputnode.eroded_wm'),
+                 [('wm_mask_file', 'inputnode.wm_mask'),
+                  ('roi_volumes', 'inputnode.roi_volumes'),
+                  ('brain_eroded', 'inputnode.eroded_brain'),
+                  ('wm_eroded', 'inputnode.eroded_wm'),
                   ('csf_eroded', 'inputnode.eroded_csf')]),
                 (reg_flow, sinker, [('outputnode.wm_mask_registered_crop', 'anat.@registered_wm'),
                                     ('outputnode.roi_volumes_registered_crop',
@@ -778,29 +729,24 @@ class fMRIPipeline(Pipeline):
                                      'anat.@eroded_csf'),
                                     ('outputnode.eroded_brain_registered_crop', 'anat.@eroded_brain')]),
             ])
-            # if self.stages['FunctionalMRI'].config.global_nuisance:
-            #     fMRI_flow.connect([
-            #                   (fMRI_inputnode,reg_flow,[('brain_eroded','inputnode.eroded_brain')])
-            #                 ])
-            # if self.stages['FunctionalMRI'].config.csf:
-            #     fMRI_flow.connect([
-            #                   (fMRI_inputnode,reg_flow,[('csf_eroded','inputnode.eroded_csf')])
-            #                 ])
 
         if self.stages['FunctionalMRI'].enabled:
             func_flow = self.create_stage_flow("FunctionalMRI")
             fMRI_flow.connect([
                 (preproc_flow, func_flow, [
                  ('outputnode.functional_preproc', 'inputnode.preproc_file')]),
-                (reg_flow, func_flow, [('outputnode.wm_mask_registered_crop', 'inputnode.registered_wm'),
+                (reg_flow, func_flow, [('outputnode.wm_mask_registered_crop',
+                                        'inputnode.registered_wm'),
                                        ('outputnode.roi_volumes_registered_crop',
                                         'inputnode.registered_roi_volumes'),
                                        ('outputnode.eroded_wm_registered_crop',
                                         'inputnode.eroded_wm'),
                                        ('outputnode.eroded_csf_registered_crop',
                                         'inputnode.eroded_csf'),
-                                       ('outputnode.eroded_brain_registered_crop', 'inputnode.eroded_brain')]),
-                (func_flow, sinker, [('outputnode.func_file', 'func.@func_file'), ("outputnode.FD", "func.@FD"),
+                                       ('outputnode.eroded_brain_registered_crop',
+                                        'inputnode.eroded_brain')]),
+                (func_flow, sinker, [('outputnode.func_file', 'func.@func_file'),
+                                     ("outputnode.FD", "func.@FD"),
                                      ("outputnode.DVARS", "func.@DVARS")]),
             ])
             if self.stages['FunctionalMRI'].config.scrubbing or self.stages['FunctionalMRI'].config.motion:
@@ -813,10 +759,13 @@ class fMRIPipeline(Pipeline):
             self.stages['Connectome'].config.subject = self.global_conf.subject
             con_flow = self.create_stage_flow("Connectome")
             fMRI_flow.connect([
-                (fMRI_inputnode, con_flow, [('parcellation_scheme', 'inputnode.parcellation_scheme'),
-                                            ('roi_graphMLs', 'inputnode.roi_graphMLs')]),
+                (fMRI_inputnode, con_flow, [('parcellation_scheme',
+                                             'inputnode.parcellation_scheme'),
+                                            ('roi_graphMLs',
+                                             'inputnode.roi_graphMLs')]),
                 (func_flow, con_flow,
-                 [('outputnode.func_file', 'inputnode.func_file'), ("outputnode.FD", "inputnode.FD"),
+                 [('outputnode.func_file', 'inputnode.func_file'),
+                  ("outputnode.FD", "inputnode.FD"),
                   ("outputnode.DVARS", "inputnode.DVARS")]),
                 (reg_flow, con_flow, [
                  ("outputnode.roi_volumes_registered_crop", "inputnode.roi_volumes_registered")]),
@@ -827,9 +776,5 @@ class fMRIPipeline(Pipeline):
                 (con_flow, sinker, [
                  ("outputnode.avg_timeseries", "func.@avg_timeseries")])
             ])
-
-            # if self.parcellation_scheme == "Custom":
-            #     fMRI_flow.connect(
-            #         [(fMRI_inputnode, con_flow, [('atlas_info', 'inputnode.atlas_info')])])
 
         return fMRI_flow
