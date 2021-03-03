@@ -587,13 +587,13 @@ class fMRIPipeline(Pipeline):
 
                 (self.subject + '_label-' + bids_atlas_label + '_desc-scale1_atlas_flirt.nii.gz',
                  self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale1_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale1_atlas_flirt.nii.gz',
+                (self.subject + '_label-' + bids_atlas_label + '_desc-scale2_atlas_flirt.nii.gz',
                  self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale2_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale1_atlas_flirt.nii.gz',
+                (self.subject + '_label-' + bids_atlas_label + '_desc-scale3_atlas_flirt.nii.gz',
                  self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale3_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale1_atlas_flirt.nii.gz',
+                (self.subject + '_label-' + bids_atlas_label + '_desc-scale4_atlas_flirt.nii.gz',
                  self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale4_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale1_atlas_flirt.nii.gz',
+                (self.subject + '_label-' + bids_atlas_label + '_desc-scale5_atlas_flirt.nii.gz',
                  self.subject + '_space-meanBOLD_label-' + bids_atlas_label + '_desc-scale5_atlas.nii.gz'),
 
                 ('connectome_freesurferaparc', self.subject +
