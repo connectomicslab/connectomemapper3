@@ -6,20 +6,20 @@
 """This module defines the `cmpbidsappmanager` script that launches the Graphical User Interface."""
 
 from traits.etsconfig.api import ETSConfig
+# Setup Qt5/Pyside2 backend for traitsui
 ETSConfig.toolkit = 'qt'
 
-import sys
 import os
+os.environ['ETS_TOOLKIT'] = 'qt'
+# os.environ['QT_API'] = 'pyqt5'
+os.environ['QT_API'] = 'pyside2'
+
+import sys
 
 # CMP imports
 from cmp.bidsappmanager import gui
 from cmp.info import __version__, __copyright__
 from cmtklib.util import print_warning
-
-# Setup Qt5 backend for traitsui
-os.environ['ETS_TOOLKIT'] = 'qt'
-# os.environ['QT_API'] = 'pyqt5'
-os.environ['QT_API'] = 'pyside2'
 
 
 def info():
