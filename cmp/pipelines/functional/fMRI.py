@@ -502,32 +502,6 @@ class fMRIPipeline(Pipeline):
 
         return True, 'Processing successful'
 
-        # self.subject = old_subject
-
-        # except Exception:
-        #
-        #     self.subject = old_subject
-        #     iflogger.info("**** Processing terminated :< ****")
-        #
-        #     return False,'Processing unsucessful'
-
-        # # Clean undesired folders/files
-        # rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
-        # for file_to_rm in rm_file_list:
-        #     if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
-        #         os.remove(os.path.join(self.base_directory,file_to_rm))
-        #
-        # # copy .ini and log file
-        # outdir = os.path.join(self.base_directory,"RESULTS",'fMRI',now)
-        # if not os.path.exists(outdir):
-        #     os.makedirs(outdir)
-        # shutil.copy(self.config_file,outdir)
-        # shutil.copy(os.path.join(self.base_directory,'LOG','pypeline.log'),outdir)
-
-        # iflogger.info("**** Processing finished ****")
-        #
-        # return True,'Processing sucessful'
-
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
         """Create the pipeline workflow.
 
