@@ -36,12 +36,6 @@ class Global_Configuration(HasTraits):
     imaging_model = Str
 
 
-class Check_Input_Notification(HasTraits):
-    message = Str
-    imaging_model_options = List(['fMRI'])
-    imaging_model = Str
-
-
 class fMRIPipeline(Pipeline):
     """Class that extends a :class:`Pipeline` and represents the processing pipeline for structural MRI.
 

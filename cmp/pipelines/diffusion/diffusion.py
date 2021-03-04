@@ -57,14 +57,6 @@ class Global_Configuration(HasTraits):
     dmri_bids_acq = Str
 
 
-class Check_Input_Notification(HasTraits):
-    message = Str
-    diffusion_imaging_model_options = List(['DSI', 'DTI', 'HARDI', 'multishell'])
-    diffusion_imaging_model = Str
-    diffusion_imaging_model_message = Str(
-        '\nMultiple diffusion inputs available. Please select desired diffusion modality.')
-
-
 class DiffusionPipeline(Pipeline):
     """Class that extends a :class:`Pipeline` and represents the processing pipeline for diffusion MRI.
 
