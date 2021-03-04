@@ -5,7 +5,7 @@ Outputs of Connectome Mapper 3
 Processed, or derivative, data are outputed to ``<bids_dataset/derivatives>/``.
 
 BIDS derivatives entities
---------------------------
+==========================
 
 .. tabularcolumns:: |l|p{5cm}|
 
@@ -38,7 +38,7 @@ See `Original BIDS Entities Appendix <https://bids-specification.readthedocs.io/
 
 
 Main Connectome Mapper Derivatives
-==========================================
+====================================
 
 Main outputs produced by Connectome Mapper 3 are written to
 ``cmp/sub-<subject_label>/``. In this folder, a configuration file
@@ -50,6 +50,7 @@ An execution log of the full workflow is saved as `sub-<subject_label>_log.txt``
 
 Anatomical derivatives
 ------------------------
+
 * Anatomical derivatives in the individual ``T1w`` space are placed
   in each subject's ``anat/`` subfolder, including:
 
@@ -129,6 +130,7 @@ Anatomical derivatives
 
 Diffusion derivatives
 ------------------------
+
 Diffusion derivatives in the individual ``DWI`` space are placed in
 each subject's ``dwi/`` subfolder, including:
 
@@ -207,7 +209,8 @@ each subject's ``dwi/`` subfolder, including:
 
 
 Functional derivatives
--------------------------------
+-----------------------
+
 Functional derivatives in the 'meanBOLD' (individual) space are placed in
 each subject's ``func/`` subfolder including:
 
@@ -289,7 +292,7 @@ The ``fsaverage`` subject distributed with the running version of FreeSurfer is 
 .. _nipype_outputs:
 
 Nipype Workflow Derivatives
-==========================================
+===========================
 
 The execution of each Nipype workflow (pipeline) dedicated to the processing of one modality (i.e. anatomical/diffusion/fMRI) involves the creation of a number of intermediate outputs which are written to ``<bids_dataset/derivatives>/nipype/sub-<subject_label>/<anatomical/diffusion/fMRI>_pipeline`` respectively:
 
