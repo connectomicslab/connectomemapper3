@@ -13,13 +13,13 @@ In particular, it integrates the relatively large
 `Pull Request #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ (~250 commits)
 that marks the end of the release candidate phase and includes the following changes.
 
-*New*
+*New features*
+
+* CMP3 pipeline configuration files adopt `JSON` as new format.
+  (`PR #76 <https://github.com/connectomicslab/connectomemapper3/pull/76>`_)
 
 * CMP3 is compatible with PyPI for installation.
   (`PR #78 <https://github.com/connectomicslab/connectomemapper3/pull/78>`_)
-
-* CMP3 pipeline configuration files adopt `JSON` as new format.
-  (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
 
 * BIDS convention naming of data derived from parcellation atlas adopt now the new BIDS
   entity ``atlas-<atlas_label>`` to distinguish data derived from different parcellation
@@ -27,19 +27,10 @@ that marks the end of the release candidate phase and includes the following cha
   parcellation scale has been replaced by the use of the entity ``res-<scale_label>``.
   (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
 
-*Update*
-
-* Update version of datalad and dependencies
-  (`PR #77 <https://github.com/connectomicslab/connectomemapper3/pull/77>`_):
-
-  * `datalad[full]==0.13.0` to ``datalad[full]==0.14.0``.
-  * `datalad-container==0.3.1` to ``datalad-container==1.1.2``.
-  * `datalad_neuroimaging==0.2.0` to ``datalad-neuroimaging==0.3.1``.
-  * `git-annex=8.20200617` to ``git-annex=8.20210127``.
-  * `datalad-revolution` was removed.
+*Updates*
 
 * Content of ``dataset_description.json`` for each derivatives folder has been updated
-  to conform with BIDS version 1.4.0.
+  to conform to BIDS version 1.4.0.
   (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
 
 *Code refactoring*
@@ -78,7 +69,8 @@ that marks the end of the release candidate phase and includes the following cha
   (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
 
 * Clean code and remove a number of commented lines that are now obsolete.
-  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_,
+  `PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
 
 *Documentation*
 
@@ -92,6 +84,9 @@ that marks the end of the release candidate phase and includes the following cha
 * Update installation instruction of `cmpbidsappmanager` using `pip install .`.
   (`PR #78 <https://github.com/connectomicslab/connectomemapper3/pull/78>`_)
 
+* Update list of outputs following the new BIDS derivatives naming convention introduced.
+  (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
+
 *Bug fixes*
 
 * Correct attributes related to the diffusion imaging model type `multishell`.
@@ -100,6 +95,17 @@ that marks the end of the release candidate phase and includes the following cha
 * Review code in `cmtklib/connectome.py` for saving functional connectome files
   in GRAPHML format.
   (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+*Software Updates*
+
+* Update version of datalad and dependencies
+  (`PR #77 <https://github.com/connectomicslab/connectomemapper3/pull/77>`_):
+
+  * `datalad[full]==0.13.0` to ``datalad[full]==0.14.0``.
+  * `datalad-container==0.3.1` to ``datalad-container==1.1.2``.
+  * `datalad_neuroimaging==0.2.0` to ``datalad-neuroimaging==0.3.1``.
+  * `git-annex=8.20200617` to ``git-annex=8.20210127``.
+  * `datalad-revolution` was removed.
 
 *Software development life cycle*
 
