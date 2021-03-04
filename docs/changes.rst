@@ -15,23 +15,17 @@ that marks the end of the release candidate phase and includes the following cha
 
 *New*
 
-.. topic:: New
+* CMP3 is compatible with PyPI for installation.
+  (`PR #78 <https://github.com/connectomicslab/connectomemapper3/pull/78>`_)
 
-    CMP3 is compatible with PyPI for installation.
-    (`PR #78 <https://github.com/connectomicslab/connectomemapper3/pull/78>`_)
+* CMP3 pipeline configuration files adopt `JSON` as new format.
+  (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
 
-.. topic:: New
-
-    CMP3 pipeline configuration files adopt `JSON` as new format.
-    (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
-
-.. topic:: New
-
-    BIDS convention naming of data derived from parcellation atlas adopt now the new BIDS
-    entity ``atlas-<atlas_label>`` to distinguish data derived from different parcellation
-    atlases. The use of the entity ``desc-<scale_label>`` to distinguish between
-    parcellation scale has been replaced by the use of the entity ``res-<scale_label>``.
-    (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
+* BIDS convention naming of data derived from parcellation atlas adopt now the new BIDS
+  entity ``atlas-<atlas_label>`` to distinguish data derived from different parcellation
+  atlases. The use of the entity ``desc-<scale_label>`` to distinguish between
+  parcellation scale has been replaced by the use of the entity ``res-<scale_label>``.
+  (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
 
 *Update*
 
