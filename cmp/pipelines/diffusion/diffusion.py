@@ -28,7 +28,7 @@ class Global_Configuration(HasTraits):
 
     Attributes
     ----------
-    process_type: 'fMRI'
+    process_type : 'fMRI'
         Processing pipeline type
 
     subjects : traits.List
@@ -98,7 +98,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        project_info: cmp.project.CMP_Project_Info
+        project_info : cmp.project.CMP_Project_Info
             Instance of `CMP_Project_Info` object.
 
         See Also
@@ -149,7 +149,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         self.stages['Diffusion'].define_inspect_outputs()
@@ -159,7 +159,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         self.stages['Diffusion'].define_inspect_outputs()
@@ -169,7 +169,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         self.stages['Connectome'].define_inspect_outputs()
@@ -180,7 +180,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : bool
             New value.
         """
         self.stages['Connectome'].define_inspect_outputs()
@@ -191,7 +191,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         self.stages['Connectome'].config.subject = new
@@ -201,7 +201,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         # print "diffusion model changed"
@@ -520,17 +520,17 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        cmp_deriv_subject_directory <Directory>
+        cmp_deriv_subject_directory : Directory
             Main CMP output directory of a subject
             e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
 
-        nipype_deriv_subject_directory <Directory>
+        nipype_deriv_subject_directory : Directory
             Intermediate Nipype output directory of a subject
             e.g. ``/output_dir/nipype/sub-XX/(ses-YY)``
 
         Returns
         -------
-        diffusion_flow <nipype.pipeline.engine.Workflow>
+        diffusion_flow : nipype.pipeline.engine.Workflow
             An instance of :class:`nipype.pipeline.engine.Workflow`
         """
         acquisition_model = self.stages['Diffusion'].config.diffusion_imaging_model
@@ -972,12 +972,13 @@ class DiffusionPipeline(Pipeline):
 
             Parameters
             ----------
-            roi_volumes
+            roi_volumes : list
                 A list of output parcellations that might contain empty element
                 in the case of the monoscale Desikan scheme for instance
 
             Returns
             -------
+            out_roi_volumes : list
                 The list with no empty element
             """
             out_roi_volumes = []
@@ -1160,7 +1161,7 @@ class DiffusionPipeline(Pipeline):
         return diffusion_flow
 
     def process(self):
-        """Executes the pipeline workflow and returns True if successful."""
+        """Executes the diffusion pipeline workflow and returns True if successful."""
         # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 
@@ -1210,8 +1211,8 @@ class DiffusionPipeline(Pipeline):
              })
 
         logging.update_logging(config)
-        iflogger = logging.getLogger('nipype.interface')
 
+        iflogger = logging.getLogger('nipype.interface')
         iflogger.info("**** Processing ****")
 
         flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory,
@@ -1226,4 +1227,4 @@ class DiffusionPipeline(Pipeline):
 
         iflogger.info("**** Processing finished ****")
 
-        return True, 'Processing successful'
+        return True

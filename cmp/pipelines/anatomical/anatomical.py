@@ -30,7 +30,7 @@ class Global_Configuration(HasTraits):
 
     Attributes
     ----------
-    process_type: 'fMRI'
+    process_type : 'anatomical'
         Processing pipeline type
 
     subjects : traits.List
@@ -90,7 +90,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         Parameters
         ----------
-        project_info: cmp.project.CMP_Project_Info
+        project_info : cmp.project.CMP_Project_Info
             Instance of `CMP_Project_Info` object.
 
         See Also
@@ -436,17 +436,17 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         Parameters
         ----------
-        cmp_deriv_subject_directory <Directory>
+        cmp_deriv_subject_directory : Directory
             Main CMP output directory of a subject
             e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
 
-        nipype_deriv_subject_directory <Directory>
+        nipype_deriv_subject_directory : Directory
             Intermediate Nipype output directory of a subject
             e.g. ``/output_dir/nipype/sub-XX/(ses-YY)``
 
         Returns
         -------
-        anat_flow <nipype.pipeline.engine.Workflow>
+        anat_flow : nipype.pipeline.engine.Workflow
             An instance of :class:`nipype.pipeline.engine.Workflow`
         """
         # Data import
@@ -807,7 +807,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return anat_flow
 
     def process(self):
-        """Executes the pipeline workflow and returns True if successful."""
+        """Executes the anatomical pipeline workflow and returns True if successful."""
         # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 
@@ -853,8 +853,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                            'crashfile_format': "txt"}
              })
         logging.update_logging(config)
-        iflogger = logging.getLogger('nipype.interface')
 
+        iflogger = logging.getLogger('nipype.interface')
         iflogger.info("**** Processing ****")
 
         anat_flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory,
@@ -870,4 +870,4 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         iflogger.info("**** Processing finished ****")
 
-        return True, 'Processing successful'
+        return True

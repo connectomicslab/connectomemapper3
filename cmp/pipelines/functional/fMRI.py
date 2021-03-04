@@ -25,7 +25,7 @@ class Global_Configuration(HasTraits):
 
     Attributes
     ----------
-    process_type: 'fMRI'
+    process_type : 'fMRI'
         Processing pipeline type
 
     imaging_model : 'fMRI'
@@ -139,7 +139,7 @@ class fMRIPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         self.stages['Connectome'].config.subject = new
@@ -361,11 +361,12 @@ class fMRIPipeline(Pipeline):
         return valid_inputs
 
     def check_config(self):
-        """
+        """Check if the fMRI pipeline parameters is properly configured.
 
         Returns
         -------
-
+        message : string
+            String that is empty if success, otherwise it contains the error message
         """
         if self.stages['FunctionalMRI'].config.motion is True and self.stages[
                 'Preprocessing'].config.motion_correction is False:
@@ -381,97 +382,22 @@ class fMRIPipeline(Pipeline):
                 'or disable scrubbing in the connectome configuration window.\t\n')
         return ''
 
-    def process(self):
-        """
-
-        Returns
-        -------
-
-        """
-        # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
-        # config.enable_provenance()
-
-        # Process time
-        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-
-        if '_' in self.subject:
-            self.subject = self.subject.split('_')[0]
-
-        if self.global_conf.subject_session == '':
-            cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, "cmp", self.subject)
-            nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, "nipype", self.subject)
-        else:
-            cmp_deriv_subject_directory = os.path.join(self.output_directory,
-                                                       "cmp",
-                                                       self.subject,
-                                                       self.global_conf.subject_session)
-            nipype_deriv_subject_directory = os.path.join(self.output_directory,
-                                                          "nipype",
-                                                          self.subject,
-                                                          self.global_conf.subject_session)
-
-            self.subject = "_".join((self.subject, self.global_conf.subject_session))
-
-        if not os.path.exists(os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline")):
-            try:
-                os.makedirs(os.path.join(
-                    nipype_deriv_subject_directory, "fMRI_pipeline"))
-            except os.error:
-                print("%s was already existing" % os.path.join(
-                    nipype_deriv_subject_directory, "fMRI_pipeline"))
-
-        # Initialization
-        if os.path.isfile(os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline", "pypeline.log")):
-            os.unlink(os.path.join(nipype_deriv_subject_directory,
-                                   "fMRI_pipeline", "pypeline.log"))
-        config.update_config(
-            {'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory,
-                                                       "fMRI_pipeline"),
-                         'log_to_file': True},
-             'execution': {'remove_unnecessary_outputs': False,
-                           'stop_on_first_crash': True,
-                           'stop_on_first_rerun': False,
-                           'use_relative_paths': True,
-                           'crashfile_format': "txt"}
-             })
-
-        logging.update_logging(config)
-        iflogger = logging.getLogger('nipype.interface')
-
-        iflogger.info("**** Processing ****")
-
-        flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory,
-                                         nipype_deriv_subject_directory=nipype_deriv_subject_directory)
-        flow.write_graph(graph2use='colored', format='svg', simple_form=False)
-
-        if self.number_of_cores != 1:
-            flow.run(plugin='MultiProc',
-                     plugin_args={'n_procs': self.number_of_cores})
-        else:
-            flow.run()
-
-        iflogger.info("**** Processing finished ****")
-
-        return True, 'Processing successful'
-
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
         """Create the pipeline workflow.
 
         Parameters
         ----------
-        cmp_deriv_subject_directory <Directory>
+        cmp_deriv_subject_directory : Directory
             Main CMP output directory of a subject
             e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
 
-        nipype_deriv_subject_directory <Directory>
+        nipype_deriv_subject_directory : Directory
             Intermediate Nipype output directory of a subject
             e.g. ``/output_dir/nipype/sub-XX/(ses-YY)``
 
         Returns
         -------
-        fMRI_flow <nipype.pipeline.engine.Workflow>
+        fMRI_flow : nipype.pipeline.engine.Workflow
             An instance of :class:`nipype.pipeline.engine.Workflow`
         """
         if self.parcellation_scheme == 'Lausanne2008':
@@ -658,15 +584,18 @@ class fMRIPipeline(Pipeline):
             interface=Merge(5), name='merge_roi_graphmls')
 
         def remove_non_existing_scales(roi_volumes):
-            """
+            """Returns a list which do not contained any empty element.
 
             Parameters
             ----------
-            roi_volumes
+            roi_volumes : list
+                A list of output parcellations that might contain empty element
+                in the case of the monoscale Desikan scheme for instance
 
             Returns
             -------
-
+            out_roi_volumes : list
+                The list with no empty element
             """
             out_roi_volumes = []
             for vol in roi_volumes:
@@ -772,3 +701,73 @@ class fMRIPipeline(Pipeline):
             ])
 
         return fMRI_flow
+
+    def process(self):
+        """Executes the fMRI pipeline workflow and returns True if successful."""
+        # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
+        # config.enable_provenance()
+
+        # Process time
+        self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+
+        if '_' in self.subject:
+            self.subject = self.subject.split('_')[0]
+
+        if self.global_conf.subject_session == '':
+            cmp_deriv_subject_directory = os.path.join(
+                self.output_directory, "cmp", self.subject)
+            nipype_deriv_subject_directory = os.path.join(
+                self.output_directory, "nipype", self.subject)
+        else:
+            cmp_deriv_subject_directory = os.path.join(self.output_directory,
+                                                       "cmp",
+                                                       self.subject,
+                                                       self.global_conf.subject_session)
+            nipype_deriv_subject_directory = os.path.join(self.output_directory,
+                                                          "nipype",
+                                                          self.subject,
+                                                          self.global_conf.subject_session)
+
+            self.subject = "_".join((self.subject, self.global_conf.subject_session))
+
+        if not os.path.exists(os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline")):
+            try:
+                os.makedirs(os.path.join(
+                    nipype_deriv_subject_directory, "fMRI_pipeline"))
+            except os.error:
+                print("%s was already existing" % os.path.join(
+                    nipype_deriv_subject_directory, "fMRI_pipeline"))
+
+        # Initialization
+        if os.path.isfile(os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline", "pypeline.log")):
+            os.unlink(os.path.join(nipype_deriv_subject_directory,
+                                   "fMRI_pipeline", "pypeline.log"))
+        config.update_config(
+            {'logging': {'log_directory': os.path.join(nipype_deriv_subject_directory,
+                                                       "fMRI_pipeline"),
+                         'log_to_file': True},
+             'execution': {'remove_unnecessary_outputs': False,
+                           'stop_on_first_crash': True,
+                           'stop_on_first_rerun': False,
+                           'use_relative_paths': True,
+                           'crashfile_format': "txt"}
+             })
+
+        logging.update_logging(config)
+
+        iflogger = logging.getLogger('nipype.interface')
+        iflogger.info("**** Processing ****")
+
+        flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory,
+                                         nipype_deriv_subject_directory=nipype_deriv_subject_directory)
+        flow.write_graph(graph2use='colored', format='svg', simple_form=False)
+
+        if self.number_of_cores != 1:
+            flow.run(plugin='MultiProc',
+                     plugin_args={'n_procs': self.number_of_cores})
+        else:
+            flow.run()
+
+        iflogger.info("**** Processing finished ****")
+
+        return True
