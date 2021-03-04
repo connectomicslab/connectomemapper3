@@ -29,19 +29,29 @@ BIDS derivatives entities
 
 See `Original BIDS Entities Appendix <https://bids-specification.readthedocs.io/en/v1.4.1/99-appendices/09-entities.html>`_ for more description.
 
-.. note:: A new BIDS entity `atlas-<atlas_label>` (where ``<atlas_label>``: ``Desikan``/ ``L2008``/ ``L2018``) has been introduced, that is used in combination
-    with the ``res-<atlas_scale>`` (where ``<atlas_scale>``: ``scale1`` / ``scale2`` / ``scale3`` / ``scale4`` / ``scale5``) entity  to distinguish
-    data derived from different parcellation atlases and different scales.
+.. note:: Connectome Mapper 3 introduced a new BIDS entity ``atlas-<atlas_label>``
+    (where ``<atlas_label>``: ``Desikan``/ ``L2008``/ ``L2018``), that is used
+    in combination with the ``res-<atlas_scale>`` (where ``<atlas_scale>``:
+    ``scale1`` / ``scale2`` / ``scale3`` / ``scale4`` / ``scale5``) entity to
+    distinguish data derived from different parcellation atlases and
+    different scales.
 
 
 Main Connectome Mapper Derivatives
 ==========================================
 
-Main outputs produced by Connectome Mapper 3 are written to ``<bids_dataset/derivatives>/cmp/sub-<subject_label>/``. In this folder, a configuration file generated for each modality pipeline (i.e. anatomical/diffusion/fMRI) and used for processing each participant is saved as ``sub-<subject_label>_anatomical/diffusion/fMRI_config.ini``. It summarizes pipeline workflow options and parameters used for processing. An execution log of the full workflow is saved as `sub-<subject_label>_log.txt``
+Main outputs produced by Connectome Mapper 3 are written to
+``cmp/sub-<subject_label>/``. In this folder, a configuration file
+generated for each modality pipeline (i.e. anatomical/diffusion/fMRI)
+and used for processing each participant is saved as
+``sub-<subject_label>_anatomical/diffusion/fMRI_config.ini``.
+It summarizes pipeline workflow options and parameters used for processing.
+An execution log of the full workflow is saved as `sub-<subject_label>_log.txt``.
 
 Anatomical derivatives
 ------------------------
-* Anatomical derivatives in the individual ``T1w`` space are placed in each subject's ``anat/`` subfolder, including:
+* Anatomical derivatives in the individual ``T1w`` space are placed
+  in each subject's ``anat/`` subfolder, including:
 
     * The original T1w image:
 
@@ -62,12 +72,12 @@ Anatomical derivatives
 
         - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_dseg.nii.gz``
 
-        where:
+          where:
 
-        - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
-          is the parcellation scheme used
-        - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
-          corresponds to the parcellation scale if applicable
+          - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+            is the parcellation scheme used
+          - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+            corresponds to the parcellation scale if applicable
 
         with the description of parcel labels and the updated FreeSurfer color lookup table:
 
@@ -93,12 +103,12 @@ Anatomical derivatives
 
         - ``anat/sub-<subject_label>_space-DWI_atlas-<atlas_label>[_res-<scale_label>]_dseg.nii.gz``
 
-        where:
+          where:
 
-        - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
-          is the parcellation scheme used
-        - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
-          corresponds to the parcellation scale if applicable
+          - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+            is the parcellation scheme used
+          - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+            corresponds to the parcellation scale if applicable
 
     * The 5TT image used for Anatomically Constrained Tractorgaphy (ACT):
 
@@ -134,7 +144,7 @@ each subject's ``dwi/`` subfolder, including:
 
     - ``dwi/sub-<subject_label>]_desc-WLS_model-DTI_diffmodel.nii.gz``
 
-    with derived Fractional Anisotropic (FA) and Mean Diffusivity (MD) maps:
+      with derived Fractional Anisotropic (FA) and Mean Diffusivity (MD) maps:
 
     - ``dwi/sub-<subject_label>]_model-DTI_FA.nii.gz``
     - ``dwi/sub-<subject_label>]_model-DTI_MD.nii.gz``
@@ -174,25 +184,25 @@ each subject's ``dwi/`` subfolder, including:
 
     - ``dwi/sub-<subject_label>_model-<model_label>_desc-<label>_tractogram.trk``
 
-    where:
+      where:
 
-    - ``<model_label>`` is the diffusion model used to drive tractography
-      (DTI, CSD, SHORE)
-    - ``<label>`` is the type of tractography algorithm employed
-      (DET for deterministic, PROB for probabilistic)
+      - ``<model_label>`` is the diffusion model used to drive tractography
+        (DTI, CSD, SHORE)
+      - ``<label>`` is the type of tractography algorithm employed
+        (DET for deterministic, PROB for probabilistic)
 
 * The structural connectivity (SC) graphs:
 
     - ``dwi/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_conndata-network_connectivity.<format>``
 
-    where:
+      where:
 
-    - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
-      is the parcellation scheme used
-    - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
-      corresponds to the parcellation scale if applicable
-    - ``<format>``: ``mat``/``gpickle``/``tsv``/``graphml`` is the preferred format
-      employed to stored the graph.
+      - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+        is the parcellation scheme used
+      - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+        corresponds to the parcellation scale if applicable
+      - ``<format>``: ``mat``/``gpickle``/``tsv``/``graphml`` is the preferred format
+        employed to stored the graph.
 
 
 Functional derivatives
@@ -233,21 +243,25 @@ each subject's ``func/`` subfolder including:
     - ``func/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_timeseries.npy``
     - ``func/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_timeseries.mat``
 
-    where ``<scale_label>`` : ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
-    corresponds to the parcellation scale if applicable
+      where:
+
+        - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+          is the parcellation scheme used
+        - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+          corresponds to the parcellation scale if applicable
 
 * The functional connectivity (FC) graphs:
 
     - ``func/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_conndata-network_connectivity.<format>``
 
-    where:
+      where:
 
-    - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
-      is the parcellation scheme used
-    - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
-      corresponds to the parcellation scale if applicable
-    - ``<format>``: ``mat``, ``gpickle``, ``tsv``, ``graphml`` is
-      the preferred format employed to stored the graph
+      - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+        is the parcellation scheme used
+      - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+        corresponds to the parcellation scale if applicable
+      - ``<format>``: ``mat``, ``gpickle``, ``tsv``, ``graphml`` is
+        the preferred format employed to stored the graph
 
 
 FreeSurfer Derivatives
