@@ -16,7 +16,11 @@ BIDS derivatives entities
 +--------------------------+------------------------------------------------------------------------------------------------------------+
 | ``ses-<label>``          | Distinguish different acquisition sessions                                                                 |
 +--------------------------+------------------------------------------------------------------------------------------------------------+
-| ``label-<label>``        | Describe the type of brain tissue segmented (for _probseg/dseg) or the parcellation atlas (for _atlas)     |
+| ``label-<label>``        | Describe the type of brain tissue segmented (for _probseg/dseg)                                            |
++--------------------------+------------------------------------------------------------------------------------------------------------+
+| ``atlas-<label>``        | Distinguish data derived from different types of parcellation atlases                                      |
++--------------------------+------------------------------------------------------------------------------------------------------------+
+| ``res-<label>``          | Distinguish data derived from the different scales of Lausanne2008 and Lausanne2018 parcellation atlases   |
 +--------------------------+------------------------------------------------------------------------------------------------------------+
 | ``space-DWI``            | Distinguish anatomical MRI derivatives in the target diffusion MRI space                                   |
 +--------------------------+------------------------------------------------------------------------------------------------------------+
@@ -25,7 +29,9 @@ BIDS derivatives entities
 
 See `Original BIDS Entities Appendix <https://bids-specification.readthedocs.io/en/v1.4.1/99-appendices/09-entities.html>`_ for more description.
 
-.. note:: A new suffix `_atlas` has been introduced, that is used in combination with the ``label-<atlas_label>`` entity (where ``<atlas_label>``:``Desikan``/``L2008``/``L2018``) to distinguish different parcellation atlas outputs.
+.. note:: A new BIDS entity `atlas-<atlas_label>` (where ``<atlas_label>``: ``Desikan``/ ``L2008``/ ``L2018``) has been introduced, that is used in combination
+    with the ``res-<atlas_scale>`` (where ``<atlas_scale>``: ``scale1`` / ``scale2`` / ``scale3`` / ``scale4`` / ``scale5``) entity  to distinguish
+    data derived from different parcellation atlases and different scales.
 
 
 Main Connectome Mapper Derivatives
@@ -54,14 +60,19 @@ Anatomical derivatives
 
     * The five different brain parcellations:
 
-    - ``anat/sub-<subject_label>_label-L2018_desc-<scale_label>_atlas.nii.gz``
+        - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_dseg.nii.gz``
 
-        where ``<scale_label>`` : ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5`` corresponds to the parcellation scale.
+        where:
+
+        - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+          is the parcellation scheme used
+        - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+          corresponds to the parcellation scale if applicable
 
         with the description of parcel labels and the updated FreeSurfer color lookup table:
 
-        - ``anat/sub-<subject_label>_label-L2018_desc-<scale_label>_atlas.graphml``
-        - ``anat/sub-<subject_label>_label-L2018_desc-<scale_label>_atlas_FreeSurferColorLUT.txt``
+        - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_dseg.graphml``
+        - ``anat/sub-<subject_label>_atlas_atlas-<atlas_label>[_res-<scale_label>]_FreeSurferColorLUT.txt``
 
 * Anatomical derivatives in the``DWI`` space produced by the diffusion pipeline are placed in each subject's ``anat/`` subfolder, including:
 
@@ -80,18 +91,21 @@ Anatomical derivatives
 
     * The five different brain parcellation are saved as:
 
-        - ``anat/sub-<subject_label>_space-DWI_label-<atlas_label>_desc-<scale_label>_atlas.nii.gz``
+        - ``anat/sub-<subject_label>_space-DWI_atlas-<atlas_label>[_res-<scale_label>]_dseg.nii.gz``
 
-       where:
+        where:
 
-    - ``<atlas_label>``:``Desikan``/``L2008``/``L2018`` is the parcellation scheme used
-    - ``<scale_label>`` : ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5`` corresponds to the parcellation scale.
+        - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+          is the parcellation scheme used
+        - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+          corresponds to the parcellation scale if applicable
 
     * The 5TT image used for Anatomically Constrained Tractorgaphy (ACT):
 
         - ``anat/sub-<subject_label>_space-DWI_label-5TT_probseg.nii.gz``
 
-    * The patial volume maps for white matter (WM), gray matter (GM), and Cortical Spinal Fluid (CSF) used for Particale Filtering Tractography (PFT), generated from 5TT image:
+    * The patial volume maps for white matter (WM), gray matter (GM), and Cortical Spinal Fluid (CSF) used
+      for Particale Filtering Tractography (PFT), generated from 5TT image:
 
         - ``anat/sub-<subject_label>_space-DWI_label-WM_probseg.nii.gz``
         - ``anat/sub-<subject_label_space-DWI>_label-GM_probseg.nii.gz``
@@ -104,9 +118,11 @@ Anatomical derivatives
 
 Diffusion derivatives
 ------------------------
-Diffusion derivatives in the individual ``DWI`` space are placed in each subject's ``dwi/`` subfolder, including:
+Diffusion derivatives in the individual ``DWI`` space are placed in
+each subject's ``dwi/`` subfolder, including:
 
-* The final preprocessed DWI image used to fit the diffusion model for tensor or fiber orientation distribution estimation:
+* The final preprocessed DWI image used to fit the diffusion model
+  for tensor or fiber orientation distribution estimation:
 
     - ``dwi/sub-<subject_label>_desc-preproc_dwi.nii.gz``
 
@@ -124,7 +140,8 @@ Diffusion derivatives in the individual ``DWI`` space are placed in each subject
     - ``dwi/sub-<subject_label>]_model-DTI_MD.nii.gz``
 
 
-* The Fiber Orientation Distribution (FOD) image from Constrained Spherical Deconvolution (CSD) fit (if performed):
+* The Fiber Orientation Distribution (FOD) image from
+  Constrained Spherical Deconvolution (CSD) fit (if performed):
 
     - ``dwi/sub-<subject_label>]_model-CSD_diffmodel.nii.gz``
 
@@ -133,7 +150,9 @@ Diffusion derivatives in the individual ``DWI`` space are placed in each subject
 
     - ``dwi/sub-<subject_label>]_model-MAPMRI_diffmodel.nii.gz``
 
-    with derived Generalized Fractional Anisotropic (GFA), Mean Squared Displacement (MSD), Return-to-Origin Probability (RTOP) and Return-to-Plane Probability (RTPP) maps:
+    with derived Generalized Fractional Anisotropic (GFA),
+    Mean Squared Displacement (MSD), Return-to-Origin Probability (RTOP)
+    and Return-to-Plane Probability (RTPP) maps:
 
     - ``dwi/sub-<subject_label>]_model-MAPMRI_GFA.nii.gz``
     - ``dwi/sub-<subject_label>]_model-MAPMRI_MSD.nii.gz``
@@ -144,7 +163,8 @@ Diffusion derivatives in the individual ``DWI`` space are placed in each subject
 
     - ``dwi/sub-<subject_label>]_model-SHORE_diffmodel.nii.gz``
 
-    with derived Generalized Fractional Anisotropic (GFA), Mean Squared Displacement (MSD), Return-to-Origin Probability (RTOP) maps:
+    with derived Generalized Fractional Anisotropic (GFA),
+    Mean Squared Displacement (MSD), Return-to-Origin Probability (RTOP) maps:
 
     - ``dwi/sub-<subject_label>]_model-SHORE_GFA.nii.gz``
     - ``dwi/sub-<subject_label>]_model-SHORE_MSD.nii.gz``
@@ -156,23 +176,29 @@ Diffusion derivatives in the individual ``DWI`` space are placed in each subject
 
     where:
 
-    - ``<model_label>`` is the diffusion model used to drive tractography (DTI, CSD, SHORE)
-    - ``<label>`` is the type of tractography algorithm employed (DET for deterministic, PROB for probabilistic)
+    - ``<model_label>`` is the diffusion model used to drive tractography
+      (DTI, CSD, SHORE)
+    - ``<label>`` is the type of tractography algorithm employed
+      (DET for deterministic, PROB for probabilistic)
 
 * The structural connectivity (SC) graphs:
 
-    - ``dwi/sub-<subject_label>__label-<atlas_label>(_desc-<scale_label>)_conndata-network_connectivity.<format>``
+    - ``dwi/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_conndata-network_connectivity.<format>``
 
     where:
 
-    - ``<atlas_label>``:``Desikan``/``L2008``/``L2018`` is the parcellation scheme used
-    - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5`` corresponds to the parcellation scale if applicable
-    - ``<format>``: ``mat``/``gpickle``/``tsv``/``graphml`` is the prefered format employed to stored the graph.
+    - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+      is the parcellation scheme used
+    - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+      corresponds to the parcellation scale if applicable
+    - ``<format>``: ``mat``/``gpickle``/``tsv``/``graphml`` is the preferred format
+      employed to stored the graph.
 
 
 Functional derivatives
 -------------------------------
-Functional derivatives in the 'meanBOLD' (individual) space are placed in each subject's ``func/`` subfolder including:
+Functional derivatives in the 'meanBOLD' (individual) space are placed in
+each subject's ``func/`` subfolder including:
 
 * The original BOLD image:
 
@@ -204,20 +230,24 @@ Functional derivatives in the 'meanBOLD' (individual) space are placed in each s
 
 * The ROI time-series for each parcellation scale:
 
-    - ``func/sub-<subject_label>_atlas-L2018_desc-<scale_label>_timeseries.npy``
-    - ``func/sub-<subject_label>_atlas-L2018_desc-<scale_label>_timeseries.mat``
+    - ``func/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_timeseries.npy``
+    - ``func/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_timeseries.mat``
 
-    where ``<scale_label>`` : ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5`` corresponds to the parcellation scale
+    where ``<scale_label>`` : ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+    corresponds to the parcellation scale if applicable
 
 * The functional connectivity (FC) graphs:
 
-    - ``func/sub-<subject_label>__label-<atlas_label>(_desc-<scale_label>)_conndata-network_connectivity.<format>``
+    - ``func/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_conndata-network_connectivity.<format>``
 
     where:
 
-    - ``<atlas_label>``:``Desikan``, ``L2008``, ``L2018`` is the parcellation scheme used
-    - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5`` corresponds to the parcellation scale if applicable
-    - ``<format>``: ``mat``, ``gpickle``, ``tsv``, ``graphml`` is the prefered format employed to stored the graph
+    - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+      is the parcellation scheme used
+    - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
+      corresponds to the parcellation scale if applicable
+    - ``<format>``: ``mat``, ``gpickle``, ``tsv``, ``graphml`` is
+      the preferred format employed to stored the graph
 
 
 FreeSurfer Derivatives
