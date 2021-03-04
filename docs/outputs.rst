@@ -74,7 +74,7 @@ Anatomical derivatives
 
           where:
 
-          - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+          - ``<atlas_label>``: ``Desikan`` / ``L2008`` / ``L2018``
             is the parcellation scheme used
           - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
             corresponds to the parcellation scale if applicable
@@ -82,9 +82,10 @@ Anatomical derivatives
         with the description of parcel labels and the updated FreeSurfer color lookup table:
 
         - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_dseg.graphml``
-        - ``anat/sub-<subject_label>_atlas_atlas-<atlas_label>[_res-<scale_label>]_FreeSurferColorLUT.txt``
+        - ``anat/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_FreeSurferColorLUT.txt``
 
-* Anatomical derivatives in the``DWI`` space produced by the diffusion pipeline are placed in each subject's ``anat/`` subfolder, including:
+* Anatomical derivatives in the ``DWI`` space produced by the diffusion pipeline are placed in
+  each subject's ``anat/`` subfolder, including:
 
     * The unmasked T1w image:
 
@@ -105,7 +106,7 @@ Anatomical derivatives
 
           where:
 
-          - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+          - ``<atlas_label>``: ``Desikan`` / ``L2008`` / ``L2018``
             is the parcellation scheme used
           - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
             corresponds to the parcellation scale if applicable
@@ -193,16 +194,16 @@ each subject's ``dwi/`` subfolder, including:
 
 * The structural connectivity (SC) graphs:
 
-    - ``dwi/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_conndata-network_connectivity.<format>``
+    - ``dwi/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_conndata-network_connectivity.<fmt>``
 
       where:
 
-      - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+      - ``<atlas_label>``: ``Desikan`` / ``L2008`` / ``L2018``
         is the parcellation scheme used
       - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
         corresponds to the parcellation scale if applicable
-      - ``<format>``: ``mat``/``gpickle``/``tsv``/``graphml`` is the preferred format
-        employed to stored the graph.
+      - ``<fmt>``: ``mat`` / ``gpickle`` / ``tsv`` / ``graphml`` is
+        the format used to store the graph
 
 
 Functional derivatives
@@ -245,23 +246,23 @@ each subject's ``func/`` subfolder including:
 
       where:
 
-        - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+        - ``<atlas_label>``: ``Desikan`` / ``L2008`` / ``L2018``
           is the parcellation scheme used
         - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
           corresponds to the parcellation scale if applicable
 
 * The functional connectivity (FC) graphs:
 
-    - ``func/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_conndata-network_connectivity.<format>``
+    - ``func/sub-<subject_label>_atlas-<atlas_label>[_res-<scale_label>]_conndata-network_connectivity.<fmt>``
 
       where:
 
-      - ``<atlas_label>``:``Desikan``/``L2008``/``L2018``
+      - ``<atlas_label>``: ``Desikan`` / ``L2008`` / ``L2018``
         is the parcellation scheme used
       - ``<scale_label>``: ``scale1``, ``scale2``, ``scale3``, ``scale4``, ``scale5``
         corresponds to the parcellation scale if applicable
-      - ``<format>``: ``mat``, ``gpickle``, ``tsv``, ``graphml`` is
-        the preferred format employed to stored the graph
+      - ``<fmt>``: ``mat`` / ``gpickle`` / ``tsv`` / ``graphml`` is
+        the format used to store the graph
 
 
 FreeSurfer Derivatives
