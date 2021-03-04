@@ -8,18 +8,33 @@ Version 3.0.0-RC4
 
 Date: March XX, 2021
 
-This version corresponds to the fourth release candidate of Connectome Mapper 3 (CMP3).
-In particular, it integrates `Pull Request #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ which includes:
+This version corresponds to the fourth and final release candidate of Connectome Mapper 3 (CMP3).
+In particular, it integrates the relatively large
+`Pull Request #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_
+that marks the end of the release candidate phase and which includes:
 
 *Update*
 
-* Update version of datalad and dependencies:
+* Update version of datalad and dependencies
+  (`PR #77 <https://github.com/connectomicslab/connectomemapper3/pull/77>`_):
 
   * `datalad[full]==0.13.0` to ``datalad[full]==0.14.0``.
   * `datalad-container==0.3.1` to ``datalad-container==1.1.2``.
   * `datalad_neuroimaging==0.2.0` to ``datalad-neuroimaging==0.3.1``.
   * `git-annex=8.20200617` to ``git-annex=8.20210127``.
   * `datalad-revolution` was removed.
+
+.. important:: BIDS convention naming of data derived from parcellation atlas has changed.
+
+* BIDS convention naming of data derived from parcellation atlas adopt now the new BIDS
+  entity ``atlas-<atlas_label>`` to distinguish data derived from different parcellation
+  atlases. The use of the entity ``desc-<scale_label>`` to distinguish between
+  parcellation scale has been replaced by the use of the entity ``res-<scale_label>``.
+  (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
+
+* Content of ``dataset_description.json`` for each derivatives folder has been updated
+  to conform with BIDS version 1.4.0.
+  (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
 
 *Major changes*
 
