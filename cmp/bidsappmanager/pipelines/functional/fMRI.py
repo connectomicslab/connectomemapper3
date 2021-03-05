@@ -23,17 +23,8 @@ from cmp.bidsappmanager.stages.preprocessing.fmri_preprocessing import Preproces
 from cmp.bidsappmanager.stages.registration.registration import RegistrationStageUI
 from cmp.bidsappmanager.stages.functional.functionalMRI import FunctionalMRIStageUI
 from cmp.bidsappmanager.stages.connectome.fmri_connectome import ConnectomeStageUI
-from cmp.pipelines.functional.fMRI import Check_Input_Notification, fMRIPipeline
+from cmp.pipelines.functional.fMRI import fMRIPipeline
 from cmtklib.util import return_button_style_sheet
-
-
-class Check_Input_NotificationUI(Check_Input_Notification):
-    traits_view = View(Item('message', style='readonly', show_label=False),
-                       Item('imaging_model', editor=EnumEditor(name='imaging_model_options'),
-                            visible_when='len(imaging_model_options)>1'),
-                       kind='modal',
-                       buttons=['OK'],
-                       title="Check inputs")
 
 
 class fMRIPipelineUI(fMRIPipeline):

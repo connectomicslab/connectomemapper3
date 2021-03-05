@@ -34,18 +34,7 @@ from cmp.bidsappmanager.stages.registration.registration import RegistrationStag
 from cmp.bidsappmanager.stages.connectome.connectome import ConnectomeStageUI
 
 from cmp.pipelines.common import Pipeline
-from cmp.pipelines.diffusion.diffusion import Global_Configuration, Check_Input_Notification, DiffusionPipeline
-
-
-class Check_Input_NotificationUI(Check_Input_Notification):
-    traits_view = View(Item('message', style='readonly', show_label=False),
-                       Item('diffusion_imaging_model_message', visible_when='len(diffusion_imaging_model_options)>1',
-                            style='readonly', show_label=False),
-                       Item('diffusion_imaging_model', editor=EnumEditor(name='diffusion_imaging_model_options'),
-                            visible_when='len(diffusion_imaging_model_options)>1'),
-                       kind='modal',
-                       buttons=['OK'],
-                       title="Check inputs")
+from cmp.pipelines.diffusion.diffusion import DiffusionPipeline
 
 
 class DiffusionPipelineUI(DiffusionPipeline):

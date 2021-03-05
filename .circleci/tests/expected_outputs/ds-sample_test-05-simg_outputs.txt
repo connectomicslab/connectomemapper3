@@ -1,4 +1,8 @@
 cmp/dataset_description.json
+cmp/sub-01/ses-01/anat/sub-01_ses-01_atlas-Desikan_dseg.graphml
+cmp/sub-01/ses-01/anat/sub-01_ses-01_atlas-Desikan_dseg.nii.gz
+cmp/sub-01/ses-01/anat/sub-01_ses-01_atlas-Desikan_FreeSurferColorLUT.txt
+cmp/sub-01/ses-01/anat/sub-01_ses-01_atlas-Desikan_stats.tsv
 cmp/sub-01/ses-01/anat/sub-01_ses-01_desc-aparcaseg_dseg.nii.gz
 cmp/sub-01/ses-01/anat/sub-01_ses-01_desc-brain_mask.nii.gz
 cmp/sub-01/ses-01/anat/sub-01_ses-01_desc-brain_T1w.nii.gz
@@ -8,10 +12,6 @@ cmp/sub-01/ses-01/anat/sub-01_ses-01_desc-head_T1w.nii.gz
 cmp/sub-01/ses-01/anat/sub-01_ses-01_label-brain_desc-eroded_dseg.nii.gz
 cmp/sub-01/ses-01/anat/sub-01_ses-01_label-CSF_desc-eroded_dseg.nii.gz
 cmp/sub-01/ses-01/anat/sub-01_ses-01_label-CSF_dseg.nii.gz
-cmp/sub-01/ses-01/anat/sub-01_ses-01_label-Desikan_atlas.graphml
-cmp/sub-01/ses-01/anat/sub-01_ses-01_label-Desikan_atlas.nii.gz
-cmp/sub-01/ses-01/anat/sub-01_ses-01_label-Desikan_FreeSurferColorLUT.txt
-cmp/sub-01/ses-01/anat/sub-01_ses-01_label-Desikan_stats.tsv
 cmp/sub-01/ses-01/anat/sub-01_ses-01_label-GM_dseg.nii.gz
 cmp/sub-01/ses-01/anat/sub-01_ses-01_label-WM_desc-eroded_dseg.nii.gz
 cmp/sub-01/ses-01/anat/sub-01_ses-01_label-WM_dseg.nii.gz

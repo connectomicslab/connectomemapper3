@@ -28,7 +28,7 @@ class Global_Configuration(HasTraits):
 
     Attributes
     ----------
-    process_type: 'fMRI'
+    process_type : 'fMRI'
         Processing pipeline type
 
     subjects : traits.List
@@ -57,14 +57,6 @@ class Global_Configuration(HasTraits):
     dmri_bids_acq = Str
 
 
-class Check_Input_Notification(HasTraits):
-    message = Str
-    diffusion_imaging_model_options = List(['DSI', 'DTI', 'HARDI', 'multishell'])
-    diffusion_imaging_model = Str
-    diffusion_imaging_model_message = Str(
-        '\nMultiple diffusion inputs available. Please select desired diffusion modality.')
-
-
 class DiffusionPipeline(Pipeline):
     """Class that extends a :class:`Pipeline` and represents the processing pipeline for diffusion MRI.
 
@@ -86,31 +78,27 @@ class DiffusionPipeline(Pipeline):
 
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("diffusion_pipeline")
-    # input_folders = ['DSI','DTI','HARDI','T1','T2']
     input_folders = ['anat', 'dwi']
     process_type = Str
     diffusion_imaging_model = Str
     subject = Str
     subject_directory = Directory
     derivatives_directory = Directory
-    ordered_stage_list = ['Preprocessing', 'Registration',
-                          'Diffusion', 'Connectome']  # ,'MRTrixConnectome']
-
+    ordered_stage_list = ['Preprocessing',
+                          'Registration',
+                          'Diffusion',
+                          'Connectome']
     parcellation_scheme = Str
     atlas_info = Dict()
-
     global_conf = Global_Configuration()
-
     config_file = Str
-
-    # anat_flow = Instance(pe.Workflow)
 
     def __init__(self, project_info):
         """Constructor of a `DiffusionPipeline` object.
 
         Parameters
         ----------
-        project_info: cmp.project.CMP_Project_Info
+        project_info : cmp.project.CMP_Project_Info
             Instance of `CMP_Project_Info` object.
 
         See Also
@@ -149,7 +137,6 @@ class DiffusionPipeline(Pipeline):
 
         self.subject = project_info.subject
         self.diffusion_imaging_model = project_info.diffusion_imaging_model
-        # self.stages['Connectome'].config.subject = self.subject
 
         self.stages['Connectome'].config.on_trait_change(self.update_vizualization_layout, 'circular_layout')
         self.stages['Connectome'].config.on_trait_change(self.update_vizualization_logscale, 'log_visualization')
@@ -162,7 +149,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         self.stages['Diffusion'].define_inspect_outputs()
@@ -172,7 +159,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         self.stages['Diffusion'].define_inspect_outputs()
@@ -182,7 +169,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         self.stages['Connectome'].define_inspect_outputs()
@@ -193,7 +180,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : bool
             New value.
         """
         self.stages['Connectome'].define_inspect_outputs()
@@ -204,7 +191,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         self.stages['Connectome'].config.subject = new
@@ -214,7 +201,7 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        new
+        new : string
             New value.
         """
         # print "diffusion model changed"
@@ -229,9 +216,6 @@ class DiffusionPipeline(Pipeline):
             String that is empty if success, otherwise it contains the error message
         """
         message = ''
-        # if self.stages['MRTrixConnectome'].config.output_types == []:
-        #     return('\n\tNo output type selected for the connectivity matrices.\t\n\t'
-        #            'Please select at least one output type in the connectome configuration window.\t\n')
         if not self.stages['Connectome'].config.output_types:
             message = (
                 '\n\tNo output type selected for the connectivity matrices.\t\n\t'
@@ -261,8 +245,6 @@ class DiffusionPipeline(Pipeline):
 
     def _atlas_info_changed(self, new):
         pass
-        # print "Atlas info changed : "
-        # print new
 
     def check_input(self, layout, gui=True):
         """Check if input of the diffusion pipeline are available.
@@ -309,12 +291,8 @@ class DiffusionPipeline(Pipeline):
 
         try:
             layout = BIDSLayout(self.base_directory)
-            # print("INFO : Valid BIDS dataset with %s subjects" % len(layout.get_subjects()))
             for subj in layout.get_subjects():
                 self.global_conf.subjects.append('sub-' + str(subj))
-            # self.global_conf.subjects = ['sub-'+str(subj) for subj in layout.get_subjects()]
-            # self.global_conf.modalities = [
-            #     str(mod) for mod in layout.get_modalities()]
 
             print("> Looking for....")
 
@@ -326,16 +304,12 @@ class DiffusionPipeline(Pipeline):
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
                             if self.global_conf.dmri_bids_acq in file.filename:
-                                dwi_file = os.path.join(
-                                    file.dirname, file.filename)
+                                dwi_file = os.path.join(file.dirname, file.filename)
                                 break
                     else:  # TODO: Better parsing of multiple runs
-                        dwi_file = os.path.join(
-                            files[0].dirname, files[0].filename)
-                        # print(dwi_file)
+                        dwi_file = os.path.join(files[0].dirname, files[0].filename)
                 else:
-                    print(
-                        "ERROR : Diffusion image not found for subject %s." % subjid)
+                    print("ERROR : Diffusion image not found for subject %s." % subjid)
                     return
 
                 files = layout.get(
@@ -344,13 +318,10 @@ class DiffusionPipeline(Pipeline):
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
                             if self.global_conf.dmri_bids_acq in file.filename:
-                                json_file = os.path.join(
-                                    file.dirname, file.filename)
+                                json_file = os.path.join(file.dirname, file.filename)
                                 break
                     else:  # TODO: Better parsing of multiple runs
-                        json_file = os.path.join(
-                            files[0].dirname, files[0].filename)
-                        # print(dwi_file)
+                        json_file = os.path.join(files[0].dirname, files[0].filename)
                 else:
                     json_file = 'NotFound'
                     print(
@@ -362,13 +333,10 @@ class DiffusionPipeline(Pipeline):
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
                             if self.global_conf.dmri_bids_acq in file.filename:
-                                bval_file = os.path.join(
-                                    file.dirname, file.filename)
+                                bval_file = os.path.join(file.dirname, file.filename)
                                 break
                     else:  # TODO: Better parsing of multiple runs
-                        bval_file = os.path.join(
-                            files[0].dirname, files[0].filename)
-                        # print(bval_file)
+                        bval_file = os.path.join(files[0].dirname, files[0].filename)
                 else:
                     print(
                         "ERROR : Diffusion bval image not found for subject %s." % subjid)
@@ -380,13 +348,10 @@ class DiffusionPipeline(Pipeline):
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
                             if self.global_conf.dmri_bids_acq in file.filename:
-                                bvec_file = os.path.join(
-                                    file.dirname, file.filename)
+                                bvec_file = os.path.join(file.dirname, file.filename)
                                 break
                     else:  # TODO: Better parsing of multiple runs
-                        bvec_file = os.path.join(
-                            files[0].dirname, files[0].filename)
-                        # print(bvec_file)
+                        bvec_file = os.path.join(files[0].dirname, files[0].filename)
                 else:
                     print(
                         "ERROR : Diffusion bvec image not found for subject %s." % subjid)
@@ -400,16 +365,14 @@ class DiffusionPipeline(Pipeline):
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
                             if self.global_conf.dmri_bids_acq in file.filename:
-                                dwi_file = os.path.join(
-                                    file.dirname, file.filename)
+                                dwi_file = os.path.join(file.dirname, file.filename)
                                 break
                     else:  # TODO: Better parsing of multiple runs
-                        dwi_file = os.path.join(
-                            files[0].dirname, files[0].filename)
-                        # print(dwi_file)
+                        dwi_file = os.path.join(files[0].dirname, files[0].filename)
                 else:
-                    print("ERROR : Diffusion image not found for subject %s, session %s." % (
-                        subjid, self.global_conf.subject_session))
+                    print(
+                        "ERROR : Diffusion image not found for subject %s, session %s." % (
+                                subjid, self.global_conf.subject_session))
                     return
 
                 files = layout.get(subject=subjid, suffix='dwi',
@@ -418,13 +381,10 @@ class DiffusionPipeline(Pipeline):
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
                             if self.global_conf.dmri_bids_acq in file.filename:
-                                json_file = os.path.join(
-                                    file.dirname, file.filename)
+                                json_file = os.path.join(file.dirname, file.filename)
                                 break
                     else:  # TODO: Better parsing of multiple runs
-                        json_file = os.path.join(
-                            files[0].dirname, files[0].filename)
-                        # print(dwi_file)
+                        json_file = os.path.join(files[0].dirname, files[0].filename)
                 else:
                     json_file = 'NotFound'
                     print("WARNING : Diffusion json sidecar not found for subject %s, session %s." % (
@@ -436,13 +396,10 @@ class DiffusionPipeline(Pipeline):
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
                             if self.global_conf.dmri_bids_acq in file.filename:
-                                bval_file = os.path.join(
-                                    file.dirname, file.filename)
+                                bval_file = os.path.join(file.dirname, file.filename)
                                 break
                     else:  # TODO: Better parsing of multiple runs
-                        bval_file = os.path.join(
-                            files[0].dirname, files[0].filename)
-                        # print bval_file
+                        bval_file = os.path.join(files[0].dirname, files[0].filename)
                 else:
                     print("ERROR : Diffusion bval image not found for subject %s, session %s." % (
                         subjid, self.global_conf.subject_session))
@@ -454,13 +411,10 @@ class DiffusionPipeline(Pipeline):
                     if self.global_conf.dmri_bids_acq != '':
                         for file in files:
                             if self.global_conf.dmri_bids_acq in file.filename:
-                                bvec_file = os.path.join(
-                                    file.dirname, file.filename)
+                                bvec_file = os.path.join(file.dirname, file.filename)
                                 break
                     else:  # TODO: Better parsing of multiple runs
-                        bvec_file = os.path.join(
-                            files[0].dirname, files[0].filename)
-                        # print bvec_file
+                        bvec_file = os.path.join(files[0].dirname, files[0].filename)
                 else:
                     print("ERROR : Diffusion bvec image not found for subject %s, session %s." % (
                         subjid, self.global_conf.subject_session))
@@ -472,7 +426,6 @@ class DiffusionPipeline(Pipeline):
             print("... bvals_file : %s" % bval_file)
 
             if os.path.isfile(dwi_file):
-                # print("%s available" % typ)
                 diffusion_available = True
 
         except Exception:
@@ -526,7 +479,8 @@ class DiffusionPipeline(Pipeline):
                     else:
                         out_json_file = os.path.join(self.output_directory, 'cmp', self.subject,
                                                      self.global_conf.subject_session, 'dwi',
-                                                     self.subject + '_' + self.global_conf.subject_session + '_desc-cmp_dwi.json')
+                                                     self.subject + '_' +
+                                                     self.global_conf.subject_session + '_desc-cmp_dwi.json')
 
                     if not os.path.isfile(out_json_file):
                         shutil.copy(src=json_file, dst=out_json_file)
@@ -539,7 +493,6 @@ class DiffusionPipeline(Pipeline):
             else:
                 input_message = 'Error during inputs check. No diffusion data available in folder ' + os.path.join(
                     self.base_directory, self.subject, self.global_conf.subject_session, 'dwi') + '!'
-        # diffusion_imaging_model = diffusion_imaging_model[0]
 
         if gui:
             print(input_message)
@@ -560,13 +513,6 @@ class DiffusionPipeline(Pipeline):
             print(
                 "ERROR : Missing required inputs.Please see documentation for more details.")
 
-        # for stage in self.stages.values():
-        #     if stage.enabled:
-        #         print stage.name
-        #         print stage.stage_dir
-
-        # self.fill_stages_outputs()
-
         return valid_inputs
 
     def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
@@ -574,17 +520,17 @@ class DiffusionPipeline(Pipeline):
 
         Parameters
         ----------
-        cmp_deriv_subject_directory <Directory>
+        cmp_deriv_subject_directory : Directory
             Main CMP output directory of a subject
             e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
 
-        nipype_deriv_subject_directory <Directory>
+        nipype_deriv_subject_directory : Directory
             Intermediate Nipype output directory of a subject
             e.g. ``/output_dir/nipype/sub-XX/(ses-YY)``
 
         Returns
         -------
-        diffusion_flow <nipype.pipeline.engine.Workflow>
+        diffusion_flow : nipype.pipeline.engine.Workflow
             An instance of :class:`nipype.pipeline.engine.Workflow`
         """
         acquisition_model = self.stages['Diffusion'].config.diffusion_imaging_model
@@ -621,20 +567,18 @@ class DiffusionPipeline(Pipeline):
             bids_atlas_label = 'Desikan'
 
         # Data import
-        # datasource = pe.Node(interface=nio.DataGrabber(outfields = ['T1','T2','diffusion','bvecs','bvals']), name='datasource')
         datasource = pe.Node(interface=nio.DataGrabber(
-            outfields=['diffusion', 'bvecs', 'bvals', 'T1', 'aparc_aseg', 'aseg', 'brain', 'brain_mask', 'wm_mask_file',
-                       'wm_eroded', 'brain_eroded', 'csf_eroded', 'roi_volume_s1', 'roi_volume_s2', 'roi_volume_s3',
-                       'roi_volume_s4', 'roi_volume_s5', 'roi_graphml_s1', 'roi_graphml_s2', 'roi_graphml_s3',
-                       'roi_graphml_s4', 'roi_graphml_s5']), name='datasource')
+            outfields=['diffusion', 'bvecs', 'bvals', 'T1',
+                       'aparc_aseg', 'aseg', 'brain', 'brain_mask',
+                       'wm_mask_file', 'wm_eroded', 'brain_eroded', 'csf_eroded',
+                       'roi_volume_s1', 'roi_volume_s2', 'roi_volume_s3',
+                       'roi_volume_s4', 'roi_volume_s5', 'roi_graphml_s1',
+                       'roi_graphml_s2', 'roi_graphml_s3', 'roi_graphml_s4',
+                       'roi_graphml_s5']),
+            name='datasource')
         datasource.inputs.base_directory = cmp_deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
-        # datasource.inputs.field_template = dict(T1='anat/T1.nii.gz',
-        #                                         T2='anat/T2.nii.gz',
-        #                                         diffusion='dwi/dwi.nii.gz',
-        #                                          bvecs='dwi/dwi.bvec',
-        #                                          bvals='dwi/dwi.bval')
 
         if self.parcellation_scheme == 'NativeFreesurfer':
             datasource.inputs.field_template = dict(diffusion='dwi/' + self.subject + '_desc-cmp_dwi.nii.gz',
@@ -650,9 +594,9 @@ class DiffusionPipeline(Pipeline):
                                                     brain_eroded='anat/' + self.subject + '_desc-brain_mask.nii.gz',
                                                     csf_eroded='anat/' + self.subject + '_label-CSF_dseg.nii.gz',
                                                     roi_volume_s1='anat/' + self.subject +
-                                                    '_label-' + bids_atlas_label + '_atlas.nii.gz',
+                                                    '_atlas-' + bids_atlas_label + '_dseg.nii.gz',
                                                     roi_graphml_s1='anat/' + self.subject +
-                                                    '_label-' + bids_atlas_label + '_atlas.graphml',
+                                                    '_atlas-' + bids_atlas_label + '_dseg.graphml',
                                                     roi_volume_s2='anat/irrelevant.nii.gz',
                                                     roi_graphml_s2='anat/irrelevant.graphml',
                                                     roi_volume_s3='anat/irrelevant.nii.gz',
@@ -674,29 +618,28 @@ class DiffusionPipeline(Pipeline):
                                                     wm_eroded='anat/' + self.subject + '_label-WM_dseg.nii.gz',
                                                     brain_eroded='anat/' + self.subject + '_desc-brain_mask.nii.gz',
                                                     csf_eroded='anat/' + self.subject + '_label-CSF_dseg.nii.gz',
-                                                    roi_volume_s1='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale1_atlas.nii.gz',
-                                                    roi_volume_s2='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale2_atlas.nii.gz',
-                                                    roi_volume_s3='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale3_atlas.nii.gz',
-                                                    roi_volume_s4='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale4_atlas.nii.gz',
-                                                    roi_volume_s5='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale5_atlas.nii.gz',
-                                                    roi_graphml_s1='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale1_atlas.graphml',
-                                                    roi_graphml_s2='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale2_atlas.graphml',
-                                                    roi_graphml_s3='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale3_atlas.graphml',
-                                                    roi_graphml_s4='anat/' + self.subject + '_label-' +
-                                                    bids_atlas_label + '_desc-scale4_atlas.graphml',
-                                                    roi_graphml_s5='anat/' + self.subject + '_label-' + bids_atlas_label + '_desc-scale5_atlas.graphml')
+                                                    roi_volume_s1='anat/' + self.subject + '_atlas-' +
+                                                    bids_atlas_label + '_res-scale1_dseg.nii.gz',
+                                                    roi_volume_s2='anat/' + self.subject + '_atlas-' +
+                                                    bids_atlas_label + '_res-scale2_dseg.nii.gz',
+                                                    roi_volume_s3='anat/' + self.subject + '_atlas-' +
+                                                    bids_atlas_label + '_res-scale3_dseg.nii.gz',
+                                                    roi_volume_s4='anat/' + self.subject + '_atlas-' +
+                                                    bids_atlas_label + '_res-scale4_dseg.nii.gz',
+                                                    roi_volume_s5='anat/' + self.subject + '_atlas-' +
+                                                    bids_atlas_label + '_res-scale5_dseg.nii.gz',
+                                                    roi_graphml_s1='anat/' + self.subject + '_atlas-' +
+                                                    bids_atlas_label + '_res-scale1_dseg.graphml',
+                                                    roi_graphml_s2='anat/' + self.subject + '_atlas-' +
+                                                    bids_atlas_label + '_res-scale2_dseg.graphml',
+                                                    roi_graphml_s3='anat/' + self.subject + '_atlas-' +
+                                                    bids_atlas_label + '_res-scale3_dseg.graphml',
+                                                    roi_graphml_s4='anat/' + self.subject + '_atlas-' +
+                                                    bids_atlas_label + '_res-scale4_dseg.graphml',
+                                                    roi_graphml_s5='anat/' + self.subject + '_atlas-' +
+                                                    bids_atlas_label + '_res-scale5_dseg.graphml')
 
         datasource.inputs.sort_filelist = True
-
-        # datasource.inputs.subject = self.subject
 
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
@@ -708,17 +651,6 @@ class DiffusionPipeline(Pipeline):
             sinker.inputs.substitutions = [  # ('T1', self.subject+'_T1w_head'),
                 ('brain_mask.nii.gz', self.subject + '_desc-brain_mask.nii.gz'),
                 ('brain.nii.gz', self.subject + '_desc-brain_T1w.nii.gz'),
-                # ('wm_mask',self.subject+'_T1w_class-WM'),('brain_mask_resampled_warped',self.subject+'_space-DWI_desc-brain_mask'),
-                # ('gm_mask',self.subject+'_T1w_class-GM'),
-                # ('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
-                # ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale33.nii.gz'),
-                # ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale60.nii.gz'),
-                # ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale125.nii.gz'),
-                # ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale250.nii.gz'),
-                # ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale500.nii.gz'),
-
-                # ('*/_ROIs_resample*/fast__pve_0_out.nii.gz',self.subject+'_dwi_connectome'),
-
                 ('T1_warped', self.subject + '_space-DWI_desc-head_T1w'),
                 ('anat_resampled_warped', self.subject + '_space-DWI_desc-head_T1w'),
                 ('brain_warped', self.subject + '_space-DWI_desc-brain_T1w'),
@@ -731,48 +663,63 @@ class DiffusionPipeline(Pipeline):
                 ('wm_mask_warped', self.subject + '_space-DWI_label-WM_dseg'),
                 ('wm_mask_resampled_warped',
                  self.subject + '_space-DWI_label-WM_dseg'),
-                (self.subject + '_label-Desikan_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-Desikan_atlas.nii.gz'),
+                (self.subject + '_atlas-Desikan_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-Desikan_dseg.nii.gz'),
                 ('ROIv_HR_th_scale1_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale1_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale1_dseg.nii.gz'),
                 ('ROIv_HR_th_scale2_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale2_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale2_dseg.nii.gz'),
                 ('ROIv_HR_th_scale3_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale3_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale3_dseg.nii.gz'),
                 ('ROIv_HR_th_scale4_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale4_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale4_dseg.nii.gz'),
                 ('ROIv_HR_th_scale5_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale5_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale1_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale1_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale2_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale2_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale3_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale3_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale4_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale4_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale5_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale5_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale5_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale1_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale1_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale2_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale2_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale3_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale3_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale4_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale4_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale5_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale5_dseg.nii.gz'),
                 ('ROIv_HR_th_scale1_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale1_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-L2008_res-scale1_dseg.nii.gz'),
                 ('ROIv_HR_th_scale2_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale2_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-L2008_res-scale2_dseg.nii.gz'),
                 ('ROIv_HR_th_scale3_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale3_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-L2008_res-scale3_dseg.nii.gz'),
                 ('ROIv_HR_th_scale4_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale4_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-L2008_res-scale4_dseg.nii.gz'),
                 ('ROIv_HR_th_scale5_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale5_atlas.nii.gz'),
-                (self.subject + '_label-L2008_desc-scale1_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale1_atlas.nii.gz'),
-                (self.subject + '_label-L2008_desc-scale2_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale2_atlas.nii.gz'),
-                (self.subject + '_label-L2008_desc-scale3_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale3_atlas.nii.gz'),
-                (self.subject + '_label-L2008_desc-scale4_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale4_atlas.nii.gz'),
-                (self.subject + '_label-L2008_desc-scale5_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale5_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-L2008_res-scale5_dseg.nii.gz'),
+                (self.subject + '_label-L2008_res-scale1_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-L2008_res-scale1_dseg.nii.gz'),
+                (self.subject + '_label-L2008_res-scale2_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-L2008_res-scale2_dseg.nii.gz'),
+                (self.subject + '_label-L2008_res-scale3_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-L2008_res-scale3_dseg.nii.gz'),
+                (self.subject + '_label-L2008_res-scale4_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-L2008_res-scale4_dseg.nii.gz'),
+                (self.subject + '_label-L2008_res-scale5_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-L2008_res-scale5_dseg.nii.gz'),
                 ('fast__pve_0_out_warped.nii.gz', self.subject + \
                  '_space-DWI_label-CSF_probseg.nii.gz'),
                 ('fast__pve_1_out_warped.nii.gz', self.subject + \
@@ -789,28 +736,25 @@ class DiffusionPipeline(Pipeline):
                  '_space-DWI_label-5TT_probseg.nii.gz'),
                 ('gmwmi_resampled_warped.nii.gz', self.subject + \
                  '_space-DWI_label-GMWMI_probseg.nii.gz'),
-                # ('connectome_'+self.subject+'_T1w_parc_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_connectome'),
-                # ('connectome_'+self.subject+'_T1w_parc_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_connectome'),
-                # ('connectome_'+self.subject+'_T1w_parc_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_connectome'),
-                # ('connectome_'+self.subject+'_T1w_parc_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_connectome'),
-                # ('connectome_'+self.subject+'_T1w_parc_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_connectome'),
                 ('connectome_freesurferaparc', self.subject + \
                  '_label-Desikan_conndata-network_connectivity'),
                 ('connectome_scale1',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale1_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale1_conndata-network_connectivity'),
                 ('connectome_scale2',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale2_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale2_conndata-network_connectivity'),
                 ('connectome_scale3',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale3_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale3_conndata-network_connectivity'),
                 ('connectome_scale4',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale4_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale4_conndata-network_connectivity'),
                 ('connectome_scale5',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale5_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale5_conndata-network_connectivity'),
                 ('dwi.nii.gz', self.subject + '_dwi.nii.gz'),
                 ('dwi.bval', self.subject + '_dwi.bval'),
-                # ('dwi.bvec',self.subject+'_dwi.bvec'),
-                # ('diffusion_resampled_CSD_det_tracked',self.subject+'_desc-DET_tractogram'),
-                # ('diffusion_resampled_CSD_prob_tracked',self.subject+'_desc-PROB_tractogram'),
                 ('eddy_corrected.nii.gz.eddy_rotated_bvecs',
                  self.subject + '_desc-eddyrotated.bvec'),
                 ('eddy_corrected.nii.gz', self.subject + \
@@ -847,32 +791,16 @@ class DiffusionPipeline(Pipeline):
                 ('target_epicorrected', self.subject + '_desc-preproc_dwi'),
                 ('diffusion_preproc_resampled.nii.gz',
                  self.subject + '_desc-preproc_dwi.nii.gz'),
-                # ('endpoints',self.subject+'_tract_endpoints'),
-                # ('filtered_fiberslabel',self.subject+'_desc-fiberslabel_filt'),
-                # ('final_fiberlabels_'+self.subject+'_T1w_parc',self.subject+'_desc-filtered_fiberlabels'),
-                # ('final_fiberslength_'+self.subject+'_T1w_parc',self.subject+'_desc-filtered_fiberslength'),
-                (
-                    'streamline_final', '{}_model-{}_desc-{}_tractogram'.format(self.subject, recon_model, tracking_model)),
-                # ('_trackvis0/converted',self.subject+'_dwi_tract'),#MRtrix tracts
-                # ('diffusion_preproc_resampled_tracked',self.subject+'_dwi_tract') #Dipy tracts
-                # TODO: Add fODF CSD / SHORE model /
+                ('streamline_final',
+                 '{}_model-{}_desc-{}_tractogram'.format(self.subject,
+                                                         recon_model,
+                                                         tracking_model)),
             ]
 
         else:
-            sinker.inputs.substitutions = [  # ('T1', self.subject+'_T1w_head'),
+            sinker.inputs.substitutions = [
                 ('brain_mask.nii.gz', self.subject + '_desc-brain_mask.nii.gz'),
                 ('brain.nii.gz', self.subject + '_desc-brain_T1w.nii.gz'),
-                # ('wm_mask',self.subject+'_T1w_class-WM'),
-                # ('gm_mask',self.subject+'_T1w_class-GM'),
-                # ('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
-                # ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale33.nii.gz'),
-                # ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale60.nii.gz'),
-                # ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale125.nii.gz'),
-                # ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale250.nii.gz'),
-                # ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale500.nii.gz'),
-
-                # ('*/_ROIs_resample*/fast__pve_0_out.nii.gz',self.subject+'_dwi_connectome'),
-
                 ('T1_warped', self.subject + '_space-DWI_desc-head_T1w'),
                 ('anat_resampled_warped', self.subject + '_space-DWI_desc-head_T1w'),
                 ('brain_warped', self.subject + '_space-DWI_desc-brain_T1w'),
@@ -885,38 +813,53 @@ class DiffusionPipeline(Pipeline):
                 ('wm_mask_warped', self.subject + '_space-DWI_label-WM_dseg'),
                 ('wm_mask_resampled_warped',
                  self.subject + '_space-DWI_label-WM_dseg'),
-                (self.subject + '_label-Desikan_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-Desikan_atlas.nii.gz'),
+                (self.subject + '_atlas-Desikan_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-Desikan_dseg.nii.gz'),
                 ('ROIv_HR_th_scale1_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale1_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale1_dseg.nii.gz'),
                 ('ROIv_HR_th_scale2_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale2_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale2_dseg.nii.gz'),
                 ('ROIv_HR_th_scale3_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale3_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale3_dseg.nii.gz'),
                 ('ROIv_HR_th_scale4_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale4_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale4_dseg.nii.gz'),
                 ('ROIv_HR_th_scale5_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale5_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale1_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale1_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale2_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale2_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale3_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale3_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale4_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale4_atlas.nii.gz'),
-                (self.subject + '_label-' + bids_atlas_label + '_desc-scale5_atlas_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-' + bids_atlas_label + '_desc-scale5_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale5_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale1_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale1_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale2_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale2_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale3_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale3_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale4_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale4_dseg.nii.gz'),
+                (self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale5_dseg_out_warped.nii.gz',
+                 self.subject + '_space-DWI_atlas-' +
+                 bids_atlas_label + '_res-scale5_dseg.nii.gz'),
                 ('ROIv_HR_th_scale1_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale1_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-L2008_res-scale1_dseg.nii.gz'),
                 ('ROIv_HR_th_scale2_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale2_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-L2008_res-scale2_dseg.nii.gz'),
                 ('ROIv_HR_th_scale3_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale3_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-L2008_res-scale3_dseg.nii.gz'),
                 ('ROIv_HR_th_scale4_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale4_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-L2008_res-scale4_dseg.nii.gz'),
                 ('ROIv_HR_th_scale5_out_warped.nii.gz',
-                 self.subject + '_space-DWI_label-L2008_desc-scale5_atlas.nii.gz'),
+                 self.subject + '_space-DWI_atlas-L2008_res-scale5_dseg.nii.gz'),
                 ('fast__pve_1_out_warped.nii.gz', self.subject + \
                  '_space-DWI_label-GM_probseg.nii.gz'),
                 ('fast__pve_2_out_warped.nii.gz', self.subject + \
@@ -931,28 +874,25 @@ class DiffusionPipeline(Pipeline):
                  '_space-DWI_label-5TT_probseg.nii.gz'),
                 ('gmwmi_resampled_warped.nii.gz', self.subject + \
                  '_space-DWI_label-GMWMI_probseg.nii.gz'),
-                # ('connectome_'+self.subject+'_T1w_parc_scale1',self.subject+'_label-'+bids_atlas_label+'_desc-scale1_connectome'),
-                # ('connectome_'+self.subject+'_T1w_parc_scale2',self.subject+'_label-'+bids_atlas_label+'_desc-scale2_connectome'),
-                # ('connectome_'+self.subject+'_T1w_parc_scale3',self.subject+'_label-'+bids_atlas_label+'_desc-scale3_connectome'),
-                # ('connectome_'+self.subject+'_T1w_parc_scale4',self.subject+'_label-'+bids_atlas_label+'_desc-scale4_connectome'),
-                # ('connectome_'+self.subject+'_T1w_parc_scale5',self.subject+'_label-'+bids_atlas_label+'_desc-scale5_connectome'),
                 ('connectome_freesurferaparc', self.subject + \
-                 '_label-Desikan_conndata-network_connectivity'),
+                 '_atlas-Desikan_conndata-network_connectivity'),
                 ('connectome_scale1',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale1_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale1_conndata-network_connectivity'),
                 ('connectome_scale2',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale2_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale2_conndata-network_connectivity'),
                 ('connectome_scale3',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale3_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale3_conndata-network_connectivity'),
                 ('connectome_scale4',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale4_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale4_conndata-network_connectivity'),
                 ('connectome_scale5',
-                 self.subject + '_label-' + bids_atlas_label + '_desc-scale5_conndata-network_connectivity'),
+                 self.subject + '_atlas-' + bids_atlas_label +
+                 '_res-scale5_conndata-network_connectivity'),
                 ('dwi.nii.gz', self.subject + '_dwi.nii.gz'),
                 ('dwi.bval', self.subject + '_dwi.bval'),
-                # ('dwi.bvec',self.subject+'_dwi.bvec'),
-                # ('diffusion_resampled_CSD_det_tracked',self.subject+'_desc-DET_tractogram'),
-                # ('diffusion_resampled_CSD_prob_tracked',self.subject+'_desc-PROB_tractogram'),
                 ('eddy_corrected.nii.gz.eddy_rotated_bvecs',
                  self.subject + '_desc-eddyrotated.bvec'),
                 ('eddy_corrected.nii.gz', self.subject + \
@@ -984,32 +924,30 @@ class DiffusionPipeline(Pipeline):
                 ('target_epicorrected', self.subject + '_desc-preproc_dwi'),
                 ('diffusion_preproc_resampled.nii.gz',
                  self.subject + '_desc-preproc_dwi.nii.gz'),
-                # ('endpoints',self.subject+'_tract_endpoints'),
-                # ('filtered_fiberslabel',self.subject+'_desc-fiberslabel_filt'),
-                # ('final_fiberlabels_'+self.subject+'_T1w_parc',self.subject+'_desc-filtered_fiberlabels'),
-                # ('final_fiberslength_'+self.subject+'_T1w_parc',self.subject+'_desc-filtered_fiberslength'),
-                (
-                    'streamline_final', '{}_model-{}_desc-{}_tractogram'.format(self.subject, recon_model, tracking_model)),
-                # ('_trackvis0/converted',self.subject+'_dwi_tract'),#MRtrix tracts
-                # ('diffusion_preproc_resampled_tracked',self.subject+'_dwi_tract') #Dipy tracts
-                # TODO: Add fODF CSD / SHORE model /
+                ('streamline_final',
+                 '{}_model-{}_desc-{}_tractogram'.format(self.subject,
+                                                         recon_model,
+                                                         tracking_model)),
             ]
         # Clear previous outputs
         self.clear_stages_outputs()
 
         # Create diffusion flow
-
         diffusion_flow = pe.Workflow(name='diffusion_pipeline',
                                      base_dir=os.path.abspath(nipype_deriv_subject_directory))
         diffusion_inputnode = pe.Node(interface=util.IdentityInterface(
-            fields=['diffusion', 'bvecs', 'bvals', 'T1', 'aseg', 'aparc_aseg', 'brain', 'T2', 'brain_mask',
-                    'wm_mask_file', 'roi_volumes', 'roi_graphMLs', 'subjects_dir', 'subject_id',
-                    'parcellation_scheme']), name='inputnode')  # ,'atlas_info'
+            fields=['diffusion', 'bvecs', 'bvals',
+                    'T1', 'aseg', 'aparc_aseg',
+                    'brain', 'T2', 'brain_mask',
+                    'wm_mask_file', 'roi_volumes', 'roi_graphMLs',
+                    'subjects_dir', 'subject_id', 'parcellation_scheme']),
+            name='inputnode')
         diffusion_inputnode.inputs.parcellation_scheme = self.parcellation_scheme
         diffusion_inputnode.inputs.atlas_info = self.atlas_info
 
         diffusion_outputnode = pe.Node(interface=util.IdentityInterface(fields=['connectivity_matrices']),
                                        name='outputnode')
+
         diffusion_flow.add_nodes([diffusion_inputnode, diffusion_outputnode])
 
         diffusion_flow.connect([
@@ -1022,9 +960,6 @@ class DiffusionPipeline(Pipeline):
                                                ("brain", "brain"),
                                                ("brain_mask", "brain_mask"),
                                                ("wm_mask_file", "wm_mask_file")]),
-            # ,( "roi_volumes","roi_volumes")])
-            #    ("parcellation_scheme","parcellation_scheme"),
-            #    ("atlas_info","atlas_info")]),
         ])
 
         merge_roi_volumes = pe.Node(
@@ -1037,12 +972,13 @@ class DiffusionPipeline(Pipeline):
 
             Parameters
             ----------
-            roi_volumes
+            roi_volumes : list
                 A list of output parcellations that might contain empty element
                 in the case of the monoscale Desikan scheme for instance
 
             Returns
             -------
+            out_roi_volumes : list
                 The list with no empty element
             """
             out_roi_volumes = []
@@ -1068,8 +1004,6 @@ class DiffusionPipeline(Pipeline):
              (("out", remove_non_existing_scales), "roi_graphMLs")])
         ])
 
-        # print diffusion_inputnode.outputs
-
         if self.stages['Preprocessing'].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
             diffusion_flow.connect([
@@ -1084,8 +1018,8 @@ class DiffusionPipeline(Pipeline):
                                                       'inputnode.wm_mask_file'),
                                                      ('roi_volumes',
                                                       'inputnode.roi_volumes'),
-                                                     ('bvecs', 'inputnode.bvecs'), ('bvals',
-                                                                                    'inputnode.bvals'),
+                                                     ('bvecs', 'inputnode.bvecs'),
+                                                     ('bvals', 'inputnode.bvals'),
                                                      ('T1', 'inputnode.T1')]),
             ])
 
@@ -1114,19 +1048,14 @@ class DiffusionPipeline(Pipeline):
                                            "inputnode.brain_mask_full"),
                                           ('outputnode.diffusion_preproc',
                                            'inputnode.target'),
-                                          ('outputnode.dwi_brain_mask', 'inputnode.target_mask')]),
-                # (preproc_flow, sinker, [
-                #  ("outputnode.diffusion_noisemap", "dwi.@noisemap")]),
-                # (preproc_flow, sinker, [
-                #  ("outputnode.diffusion_biasfield", "dwi.@biasfield")]),
+                                          ('outputnode.dwi_brain_mask',
+                                           'inputnode.target_mask')]),
                 (preproc_flow, sinker, [
                  ("outputnode.bvecs_rot", "dwi.@bvecs_rot")]),
                 (preproc_flow, sinker, [
                  ("outputnode.diffusion_preproc", "dwi.@diffusion_preproc")]),
                 (preproc_flow, sinker, [
                  ("outputnode.dwi_brain_mask", "dwi.@diffusion_brainmask")]),
-                # (preproc_flow,sinker,[("outputnode.roi_volumes","anat.@roi_volumes")]),
-                # (preproc_flow,sinker,[("outputnode.partial_volume_files","anat.@partial_volume_files")])
             ])
             if self.stages['Registration'].config.registration_mode == "BBregister (FS)":
                 diffusion_flow.connect([
@@ -1139,7 +1068,6 @@ class DiffusionPipeline(Pipeline):
             diffusion_flow.connect([
                 (reg_flow, diff_flow, [
                  ('outputnode.target_epicorrected', 'inputnode.diffusion')]),
-                # (reg_flow,diff_flow, [('outputnode.T1_registered_crop','inputnode.T1')]),
                 (reg_flow, diff_flow, [
                  ('outputnode.wm_mask_registered_crop', 'inputnode.wm_mask_registered')]),
                 (reg_flow, diff_flow, [
@@ -1183,38 +1111,14 @@ class DiffusionPipeline(Pipeline):
                  ("outputnode.partial_volumes_registered_crop", "anat.@pves_reg_crop")])
             ])
 
-        # if self.stages['MRTrixConnectome'].enabled:
-        #     if self.stages['Diffusion'].config.processing_tool == 'FSL':
-        #         self.stages['MRTrixConnectome'].config.probtrackx = True
-        #     else:
-        #         self.stages['MRTrixConnectome'].config.probtrackx = False
-        #     con_flow = self.create_stage_flow("MRTrixConnectome")
-        #     diffusion_flow.connect([
-        #           (diffusion_inputnode,con_flow, [('parcellation_scheme','inputnode.parcellation_scheme')]),
-        #           (diff_flow,con_flow, [('outputnode.diffusion_model','inputnode.diffusion_model'),('outputnode.track_file','inputnode.track_file'),
-        #           ('outputnode.fod_file','inputnode.fod_file'),('outputnode.gFA','inputnode.gFA'),
-        #                                       ('outputnode.roi_volumes','inputnode.roi_volumes_registered'),
-        #                                 ('outputnode.skewness','inputnode.skewness'),('outputnode.kurtosis','inputnode.kurtosis'),
-        #                                 ('outputnode.P0','inputnode.P0')]),
-        #           (con_flow,diffusion_outputnode, [('outputnode.connectivity_matrices','connectivity_matrices')]),
-        #                 (diff_flow,sinker,[('outputnode.track_file','dwi.@track_file'),('outputnode.fod_file','dwi.@fod_file'),('outputnode.gFA','dwi.@gFA'),
-        #                                       ('outputnode.skewness','dwi.@skewness'),('outputnode.kurtosis','dwi.@kurtosis'),
-        #                                       ('outputnode.P0','dwi.@P0')])
-        #           ])
-
-        #     if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
-        #         diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
-
         if self.stages['Connectome'].enabled:
-            # if self.stages['Diffusion'].config.processing_tool == 'FSL':
-            #     self.stages['Connectome'].config.probtrackx = True
-            # else:
             self.stages['Connectome'].config.probtrackx = False
             self.stages['Connectome'].config.subject = self.global_conf.subject
             con_flow = self.create_stage_flow("Connectome")
 
             diffusion_flow.connect([
-                (diffusion_inputnode, con_flow, [('parcellation_scheme', 'inputnode.parcellation_scheme'),
+                (diffusion_inputnode, con_flow, [('parcellation_scheme',
+                                                  'inputnode.parcellation_scheme'),
                                                  ('atlas_info',
                                                   'inputnode.atlas_info'),
                                                  ('roi_graphMLs', 'inputnode.roi_graphMLs')]),
@@ -1236,7 +1140,6 @@ class DiffusionPipeline(Pipeline):
                 (con_flow, diffusion_outputnode, [
                  ('outputnode.connectivity_matrices', 'connectivity_matrices')]),
                 (diff_flow, sinker, [
-                    #                   ('outputnode.track_file','dwi.@track_file'),
                     ('outputnode.fod_file', 'dwi.@fod_file'),
                     ('outputnode.FA', 'dwi.@FA'),
                     ('outputnode.ADC', 'dwi.@ADC'),
@@ -1248,11 +1151,6 @@ class DiffusionPipeline(Pipeline):
                     ('outputnode.mapmri_maps', 'dwi.@mapmri_maps'),
                     ('outputnode.shore_maps', 'dwi.@shore_maps'), ]),
                 (con_flow, sinker, [
-                    #                 ('outputnode.endpoints_file','dwi.@endpoints_file'),
-                    #                 ('outputnode.endpoints_mm_file','dwi.@endpoints_mm_file'),
-                    #                 ('outputnode.final_fiberslength_files','dwi.@sfinal_fiberslength_files'),
-                    #                 ('outputnode.filtered_fiberslabel_files','dwi.@filtered_fiberslabel_files'),
-                    #                 ('outputnode.final_fiberlabels_files','dwi.@final_fiberlabels_files'),
                     ('outputnode.streamline_final_file',
                      'dwi.@streamline_final_file'),
                     ("outputnode.connectivity_matrices",
@@ -1260,13 +1158,10 @@ class DiffusionPipeline(Pipeline):
                 ])
             ])
 
-            # if self.stages['Parcellation'].config.parcellation_scheme == "Custom":
-            #     diffusion_flow.connect([(diffusion_inputnode,con_flow, [('atlas_info','inputnode.atlas_info')])])
-
         return diffusion_flow
 
     def process(self):
-        """Executes the pipeline workflow and returns True if successful."""
+        """Executes the diffusion pipeline workflow and returns True if successful."""
         # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 
@@ -1282,9 +1177,13 @@ class DiffusionPipeline(Pipeline):
             nipype_deriv_subject_directory = os.path.join(
                 self.output_directory, "nipype", self.subject)
         else:
-            cmp_deriv_subject_directory = os.path.join(self.output_directory, "cmp", self.subject,
+            cmp_deriv_subject_directory = os.path.join(self.output_directory,
+                                                       "cmp",
+                                                       self.subject,
                                                        self.global_conf.subject_session)
-            nipype_deriv_subject_directory = os.path.join(self.output_directory, "nipype", self.subject,
+            nipype_deriv_subject_directory = os.path.join(self.output_directory,
+                                                          "nipype",
+                                                          self.subject,
                                                           self.global_conf.subject_session)
 
             self.subject = "_".join((self.subject, self.global_conf.subject_session))
@@ -1310,41 +1209,22 @@ class DiffusionPipeline(Pipeline):
                            'use_relative_paths': True,
                            'crashfile_format': "txt"}
              })
-        logging.update_logging(config)
-        iflogger = logging.getLogger('nipype.interface')
 
+        logging.update_logging(config)
+
+        iflogger = logging.getLogger('nipype.interface')
         iflogger.info("**** Processing ****")
-        # print self.anat_flow
 
         flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory,
                                          nipype_deriv_subject_directory=nipype_deriv_subject_directory)
         flow.write_graph(graph2use='colored', format='svg', simple_form=True)
 
         if self.number_of_cores != 1:
-            flow.run(plugin='MultiProc', plugin_args={
-                     'n_procs': self.number_of_cores})
+            flow.run(plugin='MultiProc',
+                     plugin_args={'n_procs': self.number_of_cores})
         else:
             flow.run()
 
-        # self.fill_stages_outputs()
-
-        # Clean undesired folders/files
-        # rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
-        # for file_to_rm in rm_file_list:
-        #     if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
-        #         os.remove(os.path.join(self.base_directory,file_to_rm))
-
-        # copy .ini and log file
-        # outdir = os.path.join(cmp_deriv_subject_directory,'config')
-        # if not os.path.exists(outdir):
-        #     os.makedirs(outdir)
-        #
-        # try:
-        #     shutil.copy(self.config_file,outdir)
-        # except shutil.Error:
-        #     print("Skipped copy of config file")
-        # #shutil.copy(os.path.join(self.base_directory,"derivatives","cmp",self.subject,'pypeline.log'),outdir)
-
         iflogger.info("**** Processing finished ****")
 
-        return True, 'Processing successful'
+        return True

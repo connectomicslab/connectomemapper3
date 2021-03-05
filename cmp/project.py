@@ -339,8 +339,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
         refresh_folder(bids_directory, derivatives_directory,
                        project_info.subject, dmri_pipeline.input_folders)
 
-    dmri_inputs_checked = dmri_pipeline.check_input(
-        layout=bids_layout, gui=gui)
+    dmri_inputs_checked = dmri_pipeline.check_input(layout=bids_layout, gui=gui)
     if dmri_inputs_checked:
         if is_new_project and dmri_pipeline is not None:  # and dmri_pipelineis not None:
             print("> Initialize dmri project")
@@ -431,8 +430,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
         refresh_folder(bids_directory, derivatives_directory,
                        project_info.subject, fmri_pipeline.input_folders)
 
-    fmri_inputs_checked = fmri_pipeline.check_input(
-        layout=bids_layout, gui=gui, debug=False)
+    fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout, gui=gui)
     if fmri_inputs_checked:
         if is_new_project and fmri_pipeline is not None:  # and fmri_pipelineis not None:
             print("> Initialize fmri project")
