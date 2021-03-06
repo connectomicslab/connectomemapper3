@@ -789,6 +789,9 @@ jobs:
             bash <(curl -Ls https://coverage.codacy.com/get.sh) final
 
   send_codecov_report:
+    docker:
+      - image: 'circleci/openjdk:8-jdk'
+    working_directory: /tmp/data/ds-sample/code
     steps:
       - attach_workspace:
           at: /tmp
