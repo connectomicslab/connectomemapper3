@@ -796,21 +796,21 @@ jobs:
       - attach_workspace:
           at: /tmp
       - codecov/upload:
-          file: { { /tmp/data/ds-sample/test/test-01_coverage.xml } }
+          file: /tmp/data/ds-sample/test/test-01_coverage.xml
       - codecov/upload:
-          file: { { /tmp/data/ds-sample/test/test-02_coverage.xml } }
+          file: /tmp/data/ds-sample/test/test-02_coverage.xml
       - codecov/upload:
-          file: { { /tmp/data/ds-sample/test/test-03_coverage.xml } }
+          file: /tmp/data/ds-sample/test/test-03_coverage.xml
       - codecov/upload:
-          file: { { /tmp/data/ds-sample/test/test-04_coverage.xml } }
+          file: /tmp/data/ds-sample/test/test-04_coverage.xml
       - codecov/upload:
-          file: { { /tmp/data/ds-sample/test/test-05_coverage.xml } }
+          file: /tmp/data/ds-sample/test/test-05_coverage.xml
       - codecov/upload:
-          file: { { /tmp/data/ds-sample/test/test-06_coverage.xml } }
+          file: /tmp/data/ds-sample/test/test-06_coverage.xml
       - codecov/upload:
-          file: { { /tmp/data/ds-sample/test/test-07_coverage.xml } }
+          file: /tmp/data/ds-sample/test/test-07_coverage.xml
       - codecov/upload:
-          file: { { /tmp/data/ds-sample/test/test-08_coverage.xml } }
+          file: /tmp/data/ds-sample/test/test-08_coverage.xml
 
   test_singularity_parcellation:
     machine:
