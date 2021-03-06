@@ -1245,12 +1245,12 @@ workflows:
             - test_docker_dsi_dipy
             - test_docker_parcellation
             - test_docker_fmri
-            filters:
-              branches:
-                ignore:
-                  - /docs?\/.*/
-              tags:
-                only: /.*/
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
 
       - deploy_docker_release:
           requires:
