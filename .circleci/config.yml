@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   coverage-reporter: codacy/coverage-reporter@11.9.0
   singularity: singularity/singularity@1.0.10
+  codecov: codecov/codecov@1.0.2
 
 jobs:
 
@@ -787,6 +788,27 @@ jobs:
                 -l Python -r /tmp/data/ds-sample/test/test-08_coverage.xml --partial &&\
             bash <(curl -Ls https://coverage.codacy.com/get.sh) final
 
+  send_codecov_report:
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - codecov/upload:
+          file: { { /tmp/data/ds-sample/test/test-01_coverage.xml } }
+      - codecov/upload:
+          file: { { /tmp/data/ds-sample/test/test-02_coverage.xml } }
+      - codecov/upload:
+          file: { { /tmp/data/ds-sample/test/test-03_coverage.xml } }
+      - codecov/upload:
+          file: { { /tmp/data/ds-sample/test/test-04_coverage.xml } }
+      - codecov/upload:
+          file: { { /tmp/data/ds-sample/test/test-05_coverage.xml } }
+      - codecov/upload:
+          file: { { /tmp/data/ds-sample/test/test-06_coverage.xml } }
+      - codecov/upload:
+          file: { { /tmp/data/ds-sample/test/test-07_coverage.xml } }
+      - codecov/upload:
+          file: { { /tmp/data/ds-sample/test/test-08_coverage.xml } }
+
   test_singularity_parcellation:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
@@ -1210,6 +1232,20 @@ workflows:
             - test_docker_parcellation
             - test_docker_fmri
           filters:
+              branches:
+                ignore:
+                  - /docs?\/.*/
+              tags:
+                only: /.*/
+
+      - send_codecov_report:
+          requires:
+            - test_singularity_parcellation
+            - test_docker_dsi_mrtrix
+            - test_docker_dsi_dipy
+            - test_docker_parcellation
+            - test_docker_fmri
+            filters:
               branches:
                 ignore:
                   - /docs?\/.*/
