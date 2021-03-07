@@ -68,7 +68,7 @@ def check_configuration_format(config_path):
     return ext
 
 
-def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=True):
+def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=False):
     """Save a ConfigParser to JSON file.
 
     Parameters
@@ -405,7 +405,7 @@ def get_fmri_process_detail_json(project_info, section, detail):
     return config[section][detail]
 
 
-def set_pipeline_attributes_from_config(pipeline, config, debug=True):
+def set_pipeline_attributes_from_config(pipeline, config, debug=False):
     """Set the pipeline stage attributes given a configuration.
 
     Parameters
