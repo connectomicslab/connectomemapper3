@@ -6,12 +6,14 @@ Changes
 Version 3.0.0-RC4
 ****************************
 
-Date: March XX, 2021
+Date: March 07, 2021
 
-This version corresponds to the fourth and final release candidate of Connectome Mapper 3 (CMP3).
-In particular, it integrates the relatively large
-`Pull Request #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ (~250 commits)
-that marks the end of the release candidate phase and includes the following changes.
+This version corresponds to the fourth and final release
+candidate of Connectome Mapper 3 (CMP3).
+It incorporates the relatively large
+`Pull Request #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ (~270 commits)
+which includes the following changes such that it marks
+the end of the release candidate phase.
 
 *New features*
 
