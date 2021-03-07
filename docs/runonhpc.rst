@@ -6,14 +6,36 @@ Running on a cluster (HPC)
 
 Connectome Mapper 3 BIDS App can be run on a cluster using Singularity.
 
-For your convenience, the Singularity image is automatically built along the docker image using Singularity 3.5.1 and deployed to `Sylabs.io <https://sylabs.io/>`_  as (equivalent of DockerHub for Singularity) during continuous integration on CircleCI. It can be freely downloaded with the following command:
+For your convenience, the Singularity image is automatically built along
+the docker image using Singularity 3.5.1 and deployed to
+`Sylabs.io <https://sylabs.io/>`_  as (equivalent of DockerHub for Singularity)
+during continuous integration on CircleCI. It can be freely downloaded
+with the following command:
 
 .. parsed-literal::
     $ singularity pull library://connectomicslab/default/connectomemapper-bidsapp:latest
 
-If you prefer, you can still build the Singularity image on your side using one of the 2 methods described in :ref:`Conversion to a Singularity image <simg_conversion>`.
+If you prefer, you can still build the Singularity image on your side using
+one of the 2 methods described in :ref:`Conversion to a Singularity image <simg_conversion>`.
 
-A list of useful singularity command can be found in :ref:`Useful singularity commands <singularity-cmds>`. For more documentation about Singularity, please check the `official documentation website <https://sylabs.io/docs/>`_.
+A list of useful singularity command can be found in :ref:`Useful singularity commands <singularity-cmds>`.
+For more documentation about Singularity, please check the `official documentation website <https://sylabs.io/docs/>`_.
+
+**Happy Large-Scale Connectome Mapping!**
+
+
+--------------
+Prerequisites
+--------------
+
+* Singularity must be installed.
+  Check the `official documentation webpage <https://sylabs.io/guides/3.7/user-guide/quick_start.html#quick-installation-steps>`_
+  for installation instructions.
+
+.. note::If you wish to build the singularity image then you need to
+    have Docker installed.
+    See :ref:`Prerequisites of Connectome Mapper 3 <manual-install-docker>`
+    for more installation instructions.
 
 
 .. _run_singularity:
@@ -22,16 +44,19 @@ A list of useful singularity command can be found in :ref:`Useful singularity co
 Running the singularity image
 ------------------------------------
 
-The following example shows how to call from the terminal the Singularity image of the CMP3 BIDS App to perform both anatomical and diffusion pipelines for `sub-01`, `sub-02` and `sub-03` of a BIDS dataset whose root directory is located at ``${localDir}``:
+The following example shows how to call from the
+terminal the Singularity image of the CMP3 BIDS App
+to perform both anatomical and diffusion pipelines for
+`sub-01`, `sub-02` and `sub-03` of a BIDS dataset whose
+root directory is located at ``${localDir}``::
 
-.. parsed-literal::
-	$ singularity run --containall \\
-            --bind ${localDir}:/bids_dir --bind ${localDir}/derivatives:/output_dir \\
-	        library://connectomicslab/default/connectomemapper-bidsapp:latest \\
-	        /bids_dir /output_dir participant --participant_label 01 02 03 \\
-	        --anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \\
-	        --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \\
-	        --fs_license /bids_dir/code/license.txt \\
+    $ singularity run --containall \
+            --bind ${localDir}:/bids_dir --bind ${localDir}/derivatives:/output_dir \
+	        library://connectomicslab/default/connectomemapper-bidsapp:latest \
+	        /bids_dir /output_dir participant --participant_label 01 02 03 \
+	        --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \
+	        --dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \
+	        --fs_license /bids_dir/code/license.txt \
 	        --number_of_participants_processed_in_parallel 3
 
 .. note::
@@ -55,13 +80,17 @@ Option 1 (recommended): Using the Docker image docker2singularity
 
 	.. parsed-literal::
 		$ mkdir -p /tmp/test
-		$ docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/test:/output --privileged -t --rm singularityware/docker2singularity --name cmp-|release|.simg sebastientourbier/connectomemapper-bidsapp:|release|
+		$ docker run -v /var/run/docker.sock:/var/run/docker.sock  \\
+                     -v /tmp/test:/output --privileged -t --rm  \\
+                     singularityware/docker2singularity  \\
+                     --name cmp-|release|.simg  \\
+                     sebastientourbier/connectomemapper-bidsapp:|release|
 
 
 2. Move the converted image `cmp-|release|` to the ``~/Softwares/singularity`` folder on the cluster (via ssh using scp for instance)
 
 	.. parsed-literal::
-		$ scp -v /tmp/test/cmp-|release|.simg <your_cluster_user_login>@<cluster_url>:~/Softwares/singularity/cmp-|release|.simg
+		$ scp -v /tmp/test/cmp-|release|.simg <user>@<cluster_url>:~/Softwares/singularity/cmp-|release|.simg
 
 
 **Advantage(s):** Has never failed
@@ -74,13 +103,14 @@ Option 2 : Using singularity directly
 *********************************************************************
 
 .. parsed-literal::
-	$ singularity build ~/Softwares/singularity/cmp-|release|.simg docker://sebastientourbier/connectomemapper-bidsapp:|release|
+	$ singularity build ~/Softwares/singularity/cmp-|release|.simg  \\
+                docker://sebastientourbier/connectomemapper-bidsapp:|release|
 
 This command will directly download the latest version release of the Docker image from the DockerHub and convert it to a Singularity image.
 
 **Advantage(s):** Can be executed on the cluster directly
 
-**Disadvantage(s):** Has shown to fail because of some docker/ singularity version uncompatibilities
+**Disadvantage(s):** Has shown to fail because of some docker / singularity version incompatibilities
 
 
 .. _singularity-cmds:
@@ -99,6 +129,7 @@ Useful singularity commands
 		.. parsed-literal::
 			$ singularity cache clean
 
+------------
 
-Created by Sebastien Tourbier - 2020 Mar 04 - Latest update: 2021 Jan 04
-
+:Authors: Sebastien Tourbier
+:Version: Revision: 2 (Last modification: 2021 Jan 04)

@@ -46,18 +46,32 @@ About
 	:width: 1000
 	:align: center
 
-``Connectome Mapper 3`` implements full anatomical, diffusion and resting-state MRI processing pipelines, from raw Diffusion / T1 / T2 / BOLD data to multi-resolution connection matrices.
+``Connectome Mapper 3`` implements full anatomical, diffusion and
+resting-state MRI processing pipelines, from raw Diffusion / T1 /
+T2 / BOLD data to multi-resolution connection matrices.
 
-``Connectome Mapper 3`` pipelines use a combination of tools from well-known software packages, including FSL_, FreeSurfer_, ANTs_, MRtrix3_, Dipy_ and AFNI_, orchestrated by the Nipype_ dataflow library. These pipelines were designed to provide the best software implementation for each state of processing, and will be updated as newer and better neuroimaging software become available.
+``Connectome Mapper 3`` pipelines use a combination of tools from
+well-known software packages, including FSL_, FreeSurfer_, ANTs_,
+MRtrix3_, Dipy_ and AFNI_, empowered by the Nipype_ dataflow library.
+These pipelines were designed to provide the best software implementation
+for each state of processing, and will be updated as newer and better
+neuroimaging software become available.
 
 This tool allows you to easily do the following:
 
-  * Take T1 / Diffusion / resting-state MRI data from raw to multi-resolution connection matrices.
+  * Handle T1 / Diffusion / resting-state MRI data, organized following the
+    Brain Imaging Data Structure (BIDS) standard, from raw to multi-resolution
+    connection matrices.
   * Implement tools from different software packages.
   * Achieve optimal data processing quality by using the best tools available
-  * Automate and parallelize processing steps, which provides a significant speed-up from typical linear, manual processing.
+  * Automate and parallelize processing steps, which provides a significant
+    speed-up from typical linear, manual processing.
 
-Reproducibility and replicatibility is achieved through the distribution of a BIDSApp, a software container image which provide a frozen environment where versions of all external softwares and libraries are fixed.
+Portability, reproducibility and replicatibility are achieved through the
+distribution of a BIDSApp, a software container image which (1) takes datasets
+organized following the Brain Imaging Data Structure (BIDS) standard, and which
+(2) provides a frozen computing environment where versions of all external
+softwares and libraries are fixed.
 
 .. _FSL: https://fsl.fmrib.ox.ac.uk/fsl/fslwiki
 
@@ -78,7 +92,8 @@ Reproducibility and replicatibility is achieved through the distribution of a BI
 License information
 *******************
 
-This software is distributed under the open-source license Modified BSD. See :ref:`license <LICENSE>` for more details.
+This software is distributed under the open-source license Modified BSD.
+See :ref:`license <LICENSE>` for more details.
 
 All trademarks referenced herein are property of their respective holders.
 
@@ -86,18 +101,25 @@ All trademarks referenced herein are property of their respective holders.
 Aknowledgment
 *******************
 
-If your are using the Connectome Mapper 3 in your work, please acknowledge this software. See :ref:`Citing <citing>` for more details.
+If your are using the Connectome Mapper 3 in your work,
+please acknowledge this software.
+See :ref:`Citing <citing>` for more details.
 
 Help/Questions
 --------------
 
-If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_. Code bugs can be reported by creating a "New Issue" on the `source code repository <https://github.com/connectomicslab/connectomemapper3/issues>`_.
+If you run into any problems or have any questions,
+you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_.
+Code bugs can be reported by creating a "New Issue" on the
+`source code repository <https://github.com/connectomicslab/connectomemapper3/issues>`_.
 
 ***********************
 Eager to contribute?
 ***********************
 
-Connectome Mapper 3 is open-source and all kind of contributions (bug reporting, documentation, code,...) are welcome! See :ref:`Contributing to Connectome Mapper <contributing>` for more details.
+Connectome Mapper 3 is open-source and all kind of contributions
+(bug reporting, documentation, code,...) are welcome!
+See :ref:`Contributing to Connectome Mapper <contributing>` for more details.
 
 ***********************
 Contents

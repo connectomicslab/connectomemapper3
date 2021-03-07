@@ -23,16 +23,14 @@ from cmtklib.bids.utils import write_derivative_description
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.pipelines.functional import fMRI as FMRI_pipeline
-from cmtklib.config import anat_load_config_ini, anat_save_config, \
-    dmri_load_config_ini, dmri_save_config, fmri_load_config_ini, fmri_save_config
+from cmtklib.config import anat_load_config_json, anat_save_config, \
+    dmri_load_config_json, dmri_save_config, fmri_load_config_json, fmri_save_config
 
 # Ignore some warnings
 warnings.filterwarnings("ignore",
                         message="UserWarning: No valid root directory found for domain 'derivatives'."
                                 " Falling back on the Layout's root directory. If this isn't the intended behavior, "
                                 "make sure the config file for this domain includes a 'root' key.")
-
-# from cmtklib.util import remove_aborded_interface_pickles, fix_dataset_directory_in_pickles
 
 
 class CMP_Project_Info(HasTraits):
@@ -65,7 +63,7 @@ class CMP_Project_Info(HasTraits):
 
     diffusion_imaging_model : traits.Str
         Diffusion imaging model that can be
-        'DSI', 'DTI', or 'multi-shell'
+        'DSI', 'DTI', 'HARDI' or 'multishell'
 
     dmri_bids_acqs : traits.List
         List diffusion imaging models extracted from ``acq-<label>`` filename part.
@@ -192,7 +190,7 @@ class CMP_Project_Info(HasTraits):
         'Do you want to reset the configuration to default parameters ?\n')
 
     # process_type = Enum('diffusion',['diffusion','fMRI'])
-    diffusion_imaging_model = Enum('DTI', ['DSI', 'DTI', 'HARDI'])
+    diffusion_imaging_model = Enum('DTI', ['DSI', 'DTI', 'HARDI', 'multishell'])
     parcellation_scheme = Str('Lausanne2008')
     atlas_info = Dict()
     freesurfer_subjects_dir = Str('')
@@ -341,8 +339,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
         refresh_folder(bids_directory, derivatives_directory,
                        project_info.subject, dmri_pipeline.input_folders)
 
-    dmri_inputs_checked = dmri_pipeline.check_input(
-        layout=bids_layout, gui=gui)
+    dmri_inputs_checked = dmri_pipeline.check_input(layout=bids_layout, gui=gui)
     if dmri_inputs_checked:
         if is_new_project and dmri_pipeline is not None:  # and dmri_pipelineis not None:
             print("> Initialize dmri project")
@@ -382,7 +379,7 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                 print("int_project dmri_pipeline.global_config.subjects : ")
                 print(dmri_pipeline.global_conf.subjects)
 
-            dmri_conf_loaded = dmri_load_config_ini(
+            dmri_conf_loaded = dmri_load_config_json(
                 dmri_pipeline, project_info.dmri_config_file)
 
             if not dmri_conf_loaded:
@@ -433,8 +430,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
         refresh_folder(bids_directory, derivatives_directory,
                        project_info.subject, fmri_pipeline.input_folders)
 
-    fmri_inputs_checked = fmri_pipeline.check_input(
-        layout=bids_layout, gui=gui, debug=False)
+    fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout, gui=gui)
     if fmri_inputs_checked:
         if is_new_project and fmri_pipeline is not None:  # and fmri_pipelineis not None:
             print("> Initialize fmri project")
@@ -461,7 +457,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                 if warn_res:
                     print("... Read : fMRI config file (%s)" %
                           project_info.fmri_config_file)
-                    fmri_load_config_ini(
+                    fmri_load_config_json(
                         fmri_pipeline, project_info.fmri_config_file)
                 else:
                     return None
@@ -474,7 +470,7 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                 print("int_project fmri_pipeline.global_config.subjects : ")
                 print(fmri_pipeline.global_conf.subjects)
 
-            fmri_conf_loaded = fmri_load_config_ini(
+            fmri_conf_loaded = fmri_load_config_json(
                 fmri_pipeline, project_info.fmri_config_file)
 
             if not fmri_conf_loaded:
@@ -556,7 +552,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
             print("int_project anat_pipeline.global_config.subjects : ")
             print(anat_pipeline.global_conf.subjects)
 
-        anat_conf_loaded = anat_load_config_ini(
+        anat_conf_loaded = anat_load_config_json(
             anat_pipeline, project_info.anat_config_file)
 
         if not anat_conf_loaded:
@@ -760,6 +756,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 print("ERROR : Invalid inputs")
                 sys.exit(1)
 
+            anat_pipeline.check_stages_execution()
             anat_pipeline.fill_stages_outputs()
 
     # Perform the anatomical and the diffusion pipelines
@@ -782,6 +779,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
@@ -797,6 +795,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 else:
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
+                dmri_pipeline.check_stages_execution()
+                dmri_pipeline.fill_stages_outputs()
         else:
             print(msg)
             sys.exit(1)
@@ -821,6 +821,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
@@ -843,6 +844,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 else:
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
+                fmri_pipeline.check_stages_execution()
+                fmri_pipeline.fill_stages_outputs()
         else:
             print(msg)
             sys.exit(1)
@@ -868,6 +871,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 sys.exit(1)
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
+        anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
         project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
@@ -885,6 +889,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 else:
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
+                dmri_pipeline.check_stages_execution()
+                dmri_pipeline.fill_stages_outputs()
 
             fmri_valid_inputs, fmri_pipeline = init_fmri_project(project, bids_layout, False)
             if fmri_pipeline is not None:
@@ -902,6 +908,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 else:
                     print("   ... ERROR : Invalid inputs")
                     sys.exit(1)
+                fmri_pipeline.check_stages_execution()
+                fmri_pipeline.fill_stages_outputs()
         else:
             print(msg)
             sys.exit(1)

@@ -1481,18 +1481,13 @@ class RegistrationStage(Stage):
             dwi_sinker_report = os.path.join(dwi_sinker_dir, '_report', 'report.rst')
 
             if os.path.exists(dwi_sinker_report):
-                print(self.output_dir)
                 dwi_outputs = get_pipeline_dictionary_outputs(dwi_sinker_report, self.output_dir)
 
                 tool = self.config.registration_mode
                 ref = dwi_outputs['dwi.@bdiffusion_reg_crop']
                 out = dwi_outputs['anat.@brain_reg_crop']
 
-                print(ref)
-                print(out)
-
                 if os.path.exists(ref) and os.path.exists(out):
-                    print('reg 1')
                     self.inspect_outputs_dict['Linear T1-to-b0 (%s)' % tool] = ['fsleyes', '-sdefault',
                                                                                 ref,
                                                                                 out, '-cm', "copper",
@@ -1544,8 +1539,6 @@ class RegistrationStage(Stage):
             func_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'bold_sinker')
             func_sinker_report = os.path.join(func_sinker_dir, '_report', 'report.rst')
 
-            print('fMRI registration (tool %s)' % self.config.registration_mode)
-
             if os.path.exists(func_sinker_report):
 
                 func_outputs = get_pipeline_dictionary_outputs(func_sinker_report, self.output_dir)
@@ -1568,7 +1561,6 @@ class RegistrationStage(Stage):
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)
-        print(self.inspect_outputs)
 
     def has_run(self):
         """Function that returns `True` if the stage has been run successfully.

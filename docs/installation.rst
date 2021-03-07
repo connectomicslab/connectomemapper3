@@ -18,36 +18,35 @@ The Connectome Mapper 3 is composed of a Docker image, namely the Connectome Map
 * Installation instructions for the Connectome mapper 3 BIDS App Manager are found in :ref:`manual-install-cmpbidsappmanager`.
 
 ..
-	The steps to add the NeuroDebian repository are explained here::
-
-		$ firefox http://neuro.debian.net/
+	The steps to add the NeuroDebian repository are explained at http://neuro.debian.net/ .
 
 Make sure that you have installed the following prerequisites.
 
 The Connectome Mapper 3 BIDSApp
 ===============================
 
+.. _manual-install-docker:
+
 Prerequisites
 -------------
 
-* Installed Docker Engine corresponding to your system:
+* Install Docker Engine depending of your system:
 
-  * For Ubuntu 14.04/16.04/18.04, follow the instructions from the web page::
+  * For Ubuntu 14.04/16.04/18.04, follow the instructions at
+    https://docs.docker.com/install/linux/docker-ce/ubuntu/
 
-    $ firefox https://docs.docker.com/install/linux/docker-ce/ubuntu/
+  * For Mac OSX (>=10.10.3), get the .dmg installer at
+    https://store.docker.com/editions/community/docker-ce-desktop-mac
 
-  * For Mac OSX (>=10.10.3), get the .dmg installer from the web page::
+  * For Windows (>=10), get the installer at
+    https://store.docker.com/editions/community/docker-ce-desktop-windows
 
-    $ firefox https://store.docker.com/editions/community/docker-ce-desktop-mac
-
-  * For Windows (>=10), get the installer from the web page::
-
-    $ firefox https://store.docker.com/editions/community/docker-ce-desktop-windows
-
-.. note:: Connectome Mapper 3 BIDSApp has been tested only on Ubuntu and MacOSX. For Windows users, it might be required to make few patches in the Dockerfile.
+.. note:: Connectome Mapper 3 BIDSApp has been tested only on Ubuntu and MacOSX.
+    In principles, it should also run on Windows but it might require a few patches
+    to make it work.
 
 
-* Docker managed as a non-root user
+* Manage Docker as a non-root user
 
   * Open a terminal
 
@@ -96,9 +95,7 @@ The Connectome Mapper 3 BIDSApp Manager (GUI)
 Prerequisites
 ---------------
 
-* Installed miniconda3 (Python 3) from the web page::
-
-  $ firefox https://conda.io/miniconda.html
+* Install miniconda3 (Python 3) from https://conda.io/miniconda.html
 
   Download the Python 3 installer corresponding to your 32/64bits MacOSX/Linux/Win system.
 
@@ -130,16 +127,19 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 .. note::
   If a few bugs related to the Graphical User Interface were fixed after releasing the version, you might want to use the code at its latest version on the master branch (i.e. ``git checkout master``).
 
-* Create a miniconda3 environment where all python dependencies will be installed, this by using the spec list "conda_packages_list.txt" provided by the repository::
+* Create a miniconda3 environment where all python dependencies will be installed::
 
     $ cd connectomemapper3
     $ conda env create -f environment.yml
 
 .. important::
-  It seems there is no conda package for `git-annex` available on Mac. For your convenience, we created an additional `environment_macosx.yml` miniconda3 environment where the line `- git-annex=7.20190219` has been removed.
-  Git-annex should be installed on MacOSX using brew (https://brew.sh/index_fr) i.e. ``brew install git-annex``. See https://git-annex.branchable.com/install/ for more details.
+  It seems there is no conda package for `git-annex` available on Mac.
+  For your convenience, we created an additional `environment_macosx.yml`
+  miniconda3 environment where the line `- git-annex=XXXXXXX` has been removed.
+  Git-annex should be installed on MacOSX using `brew <https://brew.sh/index_fr>`_
+  i.e. ``brew install git-annex``. See https://git-annex.branchable.com/install/ for more details.
 
-  Note that `git-annex` is only necessary if you wish to use BIDS datasets managed by Datalad (https://www.datalad.org/), a very experimental feature still in beta-testing phase.
+  Note that `git-annex` is only necessary if you wish to use BIDS datasets managed by Datalad (https://www.datalad.org/).
 
 * Activate the conda environment::
 
@@ -149,14 +149,19 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 
   $ conda activate py37cmp-gui
 
-* Install the Connectome Mapper BIDS App Manager from the Bash Shell using following commands::
+* Install the Connectome Mapper BIDS App Manager from the Bash Shell using `pip`::
 
 	(py37cmp-gui)$ cd connectomemapper3/
-	(py37cmp-gui)$ python setup_gui.py install
+	(py37cmp-gui)$ pip install .
 
 * You are ready to use the Connectome Mapper 3 BIDS App Manager. See the `dedicated user guide <bidsappmanager.html>`_.
+
+.. note::In the future, if you wish to update Connectome Mapper 3 and the Connectome Mapper 3 BIDS App Manager,
+    this could be easily done by (1) updating the git repository to a new tag with `git fetch` and
+    `git checkout tags/|release| -b |release|` and (2) running `pip install .`.
 
 Help/Questions
 --------------
 
-If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_. Code bugs can be reported by creating a "New Issue" on the `source code repository <https://github.com/connectomicslab/connectomemapper3/issues>`_.
+If you run into any problems or have any questions, you can post to the `CMTK-users group <http://groups.google.com/group/cmtk-users>`_.
+Code bugs can be reported by creating a "New Issue" on the `source code repository <https://github.com/connectomicslab/connectomemapper3/issues>`_.
