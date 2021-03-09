@@ -500,8 +500,6 @@ class ParcellationStage(Stage):
         """
         anat_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'anatomical_sinker')
         anat_sinker_report = os.path.join(anat_sinker_dir, '_report', 'report.rst')
-        # print "atlas info : "
-        # print self.config.atlas_info
 
         if self.config.parcellation_scheme != "Custom":
             if os.path.exists(anat_sinker_report):
@@ -510,30 +508,23 @@ class ParcellationStage(Stage):
                 white_matter_file = anat_outputs['anat.@wm_mask']
 
                 if isinstance(anat_outputs['anat.@roivs'], str):
-                    # print "str: %s" % parc_results.outputs.roi_files_in_structural_space
                     lut_file = pkg_resources.resource_filename('cmtklib',
                                                                os.path.join('data', 'parcellation', 'nativefreesurfer',
                                                                             'freesurferaparc',
                                                                             'FreeSurferColorLUT_adapted.txt'))
                     roi_v = anat_outputs['anat.@roivs']
 
-                    # print "roi_v : %s" % os.path.basename(roi_v)
                     if os.path.exists(white_matter_file) and os.path.exists(roi_v):
                         self.inspect_outputs_dict[os.path.basename(roi_v)] = ['freeview', '-v',
                                                                               white_matter_file + ':colormap=GEColor',
                                                                               roi_v + ":colormap=lut:lut=" + lut_file]
                 elif isinstance(anat_outputs['anat.@roivs'], list):
-                    # print parc_results.outputs.roi_files_in_structural_space
                     if self.config.parcellation_scheme == 'Lausanne2008':
                         resolution = {'1': 'resolution83', '2': 'resolution150', '3': 'resolution258',
                                       '4': 'resolution500', '5': 'resolution1015'}
                         for roi_v in anat_outputs['anat.@roivs']:
                             roi_basename = os.path.basename(roi_v)
-                            print(roi_basename)
                             scale = roi_basename[23:-7]
-                            print(scale)
-
-                            # print scale
                             lut_file = pkg_resources.resource_filename('cmtklib', os.path.join('data', 'parcellation',
                                                                                                'lausanne2008',
                                                                                                resolution[scale],
@@ -544,8 +535,6 @@ class ParcellationStage(Stage):
                                                                            white_matter_file + ':colormap=GEColor',
                                                                            roi_v + ":colormap=lut:lut=" + lut_file]
                     elif self.config.parcellation_scheme == 'Lausanne2018':
-                        # resolution = {'1':'resolution1','2':'resolution2','3':'resolution3','4':'resolution4','5':'resolution5'}
-
                         for roi_v, lut_file in zip(anat_outputs['anat.@roivs'],
                                                    anat_outputs['anat.@luts']):
                             roi_basename = os.path.basename(roi_v)

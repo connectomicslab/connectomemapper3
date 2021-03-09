@@ -30,7 +30,7 @@ class Global_Configuration(HasTraits):
 
     Attributes
     ----------
-    process_type: 'fMRI'
+    process_type : 'anatomical'
         Processing pipeline type
 
     subjects : traits.List
@@ -71,24 +71,18 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("anatomical_pipeline")
-    # input_folders = ['DSI','DTI','HARDI','T1','T2']
     input_folders = ['anat']
     process_type = Str
     diffusion_imaging_model = Str
     parcellation_scheme = Str('Lausanne2008')
     atlas_info = Dict()
-
-    # subject = Str
     subject_directory = Directory
     derivatives_directory = Directory
-    # ,'MRTrixConnectome']
-    ordered_stage_list = ['Segmentation', 'Parcellation']
+    ordered_stage_list = ['Segmentation',
+                          'Parcellation']
     custom_last_stage = Enum('Parcellation', ['Segmentation', 'Parcellation'])
-
     global_conf = Global_Configuration()
-
     config_file = Str
-
     flow = Instance(pe.Workflow)
 
     def __init__(self, project_info):
@@ -96,16 +90,13 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         Parameters
         ----------
-        project_info: cmp.project.CMP_Project_Info
+        project_info : cmp.project.CMP_Project_Info
             Instance of `CMP_Project_Info` object.
 
         See Also
         --------
         cmp.project.CMP_Project_Info
         """
-        # super(Pipeline, self).__init__(project_info)
-        # self.last_date_processed = project_info.anat_last_date_processed
-
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = self.subject
 
@@ -114,9 +105,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.subject_directory = os.path.join(project_info.base_directory,
                                                   project_info.subject,
                                                   project_info.subject_session)
+            subject_id = "_".join((self.subject, self.global_conf.subject_session))
         else:
             self.global_conf.subject_session = ''
             self.subject_directory = os.path.join(project_info.base_directory, project_info.subject)
+            subject_id = self.subject
 
         self.derivatives_directory = os.path.abspath(project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
@@ -130,6 +123,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         self.subject = project_info.subject
 
+        self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.output_directory,
+                                                                                  'freesurfer')
+        self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.output_directory,
+                                                                                'freesurfer', subject_id)
         self.stages['Segmentation'].config.on_trait_change(self.update_parcellation, 'seg_tool')
         self.stages['Parcellation'].config.on_trait_change(self.update_segmentation, 'parcellation_scheme')
         self.stages['Parcellation'].config.on_trait_change(self.update_parcellation_scheme, 'parcellation_scheme')
@@ -227,8 +224,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         print("> Looking in %s for...." % self.base_directory)
 
-        # types = layout.get_modalities()
-
         subjid = self.subject.split("-")[1]
 
         if self.global_conf.subject_session == '':
@@ -278,11 +273,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         print("... t1_json_file : %s" % T1_json_file)
 
         if os.path.isfile(T1_file):
-            # print("%s available" % typ)
             t1_available = True
 
         if os.path.isfile(T1_json_file):
-            # print("%s available" % typ)
             t1_json_available = True
 
         if t1_available:
@@ -321,8 +314,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 input_message = 'Error during inputs check. No anatomical data available in folder ' + os.path.join(
                     self.base_directory, self.subject, self.global_conf.subject_session) + '/anat/!'
 
-        # diffusion_imaging_model = diffusion_imaging_model[0]
-
         if gui:
             print(input_message)
 
@@ -338,13 +329,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if not t1_json_available:
             print(
                 "Warning : Missing BIDS json sidecar. Please see documentation for more details.")
-
-        # for stage in self.stages.values():
-        #     if stage.enabled:
-        #         print stage.name
-        #         print stage.stage_dir
-
-        # self.fill_stages_outputs()
 
         return valid_inputs
 
@@ -390,34 +374,44 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             anat_deriv_subject_directory, subject + '_desc-brain_mask.nii.gz')
         wm_mask_file = os.path.join(
             anat_deriv_subject_directory, subject + '_label-WM_dseg.nii.gz')
-        roiv_files = glob.glob(anat_deriv_subject_directory +
-                               "/" + subject + "_label-L2018_desc-scale*_atlas.nii.gz")
+
+        if self.parcellation_scheme == 'Lausanne2008':
+            bids_atlas_label = 'L2008'
+        elif self.parcellation_scheme == 'Lausanne2018':
+            bids_atlas_label = 'L2018'
+        elif self.parcellation_scheme == 'NativeFreesurfer':
+            bids_atlas_label = 'Desikan'
+
+        if bids_atlas_label == 'Desikan':
+            roiv_files = glob.glob(os.path.join(anat_deriv_subject_directory,
+                                                subject + "_atlas-" + bids_atlas_label +
+                                                "_dseg.nii.gz"))
+        else:
+            roiv_files = glob.glob(os.path.join(anat_deriv_subject_directory,
+                                                subject + "_atlas-" + bids_atlas_label +
+                                                "_res-scale*_dseg.nii.gz"))
 
         error_message = ''
 
         if os.path.isfile(T1_file):
             t1_available = True
         else:
-            error_message = "ERROR : Missing anatomical output file %s . Please re-run the anatomical pipeline" % T1_file
-            print(error_message)
+            error_message += "  .. ERROR: Missing anatomical output T1w file %s . Please re-run the anatomical pipeline" % T1_file
 
         if os.path.isfile(brain_file):
             brain_available = True
         else:
-            error_message = "ERROR : Missing anatomical output file %s . Please re-run the anatomical pipeline" % brain_file
-            print(error_message)
+            error_message += "  .. ERROR: Missing output brain masked T1w file %s . Please re-run the anatomical pipeline" % brain_file
 
         if os.path.isfile(brainmask_file):
             brainmask_available = True
         else:
-            error_message = "ERROR : Missing anatomical output file %s . Please re-run the anatomical pipeline" % brainmask_file
-            print(error_message)
+            error_message += "  .. ERROR: Missing output brain mask file %s . Please re-run the anatomical pipeline" % brainmask_file
 
         if os.path.isfile(wm_mask_file):
             wm_available = True
         else:
-            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % wm_mask_file
-            print(error_message)
+            error_message += "  .. ERROR: Missing output white-matter mask file %s . Please re-run the anatomical pipeline" % wm_mask_file
 
         cnt1 = 0
         cnt2 = 0
@@ -428,12 +422,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         if cnt1 == cnt2:
             roivs_available = True
         else:
-            error_message = "ERROR : Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline" % (
+            error_message += "  .. ERROR : Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline" % (
                 cnt1 - cnt2, cnt1)
-            print(error_message)
 
         if t1_available is True and brain_available is True and brainmask_available is True and wm_available is True and roivs_available is True:
-            print("INFO : Valid derivatives for anatomical pipeline")
+            print("  .. INFO: Valid derivatives for anatomical pipeline")
             valid_output = True
 
         return valid_output, error_message
@@ -443,24 +436,22 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         Parameters
         ----------
-        cmp_deriv_subject_directory <Directory>
+        cmp_deriv_subject_directory : Directory
             Main CMP output directory of a subject
             e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
 
-        nipype_deriv_subject_directory <Directory>
+        nipype_deriv_subject_directory : Directory
             Intermediate Nipype output directory of a subject
             e.g. ``/output_dir/nipype/sub-XX/(ses-YY)``
 
         Returns
         -------
-        anat_flow <nipype.pipeline.engine.Workflow>
+        anat_flow : nipype.pipeline.engine.Workflow
             An instance of :class:`nipype.pipeline.engine.Workflow`
         """
-        # subject_directory = self.subject_directory
-
         # Data import
-        datasource = pe.Node(interface=nio.DataGrabber(
-            outfields=['T1']), name='datasource')
+        datasource = pe.Node(interface=nio.DataGrabber(outfields=['T1']),
+                             name='datasource')
         datasource.inputs.base_directory = cmp_deriv_subject_directory
         datasource.inputs.template = '*'
         datasource.inputs.raise_on_empty = False
@@ -470,15 +461,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         # Data sinker for output
         sinker = pe.Node(nio.DataSink(), name="anatomical_sinker")
-        sinker.inputs.base_directory = os.path.abspath(
-            cmp_deriv_subject_directory)
-
-        # if self.parcellation_scheme == 'Lausanne2008':
-        #     bids_atlas_label = 'L2008'
-        # elif self.parcellation_scheme == 'Lausanne2018':
-        #     bids_atlas_label = 'L2018'
-        # elif self.parcellation_scheme == 'NativeFreesurfer':
-        #     bids_atlas_label = 'Desikan'
+        sinker.inputs.base_directory = os.path.abspath(cmp_deriv_subject_directory)
 
         # Dataname substitutions in order to comply with BIDS derivatives specifications
         if self.parcellation_scheme == 'Lausanne2008':
@@ -508,55 +491,55 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                            ('aparc+aseg.Lausanne2018.native.nii.gz',
                                             self.subject + '_desc-aparcaseg_dseg.nii.gz'),
                                            ('ROIv_Lausanne2008_scale1.nii.gz',
-                                            self.subject + '_label-L2008_desc-scale1_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2008_res-scale1_dseg.nii.gz'),
                                            ('ROIv_Lausanne2008_scale2.nii.gz',
-                                            self.subject + '_label-L2008_desc-scale2_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2008_res-scale2_dseg.nii.gz'),
                                            ('ROIv_Lausanne2008_scale3.nii.gz',
-                                            self.subject + '_label-L2008_desc-scale3_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2008_res-scale3_dseg.nii.gz'),
                                            ('ROIv_Lausanne2008_scale4.nii.gz',
-                                            self.subject + '_label-L2008_desc-scale4_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2008_res-scale4_dseg.nii.gz'),
                                            ('ROIv_Lausanne2008_scale5.nii.gz',
-                                            self.subject + '_label-L2008_desc-scale5_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2008_res-scale5_dseg.nii.gz'),
                                            ('ROIv_Lausanne2008_scale1_final.nii.gz',
-                                            self.subject + '_label-L2008_desc-scale1_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2008_res-scale1_dseg.nii.gz'),
                                            ('ROIv_Lausanne2008_scale2_final.nii.gz',
-                                            self.subject + '_label-L2008_desc-scale2_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2008_res-scale2_dseg.nii.gz'),
                                            ('ROIv_Lausanne2008_scale3_final.nii.gz',
-                                            self.subject + '_label-L2008_desc-scale3_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2008_res-scale3_dseg.nii.gz'),
                                            ('ROIv_Lausanne2008_scale4_final.nii.gz',
-                                            self.subject + '_label-L2008_desc-scale4_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2008_res-scale4_dseg.nii.gz'),
                                            ('ROIv_Lausanne2008_scale5_final.nii.gz',
-                                            self.subject + '_label-L2008_desc-scale5_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2008_res-scale5_dseg.nii.gz'),
                                            ('resolution83.graphml',
-                                            self.subject + '_label-L2008_desc-scale1_atlas.graphml'),
+                                            self.subject + '_atlas-L2008_res-scale1_dseg.graphml'),
                                            ('resolution150.graphml',
-                                            self.subject + '_label-L2008_desc-scale2_atlas.graphml'),
+                                            self.subject + '_atlas-L2008_res-scale2_dseg.graphml'),
                                            ('resolution258.graphml',
-                                            self.subject + '_label-L2008_desc-scale3_atlas.graphml'),
+                                            self.subject + '_atlas-L2008_res-scale3_dseg.graphml'),
                                            ('resolution500.graphml',
-                                            self.subject + '_label-L2008_desc-scale4_atlas.graphml'),
+                                            self.subject + '_atlas-L2008_res-scale4_dseg.graphml'),
                                            ('resolution1015.graphml',
-                                            self.subject + '_label-L2008_desc-scale5_atlas.graphml'),
+                                            self.subject + '_atlas-L2008_res-scale5_dseg.graphml'),
                                            ('resolution83_LUT.txt',
-                                            self.subject + '_label-L2008_desc-scale1_atlas_FreeSurferColorLUT.txt'),
+                                            self.subject + '_atlas-L2008_res-scale1_FreeSurferColorLUT.txt'),
                                            ('resolution150_LUT.txt',
-                                            self.subject + '_label-L2008_desc-scale2_atlas_FreeSurferColorLUT.txt'),
+                                            self.subject + '_atlas-L2008_res-scale2_FreeSurferColorLUT.txt'),
                                            ('resolution258_LUT.txt',
-                                            self.subject + '_label-L2008_desc-scale3_atlas_FreeSurferColorLUT.txt'),
+                                            self.subject + '_atlas-L2008_res-scale3_FreeSurferColorLUT.txt'),
                                            ('resolution500_LUT.txt',
-                                            self.subject + '_label-L2008_desc-scale4_atlas_FreeSurferColorLUT.txt'),
+                                            self.subject + '_atlas-L2008_res-scale4_FreeSurferColorLUT.txt'),
                                            ('resolution1015_LUT.txt',
-                                            self.subject + '_label-L2008_desc-scale5_atlas_FreeSurferColorLUT.txt'),
-                                           (
-                                           'roi_stats_scale1.tsv', self.subject + '_label-L2008_desc-scale1_stats.tsv'),
-                                           (
-                                           'roi_stats_scale2.tsv', self.subject + '_label-L2008_desc-scale2_stats.tsv'),
-                                           (
-                                           'roi_stats_scale3.tsv', self.subject + '_label-L2008_desc-scale3_stats.tsv'),
-                                           (
-                                           'roi_stats_scale4.tsv', self.subject + '_label-L2008_desc-scale4_stats.tsv'),
-                                           (
-                                           'roi_stats_scale5.tsv', self.subject + '_label-L2008_desc-scale5_stats.tsv'),
+                                            self.subject + '_atlas-L2008_res-scale5_FreeSurferColorLUT.txt'),
+                                           ('roi_stats_scale1.tsv',
+                                            self.subject + '_atlas-L2008_res-scale1_stats.tsv'),
+                                           ('roi_stats_scale2.tsv',
+                                            self.subject + '_atlas-L2008_res-scale2_stats.tsv'),
+                                           ('roi_stats_scale3.tsv',
+                                            self.subject + '_atlas-L2008_res-scale3_stats.tsv'),
+                                           ('roi_stats_scale4.tsv',
+                                            self.subject + '_atlas-L2008_res-scale4_stats.tsv'),
+                                           ('roi_stats_scale5.tsv',
+                                            self.subject + '_atlas-L2008_res-scale5_stats.tsv'),
                                            ]
         elif self.parcellation_scheme == 'Lausanne2018':
             sinker.inputs.substitutions = [('T1.nii.gz', self.subject + '_desc-head_T1w.nii.gz'),
@@ -585,65 +568,65 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                            ('aparc+aseg.Lausanne2018.native.nii.gz',
                                             self.subject + '_desc-aparcaseg_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale1.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale1_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale1_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale2.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale2_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale2_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale3.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale3_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale3_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale4.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale4_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale4_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale5.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale5_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale5_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale1_final.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale1_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale1_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale2_final.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale2_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale2_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale3_final.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale3_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale3_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale4_final.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale4_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale4_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale5_final.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale5_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale5_dseg.nii.gz'),
                                            ('ROIv_Lausanne2018_scale1.graphml',
-                                            self.subject + '_label-L2018_desc-scale1_atlas.graphml'),
+                                            self.subject + '_atlas-L2018_res-scale1_dseg.graphml'),
                                            ('ROIv_Lausanne2018_scale2.graphml',
-                                            self.subject + '_label-L2018_desc-scale2_atlas.graphml'),
+                                            self.subject + '_atlas-L2018_res-scale2_dseg.graphml'),
                                            ('ROIv_Lausanne2018_scale3.graphml',
-                                            self.subject + '_label-L2018_desc-scale3_atlas.graphml'),
+                                            self.subject + '_atlas-L2018_res-scale3_dseg.graphml'),
                                            ('ROIv_Lausanne2018_scale4.graphml',
-                                            self.subject + '_label-L2018_desc-scale4_atlas.graphml'),
+                                            self.subject + '_atlas-L2018_res-scale4_dseg.graphml'),
                                            ('ROIv_Lausanne2018_scale5.graphml',
-                                            self.subject + '_label-L2018_desc-scale5_atlas.graphml'),
+                                            self.subject + '_atlas-L2018_res-scale5_dseg.graphml'),
                                            ('ROIv_Lausanne2018_scale1_FreeSurferColorLUT.txt',
-                                            self.subject + '_label-L2018_desc-scale1_atlas_FreeSurferColorLUT.txt'),
+                                            self.subject + '_atlas-L2018_res-scale1_FreeSurferColorLUT.txt'),
                                            ('ROIv_Lausanne2018_scale2_FreeSurferColorLUT.txt',
-                                            self.subject + '_label-L2018_desc-scale2_atlas_FreeSurferColorLUT.txt'),
+                                            self.subject + '_atlas-L2018_res-scale2_FreeSurferColorLUT.txt'),
                                            ('ROIv_Lausanne2018_scale3_FreeSurferColorLUT.txt',
-                                            self.subject + '_label-L2018_desc-scale3_atlas_FreeSurferColorLUT.txt'),
+                                            self.subject + '_atlas-L2018_res-scale3_FreeSurferColorLUT.txt'),
                                            ('ROIv_Lausanne2018_scale4_FreeSurferColorLUT.txt',
-                                            self.subject + '_label-L2018_desc-scale4_atlas_FreeSurferColorLUT.txt'),
+                                            self.subject + '_atlas-L2018_res-scale4_FreeSurferColorLUT.txt'),
                                            ('ROIv_Lausanne2018_scale5_FreeSurferColorLUT.txt',
-                                            self.subject + '_label-L2018_desc-scale5_atlas_FreeSurferColorLUT.txt'),
+                                            self.subject + '_atlas-L2018_res-scale5_FreeSurferColorLUT.txt'),
                                            ('ROIv_HR_th_scale33.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale1_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale1_dseg.nii.gz'),
                                            ('ROIv_HR_th_scale60.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale2_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale2_dseg.nii.gz'),
                                            ('ROIv_HR_th_scale125.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale3_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale3_dseg.nii.gz'),
                                            ('ROIv_HR_th_scale250.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale4_atlas.nii.gz'),
+                                            self.subject + '_atlas-L2018_res-scale4_dseg.nii.gz'),
                                            ('ROIv_HR_th_scale500.nii.gz',
-                                            self.subject + '_label-L2018_desc-scale5_atlas.nii.gz'),
-                                           (
-                                           'roi_stats_scale1.tsv', self.subject + '_label-L2018_desc-scale1_stats.tsv'),
-                                           (
-                                           'roi_stats_scale2.tsv', self.subject + '_label-L2018_desc-scale2_stats.tsv'),
-                                           (
-                                           'roi_stats_scale3.tsv', self.subject + '_label-L2018_desc-scale3_stats.tsv'),
-                                           (
-                                           'roi_stats_scale4.tsv', self.subject + '_label-L2018_desc-scale4_stats.tsv'),
-                                           (
-                                           'roi_stats_scale5.tsv', self.subject + '_label-L2018_desc-scale5_stats.tsv'),
+                                            self.subject + '_atlas-L2018_res-scale5_dseg.nii.gz'),
+                                           ('roi_stats_scale1.tsv',
+                                            self.subject + '_atlas-L2018_res-scale1_stats.tsv'),
+                                           ('roi_stats_scale2.tsv',
+                                            self.subject + '_atlas-L2018_res-scale2_stats.tsv'),
+                                           ('roi_stats_scale3.tsv',
+                                            self.subject + '_atlas-L2018_res-scale3_stats.tsv'),
+                                           ('roi_stats_scale4.tsv',
+                                            self.subject + '_atlas-L2018_res-scale4_stats.tsv'),
+                                           ('roi_stats_scale5.tsv',
+                                            self.subject + '_atlas-L2018_res-scale5_stats.tsv'),
                                            ]
         elif self.parcellation_scheme == 'NativeFreesurfer':
             sinker.inputs.substitutions = [('T1.nii.gz', self.subject + '_desc-head_T1w.nii.gz'),
@@ -672,36 +655,14 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                            ('aparc+aseg.Lausanne2018.native.nii.gz',
                                             self.subject + '_desc-aparcaseg_dseg.nii.gz'),
                                            ('ROIv_HR_th_freesurferaparc.nii.gz',
-                                            self.subject + '_label-Desikan_atlas.nii.gz'),
+                                            self.subject + '_atlas-Desikan_dseg.nii.gz'),
                                            ('freesurferaparc.graphml', self.subject +
-                                            '_label-Desikan_atlas.graphml'),
+                                            '_atlas-Desikan_dseg.graphml'),
                                            ('FreeSurferColorLUT_adapted.txt',
-                                            self.subject + '_label-Desikan_FreeSurferColorLUT.txt'),
-                                           (
-                                           'roi_stats_freesurferaparc.tsv', self.subject + '_label-Desikan_stats.tsv'),
+                                            self.subject + '_atlas-Desikan_FreeSurferColorLUT.txt'),
+                                           ('roi_stats_freesurferaparc.tsv',
+                                            self.subject + '_atlas-Desikan_stats.tsv'),
                                            ]
-        # else:
-        #     sinker.inputs.substitutions = [ (self.subject+'_T1w.nii.gz', self.subject+'_T1w_head.nii.gz'),
-        #                                     ('brain_mask.nii.gz', self.subject+'_T1w_brainmask.nii.gz'),
-        #                                     ('brainmask_eroded.nii.gz', self.subject+'_T1w_brainmask_eroded.nii.gz'),
-        #                                     ('brain.nii.gz', self.subject+'_T1w_brain.nii.gz'),
-        #                                     ('fsmask_1mm.nii.gz',self.subject+'_T1w_class-WM.nii.gz'),
-        #                                     ('fsmask_1mm_eroded.nii.gz',self.subject+'_T1w_class-WM_eroded.nii.gz'),
-        #                                     ('csf_mask_eroded.nii.gz',self.subject+'_T1w_class-CSF_eroded.nii.gz'),
-        #                                     #('gm_mask',self.subject+'_T1w_class-GM'),
-        #                                     #('roivs', self.subject+'_T1w_parc'),#TODO substitute for list of files
-        #                                     ('T1w_class-GM.nii.gz',self.subject+'_T1w_class-GM.nii.gz'),
-        #                                     ('ROIv_HR_th_scale1.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
-        #                                     ('ROIv_HR_th_scale2.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
-        #                                     ('ROIv_HR_th_scale3.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
-        #                                     ('ROIv_HR_th_scale4.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
-        #                                     ('ROIv_HR_th_scale5.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
-        #                                     ('ROIv_HR_th_scale33.nii.gz',self.subject+'_T1w_parc_scale1.nii.gz'),
-        #                                     ('ROIv_HR_th_scale60.nii.gz',self.subject+'_T1w_parc_scale2.nii.gz'),
-        #                                     ('ROIv_HR_th_scale125.nii.gz',self.subject+'_T1w_parc_scale3.nii.gz'),
-        #                                     ('ROIv_HR_th_scale250.nii.gz',self.subject+'_T1w_parc_scale4.nii.gz'),
-        #                                     ('ROIv_HR_th_scale500.nii.gz',self.subject+'_T1w_parc_scale5.nii.gz'),
-        #                                   ]
 
         # Clear previous outputs
         self.clear_stages_outputs()
@@ -846,7 +807,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         return anat_flow
 
     def process(self):
-        """Executes the pipeline workflow and returns True if successful."""
+        """Executes the anatomical pipeline workflow and returns True if successful."""
         # Enable the use of the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
 
@@ -855,8 +816,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         if '_' in self.subject:
             self.subject = self.subject.split('_')[0]
-
-        # old_subject = self.subject
 
         if self.global_conf.subject_session == '':
             cmp_deriv_subject_directory = os.path.join(
@@ -894,40 +853,21 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                            'crashfile_format': "txt"}
              })
         logging.update_logging(config)
-        iflogger = logging.getLogger('nipype.interface')
 
+        iflogger = logging.getLogger('nipype.interface')
         iflogger.info("**** Processing ****")
+
         anat_flow = self.create_pipeline_flow(cmp_deriv_subject_directory=cmp_deriv_subject_directory,
                                               nipype_deriv_subject_directory=nipype_deriv_subject_directory)
         anat_flow.write_graph(graph2use='colored',
                               format='svg', simple_form=True)
 
         if self.number_of_cores != 1:
-            anat_flow.run(plugin='MultiProc', plugin_args={
-                          'n_procs': self.number_of_cores})
+            anat_flow.run(plugin='MultiProc',
+                          plugin_args={'n_procs': self.number_of_cores})
         else:
             anat_flow.run()
 
-        # self.fill_stages_outputs()
-
-        # Clean undesired folders/files
-        # rm_file_list = ['rh.EC_average','lh.EC_average','fsaverage']
-        # for file_to_rm in rm_file_list:
-        #     if os.path.exists(os.path.join(self.base_directory,file_to_rm)):
-        #         os.remove(os.path.join(self.base_directory,file_to_rm))
-
-        # copy .ini and log file
-        # outdir = os.path.join(cmp_deriv_subject_directory,'config')
-        # if not os.path.exists(outdir):
-        #     os.makedirs(outdir)
-        #
-        # try:
-        #     shutil.copy(self.config_file,outdir)
-        # except shutil.Error:
-        #     print("Skipped copy of config file")
-
-        # shutil.copy(os.path.join(self.base_directory,"derivatives","cmp",self.subject,'pypeline.log'),outdir)
-
         iflogger.info("**** Processing finished ****")
 
-        return True, 'Processing successful'
+        return True

@@ -76,10 +76,6 @@ class SegmentationConfig(HasTraits):
         Freesurfer subjects directory path
         usually ``/output_dir/freesurfer``
 
-    freesurfer_subject_id_trait : traits.List
-        Freesurfer subject (being processed) directory path
-        usually ``/output_dir/freesurfer/sub-XX(_ses-YY)``
-
     freesurfer_subject_id : traits.Str
         Freesurfer subject (being processed) ID in the form
         ``sub-XX(_ses-YY)``
@@ -119,25 +115,17 @@ class SegmentationConfig(HasTraits):
     brain_mask_path = File
     use_existing_freesurfer_data = Bool(False)
     freesurfer_subjects_dir = Str
-    freesurfer_subject_id_trait = List
     freesurfer_subject_id = Str
-    freesurfer_args = Str
+    freesurfer_args = Str("")
 
     white_matter_mask = File(exist=True)
 
     number_of_threads = Int(1, desc="Number of threads used in the stage by Freesurfer and ANTs")
 
-    def _freesurfer_subjects_dir_changed(self, old, new):
-        """"Update ``freesurfer_subject_id_trait`` class attribute if ``freesurfer_subjects_dir`` changes."""
-        dirnames = [name for name in os.listdir(self.freesurfer_subjects_dir) if
-                    os.path.isdir(os.path.join(self.freesurfer_subjects_dir, name))]
-        self.freesurfer_subject_id_trait = dirnames
-
     def _use_existing_freesurfer_data_changed(self, new):
         """"Update ``custom_segmentation`` if ``use_existing_freesurfer_data`` changes."""
         if new is True:
             self.custom_segmentation = False
-
 
 def extract_base_directory(file):
     """Extract Recon-all base directory from a file.
@@ -407,11 +395,7 @@ class SegmentationStage(Stage):
                     fs_reconall23.inputs.args = self.config.freesurfer_args
                     fs_reconall23.inputs.flags = '-autorecon3'
 
-                    # fs_reconall.inputs.subjects_dir and fs_reconall.inputs.subject_id set in cmp/pipelines/diffusion/diffusion.py
                     fs_reconall23.inputs.subjects_dir = self.config.freesurfer_subjects_dir
-
-                    # fs_reconall.inputs.hippocampal_subfields_T1 = self.config.segment_hippocampal_subfields
-                    # fs_reconall.inputs.brainstem = self.config.segment_brainstem
 
                     flow.connect([
                         (copy_brainmask_to_fs, fs_reconall23,
@@ -438,10 +422,15 @@ class SegmentationStage(Stage):
         #     outputnode.inputs.brain_mask = self.config.brain_mask_path
         #     outputnode.inputs.custom_wm_mask = self.config.white_matter_mask
 
-    def define_inspect_outputs(self):
+    def define_inspect_outputs(self, debug=False):
         """Update the `inspect_outputs' class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
+
+        Parameters
+        ----------
+        debug : bool
+            If `True`, show printed output
         """
         # print "stage_dir : %s" % self.stage_dir
 
@@ -453,13 +442,15 @@ class SegmentationStage(Stage):
                 fs_path = self.config.freesurfer_subject_id
                 if os.path.exists(reconall_report_path):
                     # print('Load pickle content')
-                    print("Read {}".format(reconall_report_path))
-                    fs_path = extract_freesurfer_subject_dir(reconall_report_path, self.output_dir)
+                    if debug:
+                        print("Read {}".format(reconall_report_path))
+                    fs_path = extract_freesurfer_subject_dir(reconall_report_path, self.output_dir, debug=debug)
             else:
                 fs_path = os.path.join(
                     self.config.freesurfer_subjects_dir, self.config.freesurfer_subject_id)
 
-            print("fs_path : %s" % fs_path)
+            if debug:
+                print("fs_path : %s" % fs_path)
 
             if 'FREESURFER_HOME' not in os.environ:
                 colorLUT_file = pkg_resources.resource_filename('cmtklib',
@@ -487,10 +478,6 @@ class SegmentationStage(Stage):
                                                            '-segmentation', os.path.join(
                                                                fs_path, 'mri', 'aseg.mgz'),
                                                            colorLUT_file]
-
-        # elif self.config.seg_tool == "Custom segmentation":
-        #     self.inspect_outputs_dict['WM mask'] = [
-        #         'fsleyes', self.config.white_matter_mask]
 
         self.inspect_outputs = sorted([key for key in list(self.inspect_outputs_dict.keys())],
                                       key=str.lower)

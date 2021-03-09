@@ -101,8 +101,10 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = u'The Connectome Mapper'
-copyright = u'2018-{}, Brain Communication Pathways Sinergia Consortium & Contributors'.format(time.strftime("%Y"))
+project = u'Connectome Mapper 3'
+copyright = u'2018-{}, Ecole Polytechnique Federale de Lausanne (EPFL), '.format(time.strftime("%Y")) +\
+            u'the University Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, ' +\
+            u'and Contributors, all rights reserved.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -330,8 +332,8 @@ apidoc_excluded_paths = [".circleci/*",
                          "tests/*",
                          "ubuntu16.04/*",
                          "run.py",
+                         "setup_cmp.py",
                          "setup.py",
-                         "setup_gui.py",
                          "get_version.py",
                          "cmp/info.py"]
 apidoc_separate_modules = True

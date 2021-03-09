@@ -37,6 +37,3 @@ _templates
 
 .circleci
 .circleci/*
-
-cmp/bidsappmanager
-cmp/bidsappmanager/*

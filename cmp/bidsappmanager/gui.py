@@ -33,11 +33,8 @@ import cmp.bidsappmanager.project as project
 from cmp.project import CMP_Project_Info
 from cmp.info import __version__
 
-from cmp.pipelines.anatomical.anatomical import AnatomicalPipeline
-from cmp.pipelines.diffusion.diffusion import DiffusionPipeline
-from cmp.pipelines.functional.fMRI import fMRIPipeline
-
-from cmtklib.util import return_button_style_sheet, BColors
+from cmtklib.util import return_button_style_sheet, \
+    BColors, print_blue, print_warning, print_error
 
 # Remove warnings visible whenever you import scipy (or another package) 
 # that was compiled against an older numpy than is installed.
@@ -549,7 +546,7 @@ class CMP_Project_InfoUI(CMP_Project_Info):
 
 
 class MultiSelectAdapter(TabularAdapter):
-    """This adapter is used by both the left and right tables."""
+    """This adapter is used by left and right tables for selection of subject to be processed."""
 
     # Titles and column names for each column of a table.
     # In this example, each table has only one column.
@@ -745,7 +742,8 @@ class CMP_BIDSAppWindow(HasTraits):
                 label='BIDS App Version'),
             VGroup(
                 Item('bids_root', style='readonly', label='Input directory'),
-                Item('output_dir', style='simple', label='Output directory'),
+                Item('output_dir', style='simple', label='Output directory',
+                     enabled_when='not(data_provenance_tracking)'),
                 label='BIDS dataset'),
             VGroup(
                 HGroup(
@@ -795,21 +793,29 @@ class CMP_BIDSAppWindow(HasTraits):
                 label='Advanced execution settings for each participant process'
             ),
             VGroup(
-                Group(Item('anat_config', label='Configuration file', visible_when='run_anat_pipeline'),
+                Group(Item('anat_config',
+                           editor=FileEditor(dialog_style='open'),
+                           label='Configuration file', visible_when='run_anat_pipeline'),
                       label='Anatomical pipeline'),
                 Group(Item('run_dmri_pipeline', label='Run processing stages'),
-                      Item('dmri_config', label='Configuration file',
+                      Item('dmri_config',
+                           editor=FileEditor(dialog_style='open'),
+                           label='Configuration file',
                            visible_when='run_dmri_pipeline'),
                       label='Diffusion pipeline',
                       visible_when='dmri_inputs_checked==True'),
                 Group(Item('run_fmri_pipeline', label='Run processing stages'),
-                      Item('fmri_config', label='Configuration file',
+                      Item('fmri_config',
+                           editor=FileEditor(dialog_style='open'),
+                           label='Configuration file',
                            visible_when='run_fmri_pipeline'),
                       label='fMRI pipeline',
                       visible_when='fmri_inputs_checked==True'),
                 label='Configuration of processing pipelines'),
             VGroup(
-                Item('fs_license', label='LICENSE'),
+                Item('fs_license',
+                     editor=FileEditor(dialog_style='open'),
+                     label='LICENSE'),
                 # Item('fs_average', label='FSaverage directory'),
                 label='Freesurfer configuration'),
             VGroup(
@@ -904,6 +910,7 @@ class CMP_BIDSAppWindow(HasTraits):
         fmri_config : string
             Path to functional pipeline configuration file (Default: \'\')
         """
+        print('> Initialize window...')
         if multiprocessing.cpu_count() < 4:
             self.number_of_threads_max = multiprocessing.cpu_count()
 
@@ -914,7 +921,7 @@ class CMP_BIDSAppWindow(HasTraits):
         try:
             bids_layout = BIDSLayout(self.bids_root)
         except Exception:
-            print("Exception : Raised at BIDSLayout")
+            print_error("  .. Exception : Raised at BIDSLayout")
             sys.exit(1)
 
         # Check if sMRI data is available in the dataset
@@ -928,7 +935,7 @@ class CMP_BIDSAppWindow(HasTraits):
         else:
             anat_inputs_checked = True
 
-        print(f'T1w available: {anat_inputs_checked}')
+        print(f'  .. T1w available: {anat_inputs_checked}')
 
         # Check if dMRI data is available in the dataset
         dmri_files = bids_layout.get(datatype='dwi',
@@ -943,7 +950,7 @@ class CMP_BIDSAppWindow(HasTraits):
             self.dmri_inputs_checked = True
             self.run_dmri_pipeline = True
 
-        print(f'DWI available: {self.dmri_inputs_checked}')
+        print(f'  .. DWI available: {self.dmri_inputs_checked}')
 
         # Check if fMRI data is available in the dataset
         fmri_files = bids_layout.get(task='rest',
@@ -958,7 +965,7 @@ class CMP_BIDSAppWindow(HasTraits):
             self.fmri_inputs_checked = True
             self.run_fmri_pipeline = True
 
-        print(f'rsfMRI available: {self.fmri_inputs_checked}')
+        print(f'  .. rsfMRI available: {self.fmri_inputs_checked}')
 
         # Initialize output directory to be /bids_dir/derivatives
         self.output_dir = os.path.join(bids_root, 'derivatives')
@@ -973,9 +980,9 @@ class CMP_BIDSAppWindow(HasTraits):
             self.fs_license = os.path.join(
                 os.environ['FREESURFER_HOME'], 'license.txt')
         else:
-            print('Environment variable $FREESURFER_HOME not found')
+            print_error('  .. ERROR: Environment variable $FREESURFER_HOME not found')
             self.fs_license = ''
-            print('Freesurfer license unset ({})'.format(self.fs_license))
+            print_warning('Freesurfer license unset ({})'.format(self.fs_license))
 
         self.datalad_is_available = project.is_tool('datalad')
 
@@ -1006,12 +1013,12 @@ class CMP_BIDSAppWindow(HasTraits):
         else:
             self.number_of_threads_max = number_of_threads_max
 
-        print('Set number of threads max to : {}'.format(self.number_of_threads_max))
+        print('  .. INFO : Update number of threads max to : {}'.format(self.number_of_threads_max))
 
     def update_run_anat_pipeline(self, new):
         """Callback function when ``run_anat_pipeline`` is updated."""
         if new is False:
-            print('At least anatomical pipeline should be run!')
+            print_warning('  .. WARNING: At least anatomical pipeline should be run!')
             self.run_anat_pipeline = True
 
     def update_run_dmri_pipeline(self, new):
@@ -1026,8 +1033,14 @@ class CMP_BIDSAppWindow(HasTraits):
         """Function that reset ``settings_checked`` attribute to False."""
         self.settings_checked = False
 
+    def _data_provenance_tracking_changed(self, new):
+        """Callback function `data_provenance_tracking` attribute is updated."""
+        if new is True:
+            self.output_dir = os.path.join(self.bids_root, 'derivatives')
+        self.data_provenance_tracking = new
+
     def _update_selection_fired(self):
-        """Callback function when the list of selected subjects has been updated."""
+        """Callback function when the list of selected subjects is updated."""
         self.configure_traits(view='select_subjects_to_be_processed_view')
 
     def _check_fired(self):
@@ -1040,28 +1053,28 @@ class CMP_BIDSAppWindow(HasTraits):
 
     def check_settings(self):
         """Checks if all the parameters of the BIDS App run are properly set before execution."""
-        print('\n-----------------------------------------')
-        print('BIDS App execution settings check summary')
-        print('-----------------------------------------')
+        print_warning('\n-----------------------------------------')
+        print_warning('BIDS App execution settings check summary')
+        print_warning('-----------------------------------------')
 
         self.settings_checked = True
 
         if os.path.isdir(self.bids_root):
-            print(f'BIDS root directory : {self.bids_root}')
+            print(f'* BIDS root directory : {self.bids_root}')
         else:
-            print(BColors.FAIL + "Error: BIDS root invalid!" + BColors.ENDC)
+            print_error("Error: BIDS root invalid!")
             self.settings_checked = False
 
         if os.path.exists(os.path.join(self.output_dir, 'cmp')):
-            print(f'Output directory (existing) : {self.output_dir}')
+            print(f'* Output directory (existing) : {self.output_dir}')
         else:
             os.makedirs(os.path.join(self.output_dir, 'cmp'))
-            print(BColors.WARNING + f'Output directory (created) : {self.output_dir}' + BColors.ENDC)
+            print_warning(f'Output directory (created) : {self.output_dir}')
 
         if len(self.list_of_subjects_to_be_processed) > 0:
-            print(f'Participant labels to be processed : {self.list_of_subjects_to_be_processed}')
+            print(f'* Participant labels to be processed : {self.list_of_subjects_to_be_processed}')
         else:
-            print(BColors.FAIL + "Error: At least one participant label to be processed should selected!" + BColors.ENDC)
+            print_error("Error: At least one participant label to be processed should selected!")
             self.settings_checked = False
         # if not self.list_of_subjects_to_be_processed.empty():
         #     print("List of subjects to be processed : {}".format(self.list_of_subjects_to_be_processed))
@@ -1069,25 +1082,25 @@ class CMP_BIDSAppWindow(HasTraits):
         #     print("Warning: List of subjects empty!")
 
         if os.path.isfile(self.anat_config):
-            print(f'Anatomical configuration file : {self.anat_config}')
+            print(f'* Anatomical configuration file : {self.anat_config}')
         else:
-            print(BColors.FAIL + "Error: Configuration file for anatomical pipeline not existing!" + BColors.ENDC)
+            print_error("Error: Configuration file for anatomical pipeline not existing!")
             self.settings_checked = False
 
         if os.path.isfile(self.dmri_config):
-            print(f'Diffusion configuration file : {self.dmri_config}')
+            print(f'* Diffusion configuration file : {self.dmri_config}')
         else:
-            print(BColors.WARNING + "Warning: Configuration file for diffusion pipeline not existing!" + BColors.ENDC)
+            print_warning("Warning: Configuration file for diffusion pipeline not existing!")
 
         if os.path.isfile(self.fmri_config):
-            print(f'fMRI configuration file : {self.fmri_config}')
+            print(f'* fMRI configuration file : {self.fmri_config}')
         else:
-            print(BColors.WARNING + "Warning: Configuration file for fMRI pipeline not existing!" + BColors.ENDC)
+            print_warning("Warning: Configuration file for fMRI pipeline not existing!")
 
         if os.path.isfile(self.fs_license):
-            print(f'Freesurfer license : {self.fs_license}')
+            print(f'* Freesurfer license : {self.fs_license}')
         else:
-            print(BColors.FAIL + f'Error: Invalid Freesurfer license ({self.fs_license})!' + BColors.ENDC)
+            print_error(f'Error: Invalid Freesurfer license ({self.fs_license})!')
             self.settings_checked = False
 
         # if os.path.isdir(self.fs_average):
@@ -1135,16 +1148,16 @@ class CMP_BIDSAppWindow(HasTraits):
                '-v', '{}:/bids_dir'.format(self.bids_root),
                '-v', '{}:/output_dir'.format(self.output_dir),
                '-v', '{}:/bids_dir/code/license.txt'.format(self.fs_license),
-               '-v', '{}:/code/ref_anatomical_config.ini'.format(self.anat_config),
+               '-v', '{}:/code/ref_anatomical_config.json'.format(self.anat_config),
                ]
 
         if self.run_dmri_pipeline:
             cmd.append('-v')
-            cmd.append('{}:/code/ref_diffusion_config.ini'.format(self.dmri_config))
+            cmd.append('{}:/code/ref_diffusion_config.json'.format(self.dmri_config))
 
         if self.run_fmri_pipeline:
             cmd.append('-v')
-            cmd.append('{}:/code/ref_fMRI_config.ini'.format(self.fmri_config))
+            cmd.append('{}:/code/ref_fMRI_config.json'.format(self.fmri_config))
 
         cmd.append('-u')
         cmd.append('{}:{}'.format(os.geteuid(), os.getegid()))
@@ -1160,15 +1173,15 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('{}'.format(label))
 
         cmd.append('--anat_pipeline_config')
-        cmd.append('/code/ref_anatomical_config.ini')
+        cmd.append('/code/ref_anatomical_config.json')
 
         if self.run_dmri_pipeline:
             cmd.append('--dwi_pipeline_config')
-            cmd.append('/code/ref_diffusion_config.ini')
+            cmd.append('/code/ref_diffusion_config.json')
 
         if self.run_fmri_pipeline:
             cmd.append('--func_pipeline_config')
-            cmd.append('/code/ref_fMRI_config.ini')
+            cmd.append('/code/ref_fMRI_config.json')
 
         cmd.append('--fs_license')
         cmd.append('{}'.format('/bids_dir/code/license.txt'))
@@ -1191,14 +1204,7 @@ class CMP_BIDSAppWindow(HasTraits):
             cmd.append('--mrtrix_random_seed')
             cmd.append('{}'.format(self.mrtrix_random_seed))
 
-        print('... BIDS App execution command: {}'.format(cmd))
-
-        # log_filename = os.path.join(
-        #     self.bids_root, 'derivatives', 'cmp', 'main_log-cmpbidsapp.txt')
-
-        # with open(log_filename, 'w+') as log:
-        #     proc = Popen(cmd, stdout=log, stderr=log)
-        #     #docker_process.communicate()
+        print_blue('... BIDS App execution command: {}'.format(' '.join(cmd)))
 
         proc = Popen(cmd)
         # proc = Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -1216,15 +1222,14 @@ class CMP_BIDSAppWindow(HasTraits):
         participant_labels : traits.List
             List of participants labels in the form ["01", "03", "04", ...]
         """
-        cmd = ['datalad', 'containers-run', ]
-
-        cmd.append('--container-name')
-        cmd.append(
-            'connectomemapper-bidsapp-{}'.format("-".join(bidsapp_tag.split("."))))
-
-        cmd.append('-m')
-        cmd.append(
-            'Processing with connectomemapper-bidsapp {}'.format(bidsapp_tag))
+        cmd = ['datalad',
+               'containers-run',
+               '--container-name',
+               'connectomemapper-bidsapp-{}'.format("-".join(bidsapp_tag.split("."))),
+               '-m',
+               'Processing with connectomemapper-bidsapp {}'.format(bidsapp_tag),
+               '--input',
+               f'{self.anat_config}']
 
         # for label in participant_labels:
         #     cmd.append('--input')
@@ -1241,25 +1246,22 @@ class CMP_BIDSAppWindow(HasTraits):
         #         cmd.append('--input')
         #         cmd.append('sub-{}/ses-*/func/sub-*_bold.*'.format(label))
 
-        cmd.append('--input')
-        cmd.append('code/ref_anatomical_config.ini')
-
         if self.run_dmri_pipeline:
             cmd.append('--input')
-            cmd.append('code/ref_diffusion_config.ini')
+            cmd.append(f'{self.dmri_config}')
 
         if self.run_fmri_pipeline:
             cmd.append('--input')
-            cmd.append('code/ref_fMRI_config.ini')
+            cmd.append(f'{self.fmri_config}')
 
         cmd.append('--output')
-        cmd.append('derivatives')
+        cmd.append(f'{self.output_dir}')
         # for label in participant_labels:
         #     cmd.append('--input')
         #     cmd.append('{}'.format(label))
 
-        cmd.append('/tmp')
-        cmd.append('/tmp/derivatives')
+        cmd.append('/bids_dir')
+        cmd.append('/output_dir')
         cmd.append('participant')
 
         cmd.append('--participant_label')
@@ -1269,30 +1271,20 @@ class CMP_BIDSAppWindow(HasTraits):
         # Counter to track position of config file as --input
         i = 0
         cmd.append('--anat_pipeline_config')
-        cmd.append('{{inputs[{}]}}'.format(i))
+        cmd.append('/{{inputs[{}]}}'.format(i))
         i += 1
         if self.run_dmri_pipeline:
             cmd.append('--dwi_pipeline_config')
-            cmd.append('{{inputs[{}]}}'.format(i))
+            cmd.append('/{{inputs[{}]}}'.format(i))
             i += 1
 
         if self.run_fmri_pipeline:
             cmd.append('--func_pipeline_config')
-            cmd.append('{{inputs[{}]}}'.format(i))
+            cmd.append('/{{inputs[{}]}}'.format(i))
 
-        print('... Datalad cmd : {}'.format(cmd))
-
-        # log_filename = os.path.join(self.bids_root,'derivatives','cmp','main-datalad_log-cmpbidsapp.txt')
-
-        # if not os.path.exists(os.path.join(self.bids_root,'derivatives','cmp')):
-        #     os.makedirs(os.path.join(self.bids_root,'derivatives','cmp'))
-
-        # with open(log_filename, 'a+') as log:
-        #     proc = Popen(cmd, stdout=log, stderr=log, cwd=os.path.join(self.bids_root))
-        #     #docker_process.communicate()
+        print_blue('... Datalad cmd : {}'.format(' '.join(cmd)))
 
         proc = Popen(cmd, cwd=os.path.join(self.bids_root))
-
         # proc = Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=os.path.join(self.bids_root,'derivatives'))
 
         return proc
@@ -1335,17 +1327,24 @@ class CMP_BIDSAppWindow(HasTraits):
         merged_env = os.environ
         if env is not None:
             merged_env.update(env)
-        process = Popen(command, stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT, shell=True,
-                        env=merged_env, cwd=cwd)
+        process = Popen(command,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        shell=True,
+                        env=merged_env,
+                        cwd=cwd)
         while True:
             line = process.stdout.readline()
-            line = str(line)[:-1]
+            # Remove the "b'" prefix and the "'" at the end return by datalad
+            line = str(line)[2:-1]
             print(line)
             if line == '' and process.poll() is not None:
                 break
         if process.returncode != 0:
-            raise Exception("Non zero return code: %d" % process.returncode)
+            raise Exception(
+                    BColors.FAIL +
+                    f'Non zero return code: {process.returncode}' +
+                    BColors.ENDC)
 
     def start_bids_app(self):
         """Function executed when the Run BIDS App button is clicked.
@@ -1353,7 +1352,7 @@ class CMP_BIDSAppWindow(HasTraits):
         It implements all steps in the creation and execution of the BIDS App
         with or without datalad.
         """
-        print("Start BIDS App")
+        print_blue("[Run BIDS App]")
 
         # Copy freesurfer license into dataset/code directory at the location
         # the BIDS app expects to find it.
@@ -1368,11 +1367,8 @@ class CMP_BIDSAppWindow(HasTraits):
             print('... dst : {}'.format(dst))
             shutil.copy2(src=self.fs_license, dst=dst)
         else:
-            print(
+            print_warning(
                 '> FreeSurfer license copy skipped as it already exists(BIDS App Manager) ')
-
-        # project.fix_dataset_directory_in_pickles(
-        #     local_dir=self.bids_root, mode='bidsapp')
 
         print("> Datalad available: {}".format(self.datalad_is_available))
 
@@ -1394,14 +1390,28 @@ class CMP_BIDSAppWindow(HasTraits):
             #    >> cd derivatives
             #    >> datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}
             if not os.path.isdir(os.path.join(self.bids_root, '.datalad')):
-                cmd = 'datalad rev-create --force -D "Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{})"'.format(
-                    self.bidsapp_tag)
+                cmd = ['datalad',
+                       'create',
+                       '--force',
+                       '-D',
+                       f'"Creation of datalad dataset to be processed by the connectome mapper bidsapp (tag:{self.bidsapp_tag})"',
+                       '-c',
+                       'text2git',
+                       '-d',
+                       f'{self.bids_root}']
+                cmd = " ".join(cmd)
                 try:
-                    print('... cmd: {}'.format(cmd))
+                    print_blue(f'... cmd: {cmd}')
                     self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
+                    print("    INFO: A datalad dataset has been created with success at the root directory!")
+                    msg = 'Add all files to datalad. ' \
+                              'Dataset ready to be linked with the BIDS App.'
+
                 except Exception:
-                    print("    DATALAD ERROR: Failed to create the datalad dataset")
+                    msg = 'Save state after error at datalad dataset creation'
+                    print_error("    DATALAD ERROR: Failed to create the datalad dataset")
             else:
+                msg = 'Datalad dataset up-to-date and ready to be linked with the BIDS App.'
                 print("    INFO: A datalad dataset already exists!")
 
             # log_filename = os.path.join(self.bids_root,'derivatives','cmp','main-datalad_log-cmpbidsapp.txt')
@@ -1413,18 +1423,21 @@ class CMP_BIDSAppWindow(HasTraits):
             # f = open(log_filename,"w+")
             # f.close()
 
-            cmd = 'datalad add -J {} -m "Modified configuration files tracked by datalad. Dataset ready to be linked with the BIDS App." .'.format(
-                multiprocessing.cpu_count())
+            cmd = f'datalad save -d . -m "{msg}"'
             try:
-                print('... cmd: {}'.format(cmd))
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    DATALAD ERROR: Failed to add changes to dataset")
+                print_error("    DATALAD ERROR: Failed to add changes to dataset")
 
-            datalad_container = os.path.join(self.bids_root, '.datalad', 'environments',
+            datalad_container = os.path.join(self.bids_root,
+                                             '.datalad',
+                                             'environments',
                                              'connectomemapper-bidsapp-{}'.format(
-                                                 "-".join(self.bidsapp_tag.split("."))), 'image')
+                                                 "-".join(self.bidsapp_tag.split("."))),
+                                             'image')
             add_container = True
+            update_container = False
             if os.path.isdir(datalad_container):
                 if self.datalad_update_environment:
                     print(
@@ -1441,38 +1454,66 @@ class CMP_BIDSAppWindow(HasTraits):
                     "    INFO: Add a new computing environment (container image) to the datalad dataset!")
 
             if add_container:
-                cmd = "datalad containers-add connectomemapper-bidsapp-{} --url dhub://sebastientourbier/connectomemapper-bidsapp:{}".format(
-                    "-".join(self.bidsapp_tag.split(".")), self.bidsapp_tag)
+                # Define the docker run command executed by Datalad.
+                # It makes the assumption that the license.txt and the configuration files
+                # are located in the code/ directory.
+                docker_cmd = ['docker', 'run', '--rm', '-t',
+                              '-v',
+                              '"$(pwd)":/bids_dir',
+                              '-v',
+                              '"$(pwd)"/derivatives:/output_dir',
+                              '-v',
+                              '"$(pwd)"/code/license.txt:/bids_dir/code/license.txt',
+                              '-v',
+                              f'"$(pwd)"/code/{os.path.basename(self.anat_config)}:/code/ref_anatomical_config.json',
+                              ]
+
+                if self.run_dmri_pipeline:
+                    docker_cmd.append('-v')
+                    docker_cmd.append(f'"$(pwd)"/code/{os.path.basename(self.dmri_config)}:/code/ref_diffusion_config.json')
+
+                if self.run_fmri_pipeline:
+                    docker_cmd.append('-v')
+                    docker_cmd.append(f'"$(pwd)"/code/{os.path.basename(self.fmri_config)}:/code/ref_fMRI_config.json')
+
+                docker_cmd.append('-u')
+                docker_cmd.append('{}:{}'.format(os.geteuid(), os.getegid()))
+
+                docker_cmd.append(f'sebastientourbier/connectomemapper-bidsapp:{self.bidsapp_tag}')
+                docker_cmd.append('{cmd}')
+
+                # Define and run the command to add the container image to datalad
+                version_tag = "-".join(self.bidsapp_tag.split("."))
+                cmd = ['datalad',
+                       'containers-add',
+                       f'connectomemapper-bidsapp-{version_tag}',
+                       '--url',
+                       f'dhub://sebastientourbier/connectomemapper-bidsapp:{self.bidsapp_tag}',
+                       '-d',
+                       '.',
+                       '--call-fmt']
+
+                cmd = " ".join(cmd)
+                docker_cmd = " ".join(docker_cmd)
+                cmd = f'{cmd} "{docker_cmd}"'
+
+                if self.datalad_update_environment:
+                    cmd = f'{cmd} --update'
                 try:
-                    print('... cmd: {}'.format(cmd))
+                    print_blue(f'... cmd: {cmd}')
                     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
+                    print("    INFO: Container image has been linked to dataset with success!")
                 except Exception:
-                    print(
-                        "   DATALAD ERROR: Failed to link the container image to the dataset")
+                    print_error("   DATALAD ERROR: Failed to link the container image to the dataset")
 
-            # Implementation with --upgrade available in latest version but not
-            # in stable version of datalad_container
-
-            # cmd = "datalad containers-add connectomemapper-bidsapp-{}"
-            # " --url dhub://sebastientourbier/connectomemapper-bidsapp:{} --update".format(
-            #                                                                       self.bidsapp_tag,
-            #                                                                       self.bidsapp_tag)
-            #
-            # try:
-            #     print('... cmd: {}'.format(cmd))
-            #     self.run(cmd, env={}, cwd=os.path.join(self.bids_root))
-            # except Exception:
-            #     print("   ERROR: Failed to link the container image to the datalad dataset")
-
-            datalad_get_list = []
-
-            datalad_get_list.append('code/ref_anatomical_config.ini')
+            # Create a list of files to be retrieved by datalad get
+            datalad_get_list = [self.anat_config]
 
             if self.run_dmri_pipeline:
-                datalad_get_list.append('code/ref_diffusion_config.ini')
+                datalad_get_list.append(self.dmri_config)
 
             if self.run_dmri_pipeline:
-                datalad_get_list.append('code/ref_fMRI_config.ini')
+                datalad_get_list.append(self.fmri_config)
 
             if session_structure:
                 for label in self.list_of_subjects_to_be_processed:
@@ -1499,52 +1540,37 @@ class CMP_BIDSAppWindow(HasTraits):
                         datalad_get_list.append(
                             'sub-{}/func/sub-{}*_bold.*'.format(label, label))
 
-            cmd = 'datalad add -J {} -m "Existing files tracked by datalad. Dataset ready for getting files via datalad run." .'.format(
-                multiprocessing.cpu_count())
+            cmd = 'datalad save -d . -m "Dataset state after adding the container image. '\
+                  'Datasets ready to get files via datalad run."'
             try:
-                print('... cmd: {}'.format(cmd))
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    DATALAD ERROR: Failed to add existing files to dataset")
+                print_error("    DATALAD ERROR: Failed to add existing files to dataset")
 
-            cmd = 'datalad run -m "Get files for sub-{}" bash -c "datalad get {}"'.format(
+            cmd = 'datalad run -d . -m "Get files for sub-{}" bash -c "datalad get {}"'.format(
                 self.list_of_subjects_to_be_processed, " ".join(datalad_get_list))
             try:
-                print('... cmd: {}'.format(cmd))
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    DATALAD ERROR: Failed to get files (cmd: datalad get {})".format(
+                print_error("    DATALAD ERROR: Failed to get files (cmd: datalad get {})".format(
                     " ".join(datalad_get_list)))
 
-            cmd = 'datalad add --nosave -J {} .'.format(
-                multiprocessing.cpu_count())
+            cmd = 'datalad save -d . -m "Dataset state after getting the files. Dataset ready for connectome mapping." '\
+                  '--version-tag ready4analysis-{}'.format(time.strftime("%Y%m%d-%H%M%S"))
             try:
-                print('... cmd: {}'.format(cmd))
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    DATALAD ERROR: Failed to add existing files to dataset")
+                print_error("    DATALAD ERROR: Failed to commit changes to dataset")
 
-            cmd = 'datalad save -m "Existing files tracked by datalad. Dataset ready for connectome mapping." --version-tag ready4analysis-{}'.format(
-                time.strftime("%Y%m%d-%H%M%S"))
+            cmd = 'datalad status -d .'
             try:
-                print('... cmd: {}'.format(cmd))
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    DATALAD ERROR: Failed to commit changes to dataset")
-
-            # cmd = 'datalad diff --revision HEAD~1'
-            # try:
-            #     print('... cmd: {}'.format(cmd))
-            #     self.run( cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            # except Exception:
-            #     print("    DATALAD ERROR: Failed to run datalad diff --revision HEAD~1")
-
-            cmd = 'datalad rev-status'
-            try:
-                print('... cmd: {}'.format(cmd))
-                self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print("    DATALAD ERROR: Failed to run datalad rev-status")
+                print_error("    DATALAD ERROR: Failed to run datalad rev-status")
 
         # maxprocs = multiprocessing.cpu_count()
         processes = []
@@ -1565,41 +1591,27 @@ class CMP_BIDSAppWindow(HasTraits):
         while len(processes) > 0:
             self.manage_bidsapp_procs(processes)
 
-        # project.fix_dataset_directory_in_pickles(
-        #     local_dir=self.bids_root, mode='local')
-
         if self.datalad_is_available and self.data_provenance_tracking:
             # Clean remaining cache files generated in tmp/ of the docker image
-            project.clean_cache(self.bids_root)
+            # project.clean_cache(self.bids_root)
 
-            cmd = 'datalad add --nosave -J {} .'.format(
-                multiprocessing.cpu_count())
-            try:
-                print('... cmd: {}'.format(cmd))
-                self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
-            except Exception:
-                print("    ERROR: Failed to add changes to datalad dataset")
-
-            cmd = 'datalad save -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{}'.format(
+            cmd = 'datalad save -d . -m "Dataset processed by the connectomemapper-bidsapp:{}" --version-tag processed-{}'.format(
                 self.bidsapp_tag, time.strftime("%Y%m%d-%H%M%S"))
             try:
-                print('... cmd: {}'.format(cmd))
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    ERROR: Failed to commit derivatives to datalad dataset")
+                print_error("    DATALAD ERROR: Failed to commit derivatives to datalad dataset")
 
-            cmd = 'datalad diff --revision HEAD~1'
+            cmd = 'datalad diff -t HEAD~1'
             try:
-                print('... cmd: {}'.format(cmd))
+                print_blue(f'... cmd: {cmd}')
                 self.run(cmd, env={}, cwd=os.path.abspath(self.bids_root))
             except Exception:
-                print("    ERROR: Failed to run datalad diff --revision HEAD~1")
+                print_error("    DATALAD ERROR: Failed to run datalad diff -t HEAD~1")
 
         print('Processing with BIDS App Finished')
-
         self.docker_running = False
-
-        # cmd = ['docke datetime.datetime.now().strftime("%Y%m%d_%H%M")
         return True
 
     # def stop_bids_app(self, ui_info):
@@ -1757,6 +1769,7 @@ class CMP_ConfiguratorWindow(HasTraits):
             Boolean that indicates if functional pipeline inputs are available
             (Default: False)
         """
+        print('> Initialize window...')
         self.project_info = project_info
 
         self.anat_pipeline = anat_pipeline
@@ -1780,25 +1793,25 @@ class CMP_ConfiguratorWindow(HasTraits):
         self.dmri_pipeline.diffusion_imaging_model = new
 
     def _save_all_config_fired(self):
-        print('Saving pipeline configuration files...')
+        print_blue('[Save all pipeline configuration files]')
 
         if self.anat_inputs_checked:
             anat_config_file = os.path.join(
-                self.project_info.base_directory, 'code', 'ref_anatomical_config.ini')
+                self.project_info.base_directory, 'code', 'ref_anatomical_config.json')
             project.anat_save_config(self.anat_pipeline, anat_config_file)
-            print('Anatomical config saved as  {}'.format(anat_config_file))
+            print('  * Anatomical config saved as  {}'.format(anat_config_file))
 
         if self.dmri_inputs_checked:
             dmri_config_file = os.path.join(
-                self.project_info.base_directory, 'code', 'ref_diffusion_config.ini')
+                self.project_info.base_directory, 'code', 'ref_diffusion_config.json')
             project.dmri_save_config(self.dmri_pipeline, dmri_config_file)
-            print('Diffusion config saved as  {}'.format(dmri_config_file))
+            print('  * Diffusion config saved as  {}'.format(dmri_config_file))
 
         if self.fmri_inputs_checked:
             fmri_config_file = os.path.join(
-                self.project_info.base_directory, 'code', 'ref_fMRI_config.ini')
+                self.project_info.base_directory, 'code', 'ref_fMRI_config.json')
             project.fmri_save_config(self.fmri_pipeline, fmri_config_file)
-            print('fMRI config saved as  {}'.format(fmri_config_file))
+            print('  * fMRI config saved as  {}'.format(fmri_config_file))
 
 
 # Window class of the ConnectomeMapper_Pipeline Quality Inspector
@@ -1927,27 +1940,25 @@ class CMP_InspectorWindow(HasTraits):
             Boolean that indicates if functional pipeline inputs are available
             (Default: False)
         """
+        print('> Initialize window...')
         self.project_info = project_info
 
         self.anat_inputs_checked = anat_inputs_checked
         self.dmri_inputs_checked = dmri_inputs_checked
         self.fmri_inputs_checked = fmri_inputs_checked
 
-        print('Fix BIDS root directory to {}'.format(
-            self.project_info.base_directory))
-
-        # project.fix_dataset_directory_in_pickles(
-        #     local_dir=self.project_info.base_directory, mode='newlocal')
-
         aborded = self.select_subject()
 
         if aborded:
             raise Exception(
-                'ABORDED: The quality control window will not be displayed.'
-                'Selection of subject/session was cancelled at initialization.')
+                BColors.FAIL +
+                ' .. ABORDED: The quality control window will not be displayed.' +
+                'Selection of subject/session was cancelled at initialization.' +
+                BColors.ENDC)
 
     def select_subject(self):
         """Function to select the subject and session for which to inspect outputs."""
+        print('> Selection of subject (and session) for which to inspect outputs')
         valid_selected_subject = False
         select = True
         aborded = False
@@ -1961,7 +1972,7 @@ class CMP_InspectorWindow(HasTraits):
                 aborded = True
                 break
 
-            print("Selected subject: {}".format(self.project_info.subject))
+            print("  .. INFO: Selected subject: {}".format(self.project_info.subject))
 
             # Select session if any
             bids_layout = BIDSLayout(self.project_info.base_directory)
@@ -1971,7 +1982,7 @@ class CMP_InspectorWindow(HasTraits):
                 target='session', return_type='id', subject=subject)
 
             if len(sessions) > 0:
-                print("Detected sessions")
+                print("  .. INFO: Input dataset has sessions")
                 print(sessions)
 
                 self.project_info.subject_sessions = []
@@ -1992,7 +2003,7 @@ class CMP_InspectorWindow(HasTraits):
                                                                       self.project_info.subject),
                                                                   '{}'.format(
                                                                       self.project_info.subject_session),
-                                                                  '{}_{}_anatomical_config.ini'.format(
+                                                                  '{}_{}_anatomical_config.json'.format(
                                                                       self.project_info.subject,
                                                                       self.project_info.subject_session))
                 if os.access(self.project_info.anat_config_file, os.F_OK):
@@ -2008,7 +2019,7 @@ class CMP_InspectorWindow(HasTraits):
                                                                           self.project_info.subject),
                                                                       '{}'.format(
                                                                           self.project_info.subject_session),
-                                                                      '{}_{}_diffusion_config.ini'.format(
+                                                                      '{}_{}_diffusion_config.json'.format(
                                                                           self.project_info.subject,
                                                                           self.project_info.subject_session))
                     if os.access(self.project_info.dmri_config_file, os.F_OK):
@@ -2027,7 +2038,7 @@ class CMP_InspectorWindow(HasTraits):
                                                                           self.project_info.subject),
                                                                       '{}'.format(
                                                                           self.project_info.subject_session),
-                                                                      '{}_{}_fMRI_config.ini'.format(
+                                                                      '{}_{}_fMRI_config.json'.format(
                                                                           self.project_info.subject,
                                                                           self.project_info.subject_session))
                     if os.access(self.project_info.fmri_config_file, os.F_OK):
@@ -2048,18 +2059,18 @@ class CMP_InspectorWindow(HasTraits):
                 # if self.fmri_pipeline is not None:
                 #     self.fmri_pipeline.global_conf.subject_session = self.project_info.subject_session
 
-                print("Selected session %s" %
+                print("  .. INFO: Selected session %s" %
                       self.project_info.subject_session)
                 if self.anat_pipeline is not None:
                     self.anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(
                         self.project_info.base_directory, 'derivatives', 'freesurfer',
                         '{}_{}'.format(self.project_info.subject, self.project_info.subject_session))
             else:
-                print("No session detected")
+                print("  .. INFO: No session detected")
                 self.project_info.anat_config_file = os.path.join(self.project_info.base_directory, 'derivatives',
                                                                   'cmp', '{}'.format(
                                                                       self.project_info.subject),
-                                                                  '{}_anatomical_config.ini'.format(
+                                                                  '{}_anatomical_config.json'.format(
                                                                       self.project_info.subject))
                 if os.access(self.project_info.anat_config_file, os.F_OK):
                     self.anat_pipeline = project.init_anat_project(
@@ -2071,7 +2082,7 @@ class CMP_InspectorWindow(HasTraits):
                     self.project_info.dmri_config_file = os.path.join(self.project_info.base_directory, 'derivatives',
                                                                       'cmp', '{}'.format(
                                                                           self.project_info.subject),
-                                                                      '{}_diffusion_config.ini'.format(
+                                                                      '{}_diffusion_config.json'.format(
                                                                           self.project_info.subject))
                     if os.access(self.project_info.dmri_config_file, os.F_OK):
                         dmri_valid_inputs, self.dmri_pipeline = project.init_dmri_project(self.project_info,
@@ -2086,7 +2097,7 @@ class CMP_InspectorWindow(HasTraits):
                     self.project_info.fmri_config_file = os.path.join(self.project_info.base_directory, 'derivatives',
                                                                       'cmp', '{}'.format(
                                                                           self.project_info.subject),
-                                                                      '{}_fMRI_config.ini'.format(
+                                                                      '{}_fMRI_config.json'.format(
                                                                           self.project_info.subject))
                     if os.access(self.project_info.fmri_config_file, os.F_OK):
                         fmri_valid_inputs, self.fmri_pipeline = project.init_fmri_project(self.project_info,
@@ -2102,8 +2113,6 @@ class CMP_InspectorWindow(HasTraits):
                     self.anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(
                         self.project_info.base_directory, 'derivatives', 'freesurfer',
                         '{}'.format(self.project_info.subject))
-
-            print("[PIPELINE INIT DONE]")
 
             if self.anat_pipeline is not None:
                 print("> Anatomical pipeline output inspection")
@@ -2135,17 +2144,18 @@ class CMP_InspectorWindow(HasTraits):
                     if (len(stage.inspect_outputs) > 0) and (stage.inspect_outputs[0] != 'Outputs not available'):
                         self.output_fmri_available = True
 
-            print("Anatomical output(s) available : %s" %
+            print_blue("  .. Anatomical output(s) available : %s" %
                   self.output_anat_available)
-            print("Diffusion output(s) available : %s" %
+            print_blue("  .. Diffusion output(s) available : %s" %
                   self.output_dmri_available)
-            print("fMRI output(s) available : %s" % self.output_fmri_available)
+            print_blue("  .. fMRI output(s) available : %s" % self.output_fmri_available)
 
             if self.output_anat_available or self.output_dmri_available or self.output_fmri_available:
                 valid_selected_subject = True
             else:
-                self.error_msg = "No output available! Please select another subject (and session if any)!"
-
+                self.error_msg = "  .. ERROR: No output available! " +\
+                                 "Please select another subject (and session if any)!"
+                print_error(self.error_msg)
                 select = error(message=self.error_msg,
                                title='Error', buttons=['OK', 'Cancel'])
                 aborded = not select
@@ -2223,11 +2233,6 @@ class CMP_MainWindow(HasTraits):
             spring,
             HGroup(
                 Item('configurator', style='custom', width=200, height=200, resizable=False, label='', show_label=False,
-                     # editor_args={
-                     #     'image': get_icon(pkg_resources.resource_filename('cmp',
-                     #                                                       os.path.join('bidsappmanager/images',
-                     #                                                                    'configurator_200x200.png'))),
-                     #     'label': "", 'label_value': ""},
                      style_sheet=return_button_style_sheet(
                              ImageResource(
                                      pkg_resources.resource_filename('cmp',
@@ -2281,15 +2286,16 @@ class CMP_MainWindow(HasTraits):
 
     def _bidsapp_fired(self):
         """ Callback of the "bidsapp" button. This displays the BIDS App Interface window."""
+        print_blue("[Open BIDS App Window]")
         bids_layout = BIDSLayout(self.project_info.base_directory)
         subjects = bids_layout.get_subjects()
 
         anat_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_anatomical_config.ini')
+            self.project_info.base_directory, 'code/', 'ref_anatomical_config.json')
         dmri_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_diffusion_config.ini')
+            self.project_info.base_directory, 'code/', 'ref_diffusion_config.json')
         fmri_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_fMRI_config.ini')
+            self.project_info.base_directory, 'code/', 'ref_fMRI_config.json')
 
         self.bidsapp_ui = CMP_BIDSAppWindow(project_info=self.project_info,
                                             bids_root=self.project_info.base_directory,
@@ -2306,19 +2312,20 @@ class CMP_MainWindow(HasTraits):
 
     def _configurator_fired(self):
         """Callback of the "configurator" button. This displays the Configurator Window."""
+        print_blue("[Open Pipeline Configurator Window]")
         if self.project_info.t1_available:
             if os.path.isfile(self.project_info.anat_config_file):
-                print("Anatomical config file : %s" %
+                print("  .. Anatomical config file : %s" %
                       self.project_info.anat_config_file)
 
         if self.project_info.dmri_available:
             if os.path.isfile(self.project_info.dmri_config_file):
-                print("Diffusion config file : %s" %
+                print("  .. Diffusion config file : %s" %
                       self.project_info.dmri_config_file)
 
         if self.project_info.fmri_available:
             if os.path.isfile(self.project_info.fmri_config_file):
-                print("fMRI config file : %s" %
+                print("  .. fMRI config file : %s" %
                       self.project_info.fmri_config_file)
 
         self.configurator_ui = CMP_ConfiguratorWindow(project_info=self.project_info,
@@ -2334,19 +2341,20 @@ class CMP_MainWindow(HasTraits):
 
     def _quality_control_fired(self):
         """Callback of the "Inspector" button. This displays the Quality Control (Inspector) Window."""
+        print_blue("[Open Quality Inspector Window]")
         if self.project_info.t1_available:
             if os.path.isfile(self.project_info.anat_config_file):
-                print("Anatomical config file : %s" %
+                print("  .. Anatomical config file : %s" %
                       self.project_info.anat_config_file)
 
         if self.project_info.dmri_available:
             if os.path.isfile(self.project_info.dmri_config_file):
-                print("Diffusion config file : %s" %
+                print("  .. Diffusion config file : %s" %
                       self.project_info.dmri_config_file)
 
         if self.project_info.fmri_available:
             if os.path.isfile(self.project_info.fmri_config_file):
-                print("fMRI config file : %s" %
+                print("  .. fMRI config file : %s" %
                       self.project_info.fmri_config_file)
 
         try:
@@ -2358,25 +2366,3 @@ class CMP_MainWindow(HasTraits):
             self.quality_control_ui.configure_traits()
         except Exception as e:
             print(e)
-
-    def show_bidsapp_interface(self):
-        """Callback of the "BIDS App" button. This displays the BIDS App Interface Window."""
-        bids_layout = BIDSLayout(self.project_info.base_directory)
-        subjects = bids_layout.get_subjects()
-
-        anat_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_anatomical_config.ini')
-        dmri_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_diffusion_config.ini')
-        fmri_config = os.path.join(
-            self.project_info.base_directory, 'code/', 'ref_fMRI_config.ini')
-
-        self.bidsapp = CMP_BIDSAppWindow(project_info=self.project_info,
-                                         bids_root=self.project_info.base_directory,
-                                         subjects=subjects,
-                                         list_of_subjects_to_be_processed=subjects,
-                                         anat_config=anat_config,
-                                         dmri_config=dmri_config,
-                                         fmri_config=fmri_config
-                                         )
-        # self.bidsapp.configure_traits()

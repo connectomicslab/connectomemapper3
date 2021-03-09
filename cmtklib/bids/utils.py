@@ -24,67 +24,72 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
     pipeline_name : string
         Type of derivatives (`['cmp', 'freesurfer', 'nipype']`)
     """
-    from cmp.info import __version__, __url__, DOWNLOAD_URL
+    from cmp.info import __version__, __url__, DOCKER_HUB
 
     bids_dir = os.path.abspath(bids_dir)
     deriv_dir = os.path.abspath(deriv_dir)
 
     if pipeline_name == 'cmp':
         desc = {
-            'Name': 'CMP - Connectome Mapper processing workflow',
-            'BIDSVersion': '1.1.1',
-            'PipelineDescription': {
-                'Name': 'Connectome Mapper',
-                'Version': __version__,
-                'CodeURL': DOWNLOAD_URL,
+            'Name': 'CMP3 Outputs',
+            'BIDSVersion': '1.4.0',
+            'DatasetType': 'derivatives',
+            'GeneratedBy': {
+                    'Name': pipeline_name,
+                    'Version': __version__,
+                    'Container': {
+                            'Type': 'docker',
+                            'Tag': '{}:{}'.format(DOCKER_HUB, __version__)
+                    },
+                    'CodeURL': __url__
             },
-            'CodeURL': __url__,
-            'HowToAcknowledge':
-                'Please cite our paper (https://doi.org/XXX), '
-                'and include the generated citation boilerplate within the Methods '
-                'section of the text.',
+            'HowToAcknowledge': 'Please cite ... ',
         }
     elif pipeline_name == 'freesurfer':
         desc = {
-            'Name': 'CMP - Connectome Mapper processing workflow',
-            'BIDSVersion': '1.1.1',
-            'PipelineDescription': {
-                'Name': 'Freesurfer v6.0.1 outputs of the Connectome Mapper',
-                'Version': __version__,
-                'CodeURL': DOWNLOAD_URL,
-            },
-            'CodeURL': __url__,
-            'HowToAcknowledge':
-                'Please cite our paper (https://doi.org/XXX), '
-                'and include the generated citation boilerplate within the Methods '
-                'section of the text.',
+                'Name': 'Freesurfer Outputs of CMP3 ({})'.format(__version__),
+                'BIDSVersion': '1.4.0',
+                'DatasetType': 'derivatives',
+                'GeneratedBy': {
+                        'Name': 'freesurfer',
+                        'Version': '6.0.1',
+                        'Container': {
+                                'Type': 'docker',
+                                'Tag': '{}:{}'.format(DOCKER_HUB, __version__)
+                        },
+                        'CodeURL': __url__
+                },
+                'HowToAcknowledge': 'Please cite ... '
         }
     elif pipeline_name == 'nipype':
+        from nipype import __version__ as nipype_version
         desc = {
-            'Name': 'CMP - Connectome Mapper processing workflow',
-            'BIDSVersion': '1.1.1',
-            'PipelineDescription': {
-                'Name': 'Nipype outputs of the Connectome Mapper',
-                'Version': __version__,
-                'CodeURL': DOWNLOAD_URL,
-            },
-            'CodeURL': __url__,
-            'HowToAcknowledge':
-                'Please cite our paper (https://doi.org/XXX), '
-                'and include the generated citation boilerplate within the Methods '
-                'section of the text.',
+                'Name': 'Nipype Outputs of CMP3 ({})'.format(__version__),
+                'BIDSVersion': '1.4.0',
+                'DatasetType': 'derivatives',
+                'GeneratedBy': {
+                        'Name': pipeline_name,
+                        'Version': nipype_version,
+                        'Container': {
+                                'Type': 'docker',
+                                'Tag': '{}:{}'.format(DOCKER_HUB, __version__)
+                        },
+                        'CodeURL': __url__
+                },
+                'HowToAcknowledge': 'Please cite ... '
         }
-    # Keys that can only be set by environment
-    if 'CMP_DOCKER_TAG' in os.environ:
-        desc['DockerHubContainerTag'] = os.environ['CMP_DOCKER_TAG']
-    if 'CMP_SINGULARITY_URL' in os.environ:
-        singularity_url = os.environ['CMP_SINGULARITY_URL']
-        desc['SingularityContainerURL'] = singularity_url
 
-        singularity_md5 = _get_shub_version(singularity_url)
-        if singularity_md5 and singularity_md5 is not NotImplemented:
-            desc['SingularityContainerMD5'] = _get_shub_version(
-                singularity_url)
+    # Keys that can only be set by environment
+    # if 'CMP_DOCKER_TAG' in os.environ:
+    #     desc['DockerHubContainerTag'] = os.environ['CMP_DOCKER_TAG']
+    # if 'CMP_SINGULARITY_URL' in os.environ:
+    #     singularity_url = os.environ['CMP_SINGULARITY_URL']
+    #     desc['SingularityContainerURL'] = singularity_url
+
+    #     singularity_md5 = _get_shub_version(singularity_url)
+    #     if singularity_md5 and singularity_md5 is not NotImplemented:
+    #         desc['SingularityContainerMD5'] = _get_shub_version(
+    #             singularity_url)
 
     # Keys deriving from source dataset
     orig_desc = {}
@@ -94,10 +99,23 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
             orig_desc = json.load(fobj)
 
     if 'DatasetDOI' in orig_desc:
-        desc['SourceDatasetsURLs'] = ['https://doi.org/{}'.format(
-            orig_desc['DatasetDOI'])]
-    if 'License' in orig_desc:
-        desc['License'] = orig_desc['License']
+        desc['SourceDatasets']: [
+            {
+                'DOI': orig_desc['DatasetDOI'],
+                'URL': 'https://doi.org/{}'.format(orig_desc['DatasetDOI']),
+                'Version': 'TODO: To be updated'
+            }
+        ]
+    else:
+        desc['SourceDatasets']: [
+            {
+                'DOI': 'TODO: To be updated',
+                'URL': 'TODO: To be updated',
+                'Version': 'TODO: To be updated'
+            }
+        ]
+
+    desc['License'] = 'TODO: To be updated (See https://creativecommons.org/about/cclicenses/)'
 
     with open(os.path.join(deriv_dir, pipeline_name, 'dataset_description.json'), 'w') as fobj:
         json.dump(desc, fobj, indent=4)

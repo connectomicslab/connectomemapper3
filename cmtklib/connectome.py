@@ -590,23 +590,17 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
                 G_out.add_edge(u, v)
                 for key in di:
                     G_out[u][v][key] = di[key]
-
                 # print('({}, {}): {}'.format(u, v, list(G[u][v].keys())))
 
         # print("  ************************************************************************")
-
         # for u, v, d in G.edges(data=True):
-
         #     print('({}, {}): {}'.format(u, v, list(d.keys())))
         #     if 'fiblist' in list(d.keys()):
         #         print(G[u][v]['fiblist'])
-
         del G
 
         print("  ************************************************")
-
         print("  >> Save connectome maps as :")
-
         # Get the edge attributes/keys/weights from the first edge and then break.
         # Change w.r.t networkx2
         edge_keys = []
@@ -658,7 +652,6 @@ def cmat(intrk, roi_volumes, roi_graphmls, parcellation_scheme, compute_curvatur
 
             # print "size_nodes : "
             # print size_nodes
-            #
             # print "Number of nodes : %i" % len(G)
 
             node_struct = {}
@@ -746,7 +739,7 @@ class CMTK_cmatInputSpec(BaseInterfaceInputSpec):
     output_types = traits.List(
         Str, desc='Output types of the connectivity matrices')
 
-    probtrackx = traits.Bool(False, desc="MUST be set to True if probtrackx was used (Not used anymore in CMP3)")
+    # probtrackx = traits.Bool(False, desc="MUST be set to True if probtrackx was used (Not used anymore in CMP3)")
 
     voxel_connectivity = InputMultiPath(File(exists=True),
                                         desc="ProbtrackX connectivity matrices (# seed voxels x # target ROIs)")
@@ -803,30 +796,12 @@ class CMTK_cmat(BaseInterface):
         else:
             additional_maps = {}
 
-        # if self.inputs.probtrackx:
-        #     probtrackx_cmat(voxel_connectivity_files=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
-        #                     parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
-        #                     output_types=self.inputs.output_types)
-        # elif len(self.inputs.track_file) > 1:
-        #     prob_cmat(intrk=self.inputs.track_file, roi_volumes=self.inputs.roi_volumes,
-        #               parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
-        #               output_types=self.inputs.output_types)
-        # else:
         cmat(intrk=self.inputs.track_file[0], roi_volumes=self.inputs.roi_volumes,
              roi_graphmls=self.inputs.roi_graphmls,
              parcellation_scheme=self.inputs.parcellation_scheme, atlas_info=self.inputs.atlas_info,
              compute_curvature=self.inputs.compute_curvature,
              additional_maps=additional_maps,
              output_types=self.inputs.output_types)
-
-        if 'cff' in self.inputs.output_types:
-            cvt = cmtk.CFFConverter()
-            cvt.inputs.title = 'Connectome mapper'
-            cvt.inputs.nifti_volumes = self.inputs.roi_volumes
-            cvt.inputs.tract_files = ['streamline_final.trk']
-            cvt.inputs.gpickled_networks = glob.glob(
-                os.path.abspath("connectome_*.gpickle"))
-            cvt.run()
 
         return runtime
 
@@ -1188,44 +1163,28 @@ class rsfmri_conmat(BaseInterface):
 
                 sio.savemat('connectome_%s.mat' % parkey, mdict={
                             'sc': edge_struct, 'nodes': node_struct})
-            if 'graphml' in self.inputs.output_types and self.inputs.parcellation_scheme != "Lausanne2018":
+            if 'graphml' in self.inputs.output_types:
                 g2 = nx.Graph()
+                # Create graph nodes
                 for u_gml, d_gml in G.nodes(data=True):
-                    g2.add_node(u_gml, {'dn_correspondence_id': d_gml['dn_correspondence_id'],
-                                        'dn_fsname': d_gml['dn_fsname'],
-                                        'dn_hemisphere': d_gml['dn_hemisphere'],
-                                        'dn_name': d_gml['dn_name'],
-                                        'dn_position_x': float(d_gml['dn_position'][0]),
-                                        'dn_position_y': float(d_gml['dn_position'][1]),
-                                        'dn_position_z': float(d_gml['dn_position'][2]),
-                                        'dn_region': d_gml['dn_region']})
+                    g2.add_node(u_gml)
+                    if self.inputs.parcellation_scheme != "Lausanne2018":
+                        g2.nodes[u_gml]['dn_correspondence_id'] = d_gml['dn_correspondence_id']
+                    else:
+                        g2.nodes[u_gml]['dn_multiscaleID'] = d_gml['dn_multiscaleID']
+                    g2.nodes[u_gml]['dn_fsname'] = d_gml['dn_fsname']
+                    g2.nodes[u_gml]['dn_hemisphere'] = d_gml['dn_hemisphere']
+                    g2.nodes[u_gml]['dn_name'] = d_gml['dn_name']
+                    g2.nodes[u_gml]['dn_position_x'] = d_gml['dn_position'][0]
+                    g2.nodes[u_gml]['dn_position_y'] = d_gml['dn_position'][1]
+                    g2.nodes[u_gml]['dn_position_z'] = d_gml['dn_position'][2]
+                    g2.nodes[u_gml]['dn_region'] = d_gml['dn_region']
+                # Create graph edges
                 for u_gml, v_gml, d_gml in G.edges(data=True):
-                    g2.add_edge(u_gml, v_gml, {'corr': float(d_gml['corr'])})
+                    g2.add_edge(u_gml, v_gml)
+                    g2[u_gml][v_gml]['corr'] = float(d_gml['corr'])
+                # Save the graph
                 nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
-
-            if 'graphml' in self.inputs.output_types and (
-                    self.inputs.parcellation_scheme == "Lausanne2018" or self.inputs.parcellation_scheme == 'NativeFreesurfer'):
-                g2 = nx.Graph()
-                for u_gml, d_gml in G.nodes(data=True):
-                    g2.add_node(u_gml, {'dn_multiscaleID': d_gml['dn_multiscaleID'],
-                                        'dn_fsname': d_gml['dn_fsname'],
-                                        'dn_hemisphere': d_gml['dn_hemisphere'],
-                                        'dn_name': d_gml['dn_name'],
-                                        'dn_position_x': float(d_gml['dn_position'][0]),
-                                        'dn_position_y': float(d_gml['dn_position'][1]),
-                                        'dn_position_z': float(d_gml['dn_position'][2]),
-                                        'dn_region': d_gml['dn_region']})
-                for u_gml, v_gml, d_gml in G.edges(data=True):
-                    g2.add_edge(u_gml, v_gml, {'corr': float(d_gml['corr'])})
-                nx.write_graphml(g2, 'connectome_%s.graphml' % parkey)
-
-            if 'cff' in self.inputs.output_types:
-                cvt = cmtk.CFFConverter()
-                cvt.inputs.title = 'Connectome mapper'
-                cvt.inputs.nifti_volumes = self.inputs.roi_volumes
-                cvt.inputs.gpickled_networks = glob.glob(
-                    os.path.abspath("connectome_*.gpickle"))
-                cvt.run()
 
         print("[ DONE ]")
         return runtime

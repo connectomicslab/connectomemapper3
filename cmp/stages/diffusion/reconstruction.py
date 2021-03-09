@@ -181,11 +181,10 @@ class Dipy_recon_config(HasTraits):
         if new == 'DSI':
             pass
         elif new == 'DTI':
-            self.local_model_editor = {
-                False: '1:Tensor', True: '2:Constrained Spherical Deconvolution'}
-        elif new == 'multi-shell':
-            self.local_model_editor = {
-                True: 'Constrained Spherical Deconvolution'}
+            self.local_model_editor = {False: '1:Tensor',
+                                       True: '2:Constrained Spherical Deconvolution'}
+        elif new == 'multishell' or new == 'HARDI':
+            self.local_model_editor = {True: 'Constrained Spherical Deconvolution'}
             self.local_model = True
 
     def _recon_mode_changed(self, new):
@@ -197,14 +196,13 @@ class Dipy_recon_config(HasTraits):
             New value of ``recon_mode``
         """
         if new == 'Probabilistic' and self.imaging_model != 'DSI':
-            self.local_model_editor = {
-                True: 'Constrained Spherical Deconvolution'}
+            self.local_model_editor = {True: 'Constrained Spherical Deconvolution'}
             self.local_model = True
         elif new == 'Probabilistic' and self.imaging_model == 'DSI':
             pass
         else:
-            self.local_model_editor = {
-                False: '1:Tensor', True: '2:Constrained Spherical Deconvolution'}
+            self.local_model_editor = {False: '1:Tensor',
+                                       True: '2:Constrained Spherical Deconvolution'}
 
 
 class MRtrix_recon_config(HasTraits):
@@ -250,11 +248,10 @@ class MRtrix_recon_config(HasTraits):
             New value of ``imaging_model``
         """
         if new == 'DTI':
-            self.local_model_editor = {
-                False: '1:Tensor', True: '2:Constrained Spherical Deconvolution'}
-        elif new == 'multi-shell':
-            self.local_model_editor = {
-                True: 'Constrained Spherical Deconvolution'}
+            self.local_model_editor = {False: '1:Tensor',
+                                       True: '2:Constrained Spherical Deconvolution'}
+        elif new == 'multishell' or new == 'HARDI':
+            self.local_model_editor = {True: 'Constrained Spherical Deconvolution'}
             self.local_model = True
 
     def _recon_mode_changed(self, new):

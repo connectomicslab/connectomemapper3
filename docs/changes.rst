@@ -3,6 +3,140 @@ Changes
 ========
 
 ****************************
+Version 3.0.0-RC4
+****************************
+
+Date: March 07, 2021
+
+This version corresponds to the fourth and final release
+candidate of Connectome Mapper 3 (CMP3).
+It incorporates the relatively large
+`Pull Request #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_ (~270 commits)
+which includes the following changes such that it marks
+the end of the release candidate phase.
+
+*New features*
+
+* CMP3 pipeline configuration files adopt `JSON` as new format.
+  (`PR #76 <https://github.com/connectomicslab/connectomemapper3/pull/76>`_)
+
+* CMP3 is compatible with PyPI for installation.
+  (`PR #78 <https://github.com/connectomicslab/connectomemapper3/pull/78>`_)
+
+* BIDS convention naming of data derived from parcellation atlas adopt now the new BIDS
+  entity ``atlas-<atlas_label>`` to distinguish data derived from different parcellation
+  atlases. The use of the entity ``desc-<scale_label>`` to distinguish between
+  parcellation scale has been replaced by the use of the entity ``res-<scale_label>``.
+  (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
+
+*Updates*
+
+* Content of ``dataset_description.json`` for each derivatives folder has been updated
+  to conform to BIDS version 1.4.0.
+  (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
+
+*Code refactoring*
+
+* Major refactoring of the `cmtklib.config` module with the addition and
+  replacement of a number of new methods to handle `JSON` configuration files.
+  (See `full diff on GitHub <https://github.com/connectomicslab/connectomemapper3/pull/74/files#diff-00f63c128c86731f18ae0c51efca7f4fb097970c53b6016754efd91f2af581ad>`_)
+  Configuration files in the old `INI` format can be converted automatically
+  with the help of the two new methods `check_configuration_format()`
+  and `convert_config_ini_2_json()` to detect if configuration files are
+  in the `INI` format and to make the conversion.
+  (`PR #76 <https://github.com/connectomicslab/connectomemapper3/pull/76>`_)
+
+* Major changes to make `cmp` and `cmpbidsappmanager` compatible with the
+  Python Package Index (`pip`) for package distribution and installation.
+  This includes the merge of `setup.py` and `setup_gui.py`, which
+  have been merged into one `setup.py` and a major refactoring to make
+  `pip` happy, as well as the creation of a new `cmp.cli` module,
+  migration to `cmp.cli` module and refactoring of the scripts
+  `connectomemapper3`, `showmatrix_gpickle`, and `cmpbidsappmanager`
+  with correction of code style issues and addition of missing docstrings.
+  (`PR #78 <https://github.com/connectomicslab/connectomemapper3/pull/78>`_)
+
+*Improvements*
+
+* Clean parameters to be saved in configuration files with the new API.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+* Clean output printed by the cmpbidsappmanager Graphical User Interface.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+* Add in `cmtklib.config` the three new functions `print_error`, `print_blue`,
+  and `print_warning`  to use different colors to differentiate general info
+  (default color), error (red), command or action (blue), and highlight or
+  warning (yellow).
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+* Clean code and remove a number of commented lines that are now obsolete.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_,
+  `PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+*Documentation*
+
+* Review usage and add a note regarding the adoption of the new `JSON` format
+  for configuration files.
+  (`PR #76 <https://github.com/connectomicslab/connectomemapper3/pull/76>`_)
+
+* Update tutorial on using CMP3 and Datalad for collaboration.
+  (`PR #77 <https://github.com/connectomicslab/connectomemapper3/pull/77>`_)
+
+* Update installation instruction of `cmpbidsappmanager` using `pip install .`.
+  (`PR #78 <https://github.com/connectomicslab/connectomemapper3/pull/78>`_)
+
+* Update list of outputs following the new BIDS derivatives naming convention introduced.
+  (`PR #79 <https://github.com/connectomicslab/connectomemapper3/pull/79>`_)
+
+*Bug fixes*
+
+* Correct attributes related to the diffusion imaging model type `multishell`.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+* Review code in `cmtklib/connectome.py` for saving functional connectome files
+  in GRAPHML format.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+*Software Updates*
+
+* Update version of datalad and dependencies
+  (`PR #77 <https://github.com/connectomicslab/connectomemapper3/pull/77>`_):
+
+  * `datalad[full]==0.13.0` to ``datalad[full]==0.14.0``.
+  * `datalad-container==0.3.1` to ``datalad-container==1.1.2``.
+  * `datalad_neuroimaging==0.2.0` to ``datalad-neuroimaging==0.3.1``.
+  * `git-annex=8.20200617` to ``git-annex=8.20210127``.
+  * `datalad-revolution` was removed.
+
+*Software development life cycle*
+
+* Improve code coverage by calling the methods `check_stages_execution()`
+  and `fill_stages_outputs()`
+  on each pipeline when executed with coverage.
+  (`PR #75 <https://github.com/connectomicslab/connectomemapper3/pull/75>`_)
+
+* Improve code coverage by saving in test-01 structural connectome files in MAT
+  and GRAPHML format.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+* Improve code coverage by saving in test-07 functional connectome files
+  in GRAPHML format.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+* Update the list of outputs for all tests.
+  (`PR #74 <https://github.com/connectomicslab/connectomemapper3/pull/74>`_)
+
+* Add `test-python-install` job that test the build and installation of `cmp`
+  and `cmpbidsappmanager` packages compatible with `pip`.
+  (`PR #78 <https://github.com/connectomicslab/connectomemapper3/pull/78>`_)
+
+Please check the
+`main pull request 74 page <https://github.com/connectomicslab/connectomemapper3/pull/74>`_
+for more details.
+
+
+****************************
 Version 3.0.0-RC3
 ****************************
 

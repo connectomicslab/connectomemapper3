@@ -1,7 +1,7 @@
 ##################################################################
 # Use Ubuntu 16.04 LTS as base image
 ##################################################################
-FROM ubuntu:xenial-20181218 as builder
+FROM ubuntu:xenial-20210114 as builder
 
 ##################################################################
 # Docker build command arguments
@@ -19,13 +19,13 @@ ARG VERSION
 WORKDIR /opt
 
 # Pre-cache neurodebian key
-COPY ubuntu16.04/files/neurodebian.gpg /root/.neurodebian.gpg
+COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 
 # Install system library dependencies
 RUN apt-get update && \
-    apt-get install software-properties-common -y && \
+    apt-get install python2.7 python2.7-minimal software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
-    locales libstdc++6 npm curl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
+    locales libstdc++6 npm curl perl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
@@ -178,13 +178,14 @@ WORKDIR /opt
 
 ENV CONDA_ENV py37cmp-core
 # Pull the environment name out of the environment.yml
-COPY ubuntu16.04/environment.yml /app/environment.yml
+COPY docker/environment.yml /app/environment.yml
 RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_ENV &&\
      conda clean -v --all --yes && rm -rf ~/.conda ~/.cache/pip/*"
 
 # Make ANTs happy
 ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
-    PATH="$ANTSPATH:$PATH"
+    PATH="$ANTSPATH:$PATH" \
+    PYTHON_EGG_CACHE="/cache/python-eggs"
 
 ##################################################################
 # Install BIDS validator
@@ -208,11 +209,15 @@ WORKDIR /app/connectomemapper3
 # Copy contents of this repository.
 COPY . /app/connectomemapper3
 
+# Create cache directory for python eggs
+RUN mkdir -p /cache/python-eggs && \
+    chmod -R 777 /cache/python-eggs
+
 # Install cmp and cmtklib packages in the conda environment $CONDA_ENV
 # ENV CONDA_ENV py37cmp-core
 # RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
 RUN /bin/bash -c ". activate ${CONDA_ENV} &&\
-    python setup.py install"
+    pip install ."
 
 # Environmment setup
 ENV ANTSPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
@@ -236,7 +241,6 @@ COPY scripts/bidsapp/run_coverage_cmp3.sh /app/run_coverage_cmp3.sh
 RUN cat /app/run_coverage_cmp3.sh
 
 ##################################################################
-# Set the working directory back to /app
 # Acquire script to be executed
 ##################################################################
 RUN chmod 775 /app/connectomemapper3/run.py && \

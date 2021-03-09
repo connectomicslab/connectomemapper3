@@ -9,6 +9,9 @@ Commandline Usage
 .. warning::
     As of ``CMP3 v3.0.0-RC2``, the BIDS App includes a **tracking** system that anonymously reports the run of the BIDS App. This feature has been introduced to support us in the task of fund finding for the development of CMP3 in the future. However, users are still free to opt-out using the ``--notrack`` commandline argument.
 
+.. important:: Since ``v3.0.0-RC4``, configuration files adopt the `JSON` format. If you have your configuration files still in the *old* `INI` format,
+    do not worry, the CMP3 BIDS App will convert them to the new `JSON` format automatically for you.
+
 Commandline Arguments
 =============================
 
@@ -31,11 +34,11 @@ To run the docker image in participant level mode (for one participant):
             -v /home/localadmin/data/ds001:/bids_dir \\
             -v /media/localadmin/data/ds001/derivatives:/output_dir \\
             (-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \\)
-            sebastientourbier/connectomemapper3:|release| \\
+            sebastientourbier/connectomemapper-bidsapp:|release| \\
             /bids_dir /output_dir participant --participant_label 01 \\(--session_label 01 \\)
-          	--anat_pipeline_config /bids_dir/code/ref_anatomical_config.ini \\)
-            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.ini \\)
-            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.ini \\)
+            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\)
+            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
+            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
             (--number_of_participants_processed_in_parallel 1)
 
 .. note:: The local directory of the input BIDS dataset (here: ``/home/localadmin/data/ds001``) and the output directory (here: ``/media/localadmin/data/ds001/derivatives``) used to process have to be mapped to the folders ``/bids_dir`` and ``/output_dir`` respectively using the ``-v`` docker run option.

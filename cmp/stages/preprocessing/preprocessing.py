@@ -926,7 +926,6 @@ class PreprocessingStage(Stage):
                 self.inspect_outputs_dict['Bias field'] = ['mrview', bias]
 
         if self.config.eddy_current_and_motion_correction:
-
             if self.config.eddy_correction_algo == 'FSL eddy_correct':
                 eddy_dir = os.path.join(self.stage_dir, 'eddy_correct')
             else:
@@ -934,7 +933,6 @@ class PreprocessingStage(Stage):
 
             # Might need extra if/else for eddy_correct/eddy
             edcorr = os.path.join(eddy_dir, 'eddy_corrected.nii.gz')
-
             if os.path.exists(edcorr):
                 self.inspect_outputs_dict['Eddy current corrected image'] = ['mrview', edcorr]
 

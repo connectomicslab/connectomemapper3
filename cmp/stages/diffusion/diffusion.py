@@ -24,7 +24,7 @@ class DiffusionConfig(HasTraits):
 
     Attributes
     ----------
-    diffusion_imaging_model_editor : ['DSI', 'DTI', 'HARDI']
+    diffusion_imaging_model_editor : ['DSI', 'DTI', 'HARDI', 'multishell']
         Available diffusion imaging models
 
     diffusion_imaging_model : traits.Str
@@ -89,7 +89,7 @@ class DiffusionConfig(HasTraits):
     cmp.stages.diffusion.diffusion.DiffusionStage
     """
 
-    diffusion_imaging_model_editor = List(['DSI', 'DTI', 'HARDI'])
+    diffusion_imaging_model_editor = List(['DSI', 'DTI', 'HARDI', 'multishell'])
     diffusion_imaging_model = Str('DTI')
     dilate_rois = Bool(True)
     dilation_kernel = Enum(['Box', 'Gauss', 'Sphere'])
@@ -220,21 +220,12 @@ class DiffusionConfig(HasTraits):
         new : string
             New value of ``diffusion_model``
         """
-        print("diffusion model changed")
-
         # Probabilistic tracking only available for Spherical Deconvoluted data
         if self.tracking_processing_tool == 'MRtrix':
             self.mrtrix_tracking_config.tracking_mode = new
-            print('tracking tool mrtrix')
             if new == 'Deterministic':
-                print('det mode')
-                # Make sure backtrack is disable for MRtrix Deterministic (ACT) Tractography
-                print('Disable backtrack for deterministic ACT')
                 self.mrtrix_tracking_config.backtrack = False
-            else:
-                print('prob mode')
         elif self.tracking_processing_tool == 'Dipy':
-            print('tracking tool dipy')
             self.dipy_tracking_config.tracking_mode = new
 
     def update_dipy_tracking_sh_order(self, new):
@@ -375,7 +366,7 @@ class DiffusionStage(Stage):
                         min_size = voxel_size
 
                 print("voxel size (min): %g" % min_size)
-                if self.confi.dilation_kernel == 'Gauss':
+                if self.config.dilation_kernel == 'Gauss':
                     kernel_size = 2 * extract_sizes.outputs.voxel_sizes + 1
                     # FWHM criteria, i.e. sigma = FWHM / 2(sqrt(2ln(2)))
                     sigma = kernel_size / 2.355
@@ -698,9 +689,7 @@ class DiffusionStage(Stage):
                     self.inspect_outputs_dict[self.config.recon_processing_tool + ' SH image'] = ['mrview', fa_res,
                                                                                                   '-odf.load_tensor',
                                                                                                   tensor_res]
-
             else:  # CSD model
-
                 RF_dir = os.path.join(self.stage_dir, "reconstruction", "mrtrix_rf")
                 RF_resp = os.path.join(RF_dir, 'diffusion_preproc_resampled_ER.mif')
                 if os.path.exists(RF_resp):
@@ -717,9 +706,7 @@ class DiffusionStage(Stage):
         # Tracking outputs
         # Dipy
         if self.config.tracking_processing_tool == 'Dipy':
-            # print('Dipy tracking: true')
             if self.config.dipy_recon_config.local_model or self.config.diffusion_imaging_model == 'DSI':
-
                 if self.config.diffusion_model == 'Deterministic':
                     diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_deterministic_tracking")
                     streamline_res = os.path.join(diff_dir, "tract.trk")
@@ -730,9 +717,7 @@ class DiffusionStage(Stage):
                 if os.path.exists(streamline_res):
                     self.inspect_outputs_dict[
                         self.config.tracking_processing_tool + ' ' + self.config.diffusion_model + ' streamline'] = ['trackvis', streamline_res]
-
             else:
-
                 diff_dir = os.path.join(self.stage_dir, "tracking", "dipy_dtieudx_tracking")
                 streamline_res = os.path.join(diff_dir, "tract.trk")
                 if os.path.exists(streamline_res):
