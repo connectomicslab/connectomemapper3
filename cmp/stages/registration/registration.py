@@ -229,25 +229,6 @@ class RegistrationConfig(HasTraits):
     apply_to_eroded_brain = Bool(False)
 
 
-def unicode2str(text):
-    """Convert a unicode to a string using system's encoding.
-
-    (This methods should be moved to utils in the upcoming future.)
-
-    Parameters
-    ----------
-    text : bytes
-        Unicode bytes representation of a string
-
-    Returns
-    -------
-    out_str : str
-        Output string
-    """
-    out_str = str(text)
-    return out_str
-
-
 class RegistrationStage(Stage):
     """Class that represents the registration stage of both `DiffusionPipeline` and `fMRIPipeline`.
 
