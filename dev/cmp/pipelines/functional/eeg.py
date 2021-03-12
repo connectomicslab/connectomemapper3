@@ -59,7 +59,7 @@ class EEGPipeline(Pipeline):
 
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = project_info.subject
-        self.global_conf.base_directory = project_info.base_directory
+
 		if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
             self.subject_directory = os.path.join(project_info.base_directory,
@@ -96,7 +96,7 @@ class EEGPipeline(Pipeline):
 
 	def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):
 		datasource = pe.Node(interface=nio.BIDSDataGrabber(index_derivatives=True), name='bids-grabber',anat_only=False)
-		datasource.inputs.base_dir = self.global_conf.base_directory
+		datasource.inputs.base_dir = self.base_directory
 		datasource.inputs.subject = self.subject_id
 		datasource.inputs.output_query = {
 											'EEG': {

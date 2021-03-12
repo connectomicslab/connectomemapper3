@@ -27,11 +27,15 @@ class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
 	svd_params = traits.Dict(
 		desc='Parameters for SVD roi tc extraction', mandatory=True)
 	
+
+	roi_ts_file = traits.File(
+		exists=False, desc="src * time series in .fif format")
+
 class CartoolInverseSolutionROIExtractionOutputSpec(TraitedSpec):
 	"""Output specification for InverseSolution."""
 
 	roi_ts_file = traits.File(
-		exists=False, desc="src * time series in .fif format")
+		exists=True, desc="src * time series in .npy format")
 
 
 class CartoolInverseSolutionROIExtraction(BaseInterface):
@@ -54,11 +58,14 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
 		lamda = self.inputs.lamda
 		rois_file = self.inputs.rois_file
 		svd_params = self.inputs.svd_params		 
+		self.roi_ts_file = self.inputs.roi_ts_file
+		roi_tcs = self.apply_inverse_epochs_cartool(epochs_file, src_file, invsol_file, lamda, rois_file, svd_params)
+		
 
-		self.roi_ts_file = self.apply_inverse_epochs_cartool(epochs_file, src_file, invsol_file, lamda, rois_file, svd_params)
+		np.save(self.roi_ts_file,roi_tcs)
+
 		return runtime
 
-	
 	def apply_inverse_epochs_cartool(self, epochs_file, src_file, invsol_file, lamda,rois_file,svd_params):		
 		epochs = mne.read_epochs(epochs_file)
 		invsol = cart.io.inverse_solution.read_is(invsol_file)
