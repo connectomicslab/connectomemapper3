@@ -11,13 +11,13 @@ class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
 		exists=True, desc='eeg * epochs in _epo.fif format', mandatory=True)
 
 
-	src_file = traits.File(
+	src_file = traits.List(
 		exists=True, desc='src (spi loaded with pycartool)', mandatory=True)
 
 	lamda = traits.Int(
 		desc='Regularization parameter for inverse solution', mandatory=True)
 
-	invsol_file = traits.File(
+	invsol_file = traits.List(
 		exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=True)
 
 
@@ -29,13 +29,13 @@ class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
 	
 
 	roi_ts_file = traits.File(
-		exists=False, desc="src * time series in .fif format")
+		exists=False, desc="rois * time series in .npy format")
 
 class CartoolInverseSolutionROIExtractionOutputSpec(TraitedSpec):
 	"""Output specification for InverseSolution."""
 
 	roi_ts_file = traits.File(
-		exists=True, desc="src * time series in .npy format")
+		exists=True, desc="rois * time series in .npy format")
 
 
 class CartoolInverseSolutionROIExtraction(BaseInterface):
@@ -53,15 +53,13 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
 	def _run_interface(self, runtime):
 
 		epochs_file = self.inputs.eeg_ts_file
-		src_file = self.inputs.src_file
-		invsol_file = self.inputs.invsol_file
+		src_file = self.inputs.src_file[0]
+		invsol_file = self.inputs.invsol_file[0]
 		lamda = self.inputs.lamda
 		rois_file = self.inputs.rois_file
 		svd_params = self.inputs.svd_params		 
 		self.roi_ts_file = self.inputs.roi_ts_file
-		roi_tcs = self.apply_inverse_epochs_cartool(epochs_file, src_file, invsol_file, lamda, rois_file, svd_params)
-		
-
+		roi_tcs = self.apply_inverse_epochs_cartool(epochs_file, src_file, invsol_file, lamda, rois_file, svd_params)	
 		np.save(self.roi_ts_file,roi_tcs)
 
 		return runtime
@@ -91,8 +89,6 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
 				roi_stc[0,:,:,k] = K[0,spis_this_roi] @ e
 				roi_stc[1,:,:,k] = K[1,spis_this_roi] @ e
 				roi_stc[2,:,:,k] = K[2,spis_this_roi] @ e 
-
-
 
 			stim_onset = np.where(times==0)[0][0]
 			svd_t_begin = stim_onset+int(svd_params['toi_begin']/tstep)

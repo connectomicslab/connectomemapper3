@@ -6,10 +6,10 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits
 class EEGLAB2fifInputSpec(BaseInterfaceInputSpec):
 	"""Input specification for EEGLAB2fif. """
 
-	eeg_ts_file = traits.File(
+	eeg_ts_file = traits.List(
 		exists=True, desc='eeg * epochs in .set format', mandatory=True)
 	
-	behav_file = traits.File(
+	behav_file = traits.List(
 		exists=True, desc='epochs metadata in _behav.txt', mandatory=True)
 	 
 	epochs_fif_fname = traits.File(
@@ -35,9 +35,9 @@ class EEGLAB2fif(BaseInterface):
 
 	def _run_interface(self, runtime):
 
-		epochs_file = self.inputs.eeg_ts_file
-		behav_file = self.inputs.behav_file
-		epochs_fif_fname = self.inputs.epochs_fif_fname		
+		epochs_file = self.inputs.eeg_ts_file[0]
+		behav_file = self.inputs.behav_file[0]
+		epochs_fif_fname = self.inputs.epochs_fif_fname
 		self.fif_ts_file = self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname)
 
 		return runtime

@@ -17,26 +17,10 @@ import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
-from cmtklib.interfaces.invsol import CartoolInverseSolutionROIExtraction
+from dev.cmtklib_dev.interfaces.invsol import CartoolInverseSolutionROIExtraction
 from cmtklib.util import get_pipeline_dictionary_outputs
 
-class EEGPreprocessingConfig(HasTraits):
-
-    #pipeline_mode = Enum(["Diffusion", "fMRI"])
-    #parcellation_scheme = Str('Lausanne2008')
-    #parcellation_scheme_editor = List(
-    #    ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018'])
-    #include_thalamic_nuclei_parcellation = Bool(True)
-    #ants_precision_type = Enum(['double', 'float'])
-    #segment_hippocampal_subfields = Bool(True)
-    #segment_brainstem = Bool(True)
-    #pre_custom = Str('Lausanne2008')
-    #number_of_regions = Int()
-    #atlas_nifti_file = File(exists=True)
-    #csf_file = File(exists=True)
-    #brain_file = File(exists=True)
-    #graphml_file = File(exists=True)
-    #atlas_info = Dict()
+class EEGLoaderConfig(HasTraits):
 
     eeg_format = Str('EEGLAB')
 
@@ -79,13 +63,13 @@ class EEGPreprocessingConfig(HasTraits):
         self.update_atlas_info()
 
 
-class EEGPreprocessingStage(Stage):
+class EEGLoaderStage(Stage):
     def __init__(self, pipeline_mode, bids_dir, output_dir):
         """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
-        self.name = 'eeg_preprocessing_stage'
+        self.name = 'eeg_loader_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        self.config = EEGPreprocessingConfig()
+        self.config = EEGLoaderConfig()
         self.config.pipeline_mode = pipeline_mode
         self.inputs = ["subjects_dir", "subject_id", "eeg_format"]
         self.outputs = ["eeg_data"]

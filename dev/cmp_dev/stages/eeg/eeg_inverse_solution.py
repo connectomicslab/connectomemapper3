@@ -17,10 +17,10 @@ import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
-from cmtklib.interfaces.invsol import CartoolInverseSolutionROIExtraction
+from dev.cmtklib_dev.interfaces.invsol import CartoolInverseSolutionROIExtraction
 from cmtklib.util import get_pipeline_dictionary_outputs
 
-class EEGPreprocessingConfig(HasTraits):
+class EEGInverseSolutionConfig(HasTraits):
 
     #pipeline_mode = Enum(["Diffusion", "fMRI"])
     #parcellation_scheme = Str('Lausanne2008')
@@ -79,13 +79,13 @@ class EEGPreprocessingConfig(HasTraits):
         self.update_atlas_info()
 
 
-class EEGPreprocessingStage(Stage):
+class EEGInverseSolutionStage(Stage):
     def __init__(self, pipeline_mode, bids_dir, output_dir):
         """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
-        self.name = 'eeg_preprocessing_stage'
+        self.name = 'eeg_inverse_solution_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        self.config = EEGPreprocessingConfig()
+        self.config = EEGInverseSolutionConfig()
         self.config.pipeline_mode = pipeline_mode
         self.inputs = ["subjects_dir", "subject_id", "eeg_format"]
         self.outputs = ["eeg_data"]
