@@ -17,51 +17,20 @@ import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
-from dev.cmtklib_dev.interfaces.invsol import CartoolInverseSolutionROIExtraction
+from dev.cmtklib_dev.interfaces.eeglab2fif import EEGLAB2fif
+from dev.cmtklib_dev.interfaces.createrois import CreateRois
 from cmtklib.util import get_pipeline_dictionary_outputs
 
 class EEGPreprocessingConfig(HasTraits):
 
-    eeg_format = Str('EEGLAB')
+    eeg_format = Enum('.set', '.fif',
+                                   desc='<.set|.fif> (default is .set)')
+    inverse_solution = List(
+        ['Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA'])
 
-    def update_atlas_info(self):
-        """Update `atlas_info` class attribute."""
-        atlas_name = os.path.basename(self.atlas_nifti_file)
-        atlas_name = os.path.splitext(os.path.splitext(atlas_name)[0])[
-            0].encode('ascii')
-        self.atlas_info = {
-            atlas_name: {'number_of_regions': self.number_of_regions, 'node_information_graphml': self.graphml_file}}
-
-    def _atlas_nifti_file_changed(self, new):
-        """Calls `update_atlas_info()` when ``atlas_nifti_file`` is changed.
-
-        Parameters
-        ----------
-        new : string
-            New value of ``atlas_nifti_file``
-        """
-        self.update_atlas_info()
-
-    def _number_of_regions_changed(self, new):
-        """Calls `update_atlas_info()` when ``number_of_regions`` is changed.
-
-        Parameters
-        ----------
-        new : string
-            New value of ``number_of_regions``
-        """
-        self.update_atlas_info()
-
-    def _graphml_file_changed(self, new):
-        """Calls `update_atlas_info()` when ``graphml_file`` is changed.
-
-        Parameters
-        ----------
-        new : string
-            New value of ``graphml_file``
-        """
-        self.update_atlas_info()
-
+    parcellation_scheme = Str('Lausanne2008')
+    parcellation_scheme_editor = List(
+        ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018'])
 
 class EEGPreprocessingStage(Stage):
     def __init__(self, pipeline_mode, bids_dir, output_dir):
@@ -71,73 +40,44 @@ class EEGPreprocessingStage(Stage):
         self.output_dir = output_dir
         self.config = EEGPreprocessingConfig()
         self.config.pipeline_mode = pipeline_mode
-        self.inputs = ["subjects_dir", "subject_id", "eeg_format"]
-        self.outputs = ["eeg_data"]
+        self.inputs = ["eeg_ts_file", "behav_file", "epochs_fif_fname",
+                       "subject_id","parcellation","cmp3_dir","cartool_dir"]
+        self.outputs = ["fif_ts_file","rois_pickle"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        """Create the stage worflow.
+        
 
-        Parameters
-        ----------
-        flow : nipype.pipeline.engine.Workflow
-            The nipype.pipeline.engine.Workflow instance of the anatomical pipeline
+        if self.config.eeg_format == ".set":
+            eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
 
-        inputnode : nipype.interfaces.utility.IdentityInterface
-            Identity interface describing the inputs of the stage
-
-        outputnode : nipype.interfaces.utility.IdentityInterface
-            Identity interface describing the outputs of the stage
-        """
-        # from nipype.interfaces.fsl.maths import MathsCommand
-
-        outputnode.inputs.eeg_format = self.config.eeg_format
-
-        def get_basename(path):
-            """Return ``os.path.basename()`` of a ``path``.
-
-            Parameters
-            ----------
-            path : os.path
-                Path to extract the containing directory
-
-            Returns
-            -------
-            path : os.path
-                Path to the containing directory
-            """
-            import os
-            path = os.path.basename(path)
-            print(path)
-            return path
-
-        if self.config.eeg_format == "EEGLAB":
-
+            flow.connect([(inputnode, eeglab2fif_node,
+                 [('epochs','eeg_ts_file'),
+                  ('behav_file','behav_file'),
+                  ('epochs_fif_fname','epochs_fif_fname'),
+                 ]
+                    )])
+            flow.connect([(eeglab2fif_node,outputnode,
+                 [
+                  ('epochs_fif_fname','epochs_fif_fname'),
+                 ]
+                    )])
             
-            eeglab2fif_node = pe.Node(interface = EEGLAB2fif(
-                ), name="eeglab2fif")
-            
-            
-            flow.connect([
-                (inputnode, eeglab2fif_node,
-                    [('epochs','eeg_ts_file'),
-                    ('behav','behav_file'),
-                    ('epochs_fif','epochs_fif_fname'),
-                    ])
-                ])        
+        if self.config.invsol.split('-')[0] == "Cartool":
+        	createrois_node = pe.Node(CreateRois(), name="createrois")
+            flow.connect([(inputnode, createrois_node,
+                 [('subject_id','subject_id'),
+                  ('parcellation','parcellation'),
+                  ('cartool_dir','cartool_dir'),
+                  ('cmp3_dir','cmp3_dir'),
+                 ]
+                    )])
+            flow.connect([(createrois_node, outputnode,
+                 [
+                  ('rois_pickle','rois_pickle'),
+                 ]
+                    )])
 
     def define_inspect_outputs(self):
-        """Update the `inspect_outputs' class attribute.
-
-        It contains a dictionary of stage outputs with corresponding commands for visual inspection.
-        """
-        eeg_sinker_dir = os.path.join(os.path.dirname(self.stage_dir), 'eeg_sinker')
-        eeg_sinker_report = os.path.join(eeg_sinker_dir, '_report', 'report.rst')
-
-        """if self.config.eeg_format == "EEGLAB":
-                                    if os.path.exists(eeg_sinker_report):
-                                        eeg_outputs = get_pipeline_dictionary_outputs(eeg_sinker_report, self.output_dir)
-        """
-
         raise NotImplementedError
 
 
@@ -148,5 +88,6 @@ class EEGPreprocessingStage(Stage):
         -------
         `True` if the stage has been run successfully
         """
-        if self.config.eeg_format == "EEGLAB":            
-            return os.path.exists(self.config.epochs_fif)
+        if self.config.eeg_format == ".set":
+            if self.config.inverse_solution.split('-')[0] == "Cartool":
+                return os.path.exists(self.config.epochs_fif)                

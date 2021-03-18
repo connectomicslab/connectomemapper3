@@ -203,14 +203,6 @@ class EEGPipeline(Pipeline):
                           )
                          ])
 
-         eeg_flow.connect([
-                          (preproc_flow, eeg_outputnode,
-                           [
-                            ('outputnode.fif_ts_file','epochs_fif_fname'),
-                           ]
-                          )
-                         ])
-
         # Create invsol. flow
         invsol_flow = self.create_stage_flow("EEGInverseSolution")
 
