@@ -21,26 +21,16 @@ from dev.cmtklib_dev.interfaces.eegloader import EEGLoader
 from cmtklib.util import get_pipeline_dictionary_outputs
 
 class EEGLoaderConfig(HasTraits):
-
-    eeg_format = Enum('.set', '.fif',
-                                   desc='<.set|.fif> (default is .set)')
-    inverse_solution = List(
-        ['Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA'])
-
-    parcellation_scheme = Str('Lausanne2008')
-    parcellation_scheme_editor = List(
-        ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018'])
-
+    pass
 class EEGLoaderStage(Stage):
-    def __init__(self, pipeline_mode, bids_dir, output_dir):
+    def __init__(self, bids_dir, output_dir):
         """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
         self.name = 'eeg_loader_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGLoaderConfig()
-        self.config.pipeline_mode = pipeline_mode
-        self.inputs = ["subject_id", "base_directory"]
-        self.outputs = ["EEG","events","src_file","invsol_file","parcellation"]
+        self.inputs = ["subject_id", "base_directory","output_query","derivative_list"]
+        self.outputs = ["EEG","src","invsol","rois"]
 
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -50,22 +40,23 @@ class EEGLoaderStage(Stage):
 
         flow.connect([(inputnode, eegloader_node,
              [('subject_id','subject_id'),
-              ('base_directory','base_directory')
+              ('base_directory','base_directory'),
+              ('output_query','output_query'),
+              ('derivative_list','derivative_list')              
              ]
                 )])
+
         flow.connect([(eegloader_node,outputnode,
              [
-              ('EEG','EEG'),
-              ('events','events'),
-              ('src_file','src_file'),
-              ('invsol_file','invsol_file'),
-              ('parcellation','parcellation'),              
-             ]
+              ('EEG','EEG'),              
+              ('src','src'),
+              ('invsol','invsol'),
+              ('rois','rois'),              
+              ]
                 )])
 
     def define_inspect_outputs(self):
         raise NotImplementedError
-
 
     def has_run(self):
         """Function that returns `True` if the stage has been run successfully.

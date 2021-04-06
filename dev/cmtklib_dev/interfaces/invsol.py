@@ -7,25 +7,21 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits
 class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
 	"""Input specification for InverseSolution."""
 
-	eeg_ts_file = traits.File(
-		exists=True, desc='eeg * epochs in _epo.fif format', mandatory=True)
-
+	eeg_ts_file = traits.List(
+		exists=True, desc='eeg * epochs in .set format', mandatory=True)
 
 	src_file = traits.List(
 		exists=True, desc='src (spi loaded with pycartool)', mandatory=True)
-
-	lamda = traits.Int(
-		desc='Regularization parameter for inverse solution', mandatory=True)
 
 	invsol_file = traits.List(
 		exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=True)
 
 
-	rois_file = traits.File(
+	rois_file = traits.List(
 		exists=True, desc='rois file, loaded with pickle', mandatory=True)
 	
-	svd_params = traits.Dict(
-		desc='Parameters for SVD roi tc extraction', mandatory=True)
+	invsol_params = traits.Dict(
+		desc='Parameters for inverse soltion and roi tc extraction', mandatory=True)
 	
 
 	roi_ts_file = traits.File(
@@ -52,13 +48,14 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
 
 	def _run_interface(self, runtime):
 
-		epochs_file = self.inputs.eeg_ts_file
+		epochs_file = self.inputs.eeg_ts_file[0]
 		src_file = self.inputs.src_file[0]
 		invsol_file = self.inputs.invsol_file[0]
-		lamda = self.inputs.lamda
-		rois_file = self.inputs.rois_file
-		svd_params = self.inputs.svd_params		 
+		lamda = self.inputs.invsol_params['lamda']
+		rois_file = self.inputs.rois_file[0]
+		svd_params = self.inputs.invsol_params['svd_params']		 
 		self.roi_ts_file = self.inputs.roi_ts_file
+
 		roi_tcs = self.apply_inverse_epochs_cartool(epochs_file, src_file, invsol_file, lamda, rois_file, svd_params)	
 		np.save(self.roi_ts_file,roi_tcs)
 

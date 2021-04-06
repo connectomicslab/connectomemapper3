@@ -15,25 +15,35 @@ class CreateRoisInputSpec(BaseInterfaceInputSpec):
     parcellation = traits.List(
         desc='parcellation scheme', mandatory=True)
 
-    cartool_dir = traits.Directory(
-        exists=True, desc='Cartool directory', mandatory=True)
+    cartool_dir = traits.Str(
+        desc='Cartool directory', mandatory=True)
 
-    cmp3_dir = traits.Directory(
-        exists=True, desc='CMP3 directory', mandatory=True)
+    cmp3_dir = traits.Str(
+        desc='CMP3 directory', mandatory=True)
+
+    output_query = traits.Dict(
+        desc='BIDSDataGrabber output_query', mandatory=True)
+
+    derivative_list = traits.List(
+            exists=True, desc='List of derivatives to add to the datagrabber', mandatory=True)
 
 class CreateRoisOutputSpec(TraitedSpec):
     """Output specification for InverseSolution."""
 
-    rois_pickle = traits.File(
-        exists=True, desc='rois file, loaded with pickle', mandatory=True)
+    #rois_pickle = traits.File(
+    #    exists=True, desc='rois file, loaded with pickle', mandatory=True)
 
+    output_query = traits.Dict(
+        desc='BIDSDataGrabber output_query', mandatory=True)
+
+    derivative_list = traits.List(
+            exists=True, desc='List of derivatives to add to the datagrabber', mandatory=True)
+    
 
 class CreateRois(BaseInterface):
 
-
     input_spec = CreateRoisInputSpec
     output_spec = CreateRoisOutputSpec
-
 
     def _run_interface(self, runtime):
         subject_id = 'sub-'+self.inputs.subject_id
@@ -41,8 +51,25 @@ class CreateRois(BaseInterface):
         parcellation_name = parcellation_image_path.split('/')[-1].split('.')[0]
         cartool_dir = self.inputs.cartool_dir
         cmp3_dir = self.inputs.cmp3_dir
+        self.derivative_list = self.inputs.derivative_list
+        self.output_query = self.inputs.output_query        
 
-        self.rois_pickle = self._create_roi_files(subject_id, parcellation_image_path, parcellation_name, cartool_dir, cmp3_dir)
+        self._create_roi_files(subject_id, parcellation_image_path, parcellation_name, cartool_dir, cmp3_dir)
+
+        self.derivative_list.append('Cartool')
+
+        self.output_query['rois'] = {
+                                     'scope': 'Cartool',
+                                     'extensions': ['pickle.rois']
+                                     }
+        self.output_query['src'] = {
+                                    'scope': 'Cartool',
+                                    'extensions': ['spi']
+                                    }
+        self.output_query['invsol'] = {
+                                    'scope': 'Cartool',
+                                    'extensions': ['LAURA.is']
+                                    }
 
         return runtime
 
@@ -89,18 +116,19 @@ class CreateRois(BaseInterface):
         filehandler = open(filename_pkl, 'wb') 
         pickle.dump(rois_file_new, filehandler)
         filehandler.close()
-                
-        filename = os.path.join(cartool_dir, subject_id, 'Rois', parcellation_name + '.rois')
-        with open(filename, "w") as text_file:
-            print("{}".format(num_spi), file=text_file)
-            print("RO01", file=text_file)
-            print("{}".format(len(names)), file=text_file)
-            for i in range(len(names)):
-                print("{}".format(names[i]), file=text_file)
-                print(" ".join([str(elem) for elem in groups_of_indexes[i]]), file=text_file)
 
-        return filename_pkl
+        """filename = os.path.join(cartool_dir, subject_id, 'Rois', parcellation_name + '.rois')
+                                with open(filename, "w") as text_file:
+                                    print("{}".format(num_spi), file=text_file)
+                                    print("RO01", file=text_file)
+                                    print("{}".format(len(names)), file=text_file)
+                                    for i in range(len(names)):
+                                        print("{}".format(names[i]), file=text_file)
+                                        print(" ".join([str(elem) for elem in groups_of_indexes[i]]), file=text_file)"""
+
+        #return filename_pkl
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['rois_pickle'] = self.rois_pickle
+        outputs['output_query'] = self.output_query
+        outputs['derivative_list'] = self.derivative_list
         return outputs

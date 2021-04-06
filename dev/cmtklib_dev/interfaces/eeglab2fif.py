@@ -11,16 +11,28 @@ class EEGLAB2fifInputSpec(BaseInterfaceInputSpec):
 	
 	behav_file = traits.List(
 		exists=True, desc='epochs metadata in _behav.txt', mandatory=True)
-	 
+	
 	epochs_fif_fname = traits.File(
 		desc='eeg * epochs in .set format', mandatory=True)
+
+	output_query = traits.Dict(
+		desc='BIDSDataGrabber output_query', mandatory=True)
 	
+	derivative_list = traits.List(
+            exists=True, desc='List of derivatives to add to the datagrabber', mandatory=True)
+
 	
 class EEGLAB2fifOutputSpec(TraitedSpec):
 	"""Output specification for EEGLAB2fif."""
 
-	fif_ts_file = traits.File(
-		exists=True, desc='eeg * epochs in .fif format', mandatory=True)
+	#fif_ts_file = traits.File(
+	#	exists=True, desc='eeg * epochs in .fif format', mandatory=True)
+
+	output_query = traits.Dict(
+        desc='BIDSDataGrabber output_query', mandatory=True)
+
+	derivative_list = traits.List(
+            exists=True, desc='List of derivatives to add to the datagrabber', mandatory=True)
 
 class EEGLAB2fif(BaseInterface):
 	"""Interface for roitimecourses.svd.
@@ -38,8 +50,16 @@ class EEGLAB2fif(BaseInterface):
 		epochs_file = self.inputs.eeg_ts_file[0]
 		behav_file = self.inputs.behav_file[0]
 		epochs_fif_fname = self.inputs.epochs_fif_fname
-		self.fif_ts_file = self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname)
+		self.derivative_list = self.inputs.derivative_list
+		self.output_query = self.inputs.output_query
 
+		self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname)
+		self.derivative_list.append('cmp')
+		self.output_query['EEG'] = {
+									'scope': 'Connectome Mapper',
+									'suffix': 'epo',
+									'extensions': ['fif']	                                
+									}
 		return runtime
 
 	def _convert_eeglab2fif(self, epochs_file, behav_file,epochs_fif_fname):		
@@ -48,10 +68,10 @@ class EEGLAB2fif(BaseInterface):
 		epochs = mne.read_epochs_eeglab(epochs_file, events=None, event_id=None, eog=(), verbose=None, uint16_codec=None)
 		epochs.events[:,2] = list(behav.COND)
 		epochs.event_id = {"Scrambled":0, "Faces":1}
-		epochs.save(epochs_fif_fname,overwrite=True)
-		return epochs_fif_fname
+		epochs.save(epochs_fif_fname,overwrite=True)	
 
 	def _list_outputs(self):
 		outputs = self._outputs().get()
-		outputs['fif_ts_file'] = self.fif_ts_file
+		outputs['output_query'] = self.output_query
+		outputs['derivative_list'] = self.derivative_list
 		return outputs
