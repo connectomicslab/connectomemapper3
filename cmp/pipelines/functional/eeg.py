@@ -21,12 +21,10 @@ from traits.api import *
 
 import cmp.pipelines.common as cmp_common
 from cmp.pipelines.common import *
-from cmp_dev.stages.eeg.eeg_loader import EEGLoaderStage
-from cmp_dev.stages.eeg.eeg_preparer import EEGPreparerStage
-from cmp_dev.stages.eeg.eeg_inverse_solution import EEGInverseSolutionStage
+from cmp.stages.eeg.eeg_loader import EEGLoaderStage
+from cmp.stages.eeg.eeg_preparer import EEGPreparerStage
+from cmp.stages.eeg.eeg_inverse_solution import EEGInverseSolutionStage
 
-
- 
 class Global_Configuration(HasTraits):
 
 	process_type = Str('EEG')
