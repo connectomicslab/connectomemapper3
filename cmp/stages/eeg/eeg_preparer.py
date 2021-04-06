@@ -17,8 +17,8 @@ import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
-from dev.cmtklib_dev.interfaces.eeglab2fif import EEGLAB2fif
-from dev.cmtklib_dev.interfaces.createrois import CreateRois
+from cmtklib.interfaces.eeglab2fif import EEGLAB2fif
+from cmtklib.interfaces.createrois import CreateRois
 from cmtklib.util import get_pipeline_dictionary_outputs
 
 class EEGPreparerConfig(HasTraits):

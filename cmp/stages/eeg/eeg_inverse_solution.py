@@ -17,7 +17,7 @@ import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
-from dev.cmtklib_dev.interfaces.invsol import CartoolInverseSolutionROIExtraction
+from cmtklib.interfaces.invsol import CartoolInverseSolutionROIExtraction
 from cmtklib.util import get_pipeline_dictionary_outputs
 
 class EEGInverseSolutionConfig(HasTraits):
@@ -26,7 +26,7 @@ class EEGInverseSolutionConfig(HasTraits):
                                     desc='Cartool vs mne')
 
 class EEGInverseSolutionStage(Stage):
-
+  
     def __init__(self, bids_dir, output_dir):
         """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
         self.name = 'eeg_inverse_solution_stage'
