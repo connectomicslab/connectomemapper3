@@ -622,7 +622,7 @@ if args.analysis_level == "participant":
             run_anat = False
             run_dmri = False
             run_fmri = False
-
+            run_eeg = False
             if args.anat_pipeline_config is not None:
                 if check_configuration_format(args.anat_pipeline_config) == '.ini':
                     anat_pipeline_config = convert_config_ini_2_json(args.anat_pipeline_config)
@@ -654,6 +654,18 @@ if args.analysis_level == "participant":
                 print("     ... fMRI config created : {}".format(
                     project.fmri_config_file))
 
+
+            if args.eeg_pipeline_config is not None:
+                if check_configuration_format(args.eeg_pipeline_config) == '.ini':
+                    eeg_pipeline_config = convert_config_ini_2_json(args.eeg_pipeline_config)
+                else:
+                    eeg_pipeline_config = args.eeg_pipeline_config
+                project.eeg_config_file = create_subject_configuration_from_ref(project, eeg_pipeline_config,
+                                                                                 'eeg')
+                run_eeg = True
+                print("     ... EEG config created : {}".format(
+                    project.eeg_config_file))
+
             if args.anat_pipeline_config is not None:
                 print("  .. INFO: Running pipelines : ")
                 print("        - Anatomical MRI (segmentation and parcellation)")
@@ -674,6 +686,7 @@ if args.analysis_level == "participant":
                                            project.anat_config_file,
                                            project.dmri_config_file,
                                            None,
+                                           project.eeg_config_file if run_eeg else None, 
                                            number_of_threads=number_of_threads)
                         if not run_dmri and run_fmri:
                             run_individual(project.base_directory,
@@ -683,6 +696,7 @@ if args.analysis_level == "participant":
                                            project.anat_config_file,
                                            None,
                                            project.fmri_config_file,
+                                           project.eeg_config_file if run_eeg else None, 
                                            number_of_threads=number_of_threads)
                         if run_dmri and run_fmri:
                             run_individual(project.base_directory,
@@ -692,6 +706,7 @@ if args.analysis_level == "participant":
                                            project.anat_config_file,
                                            project.dmri_config_file,
                                            project.fmri_config_file,
+                                           project.eeg_config_file if run_eeg else None,
                                            number_of_threads=number_of_threads)
                         # anatomical pipeline only
                         else:
@@ -702,6 +717,7 @@ if args.analysis_level == "participant":
                                            project.anat_config_file,
                                            None,
                                            None,
+                                           project.eeg_config_file if run_eeg else None,
                                            number_of_threads=number_of_threads)
                 else:
 
