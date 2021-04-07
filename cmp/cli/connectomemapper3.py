@@ -565,7 +565,7 @@ def main():
                     return exit_code
 
             eeg_valid_inputs, eeg_pipeline = cmp.project.init_eeg_project(project, bids_layout, False)
-             if eeg_pipeline is not None:
+            if eeg_pipeline is not None:
                 eeg_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 eeg_pipeline.atlas_info = anat_pipeline.atlas_info
 
