@@ -70,7 +70,7 @@ def report_usage(event_category, event_action, event_label, verbose=False):
           BColors.ENDC)
 
 
-def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=1):
+def create_cmp_command(project, run_anat, run_dmri, run_fmri, run_eeg = False, number_of_threads=1):
     """Create the command to run the `connectomemapper3` python script.
 
     Parameters
@@ -121,6 +121,12 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, number_of_threads=
     if run_fmri:
         cmd.append("--func_pipeline_config")
         cmd.append(project.fmri_config_file)
+    else:
+        print("  .. INFO: functional pipeline not performed")
+
+    if run_eeg:
+        cmd.append("--eeg_pipeline_config")
+        cmd.append(project.eeg_config_file)
     else:
         print("  .. INFO: functional pipeline not performed")
 
@@ -479,6 +485,7 @@ if args.analysis_level == "participant":
                 run_anat = False
                 run_dmri = False
                 run_fmri = False
+                run_eeg  = False
 
                 if args.anat_pipeline_config is not None:
                     if check_configuration_format(args.anat_pipeline_config) == '.ini':
@@ -510,7 +517,16 @@ if args.analysis_level == "participant":
                     run_fmri = True
                     print("     ... fMRI config created : {}".format(
                         project.fmri_config_file))
-
+                if args.eeg_pipeline_config is not None:
+                    if check_configuration_format(args.func_pipeline_config) == '.ini':
+                        eeg_pipeline_config = convert_config_ini_2_json(args.eeg_pipeline_config)
+                    else:
+                        eeg_pipeline_config = args.eeg_pipeline_config
+                    project.eeg_config_file = create_subject_configuration_from_ref(project, eeg_pipeline_config,
+                                                                                     'EEG')
+                    run_eeg = True
+                    print("     ... EEG config created : {}".format(
+                        project.eeg_config_file))
                 if args.anat_pipeline_config is not None:
                     print("  .. INFO: Running pipelines : ")
                     print("        - Anatomical MRI (segmentation and parcellation)")
@@ -522,6 +538,9 @@ if args.analysis_level == "participant":
                     if args.func_pipeline_config is not None:
                         print("        - fMRI (functional connectivity matrices)")
 
+                    if args.eeg_pipeline_config is not None:
+                        print("        - EEG (inverse-problem source reconstruction)")
+
                     if args.coverage:
                         if run_anat:
                             if run_dmri and not run_fmri:
@@ -532,6 +551,7 @@ if args.analysis_level == "participant":
                                                project.anat_config_file,
                                                project.dmri_config_file,
                                                None,
+                                               project.eeg_config_file if run_eeg else None,
                                                number_of_threads=number_of_threads)
                             elif not run_dmri and run_fmri:
                                 run_individual(project.base_directory,
@@ -541,6 +561,7 @@ if args.analysis_level == "participant":
                                                project.anat_config_file,
                                                None,
                                                project.fmri_config_file,
+                                               project.eeg_config_file if run_eeg else None,
                                                number_of_threads=number_of_threads)
                             elif run_dmri and run_fmri:
                                 run_individual(project.base_directory,
@@ -550,6 +571,7 @@ if args.analysis_level == "participant":
                                                project.anat_config_file,
                                                project.dmri_config_file,
                                                project.fmri_config_file,
+                                               project.eeg_config_file if run_eeg else None,
                                                number_of_threads=number_of_threads)
                             # anatomical pipeline only
                             else:
@@ -560,6 +582,7 @@ if args.analysis_level == "participant":
                                                project.anat_config_file,
                                                None,
                                                None,
+                                               project.eeg_config_file if run_eeg else None,
                                                number_of_threads=number_of_threads)
                     else:
                         cmd = create_cmp_command(project=project,
@@ -686,6 +709,7 @@ if args.analysis_level == "participant":
                                              run_anat=run_anat,
                                              run_dmri=run_dmri,
                                              run_fmri=run_fmri,
+                                             run_eeg = run_eeg,
                                              number_of_threads=number_of_threads)
                     print_blue("... cmd : {}".format(cmd))
 
