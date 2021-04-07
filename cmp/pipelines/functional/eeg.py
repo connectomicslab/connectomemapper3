@@ -53,7 +53,7 @@ class EEGPipeline(Pipeline):
 	global_conf = Global_Configuration()
 	config_file = Str
 	parcellation_scheme = Str
-    atlas_info = Dict()
+	atlas_info = Dict()
 	eeg_format = Str
 	subjects_dir = Str
 	subject_id = Str
