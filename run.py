@@ -523,7 +523,7 @@ if args.analysis_level == "participant":
                     else:
                         eeg_pipeline_config = args.eeg_pipeline_config
                     project.eeg_config_file = create_subject_configuration_from_ref(project, eeg_pipeline_config,
-                                                                                     'EEG')
+                                                                                     'eeg')
                     run_eeg = True
                     print("     ... EEG config created : {}".format(
                         project.eeg_config_file))
