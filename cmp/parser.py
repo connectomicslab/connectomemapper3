@@ -54,7 +54,8 @@ def get():
                    help='Configuration .txt file for processing stages of the diffusion MRI processing pipeline')
     p.add_argument('--func_pipeline_config',
                    help='Configuration .txt file for processing stages of the fMRI processing pipeline')
-
+    p.add_argument('--eeg_pipeline_config',
+                   help='Configuration .txt file for processing stages of the eeg processing pipeline')
     p.add_argument('--number_of_threads',
                    type=int,
                    help='The number of OpenMP threads used for multi-threading by '
