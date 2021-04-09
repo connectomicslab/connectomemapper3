@@ -599,7 +599,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
     return anat_pipeline
 
 
-def init_eeg_project(project_info, is_new_project, debug=False):
+def init_eeg_project(project_info,bids_layout, is_new_project, debug=False):
     """Initialize the eeg processing pipeline.
 
     Parameters
@@ -634,7 +634,7 @@ def init_eeg_project(project_info, is_new_project, debug=False):
             print('Refresh folder WITHOUT session')
         refresh_folder(bids_directory, derivatives_directory,
                        project_info.subject, eeg_pipeline.input_folders)
-    
+
     eeg_inputs_checked = eeg_pipeline.check_input(layout=bids_layout, gui=gui)
     if eeg_inputs_checked:
         if is_new_project and eeg_pipeline is not None:
