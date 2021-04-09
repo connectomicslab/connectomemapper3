@@ -94,10 +94,10 @@ class EEGPipeline(Pipeline):
 		cmp_common.Pipeline.__init__(self, project_info)
 
 		self.stages['EEGPreparer'].config.cmp3_dir = os.path.join(self.derivatives_directory,'cmp')
-        self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory,'cartool')
+		self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory,'cartool')
 
-    	self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
-        self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
+		self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
+		self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
 
 		#self.stages['EEGPreparer'].config.on_trait_change(self.update_eeg_format, 'eeg_format')
 
