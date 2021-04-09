@@ -106,8 +106,32 @@ class EEGPipeline(Pipeline):
 		
 	def check_config(self):
 		raise NotImplementedError
-	def check_input(self):
-		raise NotImplementedError
+	def check_input(self,layout, gui=True):
+		"""Check if input of the eeg pipeline are available.
+
+        Parameters
+        ----------
+        layout : bids.BIDSLayout
+            Instance of BIDSLayout
+
+        gui : traits.Bool
+            Boolean used to display different messages
+            but not really meaningful anymore since the GUI
+            components have been migrated to `cmp.bidsappmanager`
+
+        Returns
+        -------
+
+        valid_inputs : traits.Bool
+            True if inputs are available
+        """
+		print('**** Check Inputs is not still implemented ****')
+		eeg_available = False
+		epochs_available = False
+		#valid_inputs = False
+		valid_inputs = True
+		return valid_inputs
+
 	def check_output(self):
 		raise NotImplementedError
 
