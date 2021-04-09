@@ -39,7 +39,7 @@ class EEGPreparerStage(Stage):
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGPreparerConfig()        
-        self.inputs = ["eeg_format","invsol_format","epochs","behav_file","parcellation","cartool_dir","cmp3_dir","output_query","epochs_fif_fname","subject_id","derivative_list"]
+        self.inputs = ["eeg_format","invsol_format","epochs","behav_file","parcellation","cartool_dir","cmp3_dir","output_query","epochs_fif_fname","subject","derivative_list"]
         self.outputs = ["output_query","invsol_params","derivative_list"]
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -92,7 +92,7 @@ class EEGPreparerStage(Stage):
                         )])
 
             flow.connect([(inputnode, createrois_node,
-                 [('subject_id','subject_id'),
+                 [('subject','subject'),
                   ('parcellation','parcellation'),
                   ('cartool_dir','cartool_dir'),
                   ('cmp3_dir','cmp3_dir'),
