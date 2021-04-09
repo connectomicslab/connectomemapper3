@@ -55,14 +55,12 @@ class EEGPipeline(Pipeline):
 	parcellation_scheme = Str
 	atlas_info = Dict()
 	eeg_format = Str
-	subjects_dir = Str
-	subject_id = Str
+	subjects_dir = Str	
 
 	flow =  Instance(pe.Workflow)
 
 	def __init__(self, project_info):
 
-		self.subject_id = project_info.subject_id
 		self.subject = project_info.subject
 
 		self.global_conf.subjects = project_info.subjects
@@ -118,24 +116,24 @@ class EEGPipeline(Pipeline):
 	def create_pipeline_flow(self, cmp_deriv_subject_directory, nipype_deriv_subject_directory):    		
 		datasource = pe.Node(interface=util.IdentityInterface(
 					fields=['base_directory',
-							'subject_id',
+							'subject',
 							'cmp_deriv_subject_directory',
 							'nipype_deriv_subject_directory',							
 							], 
 					mandatory_inputs=True), name="datasource")
 
 		datasource.inputs.base_directory = self.base_directory
-		datasource.inputs.subject_id = self.subject_id
+		datasource.inputs.subject = self.subject
 		datasource.inputs.cmp_deriv_subject_directory = cmp_deriv_subject_directory
 		datasource.inputs.nipype_deriv_subject_directory = nipype_deriv_subject_directory
 
 
-		datasource.inputs.epochs = [os.path.join(self.base_directory,'derivatives','eeglab','sub-'+self.subject_id,'eeg','sub-'+self.subject_id+'_task-FACES_desc-preproc_eeg.set')]
-		datasource.inputs.behav_file = [os.path.join(self.base_directory,'derivatives','eeglab','sub-'+self.subject_id,'eeg','sub-'+self.subject_id+'_task-FACES_events.txt')]
+		datasource.inputs.epochs = [os.path.join(self.base_directory,'derivatives','eeglab',self.subject,'eeg','sub-'+self.subject+'_task-FACES_desc-preproc_eeg.set')]
+		datasource.inputs.behav_file = [os.path.join(self.base_directory,'derivatives','eeglab',self.subject,'eeg','sub-'+self.subject+'_task-FACES_events.txt')]
 
-		datasource.inputs.epochs_fif_fname = os.path.join(self.base_directory,'derivatives','cmp','sub-'+self.subject_id,'eeg','sub-'+self.subject_id+'_epo.fif')
-		datasource.inputs.roi_ts_file = os.path.join(self.base_directory,'derivatives','cmp','sub-'+self.subject_id,'eeg','sub-'+self.subject_id+'_rtc_epo.npy')
-		datasource.inputs.parcellation = [os.path.join(self.base_directory,'derivatives','cmp','sub-'+self.subject_id,'anat','sub-'+self.subject_id+'_label-L2008_desc-scale2_atlas.nii.gz')]
+		datasource.inputs.epochs_fif_fname = os.path.join(self.base_directory,'derivatives','cmp',self.subject,'eeg','sub-'+self.subject+'_epo.fif')
+		datasource.inputs.roi_ts_file = os.path.join(self.base_directory,'derivatives','cmp',self.subject,'eeg','sub-'+self.subject+'_rtc_epo.npy')
+		datasource.inputs.parcellation = [os.path.join(self.base_directory,'derivatives','cmp',self.subject,'anat','sub-'+self.subject+'_label-L2008_desc-scale2_atlas.nii.gz')]
 
 		datasource.inputs.output_query = dict()
 
@@ -160,7 +158,7 @@ class EEGPipeline(Pipeline):
 						  (datasource, preparer_flow, 
 						   [
 							('epochs','inputnode.epochs'),
-							('subject_id','inputnode.subject_id'),
+							('subject','inputnode.subject'),
 							('behav_file','inputnode.behav_file'),
 							('parcellation','inputnode.parcellation'),
 							('epochs_fif_fname','inputnode.epochs_fif_fname'),
@@ -171,7 +169,7 @@ class EEGPipeline(Pipeline):
 		eeg_flow.connect([
 						  (datasource, loader_flow, 
 						   [('base_directory','inputnode.base_directory'),
-						    ('subject_id','inputnode.subject_id'),
+						    ('subject','inputnode.subject'),
 							]),
 						 ])
 
