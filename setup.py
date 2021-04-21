@@ -64,7 +64,8 @@ packages = ["cmp",
 
 # Define the package data to be installed
 package_data = {'cmp':
-                ['cmp3_icon.png'],
+                ['cmp3_icon.png',
+                 'config/*.json'],
                 'cmp.bidsappmanager':
                 ['images/*.png',
                  'pipelines/anatomical/*.png',
