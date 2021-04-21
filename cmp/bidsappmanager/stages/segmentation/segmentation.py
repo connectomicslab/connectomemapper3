@@ -29,24 +29,31 @@ class SegmentationConfigUI(SegmentationConfig):
     cmp.stages.segmentation.segmentation.SegmentationConfig
     """
 
-    traits_view = View(Item('seg_tool', label="Segmentation tool"),
-                       Group(
-                           HGroup('make_isotropic',
-                                  Item('isotropic_vox_size', label="Voxel size (mm)", visible_when='make_isotropic')),
-                           Item('isotropic_interpolation', label='Interpolation',
-                                visible_when='make_isotropic'),
-                           Item('number_of_threads', label='Number of threads used for multithreading in Freesurfer and ANTs'),
-                           'brain_mask_extraction_tool',
-                           Item('ants_templatefile', label='Template',
-                                visible_when='brain_mask_extraction_tool == "ANTs"'),
-                           Item('ants_probmaskfile', label='Probability mask',
-                                visible_when='brain_mask_extraction_tool == "ANTs"'),
-                           Item('ants_regmaskfile', label='Extraction mask',
-                                visible_when='brain_mask_extraction_tool == "ANTs"'),
-                           Item('brain_mask_path', label='Brain mask path',
-                                visible_when='brain_mask_extraction_tool == "Custom"'),
-                           'freesurfer_args',
-                           visible_when="seg_tool=='Freesurfer'"))
+    traits_view = View(
+        Item('seg_tool', label="Segmentation tool"),
+        Group(
+           HGroup('make_isotropic',
+                  Item('isotropic_vox_size', label="Voxel size (mm)", visible_when='make_isotropic')),
+           Item('isotropic_interpolation', label='Interpolation',
+                visible_when='make_isotropic'),
+           Item('number_of_threads', label='Number of threads used for multithreading in Freesurfer and ANTs'),
+           'brain_mask_extraction_tool',
+           Item('ants_templatefile', label='Template',
+                visible_when='brain_mask_extraction_tool == "ANTs"'),
+           Item('ants_probmaskfile', label='Probability mask',
+                visible_when='brain_mask_extraction_tool == "ANTs"'),
+           Item('ants_regmaskfile', label='Extraction mask',
+                visible_when='brain_mask_extraction_tool == "ANTs"'),
+           Item('brain_mask_path', label='Brain mask path',
+                visible_when='brain_mask_extraction_tool == "Custom"'),
+           'freesurfer_args',
+           visible_when="seg_tool=='Freesurfer'"),
+        Group(
+            Item('custom_bids_derivatives_dir', label='Custom BIDS derivatives directory'),
+            Item('custom_bids_derivatives_json', label='JSON describing custom segmentation in BIDS format'),
+            visible_when="seg_tool=='Custom segmentation'"
+        )
+    )
 
 
 class SegmentationStageUI(SegmentationStage):
