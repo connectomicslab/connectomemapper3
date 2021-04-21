@@ -88,7 +88,7 @@ class SegmentationConfig(HasTraits):
         where white matter and brain masks can be found
 
     custom_bids_derivatives_json : traits.File
-        Path to a JSON file specifying the BISD format of
+        Path to a JSON file specifying the BIDS format of
         white matter and brain mask files to query
 
     number_of_threads : traits.Int
@@ -121,11 +121,11 @@ class SegmentationConfig(HasTraits):
     freesurfer_args = Str("")
 
     custom_bids_derivatives_dir = Directory(
-        desc="Specify a custom BIDS derivatives directory "
+        desc="Specify a custom BIDS derivatives directory " +
              "where white matter and brain masks can be found"
     )
     custom_bids_derivatives_json = File(
-        desc="Path to a JSON file specifying the BISD format of "
+        desc="Path to a JSON file specifying the BIDS format of " +
              "white matter and brain mask files to query"
     )
 
