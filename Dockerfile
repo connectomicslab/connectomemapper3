@@ -99,7 +99,7 @@ RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends curl && \
     curl "http://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" | tar xvf  --no-same-owner -C /opt/freesurfer && \
     apt-get remove -y curl && \
-    apt-get clean &&
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Simulate SetUpFreeSurfer.sh
