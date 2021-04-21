@@ -11,8 +11,7 @@ import json
 from collections.abc import Iterable
 
 from cmp.info import __version__
-from cmtklib.util import BColors, print_warning, print_error, \
-    print_blue
+from cmtklib.util import BColors, print_warning, print_error, print_blue
 
 
 def check_configuration_version(config):
@@ -31,18 +30,21 @@ def check_configuration_version(config):
         (`cmp.info.__version__`).
     """
     is_same = False
-    if 'version' in config['Global'].keys():
-        if config['Global']['version'] == __version__:
-            print(BColors.OKGREEN +
-                  '  .. INFO: Generated with the same CMP3 version'
-                  + BColors.ENDC)
+    if "version" in config["Global"].keys():
+        if config["Global"]["version"] == __version__:
+            print(
+                BColors.OKGREEN
+                + "  .. INFO: Generated with the same CMP3 version"
+                + BColors.ENDC
+            )
             is_same = True
         else:
-            conf_version = config['Global']['version']
+            conf_version = config["Global"]["version"]
             print_warning(
-                  '  .. WARNING: CMP3 version used to generate the ' +
-                  f'configuration files ({conf_version}) ' +
-                  f' and version of CMP3 used ({__version__}) differ')
+                "  .. WARNING: CMP3 version used to generate the "
+                + f"configuration files ({conf_version}) "
+                + f" and version of CMP3 used ({__version__}) differ"
+            )
             is_same = False
     return is_same
 
@@ -61,10 +63,10 @@ def check_configuration_format(config_path):
         Format extension of the pipeline configuration file
     """
     ext = None
-    if '.ini' in config_path:
-        ext = '.ini'
-    elif '.json' in config_path:
-        ext = '.json'
+    if ".ini" in config_path:
+        ext = ".ini"
+    elif ".json" in config_path:
+        ext = ".json"
     return ext
 
 
@@ -88,9 +90,11 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
     config_json = {}
 
     # In the case of diffusion pipeline
-    if 'diffusion_stage' in config.sections():
-        recon_processing_tool = config['diffusion_stage'].get('recon_processing_tool')
-        tracking_processing_tool = config['diffusion_stage'].get('tracking_processing_tool')
+    if "diffusion_stage" in config.sections():
+        recon_processing_tool = config["diffusion_stage"].get("recon_processing_tool")
+        tracking_processing_tool = config["diffusion_stage"].get(
+            "tracking_processing_tool"
+        )
 
     for section in config.sections():
         config_json[section] = {}
@@ -98,110 +102,128 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
             # Keep only parameters that are used by the diffusion stage
             # of the diffusion pipeline. This simplifies the reading of
             # its configuration file
-            if 'diffusion_stage' in section:
+            if "diffusion_stage" in section:
                 # Skip adding diffusion reconstruction parameters
-                if recon_processing_tool == 'Dipy':
-                    if 'mrtrix_recon_config' in name:
+                if recon_processing_tool == "Dipy":
+                    if "mrtrix_recon_config" in name:
                         continue
-                elif recon_processing_tool == 'MRtrix':
-                    if 'dipy_recon_config' in name:
+                elif recon_processing_tool == "MRtrix":
+                    if "dipy_recon_config" in name:
                         continue
                 # Skip adding tracking parameters
-                if tracking_processing_tool == 'Dipy':
-                    if 'mrtrix_tracking_config' in name:
+                if tracking_processing_tool == "Dipy":
+                    if "mrtrix_tracking_config" in name:
                         continue
-                elif tracking_processing_tool == 'MRtrix':
-                    if 'dipy_tracking_config' in name:
+                elif tracking_processing_tool == "MRtrix":
+                    if "dipy_tracking_config" in name:
                         continue
 
-            if '_editor' in name:
+            if "_editor" in name:
                 if debug:
-                    print_warning(f'  .. DEBUG: Skip parameter {section} / {name}')
+                    print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                 continue
 
-            if 'log_visualization' in name:
+            if "log_visualization" in name:
                 if debug:
-                    print_warning(f'  .. DEBUG: Skip parameter {section} / {name}')
+                    print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                 continue
 
-            if 'circular_layout' in name:
+            if "circular_layout" in name:
                 if debug:
-                    print_warning(f'  .. DEBUG: Skip parameter {section} / {name}')
+                    print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                 continue
 
             is_iterable = False
 
             if ini_mode:
                 try:
-                    if not(section == 'parcellation_stage' and name == 'ants_precision_type'):
+                    if not (
+                        section == "parcellation_stage"
+                        and name == "ants_precision_type"
+                    ):
                         value = eval(value)
                         if debug:
-                            print_warning(f'  .. DEBUG: String {value} evaluated')
+                            print_warning(f"  .. DEBUG: String {value} evaluated")
                     else:
                         if debug:
-                            print_warning(f'  .. DEBUG: String {value} not evaluated')
+                            print_warning(f"  .. DEBUG: String {value} not evaluated")
                 except Exception:
                     if debug:
-                        print_error(f'  .. EXCEPTION: String {value} COULD NOT BE evaluated')
+                        print_error(
+                            f"  .. EXCEPTION: String {value} COULD NOT BE evaluated"
+                        )
                     pass
 
             if isinstance(value, dict):
                 if debug:
-                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as dict')
+                    print_warning(
+                        f"  .. DEBUG: Processing {section} / {name} / {value} as dict"
+                    )
                 config_json[section][name] = value
                 is_iterable = True
             elif isinstance(value, list):
                 if debug:
-                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as list')
+                    print_warning(
+                        f"  .. DEBUG: Processing {section} / {name} / {value} as list"
+                    )
                 config_json[section][name] = value
                 is_iterable = True
             elif isinstance(value, Iterable) and not isinstance(value, str):
                 if debug:
-                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as iterable')
+                    print_warning(
+                        f"  .. DEBUG: Processing {section} / {name} / {value} as iterable"
+                    )
                 config_json[section][name] = [x for x in value if x]
                 is_iterable = True
             elif isinstance(value, bool):
                 if debug:
-                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as boolean')
+                    print_warning(
+                        f"  .. DEBUG: Processing {section} / {name} / {value} as boolean"
+                    )
                 config_json[section][name] = [value]
             elif value and not isinstance(value, str):
                 if debug:
-                    print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as not a string')
+                    print_warning(
+                        f"  .. DEBUG: Processing {section} / {name} / {value} as not a string"
+                    )
                 config_json[section][name] = [value]
             elif value and isinstance(value, str):
                 value = value.strip()
                 if value.isnumeric():
                     if debug:
-                        print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as number')
+                        print_warning(
+                            f"  .. DEBUG: Processing {section} / {name} / {value} as number"
+                        )
                     value = float(value)
                     if value.is_integer():
                         value = int(value)
                     config_json[section][name] = [value]
                 else:
                     if debug:
-                        print_warning(f'  .. DEBUG: Processing {section} / {name} / {value} as string')
+                        print_warning(
+                            f"  .. DEBUG: Processing {section} / {name} / {value} as string"
+                        )
                     config_json[section][name] = [value]
             else:
                 if debug:
-                    print_warning(
-                          f'  .. DEBUG : Type: {type(value)} / value : {value}')
-                config_json[section][name] = ''
+                    print_warning(f"  .. DEBUG : Type: {type(value)} / value : {value}")
+                config_json[section][name] = ""
 
             if not is_iterable:
                 if len(config_json[section][name]) == 1:
                     config_json[section][name] = config_json[section][name][0]
                 elif len(config_json[section][name]) == 0:
-                    config_json[section][name] = ''
+                    config_json[section][name] = ""
 
-            if config_json[section][name] == '':
+            if config_json[section][name] == "":
                 del config_json[section][name]
 
-    config_json['Global']['version'] = __version__
+    config_json["Global"]["version"] = __version__
 
     if debug:
-        print_blue(f'  .. DEBUG: {config_json}')
+        print_blue(f"  .. DEBUG: {config_json}")
 
-    with open(config_json_path, 'w') as outfile:
+    with open(config_json_path, "w") as outfile:
         json.dump(config_json, outfile, indent=4)
 
 
@@ -218,25 +240,27 @@ def convert_config_ini_2_json(config_ini_path):
     config_json_path : string
         Path to converted configuration file in new JSON format
     """
-    print('>> Load config file : {}'.format(config_ini_path))
+    print(">> Load config file : {}".format(config_ini_path))
     config = configparser.ConfigParser()
 
     try:
         config.read(config_ini_path)
     except configparser.MissingSectionHeaderError:
         print_error(
-                '  .. ERROR : file is a datalad git annex but it has not been retrieved yet.' +
-                ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)'
+            "  .. ERROR : file is a datalad git annex but it has not been retrieved yet."
+            + " Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)"
         )
 
-    config_json_path = '.'.join([os.path.splitext(config_ini_path)[0], 'json'])
+    config_json_path = ".".join([os.path.splitext(config_ini_path)[0], "json"])
     save_configparser_as_json(config, config_json_path, ini_mode=True)
-    print(f'  .. Config file converted to JSON and saved as {config_json_path}')
+    print(f"  .. Config file converted to JSON and saved as {config_json_path}")
 
     return config_json_path
 
 
-def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type, multiproc_number_of_cores=1):
+def create_subject_configuration_from_ref(
+    project, ref_conf_file, pipeline_type, multiproc_number_of_cores=1
+):
     """Create the pipeline configuration file for an individual subject from a reference given as input.
 
     Parameters
@@ -262,47 +286,51 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type,
 
     # print('project.subject_session: {}'.format(project.subject_session))
 
-    if project.subject_session != '':  # Session structure
+    if project.subject_session != "":  # Session structure
         # print('With session : {}'.format(project.subject_session))
-        subject_conf_file = os.path.join(subject_derivatives_dir,
-                                         'cmp',
-                                         project.subject,
-                                         project.subject_session,
-                                         "{}_{}_{}_config.json".format(project.subject,
-                                                                       project.subject_session,
-                                                                       pipeline_type))
+        subject_conf_file = os.path.join(
+            subject_derivatives_dir,
+            "cmp",
+            project.subject,
+            project.subject_session,
+            "{}_{}_{}_config.json".format(
+                project.subject, project.subject_session, pipeline_type
+            ),
+        )
     else:
         # print('With NO session ')
-        subject_conf_file = os.path.join(subject_derivatives_dir,
-                                         'cmp',
-                                         project.subject,
-                                         "{}_{}_config.json".format(project.subject,
-                                                                    pipeline_type))
+        subject_conf_file = os.path.join(
+            subject_derivatives_dir,
+            "cmp",
+            project.subject,
+            "{}_{}_config.json".format(project.subject, pipeline_type),
+        )
 
     if os.path.isfile(subject_conf_file):
         print_warning(
-              "  .. WARNING: rewriting config file {}".format(subject_conf_file))
+            "  .. WARNING: rewriting config file {}".format(subject_conf_file)
+        )
         os.remove(subject_conf_file)
 
     # Change relative path to absolute path if needed (required when using singularity)
     if not os.path.isabs(ref_conf_file):
         ref_conf_file = os.path.abspath(ref_conf_file)
 
-    with open(ref_conf_file, 'r') as f:
+    with open(ref_conf_file, "r") as f:
         config = json.load(f)
 
-    config['Global']['subject'] = project.subject
-    config['Global']['subjects'] = project.subjects
+    config["Global"]["subject"] = project.subject
+    config["Global"]["subjects"] = project.subjects
 
-    if 'subject_sessions' in config['Global'].keys():
-        config['Global']['subject_sessions'] = project.subject_sessions
+    if "subject_sessions" in config["Global"].keys():
+        config["Global"]["subject_sessions"] = project.subject_sessions
 
-    if 'subject_session' in config['Global'].keys():
-        config['Global']['subject_session'] = project.subject_session
+    if "subject_session" in config["Global"].keys():
+        config["Global"]["subject_session"] = project.subject_session
 
-    config['Multi-processing']['number_of_cores'] = multiproc_number_of_cores
+    config["Multi-processing"]["number_of_cores"] = multiproc_number_of_cores
 
-    with open(subject_conf_file, 'w') as outfile:
+    with open(subject_conf_file, "w") as outfile:
         json.dump(config, outfile, indent=4)
 
     return subject_conf_file
@@ -326,7 +354,7 @@ def get_process_detail_json(project_info, section, detail):
     -------
     The parameter value
     """
-    with open(project_info.config_file, 'r') as f:
+    with open(project_info.config_file, "r") as f:
         config = json.load(f)
     return config[section][detail]
 
@@ -349,7 +377,7 @@ def get_anat_process_detail_json(project_info, section, detail):
     -------
     The parameter value
     """
-    with open(project_info.anat_config_file, 'r') as f:
+    with open(project_info.anat_config_file, "r") as f:
         config = json.load(f)
     res = None
     if detail == "atlas_info":
@@ -377,7 +405,7 @@ def get_dmri_process_detail_json(project_info, section, detail):
     -------
     The parameter value
     """
-    with open(project_info.dmri_config_file, 'r') as f:
+    with open(project_info.dmri_config_file, "r") as f:
         config = json.load(f)
     return config[section][detail]
 
@@ -400,7 +428,7 @@ def get_fmri_process_detail_json(project_info, section, detail):
     -------
     The parameter value
     """
-    with open(project_info.fmri_config_file, 'r') as f:
+    with open(project_info.fmri_config_file, "r") as f:
         config = json.load(f)
     return config[section][detail]
 
@@ -420,28 +448,37 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
     debug : bool
         If `True`, show additional prints
     """
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   'trait' not in prop]  # possibly dangerous..?
+    global_keys = [
+        prop
+        for prop in list(pipeline.global_conf.traits().keys())
+        if "trait" not in prop
+    ]  # possibly dangerous..?
     for key in global_keys:
-        if key != "subject" and \
-                key != "subjects" and \
-                key != "subject_session" and \
-                key != "subject_sessions":
-            if key in config['Global'].keys():
-                conf_value = config['Global'][key]
+        if (
+            key != "subject"
+            and key != "subjects"
+            and key != "subject_session"
+            and key != "subject_sessions"
+        ):
+            if key in config["Global"].keys():
+                conf_value = config["Global"][key]
                 setattr(pipeline.global_conf, key, conf_value)
 
     for stage in list(pipeline.stages.values()):
-        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
-                      'trait' not in prop]  # possibly dangerous..?
+        stage_keys = [
+            prop for prop in list(stage.config.traits().keys()) if "trait" not in prop
+        ]  # possibly dangerous..?
         for key in stage_keys:
-            if 'config' in key:  # subconfig
+            if "config" in key:  # subconfig
                 sub_config = getattr(stage.config, key)
-                stage_sub_keys = [prop for prop in list(sub_config.traits().keys()) if
-                                  'trait' not in prop]
+                stage_sub_keys = [
+                    prop
+                    for prop in list(sub_config.traits().keys())
+                    if "trait" not in prop
+                ]
                 for sub_key in stage_sub_keys:
                     if stage.name in config.keys():
-                        tmp_key = key + '.' + sub_key
+                        tmp_key = key + "." + sub_key
                         if tmp_key in config[stage.name].keys():
                             conf_value = config[stage.name][tmp_key]
                             try:
@@ -460,12 +497,16 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                                     conf_value = float(conf_value)
                                 setattr(sub_config, sub_key, conf_value)
                                 if debug:
-                                    print(f' .. DEBUG: Set {sub_config}.{sub_key} to {conf_value}')
+                                    print(
+                                        f" .. DEBUG: Set {sub_config}.{sub_key} to {conf_value}"
+                                    )
                             except Exception as e:
                                 if debug:
-                                    print_warning('  .. EXCEPTION raised while setting ' +
-                                                  f'{sub_config}.{sub_key} to {conf_value}')
-                                    print_error(f'    {e}')
+                                    print_warning(
+                                        "  .. EXCEPTION raised while setting "
+                                        + f"{sub_config}.{sub_key} to {conf_value}"
+                                    )
+                                    print_error(f"    {e}")
                             pass
             else:
                 if stage.name in config.keys():
@@ -487,17 +528,21 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                                 conf_value = float(conf_value)
                             setattr(stage.config, key, conf_value)
                             if debug:
-                                print(f' .. DEBUG: Set {stage.config}.{key} to {conf_value}')
+                                print(
+                                    f" .. DEBUG: Set {stage.config}.{key} to {conf_value}"
+                                )
                         except Exception as e:
                             if debug:
-                                print_warning('  .. EXCEPTION raised while setting ' +
-                                              f'{stage.config}.{key} to {conf_value}')
-                                print_error(f'   {e}')
+                                print_warning(
+                                    "  .. EXCEPTION raised while setting "
+                                    + f"{stage.config}.{key} to {conf_value}"
+                                )
+                                print_error(f"   {e}")
                             pass
 
-    setattr(pipeline,
-            'number_of_cores',
-            int(config['Multi-processing']['number_of_cores']))
+    setattr(
+        pipeline, "number_of_cores", int(config["Multi-processing"]["number_of_cores"])
+    )
 
 
 def create_configparser_from_pipeline(pipeline, debug=False):
@@ -518,33 +563,39 @@ def create_configparser_from_pipeline(pipeline, debug=False):
     """
     config = configparser.RawConfigParser()
     # Add global section and corresponding parameters
-    config.add_section('Global')
-    global_keys = [prop for prop in list(pipeline.global_conf.traits().keys()) if
-                   'trait' not in prop]  # possibly dangerous..?
+    config.add_section("Global")
+    global_keys = [
+        prop
+        for prop in list(pipeline.global_conf.traits().keys())
+        if "trait" not in prop
+    ]  # possibly dangerous..?
     if debug:
         print(global_keys)
     for key in global_keys:
         # if key != "subject" and key != "subjects":
-        config.set('Global', key, getattr(pipeline.global_conf, key))
+        config.set("Global", key, getattr(pipeline.global_conf, key))
 
     # Add stage section and corresponding parameters
     for stage in list(pipeline.stages.values()):
         config.add_section(stage.name)
-        stage_keys = [prop for prop in list(stage.config.traits().keys()) if
-                      'trait' not in prop]  # possibly dangerous..?
+        stage_keys = [
+            prop for prop in list(stage.config.traits().keys()) if "trait" not in prop
+        ]  # possibly dangerous..?
         for key in stage_keys:
             keyval = getattr(stage.config, key)
-            if 'config' in key:  # subconfig
-                stage_sub_keys = [prop for prop in list(keyval.traits().keys()) if
-                                  'trait' not in prop]
+            if "config" in key:  # subconfig
+                stage_sub_keys = [
+                    prop for prop in list(keyval.traits().keys()) if "trait" not in prop
+                ]
                 for sub_key in stage_sub_keys:
-                    config.set(stage.name, key + '.' + sub_key,
-                               getattr(keyval, sub_key))
+                    config.set(
+                        stage.name, key + "." + sub_key, getattr(keyval, sub_key)
+                    )
             else:
                 config.set(stage.name, key, keyval)
 
-    config.add_section('Multi-processing')
-    config.set('Multi-processing', 'number_of_cores', pipeline.number_of_cores)
+    config.add_section("Multi-processing")
+    config.set("Multi-processing", "number_of_cores", pipeline.number_of_cores)
 
     if debug:
         print(config)
@@ -565,7 +616,7 @@ def anat_save_config(pipeline, config_path):
     """
     config = create_configparser_from_pipeline(pipeline)
     save_configparser_as_json(config, config_path)
-    print_blue('  .. SAVE: Config json file (anat) saved as {}'.format(config_path))
+    print_blue("  .. SAVE: Config json file (anat) saved as {}".format(config_path))
 
 
 def anat_load_config_json(pipeline, config_path):
@@ -579,9 +630,9 @@ def anat_load_config_json(pipeline, config_path):
     config_path : string
         Path of the JSON configuration file
     """
-    print_blue('  .. LOAD: Load anatomical config file : {}'.format(config_path))
+    print_blue("  .. LOAD: Load anatomical config file : {}".format(config_path))
     # datalad_is_available = is_tool('datalad')
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         config = json.load(f)
 
     check_configuration_version(config)
@@ -603,7 +654,9 @@ def dmri_save_config(pipeline, config_path):
     """
     config = create_configparser_from_pipeline(pipeline)
     save_configparser_as_json(config, config_path)
-    print_blue('  .. SAVE: Config json file (diffusion) saved as {}'.format(config_path))
+    print_blue(
+        "  .. SAVE: Config json file (diffusion) saved as {}".format(config_path)
+    )
 
 
 def dmri_load_config_json(pipeline, config_path):
@@ -617,9 +670,9 @@ def dmri_load_config_json(pipeline, config_path):
     config_path : string
         Path of the JSON configuration file
     """
-    print_blue('  .. LOAD: Load diffusion config file : {}'.format(config_path))
+    print_blue("  .. LOAD: Load diffusion config file : {}".format(config_path))
     # datalad_is_available = is_tool('datalad')
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         config = json.load(f)
 
     check_configuration_version(config)
@@ -641,7 +694,7 @@ def fmri_save_config(pipeline, config_path):
     """
     config = create_configparser_from_pipeline(pipeline)
     save_configparser_as_json(config, config_path)
-    print_blue('  .. SAVE: Config json file (fMRI) saved as {}'.format(config_path))
+    print_blue("  .. SAVE: Config json file (fMRI) saved as {}".format(config_path))
 
 
 def fmri_load_config_json(pipeline, config_path):
@@ -655,9 +708,9 @@ def fmri_load_config_json(pipeline, config_path):
     config_path : string
         Path of the JSON configuration file
     """
-    print_blue('  .. LOAD: Load fMRI config file : {}'.format(config_path))
+    print_blue("  .. LOAD: Load fMRI config file : {}".format(config_path))
     # datalad_is_available = is_tool('datalad')
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         config = json.load(f)
 
     check_configuration_version(config)
