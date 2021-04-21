@@ -23,14 +23,22 @@ from cmtklib.bids.utils import write_derivative_description
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
 from cmp.pipelines.functional import fMRI as FMRI_pipeline
-from cmtklib.config import anat_load_config_json, anat_save_config, \
-    dmri_load_config_json, dmri_save_config, fmri_load_config_json, fmri_save_config
+from cmtklib.config import (
+    anat_load_config_json,
+    anat_save_config,
+    dmri_load_config_json,
+    dmri_save_config,
+    fmri_load_config_json,
+    fmri_save_config,
+)
 
 # Ignore some warnings
-warnings.filterwarnings("ignore",
-                        message="UserWarning: No valid root directory found for domain 'derivatives'."
-                                " Falling back on the Layout's root directory. If this isn't the intended behavior, "
-                                "make sure the config file for this domain includes a 'root' key.")
+warnings.filterwarnings(
+    "ignore",
+    message="UserWarning: No valid root directory found for domain 'derivatives'."
+    " Falling back on the Layout's root directory. If this isn't the intended behavior, "
+    "make sure the config file for this domain includes a 'root' key.",
+)
 
 
 class CMP_Project_Info(HasTraits):
@@ -171,30 +179,33 @@ class CMP_Project_Info(HasTraits):
 
     bids_layout = Instance(BIDSLayout)
     subjects = List([])
-    subject = Enum(values='subjects')
+    subject = Enum(values="subjects")
 
     number_of_subjects = Int()
 
     subject_sessions = List([])
-    subject_session = Enum(values='subject_sessions')
+    subject_session = Enum(values="subject_sessions")
 
     # current_subj = Str()
     anat_warning_msg = Str(
-        '\nWarning: selected directory is already configured for anatomical data processing.\n\n'
-        'Do you want to reset the configuration to default parameters ?\n')
+        "\nWarning: selected directory is already configured for anatomical data processing.\n\n"
+        "Do you want to reset the configuration to default parameters ?\n"
+    )
     dmri_warning_msg = Str(
-        '\nWarning: selected directory is already configured for diffusion data processing.\n\n'
-        'Do you want to reset the configuration to default parameters ?\n')
+        "\nWarning: selected directory is already configured for diffusion data processing.\n\n"
+        "Do you want to reset the configuration to default parameters ?\n"
+    )
     fmri_warning_msg = Str(
-        '\nWarning: selected directory is already configured for resting-state data processing.\n\n'
-        'Do you want to reset the configuration to default parameters ?\n')
+        "\nWarning: selected directory is already configured for resting-state data processing.\n\n"
+        "Do you want to reset the configuration to default parameters ?\n"
+    )
 
     # process_type = Enum('diffusion',['diffusion','fMRI'])
-    diffusion_imaging_model = Enum('DTI', ['DSI', 'DTI', 'HARDI', 'multishell'])
-    parcellation_scheme = Str('Lausanne2008')
+    diffusion_imaging_model = Enum("DTI", ["DSI", "DTI", "HARDI", "multishell"])
+    parcellation_scheme = Str("Lausanne2008")
     atlas_info = Dict()
-    freesurfer_subjects_dir = Str('')
-    freesurfer_subject_id = Str('')
+    freesurfer_subjects_dir = Str("")
+    freesurfer_subject_id = Str("")
 
     pipeline_processing_summary = List()
 
@@ -202,35 +213,38 @@ class CMP_Project_Info(HasTraits):
     dmri_available = Bool(False)
     fmri_available = Bool(False)
 
-    anat_config_error_msg = Str('')
+    anat_config_error_msg = Str("")
     anat_config_to_load = Str()
     anat_available_config = List()
     anat_config_to_load_msg = Str(
-        'Several configuration files available. Select which one to load:\n')
-    anat_last_date_processed = Str('Not yet processed')
-    anat_last_stage_processed = Str('Not yet processed')
+        "Several configuration files available. Select which one to load:\n"
+    )
+    anat_last_date_processed = Str("Not yet processed")
+    anat_last_stage_processed = Str("Not yet processed")
 
     anat_stage_names = List
     anat_custom_last_stage = Str
 
-    dmri_config_error_msg = Str('')
+    dmri_config_error_msg = Str("")
     dmri_config_to_load = Str()
     dmri_available_config = List()
     dmri_config_to_load_msg = Str(
-        'Several configuration files available. Select which one to load:\n')
-    dmri_last_date_processed = Str('Not yet processed')
-    dmri_last_stage_processed = Str('Not yet processed')
+        "Several configuration files available. Select which one to load:\n"
+    )
+    dmri_last_date_processed = Str("Not yet processed")
+    dmri_last_stage_processed = Str("Not yet processed")
 
     dmri_stage_names = List
     dmri_custom_last_stage = Str
 
-    fmri_config_error_msg = Str('')
+    fmri_config_error_msg = Str("")
     fmri_config_to_load = Str()
     fmri_available_config = List()
     fmri_config_to_load_msg = Str(
-        'Several configuration files available. Select which one to load:\n')
-    fmri_last_date_processed = Str('Not yet processed')
-    fmri_last_stage_processed = Str('Not yet processed')
+        "Several configuration files available. Select which one to load:\n"
+    )
+    fmri_last_date_processed = Str("Not yet processed")
+    fmri_last_stage_processed = Str("Not yet processed")
 
     fmri_stage_names = List
     fmri_custom_last_stage = Str
@@ -238,7 +252,9 @@ class CMP_Project_Info(HasTraits):
     number_of_cores = Enum(1, list(range(1, multiprocessing.cpu_count() + 1)))
 
 
-def refresh_folder(bids_directory, derivatives_directory, subject, input_folders, session=None):
+def refresh_folder(
+    bids_directory, derivatives_directory, subject, input_folders, session=None
+):
     """Creates (if needed) the folder hierarchy.
 
     Parameters
@@ -260,28 +276,28 @@ def refresh_folder(bids_directory, derivatives_directory, subject, input_folders
     """
     paths = []
 
-    if session is None or session == '':
-        paths.append(os.path.join(
-            derivatives_directory, 'freesurfer', subject))
-        paths.append(os.path.join(derivatives_directory, 'cmp', subject))
-        paths.append(os.path.join(derivatives_directory, 'nipype', subject))
+    if session is None or session == "":
+        paths.append(os.path.join(derivatives_directory, "freesurfer", subject))
+        paths.append(os.path.join(derivatives_directory, "cmp", subject))
+        paths.append(os.path.join(derivatives_directory, "nipype", subject))
 
         for in_f in input_folders:
-            paths.append(os.path.join(
-                derivatives_directory, 'cmp', subject, in_f))
+            paths.append(os.path.join(derivatives_directory, "cmp", subject, in_f))
             # paths.append(os.path.join(derivatives_directory,'nipype',subject,in_f))
 
     else:
-        paths.append(os.path.join(derivatives_directory,
-                                  'freesurfer', '%s_%s' % (subject, session)))
-        paths.append(os.path.join(
-            derivatives_directory, 'cmp', subject, session))
-        paths.append(os.path.join(derivatives_directory,
-                                  'nipype', subject, session))
+        paths.append(
+            os.path.join(
+                derivatives_directory, "freesurfer", "%s_%s" % (subject, session)
+            )
+        )
+        paths.append(os.path.join(derivatives_directory, "cmp", subject, session))
+        paths.append(os.path.join(derivatives_directory, "nipype", subject, session))
 
         for in_f in input_folders:
-            paths.append(os.path.join(derivatives_directory,
-                                      'cmp', subject, session, in_f))
+            paths.append(
+                os.path.join(derivatives_directory, "cmp", subject, session, in_f)
+            )
             # paths.append(os.path.join(derivatives_directory,'nipype',subject,session,in_f))
 
     for full_p in paths:
@@ -293,11 +309,9 @@ def refresh_folder(bids_directory, derivatives_directory, subject, input_folders
             finally:
                 print("Created directory %s" % full_p)
 
-    write_derivative_description(bids_directory, derivatives_directory, 'cmp')
-    write_derivative_description(
-        bids_directory, derivatives_directory, 'freesurfer')
-    write_derivative_description(
-        bids_directory, derivatives_directory, 'nipype')
+    write_derivative_description(bids_directory, derivatives_directory, "cmp")
+    write_derivative_description(bids_directory, derivatives_directory, "freesurfer")
+    write_derivative_description(bids_directory, derivatives_directory, "nipype")
 
 
 def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
@@ -333,46 +347,64 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
     derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if len(project_info.subject_sessions) > 0:
-        refresh_folder(bids_directory, derivatives_directory, project_info.subject, dmri_pipeline.input_folders,
-                       session=project_info.subject_session)
+        refresh_folder(
+            bids_directory,
+            derivatives_directory,
+            project_info.subject,
+            dmri_pipeline.input_folders,
+            session=project_info.subject_session,
+        )
     else:
-        refresh_folder(bids_directory, derivatives_directory,
-                       project_info.subject, dmri_pipeline.input_folders)
+        refresh_folder(
+            bids_directory,
+            derivatives_directory,
+            project_info.subject,
+            dmri_pipeline.input_folders,
+        )
 
     dmri_inputs_checked = dmri_pipeline.check_input(layout=bids_layout, gui=gui)
     if dmri_inputs_checked:
-        if is_new_project and dmri_pipeline is not None:  # and dmri_pipelineis not None:
+        if (
+            is_new_project and dmri_pipeline is not None
+        ):  # and dmri_pipelineis not None:
             print("> Initialize dmri project")
             if not os.path.exists(derivatives_directory):
                 try:
                     os.makedirs(derivatives_directory)
                 except os.error:
-                    print("... Info : %s was already existing" %
-                          derivatives_directory)
+                    print("... Info : %s was already existing" % derivatives_directory)
                 finally:
-                    print("... Info : Created directory %s" %
-                          derivatives_directory)
+                    print("... Info : Created directory %s" % derivatives_directory)
 
-            if (project_info.subject_session != '') and (project_info.subject_session is not None):
-                project_info.dmri_config_file = os.path.join(derivatives_directory, '%s_%s_diffusion_config.ini' % (
-                    project_info.subject, project_info.subject_session))
+            if (project_info.subject_session != "") and (
+                project_info.subject_session is not None
+            ):
+                project_info.dmri_config_file = os.path.join(
+                    derivatives_directory,
+                    "%s_%s_diffusion_config.ini"
+                    % (project_info.subject, project_info.subject_session),
+                )
             else:
-                project_info.dmri_config_file = os.path.join(derivatives_directory,
-                                                             '%s_diffusion_config.ini' % project_info.subject)
+                project_info.dmri_config_file = os.path.join(
+                    derivatives_directory,
+                    "%s_diffusion_config.ini" % project_info.subject,
+                )
 
             if os.path.exists(project_info.dmri_config_file):
-                warn_res = project_info.configure_traits(
-                    view='dmri_warning_view')
+                warn_res = project_info.configure_traits(view="dmri_warning_view")
                 if warn_res:
-                    print("... Read : Diffusion config file (%s)" %
-                          project_info.dmri_config_file)
-                    dmri_save_config(
-                        dmri_pipeline, project_info.dmri_config_file)
+                    print(
+                        "... Read : Diffusion config file (%s)"
+                        % project_info.dmri_config_file
+                    )
+                    dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
                 else:
                     return None
             else:
-                print("... Create : Diffusion config file (%s)" %
-                      project_info.dmri_config_file)
+                print(
+                    "... Create : Diffusion config file (%s)"
+                    % project_info.dmri_config_file
+                )
                 dmri_save_config(dmri_pipeline, project_info.dmri_config_file)
         else:
             if debug:
@@ -380,7 +412,8 @@ def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                 print(dmri_pipeline.global_conf.subjects)
 
             dmri_conf_loaded = dmri_load_config_json(
-                dmri_pipeline, project_info.dmri_config_file)
+                dmri_pipeline, project_info.dmri_config_file
+            )
 
             if not dmri_conf_loaded:
                 return None
@@ -424,46 +457,62 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
     derivatives_directory = os.path.abspath(project_info.output_directory)
 
     if len(project_info.subject_sessions) > 0:
-        refresh_folder(bids_directory, derivatives_directory, project_info.subject, fmri_pipeline.input_folders,
-                       session=project_info.subject_session)
+        refresh_folder(
+            bids_directory,
+            derivatives_directory,
+            project_info.subject,
+            fmri_pipeline.input_folders,
+            session=project_info.subject_session,
+        )
     else:
-        refresh_folder(bids_directory, derivatives_directory,
-                       project_info.subject, fmri_pipeline.input_folders)
+        refresh_folder(
+            bids_directory,
+            derivatives_directory,
+            project_info.subject,
+            fmri_pipeline.input_folders,
+        )
 
     fmri_inputs_checked = fmri_pipeline.check_input(layout=bids_layout, gui=gui)
     if fmri_inputs_checked:
-        if is_new_project and fmri_pipeline is not None:  # and fmri_pipelineis not None:
+        if (
+            is_new_project and fmri_pipeline is not None
+        ):  # and fmri_pipelineis not None:
             print("> Initialize fmri project")
             if not os.path.exists(derivatives_directory):
                 try:
                     os.makedirs(derivatives_directory)
                 except os.error:
-                    print("... Info : %s was already existing" %
-                          derivatives_directory)
+                    print("... Info : %s was already existing" % derivatives_directory)
                 finally:
-                    print("... Info : Created directory %s" %
-                          derivatives_directory)
+                    print("... Info : Created directory %s" % derivatives_directory)
 
-            if (project_info.subject_session != '') and (project_info.subject_session is not None):
-                project_info.fmri_config_file = os.path.join(derivatives_directory, '%s_%s_fMRI_config.ini' % (
-                    project_info.subject, project_info.subject_session))
+            if (project_info.subject_session != "") and (
+                project_info.subject_session is not None
+            ):
+                project_info.fmri_config_file = os.path.join(
+                    derivatives_directory,
+                    "%s_%s_fMRI_config.ini"
+                    % (project_info.subject, project_info.subject_session),
+                )
             else:
-                project_info.fmri_config_file = os.path.join(derivatives_directory,
-                                                             '%s_fMRI_config.ini' % project_info.subject)
+                project_info.fmri_config_file = os.path.join(
+                    derivatives_directory, "%s_fMRI_config.ini" % project_info.subject
+                )
 
             if os.path.exists(project_info.fmri_config_file):
-                warn_res = project_info.configure_traits(
-                    view='fmri_warning_view')
+                warn_res = project_info.configure_traits(view="fmri_warning_view")
                 if warn_res:
-                    print("... Read : fMRI config file (%s)" %
-                          project_info.fmri_config_file)
-                    fmri_load_config_json(
-                        fmri_pipeline, project_info.fmri_config_file)
+                    print(
+                        "... Read : fMRI config file (%s)"
+                        % project_info.fmri_config_file
+                    )
+                    fmri_load_config_json(fmri_pipeline, project_info.fmri_config_file)
                 else:
                     return None
             else:
-                print("... Create : fMRI config file (%s)" %
-                      project_info.fmri_config_file)
+                print(
+                    "... Create : fMRI config file (%s)" % project_info.fmri_config_file
+                )
                 fmri_save_config(fmri_pipeline, project_info.fmri_config_file)
         else:
             if debug:
@@ -471,7 +520,8 @@ def init_fmri_project(project_info, bids_layout, is_new_project, gui=True, debug
                 print(fmri_pipeline.global_conf.subjects)
 
             fmri_conf_loaded = fmri_load_config_json(
-                fmri_pipeline, project_info.fmri_config_file)
+                fmri_pipeline, project_info.fmri_config_file
+            )
 
             if not fmri_conf_loaded:
                 return None
@@ -508,16 +558,27 @@ def init_anat_project(project_info, is_new_project, debug=False):
     bids_directory = os.path.abspath(project_info.base_directory)
     derivatives_directory = os.path.abspath(project_info.output_directory)
 
-    if (project_info.subject_session != '') and (project_info.subject_session is not None):
+    if (project_info.subject_session != "") and (
+        project_info.subject_session is not None
+    ):
         if debug:
-            print('Refresh folder WITH session')
-        refresh_folder(bids_directory, derivatives_directory, project_info.subject, anat_pipeline.input_folders,
-                       session=project_info.subject_session)
+            print("Refresh folder WITH session")
+        refresh_folder(
+            bids_directory,
+            derivatives_directory,
+            project_info.subject,
+            anat_pipeline.input_folders,
+            session=project_info.subject_session,
+        )
     else:
         if debug:
-            print('Refresh folder WITHOUT session')
-        refresh_folder(bids_directory, derivatives_directory,
-                       project_info.subject, anat_pipeline.input_folders)
+            print("Refresh folder WITHOUT session")
+        refresh_folder(
+            bids_directory,
+            derivatives_directory,
+            project_info.subject,
+            anat_pipeline.input_folders,
+        )
 
     if is_new_project and anat_pipeline is not None:  # and dmri_pipelineis not None:
         print("> Initialize anatomical project")
@@ -525,21 +586,25 @@ def init_anat_project(project_info, is_new_project, debug=False):
             try:
                 os.makedirs(derivatives_directory)
             except os.error:
-                print("... Info: %s was already existing" %
-                      derivatives_directory)
+                print("... Info: %s was already existing" % derivatives_directory)
             finally:
-                print("... Info : Created directory %s" %
-                      derivatives_directory)
+                print("... Info : Created directory %s" % derivatives_directory)
 
-        if (project_info.subject_session != '') and (project_info.subject_session is not None):
-            project_info.anat_config_file = os.path.join(derivatives_directory, '%s_%s_anatomical_config.ini' % (
-                project_info.subject, project_info.subject_session))
+        if (project_info.subject_session != "") and (
+            project_info.subject_session is not None
+        ):
+            project_info.anat_config_file = os.path.join(
+                derivatives_directory,
+                "%s_%s_anatomical_config.ini"
+                % (project_info.subject, project_info.subject_session),
+            )
         else:
-            project_info.anat_config_file = os.path.join(derivatives_directory,
-                                                         '%s_anatomical_config.ini' % project_info.subject)
+            project_info.anat_config_file = os.path.join(
+                derivatives_directory, "%s_anatomical_config.ini" % project_info.subject
+            )
 
         if os.path.exists(project_info.anat_config_file):
-            warn_res = project_info.configure_traits(view='anat_warning_view')
+            warn_res = project_info.configure_traits(view="anat_warning_view")
             if warn_res:
                 anat_save_config(anat_pipeline, project_info.anat_config_file)
             else:
@@ -553,7 +618,8 @@ def init_anat_project(project_info, is_new_project, debug=False):
             print(anat_pipeline.global_conf.subjects)
 
         anat_conf_loaded = anat_load_config_json(
-            anat_pipeline, project_info.anat_config_file)
+            anat_pipeline, project_info.anat_config_file
+        )
 
         if not anat_conf_loaded:
             return None
@@ -575,7 +641,9 @@ def update_anat_last_processed(project_info, pipeline):
         Instance of `AnatomicalPipeline` object
     """
     # last date
-    if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
+    if os.path.exists(
+        os.path.join(project_info.output_directory, "nipype", project_info.subject)
+    ):
         # out_dirs = os.listdir(os.path.join(
         #     project_info.output_directory, 'nipype', project_info.subject))
         # for out in out_dirs:
@@ -584,21 +652,35 @@ def update_anat_last_processed(project_info, pipeline):
         #         pipeline.last_date_processed = out
         #         project_info.last_date_processed = out
 
-        if (project_info.anat_last_date_processed == "Not yet processed" or
-                pipeline.now > project_info.anat_last_date_processed):
+        if (
+            project_info.anat_last_date_processed == "Not yet processed"
+            or pipeline.now > project_info.anat_last_date_processed
+        ):
             pipeline.anat_last_date_processed = pipeline.now
             project_info.anat_last_date_processed = pipeline.now
 
     # last stage
     if os.path.exists(
-            os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'anatomical_pipeline')):
+        os.path.join(
+            project_info.output_directory,
+            "nipype",
+            project_info.subject,
+            "anatomical_pipeline",
+        )
+    ):
         stage_dirs = []
         for _, dirnames, _ in os.walk(
-                os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'anatomical_pipeline')):
-            for dirname in fnmatch.filter(dirnames, '*_stage'):
+            os.path.join(
+                project_info.output_directory,
+                "nipype",
+                project_info.subject,
+                "anatomical_pipeline",
+            )
+        ):
+            for dirname in fnmatch.filter(dirnames, "*_stage"):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
-            if stage.lower() + '_stage' in stage_dirs:
+            if stage.lower() + "_stage" in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.anat_last_stage_processed = stage
 
@@ -619,7 +701,9 @@ def update_dmri_last_processed(project_info, pipeline):
         Instance of `DiffusionPipeline` object
     """
     # last date
-    if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
+    if os.path.exists(
+        os.path.join(project_info.output_directory, "nipype", project_info.subject)
+    ):
         # out_dirs = os.listdir(os.path.join(
         #     project_info.output_directory, 'nipype', project_info.subject))
         # for out in out_dirs:
@@ -628,21 +712,35 @@ def update_dmri_last_processed(project_info, pipeline):
         #         pipeline.last_date_processed = out
         #         project_info.last_date_processed = out
 
-        if (project_info.dmri_last_date_processed == "Not yet processed" or
-                pipeline.now > project_info.dmri_last_date_processed):
+        if (
+            project_info.dmri_last_date_processed == "Not yet processed"
+            or pipeline.now > project_info.dmri_last_date_processed
+        ):
             pipeline.dmri_last_date_processed = pipeline.now
             project_info.dmri_last_date_processed = pipeline.now
 
     # last stage
     if os.path.exists(
-            os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'diffusion_pipeline')):
+        os.path.join(
+            project_info.output_directory,
+            "nipype",
+            project_info.subject,
+            "diffusion_pipeline",
+        )
+    ):
         stage_dirs = []
         for _, dirnames, _ in os.walk(
-                os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'diffusion_pipeline')):
-            for dirname in fnmatch.filter(dirnames, '*_stage'):
+            os.path.join(
+                project_info.output_directory,
+                "nipype",
+                project_info.subject,
+                "diffusion_pipeline",
+            )
+        ):
+            for dirname in fnmatch.filter(dirnames, "*_stage"):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
-            if stage.lower() + '_stage' in stage_dirs:
+            if stage.lower() + "_stage" in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
 
@@ -659,7 +757,9 @@ def update_fmri_last_processed(project_info, pipeline):
         Instance of `fMRIPipeline` object
     """
     # last date
-    if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject)):
+    if os.path.exists(
+        os.path.join(project_info.output_directory, "nipype", project_info.subject)
+    ):
         # out_dirs = os.listdir(os.path.join(
         #     project_info.output_directory, 'nipype', project_info.subject))
         # for out in out_dirs:
@@ -668,26 +768,49 @@ def update_fmri_last_processed(project_info, pipeline):
         #         pipeline.last_date_processed = out
         #         project_info.last_date_processed = out
 
-        if (project_info.fmri_last_date_processed == "Not yet processed" or
-                pipeline.now > project_info.fmri_last_date_processed):
+        if (
+            project_info.fmri_last_date_processed == "Not yet processed"
+            or pipeline.now > project_info.fmri_last_date_processed
+        ):
             pipeline.fmri_last_date_processed = pipeline.now
             project_info.fmri_last_date_processed = pipeline.now
 
     # last stage
-    if os.path.exists(os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'fMRI_pipeline')):
+    if os.path.exists(
+        os.path.join(
+            project_info.output_directory,
+            "nipype",
+            project_info.subject,
+            "fMRI_pipeline",
+        )
+    ):
         stage_dirs = []
         for _, dirnames, _ in os.walk(
-                os.path.join(project_info.output_directory, 'nipype', project_info.subject, 'fMRI_pipeline')):
-            for dirname in fnmatch.filter(dirnames, '*_stage'):
+            os.path.join(
+                project_info.output_directory,
+                "nipype",
+                project_info.subject,
+                "fMRI_pipeline",
+            )
+        ):
+            for dirname in fnmatch.filter(dirnames, "*_stage"):
                 stage_dirs.append(dirname)
         for stage in pipeline.ordered_stage_list:
-            if stage.lower() + '_stage' in stage_dirs:
+            if stage.lower() + "_stage" in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
 
 
-def run_individual(bids_dir, output_dir, participant_label, session_label, anat_pipeline_config,
-                   dwi_pipeline_config, func_pipeline_config, number_of_threads=1):
+def run_individual(
+    bids_dir,
+    output_dir,
+    participant_label,
+    session_label,
+    anat_pipeline_config,
+    dwi_pipeline_config,
+    func_pipeline_config,
+    number_of_threads=1,
+):
     """Function that creates the processing pipeline for complete coverage.
 
     Parameters
@@ -719,8 +842,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
     project = CMP_Project_Info()
     project.base_directory = os.path.abspath(bids_dir)
     project.output_directory = os.path.abspath(output_dir)
-    project.subjects = ['{}'.format(participant_label)]
-    project.subject = '{}'.format(participant_label)
+    project.subjects = ["{}".format(participant_label)]
+    project.subject = "{}".format(participant_label)
 
     try:
         bids_layout = BIDSLayout(project.base_directory)
@@ -729,13 +852,13 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         sys.exit(1)
 
     if session_label is not None:
-        project.subject_sessions = ['{}'.format(session_label)]
-        project.subject_session = '{}'.format(session_label)
+        project.subject_sessions = ["{}".format(session_label)]
+        project.subject_session = "{}".format(session_label)
         print("INFO : Detected session(s)")
     else:
         print("INFO : No detected session")
-        project.subject_sessions = ['']
-        project.subject_session = ''
+        project.subject_sessions = [""]
+        project.subject_session = ""
 
     project.anat_config_file = os.path.abspath(anat_pipeline_config)
 
@@ -746,8 +869,14 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
+            print(
+                "--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP".format(
+                    number_of_threads
+                )
+            )
+            anat_pipeline.stages[
+                "Segmentation"
+            ].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -768,8 +897,14 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
+            print(
+                "--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP".format(
+                    number_of_threads
+                )
+            )
+            anat_pipeline.stages[
+                "Segmentation"
+            ].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -782,11 +917,17 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
-        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages[
+            "Segmentation"
+        ].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages[
+            "Segmentation"
+        ].config.freesurfer_subject_id
 
         if anat_valid_outputs:
-            dmri_valid_inputs, dmri_pipeline = init_dmri_project(project, bids_layout, False)
+            dmri_valid_inputs, dmri_pipeline = init_dmri_project(
+                project, bids_layout, False
+            )
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
@@ -810,8 +951,14 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
+            print(
+                "--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP".format(
+                    number_of_threads
+                )
+            )
+            anat_pipeline.stages[
+                "Segmentation"
+            ].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -824,11 +971,17 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
-        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages[
+            "Segmentation"
+        ].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages[
+            "Segmentation"
+        ].config.freesurfer_subject_id
 
         if anat_valid_outputs:
-            fmri_valid_inputs, fmri_pipeline = init_fmri_project(project, bids_layout, False)
+            fmri_valid_inputs, fmri_pipeline = init_fmri_project(
+                project, bids_layout, False
+            )
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
@@ -860,8 +1013,14 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print('--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP'.format(number_of_threads))
-            anat_pipeline.stages['Segmentation'].config.number_of_threads = number_of_threads
+            print(
+                "--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP".format(
+                    number_of_threads
+                )
+            )
+            anat_pipeline.stages[
+                "Segmentation"
+            ].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -874,11 +1033,17 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
-        project.freesurfer_subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages[
+            "Segmentation"
+        ].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages[
+            "Segmentation"
+        ].config.freesurfer_subject_id
 
         if anat_valid_outputs:
-            dmri_valid_inputs, dmri_pipeline = init_dmri_project(project, bids_layout, False)
+            dmri_valid_inputs, dmri_pipeline = init_dmri_project(
+                project, bids_layout, False
+            )
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
@@ -892,14 +1057,20 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
                 dmri_pipeline.check_stages_execution()
                 dmri_pipeline.fill_stages_outputs()
 
-            fmri_valid_inputs, fmri_pipeline = init_fmri_project(project, bids_layout, False)
+            fmri_valid_inputs, fmri_pipeline = init_fmri_project(
+                project, bids_layout, False
+            )
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
-                print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
+                fmri_pipeline.subjects_dir = anat_pipeline.stages[
+                    "Segmentation"
+                ].config.freesurfer_subjects_dir
+                fmri_pipeline.subject_id = anat_pipeline.stages[
+                    "Segmentation"
+                ].config.freesurfer_subject_id
+                print("Freesurfer subjects dir: {}".format(fmri_pipeline.subjects_dir))
+                print("Freesurfer subject id: {}".format(fmri_pipeline.subject_id))
 
                 # print sys.argv[offset+9]
                 if fmri_valid_inputs:

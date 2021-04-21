@@ -15,6 +15,7 @@ import numpy as np
 import copy
 
 import matplotlib.colors as colors
+
 # import matplotlib
 # matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
 from matplotlib.pyplot import imshow, cm, show, figure, colorbar, hist
@@ -25,11 +26,9 @@ import matplotlib.patches as m_patches
 from mne.viz.utils import plt_show
 
 
-def _plot_connectivity_circle_onpick(event,
-                                     fig=None, axes=None,
-                                     indices=None,
-                                     node_angles=None,
-                                     ylim=[9, 10]):
+def _plot_connectivity_circle_onpick(
+    event, fig=None, axes=None, indices=None, node_angles=None, ylim=[9, 10]
+):
     """Isolate connections around a single node when user left clicks a node.
 
     On right click, resets all connections.
@@ -67,17 +66,35 @@ def _plot_connectivity_circle_onpick(event,
         fig.canvas.draw()
 
 
-def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
-                             node_angles=None, node_width=None,
-                             node_colors=None, facecolor='black',
-                             textcolor='white', node_edgecolor='black',
-                             linewidth=1.5, colormap='hot', vmin=None,
-                             vmax=None, colorbar=True, title=None,
-                             colorbar_size=0.2, colorbar_pos=(-0.15, -0.05),
-                             fontsize_title=12, fontsize_names=10,
-                             fontsize_colorbar=10, padding=4.,
-                             fig=None, subplot=111, interactive=True,
-                             node_linewidth=2., show=True):
+def plot_connectivity_circle(
+    con,
+    node_names,
+    indices=None,
+    n_lines=None,
+    node_angles=None,
+    node_width=None,
+    node_colors=None,
+    facecolor="black",
+    textcolor="white",
+    node_edgecolor="black",
+    linewidth=1.5,
+    colormap="hot",
+    vmin=None,
+    vmax=None,
+    colorbar=True,
+    title=None,
+    colorbar_size=0.2,
+    colorbar_pos=(-0.15, -0.05),
+    fontsize_title=12,
+    fontsize_names=10,
+    fontsize_colorbar=10,
+    padding=4.0,
+    fig=None,
+    subplot=111,
+    interactive=True,
+    node_linewidth=2.0,
+    show=True,
+):
     """Visualize connectivity as a circular graph.
 
     Note: This code is based on the circle graph example by Nicolas P. Rougier
@@ -163,8 +180,7 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
 
     if node_angles is not None:
         if len(node_angles) != n_nodes:
-            raise ValueError('node_angles has to be the same length '
-                             'as node_names')
+            raise ValueError("node_angles has to be the same length " "as node_names")
         # convert it to radians
         node_angles = node_angles * np.pi / 180
     else:
@@ -184,23 +200,23 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
             node_colors = cycle(node_colors)
     else:
         # assign colors using colormap (plt.cmp.spectral -> plt.spectral)
-        cmap = cm.get_cmap('hsv', n_nodes)  # 'Spectral'
+        cmap = cm.get_cmap("hsv", n_nodes)  # 'Spectral'
         node_colors = [cmap(i / float(n_nodes)) for i in range(n_nodes)]
 
     # handle 1D and 2D connectivity information
     if con.ndim == 1:
         if indices is None:
-            raise ValueError('indices has to be provided if con.ndim == 1')
+            raise ValueError("indices has to be provided if con.ndim == 1")
     elif con.ndim == 2:
         print("Dimension: 2D")
         if con.shape[0] != n_nodes or con.shape[1] != n_nodes:
-            raise ValueError('con has to be 1D or a square matrix')
+            raise ValueError("con has to be 1D or a square matrix")
         # we use the lower-triangular part
         print("Number_of_nodes : %i" % n_nodes)
         indices = np.tril_indices(n_nodes, -1)
         con = np.squeeze(con[indices])
     else:
-        raise ValueError('con has to be 1D or a square matrix')
+        raise ValueError("con has to be 1D or a square matrix")
 
     con = np.squeeze(con.T)
 
@@ -226,13 +242,13 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
     plt.ylim(0, 10 + padding)
 
     # Remove the black axes border which may obscure the labels
-    axes.spines['polar'].set_visible(False)
+    axes.spines["polar"].set_visible(False)
 
     # Draw lines between connected nodes, only draw the strongest connections
     if n_lines is not None and len(con) > n_lines:
         con_thresh = np.sort(np.abs(con).ravel())[-n_lines]
     else:
-        con_thresh = 0.
+        con_thresh = 0.0
 
     # get the connections which we are drawing and sort by connection strength
     # this will allow us to draw the strongest connections first
@@ -280,10 +296,12 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
         nodes_n_con_seen[start] += 1
         nodes_n_con_seen[end] += 1
 
-        start_noise[i] *= ((nodes_n_con[start] - nodes_n_con_seen[start]) /
-                           float(nodes_n_con[start]))
-        end_noise[i] *= ((nodes_n_con[end] - nodes_n_con_seen[end]) /
-                         float(nodes_n_con[end]))
+        start_noise[i] *= (nodes_n_con[start] - nodes_n_con_seen[start]) / float(
+            nodes_n_con[start]
+        )
+        end_noise[i] *= (nodes_n_con[end] - nodes_n_con_seen[end]) / float(
+            nodes_n_con[end]
+        )
 
     # scale connectivity for colormap (vmin<=>0, vmax<=>1)
     con_val_scaled = (con - vmin) / vrange
@@ -304,22 +322,34 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
         t1 += end_noise[pos]
 
         verts = [(t0, r0), (t0, 5), (t1, 5), (t1, r1)]
-        codes = [m_path.Path.MOVETO, m_path.Path.CURVE4, m_path.Path.CURVE4,
-                 m_path.Path.LINETO]
+        codes = [
+            m_path.Path.MOVETO,
+            m_path.Path.CURVE4,
+            m_path.Path.CURVE4,
+            m_path.Path.LINETO,
+        ]
         path = m_path.Path(verts, codes)
 
         color = colormap(con_val_scaled[0, pos])
 
         # Actual line
-        patch = m_patches.PathPatch(path, fill=False, edgecolor=color,
-                                    linewidth=linewidth, alpha=1.)
+        patch = m_patches.PathPatch(
+            path, fill=False, edgecolor=color, linewidth=linewidth, alpha=1.0
+        )
         axes.add_patch(patch)
 
     # Draw ring with colored nodes
     height = np.ones(n_nodes) * 1.0
-    bars = axes.bar(node_angles, height, width=node_width, bottom=9,
-                    edgecolor=node_edgecolor, lw=node_linewidth,
-                    facecolor='.9', align='center')
+    bars = axes.bar(
+        node_angles,
+        height,
+        width=node_width,
+        bottom=9,
+        edgecolor=node_edgecolor,
+        lw=node_linewidth,
+        facecolor=".9",
+        align="center",
+    )
 
     for bar, color in zip(bars, node_colors):
         bar.set_facecolor(color)
@@ -328,29 +358,34 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
     angles_deg = 180 * node_angles / np.pi
     for name, angle_rad, angle_deg in zip(node_names, node_angles, angles_deg):
         if angle_deg >= 270 or angle_deg <= 90:
-            ha = 'left'
+            ha = "left"
         else:
             # Flip the label, so text is always upright
             angle_deg += 180
-            ha = 'right'
+            ha = "right"
 
-        axes.text(angle_rad, 10.4, name, size=fontsize_names,
-                  rotation=angle_deg, rotation_mode='anchor',
-                  horizontalalignment=ha, verticalalignment='center',
-                  color=textcolor)
+        axes.text(
+            angle_rad,
+            10.4,
+            name,
+            size=fontsize_names,
+            rotation=angle_deg,
+            rotation_mode="anchor",
+            horizontalalignment=ha,
+            verticalalignment="center",
+            color=textcolor,
+        )
 
     if title is not None:
-        plt.title(title, color=textcolor, fontsize=fontsize_title,
-                  axes=axes)
+        plt.title(title, color=textcolor, fontsize=fontsize_title, axes=axes)
 
     if colorbar:
-        sm = plt.cm.ScalarMappable(cmap=colormap,
-                                   norm=plt.Normalize(vmin, vmax))
+        sm = plt.cm.ScalarMappable(cmap=colormap, norm=plt.Normalize(vmin, vmax))
         sm.set_array(np.linspace(vmin, vmax))
-        cb = plt.colorbar(sm, ax=axes, use_gridspec=False,
-                          shrink=colorbar_size,
-                          anchor=colorbar_pos)
-        cb_yticks = plt.getp(cb.ax.axes, 'yticklabels')
+        cb = plt.colorbar(
+            sm, ax=axes, use_gridspec=False, shrink=colorbar_size, anchor=colorbar_pos
+        )
+        cb_yticks = plt.getp(cb.ax.axes, "yticklabels")
         cb.ax.tick_params(labelsize=fontsize_colorbar)
         plt.setp(cb_yticks, color=textcolor)
 
@@ -358,11 +393,16 @@ def plot_connectivity_circle(con, node_names, indices=None, n_lines=None,
 
     # Add callback for interaction
     if interactive:
-        callback = partial(_plot_connectivity_circle_onpick, fig=fig,
-                           axes=axes, indices=indices, n_nodes=n_nodes,
-                           node_angles=node_angles)
+        callback = partial(
+            _plot_connectivity_circle_onpick,
+            fig=fig,
+            axes=axes,
+            indices=indices,
+            n_nodes=n_nodes,
+            node_angles=node_angles,
+        )
 
-        fig.canvas.mpl_connect('button_press_event', callback)
+        fig.canvas.mpl_connect("button_press_event", callback)
 
     plt_show(show)
     return fig, axes
@@ -386,25 +426,29 @@ def main():
         print("open %s" % sys.argv[3])
         bb = nx.to_numpy_matrix(a, weight=sys.argv[3], dtype=np.float64)
 
-        if sys.argv[4] == 'True':
+        if sys.argv[4] == "True":
             c = np.zeros(bb.shape)
             c[bb > 0] = 1
             b = c
         else:
             b = bb
 
-        if sys.argv[1] == 'matrix':
+        if sys.argv[1] == "matrix":
             figure()
-            imshow(b, interpolation='nearest', cmap=cm.inferno, vmin=b.min(), vmax=b.max())
+            imshow(
+                b, interpolation="nearest", cmap=cm.inferno, vmin=b.min(), vmax=b.max()
+            )
             figure()
             hist(b)
             show()
-        elif sys.argv[1] == 'circular':
+        elif sys.argv[1] == "circular":
             node_names = []
             for _, d_gml in a.nodes(data=True):
                 # node_names.append(d_gml['dn_fsname'])
-                node_names.append(d_gml['dn_name'])
-            _, _ = plot_connectivity_circle(b, node_names, title="%s" % (sys.argv[3]), colormap='inferno')
+                node_names.append(d_gml["dn_name"])
+            _, _ = plot_connectivity_circle(
+                b, node_names, title="%s" % (sys.argv[3]), colormap="inferno"
+            )
 
         else:
             print("Error: invalid layout mode ('matrix' or 'circular')")
@@ -416,31 +460,35 @@ def main():
         print("open %s" % sys.argv[3])
         bb = nx.to_numpy_matrix(a, weight=sys.argv[3], dtype=np.float64)
 
-        if sys.argv[4] == 'True':
+        if sys.argv[4] == "True":
             c = np.zeros(bb.shape)
             c[bb > 0] = 1
             b = c
         else:
             b = bb
 
-        if sys.argv[1] == 'matrix':
+        if sys.argv[1] == "matrix":
             figure()
-            if sys.argv[3] == 'number_of_fibers':
-                plt.title("%s (#fibers: %i)" % (sys.argv[5], int(0.5*b.sum())))
+            if sys.argv[3] == "number_of_fibers":
+                plt.title("%s (#fibers: %i)" % (sys.argv[5], int(0.5 * b.sum())))
             else:
                 plt.title("%s" % (sys.argv[5]))
-            imshow(b, interpolation='nearest', cmap=cm.inferno, vmin=b.min(), vmax=b.max())
+            imshow(
+                b, interpolation="nearest", cmap=cm.inferno, vmin=b.min(), vmax=b.max()
+            )
             show()
-        elif sys.argv[1] == 'circular':
+        elif sys.argv[1] == "circular":
             node_names = []
             for _, d_gml in a.nodes(data=True):
                 # node_names.append(d_gml['dn_fsname'])
-                node_names.append(d_gml['dn_name'])
-            if sys.argv[3] == 'number_of_fibers':
-                title = "%s (#fibers: %i)" % (sys.argv[5], int(0.5*b.sum()))
+                node_names.append(d_gml["dn_name"])
+            if sys.argv[3] == "number_of_fibers":
+                title = "%s (#fibers: %i)" % (sys.argv[5], int(0.5 * b.sum()))
             else:
                 title = "%s" % (sys.argv[5])
-            _, _ = plot_connectivity_circle(b, node_names, title=title, colormap='inferno')
+            _, _ = plot_connectivity_circle(
+                b, node_names, title=title, colormap="inferno"
+            )
         else:
             print("Error: invalid layout mode ('matrix' or 'circular')")
             return 1
@@ -451,44 +499,55 @@ def main():
         print("open %s" % sys.argv[3])
         bb = nx.to_numpy_matrix(a, weight=sys.argv[3], dtype=np.float64)
 
-        if sys.argv[4] == 'True':
+        if sys.argv[4] == "True":
             c = np.zeros(bb.shape)
             c[bb > 0] = 1
             b = c
         else:
             b = bb
 
-        if sys.argv[1] == 'matrix':
+        if sys.argv[1] == "matrix":
             figure()
-            if sys.argv[3] == 'number_of_fibers':
-                plt.title("%s (#fibers: %i)" % (sys.argv[5], int(0.5*b.sum())))
+            if sys.argv[3] == "number_of_fibers":
+                plt.title("%s (#fibers: %i)" % (sys.argv[5], int(0.5 * b.sum())))
             else:
                 plt.title("%s" % (sys.argv[5]))
             print("sys.argv[5]==%s" % sys.argv[6])
             if sys.argv[6] == "log":
                 print("log scaling...")
-                my_cmap = copy.copy(cm.get_cmap('inferno'))  # copy the default cmap (0,0,0.5156)
+                my_cmap = copy.copy(
+                    cm.get_cmap("inferno")
+                )  # copy the default cmap (0,0,0.5156)
                 my_cmap.set_bad((0, 0, 0))
-                imshow(b, interpolation='nearest', norm=colors.LogNorm(), cmap=my_cmap)
+                imshow(b, interpolation="nearest", norm=colors.LogNorm(), cmap=my_cmap)
                 colorbar()
             else:
                 print("normal scaling...")
-                imshow(b, interpolation='nearest', norm=None, cmap=cm.inferno, vmin=b.min(), vmax=b.max())
+                imshow(
+                    b,
+                    interpolation="nearest",
+                    norm=None,
+                    cmap=cm.inferno,
+                    vmin=b.min(),
+                    vmax=b.max(),
+                )
             show()
-        elif sys.argv[1] == 'circular':
+        elif sys.argv[1] == "circular":
             node_names = []
             for _, d_gml in a.nodes(data=True):
                 # node_names.append(d_gml['dn_fsname'])
-                node_names.append(d_gml['dn_name'])
-            if sys.argv[3] == 'number_of_fibers':
-                title = "%s (#fibers: %i)" % (sys.argv[5], int(0.5*b.sum()))
+                node_names.append(d_gml["dn_name"])
+            if sys.argv[3] == "number_of_fibers":
+                title = "%s (#fibers: %i)" % (sys.argv[5], int(0.5 * b.sum()))
             else:
                 title = "%s" % (sys.argv[5])
             print("sys.argv[5]==%s" % sys.argv[6])
             if sys.argv[6] == "log":
                 print("Warning: log scale not employed as circular layout used")
 
-            _, _ = plot_connectivity_circle(b, node_names, title=title, colormap='inferno')
+            _, _ = plot_connectivity_circle(
+                b, node_names, title=title, colormap="inferno"
+            )
         else:
             print("Error: invalid layout mode ('matrix' or 'circular')")
 

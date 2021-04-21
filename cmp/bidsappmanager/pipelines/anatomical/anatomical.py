@@ -27,19 +27,32 @@ from cmp.bidsappmanager.stages.segmentation.segmentation import SegmentationStag
 from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStageUI
 
 from cmp.pipelines.common import Pipeline
-from cmp.pipelines.anatomical.anatomical import Global_Configuration, Check_Input_Notification, AnatomicalPipeline
+from cmp.pipelines.anatomical.anatomical import (
+    Global_Configuration,
+    Check_Input_Notification,
+    AnatomicalPipeline,
+)
 from cmtklib.util import return_button_style_sheet
 
 
 class Check_Input_NotificationUI(Check_Input_Notification):
-    traits_view = View(Item('message', style='readonly', show_label=False),
-                       Item('diffusion_imaging_model_message', visible_when='len(diffusion_imaging_model_options)>1',
-                            style='readonly', show_label=False),
-                       Item('diffusion_imaging_model', editor=EnumEditor(name='diffusion_imaging_model_options'),
-                            visible_when='len(diffusion_imaging_model_options)>1'),
-                       kind='modal',
-                       buttons=['OK'],
-                       title="Check inputs")
+    traits_view = View(
+        Item("message", style="readonly", show_label=False),
+        Item(
+            "diffusion_imaging_model_message",
+            visible_when="len(diffusion_imaging_model_options)>1",
+            style="readonly",
+            show_label=False,
+        ),
+        Item(
+            "diffusion_imaging_model",
+            editor=EnumEditor(name="diffusion_imaging_model_options"),
+            visible_when="len(diffusion_imaging_model_options)>1",
+        ),
+        kind="modal",
+        buttons=["OK"],
+        title="Check inputs",
+    )
 
 
 class AnatomicalPipelineUI(AnatomicalPipeline):
@@ -74,21 +87,47 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
     parcellation = Button()
 
-    view_mode = Enum('config_view', ['config_view', 'inspect_outputs_view'])
+    view_mode = Enum("config_view", ["config_view", "inspect_outputs_view"])
 
     pipeline_group = VGroup(
-        HGroup(spring, UItem('segmentation', style='custom', width=222, height=129, resizable=False,
-                             style_sheet=return_button_style_sheet(ImageResource('segmentation').absolute_path)), spring,
-               show_labels=False, label=""),
+        HGroup(
+            spring,
+            UItem(
+                "segmentation",
+                style="custom",
+                width=222,
+                height=129,
+                resizable=False,
+                style_sheet=return_button_style_sheet(
+                    ImageResource("segmentation").absolute_path
+                ),
+            ),
+            spring,
+            show_labels=False,
+            label="",
+        ),
         # Item('parcellation',editor=CustomEditor(image=ImageResource('parcellation'))),show_labels=False),
-        HGroup(spring, UItem('parcellation', style='custom', width=222, height=129, resizable=False,
-                             style_sheet=return_button_style_sheet(ImageResource('parcellation').absolute_path)), spring,
-               show_labels=False, label=""),
+        HGroup(
+            spring,
+            UItem(
+                "parcellation",
+                style="custom",
+                width=222,
+                height=129,
+                resizable=False,
+                style_sheet=return_button_style_sheet(
+                    ImageResource("parcellation").absolute_path
+                ),
+            ),
+            spring,
+            show_labels=False,
+            label="",
+        ),
         spring,
-        springy=True
+        springy=True,
     )
 
-    traits_view = QtView(Include('pipeline_group'))
+    traits_view = QtView(Include("pipeline_group"))
 
     def __init__(self, project_info):
         """Constructor of the AnatomicalPipelineUI class.
@@ -106,38 +145,60 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         """
         AnatomicalPipeline.__init__(self, project_info)
 
-        self.stages = {'Segmentation': SegmentationStageUI(bids_dir=project_info.base_directory,
-                                                           output_dir=project_info.output_directory),
-                       'Parcellation': ParcellationStageUI(pipeline_mode="Diffusion",
-                                                           bids_dir=project_info.base_directory,
-                                                           output_dir=project_info.output_directory)}
+        self.stages = {
+            "Segmentation": SegmentationStageUI(
+                bids_dir=project_info.base_directory,
+                output_dir=project_info.output_directory,
+            ),
+            "Parcellation": ParcellationStageUI(
+                pipeline_mode="Diffusion",
+                bids_dir=project_info.base_directory,
+                output_dir=project_info.output_directory,
+            ),
+        }
 
         if len(project_info.subject_sessions) > 0:
             subject_id = "_".join((self.subject, self.global_conf.subject_session))
         else:
             subject_id = self.subject
 
-        self.stages['Segmentation'].config.freesurfer_subjects_dir = os.path.join(self.output_directory,
-                                                                                  'freesurfer')
-        self.stages['Segmentation'].config.freesurfer_subject_id = os.path.join(self.output_directory,
-                                                                                'freesurfer', subject_id)
+        self.stages["Segmentation"].config.freesurfer_subjects_dir = os.path.join(
+            self.output_directory, "freesurfer"
+        )
+        self.stages["Segmentation"].config.freesurfer_subject_id = os.path.join(
+            self.output_directory, "freesurfer", subject_id
+        )
 
-        print('Freesurfer subjects directory: ' +
-              self.stages['Segmentation'].config.freesurfer_subjects_dir)
+        print(
+            "Freesurfer subjects directory: "
+            + self.stages["Segmentation"].config.freesurfer_subjects_dir
+        )
 
         for stage in list(self.stages.keys()):
-            if project_info.subject_session != '':
-                self.stages[stage].stage_dir = os.path.join(self.base_directory, "derivatives", 'nipype', self.subject,
-                                                            project_info.subject_session, self.pipeline_name,
-                                                            self.stages[stage].name)
+            if project_info.subject_session != "":
+                self.stages[stage].stage_dir = os.path.join(
+                    self.base_directory,
+                    "derivatives",
+                    "nipype",
+                    self.subject,
+                    project_info.subject_session,
+                    self.pipeline_name,
+                    self.stages[stage].name,
+                )
             else:
-                self.stages[stage].stage_dir = os.path.join(self.base_directory, "derivatives", 'nipype', self.subject,
-                                                            self.pipeline_name, self.stages[stage].name)
+                self.stages[stage].stage_dir = os.path.join(
+                    self.base_directory,
+                    "derivatives",
+                    "nipype",
+                    self.subject,
+                    self.pipeline_name,
+                    self.stages[stage].name,
+                )
 
     def _segmentation_fired(self, info):
         """Method that displays the window for the segmentation stage.
 
-        The window changed accordingly to the value of ``view_mode`` to be 
+        The window changed accordingly to the value of ``view_mode`` to be
         in configuration or quality inspection mode.
 
         Parameters
@@ -145,12 +206,12 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         info : traits.ui.Button
             The segmentation button object
         """
-        self.stages['Segmentation'].configure_traits(view=self.view_mode)
+        self.stages["Segmentation"].configure_traits(view=self.view_mode)
 
     def _parcellation_fired(self, info):
         """Method that displays the window for the parcellation stage.
 
-        The window changed accordingly to the value of ``view_mode`` to be 
+        The window changed accordingly to the value of ``view_mode`` to be
         in configuration or quality inspection mode.
 
         Parameters
@@ -158,7 +219,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         info : traits.ui.Button
             The parcellation button object
         """
-        self.stages['Parcellation'].configure_traits(view=self.view_mode)
+        self.stages["Parcellation"].configure_traits(view=self.view_mode)
 
     def check_input(self, layout, gui=True):
         """Method that checks if inputs of the anatomical pipeline are available in the datasets.
@@ -176,54 +237,77 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         valid_inputs : bool
             True in all inputs of the anatomical pipeline are available
         """
-        print('**** Check Inputs  ****')
+        print("**** Check Inputs  ****")
         t1_available = False
         valid_inputs = False
 
         types = layout.get_modalities()
 
-        if self.global_conf.subject_session == '':
+        if self.global_conf.subject_session == "":
             T1_file = os.path.join(
-                self.subject_directory, 'anat', self.subject + '_T1w.nii.gz')
+                self.subject_directory, "anat", self.subject + "_T1w.nii.gz"
+            )
         else:
             subjid = self.subject.split("-")[1]
             sessid = self.global_conf.subject_session.split("-")[1]
-            files = layout.get(subject=subjid, suffix='T1w',
-                               extensions='.nii.gz', session=sessid)
+            files = layout.get(
+                subject=subjid, suffix="T1w", extensions=".nii.gz", session=sessid
+            )
             if len(files) > 0:
                 T1_file = files[0].filename
                 print(T1_file)
             else:
-                error(message="T1w image not found for subject %s, session %s." % (
-                    subjid, self.global_conf.subject_session), title="Error", buttons=['OK', 'Cancel'], parent=None)
+                error(
+                    message="T1w image not found for subject %s, session %s."
+                    % (subjid, self.global_conf.subject_session),
+                    title="Error",
+                    buttons=["OK", "Cancel"],
+                    parent=None,
+                )
                 return
 
         print("Looking in %s for...." % self.base_directory)
         print("T1_file : %s" % T1_file)
 
         for typ in types:
-            if typ == 'T1w' and os.path.isfile(T1_file):
+            if typ == "T1w" and os.path.isfile(T1_file):
                 print("%s available" % typ)
                 t1_available = True
 
         if t1_available:
             # Copy diffusion data to derivatives / cmp  / subject / dwi
-            if self.global_conf.subject_session == '':
-                out_T1_file = os.path.join(self.derivatives_directory, 'cmp', self.subject, 'anat',
-                                           self.subject + '_T1w.nii.gz')
+            if self.global_conf.subject_session == "":
+                out_T1_file = os.path.join(
+                    self.derivatives_directory,
+                    "cmp",
+                    self.subject,
+                    "anat",
+                    self.subject + "_T1w.nii.gz",
+                )
             else:
-                out_T1_file = os.path.join(self.derivatives_directory, 'cmp', self.subject,
-                                           self.global_conf.subject_session, 'anat',
-                                           self.subject + '_' + self.global_conf.subject_session + '_T1w.nii.gz')
+                out_T1_file = os.path.join(
+                    self.derivatives_directory,
+                    "cmp",
+                    self.subject,
+                    self.global_conf.subject_session,
+                    "anat",
+                    self.subject
+                    + "_"
+                    + self.global_conf.subject_session
+                    + "_T1w.nii.gz",
+                )
 
             if not os.path.isfile(out_T1_file):
                 shutil.copy(src=T1_file, dst=out_T1_file)
 
             valid_inputs = True
-            input_message = 'Inputs check finished successfully. \nOnly anatomical data (T1) available.'
+            input_message = "Inputs check finished successfully. \nOnly anatomical data (T1) available."
         else:
-            input_message = 'Error during inputs check. No anatomical data available in folder ' + os.path.join(
-                self.base_directory, self.subject) + '/anat/!'
+            input_message = (
+                "Error during inputs check. No anatomical data available in folder "
+                + os.path.join(self.base_directory, self.subject)
+                + "/anat/!"
+            )
 
         # diffusion_imaging_model = diffusion_imaging_model[0]
 
@@ -241,8 +325,12 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             valid_inputs = True
         else:
             print("Missing required inputs.")
-            error(message="Missing required inputs. Please see documentation for more details.", title="Error",
-                  buttons=['OK', 'Cancel'], parent=None)
+            error(
+                message="Missing required inputs. Please see documentation for more details.",
+                title="Error",
+                buttons=["OK", "Cancel"],
+                parent=None,
+            )
 
         for stage in list(self.stages.values()):
             if stage.enabled:
@@ -273,64 +361,108 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
         subject = self.subject
 
-        if self.global_conf.subject_session == '':
+        if self.global_conf.subject_session == "":
             anat_deriv_subject_directory = os.path.join(
-                self.base_directory, "derivatives", "cmp", self.subject, 'anat')
+                self.base_directory, "derivatives", "cmp", self.subject, "anat"
+            )
         else:
             if self.global_conf.subject_session not in subject:
-                anat_deriv_subject_directory = os.path.join(self.base_directory, "derivatives", "cmp", subject,
-                                                            self.global_conf.subject_session, 'anat')
+                anat_deriv_subject_directory = os.path.join(
+                    self.base_directory,
+                    "derivatives",
+                    "cmp",
+                    subject,
+                    self.global_conf.subject_session,
+                    "anat",
+                )
                 subject = "_".join((subject, self.global_conf.subject_session))
             else:
-                anat_deriv_subject_directory = os.path.join(self.base_directory, "derivatives", "cmp",
-                                                            subject.split(
-                                                                "_")[0], self.global_conf.subject_session,
-                                                            'anat')
+                anat_deriv_subject_directory = os.path.join(
+                    self.base_directory,
+                    "derivatives",
+                    "cmp",
+                    subject.split("_")[0],
+                    self.global_conf.subject_session,
+                    "anat",
+                )
 
-        T1_file = os.path.join(anat_deriv_subject_directory,
-                               subject + '_T1w_head.nii.gz')
+        T1_file = os.path.join(
+            anat_deriv_subject_directory, subject + "_T1w_head.nii.gz"
+        )
         brain_file = os.path.join(
-            anat_deriv_subject_directory, subject + '_T1w_brain.nii.gz')
+            anat_deriv_subject_directory, subject + "_T1w_brain.nii.gz"
+        )
         brainmask_file = os.path.join(
-            anat_deriv_subject_directory, subject + '_T1w_brainmask.nii.gz')
+            anat_deriv_subject_directory, subject + "_T1w_brainmask.nii.gz"
+        )
         wm_mask_file = os.path.join(
-            anat_deriv_subject_directory, subject + '_T1w_class-WM.nii.gz')
+            anat_deriv_subject_directory, subject + "_T1w_class-WM.nii.gz"
+        )
         roiv_files = glob.glob(
-            anat_deriv_subject_directory + "/" + subject + "_T1w_parc_scale*.nii.gz")
+            anat_deriv_subject_directory + "/" + subject + "_T1w_parc_scale*.nii.gz"
+        )
 
-        error_message = ''
+        error_message = ""
 
         if os.path.isfile(T1_file):
             t1_available = True
         else:
-            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % T1_file
+            error_message = (
+                "Missing anatomical output file %s . Please re-run the anatomical pipeline"
+                % T1_file
+            )
             print(error_message)
-            error(message=error_message, title="Error",
-                  buttons=['OK', 'Cancel'], parent=None)
+            error(
+                message=error_message,
+                title="Error",
+                buttons=["OK", "Cancel"],
+                parent=None,
+            )
 
         if os.path.isfile(brain_file):
             brain_available = True
         else:
-            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % brain_file
+            error_message = (
+                "Missing anatomical output file %s . Please re-run the anatomical pipeline"
+                % brain_file
+            )
             print(error_message)
-            error(message=error_message, title="Error",
-                  buttons=['OK', 'Cancel'], parent=None)
+            error(
+                message=error_message,
+                title="Error",
+                buttons=["OK", "Cancel"],
+                parent=None,
+            )
 
         if os.path.isfile(brainmask_file):
             brainmask_available = True
         else:
-            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % brainmask_file
+            error_message = (
+                "Missing anatomical output file %s . Please re-run the anatomical pipeline"
+                % brainmask_file
+            )
             print(error_message)
-            error(message=error_message, title="Error",
-                  buttons=['OK', 'Cancel'], parent=None)
+            error(
+                message=error_message,
+                title="Error",
+                buttons=["OK", "Cancel"],
+                parent=None,
+            )
 
         if os.path.isfile(wm_mask_file):
             wm_available = True
         else:
-            error_message = "Missing anatomical output file %s . Please re-run the anatomical pipeline" % wm_mask_file
+            error_message = (
+                "Missing anatomical output file %s . Please re-run the anatomical pipeline"
+                % wm_mask_file
+            )
             print(error_message)
-            error(message=error_message, title="Error",
-                  buttons=['OK', 'Cancel'], parent=None)
+            error(
+                message=error_message,
+                title="Error",
+                buttons=["OK", "Cancel"],
+                parent=None,
+            )
 
         cnt1 = 0
         cnt2 = 0
@@ -341,13 +473,25 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         if cnt1 == cnt2:
             roivs_available = True
         else:
-            error_message = "Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline" % (
-                cnt1 - cnt2, cnt1)
+            error_message = (
+                "Missing %g/%g anatomical parcellation output files. Please re-run the anatomical pipeline"
+                % (cnt1 - cnt2, cnt1)
+            )
             print(error_message)
-            error(message=error_message, title="Error",
-                  buttons=['OK', 'Cancel'], parent=None)
+            error(
+                message=error_message,
+                title="Error",
+                buttons=["OK", "Cancel"],
+                parent=None,
+            )
 
-        if t1_available is True and brain_available is True and brainmask_available is True and wm_available is True and roivs_available is True:
+        if (
+            t1_available is True
+            and brain_available is True
+            and brainmask_available is True
+            and wm_available is True
+            and roivs_available is True
+        ):
             print("valid deriv/anat output")
             valid_output = True
 

@@ -35,33 +35,63 @@ class DiffusionConfigUI(DiffusionConfig):
     """
 
     traits_view = View(
-        Item('diffusion_imaging_model', style='readonly'),
+        Item("diffusion_imaging_model", style="readonly"),
         HGroup(
-            Item('dilate_rois'),
-            Item('dilation_radius', visible_when='dilate_rois', label="radius")
+            Item("dilate_rois"),
+            Item("dilation_radius", visible_when="dilate_rois", label="radius"),
         ),
-        Group(Item('recon_processing_tool', label='Reconstruction processing tool',
-                   editor=EnumEditor(name='recon_processing_tool_editor')),
-              Item('dipy_recon_config', style='custom',
-                   visible_when='recon_processing_tool=="Dipy"'),
-              Item('mrtrix_recon_config', style='custom',
-                   visible_when='recon_processing_tool=="MRtrix"'),
-              label='Reconstruction', show_border=True, show_labels=False,
-              visible_when='tracking_processing_tool!=Custom'),
-        Group(Item('tracking_processing_tool', label='Tracking processing tool',
-                   editor=EnumEditor(name='tracking_processing_tool_editor')),
-              Item('diffusion_model', editor=EnumEditor(name='diffusion_model_editor'),
-                   visible_when='tracking_processing_tool!="Custom"'),
-              Item('dipy_tracking_config', style='custom',
-                   visible_when='tracking_processing_tool=="Dipy"'),
-              Item('mrtrix_tracking_config', style='custom',
-                   visible_when='tracking_processing_tool=="MRtrix"'),
-              label='Tracking', show_border=True, show_labels=False),
         Group(
-            Item('custom_track_file', style='simple'),
-            visible_when='tracking_processing_tool=="Custom"'),
+            Item(
+                "recon_processing_tool",
+                label="Reconstruction processing tool",
+                editor=EnumEditor(name="recon_processing_tool_editor"),
+            ),
+            Item(
+                "dipy_recon_config",
+                style="custom",
+                visible_when='recon_processing_tool=="Dipy"',
+            ),
+            Item(
+                "mrtrix_recon_config",
+                style="custom",
+                visible_when='recon_processing_tool=="MRtrix"',
+            ),
+            label="Reconstruction",
+            show_border=True,
+            show_labels=False,
+            visible_when="tracking_processing_tool!=Custom",
+        ),
+        Group(
+            Item(
+                "tracking_processing_tool",
+                label="Tracking processing tool",
+                editor=EnumEditor(name="tracking_processing_tool_editor"),
+            ),
+            Item(
+                "diffusion_model",
+                editor=EnumEditor(name="diffusion_model_editor"),
+                visible_when='tracking_processing_tool!="Custom"',
+            ),
+            Item(
+                "dipy_tracking_config",
+                style="custom",
+                visible_when='tracking_processing_tool=="Dipy"',
+            ),
+            Item(
+                "mrtrix_tracking_config",
+                style="custom",
+                visible_when='tracking_processing_tool=="MRtrix"',
+            ),
+            label="Tracking",
+            show_border=True,
+            show_labels=False,
+        ),
+        Group(
+            Item("custom_track_file", style="simple"),
+            visible_when='tracking_processing_tool=="Custom"',
+        ),
         height=750,
-        width=500
+        width=500,
     )
 
     def __init__(self):
@@ -76,23 +106,32 @@ class DiffusionConfigUI(DiffusionConfig):
         cmp.cmpbidsappmanager.stages.diffusion.tracking.MRtrix_tracking_configUI
         """
         DiffusionConfig.__init__(self)
-        self.dipy_recon_config = Dipy_recon_configUI(imaging_model=self.diffusion_imaging_model,
-                                                     recon_mode=self.diffusion_model,
-                                                     tracking_processing_tool=self.tracking_processing_tool)
-        self.mrtrix_recon_config = MRtrix_recon_configUI(imaging_model=self.diffusion_imaging_model,
-                                                         recon_mode=self.diffusion_model)
-        self.dipy_tracking_config = Dipy_tracking_configUI(imaging_model=self.diffusion_imaging_model,
-                                                           tracking_mode=self.diffusion_model,
-                                                           SD=self.mrtrix_recon_config.local_model)
-        self.mrtrix_tracking_config = MRtrix_tracking_configUI(tracking_mode=self.diffusion_model,
-                                                               SD=self.mrtrix_recon_config.local_model)
+        self.dipy_recon_config = Dipy_recon_configUI(
+            imaging_model=self.diffusion_imaging_model,
+            recon_mode=self.diffusion_model,
+            tracking_processing_tool=self.tracking_processing_tool,
+        )
+        self.mrtrix_recon_config = MRtrix_recon_configUI(
+            imaging_model=self.diffusion_imaging_model, recon_mode=self.diffusion_model
+        )
+        self.dipy_tracking_config = Dipy_tracking_configUI(
+            imaging_model=self.diffusion_imaging_model,
+            tracking_mode=self.diffusion_model,
+            SD=self.mrtrix_recon_config.local_model,
+        )
+        self.mrtrix_tracking_config = MRtrix_tracking_configUI(
+            tracking_mode=self.diffusion_model, SD=self.mrtrix_recon_config.local_model
+        )
 
         self.mrtrix_recon_config.on_trait_change(
-            self.update_mrtrix_tracking_SD, 'local_model')
+            self.update_mrtrix_tracking_SD, "local_model"
+        )
         self.dipy_recon_config.on_trait_change(
-            self.update_dipy_tracking_SD, 'local_model')
+            self.update_dipy_tracking_SD, "local_model"
+        )
         self.dipy_recon_config.on_trait_change(
-            self.update_dipy_tracking_sh_order, 'lmax_order')
+            self.update_dipy_tracking_sh_order, "lmax_order"
+        )
 
 
 class DiffusionStageUI(DiffusionStage):
@@ -115,34 +154,45 @@ class DiffusionStageUI(DiffusionStage):
     cmp.stages.diffusion.diffusion.DiffusionStage
     """
 
-    inspect_output_button = Button('View')
+    inspect_output_button = Button("View")
 
-    inspect_outputs_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    inspect_outputs_view = View(
         Group(
-            Item('inspect_outputs_enum', show_label=False),
-            Item('inspect_output_button',
-                 enabled_when='inspect_outputs_enum!="Outputs not available"',
-                 show_label=False),
-            label='View outputs', show_border=True)),
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("inspect_outputs_enum", show_label=False),
+                Item(
+                    "inspect_output_button",
+                    enabled_when='inspect_outputs_enum!="Outputs not available"',
+                    show_label=False,
+                ),
+                label="View outputs",
+                show_border=True,
+            ),
+        ),
         scrollable=True,
         resizable=True,
-        kind='livemodal',
-        title='Inspect stage outputs',
-        buttons=['OK', 'Cancel'])
+        kind="livemodal",
+        title="Inspect stage outputs",
+        buttons=["OK", "Cancel"],
+    )
 
-    config_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    config_view = View(
         Group(
-            Item('config', style='custom', show_label=False),
-            label='Configuration', show_border=True)),
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("config", style="custom", show_label=False),
+                label="Configuration",
+                show_border=True,
+            ),
+        ),
         scrollable=True,
         resizable=True,
         height=900,
         width=500,
-        kind='livemodal',
-        title='Edit stage configuration',
-        buttons=['OK', 'Cancel']
+        kind="livemodal",
+        title="Edit stage configuration",
+        buttons=["OK", "Cancel"],
     )
 
     def __init__(self, bids_dir, output_dir):

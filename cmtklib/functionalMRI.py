@@ -12,7 +12,12 @@ import os
 import numpy as np
 import nibabel as nib
 import scipy.io as sio
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
+from nipype.interfaces.base import (
+    BaseInterface,
+    BaseInterfaceInputSpec,
+    TraitedSpec,
+    InputMultiPath,
+)
 
 
 class Discard_tp_InputSpec(BaseInterfaceInputSpec):
@@ -51,10 +56,16 @@ class Discard_tp(BaseInterface):
         new_data = new_data[:, :, :, n_discard:-1]
 
         hd = dataimg.get_header()
-        hd.set_data_shape([hd.get_data_shape()[0], hd.get_data_shape()[1], hd.get_data_shape()[2],
-                           hd.get_data_shape()[3] - n_discard - 1])
+        hd.set_data_shape(
+            [
+                hd.get_data_shape()[0],
+                hd.get_data_shape()[1],
+                hd.get_data_shape()[2],
+                hd.get_data_shape()[3] - n_discard - 1,
+            ]
+        )
         img = nib.Nifti1Image(new_data, dataimg.get_affine(), hd)
-        nib.save(img, os.path.abspath('fMRI_discard.nii.gz'))
+        nib.save(img, os.path.abspath("fMRI_discard.nii.gz"))
         return runtime
 
     def _list_outputs(self):
@@ -66,29 +77,31 @@ class Discard_tp(BaseInterface):
 class Nuisance_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, desc="Input fMRI volume")
 
-    brainfile = File(desc='Eroded brain mask registered to fMRI space')
+    brainfile = File(desc="Eroded brain mask registered to fMRI space")
 
-    csf_file = File(desc='Eroded CSF mask registered to fMRI space')
+    csf_file = File(desc="Eroded CSF mask registered to fMRI space")
 
-    wm_file = File(desc='Eroded WM mask registered to fMRI space')
+    wm_file = File(desc="Eroded WM mask registered to fMRI space")
 
-    motion_file = File(desc='motion nuisance effect')
+    motion_file = File(desc="motion nuisance effect")
 
-    gm_file = InputMultiPath(File(),
-                             desc='GM atlas files registered to fMRI space')
+    gm_file = InputMultiPath(File(), desc="GM atlas files registered to fMRI space")
 
-    global_nuisance = Bool(desc='If `True` perform global nuisance regression')
+    global_nuisance = Bool(desc="If `True` perform global nuisance regression")
 
-    csf_nuisance = Bool(desc='If `True` perform CSF nuisance regression')
+    csf_nuisance = Bool(desc="If `True` perform CSF nuisance regression")
 
-    wm_nuisance = Bool(desc='If `True` perform WM nuisance regression')
+    wm_nuisance = Bool(desc="If `True` perform WM nuisance regression")
 
-    motion_nuisance = Bool(desc='If `True` perform motion nuisance regression')
+    motion_nuisance = Bool(desc="If `True` perform motion nuisance regression")
 
-    nuisance_motion_nb_reg = Int('36', desc="Number of reg to use in motion nuisance regression")
+    nuisance_motion_nb_reg = Int(
+        "36", desc="Number of reg to use in motion nuisance regression"
+    )
 
     n_discard = Int(
-        desc='Number of volumes discarded from the fMRI sequence during preprocessing')
+        desc="Number of volumes discarded from the fMRI sequence during preprocessing"
+    )
 
 
 class Nuisance_OutputSpec(TraitedSpec):
@@ -149,9 +162,10 @@ class Nuisance_regression(BaseInterface):
             brain = nib.load(brainfile).get_data().astype(np.uint32)
             global_values = data[brain == 1].mean(axis=0)
             global_values = global_values - np.mean(global_values)
-            np.save(os.path.abspath('averageGlobal.npy'), global_values)
-            sio.savemat(os.path.abspath('averageGlobal.mat'),
-                        {'avgGlobal': global_values})
+            np.save(os.path.abspath("averageGlobal.npy"), global_values)
+            sio.savemat(
+                os.path.abspath("averageGlobal.mat"), {"avgGlobal": global_values}
+            )
 
         # Extract CSF average signal
         if self.inputs.csf_nuisance:
@@ -159,9 +173,8 @@ class Nuisance_regression(BaseInterface):
             csf = nib.load(csffile).get_data().astype(np.uint32)
             csf_values = data[csf == 1].mean(axis=0)
             csf_values = csf_values - np.mean(csf_values)
-            np.save(os.path.abspath('averageCSF.npy'), csf_values)
-            sio.savemat(os.path.abspath('averageCSF.mat'),
-                        {'avgCSF': csf_values})
+            np.save(os.path.abspath("averageCSF.npy"), csf_values)
+            sio.savemat(os.path.abspath("averageCSF.mat"), {"avgCSF": csf_values})
 
         # Extract WM average signal
         if self.inputs.wm_nuisance:
@@ -169,8 +182,8 @@ class Nuisance_regression(BaseInterface):
             WM = nib.load(WMfile).get_data().astype(np.uint32)
             wm_values = data[WM == 1].mean(axis=0)
             wm_values = wm_values - np.mean(wm_values)
-            np.save(os.path.abspath('averageWM.npy'), wm_values)
-            sio.savemat(os.path.abspath('averageWM.mat'), {'avgWM': wm_values})
+            np.save(os.path.abspath("averageWM.npy"), wm_values)
+            sio.savemat(os.path.abspath("averageWM.mat"), {"avgWM": wm_values})
 
         # Import parameters from head motion estimation
         if self.inputs.motion_nuisance:
@@ -178,10 +191,8 @@ class Nuisance_regression(BaseInterface):
             move = move - np.mean(move, 0)
 
             # Update
-            move_der1 = np.concatenate(
-                (np.zeros([1, 6]), move[0:-1, :]), axis=0)
-            move_der2 = np.concatenate(
-                (np.zeros([2, 6]), move[0:-2, :]), axis=0)
+            move_der1 = np.concatenate((np.zeros([1, 6]), move[0:-1, :]), axis=0)
+            move_der2 = np.concatenate((np.zeros([2, 6]), move[0:-2, :]), axis=0)
             move_sq = np.square(move)
             move_der1_sq = np.square(move_der1)
             move_der2_sq = np.square(move_der2)
@@ -192,12 +203,19 @@ class Nuisance_regression(BaseInterface):
             move_der2_sq = move_der2_sq - np.mean(move_der2_sq)
             move_sq = move_sq - np.mean(move_sq)
 
-            if self.inputs.nuisance_motion_nb_reg == '12' or self.inputs.nuisance_motion_nb_reg == '24' or self.inputs.nuisance_motion_nb_reg == '36':
+            if (
+                self.inputs.nuisance_motion_nb_reg == "12"
+                or self.inputs.nuisance_motion_nb_reg == "24"
+                or self.inputs.nuisance_motion_nb_reg == "36"
+            ):
                 move = np.hstack((move, move_sq))
-            if self.inputs.nuisance_motion_nb_reg == '24' or self.inputs.nuisance_motion_nb_reg == '36':
+            if (
+                self.inputs.nuisance_motion_nb_reg == "24"
+                or self.inputs.nuisance_motion_nb_reg == "36"
+            ):
                 move = np.hstack((move, move_der1))
                 move = np.hstack((move, move_der1_sq))
-            if self.inputs.nuisance_motion_nb_reg == '36':
+            if self.inputs.nuisance_motion_nb_reg == "36":
                 move = np.hstack((move, move_der2))
                 move = np.hstack((move, move_der2_sq))
 
@@ -215,57 +233,58 @@ class Nuisance_regression(BaseInterface):
         # build regressors matrix
         if self.inputs.global_nuisance:
             X = np.hstack(global_values.reshape(tp, 1))
-            print('> Detrend global average signal')
+            print("> Detrend global average signal")
             if self.inputs.csf_nuisance:
                 X = np.hstack((X.reshape(tp, 1), csf_values.reshape(tp, 1)))
-                print('... Detrend CSF average signal')
+                print("... Detrend CSF average signal")
                 if self.inputs.wm_nuisance:
                     X = np.hstack((X, wm_values.reshape(tp, 1)))
-                    print('... ... Detrend WM average signal')
+                    print("... ... Detrend WM average signal")
                     if self.inputs.motion_nuisance:
-                        print('... ... ... pre-Detrend motion average signals')
+                        print("... ... ... pre-Detrend motion average signals")
                         X = np.hstack((X, move))
-                        print('... ... ... Detrend motion average signals')
+                        print("... ... ... Detrend motion average signals")
                 elif self.inputs.motion_nuisance:
                     X = np.hstack((X, move))
-                    print('... ... Detrend motion average signals')
+                    print("... ... Detrend motion average signals")
             elif self.inputs.wm_nuisance:
                 X = np.hstack((X.reshape(tp, 1), wm_values.reshape(tp, 1)))
-                print('... Detrend WM average signal')
+                print("... Detrend WM average signal")
                 if self.inputs.motion_nuisance:
                     X = np.hstack((X, move))
-                    print('... ... Detrend motion average signals')
+                    print("... ... Detrend motion average signals")
             elif self.inputs.motion_nuisance:
                 X = np.hstack((X.reshape(tp, 1), move))
-                print('... Detrend motion average signals')
+                print("... Detrend motion average signals")
         elif self.inputs.csf_nuisance:
             X = np.hstack((csf_values.reshape(tp, 1)))
-            print('> Detrend CSF average signal')
+            print("> Detrend CSF average signal")
             if self.inputs.wm_nuisance:
                 X = np.hstack((X.reshape(tp, 1), wm_values.reshape(tp, 1)))
-                print('... Detrend WM average signal')
+                print("... Detrend WM average signal")
                 if self.inputs.motion_nuisance:
                     X = np.hstack((X, move))
-                    print('... ... Detrend motion average signals')
+                    print("... ... Detrend motion average signals")
             elif self.inputs.motion_nuisance:
                 X = np.hstack((X.reshape(tp, 1), move))
-                print('... Detrend motion average signals')
+                print("... Detrend motion average signals")
         elif self.inputs.wm_nuisance:
             X = np.hstack((wm_values.reshape(tp, 1)))
-            print('> Detrend WM average signal')
+            print("> Detrend WM average signal")
             if self.inputs.motion_nuisance:
-                print('... pre-Detrend motion average signals')
+                print("... pre-Detrend motion average signals")
                 # print('... move shape :',move.shape)
                 # print('... X shape :',X.shape)
                 Y = X.reshape(tp, 1)
                 # print('... Y shape :',Y.shape)
                 X = np.hstack((Y, move))
-                print('... Detrend motion average signals')
+                print("... Detrend motion average signals")
         elif self.inputs.motion_nuisance:
             X = move
-            print('> Detrend motion average signals')
+            print("> Detrend motion average signals")
 
         import statsmodels.api as sm
+
         X = sm.add_constant(X)
         # print('Shape X GLM')
         # print(X.shape)
@@ -276,12 +295,12 @@ class Nuisance_regression(BaseInterface):
             gls_model = sm.GLS(Y, X)
             gls_results = gls_model.fit()
             # new_data[index[0],index[1],index[2],:] = gls_results.resid
-            new_data[index[0], index[1], index[2],
-                     :] = gls_results.resid  # + gls_results.params[8]
+            new_data[
+                index[0], index[1], index[2], :
+            ] = gls_results.resid  # + gls_results.params[8]
 
-        img = nib.Nifti1Image(
-            new_data, dataimg.get_affine(), dataimg.get_header())
-        nib.save(img, os.path.abspath('fMRI_nuisance.nii.gz'))
+        img = nib.Nifti1Image(new_data, dataimg.get_affine(), dataimg.get_header())
+        nib.save(img, os.path.abspath("fMRI_nuisance.nii.gz"))
 
         return runtime
 
@@ -289,14 +308,14 @@ class Nuisance_regression(BaseInterface):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath("fMRI_nuisance.nii.gz")
         if self.inputs.global_nuisance:
-            outputs["averageGlobal_npy"] = os.path.abspath('averageGlobal.npy')
-            outputs["averageGlobal_mat"] = os.path.abspath('averageGlobal.mat')
+            outputs["averageGlobal_npy"] = os.path.abspath("averageGlobal.npy")
+            outputs["averageGlobal_mat"] = os.path.abspath("averageGlobal.mat")
         if self.inputs.csf_nuisance:
-            outputs["averageCSF_npy"] = os.path.abspath('averageCSF.npy')
-            outputs["averageCSF_mat"] = os.path.abspath('averageCSF.mat')
+            outputs["averageCSF_npy"] = os.path.abspath("averageCSF.npy")
+            outputs["averageCSF_mat"] = os.path.abspath("averageCSF.mat")
         if self.inputs.wm_nuisance:
-            outputs["averageWM_npy"] = os.path.abspath('averageWM.npy')
-            outputs["averageWM_mat"] = os.path.abspath('averageWM.mat')
+            outputs["averageWM_npy"] = os.path.abspath("averageWM.npy")
+            outputs["averageWM_mat"] = os.path.abspath("averageWM.mat")
         return outputs
 
 
@@ -304,7 +323,8 @@ class Detrending_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to detrend")
 
     gm_file = InputMultiPath(
-        File(exists=True), desc="ROI files registered to fMRI space")
+        File(exists=True), desc="ROI files registered to fMRI space"
+    )
 
     mode = Enum(["linear", "quadratic", "cubic"], desc="Detrending order")
 
@@ -357,14 +377,14 @@ class Detrending(BaseInterface):
                 continue
 
             Ydet = signal.detrend(
-                data[index[0], index[1], index[2], :].reshape(tp, 1), axis=0)
+                data[index[0], index[1], index[2], :].reshape(tp, 1), axis=0
+            )
             new_data_det[index[0], index[1], index[2], :] = Ydet[:, 0]
 
-        img = nib.Nifti1Image(
-            new_data_det, dataimg.get_affine(), dataimg.get_header())
-        nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
+        img = nib.Nifti1Image(new_data_det, dataimg.get_affine(), dataimg.get_header())
+        nib.save(img, os.path.abspath("fMRI_detrending.nii.gz"))
 
-        if self.inputs.mode == 'quadratic':
+        if self.inputs.mode == "quadratic":
             print("Quadratic detrending")
             print("=================")
             from obspy.signal.detrend import polynomial
@@ -375,13 +395,15 @@ class Detrending(BaseInterface):
                 if value == 0:
                     continue
                 Ydet = polynomial(
-                    new_data_det2[index[0], index[1], index[2], :], order=2)
+                    new_data_det2[index[0], index[1], index[2], :], order=2
+                )
 
             img = nib.Nifti1Image(
-                new_data_det2, dataimg.get_affine(), dataimg.get_header())
-            nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
+                new_data_det2, dataimg.get_affine(), dataimg.get_header()
+            )
+            nib.save(img, os.path.abspath("fMRI_detrending.nii.gz"))
 
-        if self.inputs.mode == 'cubic':
+        if self.inputs.mode == "cubic":
             print("Cubic-spline detrending")
             print("=================")
             from obspy.signal.detrend import spline
@@ -391,12 +413,12 @@ class Detrending(BaseInterface):
             for index, value in np.ndenumerate(gm):
                 if value == 0:
                     continue
-                Ydet = spline(
-                    new_data_det2[index[0], index[1], index[2], :], order=3)
+                Ydet = spline(new_data_det2[index[0], index[1], index[2], :], order=3)
 
             img = nib.Nifti1Image(
-                new_data_det2, dataimg.get_affine(), dataimg.get_header())
-            nib.save(img, os.path.abspath('fMRI_detrending.nii.gz'))
+                new_data_det2, dataimg.get_affine(), dataimg.get_header()
+            )
+            nib.save(img, os.path.abspath("fMRI_detrending.nii.gz"))
 
         print("[ DONE ]")
         return runtime
@@ -410,13 +432,15 @@ class Detrending(BaseInterface):
 class Scrubbing_InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="fMRI volume to scrubb")
 
-    wm_mask = File(exists=True, desc='WM mask registered to fMRI space')
+    wm_mask = File(exists=True, desc="WM mask registered to fMRI space")
 
     gm_file = InputMultiPath(
-        File(exists=True), desc='ROI volumes registered to fMRI space')
+        File(exists=True), desc="ROI volumes registered to fMRI space"
+    )
 
     motion_parameters = File(
-        exists=True, desc='Motion parameters from preprocessing stage')
+        exists=True, desc="Motion parameters from preprocessing stage"
+    )
 
 
 class Scrubbing_OutputSpec(TraitedSpec):
@@ -493,10 +517,10 @@ class Scrubbing(BaseInterface):
             temp = temp[mask > 0]
             DVARS[i] = np.power(temp.mean(), 0.5)
 
-        np.save(os.path.abspath('FD.npy'), FD)
-        np.save(os.path.abspath('DVARS.npy'), DVARS)
-        sio.savemat(os.path.abspath('FD.mat'), {'FD': FD})
-        sio.savemat(os.path.abspath('DVARS.mat'), {'DVARS': DVARS})
+        np.save(os.path.abspath("FD.npy"), FD)
+        np.save(os.path.abspath("DVARS.npy"), DVARS)
+        sio.savemat(os.path.abspath("FD.mat"), {"FD": FD})
+        sio.savemat(os.path.abspath("DVARS.mat"), {"DVARS": DVARS})
 
         print("[ DONE ]")
         return runtime
