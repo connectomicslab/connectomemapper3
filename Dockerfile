@@ -97,11 +97,9 @@ RUN apt-get update && \
 # Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
 RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends curl && \
-    curl "http://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" -o "runtime2012b.tar.gz" && \
+    curl "http://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" | tar xvf  --no-same-owner -C /opt/freesurfer && \
     apt-get remove -y curl && \
-    tar xvf runtime2012b.tar.gz && \
-    apt-get clean && \
-    rm runtime2012b.tar.gz && \
+    apt-get clean &&
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Simulate SetUpFreeSurfer.sh
