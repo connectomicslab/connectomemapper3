@@ -30,29 +30,59 @@ class SegmentationConfigUI(SegmentationConfig):
     """
 
     traits_view = View(
-        Item('seg_tool', label="Segmentation tool"),
+        Item("seg_tool", label="Segmentation tool"),
         Group(
-           HGroup('make_isotropic',
-                  Item('isotropic_vox_size', label="Voxel size (mm)", visible_when='make_isotropic')),
-           Item('isotropic_interpolation', label='Interpolation',
-                visible_when='make_isotropic'),
-           Item('number_of_threads', label='Number of threads used for multithreading in Freesurfer and ANTs'),
-           'brain_mask_extraction_tool',
-           Item('ants_templatefile', label='Template',
-                visible_when='brain_mask_extraction_tool == "ANTs"'),
-           Item('ants_probmaskfile', label='Probability mask',
-                visible_when='brain_mask_extraction_tool == "ANTs"'),
-           Item('ants_regmaskfile', label='Extraction mask',
-                visible_when='brain_mask_extraction_tool == "ANTs"'),
-           Item('brain_mask_path', label='Brain mask path',
-                visible_when='brain_mask_extraction_tool == "Custom"'),
-           'freesurfer_args',
-           visible_when="seg_tool=='Freesurfer'"),
+            HGroup(
+                "make_isotropic",
+                Item(
+                    "isotropic_vox_size",
+                    label="Voxel size (mm)",
+                    visible_when="make_isotropic",
+                ),
+            ),
+            Item(
+                "isotropic_interpolation",
+                label="Interpolation",
+                visible_when="make_isotropic",
+            ),
+            Item(
+                "number_of_threads",
+                label="Number of threads used for multithreading in Freesurfer and ANTs",
+            ),
+            "brain_mask_extraction_tool",
+            Item(
+                "ants_templatefile",
+                label="Template",
+                visible_when='brain_mask_extraction_tool == "ANTs"',
+            ),
+            Item(
+                "ants_probmaskfile",
+                label="Probability mask",
+                visible_when='brain_mask_extraction_tool == "ANTs"',
+            ),
+            Item(
+                "ants_regmaskfile",
+                label="Extraction mask",
+                visible_when='brain_mask_extraction_tool == "ANTs"',
+            ),
+            Item(
+                "brain_mask_path",
+                label="Brain mask path",
+                visible_when='brain_mask_extraction_tool == "Custom"',
+            ),
+            "freesurfer_args",
+            visible_when="seg_tool=='Freesurfer'",
+        ),
         Group(
-            Item('custom_bids_derivatives_dir', label='Custom BIDS derivatives directory'),
-            Item('custom_bids_derivatives_json', label='JSON describing custom segmentation in BIDS format'),
-            visible_when="seg_tool=='Custom segmentation'"
-        )
+            Item(
+                "custom_bids_derivatives_dir", label="Custom BIDS derivatives directory"
+            ),
+            Item(
+                "custom_bids_derivatives_json",
+                label="JSON describing custom segmentation in BIDS format",
+            ),
+            visible_when="seg_tool=='Custom segmentation'",
+        ),
     )
 
 
@@ -76,33 +106,46 @@ class SegmentationStageUI(SegmentationStage):
     cmp.stages.segmentation.segmentation.SegmentationStage
     """
 
-    inspect_output_button = Button('View')
+    inspect_output_button = Button("View")
 
-    inspect_outputs_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    inspect_outputs_view = View(
         Group(
-            Item('inspect_outputs_enum', show_label=False),
-            Item('inspect_output_button',
-                 enabled_when='inspect_outputs_enum!="Outputs not available"',
-                 show_label=False),
-            label='View outputs', show_border=True)),
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("inspect_outputs_enum", show_label=False),
+                Item(
+                    "inspect_output_button",
+                    enabled_when='inspect_outputs_enum!="Outputs not available"',
+                    show_label=False,
+                ),
+                label="View outputs",
+                show_border=True,
+            ),
+        ),
         scrollable=True,
         resizable=True,
-        kind='livemodal',
-        title='Inspect stage outputs',
-        buttons=['OK', 'Cancel'])
+        kind="livemodal",
+        title="Inspect stage outputs",
+        buttons=["OK", "Cancel"],
+    )
 
-    config_view = View(Group(
-        Item('name', editor=TitleEditor(), show_label=False),
+    config_view = View(
         Group(
-            Item('config', style='custom', show_label=False),
-            label='Configuration', show_border=True)),
+            Item("name", editor=TitleEditor(), show_label=False),
+            Group(
+                Item("config", style="custom", show_label=False),
+                label="Configuration",
+                show_border=True,
+            ),
+        ),
         scrollable=True,
         resizable=True,
-        height=400, width=450,
-        kind='livemodal',
-        title='Edit stage configuration',
-        buttons=['OK', 'Cancel'])
+        height=400,
+        width=450,
+        kind="livemodal",
+        title="Edit stage configuration",
+        buttons=["OK", "Cancel"],
+    )
 
     # General and UI members
     def __init__(self, bids_dir, output_dir):
