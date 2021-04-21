@@ -21,6 +21,7 @@ from cmtklib.parcellation import Parcellate, ParcellateBrainstemStructures, \
     ParcellateHippocampalSubfields, ParcellateThalamus, \
     CombineParcellations, ComputeParcellationRoiVolumes
 from cmtklib.util import get_pipeline_dictionary_outputs
+from cmtklib.util import get_pipeline_dictionary_outputs, get_basename
 
 
 class ParcellationConfig(HasTraits):
@@ -183,23 +184,6 @@ class ParcellationStage(Stage):
 
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
 
-        def get_basename(path):
-            """Return ``os.path.basename()`` of a ``path``.
-
-            Parameters
-            ----------
-            path : os.path
-                Path to extract the containing directory
-
-            Returns
-            -------
-            path : os.path
-                Path to the containing directory
-            """
-            import os
-            path = os.path.basename(path)
-            print(path)
-            return path
 
         if self.config.parcellation_scheme != "Custom":
 

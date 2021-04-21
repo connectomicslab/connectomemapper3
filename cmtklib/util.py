@@ -57,6 +57,23 @@ def isavailable(file):
     return file
 
 
+def get_basename(path):
+    """Return ``os.path.basename()`` of a ``path``.
+
+    Parameters
+    ----------
+    path : os.path
+        Path to extract the containing directory
+
+    Returns
+    -------
+    path : os.path
+        Path to the containing directory
+    """
+    import os
+    return os.path.basename(path)
+
+
 class BColors:
     """Utility class for color unicode."""
     HEADER = '\033[95m'
