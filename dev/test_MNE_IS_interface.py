@@ -9,11 +9,12 @@ Create a fake pipeline to test the new MNE inverse solution interface.
 Code pieces gathered from cmp/pipelines/functional/eeg.py
 
 """
-
-import pdb
+import pdb 
+import getpass
 
 import nipype.pipeline.engine as pe
 from nipype.interfaces.utility import IdentityInterface
+import nipype.interfaces.io as nio
 
 from traits.api import *
 
@@ -56,7 +57,21 @@ class FakeEEGPipeline(Pipeline):
         eeg_flow = pe.Workflow(name='eeg_pipeline', 
 							   base_dir= os.path.abspath(nipype_deriv_subject_directory))
 
-        invsol_flow = self.create_stage_flow("EEGInverseSolution")    
+        invsol_flow = self.create_stage_flow("EEGInverseSolution")
+        
+        eeg_flow.connect([
+						  (datasource, invsol_flow, 
+						   [
+							('roi_ts_file','inputnode.roi_ts_file'),
+							]),
+						 ])
+        
+        eeg_flow.connect([			
+			(invsol_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
+		])
+        
+        self.flow = eeg_flow
+        return eeg_flow
 	
     def process(self):
         cmp_deriv_subject_directory = os.path.join(
@@ -64,7 +79,10 @@ class FakeEEGPipeline(Pipeline):
         nipype_deriv_subject_directory = os.path.join(
 				self.output_directory, "nipype", self.subject)
         
-        self.create_pipeline_flow(cmp_deriv_subject_directory, nipype_deriv_subject_directory)
+        eeg_flow = self.create_pipeline_flow(cmp_deriv_subject_directory, nipype_deriv_subject_directory)
+        
+        eeg_flow.write_graph(graph2use='colored',
+							  format='svg', simple_form=True)
 
         
 class EEGFakeInputStage(Stage): 
@@ -75,12 +93,20 @@ class EEGFakeInputStage(Stage):
         
 
 # create project with project info 
-bids_dir = '/home/katha/data/DS001_BIDS'
+username = getpass.getuser()
+if username=='katha':
+    bids_dir = '/home/katha/data/DS001_BIDS'
+elif username=='katharina':
+    bids_dir = '/mnt/data/DS001_BIDS'
 
 project = cmp.project.CMP_Project_Info()
 project.base_directory = bids_dir
 #pdb.set_trace()
-project.subject = Enum("sub-01")
+
+participant_label = '01'
+project.subjects = ['{}'.format(participant_label)]
+project.subject = '{}'.format(participant_label)
+project.subject_id = '{}'.format(participant_label)
 project.subject_sessions = ['']
 project.subject_session = ''
 
