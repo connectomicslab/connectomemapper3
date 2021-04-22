@@ -93,15 +93,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Installing the Matlab R2012b (v8.0) runtime // http://ssd.mathworks.com/supportfiles/MCR_Runtime/R2012b/MCR_R2012b_glnxa64_installer.zip
-# Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
-RUN apt-get update && \
-    apt-get install -qq -y --no-install-recommends curl && \
-    curl "http://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" | tar xvf  --no-same-owner -C /opt/freesurfer && \
-    apt-get remove -y curl && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # Simulate SetUpFreeSurfer.sh
 ENV OS="Linux" \
     FS_OVERRIDE=0 \
@@ -118,6 +109,27 @@ ENV SUBJECTS_DIR="$FREESURFER_HOME/subjects" \
 ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
     MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
     PATH="$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH"
+
+# Installing the Matlab R2012b (v8.0) runtime // http://ssd.mathworks.com/supportfiles/MCR_Runtime/R2012b/MCR_R2012b_glnxa64_installer.zip
+# Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
+WORKDIR /opt/freesurfer/bin
+
+RUN apt-get update && \
+    apt-get install -qq -y --no-install-recommends curl libxt-dev libxext-dev libncurses5 && \
+    curl "https://raw.githubusercontent.com/freesurfer/freesurfer/dev/scripts/fs_install_mcr" -o fs_install_mcr && \
+    chmod +x fs_install_mcr && \
+    fs_install_mcr R2012b && \
+    rm -rf fs_install_mcr R2012b && \
+    apt-get remove -y curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# RUN apt-get update && \
+#     apt-get install -qq -y --no-install-recommends curl && \
+#     curl "http://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" | tar xvf --no-same-owner -C /opt/freesurfer && \
+#     apt-get remove -y curl && \
+#     apt-get clean && \
+#     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ##################################################################
 ## Install FSL and AFNI
