@@ -120,10 +120,15 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         self.stages = {
             "Segmentation": SegmentationStage(
-                bids_dir=project_info.base_directory, output_dir=self.output_directory
+                subject=self.global_conf.subject,
+                session=self.global_conf.subject_session,
+                bids_dir=project_info.base_directory,
+                output_dir=self.output_directory
             ),
             "Parcellation": ParcellationStage(
                 pipeline_mode="Diffusion",
+                subject=self.global_conf.subject,
+                session=self.global_conf.subject_session,
                 bids_dir=project_info.base_directory,
                 output_dir=self.output_directory,
             ),

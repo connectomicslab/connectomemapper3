@@ -165,9 +165,11 @@ class SegmentationStage(Stage):
     """
 
     # General and UI members
-    def __init__(self, bids_dir, output_dir):
+    def __init__(self, subject, session, bids_dir, output_dir):
         """Constructor of a :class:`~cmp.stages.segmentation.segmentation.SegmentationStage` instance."""
         self.name = "segmentation_stage"
+        self.bids_subject_label = subject
+        self.bids_session_label = session
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = SegmentationConfig()

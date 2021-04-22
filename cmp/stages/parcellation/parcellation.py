@@ -150,9 +150,11 @@ class ParcellationStage(Stage):
     cmp.stages.parcellation.parcellation.ParcellationConfig
     """
 
-    def __init__(self, pipeline_mode, bids_dir, output_dir):
+    def __init__(self, pipeline_mode, subject, session, bids_dir, output_dir):
         """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
         self.name = "parcellation_stage"
+        self.bids_subject_label = subject
+        self.bids_session_label = session
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = ParcellationConfig()
