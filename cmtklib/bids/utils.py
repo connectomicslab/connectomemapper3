@@ -35,54 +35,55 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
     bids_dir = os.path.abspath(bids_dir)
     deriv_dir = os.path.abspath(deriv_dir)
 
-    if pipeline_name == 'cmp':
+    if pipeline_name == "cmp":
         desc = {
-            'Name': 'CMP3 Outputs',
-            'BIDSVersion': '1.4.0',
-            'DatasetType': 'derivatives',
-            'GeneratedBy': {
-                    'Name': pipeline_name,
-                    'Version': __version__,
-                    'Container': {
-                            'Type': 'docker',
-                            'Tag': '{}:{}'.format(DOCKER_HUB, __version__)
-                    },
-                    'CodeURL': __url__
+            "Name": "CMP3 Outputs",
+            "BIDSVersion": "1.4.0",
+            "DatasetType": "derivatives",
+            "GeneratedBy": {
+                "Name": pipeline_name,
+                "Version": __version__,
+                "Container": {
+                    "Type": "docker",
+                    "Tag": "{}:{}".format(DOCKER_HUB, __version__),
+                },
+                "CodeURL": __url__,
             },
-            'HowToAcknowledge': 'Please cite ... ',
+            "HowToAcknowledge": "Please cite ... ",
         }
-    elif pipeline_name == 'freesurfer':
+    elif pipeline_name == "freesurfer":
         desc = {
-                'Name': 'Freesurfer Outputs of CMP3 ({})'.format(__version__),
-                'BIDSVersion': '1.4.0',
-                'DatasetType': 'derivatives',
-                'GeneratedBy': {
-                        'Name': 'freesurfer',
-                        'Version': '6.0.1',
-                        'Container': {
-                                'Type': 'docker',
-                                'Tag': '{}:{}'.format(DOCKER_HUB, __version__)
-                        },
-                        'CodeURL': __url__
+            "Name": "Freesurfer Outputs of CMP3 ({})".format(__version__),
+            "BIDSVersion": "1.4.0",
+            "DatasetType": "derivatives",
+            "GeneratedBy": {
+                "Name": "freesurfer",
+                "Version": "6.0.1",
+                "Container": {
+                    "Type": "docker",
+                    "Tag": "{}:{}".format(DOCKER_HUB, __version__),
                 },
-                'HowToAcknowledge': 'Please cite ... '
+                "CodeURL": __url__,
+            },
+            "HowToAcknowledge": "Please cite ... ",
         }
-    elif pipeline_name == 'nipype':
+    elif pipeline_name == "nipype":
         from nipype import __version__ as nipype_version
+
         desc = {
-                'Name': 'Nipype Outputs of CMP3 ({})'.format(__version__),
-                'BIDSVersion': '1.4.0',
-                'DatasetType': 'derivatives',
-                'GeneratedBy': {
-                        'Name': pipeline_name,
-                        'Version': nipype_version,
-                        'Container': {
-                                'Type': 'docker',
-                                'Tag': '{}:{}'.format(DOCKER_HUB, __version__)
-                        },
-                        'CodeURL': __url__
+            "Name": "Nipype Outputs of CMP3 ({})".format(__version__),
+            "BIDSVersion": "1.4.0",
+            "DatasetType": "derivatives",
+            "GeneratedBy": {
+                "Name": pipeline_name,
+                "Version": nipype_version,
+                "Container": {
+                    "Type": "docker",
+                    "Tag": "{}:{}".format(DOCKER_HUB, __version__),
                 },
-                'HowToAcknowledge': 'Please cite ... '
+                "CodeURL": __url__,
+            },
+            "HowToAcknowledge": "Please cite ... ",
         }
 
     # Keys that can only be set by environment
@@ -99,31 +100,35 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
 
     # Keys deriving from source dataset
     orig_desc = {}
-    fname = os.path.join(bids_dir, 'dataset_description.json')
+    fname = os.path.join(bids_dir, "dataset_description.json")
     if os.access(fname, os.R_OK):
-        with open(fname, 'r') as fobj:
+        with open(fname, "r") as fobj:
             orig_desc = json.load(fobj)
 
-    if 'DatasetDOI' in orig_desc:
-        desc['SourceDatasets']: [
+    if "DatasetDOI" in orig_desc:
+        desc["SourceDatasets"]: [
             {
-                'DOI': orig_desc['DatasetDOI'],
-                'URL': 'https://doi.org/{}'.format(orig_desc['DatasetDOI']),
-                'Version': 'TODO: To be updated'
+                "DOI": orig_desc["DatasetDOI"],
+                "URL": "https://doi.org/{}".format(orig_desc["DatasetDOI"]),
+                "Version": "TODO: To be updated",
             }
         ]
     else:
-        desc['SourceDatasets']: [
+        desc["SourceDatasets"]: [
             {
-                'DOI': 'TODO: To be updated',
-                'URL': 'TODO: To be updated',
-                'Version': 'TODO: To be updated'
+                "DOI": "TODO: To be updated",
+                "URL": "TODO: To be updated",
+                "Version": "TODO: To be updated",
             }
         ]
 
-    desc['License'] = 'TODO: To be updated (See https://creativecommons.org/about/cclicenses/)'
+    desc[
+        "License"
+    ] = "TODO: To be updated (See https://creativecommons.org/about/cclicenses/)"
 
-    with open(os.path.join(deriv_dir, pipeline_name, 'dataset_description.json'), 'w') as fobj:
+    with open(
+        os.path.join(deriv_dir, pipeline_name, "dataset_description.json"), "w"
+    ) as fobj:
         json.dump(desc, fobj, indent=4)
 
 
