@@ -70,6 +70,16 @@ class ParcellationConfig(HasTraits):
         >>> atlas_info = {atlas_name: {'number_of_regions': number_of_regions,
         >>>               'node_information_graphml': graphml_file}} # doctest: +SKIP
 
+    custom_bids_derivatives_dir : traits.Directory
+        Specify a custom BIDS derivatives directory
+        where parcellation and csf segmentation files
+        can be found
+
+    custom_bids_derivatives_json : traits.File
+        Path to a JSON file specifying the BIDS format of
+        parcellation atlas nifti and graphml files, and
+        csf file to query
+
     See Also
     --------
     cmp.stages.parcellation.parcellation.ParcellationStage
@@ -85,6 +95,16 @@ class ParcellationConfig(HasTraits):
     segment_hippocampal_subfields = Bool(True)
     segment_brainstem = Bool(True)
     pre_custom = Str("Lausanne2008")
+    custom_bids_derivatives_dir = Directory(
+        desc="Specify a custom BIDS derivatives directory "
+        + "where parcellation and csf segmentation files "
+        + "can be found"
+    )
+    custom_bids_derivatives_json = File(
+        desc="Path to a JSON file specifying the BIDS format of "
+        + "parcellation atlas nifti and graphml files, and "
+        + "csf file to query"
+    )
     number_of_regions = Int()
     atlas_nifti_file = File(exists=True)
     csf_file = File(exists=True)
