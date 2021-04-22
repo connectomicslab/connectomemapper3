@@ -80,7 +80,7 @@ bids_dir = '/home/katha/data/DS001_BIDS'
 project = cmp.project.CMP_Project_Info()
 project.base_directory = bids_dir
 #pdb.set_trace()
-project.subject = "sub-01"
+project.subject = Enum("sub-01")
 project.subject_sessions = ['']
 project.subject_session = ''
 
