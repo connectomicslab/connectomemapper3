@@ -8,6 +8,12 @@
 
 import os
 import json
+from nipype.interfaces.base import (
+    BaseInterfaceInputSpec,
+    BaseInterface,
+    TraitedSpec,
+    File,
+)
 
 
 def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
@@ -134,3 +140,124 @@ def _get_shub_version(singularity_url):
 
     """
     return NotImplemented
+
+
+class CreateBIDSStandardParcellationLabelIndexMappingFileInputSpec(
+    BaseInterfaceInputSpec
+):
+    """Specify the inputs of the :obj:`~cmtklib.bids.utils.CreateBIDSStandardParcellationLabelIndexMappingFile`."""
+
+    roi_graphml = File(
+        mandatory=True,
+        exists=True,
+        desc="Path to graphml file that describes graph nodes for a given parcellation",
+    )
+    roi_colorlut = File(
+        mandatory=True,
+        exists=True,
+        desc="Path to FreesurferColorLUT.txt file that describes the RGB color of the "
+        "graph nodes for a given parcellation",
+    )
+
+
+class CreateBIDSStandardParcellationLabelIndexMappingFileOutputSpec(
+    BaseInterfaceInputSpec
+):
+    """Specify the output of the :obj:`~cmtklib.bids.utils.CreateBIDSStandardParcellationLabelIndexMappingFile`."""
+
+    roi_bids_tsv = File(
+        exists=True,
+        desc="Output BIDS standard generic label-index mapping file that "
+        "describes parcellation nodes",
+    )
+
+
+class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
+    """Creates the BIDS standard generic label-index mapping file that describes parcellation nodes"""
+
+    input_spec = CreateBIDSStandardParcellationLabelIndexMappingFileInputSpec
+    output_spec = CreateBIDSStandardParcellationLabelIndexMappingFileOutputSpec
+
+    def _run_interface(self, runtime):
+        import numpy as np
+        import re
+        import csv
+        import networkx as nx
+
+        # Extract code mapping from parcellation freesurfer color lookup table
+        with open(self.inputs.roi_colorlut, "r") as f:
+            lut_content = f.readlines()
+        # Process line by line
+        pattern = re.compile(
+            r"\d{1,5}[ ]+[a-zA-Z-_0-9*.]+[ ]+\d{1,3}[ ]+\d{1,3}[ ]+\d{1,3}[ ]+\d{1,3}"
+        )
+        rois_rgb = np.empty((0, 4), dtype=np.int64)
+        for line in lut_content:
+            if pattern.match(line):
+                s = line.rstrip().split(" ")
+                s = list(filter(None, s))
+                rois_rgb = np.append(
+                    rois_rgb,
+                    np.array([[int(s[0]), int(s[2]), int(s[3]), int(s[4])]]),
+                    axis=0,
+                )
+
+        # Read the graphml node description file
+        nodes_g = nx.readwrite.graphml.read_graphml(self.inputs.roi_graphml)
+        nodes = nodes_g.nodes(data=True)
+        del nodes_g
+
+        # Create a dictionary conformed to BIDS with index, name, color, and mapping columns
+        output_bids_node_description = []
+        for node in nodes:
+            # Get the node attribute dictionary
+            in_node_description = node[1]
+            # Fill index and name
+            out_node_description = {
+                "index": in_node_description["dn_multiscaleID"],
+                "name": in_node_description["dn_name"].lower(),
+            }
+            # Convert RGB color to hexadecimal
+            r, g, b = (
+                rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 1],
+                rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 2],
+                rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 3],
+            )
+            # Fill hexadecimal color
+            out_node_description["color"] = "#%02x%02x%02x" % (
+                r.squeeze(),
+                g.squeeze(),
+                b.squeeze(),
+            )
+            # Fill mapping
+            if "brainstem" in in_node_description["dn_name"]:
+                out_node_description["mapping"] = 10
+            else:
+                if "subcortical" in in_node_description["dn_region"]:
+                    out_node_description["mapping"] = 9
+                elif "cortical" in in_node_description["dn_region"]:
+                    out_node_description["mapping"] = 8
+            # Add standardized node description dictionary to the list
+            output_bids_node_description.append(out_node_description)
+
+        # Write list of standardized node description dictionaries to output TSV file
+        keys = ["index", "name", "color", "mapping"]
+        output_tsv_filename = self._gen_output_filename(self.inputs.roi_graphml)
+        with open(output_tsv_filename, "w") as output_tsv_file:
+            dict_writer = csv.DictWriter(output_tsv_file, keys, delimiter="\t")
+            dict_writer.writeheader()
+            dict_writer.writerows(output_bids_node_description)
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["roi_bids_tsv"] = self._gen_output_filename(self.inputs.roi_graphml)
+
+    @staticmethod
+    def _gen_output_filename(input_file):
+        import os.path as op
+        from pathlib import Path
+
+        fpath = Path(input_file)
+        return op.abspath(str(fpath.name) + ".tsv")
