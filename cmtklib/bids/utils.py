@@ -274,4 +274,4 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
         from pathlib import Path
 
         fpath = Path(input_file)
-        return op.abspath(str(fpath.name) + ".tsv")
+        return op.abspath(str(fpath.stem) + ".tsv")
