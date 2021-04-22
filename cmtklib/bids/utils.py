@@ -49,9 +49,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
                 },
                 "CodeURL": __url__,
             },
-            "PipelineDescription": {
-                "Name": "CMP3 Outputs ({})".format(__version__)
-            },
+            "PipelineDescription": {"Name": "CMP3 Outputs ({})".format(__version__)},
             "HowToAcknowledge": "Please cite ... ",
         }
     elif pipeline_name == "freesurfer":
@@ -69,7 +67,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
                 "CodeURL": __url__,
             },
             "PipelineDescription": {
-                    "Name": "Freesurfer Outputs of CMP3 ({})".format(__version__),
+                "Name": "Freesurfer Outputs of CMP3 ({})".format(__version__),
             },
             "HowToAcknowledge": "Please cite ... ",
         }
@@ -90,7 +88,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
                 "CodeURL": __url__,
             },
             "PipelineDescription": {
-                    "Name": "Nipype Outputs of CMP3 ({})".format(__version__),
+                "Name": "Nipype Outputs of CMP3 ({})".format(__version__),
             },
             "HowToAcknowledge": "Please cite ... ",
         }
