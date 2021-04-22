@@ -19,6 +19,12 @@ class Stage(HasTraits):
 
     Attributes
     ----------
+    bids_subject_label : traits.Str
+        BIDS subject (participant) label
+
+    bids_session_label : traits.Str
+        BIDS session label
+
     bids_dir : traits.Str
         BIDS dataset root directory
 
@@ -51,6 +57,8 @@ class Stage(HasTraits):
     cmp.stages.connectome.fmri_connectome.ConnectomeStage
     """
 
+    bids_subject_label = Str(desc="BIDS subject (participant) label")
+    bids_session_label = Str("", desc="BIDS session label")
     bids_dir = Str
     output_dir = Str
     inspect_outputs = ["Outputs not available"]
