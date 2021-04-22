@@ -273,3 +273,157 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
 
         fpath = Path(input_file)
         return op.abspath(str(fpath.stem) + ".tsv")
+
+
+class CreateCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec(
+    BaseInterfaceInputSpec
+):
+    """Specify the inputs of the :obj:`~cmtklib.bids.utils.CreateCMPParcellationNodeDescriptionFilesFromBIDSFile`."""
+
+    roi_bids_tsv = File(
+        mandatory=True,
+        exists=True,
+        desc="Output BIDS standard generic label-index mapping file that "
+        "describes parcellation nodes",
+    )
+
+
+class CreateCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec(
+    BaseInterfaceInputSpec
+):
+    """Specify the output of the :obj:`~cmtklib.bids.utils.CreateCMPParcellationNodeDescriptionFilesFromBIDSFile`."""
+
+    roi_graphml = File(
+        exists=True,
+        desc="Path to graphml file that describes graph nodes for a given parcellation",
+    )
+    roi_colorlut = File(
+        exists=True,
+        desc="Path to FreesurferColorLUT.txt file that describes the RGB color of the "
+        "graph nodes for a given parcellation",
+    )
+
+
+class CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
+    """Creates CMP graphml and FreeSurfer colorLUT files that describe parcellation nodes from the BIDS TSV file"""
+
+    input_spec = CreateCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec
+    output_spec = CreateCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec
+
+    def _run_interface(self, runtime):
+        import csv
+        from pathlib import Path
+        from time import localtime, strftime
+
+        # Read standard BIDS parcellation node description in TSV format
+        with open(self.inputs.roi_bids_tsv, "r") as data:
+            bids_dict_nodes = []
+            for line in csv.DictReader(data, delimiter="\t"):
+                bids_dict_nodes.append(line)
+
+        # Create colorLUT file, write header and parcellation node line
+        color_lut_file = self._gen_output_filename(self.inputs.roi_bids_tsv, "colorlut")
+        print("Create colorLUT file as %s" % color_lut_file)
+
+        with open(color_lut_file, "w+") as f_color_lut:
+            time_now = strftime("%a, %d %b %Y %H:%M:%S", localtime())
+            hdr_lines = [
+                "#$Id: {}_FreeSurferColorLUT.txt {} \n \n".format(
+                    Path(self.inputs.roi_bids_tsv).stem, time_now
+                ),
+                "{:<4} {:<55} {:>3} {:>3} {:>3} {} \n \n".format(
+                    "#No.", "Label Name:", "R", "G", "B", "A"
+                ),
+            ]
+            f_color_lut.writelines(hdr_lines)
+            del hdr_lines
+
+            for bids_node in bids_dict_nodes:
+                # Convert hexadecimal to RGB color
+                h = bids_node["color"].lstrip("#")
+                (r, g, b) = tuple(int(h[i : i + 2], 16) for i in (0, 2, 4))
+                line = [
+                    "{:<4} {:<55} {:>3} {:>3} {:>3} {} \n".format(
+                        bids_node["index"], bids_node["name"], r, g, b, 0
+                    )
+                ]
+                f_color_lut.writelines(line)
+                del line
+
+        # Create graphml file, write header and parcellation node line
+        graphml_file = self._gen_output_filename(self.inputs.roi_bids_tsv, "graphml")
+        print("Create graphml_file as %s" % graphml_file)
+
+        with open(graphml_file, "w+") as f_graphml:
+            # Write header
+            hdr_lines = [
+                "{}\n".format('<?xml version="1.0" encoding="utf-8"?>'),
+                "{}\n".format(
+                    '<graphml xmlns="http://graphml.graphdrawing.org/xmlns" '
+                    'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+                    'xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">'
+                ),
+                "{}\n".format(
+                    '\t<key attr.name="dn_region" attr.type="string" for="node" id="d0" />'
+                ),
+                "{}\n".format(
+                    '\t<key attr.name="dn_fsname" attr.type="string" for="node" id="d1" />'
+                ),
+                "{}\n".format(
+                    '\t<key attr.name="dn_hemisphere" attr.type="string" for="node" id="d2" />'
+                ),
+                "{}\n".format(
+                    '\t<key attr.name="dn_multiscaleID" attr.type="int" for="node" id="d3" />'
+                ),
+                "{}\n".format(
+                    '\t<key attr.name="dn_name" attr.type="string" for="node" id="d4" />'
+                ),
+                "{}\n".format('\t<graph edgedefault="undirected" id="">'),
+            ]
+            f_graphml.writelines(hdr_lines)
+            del hdr_lines
+
+            for bids_node in bids_dict_nodes:
+                # Write node description lines
+                node_lines = [
+                    "{}\n".format('\t\t<node id="%i">' % int(bids_node["index"])),
+                    "{}\n".format('\t\t\t<data key="d0">%s</data>' % "cortical"),
+                    "{}\n".format('\t\t\t<data key="d1">%s</data>' % bids_node["name"]),
+                    "{}\n".format('\t\t\t<data key="d2">%s</data>' % None),
+                    "{}\n".format(
+                        '\t\t\t<data key="d3">%i</data>' % int(bids_node["index"])
+                    ),
+                    "{}\n".format('\t\t\t<data key="d4">%s</data>' % bids_node["name"]),
+                    "{}\n".format("\t\t</node>"),
+                ]
+                f_graphml.writelines(node_lines)
+                del node_lines
+
+            # Write bottom lines
+            bottom_lines = ["{}\n".format("\t</graph>"), "{}\n".format("</graphml>")]
+            f_graphml.writelines(bottom_lines)
+            del bottom_lines
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["roi_colorlut"] = self._gen_output_filename(
+            self.inputs.roi_bids_tsv, "colorlut"
+        )
+        outputs["roi_graphml"] = self._gen_output_filename(
+            self.inputs.roi_bids_tsv, "graphml"
+        )
+
+    @staticmethod
+    def _gen_output_filename(input_tsv_filename, output_type):
+        import os.path as op
+        from pathlib import Path
+
+        tsv_filename_path = Path(input_tsv_filename)
+        if output_type == "colorlut":
+            outprefix_name = tsv_filename_path.stem
+            return op.abspath("{}_FreeSurferColorLUT.txt".format(outprefix_name))
+        if output_type == "graphml":
+            outprefix_name = tsv_filename_path.stem
+            return op.abspath("{}.2.graphml".format(outprefix_name))
