@@ -25,7 +25,7 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 RUN apt-get update && \
     apt-get install python2.7 python2.7-minimal software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
-    locales libstdc++6 npm curl perl bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
+    locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /root/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true) && \
@@ -93,17 +93,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Installing the Matlab R2012b (v8.0) runtime // http://ssd.mathworks.com/supportfiles/MCR_Runtime/R2012b/MCR_R2012b_glnxa64_installer.zip
-# Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
-RUN apt-get update && \
-    apt-get install -qq -y --no-install-recommends curl && \
-    curl "http://surfer.nmr.mgh.harvard.edu/fswiki/MatlabRuntime?action=AttachFile&do=get&target=runtime2012bLinux.tar.gz" -o "runtime2012b.tar.gz" && \
-    apt-get remove -y curl && \
-    tar xvf runtime2012b.tar.gz && \
-    apt-get clean && \
-    rm runtime2012b.tar.gz && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # Simulate SetUpFreeSurfer.sh
 ENV OS="Linux" \
     FS_OVERRIDE=0 \
@@ -120,6 +109,20 @@ ENV SUBJECTS_DIR="$FREESURFER_HOME/subjects" \
 ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
     MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
     PATH="$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH"
+
+# Installing the Matlab R2012b (v8.0) runtime // http://ssd.mathworks.com/supportfiles/MCR_Runtime/R2012b/MCR_R2012b_glnxa64_installer.zip
+# Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
+WORKDIR /opt/freesurfer/bin
+
+RUN apt-get update && \
+    apt-get install -qq -y --no-install-recommends curl libxt-dev libxext-dev libncurses5 unzip && \
+    curl "https://raw.githubusercontent.com/freesurfer/freesurfer/dev/scripts/fs_install_mcr" -o fs_install_mcr && \
+    chmod +x fs_install_mcr && \
+    fs_install_mcr R2012b && \
+    rm -rf fs_install_mcr R2012b && \
+    apt-get remove -y curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ##################################################################
 ## Install FSL and AFNI

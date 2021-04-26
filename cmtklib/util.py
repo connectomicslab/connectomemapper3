@@ -22,6 +22,23 @@ import numpy as np
 warnings.simplefilter("ignore")
 
 
+def unicode2str(text):
+    """Convert a unicode to a string using system's encoding.
+
+    Parameters
+    ----------
+    text : bytes
+        Unicode bytes representation of a string
+
+    Returns
+    -------
+    out_str : str
+        Output string
+    """
+    out_str = str(text)
+    return out_str
+
+
 class BColors:
     """Utility class for color unicode."""
     HEADER = '\033[95m'
