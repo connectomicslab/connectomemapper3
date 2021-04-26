@@ -599,7 +599,7 @@ def init_anat_project(project_info, is_new_project, debug=False):
     return anat_pipeline
 
 
-def init_eeg_project(project_info,bids_layout, is_new_project, debug=False):
+def init_eeg_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
     """Initialize the eeg processing pipeline.
 
     Parameters
