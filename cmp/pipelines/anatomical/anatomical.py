@@ -751,49 +751,37 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             anat_flow.connect([(anat_inputnode, seg_flow, [("T1", "inputnode.T1")])])
 
             if self.stages["Segmentation"].config.seg_tool == "Custom segmentation":
+                # fmt: off
                 anat_flow.connect(
                     [
-                        (
-                            seg_flow,
-                            anat_outputnode,
-                            [
-                                ("outputnode.brain_mask", "brain_mask"),
-                                ("outputnode.brain", "brain"),
-                            ],
-                        ),
+                        (seg_flow, anat_outputnode, [("outputnode.brain_mask", "brain_mask"),
+                                                     ("outputnode.brain", "brain")])
                         (anat_inputnode, anat_outputnode, [("T1", "T1")]),
                     ]
                 )
-
+                # fmt: on
+            # fmt: off
             anat_flow.connect(
                 [
-                    (
-                        seg_flow,
-                        anat_outputnode,
-                        [
-                            ("outputnode.subjects_dir", "subjects_dir"),
-                            ("outputnode.subject_id", "subject_id"),
-                        ],
-                    )
+                    (seg_flow, anat_outputnode, [("outputnode.subjects_dir", "subjects_dir"),
+                                                 ("outputnode.subject_id", "subject_id")])
                 ]
             )
+            # fmt: on
 
         if self.stages["Parcellation"].enabled:
             parc_flow = self.create_stage_flow("Parcellation")
             if self.stages["Segmentation"].config.seg_tool == "Freesurfer":
+                # fmt: off
                 anat_flow.connect(
                     [
-                        (
-                            seg_flow,
-                            parc_flow,
-                            [
-                                ("outputnode.subjects_dir", "inputnode.subjects_dir"),
-                                ("outputnode.subject_id", "inputnode.subject_id"),
-                            ],
-                        ),
+                        (seg_flow, parc_flow, [("outputnode.subjects_dir", "inputnode.subjects_dir"),
+                                               ("outputnode.subject_id", "inputnode.subject_id")]),
                     ]
                 )
+                # fmt: on
             else:
+                # fmt: off
                 anat_flow.connect(
                     [
                         (
@@ -803,65 +791,55 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                         )
                     ]
                 )
+                # fmt: on
             if self.stages["Segmentation"].config.seg_tool == "Freesurfer":
+                # fmt: on
                 anat_flow.connect(
                     [
-                        (
-                            parc_flow,
-                            anat_outputnode,
-                            [
-                                ("outputnode.wm_mask_file", "wm_mask_file"),
-                                (
-                                    "outputnode.parcellation_scheme",
-                                    "parcellation_scheme",
-                                ),
-                                ("outputnode.atlas_info", "atlas_info"),
-                                ("outputnode.roi_volumes", "roi_volumes"),
-                                ("outputnode.roi_colorLUTs", "roi_colorLUTs"),
-                                ("outputnode.roi_graphMLs", "roi_graphMLs"),
-                                ("outputnode.roi_volumes_stats", "roi_volumes_stats"),
-                                ("outputnode.wm_eroded", "wm_eroded"),
-                                ("outputnode.gm_mask_file", "gm_mask_file"),
-                                ("outputnode.csf_mask_file", "csf_mask_file"),
-                                ("outputnode.csf_eroded", "csf_eroded"),
-                                ("outputnode.brain_eroded", "brain_eroded"),
-                                ("outputnode.T1", "T1"),
-                                ("outputnode.aseg", "aseg"),
-                                ("outputnode.aparc_aseg", "aparc_aseg"),
-                                ("outputnode.brain_mask", "brain_mask"),
-                                ("outputnode.brain", "brain"),
-                            ],
-                        )
+                        (parc_flow, anat_outputnode, [("outputnode.wm_mask_file", "wm_mask_file"),
+                                                      ("outputnode.parcellation_scheme", "parcellation_scheme"),
+                                                      ("outputnode.atlas_info", "atlas_info"),
+                                                      ("outputnode.roi_volumes", "roi_volumes"),
+                                                      ("outputnode.roi_colorLUTs", "roi_colorLUTs"),
+                                                      ("outputnode.roi_graphMLs", "roi_graphMLs"),
+                                                      ("outputnode.roi_volumes_stats", "roi_volumes_stats"),
+                                                      ("outputnode.wm_eroded", "wm_eroded"),
+                                                      ("outputnode.gm_mask_file", "gm_mask_file"),
+                                                      ("outputnode.csf_mask_file", "csf_mask_file"),
+                                                      ("outputnode.csf_eroded", "csf_eroded"),
+                                                      ("outputnode.brain_eroded", "brain_eroded"),
+                                                      ("outputnode.T1", "T1"),
+                                                      ("outputnode.aseg", "aseg"),
+                                                      ("outputnode.aparc_aseg", "aparc_aseg"),
+                                                      ("outputnode.brain_mask", "brain_mask"),
+                                                      ("outputnode.brain", "brain")])
                     ]
                 )
+                # fmt: on
             else:
+                # fmt: off
                 anat_flow.connect(
                     [
-                        (
-                            parc_flow,
-                            anat_outputnode,
-                            [
-                                ("outputnode.wm_mask_file", "wm_mask_file"),
-                                (
-                                    "outputnode.parcellation_scheme",
-                                    "parcellation_scheme",
-                                ),
-                                ("outputnode.atlas_info", "atlas_info"),
-                                ("outputnode.roi_volumes", "roi_volumes"),
-                                ("outputnode.wm_eroded", "wm_eroded"),
-                                ("outputnode.gm_mask_file", "gm_mask_file"),
-                                ("outputnode.csf_eroded", "csf_eroded"),
-                                ("outputnode.brain_eroded", "brain_eroded"),
-                            ],
-                        ),
+                        (parc_flow, anat_outputnode, [("outputnode.wm_mask_file", "wm_mask_file"),
+                                                      ("outputnode.parcellation_scheme", "parcellation_scheme"),
+                                                      ("outputnode.atlas_info", "atlas_info"),
+                                                      ("outputnode.roi_volumes", "roi_volumes"),
+                                                      ("outputnode.wm_eroded", "wm_eroded"),
+                                                      ("outputnode.gm_mask_file", "gm_mask_file"),
+                                                      ("outputnode.csf_eroded", "csf_eroded"),
+                                                      ("outputnode.brain_eroded", "brain_eroded")])
                     ]
                 )
+                # fmt: on
 
                 if not self.stages["Segmentation"].enabled:
+                    # fmt: off
                     anat_flow.connect(
                         [(anat_inputnode, anat_outputnode, [("T1", "T1")])]
                     )
+                    # fmt: on
 
+        # fmt: off
         anat_flow.connect(
             [
                 (anat_outputnode, sinker, [("T1", "anat.@T1")]),
@@ -881,6 +859,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 (anat_outputnode, sinker, [("csf_eroded", "anat.@csf_eroded")]),
             ]
         )
+        # fmt: on
 
         self.flow = anat_flow
         return anat_flow
