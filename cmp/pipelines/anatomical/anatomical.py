@@ -577,6 +577,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         # Dataname substitutions in order to comply with BIDS derivatives specifications
         if self.parcellation_scheme == "Lausanne2008":
+            # fmt: off
             sinker.inputs.substitutions = [
                 ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
                 ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
@@ -586,128 +587,38 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
                 ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
                 ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-                (
-                    "wm_eroded.nii.gz",
-                    self.subject + "_label-WM_desc-eroded_dseg.nii.gz",
-                ),
-                (
-                    "csf_eroded.nii.gz",
-                    self.subject + "_label-CSF_desc-eroded_dseg.nii.gz",
-                ),
-                (
-                    "brain_eroded.nii.gz",
-                    self.subject + "_label-brain_desc-eroded_dseg.nii.gz",
-                ),
-                (
-                    "aparc+aseg.native.nii.gz",
-                    self.subject + "_desc-aparcaseg_dseg.nii.gz",
-                ),
-                (
-                    "aparc+aseg.Lausanne2018.native.nii.gz",
-                    self.subject + "_desc-aparcaseg_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2008_scale1.nii.gz",
-                    self.subject + "_atlas-L2008_res-scale1_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2008_scale2.nii.gz",
-                    self.subject + "_atlas-L2008_res-scale2_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2008_scale3.nii.gz",
-                    self.subject + "_atlas-L2008_res-scale3_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2008_scale4.nii.gz",
-                    self.subject + "_atlas-L2008_res-scale4_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2008_scale5.nii.gz",
-                    self.subject + "_atlas-L2008_res-scale5_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2008_scale1_final.nii.gz",
-                    self.subject + "_atlas-L2008_res-scale1_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2008_scale2_final.nii.gz",
-                    self.subject + "_atlas-L2008_res-scale2_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2008_scale3_final.nii.gz",
-                    self.subject + "_atlas-L2008_res-scale3_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2008_scale4_final.nii.gz",
-                    self.subject + "_atlas-L2008_res-scale4_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2008_scale5_final.nii.gz",
-                    self.subject + "_atlas-L2008_res-scale5_dseg.nii.gz",
-                ),
-                (
-                    "resolution83.graphml",
-                    self.subject + "_atlas-L2008_res-scale1_dseg.graphml",
-                ),
-                (
-                    "resolution150.graphml",
-                    self.subject + "_atlas-L2008_res-scale2_dseg.graphml",
-                ),
-                (
-                    "resolution258.graphml",
-                    self.subject + "_atlas-L2008_res-scale3_dseg.graphml",
-                ),
-                (
-                    "resolution500.graphml",
-                    self.subject + "_atlas-L2008_res-scale4_dseg.graphml",
-                ),
-                (
-                    "resolution1015.graphml",
-                    self.subject + "_atlas-L2008_res-scale5_dseg.graphml",
-                ),
-                (
-                    "resolution83_LUT.txt",
-                    self.subject + "_atlas-L2008_res-scale1_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "resolution150_LUT.txt",
-                    self.subject + "_atlas-L2008_res-scale2_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "resolution258_LUT.txt",
-                    self.subject + "_atlas-L2008_res-scale3_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "resolution500_LUT.txt",
-                    self.subject + "_atlas-L2008_res-scale4_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "resolution1015_LUT.txt",
-                    self.subject + "_atlas-L2008_res-scale5_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "roi_stats_scale1.tsv",
-                    self.subject + "_atlas-L2008_res-scale1_stats.tsv",
-                ),
-                (
-                    "roi_stats_scale2.tsv",
-                    self.subject + "_atlas-L2008_res-scale2_stats.tsv",
-                ),
-                (
-                    "roi_stats_scale3.tsv",
-                    self.subject + "_atlas-L2008_res-scale3_stats.tsv",
-                ),
-                (
-                    "roi_stats_scale4.tsv",
-                    self.subject + "_atlas-L2008_res-scale4_stats.tsv",
-                ),
-                (
-                    "roi_stats_scale5.tsv",
-                    self.subject + "_atlas-L2008_res-scale5_stats.tsv",
-                ),
+                ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
+                ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
+                ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
+                ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
+                ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
             ]
+            scale_mapping = {
+                "scale1": "83",
+                "scale2": "150",
+                "scale3": "258",
+                "scale4": "500",
+                "scale5": "1015",
+            }
+            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2008_{scale}.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2008_{scale}_final.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'resolution{scale_mapping[scale]}.graphml', self.subject + f'_atlas-L2008_res-{scale}_dseg.graphml')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'resolution{scale_mapping[scale]}_LUT.txt', self.subject + f'_atlas-L2008_res-{scale}_FreeSurferColorLUT.txt')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
+                )
+            # fmt: on
         elif self.parcellation_scheme == "Lausanne2018":
+            # fmt: off
             sinker.inputs.substitutions = [
                 ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
                 ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
@@ -717,148 +628,32 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
                 ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
                 ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-                (
-                    "wm_eroded.nii.gz",
-                    self.subject + "_label-WM_desc-eroded_dseg.nii.gz",
-                ),
-                (
-                    "csf_eroded.nii.gz",
-                    self.subject + "_label-CSF_desc-eroded_dseg.nii.gz",
-                ),
-                (
-                    "brain_eroded.nii.gz",
-                    self.subject + "_label-brain_desc-eroded_dseg.nii.gz",
-                ),
-                (
-                    "aparc+aseg.native.nii.gz",
-                    self.subject + "_desc-aparcaseg_dseg.nii.gz",
-                ),
-                (
-                    "aparc+aseg.Lausanne2018.native.nii.gz",
-                    self.subject + "_desc-aparcaseg_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale1.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale1_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale2.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale2_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale3.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale3_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale4.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale4_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale5.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale5_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale1_final.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale1_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale2_final.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale2_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale3_final.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale3_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale4_final.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale4_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale5_final.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale5_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale1.graphml",
-                    self.subject + "_atlas-L2018_res-scale1_dseg.graphml",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale2.graphml",
-                    self.subject + "_atlas-L2018_res-scale2_dseg.graphml",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale3.graphml",
-                    self.subject + "_atlas-L2018_res-scale3_dseg.graphml",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale4.graphml",
-                    self.subject + "_atlas-L2018_res-scale4_dseg.graphml",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale5.graphml",
-                    self.subject + "_atlas-L2018_res-scale5_dseg.graphml",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale1_FreeSurferColorLUT.txt",
-                    self.subject + "_atlas-L2018_res-scale1_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale2_FreeSurferColorLUT.txt",
-                    self.subject + "_atlas-L2018_res-scale2_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale3_FreeSurferColorLUT.txt",
-                    self.subject + "_atlas-L2018_res-scale3_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale4_FreeSurferColorLUT.txt",
-                    self.subject + "_atlas-L2018_res-scale4_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "ROIv_Lausanne2018_scale5_FreeSurferColorLUT.txt",
-                    self.subject + "_atlas-L2018_res-scale5_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "ROIv_HR_th_scale33.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale1_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_HR_th_scale60.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale2_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_HR_th_scale125.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale3_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_HR_th_scale250.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale4_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_HR_th_scale500.nii.gz",
-                    self.subject + "_atlas-L2018_res-scale5_dseg.nii.gz",
-                ),
-                (
-                    "roi_stats_scale1.tsv",
-                    self.subject + "_atlas-L2018_res-scale1_stats.tsv",
-                ),
-                (
-                    "roi_stats_scale2.tsv",
-                    self.subject + "_atlas-L2018_res-scale2_stats.tsv",
-                ),
-                (
-                    "roi_stats_scale3.tsv",
-                    self.subject + "_atlas-L2018_res-scale3_stats.tsv",
-                ),
-                (
-                    "roi_stats_scale4.tsv",
-                    self.subject + "_atlas-L2018_res-scale4_stats.tsv",
-                ),
-                (
-                    "roi_stats_scale5.tsv",
-                    self.subject + "_atlas-L2018_res-scale5_stats.tsv",
-                ),
+                ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
+                ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
+                ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
+                ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
+                ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
             ]
+            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2018_{scale}.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2018_{scale}_final.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2018_{scale}.graphml', self.subject + f'_atlas-L2018_res-{scale}_dseg.graphml')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2018_{scale}_FreeSurferColorLUT.txt', self.subject + f'_atlas-L2018_res-{scale}_FreeSurferColorLUT.txt')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_stats.tsv')
+                )
+            # fmt: on
+
         elif self.parcellation_scheme == "NativeFreesurfer":
+            # fmt: off
             sinker.inputs.substitutions = [
                 ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
                 ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
@@ -868,43 +663,17 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
                 ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
                 ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-                (
-                    "wm_eroded.nii.gz",
-                    self.subject + "_label-WM_desc-eroded_dseg.nii.gz",
-                ),
-                (
-                    "csf_eroded.nii.gz",
-                    self.subject + "_label-CSF_desc-eroded_dseg.nii.gz",
-                ),
-                (
-                    "brain_eroded.nii.gz",
-                    self.subject + "_label-brain_desc-eroded_dseg.nii.gz",
-                ),
-                (
-                    "aparc+aseg.native.nii.gz",
-                    self.subject + "_desc-aparcaseg_dseg.nii.gz",
-                ),
-                (
-                    "aparc+aseg.Lausanne2018.native.nii.gz",
-                    self.subject + "_desc-aparcaseg_dseg.nii.gz",
-                ),
-                (
-                    "ROIv_HR_th_freesurferaparc.nii.gz",
-                    self.subject + "_atlas-Desikan_dseg.nii.gz",
-                ),
-                (
-                    "freesurferaparc.graphml",
-                    self.subject + "_atlas-Desikan_dseg.graphml",
-                ),
-                (
-                    "FreeSurferColorLUT_adapted.txt",
-                    self.subject + "_atlas-Desikan_FreeSurferColorLUT.txt",
-                ),
-                (
-                    "roi_stats_freesurferaparc.tsv",
-                    self.subject + "_atlas-Desikan_stats.tsv",
-                ),
+                ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
+                ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
+                ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
+                ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
+                ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
+                ("ROIv_HR_th_freesurferaparc.nii.gz", self.subject + "_atlas-Desikan_dseg.nii.gz"),
+                ("freesurferaparc.graphml", self.subject + "_atlas-Desikan_dseg.graphml"),
+                ("FreeSurferColorLUT_adapted.txt", self.subject + "_atlas-Desikan_FreeSurferColorLUT.txt"),
+                ("roi_stats_freesurferaparc.tsv", self.subject + "_atlas-Desikan_stats.tsv"),
             ]
+            # fmt: on
 
         # Clear previous outputs
         self.clear_stages_outputs()
