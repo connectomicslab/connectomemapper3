@@ -539,6 +539,103 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         return valid_output, error_message
 
+    def create_datasinker_node(self, base_directory):
+        """Create the appropriate Nipype DataSink node depending on the `parcellation_scheme`
+
+        Parameters
+        ----------
+        base_directory : Directory
+            Main CMP output directory of a subject
+            e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
+
+        Returns
+        -------
+        sinker : Output Nipype DataSink Node
+            Output Nipype Node with :obj:`~nipype.interfaces.io.DataSink` interface
+        """
+        sinker = pe.Node(nio.DataSink(), name="anatomical_sinker")
+        sinker.inputs.base_directory = os.path.abspath(base_directory)
+
+        sinker.inputs.substitutions = [
+            ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
+            ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
+            ("brain_mask.nii.gz", self.subject + "_desc-brain_mask.nii.gz"),
+            ("aseg.nii.gz", self.subject + "_desc-aseg_dseg.nii.gz"),
+            ("csf_mask.nii.gz", self.subject + "_label-CSF_dseg.nii.gz"),
+            ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
+            ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
+            ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
+            ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
+            ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
+            ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
+            ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
+            ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
+        ]
+        # Dataname substitutions in order to comply with BIDS derivatives specifications
+        if self.parcellation_scheme == "Lausanne2008":
+            # fmt: off
+            scale_mapping = {
+                "scale1": "83",
+                "scale2": "150",
+                "scale3": "258",
+                "scale4": "500",
+                "scale5": "1015",
+            }
+            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2008_{scale}.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2008_{scale}_final.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'resolution{scale_mapping[scale]}.graphml', self.subject + f'_atlas-L2008_res-{scale}_dseg.graphml')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'resolution{scale_mapping[scale]}_LUT.txt', self.subject + f'_atlas-L2008_res-{scale}_FreeSurferColorLUT.txt')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
+                )
+            # fmt: on
+        elif self.parcellation_scheme == "Lausanne2018":
+            # fmt: off
+            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2018_{scale}.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2018_{scale}_final.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2018_{scale}.graphml', self.subject + f'_atlas-L2018_res-{scale}_dseg.graphml')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2018_{scale}_FreeSurferColorLUT.txt', self.subject + f'_atlas-L2018_res-{scale}_FreeSurferColorLUT.txt')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_stats.tsv')
+                )
+            # fmt: on
+        elif self.parcellation_scheme == "NativeFreesurfer":
+            # fmt: off
+            sinker.inputs.substitutions = [
+                ("ROIv_HR_th_freesurferaparc.nii.gz", self.subject + "_atlas-Desikan_dseg.nii.gz"),
+                ("freesurferaparc.graphml", self.subject + "_atlas-Desikan_dseg.graphml"),
+                ("FreeSurferColorLUT_adapted.txt", self.subject + "_atlas-Desikan_FreeSurferColorLUT.txt"),
+                ("roi_stats_freesurferaparc.tsv", self.subject + "_atlas-Desikan_stats.tsv"),
+            ]
+            # fmt: on
+        elif self.parcellation_scheme == "Custom":
+            # TODO
+            # fmt: off
+            sinker.inputs.substitutions = [
+
+            ]
+            # fmt: on
+
+        return sinker
+
     def create_pipeline_flow(
         self, cmp_deriv_subject_directory, nipype_deriv_subject_directory
     ):
@@ -572,108 +669,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         datasource.inputs.sort_filelist = False
 
         # Data sinker for output
-        sinker = pe.Node(nio.DataSink(), name="anatomical_sinker")
-        sinker.inputs.base_directory = os.path.abspath(cmp_deriv_subject_directory)
-
-        # Dataname substitutions in order to comply with BIDS derivatives specifications
-        if self.parcellation_scheme == "Lausanne2008":
-            # fmt: off
-            sinker.inputs.substitutions = [
-                ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
-                ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
-                ("brain_mask.nii.gz", self.subject + "_desc-brain_mask.nii.gz"),
-                ("aseg.nii.gz", self.subject + "_desc-aseg_dseg.nii.gz"),
-                ("csf_mask.nii.gz", self.subject + "_label-CSF_dseg.nii.gz"),
-                ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
-                ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-                ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-                ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
-                ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
-                ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
-                ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
-                ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
-            ]
-            scale_mapping = {
-                "scale1": "83",
-                "scale2": "150",
-                "scale3": "258",
-                "scale4": "500",
-                "scale5": "1015",
-            }
-            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2008_{scale}.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2008_{scale}_final.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'resolution{scale_mapping[scale]}.graphml', self.subject + f'_atlas-L2008_res-{scale}_dseg.graphml')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'resolution{scale_mapping[scale]}_LUT.txt', self.subject + f'_atlas-L2008_res-{scale}_FreeSurferColorLUT.txt')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
-                )
-            # fmt: on
-        elif self.parcellation_scheme == "Lausanne2018":
-            # fmt: off
-            sinker.inputs.substitutions = [
-                ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
-                ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
-                ("brain_mask.nii.gz", self.subject + "_desc-brain_mask.nii.gz"),
-                ("aseg.nii.gz", self.subject + "_desc-aseg_dseg.nii.gz"),
-                ("csf_mask.nii.gz", self.subject + "_label-CSF_dseg.nii.gz"),
-                ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
-                ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-                ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-                ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
-                ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
-                ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
-                ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
-                ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
-            ]
-            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}_final.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}.graphml', self.subject + f'_atlas-L2018_res-{scale}_dseg.graphml')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}_FreeSurferColorLUT.txt', self.subject + f'_atlas-L2018_res-{scale}_FreeSurferColorLUT.txt')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_stats.tsv')
-                )
-            # fmt: on
-
-        elif self.parcellation_scheme == "NativeFreesurfer":
-            # fmt: off
-            sinker.inputs.substitutions = [
-                ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
-                ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
-                ("brain_mask.nii.gz", self.subject + "_desc-brain_mask.nii.gz"),
-                ("aseg.nii.gz", self.subject + "_desc-aseg_dseg.nii.gz"),
-                ("csf_mask.nii.gz", self.subject + "_label-CSF_dseg.nii.gz"),
-                ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
-                ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-                ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-                ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
-                ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
-                ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
-                ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
-                ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz"),
-                ("ROIv_HR_th_freesurferaparc.nii.gz", self.subject + "_atlas-Desikan_dseg.nii.gz"),
-                ("freesurferaparc.graphml", self.subject + "_atlas-Desikan_dseg.graphml"),
-                ("FreeSurferColorLUT_adapted.txt", self.subject + "_atlas-Desikan_FreeSurferColorLUT.txt"),
-                ("roi_stats_freesurferaparc.tsv", self.subject + "_atlas-Desikan_stats.tsv"),
-            ]
-            # fmt: on
+        sinker = self.create_datasinker_node(
+            base_directory=cmp_deriv_subject_directory
+        )
 
         # Clear previous outputs
         self.clear_stages_outputs()
