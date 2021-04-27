@@ -55,8 +55,7 @@ class EEGLAB2fif(BaseInterface):
 
 		self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname)
 		self.derivative_list.append('cmp')
-		self.output_query['EEG'] = {
-									'scope': 'Connectome Mapper',
+		self.output_query['EEG'] = {									
 									'suffix': 'epo',
 									'extensions': ['fif']	                                
 									}
