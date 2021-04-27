@@ -589,6 +589,7 @@ if args.analysis_level == "participant":
                                                  run_anat=run_anat,
                                                  run_dmri=run_dmri,
                                                  run_fmri=run_fmri,
+                                                 run_eeg=run_eeg,
                                                  number_of_threads=number_of_threads)
                         print_blue("... cmd : {}".format(cmd))
 
