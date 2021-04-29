@@ -165,9 +165,9 @@ def cmat(
     roi_graphmls,
     parcellation_scheme,
     compute_curvature=True,
-    additional_maps={},
+    additional_maps=None,
     output_types=["gPickle"],
-    atlas_info={},
+    atlas_info=None,
 ):
     """Create the connection matrix for each resolution using fibers and ROIs.
 
@@ -196,6 +196,10 @@ def cmat(
         Dictionary storing information such as path to files related to a
         parcellation atlas / scheme.
     """
+    if additional_maps is None:
+        additional_maps = {}
+    if atlas_info is None:
+        atlas_info = {}
 
     print("========================")
     print("> Creation of connectome maps")
