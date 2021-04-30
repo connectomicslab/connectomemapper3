@@ -214,61 +214,32 @@ class ParcellationStage(Stage):
         outputnode : nipype.interfaces.utility.IdentityInterface
             Identity interface describing the outputs of the stage
         """
-        # from nipype.interfaces.fsl.maths import MathsCommand
-
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
 
         if self.config.parcellation_scheme != "Custom":
 
             parc_node = pe.Node(
                 interface=Parcellate(),
-                name="%s_parcellation" % self.config.parcellation_scheme,
+                name=f'{self.config.parcellation_scheme}_parcellation',
             )
             parc_node.inputs.parcellation_scheme = self.config.parcellation_scheme
             parc_node.inputs.erode_masks = True
-
+            # fmt: off
             flow.connect(
                 [
-                    (
-                        inputnode,
-                        parc_node,
-                        [
-                            ("subjects_dir", "subjects_dir"),
-                            (("subject_id", get_basename), "subject_id"),
-                        ],
-                    ),
-                    (
-                        parc_node,
-                        outputnode,
-                        [
-                            ("white_matter_mask_file", "wm_mask_file"),
-                            ("csf_mask_file", "csf_mask_file"),
-                            ("wm_eroded", "wm_eroded"),
-                            ("csf_eroded", "csf_eroded"),
-                            ("brain_eroded", "brain_eroded"),
-                            ("T1", "T1"),
-                            ("brain", "brain"),
-                            ("brain_mask", "brain_mask"),
-                        ],
-                    ),
+                    (inputnode, parc_node, [("subjects_dir", "subjects_dir"), (("subject_id", get_basename), "subject_id")]),
+                    (parc_node, outputnode, [("white_matter_mask_file", "wm_mask_file"),
+                                             ("csf_mask_file", "csf_mask_file"),
+                                             ("wm_eroded", "wm_eroded"),
+                                             ("csf_eroded", "csf_eroded"),
+                                             ("brain_eroded", "brain_eroded"),
+                                             ("T1", "T1"),
+                                             ("aseg", "aseg"),
+                                             ("brain", "brain"),
+                                             ("brain_mask", "brain_mask")])
                 ]
             )
-
-            flow.connect(
-                [
-                    (parc_node, outputnode, [("aseg", "aseg")]),
-                ]
-            )
-
-            # threshold_roi = pe.Node(
-            #     interface=fsl.MathsCommand(
-            #         out_file='T1w_class-GM.nii.gz'
-            #     ),
-            #     name='make_gm_mask'
-            # )
-            # flow.connect([
-            #             (threshold_roi, outputnode, [("out_file","gm_mask_file")]),
-            #             ])
+            # fmt: on
 
             if self.config.parcellation_scheme == "Lausanne2018":
                 parcCombiner = pe.Node(
@@ -276,75 +247,43 @@ class ParcellationStage(Stage):
                 )
                 parcCombiner.inputs.create_colorLUT = True
                 parcCombiner.inputs.create_graphml = True
-
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            inputnode,
-                            parcCombiner,
-                            [
-                                ("subjects_dir", "subjects_dir"),
-                                (("subject_id", get_basename), "subject_id"),
-                            ],
-                        ),
-                        (
-                            parc_node,
-                            parcCombiner,
-                            [("roi_files_in_structural_space", "input_rois")],
-                        ),
+                        (inputnode, parcCombiner, [("subjects_dir", "subjects_dir"),
+                                                   (("subject_id", get_basename), "subject_id")]),
+                        (parc_node, parcCombiner, [("roi_files_in_structural_space", "input_rois")])
                     ]
                 )
-
+                # fmt: on
                 if self.config.segment_brainstem:
                     parcBrainStem = pe.Node(
                         interface=ParcellateBrainstemStructures(), name="parcBrainStem"
                     )
-
+                    # fmt: off
                     flow.connect(
                         [
-                            (
-                                inputnode,
-                                parcBrainStem,
-                                [
-                                    ("subjects_dir", "subjects_dir"),
-                                    (("subject_id", get_basename), "subject_id"),
-                                ],
-                            ),
-                            (
-                                parcBrainStem,
-                                parcCombiner,
-                                [("brainstem_structures", "brainstem_structures")],
-                            ),
-                        ]
+                            (inputnode, parcBrainStem, [("subjects_dir", "subjects_dir"),
+                                                        (("subject_id", get_basename), "subject_id")]),
+                            (parcBrainStem, parcCombiner, [("brainstem_structures", "brainstem_structures")])]
                     )
+                    # fmt: off
 
                 if self.config.segment_hippocampal_subfields:
                     parcHippo = pe.Node(
                         interface=ParcellateHippocampalSubfields(), name="parcHippo"
                     )
-
+                    # fmt: off
                     flow.connect(
                         [
-                            (
-                                inputnode,
-                                parcHippo,
-                                [
-                                    ("subjects_dir", "subjects_dir"),
-                                    (("subject_id", get_basename), "subject_id"),
-                                ],
-                            ),
-                            (
-                                parcHippo,
-                                parcCombiner,
-                                [("lh_hipposubfields", "lh_hippocampal_subfields")],
-                            ),
-                            (
-                                parcHippo,
-                                parcCombiner,
-                                [("rh_hipposubfields", "rh_hippocampal_subfields")],
-                            ),
+                            (inputnode, parcHippo, [("subjects_dir", "subjects_dir"),
+                                                    (("subject_id", get_basename), "subject_id")]),
+                            (parcHippo, parcCombiner, [("lh_hipposubfields", "lh_hippocampal_subfields"),
+                                                       ("rh_hipposubfields", "rh_hippocampal_subfields")]),
+
                         ]
                     )
+                    # fmt: on
 
                 if self.config.include_thalamic_nuclei_parcellation:
                     parcThal = pe.Node(interface=ParcellateThalamus(), name="parcThal")
@@ -373,43 +312,27 @@ class ParcellationStage(Stage):
                     parcThal.inputs.ants_precision_type = (
                         self.config.ants_precision_type
                     )
-
+                    # fmt: off
                     flow.connect(
                         [
-                            (
-                                inputnode,
-                                parcThal,
-                                [
-                                    ("subjects_dir", "subjects_dir"),
-                                    (("subject_id", get_basename), "subject_id"),
-                                ],
-                            ),
+                            (inputnode, parcThal, [("subjects_dir", "subjects_dir"),
+                                                   (("subject_id", get_basename), "subject_id")]),
                             (parc_node, parcThal, [("T1", "T1w_image")]),
-                            (
-                                parcThal,
-                                parcCombiner,
-                                [("max_prob_registered", "thalamus_nuclei")],
-                            ),
+                            (parcThal, parcCombiner, [("max_prob_registered", "thalamus_nuclei")]),
                         ]
                     )
-
+                    # fmt: on
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            parc_node,
-                            outputnode,
-                            [("gray_matter_mask_file", "gm_mask_file")],
-                        ),
+                        (parc_node, outputnode, [("gray_matter_mask_file", "gm_mask_file")]),
                         (parcCombiner, outputnode, [("aparc_aseg", "aparc_aseg")]),
                         (parcCombiner, outputnode, [("output_rois", "roi_volumes")]),
-                        (
-                            parcCombiner,
-                            outputnode,
-                            [("colorLUT_files", "roi_colorLUTs")],
-                        ),
+                        (parcCombiner, outputnode, [("colorLUT_files", "roi_colorLUTs")]),
                         (parcCombiner, outputnode, [("graphML_files", "roi_graphMLs")]),
                     ]
                 )
+                # fmt: on
 
                 computeROIVolumetry = pe.Node(
                     interface=ComputeParcellationRoiVolumes(),
@@ -418,160 +341,46 @@ class ParcellationStage(Stage):
                 computeROIVolumetry.inputs.parcellation_scheme = (
                     self.config.parcellation_scheme
                 )
-
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            parcCombiner,
-                            computeROIVolumetry,
-                            [("output_rois", "roi_volumes")],
-                        ),
-                        (
-                            parcCombiner,
-                            computeROIVolumetry,
-                            [("graphML_files", "roi_graphMLs")],
-                        ),
-                        (
-                            computeROIVolumetry,
-                            outputnode,
-                            [("roi_volumes_stats", "roi_volumes_stats")],
-                        ),
+                        (parcCombiner, computeROIVolumetry, [("output_rois", "roi_volumes"),
+                                                             ("graphML_files", "roi_graphMLs")]),
+                        (computeROIVolumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
                     ]
                 )
-
-                # create_atlas_info = pe.Node(interface=CreateLausanne2018AtlasInfo(),name="create_atlas_info")
-                # flow.connect([
-                #             (parcCombiner,create_atlas_info,[("output_rois","roi_volumes")]),
-                #             (parcCombiner,create_atlas_info,[("graphML_files","roi_graphMLs")]),
-                #             (create_atlas_info,outputnode,[("atlas_info","atlas_info")]),
-                #         ])
+                # fmt: on
             elif self.config.parcellation_scheme == "Lausanne2008":
 
-                roi_colorLUTs = [
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "lausanne2008",
-                                "resolution83",
-                                "resolution83_LUT.txt",
-                            ),
-                        )
-                    ),
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "lausanne2008",
-                                "resolution150",
-                                "resolution150_LUT.txt",
-                            ),
-                        )
-                    ),
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "lausanne2008",
-                                "resolution258",
-                                "resolution258_LUT.txt",
-                            ),
-                        )
-                    ),
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "lausanne2008",
-                                "resolution500",
-                                "resolution500_LUT.txt",
-                            ),
-                        )
-                    ),
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "lausanne2008",
-                                "resolution1015",
-                                "resolution1015_LUT.txt",
-                            ),
-                        )
-                    ),
-                ]
+                path_prefix = os.path.join("data", "parcellation", "lausanne2008")
 
-                roi_graphMLs = [
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "lausanne2008",
-                                "resolution83",
-                                "resolution83.graphml",
-                            ),
+                roi_colorLUTs = []
+                roi_graphMLs = []
+                for scale in ["83", "150", "258", "500", "1015"]:
+                    roi_colorLUTs.append(
+                        os.path.join(
+                            pkg_resources.resource_filename(
+                                "cmtklib",
+                                os.path.join(
+                                    path_prefix,
+                                    f'resolution{scale}',
+                                    f'resolution{scale}_LUT.txt',
+                                ),
+                            )
                         )
-                    ),
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "lausanne2008",
-                                "resolution150",
-                                "resolution150.graphml",
-                            ),
+                    )
+                    roi_graphMLs.append(
+                        os.path.join(
+                            pkg_resources.resource_filename(
+                                "cmtklib",
+                                os.path.join(
+                                    path_prefix,
+                                    f'resolution{scale}',
+                                    f'resolution{scale}.graphml',
+                                ),
+                            )
                         )
-                    ),
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "lausanne2008",
-                                "resolution258",
-                                "resolution258.graphml",
-                            ),
-                        )
-                    ),
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "lausanne2008",
-                                "resolution500",
-                                "resolution500.graphml",
-                            ),
-                        )
-                    ),
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "lausanne2008",
-                                "resolution1015",
-                                "resolution1015.graphml",
-                            ),
-                        )
-                    ),
-                ]
+                    )
 
                 parc_files = pe.Node(
                     interface=util.IdentityInterface(
@@ -583,26 +392,17 @@ class ParcellationStage(Stage):
                     "{}".format(p) for p in roi_colorLUTs
                 ]
                 parc_files.inputs.roi_graphMLs = ["{}".format(p) for p in roi_graphMLs]
-
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            parc_node,
-                            outputnode,
-                            [("gray_matter_mask_file", "gm_mask_file")],
-                        ),
+                        (parc_node, outputnode, [("gray_matter_mask_file", "gm_mask_file")]),
                         (parc_node, outputnode, [("aparc_aseg", "aparc_aseg")]),
-                        (
-                            parc_node,
-                            outputnode,
-                            [("roi_files_in_structural_space", "roi_volumes")],
-                        ),
+                        (parc_node, outputnode, [("roi_files_in_structural_space", "roi_volumes")]),
                         (parc_files, outputnode, [("roi_colorLUTs", "roi_colorLUTs")]),
-                        (parc_files, outputnode, [("roi_graphMLs", "roi_graphMLs")]),
-                        # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_LUTs),"roi_colorLUTs")]),
-                        # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_graphMLs),"roi_graphMLs")]),
+                        (parc_files, outputnode, [("roi_graphMLs", "roi_graphMLs")])
                     ]
                 )
+                # fmt: on
 
                 computeROIVolumetry = pe.Node(
                     interface=ComputeParcellationRoiVolumes(),
@@ -611,41 +411,16 @@ class ParcellationStage(Stage):
                 computeROIVolumetry.inputs.parcellation_scheme = (
                     self.config.parcellation_scheme
                 )
-
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            parc_node,
-                            computeROIVolumetry,
-                            [("roi_files_in_structural_space", "roi_volumes")],
-                        ),
-                        (
-                            parc_files,
-                            computeROIVolumetry,
-                            [("roi_graphMLs", "roi_graphMLs")],
-                        ),
-                        (
-                            computeROIVolumetry,
-                            outputnode,
-                            [("roi_volumes_stats", "roi_volumes_stats")],
-                        ),
+                        (parc_node, computeROIVolumetry, [("roi_files_in_structural_space", "roi_volumes")]),
+                        (parc_files, computeROIVolumetry, [("roi_graphMLs", "roi_graphMLs")]),
+                        (computeROIVolumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
                     ]
                 )
-            else:
-                # def get_atlas_LUTs(paths):
-                #     colorLUTs = [os.path.join(pkg_resources.resource_filename('
-                #                     cmtklib',os.path.join('data','parcellation','nativefreesurfer','
-                #                                           freesurferaparc','FreeSurferColorLUT_adapted.txt'))),
-                #                  ]
-                #     return colorLUTs
-                #
-                # def get_atlas_graphMLs(paths):
-                #     graphMLs = [os.path.join(pkg_resources.resource_filename(
-                #                   'cmtklib',os.path.join('data','parcellation','nativefreesurfer',
-                #                                          'freesurferaparc','resolution83.graphml'))),
-                #                  ]
-                #     return graphMLs
-
+                # fmt: on
+            else:  # Native Freesurfer
                 roi_colorLUTs = [
                     os.path.join(
                         pkg_resources.resource_filename(
@@ -660,7 +435,6 @@ class ParcellationStage(Stage):
                         )
                     )
                 ]
-
                 roi_graphMLs = [
                     os.path.join(
                         pkg_resources.resource_filename(
@@ -686,26 +460,17 @@ class ParcellationStage(Stage):
                     "{}".format(p) for p in roi_colorLUTs
                 ]
                 parc_files.inputs.roi_graphMLs = ["{}".format(p) for p in roi_graphMLs]
-
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            parc_node,
-                            outputnode,
-                            [("gray_matter_mask_file", "gm_mask_file")],
-                        ),
+                        (parc_node, outputnode, [("gray_matter_mask_file", "gm_mask_file")]),
                         (parc_node, outputnode, [("aparc_aseg", "aparc_aseg")]),
-                        (
-                            parc_node,
-                            outputnode,
-                            [("roi_files_in_structural_space", "roi_volumes")],
-                        ),
+                        (parc_node, outputnode, [("roi_files_in_structural_space", "roi_volumes")]),
                         (parc_files, outputnode, [("roi_colorLUTs", "roi_colorLUTs")]),
                         (parc_files, outputnode, [("roi_graphMLs", "roi_graphMLs")]),
-                        # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_LUTs),"roi_colorLUTs")]),
-                        # (parc_node,outputnode,[(("roi_files_in_structural_space",get_atlas_graphMLs),"roi_graphMLs")]),
                     ]
                 )
+                # fmt: off
 
                 computeROIVolumetry = pe.Node(
                     interface=ComputeParcellationRoiVolumes(),
@@ -714,26 +479,15 @@ class ParcellationStage(Stage):
                 computeROIVolumetry.inputs.parcellation_scheme = (
                     self.config.parcellation_scheme
                 )
-
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            parc_node,
-                            computeROIVolumetry,
-                            [("roi_files_in_structural_space", "roi_volumes")],
-                        ),
-                        (
-                            parc_files,
-                            computeROIVolumetry,
-                            [("roi_graphMLs", "roi_graphMLs")],
-                        ),
-                        (
-                            computeROIVolumetry,
-                            outputnode,
-                            [("roi_volumes_stats", "roi_volumes_stats")],
-                        ),
+                        (parc_node, computeROIVolumetry, [("roi_files_in_structural_space", "roi_volumes")]),
+                        (parc_files, computeROIVolumetry, [("roi_graphMLs", "roi_graphMLs")]),
+                        (computeROIVolumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
                     ]
                 )
+                # fmt: on
 
             # TODO
             # if self.config.pipeline_mode == "fMRI":
