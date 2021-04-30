@@ -379,22 +379,20 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     + "/anat/!"
                 )
 
-        if gui:
-            print(input_message)
-
-        else:
-            print(input_message)
+        print(input_message)
 
         if t1_available:
             valid_inputs = True
         else:
             print(
-                "ERROR : Missing required inputs. Please see documentation for more details."
+                "ERROR : Missing required inputs. ",
+                "Please see documentation for more details."
             )
 
         if not t1_json_available:
             print(
-                "Warning : Missing BIDS json sidecar. Please see documentation for more details."
+                "Warning : Missing BIDS json sidecar. ",
+                "Please see documentation for more details."
             )
 
         return valid_inputs
