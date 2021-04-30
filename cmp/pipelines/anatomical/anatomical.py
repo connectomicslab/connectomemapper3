@@ -596,6 +596,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     (f'resolution{scale_mapping[scale]}_LUT.txt', self.subject + f'_atlas-L2008_res-{scale}_FreeSurferColorLUT.txt')
                 )
                 sinker.inputs.substitutions.append(
+                    (f'resolution{scale_mapping[scale]}.tsv', self.subject + f'_atlas-L2008_res-{scale}_dseg.tsv')
+                )
+                sinker.inputs.substitutions.append(
                     (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
                 )
             # fmt: on
@@ -618,6 +621,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     (f'ROIv_Lausanne2018_{scale}_FreeSurferColorLUT.txt', self.subject + f'_atlas-L2018_res-{scale}_FreeSurferColorLUT.txt')
                 )
                 sinker.inputs.substitutions.append(
+                    (f'ROIv_Lausanne2018_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_dseg.tsv')
+                )
+                sinker.inputs.substitutions.append(
                     (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_stats.tsv')
                 )
             # fmt: on
@@ -634,6 +640,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             )
             sinker.inputs.substitutions.append(
                 ("FreeSurferColorLUT_adapted.txt", self.subject + "_atlas-Desikan_FreeSurferColorLUT.txt")
+            )
+            sinker.inputs.substitutions.append(
+                ("freesurferaparc.tsv", self.subject + "_atlas-Desikan_dseg.tsv")
             )
             sinker.inputs.substitutions.append(
                 ("roi_stats_freesurferaparc.tsv", self.subject + "_atlas-Desikan_stats.tsv")
@@ -718,6 +727,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     "atlas_info",
                     "roi_colorLUTs",
                     "roi_graphMLs",
+                    "roi_TSVs",
                     "roi_volumes_stats",
                 ]
             ),
@@ -754,33 +764,34 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 "Segmentation"
             ].config.freesurfer_subject_id = os.path.join(
                 self.output_directory, "freesurfer", self.subject
-                )
+            )
 
             # fmt: off
             anat_flow.connect(
-                    [
-                            (seg_flow, parc_flow, [("outputnode.subjects_dir", "inputnode.subjects_dir"),
-                                                   ("outputnode.subject_id", "inputnode.subject_id")]),
-                            (seg_flow, anat_outputnode, [("outputnode.subjects_dir", "subjects_dir"),
-                                                         ("outputnode.subject_id", "subject_id")]),
-                            (parc_flow, anat_outputnode, [("outputnode.wm_mask_file", "wm_mask_file"),
-                                                          ("outputnode.parcellation_scheme", "parcellation_scheme"),
-                                                          ("outputnode.atlas_info", "atlas_info"),
-                                                          ("outputnode.roi_volumes", "roi_volumes"),
-                                                          ("outputnode.roi_colorLUTs", "roi_colorLUTs"),
-                                                          ("outputnode.roi_graphMLs", "roi_graphMLs"),
-                                                          ("outputnode.roi_volumes_stats", "roi_volumes_stats"),
-                                                          ("outputnode.wm_eroded", "wm_eroded"),
-                                                          ("outputnode.gm_mask_file", "gm_mask_file"),
-                                                          ("outputnode.csf_mask_file", "csf_mask_file"),
-                                                          ("outputnode.csf_eroded", "csf_eroded"),
-                                                          ("outputnode.brain_eroded", "brain_eroded"),
-                                                          ("outputnode.T1", "T1"),
-                                                          ("outputnode.aseg", "aseg"),
-                                                          ("outputnode.aparc_aseg", "aparc_aseg"),
-                                                          ("outputnode.brain_mask", "brain_mask"),
-                                                          ("outputnode.brain", "brain")])
-                    ]
+                [
+                    (seg_flow, parc_flow, [("outputnode.subjects_dir", "inputnode.subjects_dir"),
+                                           ("outputnode.subject_id", "inputnode.subject_id")]),
+                    (seg_flow, anat_outputnode, [("outputnode.subjects_dir", "subjects_dir"),
+                                                 ("outputnode.subject_id", "subject_id")]),
+                    (parc_flow, anat_outputnode, [("outputnode.wm_mask_file", "wm_mask_file"),
+                                                  ("outputnode.parcellation_scheme", "parcellation_scheme"),
+                                                  ("outputnode.atlas_info", "atlas_info"),
+                                                  ("outputnode.roi_volumes", "roi_volumes"),
+                                                  ("outputnode.roi_colorLUTs", "roi_colorLUTs"),
+                                                  ("outputnode.roi_graphMLs", "roi_graphMLs"),
+                                                  ("outputnode.roi_TSVs", "roi_TSVs"),
+                                                  ("outputnode.roi_volumes_stats", "roi_volumes_stats"),
+                                                  ("outputnode.wm_eroded", "wm_eroded"),
+                                                  ("outputnode.gm_mask_file", "gm_mask_file"),
+                                                  ("outputnode.csf_mask_file", "csf_mask_file"),
+                                                  ("outputnode.csf_eroded", "csf_eroded"),
+                                                  ("outputnode.brain_eroded", "brain_eroded"),
+                                                  ("outputnode.T1", "T1"),
+                                                  ("outputnode.aseg", "aseg"),
+                                                  ("outputnode.aparc_aseg", "aparc_aseg"),
+                                                  ("outputnode.brain_mask", "brain_mask"),
+                                                  ("outputnode.brain", "brain")])
+                ]
             )
             # fmt: on
         else:
@@ -817,6 +828,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 (anat_outputnode, sinker, [("roi_volumes", "anat.@roivs")]),
                 (anat_outputnode, sinker, [("roi_colorLUTs", "anat.@luts")]),
                 (anat_outputnode, sinker, [("roi_graphMLs", "anat.@graphmls")]),
+                (anat_outputnode, sinker, [("roi_TSVs", "anat.@tsvs")]),
                 (anat_outputnode, sinker, [("roi_volumes_stats", "anat.@stats")]),
                 (anat_outputnode, sinker, [("brain_eroded", "anat.@brainmask_eroded")]),
                 (anat_outputnode, sinker, [("wm_eroded", "anat.@wm_eroded")]),

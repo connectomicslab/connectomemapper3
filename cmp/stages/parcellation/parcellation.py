@@ -26,6 +26,7 @@ from cmtklib.parcellation import (
     ComputeParcellationRoiVolumes,
 )
 from cmtklib.util import get_pipeline_dictionary_outputs, get_basename
+from cmtklib.bids.utils import CreateBIDSStandardParcellationLabelIndexMappingFile
 
 
 class ParcellationConfig(HasTraits):
@@ -195,6 +196,7 @@ class ParcellationStage(Stage):
             "roi_volumes",
             "roi_colorLUTs",
             "roi_graphMLs",
+            "roi_TSVs",
             "roi_volumes_stats",
             "parcellation_scheme",
             "atlas_info",
@@ -265,7 +267,8 @@ class ParcellationStage(Stage):
                         [
                             (inputnode, parcBrainStem, [("subjects_dir", "subjects_dir"),
                                                         (("subject_id", get_basename), "subject_id")]),
-                            (parcBrainStem, parcCombiner, [("brainstem_structures", "brainstem_structures")])]
+                            (parcBrainStem, parcCombiner, [("brainstem_structures", "brainstem_structures")])
+                        ]
                     )
                     # fmt: off
 
@@ -350,37 +353,80 @@ class ParcellationStage(Stage):
                     ]
                 )
                 # fmt: on
-            elif self.config.parcellation_scheme == "Lausanne2008":
-
-                path_prefix = os.path.join("data", "parcellation", "lausanne2008")
-
+                createBIDSLabelIndexMappingFile = pe.MapNode(
+                    interface=CreateBIDSStandardParcellationLabelIndexMappingFile(),
+                    name="createBIDSLabelIndexMappingFile",
+                    iterfield=['roi_graphml', 'roi_colorlut']
+                )
+                # fmt: off
+                flow.connect(
+                    [
+                        (parcCombiner, createBIDSLabelIndexMappingFile, [("colorLUT_files", "roi_colorlut")]),
+                        (parcCombiner, createBIDSLabelIndexMappingFile, [("graphML_files", "roi_graphml")]),
+                        (createBIDSLabelIndexMappingFile, outputnode, [("roi_bids_tsv", "roi_TSVs")]),
+                    ]
+                )
+                # fmt: on
+            else:
                 roi_colorLUTs = []
                 roi_graphMLs = []
-                for scale in ["83", "150", "258", "500", "1015"]:
-                    roi_colorLUTs.append(
+
+                if self.config.parcellation_scheme == "Lausanne2008":
+
+                    path_prefix = os.path.join("data", "parcellation", "lausanne2008")
+
+                    for scale in ["83", "150", "258", "500", "1015"]:
+                        roi_colorLUTs.append(
+                            os.path.join(
+                                pkg_resources.resource_filename(
+                                    "cmtklib",
+                                    os.path.join(
+                                        path_prefix,
+                                        f'resolution{scale}',
+                                        f'resolution{scale}_LUT.txt',
+                                    ),
+                                )
+                            )
+                        )
+                        roi_graphMLs.append(
+                            os.path.join(
+                                pkg_resources.resource_filename(
+                                    "cmtklib",
+                                    os.path.join(
+                                        path_prefix,
+                                        f'resolution{scale}',
+                                        f'resolution{scale}.graphml',
+                                    ),
+                                )
+                            )
+                        )
+                else:  # Native Freesurfer
+                    path_prefix = os.path.join("data", "parcellation", "nativefreesurfer")
+
+                    roi_colorLUTs = [
                         os.path.join(
                             pkg_resources.resource_filename(
                                 "cmtklib",
                                 os.path.join(
                                     path_prefix,
-                                    f'resolution{scale}',
-                                    f'resolution{scale}_LUT.txt',
+                                    "freesurferaparc",
+                                    "FreeSurferColorLUT_adapted.txt",
                                 ),
                             )
                         )
-                    )
-                    roi_graphMLs.append(
+                    ]
+                    roi_graphMLs = [
                         os.path.join(
                             pkg_resources.resource_filename(
                                 "cmtklib",
                                 os.path.join(
                                     path_prefix,
-                                    f'resolution{scale}',
-                                    f'resolution{scale}.graphml',
+                                    "freesurferaparc",
+                                    "freesurferaparc.graphml",
                                 ),
                             )
                         )
-                    )
+                    ]
 
                 parc_files = pe.Node(
                     interface=util.IdentityInterface(
@@ -403,75 +449,20 @@ class ParcellationStage(Stage):
                     ]
                 )
                 # fmt: on
-
-                computeROIVolumetry = pe.Node(
-                    interface=ComputeParcellationRoiVolumes(),
-                    name="computeROIVolumetry",
-                )
-                computeROIVolumetry.inputs.parcellation_scheme = (
-                    self.config.parcellation_scheme
+                createBIDSLabelIndexMappingFile = pe.MapNode(
+                        interface=CreateBIDSStandardParcellationLabelIndexMappingFile(),
+                        name="createBIDSLabelIndexMappingFile",
+                        iterfield=['roi_graphml', 'roi_colorlut']
                 )
                 # fmt: off
                 flow.connect(
                     [
-                        (parc_node, computeROIVolumetry, [("roi_files_in_structural_space", "roi_volumes")]),
-                        (parc_files, computeROIVolumetry, [("roi_graphMLs", "roi_graphMLs")]),
-                        (computeROIVolumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
+                        (parc_files, createBIDSLabelIndexMappingFile, [("roi_colorLUTs", "roi_colorlut")]),
+                        (parc_files, createBIDSLabelIndexMappingFile, [("roi_graphMLs", "roi_graphml")]),
+                        (createBIDSLabelIndexMappingFile, outputnode, [("roi_bids_tsv", "roi_TSVs")]),
                     ]
                 )
                 # fmt: on
-            else:  # Native Freesurfer
-                roi_colorLUTs = [
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "nativefreesurfer",
-                                "freesurferaparc",
-                                "FreeSurferColorLUT_adapted.txt",
-                            ),
-                        )
-                    )
-                ]
-                roi_graphMLs = [
-                    os.path.join(
-                        pkg_resources.resource_filename(
-                            "cmtklib",
-                            os.path.join(
-                                "data",
-                                "parcellation",
-                                "nativefreesurfer",
-                                "freesurferaparc",
-                                "freesurferaparc.graphml",
-                            ),
-                        )
-                    )
-                ]
-
-                parc_files = pe.Node(
-                    interface=util.IdentityInterface(
-                        fields=["roi_colorLUTs", "roi_graphMLs"]
-                    ),
-                    name="parcellation_files",
-                )
-                parc_files.inputs.roi_colorLUTs = [
-                    "{}".format(p) for p in roi_colorLUTs
-                ]
-                parc_files.inputs.roi_graphMLs = ["{}".format(p) for p in roi_graphMLs]
-                # fmt: off
-                flow.connect(
-                    [
-                        (parc_node, outputnode, [("gray_matter_mask_file", "gm_mask_file")]),
-                        (parc_node, outputnode, [("aparc_aseg", "aparc_aseg")]),
-                        (parc_node, outputnode, [("roi_files_in_structural_space", "roi_volumes")]),
-                        (parc_files, outputnode, [("roi_colorLUTs", "roi_colorLUTs")]),
-                        (parc_files, outputnode, [("roi_graphMLs", "roi_graphMLs")]),
-                    ]
-                )
-                # fmt: off
-
                 computeROIVolumetry = pe.Node(
                     interface=ComputeParcellationRoiVolumes(),
                     name="computeROIVolumetry",
