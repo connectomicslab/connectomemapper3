@@ -898,9 +898,7 @@ def run_individual(
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             print(
-                "--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP".format(
-                    number_of_threads
-                )
+                f'--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP'
             )
             anat_pipeline.stages[
                 "Segmentation"
@@ -952,9 +950,7 @@ def run_individual(
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             print(
-                "--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP".format(
-                    number_of_threads
-                )
+                f'--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP'
             )
             anat_pipeline.stages[
                 "Segmentation"
@@ -1014,9 +1010,7 @@ def run_individual(
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
             print(
-                "--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP".format(
-                    number_of_threads
-                )
+                f'--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP'
             )
             anat_pipeline.stages[
                 "Segmentation"
