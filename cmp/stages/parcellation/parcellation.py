@@ -289,14 +289,20 @@ class ParcellationStage(Stage):
                     # fmt: on
 
                 if self.config.include_thalamic_nuclei_parcellation:
-                    parcThal = pe.Node(interface=ParcellateThalamus(), name="parcThal")
+                    resource_prefix = os.path.join(
+                        "data",
+                        "segmentation",
+                        "thalamus2018"
+                    )
+                    parcThal = pe.Node(
+                        interface=ParcellateThalamus(),
+                        name="parcThal"
+                    )
                     parcThal.inputs.template_image = os.path.abspath(
                         pkg_resources.resource_filename(
                             "cmtklib",
                             os.path.join(
-                                "data",
-                                "segmentation",
-                                "thalamus2018",
+                                resource_prefix,
                                 "mni_icbm152_t1_tal_nlin_sym_09b_hires_1.nii.gz",
                             ),
                         )
@@ -305,9 +311,7 @@ class ParcellationStage(Stage):
                         pkg_resources.resource_filename(
                             "cmtklib",
                             os.path.join(
-                                "data",
-                                "segmentation",
-                                "thalamus2018",
+                                resource_prefix,
                                 "Thalamus_Nuclei-HCP-4DSPAMs.nii.gz",
                             ),
                         )
@@ -336,7 +340,6 @@ class ParcellationStage(Stage):
                     ]
                 )
                 # fmt: on
-
                 computeROIVolumetry = pe.Node(
                     interface=ComputeParcellationRoiVolumes(),
                     name="computeROIVolumetry",
@@ -372,8 +375,7 @@ class ParcellationStage(Stage):
                 roi_graphMLs = []
 
                 if self.config.parcellation_scheme == "Lausanne2008":
-
-                    path_prefix = os.path.join("data", "parcellation", "lausanne2008")
+                    resource_prefix = os.path.join("data", "parcellation", "lausanne2008")
 
                     for scale in ["83", "150", "258", "500", "1015"]:
                         roi_colorLUTs.append(
@@ -381,7 +383,7 @@ class ParcellationStage(Stage):
                                 pkg_resources.resource_filename(
                                     "cmtklib",
                                     os.path.join(
-                                        path_prefix,
+                                        resource_prefix,
                                         f'resolution{scale}',
                                         f'resolution{scale}_LUT.txt',
                                     ),
@@ -393,7 +395,7 @@ class ParcellationStage(Stage):
                                 pkg_resources.resource_filename(
                                     "cmtklib",
                                     os.path.join(
-                                        path_prefix,
+                                        resource_prefix,
                                         f'resolution{scale}',
                                         f'resolution{scale}.graphml',
                                     ),
@@ -401,14 +403,14 @@ class ParcellationStage(Stage):
                             )
                         )
                 else:  # Native Freesurfer
-                    path_prefix = os.path.join("data", "parcellation", "nativefreesurfer")
+                    resource_prefix = os.path.join("data", "parcellation", "nativefreesurfer")
 
                     roi_colorLUTs = [
                         os.path.join(
                             pkg_resources.resource_filename(
                                 "cmtklib",
                                 os.path.join(
-                                    path_prefix,
+                                    resource_prefix,
                                     "freesurferaparc",
                                     "FreeSurferColorLUT_adapted.txt",
                                 ),
@@ -420,7 +422,7 @@ class ParcellationStage(Stage):
                             pkg_resources.resource_filename(
                                 "cmtklib",
                                 os.path.join(
-                                    path_prefix,
+                                    resource_prefix,
                                     "freesurferaparc",
                                     "freesurferaparc.graphml",
                                 ),
@@ -511,7 +513,8 @@ class ParcellationStage(Stage):
         if self.config.parcellation_scheme != "Custom":
             if os.path.exists(anat_sinker_report):
                 anat_outputs = get_pipeline_dictionary_outputs(
-                    anat_sinker_report, self.output_dir
+                    datasink_report=anat_sinker_report,
+                    local_output_dir=self.output_dir
                 )
 
                 white_matter_file = anat_outputs["anat.@wm_mask"]
@@ -582,14 +585,17 @@ class ParcellationStage(Stage):
                                     white_matter_file + ":colormap=GEColor",
                                     roi_v + ":colormap=lut:lut=" + lut_file,
                                 ]
-
-                # self.inspect_outputs = self.inspect_outputs_dict.keys()
-        # else:
-        #     self.inspect_outputs_dict["Custom atlas"] = [
-        #         'fsleyes', self.config.atlas_nifti_file, "-cm", "random"]
+        else:
+            self.inspect_outputs_dict["Custom atlas"] = [
+                'fsleyes',
+                self.config.atlas_nifti_file,
+                "-cm",
+                "random"
+            ]
 
         self.inspect_outputs = sorted(
-            [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower
+            [key for key in list(self.inspect_outputs_dict.keys())],
+            key=str.lower
         )
 
     def has_run(self):
@@ -599,20 +605,22 @@ class ParcellationStage(Stage):
         -------
         `True` if the stage has been run successfully
         """
-        if self.config.parcellation_scheme != "Custom":
-            if self.config.parcellation_scheme == "Lausanne2018":
-                return os.path.exists(
-                    os.path.join(
-                        self.stage_dir, "parcCombiner", "result_parcCombiner.pklz"
-                    )
+        if self.config.parcellation_scheme == "Custom":
+            # TODO
+            return True
+        elif self.config.parcellation_scheme == "Lausanne2018":
+            return os.path.exists(
+                os.path.join(
+                    self.stage_dir,
+                    "parcCombiner",
+                    "result_parcCombiner.pklz"
                 )
-            else:
-                return os.path.exists(
-                    os.path.join(
-                        self.stage_dir,
-                        "%s_parcellation" % self.config.parcellation_scheme,
-                        "result_%s_parcellation.pklz" % self.config.parcellation_scheme,
-                    )
+            )
+        else:
+            return os.path.exists(
+                os.path.join(
+                    self.stage_dir,
+                    f'{self.config.parcellation_scheme}_parcellation',
+                    f'result_{self.config.parcellation_scheme}_parcellation.pklz',
                 )
-        # else:
-        #     return os.path.exists(self.config.atlas_nifti_file)
+            )
