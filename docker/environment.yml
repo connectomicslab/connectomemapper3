@@ -42,3 +42,4 @@ dependencies:
     - sphinx-argparse==0.2.5
     - recommonmark==0.6.0
     - pydicom==2.0.0
+    - carbontracker==1.1.6
