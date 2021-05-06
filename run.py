@@ -729,6 +729,10 @@ if args.analysis_level == "participant":
 
     tracker.epoch_stop()
 
+    # Optional: Add a stop in case of early termination before all monitor_epochs has
+    # been monitored to ensure that actual consumption is reported.
+    tracker.stop()
+
 # running group level; ultimately it will compute average connectivity matrices
 # elif args.analysis_level == "group":
 #     brain_sizes = []
