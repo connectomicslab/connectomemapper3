@@ -23,6 +23,9 @@ from glob import glob
 import requests
 from datetime import datetime
 
+# Carbon footprint and energy consumption
+from carbontracker.tracker import CarbonTracker
+
 # Own imports
 from cmtklib.util import BColors, print_error, print_blue
 from cmtklib.config import create_subject_configuration_from_ref,\
@@ -284,6 +287,22 @@ for tool in tools:
     if not os.path.isdir(tool_dir):
         os.makedirs(tool_dir)
 
+# Create the log directory for carbontracker tool
+carbon_tracker_log_dir = os.path.join(args.output_dir, "carbontracker", "group")
+if not os.path.isdir(carbon_tracker_log_dir):
+    os.makedirs(carbon_tracker_log_dir)
+
+# Create the Carbon Tracker object that tracks energy consumption and
+# carbon footprint of the pipeline
+tracker = CarbonTracker(
+    epochs=1,
+    epochs_before_pred=1,
+    monitor_epochs=1,
+    components="cpu",
+    update_interval=10,
+    log_dir=carbon_tracker_log_dir
+)
+
 # Make sure freesurfer is happy with the license
 print('> Set $FS_LICENSE which points to FreeSurfer license location (BIDS App)')
 
@@ -413,6 +432,8 @@ if args.analysis_level == "participant":
 
     maxprocs = parallel_number_of_subjects
     processes = []
+
+    tracker.epoch_start()
 
     # find all T1s and skullstrip them
     for subject_label in subjects_to_analyze:
@@ -705,6 +726,8 @@ if args.analysis_level == "participant":
             manage_processes(processes)
 
     clean_cache(args.bids_dir)
+
+    tracker.epoch_stop()
 
 # running group level; ultimately it will compute average connectivity matrices
 # elif args.analysis_level == "group":
