@@ -54,11 +54,12 @@ def report_usage(event_category, event_action, event_label, verbose=False):
     """
     tracking_id = 'UA-124877585-4'
     clientid_str = str(datetime.now())
-    tracking_url = 'https://www.google-analytics.com/collect?v=1&t=event&tid={}&cid={}&ec={}&ea={}&el={}&aip=1'.format(tracking_id,
-                                                                                                                       clientid_str,
-                                                                                                                       event_category,
-                                                                                                                       event_action,
-                                                                                                                       event_label)
+    tracking_url = 'https://www.google-analytics.com/collect?v=1&t=event&' + \
+                   'tid={}&cid={}&ec={}&ea={}&el={}&aip=1'.format(tracking_id,
+                                                                  clientid_str,
+                                                                  event_category,
+                                                                  event_action,
+                                                                  event_label)
     r = requests.post(tracking_url)
 
     if verbose:
