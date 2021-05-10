@@ -12,8 +12,8 @@ class EEGLoaderInputSpec(BaseInterfaceInputSpec):
     base_directory = traits.Directory(
         exists=True, desc='BIDS data directory', mandatory=True)
 
-    subject_id = traits.Str(
-        desc='subject id', mandatory=True)
+    subject = traits.Str(
+        desc='subject', mandatory=True)
 
     output_query = traits.Dict(
         desc='output query for BIDSDataGrabber', mandatory=True)
@@ -42,7 +42,7 @@ class EEGLoader(BaseInterface):
     
     def _run_interface(self, runtime):
         self.base_directory = self.inputs.base_directory
-        self.subject_id = self.inputs.subject_id        
+        self.subject = self.inputs.subject        
         self.derivative_list = self.inputs.derivative_list
         self._run_datagrabber()
         return runtime
@@ -51,7 +51,7 @@ class EEGLoader(BaseInterface):
     def _run_datagrabber(self):
         bidsdatagrabber = nio.BIDSDataGrabber(index_derivatives=False, extra_derivatives=[os.path.join(self.base_directory,'derivatives',elem) for elem in self.derivative_list])
         bidsdatagrabber.inputs.base_dir = self.base_directory
-        bidsdatagrabber.inputs.subject = self.subject_id
+        bidsdatagrabber.inputs.subject = self.subject.split('-')[1]
         bidsdatagrabber.inputs.output_query = self.inputs.output_query
         print(bidsdatagrabber.inputs.output_query)
         print(bidsdatagrabber.inputs.base_dir)

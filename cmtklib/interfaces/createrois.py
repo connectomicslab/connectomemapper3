@@ -9,8 +9,8 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits
 class CreateRoisInputSpec(BaseInterfaceInputSpec):
     """Input specification for InverseSolution."""
 
-    subject_id = traits.Str(
-        desc='subject id', mandatory=True)
+    subject = traits.Str(
+        desc='subject', mandatory=True)
 
     parcellation = traits.List(
         desc='parcellation scheme', mandatory=True)
@@ -46,7 +46,7 @@ class CreateRois(BaseInterface):
     output_spec = CreateRoisOutputSpec
 
     def _run_interface(self, runtime):
-        subject_id = 'sub-'+self.inputs.subject_id
+        subject = self.inputs.subject
         parcellation_image_path = self.inputs.parcellation[0]
         parcellation_name = parcellation_image_path.split('/')[-1].split('.')[0]
         cartool_dir = self.inputs.cartool_dir
@@ -54,7 +54,7 @@ class CreateRois(BaseInterface):
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query        
 
-        self._create_roi_files(subject_id, parcellation_image_path, parcellation_name, cartool_dir, cmp3_dir)
+        self._create_roi_files(subject, parcellation_image_path, parcellation_name, cartool_dir, cmp3_dir)
 
         self.derivative_list.append('Cartool')
 
@@ -73,15 +73,15 @@ class CreateRois(BaseInterface):
 
         return runtime
 
-    def _create_roi_files(self, subject_id, parcellation, parcellation_name, cartool_dir, cmp3_dir):
+    def _create_roi_files(self, subject, parcellation, parcellation_name, cartool_dir, cmp3_dir):
 
-        spipath = os.path.join(cartool_dir, subject_id, subject_id + '.spi')
+        spipath = os.path.join(cartool_dir, subject, subject + '.spi')
         source = cart.source_space.read_spi(spipath)
-        brain_cartool = os.path.join(cartool_dir,subject_id,subject_id+'.Brain.nii')
+        brain_cartool = os.path.join(cartool_dir,subject,subject+'.Brain.nii')
         brain_cartool = nibabel.load(brain_cartool)
         bc = brain_cartool.get_fdata()[:,:,:,0]
            
-        #impath = os.path.join(cmp3_dir,subject_id,'anat',subject_id+'_label-'+parcellation+'_atlas.nii.gz')
+        #impath = os.path.join(cmp3_dir,subject,'anat',subject+'_label-'+parcellation+'_atlas.nii.gz')
         impath = os.path.join(parcellation)
         im = nibabel.load(impath)
         imdata = im.get_fdata()
@@ -112,12 +112,12 @@ class CreateRois(BaseInterface):
                                                                    groups_of_indexes=groups_of_indexes,
                                                                    source_space=source)        
 
-        filename_pkl = os.path.join(cartool_dir, subject_id, 'Rois', parcellation_name + '.pickle.rois')
+        filename_pkl = os.path.join(cartool_dir, subject, 'Rois', parcellation_name + '.pickle.rois')
         filehandler = open(filename_pkl, 'wb') 
         pickle.dump(rois_file_new, filehandler)
         filehandler.close()
 
-        """filename = os.path.join(cartool_dir, subject_id, 'Rois', parcellation_name + '.rois')
+        """filename = os.path.join(cartool_dir, subject, 'Rois', parcellation_name + '.rois')
                                 with open(filename, "w") as text_file:
                                     print("{}".format(num_spi), file=text_file)
                                     print("RO01", file=text_file)
