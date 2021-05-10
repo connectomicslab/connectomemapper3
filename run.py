@@ -299,6 +299,7 @@ tracker = CarbonTracker(
     epochs_before_pred=1,
     monitor_epochs=1,
     components="cpu",
+    devices_by_pid=True,
     update_interval=10,
     log_dir=carbon_tracker_log_dir
 )
