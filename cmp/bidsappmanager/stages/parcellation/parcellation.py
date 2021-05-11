@@ -123,7 +123,7 @@ class ParcellationStageUI(ParcellationStage):
         buttons=["OK", "Cancel"],
     )
 
-    def __init__(self, pipeline_mode, bids_dir, output_dir):
+    def __init__(self, pipeline_mode, subject, session, bids_dir, output_dir):
         """Constructor of the ParcellationStageUI class.
 
         Parameters
@@ -142,7 +142,7 @@ class ParcellationStageUI(ParcellationStage):
         cmp.stages.parcellation.parcellation.ParcellationStage.__init_
         cmp.cmpbidsappmanager.stages.parcellation.parcellation.ParcellationStageUI
         """
-        ParcellationStage.__init__(self, pipeline_mode, bids_dir, output_dir)
+        ParcellationStage.__init__(self, pipeline_mode, subject, session, bids_dir, output_dir)
         self.config = ParcellationConfigUI()
         self.config.template_thalamus = os.path.join(
             "app",

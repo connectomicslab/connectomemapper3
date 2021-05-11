@@ -145,22 +145,28 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         """
         AnatomicalPipeline.__init__(self, project_info)
 
+        if len(project_info.subject_sessions) > 0:
+            subject_id = "_".join((self.subject, self.global_conf.subject_session))
+            subject_session = self.global_conf.subject_session
+        else:
+            subject_id = self.subject
+            subject_session = ""
+
         self.stages = {
             "Segmentation": SegmentationStageUI(
+                subject=self.subject,
+                session=subject_session,
                 bids_dir=project_info.base_directory,
                 output_dir=project_info.output_directory,
             ),
             "Parcellation": ParcellationStageUI(
                 pipeline_mode="Diffusion",
+                subject=self.subject,
+                session=subject_session,
                 bids_dir=project_info.base_directory,
                 output_dir=project_info.output_directory,
             ),
         }
-
-        if len(project_info.subject_sessions) > 0:
-            subject_id = "_".join((self.subject, self.global_conf.subject_session))
-        else:
-            subject_id = self.subject
 
         self.stages["Segmentation"].config.freesurfer_subjects_dir = os.path.join(
             self.output_directory, "freesurfer"
