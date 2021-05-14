@@ -193,8 +193,6 @@ class CMP_Project_Info(HasTraits):
 
     bids_layout = Instance(BIDSLayout)
     subjects = List([])
-    import pdb
-    pdb.set_trace()
     subject = Enum(values='subjects')
 
     number_of_subjects = Int()

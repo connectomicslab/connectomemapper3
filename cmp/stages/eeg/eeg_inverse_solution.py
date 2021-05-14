@@ -28,12 +28,13 @@ class EEGInverseSolutionConfig(HasTraits):
 
 class EEGInverseSolutionStage(Stage):
   
-    def __init__(self, bids_dir, output_dir):
+    def __init__(self, bids_dir, output_dir): #, invsol_format
         """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
         self.name = 'eeg_inverse_solution_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGInverseSolutionConfig()
+        # self.config.invsol_format = invsol_format
         self.inputs = ["eeg_ts_file", "rois_file","src_file","invsol_file",
                        "lamda","svd_params","roi_ts_file","invsol_params"]
         self.outputs = ["roi_ts_file"]

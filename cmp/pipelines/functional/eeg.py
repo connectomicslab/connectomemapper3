@@ -88,7 +88,7 @@ class EEGPipeline(Pipeline):
 					   'EEGLoader': EEGLoaderStage(bids_dir=project_info.base_directory,
 														   output_dir=self.output_directory),
 					   'EEGInverseSolution': EEGInverseSolutionStage(bids_dir=project_info.base_directory,
-														   output_dir=self.output_directory),
+														   output_dir=self.output_directory), #, invsol_format=self.
 					   }
 		
 		cmp_common.Pipeline.__init__(self, project_info)
@@ -97,8 +97,8 @@ class EEGPipeline(Pipeline):
 		self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory,'cartool')
 
 		self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
-		self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
-
+		self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format 
+        
 		#self.stages['EEGPreparer'].config.on_trait_change(self.update_eeg_format, 'eeg_format')
 
 		#self.stages['EEGLoader'].config.on_trait_change(self.update_eeg_format, 'eeg_format')	

@@ -31,11 +31,19 @@ from cmp.pipelines.common import * # contains class Pipeline
 from cmp.stages.common import Stage
 import cmp.project
 from cmp.stages.eeg.eeg_inverse_solution import EEGInverseSolutionStage
+from cmtklib.config import eeg_load_config_json
 
+class Global_Configuration(HasTraits): # copied from eeg.py
 
+	process_type = Str('EEG')
+	subjects = List(trait=Str)
+	subject = Str
+	subject_session = Str
+    
 class FakeEEGPipeline(Pipeline):
     # bits and pieces of project.py init_eeg_project and eeg.py 
     pipeline_name = Str("Fake_EEG_pipeline")
+    global_conf = Global_Configuration()
     flow =  Instance(pe.Workflow)
     
     def __init__(self, project_info):
@@ -75,7 +83,6 @@ class FakeEEGPipeline(Pipeline):
         
         eeg_flow = pe.Workflow(name='eeg_pipeline', 
 							   base_dir= os.path.abspath(nipype_deriv_subject_directory))
-        pdb.set_trace()
         invsol_flow = self.create_stage_flow("EEGInverseSolution")
         
         eeg_flow.connect([
@@ -120,7 +127,6 @@ if username=='katha':
 elif username=='katharina':
     bids_dir = '/mnt/data/Lausanne/DS001_BIDS'
 
-pdb.set_trace()
 project = cmp.project.CMP_Project_Info()
 project.base_directory = bids_dir
 participant_label = '01'
@@ -132,8 +138,14 @@ project.subject_session = ''
 
 project.number_of_cores = 1
 
+eeg_pipeline_config = '/mnt/data/Lausanne/DS001_BIDS/code/ref_mne_eeg_config.json'
+project.eeg_config_file = os.path.abspath(eeg_pipeline_config)
+
 # create the pipeline 
 eeg_test_pipeline = FakeEEGPipeline(project)
+eeg_conf_loaded = eeg_load_config_json(eeg_test_pipeline, project.eeg_config_file)
+
+# eeg_test_pipeline.config_file = project.eeg_config_file
 eeg_test_pipeline.process()
 
 
