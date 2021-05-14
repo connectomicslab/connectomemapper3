@@ -36,6 +36,7 @@ from cmp.stages.eeg.eeg_inverse_solution import EEGInverseSolutionStage
 class FakeEEGPipeline(Pipeline):
     # bits and pieces of project.py init_eeg_project and eeg.py 
     pipeline_name = Str("Fake_EEG_pipeline")
+    flow =  Instance(pe.Workflow)
     
     def __init__(self, project_info):
         self.stages = {'EEGInverseSolution': EEGInverseSolutionStage(bids_dir=project_info.base_directory, 														   output_dir=self.output_directory),
@@ -74,7 +75,7 @@ class FakeEEGPipeline(Pipeline):
         
         eeg_flow = pe.Workflow(name='eeg_pipeline', 
 							   base_dir= os.path.abspath(nipype_deriv_subject_directory))
-
+        pdb.set_trace()
         invsol_flow = self.create_stage_flow("EEGInverseSolution")
         
         eeg_flow.connect([
@@ -101,6 +102,8 @@ class FakeEEGPipeline(Pipeline):
         
         eeg_flow.write_graph(graph2use='colored',
 							  format='svg', simple_form=True)
+        pdb.set_trace()
+        eeg_flow.run()
 
         
 class EEGFakeInputStage(Stage): 
@@ -117,6 +120,7 @@ if username=='katha':
 elif username=='katharina':
     bids_dir = '/mnt/data/Lausanne/DS001_BIDS'
 
+pdb.set_trace()
 project = cmp.project.CMP_Project_Info()
 project.base_directory = bids_dir
 participant_label = '01'
@@ -132,6 +136,7 @@ project.number_of_cores = 1
 eeg_test_pipeline = FakeEEGPipeline(project)
 eeg_test_pipeline.process()
 
+
 # create mne epochs file 
 # taken from eeglab2fif interface 
 behav_file = eeg_test_pipeline.flow.inputs.datasource.behav_file
@@ -146,8 +151,6 @@ if not os.path.exists(os.path.join(bids_dir,'derivatives','cmp','eeg','sub-'+par
     os.makedirs(os.path.join(bids_dir,'derivatives','cmp','eeg','sub-'+participant_label))
 epochs.save(epochs_fif_fname,overwrite=True)
 
-
-
 # info about parcellation 
 #eeg_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
 #eeg_pipeline.atlas_info = anat_pipeline.atlas_info
@@ -155,9 +158,3 @@ epochs.save(epochs_fif_fname,overwrite=True)
 
 
 pdb.set_trace()
-
-#self.stages[stage].stage_dir = os.path.join(self.base_directory, "derivatives", 'nipype', self.subject,
-#                                                            project_info.subject_session, self.pipeline_name,
- #                                                           self.stages[stage].name)
-
-

@@ -18,6 +18,7 @@ import nipype.interfaces.utility as util
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.interfaces.invsol import CartoolInverseSolutionROIExtraction
+from cmtklib.interfaces.invsol_MNE import MNEInverseSolution
 from cmtklib.util import get_pipeline_dictionary_outputs
 
 class EEGInverseSolutionConfig(HasTraits):
@@ -41,6 +42,23 @@ class EEGInverseSolutionStage(Stage):
 
         if self.config.invsol_format.split('-')[0] == "Cartool":
             invsol_node = pe.Node(CartoolInverseSolutionROIExtraction(), name="invsol")
+            flow.connect([(inputnode, invsol_node,
+                 [('eeg_ts_file','eeg_ts_file'),
+                  ('rois_file','rois_file'),
+                  ('src_file','src_file'),
+                  ('invsol_file','invsol_file'),
+                  ('invsol_params','invsol_params'),
+                  ('roi_ts_file','roi_ts_file'),                
+                 ]
+                    )])
+            flow.connect([(invsol_node, outputnode,
+                 [
+                  ('roi_ts_file','roi_ts_file'),
+                 ]
+                    )])
+            
+        elif self.config.invsol_format.split('-')[0] == "mne":
+            invsol_node = pe.Node(MNEInverseSolution(), name="invsol")
             flow.connect([(inputnode, invsol_node,
                  [('eeg_ts_file','eeg_ts_file'),
                   ('rois_file','rois_file'),
