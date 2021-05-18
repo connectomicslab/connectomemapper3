@@ -8,11 +8,14 @@
 
 import os
 import json
+
+from traits.api import Bool
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     BaseInterface,
     TraitedSpec,
     File,
+    
 )
 
 
@@ -34,6 +37,8 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
 
     bids_dir = os.path.abspath(bids_dir)
     deriv_dir = os.path.abspath(deriv_dir)
+
+    desc = {}
 
     if pipeline_name == "cmp":
         desc = {
@@ -116,7 +121,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
         desc["SourceDatasets"]: [
             {
                 "DOI": orig_desc["DatasetDOI"],
-                "URL": "https://doi.org/{}".format(orig_desc["DatasetDOI"]),
+                "URL": 'https://doi.org/{}'.format(orig_desc["DatasetDOI"]),
                 "Version": "TODO: To be updated",
             }
         ]
@@ -170,6 +175,10 @@ class CreateBIDSStandardParcellationLabelIndexMappingFileInputSpec(
         desc="Path to FreesurferColorLUT.txt file that describes the RGB color of the "
         "graph nodes for a given parcellation",
     )
+    verbose = Bool(
+        True,
+        desc="Verbose mode"
+    )
 
 
 class CreateBIDSStandardParcellationLabelIndexMappingFileOutputSpec(
@@ -185,7 +194,7 @@ class CreateBIDSStandardParcellationLabelIndexMappingFileOutputSpec(
 
 
 class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
-    """Creates the BIDS standard generic label-index mapping file that describes parcellation nodes"""
+    """Creates the BIDS standard generic label-index mapping file that describes parcellation nodes."""
 
     input_spec = CreateBIDSStandardParcellationLabelIndexMappingFileInputSpec
     output_spec = CreateBIDSStandardParcellationLabelIndexMappingFileOutputSpec
@@ -255,6 +264,8 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
         # Write list of standardized node description dictionaries to output TSV file
         keys = ["index", "name", "color", "mapping"]
         output_tsv_filename = self._gen_output_filename(self.inputs.roi_graphml)
+        if self.inputs.verbose:
+            print(f'\t\t > Save TSV file to {output_tsv_filename}')
         with open(output_tsv_filename, "w") as output_tsv_file:
             dict_writer = csv.DictWriter(output_tsv_file, keys, delimiter="\t")
             dict_writer.writeheader()
@@ -264,7 +275,10 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["roi_bids_tsv"] = self._gen_output_filename(self.inputs.roi_graphml)
+        output_tsv_filename = self._gen_output_filename(self.inputs.roi_graphml)
+        if self.inputs.verbose:
+            print(f'\t\t > Set roi_bids_tsv output to {output_tsv_filename}')
+        outputs["roi_bids_tsv"] = output_tsv_filename
 
     @staticmethod
     def _gen_output_filename(input_file):
