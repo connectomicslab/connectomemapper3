@@ -16,7 +16,7 @@ from nipype.interfaces.base import (traits, BaseInterface, BaseInterfaceInputSpe
                                     InputMultiPath, OutputMultiPath, File,
                                     isdefined)
 import nipype.interfaces.fsl as fsl
-from traits.trait_types import Float
+from traits.trait_types import Float, Enum
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -434,6 +434,9 @@ class ApplymultipleXfmInputSpec(BaseInterfaceInputSpec):
 
     reference = File(desc="Reference image used for target space",
                      mandatory=True, exists=True)
+    
+    interp = Enum('nearestneighbour', 'spline',
+                  desc='Interpolation used')
 
 
 class ApplymultipleXfmOutputSpec(TraitedSpec):
@@ -462,8 +465,12 @@ class ApplymultipleXfm(BaseInterface):
 
     def _run_interface(self, runtime):
         for in_file in self.inputs.in_files:
-            ax = fsl.ApplyXFM(in_file=in_file, in_matrix_file=self.inputs.xfm_file, apply_xfm=True,
-                              interp="nearestneighbour", reference=self.inputs.reference)
+            ax = fsl.ApplyXFM(
+                in_file=in_file,
+                in_matrix_file=self.inputs.xfm_file,
+                apply_xfm=True,
+                interp=self.inputs.interp,
+                reference=self.inputs.reference)
             ax.run()
         return runtime
 
@@ -512,8 +519,12 @@ class ApplymultipleWarp(BaseInterface):
 
     def _run_interface(self, runtime):
         for in_file in self.inputs.in_files:
-            ax = fsl.ApplyWarp(in_file=in_file, interp=self.inputs.interp, field_file=self.inputs.field_file,
-                               ref_file=self.inputs.ref_file)
+            ax = fsl.ApplyWarp(
+                in_file=in_file,
+                interp=self.inputs.interp,
+                field_file=self.inputs.field_file,
+                ref_file=self.inputs.ref_file
+            )
             ax.run()
         return runtime
 
