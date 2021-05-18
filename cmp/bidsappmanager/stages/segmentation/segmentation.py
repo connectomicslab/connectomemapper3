@@ -65,11 +65,6 @@ class SegmentationConfigUI(SegmentationConfig):
                 label="Extraction mask",
                 visible_when='brain_mask_extraction_tool == "ANTs"',
             ),
-            Item(
-                "brain_mask_path",
-                label="Brain mask path",
-                visible_when='brain_mask_extraction_tool == "Custom"',
-            ),
             "freesurfer_args",
             visible_when="seg_tool=='Freesurfer'",
         ),
