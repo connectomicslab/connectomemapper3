@@ -440,6 +440,175 @@ class fMRIPipeline(Pipeline):
             )
         return ""
 
+    def create_datagrabber_node(self, base_directory, bids_atlas_label):
+        """Create the appropriate Nipype DataGrabber node depending on the `parcellation_scheme`
+
+        Parameters
+        ----------
+        base_directory : Directory
+            Main CMP output directory of a subject
+            e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
+            
+        bids_atlas_label : string
+            Parcellation atlas label
+
+        Returns
+        -------
+        datasource : Output Nipype DataGrabber Node
+            Output Nipype Node with :obj:`~nipype.interfaces.io.DataGrabber` interface
+        """
+        datasource = pe.Node(
+            interface=nio.DataGrabber(
+                outfields=[
+                    "fMRI",
+                    "T1",
+                    "T2",
+                    "aseg",
+                    "brain",
+                    "brain_mask",
+                    "wm_mask_file",
+                    "wm_eroded",
+                    "brain_eroded",
+                    "csf_eroded",
+                    "roi_volume_s1",
+                    "roi_volume_s2",
+                    "roi_volume_s3",
+                    "roi_volume_s4",
+                    "roi_volume_s5",
+                    "roi_graphml_s1",
+                    "roi_graphml_s2",
+                    "roi_graphml_s3",
+                    "roi_graphml_s4",
+                    "roi_graphml_s5",
+                ]
+            ),
+            name="datasource",
+        )
+        datasource.inputs.base_directory = base_directory
+        datasource.inputs.template = "*"
+        datasource.inputs.raise_on_empty = False
+
+        if self.parcellation_scheme == "NativeFreesurfer":
+            # fmt:off
+            datasource.inputs.field_template = dict(
+                fMRI="func/" + self.subject + "_task-rest_desc-cmp_bold.nii.gz",
+                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
+                T2="anat/" + self.subject + "_T2w.nii.gz",
+                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
+                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
+                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                wm_eroded="anat/" + self.subject + "_label-WM_desc-eroded_dseg.nii.gz",
+                brain_eroded="anat/" + self.subject + "_label-brain_desc-eroded_dseg.nii.gz",
+                csf_eroded="anat/" + self.subject + "_label-CSF_desc-eroded_dseg.nii.gz",
+                roi_volume_s1="anat/" + self.subject + "_atlas-Desikan_dseg.nii.gz",
+                roi_volume_s2="anat/irrelevant.nii.gz",
+                roi_volume_s3="anat/irrelevant.nii.gz",
+                roi_volume_s4="anat/irrelevant.nii.gz",
+                roi_volume_s5="anat/irrelevant.nii.gz",
+                roi_graphml_s1="anat/" + self.subject + "_atlas-Desikan_dseg.graphml",
+                roi_graphml_s2="anat/irrelevant.graphml",
+                roi_graphml_s3="anat/irrelevant.graphml",
+                roi_graphml_s4="anat/irrelevant.graphml",
+                roi_graphml_s5="anat/irrelevant.graphml",
+            )
+            # fmt:on
+        else:
+            # fmt:off
+            datasource.inputs.field_template = dict(
+                fMRI="func/" + self.subject + "_task-rest_desc-cmp_bold.nii.gz",
+                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
+                T2="anat/" + self.subject + "_T2w.nii.gz",
+                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
+                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
+                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                wm_eroded="anat/" + self.subject + "_label-WM_desc-eroded_dseg.nii.gz",
+                brain_eroded="anat/" + self.subject + "_label-brain_desc-eroded_dseg.nii.gz",
+                csf_eroded="anat/" + self.subject + "_label-CSF_desc-eroded_dseg.nii.gz",
+                roi_volume_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale1_dseg.nii.gz",
+                roi_volume_s2="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale2_dseg.nii.gz",
+                roi_volume_s3="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale3_dseg.nii.gz",
+                roi_volume_s4="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale4_dseg.nii.gz",
+                roi_volume_s5="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale5_dseg.nii.gz",
+                roi_graphml_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale1_dseg.graphml",
+                roi_graphml_s2="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale2_dseg.graphml",
+                roi_graphml_s3="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale3_dseg.graphml",
+                roi_graphml_s4="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale4_dseg.graphml",
+                roi_graphml_s5="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale5_dseg.graphml",
+            )
+            # fmt:on
+
+        datasource.inputs.sort_filelist = False
+        
+        return datasource
+
+    def create_datasinker_node(self, base_directory, bids_atlas_label):
+        """Create the appropriate Nipype DataSink node depending on the `parcellation_scheme`
+
+        Parameters
+        ----------
+        base_directory : Directory
+            Main CMP output directory of a subject
+            e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
+            
+        bids_atlas_label : string
+            Parcellation atlas label
+            
+        recon_model : string
+            Diffusion signal model (`DTI` or `CSD`)
+            
+        tracking_model : string
+            Tractography algorithm (`DET` or `PROB`)
+
+        Returns
+        -------
+        sinker : Output Nipype DataSink Node
+            Output Nipype Node with :obj:`~nipype.interfaces.io.DataSink` interface
+        """
+        sinker = pe.Node(nio.DataSink(), name="func_sinker")
+        sinker.inputs.base_directory = os.path.join(base_directory)
+        # fmt:off
+        substitutions = [
+            ("eroded_brain_registered.nii.gz", self.subject + "_space-meanBOLD_desc-eroded_label-brain_dseg.nii.gz",),
+            ("wm_mask_registered.nii.gz", self.subject + "_space-meanBOLD_label-WM_dseg.nii.gz",),
+            ("eroded_csf_registered.nii.gz", self.subject + "_space-meanBOLD_desc-eroded_label-CSF_dseg.nii.gz",),
+            ("eroded_wm_registered.nii.gz", self.subject + "_space-meanBOLD_desc-eroded_label-WM_dseg.nii.gz",),
+            ("fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz", self.subject + "_meanBOLD.nii.gz",),
+            ("fMRI_despike_st_mcf.nii.gz.par", self.subject + "_motion.tsv"),
+            ("FD.npy", self.subject + "_desc-scrubbing_FD.npy"),
+            ("DVARS.npy", self.subject + "_desc-scrubbing_DVARS.npy"),
+            ("fMRI_bandpass.nii.gz", self.subject + "_desc-bandpass_task-rest_bold.nii.gz",),
+        ]
+        # fmt:on
+        if self.parcellation_scheme == "NativeFreesurfer":
+            # fmt:off
+            substitutions += [
+                (
+                    f'{self.subject}_atlas-{bids_atlas_label}_dseg_flirt.nii.gz',
+                    f'{self.subject}_space-meanBOLD_atlas-{bids_atlas_label}_dseg.nii.gz'
+                ),
+                ("connectome_freesurferaparc", self.subject + "_atlas-Desikan_conndata-network_connectivity"),
+                ("averageTimeseries_freesurferaparc", self.subject + "_atlas-Desikan_timeseries"),
+            ]
+            # fmt:on
+        else:
+            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+                # fmt:off
+                substitutions += [
+                    (
+                        f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_flirt.nii.gz',
+                        f'{self.subject}_space-meanBOLD_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    ),
+                    (f'connectome_{scale}', f'{self.subject} + "_atlas-" + {bids_atlas_label}_res-{scale}_conndata-network_connectivity'),
+                    (f'averageTimeseries_{scale}', f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_timeseries')
+                ]
+                # fmt:on
+
+            sinker.inputs.substitutions = substitutions
+            
+            return sinker
+
     def create_pipeline_flow(
         self, cmp_deriv_subject_directory, nipype_deriv_subject_directory
     ):
@@ -468,347 +637,16 @@ class fMRIPipeline(Pipeline):
             bids_atlas_label = "Desikan"
 
         # Data sinker for output
-        sinker = pe.Node(nio.DataSink(), name="func_sinker")
-        sinker.inputs.base_directory = os.path.join(cmp_deriv_subject_directory)
-
-        if self.parcellation_scheme == "NativeFreesurfer":
-            sinker.inputs.substitutions = [
-                (
-                    "eroded_brain_registered.nii.gz",
-                    self.subject
-                    + "_space-meanBOLD_desc-eroded_label-brain_dseg.nii.gz",
-                ),
-                (
-                    "eroded_csf_registered.nii.gz",
-                    self.subject + "_space-meanBOLD_desc-eroded_label-CSF_dseg.nii.gz",
-                ),
-                (
-                    "wm_mask_registered.nii.gz",
-                    self.subject + "_space-meanBOLD_label-WM_dseg.nii.gz",
-                ),
-                (
-                    "eroded_wm_registered.nii.gz",
-                    self.subject + "_space-meanBOLD_desc-eroded_label-WM_dseg.nii.gz",
-                ),
-                (
-                    "fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz",
-                    self.subject + "_meanBOLD.nii.gz",
-                ),
-                ("fMRI_despike_st_mcf.nii.gz.par", self.subject + "_motion.par"),
-                ("FD.npy", self.subject + "_desc-scrubbing_FD.npy"),
-                ("DVARS.npy", self.subject + "_desc-scrubbing_DVARS.npy"),
-                (
-                    "fMRI_bandpass.nii.gz",
-                    self.subject + "_desc-bandpass_task-rest_bold.nii.gz",
-                ),
-                (
-                    self.subject + "_atlas-" + bids_atlas_label + "_dseg_flirt.nii.gz",
-                    self.subject
-                    + "_space-meanBOLD_atlas-"
-                    + bids_atlas_label
-                    + "_dseg.nii.gz",
-                ),
-                (
-                    "connectome_freesurferaparc",
-                    self.subject + "_atlas-Desikan_conndata-network_connectivity",
-                ),
-                (
-                    "averageTimeseries_freesurferaparc",
-                    self.subject + "_atlas-Desikan_timeseries",
-                ),
-            ]
-        else:
-            sinker.inputs.substitutions = [
-                (
-                    "eroded_brain_registered.nii.gz",
-                    self.subject
-                    + "_space-meanBOLD_desc-eroded_label-brain_dseg.nii.gz",
-                ),
-                (
-                    "wm_mask_registered.nii.gz",
-                    self.subject + "_space-meanBOLD_label-WM_dseg.nii.gz",
-                ),
-                (
-                    "eroded_csf_registered.nii.gz",
-                    self.subject + "_space-meanBOLD_desc-eroded_label-CSF_dseg.nii.gz",
-                ),
-                (
-                    "eroded_wm_registered.nii.gz",
-                    self.subject + "_space-meanBOLD_desc-eroded_label-WM_dseg.nii.gz",
-                ),
-                (
-                    "fMRI_despike_st_mcf.nii.gz_mean_reg.nii.gz",
-                    self.subject + "_meanBOLD.nii.gz",
-                ),
-                ("fMRI_despike_st_mcf.nii.gz.par", self.subject + "_motion.tsv"),
-                ("FD.npy", self.subject + "_desc-scrubbing_FD.npy"),
-                ("DVARS.npy", self.subject + "_desc-scrubbing_DVARS.npy"),
-                (
-                    "fMRI_bandpass.nii.gz",
-                    self.subject + "_desc-bandpass_task-rest_bold.nii.gz",
-                ),
-                (
-                    self.subject + "_atlas-" + bids_atlas_label + "_dseg_flirt.nii.gz",
-                    self.subject
-                    + "_space-meanBOLD_atlas-"
-                    + bids_atlas_label
-                    + "_dseg.nii.gz",
-                ),
-                (
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale1_dseg_flirt.nii.gz",
-                    self.subject
-                    + "_space-meanBOLD_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale1_dseg.nii.gz",
-                ),
-                (
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale2_dseg_flirt.nii.gz",
-                    self.subject
-                    + "_space-meanBOLD_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale2_dseg.nii.gz",
-                ),
-                (
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale3_dseg_flirt.nii.gz",
-                    self.subject
-                    + "_space-meanBOLD_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale3_dseg.nii.gz",
-                ),
-                (
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale4_dseg_flirt.nii.gz",
-                    self.subject
-                    + "_space-meanBOLD_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale4_dseg.nii.gz",
-                ),
-                (
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale5_dseg_flirt.nii.gz",
-                    self.subject
-                    + "_space-meanBOLD_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale5_dseg.nii.gz",
-                ),
-                (
-                    "connectome_freesurferaparc",
-                    self.subject + "_label-Desikan_conndata-network_connectivity",
-                ),
-                (
-                    "connectome_scale1",
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale1_conndata-network_connectivity",
-                ),
-                (
-                    "connectome_scale2",
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale2_conndata-network_connectivity",
-                ),
-                (
-                    "connectome_scale3",
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale3_conndata-network_connectivity",
-                ),
-                (
-                    "connectome_scale4",
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale4_conndata-network_connectivity",
-                ),
-                (
-                    "connectome_scale5",
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale5_conndata-network_connectivity",
-                ),
-                (
-                    "averageTimeseries_scale1",
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale1_timeseries",
-                ),
-                (
-                    "averageTimeseries_scale2",
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale2_timeseries",
-                ),
-                (
-                    "averageTimeseries_scale3",
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale3_timeseries",
-                ),
-                (
-                    "averageTimeseries_scale4",
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale4_timeseries",
-                ),
-                (
-                    "averageTimeseries_scale5",
-                    self.subject
-                    + "_atlas-"
-                    + bids_atlas_label
-                    + "_res-scale5_timeseries",
-                ),
-            ]
-
-        # Data import
-        datasource = pe.Node(
-            interface=nio.DataGrabber(
-                outfields=[
-                    "fMRI",
-                    "T1",
-                    "T2",
-                    "aseg",
-                    "brain",
-                    "brain_mask",
-                    "wm_mask_file",
-                    "wm_eroded",
-                    "brain_eroded",
-                    "csf_eroded",
-                    "roi_volume_s1",
-                    "roi_volume_s2",
-                    "roi_volume_s3",
-                    "roi_volume_s4",
-                    "roi_volume_s5",
-                    "roi_graphml_s1",
-                    "roi_graphml_s2",
-                    "roi_graphml_s3",
-                    "roi_graphml_s4",
-                    "roi_graphml_s5",
-                ]
-            ),
-            name="datasource",
+        sinker = self.create_datasinker_node(
+            base_directory=cmp_deriv_subject_directory,
+            bids_atlas_label=bids_atlas_label
         )
-        datasource.inputs.base_directory = cmp_deriv_subject_directory
-        datasource.inputs.template = "*"
-        datasource.inputs.raise_on_empty = False
-        # datasource.inputs.field_template = dict(fMRI='fMRI.nii.gz',T1='T1.nii.gz',T2='T2.nii.gz')
-
-        if self.parcellation_scheme == "NativeFreesurfer":
-            datasource.inputs.field_template = dict(
-                fMRI="func/" + self.subject + "_task-rest_desc-cmp_bold.nii.gz",
-                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
-                T2="anat/" + self.subject + "_T2w.nii.gz",
-                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
-                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
-                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
-                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
-                wm_eroded="anat/" + self.subject + "_label-WM_desc-eroded_dseg.nii.gz",
-                brain_eroded="anat/"
-                + self.subject
-                + "_label-brain_desc-eroded_dseg.nii.gz",
-                csf_eroded="anat/"
-                + self.subject
-                + "_label-CSF_desc-eroded_dseg.nii.gz",
-                roi_volume_s1="anat/" + self.subject + "_atlas-Desikan_dseg.nii.gz",
-                roi_volume_s2="anat/irrelevant.nii.gz",
-                roi_volume_s3="anat/irrelevant.nii.gz",
-                roi_volume_s4="anat/irrelevant.nii.gz",
-                roi_volume_s5="anat/irrelevant.nii.gz",
-                roi_graphml_s1="anat/" + self.subject + "_atlas-Desikan_dseg.graphml",
-                roi_graphml_s2="anat/irrelevant.graphml",
-                roi_graphml_s3="anat/irrelevant.graphml",
-                roi_graphml_s4="anat/irrelevant.graphml",
-                roi_graphml_s5="anat/irrelevant.graphml",
-            )
-        else:
-            datasource.inputs.field_template = dict(
-                fMRI="func/" + self.subject + "_task-rest_desc-cmp_bold.nii.gz",
-                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
-                T2="anat/" + self.subject + "_T2w.nii.gz",
-                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
-                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
-                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
-                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
-                wm_eroded="anat/" + self.subject + "_label-WM_desc-eroded_dseg.nii.gz",
-                brain_eroded="anat/"
-                + self.subject
-                + "_label-brain_desc-eroded_dseg.nii.gz",
-                csf_eroded="anat/"
-                + self.subject
-                + "_label-CSF_desc-eroded_dseg.nii.gz",
-                roi_volume_s1="anat/"
-                + self.subject
-                + "_atlas-"
-                + bids_atlas_label
-                + "_res-scale1_dseg.nii.gz",
-                roi_volume_s2="anat/"
-                + self.subject
-                + "_atlas-"
-                + bids_atlas_label
-                + "_res-scale2_dseg.nii.gz",
-                roi_volume_s3="anat/"
-                + self.subject
-                + "_atlas-"
-                + bids_atlas_label
-                + "_res-scale3_dseg.nii.gz",
-                roi_volume_s4="anat/"
-                + self.subject
-                + "_atlas-"
-                + bids_atlas_label
-                + "_res-scale4_dseg.nii.gz",
-                roi_volume_s5="anat/"
-                + self.subject
-                + "_atlas-"
-                + bids_atlas_label
-                + "_res-scale5_dseg.nii.gz",
-                roi_graphml_s1="anat/"
-                + self.subject
-                + "_atlas-"
-                + bids_atlas_label
-                + "_res-scale1_dseg.graphml",
-                roi_graphml_s2="anat/"
-                + self.subject
-                + "_atlas-"
-                + bids_atlas_label
-                + "_res-scale2_dseg.graphml",
-                roi_graphml_s3="anat/"
-                + self.subject
-                + "_atlas-"
-                + bids_atlas_label
-                + "_res-scale3_dseg.graphml",
-                roi_graphml_s4="anat/"
-                + self.subject
-                + "_atlas-"
-                + bids_atlas_label
-                + "_res-scale4_dseg.graphml",
-                roi_graphml_s5="anat/"
-                + self.subject
-                + "_atlas-"
-                + bids_atlas_label
-                + "_res-scale5_dseg.graphml",
-            )
-
-        datasource.inputs.sort_filelist = False
+        
+        # Data import
+        datasource = self.create_datagrabber_node(
+            base_directory=cmp_deriv_subject_directory,
+            bids_atlas_label=bids_atlas_label
+        )
 
         # Clear previous outputs
         self.clear_stages_outputs()
