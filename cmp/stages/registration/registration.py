@@ -26,7 +26,7 @@ from cmtklib.interfaces.fsl import ApplymultipleXfm, ApplymultipleWarp
 import cmtklib.interfaces.freesurfer as cmp_fs
 import cmtklib.interfaces.fsl as cmp_fsl
 from cmtklib.interfaces.ants import MultipleANTsApplyTransforms
-from cmtklib.util import get_pipeline_dictionary_outputs
+from cmtklib.util import get_pipeline_dictionary_outputs, convertList2Tuple
 
 
 class RegistrationConfig(HasTraits):
@@ -395,22 +395,6 @@ class RegistrationStage(Stage):
 
             concatnode = pe.Node(interface=util.Merge(2), name="concatnode")
 
-            def convertList2Tuple(lists):
-                """Convert list of files to tuple of files.
-
-                (Duplicated with preprocessing, could be moved to utils in the future)
-
-                Parameters
-                ----------
-                lists : [bvecs, bvals]
-                    List of files containing bvecs and bvals
-                Returns
-                -------
-                out_tuple : (bvecs, bvals)
-                    Tuple of files containing bvecs and bvals
-                """
-                out_tuple = tuple(lists)
-                return out_tuple
             # fmt:off
             flow.connect(
                 [
@@ -721,24 +705,6 @@ class RegistrationStage(Stage):
             mr_convert.inputs.force_writing = True
 
             concatnode = pe.Node(interface=util.Merge(2), name="concatnode")
-
-            def convertList2Tuple(lists):
-                """Convert list of files to tuple of files.
-
-                (Duplicated with preprocessing, and here line 355;
-                could be moved to utils in the future)
-
-                Parameters
-                ----------
-                lists : [bvecs, bvals]
-                    List of files containing bvecs and bvals
-                Returns
-                -------
-                out_tuple : (bvecs, bvals)
-                    Tuple of files containing bvecs and bvals
-                """
-                # print "******************************************",tuple(lists)
-                return tuple(lists)
 
             # fmt:off
             flow.connect(

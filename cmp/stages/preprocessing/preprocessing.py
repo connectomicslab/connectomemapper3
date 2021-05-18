@@ -37,6 +37,7 @@ from cmtklib.interfaces.mrtrix3 import (
 )
 from cmtklib.diffusion import ExtractPVEsFrom5TT, UpdateGMWMInterfaceSeeding
 from cmtklib.interfaces.fsl import CreateAcqpFile, CreateIndexFile
+from cmtklib.util import convertList2Tuple
 
 
 class PreprocessingConfig(HasTraits):
@@ -284,25 +285,8 @@ class PreprocessingStage(Stage):
 
         concatnode = pe.Node(interface=util.Merge(2), name="concatnode")
 
-        def convertList2Tuple(lists):
-            """Convert list of files to tuple of files.
-
-            Parameters
-            ----------
-            lists : [bvecs, bvals]
-                List of files containing bvecs and bvals
-            Returns
-            -------
-            out_tuple : (bvecs, bvals)
-                Tuple of files containing bvecs and bvals
-            """
-            # print "******************************************",tuple(lists)
-            out_tuple = tuple(lists)
-            return out_tuple
-
         flow.connect(
             [
-                # (processing_input,concatnode,[('bvecs','in1'),('bvals','in2')]),
                 (processing_input, concatnode, [("bvecs", "in1")]),
                 (processing_input, concatnode, [("bvals", "in2")]),
                 (concatnode, mr_convert, [(("out", convertList2Tuple), "grad_fsl")]),

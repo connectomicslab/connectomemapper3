@@ -571,3 +571,20 @@ def get_node_dictionary_outputs(node_report, local_output_dir=None, debug=False)
     if debug:
         print("Dictionary of node outputs: {}".format(dict_outputs))
     return dict_outputs
+
+
+def convertList2Tuple(lists):
+    """Convert list of files to tuple of files.
+
+    (Duplicated with preprocessing, could be moved to utils in the future)
+
+    Parameters
+    ----------
+    lists : [bvecs, bvals]
+        List of files containing bvecs and bvals
+    Returns
+    -------
+    out_tuple : (bvecs, bvals)
+        Tuple of files containing bvecs and bvals
+    """
+    return tuple(lists)
