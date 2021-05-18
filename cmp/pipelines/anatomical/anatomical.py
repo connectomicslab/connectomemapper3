@@ -259,7 +259,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             T1_file = os.path.join(
                 self.subject_directory, "anat", self.subject + "_T1w.nii.gz"
             )
-            files = layout.get(dict(subject=subjid, suffix="T1w", extensions=".nii.gz"))
+            files = layout.get(subject=subjid, suffix="T1w", extensions=".nii.gz")
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_file)
@@ -268,7 +268,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(
-                dict(subject=subjid, suffix="T1w", extensions=".nii.gz", session=sessid)
+                subject=subjid, suffix="T1w", extensions=".nii.gz", session=sessid
             )
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
@@ -282,7 +282,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             T1_json_file = os.path.join(
                 self.subject_directory, "anat", self.subject + "_T1w.json"
             )
-            files = layout.get(dict(subject=subjid, suffix="T1w", extensions=".json"))
+            files = layout.get(subject=subjid, suffix="T1w", extensions=".json")
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_json_file)
@@ -291,7 +291,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(
-                dict(subject=subjid, suffix="T1w", extensions=".json", session=sessid)
+                subject=subjid, suffix="T1w", extensions=".json", session=sessid
             )
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)

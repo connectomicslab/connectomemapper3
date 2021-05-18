@@ -309,7 +309,7 @@ class DiffusionPipeline(Pipeline):
 
             if self.global_conf.subject_session == "":
 
-                files = layout.get(dict(subject=subjid, suffix="dwi", extensions=".nii.gz"))
+                files = layout.get(subject=subjid, suffix="dwi", extensions=".nii.gz")
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != "":
                         for file in files:
@@ -322,7 +322,7 @@ class DiffusionPipeline(Pipeline):
                     print("ERROR : Diffusion image not found for subject %s." % subjid)
                     return
 
-                files = layout.get(dict(subject=subjid, suffix="dwi", extensions=".json"))
+                files = layout.get(subject=subjid, suffix="dwi", extensions=".json")
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != "":
                         for file in files:
@@ -338,7 +338,7 @@ class DiffusionPipeline(Pipeline):
                         % subjid
                     )
 
-                files = layout.get(dict(subject=subjid, suffix="dwi", extensions=".bval"))
+                files = layout.get(subject=subjid, suffix="dwi", extensions=".bval")
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != "":
                         for file in files:
@@ -354,7 +354,7 @@ class DiffusionPipeline(Pipeline):
                     )
                     return
 
-                files = layout.get(dict(subject=subjid, suffix="dwi", extensions=".bvec"))
+                files = layout.get(subject=subjid, suffix="dwi", extensions=".bvec")
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != "":
                         for file in files:
@@ -373,7 +373,7 @@ class DiffusionPipeline(Pipeline):
                 sessid = self.global_conf.subject_session.split("-")[1]
 
                 files = layout.get(
-                    dict(subject=subjid, suffix="dwi", extensions=".nii.gz", session=sessid)
+                    subject=subjid, suffix="dwi", extensions=".nii.gz", session=sessid
                 )
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != "":
@@ -391,7 +391,7 @@ class DiffusionPipeline(Pipeline):
                     return
 
                 files = layout.get(
-                    dict(subject=subjid, suffix="dwi", extensions=".json", session=sessid)
+                    subject=subjid, suffix="dwi", extensions=".json", session=sessid
                 )
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != "":
@@ -427,7 +427,7 @@ class DiffusionPipeline(Pipeline):
                     return
 
                 files = layout.get(
-                    dict(subject=subjid, suffix="dwi", extensions=".bvec", session=sessid)
+                    subject=subjid, suffix="dwi", extensions=".bvec", session=sessid
                 )
                 if len(files) > 0:
                     if self.global_conf.dmri_bids_acq != "":
@@ -763,6 +763,8 @@ class DiffusionPipeline(Pipeline):
             ("pve_2_out_warped.nii.gz", self.subject + "_space-DWI_label-WM_probseg.nii.gz"),
             ("act_5tt_resampled_warped.nii.gz", self.subject + "_space-DWI_label-5TT_probseg.nii.gz"),
             ("gmwmi_resampled_warped.nii.gz", self.subject + "_space-DWI_label-GMWMI_probseg.nii.gz"),
+            ("5tt_warped.nii.gz", self.subject + "_space-DWI_label-5TT_probseg.nii.gz"),
+            ("gmwmi_warped.nii.gz", self.subject + "_space-DWI_label-GMWMI_probseg.nii.gz"),
             ("connectome_freesurferaparc", self.subject + "_label-Desikan_conndata-network_connectivity"),
             ("dwi.nii.gz", self.subject + "_dwi.nii.gz"),
             ("dwi.bval", self.subject + "_dwi.bval"),
