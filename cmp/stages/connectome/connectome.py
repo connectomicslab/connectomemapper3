@@ -142,56 +142,34 @@ class ConnectomeStage(Stage):
 
         # Additional maps
         map_merge = pe.Node(interface=util.Merge(9), name="merge_additional_maps")
-
+        # fmt: off
         flow.connect(
             [
-                (
-                    inputnode,
-                    map_merge,
-                    [
-                        ("FA", "in1"),
-                        ("ADC", "in2"),
-                        ("AD", "in3"),
-                        ("RD", "in4"),
-                        ("skewness", "in5"),
-                        ("kurtosis", "in6"),
-                        ("P0", "in7"),
-                        ("shore_maps", "in8"),
-                        ("mapmri_maps", "in9"),
-                    ],
-                ),
+                (inputnode, map_merge, [("FA", "in1"),
+                                        ("ADC", "in2"),
+                                        ("AD", "in3"),
+                                        ("RD", "in4"),
+                                        ("skewness", "in5"),
+                                        ("kurtosis", "in6"),
+                                        ("P0", "in7"),
+                                        ("shore_maps", "in8"),
+                                        ("mapmri_maps", "in9")]),
                 (map_merge, cmtk_cmat, [("out", "additional_maps")]),
+                (inputnode, cmtk_cmat, [("track_file", "track_file"),
+                                        ("roi_graphMLs", "roi_graphmls"),
+                                        ("parcellation_scheme", "parcellation_scheme"),
+                                        ("atlas_info", "atlas_info"),
+                                        ("roi_volumes_registered", "roi_volumes")]),
+                (cmtk_cmat, outputnode, [("endpoints_file", "endpoints_file"),
+                                         ("endpoints_mm_file", "endpoints_mm_file"),
+                                         ("final_fiberslength_files", "final_fiberslength_files"),
+                                         ("filtered_fiberslabel_files", "filtered_fiberslabel_files"),
+                                         ("final_fiberlabels_files", "final_fiberlabels_files"),
+                                         ("streamline_final_file", "streamline_final_file"),
+                                         ("connectivity_matrices", "connectivity_matrices")]),
             ]
         )
-
-        flow.connect(
-            [
-                (
-                    inputnode,
-                    cmtk_cmat,
-                    [
-                        ("track_file", "track_file"),
-                        ("roi_graphMLs", "roi_graphmls"),
-                        ("parcellation_scheme", "parcellation_scheme"),
-                        ("atlas_info", "atlas_info"),
-                        ("roi_volumes_registered", "roi_volumes"),
-                    ],
-                ),
-                (
-                    cmtk_cmat,
-                    outputnode,
-                    [
-                        ("endpoints_file", "endpoints_file"),
-                        ("endpoints_mm_file", "endpoints_mm_file"),
-                        ("final_fiberslength_files", "final_fiberslength_files"),
-                        ("filtered_fiberslabel_files", "filtered_fiberslabel_files"),
-                        ("final_fiberlabels_files", "final_fiberlabels_files"),
-                        ("streamline_final_file", "streamline_final_file"),
-                        ("connectivity_matrices", "connectivity_matrices"),
-                    ],
-                ),
-            ]
-        )
+        # fmt: on
 
     def define_inspect_outputs(self):
         """Update the `inspect_outputs' class attribute.
