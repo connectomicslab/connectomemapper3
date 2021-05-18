@@ -17,6 +17,7 @@ from traits.api import *
 
 # Nipype imports
 import nipype.pipeline.engine as pe
+from nipype.interfaces.base import isdefined
 
 # from nipype.utils.filemanip import split_filename
 
@@ -124,9 +125,13 @@ class ConnectomeStage(Stage):
             interface=cmtklib.connectome.rsfmri_conmat(), name="compute_matrice"
         )
         cmtk_cmat.inputs.output_types = self.config.output_types
+
         cmtk_cmat.inputs.apply_scrubbing = self.config.apply_scrubbing
         cmtk_cmat.inputs.FD_th = self.config.FD_thr
         cmtk_cmat.inputs.DVARS_th = self.config.DVARS_thr
+
+        if not isdefined(inputnode.inputs.FD) or not isdefined(inputnode.inputs.DVARS):
+            cmtk_cmat.inputs.apply_scrubbing = False
 
         flow.connect(
             [

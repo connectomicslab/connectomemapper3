@@ -14,6 +14,7 @@ from traits.api import *
 
 # Nipype imports
 import nipype.pipeline.engine as pe
+from nipype.interfaces.base import isdefined
 import nipype.interfaces.utility as util
 from nipype.interfaces import afni
 
@@ -131,7 +132,7 @@ class FunctionalMRIStage(Stage):
         outputnode : nipype.interfaces.utility.IdentityInterface
             Identity interface describing the outputs of the stage
         """
-        if self.config.scrubbing:
+        if self.config.scrubbing and isdefined(inputnode.inputs.motion_par_file):
             scrubbing = pe.Node(interface=Scrubbing(), name="scrubbing")
             flow.connect(
                 [
