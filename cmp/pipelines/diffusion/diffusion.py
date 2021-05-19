@@ -499,7 +499,8 @@ class DiffusionPipeline(Pipeline):
                     shutil.copy(src=bval_file, dst=out_bval_file)
 
                 valid_inputs = True
-                input_message = "Inputs check finished successfully.\nDiffusion and morphological data available."
+                input_message = "Inputs check finished successfully.\n" +\
+                                "Diffusion and morphological data available."
 
                 if diffusion_json_available:
                     if self.global_conf.subject_session == "":
@@ -575,6 +576,76 @@ class DiffusionPipeline(Pipeline):
             )
 
         return valid_inputs
+    
+    def create_field_template_dict(self, bids_atlas_label):
+        """Create the dictionary of input field template given to Nipype DataGrabber`
+
+        Parameters
+        ----------
+        bids_atlas_label : string
+            Parcellation atlas label
+
+        Returns
+        -------
+        field_template : dict
+            Output dictionary of template input formats given to Nipype DataGrabber
+        """
+        if self.parcellation_scheme == "NativeFreesurfer":
+            # fmt:off
+            field_template = dict(
+                diffusion="dwi/" + self.subject + "_desc-cmp_dwi.nii.gz",
+                bvecs="dwi/" + self.subject + "_desc-cmp_dwi.bvec",
+                bvals="dwi/" + self.subject + "_desc-cmp_dwi.bval",
+                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
+                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
+                aparc_aseg="anat/" + self.subject + "_desc-aparcaseg_dseg.nii.gz",
+                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
+                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                wm_eroded="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                brain_eroded="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                csf_eroded="anat/" + self.subject + "_label-CSF_dseg.nii.gz",
+                roi_volume_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_dseg.nii.gz",
+                roi_graphml_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_dseg.graphml",
+                roi_volume_s2="anat/irrelevant.nii.gz",
+                roi_graphml_s2="anat/irrelevant.graphml",
+                roi_volume_s3="anat/irrelevant.nii.gz",
+                roi_graphml_s3="anat/irrelevant.graphml",
+                roi_volume_s4="anat/irrelevant.nii.gz",
+                roi_graphml_s4="anat/irrelevant.graphml",
+                roi_volume_s5="anat/irrelevant.nii.gz",
+                roi_graphml_s5="anat/irrelevant.graphml",
+            )
+            # fmt:on
+        else:
+            # fmt:off
+            field_template = dict(
+                diffusion="dwi/" + self.subject + "_desc-cmp_dwi.nii.gz",
+                bvecs="dwi/" + self.subject + "_desc-cmp_dwi.bvec",
+                bvals="dwi/" + self.subject + "_desc-cmp_dwi.bval",
+                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
+                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
+                aparc_aseg="anat/" + self.subject + "_desc-aparcaseg_dseg.nii.gz",
+                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
+                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                wm_eroded="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                brain_eroded="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                csf_eroded="anat/" + self.subject + "_label-CSF_dseg.nii.gz",
+                roi_volume_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale1_dseg.nii.gz",
+                roi_volume_s2="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale2_dseg.nii.gz",
+                roi_volume_s3="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale3_dseg.nii.gz",
+                roi_volume_s4="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale4_dseg.nii.gz",
+                roi_volume_s5="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale5_dseg.nii.gz",
+                roi_graphml_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale1_dseg.graphml",
+                roi_graphml_s2="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale2_dseg.graphml",
+                roi_graphml_s3="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale3_dseg.graphml",
+                roi_graphml_s4="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale4_dseg.graphml",
+                roi_graphml_s5="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale5_dseg.graphml",
+            )
+            # fmt:on
+        print(f' .. DEBUG : Field template : {field_template}')
+        return field_template
 
     def create_datagrabber_node(self, base_directory, bids_atlas_label):
         """Create the appropriate Nipype DataGrabber node depending on the `parcellation_scheme`
@@ -625,62 +696,7 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.base_directory = base_directory
         datasource.inputs.template = "*"
         datasource.inputs.raise_on_empty = False
-    
-        if self.parcellation_scheme == "NativeFreesurfer":
-            # fmt:off
-            datasource.inputs.field_template = dict(
-                diffusion="dwi/" + self.subject + "_desc-cmp_dwi.nii.gz",
-                bvecs="dwi/" + self.subject + "_desc-cmp_dwi.bvec",
-                bvals="dwi/" + self.subject + "_desc-cmp_dwi.bval",
-                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
-                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
-                aparc_aseg="anat/" + self.subject + "_desc-aparcaseg_dseg.nii.gz",
-                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
-                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
-                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
-                wm_eroded="anat/" + self.subject + "_label-WM_dseg.nii.gz",
-                brain_eroded="anat/" + self.subject + "_desc-brain_mask.nii.gz",
-                csf_eroded="anat/" + self.subject + "_label-CSF_dseg.nii.gz",
-                roi_volume_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_dseg.nii.gz",
-                roi_graphml_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_dseg.graphml",
-                roi_volume_s2="anat/irrelevant.nii.gz",
-                roi_graphml_s2="anat/irrelevant.graphml",
-                roi_volume_s3="anat/irrelevant.nii.gz",
-                roi_graphml_s3="anat/irrelevant.graphml",
-                roi_volume_s4="anat/irrelevant.nii.gz",
-                roi_graphml_s4="anat/irrelevant.graphml",
-                roi_volume_s5="anat/irrelevant.nii.gz",
-                roi_graphml_s5="anat/irrelevant.graphml",
-            )
-            # fmt:on
-        else:
-            # fmt:off
-            datasource.inputs.field_template = dict(
-                diffusion="dwi/" + self.subject + "_desc-cmp_dwi.nii.gz",
-                bvecs="dwi/" + self.subject + "_desc-cmp_dwi.bvec",
-                bvals="dwi/" + self.subject + "_desc-cmp_dwi.bval",
-                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
-                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
-                aparc_aseg="anat/" + self.subject + "_desc-aparcaseg_dseg.nii.gz",
-                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
-                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
-                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
-                wm_eroded="anat/" + self.subject + "_label-WM_dseg.nii.gz",
-                brain_eroded="anat/" + self.subject + "_desc-brain_mask.nii.gz",
-                csf_eroded="anat/" + self.subject + "_label-CSF_dseg.nii.gz",
-                roi_volume_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale1_dseg.nii.gz",
-                roi_volume_s2="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale2_dseg.nii.gz",
-                roi_volume_s3="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale3_dseg.nii.gz",
-                roi_volume_s4="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale4_dseg.nii.gz",
-                roi_volume_s5="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale5_dseg.nii.gz",
-                roi_graphml_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale1_dseg.graphml",
-                roi_graphml_s2="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale2_dseg.graphml",
-                roi_graphml_s3="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale3_dseg.graphml",
-                roi_graphml_s4="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale4_dseg.graphml",
-                roi_graphml_s5="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale5_dseg.graphml",
-            )
-            # fmt:on
-    
+        datasource.inputs.field_template = self.create_field_template_dict(bids_atlas_label=bids_atlas_label)
         datasource.inputs.sort_filelist = True
         
         return datasource
