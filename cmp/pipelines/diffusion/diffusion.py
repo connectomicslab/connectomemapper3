@@ -322,7 +322,6 @@ class DiffusionPipeline(Pipeline):
 
         Returns
         -------
-
         valid_inputs : traits.Bool
             True if inputs are available
         """
@@ -889,8 +888,10 @@ class DiffusionPipeline(Pipeline):
         # fmt:off
         diffusion_flow.connect(
             [
-                (datasource, diffusion_inputnode, [("diffusion", "diffusion"), ("bvecs", "bvecs"), ("bvals", "bvals"),],),
-                (datasource, diffusion_inputnode, [("T1", "T1"),
+                (datasource, diffusion_inputnode, [("diffusion", "diffusion"),
+                                                   ("bvecs", "bvecs"),
+                                                   ("bvals", "bvals"),
+                                                   ("T1", "T1"),
                                                    ("aseg", "aseg"),
                                                    ("aparc_aseg", "aparc_aseg"),
                                                    ("brain", "brain"),
@@ -922,6 +923,7 @@ class DiffusionPipeline(Pipeline):
                 if vol is not None:
                     out_roi_volumes.append(vol)
             return out_roi_volumes
+
         # fmt:off
         diffusion_flow.connect(
             [
