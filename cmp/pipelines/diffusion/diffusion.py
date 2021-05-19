@@ -261,6 +261,51 @@ class DiffusionPipeline(Pipeline):
 
     def _atlas_info_changed(self, new):
         pass
+    
+    def get_file(self, layout, subject, suffix, extensions, session=None):
+        """Query files with PyBIDS and take the first file in the returned list or get a specific dmri file if BIDS acq- keyword is used in filename.
+
+        Parameters
+        ----------
+        layout : Instance(BIDSLayout)
+            Instance of pybids BIDSLayout
+            
+        subject : str
+            BIDS subject/participant label i.e. XX in sub-XX
+
+        suffix : str
+            BIDS file suffix i.e. "T1w", "dwi", ...
+
+        extensions : str
+            File extension i.e. ".nii.gz", ".json", ".bval", ...
+
+        session : str
+           BIDS session label i.e. YY in ses-YY if the dataset has multiple sessions
+
+        Returns
+        -------
+        out_file : str
+            The output filepath or None if no file was found
+        """
+        if session is None:
+            files = layout.get(subject=subject, suffix=suffix, extensions=extensions)
+        else:
+            files = layout.get(subject=subject, suffix=suffix, extensions=extensions, session=session)
+
+        if len(files) > 0:
+            out_file = os.path.join(files[0].dirname, files[0].filename)
+
+            if self.global_conf.dmri_bids_acq != "":
+                for file in files:
+                    if self.global_conf.dmri_bids_acq in file.filename:
+                        out_file = os.path.join(file.dirname, file.filename)
+                        break
+
+            # TODO: Better parsing of multiple runs
+        else:
+            out_file = None
+ 
+        return out_file
 
     def check_input(self, layout, gui=True):
         """Check if input of the diffusion pipeline are available.
@@ -293,11 +338,6 @@ class DiffusionPipeline(Pipeline):
         else:
             subject = "_".join((self.subject, self.global_conf.subject_session))
 
-        dwi_file = os.path.join(self.subject_directory, "dwi", subject + "_dwi.nii.gz")
-        json_file = os.path.join(self.subject_directory, "dwi", subject + "_dwi.json")
-        bval_file = os.path.join(self.subject_directory, "dwi", subject + "_dwi.bval")
-        bvec_file = os.path.join(self.subject_directory, "dwi", subject + "_dwi.bvec")
-
         subjid = self.subject.split("-")[1]
 
         try:
@@ -308,62 +348,30 @@ class DiffusionPipeline(Pipeline):
             print("> Looking for....")
 
             if self.global_conf.subject_session == "":
-
-                files = layout.get(subject=subjid, suffix="dwi", extensions=".nii.gz")
-                if len(files) > 0:
-                    if self.global_conf.dmri_bids_acq != "":
-                        for file in files:
-                            if self.global_conf.dmri_bids_acq in file.filename:
-                                dwi_file = os.path.join(file.dirname, file.filename)
-                                break
-                    else:  # TODO: Better parsing of multiple runs
-                        dwi_file = os.path.join(files[0].dirname, files[0].filename)
-                else:
+    
+                dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".nii.gz")
+                if dwi_file is None:
                     print("ERROR : Diffusion image not found for subject %s." % subjid)
                     return
 
-                files = layout.get(subject=subjid, suffix="dwi", extensions=".json")
-                if len(files) > 0:
-                    if self.global_conf.dmri_bids_acq != "":
-                        for file in files:
-                            if self.global_conf.dmri_bids_acq in file.filename:
-                                json_file = os.path.join(file.dirname, file.filename)
-                                break
-                    else:  # TODO: Better parsing of multiple runs
-                        json_file = os.path.join(files[0].dirname, files[0].filename)
-                else:
+                json_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".json")
+                if json_file is None:
                     json_file = "NotFound"
                     print(
                         "WARNING : Diffusion json sidecar not found for subject %s."
                         % subjid
                     )
 
-                files = layout.get(subject=subjid, suffix="dwi", extensions=".bval")
-                if len(files) > 0:
-                    if self.global_conf.dmri_bids_acq != "":
-                        for file in files:
-                            if self.global_conf.dmri_bids_acq in file.filename:
-                                bval_file = os.path.join(file.dirname, file.filename)
-                                break
-                    else:  # TODO: Better parsing of multiple runs
-                        bval_file = os.path.join(files[0].dirname, files[0].filename)
-                else:
+                bval_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".bval")
+                if bval_file is None:
                     print(
                         "ERROR : Diffusion bval image not found for subject %s."
                         % subjid
                     )
                     return
 
-                files = layout.get(subject=subjid, suffix="dwi", extensions=".bvec")
-                if len(files) > 0:
-                    if self.global_conf.dmri_bids_acq != "":
-                        for file in files:
-                            if self.global_conf.dmri_bids_acq in file.filename:
-                                bvec_file = os.path.join(file.dirname, file.filename)
-                                break
-                    else:  # TODO: Better parsing of multiple runs
-                        bvec_file = os.path.join(files[0].dirname, files[0].filename)
-                else:
+                bvec_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".bvec")
+                if bvec_file is None:
                     print(
                         "ERROR : Diffusion bvec image not found for subject %s."
                         % subjid
@@ -372,72 +380,38 @@ class DiffusionPipeline(Pipeline):
             else:
                 sessid = self.global_conf.subject_session.split("-")[1]
 
-                files = layout.get(
-                    subject=subjid, suffix="dwi", extensions=".nii.gz", session=sessid
-                )
-                if len(files) > 0:
-                    if self.global_conf.dmri_bids_acq != "":
-                        for file in files:
-                            if self.global_conf.dmri_bids_acq in file.filename:
-                                dwi_file = os.path.join(file.dirname, file.filename)
-                                break
-                    else:  # TODO: Better parsing of multiple runs
-                        dwi_file = os.path.join(files[0].dirname, files[0].filename)
-                else:
+                dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".nii.gz", session=sessid)
+                if dwi_file is None:
                     print(
                         "ERROR : Diffusion image not found for subject %s, session %s."
-                        % (subjid, self.global_conf.subject_session)
+                        % (subjid, sessid)
                     )
                     return
 
-                files = layout.get(
-                    subject=subjid, suffix="dwi", extensions=".json", session=sessid
+                json_file = self.get_file(
+                    layout, subject=subjid, suffix="dwi", extensions=".json", session=sessid
                 )
-                if len(files) > 0:
-                    if self.global_conf.dmri_bids_acq != "":
-                        for file in files:
-                            if self.global_conf.dmri_bids_acq in file.filename:
-                                json_file = os.path.join(file.dirname, file.filename)
-                                break
-                    else:  # TODO: Better parsing of multiple runs
-                        json_file = os.path.join(files[0].dirname, files[0].filename)
-                else:
+                if json_file is None:
                     json_file = "NotFound"
                     print(
                         "WARNING : Diffusion json sidecar not found for subject %s, session %s."
                         % (subjid, self.global_conf.subject_session)
                     )
 
-                files = layout.get(
-                    subject=subjid, suffix="dwi", extensions=".bval", session=sessid
+                bval_file = self.get_file(
+                    layout, subject=subjid, suffix="dwi", extensions=".bval", session=sessid
                 )
-                if len(files) > 0:
-                    if self.global_conf.dmri_bids_acq != "":
-                        for file in files:
-                            if self.global_conf.dmri_bids_acq in file.filename:
-                                bval_file = os.path.join(file.dirname, file.filename)
-                                break
-                    else:  # TODO: Better parsing of multiple runs
-                        bval_file = os.path.join(files[0].dirname, files[0].filename)
-                else:
+                if bval_file is None:
                     print(
                         "ERROR : Diffusion bval image not found for subject %s, session %s."
                         % (subjid, self.global_conf.subject_session)
                     )
                     return
 
-                files = layout.get(
-                    subject=subjid, suffix="dwi", extensions=".bvec", session=sessid
+                bvec_file = self.get_file(
+                    layout, subject=subjid, suffix="dwi", extensions=".bvec", session=sessid
                 )
-                if len(files) > 0:
-                    if self.global_conf.dmri_bids_acq != "":
-                        for file in files:
-                            if self.global_conf.dmri_bids_acq in file.filename:
-                                bvec_file = os.path.join(file.dirname, file.filename)
-                                break
-                    else:  # TODO: Better parsing of multiple runs
-                        bvec_file = os.path.join(files[0].dirname, files[0].filename)
-                else:
+                if bvec_file is None:
                     print(
                         "ERROR : Diffusion bvec image not found for subject %s, session %s."
                         % (subjid, self.global_conf.subject_session)
