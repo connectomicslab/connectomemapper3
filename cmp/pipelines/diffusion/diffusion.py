@@ -1152,6 +1152,7 @@ class DiffusionPipeline(Pipeline):
                     "remove_unnecessary_outputs": False,
                     "stop_on_first_crash": True,
                     "stop_on_first_rerun": False,
+                    "try_hard_link_datasink": True,
                     "use_relative_paths": True,
                     "crashfile_format": "txt",
                 },
