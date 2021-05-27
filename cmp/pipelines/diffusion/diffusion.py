@@ -848,28 +848,15 @@ class DiffusionPipeline(Pipeline):
         elif self.parcellation_scheme == "NativeFreesurfer":
             bids_atlas_label = "Desikan"
 
-        # Data import
-        datasource = self.create_datagrabber_node(
-            base_directory=cmp_deriv_subject_directory,
-            bids_atlas_label=bids_atlas_label
-        )
-
-        # Data sinker for output
-        sinker = self.create_datasinker_node(
-            base_directory=cmp_deriv_subject_directory,
-            bids_atlas_label=bids_atlas_label,
-            recon_model=recon_model,
-            tracking_model=tracking_model
-        )
-
         # Clear previous outputs
         self.clear_stages_outputs()
 
-        # Create diffusion flow
+        # Create diffusion workflow with input and output Identityinterface nodes
         diffusion_flow = pe.Workflow(
             name="diffusion_pipeline",
             base_dir=os.path.abspath(nipype_deriv_subject_directory),
         )
+
         diffusion_inputnode = pe.Node(
             interface=util.IdentityInterface(
                 fields=[
@@ -901,6 +888,21 @@ class DiffusionPipeline(Pipeline):
         )
 
         diffusion_flow.add_nodes([diffusion_inputnode, diffusion_outputnode])
+
+        # Data import
+        datasource = self.create_datagrabber_node(
+            base_directory=cmp_deriv_subject_directory,
+            bids_atlas_label=bids_atlas_label
+        )
+
+        # Data sinker for output
+        sinker = self.create_datasinker_node(
+            base_directory=cmp_deriv_subject_directory,
+            bids_atlas_label=bids_atlas_label,
+            recon_model=recon_model,
+            tracking_model=tracking_model
+        )
+        
         # fmt:off
         diffusion_flow.connect(
             [
@@ -984,7 +986,6 @@ class DiffusionPipeline(Pipeline):
             diffusion_flow.connect(
                 [
                     # (diffusion_inputnode,reg_flow,[('T2','inputnode.T2')]),
-                    # (diffusion_inputnode,reg_flow,[("bvals","inputnode.bvals")]),
                     (preproc_flow, reg_flow, [("outputnode.T1", "inputnode.T1"),
                                               ("outputnode.act_5TT", "inputnode.act_5TT"),
                                               ("outputnode.gmwmi", "inputnode.gmwmi"),
