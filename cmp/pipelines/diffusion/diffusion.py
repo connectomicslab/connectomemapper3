@@ -1141,6 +1141,8 @@ class DiffusionPipeline(Pipeline):
         config.update_config(
             {
                 "logging": {
+                    "workflow_level": "DEBUG",
+                    "interface_level": "DEBUG",
                     "log_directory": os.path.join(
                         nipype_deriv_subject_directory, "diffusion_pipeline"
                     ),
