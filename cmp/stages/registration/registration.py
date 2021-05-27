@@ -845,8 +845,7 @@ class RegistrationStage(Stage):
                     (ants_applywarp_rois, outputnode, [("output_images", "roi_volumes_registered_crop")],),
                     (inputnode, ants_applywarp_pves, [("partial_volume_files", "input_images")],),
                     (mr_convert_b0, ants_applywarp_pves, [("converted", "reference_image")],),
-                    (ants_applywarp_pves, outputnode, [("output_images", "partial_volumes_registered_crop")],),
-                    (inputnode, outputnode, [("target", "target_epicorrected")]),
+                    (ants_applywarp_pves, outputnode, [("output_images", "partial_volumes_registered_crop")],)
                 ]
             )
             # fmt:on
@@ -1412,8 +1411,7 @@ class RegistrationStage(Stage):
                     (inputnode, fsl_applywarp_rois, [("roi_volumes", "in_files")]),
                     (inputnode, fsl_applywarp_rois, [("target", "ref_file")]),
                     (fsl_fnirt_crop, fsl_applywarp_rois, [("fieldcoeff_file", "field_file")],),
-                    (fsl_applywarp_rois, outputnode, [("out_files", "roi_volumes_registered_crop")],),
-                    (inputnode, outputnode, [("target", "target_epicorrected")]),
+                    (fsl_applywarp_rois, outputnode, [("out_files", "roi_volumes_registered_crop")],)
                 ]
             )
             # fmt:on
