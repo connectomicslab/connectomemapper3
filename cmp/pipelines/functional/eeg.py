@@ -149,14 +149,23 @@ class EEGPipeline(Pipeline):
 		datasource.inputs.cmp_deriv_subject_directory = cmp_deriv_subject_directory
 		datasource.inputs.nipype_deriv_subject_directory = nipype_deriv_subject_directory
 
+        ####
 		if self.stages['EEGPreparer'].config.eeg_format == '.set':
+            
 			datasource.inputs.epochs = [os.path.join(self.base_directory,'derivatives','eeglab',self.subject,'eeg',self.subject+'_task-FACES_desc-preproc_eeg.set')]
+            
 			datasource.inputs.behav_file = [os.path.join(self.base_directory,'derivatives','eeglab',self.subject,'eeg',self.subject+'_task-FACES_events.txt')]
+            
 			datasource.inputs.epochs_fif_fname = os.path.join(self.base_directory,'derivatives','cmp',self.subject,'eeg',self.subject+'_epo.fif')
-	
+	    ####
+        
 		datasource.inputs.roi_ts_file = os.path.join(self.base_directory,'derivatives','cmp',self.subject,'eeg',self.subject+'_rtc_epo.npy')
+        
+        ####
 		if self.stages['EEGPreparer'].config.parcellation == 'Lausanne2008':
+            
 			datasource.inputs.parcellation = [os.path.join(self.base_directory,'derivatives','cmp',self.subject,'anat',self.subject+'_label-L2008_desc-scale2_atlas.nii.gz')]
+        ####
 
 		datasource.inputs.output_query = dict()
 

@@ -70,10 +70,16 @@ class FakeEEGPipeline(Pipeline):
         datasource.inputs.nipype_deriv_subject_directory = nipype_deriv_subject_directory
 
         datasource.inputs.epochs = [os.path.join(self.base_directory,'derivatives','eeglab','sub-'+self.subject_id,self.subject_id+'_FACES_250HZ_prepd.set')]
+                
         datasource.inputs.behav_file = [os.path.join(self.base_directory,'derivatives','eeglab','sub-'+self.subject_id,'sub-'+self.subject_id+'_FACES_250HZ_behav.txt')]
+        
         datasource.inputs.epochs_fif_fname = os.path.join(self.base_directory,'derivatives','cmp','sub-'+self.subject_id,'eeg','sub-'+self.subject_id+'_epo.fif')
+        
         datasource.inputs.roi_ts_file = os.path.join(self.base_directory,'derivatives','cmp','sub-'+self.subject_id,'eeg','sub-'+self.subject_id+'_rtc_epo.npy')
+        
         datasource.inputs.parcellation = [os.path.join(self.base_directory,'derivatives','cmp','sub-'+self.subject_id,'anat','sub-'+self.subject_id+'_label-L2008_desc-scale1_atlas.nii.gz')]
+        
+        datasource.inputs.eeg_ts_file = datasource.inputs.epochs
     
         datasource.inputs.output_query = dict()
 
@@ -88,7 +94,9 @@ class FakeEEGPipeline(Pipeline):
         eeg_flow.connect([
 						  (datasource, invsol_flow, 
 						   [
-							('roi_ts_file','inputnode.roi_ts_file'),
+							('eeg_ts_file','inputnode.eeg_ts_file'),
+                            ('subject','inputnode.subject'),
+                            ('base_directory','inputnode.base_directory')
 							]),
 						 ])
         
@@ -109,7 +117,6 @@ class FakeEEGPipeline(Pipeline):
         
         eeg_flow.write_graph(graph2use='colored',
 							  format='svg', simple_form=True)
-        pdb.set_trace()
         eeg_flow.run()
 
         
@@ -138,7 +145,10 @@ project.subject_session = ''
 
 project.number_of_cores = 1
 
+# MNE: 
 eeg_pipeline_config = '/mnt/data/Lausanne/DS001_BIDS/code/ref_mne_eeg_config.json'
+# Cartool (default): 
+# eeg_pipeline_config = '/mnt/data/Lausanne/DS001_BIDS/code/ref_eeg_config.json'
 project.eeg_config_file = os.path.abspath(eeg_pipeline_config)
 
 # create the pipeline 
