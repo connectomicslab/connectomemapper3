@@ -515,7 +515,6 @@ class RegistrationStage(Stage):
                 interface=ants.Registration(), name="linear_registration"
             )
             affine_registration.inputs.collapse_output_transforms = True
-            # affine_registration.inputs.initialize_transforms_per_stage=True
             affine_registration.inputs.initial_moving_transform_com = True
             affine_registration.inputs.output_transform_prefix = "initial"
             affine_registration.inputs.num_threads = 8
@@ -528,38 +527,34 @@ class RegistrationStage(Stage):
 
             affine_registration.inputs.interpolation = self.config.ants_interpolation
             if self.config.ants_interpolation == "BSpline":
-                # (3,)
                 affine_registration.inputs.interpolation_parameters = (
                     self.config.ants_bspline_interpolation_parameters
-                )
+                )  # Default: (3,)
             elif self.config.ants_interpolation == "Gaussian":
-                # (5,5,)
                 affine_registration.inputs.interpolation_parameters = (
                     self.config.ants_gauss_interpolation_parameters
-                )
+                )  # Default: (5,5,)
             elif self.config.ants_interpolation == "MultiLabel":
-                # (5,5,)
                 affine_registration.inputs.interpolation_parameters = (
                     self.config.ants_multilab_interpolation_parameters
-                )
+                )  # Default: (5,5,)
 
-            # affine_registration.inputs.terminal_output='file'
             affine_registration.inputs.winsorize_lower_quantile = (
                 self.config.ants_lower_quantile
-            )  # 0.005
+            )  # Default: 0.005
             affine_registration.inputs.winsorize_upper_quantile = (
                 self.config.ants_upper_quantile
-            )  # 0.995
+            )  # Default: 0.995
             affine_registration.inputs.convergence_threshold = [
                 self.config.ants_convergence_thresh
-            ] * 2  # [1e-06]*2
+            ] * 2  # Default: [1e-06]*2
             affine_registration.inputs.convergence_window_size = [
                 self.config.ants_convergence_winsize
-            ] * 2  # [10]*2
+            ] * 2  # Default: [10]*2
             affine_registration.inputs.metric = [
                 self.config.ants_linear_cost,
                 self.config.ants_linear_cost,
-            ]  # ['MI','MI']
+            ]  # Default: ['MI','MI']
             affine_registration.inputs.metric_weight = [1.0] * 2
             affine_registration.inputs.number_of_iterations = [
                 [1000, 500, 250, 100],
@@ -569,17 +564,17 @@ class RegistrationStage(Stage):
             affine_registration.inputs.sampling_percentage = [
                 self.config.ants_linear_sampling_perc,
                 self.config.ants_linear_sampling_perc,
-            ]  # [0.25, 0.25]
+            ]  # Default: [0.25, 0.25]
             affine_registration.inputs.sampling_strategy = [
                 self.config.ants_linear_sampling_strategy,
                 self.config.ants_linear_sampling_strategy,
-            ]  # ['Regular','Regular']
+            ]  # Default: ['Regular','Regular']
             affine_registration.inputs.shrink_factors = [[8, 4, 2, 1]] * 2
             affine_registration.inputs.smoothing_sigmas = [[3, 2, 1, 0]] * 2
             affine_registration.inputs.transform_parameters = [
                 (self.config.ants_linear_gradient_step,),
                 (self.config.ants_linear_gradient_step,),
-            ]  # [(0.1,),(0.1,)]
+            ]  # Default: [(0.1,),(0.1,)]
             affine_registration.inputs.use_histogram_matching = True
             if self.config.ants_perform_syn:
                 affine_registration.inputs.write_composite_transform = True
@@ -614,38 +609,35 @@ class RegistrationStage(Stage):
 
                 SyN_registration.inputs.interpolation = (
                     self.config.ants_interpolation
-                )  # 'BSpline'
+                )  # Default: 'BSpline'
                 if self.config.ants_interpolation == "BSpline":
-                    # (3,)
                     SyN_registration.inputs.interpolation_parameters = (
                         self.config.ants_bspline_interpolation_parameters
-                    )
+                    )  # Default: (3,)
                 elif self.config.ants_interpolation == "Gaussian":
-                    # (5,5,)
                     SyN_registration.inputs.interpolation_parameters = (
                         self.config.ants_gauss_interpolation_parameters
-                    )
+                    )  # Default: (5,5,)
                 elif self.config.ants_interpolation == "MultiLabel":
-                    # (5,5,)
                     SyN_registration.inputs.interpolation_parameters = (
                         self.config.ants_multilab_interpolation_parameters
-                    )
+                    )  # Default: (5,5,)
 
                 SyN_registration.inputs.winsorize_lower_quantile = (
                     self.config.ants_lower_quantile
-                )  # 0.005
+                )  # Default: 0.005
                 SyN_registration.inputs.winsorize_upper_quantile = (
                     self.config.ants_upper_quantile
-                )  # 0.995
+                )  # Default: 0.995
                 SyN_registration.inputs.convergence_threshold = [
                     self.config.ants_convergence_thresh
-                ] * 1  # [1e-06]*1
+                ] * 1  # Default: [1e-06]*1
                 SyN_registration.inputs.convergence_window_size = [
                     self.config.ants_convergence_winsize
-                ] * 1  # [10]*1
+                ] * 1  # Default: [10]*1
                 SyN_registration.inputs.metric = [
                     self.config.ants_nonlinear_cost
-                ]  # ['CC']
+                ]  # Default: ['CC']
                 SyN_registration.inputs.metric_weight = [1.0] * 1
                 SyN_registration.inputs.number_of_iterations = [[20]]
                 SyN_registration.inputs.radius_or_number_of_bins = [4]
@@ -659,7 +651,7 @@ class RegistrationStage(Stage):
                         self.config.ants_nonlinear_update_field_variance,
                         self.config.ants_nonlinear_total_field_variance,
                     )
-                ]  # [(0.1, 3.0, 0.0)]
+                ]  # Default: [(0.1, 3.0, 0.0)]
                 SyN_registration.inputs.use_histogram_matching = True
                 SyN_registration.inputs.verbose = True
 

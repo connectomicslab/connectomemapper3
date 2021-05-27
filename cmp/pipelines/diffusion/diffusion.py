@@ -999,9 +999,9 @@ class DiffusionPipeline(Pipeline):
                                               ("outputnode.brain_mask_full", "inputnode.brain_mask_full"),
                                               ("outputnode.diffusion_preproc", "inputnode.target"),
                                               ("outputnode.dwi_brain_mask", "inputnode.target_mask")]),
-                    (preproc_flow, sinker, [("outputnode.bvecs_rot", "dwi.@bvecs_rot")],),
-                    (preproc_flow, sinker, [("outputnode.diffusion_preproc", "dwi.@diffusion_preproc")],),
-                    (preproc_flow, sinker, [("outputnode.dwi_brain_mask", "dwi.@diffusion_brainmask")],),
+                    (preproc_flow, sinker, [("outputnode.bvecs_rot", "dwi.@bvecs_rot"),
+                                            ("outputnode.diffusion_preproc", "dwi.@diffusion_preproc"),
+                                            ("outputnode.dwi_brain_mask", "dwi.@diffusion_brainmask")]),
                 ]
             )
             # fmt:on
