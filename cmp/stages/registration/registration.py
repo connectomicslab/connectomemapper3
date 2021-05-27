@@ -363,11 +363,21 @@ class RegistrationStage(Stage):
             flow.connect([(inputnode, extract_first, [("target", "in_file")])])
             fs_mriconvert = pe.Node(
                 interface=fs.MRIConvert(
-                    out_file="target_first.nii.gz", vox_size=(1, 1, 1)
+                    out_file="target_first.nii.gz"
                 ),
                 name="target_resample",
             )
             flow.connect([(extract_first, fs_mriconvert, [("roi_file", "in_file")])])
+
+            # fmt:off
+            flow.connect(
+                [
+                    (inputnode, outputnode, [("target", "target_epicorrected")]),
+                    (inputnode, outputnode, [("bvals", "bvals"),
+                                             ("bvecs", "bvecs")]),
+                ]
+            )
+            # fmt:on
 
         elif self.config.pipeline == "fMRI":
             fmri_bet = pe.Node(interface=fsl.BET(), name="fMRI_skullstrip")
@@ -415,8 +425,6 @@ class RegistrationStage(Stage):
                 [
                     (mr_convert, grad_mrtrix, [("converted", "in_file")]),
                     (grad_mrtrix, outputnode, [("out_grad_mrtrix", "grad")]),
-                    (inputnode, outputnode, [("bvals", "bvals")]),
-                    (inputnode, outputnode, [("bvecs", "bvecs")]),
                 ]
             )
             # fmt:on
