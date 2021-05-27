@@ -1133,16 +1133,11 @@ class DiffusionPipeline(Pipeline):
                 )
 
         # Initialization
-        if os.path.isfile(
-            os.path.join(
-                nipype_deriv_subject_directory, "diffusion_pipeline", "pypeline.log"
-            )
-        ):
-            os.unlink(
-                os.path.join(
-                    nipype_deriv_subject_directory, "diffusion_pipeline", "pypeline.log"
-                )
-            )
+        log_file = os.path.join( nipype_deriv_subject_directory, "diffusion_pipeline", "pypeline.log")
+
+        if os.path.isfile(log_file):
+            os.unlink(log_file)
+    
         config.update_config(
             {
                 "logging": {
