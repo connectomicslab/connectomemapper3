@@ -733,12 +733,14 @@ class DiffusionPipeline(Pipeline):
             ("brain_mask.nii.gz", self.subject + "_desc-brain_mask.nii.gz"),
             ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
             ("T1_warped", self.subject + "_space-DWI_desc-head_T1w"),
+            ("T1-TO-TARGET", self.subject + "_space-DWI_desc-head_T1w"),
             ("anat_resampled_warped", self.subject + "_space-DWI_desc-head_T1w"),
             ("brain_warped", self.subject + "_space-DWI_desc-brain_T1w"),
             ("anat_masked_resampled_warped", self.subject + "_space-DWI_desc-brain_T1w"),
             ("brain_mask_registered_temp_crop",self.subject + "_space-DWI_desc-brain_mask"),
             ("brain_mask_resampled_warped.nii.gz", self.subject + "_space-DWI_desc-brain_mask"),
             ("wm_mask_warped", self.subject + "_space-DWI_label-WM_dseg"),
+            ("wm_mask_registered", self.subject + "_space-DWI_label-WM_dseg"),
             ("wm_mask_resampled_warped", self.subject + "_space-DWI_label-WM_dseg"),
             (
                 f'{self.subject}_atlas-Desikan_dseg_out_warped.nii.gz',
@@ -792,7 +794,12 @@ class DiffusionPipeline(Pipeline):
                 ),
                 (
                     f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_out_warped.nii.gz',
-                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'),
+                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                ),
+                (
+                    f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_out_flirt.nii.gz',
+                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                ),
                 (
                     f'connectome_{scale}',
                     f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_conndata-network_connectivity'),
