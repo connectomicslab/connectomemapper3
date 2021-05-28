@@ -628,7 +628,7 @@ def cmat(
                     edge_struct[edge_key] = nx.to_numpy_matrix(G_out, weight=edge_key)
 
             # nodes
-            size_nodes = int(parval["number_of_regions"])
+            size_nodes = len(list(G_out.nodes(data=True)))
 
             # Get the node attributes/keys from the first node and then break.
             # Change w.r.t networkx2
@@ -1128,8 +1128,8 @@ class rsfmri_conmat(BaseInterface):
                 for edge_key in edge_keys:
                     edge_struct[edge_key] = nx.to_numpy_matrix(G, weight=edge_key)
 
-                # Nodes
-                size_nodes = int(parval["number_of_regions"])
+                # Number of ROIs (nodes)
+                size_nodes = len(list(G.nodes()))
 
                 # Get the node attributes/keys from the first node and then break.
                 # Change w.r.t networkx2
