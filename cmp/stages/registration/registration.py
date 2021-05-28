@@ -872,7 +872,8 @@ class RegistrationStage(Stage):
                 name="apply_registration_wm",
             )
             fsl_applyxfm_rois = pe.Node(
-                interface=ApplymultipleXfm(), name="apply_registration_roivs"
+                interface=ApplymultipleXfm(interp='nearestneighbour'),
+                name="apply_registration_roivs"
             )
 
             # TODO apply xfm to gmwmi / 5tt and pves
