@@ -797,7 +797,7 @@ class CMTK_cmat(BaseInterface):
         return outputs
 
 
-class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
+class CMTK_rsfmri_cmat_InputSpec(BaseInterfaceInputSpec):
     func_file = File(exists=True, mandatory=True, desc="fMRI volume")
 
     roi_volumes = InputMultiPath(
@@ -831,7 +831,7 @@ class rsfmri_conmat_InputSpec(BaseInterfaceInputSpec):
     output_types = traits.List(Str, desc="Output types of the connectivity matrices")
 
 
-class rsfmri_conmat_OutputSpec(TraitedSpec):
+class CMTK_rsfmri_cmat_OutputSpec(TraitedSpec):
     avg_timeseries = OutputMultiPath(File(exists=True), desc="ROI average timeseries")
 
     scrubbed_idx = File(exists=True, desc="Scrubbed indices")
@@ -841,7 +841,7 @@ class rsfmri_conmat_OutputSpec(TraitedSpec):
     )
 
 
-class rsfmri_conmat(BaseInterface):
+class CMTK_rsfmri_cmat(BaseInterface):
     """Creates the functional connectivity matrices for a given parcellation scheme.
 
     It applies scrubbing (if enabled), computes the average GM ROI time-series and computes
@@ -849,8 +849,8 @@ class rsfmri_conmat(BaseInterface):
 
     Examples
     --------
-    >>> from cmtklib.connectome import rsfmri_conmat
-    >>> cmat = rsfmri_conmat()
+    >>> from cmtklib.connectome import CMTK_rsfmri_cmat
+    >>> cmat = CMTK_rsfmri_cmat()
     >>> cmat.inputs.base_dir = '/my_directory'
     >>> cmat.inputs.func_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
     >>> cmat.inputs.roi_volumes = ['/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale1_dseg.nii.gz',
@@ -869,8 +869,8 @@ class rsfmri_conmat(BaseInterface):
     >>> cmat.run() # doctest: +SKIP
     """
 
-    input_spec = rsfmri_conmat_InputSpec
-    output_spec = rsfmri_conmat_OutputSpec
+    input_spec = CMTK_rsfmri_cmat_InputSpec
+    output_spec = CMTK_rsfmri_cmat_OutputSpec
 
     def _run_interface(self, runtime):
         print("================================================")
