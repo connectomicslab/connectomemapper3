@@ -70,8 +70,8 @@ class EEGPipeline(Pipeline):
 			self.global_conf.subject_session = project_info.subject_session
 			self.subject_directory = os.path.join(
 				project_info.base_directory,
-			        project_info.subject,
-			        project_info.subject_session
+					project_info.subject,
+					project_info.subject_session
 			)
 		else:
 			self.global_conf.subject_session = ''
@@ -89,8 +89,8 @@ class EEGPipeline(Pipeline):
 
 		self.stages = {
 			'EEGPreparer': EEGPreparerStage(bids_dir=project_info.base_directory, output_dir=self.output_directory),
-		        'EEGLoader': EEGLoaderStage(bids_dir=project_info.base_directory, output_dir=self.output_directory),
-		        'EEGInverseSolution': EEGInverseSolutionStage(bids_dir=project_info.base_directory, output_dir=self.output_directory),
+				'EEGLoader': EEGLoaderStage(bids_dir=project_info.base_directory, output_dir=self.output_directory),
+				'EEGInverseSolution': EEGInverseSolutionStage(bids_dir=project_info.base_directory, output_dir=self.output_directory),
 		}
 		
 		cmp_common.Pipeline.__init__(self, project_info)
@@ -114,17 +114,17 @@ class EEGPipeline(Pipeline):
 		Parameters
 		----------
 		layout : bids.BIDSLayout
-		    Instance of BIDSLayout
+			Instance of BIDSLayout
 
 		gui : traits.Bool
-		    Boolean used to display different messages
-		    but not really meaningful anymore since the GUI
-		    components have been migrated to `cmp.bidsappmanager`
+			Boolean used to display different messages
+			but not really meaningful anymore since the GUI
+			components have been migrated to `cmp.bidsappmanager`
 
 		Returns
 		-------
 		valid_inputs : traits.Bool
-		    True if inputs are available
+			True if inputs are available
 		"""
 		print('**** Check Inputs is still not implemented ****')
 		eeg_available = False
@@ -208,7 +208,7 @@ class EEGPipeline(Pipeline):
 		sinker = pe.Node(nio.DataSink(), name="eeg_sinker")
 		sinker.inputs.base_directory = os.path.abspath(cmp_deriv_subject_directory)        
 
-		 # Clear previous outputs
+		# Clear previous outputs
 		self.clear_stages_outputs()
 
 		# Create common_flow
@@ -225,19 +225,19 @@ class EEGPipeline(Pipeline):
 		eeg_flow.connect(
 			[
 				(datasource, preparer_flow, [('epochs','inputnode.epochs'),
-							     ('subject','inputnode.subject'),
-							     ('behav_file','inputnode.behav_file'),
-							     ('parcellation','inputnode.parcellation'),
-							     ('epochs_fif_fname','inputnode.epochs_fif_fname'),
-							     ('output_query','inputnode.output_query')]),
+								 ('subject','inputnode.subject'),
+								 ('behav_file','inputnode.behav_file'),
+								 ('parcellation','inputnode.parcellation'),
+								 ('epochs_fif_fname','inputnode.epochs_fif_fname'),
+								 ('output_query','inputnode.output_query')]),
 				(datasource, loader_flow, [('base_directory','inputnode.base_directory'),
-				    			   ('subject','inputnode.subject')]),
+								   ('subject','inputnode.subject')]),
 				(preparer_flow, loader_flow, [('outputnode.output_query','inputnode.output_query'),
-						    	      ('outputnode.derivative_list','inputnode.derivative_list')]),
+									  ('outputnode.derivative_list','inputnode.derivative_list')]),
 				(loader_flow, invsol_flow, [('outputnode.EEG','inputnode.eeg_ts_file'),                            
-							    ('outputnode.rois','inputnode.rois_file'),
-						            ('outputnode.src','inputnode.src_file'),
-							    ('outputnode.invsol','inputnode.invsol_file')]),
+								('outputnode.rois','inputnode.rois_file'),
+									('outputnode.src','inputnode.src_file'),
+								('outputnode.invsol','inputnode.invsol_file')]),
 				(datasource, invsol_flow, [('roi_ts_file','inputnode.roi_ts_file')]),
 				(preparer_flow, invsol_flow, [('outputnode.invsol_params','inputnode.invsol_params')]),
 				(invsol_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
@@ -301,7 +301,7 @@ class EEGPipeline(Pipeline):
 					'log_directory': os.path.join(nipype_deriv_subject_directory, "eeg_pipeline"),
 					'log_to_file': True
 				},
-			 	'execution': {
+				'execution': {
 					'remove_unnecessary_outputs': False,
 					 'stop_on_first_crash': True,
 					 'stop_on_first_rerun': False,
@@ -324,7 +324,7 @@ class EEGPipeline(Pipeline):
 		if self.number_of_cores != 1:
 			eeg_flow.run(
 				plugin='MultiProc',
-			        plugin_args={
+					plugin_args={
 					'n_procs': self.number_of_cores
 				}
 			)
