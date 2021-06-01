@@ -716,7 +716,7 @@ def eeg_load_config_json(pipeline, config_path):
     config_path : string
         Path of the JSON configuration file
     """
-    print_blue(f'  .. LOAD: Load eeg config file : {config_path}')
+    print_blue('  .. LOAD: Load eeg config file : {}'.format(config_path))
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
         config = json.load(f)
