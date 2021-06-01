@@ -269,8 +269,6 @@ class CMP_Project_Info(HasTraits):
     eeg_stage_names = List
     eeg_custom_last_stage = Str
 
-
-
     number_of_cores = Enum(1, list(range(1, multiprocessing.cpu_count() + 1)))
 
 
@@ -607,9 +605,15 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=True, debug=
     project_info : cmp.project.CMP_Project_Info
         Instance of ``cmp.project.CMP_Project_Info`` object
 
+    bids_layout : bids.BIDSLayout
+        Instance of ``BIDSLayout`` object
+
     is_new_project : bool
         Specify if it corresponds or not to a new project.
         If `True`, it will create initial pipeline configuration files.
+
+    gui : bool
+        Might be obsolete and removed in future versions
 
     debug : bool
         If `True`, display extra prints to support debugging
@@ -654,7 +658,7 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=True, debug=
                     project_info.subject, project_info.subject_session))
             else:
                 project_info.eeg_config_file = os.path.join(derivatives_directory,
-                                                             '%s_eeg_config.ini' % project_info.subject)
+                                                            '%s_eeg_config.ini' % project_info.subject)
 
             if os.path.exists(project_info.eeg_config_file):
                 warn_res = project_info.configure_traits(view='eeg_warning_view')
@@ -679,6 +683,7 @@ def init_eeg_project(project_info, bids_layout, is_new_project, gui=True, debug=
     eeg_pipeline.config_file = project_info.eeg_config_file
 
     return eeg_inputs_checked, eeg_pipeline
+
 
 def update_anat_last_processed(project_info, pipeline):
     """Update last processing information of a :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline`.
@@ -801,6 +806,7 @@ def update_fmri_last_processed(project_info, pipeline):
             if stage.lower() + '_stage' in stage_dirs:
                 pipeline.last_stage_processed = stage
                 project_info.dmri_last_stage_processed = stage
+
 
 def update_eeg_last_processed(project_info, pipeline):
     """Update last processing information of a :class:`~cmp.pipelines.functional.eeg.EEGPipeline`.
@@ -1077,7 +1083,6 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
             print(msg)
             sys.exit(1)
 
-
     ################### FORM HERE #################
     # Perform only the anatomical pipeline
     if dwi_pipeline_config is None and func_pipeline_config is None and eeg_pipeline_config is None:
@@ -1253,7 +1258,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
         else:
             print(msg)
             sys.exit(1)
-    
+
     ###### FROM HERE ######
     ###### FROM HERE ######
     ###### FROM HERE ######

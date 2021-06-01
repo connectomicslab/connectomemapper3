@@ -21,16 +21,17 @@ from cmtklib.interfaces.eeglab2fif import EEGLAB2fif
 from cmtklib.interfaces.createrois import CreateRois
 from cmtklib.util import get_pipeline_dictionary_outputs
 
-class EEGPreparerConfig(HasTraits):
 
+class EEGPreparerConfig(HasTraits):
     eeg_format = Enum('.set', '.fif',
-                                   desc='<.set|.fif> (default is .set)')
+                      desc='<.set|.fif> (default is .set)')
     invsol_format = Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
-                                    desc='Cartool vs mne')
+                         desc='Cartool vs mne')
 
     parcellation = Str('Lausanne2008')
     cartool_dir = Str()
     cmp3_dir = Str()
+
 
 class EEGPreparerStage(Stage):
     def __init__(self, bids_dir, output_dir):
@@ -38,9 +39,10 @@ class EEGPreparerStage(Stage):
         self.name = 'eeg_preparing_stage'
         self.bids_dir = bids_dir
         self.output_dir = output_dir
-        self.config = EEGPreparerConfig()        
-        self.inputs = ["eeg_format","invsol_format","epochs","behav_file","parcellation","cartool_dir","cmp3_dir","output_query","epochs_fif_fname","subject","derivative_list"]
-        self.outputs = ["output_query","invsol_params","derivative_list"]
+        self.config = EEGPreparerConfig()
+        self.inputs = ["eeg_format", "invsol_format", "epochs", "behav_file", "parcellation", "cartool_dir", "cmp3_dir",
+                       "output_query", "epochs_fif_fname", "subject", "derivative_list"]
+        self.outputs = ["output_query", "invsol_params", "derivative_list"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         inputnode.inputs.derivative_list = []
@@ -49,20 +51,19 @@ class EEGPreparerStage(Stage):
 
             eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
             flow.connect([(inputnode, eeglab2fif_node,
-                 [('epochs','eeg_ts_file'),
-                  ('behav_file','behav_file'),
-                  ('epochs_fif_fname','epochs_fif_fname'),
-                  ('output_query','output_query'),
-                  ('derivative_list','derivative_list'),
-                 ]
-                    )])
+                           [('epochs', 'eeg_ts_file'),
+                            ('behav_file', 'behav_file'),
+                            ('epochs_fif_fname', 'epochs_fif_fname'),
+                            ('output_query', 'output_query'),
+                            ('derivative_list', 'derivative_list'),
+                            ]
+                           )])
 
-
-            if not self.config.invsol_format.split('-')[0] == "Cartool":                      
+            if not self.config.invsol_format.split('-')[0] == "Cartool":
                 flow.connect([(eeglab2fif_node, outputnode,
-                     [('output_query','output_query'),
-                      ('derivative_list','derivative_list')]
-                        )])
+                               [('output_query', 'output_query'),
+                                ('derivative_list', 'derivative_list')]
+                               )])
 
             """flow.connect([(eeglab2fif_node,outputnode,
                                                      [
@@ -70,54 +71,53 @@ class EEGPreparerStage(Stage):
                                                      ]
                                                         )])"""
 
-        if self.config.invsol_format.split('-')[0] == "Cartool":    
-
+        if self.config.invsol_format.split('-')[0] == "Cartool":
 
             createrois_node = pe.Node(CreateRois(), name="createrois")
             inputnode.inputs.parcellation = self.config.parcellation
             inputnode.inputs.cartool_dir = self.config.cartool_dir
             inputnode.inputs.cmp3_dir = self.config.cmp3_dir
 
-            if (self.config.eeg_format == ".set"):
+            if self.config.eeg_format == ".set":
 
-                flow.connect([(eeglab2fif_node, createrois_node ,
-                     [('output_query','output_query'),
-                      ('derivative_list','derivative_list')]
-                        )])
+                flow.connect([(eeglab2fif_node, createrois_node,
+                               [('output_query', 'output_query'),
+                                ('derivative_list', 'derivative_list')]
+                               )])
 
             else:
-                flow.connect([(inputnode, createrois_node ,
-                     [('output_query','output_query'),
-                      ('derivative_list','derivative_list')]
-                        )])
+                flow.connect([(inputnode, createrois_node,
+                               [('output_query', 'output_query'),
+                                ('derivative_list', 'derivative_list')]
+                               )])
 
             flow.connect([(inputnode, createrois_node,
-                 [('subject','subject'),
-                  ('parcellation','parcellation'),
-                  ('cartool_dir','cartool_dir'),
-                  ('cmp3_dir','cmp3_dir'),
-                 ]
-                    )])
+                           [('subject', 'subject'),
+                            ('parcellation', 'parcellation'),
+                            ('cartool_dir', 'cartool_dir'),
+                            ('cmp3_dir', 'cmp3_dir'),
+                            ]
+                           )])
             flow.connect([(createrois_node, outputnode,
-                     [('output_query','output_query'),
-                      ('derivative_list','derivative_list')]
-                        )])
+                           [('output_query', 'output_query'),
+                            ('derivative_list', 'derivative_list')]
+                           )])
 
             ii = pe.Node(interface=util.IdentityInterface(
-                    fields=['invsol_params','roi_ts_file'], 
-                    mandatory_inputs=True), name="identityinterface")
+                fields=['invsol_params', 'roi_ts_file'],
+                mandatory_inputs=True), name="identityinterface")
 
             ii.inputs.roi_ts_file = ''
-            ii.inputs.invsol_params = {'lamda':6,   
-                                       'svd_params' : {'toi_begin' : 120,
-                                                       'toi_end' : 500}
-                                        }                   
+            ii.inputs.invsol_params = {'lamda': 6,
+                                       'svd_params': {'toi_begin': 120,
+                                                      'toi_end': 500}
+                                       }
             flow.connect([(ii, outputnode,
-                     [('invsol_params','invsol_params')]
-                        )])
+                           [('invsol_params', 'invsol_params')]
+                           )])
+
     def define_inspect_outputs(self):
         raise NotImplementedError
-
 
     def has_run(self):
         """Function that returns `True` if the stage has been run successfully.
@@ -128,4 +128,4 @@ class EEGPreparerStage(Stage):
         """
         if self.config.eeg_format == ".set":
             if self.config.inverse_solution.split('-')[0] == "Cartool":
-                return os.path.exists(self.config.epochs_fif)                
+                return os.path.exists(self.config.epochs_fif)

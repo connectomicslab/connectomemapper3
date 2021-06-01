@@ -20,8 +20,11 @@ from cmp.stages.common import Stage
 from cmtklib.interfaces.eegloader import EEGLoader
 from cmtklib.util import get_pipeline_dictionary_outputs
 
+
 class EEGLoaderConfig(HasTraits):
     pass
+
+
 class EEGLoaderStage(Stage):
     def __init__(self, bids_dir, output_dir):
         """Constructor of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` instance."""
@@ -29,31 +32,29 @@ class EEGLoaderStage(Stage):
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGLoaderConfig()
-        self.inputs = ["subject", "base_directory","output_query","derivative_list"]
-        self.outputs = ["EEG","src","invsol","rois"]
-
+        self.inputs = ["subject", "base_directory", "output_query", "derivative_list"]
+        self.outputs = ["EEG", "src", "invsol", "rois"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        
-        
-        eegloader_node = pe.Node(interface = EEGLoader(), name="eegloader")
+
+        eegloader_node = pe.Node(interface=EEGLoader(), name="eegloader")
 
         flow.connect([(inputnode, eegloader_node,
-             [('subject','subject'),
-              ('base_directory','base_directory'),
-              ('output_query','output_query'),
-              ('derivative_list','derivative_list')              
-             ]
-                )])
+                       [('subject', 'subject'),
+                        ('base_directory', 'base_directory'),
+                        ('output_query', 'output_query'),
+                        ('derivative_list', 'derivative_list')
+                        ]
+                       )])
 
-        flow.connect([(eegloader_node,outputnode,
-             [
-              ('EEG','EEG'),              
-              ('src','src'),
-              ('invsol','invsol'),
-              ('rois','rois'),              
-              ]
-                )])
+        flow.connect([(eegloader_node, outputnode,
+                       [
+                           ('EEG', 'EEG'),
+                           ('src', 'src'),
+                           ('invsol', 'invsol'),
+                           ('rois', 'rois'),
+                       ]
+                       )])
 
     def define_inspect_outputs(self):
         raise NotImplementedError
@@ -67,4 +68,4 @@ class EEGLoaderStage(Stage):
         """
         if self.config.eeg_format == ".set":
             if self.config.inverse_solution.split('-')[0] == "Cartool":
-                return os.path.exists(self.config.epochs_fif)   
+                return os.path.exists(self.config.epochs_fif)

@@ -40,9 +40,9 @@ def check_configuration_version(config):
         else:
             conf_version = config['Global']['version']
             print_warning(
-                  '  .. WARNING: CMP3 version used to generate the ' +
-                  f'configuration files ({conf_version}) ' +
-                  f' and version of CMP3 used ({__version__}) differ')
+                '  .. WARNING: CMP3 version used to generate the ' +
+                f'configuration files ({conf_version}) ' +
+                f' and version of CMP3 used ({__version__}) differ')
             is_same = False
     return is_same
 
@@ -133,7 +133,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
 
             if ini_mode:
                 try:
-                    if not(section == 'parcellation_stage' and name == 'ants_precision_type'):
+                    if not (section == 'parcellation_stage' and name == 'ants_precision_type'):
                         value = eval(value)
                         if debug:
                             print_warning(f'  .. DEBUG: String {value} evaluated')
@@ -184,7 +184,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
             else:
                 if debug:
                     print_warning(
-                          f'  .. DEBUG : Type: {type(value)} / value : {value}')
+                        f'  .. DEBUG : Type: {type(value)} / value : {value}')
                 config_json[section][name] = ''
 
             if not is_iterable:
@@ -225,8 +225,8 @@ def convert_config_ini_2_json(config_ini_path):
         config.read(config_ini_path)
     except configparser.MissingSectionHeaderError:
         print_error(
-                '  .. ERROR : file is a datalad git annex but it has not been retrieved yet.' +
-                ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)'
+            '  .. ERROR : file is a datalad git annex but it has not been retrieved yet.' +
+            ' Please do datalad get ... and reload the dataset (File > Load BIDS Dataset...)'
         )
 
     config_json_path = '.'.join([os.path.splitext(config_ini_path)[0], 'json'])
@@ -281,7 +281,7 @@ def create_subject_configuration_from_ref(project, ref_conf_file, pipeline_type,
 
     if os.path.isfile(subject_conf_file):
         print_warning(
-              "  .. WARNING: rewriting config file {}".format(subject_conf_file))
+            "  .. WARNING: rewriting config file {}".format(subject_conf_file))
         os.remove(subject_conf_file)
 
     # Change relative path to absolute path if needed (required when using singularity)
@@ -403,6 +403,7 @@ def get_fmri_process_detail_json(project_info, section, detail):
     with open(project_info.fmri_config_file, 'r') as f:
         config = json.load(f)
     return config[section][detail]
+
 
 def get_eeg_process_detail_json(project_info, section, detail):
     """Get the value for a parameter key (detail) in the stage section of the EEG JSON config file.
@@ -715,7 +716,7 @@ def eeg_load_config_json(pipeline, config_path):
     config_path : string
         Path of the JSON configuration file
     """
-    print_blue('  .. LOAD: Load eeg config file : {}'.format(config_path))
+    print_blue(f'  .. LOAD: Load eeg config file : {config_path}')
     # datalad_is_available = is_tool('datalad')
     with open(config_path, 'r') as f:
         config = json.load(f)
