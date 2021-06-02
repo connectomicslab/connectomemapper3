@@ -11,9 +11,6 @@ class CartoolInverseSolutionROIExtractionInputSpec(BaseInterfaceInputSpec):
     eeg_ts_file = traits.List(
         exists=True, desc='eeg * epochs in .set format', mandatory=True)
 
-    src_file = traits.List(
-        exists=True, desc='src (spi loaded with pycartool)', mandatory=True)
-
     invsol_file = traits.List(
         exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=True)
 
@@ -48,23 +45,21 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
     def _run_interface(self, runtime):
 
         epochs_file = self.inputs.eeg_ts_file[0]
-        src_file = self.inputs.src_file[0]
         invsol_file = self.inputs.invsol_file[0]
         lamda = self.inputs.invsol_params['lamda']
         rois_file = self.inputs.rois_file[0]
         svd_params = self.inputs.invsol_params['svd_params']
         self.roi_ts_file = self.inputs.roi_ts_file
 
-        roi_tcs = self.apply_inverse_epochs_cartool(epochs_file, src_file, invsol_file, lamda, rois_file, svd_params)
+        roi_tcs = self.apply_inverse_epochs_cartool(epochs_file, invsol_file, lamda, rois_file, svd_params)
         np.save(self.roi_ts_file, roi_tcs)
 
         return runtime
 
     @staticmethod
-    def apply_inverse_epochs_cartool(epochs_file, src_file, invsol_file, lamda, rois_file, svd_params):
+    def apply_inverse_epochs_cartool(epochs_file, invsol_file, lamda, rois_file, svd_params):
         epochs = mne.read_epochs(epochs_file)
         invsol = cart.io.inverse_solution.read_is(invsol_file)
-        src = cart.source_space.read_spi(src_file)
         pickle_in = open(rois_file, "rb")
         rois = pickle.load(pickle_in)
         K = invsol['regularisation_solutions'][lamda]

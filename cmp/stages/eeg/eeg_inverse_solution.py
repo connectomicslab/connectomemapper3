@@ -42,7 +42,6 @@ class EEGInverseSolutionStage(Stage):
             flow.connect([(inputnode, invsol_node,
                            [('eeg_ts_file', 'eeg_ts_file'),
                             ('rois_file', 'rois_file'),
-                            ('src_file', 'src_file'),
                             ('invsol_file', 'invsol_file'),
                             ('invsol_params', 'invsol_params'),
                             ('roi_ts_file', 'roi_ts_file'),

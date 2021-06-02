@@ -878,7 +878,7 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
 
     func_pipeline_config : string
         Path to fMRI pipeline configuration file
-    
+
     eeg_pipeline_config : string
         Path to eeg pipeline configuration file
     

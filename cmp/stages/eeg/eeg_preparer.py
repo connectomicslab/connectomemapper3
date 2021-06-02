@@ -46,7 +46,7 @@ class EEGPreparerStage(Stage):
             "parcellation",
             "cartool_dir",
             "cmp3_dir",
-            "output_query", 
+            "output_query",
             "epochs_fif_fname",
             "subject",
             "derivative_list"
