@@ -1,4 +1,3 @@
-import numpy as  np
 import pandas as pd
 import mne
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec

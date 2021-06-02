@@ -73,7 +73,7 @@ class CartoolInverseSolutionROIExtraction(BaseInterface):
         tstep = times[1] - times[0]
         roi_tcs = np.zeros((n_rois, len(times), len(epochs.events)))
         n_spi = np.zeros(n_rois, dtype=int)
-		for r in range(n_rois):
+        for r in range(n_rois):
             spis_this_roi = rois.groups_of_indexes[r]
             n_spi[r] = int(len(spis_this_roi))
             roi_stc = np.zeros((3, n_spi[r], len(times), len(epochs.events)))

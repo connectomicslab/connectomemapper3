@@ -3,8 +3,7 @@ import nibabel
 import os
 import pickle
 import numpy as np
-import mne
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec, InputMultiPath
+from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
 
 
 class CreateRoisInputSpec(BaseInterfaceInputSpec):
@@ -31,9 +30,6 @@ class CreateRoisInputSpec(BaseInterfaceInputSpec):
 
 class CreateRoisOutputSpec(TraitedSpec):
     """Output specification for InverseSolution."""
-
-    # rois_pickle = traits.File(
-    #    exists=True, desc='rois file, loaded with pickle', mandatory=True)
 
     output_query = traits.Dict(
         desc='BIDSDataGrabber output_query', mandatory=True)
@@ -78,11 +74,7 @@ class CreateRois(BaseInterface):
     def _create_roi_files(subject, parcellation, parcellation_name, cartool_dir, cmp3_dir):
         spipath = os.path.join(cartool_dir, subject, subject + '.spi')
         source = cart.source_space.read_spi(spipath)
-        brain_cartool = os.path.join(cartool_dir, subject, subject + '.Brain.nii')
-        brain_cartool = nibabel.load(brain_cartool)
-        bc = brain_cartool.get_fdata()[:, :, :, 0]
 
-        # impath = os.path.join(cmp3_dir,subject,'anat',subject+'_label-'+parcellation+'_atlas.nii.gz')
         impath = os.path.join(parcellation)
         im = nibabel.load(impath)
         imdata = im.get_fdata()

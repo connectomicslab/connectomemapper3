@@ -9,16 +9,13 @@
 # General imports
 import os
 from traits.api import *
-import pkg_resources
 
 # Nipype imports
 import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
 
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.interfaces.invsol import CartoolInverseSolutionROIExtraction
-from cmtklib.util import get_pipeline_dictionary_outputs
 
 
 class EEGInverseSolutionConfig(HasTraits):

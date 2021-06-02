@@ -9,7 +9,6 @@
 # General imports
 import os
 from traits.api import *
-import pkg_resources
 
 # Nipype imports
 import nipype.pipeline.engine as pe
@@ -19,7 +18,6 @@ import nipype.interfaces.utility as util
 from cmp.stages.common import Stage
 from cmtklib.interfaces.eeglab2fif import EEGLAB2fif
 from cmtklib.interfaces.createrois import CreateRois
-from cmtklib.util import get_pipeline_dictionary_outputs
 
 
 class EEGPreparerConfig(HasTraits):
@@ -64,12 +62,6 @@ class EEGPreparerStage(Stage):
                                [('output_query', 'output_query'),
                                 ('derivative_list', 'derivative_list')]
                                )])
-
-            """flow.connect([(eeglab2fif_node,outputnode,
-                                                     [
-                                                      ('epochs_fif_fname','epochs_fif_fname'),
-                                                     ]
-                                                        )])"""
 
         if self.config.invsol_format.split('-')[0] == "Cartool":
 

@@ -1,7 +1,3 @@
-import pycartool as cart
-import pickle
-import numpy as  np
-import mne
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
 import nipype.interfaces.io as nio
 import os
