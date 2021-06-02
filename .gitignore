@@ -26,6 +26,9 @@ _build
 
 scripts/runGource.sh
 
+dev/notebooks
+dev/notebooks/*
+
 *.ipynb_checkpoints
 
 .idea/
