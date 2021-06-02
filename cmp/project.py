@@ -1083,7 +1083,6 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
             print(msg)
             sys.exit(1)
 
-    ################### FORM HERE #################
     # Perform only the anatomical pipeline
     if dwi_pipeline_config is None and func_pipeline_config is None and eeg_pipeline_config is None:
 
@@ -1259,15 +1258,8 @@ def run_individual(bids_dir, output_dir, participant_label, session_label, anat_
             print(msg)
             sys.exit(1)
 
-    ###### FROM HERE ######
-    ###### FROM HERE ######
-    ###### FROM HERE ######
-    ###### FROM HERE ######
-    ###### FROM HERE ######
-    ###### FROM HERE ######
-
     # Perform only the anatomical and eeg pipeline
-    if dwi_pipeline_config is None and func_pipeline_config is None and eeg_pipeline_config is not None:
+    elif dwi_pipeline_config is None and func_pipeline_config is None and eeg_pipeline_config is not None:
 
         project.eeg_config_file = os.path.abspath(eeg_pipeline_config)
 
