@@ -116,7 +116,7 @@ class CMP_Project_Info(HasTraits):
     fmri_available : Bool
         True if fMRI scans were found
         (Default: False)
-    
+
     eeg_available : Bool
         True if EEG recordings were found
         (Default: False)
