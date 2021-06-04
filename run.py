@@ -25,7 +25,7 @@ from datetime import datetime
 
 # Own imports
 from cmtklib.util import BColors, print_error, print_blue
-from cmtklib.config import create_subject_configuration_from_ref,\
+from cmtklib.config import create_subject_configuration_from_ref, \
     check_configuration_format, convert_config_ini_2_json
 from cmp import parser
 from cmp.info import __version__
@@ -54,11 +54,12 @@ def report_usage(event_category, event_action, event_label, verbose=False):
     """
     tracking_id = 'UA-124877585-4'
     clientid_str = str(datetime.now())
-    tracking_url = 'https://www.google-analytics.com/collect?v=1&t=event&tid={}&cid={}&ec={}&ea={}&el={}&aip=1'.format(tracking_id,
-                                                                                                                       clientid_str,
-                                                                                                                       event_category,
-                                                                                                                       event_action,
-                                                                                                                       event_label)
+    tracking_url = 'https://www.google-analytics.com/collect?v=1&t=event&tid={}&cid={}&ec={}&ea={}&el={}&aip=1'.format(
+        tracking_id,
+        clientid_str,
+        event_category,
+        event_action,
+        event_label)
     r = requests.post(tracking_url)
 
     if verbose:
@@ -70,7 +71,7 @@ def report_usage(event_category, event_action, event_label, verbose=False):
           BColors.ENDC)
 
 
-def create_cmp_command(project, run_anat, run_dmri, run_fmri, run_eeg = False, number_of_threads=1):
+def create_cmp_command(project, run_anat, run_dmri, run_fmri, run_eeg=False, number_of_threads=1):
     """Create the command to run the `connectomemapper3` python script.
 
     Parameters
@@ -86,6 +87,9 @@ def create_cmp_command(project, run_anat, run_dmri, run_fmri, run_eeg = False, n
 
     run_fmri : bool
         If True, append the fMRI configuration file to the command
+
+    run_eeg : bool
+        If True, append the EEG configuration file to the command
 
     number_of_threads : int
         Number of threads used OpenMP-parallelized tools
@@ -297,7 +301,8 @@ if os.access(os.path.join('/bids_dir', 'code', 'license.txt'), os.F_OK):
 elif args.fs_license:
     os.environ['FS_LICENSE'] = os.path.abspath(args.fs_license)
 else:
-    print_error("  .. ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
+    print_error(
+        "  .. ERROR: Missing license.txt in code/ directory OR unspecified Freesurfer license with the option --fs_license ")
     sys.exit(1)
 
 print('  .. INFO: $FS_LICENSE set to {}'.format(os.environ['FS_LICENSE']))
@@ -319,7 +324,8 @@ if args.number_of_participants_processed_in_parallel is not None:
                 max_number_of_cores))
         print(
             BColors.WARNING +
-            '  .. WARNING: the specified number of subjects to be processed in parallel ({})'.format(args.number_of_participants_processed_in_parallel) +
+            '  .. WARNING: the specified number of subjects to be processed in parallel ({})'.format(
+                args.number_of_participants_processed_in_parallel) +
             ' exceeds the number of available cores ({})'.format(max_number_of_cores) +
             BColors.ENDC)
         parallel_number_of_subjects = max_number_of_cores
@@ -328,7 +334,8 @@ if args.number_of_participants_processed_in_parallel is not None:
             '  * Number of subjects to be processed in parallel set to one (sequential run)')
         print(
             BColors.WARNING +
-            '  .. WARNING: the specified number of subjects to be processed in parallel ({}) '.format(args.number_of_participants_processed_in_parallel) +
+            '  .. WARNING: the specified number of subjects to be processed in parallel ({}) '.format(
+                args.number_of_participants_processed_in_parallel) +
             'should be greater to 0' + BColors.ENDC)
         parallel_number_of_subjects = 1
     else:
@@ -346,14 +353,17 @@ if args.number_of_threads is not None:
             print('  * Number of parallel threads set to the maximal number of available cores ({})'.format(
                 max_number_of_cores))
             print(BColors.WARNING +
-                  '  .. WARNING: the specified number of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
+                  '  .. WARNING: the specified number of pipeline processes executed in parallel ({}) '.format(
+                      args.number_of_threads) +
                   'exceeds the number of available cores ({})'.format(max_number_of_cores) +
                   BColors.ENDC)
             number_of_threads = max_number_of_cores
         elif number_of_threads <= 0:
             print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
-            print(BColors.WARNING + '  .. WARNING: The specified of pipeline processes executed in parallel ({}) '.format(args.number_of_threads) +
-                  'should be greater to 0' + BColors.ENDC)
+            print(
+                BColors.WARNING + '  .. WARNING: The specified of pipeline processes executed in parallel ({}) '.format(
+                    args.number_of_threads) +
+                'should be greater to 0' + BColors.ENDC)
             number_of_threads = 1
         else:
             print('  * Number of parallel threads set to {} (total of cores: {})'.format(
@@ -364,14 +374,16 @@ if args.number_of_threads is not None:
         total_number_of_threads = parallel_number_of_subjects * number_of_threads
         if total_number_of_threads > max_number_of_cores:
             print(BColors.WARNING +
-                  '  * Total number of cores used (Subjects in parallel: {}, Threads in parallel: {}, Total: {})'.format(parallel_number_of_subjects,
-                                                                                                                         number_of_threads,
-                                                                                                                         total_number_of_threads) +
+                  '  * Total number of cores used (Subjects in parallel: {}, Threads in parallel: {}, Total: {})'.format(
+                      parallel_number_of_subjects,
+                      number_of_threads,
+                      total_number_of_threads) +
                   'is greater than the number of available cores ({})'.format(max_number_of_cores) + BColors.ENDC)
             number_of_threads = 1
             parallel_number_of_subjects = max_number_of_cores
             print(BColors.WARNING +
-                  '  .. WARNING: Processing will be ONLY parallelized at the subject level using {} cores.'.format(parallel_number_of_subjects) +
+                  '  .. WARNING: Processing will be ONLY parallelized at the subject level using {} cores.'.format(
+                      parallel_number_of_subjects) +
                   BColors.ENDC)
 else:
     print('  * Number of parallel threads set to one (total of cores: {})'.format(max_number_of_cores))
@@ -393,6 +405,7 @@ if args.ants_number_of_threads is not None:
 # See https://stackoverflow.com/questions/30791550/limit-number-of-threads-in-numpy for more details
 # noinspection PyPep8
 import numpy
+
 numpy.random.seed(1234)
 
 # Set random generator seed of MRtrix if specified
@@ -485,7 +498,7 @@ if args.analysis_level == "participant":
                 run_anat = False
                 run_dmri = False
                 run_fmri = False
-                run_eeg  = False
+                run_eeg = False
 
                 if args.anat_pipeline_config is not None:
                     if check_configuration_format(args.anat_pipeline_config) == '.ini':
@@ -523,7 +536,7 @@ if args.analysis_level == "participant":
                     else:
                         eeg_pipeline_config = args.eeg_pipeline_config
                     project.eeg_config_file = create_subject_configuration_from_ref(project, eeg_pipeline_config,
-                                                                                     'eeg')
+                                                                                    'eeg')
                     run_eeg = True
                     print("     ... EEG config created : {}".format(
                         project.eeg_config_file))
@@ -655,14 +668,13 @@ if args.analysis_level == "participant":
                 print("     ... fMRI config created : {}".format(
                     project.fmri_config_file))
 
-
             if args.eeg_pipeline_config is not None:
                 if check_configuration_format(args.eeg_pipeline_config) == '.ini':
                     eeg_pipeline_config = convert_config_ini_2_json(args.eeg_pipeline_config)
                 else:
                     eeg_pipeline_config = args.eeg_pipeline_config
                 project.eeg_config_file = create_subject_configuration_from_ref(project, eeg_pipeline_config,
-                                                                                 'eeg')
+                                                                                'eeg')
                 run_eeg = True
                 print("     ... EEG config created : {}".format(
                     project.eeg_config_file))
@@ -687,7 +699,7 @@ if args.analysis_level == "participant":
                                            project.anat_config_file,
                                            project.dmri_config_file,
                                            None,
-                                           project.eeg_config_file if run_eeg else None, 
+                                           project.eeg_config_file if run_eeg else None,
                                            number_of_threads=number_of_threads)
                         if not run_dmri and run_fmri:
                             run_individual(project.base_directory,
@@ -697,7 +709,7 @@ if args.analysis_level == "participant":
                                            project.anat_config_file,
                                            None,
                                            project.fmri_config_file,
-                                           project.eeg_config_file if run_eeg else None, 
+                                           project.eeg_config_file if run_eeg else None,
                                            number_of_threads=number_of_threads)
                         if run_dmri and run_fmri:
                             run_individual(project.base_directory,
@@ -726,7 +738,7 @@ if args.analysis_level == "participant":
                                              run_anat=run_anat,
                                              run_dmri=run_dmri,
                                              run_fmri=run_fmri,
-                                             run_eeg = run_eeg,
+                                             run_eeg=run_eeg,
                                              number_of_threads=number_of_threads)
                     print_blue("... cmd : {}".format(cmd))
 

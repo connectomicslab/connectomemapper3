@@ -22,6 +22,7 @@ class VerifyVersionCommand(install):
             info = f'Git tag: {tag} does not match the version of this app: {version}'
             sys.exit(info)
 
+
 # Get directory where this file is located
 directory = os.path.abspath(os.path.dirname(__file__))
 
@@ -65,29 +66,29 @@ packages = ["cmp",
 
 # Define the package data to be installed
 package_data = {'cmp':
-                ['cmp3_icon.png'],
+                    ['cmp3_icon.png'],
                 'cmp.bidsappmanager':
-                ['images/*.png',
-                 'pipelines/anatomical/*.png',
-                 'pipelines/diffusion/*.png',
-                 'pipelines/functional/*.png'],
+                    ['images/*.png',
+                     'pipelines/anatomical/*.png',
+                     'pipelines/diffusion/*.png',
+                     'pipelines/functional/*.png'],
                 'resources':
-                ['buttons/*.png',
-                 'icons/*png'],
+                    ['buttons/*.png',
+                     'icons/*png'],
                 'cmtklib':
-                ['data/parcellation/lausanne2008/*/*.*',
-                 'data/parcellation/lausanne2018/*.*',
-                 'data/parcellation/lausanne2018/*/*.*',
-                 'data/segmentation/ants_template_IXI/*/*.*',
-                 'data/segmentation/ants_template_IXI/*.*',
-                 'data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*/*.*',
-                 'data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*.*',
-                 'data/parcellation/nativefreesurfer/*/*.*',
-                 'data/colortable_and_gcs/*.*',
-                 'data/colortable_and_gcs/my_atlas_gcs/*.*',
-                 'data/diffusion/odf_directions/*.*',
-                 'data/diffusion/gradient_tables/*.*',
-                 'data/segmentation/thalamus2018/*.*']
+                    ['data/parcellation/lausanne2008/*/*.*',
+                     'data/parcellation/lausanne2018/*.*',
+                     'data/parcellation/lausanne2018/*/*.*',
+                     'data/segmentation/ants_template_IXI/*/*.*',
+                     'data/segmentation/ants_template_IXI/*.*',
+                     'data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*/*.*',
+                     'data/segmentation/ants_MICCAI2012_multi-atlas_challenge_data/*.*',
+                     'data/parcellation/nativefreesurfer/*/*.*',
+                     'data/colortable_and_gcs/*.*',
+                     'data/colortable_and_gcs/my_atlas_gcs/*.*',
+                     'data/diffusion/odf_directions/*.*',
+                     'data/diffusion/gradient_tables/*.*',
+                     'data/segmentation/thalamus2018/*.*']
                 }
 
 # Extract package requirements from Conda environment.yml
@@ -121,7 +122,6 @@ if include_conda_pip_dependencies:
                 install_requires.append(line)
 print(f'Install requires: {install_requires}')
 print(f'Dependency links: {dependency_links}')
-
 
 # Read the contents of your README file
 with open(os.path.join(directory, 'README.md'), encoding='utf-8') as f:
@@ -171,9 +171,9 @@ def main():
         dependency_links=dependency_links,
         python_requires='>=3.7',
         cmdclass={
-                'verify': VerifyVersionCommand,
+            'verify': VerifyVersionCommand,
         }
-        )
+    )
 
 
 if __name__ == "__main__":
