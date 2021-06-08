@@ -41,7 +41,7 @@ class CreateSrcOutputSpec(TraitedSpec):
 
 class CreateSrc(BaseInterface):
     input_spec = CreateSrcInputSpec
-    output_spec = CreateSrcOutputSpec
+    output_spec = CreateOutputSpec
 
     def _run_interface(self, runtime):
         subject = self.inputs.subject

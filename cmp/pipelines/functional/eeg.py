@@ -218,8 +218,7 @@ class EEGPipeline(Pipeline):
             name='eeg_pipeline',
             base_dir=os.path.abspath(nipype_deriv_subject_directory)
         )
-        import pdb
-        pdb.set_trace()
+
         preparer_flow = self.create_stage_flow("EEGPreparer")
         loader_flow = self.create_stage_flow("EEGLoader")
         invsol_flow = self.create_stage_flow("EEGInverseSolution")

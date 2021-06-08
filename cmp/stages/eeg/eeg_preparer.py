@@ -74,7 +74,7 @@ class EEGPreparerStage(Stage):
                             ]
                            )])
 
-            if not self.config.invsol_format.split('-')[0] == "Cartool":
+            if (not self.config.invsol_format.split('-')[0] == "Cartool") & (not self.config.invsol_format.split('-')[0] == "mne"):
                 flow.connect([(eeglab2fif_node, outputnode,
                                [('output_query', 'output_query'),
                                 ('derivative_list', 'derivative_list')]
@@ -142,10 +142,6 @@ class EEGPreparerStage(Stage):
                             ('base_dir', 'base_dir'),
                             ]
                            )])
-            flow.connect([(createsrc_node, outputnode,
-                           [('output_query', 'output_query'),
-                            ('derivative_list', 'derivative_list')]
-                           )])
             
             # create boundary element model (BEM) 
             flow.connect([(inputnode, createbem_node,
@@ -153,7 +149,14 @@ class EEGPreparerStage(Stage):
                             ('base_dir', 'base_dir'),
                             ]
                            )])
-            flow.connect([(createbem_node, outputnode,
+            
+            flow.connect([(createsrc_node, createbem_node,
+                           [('output_query', 'output_query'),
+                            ('derivative_list', 'derivative_list')]
+                           )])
+            
+            # outputnode  
+            flow.connect([(createsrc_node, outputnode,
                            [('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list')]
                            )])
