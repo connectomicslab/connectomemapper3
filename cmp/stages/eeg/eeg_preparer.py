@@ -130,7 +130,7 @@ class EEGPreparerStage(Stage):
             
             createsrc_node = pe.Node(CreateSrc(), name="createsrc")
             createbem_node = pe.Node(CreateBEM(), name="createbem")
-            # inputnode.inputs.base_dir = self.bids_dir
+            inputnode.inputs.base_dir = self.bids_dir
             # inputnode.inputs.subject = self.subject
             
             # create source space 
