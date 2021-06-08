@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import mne
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits, TraitedSpec
@@ -52,8 +53,8 @@ class EEGLAB2fif(BaseInterface):
         epochs_fif_fname = self.inputs.epochs_fif_fname
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
-
-        self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname)
+        if not os.path.exists(epochs_fif_fname): 
+            self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname)
         self.derivative_list.append('cmp')
         self.output_query['EEG'] = {
             'suffix': 'epo',

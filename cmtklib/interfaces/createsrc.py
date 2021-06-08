@@ -19,7 +19,7 @@ class CreateSrcInputSpec(BaseInterfaceInputSpec):
     subject = traits.Str(
         desc='subject', mandatory=True)
 
-    base_dir = traits.Str(
+    bids_dir = traits.Str(
         desc='base directory', mandatory=True)
 
     output_query = traits.Dict(
@@ -41,15 +41,15 @@ class CreateSrcOutputSpec(TraitedSpec):
 
 class CreateSrc(BaseInterface):
     input_spec = CreateSrcInputSpec
-    output_spec = CreateOutputSpec
+    output_spec = CreateSrcOutputSpec
 
     def _run_interface(self, runtime):
         subject = self.inputs.subject
-        base_dir = self.inputs.base_dir
+        bids_dir = self.inputs.bids_dir
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
 
-        self._create_src_space(subject, base_dir)
+        self._create_src_space(subject, bids_dir)
 
         self.derivative_list.append('MNE')
 
@@ -61,11 +61,11 @@ class CreateSrc(BaseInterface):
         return runtime
 
     @staticmethod
-    def _create_src_space(subject,base_dir):
+    def _create_src_space(subject,bids_dir):
         # from notebook 
         overwrite_src = True 
-        src_fname = os.path.join(base_dir,'derivatives','mne',subject,subject+'-oct6-src_surf_only.fif')
-        subjects_dir = os.path.join(base_dir,'derivatives','freesurfer','subjects')
+        src_fname = os.path.join(bids_dir,'derivatives','mne',subject,subject+'-oct6-src_surf_only.fif')
+        subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
         src = mne.setup_source_space(subject=subject, spacing='oct6', subjects_dir=subjects_dir)
         mne.write_source_spaces(src_fname,src,overwrite=overwrite_src)
 

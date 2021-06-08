@@ -19,7 +19,7 @@ class CreateBEMInputSpec(BaseInterfaceInputSpec):
     subject = traits.Str(
         desc='subject', mandatory=True)
 
-    base_dir = traits.Str(
+    bids_dir = traits.Str(
         desc='base directory', mandatory=True)
 
     output_query = traits.Dict(
@@ -45,11 +45,11 @@ class CreateBEM(BaseInterface):
 
     def _run_interface(self, runtime):
         subject = self.inputs.subject
-        base_dir = self.inputs.base_dir
+        bids_dir = self.inputs.bids_dir
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
 
-        self._create_BEM(subject, base_dir)
+        self._create_BEM(subject, bids_dir)
 
         self.derivative_list.append('MNE')
 
@@ -61,10 +61,10 @@ class CreateBEM(BaseInterface):
         return runtime
 
     @staticmethod
-    def _create_BEM(subject,base_dir):
+    def _create_BEM(subject,bids_dir):
         # from notebook 
         # create the boundaries between the tissues, using segmentation file 
-        subjects_dir = os.path.join(base_dir,'derivatives','freesurfer','subjects')
+        subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
         if "bem" not in os.listdir(os.path.join(subjects_dir,subject)):
             # probably not necessary because already done 
             #cmd = "export SUBJECTS_DIR="+subjects_dir

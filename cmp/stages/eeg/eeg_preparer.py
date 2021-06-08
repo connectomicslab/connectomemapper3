@@ -51,7 +51,8 @@ class EEGPreparerStage(Stage):
             "output_query",
             "epochs_fif_fname",
             "subject",
-            "derivative_list"
+            "derivative_list",
+            "bids_dir",
         ]
         self.outputs = [
             "output_query",
@@ -139,14 +140,14 @@ class EEGPreparerStage(Stage):
                            )])            
             flow.connect([(inputnode, createsrc_node,
                            [('subject', 'subject'),
-                            ('base_dir', 'base_dir'),
+                            ('bids_dir', 'bids_dir'),
                             ]
                            )])
             
             # create boundary element model (BEM) 
             flow.connect([(inputnode, createbem_node,
                            [('subject', 'subject'),
-                            ('base_dir', 'base_dir'),
+                            ('bids_dir', 'bids_dir'),
                             ]
                            )])
             
@@ -156,7 +157,7 @@ class EEGPreparerStage(Stage):
                            )])
             
             # outputnode  
-            flow.connect([(createsrc_node, outputnode,
+            flow.connect([(createbem_node, outputnode,
                            [('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list')]
                            )])
