@@ -99,7 +99,7 @@ class EEGPipeline(Pipeline):
 
         self.stages['EEGPreparer'].config.cmp3_dir = os.path.join(self.derivatives_directory, 'cmp')
         self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory, 'cartool')
-
+       
         self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
         self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
 
@@ -218,33 +218,57 @@ class EEGPipeline(Pipeline):
             name='eeg_pipeline',
             base_dir=os.path.abspath(nipype_deriv_subject_directory)
         )
-
+        import pdb
+        pdb.set_trace()
         preparer_flow = self.create_stage_flow("EEGPreparer")
         loader_flow = self.create_stage_flow("EEGLoader")
         invsol_flow = self.create_stage_flow("EEGInverseSolution")
-
+        
         # fmt: off
-        eeg_flow.connect(
-            [
-                (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
-                                             ('subject', 'inputnode.subject'),
-                                             ('behav_file', 'inputnode.behav_file'),
-                                             ('parcellation', 'inputnode.parcellation'),
-                                             ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
-                                             ('output_query', 'inputnode.output_query')]),
-                (datasource, loader_flow, [('base_directory', 'inputnode.base_directory'),
-                                           ('subject', 'inputnode.subject')]),
-                (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
-                                              ('outputnode.derivative_list', 'inputnode.derivative_list')]),
-                (loader_flow, invsol_flow, [('outputnode.EEG', 'inputnode.eeg_ts_file'),
-                                            ('outputnode.rois', 'inputnode.rois_file'),
-                                            ('outputnode.src', 'inputnode.src_file'),
-                                            ('outputnode.invsol', 'inputnode.invsol_file')]),
-                (datasource, invsol_flow, [('roi_ts_file', 'inputnode.roi_ts_file')]),
-                (preparer_flow, invsol_flow, [('outputnode.invsol_params', 'inputnode.invsol_params')]),
-                (invsol_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
-            ]
-        )
+        if self.stages['EEGInverseSolution'].config.invsol_format.split('-')[0] == "Cartool": 
+            eeg_flow.connect(
+                [
+                    (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
+                                                 ('subject', 'inputnode.subject'),
+                                                 ('behav_file', 'inputnode.behav_file'),
+                                                 ('parcellation', 'inputnode.parcellation'),
+                                                 ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
+                                                 ('output_query', 'inputnode.output_query')]),
+                    (datasource, loader_flow, [('base_directory', 'inputnode.base_directory'),
+                                               ('subject', 'inputnode.subject')]),
+                    (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
+                                                  ('outputnode.derivative_list', 'inputnode.derivative_list')]),
+                    (loader_flow, invsol_flow, [('outputnode.EEG', 'inputnode.eeg_ts_file'),
+                                                ('outputnode.rois', 'inputnode.rois_file'),
+                                                ('outputnode.src', 'inputnode.src_file'),
+                                                ('outputnode.invsol', 'inputnode.invsol_file')]),
+                    (datasource, invsol_flow, [('roi_ts_file', 'inputnode.roi_ts_file')]),
+                    (preparer_flow, invsol_flow, [('outputnode.invsol_params', 'inputnode.invsol_params')]),
+                    (invsol_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
+                ]
+            )
+        elif self.stages['EEGInverseSolution'].config.invsol_format.split('-')[0] == 'mne':
+            eeg_flow.connect(
+                [
+                    (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
+                                                  ('subject', 'inputnode.subject'),
+                                                  ('behav_file', 'inputnode.behav_file'),
+                                                  ('parcellation', 'inputnode.parcellation'),
+                                                  ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
+                                                  ('output_query', 'inputnode.output_query')]),
+                    (datasource, loader_flow, [('base_directory', 'inputnode.base_directory'),
+                                                ('subject', 'inputnode.subject')]),
+                    (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
+                                                  ('outputnode.derivative_list', 'inputnode.derivative_list')]),
+                    (loader_flow, invsol_flow, [('outputnode.EEG', 'inputnode.eeg_ts_file'),
+                                                ('outputnode.rois', 'inputnode.rois_file'),
+                                                ('outputnode.src', 'inputnode.src_file'),
+                                                ('outputnode.invsol', 'inputnode.invsol_file')]),
+                    (datasource, invsol_flow, [('roi_ts_file', 'inputnode.roi_ts_file')]),
+                    (preparer_flow, invsol_flow, [('outputnode.invsol_params', 'inputnode.invsol_params')]),
+                    (invsol_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
+                ]
+            )
         # fmt: on
 
         self.flow = eeg_flow

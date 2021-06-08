@@ -18,6 +18,8 @@ import nipype.interfaces.utility as util
 from cmp.stages.common import Stage
 from cmtklib.interfaces.eeglab2fif import EEGLAB2fif
 from cmtklib.interfaces.createrois import CreateRois
+from cmtklib.interfaces.createsrc import CreateSrc
+from cmtklib.interfaces.createbem import CreateBEM
 
 
 class EEGPreparerConfig(HasTraits):
@@ -121,6 +123,39 @@ class EEGPreparerStage(Stage):
                                        }
             flow.connect([(ii, outputnode,
                            [('invsol_params', 'invsol_params')]
+                           )])
+            
+        elif self.config.invsol_format.split('-')[0] == "mne":
+            
+            createsrc_node = pe.Node(CreateSrc(), name="createsrc")
+            createbem_node = pe.Node(CreateBEM(), name="createbem")
+            # inputnode.inputs.base_dir = self.bids_dir
+            # inputnode.inputs.subject = self.subject
+            
+            # create source space 
+            flow.connect([(eeglab2fif_node, createsrc_node,
+                           [('output_query', 'output_query'),
+                            ('derivative_list', 'derivative_list')]                           
+                           )])            
+            flow.connect([(inputnode, createsrc_node,
+                           [('subject', 'subject'),
+                            ('base_dir', 'base_dir'),
+                            ]
+                           )])
+            flow.connect([(createsrc_node, outputnode,
+                           [('output_query', 'output_query'),
+                            ('derivative_list', 'derivative_list')]
+                           )])
+            
+            # create boundary element model (BEM) 
+            flow.connect([(inputnode, createbem_node,
+                           [('subject', 'subject'),
+                            ('base_dir', 'base_dir'),
+                            ]
+                           )])
+            flow.connect([(createbem_node, outputnode,
+                           [('output_query', 'output_query'),
+                            ('derivative_list', 'derivative_list')]
                            )])
 
     def define_inspect_outputs(self):
