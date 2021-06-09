@@ -159,7 +159,7 @@ jobs:
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.5.1
+          singularity-version: 3.7.3
       - run:
           name: "Set SINGULARITY TMP and CACHEDIR to prevent overflowing the /tmp folder"
           command: |
@@ -835,7 +835,7 @@ jobs:
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.5.1
+          singularity-version: 3.7.3
       - run:
           name: Remove any config file present in ds-sample/code and create ds-sample/test
           no_output_timeout: 1h
@@ -1061,7 +1061,7 @@ jobs:
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.5.1
+          singularity-version: 3.7.3
       - run:
           name: 'Write Sylabs.io TOKEN'
           command: |
@@ -1096,7 +1096,7 @@ jobs:
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
-          singularity-version: 3.5.1
+          singularity-version: 3.7.3
       - run:
           name: 'Write Sylabs.io TOKEN'
           command: |
