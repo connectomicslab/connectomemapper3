@@ -482,7 +482,7 @@ class fMRIPipeline(Pipeline):
                     "roi_graphml_s5",
                 ]
             ),
-            name="datasource",
+            name="func_datasource",
         )
         datasource.inputs.base_directory = base_directory
         datasource.inputs.template = "*"
@@ -566,7 +566,7 @@ class fMRIPipeline(Pipeline):
         sinker : Output Nipype DataSink Node
             Output Nipype Node with :obj:`~nipype.interfaces.io.DataSink` interface
         """
-        sinker = pe.Node(nio.DataSink(), name="func_sinker")
+        sinker = pe.Node(nio.DataSink(), name="func_datasinker")
         sinker.inputs.base_directory = os.path.join(base_directory)
         # fmt:off
         substitutions = [

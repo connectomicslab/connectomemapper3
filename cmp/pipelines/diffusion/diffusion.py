@@ -691,7 +691,7 @@ class DiffusionPipeline(Pipeline):
                     "roi_graphml_s5",
                 ]
             ),
-            name="datasource",
+            name="dwi_datasource",
         )
         datasource.inputs.base_directory = base_directory
         datasource.inputs.template = "*"
@@ -724,7 +724,7 @@ class DiffusionPipeline(Pipeline):
         sinker : Output Nipype DataSink Node
             Output Nipype Node with :obj:`~nipype.interfaces.io.DataSink` interface
         """
-        sinker = pe.Node(nio.DataSink(), name="diffusion_sinker")
+        sinker = pe.Node(nio.DataSink(), name="dwi_datasinker")
         sinker.inputs.base_directory = os.path.abspath(base_directory)
 
         # Dataname substitutions in order to comply with BIDS derivatives specifications

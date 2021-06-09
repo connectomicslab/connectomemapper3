@@ -578,7 +578,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         sinker : Output Nipype DataSink Node
             Output Nipype Node with :obj:`~nipype.interfaces.io.DataSink` interface
         """
-        sinker = pe.Node(nio.DataSink(), name="anatomical_sinker")
+        sinker = pe.Node(nio.DataSink(), name="anat_datasinker")
         sinker.inputs.base_directory = os.path.abspath(base_directory)
 
         sinker.inputs.substitutions = [
