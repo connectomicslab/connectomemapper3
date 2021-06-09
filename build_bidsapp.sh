@@ -3,7 +3,7 @@
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
 #
-#  This software is distributed under the open-source license Modified BSD.
+# This software is distributed under the open-source license Modified BSD.
 
 # Build the docker image of Connectome Mapper 3.
 #
