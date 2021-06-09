@@ -537,6 +537,33 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         return valid_output, error_message
 
+    def create_datagrabber_node(self, base_directory):
+        """Create the appropriate Nipype DataGrabber node.`
+
+        Parameters
+        ----------
+        base_directory : Directory
+            Main CMP output directory of a subject
+            e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
+
+        Returns
+        -------
+        datasource : Output Nipype DataGrabber Node
+            Output Nipype Node with :obj:`~nipype.interfaces.io.DataGrabber` interface
+        """
+        datasource = pe.Node(
+            interface=nio.DataGrabber(outfields=["T1"]), name="anat_datasource"
+        )
+        datasource.inputs.base_directory = os.path.abspath(base_directory)
+        datasource.inputs.template = "*"
+        datasource.inputs.raise_on_empty = False
+        datasource.inputs.field_template = dict(
+            T1="anat/" + self.subject + "_desc-cmp_T1w.nii.gz"
+        )
+        datasource.inputs.sort_filelist = False
+    
+        return datasource
+
     def create_datasinker_node(self, base_directory):
         """Create the appropriate Nipype DataSink node depending on the `parcellation_scheme`
 
@@ -676,19 +703,12 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         anat_flow : nipype.pipeline.engine.Workflow
             An instance of :class:`nipype.pipeline.engine.Workflow`
         """
-        # Data import
-        datasource = pe.Node(
-            interface=nio.DataGrabber(outfields=["T1"]), name="datasource"
+        # Data grabber for inputs
+        datasource = self.create_datagrabber_node(
+            base_directory=cmp_deriv_subject_directory
         )
-        datasource.inputs.base_directory = cmp_deriv_subject_directory
-        datasource.inputs.template = "*"
-        datasource.inputs.raise_on_empty = False
-        datasource.inputs.field_template = dict(
-            T1="anat/" + self.subject + "_desc-cmp_T1w.nii.gz"
-        )
-        datasource.inputs.sort_filelist = False
-
-        # Data sinker for output
+        
+        # Data sinker for outputs
         sinker = self.create_datasinker_node(
             base_directory=cmp_deriv_subject_directory
         )
