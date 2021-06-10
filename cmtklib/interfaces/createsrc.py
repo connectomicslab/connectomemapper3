@@ -48,8 +48,10 @@ class CreateSrc(BaseInterface):
         bids_dir = self.inputs.bids_dir
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
-
-        self._create_src_space(subject, bids_dir)
+        
+        src_fname = os.path.join(bids_dir,'derivatives','mne',subject,subject+'-oct6-src_surf_only.fif')
+        if not os.path.exists(src_fname):
+            self._create_src_space(subject, bids_dir)
 
         self.derivative_list.append('MNE')
 
@@ -64,7 +66,7 @@ class CreateSrc(BaseInterface):
     def _create_src_space(subject,bids_dir):
         # from notebook 
         overwrite_src = True 
-        src_fname = os.path.join(bids_dir,'derivatives','mne',subject,subject+'-oct6-src_surf_only.fif')
+        
         subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
         src = mne.setup_source_space(subject=subject, spacing='oct6', subjects_dir=subjects_dir)
         mne.write_source_spaces(src_fname,src,overwrite=overwrite_src)

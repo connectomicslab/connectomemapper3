@@ -65,25 +65,24 @@ class CreateBEM(BaseInterface):
         # from notebook 
         # create the boundaries between the tissues, using segmentation file 
         subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
-        if "bem" not in os.listdir(os.path.join(subjects_dir,subject)):
-            # probably not necessary because already done 
-            #cmd = "export SUBJECTS_DIR="+subjects_dir
-            #os.system(cmd)
-            cmd = "mne watershed_bem -s "+subject
-            os.system(cmd)
+        if not "bem" in os.listdir(os.path.join(subjects_dir,subject)):
+            mne.bem.make_watershed_bem(subject,subjects_dir) # still need to check if this actually works
         
         # create the conductor model 
         conductivity = (0.3, 0.006, 0.3)  # for three layers
         bemfilename = os.path.join(subjects_dir,subject,'bem',subject+'_conductor_model.fif')
+        
+        # file names required by mne's make_bem_model not consistent with file names outputted by mne's make_watershed_bem - copy and rename 
         for elem in ["inner_skull","outer_skull","outer_skin"]:
-            if (elem not in os.listdir(os.path.join(subjects_dir,subject,'bem'))) and ("watershed" in os.listdir(os.path.join(subjects_dir,subject,'bem'))):
-                cmd = 'cp '+ os.path.join(subjects_dir,subject,'bem','watershed','*'+elem+'*') + ' ' + os.path.join(subjects_dir,'sub-'+subject,'bem',elem+'.surf')
+            elem1 = subject+'_'+elem+'_surface' # file name used by make_watershed_bem 
+            elem2 = elem+'.surf' # file name used by make_bem_model
+            if (elem2 not in os.listdir(os.path.join(subjects_dir,subject,'bem'))) and ("watershed" in os.listdir(os.path.join(subjects_dir,subject,'bem'))):
+                cmd = 'cp '+ os.path.join(subjects_dir,subject,'bem','watershed',elem1) + ' ' + os.path.join(subjects_dir,subject,'bem',elem2)
                 os.system(cmd)  
-            model = mne.make_bem_model(subject=subject, ico=4,
-                               conductivity=conductivity,
-                               subjects_dir=subjects_dir)
-            bem = mne.make_bem_solution(model)
-            mne.write_bem_solution(bemfilename,bem,overwrite=True)
+                
+        model = mne.make_bem_model(subject=subject, ico=4, conductivity=conductivity, subjects_dir=subjects_dir)
+        bem = mne.make_bem_solution(model)
+        mne.write_bem_solution(bemfilename,bem)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
