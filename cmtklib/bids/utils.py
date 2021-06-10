@@ -182,7 +182,7 @@ class CreateBIDSStandardParcellationLabelIndexMappingFileInputSpec(
 
 
 class CreateBIDSStandardParcellationLabelIndexMappingFileOutputSpec(
-    BaseInterfaceInputSpec
+    TraitedSpec
 ):
     """Specify the output of the :obj:`~cmtklib.bids.utils.CreateBIDSStandardParcellationLabelIndexMappingFile`."""
 
@@ -303,7 +303,7 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec(
 
 
 class CreateCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec(
-    BaseInterfaceInputSpec
+    TraitedSpec
 ):
     """Specify the output of the :obj:`~cmtklib.bids.utils.CreateCMPParcellationNodeDescriptionFilesFromBIDSFile`."""
 
