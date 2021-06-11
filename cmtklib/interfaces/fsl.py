@@ -434,7 +434,7 @@ class ApplymultipleXfmInputSpec(BaseInterfaceInputSpec):
 
     reference = File(desc="Reference image used for target space",
                      mandatory=True, exists=True)
-    
+
     interp = Enum('nearestneighbour', 'spline',
                   desc='Interpolation used')
 

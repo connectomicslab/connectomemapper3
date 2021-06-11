@@ -971,7 +971,7 @@ class RegistrationStage(Stage):
                     ]
                 )
                 # fmt:on
-        
+
         if (self.config.pipeline == "fMRI") and (self.config.registration_mode == "BBregister (FS)"):
 
             fs_bbregister = pe.Node(

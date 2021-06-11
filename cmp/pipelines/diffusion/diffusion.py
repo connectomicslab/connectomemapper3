@@ -261,7 +261,7 @@ class DiffusionPipeline(Pipeline):
 
     def _atlas_info_changed(self, new):
         pass
-    
+
     def get_file(self, layout, subject, suffix, extensions, session=None):
         """Query files with PyBIDS and take the first file in the returned list or get a specific dmri file if BIDS acq- keyword is used in filename.
 
@@ -837,9 +837,9 @@ class DiffusionPipeline(Pipeline):
             recon_model = "SHORE"
         else:
             if recon_tool == "Dipy" and self.stages["Diffusion"].config.dipy_recon_config.local_model:
-                    recon_model = "CSD"
+                recon_model = "CSD"
             elif recon_tool == "MRtrix" and self.stages["Diffusion"].config.mrtrix_recon_config.local_model:
-                    recon_model = "CSD"
+                recon_model = "CSD"
 
         tracking_model = self.stages["Diffusion"].config.diffusion_model
 

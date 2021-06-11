@@ -14,8 +14,7 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     BaseInterface,
     TraitedSpec,
-    File,
-    
+    File
 )
 
 

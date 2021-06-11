@@ -561,7 +561,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             T1="anat/" + self.subject + "_desc-cmp_T1w.nii.gz"
         )
         datasource.inputs.sort_filelist = False
-    
+
         return datasource
 
     def create_datasinker_node(self, base_directory):
@@ -818,7 +818,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 [
                     (seg_flow, parc_flow, [("outputnode.custom_wm_mask", "inputnode.custom_wm_mask")]),
                     (seg_flow, anat_outputnode, [("outputnode.brain_mask", "brain_mask"),
-                                                 ("outputnode.brain", "brain")])
+                                                 ("outputnode.brain", "brain")]),
                     (anat_inputnode, anat_outputnode, [("T1", "T1")]),
                     (parc_flow, anat_outputnode, [("outputnode.wm_mask_file", "wm_mask_file"),
                                                   ("outputnode.parcellation_scheme", "parcellation_scheme"),

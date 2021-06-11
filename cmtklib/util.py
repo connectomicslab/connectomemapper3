@@ -70,8 +70,6 @@ def get_basename(path):
     path : os.path
         Path to the containing directory
     """
-    import os
-
     return os.path.basename(path)
 
 

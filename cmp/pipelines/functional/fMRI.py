@@ -448,7 +448,7 @@ class fMRIPipeline(Pipeline):
         base_directory : Directory
             Main CMP output directory of a subject
             e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
-            
+
         bids_atlas_label : string
             Parcellation atlas label
 

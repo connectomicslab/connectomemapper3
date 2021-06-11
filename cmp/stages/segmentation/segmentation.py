@@ -223,7 +223,6 @@ class SegmentationStage(Stage):
         outputnode : nipype.interfaces.utility.IdentityInterface
             Identity interface describing the outputs of the stage
         """
-        
         if self.config.seg_tool == "Freesurfer":
             
             def correct_freesurfer_subjectid_path(path):

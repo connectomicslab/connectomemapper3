@@ -6,15 +6,12 @@
 
 """ CMP preprocessing Stage (not used yet!)
 """
-# from pyface.message_dialog import error
 import os
 import glob
 
 from traits.api import *
 
-from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 import nipype.interfaces.utility as util
-
 import nipype.pipeline.engine as pe
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs
@@ -23,7 +20,6 @@ import nipype.interfaces.dipy as dipy
 from cmp.stages.common import Stage
 
 import cmtklib.interfaces.fsl as cmp_fsl
-
 # from cmp.pipelines.common import MRThreshold, ExtractMRTrixGrad
 from cmtklib.interfaces.mrtrix3 import (
     DWIDenoise,

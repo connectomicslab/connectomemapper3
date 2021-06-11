@@ -211,7 +211,7 @@ def cmat(
     en_fname = "endpoints.npy"
     en_fnamemm = "endpointsmm.npy"
     curv_fname = "meancurvature.npy"
-    
+
     fib, hdr = nib.trackvis.read(intrk, False)
     n = len(fib)  # number of fibers
     
