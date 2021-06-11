@@ -235,9 +235,22 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
             in_node_description = node[1]
             # Fill index and name
             out_node_description = {
-                "index": in_node_description["dn_multiscaleID"],
-                "name": in_node_description["dn_name"].lower(),
+                "index": 'n/a',
+                "name": 'n/a',
             }
+            in_node_description_keys = list(in_node_description.keys())
+            if ("dn_correspondence_id" in in_node_description_keys) and ("dn_fsname" in in_node_description_keys):
+                out_node_description = {
+                    "index": in_node_description["dn_correspondence_id"],
+                    "name": in_node_description["dn_fsname"].lower(),
+                }
+            elif ("dn_multiscaleID" in in_node_description_keys) and ("dn_name" in in_node_description_keys):
+                out_node_description = {
+                    "index": in_node_description["dn_multiscaleID"],
+                    "name": in_node_description["dn_name"].lower(),
+                }
+            else:
+                print('  .. Error: Parcellation keys not found in the graphml.')
             # Convert RGB color to hexadecimal
             r, g, b = (
                 rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 1],
