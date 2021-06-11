@@ -224,7 +224,7 @@ class SegmentationStage(Stage):
             Identity interface describing the outputs of the stage
         """
         if self.config.seg_tool == "Freesurfer":
-            
+    
             def correct_freesurfer_subjectid_path(path):
                 if '/output_dir' not in path:
                     subject_id = path.split("freesurfer/")[-1]
@@ -235,7 +235,7 @@ class SegmentationStage(Stage):
                 if '/output_dir' not in path:
                     path = os.path.abspath(f'/output_dir/freesurfer')
                 return path
-            
+
             if self.config.use_existing_freesurfer_data is False:
                 # Converting to .mgz format
                 fs_mriconvert = pe.Node(

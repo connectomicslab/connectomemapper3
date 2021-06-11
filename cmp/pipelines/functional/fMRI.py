@@ -540,7 +540,7 @@ class fMRIPipeline(Pipeline):
             # fmt:on
 
         datasource.inputs.sort_filelist = False
-        
+
         return datasource
 
     def create_datasinker_node(self, base_directory, bids_atlas_label):

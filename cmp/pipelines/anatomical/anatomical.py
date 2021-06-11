@@ -707,7 +707,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         datasource = self.create_datagrabber_node(
             base_directory=cmp_deriv_subject_directory
         )
-        
+   
         # Data sinker for outputs
         sinker = self.create_datasinker_node(
             base_directory=cmp_deriv_subject_directory

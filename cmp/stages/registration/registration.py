@@ -1118,7 +1118,7 @@ class RegistrationStage(Stage):
             )
             mr_convert.inputs.quiet = True
             mr_convert.inputs.force_writing = True
-    
+
             concatnode = pe.Node(interface=util.Merge(2), name="concatnode")
     
             # fmt:off

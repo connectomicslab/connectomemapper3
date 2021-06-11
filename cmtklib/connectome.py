@@ -214,7 +214,7 @@ def cmat(
 
     fib, hdr = nib.trackvis.read(intrk, False)
     n = len(fib)  # number of fibers
-    
+
     if parcellation_scheme != "Custom":
         if parcellation_scheme != "Lausanne2018":
             resolutions = get_parcellation(parcellation_scheme)

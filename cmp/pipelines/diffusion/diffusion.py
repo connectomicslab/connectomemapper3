@@ -269,7 +269,7 @@ class DiffusionPipeline(Pipeline):
         ----------
         layout : Instance(BIDSLayout)
             Instance of pybids BIDSLayout
-            
+ 
         subject : str
             BIDS subject/participant label i.e. XX in sub-XX
 
@@ -655,7 +655,7 @@ class DiffusionPipeline(Pipeline):
         base_directory : Directory
             Main CMP output directory of a subject
             e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
-            
+
         bids_atlas_label : string
             Parcellation atlas label
 
@@ -709,7 +709,7 @@ class DiffusionPipeline(Pipeline):
         base_directory : Directory
             Main CMP output directory of a subject
             e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
-            
+
         bids_atlas_label : string
             Parcellation atlas label
             
@@ -737,7 +737,7 @@ class DiffusionPipeline(Pipeline):
             ("anat_resampled_warped", self.subject + "_space-DWI_desc-head_T1w"),
             ("brain_warped", self.subject + "_space-DWI_desc-brain_T1w"),
             ("anat_masked_resampled_warped", self.subject + "_space-DWI_desc-brain_T1w"),
-            ("brain_mask_registered_temp_crop",self.subject + "_space-DWI_desc-brain_mask"),
+            ("brain_mask_registered_temp_crop", self.subject + "_space-DWI_desc-brain_mask"),
             ("brain_mask_resampled_warped.nii.gz", self.subject + "_space-DWI_desc-brain_mask"),
             ("wm_mask_warped", self.subject + "_space-DWI_label-WM_dseg"),
             ("wm_mask_registered", self.subject + "_space-DWI_label-WM_dseg"),
@@ -1140,7 +1140,7 @@ class DiffusionPipeline(Pipeline):
                 )
 
         # Initialization
-        log_file = os.path.join( nipype_deriv_subject_directory, "diffusion_pipeline", "pypeline.log")
+        log_file = os.path.join(nipype_deriv_subject_directory, "diffusion_pipeline", "pypeline.log")
 
         if os.path.isfile(log_file):
             os.unlink(log_file)
