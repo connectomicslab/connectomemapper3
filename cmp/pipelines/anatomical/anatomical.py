@@ -923,6 +923,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         config.update_config(
             {
                 "logging": {
+                    "workflow_level": "DEBUG",
+                    "interface_level": "DEBUG",
                     "log_directory": os.path.join(
                         nipype_deriv_subject_directory, "anatomical_pipeline"
                     ),
@@ -932,6 +934,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     "remove_unnecessary_outputs": False,
                     "stop_on_first_crash": True,
                     "stop_on_first_rerun": False,
+                    "try_hard_link_datasink": True,
                     "use_relative_paths": True,
                     "crashfile_format": "txt",
                 },

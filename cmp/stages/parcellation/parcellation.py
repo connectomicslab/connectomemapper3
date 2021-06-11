@@ -361,6 +361,7 @@ class ParcellationStage(Stage):
                     name="createBIDSLabelIndexMappingFile",
                     iterfield=['roi_graphml', 'roi_colorlut']
                 )
+                createBIDSLabelIndexMappingFile.inputs.verbose = True
                 # fmt: off
                 flow.connect(
                     [
@@ -456,6 +457,7 @@ class ParcellationStage(Stage):
                         name="createBIDSLabelIndexMappingFile",
                         iterfield=['roi_graphml', 'roi_colorlut']
                 )
+                createBIDSLabelIndexMappingFile.inputs.verbose = True
                 # fmt: off
                 flow.connect(
                     [

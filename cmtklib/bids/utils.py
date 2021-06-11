@@ -188,8 +188,8 @@ class CreateBIDSStandardParcellationLabelIndexMappingFileOutputSpec(
 
     roi_bids_tsv = File(
         exists=True,
-        desc="Output BIDS standard generic label-index mapping file that "
-        "describes parcellation nodes",
+        mandatory=True,
+        desc="Output BIDS standard generic label-index mapping file that describes parcellation nodes",
     )
 
 
