@@ -1120,7 +1120,7 @@ class RegistrationStage(Stage):
             mr_convert.inputs.force_writing = True
 
             concatnode = pe.Node(interface=util.Merge(2), name="concatnode")
-    
+
             # fmt:off
             flow.connect(
                 [
@@ -1131,11 +1131,11 @@ class RegistrationStage(Stage):
                 ]
             )
             # fmt:on
-    
+
             grad_mrtrix = pe.Node(
                 ExtractMRTrixGrad(out_grad_mrtrix="grad.txt"), name="extract_grad"
             )
-    
+
             # fmt:off
             flow.connect(
                 [
@@ -1146,14 +1146,14 @@ class RegistrationStage(Stage):
                 ]
             )
             # fmt:on
-    
+
             mr_convert_b0 = pe.Node(
                 interface=MRConvert(out_filename="b0.nii.gz", stride=[+1, +2, +3]),
                 name="mr_convert_b0",
             )
             mr_convert_b0.inputs.extract_at_axis = 3
             mr_convert_b0.inputs.extract_at_coordinate = [0]
-    
+
             # fmt:off
             flow.connect(
                 [
@@ -1161,7 +1161,7 @@ class RegistrationStage(Stage):
                 ]
             )
             # fmt:on
-    
+
             dwi2tensor = pe.Node(
                 interface=DWI2Tensor(out_filename="dt_corrected.mif"), name="dwi2tensor"
             )
@@ -1169,7 +1169,7 @@ class RegistrationStage(Stage):
                 interface=DWI2Tensor(out_filename="dt_corrected_unmasked.mif"),
                 name="dwi2tensor_unmasked",
             )
-    
+
             tensor2FA = pe.Node(
                 interface=TensorMetrics(out_fa="fa_corrected.mif"), name="tensor2FA"
             )
@@ -1177,7 +1177,7 @@ class RegistrationStage(Stage):
                 interface=TensorMetrics(out_fa="fa_corrected_unmasked.mif"),
                 name="tensor2FA_unmasked",
             )
-    
+
             mr_convert_FA = pe.Node(
                 interface=MRConvert(
                     out_filename="fa_corrected.nii.gz", stride=[+1, +2, +3]
@@ -1190,7 +1190,7 @@ class RegistrationStage(Stage):
                 ),
                 name="mr_convert_FA_unmasked",
             )
-    
+
             FA_noNaN = pe.Node(
                 interface=cmp_fsl.MathsCommand(
                     out_file="fa_corrected_nonan.nii.gz", nan2zeros=True
@@ -1203,7 +1203,7 @@ class RegistrationStage(Stage):
                 ),
                 name="FA_noNaN_unmasked",
             )
-    
+
             # fmt:off
             flow.connect(
                 [
@@ -1220,7 +1220,7 @@ class RegistrationStage(Stage):
                 ]
             )
             # fmt:on
-    
+
             # [1.2] Linear registration of the DW data to the T1 data
             fsl_flirt = pe.Node(
                 interface=fsl.FLIRT(
@@ -1233,7 +1233,7 @@ class RegistrationStage(Stage):
             fsl_flirt.inputs.cost_func = self.config.fsl_cost
             fsl_flirt.inputs.no_search = self.config.no_search
             fsl_flirt.inputs.verbose = False
-    
+
             # fmt:off
             flow.connect(
                 [
@@ -1242,12 +1242,12 @@ class RegistrationStage(Stage):
                 ]
             )
             # fmt:on
-    
+
             # [1.3] Transforming T1-space images to avoid rotation of bvecs
             T12DWIaff = pe.Node(
                 interface=fsl.ConvertXFM(invert_xfm=False), name="T12DWIaff"
             )
-    
+
             # fmt:off
             flow.connect(
                 [
@@ -1256,7 +1256,7 @@ class RegistrationStage(Stage):
                 ]
             )
             # fmt:on
-    
+
             fsl_applyxfm_wm = pe.Node(
                 interface=fsl.ApplyXFM(
                     apply_xfm=True,
@@ -1296,7 +1296,7 @@ class RegistrationStage(Stage):
                 ),
                 name="apply_registration_T1",
             )
-    
+
             fsl_applyxfm_5tt = pe.Node(
                 interface=fsl.ApplyXFM(
                     apply_xfm=True, interp="spline", out_file="5tt_registered.nii.gz"
@@ -1309,7 +1309,7 @@ class RegistrationStage(Stage):
                 ),
                 name="apply_registration_gmwmi",
             )
-    
+
             # fmt:off
             flow.connect(
                 [
@@ -1341,11 +1341,11 @@ class RegistrationStage(Stage):
                 ]
             )
             # fmt:on
-    
+
             fsl_fnirt_crop = pe.Node(
                 interface=fsl.FNIRT(fieldcoeff_file=True), name="fsl_fnirt_crop"
             )
-    
+
             # fmt:off
             flow.connect(
                 [
@@ -1357,7 +1357,7 @@ class RegistrationStage(Stage):
                 ]
             )
             # fmt:on
-    
+
             fsl_applywarp_T1 = pe.Node(
                 interface=fsl.ApplyWarp(interp="spline", out_file="T1_warped.nii.gz"),
                 name="apply_warp_T1",
@@ -1385,7 +1385,7 @@ class RegistrationStage(Stage):
             fsl_applywarp_rois = pe.Node(
                 interface=ApplymultipleWarp(interp="nn"), name="apply_warp_roivs"
             )
-    
+
             # fmt:off
             flow.connect(
                 [

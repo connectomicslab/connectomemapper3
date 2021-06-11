@@ -269,7 +269,7 @@ class DiffusionPipeline(Pipeline):
         ----------
         layout : Instance(BIDSLayout)
             Instance of pybids BIDSLayout
- 
+
         subject : str
             BIDS subject/participant label i.e. XX in sub-XX
 
@@ -304,7 +304,7 @@ class DiffusionPipeline(Pipeline):
             # TODO: Better parsing of multiple runs
         else:
             out_file = None
- 
+
         return out_file
 
     def check_input(self, layout, gui=True):
@@ -347,7 +347,7 @@ class DiffusionPipeline(Pipeline):
             print("> Looking for....")
 
             if self.global_conf.subject_session == "":
-    
+
                 dwi_file = self.get_file(layout, subject=subjid, suffix="dwi", extensions=".nii.gz")
                 if dwi_file is None:
                     print("ERROR : Diffusion image not found for subject %s." % subjid)
@@ -698,7 +698,7 @@ class DiffusionPipeline(Pipeline):
         datasource.inputs.raise_on_empty = False
         datasource.inputs.field_template = self.create_field_template_dict(bids_atlas_label=bids_atlas_label)
         datasource.inputs.sort_filelist = True
-        
+
         return datasource
 
     def create_datasinker_node(self, base_directory, bids_atlas_label, recon_model, tracking_model):
@@ -712,10 +712,10 @@ class DiffusionPipeline(Pipeline):
 
         bids_atlas_label : string
             Parcellation atlas label
-            
+
         recon_model : string
             Diffusion signal model (`DTI` or `CSD`)
-            
+
         tracking_model : string
             Tractography algorithm (`DET` or `PROB`)
 
@@ -805,7 +805,7 @@ class DiffusionPipeline(Pipeline):
                     f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_conndata-network_connectivity'),
             ]
             # fmt:on
-        
+
         return sinker
 
     def create_pipeline_flow(
@@ -832,7 +832,7 @@ class DiffusionPipeline(Pipeline):
         recon_tool = self.stages["Diffusion"].config.recon_processing_tool
 
         recon_model = "DTI"
-        
+
         if acquisition_model == "DSI":
             recon_model = "SHORE"
         else:
@@ -909,7 +909,7 @@ class DiffusionPipeline(Pipeline):
             recon_model=recon_model,
             tracking_model=tracking_model
         )
-        
+
         # fmt:off
         diffusion_flow.connect(
             [

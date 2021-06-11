@@ -551,7 +551,7 @@ class fMRIPipeline(Pipeline):
         base_directory : Directory
             Main CMP output directory of a subject
             e.g. ``/output_dir/cmp/sub-XX/(ses-YY)``
-            
+
         bids_atlas_label : string
             Parcellation atlas label
             
@@ -606,7 +606,7 @@ class fMRIPipeline(Pipeline):
                 # fmt:on
 
             sinker.inputs.substitutions = substitutions
-            
+
             return sinker
 
     def create_pipeline_flow(
