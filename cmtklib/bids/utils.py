@@ -295,11 +295,10 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
 
     @staticmethod
     def _gen_output_filename(input_file):
-        import os.path as op
         from pathlib import Path
 
         fpath = Path(input_file)
-        return op.abspath(str(fpath.stem) + ".tsv")
+        return str(fpath.stem) + ".tsv"
 
 
 class CreateCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec(
@@ -444,13 +443,12 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
 
     @staticmethod
     def _gen_output_filename(input_tsv_filename, output_type):
-        import os.path as op
         from pathlib import Path
 
         tsv_filename_path = Path(input_tsv_filename)
         if output_type == "colorlut":
             outprefix_name = tsv_filename_path.stem
-            return op.abspath("{}_FreeSurferColorLUT.txt".format(outprefix_name))
+            return "{}_FreeSurferColorLUT.txt".format(outprefix_name)
         if output_type == "graphml":
             outprefix_name = tsv_filename_path.stem
-            return op.abspath("{}.2.graphml".format(outprefix_name))
+            return "{}.2.graphml".format(outprefix_name)
