@@ -4,13 +4,16 @@ import os
 
 
 class EEGLoaderInputSpec(BaseInterfaceInputSpec):
-    """Input specification for EEGLAB2fif. """
+    """Input specification for EEGLoader. """
 
     base_directory = traits.Directory(
         exists=True, desc='BIDS data directory', mandatory=True)
 
     subject = traits.Str(
         desc='subject', mandatory=True)
+    
+    invsol_format = traits.Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
+            desc='Cartool vs mne')
 
     output_query = traits.Dict(
         desc='output query for BIDSDataGrabber', mandatory=True)
@@ -35,6 +38,8 @@ class EEGLoaderOutputSpec(TraitedSpec):
 class EEGLoader(BaseInterface):
     input_spec = EEGLoaderInputSpec
     output_spec = EEGLoaderOutputSpec
+    import pdb
+    pdb.set_trace()
 
     def _run_interface(self, runtime):
         self.base_directory = self.inputs.base_directory
@@ -44,6 +49,8 @@ class EEGLoader(BaseInterface):
         return runtime
 
     def _run_datagrabber(self):
+        import pdb
+        pdb.set_trace()
         bidsdatagrabber = nio.BIDSDataGrabber(index_derivatives=False,
                                               extra_derivatives=[os.path.join(self.base_directory, 'derivatives', elem)
                                                                  for elem in self.derivative_list])

@@ -224,7 +224,7 @@ class EEGPipeline(Pipeline):
         invsol_flow = self.create_stage_flow("EEGInverseSolution")
         
         # fmt: off
-        if self.stages['EEGInverseSolution'].config.invsol_format.split('-')[0] == "Cartool": 
+        if self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == "Cartool": 
             eeg_flow.connect(
                 [
                     (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
@@ -235,7 +235,8 @@ class EEGPipeline(Pipeline):
                                                  ('output_query', 'inputnode.output_query')]),
                     (datasource, loader_flow, [('base_directory', 'inputnode.base_directory'),
                                                ('subject', 'inputnode.subject')]),
-                    (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
+                    (preparer_flow, loader_flow, [('outputnode.invsol_format','inputnode.invsol_format'),
+                                                  ('outputnode.output_query', 'inputnode.output_query'),
                                                   ('outputnode.derivative_list', 'inputnode.derivative_list')]),
                     (loader_flow, invsol_flow, [('outputnode.EEG', 'inputnode.eeg_ts_file'),
                                                 ('outputnode.rois', 'inputnode.rois_file'),
@@ -246,7 +247,7 @@ class EEGPipeline(Pipeline):
                     (invsol_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
                 ]
             )
-        elif self.stages['EEGInverseSolution'].config.invsol_format.split('-')[0] == 'mne':
+        elif self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == 'mne':
             eeg_flow.connect(
                 [
                     (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),

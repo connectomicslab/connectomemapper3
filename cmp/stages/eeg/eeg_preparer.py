@@ -55,6 +55,7 @@ class EEGPreparerStage(Stage):
             "bids_dir",
         ]
         self.outputs = [
+            "invsol_format",
             "output_query",
             "invsol_params",
             "derivative_list"
@@ -63,6 +64,10 @@ class EEGPreparerStage(Stage):
     def create_workflow(self, flow, inputnode, outputnode):
         inputnode.inputs.derivative_list = []
         inputnode.inputs.output_query = {}
+        
+        # pass invsol format on to next stage in EEG flow 
+        flow.connect([(inputnode,outputnode,[('invsol_format','invsol_format')])])
+        
         if self.config.eeg_format == ".set":
 
             eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
@@ -77,7 +82,8 @@ class EEGPreparerStage(Stage):
 
             if (not self.config.invsol_format.split('-')[0] == "Cartool") & (not self.config.invsol_format.split('-')[0] == "mne"):
                 flow.connect([(eeglab2fif_node, outputnode,
-                               [('output_query', 'output_query'),
+                               [('invsol_format','invsol_format'),
+                                ('output_query', 'output_query'),
                                 ('derivative_list', 'derivative_list')]
                                )])
 
@@ -131,7 +137,6 @@ class EEGPreparerStage(Stage):
             createsrc_node = pe.Node(CreateSrc(), name="createsrc")
             createbem_node = pe.Node(CreateBEM(), name="createbem")
             inputnode.inputs.base_dir = self.bids_dir
-            # inputnode.inputs.subject = self.subject
             
             # create source space 
             flow.connect([(eeglab2fif_node, createsrc_node,

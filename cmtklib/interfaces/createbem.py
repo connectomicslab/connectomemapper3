@@ -51,7 +51,7 @@ class CreateBEM(BaseInterface):
 
         self._create_BEM(subject, bids_dir)
 
-        self.derivative_list.append('MNE')
+        self.derivative_list.append('mne')
 
         self.output_query['bem'] = {
             'scope': 'MNE',

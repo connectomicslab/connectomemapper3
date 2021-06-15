@@ -33,7 +33,7 @@ def info():
 
 
 # Checks the needed dependencies. We call directly the functions instead
-# of just checking existence in $PATH in order to handl missing libraries.
+# of just checking existence in $PATH in order to handle missing libraries.
 # Note that not all the commands give the awaited 1 exit code...
 def dep_check():
     """Check if dependencies are installed.

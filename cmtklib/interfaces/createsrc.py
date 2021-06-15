@@ -46,24 +46,27 @@ class CreateSrc(BaseInterface):
     def _run_interface(self, runtime):
         subject = self.inputs.subject
         bids_dir = self.inputs.bids_dir
+        
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
         
         src_fname = os.path.join(bids_dir,'derivatives','mne',subject,subject+'-oct6-src_surf_only.fif')
         if not os.path.exists(src_fname):
-            self._create_src_space(subject, bids_dir)
-
-        self.derivative_list.append('MNE')
+            self._create_src_space(subject,bids_dir,src_fname)
+        import pdb
+        pdb.set_trace()
+        self.derivative_list.append('mne')
 
         self.output_query['src'] = {
-            'scope': 'MNE',
+            'scope': 'mne',
+            'suffix': 'oct6-src_surf_only',
             'extensions': ['fif']
         }
 
         return runtime
 
     @staticmethod
-    def _create_src_space(subject,bids_dir):
+    def _create_src_space(subject,bids_dir,src_fname):
         # from notebook 
         overwrite_src = True 
         
