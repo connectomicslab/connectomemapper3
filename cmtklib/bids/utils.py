@@ -186,8 +186,6 @@ class CreateBIDSStandardParcellationLabelIndexMappingFileOutputSpec(
     """Specify the output of the :obj:`~cmtklib.bids.utils.CreateBIDSStandardParcellationLabelIndexMappingFile`."""
 
     roi_bids_tsv = File(
-        exists=True,
-        mandatory=True,
         desc="Output BIDS standard generic label-index mapping file that describes parcellation nodes",
     )
 
@@ -319,11 +317,9 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec(
     """Specify the output of the :obj:`~cmtklib.bids.utils.CreateCMPParcellationNodeDescriptionFilesFromBIDSFile`."""
 
     roi_graphml = File(
-        exists=True,
         desc="Path to graphml file that describes graph nodes for a given parcellation",
     )
     roi_colorlut = File(
-        exists=True,
         desc="Path to FreesurferColorLUT.txt file that describes the RGB color of the "
         "graph nodes for a given parcellation",
     )
