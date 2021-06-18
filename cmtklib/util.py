@@ -70,6 +70,8 @@ def get_basename(path):
     path : os.path
         Path to the containing directory
     """
+    import os  # Important to be used as Nipype connect function
+
     return os.path.basename(path)
 
 
