@@ -286,6 +286,7 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         output_tsv_filename = self._gen_output_filename(self.inputs.roi_graphml)
+        output_tsv_filename = os.path.abspath(output_tsv_filename)
         if self.inputs.verbose:
             print(f'\t\t > Set roi_bids_tsv output to {output_tsv_filename}')
         outputs["roi_bids_tsv"] = output_tsv_filename
