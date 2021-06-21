@@ -38,8 +38,6 @@ class EEGLoaderOutputSpec(TraitedSpec):
 class EEGLoader(BaseInterface):
     input_spec = EEGLoaderInputSpec
     output_spec = EEGLoaderOutputSpec
-    import pdb
-    pdb.set_trace()
 
     def _run_interface(self, runtime):
         self.base_directory = self.inputs.base_directory
@@ -49,8 +47,6 @@ class EEGLoader(BaseInterface):
         return runtime
 
     def _run_datagrabber(self):
-        import pdb
-        pdb.set_trace()
         bidsdatagrabber = nio.BIDSDataGrabber(index_derivatives=False,
                                               extra_derivatives=[os.path.join(self.base_directory, 'derivatives', elem)
                                                                  for elem in self.derivative_list])
@@ -60,6 +56,8 @@ class EEGLoader(BaseInterface):
         print(bidsdatagrabber.inputs.output_query)
         print(bidsdatagrabber.inputs.base_dir)
         print(bidsdatagrabber.inputs.subject)
+        import pdb
+        pdb.set_trace()
         self.results = bidsdatagrabber.run()
 
     def _list_outputs(self):
