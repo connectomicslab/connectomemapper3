@@ -34,8 +34,6 @@ class EEGLoaderStage(Stage):
         self.outputs = ["EEG", "src", "invsol", "rois", "invsol_format"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        import pdb
-        pdb.set_trace()
         eegloader_node = pe.Node(interface=EEGLoader(), name="eegloader")
 
         flow.connect([(inputnode, eegloader_node,

@@ -36,8 +36,6 @@ class EEGInverseSolutionStage(Stage):
         self.outputs = ["roi_ts_file"]
 
     def create_workflow(self, flow, inputnode, outputnode):
-        import pdb
-        pdb.set_trace()
 
         if self.config.invsol_format.split('-')[0] == "Cartool":
             invsol_node = pe.Node(CartoolInverseSolutionROIExtraction(), name="invsol")
