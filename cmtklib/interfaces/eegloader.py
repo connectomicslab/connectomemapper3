@@ -30,9 +30,11 @@ class EEGLoaderOutputSpec(TraitedSpec):
     src = traits.List(
         exists=True, desc='src (spi loaded with pycartool)', mandatory=True)
     invsol = traits.List(
-        exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=True)
+        exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=False)
     rois = traits.List(
         exists=True, desc='parcellation scheme', mandatory=True)
+    bem = traits.List(
+        exists=True, desc='boundary surfaces for MNE head model', mandatory=False)
 
 
 class EEGLoader(BaseInterface):
@@ -56,8 +58,6 @@ class EEGLoader(BaseInterface):
         print(bidsdatagrabber.inputs.output_query)
         print(bidsdatagrabber.inputs.base_dir)
         print(bidsdatagrabber.inputs.subject)
-        import pdb
-        pdb.set_trace()
         self.results = bidsdatagrabber.run()
 
     def _list_outputs(self):

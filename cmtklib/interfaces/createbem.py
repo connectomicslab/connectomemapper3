@@ -48,14 +48,16 @@ class CreateBEM(BaseInterface):
         bids_dir = self.inputs.bids_dir
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
-
+        
+        # bem_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects',subject,'bem')
+        # if not os.path.isdir(bem_dir):
         self._create_BEM(subject, bids_dir)
-
-        self.derivative_list.append('mne')
+        
+        if 'freesurfer' not in self.derivative_list:
+            self.derivative_list.append('freesurfer')
 
         self.output_query['bem'] = {
-            'scope': 'MNE',
-            'extensions': ['fif']
+            'extensions': ['surf']
         }
 
         return runtime
@@ -65,24 +67,26 @@ class CreateBEM(BaseInterface):
         # from notebook 
         # create the boundaries between the tissues, using segmentation file 
         subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
+        import pdb
+        pdb.set_trace()
         if not "bem" in os.listdir(os.path.join(subjects_dir,subject)):
             mne.bem.make_watershed_bem(subject,subjects_dir) # still need to check if this actually works
         
-        # create the conductor model 
-        conductivity = (0.3, 0.006, 0.3)  # for three layers
-        bemfilename = os.path.join(subjects_dir,subject,'bem',subject+'_conductor_model.fif')
-        
-        # file names required by mne's make_bem_model not consistent with file names outputted by mne's make_watershed_bem - copy and rename 
-        for elem in ["inner_skull","outer_skull","outer_skin"]:
-            elem1 = subject+'_'+elem+'_surface' # file name used by make_watershed_bem 
-            elem2 = elem+'.surf' # file name used by make_bem_model
-            if (elem2 not in os.listdir(os.path.join(subjects_dir,subject,'bem'))) and ("watershed" in os.listdir(os.path.join(subjects_dir,subject,'bem'))):
-                cmd = 'cp '+ os.path.join(subjects_dir,subject,'bem','watershed',elem1) + ' ' + os.path.join(subjects_dir,subject,'bem',elem2)
-                os.system(cmd)  
-                
-        model = mne.make_bem_model(subject=subject, ico=4, conductivity=conductivity, subjects_dir=subjects_dir)
-        bem = mne.make_bem_solution(model)
-        mne.write_bem_solution(bemfilename,bem)
+            # create the conductor model 
+            conductivity = (0.3, 0.006, 0.3)  # for three layers
+            bemfilename = os.path.join(subjects_dir,subject,'bem',subject+'_conductor_model.fif')
+            
+            # file names required by mne's make_bem_model not consistent with file names outputted by mne's make_watershed_bem - copy and rename 
+            for elem in ["inner_skull","outer_skull","outer_skin"]:
+                elem1 = subject+'_'+elem+'_surface' # file name used by make_watershed_bem 
+                elem2 = elem+'.surf' # file name used by make_bem_model
+                if (elem2 not in os.listdir(os.path.join(subjects_dir,subject,'bem'))) and ("watershed" in os.listdir(os.path.join(subjects_dir,subject,'bem'))):
+                    cmd = 'cp '+ os.path.join(subjects_dir,subject,'bem','watershed',elem1) + ' ' + os.path.join(subjects_dir,subject,'bem',elem2)
+                    os.system(cmd)  
+                    
+            model = mne.make_bem_model(subject=subject, ico=4, conductivity=conductivity, subjects_dir=subjects_dir)
+            bem = mne.make_bem_solution(model)
+            mne.write_bem_solution(bemfilename,bem)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

@@ -50,16 +50,14 @@ class CreateSrc(BaseInterface):
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
         
-        src_fname = os.path.join(bids_dir,'derivatives','mne',subject,subject+'-oct6-src_surf_only.fif')
+        src_fname = os.path.join(bids_dir,'derivatives','cmp',subject,'eeg',subject+'_src.fif')
         if not os.path.exists(src_fname):
             self._create_src_space(subject,bids_dir,src_fname)
-        import pdb
-        pdb.set_trace()
-        self.derivative_list.append('mne')
+        if 'cmp' not in self.derivative_list:
+            self.derivative_list.append('cmp') 
 
         self.output_query['src'] = {
-            'scope': 'mne',
-            'suffix': 'oct6-src_surf_only',
+            'suffix': 'src',
             'extensions': ['fif']
         }
 
