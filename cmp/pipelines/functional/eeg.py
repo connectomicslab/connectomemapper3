@@ -100,8 +100,9 @@ class EEGPipeline(Pipeline):
         self.stages['EEGPreparer'].config.cmp3_dir = os.path.join(self.derivatives_directory, 'cmp')
         self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory, 'cartool')
        
-        self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
-        self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
+        # removing the following two lines because these parameters are all set to default values at this point (the config file hasn't been read yet), so setting them with each other is pointless
+        # self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
+        # self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
 
     # self.stages['EEGPreparer'].config.on_trait_change(self.update_eeg_format, 'eeg_format')
     # self.stages['EEGLoader'].config.on_trait_change(self.update_eeg_format, 'eeg_format')
@@ -157,7 +158,23 @@ class EEGPipeline(Pipeline):
         datasource.inputs.cmp_deriv_subject_directory = cmp_deriv_subject_directory
         datasource.inputs.nipype_deriv_subject_directory = nipype_deriv_subject_directory
 
-        if self.stages['EEGPreparer'].config.eeg_format == '.set':
+
+        # Create common_flow
+        eeg_flow = pe.Workflow(
+            name='eeg_pipeline',
+            base_dir=os.path.abspath(nipype_deriv_subject_directory)
+        )
+
+        # create stages (parameters specified in config file are read and set)
+        preparer_flow = self.create_stage_flow("EEGPreparer")
+        loader_flow = self.create_stage_flow("EEGLoader")
+        invsol_flow = self.create_stage_flow("EEGInverseSolution")
+        
+        self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
+        self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
+
+
+        if self.stages['EEGPreparer'].config.eeg_format == '.set': 
             datasource.inputs.epochs = [
                 os.path.join(
                     self.base_directory,
@@ -213,15 +230,6 @@ class EEGPipeline(Pipeline):
         # Clear previous outputs
         self.clear_stages_outputs()
 
-        # Create common_flow
-        eeg_flow = pe.Workflow(
-            name='eeg_pipeline',
-            base_dir=os.path.abspath(nipype_deriv_subject_directory)
-        )
-
-        preparer_flow = self.create_stage_flow("EEGPreparer")
-        loader_flow = self.create_stage_flow("EEGLoader")
-        invsol_flow = self.create_stage_flow("EEGInverseSolution")
         
         # fmt: off
         if self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == "Cartool": 
@@ -238,7 +246,8 @@ class EEGPipeline(Pipeline):
                     (preparer_flow, loader_flow, [('outputnode.invsol_format','inputnode.invsol_format'),
                                                   ('outputnode.output_query', 'inputnode.output_query'),
                                                   ('outputnode.derivative_list', 'inputnode.derivative_list')]),
-                    (loader_flow, invsol_flow, [('outputnode.EEG', 'inputnode.eeg_ts_file'),
+                    (loader_flow, invsol_flow, [('outputnode.invsol_format','inputnode.invsol_format'),
+                                                ('outputnode.EEG', 'inputnode.eeg_ts_file'),
                                                 ('outputnode.rois', 'inputnode.rois_file'),
                                                 ('outputnode.src', 'inputnode.src_file'),
                                                 ('outputnode.invsol', 'inputnode.invsol_file')]),
@@ -259,9 +268,11 @@ class EEGPipeline(Pipeline):
                                                   ('base_directory','inputnode.bids_dir')]),
                     (datasource, loader_flow, [('base_directory', 'inputnode.base_directory'),
                                                 ('subject', 'inputnode.subject')]),
-                    (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
+                    (preparer_flow, loader_flow, [('outputnode.invsol_format','inputnode.invsol_format'),
+                                                  ('outputnode.output_query', 'inputnode.output_query'),
                                                   ('outputnode.derivative_list', 'inputnode.derivative_list')]),
-                    (loader_flow, invsol_flow, [('outputnode.EEG', 'inputnode.eeg_ts_file'),
+                    (loader_flow, invsol_flow, [('outputnode.invsol_format','inputnode.invsol_format'),
+                                                ('outputnode.EEG', 'inputnode.eeg_ts_file'),
                                                 ('outputnode.rois', 'inputnode.rois_file'),
                                                 ('outputnode.src', 'inputnode.src_file'),
                                                 ('outputnode.invsol', 'inputnode.invsol_file')]),

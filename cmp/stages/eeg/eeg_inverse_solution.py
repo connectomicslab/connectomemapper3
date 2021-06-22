@@ -32,10 +32,12 @@ class EEGInverseSolutionStage(Stage):
         self.output_dir = output_dir
         self.config = EEGInverseSolutionConfig()
         self.inputs = ["eeg_ts_file", "rois_file", "src_file", "invsol_file",
-                       "lamda", "svd_params", "roi_ts_file", "invsol_params"]
+                       "lamda", "svd_params", "roi_ts_file", "invsol_params", "invsol_format"]
         self.outputs = ["roi_ts_file"]
 
     def create_workflow(self, flow, inputnode, outputnode):
+        import pdb
+        pdb.set_trace()
 
         if self.config.invsol_format.split('-')[0] == "Cartool":
             invsol_node = pe.Node(CartoolInverseSolutionROIExtraction(), name="invsol")

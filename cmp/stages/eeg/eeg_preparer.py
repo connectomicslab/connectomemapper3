@@ -67,7 +67,7 @@ class EEGPreparerStage(Stage):
         
         # pass invsol format on to next stage in EEG flow 
         flow.connect([(inputnode,outputnode,[('invsol_format','invsol_format')])])
-        
+                
         if self.config.eeg_format == ".set":
 
             eeglab2fif_node = pe.Node(EEGLAB2fif(), name="eeglab2fif")
@@ -166,7 +166,7 @@ class EEGPreparerStage(Stage):
                            [('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list')]
                            )])
-
+            
     def define_inspect_outputs(self):
         raise NotImplementedError
 
