@@ -16,6 +16,8 @@ import nipype.pipeline.engine as pe
 # Own imports
 from cmp.stages.common import Stage
 from cmtklib.interfaces.invsol import CartoolInverseSolutionROIExtraction
+from cmtklib.interfaces.createcov import CreateCov
+from cmtklib.interfaces.createfwd import CreateFwd
 from cmtklib.interfaces.invsol_MNE import MNEInverseSolution
 
 
@@ -31,8 +33,8 @@ class EEGInverseSolutionStage(Stage):
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGInverseSolutionConfig()
-        self.inputs = ["eeg_ts_file", "rois_file", "src_file", "invsol_file",
-                       "lamda", "svd_params", "roi_ts_file", "invsol_params", "invsol_format"]
+        self.inputs = ["eeg_ts_file", "epochs_fif_fname", "rois_file", "src_file", "invsol_file",
+                       "lamda", "svd_params", "roi_ts_file", "invsol_params", "bem_file"]
         self.outputs = ["roi_ts_file"]
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -54,26 +56,36 @@ class EEGInverseSolutionStage(Stage):
                     )])
             
         elif self.config.invsol_format.split('-')[0] == "mne":
-            invsol_node = pe.Node(MNEInverseSolution(), name="invsol")
-            flow.connect([(inputnode, invsol_node,
-                   [('eeg_ts_file','eeg_ts_file'),
-                  # ('rois_file','rois_file'),
-                  # ('src_file','src_file'),
-                  # ('invsol_file','invsol_file'),
-                  # ('invsol_params','invsol_params'),
-                  # ('roi_ts_file','roi_ts_file'),                
+            
+            covmat_node = pe.Node(CreateCov(), name='createcov') # compute the noise covariance
+            fwd_node = pe.Node(CreateFwd(), name='createfwd') # compute the forward solution 
+            invsol_node = pe.Node(MNEInverseSolution(), name="invsol") # compute the inverse operator 
+            
+            flow.connect([(inputnode, covmat_node,
+                   [('epochs_fif_fname','epochs_fif_fname')
                   ]
-                    )])            
+                    )])  
+            
+            flow.connect([(inputnode, fwd_node,
+                   [('src_file','src'),
+                    ('bem_file','bem')
+                  ]
+                    )]) 
+            
+            flow.connect([(covmat_node, invsol_node,
+                   [('noise_cov_file','noise_cov_file')
+                  ]
+                    )])          
+            
+            flow.connect([(fwd_node, invsol_node,
+                   [('fwd','fwd_file')
+                  ]
+                    )]) 
+
             flow.connect([(invsol_node, outputnode,
-                 [
-                  ('leadfield_file','leadfield_file'),
-                 ]
+                  [('roi_ts_file','roi_ts_file'),
+                  ]
                     )])
-            # flow.connect([(invsol_node, outputnode,
-            #      [
-            #       ('roi_ts_file','roi_ts_file'),
-            #      ]
-            #         )])
 
 
     def define_inspect_outputs(self):

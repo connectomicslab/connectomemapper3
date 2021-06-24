@@ -30,8 +30,8 @@ class EEGLoaderStage(Stage):
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGLoaderConfig()
-        self.inputs = ["subject", "base_directory", "invsol_format","output_query", "derivative_list"]
-        self.outputs = ["EEG", "src", "invsol", "rois", "invsol_format"]
+        self.inputs = ["subject", "base_directory","output_query", "derivative_list"]
+        self.outputs = ["EEG", "src", "invsol", "rois", "bem"]
 
     def create_workflow(self, flow, inputnode, outputnode):
         eegloader_node = pe.Node(interface=EEGLoader(), name="eegloader")
@@ -43,11 +43,6 @@ class EEGLoaderStage(Stage):
                         ('derivative_list', 'derivative_list')
                         ]
                        )])
-        
-        flow.connect([(inputnode, outputnode,
-                       [('invsol_format','invsol_format')
-                        ]     
-                       )])
 
         flow.connect([(eegloader_node, outputnode,
                        [
@@ -55,6 +50,7 @@ class EEGLoaderStage(Stage):
                            ('src', 'src'),
                            ('invsol', 'invsol'),
                            ('rois', 'rois'),
+                           ('bem', 'bem')
                        ]
                        )])
 

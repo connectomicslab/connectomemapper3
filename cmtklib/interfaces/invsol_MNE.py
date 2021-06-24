@@ -1,3 +1,9 @@
+# Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
+# Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
+# All rights reserved.
+#
+#  This software is distributed under the open-source license Modified BSD.
+
 import os 
 import pickle
 import numpy as  np
@@ -7,41 +13,32 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits
 class MNEInverseSolutionInputSpec(BaseInterfaceInputSpec):
     """Input specification for InverseSolution."""
     
-    #######
-    # will be taken over by EEG Loader/Preparer 
-    base_directory = traits.Directory(
-        exists=True, desc='BIDS data directory', mandatory=True)
+    # base_directory = traits.Directory(
+    #     exists=True, desc='BIDS data directory', mandatory=True)
     
-    subject = traits.Str(
-        desc='subject', mandatory=True)
-    #########
+    # subject = traits.Str(
+    #     desc='subject', mandatory=True)
     
-    # actual interface inputs 
     eeg_ts_file = traits.List(
         exists=True, desc='eeg * epochs in .set format', mandatory=True)
 
-#     src_file = traits.List(
-#         exists=True, desc='src (spi loaded with pycartool)', mandatory=True)
+    src_file = traits.List(
+        exists=True, desc='source space created with MNE', mandatory=True)
 
-#     invsol_file = traits.List(
-#         exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=True)
-
-
-#     rois_file = traits.List(
-#         exists=True, desc='rois file, loaded with pickle', mandatory=True)
-#     
-#     invsol_params = traits.Dict(
-#         desc='Parameters for inverse soltion and roi tc extraction', mandatory=True)
-#     
-
-#     roi_ts_file = traits.File(
-#         exists=False, desc="rois * time series in .npy format")
+    bem_file = traits.List(
+        exists=True, desc='surfaces for head model', mandatory=True)
+  
+    noise_cov_file = traits.File(
+        exists=True, desc="noise covariance matrix in fif format", mandatory=True)
+    
+    fwd_file = traits.File(
+        exists=True, desc="forward solution in fif format", mandatory=True)
     
 class MNEInverseSolutionOutputSpec(TraitedSpec):
     """Output specification for InverseSolution."""
 
-    leadfield_file = traits.File(
-        exists=True, desc="Leadfield matrix in .npy format")
+    roi_ts_file = traits.File(
+        exists=True, desc="rois * time series in .npy format")
 
 
 class MNEInverseSolution(BaseInterface):
@@ -56,7 +53,7 @@ class MNEInverseSolution(BaseInterface):
     output_spec = MNEInverseSolutionOutputSpec
 
     def _run_interface(self, runtime):
-        epochs_file = self.inputs.eeg_ts_file        
+        epochs_file = self.inputs.eeg_ts_file   
 #         src_file = self.inputs.src_file[0]
 #         invsol_file = self.inputs.invsol_file[0]
 #         lamda = self.inputs.lamda
@@ -65,17 +62,12 @@ class MNEInverseSolution(BaseInterface):
 #         self.roi_ts_file = self.inputs.roi_ts_file
 #         roi_tcs = self.apply_inverse_epochs_cartool(epochs_file, src_file, invsol_file, lamda, rois_file, svd_params)    
 #         np.save(self.roi_ts_file,roi_tcs)
-        self.create_bem()
+
+        import pdb
+        pdb.set_trace()
 
         return runtime
 
-    def create_bem(self): 
-        subjects_dir = 0
-        subject = 0
-        cmd = "export SUBJECTS_DIR="+subjects_dir
-        os.system(cmd)
-        cmd = "mne watershed_bem -s "+subject
-        os.system(cmd)  
 
     def apply_inverse_epochs_cartool(self, epochs_file, src_file, invsol_file, lamda,rois_file,svd_params):        
         epochs = mne.read_epochs(epochs_file)

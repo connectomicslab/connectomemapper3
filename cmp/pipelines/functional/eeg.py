@@ -265,16 +265,17 @@ class EEGPipeline(Pipeline):
                                                   ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
                                                   ('output_query', 'inputnode.output_query'),
                                                   ('base_directory','inputnode.bids_dir')]),
+                    
                     (datasource, loader_flow, [('base_directory', 'inputnode.base_directory'),
                                                 ('subject', 'inputnode.subject')]),
+                    
                     (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
                                                   ('outputnode.derivative_list', 'inputnode.derivative_list')]),
-                    (loader_flow, invsol_flow, [('outputnode.EEG', 'inputnode.eeg_ts_file'),
-                                                ('outputnode.rois', 'inputnode.rois_file'),
-                                                ('outputnode.src', 'inputnode.src_file'),
-                                                ('outputnode.invsol', 'inputnode.invsol_file')]),
-                    (datasource, invsol_flow, [('roi_ts_file', 'inputnode.roi_ts_file')]),
-                    (preparer_flow, invsol_flow, [('outputnode.invsol_params', 'inputnode.invsol_params')]),
+                    
+                    (datasource, invsol_flow, [('epochs_fif_fname', 'inputnode.epochs_fif_fname')]),
+                    (loader_flow, invsol_flow, [('outputnode.src', 'inputnode.src_file'),
+                                                ('outputnode.bem', 'inputnode.bem_file')]),
+                    
                     (invsol_flow, sinker, [("outputnode.roi_ts_file", "eeg.@roi_ts_file")]),
                 ]
             )

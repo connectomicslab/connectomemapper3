@@ -28,7 +28,7 @@ class EEGLoaderOutputSpec(TraitedSpec):
     EEG = traits.List(
         exists=True, desc='eeg * epochs in .fif format', mandatory=True)
     src = traits.List(
-        exists=True, desc='src (spi loaded with pycartool)', mandatory=True)
+        exists=True, desc='src (spi loaded with pycartool or source space created with MNE)', mandatory=True)
     invsol = traits.List(
         exists=True, desc='Inverse solution (.is file loaded with pycartool)', mandatory=False)
     rois = traits.List(

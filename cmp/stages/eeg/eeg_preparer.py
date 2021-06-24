@@ -42,7 +42,6 @@ class EEGPreparerStage(Stage):
         self.config = EEGPreparerConfig()
         self.inputs = [
             "eeg_format",
-            "invsol_format",
             "epochs",
             "behav_file",
             "parcellation",
@@ -55,7 +54,6 @@ class EEGPreparerStage(Stage):
             "bids_dir",
         ]
         self.outputs = [
-            "invsol_format",
             "output_query",
             "invsol_params",
             "derivative_list"
@@ -64,9 +62,6 @@ class EEGPreparerStage(Stage):
     def create_workflow(self, flow, inputnode, outputnode):
         inputnode.inputs.derivative_list = []
         inputnode.inputs.output_query = {}
-        
-        # pass invsol format on to next stage in EEG flow 
-        flow.connect([(inputnode,outputnode,[('invsol_format','invsol_format')])])
                 
         if self.config.eeg_format == ".set":
 
@@ -82,8 +77,7 @@ class EEGPreparerStage(Stage):
 
             if (not self.config.invsol_format.split('-')[0] == "Cartool") & (not self.config.invsol_format.split('-')[0] == "mne"):
                 flow.connect([(eeglab2fif_node, outputnode,
-                               [('invsol_format','invsol_format'),
-                                ('output_query', 'output_query'),
+                               [('output_query', 'output_query'),
                                 ('derivative_list', 'derivative_list')]
                                )])
 
