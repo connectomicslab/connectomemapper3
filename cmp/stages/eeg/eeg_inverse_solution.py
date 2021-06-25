@@ -34,7 +34,7 @@ class EEGInverseSolutionStage(Stage):
         self.output_dir = output_dir
         self.config = EEGInverseSolutionConfig()
         self.inputs = ["eeg_ts_file", "epochs_fif_fname", "rois_file", "src_file", "invsol_file",
-                       "lamda", "svd_params", "roi_ts_file", "invsol_params", "bem_file"]
+                       "lamda", "svd_params", "roi_ts_file", "invsol_params", "bem_file", "noise_cov_fname"]
         self.outputs = ["roi_ts_file"]
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -62,7 +62,8 @@ class EEGInverseSolutionStage(Stage):
             invsol_node = pe.Node(MNEInverseSolution(), name="invsol") # compute the inverse operator 
             
             flow.connect([(inputnode, covmat_node,
-                   [('epochs_fif_fname','epochs_fif_fname')
+                   [('noise_cov_fname','noise_cov_fname'),
+                    ('epochs_fif_fname','epochs_fif_fname')
                   ]
                     )])  
             
@@ -72,8 +73,9 @@ class EEGInverseSolutionStage(Stage):
                   ]
                     )]) 
             
-            flow.connect([(covmat_node, invsol_node,
-                   [('noise_cov_file','noise_cov_file')
+            flow.connect([(inputnode, invsol_node,
+                   [('noise_cov_fname','noise_cov_fname'),
+                    ('epochs_fif_fname','epochs_fif_fname')
                   ]
                     )])          
             

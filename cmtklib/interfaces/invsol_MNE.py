@@ -19,8 +19,8 @@ class MNEInverseSolutionInputSpec(BaseInterfaceInputSpec):
     # subject = traits.Str(
     #     desc='subject', mandatory=True)
     
-    eeg_ts_file = traits.List(
-        exists=True, desc='eeg * epochs in .set format', mandatory=True)
+    epochs_fif_fname = traits.File(
+        desc='eeg * epochs in .set format', mandatory=True)
 
     src_file = traits.List(
         exists=True, desc='source space created with MNE', mandatory=True)
@@ -28,8 +28,8 @@ class MNEInverseSolutionInputSpec(BaseInterfaceInputSpec):
     bem_file = traits.List(
         exists=True, desc='surfaces for head model', mandatory=True)
   
-    noise_cov_file = traits.File(
-        exists=True, desc="noise covariance matrix in fif format", mandatory=True)
+    noise_cov_fname = traits.File(
+        desc="noise covariance matrix in fif format", mandatory=True)
     
     fwd_file = traits.File(
         exists=True, desc="forward solution in fif format", mandatory=True)
@@ -53,7 +53,7 @@ class MNEInverseSolution(BaseInterface):
     output_spec = MNEInverseSolutionOutputSpec
 
     def _run_interface(self, runtime):
-        epochs_file = self.inputs.eeg_ts_file   
+        epochs_file = self.inputs.epochs_fif_fname   
 #         src_file = self.inputs.src_file[0]
 #         invsol_file = self.inputs.invsol_file[0]
 #         lamda = self.inputs.lamda

@@ -256,6 +256,8 @@ class EEGPipeline(Pipeline):
                 ]
             )
         elif self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == 'mne':
+            datasource.inputs.noise_cov_fname = os.path.join(self.base_directory,'derivatives','cmp',self.subject, 'eeg', self.subject + '_noisecov.fif')
+            
             eeg_flow.connect(
                 [
                     (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
@@ -272,7 +274,9 @@ class EEGPipeline(Pipeline):
                     (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
                                                   ('outputnode.derivative_list', 'inputnode.derivative_list')]),
                     
-                    (datasource, invsol_flow, [('epochs_fif_fname', 'inputnode.epochs_fif_fname')]),
+                    (datasource, invsol_flow, [('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
+                                               ('noise_cov_fname','inputnode.noise_cov_fname')]),
+                    
                     (loader_flow, invsol_flow, [('outputnode.src', 'inputnode.src_file'),
                                                 ('outputnode.bem', 'inputnode.bem_file')]),
                     

@@ -16,12 +16,15 @@ class CreateCovInputSpec(BaseInterfaceInputSpec):
     
     epochs_fif_fname = traits.File(
         desc='eeg * epochs in .set format', mandatory=True)
+    
+    noise_cov_fname = traits.File(
+        desc='Location and name to store noise covariance matrix in fif format', mandatory=True)
 
 class CreateCovOutputSpec(TraitedSpec):
     """Output specification for creating noise covariance matrix."""
 
     noise_cov_file = traits.File(
-        exists=True, desc="noise covariance matrix in fif format", mandatory=True)
+        desc="noise covariance matrix in fif format", mandatory=True)
 
 
 class CreateCov(BaseInterface):
@@ -31,16 +34,23 @@ class CreateCov(BaseInterface):
     def _run_interface(self, runtime):
 
         epochs_fname = self.inputs.epochs_fif_fname
-        self._create_Cov(epochs_fname)
+        noise_cov_fname = self.inputs.noise_cov_fname
+        self._create_Cov(epochs_fname,noise_cov_fname)
 
         # self.noise_cov_file = os.path.join(base_dir,'derivatives','cmp',subject,'eeg',subject+'_noise_cov.fif')
 
         return runtime
 
     @staticmethod
-    def _create_Cov(epochs_fname):
+    def _create_Cov(epochs_fname,noise_cov_fname):
         # load events and EEG data 
-        events = mne.read_events(epochs_fname)
+        epochs = mne.read_epochs(epochs_fname)
+        noise_cov = mne.compute_covariance(epochs,
+                                           keep_sample_mean=True,
+                                           tmin=-0.2, tmax=0., 
+                                           method=['shrunk', 'empirical'], 
+                                           verbose=True)
+        mne.write_cov(noise_cov_fname,noise_cov)
         import pdb
         pdb.set_trace()
         # epochs = mne.read_epochs_eeglab(EEG_data, events=events,event_id=event_id, eog=(), verbose=None, uint16_codec=None)
