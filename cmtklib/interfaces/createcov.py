@@ -37,8 +37,6 @@ class CreateCov(BaseInterface):
         noise_cov_fname = self.inputs.noise_cov_fname
         self._create_Cov(epochs_fname,noise_cov_fname)
 
-        # self.noise_cov_file = os.path.join(base_dir,'derivatives','cmp',subject,'eeg',subject+'_noise_cov.fif')
-
         return runtime
 
     @staticmethod
@@ -53,21 +51,13 @@ class CreateCov(BaseInterface):
         mne.write_cov(noise_cov_fname,noise_cov)
         import pdb
         pdb.set_trace()
-        # epochs = mne.read_epochs_eeglab(EEG_data, events=events,event_id=event_id, eog=(), verbose=None, uint16_codec=None)
+
         # montage.ch_names = epochs.ch_names
         # epochs.set_montage(montage)
         # epochs.apply_baseline((-.2,0))
         # epochs.set_eeg_reference(ref_channels='average',projection = True)
         # epochs.crop(tmin=-.2,tmax=.6)
         # epochs.apply_proj()
-    
-        # # noise covariance matrix     
-        # noise_cov = mne.compute_covariance(epochs,
-        #                                    keep_sample_mean=True,
-        #                                    tmin=-0.2, tmax=0., 
-        #                                    method=['shrunk', 'empirical'], 
-        #                                    verbose=True)
-        # mne.write_cov(cov_fname,noise_cov)
         
 
     def _list_outputs(self):

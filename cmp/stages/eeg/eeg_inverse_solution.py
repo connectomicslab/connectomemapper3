@@ -34,7 +34,8 @@ class EEGInverseSolutionStage(Stage):
         self.output_dir = output_dir
         self.config = EEGInverseSolutionConfig()
         self.inputs = ["eeg_ts_file", "epochs_fif_fname", "rois_file", "src_file", "invsol_file",
-                       "lamda", "svd_params", "roi_ts_file", "invsol_params", "bem_file", "noise_cov_fname"]
+                       "lamda", "svd_params", "roi_ts_file", "invsol_params", "bem_file", "noise_cov_fname",
+                       "trans_fname"]
         self.outputs = ["roi_ts_file"]
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -69,7 +70,8 @@ class EEGInverseSolutionStage(Stage):
             
             flow.connect([(inputnode, fwd_node,
                    [('src_file','src'),
-                    ('bem_file','bem')
+                    ('bem_file','bem'),
+                    ('trans_fname','trans_fname')
                   ]
                     )]) 
             

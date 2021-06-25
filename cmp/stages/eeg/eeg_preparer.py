@@ -49,6 +49,8 @@ class EEGPreparerStage(Stage):
             "cmp3_dir",
             "output_query",
             "epochs_fif_fname",
+            "electrode_positions_file",
+            "MRI_align_transform_file",
             "subject",
             "derivative_list",
             "bids_dir",
@@ -70,6 +72,8 @@ class EEGPreparerStage(Stage):
                            [('epochs', 'eeg_ts_file'),
                             ('behav_file', 'behav_file'),
                             ('epochs_fif_fname', 'epochs_fif_fname'),
+                            ('electrode_positions_file','electrode_positions_file'),
+                            ('MRI_align_transform_file','MRI_align_transform_file'),
                             ('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list'),
                             ]

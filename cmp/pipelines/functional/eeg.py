@@ -256,7 +256,31 @@ class EEGPipeline(Pipeline):
                 ]
             )
         elif self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == 'mne':
-            datasource.inputs.noise_cov_fname = os.path.join(self.base_directory,'derivatives','cmp',self.subject, 'eeg', self.subject + '_noisecov.fif')
+            cartool_dir = self.stages['EEGPreparer'].config.cartool_dir
+            
+            datasource.inputs.noise_cov_fname = os.path.join(self.base_directory,
+                                                             'derivatives','cmp',
+                                                             self.subject, 
+                                                             'eeg', 
+                                                             self.subject + '_noisecov.fif')
+            datasource.inputs.trans_fname = os.path.join(self.base_directory,
+                                                         'derivatives',
+                                                         'cmp',
+                                                         self.subject, 
+                                                         'eeg', 
+                                                         self.subject + '-trans.fif')
+            datasource.inputs.electrode_positions_file = os.path.join(self.base_directory,
+                                                                      'derivatives',
+                                                                      cartool_dir,
+                                                                      self.subject, 
+                                                                      'eeg', 
+                                                                      self.subject + '.xyz')                                                                      
+            datasource.inputs.MRI_align_transform_file = os.path.join(self.base_directory,
+                                                                      'derivatives',
+                                                                      cartool_dir,
+                                                                      self.subject, 
+                                                                      'eeg', 
+                                                                      self.subject + '.Transform.Electrodes Coregistration.Electrodes to Realigned MRI.txt')
             
             eeg_flow.connect(
                 [
@@ -265,6 +289,8 @@ class EEGPipeline(Pipeline):
                                                   ('behav_file', 'inputnode.behav_file'),
                                                   ('parcellation', 'inputnode.parcellation'),
                                                   ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
+                                                  ('electrode_positions_file','inputnode.electrode_positions_file'),
+                                                  ('MRI_align_transform_file','inputnode.MRI_align_transform_file'),
                                                   ('output_query', 'inputnode.output_query'),
                                                   ('base_directory','inputnode.bids_dir')]),
                     
@@ -275,7 +301,8 @@ class EEGPipeline(Pipeline):
                                                   ('outputnode.derivative_list', 'inputnode.derivative_list')]),
                     
                     (datasource, invsol_flow, [('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
-                                               ('noise_cov_fname','inputnode.noise_cov_fname')]),
+                                               ('noise_cov_fname','inputnode.noise_cov_fname'),
+                                               ('trans_fname','inputnode.trans_fname')]),
                     
                     (loader_flow, invsol_flow, [('outputnode.src', 'inputnode.src_file'),
                                                 ('outputnode.bem', 'inputnode.bem_file')]),
