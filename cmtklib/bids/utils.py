@@ -290,6 +290,7 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
         if self.inputs.verbose:
             print(f'\t\t > Set roi_bids_tsv output to {output_tsv_filename}')
         outputs["roi_bids_tsv"] = output_tsv_filename
+        return outputs
 
     @staticmethod
     def _gen_output_filename(input_file):
