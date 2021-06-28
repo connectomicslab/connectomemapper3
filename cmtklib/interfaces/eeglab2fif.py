@@ -68,7 +68,7 @@ class EEGLAB2fif(BaseInterface):
         epochs_fif_fname = self.inputs.epochs_fif_fname
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
-        if not os.path.exists(epochs_fif_fname): 
+        if os.path.exists(epochs_fif_fname): 
             self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname, montage_fname, dev_head_t_fname)
         self.derivative_list.append('cmp')
         self.output_query['EEG'] = {

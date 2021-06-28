@@ -23,8 +23,7 @@ class CreateCovInputSpec(BaseInterfaceInputSpec):
 class CreateCovOutputSpec(TraitedSpec):
     """Output specification for creating noise covariance matrix."""
 
-    noise_cov_file = traits.File(
-        desc="noise covariance matrix in fif format", mandatory=True)
+    has_run = traits.Bool(False, desc='if true, covariance matrix has been produced')
 
 
 class CreateCov(BaseInterface):
@@ -35,7 +34,11 @@ class CreateCov(BaseInterface):
 
         epochs_fname = self.inputs.epochs_fif_fname
         noise_cov_fname = self.inputs.noise_cov_fname
-        self._create_Cov(epochs_fname,noise_cov_fname)
+        
+        if os.path.exists(noise_cov_fname):
+            self.has_run = True
+        else:
+            self.has_run = self._create_Cov(epochs_fname,noise_cov_fname)
 
         return runtime
 
@@ -49,8 +52,11 @@ class CreateCov(BaseInterface):
                                            method=['shrunk', 'empirical'], 
                                            verbose=True)
         mne.write_cov(noise_cov_fname,noise_cov)
+        has_run = True
         import pdb
         pdb.set_trace()
+        return has_run 
+        
 
         # montage.ch_names = epochs.ch_names
         # epochs.set_montage(montage)
@@ -64,5 +70,5 @@ class CreateCov(BaseInterface):
         outputs = self._outputs().get()
         # outputs['output_query'] = self.output_query
         # outputs['derivative_list'] = self.derivative_list
-        outputs['noise_cov_file'] = 'bla'
+        #outputs['noise_cov_file'] = 'bla'
         return outputs

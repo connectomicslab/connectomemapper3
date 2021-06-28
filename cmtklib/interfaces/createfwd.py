@@ -14,6 +14,9 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits
 class CreateFwdInputSpec(BaseInterfaceInputSpec):
     """Input specification for creating MNE source space."""
     
+    fwd_fname = traits.File(
+        desc='forward solution created with MNE')    
+
     src = traits.List(
         exists=True, desc='source space created with MNE', mandatory=True)
     
@@ -22,13 +25,14 @@ class CreateFwdInputSpec(BaseInterfaceInputSpec):
     
     trans_fname = traits.File(
         exists=True, desc='trans.fif file containing co-registration information (electrodes x MRI)')
+    
+    epochs_fif_fname = traits.File(
+        exists=True, desc='eeg * epochs in .set format, containing information about electrode montage', mandatory=True)
 
 class CreateFwdOutputSpec(TraitedSpec):
     """Output specification for creating MNE source space."""
-
-    fwd = traits.List(
-        exists=True, desc='forwards solution created with MNE')    
-
+    
+    has_run = traits.Bool(False, desc='if true, forward solution has been produced')
 
 class CreateFwd(BaseInterface):
     input_spec = CreateFwdInputSpec
@@ -36,23 +40,30 @@ class CreateFwd(BaseInterface):
 
     def _run_interface(self, runtime):
 
-        src = self.inputs.src
-        bem = self.inputs.bem
+        fwd_fname = self.inputs.fwd_fname      
+        src = self.inputs.src[0]
+        bem = self.inputs.bem[0]
         trans = self.inputs.trans_fname
-        fwd = self._create_Fwd(src, bem, trans)
+        epochs_fname = self.inputs.epochs_fif_fname
+        epochs = mne.read_epochs(epochs_fname)
+        info = epochs.info 
+        if os.path.exists(fwd_fname):
+            self.has_run = True
+        else:
+            self.has_run = self._create_Fwd(src, bem, trans, info, fwd_fname)
 
         return runtime
 
     @staticmethod
-    def _create_Fwd(src,bem,trans):
-        fwd = mne.make_forward_solution(info, trans=trans, src=src,
-                                    bem=bem, meg=False, eeg=True, mindist=5.0, n_jobs=4)
+    def _create_Fwd(src,bem,trans,info,fwd_fname):
+        fwd = mne.make_forward_solution(info, trans=trans, src=src,bem=bem, meg=False, eeg=True, mindist=5.0, n_jobs=4)
     
         mne.write_forward_solution(fwd_fname, fwd, overwrite=True, verbose=None)
-
+        has_run = True
+        return has_run
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_query'] = self.output_query
-        outputs['derivative_list'] = self.derivative_list
+        # outputs['output_query'] = self.output_query
+        # outputs['derivative_list'] = self.derivative_list
         return outputs

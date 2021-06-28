@@ -53,11 +53,12 @@ class CreateBEM(BaseInterface):
         # if not os.path.isdir(bem_dir):
         self._create_BEM(subject, bids_dir)
         
-        if 'freesurfer' not in self.derivative_list:
-            self.derivative_list.append('freesurfer')
+        if 'cmp' not in self.derivative_list:
+            self.derivative_list.append('cmp')
 
         self.output_query['bem'] = {
-            'extensions': ['surf']
+            'suffix': 'bem',
+            'extensions': ['fif']
         }
 
         return runtime
@@ -66,13 +67,11 @@ class CreateBEM(BaseInterface):
     def _create_BEM(subject,bids_dir):
         # create the boundaries between the tissues, using segmentation file 
         subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
+        bemfilename = os.path.join(bids_dir,'derivatives','cmp',subject,'eeg',subject+'_bem.fif')
+        import pdb
+        pdb.set_trace()
         if not "bem" in os.listdir(os.path.join(subjects_dir,subject)):
             mne.bem.make_watershed_bem(subject,subjects_dir) # still need to check if this actually works
-        
-            # create the conductor model 
-            conductivity = (0.3, 0.006, 0.3)  # for three layers
-            bemfilename = os.path.join(subjects_dir,subject,'bem',subject+'_conductor_model.fif')
-            
             # file names required by mne's make_bem_model not consistent with file names outputted by mne's make_watershed_bem - copy and rename 
             for elem in ["inner_skull","outer_skull","outer_skin"]:
                 elem1 = subject+'_'+elem+'_surface' # file name used by make_watershed_bem 
@@ -80,7 +79,10 @@ class CreateBEM(BaseInterface):
                 if (elem2 not in os.listdir(os.path.join(subjects_dir,subject,'bem'))) and ("watershed" in os.listdir(os.path.join(subjects_dir,subject,'bem'))):
                     cmd = 'cp '+ os.path.join(subjects_dir,subject,'bem','watershed',elem1) + ' ' + os.path.join(subjects_dir,subject,'bem',elem2)
                     os.system(cmd)  
-                    
+            
+        if not os.path.exists(bemfilename):
+            # create the conductor model 
+            conductivity = (0.3, 0.006, 0.3)  # for three layers 
             model = mne.make_bem_model(subject=subject, ico=4, conductivity=conductivity, subjects_dir=subjects_dir)
             bem = mne.make_bem_solution(model)
             mne.write_bem_solution(bemfilename,bem)
