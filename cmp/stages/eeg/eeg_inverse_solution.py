@@ -33,9 +33,9 @@ class EEGInverseSolutionStage(Stage):
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = EEGInverseSolutionConfig()
-        self.inputs = ["eeg_ts_file", "epochs_fif_fname", "rois_file", "src_file", "invsol_file",
+        self.inputs = ["bids_dir","subject","eeg_ts_file", "epochs_fif_fname", "rois_file", "src_file", "invsol_file",
                        "lamda", "svd_params", "roi_ts_file", "invsol_params", "bem_file", "noise_cov_fname",
-                       "trans_fname", "fwd_fname"]
+                       "trans_fname", "fwd_fname","parcellation"]
         self.outputs = ["roi_ts_file"]
 
     def create_workflow(self, flow, inputnode, outputnode):
@@ -47,7 +47,7 @@ class EEGInverseSolutionStage(Stage):
                             ('rois_file', 'rois_file'),
                             ('invsol_file', 'invsol_file'),
                             ('invsol_params', 'invsol_params'),
-                            ('roi_ts_file', 'roi_ts_file'),
+                            ('roi_ts_file', 'roi_ts_file')
                             ]
                            )])
             flow.connect([(invsol_node, outputnode,
@@ -78,11 +78,15 @@ class EEGInverseSolutionStage(Stage):
                     )]) 
             
             flow.connect([(inputnode, invsol_node,
-                   [('fwd_fname','fwd_fname'),
+                   [('subject', 'subject'),
+                    ('bids_dir', 'bids_dir'),
+                    ('fwd_fname','fwd_fname'),
                     ('src_file','src_file'),
                     ('bem_file','bem_file'),
                     ('noise_cov_fname','noise_cov_fname'),
-                    ('epochs_fif_fname','epochs_fif_fname')
+                    ('epochs_fif_fname','epochs_fif_fname'),
+                    ('parcellation','parcellation'),
+                    ('roi_ts_file', 'roi_ts_file')
                    ]
                     )])      
             

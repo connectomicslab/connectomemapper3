@@ -53,7 +53,7 @@ class EEGPreparerStage(Stage):
             "MRI_align_transform_file",
             "subject",
             "derivative_list",
-            "bids_dir",
+            "bids_dir"
         ]
         self.outputs = [
             "output_query",

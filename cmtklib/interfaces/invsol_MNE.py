@@ -13,11 +13,11 @@ from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, traits
 class MNEInverseSolutionInputSpec(BaseInterfaceInputSpec):
     """Input specification for InverseSolution."""
     
-    # base_directory = traits.Directory(
-    #     exists=True, desc='BIDS data directory', mandatory=True)
-    
-    # subject = traits.Str(
-    #     desc='subject', mandatory=True)
+    subject = traits.Str(
+        desc='subject', mandatory=True)
+
+    bids_dir = traits.Str(
+        desc='base directory', mandatory=True)
     
     epochs_fif_fname = traits.File(
         exists=True, desc='eeg * epochs in .set format', mandatory=True)
@@ -40,6 +40,11 @@ class MNEInverseSolutionInputSpec(BaseInterfaceInputSpec):
     fwd_fname = traits.File(
         desc="forward solution in fif format", mandatory=True)
     
+    parcellation = traits.List('Lausanne2008')
+    
+    roi_ts_file = traits.File(
+        exists=False, desc="rois * time series in .npy format")
+    
 class MNEInverseSolutionOutputSpec(TraitedSpec):
     """Output specification for InverseSolution."""
 
@@ -59,64 +64,48 @@ class MNEInverseSolution(BaseInterface):
     output_spec = MNEInverseSolutionOutputSpec
 
     def _run_interface(self, runtime):
+        bids_dir = self.inputs.bids_dir
+        subject = self.inputs.subject
         epochs_file = self.inputs.epochs_fif_fname   
-#         src_file = self.inputs.src_file[0]
-#         invsol_file = self.inputs.invsol_file[0]
-#         lamda = self.inputs.lamda
-#         rois_file = self.inputs.rois_file
-#         svd_params = self.inputs.svd_params         
-#         self.roi_ts_file = self.inputs.roi_ts_file
-#         roi_tcs = self.apply_inverse_epochs_cartool(epochs_file, src_file, invsol_file, lamda, rois_file, svd_params)    
-#         np.save(self.roi_ts_file,roi_tcs)
-
+        src_file = self.inputs.src_file[0]
+        fwd_fname = self.inputs.fwd_fname
+        noise_cov_fname = self.inputs.noise_cov_fname
+        self.roi_ts_file = self.inputs.roi_ts_file 
+        
         import pdb
         pdb.set_trace()
-
+        
+        if not os.path.exists(self.roi_ts_file):
+            roi_tcs = self._createInv_MNE(bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file)
+            np.save(self.roi_ts_file, roi_tcs)
+        
         return runtime
 
 
-    def apply_inverse_epochs_cartool(self, epochs_file, src_file, invsol_file, lamda,rois_file,svd_params):        
+    def _createInv_MNE(self, bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file):  
         epochs = mne.read_epochs(epochs_file)
-        invsol = cart.io.inverse_solution.read_is(invsol_file)
-        src = cart.source_space.read_spi(src_file)
-        pickle_in = open(rois_file,"rb")
-        rois = pickle.load(pickle_in)
-        vertices_left  = np.array([idx for idx,coords in enumerate(src.coordinates) if coords[0]<0])
-        vertices_right = np.array([idx for idx,coords in enumerate(src.coordinates) if coords[0]>=0])
-        K = invsol['regularisation_solutions'][lamda]
-        n_rois = len(rois.names)
-        times = epochs.times
-        tstep = times[1]-times[0]
-        roi_tcs = np.zeros((n_rois, len(times),len(epochs.events))) 
-        n_spi = np.zeros(n_rois,dtype = int);
-        for r in range(n_rois):        
-            spis_this_roi = rois.groups_of_indexes[r]
-            n_spi[r] = int(len(spis_this_roi))
-            roi_stc = np.zeros((3,n_spi[r],len(times),len(epochs.events)))        
-
-            for k, e in enumerate(epochs):        
-                #logger.info('Processing epoch : %d%s' % (k + 1, total)) 
-
-                roi_stc[0,:,:,k] = K[0,spis_this_roi] @ e
-                roi_stc[1,:,:,k] = K[1,spis_this_roi] @ e
-                roi_stc[2,:,:,k] = K[2,spis_this_roi] @ e 
-
-            stim_onset = np.where(times==0)[0][0]
-            svd_t_begin = stim_onset+int(svd_params['toi_begin']/tstep)
-            svd_t_end = stim_onset+int(svd_params['toi_end']/tstep)
-
-            mean_roi_stc  = np.mean(roi_stc[:,:,svd_t_begin:svd_t_end,:],axis=3)
-            u1,_,_ = np.linalg.svd(mean_roi_stc.reshape(3,-1))
-
-            tc_loc = np.zeros((len(times),n_spi[r],len(epochs.events)))  
-
-            for k in range(n_spi[r]):
-                for e in range(len(epochs.events)):
-                    tc_loc[:,k,e] = u1[:,0].reshape(1,3) @ roi_stc[:,k,:,e]            
-
-            roi_tcs[r,:,:] = np.mean(tc_loc,axis=1)            
-
-        return roi_tcs.transpose(2,0,1)
+        fwd = mne.read_forward_solution(fwd_fname)
+        noise_cov = mne.read_cov(noise_cov_fname)
+        src = mne.read_source_spaces(src_file, patch_stats=False, verbose=None)
+        # compute the inverse operator 
+        inverse_operator = mne.minimum_norm.make_inverse_operator(epochs.info, fwd, noise_cov, loose=1, depth=None, fixed=False)
+        # compute the time courses of the source points 
+        # some parameters 
+        method = "sLORETA" 
+        snr = 3.
+        lambda2 = 1. / snr ** 2
+        evoked = epochs.average().pick('eeg')
+        stcs = mne.minimum_norm.apply_inverse_epochs(epochs, inverse_operator, lambda2, method, pick_ori="normal", nave=evoked.nave,return_generator=False) 
+        
+        # get ROI time courses 
+        # read the labels of the source points 
+        subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
+        labels_parc = mne.read_labels_from_annot(subject, parc='aparc',subjects_dir=subjects_dir)
+        # get the ROI time courses 
+        roi_tcs = mne.extract_label_time_course(stcs, labels_parc, src, mode='pca_flip', allow_empty=True,
+        return_generator=False)
+        
+        return roi_tcs
 
     def _list_outputs(self):
         outputs = self._outputs().get()

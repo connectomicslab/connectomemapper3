@@ -314,10 +314,14 @@ class EEGPipeline(Pipeline):
                     (preparer_flow, loader_flow, [('outputnode.output_query', 'inputnode.output_query'),
                                                   ('outputnode.derivative_list', 'inputnode.derivative_list')]),
                     
-                    (datasource, invsol_flow, [('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
+                    (datasource, invsol_flow, [('subject', 'inputnode.subject'),
+                                               ('base_directory','inputnode.bids_dir'),
+                                               ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
                                                ('noise_cov_fname','inputnode.noise_cov_fname'),
                                                ('trans_fname','inputnode.trans_fname'),
-                                               ('fwd_fname','inputnode.fwd_fname')]),
+                                               ('fwd_fname','inputnode.fwd_fname'),
+                                               ('parcellation', 'inputnode.parcellation'),
+                                               ('roi_ts_file', 'inputnode.roi_ts_file')]),
                     
                     (loader_flow, invsol_flow, [('outputnode.src', 'inputnode.src_file'),
                                                 ('outputnode.bem', 'inputnode.bem_file')]),
