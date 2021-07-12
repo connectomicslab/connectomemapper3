@@ -53,8 +53,6 @@ class CreateCov(BaseInterface):
                                            verbose=True)
         mne.write_cov(noise_cov_fname,noise_cov)
         has_run = True
-        import pdb
-        pdb.set_trace()
         return has_run 
         
 

@@ -61,14 +61,14 @@ class EEGLAB2fif(BaseInterface):
         behav_file = self.inputs.behav_file[0]
         
         ####
-        montage_fname = self.inputs.electrode_positions_file[0]
+        montage_fname = self.inputs.electrode_positions_file
         dev_head_t_fname = self.inputs.MRI_align_transform_file
         ####
         
         epochs_fif_fname = self.inputs.epochs_fif_fname
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
-        if os.path.exists(epochs_fif_fname): 
+        if not os.path.exists(epochs_fif_fname): 
             self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname, montage_fname, dev_head_t_fname)
         self.derivative_list.append('cmp')
         self.output_query['EEG'] = {
@@ -85,6 +85,15 @@ class EEGLAB2fif(BaseInterface):
                                         uint16_codec=None)
         epochs.events[:, 2] = list(behav.COND)
         epochs.event_id = {"Scrambled": 0, "Faces": 1}
+        
+        ###
+        # apply baseline, re-reference - should be user-defined (?)
+        start_t = -0.2
+        end_t = 0.6
+        epochs.apply_baseline((start_t,0))
+        epochs.set_eeg_reference(ref_channels='average',projection = True)
+        epochs.crop(tmin=start_t,tmax=end_t)
+        ###
         
         ###
         # create info object with information about electrode positions 

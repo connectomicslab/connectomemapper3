@@ -71,11 +71,8 @@ class MNEInverseSolution(BaseInterface):
         fwd_fname = self.inputs.fwd_fname
         noise_cov_fname = self.inputs.noise_cov_fname
         self.roi_ts_file = self.inputs.roi_ts_file 
-        
-        import pdb
-        pdb.set_trace()
-        
-        if not os.path.exists(self.roi_ts_file):
+                
+        if os.path.exists(self.roi_ts_file):
             roi_tcs = self._createInv_MNE(bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file)
             np.save(self.roi_ts_file, roi_tcs)
         
@@ -84,6 +81,8 @@ class MNEInverseSolution(BaseInterface):
 
     def _createInv_MNE(self, bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file):  
         epochs = mne.read_epochs(epochs_file)
+        import pdb
+        pdb.set_trace()
         fwd = mne.read_forward_solution(fwd_fname)
         noise_cov = mne.read_cov(noise_cov_fname)
         src = mne.read_source_spaces(src_file, patch_stats=False, verbose=None)
@@ -104,7 +103,7 @@ class MNEInverseSolution(BaseInterface):
         # get the ROI time courses 
         roi_tcs = mne.extract_label_time_course(stcs, labels_parc, src, mode='pca_flip', allow_empty=True,
         return_generator=False)
-        
+                
         return roi_tcs
 
     def _list_outputs(self):
