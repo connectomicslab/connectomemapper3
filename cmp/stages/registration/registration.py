@@ -1140,9 +1140,7 @@ class RegistrationStage(Stage):
             flow.connect(
                 [
                     (mr_convert, grad_mrtrix, [("converted", "in_file")]),
-                    (grad_mrtrix, outputnode, [("out_grad_mrtrix", "grad")]),
-                    (inputnode, outputnode, [("bvals", "bvals")]),
-                    (inputnode, outputnode, [("bvecs", "bvecs")]),
+                    (grad_mrtrix, outputnode, [("out_grad_mrtrix", "grad")])
                 ]
             )
             # fmt:on
