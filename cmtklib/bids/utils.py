@@ -437,6 +437,7 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
         outputs["roi_graphml"] = self._gen_output_filename(
             self.inputs.roi_bids_tsv, "graphml"
         )
+        return outputs
 
     @staticmethod
     def _gen_output_filename(input_tsv_filename, output_type):
