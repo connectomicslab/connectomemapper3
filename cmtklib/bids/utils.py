@@ -254,6 +254,10 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
                 rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 2],
                 rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 3],
             )
+            # Make sure we have scalar and not arrays of one element
+            r = r[0] if hasattr(r, '__len__') else r
+            g = g[0] if hasattr(g, '__len__') else g
+            b = b[0] if hasattr(b, '__len__') else b
             print(f'DEBUG: r = {r}, g = {g}, b = {b}')
             # Fill hexadecimal color
             out_node_description["color"] = "#%02x%02x%02x" % (
