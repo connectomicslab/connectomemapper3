@@ -580,6 +580,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         """
         sinker = pe.Node(nio.DataSink(), name="anat_datasinker")
         sinker.inputs.base_directory = os.path.abspath(base_directory)
+        sinker.inputs.parametrization = False  # Do not store output in parametrized structure (for MapNode)
 
         sinker.inputs.substitutions = [
             ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
