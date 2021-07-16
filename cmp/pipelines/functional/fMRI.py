@@ -600,7 +600,7 @@ class fMRIPipeline(Pipeline):
                         f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_flirt.nii.gz',
                         f'{self.subject}_space-meanBOLD_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
                     ),
-                    (f'connectome_{scale}', f'{self.subject} + "_atlas-" + {bids_atlas_label}_res-{scale}_conndata-network_connectivity'),
+                    (f'connectome_{scale}', f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_conndata-network_connectivity'),
                     (f'averageTimeseries_{scale}', f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_timeseries')
                 ]
                 # fmt:on
