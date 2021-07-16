@@ -580,7 +580,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         """
         sinker = pe.Node(nio.DataSink(), name="anat_datasinker")
         sinker.inputs.base_directory = os.path.abspath(base_directory)
-        sinker.inputs.parametrization = False  # Do not store output in parametrized structure (for MapNode)
+        # sinker.inputs.parametrization = True  # Store output in parametrized structure (for MapNode)
 
         sinker.inputs.substitutions = [
             ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
@@ -605,7 +605,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 "scale4": "500",
                 "scale5": "1015",
             }
-            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+            for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
                 sinker.inputs.substitutions.append(
                     ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
                 )
@@ -622,6 +622,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     (f'resolution{scale_mapping[scale]}_LUT.txt', self.subject + f'_atlas-L2008_res-{scale}_FreeSurferColorLUT.txt')
                 )
                 sinker.inputs.substitutions.append(
+                    (f'_createBIDSLabelIndexMappingFile{i}/', '')
+                )
+                sinker.inputs.substitutions.append(
                     (f'resolution{scale_mapping[scale]}.tsv', self.subject + f'_atlas-L2008_res-{scale}_dseg.tsv')
                 )
                 sinker.inputs.substitutions.append(
@@ -630,7 +633,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             # fmt: on
         elif self.parcellation_scheme == "Lausanne2018":
             # fmt: off
-            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+            for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
                 sinker.inputs.substitutions.append(
                     ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
                 )
@@ -645,6 +648,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 )
                 sinker.inputs.substitutions.append(
                     (f'ROIv_Lausanne2018_{scale}_FreeSurferColorLUT.txt', self.subject + f'_atlas-L2018_res-{scale}_FreeSurferColorLUT.txt')
+                )
+                sinker.inputs.substitutions.append(
+                    (f'_createBIDSLabelIndexMappingFile{i}/', '')
                 )
                 sinker.inputs.substitutions.append(
                     (f'ROIv_Lausanne2018_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_dseg.tsv')
