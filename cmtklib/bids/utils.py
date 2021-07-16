@@ -215,10 +215,11 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
                 s = line.rstrip().split(" ")
                 s = list(filter(None, s))
                 rois_rgb = np.append(
-                    rois_rgb,
                     np.array([[int(s[0]), int(s[2]), int(s[3]), int(s[4])]]),
                     axis=0,
                 )
+        
+        print(f'ROIS RGB Colors: {rois_rgb}')
 
         # Read the graphml node description file
         nodes_g = nx.readwrite.graphml.read_graphml(self.inputs.roi_graphml)
@@ -258,7 +259,9 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
             r = r[0] if hasattr(r, '__len__') else r
             g = g[0] if hasattr(g, '__len__') else g
             b = b[0] if hasattr(b, '__len__') else b
-            print(f'DEBUG: r = {r}, g = {g}, b = {b}')
+            print(f'DEBUG: node = {out_node_description["index"]} (name = {out_node_description["name"]}), '
+                  f'r = {r}, g = {g}, b = {b} '
+                  f'({rois_rgb[rois_rgb[:, 0] == out_node_description["index"]]})')
             # Fill hexadecimal color
             out_node_description["color"] = "#%02x%02x%02x" % (
                 r.squeeze(),
