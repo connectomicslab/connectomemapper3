@@ -67,7 +67,7 @@
 29    ctx-rh-inferiortemporal             180 40  120 0
 15    ctx-rh-isthmuscingulate             140 20  140 0
 23    ctx-rh-lateraloccipital             20  30  140 0
-1	ctx-rh-lateralorbitofrontal         35  75  50  0
+1    ctx-rh-lateralorbitofrontal         35  75  50  0
 24    ctx-rh-lingual                      225 140 140 0
 4    ctx-rh-medialorbitofrontal          200 35  75  0
 30    ctx-rh-middletemporal               160 100 50  0
