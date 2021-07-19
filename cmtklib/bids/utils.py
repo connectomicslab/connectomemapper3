@@ -175,7 +175,7 @@ class CreateBIDSStandardParcellationLabelIndexMappingFileInputSpec(
         "graph nodes for a given parcellation",
     )
     verbose = Bool(
-        True,
+        False,
         desc="Verbose mode"
     )
 
@@ -220,7 +220,8 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
                     axis=0,
                 )
         
-        print(f'ROIS RGB Colors: {rois_rgb}')
+        if self.inputs.verbose:
+            print(f'ROIS RGB Colors: {rois_rgb}')
 
         # Read the graphml node description file
         nodes_g = nx.readwrite.graphml.read_graphml(self.inputs.roi_graphml)
@@ -256,14 +257,18 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
                 rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 2],
                 rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 3],
             )
-            print(f'DEBUG: node = {out_node_description["index"]} (name = {out_node_description["name"]}), '
-                  f'roi rgb = {rois_rgb[rois_rgb[:, 0] == out_node_description["index"]]}')
+            if self.inputs.verbose:
+                print(f'DEBUG: node = {out_node_description["index"]} '
+                      f'(name = {out_node_description["name"]}), '
+                      f'roi rgb = {rois_rgb[rois_rgb[:, 0] == out_node_description["index"]]}')
             # Make sure we have scalar and not arrays of one element
             r = r[0] if hasattr(r, '__len__') else r
             g = g[0] if hasattr(g, '__len__') else g
             b = b[0] if hasattr(b, '__len__') else b
-            print(f'DEBUG: node = {out_node_description["index"]} (name = {out_node_description["name"]}), '
-                  f'r = {r}, g = {g}, b = {b}')
+            if self.inputs.verbose:
+                print(f'DEBUG: node = {out_node_description["index"]} '
+                      f'(name = {out_node_description["name"]}), '
+                      f'r = {r}, g = {g}, b = {b}')
             # Fill hexadecimal color
             out_node_description["color"] = "#%02x%02x%02x" % (
                 r.squeeze(),
@@ -284,8 +289,7 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
         # Write list of standardized node description dictionaries to output TSV file
         keys = ["index", "name", "color", "mapping"]
         output_tsv_filename = self._gen_output_filename(self.inputs.roi_graphml)
-        if self.inputs.verbose:
-            print(f'\t\t > Save TSV file to {output_tsv_filename}')
+        print(f'\t\t > Save TSV file to {output_tsv_filename}...')
         with open(output_tsv_filename, "w") as output_tsv_file:
             dict_writer = csv.DictWriter(output_tsv_file, keys, delimiter="\t")
             dict_writer.writeheader()
@@ -297,8 +301,6 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
         outputs = self._outputs().get()
         output_tsv_filename = self._gen_output_filename(self.inputs.roi_graphml)
         output_tsv_filename = os.path.abspath(output_tsv_filename)
-        if self.inputs.verbose:
-            print(f'\t\t > Set roi_bids_tsv output to {output_tsv_filename}')
         outputs["roi_bids_tsv"] = output_tsv_filename
         return outputs
 
