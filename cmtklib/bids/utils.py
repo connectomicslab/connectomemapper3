@@ -241,26 +241,26 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
             in_node_description_keys = list(in_node_description.keys())
             if ("dn_correspondence_id" in in_node_description_keys) and ("dn_fsname" in in_node_description_keys):
                 out_node_description = {
-                    "index": in_node_description["dn_correspondence_id"],
+                    "index": int(in_node_description["dn_correspondence_id"]),
                     "name": in_node_description["dn_fsname"].lower(),
                 }
             elif ("dn_multiscaleID" in in_node_description_keys) and ("dn_name" in in_node_description_keys):
                 out_node_description = {
-                    "index": in_node_description["dn_multiscaleID"],
+                    "index": int(in_node_description["dn_multiscaleID"]),
                     "name": in_node_description["dn_name"].lower(),
                 }
             else:
                 print('  .. Error: Parcellation keys not found in the graphml.')
             # Convert RGB color to hexadecimal
             r, g, b = (
-                rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 1],
-                rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 2],
-                rois_rgb[rois_rgb[:, 0] == out_node_description["index"]][:, 3],
+                rois_rgb[int(rois_rgb[:, 0]) == out_node_description["index"]][:, 1],
+                rois_rgb[int(rois_rgb[:, 0]) == out_node_description["index"]][:, 2],
+                rois_rgb[int(rois_rgb[:, 0]) == out_node_description["index"]][:, 3],
             )
             if self.inputs.verbose:
                 print(f'DEBUG: node = {out_node_description["index"]} '
                       f'(name = {out_node_description["name"]}), '
-                      f'roi rgb = {rois_rgb[rois_rgb[:, 0] == out_node_description["index"]]}')
+                      f'roi rgb = {rois_rgb[int(rois_rgb[:, 0]) == out_node_description["index"]]}')
             # Make sure we have scalar and not arrays of one element
             r = r[0] if hasattr(r, '__len__') else r
             g = g[0] if hasattr(g, '__len__') else g
