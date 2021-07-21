@@ -24,6 +24,9 @@ class CreateCovOutputSpec(TraitedSpec):
     """Output specification for creating noise covariance matrix."""
 
     has_run = traits.Bool(False, desc='if true, covariance matrix has been produced')
+    
+    noise_cov_fname = traits.File(
+        desc='Location and name to store noise covariance matrix in fif format')
 
 
 class CreateCov(BaseInterface):
@@ -31,14 +34,13 @@ class CreateCov(BaseInterface):
     output_spec = CreateCovOutputSpec
 
     def _run_interface(self, runtime):
-
         epochs_fname = self.inputs.epochs_fif_fname
-        noise_cov_fname = self.inputs.noise_cov_fname
+        self.noise_cov_fname = self.inputs.noise_cov_fname
         
-        if os.path.exists(noise_cov_fname):
+        if os.path.exists(self.noise_cov_fname):
             self.has_run = True
         else:
-            self.has_run = self._create_Cov(epochs_fname,noise_cov_fname)
+            self.has_run = self._create_Cov(epochs_fname,self.noise_cov_fname)
 
         return runtime
 
@@ -54,19 +56,10 @@ class CreateCov(BaseInterface):
         mne.write_cov(noise_cov_fname,noise_cov)
         has_run = True
         return has_run 
-        
-
-        # montage.ch_names = epochs.ch_names
-        # epochs.set_montage(montage)
-        # epochs.apply_baseline((-.2,0))
-        # epochs.set_eeg_reference(ref_channels='average',projection = True)
-        # epochs.crop(tmin=-.2,tmax=.6)
-        # epochs.apply_proj()
-        
 
     def _list_outputs(self):
+        import pdb
+        pdb.set_trace()
         outputs = self._outputs().get()
-        # outputs['output_query'] = self.output_query
-        # outputs['derivative_list'] = self.derivative_list
-        #outputs['noise_cov_file'] = 'bla'
+        outputs['noise_cov_fname'] = self.noise_cov_fname
         return outputs

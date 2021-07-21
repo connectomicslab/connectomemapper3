@@ -58,7 +58,6 @@ class CreateFwd(BaseInterface):
     @staticmethod
     def _create_Fwd(src,bem,trans,info,fwd_fname):
         fwd = mne.make_forward_solution(info, trans=trans, src=src,bem=bem, meg=False, eeg=True, mindist=5.0, n_jobs=4)
-    
         mne.write_forward_solution(fwd_fname, fwd, overwrite=True, verbose=None)
         has_run = True
         return has_run

@@ -25,6 +25,7 @@ from cmtklib.interfaces.createbem import CreateBEM
 class EEGPreparerConfig(HasTraits):
     eeg_format = Enum('.set', '.fif',
                       desc='<.set|.fif> (default is .set)')
+    epochs = File(desc='name of file containing EEG epochs')
     invsol_format = Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
                          desc='Cartool vs mne')
 

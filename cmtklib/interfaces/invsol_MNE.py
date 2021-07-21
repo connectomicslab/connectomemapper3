@@ -81,8 +81,6 @@ class MNEInverseSolution(BaseInterface):
 
     def _createInv_MNE(self, bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file):  
         epochs = mne.read_epochs(epochs_file)
-        import pdb
-        pdb.set_trace()
         fwd = mne.read_forward_solution(fwd_fname)
         noise_cov = mne.read_cov(noise_cov_fname)
         src = mne.read_source_spaces(src_file, patch_stats=False, verbose=None)

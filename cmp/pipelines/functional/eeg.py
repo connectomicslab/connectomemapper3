@@ -174,6 +174,21 @@ class EEGPipeline(Pipeline):
         preparer_flow = self.create_stage_flow("EEGPreparer")
         loader_flow = self.create_stage_flow("EEGLoader")
         invsol_flow = self.create_stage_flow("EEGInverseSolution")
+        
+        # 2do: implement dataset-generic workflow! 
+        # workflow for reading EEG data 
+            # read file name from config file 
+            # figure out format from file name and return error if not implemented 
+            # find the file in the correct derivatives folder depending on the format 
+        # more specifically: 
+            # rn, variable name in config file is "eeg_format", and from that, "epochs" is created 
+            # --> instead, read "epochs" and create "eeg_format" from that 
+        # parcellation file: (how does it work in anatomical pipeline?)
+            # search for file name using the provided string 
+            # if it can't be found, look for any file name that has the string as a part of it, display information 
+            # if both fail, display an error 
+        # other EEG params (see config file)
+        
                 
         if self.stages['EEGPreparer'].config.eeg_format == '.set': 
             datasource.inputs.epochs = [
