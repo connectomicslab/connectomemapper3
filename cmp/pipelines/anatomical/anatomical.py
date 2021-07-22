@@ -594,6 +594,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
             ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
             ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
+            ("_createBIDSLabelIndexMappingFile0/", ""),
+            ("_createBIDSLabelIndexMappingFile1/", ""),
+            ("_createBIDSLabelIndexMappingFile2/", ""),
+            ("_createBIDSLabelIndexMappingFile3/", ""),
+            ("_createBIDSLabelIndexMappingFile4/", ""),
         ]
         # Dataname substitutions in order to comply with BIDS derivatives specifications
         if self.parcellation_scheme == "Lausanne2008":
