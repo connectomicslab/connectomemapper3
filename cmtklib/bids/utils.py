@@ -253,14 +253,14 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
                 print('  .. Error: Parcellation keys not found in the graphml.')
             # Convert RGB color to hexadecimal
             r, g, b = (
-                rois_rgb[int(rois_rgb[:, 0]) == out_node_description["index"]][:, 1],
-                rois_rgb[int(rois_rgb[:, 0]) == out_node_description["index"]][:, 2],
-                rois_rgb[int(rois_rgb[:, 0]) == out_node_description["index"]][:, 3],
+                rois_rgb[rois_rgb[:, 0].astype(int) == out_node_description["index"]][:, 1],
+                rois_rgb[rois_rgb[:, 0].astype(int) == out_node_description["index"]][:, 2],
+                rois_rgb[rois_rgb[:, 0].astype(int) == out_node_description["index"]][:, 3],
             )
             if self.inputs.verbose:
                 print(f'DEBUG: node = {out_node_description["index"]} '
                       f'(name = {out_node_description["name"]}), '
-                      f'roi rgb = {rois_rgb[int(rois_rgb[:, 0]) == out_node_description["index"]]}')
+                      f'roi rgb = {rois_rgb[rois_rgb[:, 0].astype(int) == out_node_description["index"]]}')
             # Make sure we have scalar and not arrays of one element
             r = r[0] if hasattr(r, '__len__') else r
             g = g[0] if hasattr(g, '__len__') else g
