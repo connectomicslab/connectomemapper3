@@ -347,9 +347,9 @@ def create_dipy_tracking_flow(config):
         dipy_tracking.inputs.max_angle = config.max_angle
         dipy_tracking.inputs.step_size = config.step_size
 
+        # fmt:off
         flow.connect(
             [
-                # (dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
                 (inputnode, dipy_tracking, [("wm_mask_resampled", "seed_mask")]),
                 (inputnode, dipy_tracking, [("DWI", "in_file")]),
                 (inputnode, dipy_tracking, [("model", "in_model")]),
@@ -358,6 +358,7 @@ def create_dipy_tracking_flow(config):
                 (dipy_tracking, outputnode, [("tracks", "track_file")]),
             ]
         )
+        # fmt:on
 
     else:  # If CSD was used
         if config.tracking_mode == "Deterministic":
@@ -374,7 +375,6 @@ def create_dipy_tracking_flow(config):
             dipy_tracking.inputs.use_act = config.use_act
             dipy_tracking.inputs.use_act = config.seed_from_gmwmi
             dipy_tracking.inputs.seed_density = config.seed_density
-
             # dipy_tracking.inputs.fast_number_of_classes = config.fast_number_of_classes
 
             if config.imaging_model == "DSI":
@@ -384,33 +384,27 @@ def create_dipy_tracking_flow(config):
                 dipy_tracking.inputs.recon_order = config.sh_order
 
             if config.imaging_model == "DSI":
+                # fmt:off
                 flow.connect(
                     [
                         (inputnode, dipy_tracking, [("fod_file", "fod_file")]),
                     ]
                 )
-
+                # fmt:on
+            # fmt:off
             flow.connect(
                 [
-                    # (dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
                     (inputnode, dipy_tracking, [("DWI", "in_file")]),
-                    (
-                        inputnode,
-                        dipy_tracking,
-                        [("partial_volumes", "in_partial_volume_files")],
-                    ),
+                    (inputnode, dipy_tracking, [("partial_volumes", "in_partial_volume_files")],),
                     (inputnode, dipy_tracking, [("model", "in_model")]),
                     (inputnode, dipy_tracking, [("FA", "in_fa")]),
                     (inputnode, dipy_tracking, [("wm_mask_resampled", "seed_mask")]),
                     (inputnode, dipy_tracking, [("gmwmi_file", "gmwmi_file")]),
-                    (
-                        inputnode,
-                        dipy_tracking,
-                        [("wm_mask_resampled", "tracking_mask")],
-                    ),
+                    (inputnode, dipy_tracking, [("wm_mask_resampled", "tracking_mask")],),
                     (dipy_tracking, outputnode, [("tracks", "track_file")]),
                 ]
             )
+            # fmt:on
 
         elif config.tracking_mode == "Probabilistic":
 
@@ -434,39 +428,28 @@ def create_dipy_tracking_flow(config):
                 dipy_tracking.inputs.recon_model = "CSD"
                 dipy_tracking.inputs.recon_order = config.sh_order
 
-            # flow.connect([
-            #               (inputnode,dipy_tracking,[("bvals","bvals")]),
-            #               (inputnode,dipy_tracking,[("bvecs","bvecs")])
-            #             ])
-
             if config.imaging_model == "DSI":
+                # fmt:off
                 flow.connect(
                     [
                         (inputnode, dipy_tracking, [("fod_file", "fod_file")]),
                     ]
                 )
-
+                # fmt:on
+            # fmt:off
             flow.connect(
                 [
-                    # (dipy_seeds,dipy_tracking,[('seed_files','seed_file')]),
                     (inputnode, dipy_tracking, [("DWI", "in_file")]),
-                    (
-                        inputnode,
-                        dipy_tracking,
-                        [("partial_volumes", "in_partial_volume_files")],
-                    ),
+                    (inputnode, dipy_tracking, [("partial_volumes", "in_partial_volume_files")]),
                     (inputnode, dipy_tracking, [("model", "in_model")]),
                     (inputnode, dipy_tracking, [("FA", "in_fa")]),
                     (inputnode, dipy_tracking, [("wm_mask_resampled", "seed_mask")]),
                     (inputnode, dipy_tracking, [("gmwmi_file", "gmwmi_file")]),
-                    (
-                        inputnode,
-                        dipy_tracking,
-                        [("wm_mask_resampled", "tracking_mask")],
-                    ),
+                    (inputnode, dipy_tracking, [("wm_mask_resampled", "tracking_mask")]),
                     (dipy_tracking, outputnode, [("tracks", "track_file")]),
                 ]
             )
+            # fmt:on
 
     return flow
 
@@ -546,52 +529,61 @@ def create_mrtrix_tracking_flow(config):
             mrtrix_tracking.inputs.inputmodel = "SD_Stream"
         else:
             mrtrix_tracking.inputs.inputmodel = "SD_Stream"
+        # fmt:off
         flow.connect(
             [(inputnode, mrtrix_tracking, [("grad", "gradient_encoding_file")])]
         )
+        # fmt:on
+        
 
         voxel2WorldMatrixExtracter = pe.Node(
             interface=ExtractHeaderVoxel2WorldMatrix(),
             name="voxel2WorldMatrixExtracter",
         )
 
+        # fmt:off
         flow.connect(
             [
-                (
-                    inputnode,
-                    voxel2WorldMatrixExtracter,
-                    [("wm_mask_resampled", "in_file")],
-                )
+                (inputnode, voxel2WorldMatrixExtracter, [("wm_mask_resampled", "in_file")],)
             ]
         )
+        # fmt:on
 
         if config.use_act:
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, mrtrix_tracking, [("act_5tt_registered", "act_file")]),
                 ]
             )
+            # fmt:on
             mrtrix_tracking.inputs.backtrack = config.backtrack
             mrtrix_tracking.inputs.crop_at_gmwmi = config.crop_at_gmwmi
         else:
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, mrtrix_tracking, [("wm_mask_resampled", "mask_file")]),
                 ]
             )
+            # fmt:on
 
         if config.seed_from_gmwmi:
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, mrtrix_tracking, [("gmwmi_registered", "seed_gmwmi")]),
                 ]
             )
+            # fmt:on
         else:
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, mrtrix_tracking, [("wm_mask_resampled", "seed_file")]),
                 ]
             )
+            # fmt:on
 
         # converter = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name="trackvis")
         converter = pe.Node(interface=Tck2Trk(), name="trackvis")
@@ -601,35 +593,36 @@ def create_mrtrix_tracking_flow(config):
 
             filter_tractogram = pe.Node(interface=FilterTractogram(), name="sift_node")
             filter_tractogram.inputs.out_file = "sift-filtered_tractogram.tck"
-
+            # fmt:off
             flow.connect(
                 [
                     (mrtrix_tracking, filter_tractogram, [("tracked", "in_tracks")]),
                     (inputnode, filter_tractogram, [("DWI", "in_fod")]),
                 ]
             )
-
+            # fmt:on
             if config.use_act:
+                # fmt:off
                 flow.connect(
                     [
-                        (
-                            inputnode,
-                            filter_tractogram,
-                            [("act_5tt_registered", "act_file")],
-                        ),
+                        (inputnode, filter_tractogram, [("act_5tt_registered", "act_file")],),
                     ]
                 )
-
+                # fmt:on
+            # fmt:off
             flow.connect(
                 [(filter_tractogram, converter, [("out_tracks", "in_tracks")])]
             )
+            # fmt:on
         else:
+            # fmt:off
             flow.connect(
                 [
                     (mrtrix_tracking, converter, [("tracked", "in_tracks")]),
                 ]
             )
-
+            # fmt:on
+        # fmt:off
         flow.connect(
             [
                 (inputnode, mrtrix_tracking, [("DWI", "in_file")]),
@@ -637,6 +630,7 @@ def create_mrtrix_tracking_flow(config):
                 (converter, outputnode, [("out_tracks", "track_file")]),
             ]
         )
+        # fmt:on
 
     elif config.tracking_mode == "Probabilistic":
         mrtrix_tracking = pe.Node(
@@ -663,66 +657,76 @@ def create_mrtrix_tracking_flow(config):
         converter.inputs.out_tracks = "converted.trk"
 
         if config.use_act:
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, mrtrix_tracking, [("act_5tt_registered", "act_file")]),
                 ]
             )
+            # fmt:on
             mrtrix_tracking.inputs.backtrack = config.backtrack
             mrtrix_tracking.inputs.crop_at_gmwmi = config.crop_at_gmwmi
         else:
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, mrtrix_tracking, [("wm_mask_resampled", "mask_file")]),
                 ]
             )
+            # fmt:on
 
         if config.seed_from_gmwmi:
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, mrtrix_tracking, [("gmwmi_registered", "seed_gmwmi")]),
                 ]
             )
+            # fmt:on
         else:
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, mrtrix_tracking, [("wm_mask_resampled", "seed_file")]),
                 ]
             )
+            # fmt:on
 
         if config.sift:
 
             filter_tractogram = pe.Node(interface=FilterTractogram(), name="sift_node")
             filter_tractogram.inputs.out_file = "sift-filtered_tractogram.tck"
-
+            # fmt:off
             flow.connect(
                 [
                     (mrtrix_tracking, filter_tractogram, [("tracked", "in_tracks")]),
                     (inputnode, filter_tractogram, [("DWI", "in_fod")]),
                 ]
             )
-
+            # fmt:on
             if config.use_act:
+                # fmt:off
                 flow.connect(
                     [
-                        (
-                            inputnode,
-                            filter_tractogram,
-                            [("act_5tt_registered", "act_file")],
-                        ),
+                        (inputnode, filter_tractogram, [("act_5tt_registered", "act_file")],),
                     ]
                 )
-
+                # fmt:on
+            # fmt:off
             flow.connect(
                 [(filter_tractogram, converter, [("out_tracks", "in_tracks")])]
             )
+            # fmt:on
         else:
+            # fmt:off
             flow.connect(
                 [
                     (mrtrix_tracking, converter, [("tracked", "in_tracks")]),
                 ]
             )
+            # fmt:on
 
+        # fmt:off
         flow.connect(
             [
                 (inputnode, mrtrix_tracking, [("DWI", "in_file")]),
@@ -730,5 +734,6 @@ def create_mrtrix_tracking_flow(config):
                 (converter, outputnode, [("out_tracks", "track_file")]),
             ]
         )
+        # fmt:on
 
     return flow

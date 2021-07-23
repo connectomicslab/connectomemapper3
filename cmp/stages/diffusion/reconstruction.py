@@ -361,12 +361,14 @@ def create_dipy_recon_flow(config):
     flip_bvecs.inputs.delimiter = " "
     flip_bvecs.inputs.header_lines = 0
     flip_bvecs.inputs.orientation = "h"
+    # fmt:off
     flow.connect(
         [
             (inputnode, flip_bvecs, [("bvecs", "bvecs")]),
             (flip_bvecs, outputnode, [("bvecs_flipped", "bvecs")]),
         ]
     )
+    # fmt:on
 
     # Compute single fiber voxel mask
     dipy_erode = pe.Node(
@@ -383,18 +385,13 @@ def create_dipy_recon_flow(config):
         dipy_tensor.inputs.auto = True
         dipy_tensor.inputs.roi_radius = 10
         dipy_tensor.inputs.fa_thresh = config.single_fib_thr
-
+        # fmt:off
         flow.connect(
             [
                 (inputnode, dipy_tensor, [("diffusion_resampled", "in_file")]),
                 (inputnode, dipy_tensor, [("bvals", "in_bval")]),
                 (flip_bvecs, dipy_tensor, [("bvecs_flipped", "in_bvec")]),
                 (dipy_erode, dipy_tensor, [("out_file", "in_mask")]),
-            ]
-        )
-
-        flow.connect(
-            [
                 (dipy_tensor, outputnode, [("response", "RF")]),
                 (dipy_tensor, outputnode, [("fa_file", "FA")]),
                 (dipy_tensor, outputnode, [("ad_file", "AD")]),
@@ -402,23 +399,23 @@ def create_dipy_recon_flow(config):
                 (dipy_tensor, outputnode, [("rd_file", "RD")]),
             ]
         )
+        # fmt:on
 
         if not config.local_model:
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, outputnode, [("diffusion_resampled", "DWI")]),
                     (dipy_tensor, outputnode, [("dti_model", "model")]),
                 ]
             )
-            # Tensor -> Eigenvectors
-            # mrtrix_eigVectors = pe.Node(interface=Tensor2Vector(),name="mrtrix_eigenvectors")
+            # fmt:on
 
         # Constrained Spherical Deconvolution
         else:
             # Perform spherical deconvolution
             dipy_CSD = pe.Node(interface=CSD(), name="dipy_CSD")
 
-            # if config.tracking_processing_tool != 'Dipy':
             dipy_CSD.inputs.save_shm_coeff = True
             dipy_CSD.inputs.out_shm_coeff = "diffusion_shm_coeff.nii.gz"
 
@@ -427,46 +424,42 @@ def create_dipy_recon_flow(config):
             elif config.tracking_processing_tool == "Dipy":
                 dipy_CSD.inputs.tracking_processing_tool = "dipy"
 
-            # dipy_CSD.inputs.save_fods=True
-            # dipy_CSD.inputs.out_fods='diffusion_fODFs.nii.gz'
-
             if config.lmax_order != "Auto":
                 dipy_CSD.inputs.sh_order = config.lmax_order
 
             dipy_CSD.inputs.fa_thresh = config.single_fib_thr
-
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, dipy_CSD, [("diffusion_resampled", "in_file")]),
                     (inputnode, dipy_CSD, [("bvals", "in_bval")]),
                     (flip_bvecs, dipy_CSD, [("bvecs_flipped", "in_bvec")]),
-                    # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
-                    # (dipy_erode, dipy_CSD,[('out_file','in_mask')]),
                     (inputnode, dipy_CSD, [("brain_mask_resampled", "in_mask")]),
-                    # (dipy_tensor, dipy_CSD,[('response','response')]),
                     (dipy_CSD, outputnode, [("model", "model")]),
                 ]
             )
+            # fmt:on
 
             if config.tracking_processing_tool != "Dipy":
-                flow.connect([(dipy_CSD, outputnode, [("out_shm_coeff", "DWI")])])
+                # fmt:off
+                flow.connect(
+                    [(dipy_CSD, outputnode, [("out_shm_coeff", "DWI")])]
+                )
+                # fmt:on
             else:
+                # fmt:off
                 flow.connect(
                     [(inputnode, outputnode, [("diffusion_resampled", "DWI")])]
                 )
+                # fmt:on
     else:
         # Perform SHORE reconstruction (DSI)
-
         dipy_SHORE = pe.Node(interface=SHORE(), name="dipy_SHORE")
 
         if config.tracking_processing_tool == "MRtrix":
             dipy_SHORE.inputs.tracking_processing_tool = "mrtrix"
         elif config.tracking_processing_tool == "Dipy":
             dipy_SHORE.inputs.tracking_processing_tool = "dipy"
-
-        # if config.tracking_processing_tool != 'Dipy':
-        # dipy_SHORE.inputs.save_shm_coeff = True
-        # dipy_SHORE.inputs.out_shm_coeff='diffusion_shm_coeff.nii.gz'
 
         dipy_SHORE.inputs.radial_order = int(config.shore_radial_order)
         dipy_SHORE.inputs.zeta = config.shore_zeta
@@ -475,39 +468,24 @@ def create_dipy_recon_flow(config):
         dipy_SHORE.inputs.tau = config.shore_tau
         dipy_SHORE.inputs.constrain_e0 = config.shore_constrain_e0
         dipy_SHORE.inputs.positive_constraint = config.shore_positive_constraint
-        # dipy_SHORE.inputs.save_shm_coeff = True
-        # dipy_SHORE.inputs.out_shm_coeff = 'diffusion_shore_shm_coeff.nii.gz'
 
         shore_maps_merge = pe.Node(interface=util.Merge(3), name="merge_shore_maps")
-
+        # fmt:off
         flow.connect(
             [
                 (inputnode, dipy_SHORE, [("diffusion_resampled", "in_file")]),
                 (inputnode, dipy_SHORE, [("bvals", "in_bval")]),
                 (flip_bvecs, dipy_SHORE, [("bvecs_flipped", "in_bvec")]),
-                # (dipy_tensor, dipy_CSD,[('out_mask','in_mask')]),
-                # (dipy_erode, dipy_SHORE,[('out_file','in_mask')]),
-                # (inputnode,dipy_SHORE,[("wm_mask_resampled",'in_mask')]),
                 (inputnode, dipy_SHORE, [("brain_mask_resampled", "in_mask")]),
-                # (dipy_tensor, dipy_CSD,[('response','response')]),
                 (dipy_SHORE, outputnode, [("model", "model")]),
                 (dipy_SHORE, outputnode, [("fodf", "fod")]),
                 (dipy_SHORE, outputnode, [("GFA", "FA")]),
-            ]
-        )
-
-        flow.connect(
-            [
-                (
-                    dipy_SHORE,
-                    shore_maps_merge,
-                    [("GFA", "in1"), ("MSD", "in2"), ("RTOP", "in3")],
-                ),
+                (dipy_SHORE, shore_maps_merge, [("GFA", "in1"), ("MSD", "in2"), ("RTOP", "in3")],),
                 (shore_maps_merge, outputnode, [("out", "shore_maps")]),
+                (inputnode, outputnode, [("diffusion_resampled", "DWI")])
             ]
         )
-
-        flow.connect([(inputnode, outputnode, [("diffusion_resampled", "DWI")])])
+        # fmt:on
 
     if config.mapmri:
         dipy_MAPMRI = pe.Node(interface=MAPMRI(), name="dipy_mapmri")
@@ -521,33 +499,24 @@ def create_dipy_recon_flow(config):
 
         mapmri_maps_merge = pe.Node(interface=util.Merge(8), name="merge_mapmri_maps")
 
+        # fmt:off
         flow.connect(
             [
                 (inputnode, dipy_MAPMRI, [("diffusion_resampled", "in_file")]),
                 (inputnode, dipy_MAPMRI, [("bvals", "in_bval")]),
                 (flip_bvecs, dipy_MAPMRI, [("bvecs_flipped", "in_bvec")]),
-            ]
-        )
-
-        flow.connect(
-            [
-                (
-                    dipy_MAPMRI,
-                    mapmri_maps_merge,
-                    [
-                        ("rtop_file", "in1"),
-                        ("rtap_file", "in2"),
-                        ("rtpp_file", "in3"),
-                        ("msd_file", "in4"),
-                        ("qiv_file", "in5"),
-                        ("ng_file", "in6"),
-                        ("ng_perp_file", "in7"),
-                        ("ng_para_file", "in8"),
-                    ],
-                ),
+                (dipy_MAPMRI, mapmri_maps_merge, [("rtop_file", "in1"),
+                                                  ("rtap_file", "in2"),
+                                                  ("rtpp_file", "in3"),
+                                                  ("msd_file", "in4"),
+                                                  ("qiv_file", "in5"),
+                                                  ("ng_file", "in6"),
+                                                  ("ng_perp_file", "in7"),
+                                                  ("ng_para_file", "in8")]),
                 (mapmri_maps_merge, outputnode, [("out", "mapmri_maps")]),
             ]
         )
+        # fmt:on
 
     return flow
 
@@ -589,25 +558,25 @@ def create_mrtrix_recon_flow(config):
     flip_table.inputs.delimiter = " "
     flip_table.inputs.header_lines = 0
     flip_table.inputs.orientation = "v"
+    # fmt:off
     flow.connect(
         [
             (inputnode, flip_table, [("grad", "table")]),
             (flip_table, outputnode, [("table", "grad")]),
         ]
     )
-    # flow.connect([
-    #             (inputnode,outputnode,[("grad","grad")])
-    #             ])
+    # fmt:on
 
     # Tensor
     mrtrix_tensor = pe.Node(interface=DWI2Tensor(), name="mrtrix_make_tensor")
-
+    # fmt:off
     flow.connect(
         [
             (inputnode, mrtrix_tensor, [("diffusion_resampled", "in_file")]),
             (flip_table, mrtrix_tensor, [("table", "encoding_file")]),
         ]
     )
+    # fmt:on
 
     # Tensor -> FA map
     mrtrix_tensor_metrics = pe.Node(
@@ -623,7 +592,7 @@ def create_mrtrix_recon_flow(config):
     convert_ADC = pe.Node(
         interface=MRConvert(out_filename="ADC.nii.gz"), name="convert_ADC"
     )
-
+    # fmt:off
     flow.connect(
         [
             (mrtrix_tensor, convert_Tensor, [("tensor", "in_file")]),
@@ -635,16 +604,18 @@ def create_mrtrix_recon_flow(config):
             (convert_ADC, outputnode, [("converted", "ADC")]),
         ]
     )
+    # fmt:on
 
     # Tensor -> Eigenvectors
     mrtrix_eigVectors = pe.Node(interface=Tensor2Vector(), name="mrtrix_eigenvectors")
-
+    # fmt:off
     flow.connect(
         [
             (mrtrix_tensor, mrtrix_eigVectors, [("tensor", "in_file")]),
             (mrtrix_eigVectors, outputnode, [("vector", "eigVec")]),
         ]
     )
+    # fmt:on
 
     # Constrained Spherical Deconvolution
     if config.local_model:
@@ -659,14 +630,12 @@ def create_mrtrix_recon_flow(config):
         mrtrix_mul_eroded_FA = pe.Node(
             interface=MRtrix_mul(), name="mrtrix_mul_eroded_FA"
         )
-        mrtrix_mul_eroded_FA.inputs.out_filename = (
-            "diffusion_resampled_tensor_FA_masked.mif"
-        )
+        mrtrix_mul_eroded_FA.inputs.out_filename = "diffusion_resampled_tensor_FA_masked.mif"
         mrtrix_thr_FA = pe.Node(
             interface=MRThreshold(out_file="FA_th.mif"), name="mrtrix_thr"
         )
         mrtrix_thr_FA.inputs.abs_value = config.single_fib_thr
-
+        # fmt:off
         flow.connect(
             [
                 (inputnode, mrtrix_erode, [("wm_mask_resampled", "in_file")]),
@@ -675,13 +644,14 @@ def create_mrtrix_recon_flow(config):
                 (mrtrix_mul_eroded_FA, mrtrix_thr_FA, [("out_file", "in_file")]),
             ]
         )
+        # fmt:on
+
         # Compute single fiber response function
         mrtrix_rf = pe.Node(interface=EstimateResponseForSH(), name="mrtrix_rf")
-        # if config.lmax_order != 'Auto':
         mrtrix_rf.inputs.maximum_harmonic_order = int(config.lmax_order)
-
         mrtrix_rf.inputs.algorithm = "tournier"
         # mrtrix_rf.inputs.normalise = config.normalize_to_B0
+        # fmt:off
         flow.connect(
             [
                 (inputnode, mrtrix_rf, [("diffusion_resampled", "in_file")]),
@@ -689,6 +659,7 @@ def create_mrtrix_recon_flow(config):
                 (flip_table, mrtrix_rf, [("table", "encoding_file")]),
             ]
         )
+        # fmt:on
 
         # Perform spherical deconvolution
         mrtrix_CSD = pe.Node(
@@ -702,7 +673,7 @@ def create_mrtrix_recon_flow(config):
             interface=MRConvert(out_filename="spherical_harmonics_image.nii.gz"),
             name="convert_CSD",
         )
-
+        # fmt:off
         flow.connect(
             [
                 (inputnode, mrtrix_CSD, [("diffusion_resampled", "in_file")]),
@@ -715,7 +686,11 @@ def create_mrtrix_recon_flow(config):
                 # (mrtrix_CSD,outputnode,[('spherical_harmonics_image','DWI')])
             ]
         )
+        # fmt:on
     else:
-        flow.connect([(inputnode, outputnode, [("diffusion_resampled", "DWI")])])
-
+        # fmt:off
+        flow.connect(
+            [(inputnode, outputnode, [("diffusion_resampled", "DWI")])]
+        )
+        # fmt:on
     return flow
