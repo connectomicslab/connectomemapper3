@@ -527,7 +527,6 @@ def create_mrtrix_tracking_flow(config):
     flow.connect([(inputnode, wm_erode, [("wm_mask_resampled", "in_file")])])
 
     if config.tracking_mode == "Deterministic":
-        mrtrix_seeds = pe.Node(interface=Make_Mrtrix_Seeds(), name="mrtrix_seeds")
         mrtrix_tracking = pe.Node(
             interface=StreamlineTrack(), name="mrtrix_deterministic_tracking"
         )
@@ -563,13 +562,6 @@ def create_mrtrix_tracking_flow(config):
                     voxel2WorldMatrixExtracter,
                     [("wm_mask_resampled", "in_file")],
                 )
-            ]
-        )
-
-        flow.connect(
-            [
-                (inputnode, mrtrix_seeds, [("wm_mask_resampled", "WM_file")]),
-                (inputnode, mrtrix_seeds, [("gm_registered", "ROI_files")]),
             ]
         )
 
@@ -647,7 +639,6 @@ def create_mrtrix_tracking_flow(config):
         )
 
     elif config.tracking_mode == "Probabilistic":
-        mrtrix_seeds = pe.Node(interface=Make_Mrtrix_Seeds(), name="mrtrix_seeds")
         mrtrix_tracking = pe.Node(
             interface=StreamlineTrack(), name="mrtrix_probabilistic_tracking"
         )
@@ -668,18 +659,8 @@ def create_mrtrix_tracking_flow(config):
         else:
             mrtrix_tracking.inputs.inputmodel = "Tensor_Prob"
 
-        # converter = pe.MapNode(interface=mrtrix.MRTrix2TrackVis(),iterfield=['in_file'],name='trackvis')
         converter = pe.Node(interface=Tck2Trk(), name="trackvis")
         converter.inputs.out_tracks = "converted.trk"
-
-        # orientation_matcher = pe.Node(interface=match_orientation(), name="orient_matcher")
-
-        flow.connect(
-            [
-                (inputnode, mrtrix_seeds, [("wm_mask_resampled", "WM_file")]),
-                (inputnode, mrtrix_seeds, [("gm_registered", "ROI_files")]),
-            ]
-        )
 
         if config.use_act:
             flow.connect(
