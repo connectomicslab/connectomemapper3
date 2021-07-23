@@ -82,59 +82,6 @@ class ProcessThread(threading.Thread):
         self.pipeline.process()
 
 
-# -- FileAdapter Class ----------------------------------------------------
-
-
-# class FileAdapter(ITreeNodeAdapter):
-#
-#     adapts(File, ITreeNode)
-#
-#     #-- ITreeNodeAdapter Method Overrides ------------------------------------
-#
-#     def allows_children(self):
-#         """ Returns whether this object can have children.
-#         """
-#         return self.adaptee.is_folder
-#
-#     def has_children(self):
-#         """ Returns whether the object has children.
-#         """
-#         children = self.adaptee.children
-#         return ((children is not None) and (len(children) > 0))
-#
-#     def get_children(self):
-#         """ Gets the object's children.
-#         """
-#         return self.adaptee.children
-#
-#     def get_label(self):
-#         """ Gets the label to display for a specified object.
-#         """
-#         return self.adaptee.name + self.adaptee.ext
-#
-#     def get_tooltip(self):
-#         """ Gets the tooltip to display for a specified object.
-#         """
-#         return self.adaptee.absolute_path
-#
-#     def get_icon(self, is_expanded):
-#         """ Returns the icon for a specified object.
-#         """
-#         if self.adaptee.is_file:
-#             return '<item>'
-#
-#         if is_expanded:
-#             return '<open>'
-#
-#         return '<open>'
-#
-#     def can_auto_close(self):
-#         """ Returns whether the object's children should be automatically
-#             closed.
-#         """
-#         return True
-
-
 class Pipeline(HasTraits):
     """Parent class that extends `HasTraits` and represents a processing pipeline.
 
@@ -161,13 +108,7 @@ class Pipeline(HasTraits):
 
     anat_flow = None
 
-    # -- Traits Default Value Methods -----------------------------------------
-
-    # def _base_directory_default(self):
-    #     return getcwd()
-
     # -- Property Implementations ---------------------------------------------
-
     @property_depends_on("base_directory")
     def _get_root(self):
         return File(path=self.base_directory)
