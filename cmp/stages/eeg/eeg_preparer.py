@@ -32,6 +32,7 @@ class EEGPreparerConfig(HasTraits):
     parcellation = Dict({'label':'aparc', 'desc':'', 'suffix':''})
     cartool_dir = Str()
     cmp3_dir = Str()
+    EEG_params = Dict()
 
 
 class EEGPreparerStage(Stage):
@@ -53,6 +54,7 @@ class EEGPreparerStage(Stage):
             "electrode_positions_file",
             "MRI_align_transform_file",
             "subject",
+            "EEG_params",
             "derivative_list",
             "bids_dir"
         ]
@@ -75,6 +77,7 @@ class EEGPreparerStage(Stage):
                             ('epochs_fif_fname', 'epochs_fif_fname'),
                             ('electrode_positions_file','electrode_positions_file'),
                             ('MRI_align_transform_file','MRI_align_transform_file'),
+                            ('EEG_params','EEG_params'),
                             ('output_query', 'output_query'),
                             ('derivative_list', 'derivative_list'),
                             ]

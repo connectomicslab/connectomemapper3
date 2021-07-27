@@ -205,20 +205,13 @@ class EEGPipeline(Pipeline):
         datasource.inputs.epochs = [os.path.join(self.base_directory,'derivatives',derivatives_folder, self.subject,
                                                  'eeg', self.subject + epochs_fname)]
         
+        datasource.inputs.EEG_params = self.stages['EEGPreparer'].config.EEG_params
+        
         # read name of parcellation and determine file name 
         parcellation_label = self.stages['EEGPreparer'].config.parcellation['label']
         parcellation_desc = self.stages['EEGPreparer'].config.parcellation['desc']
         parcellation_suffix = self.stages['EEGPreparer'].config.parcellation['suffix']
-        
-        parcellation_image = self.subject + '_label-' +parcellation_label +'_desc-' +parcellation_desc + '_' + parcellation_suffix + '.nii.gz'
-        
-        # cartool: requires image 
-        datasource.inputs.parcellation = os.path.join(self.base_directory, 'derivatives', 'cmp', self.subject,
-                                                       'anat', parcellation_image)
-        
-        # MNE: requires freesurfer annot file 
-        # parcellation_annot = 
-        
+                
         if self.stages['EEGPreparer'].config.eeg_format == '.set': 
             
             datasource.inputs.behav_file = [
@@ -257,10 +250,14 @@ class EEGPipeline(Pipeline):
 
         # Clear previous outputs
         self.clear_stages_outputs()
-
         
         # fmt: off
         if self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == "Cartool": 
+            # atlas image is required 
+            parcellation = self.subject + '_label-' +parcellation_label +'_desc-' +parcellation_desc + '_' + parcellation_suffix + '.nii.gz'
+            datasource.inputs.parcellation = os.path.join(self.base_directory, 'derivatives', 'cmp', self.subject,
+                                                       'anat', parcellation)
+                    
             eeg_flow.connect(
                 [
                     (datasource, preparer_flow, [('epochs', 'inputnode.epochs'),
@@ -284,6 +281,9 @@ class EEGPipeline(Pipeline):
             )
         elif self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == 'mne':
             cartool_dir = self.stages['EEGPreparer'].config.cartool_dir
+            
+            # MNE finds Freesurfer annot files based on parcellation label 
+            datasource.inputs.parcellation = parcellation_label + '.' + parcellation_desc
             
             # define names for MNE outputs 
             datasource.inputs.noise_cov_fname = os.path.join(self.base_directory,
@@ -332,6 +332,7 @@ class EEGPipeline(Pipeline):
                                                   ('epochs_fif_fname', 'inputnode.epochs_fif_fname'),
                                                   ('electrode_positions_file','inputnode.electrode_positions_file'),
                                                   ('MRI_align_transform_file','inputnode.MRI_align_transform_file'),
+                                                  ('EEG_params','inputnode.EEG_params'),
                                                   ('output_query', 'inputnode.output_query'),
                                                   ('base_directory','inputnode.bids_dir')]),
                     

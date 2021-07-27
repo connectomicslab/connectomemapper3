@@ -17,13 +17,14 @@ class EEGLAB2fifInputSpec(BaseInterfaceInputSpec):
     epochs_fif_fname = traits.File(
         desc='eeg * epochs in .set format', mandatory=True)
     
-    ####
     electrode_positions_file = traits.File(
         exists=True, desc='positions of EEG electrodes in a txt file', mandatory=True)
     
     MRI_align_transform_file = traits.File(
         exists=True, desc='file containing transformation matrix to align electrode positions in electrode_positions_file with the MRI', mandatory=True)
-    ####
+    
+    EEG_params = traits.Dict(
+        desc='dictionary defining EEG parameters')
 
     output_query = traits.Dict(
         desc='BIDSDataGrabber output_query', mandatory=True)
@@ -60,16 +61,15 @@ class EEGLAB2fif(BaseInterface):
         epochs_file = self.inputs.eeg_ts_file[0]
         behav_file = self.inputs.behav_file[0]
         
-        ####
         montage_fname = self.inputs.electrode_positions_file
         dev_head_t_fname = self.inputs.MRI_align_transform_file
-        ####
         
         epochs_fif_fname = self.inputs.epochs_fif_fname
+        EEG_params = self.inputs.EEG_params
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
         if not os.path.exists(epochs_fif_fname): 
-            self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname, montage_fname, dev_head_t_fname)
+            self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname, montage_fname, dev_head_t_fname, EEG_params)
         self.derivative_list.append('cmp')
         self.output_query['EEG'] = {
             'suffix': 'epo',
@@ -78,7 +78,7 @@ class EEGLAB2fif(BaseInterface):
         return runtime
 
     @staticmethod
-    def _convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname, montage_fname, dev_head_t_fname):
+    def _convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname, montage_fname, dev_head_t_fname, EEG_params):
         behav = pd.read_csv(behav_file, sep=",")
         behav = behav[behav.bad_trials == 0]
         epochs = mne.read_epochs_eeglab(epochs_file, events=None, event_id=None, eog=(), verbose=None,
@@ -86,14 +86,12 @@ class EEGLAB2fif(BaseInterface):
         epochs.events[:, 2] = list(behav.COND)
         epochs.event_id = {"Scrambled": 0, "Faces": 1}
         
-        ###
-        # apply baseline, re-reference - should be user-defined (?)
-        start_t = -0.2
-        end_t = 0.6
+        # apply user-defined EEG parameters
+        start_t = EEG_params['start_t']
+        end_t = EEG_params['end_t']
         epochs.apply_baseline((start_t,0))
         epochs.set_eeg_reference(ref_channels='average',projection = True)
         epochs.crop(tmin=start_t,tmax=end_t)
-        ###
         
         ###
         # create info object with information about electrode positions 
@@ -110,7 +108,7 @@ class EEGLAB2fif(BaseInterface):
         dev_head_t = np.loadtxt(dev_head_t_fname)
         montage.dev_head_t = dev_head_t
     
-        sfreq = 250. # sampling frequency 
+        sfreq = EEG_params['sfreq']
         info = mne.create_info(ch_names, sfreq, 'eeg')
         info.set_montage(montage)
         epochs.info = info

@@ -60,8 +60,6 @@ class CreateCov(BaseInterface):
         return has_run 
 
     def _list_outputs(self):
-        import pdb
-        pdb.set_trace()
         outputs = self._outputs().get()
         outputs['noise_cov_fname'] = self.noise_cov_fname
         outputs['has_run'] = self.has_run

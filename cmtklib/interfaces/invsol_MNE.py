@@ -41,7 +41,7 @@ class MNEInverseSolutionInputSpec(BaseInterfaceInputSpec):
         desc="forward solution in fif format", mandatory=True)
     
     parcellation = traits.Str(
-        desc='parcellation scheme', mandatory=True)
+        desc='parcellation scheme')
     
     roi_ts_file = traits.File(
         exists=False, desc="rois * time series in .npy format")
@@ -70,16 +70,17 @@ class MNEInverseSolution(BaseInterface):
         src_file = self.inputs.src_file[0]
         fwd_fname = self.inputs.fwd_fname
         noise_cov_fname = self.inputs.noise_cov_fname
+        parcellation = self.inputs.parcellation
         self.roi_ts_file = self.inputs.roi_ts_file 
                 
         if os.path.exists(self.roi_ts_file):
-            roi_tcs = self._createInv_MNE(bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file)
+            roi_tcs = self._createInv_MNE(bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file, parcellation)
             np.save(self.roi_ts_file, roi_tcs)
         
         return runtime
 
 
-    def _createInv_MNE(self, bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file):  
+    def _createInv_MNE(self, bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file, parcellation):  
         epochs = mne.read_epochs(epochs_file)
         fwd = mne.read_forward_solution(fwd_fname)
         noise_cov = mne.read_cov(noise_cov_fname)
@@ -97,7 +98,7 @@ class MNEInverseSolution(BaseInterface):
         # get ROI time courses 
         # read the labels of the source points 
         subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
-        labels_parc = mne.read_labels_from_annot(subject, parc='aparc',subjects_dir=subjects_dir)
+        labels_parc = mne.read_labels_from_annot(subject, parc=parcellation, subjects_dir=subjects_dir)
         # get the ROI time courses 
         roi_tcs = mne.extract_label_time_course(stcs, labels_parc, src, mode='pca_flip', allow_empty=True,
         return_generator=False)
