@@ -34,6 +34,8 @@ class CreateCov(BaseInterface):
     output_spec = CreateCovOutputSpec
 
     def _run_interface(self, runtime):
+        import pdb
+        pdb.set_trace()
         epochs_fname = self.inputs.epochs_fif_fname
         self.noise_cov_fname = self.inputs.noise_cov_fname
         
@@ -62,4 +64,5 @@ class CreateCov(BaseInterface):
         pdb.set_trace()
         outputs = self._outputs().get()
         outputs['noise_cov_fname'] = self.noise_cov_fname
+        outputs['has_run'] = self.has_run
         return outputs

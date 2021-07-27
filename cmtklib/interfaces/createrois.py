@@ -12,7 +12,7 @@ class CreateRoisInputSpec(BaseInterfaceInputSpec):
     subject = traits.Str(
         desc='subject', mandatory=True)
 
-    parcellation = traits.List(
+    parcellation = traits.Str(
         desc='parcellation scheme', mandatory=True)
 
     cartool_dir = traits.Str(

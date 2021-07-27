@@ -29,7 +29,7 @@ class EEGPreparerConfig(HasTraits):
     invsol_format = Enum('Cartool-LAURA', 'Cartool-LORETA', 'mne-sLORETA',
                          desc='Cartool vs mne')
 
-    parcellation = Str('Lausanne2008')
+    parcellation = Dict({'label':'aparc', 'desc':'', 'suffix':''})
     cartool_dir = Str()
     cmp3_dir = Str()
 

@@ -64,6 +64,5 @@ class CreateFwd(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        # outputs['output_query'] = self.output_query
-        # outputs['derivative_list'] = self.derivative_list
+        outputs['has_run'] = self.has_run
         return outputs

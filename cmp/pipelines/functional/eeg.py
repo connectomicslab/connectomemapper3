@@ -174,7 +174,7 @@ class EEGPipeline(Pipeline):
         preparer_flow = self.create_stage_flow("EEGPreparer")
         loader_flow = self.create_stage_flow("EEGLoader")
         invsol_flow = self.create_stage_flow("EEGInverseSolution")
-        
+                
         # 2do: implement dataset-generic workflow! 
         # workflow for reading EEG data 
             # read file name from config file 
@@ -189,18 +189,38 @@ class EEGPipeline(Pipeline):
             # if both fail, display an error 
         # other EEG params (see config file)
         
-                
+        # read name of eeg file and determine format and derivatives folder name 
+        epochs_fname = self.stages['EEGPreparer'].config.epochs        
+        file_extension_start = epochs_fname.find('.')
+        eeg_format = epochs_fname[file_extension_start:]
+        if eeg_format=='.set': 
+            derivatives_folder = 'eeglab'
+        elif eeg_format=='.fif': 
+            derivatives_folder = 'mne'
+        else: 
+            pass # throw not implemented exception  
+        
+        self.stages['EEGPreparer'].config.eeg_format = eeg_format
+        
+        datasource.inputs.epochs = [os.path.join(self.base_directory,'derivatives',derivatives_folder, self.subject,
+                                                 'eeg', self.subject + epochs_fname)]
+        
+        # read name of parcellation and determine file name 
+        parcellation_label = self.stages['EEGPreparer'].config.parcellation['label']
+        parcellation_desc = self.stages['EEGPreparer'].config.parcellation['desc']
+        parcellation_suffix = self.stages['EEGPreparer'].config.parcellation['suffix']
+        
+        parcellation_image = self.subject + '_label-' +parcellation_label +'_desc-' +parcellation_desc + '_' + parcellation_suffix + '.nii.gz'
+        
+        # cartool: requires image 
+        datasource.inputs.parcellation = os.path.join(self.base_directory, 'derivatives', 'cmp', self.subject,
+                                                       'anat', parcellation_image)
+        
+        # MNE: requires freesurfer annot file 
+        # parcellation_annot = 
+        
         if self.stages['EEGPreparer'].config.eeg_format == '.set': 
-            datasource.inputs.epochs = [
-                os.path.join(
-                    self.base_directory,
-                    'derivatives',
-                    'eeglab',
-                    self.subject,
-                    'eeg',
-                    self.subject + '_task-FACES_desc-preproc_eeg.set'
-                )
-            ]
+            
             datasource.inputs.behav_file = [
                 os.path.join(
                     self.base_directory,
@@ -209,13 +229,17 @@ class EEGPipeline(Pipeline):
                     self.subject, 'eeg', self.subject + '_task-FACES_events.txt'
                 )
             ]
+            
+            # name of output file (EEG data source level)
             datasource.inputs.epochs_fif_fname = os.path.join(
                 self.base_directory,
                 'derivatives',
                 'cmp',
                 self.subject, 'eeg', self.subject + '_epo.fif'
             )
-
+            
+            
+        # name of output file (ROI time courses)
         datasource.inputs.roi_ts_file = os.path.join(
             self.base_directory,
             'derivatives',
@@ -224,18 +248,6 @@ class EEGPipeline(Pipeline):
             'eeg',
             self.subject + '_rtc_epo.npy'
         )
-
-        if self.stages['EEGPreparer'].config.parcellation == 'Lausanne2008':
-            datasource.inputs.parcellation = [
-                os.path.join(
-                    self.base_directory,
-                    'derivatives',
-                    'cmp',
-                    self.subject,
-                    'anat',
-                    self.subject + '_label-L2008_desc-scale2_atlas.nii.gz'
-                )
-            ]
 
         datasource.inputs.output_query = dict()
 

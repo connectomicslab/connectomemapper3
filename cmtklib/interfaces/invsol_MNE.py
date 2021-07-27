@@ -29,7 +29,7 @@ class MNEInverseSolutionInputSpec(BaseInterfaceInputSpec):
         exists=True, desc='surfaces for head model', mandatory=True)
   
     cov_has_run = traits.Bool(
-        desc='indicates if covariance matrix has been produced')
+        desc='indicates if covariance matrix has been produced', mandatory=True)
     
     noise_cov_fname = traits.File(
         exists=True, desc="noise covariance matrix in fif format", mandatory=True)
@@ -40,7 +40,8 @@ class MNEInverseSolutionInputSpec(BaseInterfaceInputSpec):
     fwd_fname = traits.File(
         desc="forward solution in fif format", mandatory=True)
     
-    parcellation = traits.List('Lausanne2008')
+    parcellation = traits.Str(
+        desc='parcellation scheme', mandatory=True)
     
     roi_ts_file = traits.File(
         exists=False, desc="rois * time series in .npy format")
@@ -59,7 +60,6 @@ class MNEInverseSolution(BaseInterface):
     Outputs
     -------
     """
-
     input_spec = MNEInverseSolutionInputSpec
     output_spec = MNEInverseSolutionOutputSpec
 
