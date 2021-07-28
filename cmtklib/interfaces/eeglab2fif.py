@@ -36,9 +36,6 @@ class EEGLAB2fifInputSpec(BaseInterfaceInputSpec):
 class EEGLAB2fifOutputSpec(TraitedSpec):
     """Output specification for EEGLAB2fif."""
 
-    # fif_ts_file = traits.File(
-    #	exists=True, desc='eeg * epochs in .fif format', mandatory=True)
-
     output_query = traits.Dict(
         desc='BIDSDataGrabber output_query', mandatory=True)
 
@@ -68,7 +65,7 @@ class EEGLAB2fif(BaseInterface):
         EEG_params = self.inputs.EEG_params
         self.derivative_list = self.inputs.derivative_list
         self.output_query = self.inputs.output_query
-        if os.path.exists(epochs_fif_fname): 
+        if not os.path.exists(epochs_fif_fname): 
             self._convert_eeglab2fif(epochs_file, behav_file, epochs_fif_fname, montage_fname, dev_head_t_fname, EEG_params)
         self.derivative_list.append('cmp')
         self.output_query['EEG'] = {
@@ -83,8 +80,8 @@ class EEGLAB2fif(BaseInterface):
         behav = behav[behav.bad_trials == 0]
         epochs = mne.read_epochs_eeglab(epochs_file, events=None, event_id=None, eog=(), verbose=None,
                                         uint16_codec=None)
-        epochs.events[:, 2] = list(behav.COND)
-        epochs.event_id = {"Scrambled": 0, "Faces": 1}
+        epochs.events[:, 2] = list(behav.iloc[:,0])
+        epochs.event_id = EEG_params['EEG_event_IDs']
         
         # apply user-defined EEG parameters
         start_t = EEG_params['start_t']
@@ -93,15 +90,17 @@ class EEGLAB2fif(BaseInterface):
         epochs.set_eeg_reference(ref_channels='average',projection = True)
         epochs.crop(tmin=start_t,tmax=end_t)
         
-        ###
         # create info object with information about electrode positions 
+        ###
         # very specific to our dataset - adapt and make more generic!! 
         n = int(open(montage_fname).readline().lstrip().split(' ')[0])
         all_coord = np.loadtxt(montage_fname, skiprows=1, usecols=(0, 1, 2), max_rows=n)
         all_names = np.loadtxt(montage_fname, skiprows=1, usecols=3, max_rows=n,dtype=np.dtype(str)).tolist()
         all_coord = list(map(lambda x: x/1000,all_coord))
         ch_coord  = [all_coord[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]
-        ch_names  = [all_names[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]    
+        ch_names  = [all_names[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]   
+        ###
+        
         # create the montage object with the channel names and positions read from the file 
         montage = mne.channels.make_dig_montage(ch_pos=dict(zip(ch_names, ch_coord)),coord_frame='head')
         # align with MRI 
@@ -112,9 +111,7 @@ class EEGLAB2fif(BaseInterface):
         info = mne.create_info(ch_names, sfreq, 'eeg')
         info.set_montage(montage)
         epochs.info = info
-        ###
-        import pdb
-        pdb.set_trace()
+        
         epochs.save(epochs_fif_fname, overwrite=True)
 
     def _list_outputs(self):

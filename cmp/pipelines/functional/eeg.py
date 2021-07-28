@@ -213,13 +213,14 @@ class EEGPipeline(Pipeline):
         parcellation_suffix = self.stages['EEGPreparer'].config.parcellation['suffix']
                 
         if self.stages['EEGPreparer'].config.eeg_format == '.set': 
-            
+            # file with events/behavioral info 
+            expe_name = datasource.inputs.EEG_params['expe_name']
             datasource.inputs.behav_file = [
                 os.path.join(
                     self.base_directory,
                     'derivatives',
                     'eeglab',
-                    self.subject, 'eeg', self.subject + '_task-FACES_events.txt'
+                    self.subject, 'eeg', self.subject + '_task-' + expe_name + '_events.txt'
                 )
             ]
             
