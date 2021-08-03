@@ -73,7 +73,7 @@ class MNEInverseSolution(BaseInterface):
         parcellation = self.inputs.parcellation
         self.roi_ts_file = self.inputs.roi_ts_file 
                 
-        if os.path.exists(self.roi_ts_file):
+        if not os.path.exists(self.roi_ts_file):
             roi_tcs = self._createInv_MNE(bids_dir, subject, epochs_file, fwd_fname, noise_cov_fname, src_file, parcellation)
             np.save(self.roi_ts_file, roi_tcs)
         

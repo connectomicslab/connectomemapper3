@@ -98,9 +98,8 @@ class EEGPipeline(Pipeline):
         cmp_common.Pipeline.__init__(self, project_info)
 
         self.stages['EEGPreparer'].config.cmp3_dir = os.path.join(self.derivatives_directory, 'cmp')
-        self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory, 'cartool')
-       
-        # removing the following two lines because these parameters are all set to default values at this point (the config file hasn't been read yet), so setting them with each other is pointless
+        # removing the following three lines because these parameters are all set to default values at this point (the config file hasn't been read yet), so setting them with each other is pointless
+        # self.stages['EEGPreparer'].config.cartool_dir = os.path.join(self.derivatives_directory, 'cartool')
         # self.stages['EEGLoader'].config.eeg_format = self.stages['EEGPreparer'].config.eeg_format
         # self.stages['EEGLoader'].config.invsol_format = self.stages['EEGPreparer'].config.invsol_format
 
@@ -281,7 +280,6 @@ class EEGPipeline(Pipeline):
                 ]
             )
         elif self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == 'mne':
-            cartool_dir = self.stages['EEGPreparer'].config.cartool_dir
             
             # MNE finds Freesurfer annot files based on parcellation label 
             datasource.inputs.parcellation = parcellation_label + '.' + parcellation_desc
@@ -309,16 +307,30 @@ class EEGPipeline(Pipeline):
             
             ######
             # this is non-standard, needs to be fixed!! 
+            # datasource.inputs.electrode_positions_file = os.path.join(self.base_directory,
+            #                                                           'derivatives',
+            #                                                           cartool_dir,
+            #                                                           self.subject, 
+            #                                                           'eeg', 
+            #                                                           self.subject + '.xyz')                                                                      
+            
             datasource.inputs.electrode_positions_file = os.path.join(self.base_directory,
                                                                       'derivatives',
-                                                                      cartool_dir,
+                                                                      'eeglab',
                                                                       self.subject, 
                                                                       'eeg', 
-                                                                      self.subject + '.xyz')                                                                      
+                                                                      self.subject + '.xyz')
+            
+            # datasource.inputs.MRI_align_transform_file = os.path.join(self.base_directory,
+            #                                                           'derivatives',
+            #                                                           cartool_dir,
+            #                                                           self.subject, 
+            #                                                           'eeg', 
+            #                                                           self.subject + '.Transform.Electrodes Coregistration.Electrodes to Realigned MRI.txt')
             
             datasource.inputs.MRI_align_transform_file = os.path.join(self.base_directory,
                                                                       'derivatives',
-                                                                      cartool_dir,
+                                                                      'eeglab',
                                                                       self.subject, 
                                                                       'eeg', 
                                                                       self.subject + '.Transform.Electrodes Coregistration.Electrodes to Realigned MRI.txt')

@@ -91,15 +91,12 @@ class EEGLAB2fif(BaseInterface):
         epochs.crop(tmin=start_t,tmax=end_t)
         
         # create info object with information about electrode positions 
-        ###
-        # very specific to our dataset - adapt and make more generic!! 
         n = int(open(montage_fname).readline().lstrip().split(' ')[0])
         all_coord = np.loadtxt(montage_fname, skiprows=1, usecols=(0, 1, 2), max_rows=n)
         all_names = np.loadtxt(montage_fname, skiprows=1, usecols=3, max_rows=n,dtype=np.dtype(str)).tolist()
         all_coord = list(map(lambda x: x/1000,all_coord))
         ch_coord  = [all_coord[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]
         ch_names  = [all_names[idx] for idx, chan in  enumerate(all_names) if chan not in ['lpa','rpa','nasion']]   
-        ###
         
         # create the montage object with the channel names and positions read from the file 
         montage = mne.channels.make_dig_montage(ch_pos=dict(zip(ch_names, ch_coord)),coord_frame='head')
