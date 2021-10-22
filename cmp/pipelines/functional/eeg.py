@@ -282,7 +282,14 @@ class EEGPipeline(Pipeline):
         elif self.stages['EEGPreparer'].config.invsol_format.split('-')[0] == 'mne':
             
             # MNE finds Freesurfer annot files based on parcellation label 
-            datasource.inputs.parcellation = parcellation_label + '.' + parcellation_desc
+            if parcellation_desc=='':
+                parcellation = parcellation_label
+            else:
+                parcellation = parcellation_label + '.' + parcellation_desc
+
+            datasource.inputs.parcellation = parcellation#os.path.join(self.base_directory,
+            #                                                  'derivatives', 'cmp', self.subject,
+            #                                                  'anat', parcellation)
             
             # define names for MNE outputs 
             datasource.inputs.noise_cov_fname = os.path.join(self.base_directory,
