@@ -23,8 +23,6 @@ dependencies:
 - indexed_gzip=1.2.* # requirements of fsleyes
 
 - pip:
-    #- cfflib==2.0.5
-    # - git+https://github.com/LTS5/cfflib.git
     - duecredit==0.8.0 # ==0.7.0
     - dipy==1.1.1 # ==0.15.0
     - mne==0.20.7 # ==0.17.1
@@ -36,8 +34,4 @@ dependencies:
     - apptools==4.5.0
     - statsmodels==0.11.1 # ==0.9.0
     - networkx==2.2
-    - sphinx==3.1.1 # ==1.8.5
-    - sphinx_rtd_theme==0.5.0 # ==0.4.3
-    - sphinx-argparse==0.2.5 # ==0.2.5
-    - recommonmark==0.6.0 # ==0.5.0
     - pydicom==2.0.0 # ==1.4.2
