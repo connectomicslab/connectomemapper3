@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/sh
 # Copyright (C) 2009-2021, Ecole Polytechnique Federale de Lausanne (EPFL) and
 # Hospital Center and University of Lausanne (UNIL-CHUV), Switzerland, and CMP3 contributors
 # All rights reserved.
@@ -18,27 +18,24 @@
 # Source: https://github.com/connectomicslab/connectomemapper3/blob/master/build_docs.sh
 
 # Get the directory where this script is located
-if [[ "$OSTYPE" == "linux-gnu" ]]; then
-        # Linux
-        DIR="$(dirname $(readlink -f "$0"))"
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # Mac OSX
-        DIR="$(dirname "$0")"
-fi
+# to derive the path to the project and docs root
+# directories
+UTILSDIR=$(cd "$(dirname "$0")"; pwd)
+SCRIPTSDIR="$(dirname "$UTILSDIR")"
+BASEDIR="$(dirname "$SCRIPTSDIR")"
 
-echo "Building documentation in $DIR/docs/_build/html"
+# Install the latest version of the code
+cd "$BASEDIR"
+# pip install .
 
-# Store current working directory
-OLDPWD="$PWD"
+# Indicate we are building the docs when reading cmp source code
+export READTHEDOCS="True"
 
-# Go to the documentation root directory
-cd "$DIR/docs"
-
-# Clean an existing build
+# Clean a potential existing build and build the HTML documentation
+cd "$BASEDIR/docs"
+echo "INFO: Building documentation in $(pwd)/_build/html"
 make clean
-
-# Build the HTML documentation
 make html
 
-# Get back to current working directory
-cd "$OLDPWD"
+# Remove $READTHEDOCS
+unset READTHEDOCS
