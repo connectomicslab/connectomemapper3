@@ -40,7 +40,8 @@ class Discard_tp(BaseInterface):
     >>> discard.inputs.base_dir = '/my_directory'
     >>> discard.inputs.in_file = '/path/to/sub-01_task-rest_desc-preproc_bold.nii.gz'
     >>> discard.inputs.n_discard = 5
-    >>> discard.run() # doctest: +SKIP
+    >>> discard.run()  # doctest: +SKIP
+
     """
 
     input_spec = Discard_tp_InputSpec
@@ -143,7 +144,8 @@ class Nuisance_regression(BaseInterface):
     >>> nuisance.inputs.motion_nuisance = True
     >>> nuisance.inputs.nuisance_motion_nb_reg = 36
     >>> nuisance.inputs.n_discard = 5
-    >>> nuisance.run() # doctest: +SKIP
+    >>> nuisance.run()  # doctest: +SKIP
+
     """
 
     input_spec = Nuisance_InputSpec
@@ -348,7 +350,8 @@ class Detrending(BaseInterface):
     >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale4_dseg.nii.gz',
     >>>                            '/path/to/sub-01_space-meanBOLD_atlas-L2018_desc-scale5_dseg.nii.gz']
     >>> detrend.inputs.mode = 'quadratic'
-    >>> detrend.run() # doctest: +SKIP
+    >>> detrend.run()  # doctest: +SKIP
+
     """
 
     input_spec = Detrending_InputSpec
@@ -470,7 +473,8 @@ class Scrubbing(BaseInterface):
     >>> scrub.inputs.wm_mask = '/path/to/sub-01_space-meanBOLD_label-WM_dseg.nii.gz'
     >>> scrub.inputs.gm_file = '/path/to/sub-01_space-meanBOLD_label-GM_dseg.nii.gz'
     >>> scrub.inputs.mode = 'quadratic'
-    >>> scrub.run() # doctest: +SKIP
+    >>> scrub.run()  # doctest: +SKIP
+
     """
 
     input_spec = Scrubbing_InputSpec

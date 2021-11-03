@@ -4,8 +4,8 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-""" CMP preprocessing Stage (not used yet!)
-"""
+"""Definition of config and stage classes for diffusion MRI preprocessing."""
+
 import os
 import glob
 
@@ -1112,7 +1112,7 @@ class PreprocessingStage(Stage):
         )
 
     def define_inspect_outputs(self):
-        """Update the `inspect_outputs' class attribute.
+        """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """

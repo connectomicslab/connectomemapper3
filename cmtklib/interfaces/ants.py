@@ -89,6 +89,7 @@ class MultipleANTsApplyTransforms(BaseInterface):
     >>> apply_tf.inputs.default_value = 0.0
     >>> apply_tf.inputs.out_postfix = "_transformed"
     >>> apply_tf.run() # doctest: +SKIP
+
     """
 
     input_spec = MultipleANTsApplyTransformsInputSpec

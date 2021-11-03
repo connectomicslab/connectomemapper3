@@ -90,7 +90,8 @@ class ComputeParcellationRoiVolumes(BaseInterface):
     >>>                             '/path/to/sub-01_atlas-L2018_desc-scale4_dseg.graphml',
     >>>                             '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.graphml']
     >>> compute_vol.inputs.parcellation_scheme = ['Lausanne2018']
-    >>> compute_vol.run() # doctest: +SKIP
+    >>> compute_vol.run()  # doctest: +SKIP
+
     """
 
     input_spec = ComputeParcellationRoiVolumesInputSpec
@@ -261,7 +262,8 @@ class Erode(BaseInterface):
     --------
     >>> erode = Erode()
     >>> erode.inputs.in_file = '/path/to/sub-01_desc-brain_mask.nii.gz'
-    >>> erode.run() # doctest: +SKIP
+    >>> erode.run()  # doctest: +SKIP
+
     """
 
     input_spec = Erode_inputspec
@@ -304,7 +306,8 @@ class ParcellateHippocampalSubfields(BaseInterface):
     >>> parc_hippo = ParcellateHippocampalSubfields()
     >>> parc_hippo.inputs.subjects_dir = '/path/to/derivatives/freesurfer'
     >>> parc_hippo.inputs.subject_id = 'sub-01'
-    >>> parc_hippo.run() # doctest: +SKIP
+    >>> parc_hippo.run()  # doctest: +SKIP
+
     """
 
     input_spec = ParcellateHippocampalSubfieldsInputSpec
@@ -408,7 +411,8 @@ class ParcellateBrainstemStructures(BaseInterface):
     >>> parc_bstem = ParcellateBrainstemStructures()
     >>> parc_bstem.inputs.subjects_dir = '/path/to/derivatives/freesurfer'
     >>> parc_bstem.inputs.subject_id = 'sub-01'
-    >>> parc_bstem.run() # doctest: +SKIP
+    >>> parc_bstem.run()  # doctest: +SKIP
+
     """
 
     input_spec = ParcellateBrainstemStructuresInputSpec
@@ -495,9 +499,9 @@ class CombineParcellations(BaseInterface):
 
     It combines the original cortico sub-cortical parcellation with
     the following extra segmented structures:
-    * Segmentation of the 8 thalamic nuclei per hemisphere
-    * Segmentation of 14 hippocampal subfields per hemisphere
-    * Segmentation of 3 brainstem sub-structures
+        * Segmentation of the 8 thalamic nuclei per hemisphere
+        * Segmentation of 14 hippocampal subfields per hemisphere
+        * Segmentation of 3 brainstem sub-structures
 
     It also generates by defaults the corresponding (1) description of the nodes in `graphml`
     format and (2) color lookup tables in FreeSurfer format that can be displayed in `freeview`.
@@ -518,7 +522,8 @@ class CombineParcellations(BaseInterface):
     >>> parc_combine.inputs.create_graphml = True
     >>> parc_combine.inputs.subjects_dir = '/path/to/output_dir/freesurfer')
     >>> parc_combine.inputs.subject_id = 'sub-01'
-    >>> parc_combine.run() # doctest: +SKIP
+    >>> parc_combine.run()  # doctest: +SKIP
+
     """
 
     input_spec = CombineParcellationsInputSpec
@@ -1701,7 +1706,8 @@ class ParcellateThalamus(BaseInterface):
     >>> parc_thal.inputs.subjects_dir = '/path/to/output_dir/freesurfer'
     >>> parc_thal.inputs.subject_id = 'sub-01'
     >>> parc_thal.inputs.ants_precision_type = 'float'
-    >>> parc_thal.run() # doctest: +SKIP
+    >>> parc_thal.run()  # doctest: +SKIP
+
     """
 
     input_spec = ParcellateThalamusInputSpec
@@ -2105,8 +2111,8 @@ class Parcellate(BaseInterface):
     """Subdivides segmented ROI file into smaller subregions.
 
     This interface interfaces with the CMTK parcellation functions
-    available in `cmtklib.parcellation` module for all parcellation
-    resolutions of a given scheme.
+        available in `cmtklib.parcellation` module for all parcellation
+        resolutions of a given scheme.
 
     Example
     -------
@@ -2115,7 +2121,7 @@ class Parcellate(BaseInterface):
     >>> parcellate.inputs.subjects_dir = '/path/to/output_dir/freesurfer'
     >>> parcellate.inputs.subject_id = 'sub-01'
     >>> parcellate.inputs.parcellation_scheme = 'Lausanne2018'
-    >>> parcellate.run()                 # doctest: +SKIP
+    >>> parcellate.run()  # doctest: +SKIP
     """
 
     input_spec = ParcellateInputSpec

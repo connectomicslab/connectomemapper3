@@ -241,7 +241,7 @@ class PreprocessingStage(Stage):
                 )
 
     def define_inspect_outputs(self):
-        """Update the `inspect_outputs' class attribute.
+        """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """

@@ -12,6 +12,11 @@
 # Created by Sebastien Tourbier
 # Source: https://github.com/connectomicslab/connectomemapper3/blob/master/build_bidsapp.sh
 
+# Get base directory of repo where the Dockerfile is
+UTILSDIR=$(cd "$(dirname "$0")"; pwd)
+SCRIPTSDIR="$(dirname "$UTILSDIR")"
+BASEDIR="$(dirname "$SCRIPTSDIR")"
+
 # Get the current date and time
 CMP_BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 echo "$CMP_BUILD_DATE"
@@ -25,6 +30,7 @@ VCS_REF=$(git rev-parse --verify HEAD)
 echo "$VCS_REF"
 
 # Build the Docker image
+cd "$BASEDIR"
 docker build --rm --build-arg BUILD_DATE="$CMP_BUILD_DATE "\
 				  --build-arg VCS_REF="$VCS_REF" \
 				  --build-arg VERSION="$VERSION" \
