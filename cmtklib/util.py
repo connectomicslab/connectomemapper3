@@ -208,7 +208,6 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
 
     Returns
     -------
-
     connmats: dict
         Dictionary of connectivity matrices
 

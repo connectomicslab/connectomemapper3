@@ -42,7 +42,8 @@ class MRtrix_mul(CommandLine):
     >>> multiply.inputs.input1  = 'image1.nii.gz'
     >>> multiply.inputs.input2  = 'image2.nii.gz'
     >>> multiply.inputs.out_filename = 'result.nii.gz'
-    >>> multiply.run() # doctest: +SKIP
+    >>> multiply.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'mrcalc'
@@ -100,7 +101,8 @@ class Erode(CommandLine):
     >>> import cmtklib.interfaces.mrtrix3 as mrt
     >>> erode = mrt.Erode()
     >>> erode.inputs.in_file = 'mask.mif'
-    >>> erode.run() # doctest: +SKIP
+    >>> erode.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'maskfilter'
@@ -167,7 +169,8 @@ class DWIDenoise(CommandLine):
     >>> dwi_denoise.inputs.in_file = 'sub-01_dwi.nii.gz'
     >>> dwi_denoise.inputs.out_file = 'sub-01_desc-denoised_dwi.nii.gz'
     >>> dwi_denoise.inputs.out_noisemap = 'sub-01_mod-dwi_noisemap.nii.gz'
-    >>> dwi_denoise.run() # doctest: +SKIP
+    >>> dwi_denoise.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'dwidenoise'
@@ -291,6 +294,7 @@ class DWIBiasCorrect(CommandLine):
     >>> dwi_biascorr.inputs.in_file = 'sub-01_dwi.nii.gz'
     >>> dwi_biascorr.inputs.use_ants = True
     >>> dwi_biascorr.run() # doctest: +SKIP
+
     """
 
     _cmd = 'dwibiascorrect'
@@ -456,7 +460,8 @@ class MRConvert(CommandLine):
     >>> mrconvert = mrt.MRConvert()
     >>> mrconvert.inputs.in_file = 'dwi_FA.mif'
     >>> mrconvert.inputs.out_filename = 'dwi_FA.nii'
-    >>> mrconvert.run()                                 # doctest: +SKIP
+    >>> mrconvert.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'mrconvert'
@@ -513,7 +518,7 @@ class ApplymultipleMRConvertOutputSpec(TraitedSpec):
 
 
 class ApplymultipleMRConvert(BaseInterface):
-    """Apply ``mrconvert` tool to multiple images.
+    """Apply `mrconvert` tool to multiple images.
 
     Example
     -------
@@ -521,7 +526,8 @@ class ApplymultipleMRConvert(BaseInterface):
     >>> mrconvert = mrt.ApplymultipleMRConvert()
     >>> mrconvert.inputs.in_files = ['dwi_FA.mif','dwi_MD.mif']
     >>> mrconvert.inputs.extension = 'nii'
-    >>> mrconvert.run() # doctest: +SKIP
+    >>> mrconvert.run()  # doctest: +SKIP
+
     """
 
     input_spec = ApplymultipleMRConvertInputSpec
@@ -573,7 +579,8 @@ class MRCrop(CommandLine):
     >>> mrcrop.inputs.in_file = 'sub-01_dwi.nii.gz'
     >>> mrcrop.inputs.in_mask_file = 'sub-01_mod-dwi_desc-brain_mask.nii.gz'
     >>> mrcrop.inputs.out_filename = 'sub-01_desc-cropped_dwi.nii.gz'
-    >>> mrcrop.run() # doctest: +SKIP
+    >>> mrcrop.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'mrcrop'
@@ -629,7 +636,8 @@ class MRThreshold(CommandLine):
     >>> mrthresh = mrt.MRCrop()
     >>> mrthresh.inputs.in_file = 'sub-01_dwi.nii.gz'
     >>> mrthresh.inputs.out_file = 'sub-01_desc-thresholded_dwi.nii.gz'
-    >>> mrthresh.run() # doctest: +SKIP
+    >>> mrthresh.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'mrthreshold'
@@ -694,7 +702,8 @@ class MRTransform(CommandLine):
     >>> MRxform = MRTransform()
     >>> MRxform.inputs.in_files = 'anat_coreg.mif'
     >>> MRxform.inputs.interp = 'cubic'
-    >>> MRxform.run() # doctest: +SKIP
+    >>> MRxform.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'mrtransform'
@@ -744,7 +753,8 @@ class ApplymultipleMRCrop(BaseInterface):
     >>>                               'sub-01_atlas-L2018_desc-scale4_dseg.nii.gz',
     >>>                               'sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
     >>> multi_crop.inputs.template_image = 'sub-01_T1w.nii.gz'
-    >>> multi_crop.run() # doctest: +SKIP
+    >>> multi_crop.run()  # doctest: +SKIP
+
 
     See Also
     --------
@@ -791,7 +801,8 @@ class ApplymultipleMRTransforms(BaseInterface):
     >>>                                    'sub-01_atlas-L2018_desc-scale4_dseg.nii.gz',
     >>>                                    'sub-01_atlas-L2018_desc-scale5_dseg.nii.gz']
     >>> multi_transform.inputs.template_image = 'sub-01_T1w.nii.gz'
-    >>> multi_transform.run() # doctest: +SKIP
+    >>> multi_transform.run()  # doctest: +SKIP
+
 
     See Also
     --------
@@ -836,7 +847,8 @@ class ExtractFSLGrad(CommandLine):
     >>> fsl_grad = mrt.ExtractFSLGrad()
     >>> fsl_grad.inputs.in_file = 'sub-01_dwi.mif'
     >>> fsl_grad.inputs.out_grad_fsl = ['sub-01_dwi.bvecs', 'sub-01_dwi.bvals']
-    >>> fsl_grad.run() # doctest: +SKIP
+    >>> fsl_grad.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'mrinfo'
@@ -874,7 +886,8 @@ class ExtractMRTrixGrad(CommandLine):
     >>> mrtrix_grad = mrt.ExtractMRTrixGrad()
     >>> mrtrix_grad.inputs.in_file = 'sub-01_dwi.mif'
     >>> mrtrix_grad.inputs.out_grad_mrtrix = 'sub-01_gradient.txt'
-    >>> mrtrix_grad.run() # doctest: +SKIP
+    >>> mrtrix_grad.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'mrinfo'
@@ -933,7 +946,8 @@ class DWI2Tensor(CommandLine):
     >>> dwi2tensor = mrt.DWI2Tensor()
     >>> dwi2tensor.inputs.in_file = 'dwi.mif'
     >>> dwi2tensor.inputs.encoding_file = 'encoding.txt'
-    >>> dwi2tensor.run() # doctest: +SKIP
+    >>> dwi2tensor.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'dwi2tensor'
@@ -986,7 +1000,8 @@ class Tensor2Vector(CommandLine):
     >>> import cmtklib.interfaces.mrtrix3 as mrt
     >>> tensor2vector = mrt.Tensor2Vector()
     >>> tensor2vector.inputs.in_file = 'dwi_tensor.mif'
-    >>> tensor2vector.run()                             # doctest: +SKIP
+    >>> tensor2vector.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'tensor2metric'
@@ -1053,7 +1068,8 @@ class EstimateResponseForSH(CommandLine):
     >>> estresp.inputs.in_file = 'dwi.mif'
     >>> estresp.inputs.mask_image = 'dwi_WMProb.mif'
     >>> estresp.inputs.encoding_file = 'encoding.txt'
-    >>> estresp.run()                                   # doctest: +SKIP
+    >>> estresp.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'dwi2response'
@@ -1149,6 +1165,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     * [6] Im {Y(4,4)}
     * [7] Im {Y(4,3)}
 
+
     Example
     -------
     >>> import cmtklib.interfaces.mrtrix3 as mrt
@@ -1218,6 +1235,7 @@ class Generate5tt(CommandLine):
     >>> gen5tt.cmdline                             # doctest: +ELLIPSIS
     '5ttgen fsl T1.nii.gz 5tt.mif'
     >>> gen5tt.run()                               # doctest: +SKIP
+
     """
 
     _cmd = '5ttgen'
@@ -1255,9 +1273,8 @@ class GenerateGMWMInterface(CommandLine):
     >>> genWMGMI = cmp_mrt.Generate5tt()
     >>> genWMGMI.inputs.in_file = '5tt.mif'
     >>> genWMGMI.inputs.out_file = 'gmwmi.mif'
-    >>> genWMGMI.cmdline                             # doctest: +ELLIPSIS
-    '5tt2gmwmi 5tt.mif gmwmi.mif'
-    >>> genGMWMI.run()                               # doctest: +SKIP
+    >>> genGMWMI.run()  # doctest: +SKIP
+
     """
 
     _cmd = '5tt2gmwmi'
@@ -1388,11 +1405,13 @@ class StreamlineTrack(CommandLine):
     """Performs tractography using `tckgen`.
 
     It can use one of the following models::
+
         'dt_prob', 'dt_stream', 'sd_prob', 'sd_stream'
 
     where 'dt' stands for diffusion tensor,
     'sd' stands for spherical deconvolution, and
     'prob' stands for probabilistic.
+
 
     Example
     -------
@@ -1401,7 +1420,8 @@ class StreamlineTrack(CommandLine):
     >>> strack.inputs.inputmodel = 'SD_PROB'
     >>> strack.inputs.in_file = 'data.Bfloat'
     >>> strack.inputs.seed_file = 'seed_mask.nii'
-    >>> strack.run()                                    # doctest: +SKIP
+    >>> strack.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'tckgen'
@@ -1491,6 +1511,7 @@ class FilterTractogram(MRTrix3Base):
     ----------
     .. [Smith2013SIFT] R.E. Smith et al., NeuroImage 67 (2013), pp. 298–312, <https://www.ncbi.nlm.nih.gov/pubmed/23238430>.
 
+
     Example
     -------
     >>> import cmtklib.interfaces.mrtrix3 as cmp_mrt
@@ -1498,7 +1519,8 @@ class FilterTractogram(MRTrix3Base):
     >>> mrtrix_sift.inputs.in_tracks = 'tractogram.tck'
     >>> mrtrix_sift.inputs.in_fod = 'spherical_harmonics_image.nii.gz'
     >>> mrtrix_sift.inputs.out_file = 'sift_tractogram.tck'
-    >>> mrtrix_sift.run()                               # doctest: +SKIP
+    >>> mrtrix_sift.run()   # doctest: +SKIP
+
     """
 
     _cmd = 'tcksift'
@@ -1539,6 +1561,7 @@ class SIFT2(MRTrix3Base):
     ----------
     .. [Smith2015SIFT2] Smith RE et al., Neuroimage, 2015, 119:338-51. <https://doi.org/10.1016/j.neuroimage.2015.06.092>.
 
+
     Example
     -------
     >>> import cmtklib.interfaces.mrtrix3 as cmp_mrt
@@ -1546,7 +1569,8 @@ class SIFT2(MRTrix3Base):
     >>> mrtrix_sift2.inputs.in_tracks = 'tractogram.tck'
     >>> mrtrix_sift2.inputs.in_fod = 'spherical_harmonics_image.nii.gz'
     >>> mrtrix_sift2.inputs.out_file = 'sift2_fiber_weights.txt'
-    >>> mrtrix_sift2.run()                               # doctest: +SKIP
+    >>> mrtrix_sift2.run()  # doctest: +SKIP
+
     """
 
     _cmd = 'tcksift2'

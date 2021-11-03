@@ -749,7 +749,8 @@ class CMTK_cmat(BaseInterface):
     >>>                             '/path/to/sub-01_atlas-L2018_desc-scale5_dseg.graphml']
     >>> cmat.inputs.parcellation scheme = 'Lausanne2018'
     >>> cmat.inputs.output_types = ['gPickle','mat','graphml']
-    >>> cmat.run() # doctest: +SKIP
+    >>> cmat.run()  # doctest: +SKIP
+
     """
 
     input_spec = CMTK_cmatInputSpec
@@ -845,7 +846,7 @@ class CMTK_rsfmri_cmat(BaseInterface):
     """Creates the functional connectivity matrices for a given parcellation scheme.
 
     It applies scrubbing (if enabled), computes the average GM ROI time-series and computes
-    the Pearson's correlation coefficient between each GM ROI time-series poir.
+        the Pearson's correlation coefficient between each GM ROI time-series poir.
 
     Examples
     --------
@@ -867,6 +868,7 @@ class CMTK_rsfmri_cmat(BaseInterface):
     >>> cmat.inputs.apply_scrubbing = False
     >>> cmat.inputs.output_types = ['gPickle','mat','graphml']
     >>> cmat.run() # doctest: +SKIP
+
     """
 
     input_spec = CMTK_rsfmri_cmat_InputSpec

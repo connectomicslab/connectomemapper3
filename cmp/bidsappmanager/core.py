@@ -11,7 +11,7 @@ import subprocess
 
 
 def run(command, env=None, cwd=None):
-    """Function calls by :class:`CMP_MainWindowHandler` to run datalad commands.
+    """Function calls by `CMP_MainWindowHandler` to run datalad commands.
 
     It runs the command specified as input via ``subprocess.run()``.
 
@@ -30,6 +30,7 @@ def run(command, env=None, cwd=None):
     --------
     >>> cmd = 'datalad save'
     >>> run(cmd) # doctest: +SKIP
+
     """
     if (cwd is None) or (cwd == {}):
         cwd = os.getcwd()

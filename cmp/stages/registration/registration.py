@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""Definition of config and stage classes for MRI co-registration"""
+"""Definition of config and stage classes for MRI co-registration."""
 
 # General imports
 import os
@@ -1416,7 +1416,7 @@ class RegistrationStage(Stage):
             # fmt:on
 
     def define_inspect_outputs(self):
-        """Update the `inspect_outputs' class attribute.
+        """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
         """

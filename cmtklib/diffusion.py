@@ -163,7 +163,8 @@ class FlipTable(BaseInterface):
     >>> flip_table.inputs.flipping_axis = ['x']
     >>> flip_table.inputs.orientation = 'v'
     >>> flip_table.inputs.delimiter = ','
-    >>> flip_table.run() # doctest: +SKIP
+    >>> flip_table.run()  # doctest: +SKIP
+
     """
 
     input_spec = FlipTableInputSpec
@@ -243,7 +244,8 @@ class ExtractPVEsFrom5TT(BaseInterface):
     >>> pves.inputs.pve_csf_file = '/path/to/output_csf_pve.nii.gz'
     >>> pves.inputs.pve_gm_file = '/path/to/output_gm_pve.nii.gz'
     >>> pves.inputs.pve_wm_file = '/path/to/output_wm_pve.nii.gz'
-    >>> pves.run() # doctest: +SKIP
+    >>> pves.run()  # doctest: +SKIP
+
     """
 
     input_spec = ExtractPVEsFrom5TTInputSpec
@@ -422,7 +424,8 @@ class Tck2Trk(BaseInterface):
     >>> tck_to_trk.inputs.in_tracks = 'sub-01_tractogram.tck'
     >>> tck_to_trk.inputs.in_image = 'sub-01_desc-preproc_dwi.nii.gz'
     >>> tck_to_trk.inputs.out_tracks = 'sub-01_tractogram.trk'
-    >>> tck_to_trk.run() # doctest: +SKIP
+    >>> tck_to_trk.run()  # doctest: +SKIP
+
     """
 
     input_spec = Tck2TrkInputSpec
@@ -489,7 +492,8 @@ class FlipBvec(BaseInterface):
     >>> flip_bvec.inputs.delimiter = ' '
     >>> flip_bvec.inputs.header_lines = 0
     >>> flip_bvec.inputs.orientation = 'h'
-    >>> flip_bvec.run() # doctest: +SKIP
+    >>> flip_bvec.run()  # doctest: +SKIP
+
     """
 
     input_spec = FlipBvecInputSpec
@@ -574,7 +578,8 @@ class UpdateGMWMInterfaceSeeding(BaseInterface):
     >>>                                       'sub-01_space-DWI_atlas-L2018_desc-scale3_dseg.nii.gz',
     >>>                                       'sub-01_space-DWI_atlas-L2018_desc-scale4_dseg.nii.gz',
     >>>                                       'sub-01_space-DWI_atlas-L2018_desc-scale5_dseg.nii.gz']
-    >>> update_gmwmi.run() # doctest: +SKIP
+    >>> update_gmwmi.run()  # doctest: +SKIP
+
     """
 
     input_spec = UpdateGMWMInterfaceSeedingInputSpec
@@ -686,7 +691,8 @@ class Make_Seeds(BaseInterface):
     >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale4_dseg.nii.gz',
     >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale5_dseg.nii.gz']
     >>> make_dipy_seeds.inputs.WM_file = 'sub-01_space-DWI_label-WM_dseg.nii.gz'
-    >>> make_dipy_seeds.run() # doctest: +SKIP
+    >>> make_dipy_seeds.run()  # doctest: +SKIP
+
     """
 
     input_spec = Make_SeedsInputSpec
@@ -768,7 +774,8 @@ class Make_Mrtrix_Seeds(BaseInterface):
     >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale4_dseg.nii.gz',
     >>>                                 'sub-01_space-DWI_atlas-L2018_desc-scale5_dseg.nii.gz']
     >>> make_mrtrix_seeds.inputs.WM_file = 'sub-01_space-DWI_label-WM_dseg.nii.gz'
-    >>> make_mrtrix_seeds.run() # doctest: +SKIP
+    >>> make_mrtrix_seeds.run()  # doctest: +SKIP
+
     """
 
     input_spec = Make_SeedsInputSpec
@@ -842,7 +849,8 @@ class SplitDiffusion(BaseInterface):
     >>> split_dwi.inputs.in_file  = 'sub-01_dwi.nii.gz'
     >>> split_dwi.inputs.start  = 5
     >>> split_dwi.inputs.in_file  = 30
-    >>> split_dwi.run() # doctest: +SKIP
+    >>> split_dwi.run()  # doctest: +SKIP
+
     """
 
     input_spec = SplitDiffusion_InputSpec
