@@ -130,11 +130,11 @@ The installation of the Connectome Mapper 3 BIDS App Manager (CMPBIDSAPPManager)
 * Create a miniconda3 environment where all python dependencies will be installed::
 
     $ cd connectomemapper3
-    $ conda env create -f environment.yml
+    $ conda env create -f conda/environment.yml
 
 .. important::
   It seems there is no conda package for `git-annex` available on Mac.
-  For your convenience, we created an additional `environment_macosx.yml`
+  For your convenience, we created an additional `conda/environment_macosx.yml`
   miniconda3 environment where the line `- git-annex=XXXXXXX` has been removed.
   Git-annex should be installed on MacOSX using `brew <https://brew.sh/index_fr>`_
   i.e. ``brew install git-annex``. See https://git-annex.branchable.com/install/ for more details.
