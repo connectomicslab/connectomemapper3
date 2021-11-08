@@ -29,23 +29,13 @@ dependencies:
 # - libnetcdf=4.7.3
 
 - pip:
-    # - git+https://github.com/LTS5/cfflib.git
     - coverage==5.2
     - duecredit==0.8.0  # 0.7.0
-    # - dipy==1.1.1  # 0.15.0
     - mne==0.20.7  # 0.17.1
-    # - obspy==1.2.1  # 1.1.1
-    - datalad[full]==0.13.0  # 0.11.3
-    - datalad-revolution==0.6.0
-    - datalad-container==0.3.1
-    - datalad_neuroimaging==0.2.0
+    - datalad[full]==0.14.0  # 0.11.3
+    - datalad-container==1.1.2
+    - datalad_neuroimaging==0.3.1
     - pybids==0.10.2  # 0.9.1
-    - apptools==4.5.0
     - statsmodels==0.11.1  # 0.9.0
     - networkx==2.4
-    - sphinx==3.1.1  # 1.5.1
-    - sphinx_rtd_theme==0.5.0  # 0.4.3
-    - sphinx-argparse==0.2.5
-    - recommonmark==0.6.0  # 0.5.0
     - pydicom==2.0.0  # 1.4.2
-    # - fury==0.5.0
