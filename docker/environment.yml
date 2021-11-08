@@ -4,7 +4,6 @@ channels:
 - anaconda
 - conda-forge
 - aramislab
-- defaults
 - mrtrix3
 
 dependencies:
