@@ -98,7 +98,7 @@ include_conda_pip_dependencies = False
 install_requires = []
 dependency_links = []
 if include_conda_pip_dependencies:
-    path = os.path.join(directory, "ubuntu16.04", "environment.yml")
+    path = os.path.join(directory, "docker", "environment.yml")
     with open(path) as read_file:
         state = "PREAMBLE"
         for line in read_file:
