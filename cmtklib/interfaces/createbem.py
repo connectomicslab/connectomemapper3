@@ -69,7 +69,7 @@ class CreateBEM(BaseInterface):
         subjects_dir = os.path.join(bids_dir,'derivatives','freesurfer','subjects')
         bemfilename = os.path.join(bids_dir,'derivatives','cmp',subject,'eeg',subject+'_bem.fif')
         if not "bem" in os.listdir(os.path.join(subjects_dir,subject)):
-            mne.bem.make_watershed_bem(subject,subjects_dir) # still need to check if this actually works
+            mne.bem.make_watershed_bem(subject,subjects_dir,overwrite=True) # still need to check if this actually works
             # file names required by mne's make_bem_model not consistent with file names outputted by mne's make_watershed_bem - copy and rename 
             for elem in ["inner_skull","outer_skull","outer_skin"]:
                 elem1 = subject+'_'+elem+'_surface' # file name used by make_watershed_bem 
