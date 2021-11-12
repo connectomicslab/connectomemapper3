@@ -99,97 +99,106 @@ class ComputeParcellationRoiVolumes(BaseInterface):
 
     def _run_interface(self, runtime):
 
-        resolutions = get_parcellation(self.inputs.parcellation_scheme)
+        if "Custom" in self.inputs.parcellation_scheme:
+            self._compute_and_save_volumetry(
+                self.inputs.roi_volumes[0],
+                self.inputs.roi_graphMLs[0],
+                "custom"
+            )
+        else:
+            resolutions = get_parcellation(self.inputs.parcellation_scheme)
 
-        for parkey, parval in list(resolutions.items()):
+            for parkey, parval in list(resolutions.items()):
 
-            for roi in self.inputs.roi_volumes:
-                if parkey in roi:
-                    roi_fname = roi
-                    break
-
-            if self.inputs.parcellation_scheme != 'Lausanne2008':
-                for graphml in self.inputs.roi_graphMLs:
-                    if parkey in graphml:
-                        roi_info_graphml = graphml
+                for roi in self.inputs.roi_volumes:
+                    if parkey in roi:
+                        roi_fname = roi
                         break
-            else:
-                roi_info_graphml = parval['node_information_graphml']
 
-            iflogger.info(
-                "-------------------------------------------------------")
-            iflogger.info(
-                "Processing {} parcellation - {}".format(self.inputs.parcellation_scheme, parkey))
-            iflogger.info(
-                "-------------------------------------------------------")
-
-            iflogger.info("  > Load {}...".format(roi_fname))
-            roiImg = ni.load(roi_fname)
-            roiData = roiImg.get_data()
-
-            # Compute the volume of the voxel
-            voxel_dimX, voxel_dimY, voxel_dimZ = roiImg.header.get_zooms()
-            voxel_volume = voxel_dimX * voxel_dimY * voxel_dimZ
-            iflogger.info("    ... Voxel volume = {} mm3".format(roi_fname))
-
-            # Initialize the TSV file used to store the parcellation volumetry resulty
-            volumetry_file = op.abspath('roi_stats_{}.tsv'.format(parkey))
-            f_volumetry = open(volumetry_file, 'w+')
-            iflogger.info(
-                "  > Create Volumetry TSV file as {}".format(volumetry_file))
-
-            # Format the TSV file according to BIDS Extension Proposal 11 (BEP011): The structural preprocessing derivatives.
-            time_now = strftime("%a %d %b %Y %H:%M:%S", localtime())
-            hdr_lines = ['{:<4}, {:<55}, {:<10}, {:>10} \n'.format(
-                "index", "name", "type", "volume-mm3")]
-
-            f_volumetry.writelines(hdr_lines)
-            del hdr_lines
-
-            # add node information from parcellation
-            iflogger.info("  > Load {}...".format(roi_info_graphml))
-            gp = nx.read_graphml(roi_info_graphml)
-            n_nodes = len(gp)
-
-            # variables used by the percent counter
-            pc = -1
-            cnt = -1
-
-            iflogger.info("  > Processing parcels...")
-
-            # Loop over each parcel/ROI
-            for u, d in gp.nodes(data=True):
-                # Percent counter
-                cnt += 1
-                pcN = int(round(float(100 * cnt) / n_nodes))
-                if pcN > pc and pcN % 10 == 0:
-                    pc = pcN
-                    iflogger.info('%4.0f%%' % pc)
-
-                # Get the label number
-                if self.inputs.parcellation_scheme == 'Lausanne2018':
-                    parcel_label = d["dn_multiscaleID"]
+                if self.inputs.parcellation_scheme != 'Lausanne2008':
+                    for graphml in self.inputs.roi_graphMLs:
+                        if parkey in graphml:
+                            roi_info_graphml = graphml
+                            break
                 else:
-                    parcel_label = d["dn_correspondence_id"]
+                    roi_info_graphml = parval['node_information_graphml']
 
-                # Get each the parcel is cortical or subcortical
-                parcel_type = d["dn_region"]
-
-                # Get the name of the parcel
-                parcel_name = d["dn_name"]
-
-                # Compute the parcel/ROI volume
-                parcel_volumetry = np.sum(roiData == int(
-                    parcel_label)) * voxel_volume
-
-                f_volumetry.write(
-                    '{:<4}, {:<55}, {:<10}, {:>10} \n'.format(parcel_label, parcel_name, parcel_type, parcel_volumetry))
-
-            f_volumetry.close()
+                iflogger.info(
+                    "-------------------------------------------------------")
+                iflogger.info(
+                    "Processing {} parcellation - {}".format(self.inputs.parcellation_scheme, parkey))
+                iflogger.info(
+                    "-------------------------------------------------------")
+                self._compute_and_save_volumetry(roi_fname, roi_info_graphml, parkey)
 
         iflogger.info('  [Done]')
 
         return runtime
+
+    def _compute_and_save_volumetry(self, roi_fname, roi_info_graphml, parkey):
+        iflogger.info("  > Load {}...".format(roi_fname))
+        roiImg = ni.load(roi_fname)
+        roiData = roiImg.get_data()
+
+        # Compute the volume of the voxel
+        voxel_dimX, voxel_dimY, voxel_dimZ = roiImg.header.get_zooms()
+        voxel_volume = voxel_dimX * voxel_dimY * voxel_dimZ
+        iflogger.info("    ... Voxel volume = {} mm3".format(roi_fname))
+
+        # Initialize the TSV file used to store the parcellation volumetry resulty
+        volumetry_file = op.abspath('roi_stats_{}.tsv'.format(parkey))
+        f_volumetry = open(volumetry_file, 'w+')
+        iflogger.info(
+                "  > Create Volumetry TSV file as {}".format(volumetry_file))
+
+        # Format the TSV file according to BIDS Extension Proposal 11 (BEP011):
+        # The structural preprocessing derivatives.
+        hdr_lines = ['{:<4}, {:<55}, {:<10}, {:>10} \n'.format(
+                "index", "name", "type", "volume-mm3")]
+
+        f_volumetry.writelines(hdr_lines)
+        del hdr_lines
+
+        # add node information from parcellation
+        iflogger.info("  > Load {}...".format(roi_info_graphml))
+        gp = nx.read_graphml(roi_info_graphml)
+        n_nodes = len(gp)
+
+        # variables used by the percent counter
+        pc = -1
+        cnt = -1
+
+        iflogger.info("  > Processing parcels...")
+
+        # Loop over each parcel/ROI
+        for u, d in gp.nodes(data=True):
+            # Percent counter
+            cnt += 1
+            pcN = int(round(float(100 * cnt) / n_nodes))
+            if pcN > pc and pcN % 10 == 0:
+                pc = pcN
+                iflogger.info('%4.0f%%' % pc)
+
+            # Get the label number
+            if self.inputs.parcellation_scheme == 'Lausanne2018':
+                parcel_label = d["dn_multiscaleID"]
+            else:
+                parcel_label = d["dn_correspondence_id"]
+
+            # Get if the parcel is cortical or subcortical
+            parcel_type = d["dn_region"]
+
+            # Get the name of the parcel
+            parcel_name = d["dn_name"]
+
+            # Compute the parcel/ROI volume
+            parcel_volumetry = np.sum(roiData == int(
+                    parcel_label)) * voxel_volume
+
+            f_volumetry.write(
+                    '{:<4}, {:<55}, {:<10}, {:>10} \n'.format(parcel_label, parcel_name, parcel_type, parcel_volumetry))
+
+        f_volumetry.close()
 
     def _list_outputs(self):
         outputs = self._outputs().get()
