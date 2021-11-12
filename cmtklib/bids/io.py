@@ -6,7 +6,7 @@
 
 """This module provides classes to handle custom BIDS derivatives file input."""
 
-from traits.api import (HasTraits, Directory, Str, Instance)
+from traits.api import (HasTraits, Directory, Str)
 
 
 class CustomBIDSFile(HasTraits):
