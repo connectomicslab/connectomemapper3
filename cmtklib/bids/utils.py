@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""This modules provides CMTK Utility functions to handle BIDS datasets."""
+"""This module provides CMTK Utility functions to handle BIDS datasets."""
 
 import os
 import json
