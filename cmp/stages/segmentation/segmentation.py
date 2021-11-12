@@ -485,29 +485,22 @@ class SegmentationStage(Stage):
             if debug:
                 print("fs_path : %s" % fs_path)
 
-            self.inspect_outputs_dict["T1/wm/brainmask"] = [
+            self.inspect_outputs_dict["T1/brainmask"] = [
                 "freeview",
                 "-v",
                 f'{os.path.join(fs_path, "mri", "T1.mgz")}',
-                f'{os.path.join(fs_path, "mri", "wm.mgz")}',
                 f'{os.path.join(fs_path, "mri", "brainmask.mgz")}:colormap=heat:opacity=0.2'
-            ]
-            self.inspect_outputs_dict["norm/aseg"] = [
-                "freeview",
-                "-v",
-                f'{os.path.join(fs_path, "mri", "norm.mgz")}',
-                f'{os.path.join(fs_path, "mri", "aseg.mgz")}:colormap=lut:opacity=0.2'
             ]
             self.inspect_outputs_dict["norm/aseg/surf"] = [
                 "freeview",
                 "-v",
                 f'{os.path.join(fs_path, "mri", "norm.mgz")}',
-                f'{os.path.join(fs_path, "mri", "aseg.mgz")}:colormap=lut:opacity=0.2'
+                f'{os.path.join(fs_path, "mri", "aseg.mgz")}:colormap=lut:opacity=0.2',
                 "-f",
                 f'{os.path.join(fs_path, "surf", "lh.white")}:edgecolor=blue',
                 f'{os.path.join(fs_path, "surf", "rh.white")}:edgecolor=blue',
                 f'{os.path.join(fs_path, "surf", "lh.pial")}:edgecolor=red',
-                f'{os.path.join(fs_path, "surf", "rh.pial")}:edgecolor=red'
+                f'{os.path.join(fs_path, "surf", "rh.pial")}:edgecolor=red',
             ]
 
         # TODO: Add condition when "Custom Segmentation is used"
