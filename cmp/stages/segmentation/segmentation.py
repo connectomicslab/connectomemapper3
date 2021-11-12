@@ -485,48 +485,28 @@ class SegmentationStage(Stage):
             if debug:
                 print("fs_path : %s" % fs_path)
 
-            if "FREESURFER_HOME" not in os.environ:
-                colorLUT_file = pkg_resources.resource_filename(
-                    "cmtklib",
-                    os.path.join(
-                        "data", "segmentation", "freesurfer", "FreeSurferColorLUT.txt"
-                    ),
-                )
-            else:
-                colorLUT_file = os.path.join(
-                    os.environ["FREESURFER_HOME"], "FreeSurferColorLUT.txt"
-                )
-
             self.inspect_outputs_dict["brainmask/T1"] = [
-                "tkmedit",
-                "-f",
-                os.path.join(fs_path, "mri", "brainmask.mgz"),
-                "-surface",
-                os.path.join(fs_path, "surf", "lh.white"),
-                "-aux",
-                os.path.join(fs_path, "mri", "T1.mgz"),
-                "-aux-surface",
-                os.path.join(fs_path, "surf", "rh.white"),
+                "freeview",
+                "-v",
+                f'{os.path.join(fs_path, "mri", "T1.mgz")}',
+                f'{os.path.join(fs_path, "mri", "brainmask.mgz")}:opacity=0.2'
             ]
             self.inspect_outputs_dict["norm/aseg"] = [
-                "tkmedit",
-                "-f",
-                os.path.join(fs_path, "mri", "norm.mgz"),
-                "-segmentation",
-                os.path.join(fs_path, "mri", "aseg.mgz"),
-                colorLUT_file,
+                "freeview",
+                "-v",
+                f'{os.path.join(fs_path, "mri", "norm.mgz")}',
+                f'{os.path.join(fs_path, "mri", "aseg.mgz")}:colormap=lut:opacity=0.2'
             ]
             self.inspect_outputs_dict["norm/aseg/surf"] = [
-                "tkmedit",
+                "freeview",
+                "-v",
+                f'{os.path.join(fs_path, "mri", "norm.mgz")}',
+                f'{os.path.join(fs_path, "mri", "aseg.mgz")}:colormap=lut:opacity=0.2'
                 "-f",
-                os.path.join(fs_path, "mri", "norm.mgz"),
-                "-surface",
-                os.path.join(fs_path, "surf", "lh.white"),
-                "-aux-surface",
-                os.path.join(fs_path, "surf", "rh.white"),
-                "-segmentation",
-                os.path.join(fs_path, "mri", "aseg.mgz"),
-                colorLUT_file,
+                f'{os.path.join(fs_path, "surf", "lh.white")}:edgecolor=blue',
+                f'{os.path.join(fs_path, "surf", "rh.white")}:edgecolor=blue',
+                f'{os.path.join(fs_path, "surf", "lh.pial")}:edgecolor=red',
+                f'{os.path.join(fs_path, "surf", "rh.pial")}:edgecolor=red'
             ]
 
         # TODO: Add condition when "Custom Segmentation is used"
