@@ -485,11 +485,12 @@ class SegmentationStage(Stage):
             if debug:
                 print("fs_path : %s" % fs_path)
 
-            self.inspect_outputs_dict["brainmask/T1"] = [
+            self.inspect_outputs_dict["T1/wm/brainmask"] = [
                 "freeview",
                 "-v",
                 f'{os.path.join(fs_path, "mri", "T1.mgz")}',
-                f'{os.path.join(fs_path, "mri", "brainmask.mgz")}:opacity=0.2'
+                f'{os.path.join(fs_path, "mri", "wm.mgz")}',
+                f'{os.path.join(fs_path, "mri", "brainmask.mgz")}:colormap=heat:opacity=0.2'
             ]
             self.inspect_outputs_dict["norm/aseg"] = [
                 "freeview",
