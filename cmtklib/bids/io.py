@@ -6,7 +6,10 @@
 
 """This module provides classes to handle custom BIDS derivatives file input."""
 
+import os
+import json
 from traits.api import (HasTraits, Directory, Str)
+from bids import BIDSLayout
 
 
 class CustomBIDSFile(HasTraits):
@@ -71,15 +74,35 @@ class CustomBIDSFile(HasTraits):
     def __str__(self):
         msg = "{"
         msg += f' "custom_derivatives_dir": {self.custom_derivatives_dir}, '
-        msg += f' "suffix": {self.suffix}, '
-        msg += f' "extension": {self.extension}, '
-        msg += f' "acquisition": {self.acquisition}, '
-        msg += f' "atlas": {self.atlas}, '
-        msg += f' "resolution": {self.resolution}, '
-        msg += f' "label": {self.label}, '
-        msg += f' "desc": {self.desc}'
+        if self.suffix:
+            msg += f' "suffix": {self.suffix}, '
+        if self.extension:
+            msg += f' "extension": {self.extension}, '
+        if self.acquisition:
+            msg += f' "acquisition": {self.acquisition}, '
+        if self.atlas:
+            msg += f' "atlas": {self.atlas}, '
+        if self.resolution:
+            msg += f' "resolution": {self.resolution}, '
+        if self.label:
+            msg += f' "label": {self.label}, '
+        if self.desc:
+            msg += f' "desc": {self.desc}'
         msg += "}"
         return msg
+
+    def __dict__(self):
+        return json.loads(self.__str__())
+
+    def get_query_dict(self):
+        """Return the dictionary to be passed to `BIDSDataGrabber` to query a list of files."""
+        query_dict = self.__dict__()
+        del query_dict["custom_derivatives_dir"]
+        return query_dict
+
+    def get_custom_derivatives_dir(self):
+        """Return the value of `custom_derivatives_dir` attribute."""
+        return self.custom_derivatives_dir
 
 
 class CustomParcellationBIDSFile(CustomBIDSFile):
