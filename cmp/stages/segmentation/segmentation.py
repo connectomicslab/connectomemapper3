@@ -176,11 +176,6 @@ class SegmentationConfig(HasTraits):
 
     number_of_threads = Int(1, desc="Number of threads used in the stage by Freesurfer and ANTs")
 
-    def _use_existing_freesurfer_data_changed(self, new):
-        """"Update ``custom_segmentation`` if ``use_existing_freesurfer_data`` changes."""
-        if new is True:
-            self.custom_segmentation = False
-
 
 class SegmentationStage(Stage):
     """Class that represents the segmentation stage of a :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline`.
