@@ -462,3 +462,8 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
         if output_type == "graphml":
             outprefix_name = tsv_filename_path.stem
             return "{}.2.graphml".format(outprefix_name)
+
+
+def get_tsv_sidecar_path(filepath):
+    """Return the path to the tsv sidecar file of a compressed nifti image."""
+    return filepath.replace(".nii.gz", ".tsv")
