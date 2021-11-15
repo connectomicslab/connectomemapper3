@@ -75,7 +75,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     input_folders = ["anat"]
     process_type = Str
     diffusion_imaging_model = Str
-    parcellation_scheme = Str("Lausanne2008")
+    parcellation_scheme = Str("Lausanne2018")
     atlas_info = Dict()
     subject_directory = Directory
     derivatives_directory = Directory
@@ -185,19 +185,27 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
     def update_parcellation_scheme(self):
         """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
-        self.parcellation_scheme = self.stages[
-            "Parcellation"
-        ].config.parcellation_scheme
-        self.atlas_info = self.stages["Parcellation"].config.atlas_info
+        self.parcellation_scheme = self.stages["Parcellation"].config.parcellation_scheme
+        if self.parcellation_scheme != "Custom":
+            self.atlas_info = self.stages["Parcellation"].config.atlas_info
+        else:
+            self.atlas_info = {
+                f"{self.config.custom_parcellation.atlas}": {
+                    "number_of_regions": 83,
+                    "node_information_graphml": "/path/to/file.graphml"
+                }
+            }
 
     def update_parcellation(self):
         """Update self.stages['Parcellation'].config.parcellation_scheme when ``seg_tool`` is updated."""
         if self.stages["Segmentation"].config.seg_tool == "Custom segmentation":
             self.stages["Parcellation"].config.parcellation_scheme = "Custom"
+            self.stages["Parcellation"].config.parcellation_scheme_editor = ["Custom"]
         else:
-            self.stages["Parcellation"].config.parcellation_scheme = self.stages[
-                "Parcellation"
-            ].config.pre_custom
+            self.stages["Parcellation"].config.parcellation_scheme = "Lausanne2018"
+            self.stages["Parcellation"].config.parcellation_scheme_editor = [
+                "NativeFreesurfer", "Lausanne2008", "Lausanne2018", "Custom"
+            ]
 
     def update_segmentation(self):
         """Update self.stages['Segmentation'].config.seg_tool when ``parcellation_scheme`` is updated."""
@@ -228,7 +236,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 break
 
     def check_input(self, layout, gui=True):
-        """Check if input of the anatomical pipeline are available.
+        """Check if inputs of the anatomical pipeline are available.
 
         Parameters
         ----------
@@ -256,9 +264,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         subjid = self.subject.split("-")[1]
 
         if self.global_conf.subject_session == "":
-            T1_file = os.path.join(
-                self.subject_directory, "anat", self.subject + "_T1w.nii.gz"
-            )
             files = layout.get(subject=subjid, suffix="T1w", extensions=".nii.gz")
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
@@ -279,9 +284,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         print("... t1_file : %s" % T1_file)
 
         if self.global_conf.subject_session == "":
-            T1_json_file = os.path.join(
-                self.subject_directory, "anat", self.subject + "_T1w.json"
-            )
             files = layout.get(subject=subjid, suffix="T1w", extensions=".json")
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)
@@ -394,6 +396,217 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 "Warning : Missing BIDS json sidecar. ",
                 "Please see documentation for more details."
             )
+
+        if self.stages["Parcellation"].config.parcellation_scheme == "Custom":
+
+            custom_parc_nii_available = True
+            custom_parc_tsv_available = True
+
+            layout.add_derivatives(
+                self.stages["Parcellation"].config.custom_parcellation.get_custom_derivatives_dir()
+            )
+            if self.global_conf.subject_session == "":
+                files = layout.get(
+                    subject=subjid,
+                    suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
+                    extensions=".nii.gz",
+                    atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
+                    resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
+                )
+                if len(files) > 0:
+                    custom_parc_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_parc_file = "NotFound"
+                    custom_parc_nii_available = False
+            else:
+                sessid = self.global_conf.subject_session.split("-")[1]
+                files = layout.get(
+                    subject=subjid,
+                    session=sessid,
+                    suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
+                    extensions=".nii.gz",
+                    atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
+                    resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
+                )
+                if len(files) > 0:
+                    custom_parc_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_parc_file = "NotFound"
+                    custom_parc_nii_available = False
+            print("... custom_parc_file : %s" % custom_parc_file)
+
+            if self.global_conf.subject_session == "":
+                files = layout.get(
+                    subject=subjid,
+                    suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
+                    extensions=".tsv",
+                    atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
+                    resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
+                )
+                if len(files) > 0:
+                    custom_parc_tsv_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_parc_tsv_file = "NotFound"
+                    custom_parc_tsv_available = False
+            else:
+                sessid = self.global_conf.subject_session.split("-")[1]
+                files = layout.get(
+                    subject=subjid,
+                    session=sessid,
+                    suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
+                    extensions=".nii.gz",
+                    atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
+                    resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
+                )
+                if len(files) > 0:
+                    custom_parc_tsv_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_parc_tsv_file = "NotFound"
+                    custom_parc_tsv_available = False
+            print("... custom_parc_tsv_file : %s" % custom_parc_tsv_file)
+
+            if not custom_parc_nii_available and not custom_parc_tsv_available:
+                valid_inputs = False
+
+            layout.add_derivatives(
+                self.stages["Parcellation"].config.custom_gm_mask.get_custom_derivatives_dir()
+            )
+            if self.global_conf.subject_session == "":
+                files = layout.get(
+                    subject=subjid,
+                    suffix=self.stages["Parcellation"].config.custom_gm_mask.suffix,
+                    extensions=".nii.gz",
+                    label=self.stages["Parcellation"].config.custom_gm_mask.label,
+                )
+                if len(files) > 0:
+                    custom_gm_mask_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_gm_mask_file = "NotFound"
+                    custom_gm_mask_available = False
+            else:
+                sessid = self.global_conf.subject_session.split("-")[1]
+                files = layout.get(
+                    subject=subjid,
+                    session=sessid,
+                    suffix=self.stages["Parcellation"].config.custom_gm_mask.suffix,
+                    extensions=".nii.gz",
+                    label=self.stages["Parcellation"].config.custom_gm_mask.label,
+                )
+                if len(files) > 0:
+                    custom_gm_mask_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_gm_mask_file = "NotFound"
+                    custom_gm_mask_available = False
+
+            print("... custom_gm_mask_file : %s" % custom_gm_mask_file)
+
+            if not custom_gm_mask_available:
+                valid_inputs = False
+
+            layout.add_derivatives(
+                self.stages["Parcellation"].config.custom_wm_mask.get_custom_derivatives_dir()
+            )
+            if self.global_conf.subject_session == "":
+                files = layout.get(
+                    subject=subjid,
+                    suffix=self.stages["Parcellation"].config.custom_wm_mask.suffix,
+                    extensions=".nii.gz",
+                    label=self.stages["Parcellation"].config.custom_wm_mask.label,
+                )
+                if len(files) > 0:
+                    custom_wm_mask_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_wm_mask_file = "NotFound"
+                    custom_wm_mask_available = False
+            else:
+                sessid = self.global_conf.subject_session.split("-")[1]
+                files = layout.get(
+                    subject=subjid,
+                    session=sessid,
+                    suffix=self.stages["Parcellation"].config.custom_wm_mask.suffix,
+                    extensions=".nii.gz",
+                    label=self.stages["Parcellation"].config.custom_wm_mask.label,
+                )
+                if len(files) > 0:
+                    custom_wm_mask_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_wm_mask_file = "NotFound"
+                    custom_wm_mask_available = False
+
+            print("... custom_wm_mask_file : %s" % custom_wm_mask_file)
+
+            if not custom_wm_mask_available:
+                valid_inputs = False
+
+            layout.add_derivatives(
+                self.stages["Parcellation"].config.custom_csf_mask.get_custom_derivatives_dir()
+            )
+            if self.global_conf.subject_session == "":
+                files = layout.get(
+                    subject=subjid,
+                    suffix=self.stages["Parcellation"].config.custom_csf_mask.suffix,
+                    extensions=".nii.gz",
+                    label=self.stages["Parcellation"].config.custom_csf_mask.label,
+                )
+                if len(files) > 0:
+                    custom_csf_mask_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_csf_mask_file = "NotFound"
+                    custom_csf_mask_available = False
+            else:
+                sessid = self.global_conf.subject_session.split("-")[1]
+                files = layout.get(
+                    subject=subjid,
+                    session=sessid,
+                    suffix=self.stages["Parcellation"].config.custom_csf_mask.suffix,
+                    extensions=".nii.gz",
+                    label=self.stages["Parcellation"].config.custom_csf_mask.label,
+                )
+                if len(files) > 0:
+                    custom_csf_mask_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_csf_mask_file = "NotFound"
+                    custom_csf_mask_available = False
+
+            print("... custom_csf_mask_file : %s" % custom_csf_mask_file)
+
+            if not custom_csf_mask_available:
+                valid_inputs = False
+
+            layout.add_derivatives(
+                    self.stages["Parcellation"].config.custom_aparcaseg.get_custom_derivatives_dir()
+            )
+            if self.global_conf.subject_session == "":
+                files = layout.get(
+                    subject=subjid,
+                    suffix=self.stages["Parcellation"].config.custom_aparcaseg.suffix,
+                    extensions=".nii.gz",
+                    desc=self.stages["Parcellation"].config.custom_aparcaseg.desc,
+                )
+                if len(files) > 0:
+                    custom_aparcaseg_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_aparcaseg_file = "NotFound"
+                    custom_aparcaseg_available = False
+            else:
+                sessid = self.global_conf.subject_session.split("-")[1]
+                files = layout.get(
+                    subject=subjid,
+                    session=sessid,
+                    suffix=self.stages["Parcellation"].config.custom_aparcaseg.suffix,
+                    extensions=".nii.gz",
+                    desc=self.stages["Parcellation"].config.custom_aparcaseg.desc,
+                )
+                if len(files) > 0:
+                    custom_aparcaseg_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_aparcaseg_file = "NotFound"
+                    custom_aparcaseg_available = False
+
+            print("... custom_aparcaseg_file : %s" % custom_aparcaseg_file)
+
+            if not custom_aparcaseg_available:
+                valid_inputs = False
 
         return valid_inputs
 
