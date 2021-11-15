@@ -422,11 +422,10 @@ class ParcellationStage(Stage):
                 )
                 # fmt: on
                 computeROIVolumetry = pe.Node(
-                    interface=ComputeParcellationRoiVolumes(),
+                    interface=ComputeParcellationRoiVolumes(
+                        parcellation_scheme=self.config.parcellation_scheme
+                    ),
                     name="computeROIVolumetry",
-                )
-                computeROIVolumetry.inputs.parcellation_scheme = (
-                    self.config.parcellation_scheme
                 )
                 # fmt: off
                 flow.connect(
@@ -517,7 +516,7 @@ class ParcellationStage(Stage):
 
         computeROIVolumetry = pe.Node(
             interface=ComputeParcellationRoiVolumes(
-                parcellation_scheme="Custom"
+                parcellation_scheme=self.config.parcellation_scheme
             ),
             name="custom_computeROIVolumetry",
         )
