@@ -495,7 +495,8 @@ class ParcellationStage(Stage):
 
         create_cmp_parc_desc_files = pe.Node(
             interface=CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(),
-            name="create_cmp_parc_desc_files_from_custom"
+            name="create_cmp_parc_desc_files_from_custom",
+            iterfield=['roi_bids_tsv']
         )
         # fmt: off
         flow.connect(
@@ -518,7 +519,7 @@ class ParcellationStage(Stage):
             interface=ComputeParcellationRoiVolumes(
                 parcellation_scheme=self.config.parcellation_scheme
             ),
-            name="custom_computeROIVolumetry",
+            name="custom_computeROIVolumetry"
         )
         # fmt: off
         flow.connect(
