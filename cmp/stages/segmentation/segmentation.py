@@ -30,6 +30,7 @@ from cmtklib.util import (
     extract_freesurfer_subject_dir,
     extract_reconall_base_dir,
     get_freesurfer_subject_id,
+    update_list_of_paths
 )
 from cmtklib.bids.io import (
     CustomBrainMaskBIDSFile,
@@ -249,10 +250,10 @@ class SegmentationStage(Stage):
             The nipype.pipeline.engine.Workflow instance of the anatomical pipeline
 
         inputnode : nipype.interfaces.utility.IdentityInterface
-            Identity interface describing the inputs of the stage
+            Identity interface describing the inputs of the segmentation stage
 
         outputnode : nipype.interfaces.utility.IdentityInterface
-            Identity interface describing the outputs of the stage
+            Identity interface describing the outputs of the segmentation stage
         """
         if self.config.seg_tool == "Freesurfer":
     
@@ -459,31 +460,81 @@ class SegmentationStage(Stage):
                 outputnode.inputs.subjects_dir = correct_freesurfer_subjects_path(self.config.freesurfer_subjects_dir)
                 outputnode.inputs.subject_id = correct_freesurfer_subjectid_path(self.config.freesurfer_subject_id)
         elif self.config.seg_tool == "Custom segmentation":
-            # Get the custom brain mask and white matter volume
-            print("Get custom brain and white matter masks with...")
-            json_dict = json.load(self.config.custom_bids_derivatives_json)
-            print(f" {json_dict}")
-            custom_seg_grabber = pe.Node(
-                interface=BIDSDataGrabber(
-                    base_dir=self.bids_dir,
-                    extra_derivatives=[self.config.custom_bids_derivatives_dir],
-                    output_query=json_dict,
-                ),
-                name="custom_seg_grabber",
-            )
-            apply_mask = pe.Node(interface=fsl.ApplyMask(), name="applyMask")
-            apply_mask.inputs.out_file = "brain.nii.gz"
-            # fmt: off
-            flow.connect(
-                [
-                    (inputnode, apply_mask, [("T1", "in_file")]),
-                    (custom_seg_grabber, apply_mask, [("brain_mask", "mask_file")]),
-                    (apply_mask, outputnode, [("out_file", "brain")]),
-                    (custom_seg_grabber, outputnode, [("brain_mask", "brain_mask")]),
-                    (custom_seg_grabber, outputnode, [("wm_mask", "custom_wm_mask")]),
-                ]
-            )
-            # fmt: on
+            self.create_workflow_custom(flow, inputnode, outputnode)
+
+    def create_workflow_custom(self, flow, inputnode, outputnode):
+        """Create the stage workflow when custom inputs are specified.
+
+        Parameters
+        ----------
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the anatomical pipeline
+
+        inputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the inputs of the segmentation stage
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the segmentation stage
+        """
+        # Create the dictionary of to be passed as output_query to BIDSDataGrabber
+        output_query_dict = {
+            "custom_brain_mask": self.config.custom_brainmask.get_query_dict(),
+            "custom_wm_mask": self.config.custom_wm_mask.get_query_dict(),
+            "custom_gm_mask": self.config.custom_gm_mask.get_query_dict(),
+            "custom_csf_mask": self.config.custom_csf_mask.get_query_dict(),
+            "custom_aparcaseg": self.config.custom_aparcaseg.get_query_dict()
+        }
+
+        # Make a list of paths where custom BIDS derivatives can be found
+        derivatives_paths = []
+        derivatives_paths = update_list_of_paths(
+            derivatives_paths,
+            self.config.custom_brainmask.get_custom_derivatives_dir()
+        )
+        derivatives_paths = update_list_of_paths(
+            derivatives_paths,
+            self.config.custom_wm_mask.get_custom_derivatives_dir()
+        )
+        derivatives_paths = update_list_of_paths(
+            derivatives_paths,
+            self.config.custom_gm_mask.get_custom_derivatives_dir()
+        )
+        derivatives_paths = update_list_of_paths(
+            derivatives_paths,
+            self.config.custom_csf_mask.get_custom_derivatives_dir()
+        )
+        derivatives_paths = update_list_of_paths(
+            derivatives_paths,
+            self.config.custom_aparcaseg.get_custom_derivatives_dir()
+        )
+
+        # Get input brain segmentation and mask files from custom BIDS derivatives
+        # with BIDSDataGrabber
+        print("Get input brain segmentation and mask files from custom BIDS derivatives...")
+        custom_seg_grabber = pe.Node(
+            interface=BIDSDataGrabber(
+                base_dir=self.bids_dir,
+                extra_derivatives=derivatives_paths,
+                output_query=output_query_dict,
+            ),
+            name="custom_seg_grabber",
+        )
+        apply_mask = pe.Node(interface=fsl.ApplyMask(), name="applyMask")
+        apply_mask.inputs.out_file = "brain.nii.gz"
+        # fmt: off
+        flow.connect(
+            [
+                (inputnode, apply_mask, [("T1", "in_file")]),
+                (custom_seg_grabber, apply_mask, [("custom_brain_mask", "mask_file")]),
+                (apply_mask, outputnode, [("out_file", "brain")]),
+                (custom_seg_grabber, outputnode, [("custom_brain_mask", "custom_brain_mask")]),
+                (custom_seg_grabber, outputnode, [("custom_wm_mask", "custom_wm_mask")]),
+                (custom_seg_grabber, outputnode, [("custom_gm_mask", "custom_gm_mask")]),
+                (custom_seg_grabber, outputnode, [("custom_csf_mask", "custom_csf_mask")]),
+                (custom_seg_grabber, outputnode, [("custom_aparcaseg", "custom_aparcaseg")]),
+            ]
+        )
+        # fmt: on
 
     def define_inspect_outputs(self, debug=False):
         """Update the `inspect_outputs` class attribute.
@@ -549,7 +600,9 @@ class SegmentationStage(Stage):
         """
         if self.config.use_existing_freesurfer_data:
             return True
-        else:  # TODO: Add condition when "Custom Segmentation is used"
+        else:
             return os.path.exists(
                 os.path.join(self.stage_dir, "reconall", "result_reconall.pklz")
             )
+
+        # TODO: Add condition when "Custom Segmentation is used"
