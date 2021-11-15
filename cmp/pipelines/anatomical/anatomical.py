@@ -1131,34 +1131,17 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
             self.subject = "_".join((self.subject, self.global_conf.subject_session))
 
-        if not os.path.exists(
-            os.path.join(nipype_deriv_subject_directory, "anatomical_pipeline")
-        ):
+        nipype_anatomical_pipeline_subject_dir = os.path.join(nipype_deriv_subject_directory, "anatomical_pipeline")
+        if not os.path.exists(nipype_anatomical_pipeline_subject_dir):
             try:
-                os.makedirs(
-                    os.path.join(nipype_deriv_subject_directory, "anatomical_pipeline")
-                )
+                os.makedirs(nipype_anatomical_pipeline_subject_dir)
             except os.error:
-                print(
-                    "%s was already existing"
-                    % os.path.join(
-                        nipype_deriv_subject_directory, "anatomical_pipeline"
-                    )
-                )
+                print("%s was already existing" % nipype_anatomical_pipeline_subject_dir)
 
         # Initialization
-        if os.path.isfile(
-            os.path.join(
-                nipype_deriv_subject_directory, "anatomical_pipeline", "pypeline.log"
-            )
-        ):
-            os.unlink(
-                os.path.join(
-                    nipype_deriv_subject_directory,
-                    "anatomical_pipeline",
-                    "pypeline.log",
-                )
-            )
+        if os.path.isfile(os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log")):
+            os.unlink(os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log"))
+
         config.update_config(
             {
                 "logging": {
