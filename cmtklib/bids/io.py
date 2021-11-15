@@ -83,28 +83,42 @@ class CustomBIDSFile(HasTraits):
 
 
 class CustomParcellationBIDSFile(CustomBIDSFile):
-    """Represent a custom parcellation files in the form `sub-<label>_atlas-<label>[_res-<label>]_dseg.<extension>`."""
+    """Represent a custom parcellation files in the form `sub-<label>_atlas-<label>[_res-<label>]_dseg.nii.gz`."""
 
     def __init__(self):
-        super().__init__(p_suffix="dseg", p_atlas="L2018")
+        super().__init__(p_suffix="dseg", p_atlas="L2018", p_extension=".nii.gz")
+
+
+class CustomBrainMaskBIDSFile(CustomBIDSFile):
+    """Represent a custom brain mask in the form `sub-<label>_desc-brain_mask.nii.gz`."""
+
+    def __init__(self):
+        super().__init__(p_suffix="mask", p_desc="brain", p_extension=".nii.gz")
 
 
 class CustomWMMaskBIDSFile(CustomBIDSFile):
     """Represent a custom white-matter mask in the form `sub-<label>_label-WM_dseg.nii.gz`."""
 
     def __init__(self):
-        super().__init__(p_suffix="dseg", p_label="WM")
+        super().__init__(p_suffix="dseg", p_label="WM", p_extension=".nii.gz")
 
 
 class CustomGMMaskBIDSFile(CustomBIDSFile):
     """Represent a custom gray-matter mask in the form `sub-<label>_label-GM_dseg.nii.gz`."""
 
     def __init__(self):
-        super().__init__(p_suffix="dseg", p_label="GM")
+        super().__init__(p_suffix="dseg", p_label="GM", p_extension=".nii.gz")
 
 
 class CustomCSFMaskBIDSFile(CustomBIDSFile):
     """Represent a custom CSF mask in the form `sub-<label>_label-CSF_dseg.nii.gz`."""
 
     def __init__(self):
-        super().__init__(p_suffix="dseg", p_label="CSF")
+        super().__init__(p_suffix="dseg", p_label="CSF", p_extension=".nii.gz")
+
+
+class CustomAparcAsegBIDSFile(CustomBIDSFile):
+    """Represent a custom BIDS-formatted Freesurfer aparc+aseg file in the form `sub-<label>_desc-aparcaseg_dseg.nii.gz`."""
+
+    def __init__(self):
+        super().__init__(p_suffix="dseg", p_desc="aparcaseg", p_extension=".nii.gz")
