@@ -587,3 +587,10 @@ def convertList2Tuple(lists):
         Tuple of files containing bvecs and bvals
     """
     return tuple(lists)
+
+
+def update_list_of_paths(paths, path_to_be_added):
+    """Add path to list of paths if not already present and return the list."""
+    if path_to_be_added not in paths:
+        paths.append(str(path_to_be_added))
+    return paths
