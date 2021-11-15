@@ -674,19 +674,33 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             bids_atlas_label = "L2018"
         elif self.parcellation_scheme == "NativeFreesurfer":
             bids_atlas_label = "Desikan"
+        elif self.parcellation_scheme == "Custom":
+            bids_atlas_label = self.stages["Parcellation"].config.custom_parcellation.atlas
 
-        if bids_atlas_label == "Desikan":
-            roiv_files = glob.glob(
-                os.path.join(
-                    anat_deriv_subject_directory,
-                    subject + "_atlas-" + bids_atlas_label + "_dseg.nii.gz",
+        if self.parcellation_scheme != "Custom":
+            if bids_atlas_label == "Desikan":
+                roiv_files = glob.glob(
+                    os.path.join(
+                        anat_deriv_subject_directory,
+                        subject + "_atlas-" + bids_atlas_label + "_dseg.nii.gz",
+                    )
                 )
-            )
+            else:
+                roiv_files = glob.glob(
+                    os.path.join(
+                        anat_deriv_subject_directory,
+                        subject + "_atlas-" + bids_atlas_label + "_res-scale*_dseg.nii.gz",
+                    )
+                )
         else:
+            roiv_filename = subject + "_atlas-" + bids_atlas_label
+            if self.stages["Parcellation"].config.custom_parcellation.resolution:
+                roiv_filename += f'_res-{self.stages["Parcellation"].config.custom_parcellation.resolution}'
+            roiv_filename += "_dseg.nii.gz"
             roiv_files = glob.glob(
                 os.path.join(
                     anat_deriv_subject_directory,
-                    subject + "_atlas-" + bids_atlas_label + "_res-scale*_dseg.nii.gz",
+                    roiv_filename
                 )
             )
 
