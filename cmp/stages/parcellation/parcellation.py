@@ -641,7 +641,7 @@ class ParcellationStage(Stage):
                 os.path.join(
                     self.stage_dir,
                     "custom_computeROIVolumetry",
-                    f'result_custom_computeROIVolumetry.pklz',
+                    "result_custom_computeROIVolumetry.pklz"
                 )
             )
         elif self.config.parcellation_scheme == "Lausanne2018":
