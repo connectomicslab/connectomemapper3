@@ -31,6 +31,13 @@ from cmtklib.util import (
     extract_reconall_base_dir,
     get_freesurfer_subject_id,
 )
+from cmtklib.bids.io import (
+    CustomBrainMaskBIDSFile,
+    CustomWMMaskBIDSFile,
+    CustomGMMaskBIDSFile,
+    CustomCSFMaskBIDSFile,
+    CustomAparcAsegBIDSFile
+)
 
 
 class SegmentationConfig(HasTraits):
@@ -87,13 +94,25 @@ class SegmentationConfig(HasTraits):
     freesurfer_args : traits.Str
         Extra Freesurfer ``recon-all`` arguments
 
-    custom_bids_derivatives_dir : traits.Directory
-        Specify a custom BIDS derivatives directory
-        where white matter and brain masks can be found
+    custom_brainmask : traits.Instance(CustomBrainMaskBIDSFile)
+        Instance of :obj:`~cmtklib.bids.io.CustomBrainMaskBIDSFile`
+        that describes the custom BIDS formatted brain mask
 
-    custom_bids_derivatives_json : traits.File
-        Path to a JSON file specifying the BIDS format of
-        white matter and brain mask files to query
+    custom_wm_mask : traits.Instance(CustomWMMaskBIDSFile)
+        Instance of :obj:`~cmtklib.bids.io.CustomWMMaskBIDSFile`
+        that describes the custom BIDS formatted white-matter mask
+
+    custom_gm_mask : traits.Instance(CustomGMMaskBIDSFile)
+        Instance of :obj:`~cmtklib.bids.io.CustomGMMaskBIDSFile`
+        that describes the custom BIDS formatted gray-matter mask
+
+    custom_csf_mask : traits.Instance(CustomCSFMaskBIDSFile)
+        Instance of :obj:`~cmtklib.bids.io.CustomCSFMaskBIDSFile`
+        that describes the custom BIDS formatted CSF mask
+
+    custom_aparcaseg : traits.Instance(CustomAparcAsegBIDSFile)
+        Instance of :obj:`~cmtklib.bids.io.CustomAparcAsegBIDSFile`
+        that describes the custom BIDS formatted Freesurfer aparc-aseg file
 
     number_of_threads : traits.Int
         Number of threads leveraged by OpenMP and used in
@@ -103,6 +122,10 @@ class SegmentationConfig(HasTraits):
     See Also
     --------
     cmp.stages.segmentation.segmentation.SegmentationStage
+    cmtklib.bids.io.CustomBrainMaskBIDSFile
+    cmtklib.bids.io.CustomWMMaskBIDSFile
+    cmtklib.bids.io.CustomGMMaskBIDSFile
+    cmtklib.bids.io.CustomCSFMaskBIDSFile
     """
 
     seg_tool = Enum(["Freesurfer", "Custom segmentation"])
@@ -131,18 +154,27 @@ class SegmentationConfig(HasTraits):
     freesurfer_subject_id = Str
     freesurfer_args = Str("")
 
-    custom_bids_derivatives_dir = Directory(
-        desc="Specify a custom BIDS derivatives directory "
-        + "where white matter and brain masks can be found"
-    )
-    custom_bids_derivatives_json = File(
-        desc="Path to a JSON file specifying the BIDS format of "
-        + "white matter and brain mask files to query"
-    )
+    custom_brainmask = Instance(CustomBrainMaskBIDSFile , (),
+                                desc="Instance of :obj:`~cmtklib.bids.io.CustomBrainMaskBIDSFile` "
+                                     "that describes the custom BIDS formatted brain mask")
 
-    number_of_threads = Int(
-        1, desc="Number of threads used in the stage by Freesurfer and ANTs"
-    )
+    custom_wm_mask = Instance(CustomWMMaskBIDSFile , (),
+                              desc="Instance of :obj:`~cmtklib.bids.io.CustomWMMaskBIDSFile` "
+                                   "that describes the custom BIDS formatted white-matter mask")
+
+    custom_gm_mask = Instance(CustomGMMaskBIDSFile, (),
+                              desc="Instance of :obj:`~cmtklib.bids.io.CustomGMMaskBIDSFile` "
+                                   "that describes the custom BIDS formatted gray-matter mask")
+
+    custom_csf_mask = Instance(CustomCSFMaskBIDSFile, (),
+                               desc="Instance of :obj:`~cmtklib.bids.io.CustomCSFMaskBIDSFile` "
+                                    "that describes the custom BIDS formatted CSF mask")
+
+    custom_aparcaseg = Instance(CustomAparcAsegBIDSFile, (),
+                                desc="Instance of :obj:`~cmtklib.bids.io.CustomAparcAsegBIDSFile`"
+                                     "that describes the custom BIDS-formatted Freesurfer aparc+aseg file")
+
+    number_of_threads = Int(1, desc="Number of threads used in the stage by Freesurfer and ANTs")
 
     def _use_existing_freesurfer_data_changed(self, new):
         """"Update ``custom_segmentation`` if ``use_existing_freesurfer_data`` changes."""
@@ -204,9 +236,13 @@ class SegmentationStage(Stage):
         self.outputs = [
             "subjects_dir",
             "subject_id",
-            "custom_wm_mask",
             "brain_mask",
             "brain",
+            "custom_brain_mask",
+            "custom_wm_mask",
+            "custom_gm_mask",
+            "custom_csf_mask",
+            "custom_aparcaseg",
         ]
 
     def create_workflow(self, flow, inputnode, outputnode):
