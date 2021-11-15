@@ -27,7 +27,9 @@ from cmtklib.parcellation import (
 )
 from cmtklib.util import get_pipeline_dictionary_outputs, get_basename
 from cmtklib.bids.utils import CreateBIDSStandardParcellationLabelIndexMappingFile
-
+from cmtklib.bids.io import (
+    CustomParcellationBIDSFile
+)
 
 class ParcellationConfig(HasTraits):
     """Class used to store configuration parameters of a :class:`~cmp.stages.parcellation.parcellation.ParcellationStage` object.
@@ -71,15 +73,9 @@ class ParcellationConfig(HasTraits):
         >>> atlas_info = {atlas_name: {'number_of_regions': number_of_regions,
         >>>               'node_information_graphml': graphml_file}} # doctest: +SKIP
 
-    custom_bids_derivatives_dir : traits.Directory
-        Specify a custom BIDS derivatives directory
-        where parcellation and csf segmentation files
-        can be found
-
-    custom_bids_derivatives_json : traits.File
-        Path to a JSON file specifying the BIDS format of
-        parcellation atlas nifti and graphml files, and
-        csf file to query
+    custom_parcellation : traits.Instance(CustomParcellationBIDSFile)
+        Instance of :obj:`~cmtklib.bids.io.CustomParcellationBIDSFile`
+        that describes the custom BIDS-formatted brain parcellation file
 
     See Also
     --------
@@ -96,15 +92,10 @@ class ParcellationConfig(HasTraits):
     segment_hippocampal_subfields = Bool(True)
     segment_brainstem = Bool(True)
     pre_custom = Str("Lausanne2008")
-    custom_bids_derivatives_dir = Directory(
-        desc="Specify a custom BIDS derivatives directory "
-        + "where parcellation and csf segmentation files "
-        + "can be found"
-    )
-    custom_bids_derivatives_json = File(
-        desc="Path to a JSON file specifying the BIDS format of "
-        + "parcellation atlas nifti and graphml files, and "
-        + "csf file to query"
+    custom_parcellation = Instance(
+        CustomParcellationBIDSFile, (),
+        desc="Instance of :obj:`~cmtklib.bids.io.CustomParcellationBIDSFile`"
+             "that describes the custom BIDS-formatted brain parcellation file"
     )
     number_of_regions = Int()
     atlas_nifti_file = File(exists=True)
@@ -283,7 +274,6 @@ class ParcellationStage(Stage):
                                                     (("subject_id", get_basename), "subject_id")]),
                             (parcHippo, parcCombiner, [("lh_hipposubfields", "lh_hippocampal_subfields"),
                                                        ("rh_hipposubfields", "rh_hippocampal_subfields")]),
-
                         ]
                     )
                     # fmt: on
@@ -483,6 +473,8 @@ class ParcellationStage(Stage):
                     ]
                 )
                 # fmt: on
+        else:
+            return NotImplementedError
 
             # TODO
             # if self.config.pipeline_mode == "fMRI":
