@@ -639,19 +639,15 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             if self.global_conf.subject_session not in subject:
                 anat_deriv_subject_directory = os.path.join(
-                    self.output_directory,
-                    "cmp",
-                    subject,
-                    self.global_conf.subject_session,
+                    self.output_directory, "cmp",
+                    subject, self.global_conf.subject_session,
                     "anat",
                 )
                 subject = "_".join((subject, self.global_conf.subject_session))
             else:
                 anat_deriv_subject_directory = os.path.join(
-                    self.output_directory,
-                    "cmp",
-                    subject.split("_")[0],
-                    self.global_conf.subject_session,
+                    self.output_directory, "cmp",
+                    subject.split("_")[0], self.global_conf.subject_session,
                     "anat",
                 )
 
