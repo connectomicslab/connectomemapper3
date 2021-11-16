@@ -22,6 +22,9 @@ class ParcellationConfigUI(ParcellationConfig):
 
     Attributes
     ----------
+    custom_parcellation_group : traits.ui.VGroup
+        VGroup that displays the different parts of a custom BIDS parcellation file
+
     traits_view : traits.ui.View
         TraitsUI view that displays the attributes of this class, e.g.
         the parameters for the stage
@@ -31,21 +34,20 @@ class ParcellationConfigUI(ParcellationConfig):
     cmp.stages.parcellation.parcellation.ParcellationConfig
     """
 
+    custom_parcellation_group = VGroup(
+        Item('custom_parcellation.custom_derivatives_dir'),
+        Item('custom_parcellation.atlas'),
+        Item('custom_parcellation.resolution'),
+        Item('custom_parcellation.suffix', style='readonly'),
+        label="Custom parcellation"
+    )
+
     traits_view = View(
         Item(
             "parcellation_scheme", editor=EnumEditor(name="parcellation_scheme_editor")
         ),
         Group(
-            "number_of_regions",
-            "atlas_nifti_file",
-            "graphml_file",
-            Group(
-                "csf_file",
-                "brain_file",
-                show_border=True,
-                label="Files for nuisance regression (optional)",
-                visible_when="pipeline_mode=='fMRI'",
-            ),
+            Include('custom_parcellation_group'),
             visible_when='parcellation_scheme=="Custom"',
         ),
         Group(

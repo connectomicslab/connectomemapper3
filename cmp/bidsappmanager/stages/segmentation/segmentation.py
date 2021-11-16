@@ -20,6 +20,26 @@ class SegmentationConfigUI(SegmentationConfig):
 
     Attributes
     ----------
+    custom_brainmask_group : traits.ui.VGroup
+        VGroup that displays the different parts of
+        a custom BIDS brain mask file
+
+    custom_gm_mask_group : traits.ui.VGroup
+        VGroup that displays the different parts of a
+        custom BIDS gray matter mask file
+
+    custom_wm_mask_group : traits.ui.VGroup
+        VGroup that displays the different parts of a
+        custom BIDS white matter mask file
+
+    custom_csf_mask_group : traits.ui.VGroup
+        VGroup that displays the different parts of a
+        custom BIDS CSF mask file
+
+    custom_aparcaseg_group : traits.ui.VGroup
+        VGroup that displays the different parts of a
+        custom BIDS-formatted Freesurfer's aparc+aseg file
+
     traits_view : traits.ui.View
         TraitsUI view that displays the attributes of this class, e.g.
         the parameters for the stage
@@ -28,6 +48,44 @@ class SegmentationConfigUI(SegmentationConfig):
     ---------
     cmp.stages.segmentation.segmentation.SegmentationConfig
     """
+
+    custom_brainmask_group = VGroup(
+        Item('custom_brainmask.custom_derivatives_dir'),
+        Item('custom_brainmask.desc', style='readonly'),
+        Item('custom_brainmask.suffix', style='readonly'),
+        label="Custom brain mask"
+    )
+
+    custom_gm_mask_group = VGroup(
+        Item('custom_gm_mask.custom_derivatives_dir'),
+        Item('custom_gm_mask.desc'),
+        Item('custom_gm_mask.label', style='readonly'),
+        Item('custom_gm_mask.suffix', style='readonly'),
+        label="Custom gray matter mask"
+    )
+
+    custom_wm_mask_group = VGroup(
+        Item('custom_wm_mask.custom_derivatives_dir'),
+        Item('custom_wm_mask.desc'),
+        Item('custom_wm_mask.label', style='readonly'),
+        Item('custom_wm_mask.suffix', style='readonly'),
+        label="Custom white matter mask"
+    )
+
+    custom_csf_mask_group = VGroup(
+        Item('custom_csf_mask.custom_derivatives_dir'),
+        Item('custom_csf_mask.desc'),
+        Item('custom_csf_mask.label', style='readonly'),
+        Item('custom_csf_mask.suffix', style='readonly'),
+        label="Custom CSF mask"
+    )
+
+    custom_aparcaseg_group = VGroup(
+        Item('custom_aparcaseg.custom_derivatives_dir'),
+        Item('custom_aparcaseg.desc', style='readonly'),
+        Item('custom_aparcaseg.suffix', style='readonly'),
+        label="Custom Freesurfer aparc+aseg (used by MRtrix3 to build the 5TT image)"
+    )
 
     traits_view = View(
         Item("seg_tool", label="Segmentation tool"),
@@ -69,13 +127,11 @@ class SegmentationConfigUI(SegmentationConfig):
             visible_when="seg_tool=='Freesurfer'",
         ),
         Group(
-            Item(
-                "custom_bids_derivatives_dir", label="Custom BIDS derivatives directory"
-            ),
-            Item(
-                "custom_bids_derivatives_json",
-                label="JSON describing custom segmentation in BIDS format",
-            ),
+            Include('custom_brainmask_group'),
+            Include('custom_gm_mask_group'),
+            Include('custom_wm_mask_group'),
+            Include('custom_csf_mask_group'),
+            Include('custom_aparcaseg_group'),
             visible_when="seg_tool=='Custom segmentation'",
         ),
     )
