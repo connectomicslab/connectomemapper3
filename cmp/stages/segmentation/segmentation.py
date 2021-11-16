@@ -514,6 +514,10 @@ class SegmentationStage(Stage):
         custom_seg_grabber = pe.Node(
             interface=BIDSDataGrabber(
                 base_dir=self.bids_dir,
+                subject=self.bids_subject_label,
+                session=self.bids_session_label if (
+                        self.bids_session_label and self.bids_session_label != ""
+                ) else None,
                 extra_derivatives=derivatives_paths,
                 output_query=output_query_dict,
             ),
