@@ -7,33 +7,21 @@
 """Diffusion pipeline UI Class definition."""
 
 import os
-import datetime
-
-from pyface.qt.QtCore import *
-from pyface.qt.QtGui import *
+import shutil
 
 from traitsui.api import *
 from traits.api import *
 from traitsui.qt4.extra.qt_view import QtView
-from traitsui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
-
 from pyface.api import ImageResource
-import shutil
-
-import nibabel as nib
 
 from bids import BIDSLayout
 
 # Own imports
-from cmp.bidsappmanager.pipelines.anatomical.anatomical import AnatomicalPipelineUI
-
 from cmtklib.util import return_button_style_sheet
 from cmp.bidsappmanager.stages.preprocessing.preprocessing import PreprocessingStageUI
 from cmp.bidsappmanager.stages.diffusion.diffusion import DiffusionStageUI
 from cmp.bidsappmanager.stages.registration.registration import RegistrationStageUI
 from cmp.bidsappmanager.stages.connectome.connectome import ConnectomeStageUI
-
-from cmp.pipelines.common import Pipeline
 from cmp.pipelines.diffusion.diffusion import DiffusionPipeline
 
 

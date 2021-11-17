@@ -12,10 +12,6 @@ import shutil
 from traits.api import *
 from traitsui.api import *
 from traitsui.qt4.extra.qt_view import QtView
-
-# from pyface.ui.qt4.image_resource import ImageResource
-from pyface.qt.QtCore import *
-from pyface.qt.QtGui import *
 from pyface.api import ImageResource
 
 # Own imports

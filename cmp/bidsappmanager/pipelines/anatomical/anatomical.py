@@ -6,10 +6,8 @@
 
 """Anatomical pipeline UI Class definition."""
 
-import datetime
 import os
 import glob
-
 import shutil
 
 from traits.api import *
@@ -17,19 +15,10 @@ from traitsui.api import *
 from traitsui.qt4.extra.qt_view import QtView
 from pyface.ui.qt4.image_resource import ImageResource
 
-from pyface.qt.QtCore import *
-from pyface.qt.QtGui import *
-
-from bids import BIDSLayout
-
 # Own import
 from cmp.bidsappmanager.stages.segmentation.segmentation import SegmentationStageUI
 from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStageUI
-
-from cmp.pipelines.common import Pipeline
 from cmp.pipelines.anatomical.anatomical import (
-    Global_Configuration,
-    Check_Input_Notification,
     AnatomicalPipeline,
 )
 from cmtklib.util import return_button_style_sheet
