@@ -91,12 +91,12 @@ class CustomBIDSFile(HasTraits):
         msg += "}"
         return msg
 
-    def __dict__(self):
+    def _string2dict(self):
         return json.loads(self.__str__())
 
     def get_query_dict(self):
         """Return the dictionary to be passed to `BIDSDataGrabber` to query a list of files."""
-        query_dict = self.__dict__()
+        query_dict = self._string2dict()
         del query_dict["custom_derivatives_dir"]
         return query_dict
 
