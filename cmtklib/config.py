@@ -89,6 +89,12 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
     """
     config_json = {}
 
+    # In the case of anatomical pipeline
+    if "segmentation_stage" in config.sections():
+        segmentation_tool = config["segmentation_stage"].get("seg_tool")
+    if "parcellation_stage" in config.sections():
+        parcellation_scheme = config["parcellation_stage"].get("parcellation_scheme")
+
     # In the case of diffusion pipeline
     if "diffusion_stage" in config.sections():
         recon_processing_tool = config["diffusion_stage"].get("recon_processing_tool")
@@ -116,6 +122,29 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
                         continue
                 elif tracking_processing_tool == "MRtrix":
                     if "dipy_tracking_config" in name:
+                        continue
+            if "segmentation_stage" in section:
+                if segmentation_tool == "Custom segmentation":
+                    if "custom" not in name:
+                        if debug:
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
+                else:
+                    if "custom" in name:
+                        if debug:
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
+
+            if "parcellation_stage" in section:
+                if parcellation_scheme == "Custom":
+                    if "custom" not in name:
+                        if debug:
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
+                else:
+                    if "custom" in name:
+                        if debug:
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
 
             if "_editor" in name:
@@ -433,7 +462,7 @@ def get_fmri_process_detail_json(project_info, section, detail):
     return config[section][detail]
 
 
-def set_pipeline_attributes_from_config(pipeline, config, debug=False):
+def set_pipeline_attributes_from_config(pipeline, config, debug=True):
     """Set the pipeline stage attributes given a configuration.
 
     Parameters
@@ -469,7 +498,12 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
             prop for prop in list(stage.config.traits().keys()) if "trait" not in prop
         ]  # possibly dangerous..?
         for key in stage_keys:
-            if "config" in key:  # subconfig
+            if "config" in key or key in ['custom_brainmask',
+                                          'custom_wm_mask',
+                                          'custom_gm_mask',
+                                          'custom_csf_mask',
+                                          'custom_aparcaseg',
+                                          'custom_parcellation']:  # subconfig or custom inputs
                 sub_config = getattr(stage.config, key)
                 stage_sub_keys = [
                     prop
@@ -507,7 +541,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                                         + f"{sub_config}.{sub_key} to {conf_value}"
                                     )
                                     print_error(f"    {e}")
-                            pass
+                                pass
             else:
                 if stage.name in config.keys():
                     if key in config[stage.name].keys():
@@ -545,7 +579,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
     )
 
 
-def create_configparser_from_pipeline(pipeline, debug=False):
+def create_configparser_from_pipeline(pipeline, debug=True):
     """Create a `ConfigParser` object from a Pipeline instance.
 
     Parameters
@@ -583,7 +617,12 @@ def create_configparser_from_pipeline(pipeline, debug=False):
         ]  # possibly dangerous..?
         for key in stage_keys:
             keyval = getattr(stage.config, key)
-            if "config" in key:  # subconfig
+            if "config" in key or key in ['custom_brainmask',
+                                          'custom_wm_mask',
+                                          'custom_gm_mask',
+                                          'custom_csf_mask',
+                                          'custom_aparcaseg',
+                                          'custom_parcellation']:  # subconfig or custom inputs
                 stage_sub_keys = [
                     prop for prop in list(keyval.traits().keys()) if "trait" not in prop
                 ]
