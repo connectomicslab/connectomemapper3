@@ -170,6 +170,47 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                     self.stages[stage].name,
                 )
 
+            self.stages["Segmentation"].config.on_trait_change(
+                self._update_parcellation, "seg_tool"
+            )
+            self.stages["Parcellation"].config.on_trait_change(
+                self._update_segmentation, "parcellation_scheme"
+            )
+            self.stages["Parcellation"].config.on_trait_change(
+                self._update_parcellation_scheme, "parcellation_scheme"
+            )
+
+    def _update_parcellation_scheme(self):
+        """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
+        self.parcellation_scheme = self.stages["Parcellation"].config.parcellation_scheme
+        if self.parcellation_scheme != "Custom":
+            self.atlas_info = self.stages["Parcellation"].config.atlas_info
+        else:
+            self.atlas_info = {
+                f'{self.stages["Parcellation"].config.custom_parcellation.atlas}': {
+                    "number_of_regions": 83,
+                    "node_information_graphml": "/path/to/file.graphml"
+                }
+            }
+
+    def _update_parcellation(self):
+        """Update self.stages['Parcellation'].config.parcellation_scheme when ``seg_tool`` is updated."""
+        if self.stages["Segmentation"].config.seg_tool == "Custom segmentation":
+            self.stages["Parcellation"].config.parcellation_scheme = "Custom"
+            self.stages["Parcellation"].config.parcellation_scheme_editor = ["Custom"]
+        else:
+            self.stages["Parcellation"].config.parcellation_scheme = "Lausanne2018"
+            self.stages["Parcellation"].config.parcellation_scheme_editor = [
+                "NativeFreesurfer", "Lausanne2008", "Lausanne2018", "Custom"
+            ]
+
+    def _update_segmentation(self):
+        """Update self.stages['Segmentation'].config.seg_tool when ``parcellation_scheme`` is updated."""
+        if self.stages["Parcellation"].config.parcellation_scheme == "Custom":
+            self.stages["Segmentation"].config.seg_tool = "Custom segmentation"
+        else:
+            self.stages["Segmentation"].config.seg_tool = "Freesurfer"
+
     def _segmentation_fired(self, info):
         """Method that displays the window for the segmentation stage.
 
@@ -196,16 +237,13 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         """
         self.stages["Parcellation"].configure_traits(view=self.view_mode)
 
-    def check_input(self, layout, gui=True):
+    def check_input(self, layout):
         """Method that checks if inputs of the anatomical pipeline are available in the datasets.
 
         Parameters
         -----------
         layout : bids.BIDSLayout
             BIDSLayout object used to query
-
-        gui : Boolean
-            If `True` display messages and errors in graphical window
 
         Returns
         -------
@@ -218,101 +256,245 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
         types = layout.get_modalities()
 
-        if self.global_conf.subject_session == "":
-            T1_file = os.path.join(
-                self.subject_directory, "anat", self.subject + "_T1w.nii.gz"
-            )
-        else:
-            subjid = self.subject.split("-")[1]
-            sessid = self.global_conf.subject_session.split("-")[1]
-            files = layout.get(
-                subject=subjid, suffix="T1w", extensions=".nii.gz", session=sessid
-            )
-            if len(files) > 0:
-                T1_file = files[0].filename
-                print(T1_file)
-            else:
-                error(
-                    message="T1w image not found for subject %s, session %s."
-                    % (subjid, self.global_conf.subject_session),
-                    title="Error",
-                    buttons=["OK", "Cancel"],
-                    parent=None,
-                )
-                return
+        subjid = self.subject.split("-")[1]
 
-        print("Looking in %s for...." % self.base_directory)
-        print("T1_file : %s" % T1_file)
+        if self.global_conf.subject_session != "":
+            sessid = self.global_conf.subject_session.split("-")[1]
+
+        files = layout.get(
+            subject=subjid,
+            session=None if (self.global_conf.subject_session == "") else sessid,
+            suffix="T1w",
+            extensions=".nii.gz",
+        )
+        if len(files) > 0:
+            T1_file = files[0].filename
+            print(T1_file)
+        else:
+            error(
+                message="T1w image not found for subject %s, session %s."
+                % (subjid, self.global_conf.subject_session),
+                title="Error",
+                buttons=["OK", "Cancel"],
+                parent=None,
+            )
+            return False
 
         for typ in types:
             if typ == "T1w" and os.path.isfile(T1_file):
-                print("%s available" % typ)
+                print("T1_file found: %s" % T1_file)
                 t1_available = True
 
         if t1_available:
             # Copy diffusion data to derivatives / cmp  / subject / dwi
             if self.global_conf.subject_session == "":
                 out_T1_file = os.path.join(
-                    self.derivatives_directory,
-                    "cmp",
-                    self.subject,
-                    "anat",
+                    self.derivatives_directory, "cmp",
+                    self.subject, "anat",
                     self.subject + "_T1w.nii.gz",
                 )
             else:
                 out_T1_file = os.path.join(
-                    self.derivatives_directory,
-                    "cmp",
-                    self.subject,
-                    self.global_conf.subject_session,
-                    "anat",
-                    self.subject
-                    + "_"
-                    + self.global_conf.subject_session
-                    + "_T1w.nii.gz",
+                    self.derivatives_directory, "cmp",
+                    self.subject, self.global_conf.subject_session, "anat",
+                    f'{self.subject}_{self.global_conf.subject_session}_T1w.nii.gz',
                 )
 
             if not os.path.isfile(out_T1_file):
                 shutil.copy(src=T1_file, dst=out_T1_file)
 
+            msg = "Inputs check finished successfully. \nAnatomical data (T1w) available."
+            print(f'\tINFO: {msg}')
             valid_inputs = True
-            input_message = "Inputs check finished successfully. \nOnly anatomical data (T1) available."
         else:
-            input_message = (
-                "Error during inputs check. No anatomical data available in folder "
-                + os.path.join(self.base_directory, self.subject)
-                + "/anat/!"
+            msg = (
+                "  * No anatomical data (T1w) available in folder "
+                + os.path.join(self.base_directory, self.subject, 'anat')
+                + "!\n"
             )
-
-        # diffusion_imaging_model = diffusion_imaging_model[0]
-
-        if gui:
-            # input_notification = Check_Input_Notification(message=input_message,
-            #                                               diffusion_imaging_model_options=diffusion_imaging_model,
-            #                                               diffusion_imaging_model=diffusion_imaging_model)
-            # input_notification.configure_traits()
-            print(input_message)
-
-        else:
-            print(input_message)
-
-        if t1_available:
-            valid_inputs = True
-        else:
-            print("Missing required inputs.")
+            print(f'\tERROR: Missing required inputs: {msg}')
             error(
-                message="Missing required inputs. Please see documentation for more details.",
+                message=f"Missing required inputs:\n{msg} Please see documentation for more details.",
                 title="Error",
                 buttons=["OK", "Cancel"],
                 parent=None,
             )
 
-        for stage in list(self.stages.values()):
-            if stage.enabled:
-                print(stage.name)
-                print(stage.stage_dir)
+        if self.stages["Parcellation"].config.parcellation_scheme == "Custom":
+            msg = ""
 
-        # self.fill_stages_outputs()
+            custom_parc_nii_available = True
+            custom_parc_tsv_available = True
+
+            layout.add_derivatives(
+                self.stages["Parcellation"].config.custom_parcellation.get_custom_derivatives_dir()
+            )
+
+            files = layout.get(
+                subject=subjid,
+                session=(None
+                         if self.global_conf.subject_session == ""
+                         else self.global_conf.subject_session.split("-")[1]),
+                suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
+                atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
+                resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
+                extensions=".nii.gz",
+            )
+            if len(files) > 0:
+                custom_parc_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_parc_file = "NotFound"
+                custom_parc_nii_available = False
+            print("... custom_parc_file : %s" % custom_parc_file)
+
+            files = layout.get(
+                subject=subjid,
+                session=(None
+                         if self.global_conf.subject_session == ""
+                         else self.global_conf.subject_session.split("-")[1]),
+                suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
+                extensions=".tsv",
+                atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
+                resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
+            )
+            if len(files) > 0:
+                custom_parc_tsv_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_parc_tsv_file = "NotFound"
+                msg += f'  * Custom parcellation ({self.stages["Parcellation"].config.custom_parcellation}) not found\n'
+                custom_parc_tsv_available = False
+            print("... custom_parc_tsv_file : %s" % custom_parc_tsv_file)
+
+            if not custom_parc_nii_available and not custom_parc_tsv_available:
+                valid_inputs = False
+
+            layout.add_derivatives(
+                    self.stages["Parcellation"].config.custom_brainmask.get_custom_derivatives_dir()
+            )
+
+            files = layout.get(
+                    subject=subjid,
+                    session=(None
+                             if self.global_conf.subject_session == ""
+                             else self.global_conf.subject_session.split("-")[1]),
+                    suffix=self.stages["Parcellation"].config.custom_brainmask.suffix,
+                    extensions=".nii.gz",
+                    desc=self.stages["Parcellation"].config.custom_brainmask.desc,
+            )
+            if len(files) > 0:
+                custom_brainmask_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_brainmask_file = "NotFound"
+                msg += f'  * Custom brain mask ({self.stages["Parcellation"].config.custom_brainmask}) not found\n'
+                custom_brainmask_available = False
+            print("... custom_brainmask_file : %s" % custom_brainmask_file)
+
+            if not custom_brainmask_available:
+                valid_inputs = False
+
+            layout.add_derivatives(
+                self.stages["Parcellation"].config.custom_gm_mask.get_custom_derivatives_dir()
+            )
+
+            files = layout.get(
+                subject=subjid,
+                session=(None
+                         if self.global_conf.subject_session == ""
+                         else self.global_conf.subject_session.split("-")[1]),
+                suffix=self.stages["Parcellation"].config.custom_gm_mask.suffix,
+                extensions=".nii.gz",
+                label=self.stages["Parcellation"].config.custom_gm_mask.label,
+            )
+            if len(files) > 0:
+                custom_gm_mask_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_gm_mask_file = "NotFound"
+                msg += f'  * Custom gray matter mask ({self.stages["Parcellation"].config.custom_gm_mask}) not found\n'
+                custom_gm_mask_available = False
+            print("... custom_gm_mask_file : %s" % custom_gm_mask_file)
+
+            if not custom_gm_mask_available:
+                valid_inputs = False
+
+            layout.add_derivatives(
+                self.stages["Parcellation"].config.custom_wm_mask.get_custom_derivatives_dir()
+            )
+
+            files = layout.get(
+                subject=subjid,
+                session=(None
+                         if self.global_conf.subject_session == ""
+                         else self.global_conf.subject_session.split("-")[1]),
+                suffix=self.stages["Parcellation"].config.custom_wm_mask.suffix,
+                extensions=".nii.gz",
+                label=self.stages["Parcellation"].config.custom_wm_mask.label,
+            )
+            if len(files) > 0:
+                custom_wm_mask_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_wm_mask_file = "NotFound"
+                msg += f'  * Custom white matter mask ({self.stages["Parcellation"].config.custom_wm_mask}) not found\n'
+                custom_wm_mask_available = False
+            print("... custom_wm_mask_file : %s" % custom_wm_mask_file)
+
+            if not custom_wm_mask_available:
+                valid_inputs = False
+
+            layout.add_derivatives(
+                self.stages["Parcellation"].config.custom_csf_mask.get_custom_derivatives_dir()
+            )
+
+            files = layout.get(
+                subject=subjid,
+                session=(None
+                         if self.global_conf.subject_session == ""
+                         else self.global_conf.subject_session.split("-")[1]),
+                suffix=self.stages["Parcellation"].config.custom_csf_mask.suffix,
+                extensions=".nii.gz",
+                label=self.stages["Parcellation"].config.custom_csf_mask.label,
+            )
+            if len(files) > 0:
+                custom_csf_mask_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_csf_mask_file = "NotFound"
+                msg += f'  * Custom CSF mask ({self.stages["Parcellation"].config.custom_csf_mask}) not found\n'
+                custom_csf_mask_available = False
+            print("... custom_csf_mask_file : %s" % custom_csf_mask_file)
+
+            if not custom_csf_mask_available:
+                valid_inputs = False
+
+            layout.add_derivatives(
+                    self.stages["Parcellation"].config.custom_aparcaseg.get_custom_derivatives_dir()
+            )
+
+            files = layout.get(
+                subject=subjid,
+                session=(None
+                         if self.global_conf.subject_session == ""
+                         else self.global_conf.subject_session.split("-")[1]),
+                suffix=self.stages["Parcellation"].config.custom_aparcaseg.suffix,
+                extensions=".nii.gz",
+                desc=self.stages["Parcellation"].config.custom_aparcaseg.desc,
+            )
+            if len(files) > 0:
+                custom_aparcaseg_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_aparcaseg_file = "NotFound"
+                msg += f'  * Custom Freesurfer\'s aparc+aseg ({self.stages["Parcellation"].config.custom_gm_mask}) not found\n'
+                custom_aparcaseg_available = False
+            print("... custom_aparcaseg_file : %s" % custom_aparcaseg_file)
+
+            if not custom_aparcaseg_available:
+                valid_inputs = False
+
+            if not valid_inputs:
+                error(
+                    message=f"Missing required custom inputs:\n{msg} Please see documentation for more details.",
+                    title="Error",
+                    buttons=["OK", "Cancel"],
+                    parent=None,
+                )
 
         return valid_inputs
 
@@ -343,22 +525,14 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         else:
             if self.global_conf.subject_session not in subject:
                 anat_deriv_subject_directory = os.path.join(
-                    self.base_directory,
-                    "derivatives",
-                    "cmp",
-                    subject,
-                    self.global_conf.subject_session,
-                    "anat",
+                    self.base_directory, "derivatives", "cmp",
+                    subject, self.global_conf.subject_session, "anat",
                 )
                 subject = "_".join((subject, self.global_conf.subject_session))
             else:
                 anat_deriv_subject_directory = os.path.join(
-                    self.base_directory,
-                    "derivatives",
-                    "cmp",
-                    subject.split("_")[0],
-                    self.global_conf.subject_session,
-                    "anat",
+                    self.base_directory, "derivatives", "cmp",
+                    subject.split("_")[0], self.global_conf.subject_session, "anat",
                 )
 
         T1_file = os.path.join(
