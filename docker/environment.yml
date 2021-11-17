@@ -14,7 +14,7 @@ dependencies:
 - graphviz=2.40.1
 - traits=6.2.0
 - configparser=5.0.0
-- nipype=1.5.1
+- nipype=1.7.0
 - pyside2=5.9.0a1
 - git-annex=8.20200617  # 7.20190219
 - pydotplus=2.0.2
@@ -33,7 +33,7 @@ dependencies:
     - datalad[full]==0.14.0  # 0.11.3
     - datalad-container==1.1.2
     - datalad_neuroimaging==0.3.1
-    - pybids==0.10.2  # 0.9.1
+    - pybids==0.14.0  # 0.9.1
     - statsmodels==0.11.1  # 0.9.0
     - networkx==2.4
     - pydicom==2.0.0  # 1.4.2
