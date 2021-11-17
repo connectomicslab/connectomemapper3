@@ -1,9 +1,8 @@
 name: py37cmp-gui
 
 channels:
-- aramislab
-- anaconda
 - conda-forge
+- aramislab
 - mrtrix3
 
 dependencies:

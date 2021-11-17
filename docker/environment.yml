@@ -1,7 +1,6 @@
 name: py37cmp-core
 
 channels:
-- anaconda
 - conda-forge
 - aramislab
 - mrtrix3
