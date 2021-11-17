@@ -73,21 +73,21 @@ class CustomBIDSFile(HasTraits):
 
     def __str__(self):
         msg = "{"
-        msg += f' "custom_derivatives_dir": {self.custom_derivatives_dir}, '
+        msg += f' "custom_derivatives_dir": "{self.custom_derivatives_dir}"'
         if self.suffix:
-            msg += f' "suffix": {self.suffix}, '
+            msg += f', "suffix": "{self.suffix}"'
         if self.extension:
-            msg += f' "extension": {self.extension}, '
+            msg += f', "extension": "{self.extension}"'
         if self.acquisition:
-            msg += f' "acquisition": {self.acquisition}, '
+            msg += f', "acquisition": "{self.acquisition}"'
         if self.atlas:
-            msg += f' "atlas": {self.atlas}, '
+            msg += f', "atlas": "{self.atlas}"'
         if self.resolution:
-            msg += f' "resolution": {self.resolution}, '
+            msg += f', "resolution": "{self.resolution}"'
         if self.label:
-            msg += f' "label": {self.label}, '
+            msg += f', "label": "{self.label}"'
         if self.desc:
-            msg += f' "desc": {self.desc}'
+            msg += f', "desc": "{self.desc}"'
         msg += "}"
         return msg
 
