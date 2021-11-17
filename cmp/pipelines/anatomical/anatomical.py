@@ -224,7 +224,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         subjid = self.subject.split("-")[1]
 
         if self.global_conf.subject_session == "":
-            files = layout.get(subject=subjid, suffix="T1w", extensions=".nii.gz")
+            files = layout.get(subject=subjid, suffix="T1w", extension=".nii.gz")
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_file)
@@ -233,7 +233,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(
-                subject=subjid, suffix="T1w", extensions=".nii.gz", session=sessid
+                subject=subjid, suffix="T1w", extension=".nii.gz", session=sessid
             )
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
@@ -244,7 +244,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         print("... t1_file : %s" % T1_file)
 
         if self.global_conf.subject_session == "":
-            files = layout.get(subject=subjid, suffix="T1w", extensions=".json")
+            files = layout.get(subject=subjid, suffix="T1w", extension=".json")
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_json_file)
@@ -253,7 +253,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(
-                subject=subjid, suffix="T1w", extensions=".json", session=sessid
+                subject=subjid, suffix="T1w", extension=".json", session=sessid
             )
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)
@@ -368,13 +368,16 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             custom_aparcaseg_available = True
 
             layout.add_derivatives(
-                self.stages["Parcellation"].config.custom_parcellation.get_custom_derivatives_dir()
+                os.path.join(
+                    self.base_directory, 'derivatives',
+                    self.stages["Parcellation"].config.custom_parcellation.get_toolbox_derivatives_dir()
+                )
             )
             if self.global_conf.subject_session == "":
                 files = layout.get(
                     subject=subjid,
                     suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
                     resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
                 )
@@ -389,7 +392,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     subject=subjid,
                     session=sessid,
                     suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
                     resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
                 )
@@ -404,7 +407,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 files = layout.get(
                     subject=subjid,
                     suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
-                    extensions=".tsv",
+                    extension=".tsv",
                     atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
                     resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
                 )
@@ -419,7 +422,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     subject=subjid,
                     session=sessid,
                     suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
                     resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
                 )
@@ -434,13 +437,16 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 valid_inputs = False
 
             layout.add_derivatives(
-                    self.stages["Parcellation"].config.custom_brainmask.get_custom_derivatives_dir()
+                os.path.join(
+                    self.base_directory, 'derivatives',
+                    self.stages["Parcellation"].config.custom_brainmask.get_toolbox_derivatives_dir()
+                )
             )
             if self.global_conf.subject_session == "":
                 files = layout.get(
                         subject=subjid,
                         suffix=self.stages["Parcellation"].config.custom_brainmask.suffix,
-                        extensions=".nii.gz",
+                        extension=".nii.gz",
                         desc=self.stages["Parcellation"].config.custom_brainmask.desc,
                 )
                 if len(files) > 0:
@@ -454,7 +460,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                         subject=subjid,
                         session=sessid,
                         suffix=self.stages["Parcellation"].config.custom_brainmask.suffix,
-                        extensions=".nii.gz",
+                        extension=".nii.gz",
                         desc=self.stages["Parcellation"].config.custom_brainmask.desc,
                 )
                 if len(files) > 0:
@@ -469,13 +475,16 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 valid_inputs = False
 
             layout.add_derivatives(
-                self.stages["Parcellation"].config.custom_gm_mask.get_custom_derivatives_dir()
+                os.path.join(
+                    self.base_directory, 'derivatives',
+                    self.stages["Parcellation"].config.custom_gm_mask.get_toolbox_derivatives_dir()
+                )
             )
             if self.global_conf.subject_session == "":
                 files = layout.get(
                     subject=subjid,
                     suffix=self.stages["Parcellation"].config.custom_gm_mask.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     label=self.stages["Parcellation"].config.custom_gm_mask.label,
                 )
                 if len(files) > 0:
@@ -489,7 +498,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     subject=subjid,
                     session=sessid,
                     suffix=self.stages["Parcellation"].config.custom_gm_mask.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     label=self.stages["Parcellation"].config.custom_gm_mask.label,
                 )
                 if len(files) > 0:
@@ -504,13 +513,16 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 valid_inputs = False
 
             layout.add_derivatives(
-                self.stages["Parcellation"].config.custom_wm_mask.get_custom_derivatives_dir()
+                os.path.join(
+                    self.base_directory, 'derivatives',
+                    self.stages["Parcellation"].config.custom_wm_mask.get_toolbox_derivatives_dir()
+                )
             )
             if self.global_conf.subject_session == "":
                 files = layout.get(
                     subject=subjid,
                     suffix=self.stages["Parcellation"].config.custom_wm_mask.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     label=self.stages["Parcellation"].config.custom_wm_mask.label,
                 )
                 if len(files) > 0:
@@ -524,7 +536,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     subject=subjid,
                     session=sessid,
                     suffix=self.stages["Parcellation"].config.custom_wm_mask.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     label=self.stages["Parcellation"].config.custom_wm_mask.label,
                 )
                 if len(files) > 0:
@@ -539,13 +551,16 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 valid_inputs = False
 
             layout.add_derivatives(
-                self.stages["Parcellation"].config.custom_csf_mask.get_custom_derivatives_dir()
+                os.path.join(
+                    self.base_directory, 'derivatives',
+                    self.stages["Parcellation"].config.custom_csf_mask.get_toolbox_derivatives_dir()
+                )
             )
             if self.global_conf.subject_session == "":
                 files = layout.get(
                     subject=subjid,
                     suffix=self.stages["Parcellation"].config.custom_csf_mask.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     label=self.stages["Parcellation"].config.custom_csf_mask.label,
                 )
                 if len(files) > 0:
@@ -559,7 +574,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     subject=subjid,
                     session=sessid,
                     suffix=self.stages["Parcellation"].config.custom_csf_mask.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     label=self.stages["Parcellation"].config.custom_csf_mask.label,
                 )
                 if len(files) > 0:
@@ -574,13 +589,16 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 valid_inputs = False
 
             layout.add_derivatives(
-                    self.stages["Parcellation"].config.custom_aparcaseg.get_custom_derivatives_dir()
+                os.path.join(
+                    self.base_directory, 'derivatives',
+                    self.stages["Parcellation"].config.custom_aparcaseg.get_toolbox_derivatives_dir()
+                )
             )
             if self.global_conf.subject_session == "":
                 files = layout.get(
                     subject=subjid,
                     suffix=self.stages["Parcellation"].config.custom_aparcaseg.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     desc=self.stages["Parcellation"].config.custom_aparcaseg.desc,
                 )
                 if len(files) > 0:
@@ -594,7 +612,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     subject=subjid,
                     session=sessid,
                     suffix=self.stages["Parcellation"].config.custom_aparcaseg.suffix,
-                    extensions=".nii.gz",
+                    extension=".nii.gz",
                     desc=self.stages["Parcellation"].config.custom_aparcaseg.desc,
                 )
                 if len(files) > 0:

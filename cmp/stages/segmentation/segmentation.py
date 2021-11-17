@@ -485,40 +485,44 @@ class SegmentationStage(Stage):
             "custom_aparcaseg": self.config.custom_aparcaseg.get_query_dict()
         }
 
-        # Make a list of paths where custom BIDS derivatives can be found
-        derivatives_paths = []
-        derivatives_paths = update_list_of_paths(
-            derivatives_paths,
-            self.config.custom_brainmask.get_custom_derivatives_dir()
+        # Make a list of toolbox derivatives directories where custom BIDS derivatives can be found
+        toolbox_derivatives_dirs = []
+        toolbox_derivatives_dirs = update_list_of_paths(
+            toolbox_derivatives_dirs,
+            self.config.custom_brainmask.get_toolbox_derivatives_dir()
         )
-        derivatives_paths = update_list_of_paths(
-            derivatives_paths,
-            self.config.custom_wm_mask.get_custom_derivatives_dir()
+        toolbox_derivatives_dirs = update_list_of_paths(
+            toolbox_derivatives_dirs,
+            self.config.custom_wm_mask.get_toolbox_derivatives_dir()
         )
-        derivatives_paths = update_list_of_paths(
-            derivatives_paths,
-            self.config.custom_gm_mask.get_custom_derivatives_dir()
+        toolbox_derivatives_dirs = update_list_of_paths(
+            toolbox_derivatives_dirs,
+            self.config.custom_gm_mask.get_toolbox_derivatives_dir()
         )
-        derivatives_paths = update_list_of_paths(
-            derivatives_paths,
-            self.config.custom_csf_mask.get_custom_derivatives_dir()
+        toolbox_derivatives_dirs = update_list_of_paths(
+            toolbox_derivatives_dirs,
+            self.config.custom_csf_mask.get_toolbox_derivatives_dir()
         )
-        derivatives_paths = update_list_of_paths(
-            derivatives_paths,
-            self.config.custom_aparcaseg.get_custom_derivatives_dir()
+        toolbox_derivatives_dirs = update_list_of_paths(
+            toolbox_derivatives_dirs,
+            self.config.custom_aparcaseg.get_toolbox_derivatives_dir()
         )
+
+        toolbox_derivatives_paths = [
+            os.path.join(self.bids_dir, "derivatives", toolbox_dir) for toolbox_dir in toolbox_derivatives_dirs
+        ]
 
         # Get input brain segmentation and mask files from custom BIDS derivatives
         # with BIDSDataGrabber
-        print("Get input brain segmentation and mask files from custom BIDS derivatives...")
+        print(f"Get custom input brain segmentation and mask files from {toolbox_derivatives_paths}...")
         custom_seg_grabber = pe.Node(
             interface=BIDSDataGrabber(
                 base_dir=self.bids_dir,
                 subject=self.bids_subject_label,
-                session=self.bids_session_label if (
-                        self.bids_session_label and self.bids_session_label != ""
-                ) else None,
-                extra_derivatives=derivatives_paths,
+                session=(self.bids_session_label
+                         if self.bids_session_label and self.bids_session_label != ""
+                         else None),
+                extra_derivatives=toolbox_derivatives_paths,
                 output_query=output_query_dict,
             ),
             name="custom_seg_grabber",

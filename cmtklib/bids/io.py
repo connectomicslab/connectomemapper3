@@ -17,8 +17,8 @@ class CustomBIDSFile(HasTraits):
 
     Attributes
     ----------
-    custom_derivatives_dir : Directory
-        Path to custom BIDS derivatives directory
+    toolbox_derivatives_dir : Str
+        Toolbox folder name in the `derivatives/` of the BIDS dataset
 
     suffix : Str
         Filename suffix e.g. `sub-01_T1w.nii.gz` has suffix `T1w`
@@ -42,7 +42,7 @@ class CustomBIDSFile(HasTraits):
         Label used in `_desc-<label>_`
 
     """
-    custom_derivatives_dir = Directory
+    toolbox_derivatives_dir = Str
     suffix = Str
     acquisition = Str
     resolution = Str
@@ -53,7 +53,7 @@ class CustomBIDSFile(HasTraits):
 
     def __init__(
             self,
-            p_custom_derivatives_dir="",
+            p_toolbox_derivatives_dir="",
             p_suffix="",
             p_extension="",
             p_acquisition="",
@@ -62,7 +62,7 @@ class CustomBIDSFile(HasTraits):
             p_label="",
             p_desc=""
     ):
-        self.custom_derivatives_dir = p_custom_derivatives_dir
+        self.toolbox_derivatives_dir = p_toolbox_derivatives_dir
         self.suffix = p_suffix
         self.extension = p_extension
         self.acquisition = p_acquisition
@@ -73,7 +73,7 @@ class CustomBIDSFile(HasTraits):
 
     def __str__(self):
         msg = "{"
-        msg += f' "custom_derivatives_dir": "{self.custom_derivatives_dir}"'
+        msg += f' "custom_derivatives_dir": "{self.toolbox_derivatives_dir}"'
         if self.suffix:
             msg += f', "suffix": "{self.suffix}"'
         if self.extension:
@@ -100,9 +100,9 @@ class CustomBIDSFile(HasTraits):
         del query_dict["custom_derivatives_dir"]
         return query_dict
 
-    def get_custom_derivatives_dir(self):
+    def get_toolbox_derivatives_dir(self):
         """Return the value of `custom_derivatives_dir` attribute."""
-        return self.custom_derivatives_dir
+        return self.toolbox_derivatives_dir
 
 
 class CustomParcellationBIDSFile(CustomBIDSFile):
