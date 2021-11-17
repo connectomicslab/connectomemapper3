@@ -229,7 +229,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_file)
             else:
-                return
+                return False
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(
@@ -239,7 +239,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_file)
             else:
-                return
+                return False
 
         print("... t1_file : %s" % T1_file)
 
@@ -426,6 +426,41 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             print("... custom_parc_tsv_file : %s" % custom_parc_tsv_file)
 
             if not custom_parc_nii_available and not custom_parc_tsv_available:
+                valid_inputs = False
+
+            layout.add_derivatives(
+                    self.stages["Parcellation"].config.custom_brainmask.get_custom_derivatives_dir()
+            )
+            if self.global_conf.subject_session == "":
+                files = layout.get(
+                        subject=subjid,
+                        suffix=self.stages["Parcellation"].config.custom_brainmask.suffix,
+                        extensions=".nii.gz",
+                        desc=self.stages["Parcellation"].config.custom_brainmask.desc,
+                )
+                if len(files) > 0:
+                    custom_brainmask_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_brainmask_file = "NotFound"
+                    custom_brainmask_available = False
+            else:
+                sessid = self.global_conf.subject_session.split("-")[1]
+                files = layout.get(
+                        subject=subjid,
+                        session=sessid,
+                        suffix=self.stages["Parcellation"].config.custom_brainmask.suffix,
+                        extensions=".nii.gz",
+                        desc=self.stages["Parcellation"].config.custom_brainmask.desc,
+                )
+                if len(files) > 0:
+                    custom_brainmask_file = os.path.join(files[0].dirname, files[0].filename)
+                else:
+                    custom_brainmask_file = "NotFound"
+                    custom_brainmask_available = False
+
+            print("... custom_brainmask_file : %s" % custom_brainmask_file)
+
+            if not custom_brainmask_available:
                 valid_inputs = False
 
             layout.add_derivatives(
