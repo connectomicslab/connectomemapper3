@@ -462,7 +462,7 @@ def get_fmri_process_detail_json(project_info, section, detail):
     return config[section][detail]
 
 
-def set_pipeline_attributes_from_config(pipeline, config, debug=True):
+def set_pipeline_attributes_from_config(pipeline, config, debug=False):
     """Set the pipeline stage attributes given a configuration.
 
     Parameters
@@ -579,7 +579,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=True):
     )
 
 
-def create_configparser_from_pipeline(pipeline, debug=True):
+def create_configparser_from_pipeline(pipeline, debug=False):
     """Create a `ConfigParser` object from a Pipeline instance.
 
     Parameters
