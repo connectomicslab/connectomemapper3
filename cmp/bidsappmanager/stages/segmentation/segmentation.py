@@ -50,41 +50,46 @@ class SegmentationConfigUI(SegmentationConfig):
     """
 
     custom_brainmask_group = VGroup(
-        Item('custom_brainmask.custom_derivatives_dir'),
-        Item('custom_brainmask.desc', style='readonly'),
-        Item('custom_brainmask.suffix', style='readonly'),
-        label="Custom brain mask"
+        Item('object.custom_brainmask.custom_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_brainmask.desc', style='readonly', label="desc"),
+        Item('object.custom_brainmask.suffix', style='readonly', label="suffix"),
+        label="Custom brain mask",
+        show_border=True
     )
 
     custom_gm_mask_group = VGroup(
-        Item('custom_gm_mask.custom_derivatives_dir'),
-        Item('custom_gm_mask.desc'),
-        Item('custom_gm_mask.label', style='readonly'),
-        Item('custom_gm_mask.suffix', style='readonly'),
-        label="Custom gray matter mask"
+        Item('object.custom_gm_mask.custom_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_gm_mask.desc', label="desc"),
+        Item('object.custom_gm_mask.label', label="label", style='readonly'),
+        Item('object.custom_gm_mask.suffix', label="suffix", style='readonly'),
+        label="Custom gray matter mask",
+        show_border=True
     )
 
     custom_wm_mask_group = VGroup(
-        Item('custom_wm_mask.custom_derivatives_dir'),
-        Item('custom_wm_mask.desc'),
-        Item('custom_wm_mask.label', style='readonly'),
-        Item('custom_wm_mask.suffix', style='readonly'),
-        label="Custom white matter mask"
+        Item('object.custom_wm_mask.custom_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_wm_mask.desc', label="desc"),
+        Item('object.custom_wm_mask.label', label="label", style='readonly'),
+        Item('object.custom_wm_mask.suffix', label="suffix", style='readonly'),
+        label="Custom white matter mask",
+        show_border=True
     )
 
     custom_csf_mask_group = VGroup(
-        Item('custom_csf_mask.custom_derivatives_dir'),
-        Item('custom_csf_mask.desc'),
-        Item('custom_csf_mask.label', style='readonly'),
-        Item('custom_csf_mask.suffix', style='readonly'),
-        label="Custom CSF mask"
+        Item('object.custom_csf_mask.custom_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_csf_mask.desc', label="desc"),
+        Item('object.custom_csf_mask.label', label="label", style='readonly'),
+        Item('object.custom_csf_mask.suffix', label="suffix", style='readonly'),
+        label="Custom CSF mask",
+        show_border=True
     )
 
     custom_aparcaseg_group = VGroup(
-        Item('custom_aparcaseg.custom_derivatives_dir'),
-        Item('custom_aparcaseg.desc', style='readonly'),
-        Item('custom_aparcaseg.suffix', style='readonly'),
-        label="Custom Freesurfer aparc+aseg (used by MRtrix3 to build the 5TT image)"
+        Item('object.custom_aparcaseg.custom_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_aparcaseg.desc', label="desc", style='readonly'),
+        Item('object.custom_aparcaseg.suffix', label="suffix", style='readonly'),
+        label="Custom Freesurfer aparc+aseg (used by MRtrix3 to build the 5TT image)",
+        show_border=True
     )
 
     traits_view = View(
@@ -105,7 +110,8 @@ class SegmentationConfigUI(SegmentationConfig):
             ),
             Item(
                 "number_of_threads",
-                label="Number of threads used for multithreading in Freesurfer and ANTs",
+                label="Number of parallel threads used by Freesurfer and ANTs",
+                resizable=True
             ),
             "brain_mask_extraction_tool",
             Item(
@@ -191,8 +197,8 @@ class SegmentationStageUI(SegmentationStage):
         ),
         scrollable=True,
         resizable=True,
-        height=400,
-        width=450,
+        height=800,
+        width=600,
         kind="livemodal",
         title="Edit stage configuration",
         buttons=["OK", "Cancel"],

@@ -22,7 +22,7 @@ class ParcellationConfigUI(ParcellationConfig):
 
     Attributes
     ----------
-    custom_parcellation_group : traits.ui.VGroup
+    custom_parcellation_view : traits.ui.View
         VGroup that displays the different parts of a custom BIDS parcellation file
 
     traits_view : traits.ui.View
@@ -35,10 +35,10 @@ class ParcellationConfigUI(ParcellationConfig):
     """
 
     custom_parcellation_group = VGroup(
-        Item('custom_parcellation.custom_derivatives_dir'),
-        Item('custom_parcellation.atlas'),
-        Item('custom_parcellation.resolution'),
-        Item('custom_parcellation.suffix', style='readonly'),
+        Item('object.custom_parcellation.custom_derivatives_dir', label="Derivatives directory"),
+        Item('object.custom_parcellation.atlas', label="atlas"),
+        Item('object.custom_parcellation.resolution', label="res"),
+        Item('object.custom_parcellation.suffix', label="suffix", style='readonly'),
         label="Custom parcellation"
     )
 
@@ -118,8 +118,8 @@ class ParcellationStageUI(ParcellationStage):
         ),
         scrollable=True,
         resizable=True,
-        height=280,
-        width=450,
+        height=350,
+        width=600,
         kind="livemodal",
         title="Edit stage configuration",
         buttons=["OK", "Cancel"],
