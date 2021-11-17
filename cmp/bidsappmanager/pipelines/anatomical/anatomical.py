@@ -325,6 +325,11 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
             custom_parc_nii_available = True
             custom_parc_tsv_available = True
+            custom_brainmask_available = True
+            custom_gm_mask_available = True
+            custom_wm_mask_available = True
+            custom_csf_mask_available = True
+            custom_aparcaseg_available = True
 
             layout.add_derivatives(
                 self.stages["Parcellation"].config.custom_parcellation.get_custom_derivatives_dir()
