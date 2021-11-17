@@ -143,15 +143,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.stages["Segmentation"].config.freesurfer_subject_id = os.path.join(
             self.output_directory, "freesurfer", subject_id
         )
-        self.stages["Segmentation"].config.on_trait_change(
-            self.update_parcellation, "seg_tool"
-        )
-        self.stages["Parcellation"].config.on_trait_change(
-            self.update_segmentation, "parcellation_scheme"
-        )
-        self.stages["Parcellation"].config.on_trait_change(
-            self.update_parcellation_scheme, "parcellation_scheme"
-        )
 
     def check_config(self):
         """Check if custom white matter mask and custom atlas files specified in the configuration exist.
@@ -182,37 +173,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     "Parcellation configuration window.\t\n"
                 )
         return message
-
-    def update_parcellation_scheme(self):
-        """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
-        self.parcellation_scheme = self.stages["Parcellation"].config.parcellation_scheme
-        if self.parcellation_scheme != "Custom":
-            self.atlas_info = self.stages["Parcellation"].config.atlas_info
-        else:
-            self.atlas_info = {
-                f"{self.config.custom_parcellation.atlas}": {
-                    "number_of_regions": 83,
-                    "node_information_graphml": "/path/to/file.graphml"
-                }
-            }
-
-    def update_parcellation(self):
-        """Update self.stages['Parcellation'].config.parcellation_scheme when ``seg_tool`` is updated."""
-        if self.stages["Segmentation"].config.seg_tool == "Custom segmentation":
-            self.stages["Parcellation"].config.parcellation_scheme = "Custom"
-            self.stages["Parcellation"].config.parcellation_scheme_editor = ["Custom"]
-        else:
-            self.stages["Parcellation"].config.parcellation_scheme = "Lausanne2018"
-            self.stages["Parcellation"].config.parcellation_scheme_editor = [
-                "NativeFreesurfer", "Lausanne2008", "Lausanne2018", "Custom"
-            ]
-
-    def update_segmentation(self):
-        """Update self.stages['Segmentation'].config.seg_tool when ``parcellation_scheme`` is updated."""
-        if self.stages["Parcellation"].config.parcellation_scheme == "Custom":
-            self.stages["Segmentation"].config.seg_tool = "Custom segmentation"
-        else:
-            self.stages["Segmentation"].config.seg_tool = "Freesurfer"
 
     def define_custom_mapping(self, custom_last_stage):
         """Define the pipeline to be executed until a specific stages.
