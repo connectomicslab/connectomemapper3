@@ -50,7 +50,7 @@ class SegmentationConfigUI(SegmentationConfig):
     """
 
     custom_brainmask_group = VGroup(
-        Item('object.custom_brainmask.custom_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_brainmask.toolbox_derivatives_dir', label='Derivatives directory'),
         Item('object.custom_brainmask.desc', style='readonly', label="desc"),
         Item('object.custom_brainmask.suffix', style='readonly', label="suffix"),
         label="Custom brain mask",
@@ -58,7 +58,7 @@ class SegmentationConfigUI(SegmentationConfig):
     )
 
     custom_gm_mask_group = VGroup(
-        Item('object.custom_gm_mask.custom_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_gm_mask.toolbox_derivatives_dir', label='Derivatives directory'),
         Item('object.custom_gm_mask.desc', label="desc"),
         Item('object.custom_gm_mask.label', label="label", style='readonly'),
         Item('object.custom_gm_mask.suffix', label="suffix", style='readonly'),
@@ -67,7 +67,7 @@ class SegmentationConfigUI(SegmentationConfig):
     )
 
     custom_wm_mask_group = VGroup(
-        Item('object.custom_wm_mask.custom_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_wm_mask.toolbox_derivatives_dir', label='Derivatives directory'),
         Item('object.custom_wm_mask.desc', label="desc"),
         Item('object.custom_wm_mask.label', label="label", style='readonly'),
         Item('object.custom_wm_mask.suffix', label="suffix", style='readonly'),
@@ -76,7 +76,7 @@ class SegmentationConfigUI(SegmentationConfig):
     )
 
     custom_csf_mask_group = VGroup(
-        Item('object.custom_csf_mask.custom_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_csf_mask.toolbox_derivatives_dir', label='Derivatives directory'),
         Item('object.custom_csf_mask.desc', label="desc"),
         Item('object.custom_csf_mask.label', label="label", style='readonly'),
         Item('object.custom_csf_mask.suffix', label="suffix", style='readonly'),
@@ -85,7 +85,7 @@ class SegmentationConfigUI(SegmentationConfig):
     )
 
     custom_aparcaseg_group = VGroup(
-        Item('object.custom_aparcaseg.custom_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_aparcaseg.toolbox_derivatives_dir', label='Derivatives directory'),
         Item('object.custom_aparcaseg.desc', label="desc", style='readonly'),
         Item('object.custom_aparcaseg.suffix', label="suffix", style='readonly'),
         label="Custom Freesurfer aparc+aseg (used by MRtrix3 to build the 5TT image)",
