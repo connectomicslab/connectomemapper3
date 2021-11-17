@@ -23,7 +23,7 @@ COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
 
 # Install system library dependencies
 RUN apt-get update && \
-    apt-get install python2.7 python2.7-minimal software-properties-common -y && \
+    apt-get install software-properties-common -y && \
     apt-get install -qq -y --no-install-recommends bc \
     locales libstdc++6 npm curl perl gzip bzip2 xvfb liblzma-dev locate exfat-fuse exfat-utils default-jre && \
     curl -sSL http://neuro.debian.net/lists/xenial.us-ca.full >> /etc/apt/sources.list.d/neurodebian.sources.list && \
