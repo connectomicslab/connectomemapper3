@@ -14,7 +14,7 @@ dependencies:
 - traitsui=7.0.0 # =6.0.0
 - graphviz=2.40.1 # =2.40.1
 - configparser=5.0.0
-- nipype=1.5.1 # =1.5.0
+- nipype=1.7.0 # =1.5.0
 - git-annex=8.20210127 # =7.20190219
 - pyside2=5.9.0a1 # =5.9.0a1
 - fslpy=3.2.1 # =1.13.2
@@ -32,7 +32,7 @@ dependencies:
     - datalad[full]==0.14.0 # ==0.11.4
     - datalad-container==1.1.2
     - datalad-neuroimaging==0.3.1
-    - pybids==0.10.2 # ==0.9.5
+    - pybids==0.14.0 # ==0.9.5
     - statsmodels==0.11.1 # ==0.9.0
     - networkx==2.4
     - pydicom==2.0.0 # ==1.4.2
