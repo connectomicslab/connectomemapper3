@@ -24,26 +24,6 @@ from cmp.pipelines.anatomical.anatomical import (
 from cmtklib.util import return_button_style_sheet
 
 
-class Check_Input_NotificationUI(Check_Input_Notification):
-    traits_view = View(
-        Item("message", style="readonly", show_label=False),
-        Item(
-            "diffusion_imaging_model_message",
-            visible_when="len(diffusion_imaging_model_options)>1",
-            style="readonly",
-            show_label=False,
-        ),
-        Item(
-            "diffusion_imaging_model",
-            editor=EnumEditor(name="diffusion_imaging_model_options"),
-            visible_when="len(diffusion_imaging_model_options)>1",
-        ),
-        kind="modal",
-        buttons=["OK"],
-        title="Check inputs",
-    )
-
-
 class AnatomicalPipelineUI(AnatomicalPipeline):
     """Class that extends the :class:`~cmp.pipelines.anatomical.anatomical.AnatomicalPipeline` with graphical components.
 
