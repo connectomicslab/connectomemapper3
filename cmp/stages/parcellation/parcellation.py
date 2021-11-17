@@ -473,10 +473,13 @@ class ParcellationStage(Stage):
             "custom_roi_volumes": self.config.custom_parcellation.get_query_dict(),
         }
 
-        # Make a list of paths where custom BIDS derivatives can be found
-        derivatives_paths = [self.config.custom_parcellation.get_custom_derivatives_dir()]
+        # Make a list of toolbox directories where custom BIDS derivatives can be found
+        toolbox_derivatives_dirs = [self.config.custom_parcellation.get_custom_derivatives_dir()]
+        toolbox_derivatives_paths = [
+            os.path.join(self.bids_dir, "derivatives", toolbox_dir) for toolbox_dir in toolbox_derivatives_dirs
+        ]
 
-        print(f"Get input brain parcellation file from {derivatives_paths}...")
+        print(f"Get input brain parcellation file from {toolbox_derivatives_paths}...")
         custom_parc_grabber = pe.Node(
             interface=BIDSDataGrabber(
                 base_dir=self.bids_dir,
@@ -484,7 +487,7 @@ class ParcellationStage(Stage):
                 session=self.bids_session_label if (
                     self.bids_session_label and self.bids_session_label != ""
                 ) else None,
-                extra_derivatives=derivatives_paths,
+                extra_derivatives=toolbox_derivatives_paths,
                 output_query=output_query_dict,
             ),
             name="custom_parc_grabber",
