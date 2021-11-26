@@ -26,7 +26,7 @@ class CustomBIDSFile(HasTraits):
     acquisition : Str
         Label used in `_acq-<label>_`
 
-    resolution : Str
+    res : Str
         Label used in `_res-<label>_`
 
     extension : Str
@@ -45,7 +45,7 @@ class CustomBIDSFile(HasTraits):
     toolbox_derivatives_dir = Str
     suffix = Str
     acquisition = Str
-    resolution = Str
+    res = Str
     extension = Str
     atlas = Str
     label = Str
@@ -58,7 +58,7 @@ class CustomBIDSFile(HasTraits):
             p_extension="",
             p_acquisition="",
             p_atlas="",
-            p_resolution="",
+            p_res="",
             p_label="",
             p_desc=""
     ):
@@ -67,7 +67,7 @@ class CustomBIDSFile(HasTraits):
         self.extension = p_extension
         self.acquisition = p_acquisition
         self.atlas = p_atlas
-        self.resolution = p_resolution
+        self.res = p_res
         self.label = p_label
         self.desc = p_desc
 
@@ -82,8 +82,8 @@ class CustomBIDSFile(HasTraits):
             msg += f', "acquisition": "{self.acquisition}"'
         if self.atlas:
             msg += f', "atlas": "{self.atlas}"'
-        if self.resolution:
-            msg += f', "resolution": "{self.resolution}"'
+        if self.res:
+            msg += f', "res": "{self.res}"'
         if self.label:
             msg += f', "label": "{self.label}"'
         if self.desc:

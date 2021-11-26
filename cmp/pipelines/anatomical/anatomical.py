@@ -366,12 +366,15 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             custom_wm_mask_available = True
             custom_csf_mask_available = True
             custom_aparcaseg_available = True
+            
+            custom_toolbox_derivatives = os.path.join(
+                self.output_directory,
+                self.stages["Parcellation"].config.custom_parcellation.get_toolbox_derivatives_dir()
+            )
+            print(f'DEBUG: custom_toolbox_derivatives: {custom_toolbox_derivatives}')
 
             layout.add_derivatives(
-                os.path.join(
-                    self.base_directory, 'derivatives',
-                    self.stages["Parcellation"].config.custom_parcellation.get_toolbox_derivatives_dir()
-                )
+                custom_toolbox_derivatives
             )
             if self.global_conf.subject_session == "":
                 files = layout.get(
@@ -379,7 +382,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
                     extension=".nii.gz",
                     atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
-                    resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
+                    res=self.stages["Parcellation"].config.custom_parcellation.res,
                 )
                 if len(files) > 0:
                     custom_parc_file = os.path.join(files[0].dirname, files[0].filename)
@@ -394,7 +397,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
                     extension=".nii.gz",
                     atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
-                    resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
+                    res=self.stages["Parcellation"].config.custom_parcellation.res,
                 )
                 if len(files) > 0:
                     custom_parc_file = os.path.join(files[0].dirname, files[0].filename)
@@ -409,7 +412,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
                     extension=".tsv",
                     atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
-                    resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
+                    res=self.stages["Parcellation"].config.custom_parcellation.res,
                 )
                 if len(files) > 0:
                     custom_parc_tsv_file = os.path.join(files[0].dirname, files[0].filename)
@@ -424,7 +427,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                     suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
                     extension=".nii.gz",
                     atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
-                    resolution=self.stages["Parcellation"].config.custom_parcellation.resolution,
+                    res=self.stages["Parcellation"].config.custom_parcellation.res,
                 )
                 if len(files) > 0:
                     custom_parc_tsv_file = os.path.join(files[0].dirname, files[0].filename)
@@ -708,8 +711,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 )
         else:
             roiv_filename = subject + "_atlas-" + bids_atlas_label
-            if self.stages["Parcellation"].config.custom_parcellation.resolution:
-                roiv_filename += f'_res-{self.stages["Parcellation"].config.custom_parcellation.resolution}'
+            if self.stages["Parcellation"].config.custom_parcellation.res:
+                roiv_filename += f'_res-{self.stages["Parcellation"].config.custom_parcellation.res}'
             roiv_filename += "_dseg.nii.gz"
             roiv_files = glob.glob(
                 os.path.join(
