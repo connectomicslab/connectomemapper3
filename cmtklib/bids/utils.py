@@ -44,36 +44,34 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
             "Name": "CMP3 Outputs",
             "BIDSVersion": "1.4.0",
             "DatasetType": "derivatives",
-            "GeneratedBy": {
-                "Name": pipeline_name,
-                "Version": __version__,
-                "Container": {
-                    "Type": "docker",
-                    "Tag": "{}:{}".format(DOCKER_HUB, __version__),
-                },
-                "CodeURL": __url__,
-            },
-            "PipelineDescription": {"Name": "CMP3 Outputs ({})".format(__version__)},
-            "HowToAcknowledge": "Please cite ... ",
+            "GeneratedBy": [
+                {
+                    "Name": pipeline_name,
+                    "Version": __version__,
+                    "Container": {
+                        "Type": "docker",
+                        "Tag": "{}:{}".format(DOCKER_HUB, __version__),
+                    },
+                    "CodeURL": __url__,
+                }
+            ]
         }
     elif pipeline_name == "freesurfer":
         desc = {
             "Name": "Freesurfer Outputs of CMP3 ({})".format(__version__),
             "BIDSVersion": "1.4.0",
             "DatasetType": "derivatives",
-            "GeneratedBy": {
-                "Name": "freesurfer",
-                "Version": "6.0.1",
-                "Container": {
-                    "Type": "docker",
-                    "Tag": "{}:{}".format(DOCKER_HUB, __version__),
-                },
-                "CodeURL": __url__,
-            },
-            "PipelineDescription": {
-                "Name": "Freesurfer Outputs of CMP3 ({})".format(__version__),
-            },
-            "HowToAcknowledge": "Please cite ... ",
+            "GeneratedBy": [
+                {
+                    "Name": "freesurfer",
+                    "Version": "6.0.1",
+                    "Container": {
+                        "Type": "docker",
+                        "Tag": "{}:{}".format(DOCKER_HUB, __version__),
+                    },
+                    "CodeURL": __url__,
+                }
+            ]
         }
     elif pipeline_name == "nipype":
         from nipype import __version__ as nipype_version
@@ -82,19 +80,17 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
             "Name": "Nipype Outputs of CMP3 ({})".format(__version__),
             "BIDSVersion": "1.4.0",
             "DatasetType": "derivatives",
-            "GeneratedBy": {
-                "Name": pipeline_name,
-                "Version": nipype_version,
-                "Container": {
-                    "Type": "docker",
-                    "Tag": "{}:{}".format(DOCKER_HUB, __version__),
+            "GeneratedBy": [
+                {
+                    "Name": pipeline_name,
+                    "Version": nipype_version,
+                    "Container": {
+                        "Type": "docker",
+                        "Tag": "{}:{}".format(DOCKER_HUB, __version__),
+                    },
+                    "CodeURL": __url__,
                 },
-                "CodeURL": __url__,
-            },
-            "PipelineDescription": {
-                "Name": "Nipype Outputs of CMP3 ({})".format(__version__),
-            },
-            "HowToAcknowledge": "Please cite ... ",
+            ],
         }
 
     # Keys that can only be set by environment
