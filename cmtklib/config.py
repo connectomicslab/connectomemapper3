@@ -125,7 +125,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
                         continue
             if "segmentation_stage" in section:
                 if segmentation_tool == "Custom segmentation":
-                    if "custom" not in name:
+                    if "custom" not in name and "seg_tool" not in name:
                         if debug:
                             print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
@@ -137,7 +137,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
 
             if "parcellation_stage" in section:
                 if parcellation_scheme == "Custom":
-                    if "custom" not in name:
+                    if "custom" not in name and "parcellation_scheme" not in name:
                         if debug:
                             print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
                         continue
