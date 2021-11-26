@@ -50,9 +50,9 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
                     "Version": __version__,
                     "Container": {
                         "Type": "docker",
-                        "Tag": "{}:{}".format(DOCKER_HUB, __version__),
+                        "Tag": "{}:{}".format(DOCKER_HUB, __version__)
                     },
-                    "CodeURL": __url__,
+                    "CodeURL": __url__
                 }
             ]
         }
@@ -67,9 +67,9 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
                     "Version": "6.0.1",
                     "Container": {
                         "Type": "docker",
-                        "Tag": "{}:{}".format(DOCKER_HUB, __version__),
+                        "Tag": "{}:{}".format(DOCKER_HUB, __version__)
                     },
-                    "CodeURL": __url__,
+                    "CodeURL": __url__
                 }
             ]
         }
@@ -86,11 +86,11 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
                     "Version": nipype_version,
                     "Container": {
                         "Type": "docker",
-                        "Tag": "{}:{}".format(DOCKER_HUB, __version__),
+                        "Tag": "{}:{}".format(DOCKER_HUB, __version__)
                     },
-                    "CodeURL": __url__,
-                },
-            ],
+                    "CodeURL": __url__
+                }
+            ]
         }
 
     # Keys that can only be set by environment
