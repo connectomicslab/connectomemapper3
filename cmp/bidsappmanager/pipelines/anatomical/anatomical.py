@@ -379,7 +379,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             layout.add_derivatives(
                 os.path.join(
                     self.base_directory, 'derivatives',
-                    self.stages["Parcellation"].config.custom_brainmask.get_toolbox_derivatives_dir()
+                    self.stages["Segmentation"].config.custom_brainmask.get_toolbox_derivatives_dir()
                 )
             )
 
@@ -388,15 +388,15 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                     session=(None
                              if self.global_conf.subject_session == ""
                              else self.global_conf.subject_session.split("-")[1]),
-                    suffix=self.stages["Parcellation"].config.custom_brainmask.suffix,
+                    suffix=self.stages["Segmentation"].config.custom_brainmask.suffix,
                     extension=".nii.gz",
-                    desc=self.stages["Parcellation"].config.custom_brainmask.desc,
+                    desc=self.stages["Segmentation"].config.custom_brainmask.desc,
             )
             if len(files) > 0:
                 custom_brainmask_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 custom_brainmask_file = "NotFound"
-                msg += f'  * Custom brain mask ({self.stages["Parcellation"].config.custom_brainmask}) not found\n'
+                msg += f'  * Custom brain mask ({self.stages["Segmentation"].config.custom_brainmask}) not found\n'
                 custom_brainmask_available = False
             print("... custom_brainmask_file : %s" % custom_brainmask_file)
 
@@ -406,7 +406,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             layout.add_derivatives(
                 os.path.join(
                     self.base_directory, 'derivatives',
-                    self.stages["Parcellation"].config.custom_gm_mask.get_toolbox_derivatives_dir()
+                    self.stages["Segmentation"].config.custom_gm_mask.get_toolbox_derivatives_dir()
                 )
             )
 
@@ -415,15 +415,15 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                 session=(None
                          if self.global_conf.subject_session == ""
                          else self.global_conf.subject_session.split("-")[1]),
-                suffix=self.stages["Parcellation"].config.custom_gm_mask.suffix,
+                suffix=self.stages["Segmentation"].config.custom_gm_mask.suffix,
                 extension=".nii.gz",
-                label=self.stages["Parcellation"].config.custom_gm_mask.label,
+                label=self.stages["Segmentation"].config.custom_gm_mask.label,
             )
             if len(files) > 0:
                 custom_gm_mask_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 custom_gm_mask_file = "NotFound"
-                msg += f'  * Custom gray matter mask ({self.stages["Parcellation"].config.custom_gm_mask}) not found\n'
+                msg += f'  * Custom gray matter mask ({self.stages["Segmentation"].config.custom_gm_mask}) not found\n'
                 custom_gm_mask_available = False
             print("... custom_gm_mask_file : %s" % custom_gm_mask_file)
 
@@ -433,7 +433,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             layout.add_derivatives(
                 os.path.join(
                     self.base_directory, 'derivatives',
-                    self.stages["Parcellation"].config.custom_wm_mask.get_toolbox_derivatives_dir()
+                    self.stages["Segmentation"].config.custom_wm_mask.get_toolbox_derivatives_dir()
                 )
             )
 
@@ -442,15 +442,15 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                 session=(None
                          if self.global_conf.subject_session == ""
                          else self.global_conf.subject_session.split("-")[1]),
-                suffix=self.stages["Parcellation"].config.custom_wm_mask.suffix,
+                suffix=self.stages["Segmentation"].config.custom_wm_mask.suffix,
                 extension=".nii.gz",
-                label=self.stages["Parcellation"].config.custom_wm_mask.label,
+                label=self.stages["Segmentation"].config.custom_wm_mask.label,
             )
             if len(files) > 0:
                 custom_wm_mask_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 custom_wm_mask_file = "NotFound"
-                msg += f'  * Custom white matter mask ({self.stages["Parcellation"].config.custom_wm_mask}) not found\n'
+                msg += f'  * Custom white matter mask ({self.stages["Segmentation"].config.custom_wm_mask}) not found\n'
                 custom_wm_mask_available = False
             print("... custom_wm_mask_file : %s" % custom_wm_mask_file)
 
@@ -460,7 +460,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             layout.add_derivatives(
                 os.path.join(
                     self.base_directory, 'derivatives',
-                    self.stages["Parcellation"].config.custom_csf_mask.get_toolbox_derivatives_dir()
+                    self.stages["Segmentation"].config.custom_csf_mask.get_toolbox_derivatives_dir()
                 )
             )
 
@@ -469,15 +469,15 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                 session=(None
                          if self.global_conf.subject_session == ""
                          else self.global_conf.subject_session.split("-")[1]),
-                suffix=self.stages["Parcellation"].config.custom_csf_mask.suffix,
+                suffix=self.stages["Segmentation"].config.custom_csf_mask.suffix,
                 extension=".nii.gz",
-                label=self.stages["Parcellation"].config.custom_csf_mask.label,
+                label=self.stages["Segmentation"].config.custom_csf_mask.label,
             )
             if len(files) > 0:
                 custom_csf_mask_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 custom_csf_mask_file = "NotFound"
-                msg += f'  * Custom CSF mask ({self.stages["Parcellation"].config.custom_csf_mask}) not found\n'
+                msg += f'  * Custom CSF mask ({self.stages["Segmentation"].config.custom_csf_mask}) not found\n'
                 custom_csf_mask_available = False
             print("... custom_csf_mask_file : %s" % custom_csf_mask_file)
 
@@ -487,7 +487,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             layout.add_derivatives(
                 os.path.join(
                     self.base_directory, 'derivatives',
-                    self.stages["Parcellation"].config.custom_aparcaseg.get_toolbox_derivatives_dir()
+                    self.stages["Segmentation"].config.custom_aparcaseg.get_toolbox_derivatives_dir()
                 )
             )
 
@@ -496,15 +496,15 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                 session=(None
                          if self.global_conf.subject_session == ""
                          else self.global_conf.subject_session.split("-")[1]),
-                suffix=self.stages["Parcellation"].config.custom_aparcaseg.suffix,
+                suffix=self.stages["Segmentation"].config.custom_aparcaseg.suffix,
                 extension=".nii.gz",
-                desc=self.stages["Parcellation"].config.custom_aparcaseg.desc,
+                desc=self.stages["Segmentation"].config.custom_aparcaseg.desc,
             )
             if len(files) > 0:
                 custom_aparcaseg_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 custom_aparcaseg_file = "NotFound"
-                msg += f'  * Custom Freesurfer\'s aparc+aseg ({self.stages["Parcellation"].config.custom_gm_mask}) not found\n'
+                msg += f'  * Custom Freesurfer\'s aparc+aseg ({self.stages["Segmentation"].config.custom_gm_mask}) not found\n'
                 custom_aparcaseg_available = False
             print("... custom_aparcaseg_file : %s" % custom_aparcaseg_file)
 
