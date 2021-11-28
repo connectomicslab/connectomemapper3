@@ -37,7 +37,7 @@ class ParcellationConfigUI(ParcellationConfig):
     custom_parcellation_group = VGroup(
         Item('object.custom_parcellation.toolbox_derivatives_dir', label="Derivatives directory"),
         Item('object.custom_parcellation.atlas', label="atlas"),
-        Item('object.custom_parcellation.resolution', label="res"),
+        Item('object.custom_parcellation.res', label="res"),
         Item('object.custom_parcellation.suffix', label="suffix", style='readonly'),
         label="Custom parcellation"
     )
