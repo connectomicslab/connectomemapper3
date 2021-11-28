@@ -474,7 +474,7 @@ class ParcellationStage(Stage):
         }
 
         # Make a list of toolbox directories where custom BIDS derivatives can be found
-        toolbox_derivatives_dirs = [self.config.custom_parcellation.get_custom_derivatives_dir()]
+        toolbox_derivatives_dirs = [self.config.custom_parcellation.get_toolbox_derivatives_dir()]
         toolbox_derivatives_paths = [
             os.path.join(self.bids_dir, "derivatives", toolbox_dir) for toolbox_dir in toolbox_derivatives_dirs
         ]
