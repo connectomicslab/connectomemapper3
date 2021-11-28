@@ -366,16 +366,25 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             custom_wm_mask_available = True
             custom_csf_mask_available = True
             custom_aparcaseg_available = True
-            
-            custom_toolbox_derivatives = os.path.join(
-                self.output_directory,
-                self.stages["Parcellation"].config.custom_parcellation.get_toolbox_derivatives_dir()
-            )
-            print(f'DEBUG: custom_toolbox_derivatives: {custom_toolbox_derivatives}')
 
-            layout.add_derivatives(
-                custom_toolbox_derivatives
-            )
+            # Add custom BIDS derivatives directories to the BIDSLayout
+            custom_derivatives_dirnames = [
+                self.stages["Parcellation"].config.custom_parcellation.get_toolbox_derivatives_dir(),
+                self.stages["Segmentation"].config.custom_brainmask.get_toolbox_derivatives_dir(),
+                self.stages["Segmentation"].config.custom_gm_mask.get_toolbox_derivatives_dir(),
+                self.stages["Segmentation"].config.custom_wm_mask.get_toolbox_derivatives_dir(),
+                self.stages["Segmentation"].config.custom_csf_mask.get_toolbox_derivatives_dir(),
+                self.stages["Segmentation"].config.custom_aparcaseg.get_toolbox_derivatives_dir()
+            ]
+            # Keep only unique custom derivatives to make the BIDSLayout happy
+            custom_derivatives_dirnames = list(set(custom_derivatives_dirnames))
+            print(f"DEBUG: custom_derivatives_dirnames: {custom_derivatives_dirnames}")
+            print(f"DEBUG: layout.derivatives: {layout.derivatives}")
+            for custom_derivatives_dirname in  custom_derivatives_dirnames:
+                if custom_derivatives_dirname not in layout.derivatives:
+                    print(f"    * Add custom_derivatives_dirname: {custom_derivatives_dirname}")
+                    layout.add_derivatives(os.path.join(self.base_directory, 'derivatives', custom_derivatives_dirname))
+
             files = layout.get(
                 subject=subjid,
                 session=(self.global_conf.subject_session.split("-")[1]
@@ -413,12 +422,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if not custom_parc_nii_available and not custom_parc_tsv_available:
                 valid_inputs = False
 
-            layout.add_derivatives(
-                os.path.join(
-                    self.base_directory, 'derivatives',
-                    self.stages["Segmentation"].config.custom_brainmask.get_toolbox_derivatives_dir()
-                )
-            )
             files = layout.get(
                     subject=subjid,
                     session=(self.global_conf.subject_session.split("-")[1]
@@ -438,12 +441,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if not custom_brainmask_available:
                 valid_inputs = False
 
-            layout.add_derivatives(
-                os.path.join(
-                    self.base_directory, 'derivatives',
-                    self.stages["Segmentation"].config.custom_gm_mask.get_toolbox_derivatives_dir()
-                )
-            )
             files = layout.get(
                 subject=subjid,
                 session=(self.global_conf.subject_session.split("-")[1]
@@ -463,12 +460,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if not custom_gm_mask_available:
                 valid_inputs = False
 
-            layout.add_derivatives(
-                os.path.join(
-                    self.base_directory, 'derivatives',
-                    self.stages["Segmentation"].config.custom_wm_mask.get_toolbox_derivatives_dir()
-                )
-            )
             files = layout.get(
                 subject=subjid,
                 session=(self.global_conf.subject_session.split("-")[1]
@@ -488,12 +479,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if not custom_wm_mask_available:
                 valid_inputs = False
 
-            layout.add_derivatives(
-                os.path.join(
-                    self.base_directory, 'derivatives',
-                    self.stages["Segmentation"].config.custom_csf_mask.get_toolbox_derivatives_dir()
-                )
-            )
             files = layout.get(
                 subject=subjid,
                 session=(self.global_conf.subject_session.split("-")[1]
@@ -513,12 +498,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if not custom_csf_mask_available:
                 valid_inputs = False
 
-            layout.add_derivatives(
-                os.path.join(
-                    self.base_directory, 'derivatives',
-                    self.stages["Segmentation"].config.custom_aparcaseg.get_toolbox_derivatives_dir()
-                )
-            )
             files = layout.get(
                 subject=subjid,
                 session=(self.global_conf.subject_session.split("-")[1]
