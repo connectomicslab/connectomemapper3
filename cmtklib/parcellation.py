@@ -53,7 +53,7 @@ class ComputeParcellationRoiVolumesInputSpec(BaseInterfaceInputSpec):
 
     parcellation_scheme = traits.Enum(
             'Lausanne2018',
-            ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018'],
+            ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018', 'Custom'],
             usedefault=True, mandatory=True,
             desc="Parcellation scheme")
 
