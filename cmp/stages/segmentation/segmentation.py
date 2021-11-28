@@ -29,8 +29,7 @@ from cmtklib.util import (
     isavailable,
     extract_freesurfer_subject_dir,
     extract_reconall_base_dir,
-    get_freesurfer_subject_id,
-    update_list_of_paths
+    get_freesurfer_subject_id
 )
 from cmtklib.bids.io import (
     CustomBrainMaskBIDSFile,
@@ -486,30 +485,17 @@ class SegmentationStage(Stage):
         }
 
         # Make a list of toolbox derivatives directories where custom BIDS derivatives can be found
-        toolbox_derivatives_dirs = []
-        toolbox_derivatives_dirs = update_list_of_paths(
-            toolbox_derivatives_dirs,
-            self.config.custom_brainmask.get_toolbox_derivatives_dir()
-        )
-        toolbox_derivatives_dirs = update_list_of_paths(
-            toolbox_derivatives_dirs,
-            self.config.custom_wm_mask.get_toolbox_derivatives_dir()
-        )
-        toolbox_derivatives_dirs = update_list_of_paths(
-            toolbox_derivatives_dirs,
-            self.config.custom_gm_mask.get_toolbox_derivatives_dir()
-        )
-        toolbox_derivatives_dirs = update_list_of_paths(
-            toolbox_derivatives_dirs,
-            self.config.custom_csf_mask.get_toolbox_derivatives_dir()
-        )
-        toolbox_derivatives_dirs = update_list_of_paths(
-            toolbox_derivatives_dirs,
+        toolbox_derivatives_dirnames = [
+            self.config.custom_brainmask.get_toolbox_derivatives_dir(),
+            self.config.custom_wm_mask.get_toolbox_derivatives_dir(),
+            self.config.custom_gm_mask.get_toolbox_derivatives_dir(),
+            self.config.custom_csf_mask.get_toolbox_derivatives_dir(),
             self.config.custom_aparcaseg.get_toolbox_derivatives_dir()
-        )
-
+        ]
+        toolbox_derivatives_dirnames=list(set(toolbox_derivatives_dirnames))
+        
         toolbox_derivatives_paths = [
-            os.path.join(self.bids_dir, "derivatives", toolbox_dir) for toolbox_dir in toolbox_derivatives_dirs
+            os.path.join(self.bids_dir, "derivatives", toolbox_dir) for toolbox_dir in toolbox_derivatives_dirnames
         ]
 
         # Get input brain segmentation and mask files from custom BIDS derivatives
