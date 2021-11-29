@@ -488,6 +488,7 @@ class ParcellationStage(Stage):
                 session=(self.bids_session_label.split("-")[1]
                          if self.bids_session_label is not None and self.bids_session_label != ""
                          else None),
+                datatype="anat",
                 extra_derivatives=toolbox_derivatives_paths,
                 output_query=output_query_dict,
             ),

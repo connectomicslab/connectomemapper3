@@ -507,12 +507,13 @@ class SegmentationStage(Stage):
                 session=(self.bids_session_label.split("-")[1]
                          if self.bids_session_label is not None and self.bids_session_label != ""
                          else None),
+                datatype="anat",
                 extra_derivatives=toolbox_derivatives_paths,
                 output_query=output_query_dict,
             ),
             name="custom_seg_grabber",
         )
-        apply_mask = pe.Node(interface=fsl.ApplyMask(), name="applyMask")
+        apply_mask = pe.MapNode(interface=fsl.ApplyMask(), iterfield=["mask_file"], name="applyMask")
         apply_mask.inputs.out_file = "brain.nii.gz"
         # fmt: off
         flow.connect(
