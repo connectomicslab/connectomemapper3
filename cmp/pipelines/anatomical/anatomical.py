@@ -961,14 +961,14 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             anat_flow.connect(
                 [
                     (seg_flow, parc_flow, [("outputnode.custom_wm_mask", "inputnode.custom_wm_mask")]),
-                    (seg_flow, anat_outputnode, [("outputnode.custom_brain_mask", "brain_mask"),
+                    (seg_flow, anat_outputnode, [("outputnode.brain", "brain"),
+                                                 ("outputnode.custom_brain_mask", "brain_mask"),
                                                  ("outputnode.custom_gm_mask", "gm_mask_file"),
+                                                 ("outputnode.custom_wm_mask", "wm_mask_file"),
                                                  ("outputnode.custom_csf_mask", "csf_mask_file"),
-                                                 ("outputnode.custom_aparcaseg", "aparc_aseg"),
-                                                 ("outputnode.brain", "brain")]),
+                                                 ("outputnode.custom_aparcaseg", "aparc_aseg")]),
                     (anat_inputnode, anat_outputnode, [("T1", "T1")]),
-                    (parc_flow, anat_outputnode, [("outputnode.wm_mask_file", "wm_mask_file"),
-                                                  ("outputnode.parcellation_scheme", "parcellation_scheme"),
+                    (parc_flow, anat_outputnode, [("outputnode.parcellation_scheme", "parcellation_scheme"),
                                                   ("outputnode.atlas_info", "atlas_info"),
                                                   ("outputnode.roi_volumes", "roi_volumes"),
                                                   ("outputnode.roi_colorLUTs", "roi_colorLUTs"),
@@ -976,7 +976,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                                   ("outputnode.roi_TSVs", "roi_TSVs"),
                                                   ("outputnode.roi_volumes_stats", "roi_volumes_stats"),
                                                   ("outputnode.wm_eroded", "wm_eroded"),
-                                                  ("outputnode.gm_mask_file", "gm_mask_file"),
                                                   ("outputnode.csf_eroded", "csf_eroded"),
                                                   ("outputnode.brain_eroded", "brain_eroded")])
                 ]
