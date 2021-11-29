@@ -1,22 +1,13 @@
 ##################################################################
 # Use Ubuntu 16.04 LTS as base image
 ##################################################################
-FROM ubuntu:xenial-20210114 as builder
-
-##################################################################
-# Docker build command arguments
-##################################################################
-ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
+FROM ubuntu:xenial-20210114
 
 ##################################################################
 # Install system library dependencies including
 # exfat libraries for exfat-formatted hard-drives (only MAC?) :
 # exfat-fuse exfat-utils Neurodebian
 ##################################################################
-
-WORKDIR /opt
 
 # Pre-cache neurodebian key
 COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
@@ -41,9 +32,6 @@ ENV LANG="en_US.UTF-8"
 ##################################################################
 # Install Miniconda3
 ##################################################################
-FROM builder as builder_conda
-
-WORKDIR /opt
 
 # Add conda to $PATH
 ENV PATH="/opt/conda/bin:$PATH"
@@ -64,7 +52,6 @@ RUN apt-get update && \
 ##################################################################
 ## Install freesurfer 6.0.1
 ##################################################################
-FROM builder_conda as builder_fs
 
 WORKDIR /opt/freesurfer
 
@@ -127,9 +114,6 @@ RUN apt-get update && \
 ##################################################################
 ## Install FSL and AFNI
 ##################################################################
-FROM builder_fs as builder_afni
-
-WORKDIR /opt
 
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
@@ -175,9 +159,6 @@ RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.
 ###################################################################
 ## Install conda environment, including ANTs 2.2.0 and MRtrix 3.0.2
 ###################################################################
-FROM builder_afni as builder_conda_env
-
-WORKDIR /opt
 
 ENV CONDA_ENV py37cmp-core
 # Pull the environment name out of the environment.yml
@@ -204,13 +185,18 @@ ENV LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_P
 ##################################################################
 # Installation of Connectome Mapper 3 packages
 ##################################################################
-FROM builder_conda_env as builder_cmp3
 
 # Set the working directory to /app/connectomemapper3
 WORKDIR /app/connectomemapper3
 
-# Copy contents of this repository.
-COPY . /app/connectomemapper3
+# Copy Python contents of this repository.
+COPY COPYRIGHT ./COPYRIGHT
+COPY setup.py ./setup.py
+COPY README.md ./README.md
+COPY cmp ./cmp
+COPY cmtklib ./cmtklib
+COPY resources ./resources
+COPY run.py ./run.py
 
 # Create cache directory for python eggs
 RUN mkdir -p /cache/python-eggs && \
@@ -321,6 +307,13 @@ ENTRYPOINT ["/app/run_cmp3.sh"]
 # Copy version information
 ##################################################################
 # COPY version /version
+
+##################################################################
+# Docker build command arguments
+##################################################################
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
 
 ##################################################################
 # Metadata
