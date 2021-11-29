@@ -439,11 +439,11 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["roi_colorlut"] = self._gen_output_filename(
-            self.inputs.roi_bids_tsv, "colorlut"
+        outputs["roi_colorlut"] = os.path.abspath(
+            self._gen_output_filename( self.inputs.roi_bids_tsv, "colorlut")
         )
-        outputs["roi_graphml"] = self._gen_output_filename(
-            self.inputs.roi_bids_tsv, "graphml"
+        outputs["roi_graphml"] = os.path.abspath(
+            self._gen_output_filename(self.inputs.roi_bids_tsv, "graphml")
         )
         return outputs
 
@@ -454,7 +454,7 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
         tsv_filename_path = Path(input_tsv_filename)
         if output_type == "colorlut":
             outprefix_name = tsv_filename_path.stem
-            return "{}_FreeSurferColorLUT.txt".format(outprefix_name)
+            return "{}_FreeSurferColorLUT.txt".format(outprefix_name.replace('_dseg', ''))
         if output_type == "graphml":
             outprefix_name = tsv_filename_path.stem
             return "{}.2.graphml".format(outprefix_name)

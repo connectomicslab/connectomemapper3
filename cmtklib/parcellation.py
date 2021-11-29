@@ -180,7 +180,7 @@ class ComputeParcellationRoiVolumes(BaseInterface):
                 iflogger.info('%4.0f%%' % pc)
 
             # Get the label number
-            if self.inputs.parcellation_scheme == 'Lausanne2018':
+            if self.inputs.parcellation_scheme in ["Custom", "Lausanne2018"]:
                 parcel_label = d["dn_multiscaleID"]
             else:
                 parcel_label = d["dn_correspondence_id"]
