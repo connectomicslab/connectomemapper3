@@ -29,9 +29,10 @@ echo "$VERSION"
 VCS_REF=$(git rev-parse --verify HEAD)
 echo "$VCS_REF"
 
-# Build the Docker image
 cd "$BASEDIR"
-docker build --rm --build-arg BUILD_DATE="$CMP_BUILD_DATE "\
+
+# Build the final image
+docker build --build-arg BUILD_DATE="$CMP_BUILD_DATE "\
 				  --build-arg VCS_REF="$VCS_REF" \
 				  --build-arg VERSION="$VERSION" \
 				  -t sebastientourbier/connectomemapper-bidsapp:"${VERSION}" .
