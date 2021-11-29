@@ -483,10 +483,10 @@ class ParcellationStage(Stage):
         custom_parc_grabber = pe.Node(
             interface=BIDSDataGrabber(
                 base_dir=self.bids_dir,
-                subject=self.bids_subject_label,
-                session=self.bids_session_label if (
-                    self.bids_session_label and self.bids_session_label != ""
-                ) else None,
+                subject=self.bids_subject_label.split("-")[1],
+                session=(self.bids_session_label.split("-")[1]
+                         if self.bids_session_label is not None and self.bids_session_label != ""
+                         else None),
                 extra_derivatives=toolbox_derivatives_paths,
                 output_query=output_query_dict,
             ),

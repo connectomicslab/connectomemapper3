@@ -501,12 +501,13 @@ class SegmentationStage(Stage):
         # Get input brain segmentation and mask files from custom BIDS derivatives
         # with BIDSDataGrabber
         print(f"Get custom input brain segmentation and mask files from {toolbox_derivatives_paths}...")
+        print(f"    * Output query: {output_query_dict}...")
         custom_seg_grabber = pe.Node(
             interface=BIDSDataGrabber(
                 base_dir=self.bids_dir,
-                subject=self.bids_subject_label,
-                session=(self.bids_session_label
-                         if self.bids_session_label and self.bids_session_label != ""
+                subject=self.bids_subject_label.split("-")[1],
+                session=(self.bids_session_label.split("-")[1]
+                         if self.bids_session_label is not None and self.bids_session_label != ""
                          else None),
                 extra_derivatives=toolbox_derivatives_paths,
                 output_query=output_query_dict,

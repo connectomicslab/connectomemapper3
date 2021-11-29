@@ -98,7 +98,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         cmp.project.CMP_Project_Info
         """
         self.global_conf.subjects = project_info.subjects
-        self.global_conf.subject = self.subject
+        self.global_conf.subject = project_info.subject
 
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
@@ -107,13 +107,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 project_info.subject,
                 project_info.subject_session,
             )
-            subject_id = "_".join((self.subject, self.global_conf.subject_session))
+            subject_id = "_".join(( self.global_conf.subject, self.global_conf.subject_session))
         else:
             self.global_conf.subject_session = ""
-            self.subject_directory = os.path.join(
-                project_info.base_directory, project_info.subject
-            )
-            subject_id = self.subject
+            self.subject_directory = os.path.join( project_info.base_directory, self.global_conf.subject)
+            subject_id =  self.global_conf.subject
 
         self.derivatives_directory = os.path.abspath(project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
