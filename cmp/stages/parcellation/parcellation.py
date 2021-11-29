@@ -30,7 +30,8 @@ from cmtklib.util import get_pipeline_dictionary_outputs, get_basename
 from cmtklib.bids.utils import (
     CreateBIDSStandardParcellationLabelIndexMappingFile,
     CreateCMPParcellationNodeDescriptionFilesFromBIDSFile,
-    get_tsv_sidecar_path
+    get_native_space_tsv_sidecar_files,
+    get_native_space_files
 )
 from cmtklib.bids.io import (
     CustomParcellationBIDSFile
@@ -495,12 +496,12 @@ class ParcellationStage(Stage):
         # fmt: off
         flow.connect(
             [
-                (custom_parc_grabber, outputnode, [("custom_roi_volumes", "roi_volumes")]),
+                (custom_parc_grabber, outputnode, [(("custom_roi_volumes", get_native_space_files), "roi_volumes")]),
             ]
         )
         # fmt: on
 
-        create_cmp_parc_desc_files = pe.Node(
+        create_cmp_parc_desc_files = pe.MapNode(
             interface=CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(),
             name="create_cmp_parc_desc_files_from_custom",
             iterfield=['roi_bids_tsv']
@@ -509,11 +510,11 @@ class ParcellationStage(Stage):
         flow.connect(
             [
                 (custom_parc_grabber, create_cmp_parc_desc_files, [
-                        (("custom_roi_volumes", get_tsv_sidecar_path), "roi_bids_tsv")
+                        (("custom_roi_volumes", get_native_space_tsv_sidecar_files), "roi_bids_tsv")
                     ]
                  ),
                 (custom_parc_grabber, outputnode, [
-                        (("custom_roi_volumes", get_tsv_sidecar_path), "roi_TSVs")
+                        (("custom_roi_volumes", get_native_space_tsv_sidecar_files), "roi_TSVs")
                     ]
                  ),
                 (create_cmp_parc_desc_files, outputnode, [("roi_graphml", "roi_graphMLs")]),

@@ -9,9 +9,7 @@
 # General imports
 import os
 from traits.api import *
-
 import pkg_resources
-import json
 
 # Nipype imports
 import nipype.pipeline.engine as pe

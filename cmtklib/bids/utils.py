@@ -460,6 +460,19 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
             return "{}.2.graphml".format(outprefix_name)
 
 
-def get_tsv_sidecar_path(filepath):
-    """Return the path to the tsv sidecar file of a compressed nifti image."""
-    return filepath.replace(".nii.gz", ".tsv")
+def get_native_space_tsv_sidecar_files(filepathlist):
+    """Return path to tsv sidecar file of a list of niftis (`.nii.gz`) without `_space-<label>_` in their filename."""
+    out_filepathlist = []
+    for filepath in filepathlist:
+        if "space-" not in filepath:
+            out_filepathlist.append(filepath.replace(".nii.gz", ".tsv"))
+    return out_filepathlist
+
+
+def get_native_space_files(filepathlist):
+    """Return a list of files without `_space-<label>_` in the filename."""
+    out_filepathlist = []
+    for filepath in filepathlist:
+        if "space-" not in filepath:
+            out_filepathlist.append(filepath)
+    return out_filepathlist
