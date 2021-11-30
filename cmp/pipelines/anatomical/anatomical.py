@@ -711,117 +711,124 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         sinker = pe.Node(nio.DataSink(), name="anat_datasinker")
         sinker.inputs.base_directory = os.path.abspath(base_directory)
         # sinker.inputs.parametrization = True  # Store output in parametrized structure (for MapNode)
-
-        sinker.inputs.substitutions = [
-            ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
-            ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
-            ("brain_mask.nii.gz", self.subject + "_desc-brain_mask.nii.gz"),
-            ("aseg.nii.gz", self.subject + "_desc-aseg_dseg.nii.gz"),
-            ("csf_mask.nii.gz", self.subject + "_label-CSF_dseg.nii.gz"),
-            ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
-            ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-            ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-            ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
-            ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
-            ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
-            ("_createBIDSLabelIndexMappingFile0/", ""),
-            ("_createBIDSLabelIndexMappingFile1/", ""),
-            ("_createBIDSLabelIndexMappingFile2/", ""),
-            ("_createBIDSLabelIndexMappingFile3/", ""),
-            ("_createBIDSLabelIndexMappingFile4/", ""),
-        ]
-        # Dataname substitutions in order to comply with BIDS derivatives specifications
-        if self.parcellation_scheme == "Lausanne2008":
+        
+        if self.stages["Parcellation"].config.parcellation_scheme == "Custom":
+            custom_atlas = self.stages["Parcellation"].config.custom_parcellation.atlas
+            custom_atlas_res = self.stages["Parcellation"].config.custom_parcellation.res
+            if custom_atlas_res is not None and custom_atlas_res != "":
+                sinker.inputs.substitutions = [
+                    ("roi_stats_custom.tsv", f'{self.subject}_atlas-{custom_atlas}_res-{custom_atlas_res}_stats.tsv')
+                ]
+            else:
+                sinker.inputs.substitutions = [
+                    ("roi_stats_custom.tsv", f'{self.subject}_atlas-{custom_atlas}_stats.tsv')
+                ]
+        else:
             # fmt: off
-            scale_mapping = {
-                "scale1": "83",
-                "scale2": "150",
-                "scale3": "258",
-                "scale4": "500",
-                "scale5": "1015",
-            }
-            for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
+            sinker.inputs.substitutions = [
+                ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
+                ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
+                ("brain_mask.nii.gz", self.subject + "_desc-brain_mask.nii.gz"),
+                ("aseg.nii.gz", self.subject + "_desc-aseg_dseg.nii.gz"),
+                ("csf_mask.nii.gz", self.subject + "_label-CSF_dseg.nii.gz"),
+                ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
+                ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
+                ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
+                ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
+                ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
+                ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
+                ("_createBIDSLabelIndexMappingFile0/", ""),
+                ("_createBIDSLabelIndexMappingFile1/", ""),
+                ("_createBIDSLabelIndexMappingFile2/", ""),
+                ("_createBIDSLabelIndexMappingFile3/", ""),
+                ("_createBIDSLabelIndexMappingFile4/", ""),
+            ]
+            # fmt: on
+            # Dataname substitutions in order to comply with BIDS derivatives specifications
+            if self.parcellation_scheme == "Lausanne2008":
+                # fmt: off
+                scale_mapping = {
+                    "scale1": "83",
+                    "scale2": "150",
+                    "scale3": "258",
+                    "scale4": "500",
+                    "scale5": "1015",
+                }
+                for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
+                    sinker.inputs.substitutions.append(
+                        ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2008_{scale}.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2008_{scale}_final.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'resolution{scale_mapping[scale]}.graphml', self.subject + f'_atlas-L2008_res-{scale}_dseg.graphml')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'resolution{scale_mapping[scale]}_LUT.txt', self.subject + f'_atlas-L2008_res-{scale}_FreeSurferColorLUT.txt')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'_createBIDSLabelIndexMappingFile{i}/', '')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'resolution{scale_mapping[scale]}.tsv', self.subject + f'_atlas-L2008_res-{scale}_dseg.tsv')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
+                    )
+                # fmt: on
+            elif self.parcellation_scheme == "Lausanne2018":
+                # fmt: off
+                for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
+                    sinker.inputs.substitutions.append(
+                        ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2018_{scale}.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2018_{scale}_final.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2018_{scale}.graphml', self.subject + f'_atlas-L2018_res-{scale}_dseg.graphml')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2018_{scale}_FreeSurferColorLUT.txt', self.subject + f'_atlas-L2018_res-{scale}_FreeSurferColorLUT.txt')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'_createBIDSLabelIndexMappingFile{i}/', '')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2018_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_dseg.tsv')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_stats.tsv')
+                    )
+                # fmt: on
+            elif self.parcellation_scheme == "NativeFreesurfer":
+                # fmt: off
                 sinker.inputs.substitutions.append(
                     ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
                 )
                 sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2008_{scale}.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                    ("ROIv_HR_th_freesurferaparc.nii.gz", self.subject + "_atlas-Desikan_dseg.nii.gz")
                 )
                 sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2008_{scale}_final.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                    ("freesurferaparc.graphml", self.subject + "_atlas-Desikan_dseg.graphml")
                 )
                 sinker.inputs.substitutions.append(
-                    (f'resolution{scale_mapping[scale]}.graphml', self.subject + f'_atlas-L2008_res-{scale}_dseg.graphml')
+                    ("FreeSurferColorLUT_adapted.txt", self.subject + "_atlas-Desikan_FreeSurferColorLUT.txt")
                 )
                 sinker.inputs.substitutions.append(
-                    (f'resolution{scale_mapping[scale]}_LUT.txt', self.subject + f'_atlas-L2008_res-{scale}_FreeSurferColorLUT.txt')
+                    ("freesurferaparc.tsv", self.subject + "_atlas-Desikan_dseg.tsv")
                 )
                 sinker.inputs.substitutions.append(
-                    (f'_createBIDSLabelIndexMappingFile{i}/', '')
+                    ("roi_stats_freesurferaparc.tsv", self.subject + "_atlas-Desikan_stats.tsv")
                 )
-                sinker.inputs.substitutions.append(
-                    (f'resolution{scale_mapping[scale]}.tsv', self.subject + f'_atlas-L2008_res-{scale}_dseg.tsv')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
-                )
-            # fmt: on
-        elif self.parcellation_scheme == "Lausanne2018":
-            # fmt: off
-            for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
-                sinker.inputs.substitutions.append(
-                    ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}_final.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}.graphml', self.subject + f'_atlas-L2018_res-{scale}_dseg.graphml')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}_FreeSurferColorLUT.txt', self.subject + f'_atlas-L2018_res-{scale}_FreeSurferColorLUT.txt')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'_createBIDSLabelIndexMappingFile{i}/', '')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_dseg.tsv')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_stats.tsv')
-                )
-            # fmt: on
-        elif self.parcellation_scheme == "NativeFreesurfer":
-            # fmt: off
-            sinker.inputs.substitutions.append(
-                ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
-            )
-            sinker.inputs.substitutions.append(
-                ("ROIv_HR_th_freesurferaparc.nii.gz", self.subject + "_atlas-Desikan_dseg.nii.gz")
-            )
-            sinker.inputs.substitutions.append(
-                ("freesurferaparc.graphml", self.subject + "_atlas-Desikan_dseg.graphml")
-            )
-            sinker.inputs.substitutions.append(
-                ("FreeSurferColorLUT_adapted.txt", self.subject + "_atlas-Desikan_FreeSurferColorLUT.txt")
-            )
-            sinker.inputs.substitutions.append(
-                ("freesurferaparc.tsv", self.subject + "_atlas-Desikan_dseg.tsv")
-            )
-            sinker.inputs.substitutions.append(
-                ("roi_stats_freesurferaparc.tsv", self.subject + "_atlas-Desikan_stats.tsv")
-            )
-            # fmt: on
-        elif self.parcellation_scheme == "Custom":
-            # TODO
-            # fmt: off
-            sinker.inputs.substitutions = [
-
-            ]
-            # fmt: on
+                # fmt: on
 
         return sinker
 
