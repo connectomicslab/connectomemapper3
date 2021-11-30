@@ -271,6 +271,9 @@ def main():
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    dmri_pipeline.custom_atlas_name = anat_pipeline.stages["Segmentation"].config.custom_parcellation.atlas
+                    dmri_pipeline.custom_atlas_res = anat_pipeline.stages["Segmentation"].config.custom_parcellation.res
 
                 if dmri_valid_inputs:
                     dmri_pipeline.process()
@@ -326,6 +329,9 @@ def main():
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    fmri_pipeline.custom_atlas_name = anat_pipeline.stages["Segmentation"].config.custom_parcellation.atlas
+                    fmri_pipeline.custom_atlas_res = anat_pipeline.stages["Segmentation"].config.custom_parcellation.res
 
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
@@ -381,6 +387,9 @@ def main():
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    dmri_pipeline.custom_atlas_name = anat_pipeline.stages["Segmentation"].config.custom_parcellation.atlas
+                    dmri_pipeline.custom_atlas_res = anat_pipeline.stages["Segmentation"].config.custom_parcellation.res
 
                 if dmri_valid_inputs:
                     print(">> Process diffusion pipeline")
@@ -396,6 +405,9 @@ def main():
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    fmri_pipeline.custom_atlas_name = anat_pipeline.stages["Segmentation"].config.custom_parcellation.atlas
+                    fmri_pipeline.custom_atlas_res = anat_pipeline.stages["Segmentation"].config.custom_parcellation.res
 
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
