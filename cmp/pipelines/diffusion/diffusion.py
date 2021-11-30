@@ -86,6 +86,8 @@ class DiffusionPipeline(Pipeline):
     derivatives_directory = Directory
     ordered_stage_list = ["Preprocessing", "Registration", "Diffusion", "Connectome"]
     parcellation_scheme = Str
+    custom_atlas_name = Str
+    custom_atlas_res = Str
     atlas_info = Dict()
     global_conf = Global_Configuration()
     config_file = Str
@@ -617,6 +619,33 @@ class DiffusionPipeline(Pipeline):
                 roi_graphml_s5="anat/irrelevant.graphml",
             )
             # fmt:on
+        elif self.parcellation_scheme == "Custom":
+            # fmt:off
+            field_template = dict(
+                diffusion="dwi/" + self.subject + "_desc-cmp_dwi.nii.gz",
+                bvecs="dwi/" + self.subject + "_desc-cmp_dwi.bvec",
+                bvals="dwi/" + self.subject + "_desc-cmp_dwi.bval",
+                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
+                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
+                aparc_aseg="anat/" + self.subject + "_desc-aparcaseg_dseg.nii.gz",
+                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
+                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                wm_eroded="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                brain_eroded="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                csf_eroded="anat/" + self.subject + "_label-CSF_dseg.nii.gz",
+                roi_volume_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_dseg.nii.gz",
+                roi_graphml_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_dseg.graphml",
+                roi_volume_s2="anat/irrelevant.nii.gz",
+                roi_graphml_s2="anat/irrelevant.graphml",
+                roi_volume_s3="anat/irrelevant.nii.gz",
+                roi_graphml_s3="anat/irrelevant.graphml",
+                roi_volume_s4="anat/irrelevant.nii.gz",
+                roi_graphml_s4="anat/irrelevant.graphml",
+                roi_volume_s5="anat/irrelevant.nii.gz",
+                roi_graphml_s5="anat/irrelevant.graphml",
+            )
+            # fmt:on
         else:
             # fmt:off
             field_template = dict(
@@ -854,6 +883,10 @@ class DiffusionPipeline(Pipeline):
             bids_atlas_label = "L2018"
         elif self.parcellation_scheme == "NativeFreesurfer":
             bids_atlas_label = "Desikan"
+        elif self.parcellation_scheme == "Custom":
+            bids_atlas_label = self.custom_atlas_name
+            if self.custom_atlas_res is not None and self.custom_atlas_res != "":
+                bids_atlas_label += f'_res-{self.custom_atlas_res}'
 
         # Clear previous outputs
         self.clear_stages_outputs()

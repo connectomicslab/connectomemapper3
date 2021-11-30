@@ -77,6 +77,8 @@ class fMRIPipeline(Pipeline):
     config_file = Str
     parcellation_scheme = Str
     atlas_info = Dict()
+    custom_atlas_name = Str
+    custom_atlas_res = Str
     subjects_dir = Str
     subject_id = Str
 
@@ -513,6 +515,31 @@ class fMRIPipeline(Pipeline):
                 roi_graphml_s5="anat/irrelevant.graphml",
             )
             # fmt:on
+        elif self.parcellation_scheme == "Custom":
+            # fmt:off
+            datasource.inputs.field_template = dict(
+                fMRI="func/" + self.subject + "_task-rest_desc-cmp_bold.nii.gz",
+                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
+                T2="anat/" + self.subject + "_T2w.nii.gz",
+                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
+                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
+                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                wm_eroded="anat/" + self.subject + "_label-WM_desc-eroded_dseg.nii.gz",
+                brain_eroded="anat/" + self.subject + "_label-brain_desc-eroded_dseg.nii.gz",
+                csf_eroded="anat/" + self.subject + "_label-CSF_desc-eroded_dseg.nii.gz",
+                roi_volume_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_dseg.nii.gz",
+                roi_volume_s2="anat/irrelevant.nii.gz",
+                roi_volume_s3="anat/irrelevant.nii.gz",
+                roi_volume_s4="anat/irrelevant.nii.gz",
+                roi_volume_s5="anat/irrelevant.nii.gz",
+                roi_graphml_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_dseg.graphml",
+                roi_graphml_s2="anat/irrelevant.graphml",
+                roi_graphml_s3="anat/irrelevant.graphml",
+                roi_graphml_s4="anat/irrelevant.graphml",
+                roi_graphml_s5="anat/irrelevant.graphml",
+            )
+            # fmt:on
         else:
             # fmt:off
             datasource.inputs.field_template = dict(
@@ -635,6 +662,10 @@ class fMRIPipeline(Pipeline):
             bids_atlas_label = "L2018"
         elif self.parcellation_scheme == "NativeFreesurfer":
             bids_atlas_label = "Desikan"
+        elif self.parcellation_scheme == "Custom":
+            bids_atlas_label = self.custom_atlas_name
+            if self.custom_atlas_res is not None and self.custom_atlas_res != "":
+                bids_atlas_label += f'_res-{self.custom_atlas_res}'
 
         # Data sinker for output
         sinker = self.create_datasinker_node(
