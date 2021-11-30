@@ -288,9 +288,9 @@ class DiffusionPipeline(Pipeline):
             The output filepath or None if no file was found
         """
         if session is None:
-            files = layout.get(subject=subject, suffix=suffix, extensions=extensions)
+            files = layout.get(subject=subject, suffix=suffix, extension=extensions)
         else:
-            files = layout.get(subject=subject, suffix=suffix, extensions=extensions, session=session)
+            files = layout.get(subject=subject, suffix=suffix, extension=extensions, session=session)
 
         if len(files) > 0:
             out_file = os.path.join(files[0].dirname, files[0].filename)
@@ -425,8 +425,8 @@ class DiffusionPipeline(Pipeline):
             if os.path.isfile(dwi_file):
                 diffusion_available = True
 
-        except Exception:
-            print("Invalid BIDS dataset. Please see documentation for more details.")
+        except Exception as e:
+            print(f"Invalid BIDS dataset.\n\n\t{e}\n\nPlease see documentation for more details.")
             return
 
         if os.path.isfile(json_file):
