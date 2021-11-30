@@ -202,19 +202,21 @@ class ComputeParcellationRoiVolumes(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['roi_volumes_stats'] = self._gen_outfilenames(
-            'roi_stats', '.tsv', self.inputs.parcellation_scheme)
+        if self.inputs.parcellation_scheme == "Custom":
+            outputs['roi_volumes_stats'] = 'roi_stats_custom.tsv'
+        else:
+            outputs['roi_volumes_stats'] = self._gen_outfilenames('roi_stats', '.tsv')
 
         return outputs
 
-    def _gen_outfilenames(self, basename, posfix, parcellation_scheme):
+    def _gen_outfilenames(self, basename, posfix):
         filepaths = []
-        for scale in list(get_parcellation(parcellation_scheme).keys()):
+        for scale in list(get_parcellation(self.inputs.parcellation_scheme).keys()):
             filepaths.append(op.abspath(basename + '_' + scale + posfix))
         return filepaths
 
 
-def erode_mask(fsdir, maskFile):
+def erode_mask(fsdir, mask_file):
     """Erodes the mask and saves it the Freesurfer subject directory.
 
     Parameters
@@ -222,7 +224,7 @@ def erode_mask(fsdir, maskFile):
     fsdir : string
         Freesurfer subject directory
 
-    maskFile : string
+    mask_file : string
         Path to mask file
     """
     # Define erosion mask
@@ -233,8 +235,8 @@ def erode_mask(fsdir, maskFile):
     se[1, 1, :] = 1
 
     # Erode mask
-    print('    > Load mask {}'.format(maskFile))
-    img = ni.load(maskFile)
+    print('    > Load mask {}'.format(mask_file))
+    img = ni.load(mask_file)
     mask = img.get_data()
 
     # Circumvent a casting issue for csf_mask which did not have element exactly equal to 1 (instead 0.999998....)
@@ -251,7 +253,7 @@ def erode_mask(fsdir, maskFile):
     print(er_mask.sum())
     img = ni.Nifti1Image(er_mask, img.get_affine(), img.get_header())
     out_fname = os.path.join(fsdir, 'mri',
-                             '{}_eroded.nii.gz'.format(os.path.splitext(op.splitext(op.basename(maskFile))[0])[0]))
+                             '{}_eroded.nii.gz'.format(os.path.splitext(op.splitext(op.basename(mask_file))[0])[0]))
     print('    > Save eroded mask to: {}'.format(out_fname))
     ni.save(img, out_fname)
 

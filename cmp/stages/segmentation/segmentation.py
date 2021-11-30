@@ -29,6 +29,10 @@ from cmtklib.util import (
     extract_reconall_base_dir,
     get_freesurfer_subject_id
 )
+from cmtklib.bids.utils import (
+    get_native_space_files,
+    get_native_space_no_desc_files
+)
 from cmtklib.bids.io import (
     CustomBrainMaskBIDSFile,
     CustomWMMaskBIDSFile,
@@ -513,19 +517,29 @@ class SegmentationStage(Stage):
             ),
             name="custom_seg_grabber",
         )
-        apply_mask = pe.MapNode(interface=fsl.ApplyMask(), iterfield=["mask_file"], name="applyMask")
-        apply_mask.inputs.out_file = "brain.nii.gz"
+        
+        def get_first_path(paths):
+            from cmtklib.bids.utils import get_native_space_files
+            paths = get_native_space_files(paths)
+            return paths[0]
+        
+        apply_mask = pe.Node(interface=fsl.ApplyMask(), name="applyMask")
+        if self.bids_session_label is not None and self.bids_session_label != "":
+            apply_mask.inputs.out_file = f'{self.bids_subject_label}_desc-brain_T1w.nii.gz'
+        else:
+            apply_mask.inputs.out_file = f'{self.bids_subject_label}_{self.bids_session_label}_desc-brain_T1w.nii.gz'
+
         # fmt: off
         flow.connect(
             [
                 (inputnode, apply_mask, [("T1", "in_file")]),
-                (custom_seg_grabber, apply_mask, [("custom_brain_mask", "mask_file")]),
+                (custom_seg_grabber, apply_mask, [(("custom_brain_mask", get_first_path), "mask_file")]),
                 (apply_mask, outputnode, [("out_file", "brain")]),
-                (custom_seg_grabber, outputnode, [("custom_brain_mask", "custom_brain_mask")]),
-                (custom_seg_grabber, outputnode, [("custom_wm_mask", "custom_wm_mask")]),
-                (custom_seg_grabber, outputnode, [("custom_gm_mask", "custom_gm_mask")]),
-                (custom_seg_grabber, outputnode, [("custom_csf_mask", "custom_csf_mask")]),
-                (custom_seg_grabber, outputnode, [("custom_aparcaseg", "custom_aparcaseg")]),
+                (custom_seg_grabber, outputnode, [(("custom_brain_mask", get_native_space_no_desc_files), "custom_brain_mask")]),
+                (custom_seg_grabber, outputnode, [(("custom_wm_mask", get_native_space_no_desc_files), "custom_wm_mask")]),
+                (custom_seg_grabber, outputnode, [(("custom_gm_mask", get_native_space_no_desc_files), "custom_gm_mask")]),
+                (custom_seg_grabber, outputnode, [(("custom_csf_mask", get_native_space_no_desc_files), "custom_csf_mask")]),
+                (custom_seg_grabber, outputnode, [(("custom_aparcaseg", get_native_space_files), "custom_aparcaseg")]),
             ]
         )
         # fmt: on

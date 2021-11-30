@@ -29,7 +29,7 @@ from cmtklib.parcellation import (
 from cmtklib.util import get_pipeline_dictionary_outputs, get_basename
 from cmtklib.bids.utils import (
     CreateBIDSStandardParcellationLabelIndexMappingFile,
-    CreateCMPParcellationNodeDescriptionFilesFromBIDSFile,
+    CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile,
     get_native_space_tsv_sidecar_files,
     get_native_space_files
 )
@@ -295,19 +295,19 @@ class ParcellationStage(Stage):
                     ]
                 )
                 # fmt: on
-                computeROIVolumetry = pe.Node(
+                compute_roi_volumetry = pe.Node(
                     interface=ComputeParcellationRoiVolumes(),
-                    name="computeROIVolumetry",
+                    name="compute_roi_volumetry",
                 )
-                computeROIVolumetry.inputs.parcellation_scheme = (
+                compute_roi_volumetry.inputs.parcellation_scheme = (
                     self.config.parcellation_scheme
                 )
                 # fmt: off
                 flow.connect(
                     [
-                        (parcCombiner, computeROIVolumetry, [("output_rois", "roi_volumes"),
+                        (parcCombiner, compute_roi_volumetry, [("output_rois", "roi_volumes"),
                                                              ("graphML_files", "roi_graphMLs")]),
-                        (computeROIVolumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
+                        (compute_roi_volumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
                     ]
                 )
                 # fmt: on
@@ -422,18 +422,18 @@ class ParcellationStage(Stage):
                     ]
                 )
                 # fmt: on
-                computeROIVolumetry = pe.Node(
+                compute_roi_volumetry = pe.Node(
                     interface=ComputeParcellationRoiVolumes(
                         parcellation_scheme=self.config.parcellation_scheme
                     ),
-                    name="computeROIVolumetry",
+                    name="compute_roi_volumetry",
                 )
                 # fmt: off
                 flow.connect(
                     [
-                        (parc_node, computeROIVolumetry, [("roi_files_in_structural_space", "roi_volumes")]),
-                        (parc_files, computeROIVolumetry, [("roi_graphMLs", "roi_graphMLs")]),
-                        (computeROIVolumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
+                        (parc_node, compute_roi_volumetry, [("roi_files_in_structural_space", "roi_volumes")]),
+                        (parc_files, compute_roi_volumetry, [("roi_graphMLs", "roi_graphMLs")]),
+                        (compute_roi_volumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
                     ]
                 )
                 # fmt: on
@@ -502,40 +502,41 @@ class ParcellationStage(Stage):
         )
         # fmt: on
 
-        create_cmp_parc_desc_files = pe.MapNode(
-            interface=CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(),
-            name="create_cmp_parc_desc_files_from_custom",
-            iterfield=['roi_bids_tsv']
+        create_cmp_parc_desc_files = pe.Node(
+            interface=CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile(),
+            name="create_cmp_parc_desc_files_from_custom"
         )
         # fmt: off
         flow.connect(
             [
                 (custom_parc_grabber, create_cmp_parc_desc_files, [
-                        (("custom_roi_volumes", get_native_space_tsv_sidecar_files), "roi_bids_tsv")
+                        (("custom_roi_volumes", get_native_space_tsv_sidecar_files), "roi_bids_tsvs")
                     ]
                  ),
                 (custom_parc_grabber, outputnode, [
                         (("custom_roi_volumes", get_native_space_tsv_sidecar_files), "roi_TSVs")
                     ]
                  ),
-                (create_cmp_parc_desc_files, outputnode, [("roi_graphml", "roi_graphMLs")]),
-                (create_cmp_parc_desc_files, outputnode, [("roi_colorlut", "roi_colorlut")]),
+                (create_cmp_parc_desc_files, outputnode, [("roi_graphmls", "roi_graphMLs")]),
+                (create_cmp_parc_desc_files, outputnode, [("roi_colorluts", "roi_colorLUTs")]),
             ]
         )
         # fmt: on
 
-        computeROIVolumetry = pe.Node(
+        compute_roi_volumetry = pe.Node(
             interface=ComputeParcellationRoiVolumes(
                 parcellation_scheme=self.config.parcellation_scheme
             ),
-            name="custom_computeROIVolumetry"
+            name="custom_compute_roi_volumetry"
         )
         # fmt: off
         flow.connect(
             [
-                (custom_parc_grabber, computeROIVolumetry, [("custom_roi_volumes", "roi_volumes")]),
-                (create_cmp_parc_desc_files, computeROIVolumetry, [("roi_graphml", "roi_graphMLs")]),
-                (computeROIVolumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
+                (custom_parc_grabber, compute_roi_volumetry, [
+                    (("custom_roi_volumes", get_native_space_files), "roi_volumes")
+                ]),
+                (create_cmp_parc_desc_files, compute_roi_volumetry, [("roi_graphmls", "roi_graphMLs")]),
+                (compute_roi_volumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
             ]
         )
         # fmt: on
@@ -544,6 +545,7 @@ class ParcellationStage(Stage):
         """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
+
         """
         anat_sinker_dir = os.path.join(
             os.path.dirname(self.stage_dir), "anatomical_sinker"
@@ -649,8 +651,8 @@ class ParcellationStage(Stage):
             return os.path.exists(
                 os.path.join(
                     self.stage_dir,
-                    "custom_computeROIVolumetry",
-                    "result_custom_computeROIVolumetry.pklz"
+                    "custom_compute_roi_volumetry",
+                    "result_custom_compute_roi_volumetry.pklz"
                 )
             )
         elif self.config.parcellation_scheme == "Lausanne2018":
