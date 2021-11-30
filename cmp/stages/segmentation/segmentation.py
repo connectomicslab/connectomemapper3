@@ -519,15 +519,15 @@ class SegmentationStage(Stage):
         )
         
         def get_first_path(paths):
-            from cmtklib.bids.utils import get_native_space_files
+            from cmtklib.bids.utils import get_native_space_files  # noqa
             paths = get_native_space_files(paths)
             return paths[0]
         
         apply_mask = pe.Node(interface=fsl.ApplyMask(), name="applyMask")
         if self.bids_session_label is not None and self.bids_session_label != "":
-            apply_mask.inputs.out_file = f'{self.bids_subject_label}_desc-brain_T1w.nii.gz'
-        else:
             apply_mask.inputs.out_file = f'{self.bids_subject_label}_{self.bids_session_label}_desc-brain_T1w.nii.gz'
+        else:
+            apply_mask.inputs.out_file = f'{self.bids_subject_label}_desc-brain_T1w.nii.gz'
 
         # fmt: off
         flow.connect(

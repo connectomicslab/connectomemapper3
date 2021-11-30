@@ -176,23 +176,9 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             self.stages["Parcellation"].config.on_trait_change(
                 self._update_segmentation, "parcellation_scheme"
             )
-
             self.stages["Parcellation"].config.on_trait_change(
                 self._update_parcellation_scheme, "parcellation_scheme"
             )
-
-    def _update_parcellation_scheme(self):
-        """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
-        self.parcellation_scheme = self.stages["Parcellation"].config.parcellation_scheme
-        if self.parcellation_scheme != "Custom":
-            self.atlas_info = self.stages["Parcellation"].config.atlas_info
-        else:
-            self.atlas_info = {
-                f'{self.stages["Parcellation"].config.custom_parcellation.atlas}': {
-                    "number_of_regions": 83,
-                    "node_information_graphml": "/path/to/file.graphml"
-                }
-            }
 
     def _update_parcellation(self):
         """Update self.stages['Parcellation'].config.parcellation_scheme when ``seg_tool`` is updated."""

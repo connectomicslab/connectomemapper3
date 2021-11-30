@@ -869,14 +869,8 @@ def run_individual(
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print(
-                "--- Set Freesurfer and ANTs to use {} threads by the means of OpenMP".format(
-                    number_of_threads
-                )
-            )
-            anat_pipeline.stages[
-                "Segmentation"
-            ].config.number_of_threads = number_of_threads
+            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
+            anat_pipeline.stages["Segmentation"].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -897,12 +891,8 @@ def run_individual(
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print(
-                f'--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP'
-            )
-            anat_pipeline.stages[
-                "Segmentation"
-            ].config.number_of_threads = number_of_threads
+            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
+            anat_pipeline.stages[ "Segmentation"].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -915,12 +905,8 @@ def run_individual(
         anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
-        project.freesurfer_subjects_dir = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
 
         if anat_valid_outputs:
             dmri_valid_inputs, dmri_pipeline = init_dmri_project(
@@ -949,12 +935,8 @@ def run_individual(
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print(
-                f'--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP'
-            )
-            anat_pipeline.stages[
-                "Segmentation"
-            ].config.number_of_threads = number_of_threads
+            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
+            anat_pipeline.stages[ "Segmentation"].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -967,12 +949,8 @@ def run_individual(
         anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
-        project.freesurfer_subjects_dir = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
 
         if anat_valid_outputs:
             fmri_valid_inputs, fmri_pipeline = init_fmri_project(
@@ -981,12 +959,7 @@ def run_individual(
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                # fmri_pipeline.subjects_dir = anat_pipeline.stages['Segmentation'].config.freesurfer_subjects_dir
-                # fmri_pipeline.subject_id = anat_pipeline.stages['Segmentation'].config.freesurfer_subject_id
-                # print('Freesurfer subjects dir: {}'.format(fmri_pipeline.subjects_dir))
-                # print('Freesurfer subject id: {}'.format(fmri_pipeline.subject_id))
-
-                # print sys.argv[offset+9]
+                
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
                     fmri_pipeline.process()
@@ -1009,12 +982,8 @@ def run_individual(
         if anat_pipeline is not None:
             anat_valid_inputs = anat_pipeline.check_input(bids_layout, gui=False)
 
-            print(
-                f'--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP'
-            )
-            anat_pipeline.stages[
-                "Segmentation"
-            ].config.number_of_threads = number_of_threads
+            print(f"--- Set Freesurfer and ANTs to use {number_of_threads} threads by the means of OpenMP")
+            anat_pipeline.stages[ "Segmentation"].config.number_of_threads = number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -1027,12 +996,8 @@ def run_individual(
         anat_pipeline.check_stages_execution()
         anat_pipeline.fill_stages_outputs()
 
-        project.freesurfer_subjects_dir = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
 
         if anat_valid_outputs:
             dmri_valid_inputs, dmri_pipeline = init_dmri_project(
@@ -1057,12 +1022,8 @@ def run_individual(
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
-                fmri_pipeline.subjects_dir = anat_pipeline.stages[
-                    "Segmentation"
-                ].config.freesurfer_subjects_dir
-                fmri_pipeline.subject_id = anat_pipeline.stages[
-                    "Segmentation"
-                ].config.freesurfer_subject_id
+                fmri_pipeline.subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+                fmri_pipeline.subject_id = anat_pipeline.stages[ "Segmentation"].config.freesurfer_subject_id
                 print("Freesurfer subjects dir: {}".format(fmri_pipeline.subjects_dir))
                 print("Freesurfer subject id: {}".format(fmri_pipeline.subject_id))
 

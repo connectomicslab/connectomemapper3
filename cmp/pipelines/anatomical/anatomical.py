@@ -142,6 +142,32 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.output_directory, "freesurfer", subject_id
         )
 
+    def _update_parcellation_scheme(self):
+        """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
+        self.parcellation_scheme = self.stages["Parcellation"].config.parcellation_scheme
+        if self.parcellation_scheme != "Custom":
+            self.atlas_info = self.stages["Parcellation"].config.atlas_info
+        else:
+            self.atlas_info = {
+                f'{self.stages["Parcellation"].config.custom_parcellation.atlas}': {
+                    "number_of_regions": self.stages["Parcellation"].config.custom_parcellation.get_nb_of_regions(
+                        bids_dir=self.base_directory,
+                        subject=self.stages["Parcellation"].bids_subject_label,
+                        session=(self.stages["Parcellation"].bids_session_label
+                                 if self.stages["Parcellation"].bids_session_label is not None and self.stages["Parcellation"].bids_session_label != ""
+                                 else None)
+                    ),
+                    "node_information_graphml": self.stages["Parcellation"].config.custom_parcellation.get_filename_path(
+                        base_dir=os.path.join(self.output_directory, "cmp"),
+                        subject=self.stages["Parcellation"].bids_subject_label,
+                        session=(self.stages["Parcellation"].bids_session_label
+                                 if self.stages["Parcellation"].bids_session_label is not None and self.stages["Parcellation"].bids_session_label != ""
+                                 else None)
+                    ) + '.graphml'
+                }
+            }
+            print(f' .. DEBUG : Updated custom parcellation atlas_info = {self.atlas_info}')
+
     def check_config(self):
         """Check if custom white matter mask and custom atlas files specified in the configuration exist.
 
@@ -723,6 +749,9 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 sinker.inputs.substitutions = [
                     ("roi_stats_custom.tsv", f'{self.subject}_atlas-{custom_atlas}_stats.tsv')
                 ]
+            sinker.inputs.substitutions.append(
+                (f'{self.subject}_desc-cmp_T1w.nii.gz', f'{self.subject}_desc-head_T1w.nii.gz')
+            )
         else:
             # fmt: off
             sinker.inputs.substitutions = [
@@ -1095,6 +1124,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             )
         else:
             anat_flow.run()
+            
+        self._update_parcellation_scheme()
 
         iflogger.info("**** Processing finished ****")
 

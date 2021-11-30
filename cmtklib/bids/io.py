@@ -5,7 +5,7 @@
 #  This software is distributed under the open-source license Modified BSD.
 
 """This module provides classes to handle custom BIDS derivatives file input."""
-
+import csv
 import os
 import json
 from traits.api import (HasTraits, Directory, Str)
@@ -110,6 +110,85 @@ class CustomParcellationBIDSFile(CustomBIDSFile):
 
     def __init__(self):
         super().__init__(p_suffix="dseg", p_atlas="L2018", p_extension=".nii.gz")
+
+    def get_filename_path(self, base_dir, subject, session=None, debug=True):
+        """Return the number of regions by reading its associated TSV side car file describing the nodes.
+    
+        Parameters
+        ----------
+        base_dir: str
+            BIDS root directory or `derivatives/` directory in BIDS root directory
+            
+        subject: str
+            Subject filename entity e.g. "sub-01"
+    
+        session: str
+            Session filename entity e.g. "ses-01" if applicable
+            (Default: None)
+            
+        debug: bool
+            Debug mode (Extra outputed messages) if `True`
+         
+        """
+        # Build path to BIDS TSV side car of the parcellation file
+        parc_filepath = os.path.join(
+            base_dir,
+            subject
+        )
+        if session is None:
+            parc_fname = f'{subject}'
+        else:
+            parc_fname = f'{subject}_{session}'
+        parc_filepath = os.path.join(parc_filepath, session)
+        if self.desc is not None and self.desc != "":
+            parc_fname += f'_desc-{self.desc}'
+        parc_fname += f'_atlas-{self.atlas}'
+        if self.res is not None and self.res != "":
+            parc_fname += f'_res-{self.res}'
+        parc_fname += '_dseg'
+        parc_filepath = os.path.join(parc_filepath, "anat", parc_fname)
+        if debug:
+            print(f" .. DEBUG : Generated parcellation file path (no extension) = {parc_filepath}")
+        return parc_filepath
+        
+    def get_nb_of_regions(self, bids_dir, subject, session=None, debug=True):
+        """Return the number of regions by reading its associated TSV side car file describing the nodes.
+    
+        Parameters
+        ----------
+        bids_dir: str
+            BIDS root directory
+            
+        subject: str
+            Subject filename entity e.g. "sub-01"
+
+        session: str
+            Session filename entity e.g. "ses-01" if applicable
+            (Default: None)
+            
+        debug: bool
+            Debug mode (Extra outputed messages) if `True`
+         
+        """
+        # Build path to BIDS TSV side car of the parcellation file
+        parc_filepath = self.get_filename_path(
+            base_dir=os.path.join( bids_dir, "derivatives", self.toolbox_derivatives_dir),
+            subject=subject,
+            session=session,
+            debug=debug
+        ) + '.tsv'
+        
+        if os.path.exists(parc_filepath):
+            if debug:
+                print(f" .. DEBUG : Open {parc_filepath} to get number of regions")
+            with open(parc_filepath) as file:
+                tsv_file = csv.reader(file, delimiter="\t")
+                nb_of_regions = len(list(tsv_file)) - 1  # Remove 1 to account for the header (# of lines - 1 = # regions)
+                if debug:
+                    print(f" .. DEBUG : Number of regions = {nb_of_regions}")
+            return nb_of_regions
+        else:
+            return None
 
 
 class CustomBrainMaskBIDSFile(CustomBIDSFile):
