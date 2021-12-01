@@ -104,13 +104,6 @@ class CustomBIDSFile(HasTraits):
         """Return the value of `custom_derivatives_dir` attribute."""
         return self.toolbox_derivatives_dir
 
-
-class CustomParcellationBIDSFile(CustomBIDSFile):
-    """Represent a custom parcellation files in the form `sub-<label>_atlas-<label>[_res-<label>]_dseg.nii.gz`."""
-
-    def __init__(self):
-        super().__init__(p_suffix="dseg", p_atlas="L2018", p_extension=".nii.gz")
-
     def get_filename_path(self, base_dir, subject, session=None, debug=True):
         """Return the number of regions by reading its associated TSV side car file describing the nodes.
     
@@ -131,25 +124,32 @@ class CustomParcellationBIDSFile(CustomBIDSFile):
          
         """
         # Build path to BIDS TSV side car of the parcellation file
-        parc_filepath = os.path.join(
+        filepath = os.path.join(
             base_dir,
             subject
         )
-        if session is None:
-            parc_fname = f'{subject}'
-        else:
-            parc_fname = f'{subject}_{session}'
-        parc_filepath = os.path.join(parc_filepath, session)
-        if self.desc is not None and self.desc != "":
-            parc_fname += f'_desc-{self.desc}'
-        parc_fname += f'_atlas-{self.atlas}'
+        fname = f'{subject}' if session is None else f'{subject}_{session}'
+        filepath = os.path.join(filepath, session)
+        if self.label is not None and self.label != "":
+            fname += f'_label-{self.label}'
+        if self.atlas is not None and self.atlas != "":
+            fname += f'_atlas-{self.atlas}'
         if self.res is not None and self.res != "":
-            parc_fname += f'_res-{self.res}'
-        parc_fname += '_dseg'
-        parc_filepath = os.path.join(parc_filepath, "anat", parc_fname)
+            fname += f'_res-{self.res}'
+        if self.desc is not None and self.desc != "":
+            fname += f'_desc-{self.desc}'
+        fname += f'_{self.suffix}'
+        filepath = os.path.join(filepath, "anat", fname)
         if debug:
-            print(f" .. DEBUG : Generated parcellation file path (no extension) = {parc_filepath}")
-        return parc_filepath
+            print(f" .. DEBUG : Generated parcellation file path (no extension) = {filepath}")
+        return filepath
+
+
+class CustomParcellationBIDSFile(CustomBIDSFile):
+    """Represent a custom parcellation files in the form `sub-<label>_atlas-<label>[_res-<label>]_dseg.nii.gz`."""
+
+    def __init__(self):
+        super().__init__(p_suffix="dseg", p_atlas="L2018", p_extension=".nii.gz")
         
     def get_nb_of_regions(self, bids_dir, subject, session=None, debug=True):
         """Return the number of regions by reading its associated TSV side car file describing the nodes.
