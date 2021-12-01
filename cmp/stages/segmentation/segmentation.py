@@ -8,6 +8,7 @@
 
 # General imports
 import os
+from glob import glob
 from traits.api import *
 import pkg_resources
 
@@ -592,8 +593,67 @@ class SegmentationStage(Stage):
                 f'{os.path.join(fs_path, "surf", "lh.pial")}:edgecolor=red',
                 f'{os.path.join(fs_path, "surf", "rh.pial")}:edgecolor=red',
             ]
+        else:
+            raw_subject_dir = os.path.join( self.bids_dir, self.bids_subject_label)
+            sub_ses = self.bids_subject_label
+            if self.bids_session_label is not None and self.bids_session_label != "":
+                raw_subject_dir = os.path.join(raw_subject_dir, self.bids_session_label)
+                sub_ses += "_" + self.bids_session_label
 
-        # TODO: Add condition when "Custom Segmentation is used"
+            # Take the first T1w found in the subject/session directory of raw data
+            t1_file = glob(os.path.join(raw_subject_dir, "anat", sub_ses + "*_T1w.nii.gz"))[0]
+            print(t1_file)
+            
+            brainmask_file = self.config.custom_brainmask.get_filename_path(
+                base_dir=os.path.join(self.output_dir, "cmp"),
+                subject=self.bids_subject_label,
+                session=self.bids_session_label if self.bids_session_label != "" else None
+            ) + ".nii.gz"
+
+            gm_file = self.config.custom_gm_mask.get_filename_path(
+                base_dir=os.path.join(self.output_dir, "cmp"),
+                subject=self.bids_subject_label,
+                session=self.bids_session_label if self.bids_session_label != "" else None
+            ) + ".nii.gz"
+
+            wm_file = self.config.custom_wm_mask.get_filename_path(
+                base_dir=os.path.join(self.output_dir, "cmp"),
+                subject=self.bids_subject_label,
+                session=self.bids_session_label if self.bids_session_label != "" else None
+            ) + ".nii.gz"
+
+            csf_file = self.config.custom_csf_mask.get_filename_path(
+                base_dir=os.path.join(self.output_dir, "cmp"),
+                subject=self.bids_subject_label,
+                session=self.bids_session_label if self.bids_session_label != "" else None
+            ) + ".nii.gz"
+
+            aparcaseg_file = self.config.custom_aparcaseg.get_filename_path(
+                base_dir=os.path.join(self.output_dir, "cmp"),
+                subject=self.bids_subject_label,
+                session=self.bids_session_label if self.bids_session_label != "" else None
+            ) + ".nii.gz"
+
+            self.inspect_outputs_dict["T1/brainmask"] = [
+                "freeview",
+                "-v",
+                f'{t1_file}',
+                f'{brainmask_file}:colormap=heat:opacity=0.2'
+            ]
+            self.inspect_outputs_dict["T1/aparcaseg"] = [
+                "freeview",
+                "-v",
+                f'{t1_file}',
+                f'{aparcaseg_file}:colormap=lut:opacity=0.2',
+            ]
+            self.inspect_outputs_dict["T1/WM/GM/CSF"] = [
+                "freeview",
+                "-v",
+                f'{t1_file}',
+                f'{csf_file}:opacity=0.2',
+                f'{gm_file}:opacity=0.2',
+                f'{wm_file}:opacity=0.2',
+            ]
 
         self.inspect_outputs = sorted(
             [key for key in list(self.inspect_outputs_dict.keys())], key=str.lower

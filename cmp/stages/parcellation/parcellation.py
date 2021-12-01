@@ -628,11 +628,21 @@ class ParcellationStage(Stage):
                                     roi_v + ":colormap=lut:lut=" + lut_file,
                                 ]
         else:
-            self.inspect_outputs_dict["Custom atlas"] = [
-                'fsleyes',
-                self.config.atlas_nifti_file,
-                "-cm",
-                "random"
+            roi_v = self.config.custom_parcellation.get_filename_path(
+                base_dir=os.path.join(self.output_dir, "cmp"),
+                subject=self.bids_subject_label,
+                session=self.bids_session_label if self.bids_session_label != "" else None
+            ) + ".nii.gz"
+            lut_file = self.config.custom_parcellation.get_filename_path(
+                base_dir=os.path.join(self.output_dir, "cmp"),
+                subject=self.bids_subject_label,
+                session=self.bids_session_label if self.bids_session_label != "" else None
+            ).split("_dseg")[0] + "_FreeSurferColorLUT.txt"
+            
+            self.inspect_outputs_dict[f'Custom atlas ({self.config.custom_parcellation.atlas})'] = [
+                "freeview",
+                "-v",
+                f"{roi_v}:colormap=lut:lut={lut_file}" + lut_file,
             ]
 
         self.inspect_outputs = sorted(
