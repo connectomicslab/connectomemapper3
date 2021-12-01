@@ -306,7 +306,7 @@ def cmat(
                 G.nodes[int(u)][key] = d[key]
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
-            if parcellation_scheme != "Lausanne2018":
+            if parcellation_scheme not in ["Custom", "Lausanne2018"]:
                 G.nodes[int(u)]["dn_position"] = tuple(
                     np.mean(np.where(roiData == int(d["dn_correspondence_id"])), axis=1)
                 )
@@ -631,7 +631,7 @@ def cmat(
                     g2[u_gml][v_gml][key] = d_gml[key]
             for u_gml, d_gml in G_out.nodes(data=True):
                 g2.add_node(u_gml)
-                if parcellation_scheme != "Lausanne2018":
+                if parcellation_scheme not in ["Custom", "Lausanne2018"]:
                     g2.nodes[u_gml]["dn_correspondence_id"] = d_gml[
                         "dn_correspondence_id"
                     ]
@@ -946,7 +946,7 @@ class CMTK_rsfmri_cmat(BaseInterface):
                     G.nodes[int(u)][key] = d[key]
                 # Compute a position for the node based on the mean position of the
                 # ROI in voxel coordinates (segmentation volume )
-                if self.inputs.parcellation_scheme != "Lausanne2018":
+                if self.inputs.parcellation_scheme not in ["Custom", "Lausanne2018"]:
                     G.nodes[int(u)]["dn_position"] = tuple(
                         np.mean(
                             np.where(mask == int(d["dn_correspondence_id"])), axis=1
@@ -1078,7 +1078,7 @@ class CMTK_rsfmri_cmat(BaseInterface):
                 # Create graph nodes
                 for u_gml, d_gml in G.nodes(data=True):
                     g2.add_node(u_gml)
-                    if self.inputs.parcellation_scheme != "Lausanne2018":
+                    if self.inputs.parcellation_scheme not in ["Custom", "Lausanne2018"]:
                         g2.nodes[u_gml]["dn_correspondence_id"] = d_gml["dn_correspondence_id"]
                     else:
                         g2.nodes[u_gml]["dn_multiscaleID"] = d_gml["dn_multiscaleID"]
