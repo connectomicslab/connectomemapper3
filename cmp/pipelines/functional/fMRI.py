@@ -581,10 +581,10 @@ class fMRIPipeline(Pipeline):
 
         bids_atlas_label : string
             Parcellation atlas label
-            
+
         recon_model : string
             Diffusion signal model (`DTI` or `CSD`)
-            
+
         tracking_model : string
             Tractography algorithm (`DET` or `PROB`)
 
@@ -672,7 +672,7 @@ class fMRIPipeline(Pipeline):
             base_directory=cmp_deriv_subject_directory,
             bids_atlas_label=bids_atlas_label
         )
-        
+
         # Data import
         datasource = self.create_datagrabber_node(
             base_directory=cmp_deriv_subject_directory,
@@ -740,243 +740,129 @@ class fMRIPipeline(Pipeline):
                     out_roi_volumes.append(vol)
             return out_roi_volumes
 
+        # fmt:off
         fMRI_flow.connect(
             [
-                (
-                    datasource,
-                    merge_roi_volumes,
-                    [
-                        ("roi_volume_s1", "in1"),
-                        ("roi_volume_s2", "in2"),
-                        ("roi_volume_s3", "in3"),
-                        ("roi_volume_s4", "in4"),
-                        ("roi_volume_s5", "in5"),
-                    ],
-                )
+                (datasource, merge_roi_volumes, [("roi_volume_s1", "in1"),
+                								 ("roi_volume_s2", "in2"),
+                								 ("roi_volume_s3", "in3"),
+                								 ("roi_volume_s4", "in4"),
+                								 ("roi_volume_s5", "in5")])
             ]
         )
+        # fmt:on
 
+        # fmt:off
         fMRI_flow.connect(
             [
-                (
-                    datasource,
-                    merge_roi_graphmls,
-                    [
-                        ("roi_graphml_s1", "in1"),
-                        ("roi_graphml_s2", "in2"),
-                        ("roi_graphml_s3", "in3"),
-                        ("roi_graphml_s4", "in4"),
-                        ("roi_graphml_s5", "in5"),
-                    ],
-                )
+                (datasource, merge_roi_graphmls, [("roi_graphml_s1", "in1"),
+                    							  ("roi_graphml_s2", "in2"),
+							                      ("roi_graphml_s3", "in3"),
+							                      ("roi_graphml_s4", "in4"),
+							                      ("roi_graphml_s5", "in5")])
             ]
         )
+        # fmt:on
 
+        # fmt:off
         fMRI_flow.connect(
             [
-                (
-                    datasource,
-                    fMRI_inputnode,
-                    [
-                        ("fMRI", "fMRI"),
-                        ("T1", "T1"),
-                        ("T2", "T2"),
-                        ("aseg", "aseg"),
-                        ("wm_mask_file", "wm_mask_file"),
-                        ("brain_eroded", "brain_eroded"),
-                        ("wm_eroded", "wm_eroded"),
-                        ("csf_eroded", "csf_eroded"),
-                    ],
-                ),
-                (
-                    merge_roi_volumes,
-                    fMRI_inputnode,
-                    [(("out", remove_non_existing_scales), "roi_volumes")],
-                ),
-                (
-                    merge_roi_graphmls,
-                    fMRI_inputnode,
-                    [(("out", remove_non_existing_scales), "roi_graphMLs")],
-                ),
+                (datasource, fMRI_inputnode, [("fMRI", "fMRI"),
+					                          ("T1", "T1"),
+					                          ("T2", "T2"),
+					                          ("aseg", "aseg"),
+					                          ("wm_mask_file", "wm_mask_file"),
+					                          ("brain_eroded", "brain_eroded"),
+					                          ("wm_eroded", "wm_eroded"),
+					                          ("csf_eroded", "csf_eroded")]),
+                (merge_roi_volumes, fMRI_inputnode, [(("out", remove_non_existing_scales), "roi_volumes")]),
+                (merge_roi_graphmls, fMRI_inputnode, [(("out", remove_non_existing_scales), "roi_graphMLs")])
             ]
         )
+        # fmt:on
 
         if self.stages["Preprocessing"].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
+            # fmt:off
             fMRI_flow.connect(
                 [
                     (fMRI_inputnode, preproc_flow, [("fMRI", "inputnode.functional")]),
                     (preproc_flow, sinker, [("outputnode.mean_vol", "func.@mean_vol")]),
                 ]
             )
+            # fmt:on
 
         if self.stages["Registration"].enabled:
             reg_flow = self.create_stage_flow("Registration")
+            # fmt:off
             fMRI_flow.connect(
                 [
                     (fMRI_inputnode, reg_flow, [("T1", "inputnode.T1")]),
                     (fMRI_inputnode, reg_flow, [("T2", "inputnode.T2")]),
-                    (
-                        preproc_flow,
-                        reg_flow,
-                        [("outputnode.mean_vol", "inputnode.target")],
-                    ),
-                    (
-                        fMRI_inputnode,
-                        reg_flow,
-                        [
-                            ("wm_mask_file", "inputnode.wm_mask"),
-                            ("roi_volumes", "inputnode.roi_volumes"),
-                            ("brain_eroded", "inputnode.eroded_brain"),
-                            ("wm_eroded", "inputnode.eroded_wm"),
-                            ("csf_eroded", "inputnode.eroded_csf"),
-                        ],
-                    ),
-                    (
-                        reg_flow,
-                        sinker,
-                        [
-                            (
-                                "outputnode.wm_mask_registered_crop",
-                                "anat.@registered_wm",
-                            ),
-                            (
-                                "outputnode.roi_volumes_registered_crop",
-                                "anat.@registered_roi_volumes",
-                            ),
-                            ("outputnode.eroded_wm_registered_crop", "anat.@eroded_wm"),
-                            (
-                                "outputnode.eroded_csf_registered_crop",
-                                "anat.@eroded_csf",
-                            ),
-                            (
-                                "outputnode.eroded_brain_registered_crop",
-                                "anat.@eroded_brain",
-                            ),
-                        ],
-                    ),
+                    (preproc_flow, reg_flow, [("outputnode.mean_vol", "inputnode.target")], ),
+                    (fMRI_inputnode, reg_flow, [("wm_mask_file", "inputnode.wm_mask"),
+					                            ("roi_volumes", "inputnode.roi_volumes"),
+					                            ("brain_eroded", "inputnode.eroded_brain"),
+					                            ("wm_eroded", "inputnode.eroded_wm"),
+					                            ("csf_eroded", "inputnode.eroded_csf")]),
+                    (reg_flow, sinker, [("outputnode.wm_mask_registered_crop", "anat.@registered_wm"),
+                    					("outputnode.roi_volumes_registered_crop", "anat.@registered_roi_volumes"),
+                    					("outputnode.eroded_wm_registered_crop", "anat.@eroded_wm"),
+                    					("outputnode.eroded_csf_registered_crop", "anat.@eroded_csf"),
+                    					("outputnode.eroded_brain_registered_crop", "anat.@eroded_brain")]),
                 ]
             )
+            # fmt:on
 
         if self.stages["FunctionalMRI"].enabled:
             func_flow = self.create_stage_flow("FunctionalMRI")
+            # fmt:off
             fMRI_flow.connect(
                 [
-                    (
-                        preproc_flow,
-                        func_flow,
-                        [("outputnode.functional_preproc", "inputnode.preproc_file")],
-                    ),
-                    (
-                        reg_flow,
-                        func_flow,
-                        [
-                            (
-                                "outputnode.wm_mask_registered_crop",
-                                "inputnode.registered_wm",
-                            ),
-                            (
-                                "outputnode.roi_volumes_registered_crop",
-                                "inputnode.registered_roi_volumes",
-                            ),
-                            (
-                                "outputnode.eroded_wm_registered_crop",
-                                "inputnode.eroded_wm",
-                            ),
-                            (
-                                "outputnode.eroded_csf_registered_crop",
-                                "inputnode.eroded_csf",
-                            ),
-                            (
-                                "outputnode.eroded_brain_registered_crop",
-                                "inputnode.eroded_brain",
-                            ),
-                        ],
-                    ),
-                    (
-                        func_flow,
-                        sinker,
-                        [
-                            ("outputnode.func_file", "func.@func_file"),
-                            ("outputnode.FD", "func.@FD"),
-                            ("outputnode.DVARS", "func.@DVARS"),
-                        ],
-                    ),
+                    (preproc_flow, func_flow, [("outputnode.functional_preproc", "inputnode.preproc_file")], ),
+                    (reg_flow, func_flow, [("outputnode.wm_mask_registered_crop", "inputnode.registered_wm"),
+                    					   ("outputnode.roi_volumes_registered_crop", "inputnode.registered_roi_volumes"),
+                    					   ("outputnode.eroded_wm_registered_crop", "inputnode.eroded_wm"),
+                    					   ("outputnode.eroded_csf_registered_crop", "inputnode.eroded_csf"),
+                    					   ("outputnode.eroded_brain_registered_crop", "inputnode.eroded_brain")]),
+                    (func_flow, sinker, [("outputnode.func_file", "func.@func_file"),
+                    					 ("outputnode.FD", "func.@FD"),
+                    					 ("outputnode.DVARS", "func.@DVARS")]),
                 ]
             )
+            # fmt:on
+
             if (
                 self.stages["FunctionalMRI"].config.scrubbing
                 or self.stages["FunctionalMRI"].config.motion
             ):
+                # fmt:off
                 fMRI_flow.connect(
                     [
-                        (
-                            preproc_flow,
-                            func_flow,
-                            [("outputnode.par_file", "inputnode.motion_par_file")],
-                        ),
-                        (
-                            preproc_flow,
-                            sinker,
-                            [("outputnode.par_file", "func.@motion_par_file")],
-                        ),
+                        (preproc_flow, func_flow, [("outputnode.par_file", "inputnode.motion_par_file")]),
+                        (preproc_flow, sinker, [("outputnode.par_file", "func.@motion_par_file")]),
                     ]
                 )
+                # fmt:on
 
         if self.stages["Connectome"].enabled:
             self.stages["Connectome"].config.subject = self.global_conf.subject
             con_flow = self.create_stage_flow("Connectome")
+            # fmt:off
             fMRI_flow.connect(
                 [
-                    (
-                        fMRI_inputnode,
-                        con_flow,
-                        [
-                            ("parcellation_scheme", "inputnode.parcellation_scheme"),
-                            ("roi_graphMLs", "inputnode.roi_graphMLs"),
-                        ],
-                    ),
-                    (
-                        func_flow,
-                        con_flow,
-                        [
-                            ("outputnode.func_file", "inputnode.func_file"),
-                            ("outputnode.FD", "inputnode.FD"),
-                            ("outputnode.DVARS", "inputnode.DVARS"),
-                        ],
-                    ),
-                    (
-                        reg_flow,
-                        con_flow,
-                        [
-                            (
-                                "outputnode.roi_volumes_registered_crop",
-                                "inputnode.roi_volumes_registered",
-                            )
-                        ],
-                    ),
-                    (
-                        con_flow,
-                        fMRI_outputnode,
-                        [("outputnode.connectivity_matrices", "connectivity_matrices")],
-                    ),
-                    (
-                        con_flow,
-                        sinker,
-                        [
-                            (
-                                "outputnode.connectivity_matrices",
-                                "func.@connectivity_matrices",
-                            )
-                        ],
-                    ),
-                    (
-                        con_flow,
-                        sinker,
-                        [("outputnode.avg_timeseries", "func.@avg_timeseries")],
-                    ),
+                    (fMRI_inputnode, con_flow, [("parcellation_scheme", "inputnode.parcellation_scheme"),
+                    							("roi_graphMLs", "inputnode.roi_graphMLs")]),
+                    (func_flow, con_flow, [("outputnode.func_file", "inputnode.func_file"),
+                    					   ("outputnode.FD", "inputnode.FD"),
+                    					   ("outputnode.DVARS", "inputnode.DVARS")]),
+                    (reg_flow, con_flow, [("outputnode.roi_volumes_registered_crop", "inputnode.roi_volumes_registered")]),
+                    (con_flow, fMRI_outputnode, [("outputnode.connectivity_matrices", "connectivity_matrices")]),
+                    (con_flow, sinker, [("outputnode.connectivity_matrices", "func.@connectivity_matrices"),
+                    					("outputnode.avg_timeseries", "func.@avg_timeseries")])
                 ]
             )
+            # fmt:on
 
         return fMRI_flow
 
