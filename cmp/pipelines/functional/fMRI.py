@@ -834,10 +834,7 @@ class fMRIPipeline(Pipeline):
             )
             # fmt:on
             
-            if (
-                    self.stages["FunctionalMRI"].config.scrubbing
-                    or self.stages["FunctionalMRI"].config.motion
-            ):
+            if self.stages["FunctionalMRI"].config.scrubbing or self.stages["FunctionalMRI"].config.motion:
                 # fmt:off
                 fMRI_flow.connect(
                     [
@@ -854,6 +851,7 @@ class fMRIPipeline(Pipeline):
             fMRI_flow.connect(
                 [
                     (fMRI_inputnode, con_flow, [("parcellation_scheme", "inputnode.parcellation_scheme"),
+                                                ("atlas_info", "inputnode.atlas_info"),
                                                 ("roi_graphMLs", "inputnode.roi_graphMLs")]),
                     (func_flow, con_flow, [("outputnode.func_file", "inputnode.func_file"),
                                            ("outputnode.FD", "inputnode.FD"),
