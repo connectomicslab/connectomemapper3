@@ -578,7 +578,7 @@ class DiffusionPipeline(Pipeline):
             )
 
         return valid_inputs
-    
+
     def create_field_template_dict(self, bids_atlas_label):
         """Create the dictionary of input field template given to Nipype DataGrabber`
 
@@ -814,24 +814,42 @@ class DiffusionPipeline(Pipeline):
         ]
         # fmt:on
 
-        for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+        if self.parcellation_scheme != "Custom":
+            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+                # fmt:off
+                sinker.inputs.substitutions += [
+                    (
+                        f'ROIv_HR_th_{scale}_out_warped.nii.gz',
+                        f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    ),
+                    (
+                        f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_out_warped.nii.gz',
+                        f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    ),
+                    (
+                        f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_out_flirt.nii.gz',
+                        f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    ),
+                    (
+                        f'connectome_{scale}',
+                        f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_conndata-network_connectivity'),
+                ]
+                # fmt:on
+        else:
             # fmt:off
+            bids_atlas_name = bids_atlas_label if "res" not in bids_atlas_label else bids_atlas_label.split('_')[0]
             sinker.inputs.substitutions += [
                 (
-                    f'ROIv_HR_th_{scale}_out_warped.nii.gz',
-                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    f'{self.subject}_atlas-{bids_atlas_label}_dseg_out_warped.nii.gz',
+                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_dseg.nii.gz'
                 ),
                 (
-                    f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_out_warped.nii.gz',
-                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    f'{self.subject}_atlas-{bids_atlas_label}_dseg_out_flirt.nii.gz',
+                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_dseg.nii.gz'
                 ),
                 (
-                    f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_out_flirt.nii.gz',
-                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
-                ),
-                (
-                    f'connectome_{scale}',
-                    f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_conndata-network_connectivity'),
+                    f'connectome_{bids_atlas_name}',
+                    f'{self.subject}_atlas-{bids_atlas_label}_conndata-network_connectivity'),
             ]
             # fmt:on
 
@@ -1177,7 +1195,7 @@ class DiffusionPipeline(Pipeline):
 
         if os.path.isfile(log_file):
             os.unlink(log_file)
-    
+
         config.update_config(
             {
                 "logging": {
