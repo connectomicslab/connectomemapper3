@@ -133,31 +133,21 @@ class ConnectomeStage(Stage):
         if not isdefined(inputnode.inputs.FD) or not isdefined(inputnode.inputs.DVARS):
             cmtk_cmat.inputs.apply_scrubbing = False
 
+        # fmt: off
         flow.connect(
             [
-                (
-                    inputnode,
-                    cmtk_cmat,
-                    [
-                        ("func_file", "func_file"),
-                        ("FD", "FD"),
-                        ("DVARS", "DVARS"),
-                        ("parcellation_scheme", "parcellation_scheme"),
-                        ("atlas_info", "atlas_info"),
-                        ("roi_volumes_registered", "roi_volumes"),
-                        ("roi_graphMLs", "roi_graphmls"),
-                    ],
-                ),
-                (
-                    cmtk_cmat,
-                    outputnode,
-                    [
-                        ("connectivity_matrices", "connectivity_matrices"),
-                        ("avg_timeseries", "avg_timeseries"),
-                    ],
-                ),
+                (inputnode,cmtk_cmat, [("func_file", "func_file"),
+                                       ("FD", "FD"),
+                                       ("DVARS", "DVARS"),
+                                       ("parcellation_scheme", "parcellation_scheme"),
+                                       ("atlas_info", "atlas_info"),
+                                       ("roi_volumes_registered", "roi_volumes"),
+                                       ("roi_graphMLs", "roi_graphmls"),],),
+                (cmtk_cmat, outputnode, [("connectivity_matrices", "connectivity_matrices"),
+                                         ("avg_timeseries", "avg_timeseries"),],),
             ]
         )
+        # fmt: on
 
     def define_inspect_outputs(self):
         """Update the `inspect_outputs` class attribute.

@@ -134,6 +134,7 @@ class FunctionalMRIStage(Stage):
         """
         if self.config.scrubbing and isdefined(inputnode.inputs.motion_par_file):
             scrubbing = pe.Node(interface=Scrubbing(), name="scrubbing")
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, scrubbing, [("preproc_file", "in_file")]),
@@ -144,6 +145,7 @@ class FunctionalMRIStage(Stage):
                     (scrubbing, outputnode, [("dvars_npy", "DVARS")]),
                 ]
             )
+            # fmt:on
 
         detrending_output = pe.Node(
             interface=util.IdentityInterface(fields=["detrending_output"]),
@@ -152,27 +154,23 @@ class FunctionalMRIStage(Stage):
         if self.config.detrending:
             detrending = pe.Node(interface=Detrending(), name="detrending")
             detrending.inputs.mode = self.config.detrending_mode
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, detrending, [("preproc_file", "in_file")]),
                     (inputnode, detrending, [("registered_roi_volumes", "gm_file")]),
-                    (
-                        detrending,
-                        detrending_output,
-                        [("out_file", "detrending_output")],
-                    ),
+                    (detrending, detrending_output, [("out_file", "detrending_output")],),
                 ]
             )
+            # fmt:on
         else:
+            # fmt:off
             flow.connect(
                 [
-                    (
-                        inputnode,
-                        detrending_output,
-                        [("preproc_file", "detrending_output")],
-                    )
+                    (inputnode, detrending_output, [("preproc_file", "detrending_output")],)
                 ]
             )
+            # fmt:on
 
         nuisance_output = pe.Node(
             interface=util.IdentityInterface(fields=["nuisance_output"]),
@@ -192,6 +190,7 @@ class FunctionalMRIStage(Stage):
             nuisance.inputs.wm_nuisance = self.config.wm
             nuisance.inputs.motion_nuisance = self.config.motion
             nuisance.inputs.n_discard = self.config.discard_n_volumes
+            # fmt:off
             flow.connect(
                 [
                     (detrending_output, nuisance, [("detrending_output", "in_file")]),
@@ -203,16 +202,15 @@ class FunctionalMRIStage(Stage):
                     (nuisance, nuisance_output, [("out_file", "nuisance_output")]),
                 ]
             )
+            # fmt:on
         else:
+            # fmt:off
             flow.connect(
                 [
-                    (
-                        detrending_output,
-                        nuisance_output,
-                        [("detrending_output", "nuisance_output")],
-                    )
+                    (detrending_output, nuisance_output, [("detrending_output", "nuisance_output")],)
                 ]
             )
+            # fmt:on
 
         filter_output = pe.Node(
             interface=util.IdentityInterface(fields=["filter_output"]),
@@ -236,6 +234,7 @@ class FunctionalMRIStage(Stage):
 
             filtering.inputs.no_detrend = True
 
+            # fmt:off
             flow.connect(
                 [
                     (nuisance_output, filtering, [("nuisance_output", "in_file")]),
@@ -244,18 +243,19 @@ class FunctionalMRIStage(Stage):
                     (converter, filter_output, [("out_file", "filter_output")]),
                 ]
             )
+            # fmt:on
         else:
+            # fmt:off
             flow.connect(
                 [
-                    (
-                        nuisance_output,
-                        filter_output,
-                        [("nuisance_output", "filter_output")],
-                    )
+                    (nuisance_output, filter_output, [("nuisance_output", "filter_output")],)
                 ]
             )
+            # fmt:on
 
+        # fmt:off
         flow.connect([(filter_output, outputnode, [("filter_output", "func_file")])])
+        # fmt:on
 
     def define_inspect_outputs(self):
         """Update the `inspect_outputs` class attribute.

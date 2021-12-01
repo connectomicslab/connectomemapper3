@@ -414,69 +414,50 @@ class DiffusionStage(Stage):
                     radius = 0.5 * min_size + self.config.dilation_radius * min_size
                     dilate_rois.inputs.kernel_shape = "sphere"
                     dilate_rois.inputs.kernel_size = radius
-
+            # fmt: off
             flow.connect(
                 [
                     (inputnode, dilate_rois, [("roi_volumes", "in_file")]),
                     (dilate_rois, outputnode, [("out_file", "roi_volumes")]),
                 ]
             )
+            # fmt: on
         else:
+            # fmt: off
             flow.connect([(inputnode, outputnode, [("roi_volumes", "roi_volumes")])])
+            # fmt: on
 
         if self.config.recon_processing_tool == "Dipy":
             recon_flow = create_dipy_recon_flow(self.config.dipy_recon_config)
-
+            # fmt: off
             flow.connect(
                 [
                     (inputnode, recon_flow, [("diffusion", "inputnode.diffusion")]),
                     (inputnode, recon_flow, [("bvals", "inputnode.bvals")]),
                     (inputnode, recon_flow, [("bvecs", "inputnode.bvecs")]),
-                    (
-                        inputnode,
-                        recon_flow,
-                        [("diffusion", "inputnode.diffusion_resampled")],
-                    ),
-                    (
-                        inputnode,
-                        recon_flow,
-                        [("wm_mask_registered", "inputnode.wm_mask_resampled")],
-                    ),
-                    (
-                        inputnode,
-                        recon_flow,
-                        [("brain_mask_registered", "inputnode.brain_mask_resampled")],
-                    ),
+                    (inputnode, recon_flow, [("diffusion", "inputnode.diffusion_resampled")],),
+                    (inputnode, recon_flow, [("wm_mask_registered", "inputnode.wm_mask_resampled")],),
+                    (inputnode, recon_flow, [("brain_mask_registered", "inputnode.brain_mask_resampled")],),
                     (recon_flow, outputnode, [("outputnode.FA", "FA")]),
                     (recon_flow, outputnode, [("outputnode.MD", "ADC")]),
                     (recon_flow, outputnode, [("outputnode.AD", "AD")]),
                     (recon_flow, outputnode, [("outputnode.RD", "RD")]),
                     (recon_flow, outputnode, [("outputnode.shore_maps", "shore_maps")]),
-                    (
-                        recon_flow,
-                        outputnode,
-                        [("outputnode.mapmri_maps", "mapmri_maps")],
-                    ),
+                    (recon_flow, outputnode, [("outputnode.mapmri_maps", "mapmri_maps")],),
                 ]
             )
+            # fmt: on
 
         elif self.config.recon_processing_tool == "MRtrix":
             # TODO modify nipype tensormetric interface to get AD and RD maps
             recon_flow = create_mrtrix_recon_flow(self.config.mrtrix_recon_config)
+            # fmt: off
             flow.connect(
                 [
                     (inputnode, recon_flow, [("diffusion", "inputnode.diffusion")]),
                     (inputnode, recon_flow, [("grad", "inputnode.grad")]),
-                    (
-                        inputnode,
-                        recon_flow,
-                        [("diffusion", "inputnode.diffusion_resampled")],
-                    ),
-                    (
-                        inputnode,
-                        recon_flow,
-                        [("brain_mask_registered", "inputnode.wm_mask_resampled")],
-                    ),
+                    (inputnode, recon_flow, [("diffusion", "inputnode.diffusion_resampled")],),
+                    (inputnode, recon_flow, [("brain_mask_registered", "inputnode.wm_mask_resampled")],),
                     (recon_flow, outputnode, [("outputnode.FA", "FA")]),
                     (recon_flow, outputnode, [("outputnode.ADC", "ADC")]),
                     (recon_flow, outputnode, [("outputnode.tensor", "tensor")]),
@@ -484,174 +465,116 @@ class DiffusionStage(Stage):
                     # (recon_flow,outputnode,[("outputnode.RD","RD")]),
                 ]
             )
+            # fmt: on
 
         if self.config.tracking_processing_tool == "Dipy":
             track_flow = create_dipy_tracking_flow(self.config.dipy_tracking_config)
-            # print "Dipy tracking"
 
             if self.config.diffusion_imaging_model != "DSI":
+                # fmt: off
                 flow.connect(
                     [
                         (recon_flow, outputnode, [("outputnode.DWI", "fod_file")]),
-                        (
-                            recon_flow,
-                            track_flow,
-                            [("outputnode.model", "inputnode.model")],
-                        ),
+                        (recon_flow, track_flow, [("outputnode.model", "inputnode.model")],),
                         (inputnode, track_flow, [("bvals", "inputnode.bvals")]),
-                        (
-                            recon_flow,
-                            track_flow,
-                            [("outputnode.bvecs", "inputnode.bvecs")],
-                        ),
+                        (recon_flow, track_flow, [("outputnode.bvecs", "inputnode.bvecs")],),
                         # Diffusion resampled
                         (inputnode, track_flow, [("diffusion", "inputnode.DWI")]),
-                        (
-                            inputnode,
-                            track_flow,
-                            [("partial_volumes", "inputnode.partial_volumes")],
-                        ),
-                        (
-                            inputnode,
-                            track_flow,
-                            [("wm_mask_registered", "inputnode.wm_mask_resampled")],
-                        ),
+                        (inputnode, track_flow, [("partial_volumes", "inputnode.partial_volumes")],),
+                        (inputnode, track_flow, [("wm_mask_registered", "inputnode.wm_mask_resampled")],),
                         # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
                         (recon_flow, track_flow, [("outputnode.FA", "inputnode.FA")]),
-                        (
-                            dilate_rois,
-                            track_flow,
-                            [("out_file", "inputnode.gm_registered")],
-                        )
+                        (dilate_rois, track_flow, [("out_file", "inputnode.gm_registered")],)
                         # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                     ]
                 )
+                # fmt: on
             else:
+                # fmt: off
                 flow.connect(
                     [
                         (recon_flow, outputnode, [("outputnode.fod", "fod_file")]),
-                        (
-                            recon_flow,
-                            track_flow,
-                            [("outputnode.fod", "inputnode.fod_file")],
-                        ),
-                        (
-                            recon_flow,
-                            track_flow,
-                            [("outputnode.model", "inputnode.model")],
-                        ),
+                        (recon_flow, track_flow, [("outputnode.fod", "inputnode.fod_file")],),
+                        (recon_flow, track_flow, [("outputnode.model", "inputnode.model")],),
                         (inputnode, track_flow, [("bvals", "inputnode.bvals")]),
-                        (
-                            recon_flow,
-                            track_flow,
-                            [("outputnode.bvecs", "inputnode.bvecs")],
-                        ),
+                        (recon_flow, track_flow, [("outputnode.bvecs", "inputnode.bvecs")],),
                         # Diffusion resampled
                         (inputnode, track_flow, [("diffusion", "inputnode.DWI")]),
-                        (
-                            inputnode,
-                            track_flow,
-                            [("partial_volumes", "inputnode.partial_volumes")],
-                        ),
-                        (
-                            inputnode,
-                            track_flow,
-                            [("wm_mask_registered", "inputnode.wm_mask_resampled")],
-                        ),
+                        (inputnode, track_flow, [("partial_volumes", "inputnode.partial_volumes")],),
+                        (inputnode, track_flow, [("wm_mask_registered", "inputnode.wm_mask_resampled")],),
                         # (inputnode, track_flow,[('diffusion','inputnode.DWI')]),
                         (recon_flow, track_flow, [("outputnode.FA", "inputnode.FA")]),
-                        (
-                            dilate_rois,
-                            track_flow,
-                            [("out_file", "inputnode.gm_registered")],
-                        )
+                        (dilate_rois, track_flow, [("out_file", "inputnode.gm_registered")],)
                         # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                     ]
                 )
+                # fmt: on
 
             if (
                 self.config.dipy_tracking_config.use_act
                 and self.config.dipy_tracking_config.seed_from_gmwmi
             ):
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            inputnode,
-                            track_flow,
-                            [("gmwmi_registered", "inputnode.gmwmi_file")],
-                        ),
+                        (inputnode, track_flow, [("gmwmi_registered", "inputnode.gmwmi_file")],),
                     ]
                 )
+                # fmt: on
 
+            # fmt: off
             flow.connect(
                 [(track_flow, outputnode, [("outputnode.track_file", "track_file")])]
             )
+            # fmt: on
 
         elif (
             self.config.tracking_processing_tool == "MRtrix"
             and self.config.recon_processing_tool == "MRtrix"
         ):
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
-
+            # fmt: off
             flow.connect(
                 [
-                    (
-                        inputnode,
-                        track_flow,
-                        [("wm_mask_registered", "inputnode.wm_mask_resampled")],
-                    ),
+                    (inputnode, track_flow, [("wm_mask_registered", "inputnode.wm_mask_resampled")]),
                     (recon_flow, outputnode, [("outputnode.DWI", "fod_file")]),
-                    (
-                        recon_flow,
-                        track_flow,
-                        [
-                            ("outputnode.DWI", "inputnode.DWI"),
-                            ("outputnode.grad", "inputnode.grad"),
-                        ],
-                    ),
+                    (recon_flow, track_flow, [("outputnode.DWI", "inputnode.DWI"), ("outputnode.grad", "inputnode.grad")]),
                     # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                 ]
             )
+            # fmt: on
 
             if self.config.dilate_rois:
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            dilate_rois,
-                            track_flow,
-                            [("out_file", "inputnode.gm_registered")],
-                        )
+                        (dilate_rois, track_flow, [("out_file", "inputnode.gm_registered")])
                     ]
                 )
+                # fmt: on
             else:
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            inputnode,
-                            track_flow,
-                            [("roi_volumes", "inputnode.gm_registered")],
-                        )
+                        (inputnode, track_flow, [("roi_volumes", "inputnode.gm_registered")])
                     ]
                 )
+                # fmt: on
 
+            # fmt: off
             flow.connect(
                 [
-                    (
-                        inputnode,
-                        track_flow,
-                        [("act_5tt_registered", "inputnode.act_5tt_registered")],
-                    ),
-                    (
-                        inputnode,
-                        track_flow,
-                        [("gmwmi_registered", "inputnode.gmwmi_registered")],
-                    ),
+                    (inputnode, track_flow, [("act_5tt_registered", "inputnode.act_5tt_registered")],),
+                    (inputnode, track_flow, [("gmwmi_registered", "inputnode.gmwmi_registered")],),
                 ]
             )
+            # fmt: on
 
+            # fmt: off
             flow.connect(
                 [(track_flow, outputnode, [("outputnode.track_file", "track_file")])]
             )
+            # fmt: on
 
         elif (
             self.config.tracking_processing_tool == "MRtrix"
@@ -661,91 +584,70 @@ class DiffusionStage(Stage):
             track_flow = create_mrtrix_tracking_flow(self.config.mrtrix_tracking_config)
 
             if self.config.diffusion_imaging_model != "DSI":
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            inputnode,
-                            track_flow,
-                            [
-                                ("wm_mask_registered", "inputnode.wm_mask_resampled"),
-                                ("grad", "inputnode.grad"),
-                            ],
-                        ),
+                        (inputnode, track_flow, [("wm_mask_registered", "inputnode.wm_mask_resampled"), ("grad", "inputnode.grad"),],),
                         (recon_flow, outputnode, [("outputnode.DWI", "fod_file")]),
                         (recon_flow, track_flow, [("outputnode.DWI", "inputnode.DWI")]),
                         # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                     ]
                 )
+                # fmt: on
             else:
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            inputnode,
-                            track_flow,
-                            [
-                                ("wm_mask_registered", "inputnode.wm_mask_resampled"),
-                                ("grad", "inputnode.grad"),
-                            ],
-                        ),
+                        (inputnode, track_flow, [("wm_mask_registered", "inputnode.wm_mask_resampled"), ("grad", "inputnode.grad"),],),
                         (recon_flow, outputnode, [("outputnode.fod", "fod_file")]),
                         (recon_flow, track_flow, [("outputnode.fod", "inputnode.DWI")]),
                         # (recon_flow, track_flow,[('outputnode.SD','inputnode.SD')]),
                     ]
                 )
+                # fmt: on
 
             if self.config.dilate_rois:
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            dilate_rois,
-                            track_flow,
-                            [("out_file", "inputnode.gm_registered")],
-                        )
+                        (dilate_rois, track_flow, [("out_file", "inputnode.gm_registered")],)
                     ]
                 )
+                # fmt: on
             else:
+                # fmt: off
                 flow.connect(
                     [
-                        (
-                            inputnode,
-                            track_flow,
-                            [("roi_volumes", "inputnode.gm_registered")],
-                        )
+                        (inputnode, track_flow, [("roi_volumes", "inputnode.gm_registered")],)
                     ]
                 )
+                # fmt: on
 
+            # fmt: off
             flow.connect(
                 [
-                    (
-                        inputnode,
-                        track_flow,
-                        [("act_5tt_registered", "inputnode.act_5tt_registered")],
-                    ),
-                    (
-                        inputnode,
-                        track_flow,
-                        [("gmwmi_registered", "inputnode.gmwmi_registered")],
-                    ),
+                    (inputnode, track_flow, [("act_5tt_registered", "inputnode.act_5tt_registered")],),
+                    (inputnode, track_flow, [("gmwmi_registered", "inputnode.gmwmi_registered")],),
                 ]
             )
+            # fmt: on
 
-            #  if self.config.diffusion_model == 'Probabilistic':
-            #      flow.connect([
-            # (dilate_rois,track_flow,[('out_file','inputnode.gm_registered')]),
-            # ])
-
+            # fmt: off
             flow.connect(
                 [(track_flow, outputnode, [("outputnode.track_file", "track_file")])]
             )
+            # fmt: on
 
         temp_node = pe.Node(
             interface=util.IdentityInterface(fields=["diffusion_model"]),
             name="diffusion_model",
         )
         temp_node.inputs.diffusion_model = self.config.diffusion_model
+        # fmt: off
         flow.connect(
             [(temp_node, outputnode, [("diffusion_model", "diffusion_model")])]
         )
+        # fmt: on
 
         # if self.config.tracking_processing_tool == 'Custom':
         #     # FIXME make sure header of TRK / TCK are consistent with DWI
