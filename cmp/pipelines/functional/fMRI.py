@@ -608,7 +608,20 @@ class fMRIPipeline(Pipeline):
             ("fMRI_bandpass.nii.gz", self.subject + "_desc-bandpass_task-rest_bold.nii.gz"),
         ]
         # fmt:on
-        if self.parcellation_scheme == "NativeFreesurfer":
+
+        if self.parcellation_scheme == "Custom":
+            bids_atlas_name = bids_atlas_label if "res" not in bids_atlas_label else bids_atlas_label.split("_")[0]
+            # fmt:off
+            substitutions += [
+                (
+                    f'{self.subject}_atlas-{bids_atlas_label}_dseg_flirt.nii.gz',
+                    f'{self.subject}_space-meanBOLD_atlas-{bids_atlas_label}_dseg.nii.gz'
+                ),
+                (f"connectome_{bids_atlas_name}", self.subject + f"_atlas-{bids_atlas_label}_conndata-network_connectivity"),
+                (f"averageTimeseries_{bids_atlas_name}", self.subject + f"_atlas-{bids_atlas_label}_timeseries"),
+            ]
+            # fmt:on
+        elif self.parcellation_scheme == "NativeFreesurfer":
             # fmt:off
             substitutions += [
                 (
