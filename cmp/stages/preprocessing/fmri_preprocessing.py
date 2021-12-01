@@ -224,9 +224,9 @@ class PreprocessingStage(Stage):
                 flow.connect(
                     [
                         (despiking_output, mo_corr, [("despiking_output", "in_file")]),
-                        (mo_corr, outputnode, [("out_file", "functional_preproc")]),
-                        (mo_corr, outputnode, [("par_file", "par_file")]),
-                        (mo_corr, outputnode, [("mean_img", "mean_vol")]),
+                        (mo_corr, outputnode, [("out_file", "functional_preproc"),
+                                               ("par_file", "par_file"),
+                                               ("mean_img", "mean_vol")]),
                     ]
                 )
                 # fmt:on
@@ -235,8 +235,8 @@ class PreprocessingStage(Stage):
                 # fmt:off
                 flow.connect(
                     [
-                        (despiking_output, outputnode, [("despiking_output", "functional_preproc")],),
-                        (inputnode, mean, [("functional", "in_file")]),
+                        (despiking_output, outputnode, [("despiking_output", "functional_preproc")]),
+                        (despiking_output, mean, [("despiking_output", "in_file")]),
                         (mean, outputnode, [("out_file", "mean_vol")]),
                     ]
                 )
