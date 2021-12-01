@@ -605,23 +605,12 @@ class fMRIPipeline(Pipeline):
             ("fMRI_despike_st_mcf.nii.gz.par", self.subject + "_motion.tsv"),
             ("FD.npy", self.subject + "_desc-scrubbing_FD.npy"),
             ("DVARS.npy", self.subject + "_desc-scrubbing_DVARS.npy"),
-            ("fMRI_bandpass.nii.gz", self.subject + "_desc-bandpass_task-rest_bold.nii.gz"),
+            ("fMRI_bandpass.nii.gz", self.subject + "_task-rest_desc-bandpass_bold.nii.gz"),
+            ("fMRI_discard_mean.nii.gz",  self.subject + "_meanBOLD.nii.gz")
         ]
         # fmt:on
 
-        if self.parcellation_scheme == "Custom":
-            bids_atlas_name = bids_atlas_label if "res" not in bids_atlas_label else bids_atlas_label.split("_")[0]
-            # fmt:off
-            substitutions += [
-                (
-                    f'{self.subject}_atlas-{bids_atlas_label}_dseg_flirt.nii.gz',
-                    f'{self.subject}_space-meanBOLD_atlas-{bids_atlas_label}_dseg.nii.gz'
-                ),
-                (f"connectome_{bids_atlas_name}", self.subject + f"_atlas-{bids_atlas_label}_conndata-network_connectivity"),
-                (f"averageTimeseries_{bids_atlas_name}", self.subject + f"_atlas-{bids_atlas_label}_timeseries"),
-            ]
-            # fmt:on
-        elif self.parcellation_scheme == "NativeFreesurfer":
+        if self.parcellation_scheme == "NativeFreesurfer":
             # fmt:off
             substitutions += [
                 (
@@ -630,6 +619,19 @@ class fMRIPipeline(Pipeline):
                 ),
                 ("connectome_freesurferaparc", self.subject + "_atlas-Desikan_conndata-network_connectivity"),
                 ("averageTimeseries_freesurferaparc", self.subject + "_atlas-Desikan_timeseries"),
+            ]
+            # fmt:on
+        elif self.parcellation_scheme == "Custom":
+            bids_atlas_name = bids_atlas_label if "res" not in bids_atlas_label else bids_atlas_label.split("_")[0]
+            # fmt:off
+            substitutions += [
+                (f'{self.subject}_task-rest_desc-cmp_bold_mean.nii.gz', f'{self.subject}_meanBOLD.nii.gz'),
+                (
+                    f'{self.subject}_atlas-{bids_atlas_label}_dseg_flirt.nii.gz',
+                    f'{self.subject}_space-meanBOLD_atlas-{bids_atlas_label}_dseg.nii.gz'
+                ),
+                (f"connectome_{bids_atlas_name}", self.subject + f"_atlas-{bids_atlas_label}_conndata-network_connectivity"),
+                (f"averageTimeseries_{bids_atlas_name}", self.subject + f"_atlas-{bids_atlas_label}_timeseries"),
             ]
             # fmt:on
         else:
@@ -646,9 +648,9 @@ class fMRIPipeline(Pipeline):
                 ]
                 # fmt:on
             
-            sinker.inputs.substitutions = substitutions
-            
-            return sinker
+        sinker.inputs.substitutions = substitutions
+        
+        return sinker
     
     def create_pipeline_flow(
             self, cmp_deriv_subject_directory, nipype_deriv_subject_directory
