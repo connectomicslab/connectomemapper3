@@ -25,6 +25,8 @@ import jinja2
 from nipype.utils.filemanip import copyfile
 from pkg_resources import resource_filename as pkgrf
 
+from cmp.project import nipype_directory
+
 # from niworkflows.utils.misc import read_crashfile
 
 
@@ -136,7 +138,7 @@ class Report(object):
                     title=subrep_cfg.get('title'))
                 self.sections.append(order_by_run(sub_report))
 
-        error_dir = self.out_dir / "nipype" / subject / 'log' / self.run_uuid
+        error_dir = self.out_dir / nipype_directory / subject / 'log' / self.run_uuid
         if error_dir.is_dir():
             self.index_error_dir(error_dir)
 

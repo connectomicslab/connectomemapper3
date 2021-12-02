@@ -17,6 +17,7 @@ from pyface.api import ImageResource
 from bids import BIDSLayout
 
 # Own imports
+from cmp.project import cmp_directory, nipype_directory
 from cmtklib.util import return_button_style_sheet
 from cmp.bidsappmanager.stages.preprocessing.preprocessing import PreprocessingStageUI
 from cmp.bidsappmanager.stages.diffusion.diffusion import DiffusionStageUI
@@ -195,7 +196,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    "nipype",
+                    nipype_directory,
                     self.subject,
                     project_info.subject_session,
                     self.pipeline_name,
@@ -205,7 +206,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    "nipype",
+                    nipype_directory,
                     self.subject,
                     self.pipeline_name,
                     self.stages[stage].name,
@@ -437,21 +438,21 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 if self.global_conf.subject_session == "":
                     out_dwi_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        cmp_directory,
                         self.subject,
                         "dwi",
                         subject + "_dwi.nii.gz",
                     )
                     out_bval_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        cmp_directory,
                         self.subject,
                         "dwi",
                         subject + "_dwi.bval",
                     )
                     out_bvec_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        cmp_directory,
                         self.subject,
                         "dwi",
                         subject + "_dwi.bvec",
@@ -459,7 +460,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 else:
                     out_dwi_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        cmp_directory,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",
@@ -467,7 +468,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     )
                     out_bval_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        cmp_directory,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",
@@ -475,7 +476,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     )
                     out_bvec_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        cmp_directory,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",

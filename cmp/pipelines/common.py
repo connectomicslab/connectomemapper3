@@ -7,8 +7,6 @@
 """Definition of common parent classes for pipelines."""
 
 import os
-
-# import fnmatch
 import threading
 import time
 
@@ -16,8 +14,9 @@ from traits.api import *
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
-
 from nipype.interfaces.base import File, Directory
+
+from cmp.project import nipype_directory
 
 
 class ProgressWindow(HasTraits):
@@ -122,7 +121,7 @@ class Pipeline(HasTraits):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    "nipype",
+                    nipype_directory,
                     self.subject,
                     project_info.subject_session,
                     self.pipeline_name,
@@ -132,7 +131,7 @@ class Pipeline(HasTraits):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    "nipype",
+                    nipype_directory,
                     self.subject,
                     self.pipeline_name,
                     self.stages[stage].name,
