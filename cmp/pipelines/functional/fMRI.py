@@ -13,6 +13,7 @@ import nipype.interfaces.io as nio
 from nipype import config, logging
 from nipype.interfaces.utility import Merge
 
+from cmp.project import cmp_directory, nipype_directory
 from cmp.pipelines.common import *
 from cmp.stages.connectome.fmri_connectome import ConnectomeStage
 from cmp.stages.functional.functionalMRI import FunctionalMRIStage
@@ -360,11 +361,11 @@ class fMRIPipeline(Pipeline):
         
         if fMRI_available:
             if self.global_conf.subject_session == "":
-                out_dir = os.path.join(self.output_directory, "cmp", self.subject)
+                out_dir = os.path.join(self.output_directory, cmp_directory, self.subject)
             else:
                 out_dir = os.path.join(
                     self.output_directory,
-                    "cmp",
+                    cmp_directory,
                     self.subject,
                     self.global_conf.subject_session,
                 )
@@ -894,21 +895,21 @@ class fMRIPipeline(Pipeline):
         
         if self.global_conf.subject_session == "":
             cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, "cmp", self.subject
+                self.output_directory, cmp_directory, self.subject
             )
             nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, "nipype", self.subject
+                self.output_directory, nipype_directory, self.subject
             )
         else:
             cmp_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                "cmp",
+                cmp_directory,
                 self.subject,
                 self.global_conf.subject_session,
             )
             nipype_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                "nipype",
+                nipype_directory,
                 self.subject,
                 self.global_conf.subject_session,
             )

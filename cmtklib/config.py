@@ -319,7 +319,7 @@ def create_subject_configuration_from_ref(
         # print('With session : {}'.format(project.subject_session))
         subject_conf_file = os.path.join(
             subject_derivatives_dir,
-            "cmp",
+            f"cmp-{__version__}",
             project.subject,
             project.subject_session,
             "{}_{}_{}_config.json".format(
@@ -330,7 +330,7 @@ def create_subject_configuration_from_ref(
         # print('With NO session ')
         subject_conf_file = os.path.join(
             subject_derivatives_dir,
-            "cmp",
+            f"cmp-{__version__}",
             project.subject,
             "{}_{}_config.json".format(project.subject, pipeline_type),
         )

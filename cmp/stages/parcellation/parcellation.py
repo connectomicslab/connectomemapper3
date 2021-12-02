@@ -17,6 +17,7 @@ import nipype.interfaces.utility as util
 from nipype.interfaces.io import BIDSDataGrabber
 
 # Own imports
+from cmp.project import cmp_directory
 from cmp.stages.common import Stage
 from cmtklib.parcellation import (
     Parcellate,
@@ -629,12 +630,12 @@ class ParcellationStage(Stage):
                                 ]
         else:
             roi_v = self.config.custom_parcellation.get_filename_path(
-                base_dir=os.path.join(self.output_dir, "cmp"),
+                base_dir=os.path.join(self.output_dir, cmp_directory),
                 subject=self.bids_subject_label,
                 session=self.bids_session_label if self.bids_session_label != "" else None
             ) + ".nii.gz"
             lut_file = self.config.custom_parcellation.get_filename_path(
-                base_dir=os.path.join(self.output_dir, "cmp"),
+                base_dir=os.path.join(self.output_dir, cmp_directory),
                 subject=self.bids_subject_label,
                 session=self.bids_session_label if self.bids_session_label != "" else None
             ).split("_dseg")[0] + "_FreeSurferColorLUT.txt"
