@@ -13,7 +13,7 @@ import nipype.interfaces.io as nio
 from nipype import config, logging
 from nipype.interfaces.utility import Merge
 
-from cmp.project import cmp_directory, nipype_directory
+from cmp.project import __cmp_directory__, __nipype_directory__
 from cmp.pipelines.common import *
 from cmp.stages.connectome.fmri_connectome import ConnectomeStage
 from cmp.stages.functional.functionalMRI import FunctionalMRIStage
@@ -361,11 +361,11 @@ class fMRIPipeline(Pipeline):
         
         if fMRI_available:
             if self.global_conf.subject_session == "":
-                out_dir = os.path.join(self.output_directory, cmp_directory, self.subject)
+                out_dir = os.path.join(self.output_directory, __cmp_directory__, self.subject)
             else:
                 out_dir = os.path.join(
                     self.output_directory,
-                    cmp_directory,
+                    __cmp_directory__,
                     self.subject,
                     self.global_conf.subject_session,
                 )
@@ -895,21 +895,21 @@ class fMRIPipeline(Pipeline):
         
         if self.global_conf.subject_session == "":
             cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, cmp_directory, self.subject
+                self.output_directory, __cmp_directory__, self.subject
             )
             nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, nipype_directory, self.subject
+                self.output_directory, __nipype_directory__, self.subject
             )
         else:
             cmp_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                cmp_directory,
+                __cmp_directory__,
                 self.subject,
                 self.global_conf.subject_session,
             )
             nipype_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                nipype_directory,
+                __nipype_directory__,
                 self.subject,
                 self.global_conf.subject_session,
             )

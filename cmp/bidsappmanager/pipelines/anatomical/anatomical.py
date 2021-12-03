@@ -16,7 +16,7 @@ from traitsui.qt4.extra.qt_view import QtView
 from pyface.ui.qt4.image_resource import ImageResource
 
 # Own import
-from cmp.project import cmp_directory, nipype_directory, freesurfer_directory
+from cmp.project import __cmp_directory__, __nipype_directory__, __freesurfer_directory__
 from cmp.bidsappmanager.stages.segmentation.segmentation import SegmentationStageUI
 from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStageUI
 from cmp.pipelines.anatomical.anatomical import (
@@ -139,10 +139,10 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
         }
 
         self.stages["Segmentation"].config.freesurfer_subjects_dir = os.path.join(
-            self.output_directory, freesurfer_directory
+            self.output_directory, __freesurfer_directory__
         )
         self.stages["Segmentation"].config.freesurfer_subject_id = os.path.join(
-            self.output_directory, freesurfer_directory, subject_id
+            self.output_directory, __freesurfer_directory__, subject_id
         )
 
         print(
@@ -155,7 +155,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    nipype_directory,
+                    __nipype_directory__,
                     self.subject,
                     project_info.subject_session,
                     self.pipeline_name,
@@ -165,7 +165,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    nipype_directory,
+                    __nipype_directory__,
                     self.subject,
                     self.pipeline_name,
                     self.stages[stage].name,
@@ -277,13 +277,13 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             # Copy diffusion data to derivatives / cmp  / subject / dwi
             if self.global_conf.subject_session == "":
                 out_T1_file = os.path.join(
-                    self.derivatives_directory, cmp_directory,
+                    self.derivatives_directory, __cmp_directory__,
                     self.subject, "anat",
                     self.subject + "_T1w.nii.gz",
                 )
             else:
                 out_T1_file = os.path.join(
-                    self.derivatives_directory, cmp_directory,
+                    self.derivatives_directory, __cmp_directory__,
                     self.subject, self.global_conf.subject_session, "anat",
                     f'{self.subject}_{self.global_conf.subject_session}_T1w.nii.gz',
                 )
@@ -507,18 +507,18 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
 
         if self.global_conf.subject_session == "":
             anat_deriv_subject_directory = os.path.join(
-                self.base_directory, "derivatives", cmp_directory, self.subject, "anat"
+                self.base_directory, "derivatives", __cmp_directory__, self.subject, "anat"
             )
         else:
             if self.global_conf.subject_session not in subject:
                 anat_deriv_subject_directory = os.path.join(
-                    self.base_directory, "derivatives", cmp_directory,
+                    self.base_directory, "derivatives", __cmp_directory__,
                     subject, self.global_conf.subject_session, "anat",
                 )
                 subject = "_".join((subject, self.global_conf.subject_session))
             else:
                 anat_deriv_subject_directory = os.path.join(
-                    self.base_directory, "derivatives", cmp_directory,
+                    self.base_directory, "derivatives", __cmp_directory__,
                     subject.split("_")[0], self.global_conf.subject_session, "anat",
                 )
 

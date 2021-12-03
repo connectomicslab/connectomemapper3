@@ -14,7 +14,7 @@ import json
 import networkx as nx
 import numpy as np
 
-from cmp.project import cmp_directory
+from cmp.project import __cmp_directory__
 
 warnings.simplefilter("ignore")
 
@@ -228,7 +228,7 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
             if len(subj_sessions) > 0:  # Session structure
                 for subj_session in subj_sessions:
                     conn_derivatives_dir = op.join(
-                        output_dir, cmp_directory, subj, subj_session, "connectivity"
+                        output_dir, __cmp_directory__, subj, subj_session, "connectivity"
                     )
 
                     # Extract the connectivity matrix
@@ -257,7 +257,7 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
                 if len(subj_sessions) > 0:  # Session structure
                     for subj_session in subj_sessions:
                         conn_derivatives_dir = op.join(
-                            output_dir, cmp_directory, subj, subj_session, "connectivity"
+                            output_dir, __cmp_directory__, subj, subj_session, "connectivity"
                         )
 
                         # Extract the connectivity matrix

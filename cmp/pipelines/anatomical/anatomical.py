@@ -20,7 +20,7 @@ from nipype import config, logging
 from traits.api import *
 
 # Own import
-from cmp.project import cmp_directory, nipype_directory
+from cmp.project import __cmp_directory__, __nipype_directory__
 import cmp.pipelines.common as cmp_common
 from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
@@ -159,7 +159,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                                  else None)
                     ),
                     "node_information_graphml": self.stages["Parcellation"].config.custom_parcellation.get_filename_path(
-                        base_dir=os.path.join(self.output_directory, cmp_directory),
+                        base_dir=os.path.join(self.output_directory, __cmp_directory__),
                         subject=self.stages["Parcellation"].bids_subject_label,
                         session=(self.stages["Parcellation"].bids_session_label
                                  if self.stages["Parcellation"].bids_session_label is not None and self.stages["Parcellation"].bids_session_label != ""
@@ -299,7 +299,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if self.global_conf.subject_session == "":
                 out_T1_file = os.path.join(
                     self.output_directory,
-                    cmp_directory,
+                    __cmp_directory__,
                     self.subject,
                     "anat",
                     self.subject + "_desc-cmp_T1w.nii.gz",
@@ -307,7 +307,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             else:
                 out_T1_file = os.path.join(
                     self.output_directory,
-                    cmp_directory,
+                    __cmp_directory__,
                     self.subject,
                     self.global_conf.subject_session,
                     "anat",
@@ -327,7 +327,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 if self.global_conf.subject_session == "":
                     out_T1_json_file = os.path.join(
                         self.output_directory,
-                        cmp_directory,
+                        __cmp_directory__,
                         self.subject,
                         "anat",
                         self.subject + "_desc-cmp_T1w.json",
@@ -335,7 +335,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 else:
                     out_T1_json_file = os.path.join(
                         self.output_directory,
-                        cmp_directory,
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "anat",
@@ -568,19 +568,19 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         if self.global_conf.subject_session == "":
             anat_deriv_subject_directory = os.path.join(
-                self.output_directory, cmp_directory, self.subject, "anat"
+                self.output_directory, __cmp_directory__, self.subject, "anat"
             )
         else:
             if self.global_conf.subject_session not in subject:
                 anat_deriv_subject_directory = os.path.join(
-                    self.output_directory, cmp_directory,
+                    self.output_directory, __cmp_directory__,
                     subject, self.global_conf.subject_session,
                     "anat",
                 )
                 subject = "_".join((subject, self.global_conf.subject_session))
             else:
                 anat_deriv_subject_directory = os.path.join(
-                    self.output_directory, cmp_directory,
+                    self.output_directory, __cmp_directory__,
                     subject.split("_")[0], self.global_conf.subject_session,
                     "anat",
                 )
@@ -1056,21 +1056,21 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         if self.global_conf.subject_session == "":
             cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, cmp_directory, self.subject
+                self.output_directory, __cmp_directory__, self.subject
             )
             nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, nipype_directory, self.subject
+                self.output_directory, __nipype_directory__, self.subject
             )
         else:
             cmp_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                cmp_directory,
+                __cmp_directory__,
                 self.subject,
                 self.global_conf.subject_session,
             )
             nipype_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                nipype_directory,
+                __nipype_directory__,
                 self.subject,
                 self.global_conf.subject_session,
             )

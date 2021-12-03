@@ -21,6 +21,12 @@ from nipype import __version__ as nipype_version
 
 # Own imports
 from cmp.info import __version__
+
+# Directories for derivatives compliant to BIDS `1.4.0` (e.g. <toolbox>-<version>)
+# Need to be declared before import the pipeline modules
+__cmp_directory__ = f'cmp-{__version__}'  # noqa
+__nipype_directory__ = f'nipype-{nipype_version}'  # noqa
+__freesurfer_directory__ = f'freesurfer-6.0.1'  # noqa
 from cmtklib.bids.utils import write_derivative_description
 from cmp.pipelines.anatomical import anatomical as Anatomical_pipeline
 from cmp.pipelines.diffusion import diffusion as Diffusion_pipeline
@@ -42,11 +48,6 @@ warnings.filterwarnings(
     "make sure the config file for this domain includes a 'root' key.",
 )
 
-# Directories for derivatives compliant to BIDS `1.4.0` (e.g. <toolbox>-<version>)
-cmp_directory = f'cmp-{__version__}'
-nipype_directory = f'nipype-{nipype_version}'
-freesurfer_directory=f'freesurfer-6.0.1'
-
 
 class CMP_Project_Info(HasTraits):
     """Class used to store all properties of a processing project.
@@ -62,13 +63,13 @@ class CMP_Project_Info(HasTraits):
     bids_layout : bids.BIDSLayout
         Instance of pybids `BIDSLayout`
         
-    cmp_directory : str
+    __cmp_directory__ : str
         Name of
         
-    nipype_directory : str
+    __nipype_directory__ : str
         Name of directory for nipype intermediate derivatives (e.g. nipype-<version>) compliant to BIDS `1.4.0`
         
-    freesurfer_directory : str
+    __freesurfer_directory__ : str
         Name of directory for freesurfer derivatives (e.g. freesurfer-<version>) compliant to BIDS `1.4.0`
 
     subjects : traits.List
@@ -293,26 +294,26 @@ def refresh_folder(
     paths = []
 
     if session is None or session == "":
-        paths.append(os.path.join(derivatives_directory, freesurfer_directory, subject))
-        paths.append(os.path.join(derivatives_directory, cmp_directory, subject))
-        paths.append(os.path.join(derivatives_directory, nipype_directory, subject))
+        paths.append(os.path.join(derivatives_directory, __freesurfer_directory__, subject))
+        paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject))
+        paths.append(os.path.join(derivatives_directory, __nipype_directory__, subject))
 
         for in_f in input_folders:
-            paths.append(os.path.join(derivatives_directory, cmp_directory, subject, in_f))
+            paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject, in_f))
             # paths.append(os.path.join(derivatives_directory,'nipype',subject,in_f))
 
     else:
         paths.append(
             os.path.join(
-                derivatives_directory, freesurfer_directory, "%s_%s" % (subject, session)
+                derivatives_directory, __freesurfer_directory__, "%s_%s" % (subject, session)
             )
         )
-        paths.append(os.path.join(derivatives_directory, cmp_directory, subject, session))
-        paths.append(os.path.join(derivatives_directory, nipype_directory, subject, session))
+        paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject, session))
+        paths.append(os.path.join(derivatives_directory, __nipype_directory__, subject, session))
 
         for in_f in input_folders:
             paths.append(
-                os.path.join(derivatives_directory, cmp_directory, subject, session, in_f)
+                os.path.join(derivatives_directory, __cmp_directory__, subject, session, in_f)
             )
             # paths.append(os.path.join(derivatives_directory,'nipype',subject,session,in_f))
 
@@ -658,7 +659,7 @@ def update_anat_last_processed(project_info, pipeline):
     """
     # last date
     if os.path.exists(
-        os.path.join(project_info.output_directory, nipype_directory, project_info.subject)
+        os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
     ):
         # out_dirs = os.listdir(os.path.join(
         #     project_info.output_directory, 'nipype', project_info.subject))
@@ -679,7 +680,7 @@ def update_anat_last_processed(project_info, pipeline):
     if os.path.exists(
         os.path.join(
             project_info.output_directory,
-            nipype_directory,
+            __nipype_directory__,
             project_info.subject,
             "anatomical_pipeline",
         )
@@ -688,7 +689,7 @@ def update_anat_last_processed(project_info, pipeline):
         for _, dirnames, _ in os.walk(
             os.path.join(
                 project_info.output_directory,
-                nipype_directory,
+                __nipype_directory__,
                 project_info.subject,
                 "anatomical_pipeline",
             )
@@ -718,7 +719,7 @@ def update_dmri_last_processed(project_info, pipeline):
     """
     # last date
     if os.path.exists(
-        os.path.join(project_info.output_directory, nipype_directory, project_info.subject)
+        os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
     ):
         # out_dirs = os.listdir(os.path.join(
         #     project_info.output_directory, 'nipype', project_info.subject))
@@ -739,7 +740,7 @@ def update_dmri_last_processed(project_info, pipeline):
     if os.path.exists(
         os.path.join(
             project_info.output_directory,
-            nipype_directory,
+            __nipype_directory__,
             project_info.subject,
             "diffusion_pipeline",
         )
@@ -748,7 +749,7 @@ def update_dmri_last_processed(project_info, pipeline):
         for _, dirnames, _ in os.walk(
             os.path.join(
                 project_info.output_directory,
-                nipype_directory,
+                __nipype_directory__,
                 project_info.subject,
                 "diffusion_pipeline",
             )
@@ -774,7 +775,7 @@ def update_fmri_last_processed(project_info, pipeline):
     """
     # last date
     if os.path.exists(
-        os.path.join(project_info.output_directory, nipype_directory, project_info.subject)
+        os.path.join(project_info.output_directory, __nipype_directory__, project_info.subject)
     ):
         # out_dirs = os.listdir(os.path.join(
         #     project_info.output_directory, 'nipype', project_info.subject))
@@ -795,7 +796,7 @@ def update_fmri_last_processed(project_info, pipeline):
     if os.path.exists(
         os.path.join(
             project_info.output_directory,
-            nipype_directory,
+            __nipype_directory__,
             project_info.subject,
             "fMRI_pipeline",
         )
@@ -804,7 +805,7 @@ def update_fmri_last_processed(project_info, pipeline):
         for _, dirnames, _ in os.walk(
             os.path.join(
                 project_info.output_directory,
-                nipype_directory,
+                __nipype_directory__,
                 project_info.subject,
                 "fMRI_pipeline",
             )

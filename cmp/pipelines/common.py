@@ -16,7 +16,7 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 from nipype.interfaces.base import File, Directory
 
-from cmp.project import nipype_directory
+from cmp.project import __nipype_directory__
 
 
 class ProgressWindow(HasTraits):
@@ -121,7 +121,7 @@ class Pipeline(HasTraits):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    nipype_directory,
+                    __nipype_directory__,
                     self.subject,
                     project_info.subject_session,
                     self.pipeline_name,
@@ -131,7 +131,7 @@ class Pipeline(HasTraits):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    nipype_directory,
+                    __nipype_directory__,
                     self.subject,
                     self.pipeline_name,
                     self.stages[stage].name,

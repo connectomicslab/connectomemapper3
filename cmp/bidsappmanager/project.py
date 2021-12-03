@@ -24,7 +24,7 @@ from pyface.api import FileDialog, OK
 # Own imports
 from . import core
 from . import gui
-from cmp.project import cmp_directory, nipype_directory, freesurfer_directory
+from cmp.project import __cmp_directory__, __nipype_directory__, __freesurfer_directory__
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as anatomical_pipeline
 from cmp.bidsappmanager.pipelines.diffusion import diffusion as diffusion_pipeline
 from cmp.bidsappmanager.pipelines.functional import fMRI as fMRI_pipeline
@@ -126,24 +126,24 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
     paths = []
 
     if session is None or session == "":
-        paths.append(os.path.join(derivatives_directory, freesurfer_directory, subject))
-        paths.append(os.path.join(derivatives_directory, cmp_directory, subject))
-        paths.append(os.path.join(derivatives_directory, nipype_directory, subject))
+        paths.append(os.path.join(derivatives_directory, __freesurfer_directory__, subject))
+        paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject))
+        paths.append(os.path.join(derivatives_directory, __nipype_directory__, subject))
 
         for in_f in input_folders:
-            paths.append(os.path.join(derivatives_directory, cmp_directory, subject, in_f))
+            paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject, in_f))
     else:
         paths.append(
             os.path.join(
-                derivatives_directory, freesurfer_directory, "%s_%s" % (subject, session)
+                derivatives_directory, __freesurfer_directory__, "%s_%s" % (subject, session)
             )
         )
-        paths.append(os.path.join(derivatives_directory, cmp_directory, subject, session))
-        paths.append(os.path.join(derivatives_directory, nipype_directory, subject, session))
+        paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject, session))
+        paths.append(os.path.join(derivatives_directory, __nipype_directory__, subject, session))
 
         for in_f in input_folders:
             paths.append(
-                os.path.join(derivatives_directory, cmp_directory, subject, session, in_f)
+                os.path.join(derivatives_directory, __cmp_directory__, subject, session, in_f)
             )
 
     for full_p in paths:
@@ -433,7 +433,7 @@ def update_anat_last_processed(project_info, pipeline):
     # last date
     if os.path.exists(
         os.path.join(
-            project_info.base_directory, "derivatives", cmp_directory, project_info.subject
+            project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
         )
     ):
         # out_dirs = os.listdir(os.path.join(
@@ -456,7 +456,7 @@ def update_anat_last_processed(project_info, pipeline):
         os.path.join(
             project_info.base_directory,
             "derivatives",
-            cmp_directory,
+            __cmp_directory__,
             project_info.subject,
             "tmp",
             "anatomical_pipeline",
@@ -467,7 +467,7 @@ def update_anat_last_processed(project_info, pipeline):
             os.path.join(
                 project_info.base_directory,
                 "derivatives",
-                cmp_directory,
+                __cmp_directory__,
                 project_info.subject,
                 "tmp",
                 "anatomical_pipeline",
@@ -499,7 +499,7 @@ def update_dmri_last_processed(project_info, pipeline):
     # last date
     if os.path.exists(
         os.path.join(
-            project_info.base_directory, "derivatives", cmp_directory, project_info.subject
+            project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
         )
     ):
         # out_dirs = os.listdir(os.path.join(
@@ -522,7 +522,7 @@ def update_dmri_last_processed(project_info, pipeline):
         os.path.join(
             project_info.base_directory,
             "derivatives",
-            cmp_directory,
+            __cmp_directory__,
             project_info.subject,
             "tmp",
             "diffusion_pipeline",
@@ -533,7 +533,7 @@ def update_dmri_last_processed(project_info, pipeline):
             os.path.join(
                 project_info.base_directory,
                 "derivatives",
-                cmp_directory,
+                __cmp_directory__,
                 project_info.subject,
                 "tmp",
                 "diffusion_pipeline",
@@ -561,7 +561,7 @@ def update_fmri_last_processed(project_info, pipeline):
     # last date
     if os.path.exists(
         os.path.join(
-            project_info.base_directory, "derivatives", cmp_directory, project_info.subject
+            project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
         )
     ):
         # out_dirs = os.listdir(os.path.join(
@@ -584,7 +584,7 @@ def update_fmri_last_processed(project_info, pipeline):
         os.path.join(
             project_info.base_directory,
             "derivatives",
-            cmp_directory,
+            __cmp_directory__,
             project_info.subject,
             "tmp",
             "fMRI_pipeline",
@@ -595,7 +595,7 @@ def update_fmri_last_processed(project_info, pipeline):
             os.path.join(
                 project_info.base_directory,
                 "derivatives",
-                cmp_directory,
+                __cmp_directory__,
                 project_info.subject,
                 "tmp",
                 "fMRI_pipeline",

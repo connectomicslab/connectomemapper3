@@ -16,7 +16,7 @@ from nipype import config, logging
 from nipype.interfaces.utility import Merge
 
 # Own imports
-from cmp.project import cmp_directory, nipype_directory
+from cmp.project import __cmp_directory__, __nipype_directory__
 from cmp.pipelines.common import *
 from cmp.stages.connectome.connectome import ConnectomeStage
 from cmp.stages.diffusion.diffusion import DiffusionStage
@@ -449,21 +449,21 @@ class DiffusionPipeline(Pipeline):
                 if self.global_conf.subject_session == "":
                     out_dwi_file = os.path.join(
                         self.output_directory,
-                        cmp_directory,
+                        __cmp_directory__,
                         self.subject,
                         "dwi",
                         subject + "_desc-cmp_dwi.nii.gz",
                     )
                     out_bval_file = os.path.join(
                         self.output_directory,
-                        cmp_directory,
+                        __cmp_directory__,
                         self.subject,
                         "dwi",
                         subject + "_desc-cmp_dwi.bval",
                     )
                     out_bvec_file = os.path.join(
                         self.output_directory,
-                        cmp_directory,
+                        __cmp_directory__,
                         self.subject,
                         "dwi",
                         subject + "_desc-cmp_dwi.bvec",
@@ -471,7 +471,7 @@ class DiffusionPipeline(Pipeline):
                 else:
                     out_dwi_file = os.path.join(
                         self.output_directory,
-                        cmp_directory,
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",
@@ -479,7 +479,7 @@ class DiffusionPipeline(Pipeline):
                     )
                     out_bval_file = os.path.join(
                         self.output_directory,
-                        cmp_directory,
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",
@@ -487,7 +487,7 @@ class DiffusionPipeline(Pipeline):
                     )
                     out_bvec_file = os.path.join(
                         self.output_directory,
-                        cmp_directory,
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",
@@ -509,7 +509,7 @@ class DiffusionPipeline(Pipeline):
                     if self.global_conf.subject_session == "":
                         out_json_file = os.path.join(
                             self.output_directory,
-                            cmp_directory,
+                            __cmp_directory__,
                             self.subject,
                             "dwi",
                             self.subject + "_desc-cmp_dwi.json",
@@ -517,7 +517,7 @@ class DiffusionPipeline(Pipeline):
                     else:
                         out_json_file = os.path.join(
                             self.output_directory,
-                            cmp_directory,
+                            __cmp_directory__,
                             self.subject,
                             self.global_conf.subject_session,
                             "dwi",
@@ -1157,21 +1157,21 @@ class DiffusionPipeline(Pipeline):
 
         if self.global_conf.subject_session == "":
             cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, cmp_directory, self.subject
+                self.output_directory, __cmp_directory__, self.subject
             )
             nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, nipype_directory, self.subject
+                self.output_directory, __nipype_directory__, self.subject
             )
         else:
             cmp_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                cmp_directory,
+                __cmp_directory__,
                 self.subject,
                 self.global_conf.subject_session,
             )
             nipype_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                nipype_directory,
+                __nipype_directory__,
                 self.subject,
                 self.global_conf.subject_session,
             )

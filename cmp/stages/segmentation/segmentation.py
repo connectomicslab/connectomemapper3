@@ -22,7 +22,7 @@ import nipype.interfaces.utility as util
 from nipype.interfaces.io import BIDSDataGrabber
 
 # Own imports
-from cmp.project import cmp_directory, freesurfer_directory
+from cmp.project import __cmp_directory__, __freesurfer_directory__
 from cmp.stages.common import Stage
 from cmtklib.interfaces.freesurfer import copyBrainMaskToFreesurfer
 from cmtklib.util import (
@@ -262,13 +262,13 @@ class SegmentationStage(Stage):
     
             def correct_freesurfer_subjectid_path(path):
                 if '/output_dir' not in path:
-                    subject_id = path.split(f"{freesurfer_directory}/")[-1]
-                    path = os.path.abspath(f'/output_dir/{freesurfer_directory}/{subject_id}')
+                    subject_id = path.split(f"{__freesurfer_directory__}/")[-1]
+                    path = os.path.abspath(f'/output_dir/{__freesurfer_directory__}/{subject_id}')
                 return path
 
             def correct_freesurfer_subjects_path(path):
                 if '/output_dir' not in path:
-                    path = os.path.abspath(f'/output_dir/{freesurfer_directory}')
+                    path = os.path.abspath(f'/output_dir/{__freesurfer_directory__}')
                 return path
 
             if self.config.use_existing_freesurfer_data is False:
@@ -606,31 +606,31 @@ class SegmentationStage(Stage):
             print(t1_file)
             
             brainmask_file = self.config.custom_brainmask.get_filename_path(
-                base_dir=os.path.join(self.output_dir, cmp_directory),
+                base_dir=os.path.join(self.output_dir, __cmp_directory__),
                 subject=self.bids_subject_label,
                 session=self.bids_session_label if self.bids_session_label != "" else None
             ) + ".nii.gz"
 
             gm_file = self.config.custom_gm_mask.get_filename_path(
-                base_dir=os.path.join(self.output_dir, cmp_directory),
+                base_dir=os.path.join(self.output_dir, __cmp_directory__),
                 subject=self.bids_subject_label,
                 session=self.bids_session_label if self.bids_session_label != "" else None
             ) + ".nii.gz"
 
             wm_file = self.config.custom_wm_mask.get_filename_path(
-                base_dir=os.path.join(self.output_dir, cmp_directory),
+                base_dir=os.path.join(self.output_dir, __cmp_directory__),
                 subject=self.bids_subject_label,
                 session=self.bids_session_label if self.bids_session_label != "" else None
             ) + ".nii.gz"
 
             csf_file = self.config.custom_csf_mask.get_filename_path(
-                base_dir=os.path.join(self.output_dir, cmp_directory),
+                base_dir=os.path.join(self.output_dir, __cmp_directory__),
                 subject=self.bids_subject_label,
                 session=self.bids_session_label if self.bids_session_label != "" else None
             ) + ".nii.gz"
 
             aparcaseg_file = self.config.custom_aparcaseg.get_filename_path(
-                base_dir=os.path.join(self.output_dir, cmp_directory),
+                base_dir=os.path.join(self.output_dir, __cmp_directory__),
                 subject=self.bids_subject_label,
                 session=self.bids_session_label if self.bids_session_label != "" else None
             ) + ".nii.gz"
