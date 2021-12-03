@@ -3,6 +3,59 @@ Changes
 ========
 
 ****************************
+Version 3.0.0
+****************************
+
+Date: Dec XX, 2021
+
+This version corresponds to the first official release of Connectome Mapper 3 (CMP3).
+It incorporates `Pull Request #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_ (~230 commits)
+which includes the following changes.
+
+*New features*
+
+*   CMP3 can take custom segmentation (brain, white-matter, gray-matter and
+    CSF masks, Freesurfer's aparcaseg - used for ACT for PFT) and parcellation
+    files as long as they comply to [BIDS Derivatives specifications](https://bids-specification.readthedocs.io/en/stable/05-derivatives/01-introduction.html),
+    by providing the label value for the different entity in the filename.
+    This has led to the creation of the new module :py:mod:`cmtklib.bids.io`,
+    which provides different classes to represent the diversity of custom input
+    BIDS-formatted files.
+    (`PR #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_)
+
+*Updates*
+
+*   Directories for the derivatives produced by cmp (`cmp`, `freesurfer`, `nipype`)
+    were renamed to `cmp-<cmp_version>`,  `freesurfer-<freesurfer_version>`, and
+    `nipype-<nipype_version>` to comply with BIDS 1.4.0+.
+    (`PR #3 (fork) <https://github.com/sebastientourbier/connectomemapper3/pull/3>`_)
+
+*Improvements*
+
+*   Creation in `AnatomicalPipeline`, `DiffusionPipeline`, `fMRIPipeline` of
+    `create_datagrabber_node()` and `create_datasinker_node()` methods to
+    reduce the code in `create_workflow()`.
+
+*   Clean code and remove a number of commented lines that are now obsolete.
+    Code related to the connection of nodes in the Nipype `Workflow` adopts a
+    specific format and are protected from being reformatted by BLACK with
+    the `# fmt: off` and `# fmt: on` tags.
+
+*Documentation*
+
+*   Add instructions to use custom segmentation and parcellation files as inputs.
+
+*   Add description in contributing page of format for code related to
+    the connection of the nodes in a Nipype `Workflow`.
+
+*Software development life cycle*
+
+*   Update the list of outputs of circleci tests with the new names of
+    directories produced by cmp in `output_dir/`.
+
+Please check the `main pull request 88 page <https://github.com/connectomicslab/connectomemapper3/pull/88>`_ for more details.
+
+****************************
 Version 3.0.0-RC4
 ****************************
 
