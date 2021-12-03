@@ -9,6 +9,7 @@ import os
 import configparser
 import json
 from collections.abc import Iterable
+from ast import literal_eval
 
 from cmp.info import __version__
 from cmtklib.util import BColors, print_warning, print_error, \
@@ -134,7 +135,7 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
             if ini_mode:
                 try:
                     if not(section == 'parcellation_stage' and name == 'ants_precision_type'):
-                        value = eval(value)
+                        value = literal_eval(value)
                         if debug:
                             print_warning(f'  .. DEBUG: String {value} evaluated')
                     else:
@@ -353,7 +354,7 @@ def get_anat_process_detail_json(project_info, section, detail):
         config = json.load(f)
     res = None
     if detail == "atlas_info":
-        res = eval(config[section][detail])
+        res = literal_eval(config[section][detail])
     else:
         res = config[section][detail]
     return res
