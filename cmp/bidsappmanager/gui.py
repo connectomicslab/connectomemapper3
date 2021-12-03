@@ -979,8 +979,11 @@ class CMP_BIDSAppWindow(HasTraits):
         if 'FREESURFER_HOME' in os.environ:
             self.fs_license = os.path.join(
                 os.environ['FREESURFER_HOME'], 'license.txt')
+        elif os.path.isfile(os.path.join(bids_root, 'code', 'license.txt')):
+            self.fs_license = os.path.join(bids_root, 'code', 'license.txt')
         else:
-            print_error('  .. ERROR: Environment variable $FREESURFER_HOME not found')
+            print_error('.. ERROR: Environment variable $FREESURFER_HOME not found and no Freesurfer license file '
+                        'found in local code-folder ')
             self.fs_license = ''
             print_warning('Freesurfer license unset ({})'.format(self.fs_license))
 
