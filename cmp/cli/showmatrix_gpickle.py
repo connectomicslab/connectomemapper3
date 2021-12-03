@@ -29,7 +29,7 @@ def _plot_connectivity_circle_onpick(event,
                                      fig=None, axes=None,
                                      indices=None,
                                      node_angles=None,
-                                     ylim=[9, 10]):
+                                     ylim=None):
     """Isolate connections around a single node when user left clicks a node.
 
     On right click, resets all connections.
@@ -43,6 +43,9 @@ def _plot_connectivity_circle_onpick(event,
     #
     # Modified by:
     #          Sebastien Tourbier <sebastien.tourbier@alumni.epfl.ch>
+
+    if ylim is None:
+        ylim = [9, 10]
 
     if event.inaxes != axes:
         return
