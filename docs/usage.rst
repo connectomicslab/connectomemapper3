@@ -36,7 +36,7 @@ To run the docker image in participant level mode (for one participant):
             (-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \\)
             sebastientourbier/connectomemapper-bidsapp:|release| \\
             /bids_dir /output_dir participant --participant_label 01 \\(--session_label 01 \\)
-            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\)
+            (--anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\)
             (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
             (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
             (--number_of_participants_processed_in_parallel 1)
