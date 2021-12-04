@@ -12,6 +12,7 @@ import sys
 # Own imports
 from cmp.info import __version__
 from cmp.parser import get_singularity_wrapper_parser
+from cmp.input_validator import check_directory_exists
 from cmp.bidsappmanager.core import run
 
 
@@ -91,6 +92,7 @@ def main():
     parser = get_singularity_wrapper_parser()
     args = parser.parse_args()
 
+    check_directory_exists(args.bids_dir)
     # Create the singularity run command
     cmd = create_singularity_cmd(args)
 
