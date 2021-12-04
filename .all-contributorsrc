@@ -23,6 +23,18 @@
         "tutorial",
         "talk"
       ]
+    },
+    {
+      "login": "joanrue",
+      "name": "joanrue",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13551804?v=4",
+      "profile": "https://github.com/joanrue",
+      "contributions": [
+        "bug",
+        "code",
+        "test",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
