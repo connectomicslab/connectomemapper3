@@ -1,6 +1,6 @@
 ## Connectome Mapper 3 BIDS App
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 
@@ -167,6 +167,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/jwirsich"><img src="https://avatars.githubusercontent.com/u/7943145?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jwirsich</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/issues?q=author%3Ajwirsich" title="Bug reports">🐛</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=jwirsich" title="Code">💻</a> <a href="#ideas-jwirsich" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://github.com/kuba-fidel"><img src="https://avatars.githubusercontent.com/u/92929875?v=4?s=100" width="100px;" alt=""/><br /><sub><b>kuba-fidel</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/commits?author=kuba-fidel" title="Code">💻</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=kuba-fidel" title="Documentation">📖</a> <a href="#ideas-kuba-fidel" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://github.com/stefanches7"><img src="https://avatars.githubusercontent.com/u/17748742?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Stefan</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/commits?author=stefanches7" title="Code">💻</a> <a href="#tutorial-stefanches7" title="Tutorials">✅</a> <a href="#ideas-stefanches7" title="Ideas, Planning, & Feedback">🤔</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/mschoettner"><img src="https://avatars.githubusercontent.com/u/48212821?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mikkel Schöttner</b></sub></a><br /><a href="#tutorial-mschoettner" title="Tutorials">✅</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=mschoettner" title="Code">💻</a> <a href="#ideas-mschoettner" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 
