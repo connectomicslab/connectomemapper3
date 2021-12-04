@@ -1,4 +1,7 @@
 ## Connectome Mapper 3 BIDS App
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/connectomicslab/connectomemapper3) ![GitHub Release Date](https://img.shields.io/github/release-date/connectomicslab/connectomemapper3?color=orange) [![DOI](https://zenodo.org/badge/183162514.svg)](https://zenodo.org/badge/latestdoi/183162514) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/sebastientourbier/connectomemapper-bidsapp?color=orange&label=docker%20version) [![Docker Pulls](https://img.shields.io/docker/pulls/sebastientourbier/connectomemapper-bidsapp)](https://hub.docker.com/r/sebastientourbier/connectomemapper-bidsapp) [![CircleCI](https://circleci.com/gh/connectomicslab/connectomemapper3.svg?style=shield)](https://circleci.com/gh/connectomicslab/connectomemapper3) [![Code Coverage](https://app.codacy.com/project/badge/Coverage/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Coverage) [![Documentation Status](https://readthedocs.org/projects/connectome-mapper-3/badge/?version=latest)](https://connectome-mapper-3.readthedocs.io/en/latest/?badge=latest) [![Code Quality Review](https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb)](https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade)
@@ -147,3 +150,23 @@ This software is distributed under the open-source license Modified BSD. See [li
 All trademarks referenced herein are property of their respective holders.
 
 Copyright (C) 2009-2021, Hospital Center and University of Lausanne (UNIL-CHUV), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland & Contributors.
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/sebastientourbier"><img src="https://avatars.githubusercontent.com/u/22279770?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sébastien Tourbier</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/commits?author=sebastientourbier" title="Code">💻</a> <a href="#design-sebastientourbier" title="Design">🎨</a> <a href="#infra-sebastientourbier" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=sebastientourbier" title="Tests">⚠️</a> <a href="#example-sebastientourbier" title="Examples">💡</a> <a href="#ideas-sebastientourbier" title="Ideas, Planning, & Feedback">🤔</a> <a href="#mentoring-sebastientourbier" title="Mentoring">🧑‍🏫</a> <a href="#projectManagement-sebastientourbier" title="Project Management">📆</a> <a href="https://github.com/connectomicslab/connectomemapper3/pulls?q=is%3Apr+reviewed-by%3Asebastientourbier" title="Reviewed Pull Requests">👀</a> <a href="#tutorial-sebastientourbier" title="Tutorials">✅</a> <a href="#talk-sebastientourbier" title="Talks">📢</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
