@@ -830,13 +830,19 @@ jobs:
               circleci step halt
             fi
       - run:
-          name: install miniconda
+          name: setup miniconda environment
           command: |
             apt update
             apt install -y wget
             wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
             echo $(sha256sum miniconda.sh)
             bash miniconda.sh -b -p $HOME/miniconda
+            export PATH="$HOME/miniconda/bin:$PATH"
+            conda update -y conda
+            conda env create -f environment.yml --name connectomemapper
+            source activate connectomemapper
+            echo $(which pip)
+            pip install .
       - attach_workspace:
           at: /tmp
       - singularity/install-go:
@@ -866,13 +872,8 @@ jobs:
           name: Run anatomical pipeline on ds-sample (test 5 bis - NativeFreesurfer)
           no_output_timeout: 5h
           command: |
-            # Execute BIDS App
-            export PATH="$HOME/miniconda/bin:$PATH"
-            conda update -y conda
-            conda env create -f environment.yml --name connectomemapper
             source activate connectomemapper
-            echo $(which pip)
-            pip install .
+            # Execute BIDS App
             connectomemapper_singularity \
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
                 --singularity_image /tmp/cache/connectomemapper3.simg \
