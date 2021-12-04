@@ -186,7 +186,7 @@ jobs:
             singularity --debug -v build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
           no_output_timeout: 5h
       - run:
-          name: Display storage information
+          name: "Display storage information ALL"
           command: df -h
       - persist_to_workspace:
           root: /tmp
@@ -218,6 +218,7 @@ jobs:
             wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
               -O freesurfer.tar.gz "https://zenodo.org/record/3712762/files/freesurfer.tar.gz?download=1"
             tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives
+            mv /tmp/data/ds-sample/derivatives/freesurfer /tmp/data/ds-sample/derivatives/freesurfer-6.0.1
             echo "FreeSurfer derivatives of ds-sample  have been successfully downloaded"
       - run:
           name: Store FreeSurfer license file
