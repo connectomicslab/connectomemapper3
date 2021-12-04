@@ -27,12 +27,8 @@ def create_singularity_cmd(args):
             {
                 'bids_dir': "/path/to/bids/dataset/directory",
                 'output_dir': "/path/to/output/directory",
-                'param_file': "/path/to/configuration/parameter/file",
                 'analysis_level': "participant",
-                'participant_label': ['01', '02', '03'],
-                'openmp_nb_of_cores': 1,
-                'nipype_nb_of_cores': 1,
-                'masks_derivatives_dir': 'manual_masks'
+                'participant_label': ['01', '02', '03']
             }
 
     Returns
@@ -44,7 +40,6 @@ def create_singularity_cmd(args):
     cmd = 'singularity run --containall '
     cmd += f'--bind {args.bids_dir}:/bids_dir '
     cmd += f'--bind {args.output_dir}:/output_dir '
-    # cmd += f'--bind {args.param_file}:/bids_dir/code/participants_params.json '
     cmd += args.singularity_image
 
     # Standard BIDS App inputs
