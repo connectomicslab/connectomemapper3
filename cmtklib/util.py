@@ -13,7 +13,6 @@ import warnings
 from glob import glob
 
 # import pickle
-import gzip
 import json
 
 import networkx as nx
