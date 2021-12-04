@@ -26,19 +26,50 @@ The command to run ``CMP3`` follows the `BIDS-Apps <https://github.com/BIDS-Apps
 
 Participant Level Analysis
 ===========================
-To run the docker image in participant level mode (for one participant):
+
+With the wrappers
+-------------------
+
+When you run ``connectomemapper_docker``, it will generate a Docker command line for you, print it out for reporting purposes, and then execute it without further action needed, e.g.:
+
+    .. code-block:: console
+
+       $ connectomemapper_docker \
+            /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
+                --docker_image /tmp/cache/connectomemapper3.simg \
+                --anat_pipeline_config /config/ref_anatomical_config_2.ini \
+                --fs_license /bids_dir/code/license.txt
+            
+When you run ``connectomemapper_singularity``, it will generate a Singularity command line for you, print it out for reporting purposes, and then execute it without further action needed, e.g.:
+
+    .. code-block:: console
+
+       $ connectomemapper_singularity \
+            /home/localadmin/data/ds001 /media/localadmin/data/ds001/derivatives \
+            participant --participant_label 01 \
+            
+
+With the Docker / Singularity Engine
+--------------------------------------
+
+If you need a finer control over the container execution, or you feel comfortable with the Docker or Singularity Engine, avoiding the extra software layer of the wrapper might be a good decision.
+
+Docker 
+------
+
+For instance, the previous call to the ``connectomemapper_docker`` wrapper corresponds to:
 
   .. parsed-literal::
 
     $ docker run -t --rm -u $(id -u):$(id -g) \\
-            -v /home/localadmin/data/ds001:/bids_dir \\
-            -v /media/localadmin/data/ds001/derivatives:/output_dir \\
-            (-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \\)
-            sebastientourbier/connectomemapper-bidsapp:|release| \\
-            /bids_dir /output_dir participant --participant_label 01 \\(--session_label 01 \\)
-            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\)
-            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
-            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
+            -v /home/localadmin/data/ds001:/bids_dir \
+            -v /media/localadmin/data/ds001/derivatives:/output_dir \
+            (-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \)
+            sebastientourbier/connectomemapper-bidsapp:|release| \
+            /bids_dir /output_dir participant --participant_label 01 \(--session_label 01 \)
+            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \)
+            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \)
+            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \)
             (--number_of_participants_processed_in_parallel 1)
 
 .. note:: The local directory of the input BIDS dataset (here: ``/home/localadmin/data/ds001``) and the output directory (here: ``/media/localadmin/data/ds001/derivatives``) used to process have to be mapped to the folders ``/bids_dir`` and ``/output_dir`` respectively using the ``-v`` docker run option.

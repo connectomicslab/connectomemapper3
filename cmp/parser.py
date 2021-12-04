@@ -93,3 +93,21 @@ def get():
     p.add_argument('-v', '--version', action='version',
                    version='BIDS-App Connectome Mapper version {} \nRelease date: {}'.format(__version__, __release_date__))
     return p
+
+
+def get_docker_wrapper_parser():
+    """Return the argparse parser of the Docker BIDS App.
+    Returns
+    -------
+    p : object
+       Instance of :class:`argparse.ArgumentParser` class
+    """
+    p = get()
+    p.description = f"Entrypoint script of the BIDS-App Connectome Mapper version {__version__} via Docker."
+    p.add_argument(
+        '--docker_image',
+        type=str,
+        default=f'library://connectomicslab/default/connectomemapper-bidsapp:{__version__} ',
+        help="The path to the docker image.",
+    )
+    return p
