@@ -26,6 +26,10 @@ The command to run ``CMP3`` follows the `BIDS-Apps <https://github.com/BIDS-Apps
 
 Participant Level Analysis
 ===========================
+
+Docker
+------
+
 To run the docker image in participant level mode (for one participant):
 
   .. parsed-literal::
@@ -40,6 +44,22 @@ To run the docker image in participant level mode (for one participant):
             (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
             (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
             (--number_of_participants_processed_in_parallel 1)
+
+Singularity
+-----------
+
+  .. parsed-literal::
+
+  $ python connectomemapper_singularity \\
+        /home/localadmin/data/ds001:/bids_dir \\
+        /media/localadmin/data/ds001/derivatives:/output_dir \\
+        participant \\
+        (--anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\)
+        (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
+        (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
+        (--number_of_participants_processed_in_parallel 1)
+
+
 
 .. note:: The local directory of the input BIDS dataset (here: ``/home/localadmin/data/ds001``) and the output directory (here: ``/media/localadmin/data/ds001/derivatives``) used to process have to be mapped to the folders ``/bids_dir`` and ``/output_dir`` respectively using the ``-v`` docker run option.
 
