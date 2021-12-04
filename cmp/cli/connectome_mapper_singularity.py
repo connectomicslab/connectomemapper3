@@ -11,7 +11,7 @@ import sys
 
 # Own imports
 from cmp.info import __version__
-from cmp import parser as cmp_parser
+from cmp.parser import get_singularity_wrapper_parser
 from cmp.bidsappmanager.core import run
 
 
@@ -44,7 +44,7 @@ def create_singularity_cmd(args):
     cmd += f'--bind {args.bids_dir}:/bids_dir '
     cmd += f'--bind {args.output_dir}:/output_dir '
     # cmd += f'--bind {args.param_file}:/bids_dir/code/participants_params.json '
-    cmd += f'library://connectomicslab/default/connectomemapper-bidsapp:{__version__} '
+    cmd += args.singularity_image
 
     # Standard BIDS App inputs
     cmd += '/bids_dir '
@@ -88,7 +88,7 @@ def main():
             * '1' in case of an error
     """
     # Create and parse arguments
-    parser = cmp_parser.get()
+    parser = get_singularity_wrapper_parser()
     args = parser.parse_args()
 
     # Create the singularity run command
