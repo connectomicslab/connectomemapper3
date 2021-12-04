@@ -1,6 +1,6 @@
 ## Connectome Mapper 3 BIDS App
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 
@@ -170,6 +170,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/mschoettner"><img src="https://avatars.githubusercontent.com/u/48212821?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mikkel Schöttner</b></sub></a><br /><a href="#tutorial-mschoettner" title="Tutorials">✅</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=mschoettner" title="Code">💻</a> <a href="#ideas-mschoettner" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/yasseraleman"><img src="https://avatars.githubusercontent.com/u/7859430?v=4?s=100" width="100px;" alt=""/><br /><sub><b>yasseraleman</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/commits?author=yasseraleman" title="Code">💻</a> <a href="#ideas-yasseraleman" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 
