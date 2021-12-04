@@ -44,7 +44,7 @@ def create_singularity_cmd(args):
     cmd += f'--bind {args.bids_dir}:/bids_dir '
     cmd += f'--bind {args.output_dir}:/output_dir '
     # cmd += f'--bind {args.param_file}:/bids_dir/code/participants_params.json '
-    cmd += f'library://tourbier/mialsuperresolutiontoolkit-bidsapp:v{__version__} '
+    cmd += f'library://connectomicslab/default/connectomemapper-bidsapp:{__version__} '
 
     # Standard BIDS App inputs
     cmd += '/bids_dir '
