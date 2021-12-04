@@ -11,7 +11,7 @@ import sys
 
 # Own imports
 from cmp.info import __version__
-from cmp.parser import get
+from cmp import parser as cmp_parser
 from cmp.bidsappmanager.core import run
 
 
@@ -88,7 +88,7 @@ def main():
             * '1' in case of an error
     """
     # Create and parse arguments
-    parser = get()
+    parser = cmp_parser.get()
     args = parser.parse_args()
 
     # Create the singularity run command
