@@ -50,7 +50,7 @@ Singularity
 
   .. parsed-literal::
 
-  $ python connectomemapper_singularity \\
+  $ connectomemapper_singularity \\
         /home/localadmin/data/ds001:/bids_dir \\
         /media/localadmin/data/ds001/derivatives:/output_dir \\
         participant \\
