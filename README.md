@@ -1,6 +1,6 @@
 ## Connectome Mapper 3 BIDS App
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-11-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 
@@ -173,6 +173,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/yasseraleman"><img src="https://avatars.githubusercontent.com/u/7859430?v=4?s=100" width="100px;" alt=""/><br /><sub><b>yasseraleman</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/commits?author=yasseraleman" title="Code">💻</a> <a href="#ideas-yasseraleman" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://github.com/agriffa"><img src="https://avatars.githubusercontent.com/u/557451?v=4?s=100" width="100px;" alt=""/><br /><sub><b>agriffa</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/commits?author=agriffa" title="Code">💻</a> <a href="#ideas-agriffa" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://github.com/emullier"><img src="https://avatars.githubusercontent.com/u/43587002?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Emeline Mullier</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/commits?author=emullier" title="Code">💻</a></td>
+    <td align="center"><a href="https://wp.unil.ch/connectomics"><img src="https://avatars.githubusercontent.com/u/411192?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patric Hagmann</b></sub></a><br /><a href="#ideas-pahagman" title="Ideas, Planning, & Feedback">🤔</a> <a href="#fundingFinding-pahagman" title="Funding Finding">🔍</a></td>
   </tr>
 </table>
 
