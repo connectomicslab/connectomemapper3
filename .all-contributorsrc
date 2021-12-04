@@ -70,6 +70,17 @@
         "code",
         "ideas"
       ]
+    },
+    {
+      "login": "kuba-fidel",
+      "name": "kuba-fidel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/92929875?v=4",
+      "profile": "https://github.com/kuba-fidel",
+      "contributions": [
+        "code",
+        "doc",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
