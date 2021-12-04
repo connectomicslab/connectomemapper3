@@ -35,6 +35,18 @@
         "test",
         "ideas"
       ]
+    },
+    {
+      "login": "Katharinski",
+      "name": "Katharina Glomb",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20595787?v=4",
+      "profile": "https://github.com/Katharinski",
+      "contributions": [
+        "bug",
+        "code",
+        "test",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
