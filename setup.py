@@ -142,7 +142,8 @@ def main():
             "console_scripts": [
                 'connectomemapper3 = cmp.cli.connectomemapper3:main',
                 'cmpbidsappmanager = cmp.cli.cmpbidsappmanager:main',
-                'showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main'
+                'showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main',
+                'connectomemapper_singularity = cmp.cli.connectome_mapper_singularity:main'
             ]
         },
         license='BSD-3-Clause',
