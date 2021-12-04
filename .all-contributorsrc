@@ -132,6 +132,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "pahagman",
+      "name": "Patric Hagmann",
+      "avatar_url": "https://avatars.githubusercontent.com/u/411192?v=4",
+      "profile": "https://wp.unil.ch/connectomics",
+      "contributions": [
+        "ideas",
+        "fundingFinding"
+      ]
     }
   ],
   "contributorsPerLine": 7,
