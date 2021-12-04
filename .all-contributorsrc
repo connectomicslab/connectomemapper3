@@ -81,6 +81,17 @@
         "doc",
         "ideas"
       ]
+    },
+    {
+      "login": "stefanches7",
+      "name": "Stefan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17748742?v=4",
+      "profile": "https://github.com/stefanches7",
+      "contributions": [
+        "code",
+        "tutorial",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
