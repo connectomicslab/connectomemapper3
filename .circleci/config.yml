@@ -832,11 +832,11 @@ jobs:
       - run:
           name: install miniconda
           command: |
-          apt update
-          apt install -y wget
-          wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-          echo $(sha256sum miniconda.sh)
-          bash miniconda.sh -b -p $HOME/miniconda
+            apt update
+            apt install -y wget
+            wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+            echo $(sha256sum miniconda.sh)
+            bash miniconda.sh -b -p $HOME/miniconda
       - attach_workspace:
           at: /tmp
       - singularity/install-go:
