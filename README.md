@@ -1,6 +1,6 @@
 ## Connectome Mapper 3 BIDS App
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 This neuroimaging processing pipeline software is developed by the Connectomics Lab at the University Hospital of Lausanne (CHUV) for use within the [SNF Sinergia Project 170873](http://p3.snf.ch/project-170873), as well as for open-source software distribution.
 
@@ -165,6 +165,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/Katharinski"><img src="https://avatars.githubusercontent.com/u/20595787?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Katharina Glomb</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/issues?q=author%3AKatharinski" title="Bug reports">🐛</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=Katharinski" title="Code">💻</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=Katharinski" title="Tests">⚠️</a> <a href="#ideas-Katharinski" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://www.linkedin.com/in/aniltuncel/"><img src="https://avatars.githubusercontent.com/u/7026020?v=4?s=100" width="100px;" alt=""/><br /><sub><b>anilbey</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/commits?author=anilbey" title="Code">💻</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=anilbey" title="Tests">⚠️</a> <a href="#ideas-anilbey" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=anilbey" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/jwirsich"><img src="https://avatars.githubusercontent.com/u/7943145?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jwirsich</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/issues?q=author%3Ajwirsich" title="Bug reports">🐛</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=jwirsich" title="Code">💻</a> <a href="#ideas-jwirsich" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/kuba-fidel"><img src="https://avatars.githubusercontent.com/u/92929875?v=4?s=100" width="100px;" alt=""/><br /><sub><b>kuba-fidel</b></sub></a><br /><a href="https://github.com/connectomicslab/connectomemapper3/commits?author=kuba-fidel" title="Code">💻</a> <a href="https://github.com/connectomicslab/connectomemapper3/commits?author=kuba-fidel" title="Documentation">📖</a> <a href="#ideas-kuba-fidel" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 
