@@ -874,11 +874,14 @@ jobs:
           command: |
             source activate connectomemapper
             # Execute BIDS App
-            connectomemapper_singularity \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --singularity_image /tmp/cache/connectomemapper3.simg \
-                --anat_pipeline_config /config/ref_anatomical_config_2.ini \
-                --fs_license /bids_dir/code/license.txt
+            bids_dir="/tmp/data/${CIRCLE_JOB}/ds-sample"
+            output_dir="${bids_dir}/derivatives"
+            config_dir="/home/circleci/src/connectomemapper3/.circleci/tests/configuration_files"
+            connectomemapper3_singularity \
+                "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
+                --singularity_image "/tmp/cache/connectomemapper3.simg" \
+                --anat_pipeline_config "${config_dir}/ref_anatomical_config_2.ini" \
+                --fs_license "${bids_dir}/code/license.txt"
       - run:
           name: Checking outputs of Connectome Mapper run (test 5)
           command: |
