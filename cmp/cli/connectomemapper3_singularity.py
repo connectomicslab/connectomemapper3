@@ -28,7 +28,17 @@ def create_singularity_cmd(args):
                 'bids_dir': "/path/to/bids/dataset/directory",
                 'output_dir': "/path/to/output/directory",
                 'analysis_level': "participant",
-                'participant_label': ['01', '02', '03']
+                'participant_label': ['01', '02', '03'],
+                'anat_pipeline_config': "/path/to/ref_anatomical_config.json",
+                'dwi_pipeline_config': "/path/to/ref_diffusion_config.json",
+                'func_pipeline_config': "/path/to/ref_fMRI_config.json",
+                ('number_of_threads': 1,)
+                ('number_of_participants_processed_in_parallel': 1,)
+                ('mrtrix_random_seed': 1234,)
+                ('ants_random_seed': 1234,)
+                ('ants_number_of_threads': 2,)
+                ('fs_license': "/path/to/license.txt",)
+                ('notrack': True)
             }
 
     Returns

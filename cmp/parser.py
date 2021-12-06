@@ -108,7 +108,7 @@ def get_singularity_wrapper_parser():
     p.add_argument(
         '--singularity_image',
         type=str,
-        default=f'library://connectomicslab/default/connectomemapper-bidsapp:{__version__} ',
+        default=f'library://connectomicslab/default/connectomemapper-bidsapp:{__version__}',
         help="The path to the singularity image.",
     )
     return p
