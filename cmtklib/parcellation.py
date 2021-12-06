@@ -154,7 +154,6 @@ class ComputeParcellationRoiVolumes(BaseInterface):
         # Format the TSV file according to BIDS Extension Proposal 11 (BEP011):
         # The structural preprocessing derivatives.
         hdr_lines = ['{:<4}, {:<55}, {:<10}, {:>10} \n'.format(
-                "index", "name", "type", "volume-mm3")]
 
         f_volumetry.writelines(hdr_lines)
         del hdr_lines
@@ -753,7 +752,7 @@ class CombineParcellations(BaseInterface):
 
         print("create color look up table : ", self.inputs.create_colorLUT)
 
-        for roi_index, roi in enumerate(self.inputs.input_rois):
+        for _, roi in enumerate(self.inputs.input_rois):
             # colorLUT creation if enabled
             if self.inputs.create_colorLUT:
                 outprefix_name = roi.split(".")[0]

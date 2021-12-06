@@ -26,6 +26,7 @@ The command to run ``CMP3`` follows the `BIDS-Apps <https://github.com/BIDS-Apps
 
 Participant Level Analysis
 ===========================
+
 To run the docker image in participant level mode (for one participant):
 
   .. parsed-literal::

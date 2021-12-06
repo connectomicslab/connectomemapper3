@@ -891,6 +891,10 @@ class CMP_ConfigQualityWindowHandler(Handler):
             print(loaded_project.subjects)
             loaded_project.number_of_subjects = len(loaded_project.subjects)
 
+        except ValueError as e:
+            msg = str(e)
+            error(message=msg, title="BIDS error")
+            return
         except Exception:
             error(
                 message="Invalid BIDS dataset. Please see documentation for more details.",
@@ -2208,11 +2212,12 @@ class CMP_MainWindowHandler(Handler):
                     if len(query_files) > 0:
                         print("        * Available BOLD(s): {}".format(query_files))
                         fmri_available = True
-
-            except Exception:
-                msg = "Invalid BIDS dataset. Please see documentation for more details."
-                print_error(msg)
+            except ValueError as e:
+                msg = str(e)
                 error(message=msg, title="BIDS error")
+            except Exception:
+                error(message="Invalid BIDS dataset. Please see documentation for more details.",
+                  title="BIDS error")
                 return
 
             ui_info.ui.context["object"].project_info = loaded_project

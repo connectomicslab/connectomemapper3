@@ -144,9 +144,10 @@ def main():
         url="https://github.com/connectomicslab/connectomemapper3",
         entry_points={
             "console_scripts": [
-                "connectomemapper3 = cmp.cli.connectomemapper3:main",
-                "cmpbidsappmanager = cmp.cli.cmpbidsappmanager:main",
-                "showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main",
+                'connectomemapper3 = cmp.cli.connectomemapper3:main',
+                'cmpbidsappmanager = cmp.cli.cmpbidsappmanager:main',
+                'showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main',
+                'connectomemapper3_singularity = cmp.cli.connectomemapper3_singularity:main'
             ]
         },
         license="BSD-3-Clause",

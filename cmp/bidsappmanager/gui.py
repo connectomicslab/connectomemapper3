@@ -1180,13 +1180,17 @@ class CMP_BIDSAppWindow(HasTraits):
         self.dmri_config = dmri_config
         self.fmri_config = fmri_config
 
-        if "FREESURFER_HOME" in os.environ:
-            self.fs_license = os.path.join(os.environ["FREESURFER_HOME"], "license.txt")
+        if 'FREESURFER_HOME' in os.environ:
+            self.fs_license = os.path.join(
+                os.environ['FREESURFER_HOME'], 'license.txt')
+        elif os.path.isfile(os.path.join(bids_root, 'code', 'license.txt')):
+            self.fs_license = os.path.join(bids_root, 'code', 'license.txt')
         else:
-            print_error("  .. ERROR: Environment variable $FREESURFER_HOME not found")
-            self.fs_license = ""
-            print_warning("Freesurfer license unset ({})".format(self.fs_license))
-
+            print_error('.. ERROR: Environment variable $FREESURFER_HOME not found and no Freesurfer license file '
+                        'found in local code-folder ')
+            self.fs_license = ''
+            print_warning('Freesurfer license unset ({})'.format(self.fs_license))
+            
         self.datalad_is_available = project.is_tool("datalad")
 
         self.on_trait_change(self.update_run_dmri_pipeline, "run_dmri_pipeline")

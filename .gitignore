@@ -29,3 +29,5 @@ _build
 
 .idea/
 **/*.idea/*
+.vscode
+*.egg-info

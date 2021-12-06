@@ -815,6 +815,20 @@ jobs:
               echo "Skipping test_singularity_parcellation job"
               circleci step halt
             fi
+      - run:
+          name: setup miniconda environment
+          command: |
+            apt update
+            apt install -y wget
+            wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+            echo $(sha256sum miniconda.sh)
+            bash miniconda.sh -b -p $HOME/miniconda
+            export PATH="$HOME/miniconda/bin:$PATH"
+            conda update -y conda
+            conda env create -f environment.yml --name connectomemapper
+            source activate connectomemapper
+            echo $(which pip)
+            pip install .
       - attach_workspace:
           at: /tmp
       - singularity/install-go:
@@ -844,15 +858,16 @@ jobs:
           name: Run anatomical pipeline on ds-sample (test 5 bis - NativeFreesurfer)
           no_output_timeout: 5h
           command: |
+            source activate connectomemapper
             # Execute BIDS App
-            singularity run --containall \
-                --bind /tmp/data/${CIRCLE_JOB}/ds-sample:/bids_dir \
-                --bind /tmp/data/${CIRCLE_JOB}/ds-sample/derivatives:/output_dir \
-                --bind /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files:/config \
-                /tmp/cache/connectomemapper3.simg \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --anat_pipeline_config /config/ref_anatomical_config_2.ini \
-                --fs_license /bids_dir/code/license.txt
+            bids_dir="/tmp/data/${CIRCLE_JOB}/ds-sample"
+            output_dir="${bids_dir}/derivatives"
+            config_dir="/home/circleci/src/connectomemapper3/.circleci/tests/configuration_files"
+            connectomemapper3_singularity \
+                "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
+                --singularity_image "/tmp/cache/connectomemapper3.simg" \
+                --anat_pipeline_config "${config_dir}/ref_anatomical_config_2.ini" \
+                --fs_license "${bids_dir}/code/license.txt"
       - run:
           name: Checking outputs of Connectome Mapper run (test 5)
           command: |
