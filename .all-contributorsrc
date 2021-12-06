@@ -1,0 +1,153 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "sebastientourbier",
+      "name": "Sébastien Tourbier",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22279770?v=4",
+      "profile": "https://github.com/sebastientourbier",
+      "contributions": [
+        "code",
+        "design",
+        "infra",
+        "test",
+        "example",
+        "ideas",
+        "mentoring",
+        "projectManagement",
+        "review",
+        "tutorial",
+        "talk"
+      ]
+    },
+    {
+      "login": "joanrue",
+      "name": "joanrue",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13551804?v=4",
+      "profile": "https://github.com/joanrue",
+      "contributions": [
+        "bug",
+        "code",
+        "test",
+        "ideas"
+      ]
+    },
+    {
+      "login": "Katharinski",
+      "name": "Katharina Glomb",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20595787?v=4",
+      "profile": "https://github.com/Katharinski",
+      "contributions": [
+        "bug",
+        "code",
+        "test",
+        "ideas"
+      ]
+    },
+    {
+      "login": "anilbey",
+      "name": "anilbey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7026020?v=4",
+      "profile": "https://www.linkedin.com/in/aniltuncel/",
+      "contributions": [
+        "code",
+        "test",
+        "ideas",
+        "doc"
+      ]
+    },
+    {
+      "login": "jwirsich",
+      "name": "jwirsich",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7943145?v=4",
+      "profile": "https://github.com/jwirsich",
+      "contributions": [
+        "bug",
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "kuba-fidel",
+      "name": "kuba-fidel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/92929875?v=4",
+      "profile": "https://github.com/kuba-fidel",
+      "contributions": [
+        "code",
+        "doc",
+        "ideas"
+      ]
+    },
+    {
+      "login": "stefanches7",
+      "name": "Stefan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17748742?v=4",
+      "profile": "https://github.com/stefanches7",
+      "contributions": [
+        "code",
+        "tutorial",
+        "ideas"
+      ]
+    },
+    {
+      "login": "mschoettner",
+      "name": "Mikkel Schöttner",
+      "avatar_url": "https://avatars.githubusercontent.com/u/48212821?v=4",
+      "profile": "https://github.com/mschoettner",
+      "contributions": [
+        "tutorial",
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "yasseraleman",
+      "name": "yasseraleman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7859430?v=4",
+      "profile": "https://github.com/yasseraleman",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "agriffa",
+      "name": "agriffa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/557451?v=4",
+      "profile": "https://github.com/agriffa",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "emullier",
+      "name": "Emeline Mullier",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43587002?v=4",
+      "profile": "https://github.com/emullier",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "pahagman",
+      "name": "Patric Hagmann",
+      "avatar_url": "https://avatars.githubusercontent.com/u/411192?v=4",
+      "profile": "https://wp.unil.ch/connectomics",
+      "contributions": [
+        "ideas",
+        "fundingFinding"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "connectomemapper3",
+  "projectOwner": "connectomicslab",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
