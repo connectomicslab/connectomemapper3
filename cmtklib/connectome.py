@@ -166,7 +166,7 @@ def cmat(
     parcellation_scheme=None,
     compute_curvature=True,
     additional_maps=None,
-    output_types=["gPickle"],
+    output_types=None,
     atlas_info=None,
 ):
     """Create the connection matrix for each resolution using fibers and ROIs.
@@ -200,6 +200,8 @@ def cmat(
         additional_maps = {}
     if atlas_info is None:
         atlas_info = {}
+    if output_types is None:
+        output_types = ["gPickle"]
 
     print("================================================")
     print(" > Creation of connectome maps")
