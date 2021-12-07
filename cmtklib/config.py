@@ -6,6 +6,7 @@
 
 """ Module that defines methods for handling CMP3 configuration files."""
 import os
+from pathlib import Path
 import configparser
 import json
 from collections.abc import Iterable
@@ -357,6 +358,9 @@ def create_subject_configuration_from_ref(
 
     config["Multi-processing"]["number_of_cores"] = multiproc_number_of_cores
 
+    subject_conf_file_dir = Path(subject_conf_file).parent
+    if not os.path.isdir(str(subject_conf_file_dir)):
+        os.makedirs(str(subject_conf_file_dir), exist_ok=True)
     with open(subject_conf_file, "w") as outfile:
         json.dump(config, outfile, indent=4)
 
