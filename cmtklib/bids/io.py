@@ -16,9 +16,9 @@ from nipype import __version__ as nipype_version
 
 # Directories for derivatives compliant to BIDS `1.4.0` (e.g. <toolbox>-<version>)
 # Need to be declared before import the pipeline modules
-__cmp_directory__ = f'cmp-{__version__}'  # noqa
-__nipype_directory__ = f'nipype-{nipype_version}'  # noqa
-__freesurfer_directory__ = f'freesurfer-6.0.1'  # noqa
+__cmp_directory__ = f'cmp-{__version__}'
+__nipype_directory__ = f'nipype-{nipype_version}'
+__freesurfer_directory__ = f'freesurfer-6.0.1'
 
 
 class CustomBIDSFile(HasTraits):
