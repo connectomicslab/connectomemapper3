@@ -830,7 +830,7 @@ jobs:
               circleci step halt
             fi
       - run:
-          name: setup miniconda environment
+          name: Setup miniconda environment and install connectomemapper3 with Python wrappers
           command: |
             apt update
             apt install -y wget
@@ -839,8 +839,8 @@ jobs:
             bash miniconda.sh -b -p $HOME/miniconda
             export PATH="$HOME/miniconda/bin:$PATH"
             conda update -y conda
-            conda env create -f environment.yml --name connectomemapper
-            source activate connectomemapper
+            conda env create -f environment.yml --name connectomemapper3
+            source activate connectomemapper3
             echo $(which pip)
             pip install .
       - attach_workspace:
@@ -869,11 +869,12 @@ jobs:
             mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
             cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
       - run:
-          name: Run anatomical pipeline on ds-sample (test 5 bis - NativeFreesurfer)
+          name: Run anatomical pipeline on ds-sample (test 5 bis - NativeFreesurfer - Python wrapper)
           no_output_timeout: 5h
           command: |
+            # Activate the conda environment
             source activate connectomemapper
-            # Execute BIDS App
+            # Execute BIDS App via the singularity python wrapper
             bids_dir="/tmp/data/${CIRCLE_JOB}/ds-sample"
             output_dir="${bids_dir}/derivatives"
             config_dir="/home/circleci/src/connectomemapper3/.circleci/tests/configuration_files"
