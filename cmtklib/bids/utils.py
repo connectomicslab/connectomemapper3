@@ -465,7 +465,7 @@ class CreateCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
 
 class CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec(BaseInterfaceInputSpec):
     """Specify the inputs of the :obj:`~cmtklib.bids.utils.CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile`."""
-    
+
     roi_bids_tsvs = InputMultiPath(
         File(mandatory=True,
              exists=True,
@@ -474,11 +474,9 @@ class CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec(Bas
     )
 
 
-class CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec(
-    TraitedSpec
-):
+class CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec(TraitedSpec):
     """Specify the output of the :obj:`~cmtklib.bids.utils.CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile`."""
-    
+
     roi_graphmls = OutputMultiPath(
         File(desc="Path to graphml file that describes graph nodes for a given parcellation")
     )
@@ -490,7 +488,7 @@ class CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec(
 
 class CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterface):
     """Creates CMP graphml and FreeSurfer colorLUT files describing parcellation nodes from a list of BIDS TSV files"""
-    
+
     input_spec = CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileInputSpec
     output_spec = CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFileOutputSpec
 
@@ -505,7 +503,7 @@ class CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile(BaseInterfac
         outputs['roi_graphmls'] = glob(os.path.abspath("*.graphml"))
         outputs['roi_colorluts'] = glob(os.path.abspath("*_FreeSurferColorLUT.txt"))
         return outputs
-    
+
 
 def get_native_space_tsv_sidecar_files(filepathlist):
     """Return path to tsv sidecar file of a list of niftis (`.nii.gz`) without `_space-<label>_` in their filename."""

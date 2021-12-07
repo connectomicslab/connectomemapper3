@@ -888,7 +888,7 @@ class fMRIPipeline(Pipeline):
 
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-        
+
         if "_" in self.subject:
             self.subject = self.subject.split("_")[0]
 
@@ -930,9 +930,9 @@ class fMRIPipeline(Pipeline):
 
         # Initialization
         if os.path.isfile(
-                os.path.join(
-                    nipype_deriv_subject_directory, "fMRI_pipeline", "pypeline.log"
-                )
+            os.path.join(
+                nipype_deriv_subject_directory, "fMRI_pipeline", "pypeline.log"
+            )
         ):
             os.unlink(
                 os.path.join(

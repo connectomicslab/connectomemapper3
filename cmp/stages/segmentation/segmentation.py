@@ -497,7 +497,7 @@ class SegmentationStage(Stage):
             self.config.custom_aparcaseg.get_toolbox_derivatives_dir()
         ]
         toolbox_derivatives_dirnames=list(set(toolbox_derivatives_dirnames))
-        
+
         toolbox_derivatives_paths = [
             os.path.join(self.bids_dir, "derivatives", toolbox_dir) for toolbox_dir in toolbox_derivatives_dirnames
         ]
@@ -519,12 +519,12 @@ class SegmentationStage(Stage):
             ),
             name="custom_seg_grabber",
         )
-        
+
         def get_first_path(paths):
             from cmtklib.bids.utils import get_native_space_files  # noqa
             paths = get_native_space_files(paths)
             return paths[0]
-        
+
         apply_mask = pe.Node(interface=fsl.ApplyMask(), name="applyMask")
         if self.bids_session_label is not None and self.bids_session_label != "":
             apply_mask.inputs.out_file = f'{self.bids_subject_label}_{self.bids_session_label}_desc-brain_T1w.nii.gz'
@@ -604,7 +604,7 @@ class SegmentationStage(Stage):
             # Take the first T1w found in the subject/session directory of raw data
             t1_file = glob(os.path.join(raw_subject_dir, "anat", sub_ses + "*_T1w.nii.gz"))[0]
             print(t1_file)
-            
+
             brainmask_file = self.config.custom_brainmask.get_filename_path(
                 base_dir=os.path.join(self.output_dir, __cmp_directory__),
                 subject=self.bids_subject_label,
