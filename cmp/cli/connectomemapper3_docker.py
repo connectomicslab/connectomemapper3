@@ -8,6 +8,7 @@
 
 # General imports
 import sys
+from pathlib import Path
 
 # Own imports
 from cmp.info import __version__
@@ -28,6 +29,16 @@ def create_docker_cmd(args):
                 'output_dir': "/path/to/output/directory",
                 'analysis_level': "participant",
                 'participant_label': ['01', '02', '03'],
+                'anat_pipeline_config': "/path/to/ref_anatomical_config.json",
+                'dwi_pipeline_config': "/path/to/ref_diffusion_config.json",
+                'func_pipeline_config': "/path/to/ref_fMRI_config.json",
+                ('number_of_threads': 1,)
+                ('number_of_participants_processed_in_parallel': 1,)
+                ('mrtrix_random_seed': 1234,)
+                ('ants_random_seed': 1234,)
+                ('ants_number_of_threads': 2,)
+                ('fs_license': "/path/to/license.txt",)
+                ('notrack': True)
             }
 
     Returns
@@ -38,38 +49,50 @@ def create_docker_cmd(args):
     # Docker run command prelude
     cmd = 'docker run -t --rm '
     cmd += '-u $(id -u):$(id -g) '
-    cmd += f'-bind {args.bids_dir}:/bids_dir '
-    cmd += f'-bind {args.output_dir}:/output_dir '
-    # cmd += f'-v {args.param_file}:/bids_dir/code/participants_params.json '
-    # cmd += f'sebastientourbier/mialsuperresolutiontoolkit-bidsapp:v{__version__} '
-    cmd += args.docker_image
+    if args.coverage:
+        cmd += '--entrypoint /app/run_coverage_cmp3.sh '
+    cmd += f'-v {args.bids_dir}:/bids_dir '
+    cmd += f'-v {args.output_dir}:/output_dir '
+    if args.config_dir:
+        cmd += f'-v {args.config_dir}:/config '
+    else:
+        cmd += f'-v {args.bids_dir}/code:/config '
+    if args.fs_license:
+        cmd += f'-v {args.fs_license}:/bids_dir/code/license.txt '
+
+    cmd += f'{args.docker_image} '
 
     # Standard BIDS App inputs
     cmd += '/bids_dir '
     cmd += '/output_dir '
     cmd += f'{args.analysis_level} '
-
     if args.participant_label:
         cmd += '--participant_label '
         for label in args.participant_label:
             cmd += f'{label} '
-
     if args.session_label:
         cmd += '--session_label '
         for label in args.session_label:
             cmd += f'{label} '
-
+    if args.anat_pipeline_config:
+        cmd += f'/config/{args.anat_pipeline_config} '
+    if args.dwi_pipeline_config:
+        cmd += f'/config/{args.dwi_pipeline_config} '
+    if args.func_pipeline_config:
+        cmd += f'/config/{args.func_pipeline_config} '
+    cmd += f'--fs_license /bids_dir/code/license.txt '
     optional_single_args = (
-        "anat_pipeline_config", "dwi_pipeline_config", "func_pipeline_config",
         "number_of_threads", "number_of_participants_processed_in_parallel",
         "mrtrix_random_seed", "ants_random_seed", "ants_number_of_threads",
-        "fs_license", "notrack"
     )
-
     for arg_name in optional_single_args:
         argument_value = getattr(args, arg_name)
         if argument_value:
             cmd += f'--{arg_name} {argument_value} '
+    if args.notrack:
+        cmd += "--notrack "
+    if args.coverage:
+        cmd += "--coverage"
 
     return cmd
 

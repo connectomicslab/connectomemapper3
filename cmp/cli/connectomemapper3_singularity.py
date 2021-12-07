@@ -8,6 +8,7 @@
 
 # General imports
 import sys
+from pathlib import Path
 
 # Own imports
 from cmp.info import __version__
@@ -50,13 +51,19 @@ def create_singularity_cmd(args):
     cmd = 'singularity run --containall '
     cmd += f'--bind {args.bids_dir}:/bids_dir '
     cmd += f'--bind {args.output_dir}:/output_dir '
-    cmd += args.singularity_image
+    if args.config_dir:
+        cmd += f'--bind {args.config_dir}:/config '
+    else:
+        cmd += f'--bind {args.bids_dir}/code:/config '
+    if args.fs_license:
+        cmd += f'--bind {args.fs_license}:/bids_dir/code/license.txt '
+
+    cmd += f'{args.singularity_image} '
 
     # Standard BIDS App inputs
     cmd += '/bids_dir '
     cmd += '/output_dir '
     cmd += f'{args.analysis_level} '
-
     if args.participant_label:
         cmd += '--participant_label '
         for label in args.participant_label:
@@ -65,18 +72,25 @@ def create_singularity_cmd(args):
         cmd += '--session_label '
         for label in args.session_label:
             cmd += f'{label} '
-
+    if args.anat_pipeline_config:
+        cmd += f'/config/{args.anat_pipeline_config} '
+    if args.dwi_pipeline_config:
+        cmd += f'/config/{args.dwi_pipeline_config} '
+    if args.func_pipeline_config:
+        cmd += f'/config/{args.func_pipeline_config} '
+    cmd += f'--fs_license /bids_dir/code/license.txt '
     optional_single_args = (
-        "anat_pipeline_config", "dwi_pipeline_config", "func_pipeline_config",
         "number_of_threads", "number_of_participants_processed_in_parallel",
         "mrtrix_random_seed", "ants_random_seed", "ants_number_of_threads",
-        "fs_license", "notrack"
     )
-
     for arg_name in optional_single_args:
         argument_value = getattr(args, arg_name)
         if argument_value:
             cmd += f'--{arg_name} {argument_value} '
+    if args.notrack:
+        cmd += "--notrack "
+    if args.coverage:
+        cmd += "--coverage"
 
     return cmd
 
