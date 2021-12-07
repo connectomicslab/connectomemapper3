@@ -830,7 +830,7 @@ jobs:
               circleci step halt
             fi
       - run:
-          name: setup miniconda environment
+          name: Setup miniconda environment and install connectomemapper3 with Python wrappers
           command: |
             apt update
             apt install -y wget
@@ -869,16 +869,20 @@ jobs:
             mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
             cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
       - run:
-          name: Run anatomical pipeline on ds-sample (test 5 bis - NativeFreesurfer)
+          name: Run anatomical pipeline on ds-sample (test 5 bis - NativeFreesurfer - Python wrapper)
           no_output_timeout: 5h
           command: |
-            source activate connectomemapper3 
-            # Execute BIDS App
-            connectomapper3_docker \
-                /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
-                --docker_image /tmp/cache/connectomemapper3.simg \
-                --anat_pipeline_config /config/ref_anatomical_config_2.ini \
-                --fs_license /bids_dir/code/license.txt
+            # Activate the conda environment
+            source activate connectomemapper
+            # Execute BIDS App via the singularity python wrapper
+            bids_dir="/tmp/data/${CIRCLE_JOB}/ds-sample"
+            output_dir="${bids_dir}/derivatives"
+            config_dir="/home/circleci/src/connectomemapper3/.circleci/tests/configuration_files"
+            connectomemapper3_singularity \
+                "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
+                --singularity_image "/tmp/cache/connectomemapper3.simg" \
+                --anat_pipeline_config "${config_dir}/ref_anatomical_config_2.ini" \
+                --fs_license "${bids_dir}/code/license.txt"
       - run:
           name: Checking outputs of Connectome Mapper run (test 5)
           command: |

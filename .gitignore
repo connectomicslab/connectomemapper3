@@ -28,3 +28,5 @@ scripts/runGource.sh
 *.ipynb_checkpoints
 
 .idea/
+.vscode
+*.egg-info
