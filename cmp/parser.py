@@ -108,8 +108,14 @@ def get_docker_wrapper_parser():
     p.add_argument(
         '--docker_image',
         type=str,
-        default=f'sebastientourbier/connectomemapper-bidsapp:{__version__} ',
+        default=f'sebastientourbier/connectomemapper-bidsapp:{__version__}',
         help="The path to the docker image.",
+    )
+    p.add_argument(
+        '--config_dir',
+        type=str,
+        default=None,
+        help="The path to the directory containing the configuration files.",
     )
     return p
 
@@ -129,5 +135,11 @@ def get_singularity_wrapper_parser():
         type=str,
         default=f'library://connectomicslab/default/connectomemapper-bidsapp:{__version__}',
         help="The path to the singularity image.",
+    )
+    p.add_argument(
+        '--config_dir',
+        type=str,
+        default=None,
+        help="The path to the directory containing the configuration files.",
     )
     return p
