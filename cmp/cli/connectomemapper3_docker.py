@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""This module defines the `connectome_mapper_singularity` script that wraps calls to the Singularity BIDS APP image."""
+"""This module defines the `connectomemapper_docker.py` script that wraps calls to the Docker BIDS APP image."""
 
 # General imports
 import sys
@@ -12,13 +12,12 @@ from pathlib import Path
 
 # Own imports
 from cmp.info import __version__
-from cmp.parser import get_singularity_wrapper_parser
-from cmp.input_validator import check_directory_exists
+from cmp.parser import get_docker_wrapper_parser
 from cmp.bidsappmanager.core import run
 
 
-def create_singularity_cmd(args):
-    """Function that creates and returns the BIDS App singularity run command.
+def create_docker_cmd(args):
+    """Function that creates and returns the BIDS App docker run command.
 
     Parameters
     ----------
@@ -47,18 +46,21 @@ def create_singularity_cmd(args):
     cmd : string
         String containing the command to be run via `subprocess.run()`
     """
-    # Singularity run command prelude
-    cmd = 'singularity run --containall '
-    cmd += f'--bind {args.bids_dir}:/bids_dir '
-    cmd += f'--bind {args.output_dir}:/output_dir '
+    # Docker run command prelude
+    cmd = 'docker run -t --rm '
+    cmd += '-u $(id -u):$(id -g) '
+    if args.coverage:
+        cmd += '--entrypoint /app/run_coverage_cmp3.sh '
+    cmd += f'-v {args.bids_dir}:/bids_dir '
+    cmd += f'-v {args.output_dir}:/output_dir '
     if args.config_dir:
-        cmd += f'--bind {args.config_dir}:/config '
+        cmd += f'-v {args.config_dir}:/config '
     else:
-        cmd += f'--bind {args.bids_dir}/code:/config '
+        cmd += f'-v {args.bids_dir}/code:/config '
     if args.fs_license:
-        cmd += f'--bind {args.fs_license}:/bids_dir/code/license.txt '
+        cmd += f'-v {args.fs_license}:/bids_dir/code/license.txt '
 
-    cmd += f'{args.singularity_image} '
+    cmd += f'{args.docker_image} '
 
     # Standard BIDS App inputs
     cmd += '/bids_dir '
@@ -96,7 +98,7 @@ def create_singularity_cmd(args):
 
 
 def main():
-    """Main function that creates and executes the BIDS App singularity command.
+    """Main function that creates and executes the BIDS App docker command.
 
     Returns
     -------
@@ -108,14 +110,13 @@ def main():
             * '1' in case of an error
     """
     # Create and parse arguments
-    parser = get_singularity_wrapper_parser()
+    parser = get_docker_wrapper_parser()
     args = parser.parse_args()
 
-    check_directory_exists(args.bids_dir)
-    # Create the singularity run command
-    cmd = create_singularity_cmd(args)
+    # Create the docker run command
+    cmd = create_docker_cmd(args)
 
-    # Execute the singularity run command
+    # Execute the docker run command
     try:
         print(f'... cmd: {cmd}')
         run(cmd)
