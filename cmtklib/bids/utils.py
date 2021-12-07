@@ -218,7 +218,7 @@ class CreateBIDSStandardParcellationLabelIndexMappingFile(BaseInterface):
                     np.array([[int(s[0]), int(s[2]), int(s[3]), int(s[4])]]),
                     axis=0,
                 )
-        
+
         if self.inputs.verbose:
             print(f'ROIS RGB Colors: {rois_rgb}')
 

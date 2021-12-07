@@ -17,10 +17,9 @@ import warnings
 from traits.api import *
 
 from bids import BIDSLayout
-from nipype import __version__ as nipype_version
 
 # Own imports
-from cmp.project_global import (
+from cmtklib.bids.io import (
     __cmp_directory__,
     __nipype_directory__,
     __freesurfer_directory__
@@ -60,7 +59,7 @@ class CMP_Project_Info(HasTraits):
 
     bids_layout : bids.BIDSLayout
         Instance of pybids `BIDSLayout`
-        
+
     __cmp_directory__ : str
         Name of
         

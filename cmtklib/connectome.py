@@ -161,9 +161,9 @@ def save_fibers(oldhdr, oldfib, fname, indices):
 
 def cmat(
     intrk,
-    roi_volumes,
-    roi_graphmls,
-    parcellation_scheme,
+    roi_volumes=None,
+    roi_graphmls=None,
+    parcellation_scheme=None,
     compute_curvature=True,
     additional_maps=None,
     output_types=["gPickle"],
@@ -226,7 +226,7 @@ def cmat(
                         roi_fname = vol
                     if parkey in graphml:
                         roi_graphml_fname = graphml
-                    
+
                 roi = nib.load(roi_fname)
                 roiData = roi.get_data()
                 resolutions[parkey]["number_of_regions"] = roiData.max()

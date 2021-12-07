@@ -639,7 +639,7 @@ class ParcellationStage(Stage):
                 subject=self.bids_subject_label,
                 session=self.bids_session_label if self.bids_session_label != "" else None
             ).split("_dseg")[0] + "_FreeSurferColorLUT.txt"
-            
+
             self.inspect_outputs_dict[f'Custom atlas ({self.config.custom_parcellation.atlas})'] = [
                 "freeview",
                 "-v",

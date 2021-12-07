@@ -738,7 +738,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         sinker = pe.Node(nio.DataSink(), name="anat_datasinker")
         sinker.inputs.base_directory = os.path.abspath(base_directory)
         # sinker.inputs.parametrization = True  # Store output in parametrized structure (for MapNode)
-        
+
         if self.stages["Parcellation"].config.parcellation_scheme == "Custom":
             custom_atlas = self.stages["Parcellation"].config.custom_parcellation.atlas
             custom_atlas_res = self.stages["Parcellation"].config.custom_parcellation.res

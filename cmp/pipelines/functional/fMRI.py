@@ -32,7 +32,7 @@ class Global_Configuration(HasTraits):
     imaging_model : 'fMRI'
         Imaging model used by `RegistrationStage`
     """
-    
+
     process_type = Str("fMRI")
     imaging_model = Str
 

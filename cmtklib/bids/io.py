@@ -8,7 +8,7 @@
 import csv
 import os
 import json
-from traits.api import (HasTraits, Directory, Str)
+from traits.api import (HasTraits, Str)
 
 from cmp.info import __version__
 from nipype import __version__ as nipype_version
@@ -115,7 +115,7 @@ class CustomBIDSFile(HasTraits):
 
     def get_filename_path(self, base_dir, subject, session=None, debug=True):
         """Return the number of regions by reading its associated TSV side car file describing the nodes.
-    
+
         Parameters
         ----------
         base_dir: str
