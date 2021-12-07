@@ -16,7 +16,7 @@ from traitsui.qt4.extra.qt_view import QtView
 from pyface.ui.qt4.image_resource import ImageResource
 
 # Own import
-from cmp.project import __cmp_directory__, __nipype_directory__, __freesurfer_directory__
+from cmp.project_global import __cmp_directory__, __nipype_directory__, __freesurfer_directory__
 from cmp.bidsappmanager.stages.segmentation.segmentation import SegmentationStageUI
 from cmp.bidsappmanager.stages.parcellation.parcellation import ParcellationStageUI
 from cmp.pipelines.anatomical.anatomical import (

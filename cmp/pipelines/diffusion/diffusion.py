@@ -16,7 +16,7 @@ from nipype import config, logging
 from nipype.interfaces.utility import Merge
 
 # Own imports
-from cmp.project import __cmp_directory__, __nipype_directory__
+from cmp.project_global import __cmp_directory__, __nipype_directory__
 from cmp.pipelines.common import *
 from cmp.stages.connectome.connectome import ConnectomeStage
 from cmp.stages.diffusion.diffusion import DiffusionStage

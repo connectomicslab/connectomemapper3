@@ -15,7 +15,7 @@ import json
 import networkx as nx
 import numpy as np
 
-from cmp.project import __cmp_directory__
+from cmp.project_global import __cmp_directory__
 
 warnings.simplefilter("ignore")
 
