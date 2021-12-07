@@ -60,15 +60,6 @@ class CMP_Project_Info(HasTraits):
     bids_layout : bids.BIDSLayout
         Instance of pybids `BIDSLayout`
 
-    __cmp_directory__ : str
-        Name of
-        
-    __nipype_directory__ : str
-        Name of directory for nipype intermediate derivatives (e.g. nipype-<version>) compliant to BIDS `1.4.0`
-        
-    __freesurfer_directory__ : str
-        Name of directory for freesurfer derivatives (e.g. freesurfer-<version>) compliant to BIDS `1.4.0`
-
     subjects : traits.List
         List of subjects in the dataset
 
@@ -200,7 +191,6 @@ class CMP_Project_Info(HasTraits):
     subject_sessions = List([])
     subject_session = Enum(values="subject_sessions")
 
-# current_subj = Str()
     anat_warning_msg = Str(
         "\nWarning: selected directory is already configured for anatomical data processing.\n\n"
         "Do you want to reset the configuration to default parameters ?\n"

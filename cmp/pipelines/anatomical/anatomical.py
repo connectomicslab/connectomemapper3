@@ -1125,7 +1125,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             )
         else:
             anat_flow.run()
-            
+
         self._update_parcellation_scheme()
 
         iflogger.info("**** Processing finished ****")

@@ -929,7 +929,7 @@ class CMTK_rsfmri_cmat(BaseInterface):
             # loop throughout all the ROIs (current resolution)
             for i in range(1, nROIs + 1):
                 ts[i - 1, :] = fdata[mask == i].mean(axis=0)
-            
+
             # Save average roi time-series
             np.save(os.path.abspath("averageTimeseries_%s.npy" % parkey), ts)
             sio.savemat(os.path.abspath("averageTimeseries_%s.mat" % parkey), {"ts": ts})

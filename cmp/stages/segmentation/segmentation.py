@@ -295,7 +295,7 @@ class SegmentationStage(Stage):
                 if not os.path.exists(orig_dir):
                     print(f'INFO : Create folder: {orig_dir}')
                     os.makedirs(orig_dir)
-                    
+
                 rename.inputs.format_string = os.path.join(orig_dir, "001.mgz")
 
                 if self.config.brain_mask_extraction_tool == "Freesurfer":

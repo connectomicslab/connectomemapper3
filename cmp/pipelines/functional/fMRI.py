@@ -60,7 +60,7 @@ class fMRIPipeline(Pipeline):
     cmp.stages.functional.functionalMRI.FunctionalMRIStage
     cmp.stages.connectome.fmri_connectome.ConnectomeStage
     """
-    
+
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
     pipeline_name = Str("fMRI_pipeline")
     input_folders = ["anat", "func"]
@@ -82,7 +82,7 @@ class fMRIPipeline(Pipeline):
     custom_atlas_res = Str
     subjects_dir = Str
     subject_id = Str
-    
+
     def __init__(self, project_info):
         """Constructor of a `fMRIPipeline` object.
 
@@ -97,10 +97,10 @@ class fMRIPipeline(Pipeline):
         """
         self.subjects_dir = project_info.freesurfer_subjects_dir
         self.subject_id = project_info.freesurfer_subject_id
-        
+
         self.global_conf.subjects = project_info.subjects
         self.global_conf.subject = project_info.subject
-        
+
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
             self.subject_directory = os.path.join(
@@ -113,14 +113,14 @@ class fMRIPipeline(Pipeline):
             self.subject_directory = os.path.join(
                 project_info.base_directory, project_info.subject
             )
-        
+
         self.derivatives_directory = os.path.abspath(project_info.output_directory)
-        
+
         if project_info.output_directory is not None:
             self.output_directory = os.path.abspath(project_info.output_directory)
         else:
             self.output_directory = os.path.join(self.base_directory, "derivatives")
-        
+
         self.stages = {
             "Preprocessing": PreprocessingStage(
                 bids_dir=project_info.base_directory, output_dir=self.output_directory
@@ -139,11 +139,11 @@ class fMRIPipeline(Pipeline):
                 bids_dir=project_info.base_directory, output_dir=self.output_directory
             ),
         }
-        
+
         Pipeline.__init__(self, project_info)
-        
+
         self.subject = project_info.subject
-        
+
         self.stages["FunctionalMRI"].config.on_trait_change(
             self.update_nuisance_requirements, "global_nuisance"
         )
@@ -156,7 +156,7 @@ class fMRIPipeline(Pipeline):
         self.stages["Connectome"].config.on_trait_change(
             self.update_scrubbing, "apply_scrubbing"
         )
-    
+
     def _subject_changed(self, new):
         """ "Update subject in the connectome stage configuration when ``subject`` is updated.
 
@@ -166,7 +166,7 @@ class fMRIPipeline(Pipeline):
             New value.
         """
         self.stages["Connectome"].config.subject = new
-    
+
     def update_registration(self):
         """Configure the list of registration tools."""
         if (
@@ -183,7 +183,7 @@ class fMRIPipeline(Pipeline):
                 "Linear (FSL)",
                 "BBregister (FS)",
             ]
-    
+
     def update_nuisance_requirements(self):
         """Update nuisance requirements.
 
@@ -199,13 +199,13 @@ class fMRIPipeline(Pipeline):
         self.stages["Registration"].config.apply_to_eroded_wm = self.stages[
             "FunctionalMRI"
         ].config.wm
-    
+
     def update_scrubbing(self):
         """Update to precompute or inputs for scrubbing during the FunctionalMRI stage."""
         self.stages["FunctionalMRI"].config.scrubbing = self.stages[
             "Connectome"
         ].config.apply_scrubbing
-    
+
     def define_custom_mapping(self, custom_last_stage):
         """Define the pipeline to be executed until a specific stages.
 
@@ -226,7 +226,7 @@ class fMRIPipeline(Pipeline):
             self.stages[stage].enabled = True
             if stage == custom_last_stage:
                 break
-    
+
     def check_input(self, layout, gui=True):
         """Check if input of the diffusion pipeline are available.
 
@@ -252,12 +252,12 @@ class fMRIPipeline(Pipeline):
         t1_available = False
         t2_available = False
         valid_inputs = False
-        
+
         if self.global_conf.subject_session == "":
             subject = self.subject
         else:
             subject = "_".join((self.subject, self.global_conf.subject_session))
-        
+
         fmri_file = os.path.join(
             self.subject_directory, "func", subject + "_task-rest_bold.nii.gz"
         )
@@ -266,40 +266,40 @@ class fMRIPipeline(Pipeline):
         )
         t1_file = os.path.join(self.subject_directory, "anat", subject + "_T1w.nii.gz")
         t2_file = os.path.join(self.subject_directory, "anat", subject + "_T2w.nii.gz")
-        
+
         subjid = self.subject.split("-")[1]
-        
+
         print("> Looking for....")
         if self.global_conf.subject_session == "":
-            
+
             files = layout.get(subject=subjid, suffix="bold", extension=".nii.gz")
             if len(files) > 0:
                 fmri_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 print("ERROR : BOLD image not found for subject %s." % subjid)
                 return
-            
+
             files = layout.get(subject=subjid, suffix="bold", extension=".json")
             if len(files) > 0:
                 json_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 print("WARNING : BOLD json sidecar not found for subject %s." % subjid)
-            
+
             files = layout.get(subject=subjid, suffix="T1w", extension=".nii.gz")
             if len(files) > 0:
                 t1_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 print("WARNING : T1w image not found for subject %s." % subjid)
-            
+
             files = layout.get(subject=subjid, suffix="T2w", extension=".nii.gz")
             if len(files) > 0:
                 t2_file = os.path.join(files[0].dirname, files[0].filename)
             else:
                 print("WARNING : T2w image not found for subject %s." % subjid)
-        
+
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
-            
+
             files = layout.get(
                 subject=subjid, suffix="bold", extension=".nii.gz", session=sessid
             )
@@ -311,7 +311,7 @@ class fMRIPipeline(Pipeline):
                     % (subjid, self.global_conf.subject_session)
                 )
                 return
-            
+
             files = layout.get(
                 subject=subjid, suffix="bold", extension=".json", session=sessid
             )
@@ -322,7 +322,7 @@ class fMRIPipeline(Pipeline):
                     "WARNING : BOLD json sidecar not found for subject %s, session %s."
                     % (subjid, self.global_conf.subject_session)
                 )
-            
+
             files = layout.get(
                 subject=subjid, suffix="T1w", extension=".nii.gz", session=sessid
             )
@@ -333,7 +333,7 @@ class fMRIPipeline(Pipeline):
                     "WARNING : T1w image not found for subject %s, session %s."
                     % (subjid, self.global_conf.subject_session)
                 )
-            
+
             files = layout.get(
                 subject=subjid, suffix="T2w", extension=".nii.gz", session=sessid
             )
@@ -344,12 +344,12 @@ class fMRIPipeline(Pipeline):
                     "WARNING : T2w image not found for subject %s, session %s."
                     % (subjid, self.global_conf.subject_session)
                 )
-        
+
         print("... t1_file : %s" % t1_file)
         print("... t2_file : %s" % t2_file)
         print("... fmri_file : %s" % fmri_file)
         print("... json_file : %s" % json_file)
-        
+
         if os.path.isfile(t1_file):
             t1_available = True
         if os.path.isfile(t2_file):
@@ -358,7 +358,7 @@ class fMRIPipeline(Pipeline):
             fMRI_available = True
         if os.path.isfile(json_file):
             fMRI_json_available = True
-        
+
         if fMRI_available:
             if self.global_conf.subject_session == "":
                 out_dir = os.path.join(self.output_directory, __cmp_directory__, self.subject)
@@ -369,38 +369,38 @@ class fMRIPipeline(Pipeline):
                     self.subject,
                     self.global_conf.subject_session,
                 )
-            
+
             out_fmri_file = os.path.join(
                 out_dir, "func", subject + "_task-rest_desc-cmp_bold.nii.gz"
             )
             shutil.copy(src=fmri_file, dst=out_fmri_file)
-            
+
             valid_inputs = True
             input_message = "Inputs check finished successfully.\nfMRI data available."
-            
+
             if t2_available:
                 out_t2_file = os.path.join(out_dir, "anat", subject + "_T2w.nii.gz")
                 shutil.copy(src=t2_file, dst=out_t2_file)
                 # swap_and_reorient(src_file=os.path.join(self.base_directory,'NIFTI','T2_orig.nii.gz'),
                 #                   ref_file=os.path.join(self.base_directory,'NIFTI','fMRI.nii.gz'),
                 #                   out_file=os.path.join(self.base_directory,'NIFTI','T2.nii.gz'))
-            
+
             if fMRI_json_available:
                 out_json_file = os.path.join(
                     out_dir, "func", subject + "_task-rest_desc-cmp_bold.json"
                 )
                 shutil.copy(src=json_file, dst=out_json_file)
-        
+
         else:
             input_message = (
                 "Error during inputs check. \nfMRI data not available (fMRI)."
             )
-        
+
         print(input_message)
-        
+
         self.global_conf.imaging_model = "fMRI"
         self.stages["Registration"].config.imaging_model = "fMRI"
-        
+
         if t2_available:
             self.stages["Registration"].config.registration_mode_trait = [
                 "FSL (Linear)",
@@ -410,11 +410,10 @@ class fMRIPipeline(Pipeline):
             self.stages["Registration"].config.registration_mode_trait = [
                 "FSL (Linear)"
             ]
-        
         # self.fill_stages_outputs()
-        
+
         return valid_inputs
-    
+
     def check_config(self):
         """Check if the fMRI pipeline parameters is properly configured.
 
@@ -424,8 +423,8 @@ class fMRIPipeline(Pipeline):
             String that is empty if success, otherwise it contains the error message
         """
         if (
-                self.stages["FunctionalMRI"].config.motion is True
-                and self.stages["Preprocessing"].config.motion_correction is False
+            self.stages["FunctionalMRI"].config.motion is True
+            and self.stages["Preprocessing"].config.motion_correction is False
         ):
             return (
                 "\n\tMotion signal regression selected but no motion correction set.\t\n\t"
@@ -442,7 +441,7 @@ class fMRIPipeline(Pipeline):
                 "or disable scrubbing in the connectome configuration window.\t\n"
             )
         return ""
-    
+
     def create_datagrabber_node(self, base_directory, bids_atlas_label):
         """Create the appropriate Nipype DataGrabber node depending on the `parcellation_scheme`
 
@@ -490,7 +489,7 @@ class fMRIPipeline(Pipeline):
         datasource.inputs.base_directory = base_directory
         datasource.inputs.template = "*"
         datasource.inputs.raise_on_empty = False
-        
+
         if self.parcellation_scheme == "NativeFreesurfer":
             # fmt:off
             datasource.inputs.field_template = dict(
@@ -566,11 +565,11 @@ class fMRIPipeline(Pipeline):
                 roi_graphml_s5="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_res-scale5_dseg.graphml",
             )
             # fmt:on
-        
+
         datasource.inputs.sort_filelist = False
-        
+
         return datasource
-    
+
     def create_datasinker_node(self, base_directory, bids_atlas_label):
         """Create the appropriate Nipype DataSink node depending on the `parcellation_scheme`
 
@@ -648,13 +647,13 @@ class fMRIPipeline(Pipeline):
                     (f'averageTimeseries_{scale}', f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_timeseries')
                 ]
                 # fmt:on
-            
+
         sinker.inputs.substitutions = substitutions
-        
+
         return sinker
-    
+
     def create_pipeline_flow(
-            self, cmp_deriv_subject_directory, nipype_deriv_subject_directory
+        self, cmp_deriv_subject_directory, nipype_deriv_subject_directory
     ):
         """Create the pipeline workflow.
 
@@ -683,22 +682,22 @@ class fMRIPipeline(Pipeline):
             bids_atlas_label = self.custom_atlas_name
             if self.custom_atlas_res is not None and self.custom_atlas_res != "":
                 bids_atlas_label += f'_res-{self.custom_atlas_res}'
-        
+
         # Data sinker for output
         sinker = self.create_datasinker_node(
             base_directory=cmp_deriv_subject_directory,
             bids_atlas_label=bids_atlas_label
         )
-        
+
         # Data import
         datasource = self.create_datagrabber_node(
             base_directory=cmp_deriv_subject_directory,
             bids_atlas_label=bids_atlas_label
         )
-        
+
         # Clear previous outputs
         self.clear_stages_outputs()
-        
+
         # Create fMRI flow
         fMRI_flow = pe.Workflow(
             name="fMRI_pipeline",
@@ -726,17 +725,17 @@ class fMRIPipeline(Pipeline):
         fMRI_inputnode.inputs.atlas_info = self.atlas_info
         fMRI_inputnode.subjects_dir = self.subjects_dir
         fMRI_inputnode.subject_id = os.path.basename(self.subject_id)
-        
+
         fMRI_outputnode = pe.Node(
             interface=util.IdentityInterface(fields=["connectivity_matrices"]),
             name="outputnode",
         )
-        
+
         fMRI_flow.add_nodes([fMRI_inputnode, fMRI_outputnode])
-        
+
         merge_roi_volumes = pe.Node(interface=Merge(5), name="merge_roi_volumes")
         merge_roi_graphmls = pe.Node(interface=Merge(5), name="merge_roi_graphmls")
-        
+
         def remove_non_existing_scales(roi_volumes):
             """Returns a list which do not contained any empty element.
 
@@ -756,7 +755,7 @@ class fMRIPipeline(Pipeline):
                 if vol is not None:
                     out_roi_volumes.append(vol)
             return out_roi_volumes
-        
+
         # fmt:off
         fMRI_flow.connect(
             [
@@ -768,7 +767,7 @@ class fMRIPipeline(Pipeline):
             ]
         )
         # fmt:on
-        
+
         # fmt:off
         fMRI_flow.connect(
             [
@@ -780,7 +779,7 @@ class fMRIPipeline(Pipeline):
             ]
         )
         # fmt:on
-        
+
         # fmt:off
         fMRI_flow.connect(
             [
@@ -797,7 +796,7 @@ class fMRIPipeline(Pipeline):
             ]
         )
         # fmt:on
-        
+
         if self.stages["Preprocessing"].enabled:
             preproc_flow = self.create_stage_flow("Preprocessing")
             # fmt:off
@@ -808,7 +807,7 @@ class fMRIPipeline(Pipeline):
                 ]
             )
             # fmt:on
-        
+
         if self.stages["Registration"].enabled:
             reg_flow = self.create_stage_flow("Registration")
             # fmt:off
@@ -830,7 +829,7 @@ class fMRIPipeline(Pipeline):
                 ]
             )
             # fmt:on
-        
+
         if self.stages["FunctionalMRI"].enabled:
             func_flow = self.create_stage_flow("FunctionalMRI")
             # fmt:off
@@ -849,7 +848,7 @@ class fMRIPipeline(Pipeline):
                 ]
             )
             # fmt:on
-            
+
             if self.stages["FunctionalMRI"].config.scrubbing or self.stages["FunctionalMRI"].config.motion:
                 # fmt:off
                 fMRI_flow.connect(
@@ -859,7 +858,7 @@ class fMRIPipeline(Pipeline):
                     ]
                 )
                 # fmt:on
-        
+
         if self.stages["Connectome"].enabled:
             self.stages["Connectome"].config.subject = self.global_conf.subject
             con_flow = self.create_stage_flow("Connectome")
@@ -879,20 +878,20 @@ class fMRIPipeline(Pipeline):
                 ]
             )
             # fmt:on
-        
+
         return fMRI_flow
-    
+
     def process(self):
         """Executes the fMRI pipeline workflow and returns True if successful."""
         # Enable the use of the the W3C PROV data model to capture and represent provenance in Nipype
         # config.enable_provenance()
-        
+
         # Process time
         self.now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
         
         if "_" in self.subject:
             self.subject = self.subject.split("_")[0]
-        
+
         if self.global_conf.subject_session == "":
             cmp_deriv_subject_directory = os.path.join(
                 self.output_directory, __cmp_directory__, self.subject
@@ -913,11 +912,11 @@ class fMRIPipeline(Pipeline):
                 self.subject,
                 self.global_conf.subject_session,
             )
-            
+
             self.subject = "_".join((self.subject, self.global_conf.subject_session))
-        
+
         if not os.path.exists(
-                os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline")
+            os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline")
         ):
             try:
                 os.makedirs(
@@ -928,7 +927,7 @@ class fMRIPipeline(Pipeline):
                     "%s was already existing"
                     % os.path.join(nipype_deriv_subject_directory, "fMRI_pipeline")
                 )
-        
+
         # Initialization
         if os.path.isfile(
                 os.path.join(
@@ -957,23 +956,23 @@ class fMRIPipeline(Pipeline):
                 },
             }
         )
-        
+
         logging.update_logging(config)
-        
+
         iflogger = logging.getLogger("nipype.interface")
         iflogger.info("**** Processing ****")
-        
+
         flow = self.create_pipeline_flow(
             cmp_deriv_subject_directory=cmp_deriv_subject_directory,
             nipype_deriv_subject_directory=nipype_deriv_subject_directory,
         )
         flow.write_graph(graph2use="colored", format="svg", simple_form=False)
-        
+
         if self.number_of_cores != 1:
             flow.run(plugin="MultiProc", plugin_args={"n_procs": self.number_of_cores})
         else:
             flow.run()
-        
+
         iflogger.info("**** Processing finished ****")
-        
+
         return True

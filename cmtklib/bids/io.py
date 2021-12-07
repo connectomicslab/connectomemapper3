@@ -120,17 +120,17 @@ class CustomBIDSFile(HasTraits):
         ----------
         base_dir: str
             BIDS root directory or `derivatives/` directory in BIDS root directory
-            
+
         subject: str
             Subject filename entity e.g. "sub-01"
-    
+
         session: str
             Session filename entity e.g. "ses-01" if applicable
             (Default: None)
-            
+
         debug: bool
             Debug mode (Extra outputed messages) if `True`
-         
+
         """
         # Build path to BIDS TSV side car of the parcellation file
         filepath = os.path.join(
@@ -159,25 +159,24 @@ class CustomParcellationBIDSFile(CustomBIDSFile):
 
     def __init__(self):
         super().__init__(p_suffix="dseg", p_atlas="L2018", p_extension=".nii.gz")
-        
+
     def get_nb_of_regions(self, bids_dir, subject, session=None, debug=True):
         """Return the number of regions by reading its associated TSV side car file describing the nodes.
-    
+
         Parameters
         ----------
         bids_dir: str
             BIDS root directory
-            
+
         subject: str
             Subject filename entity e.g. "sub-01"
 
         session: str
             Session filename entity e.g. "ses-01" if applicable
             (Default: None)
-            
+
         debug: bool
             Debug mode (Extra outputed messages) if `True`
-         
         """
         # Build path to BIDS TSV side car of the parcellation file
         parc_filepath = self.get_filename_path(
@@ -186,7 +185,7 @@ class CustomParcellationBIDSFile(CustomBIDSFile):
             session=session,
             debug=debug
         ) + '.tsv'
-        
+
         if os.path.exists(parc_filepath):
             if debug:
                 print(f" .. DEBUG : Open {parc_filepath} to get number of regions")
