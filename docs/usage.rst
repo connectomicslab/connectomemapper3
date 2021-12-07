@@ -37,12 +37,13 @@ When you run ``connectomemapper3_docker``, it will generate a Docker command lin
     .. code-block:: console
 
        $ connectomemapper_docker \
-            /home/user/data/ds001 /home/user/data/ds001/derivatives \
+            "/home/user/data/ds001" "/home/user/data/ds001/derivatives" \
             participant --participant_label 01 --session_label 01 \
-            --fs_license /usr/local/freesurfer/license.txt \
-            --anat_pipeline_config /home/user/data/ds001/code/ref_anatomical_config.json \
-            (--dwi_pipeline_config /home/user/data/ds001/code/ref_diffusion_config.json \)
-            (--func_pipeline_config /home/user/data/ds001/code/ref_fMRI_config.json \)
+            --fs_license "/usr/local/freesurfer/license.txt" \
+            --config_dir "/home/user/data/ds001/code" \
+            --anat_pipeline_config "ref_anatomical_config.json" \
+            (--dwi_pipeline_config "ref_diffusion_config.json" \)
+            (--func_pipeline_config "ref_fMRI_config.json" \)
             (--number_of_participants_processed_in_parallel 1)
             
 When you run ``connectomemapper3_singularity``, it will generate a Singularity command line for you, print it out for reporting purposes, and then execute it without further action needed, e.g.:
@@ -50,12 +51,13 @@ When you run ``connectomemapper3_singularity``, it will generate a Singularity c
     .. code-block:: console
 
        $ connectomemapper3_singularity \
-            /home/user/data/ds001 /home/user/data/ds001/derivatives \
+            "/home/user/data/ds001" "/home/user/data/ds001/derivatives" \
             participant --participant_label 01 --session_label 01 \
-            --fs_license /usr/local/freesurfer/license.txt \
-            --anat_pipeline_config /home/user/data/ds001/code/ref_anatomical_config.json \
-            (--dwi_pipeline_config /home/user/data/ds001/code/ref_diffusion_config.json \)
-            (--func_pipeline_config /home/user/data/ds001/code/ref_fMRI_config.json \)
+            --fs_license "/usr/local/freesurfer/license.txt" \
+            --config_dir "/home/user/data/ds001/code" \
+            --anat_pipeline_config "ref_anatomical_config.json" \
+            (--dwi_pipeline_config "ref_diffusion_config.json" \)
+            (--func_pipeline_config "ref_fMRI_config.json" \)
             (--number_of_participants_processed_in_parallel 1)
             
 
