@@ -33,6 +33,9 @@ This neuroimaging processing pipeline software is developed by the Connectomics 
 .. image:: https://app.codacy.com/project/badge/Grade/658266303c3046e8896769670e6988eb
   :target: https://www.codacy.com/gh/connectomicslab/connectomemapper3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=connectomicslab/connectomemapper3&amp;utm_campaign=Badge_Grade
   :alt: Code Quality Review Status
+.. image:: https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square
+  :target: contributors
+  :alt: All-contributors
 
 
 .. warning:: THIS SOFTWARE IS FOR RESEARCH PURPOSES ONLY AND SHALL NOT BE USED FOR ANY CLINICAL USE. THIS SOFTWARE HAS NOT BEEN REVIEWED OR APPROVED BY THE FOOD AND DRUG ADMINISTRATION OR EQUIVALENT AUTHORITY, AND IS FOR NON-CLINICAL, IRB-APPROVED RESEARCH USE ONLY. IN NO EVENT SHALL DATA OR IMAGES GENERATED THROUGH THE USE OF THE SOFTWARE BE USED IN THE PROVISION OF PATIENT CARE.
@@ -170,6 +173,7 @@ Contents
    LICENSE
    changes
    citing
+   contributors
    contributing
    support
 
