@@ -183,7 +183,7 @@ jobs:
             SINGULARITY_LOCALCACHEDIR=~/.singularity/tmp \
             SINGULARITY_CACHEDIR=~/.singularity/tmp SINGULARITY_TMPDIR=~/.singularity/tmp \
             TMPDIR=~/.singularity/tmp SINGULARITY_DISABLE_CACHE=true \
-            singularity -v build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
+            singularity build /tmp/cache/connectomemapper3.simg docker://localhost:5000/sebastientourbier/connectomemapper3:latest
           no_output_timeout: 5h
       - run:
           name: "Display storage information ALL"
@@ -192,8 +192,6 @@ jobs:
           root: /tmp
           paths:
             - cache/connectomemapper3.simg
-      - store_artifacts:
-          path: /tmp/cache/connectomemapper3.simg
       - store_artifacts:
           path: ~/usage.txt
 
