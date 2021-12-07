@@ -149,11 +149,14 @@ class ComputeParcellationRoiVolumes(BaseInterface):
         volumetry_file = op.abspath('roi_stats_{}.tsv'.format(parkey))
         f_volumetry = open(volumetry_file, 'w+')
         iflogger.info(
-                "  > Create Volumetry TSV file as {}".format(volumetry_file))
+            "  > Create Volumetry TSV file as {}".format(volumetry_file)
+        )
 
         # Format the TSV file according to BIDS Extension Proposal 11 (BEP011):
         # The structural preprocessing derivatives.
-        hdr_lines = ['{:<4}, {:<55}, {:<10}, {:>10} \n'.format(
+        hdr_lines = [
+            '{:<4}, {:<55}, {:<10}, {:>10} \n'.format("index", "name", "type", "volume-mm3")
+        ]
 
         f_volumetry.writelines(hdr_lines)
         del hdr_lines
