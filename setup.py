@@ -16,9 +16,9 @@ class VerifyVersionCommand(install):
     description = "verify that the git tag matches our version"
 
     def run(self):
-        tag = os.getenv("CIRCLE_TAG")
-        version = f"{__version__}"
-
+        """Verify that the git tag (`CIRCLE_TAG`) matches our version."""
+        tag = os.getenv('CIRCLE_TAG')
+        version = f'{__version__}'
         if tag != version:
             info = f"Git tag: {tag} does not match the version of this app: {version}"
             sys.exit(info)
@@ -147,8 +147,9 @@ def main():
                 'connectomemapper3 = cmp.cli.connectomemapper3:main',
                 'cmpbidsappmanager = cmp.cli.cmpbidsappmanager:main',
                 'showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main',
-                'connectomemapper3_docker = cmp.cli.connectomemapper3_docker:main'
+                'connectomemapper3_docker = cmp.cli.connectomemapper3_docker:main',
                 'connectomemapper3_singularity = cmp.cli.connectomemapper3_singularity:main'
+            ]
         },
         license="BSD-3-Clause",
         classifiers=[
