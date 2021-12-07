@@ -20,7 +20,7 @@ from nipype import config, logging
 from traits.api import *
 
 # Own import
-from cmp.project_global import __cmp_directory__, __nipype_directory__
+from cmtklib.bids.io import __cmp_directory__, __nipype_directory__
 import cmp.pipelines.common as cmp_common
 from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage

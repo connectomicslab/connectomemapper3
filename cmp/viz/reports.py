@@ -25,7 +25,7 @@ import jinja2
 from nipype.utils.filemanip import copyfile
 from pkg_resources import resource_filename as pkgrf
 
-from cmp.project_global import __nipype_directory__
+from cmtklib.bids.io import __nipype_directory__
 
 # from niworkflows.utils.misc import read_crashfile
 

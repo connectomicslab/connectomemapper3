@@ -17,7 +17,7 @@ import nipype.interfaces.utility as util
 from nipype.interfaces.io import BIDSDataGrabber
 
 # Own imports
-from cmp.project_global import __cmp_directory__
+from cmtklib.bids.io import __cmp_directory__
 from cmp.stages.common import Stage
 from cmtklib.parcellation import (
     Parcellate,

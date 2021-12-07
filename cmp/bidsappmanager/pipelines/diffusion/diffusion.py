@@ -17,7 +17,7 @@ from pyface.api import ImageResource
 from bids import BIDSLayout
 
 # Own imports
-from cmp.project_global import __cmp_directory__, __nipype_directory__
+from cmtklib.bids.io import __cmp_directory__, __nipype_directory__
 from cmtklib.util import return_button_style_sheet
 from cmp.bidsappmanager.stages.preprocessing.preprocessing import PreprocessingStageUI
 from cmp.bidsappmanager.stages.diffusion.diffusion import DiffusionStageUI

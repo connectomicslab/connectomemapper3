@@ -24,7 +24,7 @@ from pyface.api import FileDialog, OK
 # Own imports
 from . import core
 from . import gui
-from cmp.project_global import __cmp_directory__, __nipype_directory__, __freesurfer_directory__
+from cmtklib.bids.io import __cmp_directory__, __nipype_directory__, __freesurfer_directory__
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as anatomical_pipeline
 from cmp.bidsappmanager.pipelines.diffusion import diffusion as diffusion_pipeline
 from cmp.bidsappmanager.pipelines.functional import fMRI as fMRI_pipeline

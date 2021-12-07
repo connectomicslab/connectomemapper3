@@ -15,7 +15,7 @@ from traitsui.qt4.extra.qt_view import QtView
 from pyface.api import ImageResource
 
 # Own imports
-from cmp.project_global import __cmp_directory__, __nipype_directory__
+from cmtklib.bids.io import __cmp_directory__, __nipype_directory__
 from cmp.bidsappmanager.stages.preprocessing.fmri_preprocessing import (
     PreprocessingStageUI,
 )

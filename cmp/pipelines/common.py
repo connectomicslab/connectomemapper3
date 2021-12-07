@@ -16,7 +16,7 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 from nipype.interfaces.base import File, Directory
 
-from cmp.project_global import __nipype_directory__
+from cmtklib.bids.io import __nipype_directory__
 
 
 class ProgressWindow(HasTraits):

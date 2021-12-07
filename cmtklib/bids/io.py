@@ -9,7 +9,16 @@ import csv
 import os
 import json
 from traits.api import (HasTraits, Directory, Str)
-from bids import BIDSLayout
+
+from cmp.info import __version__
+from nipype import __version__ as nipype_version
+
+
+# Directories for derivatives compliant to BIDS `1.4.0` (e.g. <toolbox>-<version>)
+# Need to be declared before import the pipeline modules
+__cmp_directory__ = f'cmp-{__version__}'  # noqa
+__nipype_directory__ = f'nipype-{nipype_version}'  # noqa
+__freesurfer_directory__ = f'freesurfer-6.0.1'  # noqa
 
 
 class CustomBIDSFile(HasTraits):
