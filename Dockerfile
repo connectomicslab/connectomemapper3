@@ -53,7 +53,7 @@ RUN apt-get update && \
 ##################################################################
 ## Install freesurfer 6.0.1
 ##################################################################
-FROM neurobuntu_conda AS neurobuntu_fs
+FROM neurobuntu AS neurobuntu_fs
 
 WORKDIR /opt/freesurfer
 
@@ -116,7 +116,7 @@ RUN apt-get update && \
 ##################################################################
 ## Install FSL and AFNI
 ##################################################################
-FROM neurobuntu_fs AS neurobuntu_fsl
+FROM neurobuntu AS neurobuntu_fsl
 
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
@@ -162,7 +162,7 @@ RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.
 ###################################################################
 ## Install conda environment, including ANTs 2.2.0 and MRtrix 3.0.2
 ###################################################################
-FROM neurobuntu_fsl AS neurobuntu_condaenv
+FROM neurobuntu_conda AS neurobuntu_condaenv
 
 ENV CONDA_ENV="py37cmp-core"
 # Pull the environment name out of the environment.yml
@@ -189,12 +189,17 @@ ENV LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_P
 ##################################################################
 # Installation of Connectome Mapper 3 packages
 ##################################################################
-FROM neurobuntu_condaenv AS neurobuntu_cmp
+FROM neurobuntu AS neurobuntu_cmp
 
 # Docker build command arguments
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
+
+# Copy content of intermediate stage builds
+COPY --from=neurobuntu_condaenv . .
+COPY --from=neurobuntu_fs . .
+COPY --from=neurobuntu_fsl . .
 
 # Set the working directory to /app/connectomemapper3
 WORKDIR /app/connectomemapper3
