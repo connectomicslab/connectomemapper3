@@ -51,6 +51,7 @@ jobs:
       - run:
           name: Install parallel gzip
           command: |
+            sudo apt-get update
             sudo apt-get install pigz
       - restore_cache:
           keys:
