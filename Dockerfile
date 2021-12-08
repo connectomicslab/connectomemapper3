@@ -1,7 +1,7 @@
 ##################################################################
 # Use Ubuntu 16.04 LTS as base image
 ##################################################################
-FROM ubuntu:xenial-20210114
+FROM ubuntu:xenial-20210114 AS neurobuntu
 
 ##################################################################
 # Install system library dependencies including
@@ -32,6 +32,7 @@ ENV LANG="en_US.UTF-8"
 ##################################################################
 # Install Miniconda3
 ##################################################################
+FROM neurobuntu AS neurobuntu_conda
 
 # Add conda to $PATH
 ENV PATH="/opt/conda/bin:$PATH"
@@ -52,6 +53,7 @@ RUN apt-get update && \
 ##################################################################
 ## Install freesurfer 6.0.1
 ##################################################################
+FROM neurobuntu_conda AS neurobuntu_fs
 
 WORKDIR /opt/freesurfer
 
@@ -114,6 +116,7 @@ RUN apt-get update && \
 ##################################################################
 ## Install FSL and AFNI
 ##################################################################
+FROM neurobuntu_fs AS neurobuntu_fsl
 
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
@@ -159,6 +162,7 @@ RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.
 ###################################################################
 ## Install conda environment, including ANTs 2.2.0 and MRtrix 3.0.2
 ###################################################################
+FROM neurobuntu_fsl AS neurobuntu_condaenv
 
 ENV CONDA_ENV py37cmp-core
 # Pull the environment name out of the environment.yml
@@ -185,6 +189,12 @@ ENV LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_P
 ##################################################################
 # Installation of Connectome Mapper 3 packages
 ##################################################################
+FROM neurobuntu_condaenv AS neurobuntu_cmp
+
+# Docker build command arguments
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
 
 # Set the working directory to /app/connectomemapper3
 WORKDIR /app/connectomemapper3
@@ -307,13 +317,6 @@ ENTRYPOINT ["/app/run_cmp3.sh"]
 # Copy version information
 ##################################################################
 # COPY version /version
-
-##################################################################
-# Docker build command arguments
-##################################################################
-ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
 
 ##################################################################
 # Metadata

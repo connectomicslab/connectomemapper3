@@ -32,7 +32,9 @@ echo "$VCS_REF"
 cd "$BASEDIR"
 
 # Build the final image
-docker build --build-arg BUILD_DATE="$CMP_BUILD_DATE "\
-				  --build-arg VCS_REF="$VCS_REF" \
-				  --build-arg VERSION="$VERSION" \
-				  -t sebastientourbier/connectomemapper-bidsapp:"${VERSION}" .
+DOCKER_BUILDKIT=1 \
+  docker build --rm \
+      --build-arg BUILD_DATE="$CMP_BUILD_DATE "\
+      --build-arg VCS_REF="$VCS_REF" \
+      --build-arg VERSION="$VERSION" \
+      -t sebastientourbier/connectomemapper-bidsapp:"${VERSION}" .
