@@ -43,15 +43,15 @@ jobs:
     environment:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
       SCRATCH: "/scratch"
-    docker:
-      - image: docker:20.10.11-git
+    machine:
+      image: ubuntu-1604:201903-01
     resource_class: large
     working_directory: tmp/src/connectomemapper3
     steps:
       - run:
-          name: Install parallel gzip and python3
+          name: Install parallel gzip
           command: |
-            apk add --no-cache pigz python3
+            apt-get install pigz
       - restore_cache:
           keys:
             - docker-{{ .Branch }}-{{ .Revision }}
@@ -79,8 +79,8 @@ jobs:
           no_output_timeout: 120m
           command: |
             # Get version, update files.
-            python3 --version
-            THISVERSION=$( python3 get_version.py )
+            python --version
+            THISVERSION=$( python get_version.py )
             echo "THISVERSION : ${THISVERSION}"
             echo "CIRCLE_TAG : ${CIRCLE_TAG}"
             if [[ ${THISVERSION:0:1} == "0" ]] ; then
