@@ -57,7 +57,7 @@ jobs:
           name: Enable "--squash" feature of docker build
           command: |
             sudo touch /etc/docker/daemon.json
-            echo "{\n\t\"experimental\": true\n}" | sudo tee -a /etc/docker/daemon.json
+            echo "{\"experimental\": true}" | sudo tee -a /etc/docker/daemon.json
             sudo service docker restart
       #- restore_cache:
       #    keys:
