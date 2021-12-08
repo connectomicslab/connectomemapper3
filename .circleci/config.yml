@@ -79,7 +79,7 @@ jobs:
           command: |
             # Get version, update files.
             python --version
-            THISVERSION=$( python get_version.py )
+            THISVERSION=$( python /tmp/src/connectomemapper3/get_version.py )
             echo "THISVERSION : ${THISVERSION}"
             echo "CIRCLE_TAG : ${CIRCLE_TAG}"
             if [[ ${THISVERSION:0:1} == "0" ]] ; then
@@ -112,7 +112,7 @@ jobs:
           no_output_timeout: 40m
           command: |
             # Get version, update files.
-            THISVERSION=$( python get_version.py )
+            THISVERSION=$( python /tmp/src/connectomemapper3/get_version.py )
             mkdir -p /tmp/cache
             docker save sebastientourbier/connectomemapper3 \
             | pigz -8 -p 3 > /tmp/cache/docker.tar.gz
