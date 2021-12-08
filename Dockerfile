@@ -1,7 +1,7 @@
 ##################################################################
 # Use Ubuntu 16.04 LTS as base image
 ##################################################################
-FROM ubuntu:xenial-20210114 AS neurobuntu
+FROM ubuntu:xenial-20210114 AS main
 
 ##################################################################
 # Install system library dependencies including
@@ -26,35 +26,12 @@ RUN apt-get update && \
     apt-get remove -y curl && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Set local enccoding
-ENV LANG="en_US.UTF-8"
-
 ##################################################################
-# Install Miniconda3
+## Install freesurfer 6.0.1, FSL and AFNI
 ##################################################################
-FROM neurobuntu AS neurobuntu_conda
+FROM main AS neurobuntu
 
-# Add conda to $PATH
-ENV PATH="/opt/conda/bin:$PATH"
-
-# Install
-RUN apt-get update && \
-    apt-get install -qq -y --no-install-recommends curl && \
-    curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
-    bash /tmp/miniconda.sh -bfp /opt/conda && \
-    rm -rf /tmp/miniconda.sh && \
-    apt-get remove -y curl && \
-    conda update conda && \
-    conda clean --all --yes && \
-    rm -rf ~/.conda ~/.cache/pip/* && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-##################################################################
-## Install freesurfer 6.0.1
-##################################################################
-FROM neurobuntu AS neurobuntu_fs
-
+# Installing Freesurfer
 WORKDIR /opt/freesurfer
 
 # Download and install
@@ -82,23 +59,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Simulate SetUpFreeSurfer.sh
-ENV OS="Linux" \
-    FS_OVERRIDE=0 \
-    FIX_VERTEX_AREA="" \
-    FSF_OUTPUT_FORMAT="nii.gz" \
-    FREESURFER_HOME="/opt/freesurfer"
-ENV SUBJECTS_DIR="$FREESURFER_HOME/subjects" \
-    FUNCTIONALS_DIR="$FREESURFER_HOME/sessions" \
-    MNI_DIR="$FREESURFER_HOME/mni" \
-    LOCAL_DIR="$FREESURFER_HOME/local" \
-    MINC_BIN_DIR="$FREESURFER_HOME/mni/bin" \
-    MINC_LIB_DIR="$FREESURFER_HOME/mni/lib" \
-    MNI_DATAPATH="$FREESURFER_HOME/mni/data"
-ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
-    MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
-    PATH="$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH"
-
 # Installing the Matlab R2012b (v8.0) runtime // http://ssd.mathworks.com/supportfiles/MCR_Runtime/R2012b/MCR_R2012b_glnxa64_installer.zip
 # Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
 WORKDIR /opt/freesurfer/bin
@@ -113,11 +73,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-##################################################################
-## Install FSL and AFNI
-##################################################################
-FROM neurobuntu AS neurobuntu_fsl
-
 # Installing Neurodebian packages (FSL, AFNI)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -129,26 +84,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Setting AFNI envvars
-ENV PATH="/usr/lib/afni/bin:$PATH" \
-    AFNI_MODELPATH="/usr/lib/afni/models" \
-    AFNI_IMSAVE_WARNINGS="NO" \
-    AFNI_TTATLAS_DATASET="/usr/share/afni/atlases" \
-    AFNI_PLUGINPATH="/usr/lib/afni/plugins"
-
-# Setting FSL envvars
-ENV FSLDIR="/usr/share/fsl/5.0" \
-    FSLOUTPUTTYPE="NIFTI_GZ" \
-    FSLMULTIFILEQUIT="TRUE" \
-    POSSUMDIR="/usr/share/fsl/5.0" \
-    FSLTCLSH="/usr/bin/tclsh" \
-    FSLWISH="/usr/bin/wish" \
-    PATH="/usr/lib/fsl/5.0:$PATH" \
-    LD_LIBRARY_PATH="/usr/lib/fsl/5.0:$LD_LIBRARY_PATH"
-
 # Patch that replaces replace aff2rigid fsl_abspath fsladd imglob
 # for python3 compatibility
 WORKDIR /tmp
+ENV FSLDIR="/usr/share/fsl/5.0"
 RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.gz \
     && tar -zxvf fsl-5.0.10-python3.tar.gz \
     && cp fsl/bin/* "$FSLDIR/bin/" \
@@ -159,21 +98,33 @@ RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.
 # depend on it
 #RUN apt-mark manual package_name
 
-###################################################################
-## Install conda environment, including ANTs 2.2.0 and MRtrix 3.0.2
-###################################################################
-FROM neurobuntu_conda AS neurobuntu_condaenv
+##################################################################
+## Install Miniconda3 and environment including ANTs and MRtrix
+##################################################################
+FROM main AS neurocondabuntu
 
+# Add conda to $PATH
+ENV PATH="/opt/conda/bin:$PATH"
+
+# Install Miniconda3
+RUN apt-get update && \
+    apt-get install -qq -y --no-install-recommends curl && \
+    curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -bfp /opt/conda && \
+    rm -rf /tmp/miniconda.sh && \
+    apt-get remove -y curl && \
+    conda update conda && \
+    conda clean --all --yes && \
+    rm -rf ~/.conda ~/.cache/pip/* && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+## Install conda environment, including ANTs 2.2.0 and MRtrix 3.0.2
 ENV CONDA_ENV="py37cmp-core"
 # Pull the environment name out of the environment.yml
 COPY docker/environment.yml /app/environment.yml
 RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_ENV &&\
      conda clean -v --all --yes && rm -rf ~/.conda ~/.cache/pip/*"
-
-# Make ANTs happy
-ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
-    PATH="$ANTSPATH:$PATH" \
-    PYTHON_EGG_CACHE="/cache/python-eggs"
 
 ##################################################################
 # Install BIDS validator
@@ -182,23 +133,23 @@ ENV ANTSPATH="/opt/conda/envs/$CONDA_ENV/bin" \
 #     rm -rf ~/.npm ~/.empty
 
 ##################################################################
-# Last environmment setup
-##################################################################
-ENV LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH"
-
-##################################################################
 # Installation of Connectome Mapper 3 packages
 ##################################################################
-FROM neurobuntu_condaenv AS neurobuntu_cmp
+FROM neurocondabuntu AS cmpbuntu
 
 # Docker build command arguments
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
 
-# Copy content of intermediate stage builds
-COPY --from=neurobuntu_fs . .
-COPY --from=neurobuntu_fsl . .
+# Copy content of neurobuntu intermediate stage build
+COPY --from=neurobuntu /opt/freesurfer /opt/freesurfer
+COPY --from=neurobuntu /usr/lib/fsl /usr/lib/fsl
+COPY --from=neurobuntu /usr/share/fsl /usr/share/fsl
+COPY --from=neurobuntu /usr/lib/afni /usr/lib/afni
+COPY --from=neurobuntu /usr/share/afni /usr/share/afni
+COPY --from=neurobuntu /usr/bin/tclsh /usr/bin/tclsh
+COPY --from=neurobuntu /usr/bin/wish /usr/bin/wish
 
 # Set the working directory to /app/connectomemapper3
 WORKDIR /app/connectomemapper3
@@ -217,19 +168,9 @@ RUN mkdir -p /cache/python-eggs && \
     chmod -R 777 /cache/python-eggs
 
 # Install cmp and cmtklib packages in the conda environment $CONDA_ENV
-# ENV CONDA_ENV py37cmp-core
-# RUN apt-get -qq -y install libtiff5-dev=4.0.6-1ubuntu0.4 libssl-dev=1.0.2g-1ubuntu4.13
+ENV CONDA_ENV="py37cmp-core"
 RUN /bin/bash -c ". activate ${CONDA_ENV} &&\
     pip install ."
-
-# Environmment setup
-ENV ANTSPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
-    PYTHONPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
-    PATH="$ANTSPATH:$PATH" \
-    LD_LIBRARY_PATH="/opt/conda/envs/${CONDA_ENV}/lib:${LD_LIBRARY_PATH}"
-
-# Make dipy.viz (fury/vtk) happy
-# RUN /bin/bash -c "ln -s /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.15 /opt/conda/envs/$CONDA_ENV/lib/libnetcdf.so.13"
 
 ##################################################################
 # Copy primary BIDSapp entrypoint script
@@ -250,6 +191,66 @@ RUN chmod 775 /app/connectomemapper3/run.py && \
     chmod 775 /app/run_cmp3.sh && \
     chmod 775 /app/run_coverage_cmp3.sh && \
     chmod 777 /opt/freesurfer
+
+##################################################################
+# Set local enccoding
+##################################################################
+ENV LANG="en_US.UTF-8"
+
+##################################################################
+# Add conda to $PATH
+##################################################################
+ENV PATH="/opt/conda/bin:$PATH"
+
+##################################################################
+# Simulate SetUpFreeSurfer.sh
+##################################################################
+ENV OS="Linux" \
+    FS_OVERRIDE=0 \
+    FIX_VERTEX_AREA="" \
+    FSF_OUTPUT_FORMAT="nii.gz" \
+    FREESURFER_HOME="/opt/freesurfer"
+ENV SUBJECTS_DIR="$FREESURFER_HOME/subjects" \
+    FUNCTIONALS_DIR="$FREESURFER_HOME/sessions" \
+    MNI_DIR="$FREESURFER_HOME/mni" \
+    LOCAL_DIR="$FREESURFER_HOME/local" \
+    MINC_BIN_DIR="$FREESURFER_HOME/mni/bin" \
+    MINC_LIB_DIR="$FREESURFER_HOME/mni/lib" \
+    MNI_DATAPATH="$FREESURFER_HOME/mni/data"
+ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
+    MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
+    PATH="$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH"
+
+##################################################################
+# Setting AFNI envvars
+##################################################################
+ENV PATH="/usr/lib/afni/bin:$PATH" \
+    AFNI_MODELPATH="/usr/lib/afni/models" \
+    AFNI_IMSAVE_WARNINGS="NO" \
+    AFNI_TTATLAS_DATASET="/usr/share/afni/atlases" \
+    AFNI_PLUGINPATH="/usr/lib/afni/plugins"
+
+##################################################################
+# Setting FSL envvars
+##################################################################
+ENV FSLDIR="/usr/share/fsl/5.0" \
+    FSLOUTPUTTYPE="NIFTI_GZ" \
+    FSLMULTIFILEQUIT="TRUE" \
+    POSSUMDIR="/usr/share/fsl/5.0" \
+    FSLTCLSH="/usr/bin/tclsh" \
+    FSLWISH="/usr/bin/wish" \
+    PATH="/usr/lib/fsl/5.0:$PATH" \
+    LD_LIBRARY_PATH="/usr/lib/fsl/5.0:$LD_LIBRARY_PATH"
+
+##################################################################
+# Make ANTs happy
+##################################################################
+ENV ANTSPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
+    PYTHONPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
+    PYTHON_EGG_CACHE="/cache/python-eggs"
+    PATH="$ANTSPATH:$PATH" \
+    LD_LIBRARY_PATH="/opt/conda/envs/${CONDA_ENV}/lib:${LD_LIBRARY_PATH}"
+    LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH"
 
 ##################################################################
 # Temporary tmp folder
