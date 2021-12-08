@@ -219,27 +219,37 @@ jobs:
       - run:
           name: Get test data from ds-sample
           command: |
-            mkdir -p /tmp/data
-            wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
-              -O ds-sample.tar.gz "https://zenodo.org/record/3712762/files/ds-sample.tar.gz?download=1"
-            tar xvzf ds-sample.tar.gz -C /tmp/data/
-            echo "Dataset ds-sample has been successfully downloaded"
+            if [[ ! -d /tmp/data/ds-sample ]]; then
+              mkdir -p /tmp/data
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
+                -O ds-sample.tar.gz "https://zenodo.org/record/3712762/files/ds-sample.tar.gz?download=1"
+              tar xvzf ds-sample.tar.gz -C /tmp/data/
+              echo "Dataset ds-sample has been successfully downloaded"
+            else
+              echo "Dataset ds-sample was cached"
       - run:
           name: Get FreeSurfer derivatives for ds-sample
           command: |
-            mkdir -p /tmp/data/ds-sample/derivatives
-            wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
-              -O freesurfer.tar.gz "https://zenodo.org/record/3712762/files/freesurfer.tar.gz?download=1"
-            tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives
-            mv /tmp/data/ds-sample/derivatives/freesurfer /tmp/data/ds-sample/derivatives/freesurfer-6.0.1
-            echo "FreeSurfer derivatives of ds-sample  have been successfully downloaded"
+            if [[ ! -d /tmp/data/ds-sample/derivatives/freesurfer ]]; then
+              mkdir -p /tmp/data/ds-sample/derivatives
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
+                -O freesurfer.tar.gz "https://zenodo.org/record/3712762/files/freesurfer.tar.gz?download=1"
+              tar xvzf freesurfer.tar.gz -C /tmp/data/ds-sample/derivatives
+              mv /tmp/data/ds-sample/derivatives/freesurfer /tmp/data/ds-sample/derivatives/freesurfer-6.0.1
+              echo "FreeSurfer derivatives of ds-sample have been successfully downloaded"
+            else
+              echo "FreeSurfer derivatives of ds-sample was cached"
       - run:
           name: Store FreeSurfer license file
           command: |
-            mkdir -p /tmp/data/ds-sample/code
-            cd /tmp/data/ds-sample/code
-            echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds-sample/code/license.txt
-            cat /tmp/data/ds-sample/code/license.txt
+            if [[ ! -e /tmp/data/ds-sample/code/license.txt ]]; then
+              mkdir -p /tmp/data/ds-sample/code
+              cd /tmp/data/ds-sample/code
+              echo `echo c2ViYXN0aWVuLnRvdXJiaWVyMUBnbWFpbC5jb20KMzAwNzYKICpDYUpVZ0VMQlJEYkEKIEZTMkkyWDNwNkpicWcK== | base64 -di` > /tmp/data/ds-sample/code/license.txt
+              cat /tmp/data/ds-sample/code/license.txt
+              echo "FreeSurfer license.txt been successfully created"
+            else
+              echo "FreeSurfer license.txt was cached"
       - persist_to_workspace:
           root: /tmp
           paths:
