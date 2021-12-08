@@ -44,14 +44,14 @@ jobs:
       TZ: "/usr/share/zoneinfo/Europe/Zurich"
       SCRATCH: "/scratch"
     docker:
-      - image: docker:19.03.1-git
+      - image: docker:20.10.11-git
     resource_class: large
     working_directory: tmp/src/connectomemapper3
     steps:
       - run:
-          name: Install parallel gzip and python2
+          name: Install parallel gzip and python3
           command: |
-            apk add --no-cache pigz python2
+            apk add --no-cache pigz python3
       - restore_cache:
           keys:
             - docker-{{ .Branch }}-{{ epoch }}
@@ -91,7 +91,7 @@ jobs:
             # Build CMP BIDS App docker image
             ls -la .
             e=1 && for i in {1..5}; do
-              docker build --cache-from sebastientourbier/connectomemapper3 --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 . \
+              DOCKER_BUILDKIT=1 docker build --cache-from sebastientourbier/connectomemapper3 --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
       - run:
