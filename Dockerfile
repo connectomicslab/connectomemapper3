@@ -63,13 +63,14 @@ RUN apt-get update && \
 # Required by the brainstem and hippocampal subfield modules in FreeSurfer 6.0.1
 WORKDIR /opt/freesurfer/bin
 
+ENV OS="Linux" FREESURFER_HOME="/opt/freesurfer"
 RUN apt-get update && \
     apt-get install -qq -y --no-install-recommends curl libxt-dev libxext-dev libncurses5 unzip && \
     curl "https://raw.githubusercontent.com/freesurfer/freesurfer/dev/scripts/fs_install_mcr" -o fs_install_mcr && \
     ls -al . && \
-    chmod +x fs_install_mcr && \
-    fs_install_mcr R2012b && \
-    rm -rf fs_install_mcr R2012b && \
+    chmod +x ./fs_install_mcr && \
+    ./fs_install_mcr R2012b && \
+    rm -rf ./fs_install_mcr ./R2012b && \
     apt-get remove -y curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -90,9 +91,9 @@ RUN apt-get update && \
 WORKDIR /tmp
 ENV FSLDIR="/usr/share/fsl/5.0"
 RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.gz \
-    && tar -zxvf fsl-5.0.10-python3.tar.gz \
-    && cp fsl/bin/* "$FSLDIR/bin/" \
-    && rm -r fsl*
+    && tar -zxvf ./fsl-5.0.10-python3.tar.gz \
+    && cp ./fsl/bin/* "$FSLDIR/bin/" \
+    && rm -r ./fsl*
 
 # Mark a package as being manually installed, which will
 # prevent the package from being automatically removed if no other packages
