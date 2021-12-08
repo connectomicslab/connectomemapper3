@@ -53,6 +53,11 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install pigz
+      - run:
+          name: Enable "--squash" feature of docker build
+          command: |
+            echo "{\n\t\"experimental\": true\n}" > /etc/docker/daemon.json
+            sudo service docker restart
       #- restore_cache:
       #    keys:
       #      - docker-{{ .Branch }}-{{ .Revision }}
@@ -92,7 +97,6 @@ jobs:
             cd /tmp/src/connectomemapper3/
             ls -la .
             DOCKER_BUILDKIT=1 docker build --progress=plain --squash --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 /tmp/src/connectomemapper3 \
-
       - run:
           name: Prune Docker cache (temporary)
           command: docker system prune -f
