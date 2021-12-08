@@ -91,7 +91,7 @@ jobs:
             # Build CMP BIDS App docker image
             cd /tmp/src/connectomemapper3/
             ls -la .
-            DOCKER_BUILDKIT=1 docker build --progress=plain --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 /tmp/src/connectomemapper3 \
+            DOCKER_BUILDKIT=1 docker build --progress=plain --squash --rm=true --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" -t sebastientourbier/connectomemapper3 /tmp/src/connectomemapper3 \
 
       - run:
           name: Prune Docker cache (temporary)
