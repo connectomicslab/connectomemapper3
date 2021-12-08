@@ -231,7 +231,7 @@ jobs:
       - run:
           name: Get FreeSurfer derivatives for ds-sample
           command: |
-            if [[ ! -d /tmp/data/ds-sample/derivatives/freesurfer ]]; then
+            if [[ ! -d /tmp/data/ds-sample/derivatives/freesurfer-6.0.1 ]]; then
               mkdir -p /tmp/data/ds-sample/derivatives
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -v \
                 -O freesurfer.tar.gz "https://zenodo.org/record/3712762/files/freesurfer.tar.gz?download=1"
