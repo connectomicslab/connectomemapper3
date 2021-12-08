@@ -59,15 +59,15 @@ jobs:
             sudo touch /etc/docker/daemon.json
             echo "{\"experimental\": true}" | sudo tee -a /etc/docker/daemon.json
             sudo service docker restart
-      - restore_cache:
-          keys:
-            - docker-v1-{{ .Branch }}-{{ .Revision }}
-            - docker-v1--{{ .Revision }}
-            - docker-v1-{{ .Branch }}-
-            - docker-v1-master-
-            - docker-v1-
-          paths:
-            - /tmp/cache
+      #- restore_cache:
+      #    keys:
+      #      - docker-v1-{{ .Branch }}-{{ .Revision }}
+      #      - docker-v1--{{ .Revision }}
+      #      - docker-v1-{{ .Branch }}-
+      #      - docker-v1-master-
+      #      - docker-v1-
+      #    paths:
+      #      - /tmp/cache
       - checkout
       - run:
           name: Load Docker image layer cache
@@ -125,10 +125,10 @@ jobs:
           paths:
             - cache/docker.tar.gz
             - src/connectomemapper3
-      - save_cache:
-          key: docker-v1-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - /tmp/cache
+      #- save_cache:
+      #    key: docker-v1-{{ .Branch }}-{{ .Revision }}
+      #    paths:
+      #      - /tmp/cache
 
   build_singularity:
     machine:
