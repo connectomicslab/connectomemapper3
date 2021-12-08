@@ -208,6 +208,15 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: /home/circleci/data
     steps:
+      - restore_cache:
+          keys:
+            - data-{{ .Branch }}-{{ .Revision }}
+            - data--{{ .Revision }}
+            - data-{{ .Branch }}-
+            - data-master-
+            - data-
+          paths:
+            - /tmp/data
       - run:
           name: Get test data from ds-sample
           command: |
@@ -237,7 +246,7 @@ jobs:
           paths:
             - data
       - save_cache:
-         key: data-{{ epoch }}
+         key: data-{{ .Branch }}-{{ .Revision }}
          paths:
             - /tmp/data
 
