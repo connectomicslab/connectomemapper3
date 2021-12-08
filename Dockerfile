@@ -1,7 +1,7 @@
 ##################################################################
 # Use Ubuntu 16.04 LTS as base image
 ##################################################################
-FROM ubuntu:xenial-20210114 AS main
+FROM ubuntu:xenial-20210114 AS cmp3-docker
 
 ##################################################################
 # Install system library dependencies including
@@ -29,8 +29,6 @@ RUN apt-get update && \
 ##################################################################
 ## Install freesurfer 6.0.1, FSL and AFNI
 ##################################################################
-FROM main AS neurobuntu
-
 # Installing Freesurfer
 WORKDIR /opt/freesurfer
 
@@ -103,8 +101,6 @@ RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.
 ##################################################################
 ## Install Miniconda3 and the environment incl. ANTs and MRtrix
 ##################################################################
-FROM main AS neurocondabuntu
-
 # Add conda to $PATH
 ENV PATH="/opt/conda/bin:$PATH"
 
@@ -137,26 +133,11 @@ RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_
 ##################################################################
 # Installation of Connectome Mapper 3 packages
 ##################################################################
-FROM neurocondabuntu AS cmpbuntu
 
 # Docker build command arguments
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
-
-# Copy content of neurobuntu intermediate stage build
-COPY --from=neurobuntu /opt/freesurfer /opt/freesurfer
-COPY --from=neurobuntu /usr/lib/fsl /usr/lib/fsl
-COPY --from=neurobuntu /usr/share/fsl /usr/share/fsl
-COPY --from=neurobuntu /etc/fsl /etc/fsl
-COPY --from=neurobuntu /usr/lib/afni /usr/lib/afni
-COPY --from=neurobuntu /usr/share/afni /usr/share/afni
-COPY --from=neurobuntu /usr/bin/tclsh /usr/bin/tclsh
-COPY --from=neurobuntu /usr/bin/wish /usr/bin/wish
-
-RUN ls -la /usr/share/fsl
-
-RUN ls -la /usr/share/
 
 # Set the working directory to /app/connectomemapper3
 WORKDIR /app/connectomemapper3
@@ -198,11 +179,6 @@ RUN chmod 775 /app/connectomemapper3/run.py && \
     chmod 775 /app/run_cmp3.sh && \
     chmod 775 /app/run_coverage_cmp3.sh && \
     chmod 777 /opt/freesurfer
-
-##################################################################
-# Set local enccoding
-##################################################################
-ENV LANG="en_US.UTF-8"
 
 ##################################################################
 # Add conda to $PATH
@@ -319,10 +295,6 @@ RUN export
 # Define primary entryppoint script
 ##################################################################
 WORKDIR /tmp/
-
-##################################################################
-# Define primary entryppoint script
-##################################################################
 ENTRYPOINT ["/app/run_cmp3.sh"]
 
 ##################################################################
