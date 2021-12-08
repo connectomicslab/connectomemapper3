@@ -164,7 +164,7 @@ RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.
 ###################################################################
 FROM neurobuntu_fsl AS neurobuntu_condaenv
 
-ENV CONDA_ENV py37cmp-core
+ENV CONDA_ENV="py37cmp-core"
 # Pull the environment name out of the environment.yml
 COPY docker/environment.yml /app/environment.yml
 RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_ENV &&\
