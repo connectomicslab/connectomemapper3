@@ -99,7 +99,7 @@ RUN wget https://fsl.fmrib.ox.ac.uk/fsldownloads/patches/fsl-5.0.10-python3.tar.
 #RUN apt-mark manual package_name
 
 ##################################################################
-## Install Miniconda3 and environment including ANTs and MRtrix
+## Install Miniconda3 and the environment incl. ANTs and MRtrix
 ##################################################################
 FROM main AS neurocondabuntu
 

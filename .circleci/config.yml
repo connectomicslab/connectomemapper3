@@ -53,15 +53,15 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install pigz
-      - restore_cache:
-          keys:
-            - docker-{{ .Branch }}-{{ .Revision }}
-            - docker--{{ .Revision }}
-            - docker-{{ .Branch }}-
-            - docker-master-
-            - docker-
-          paths:
-            - /tmp/cache
+      #- restore_cache:
+      #    keys:
+      #      - docker-{{ .Branch }}-{{ .Revision }}
+      #      - docker--{{ .Revision }}
+      #      - docker-{{ .Branch }}-
+      #      - docker-master-
+      #      - docker-
+      #    paths:
+      #      - /tmp/cache
       - checkout
       - run:
           name: Load Docker image layer cache
@@ -120,10 +120,10 @@ jobs:
           paths:
             - cache/docker.tar.gz
             - src/connectomemapper3
-      - save_cache:
-          key: docker-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - /tmp/cache
+      #- save_cache:
+      #    key: docker-{{ .Branch }}-{{ .Revision }}
+      #    paths:
+      #      - /tmp/cache
 
   build_singularity:
     machine:
