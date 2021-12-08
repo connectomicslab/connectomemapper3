@@ -247,9 +247,9 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
 ##################################################################
 ENV ANTSPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
     PYTHONPATH="/opt/conda/envs/${CONDA_ENV}/bin" \
-    PYTHON_EGG_CACHE="/cache/python-eggs"
+    PYTHON_EGG_CACHE="/cache/python-eggs" \
     PATH="$ANTSPATH:$PATH" \
-    LD_LIBRARY_PATH="/opt/conda/envs/${CONDA_ENV}/lib:${LD_LIBRARY_PATH}"
+    LD_LIBRARY_PATH="/opt/conda/envs/${CONDA_ENV}/lib:${LD_LIBRARY_PATH}" \
     LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH"
 
 ##################################################################
