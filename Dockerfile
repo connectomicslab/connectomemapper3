@@ -189,7 +189,7 @@ ENV LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib:$LD_LIBRARY_P
 ##################################################################
 # Installation of Connectome Mapper 3 packages
 ##################################################################
-FROM neurobuntu AS neurobuntu_cmp
+FROM neurobuntu_condaenv AS neurobuntu_cmp
 
 # Docker build command arguments
 ARG BUILD_DATE
@@ -197,7 +197,6 @@ ARG VCS_REF
 ARG VERSION
 
 # Copy content of intermediate stage builds
-COPY --from=neurobuntu_condaenv . .
 COPY --from=neurobuntu_fs . .
 COPY --from=neurobuntu_fsl . .
 

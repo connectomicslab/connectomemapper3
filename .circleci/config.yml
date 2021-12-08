@@ -54,12 +54,13 @@ jobs:
             apk add --no-cache pigz python3
       - restore_cache:
           keys:
-            - docker-{{ .Branch }}-{{ epoch }}
+            - docker-{{ .Branch }}-{{ .Revision }}
+            - docker--{{ .Revision }}
             - docker-{{ .Branch }}-
             - docker-master-
             - docker-
           paths:
-            - /tmp/cache/docker.tar.gz
+            - /tmp/cache
       - checkout
       - setup_remote_docker:
           docker_layer_caching: false
@@ -121,6 +122,10 @@ jobs:
           paths:
             - cache/docker.tar.gz
             - src/connectomemapper3
+      - save_cache:
+          key: docker-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/cache
 
   build_singularity:
     machine:
