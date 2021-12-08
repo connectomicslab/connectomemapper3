@@ -227,6 +227,7 @@ jobs:
               echo "Dataset ds-sample has been successfully downloaded"
             else
               echo "Dataset ds-sample was cached"
+            fi
       - run:
           name: Get FreeSurfer derivatives for ds-sample
           command: |
@@ -239,6 +240,7 @@ jobs:
               echo "FreeSurfer derivatives of ds-sample have been successfully downloaded"
             else
               echo "FreeSurfer derivatives of ds-sample was cached"
+            fi
       - run:
           name: Store FreeSurfer license file
           command: |
@@ -250,6 +252,7 @@ jobs:
               echo "FreeSurfer license.txt been successfully created"
             else
               echo "FreeSurfer license.txt was cached"
+            fi
       - persist_to_workspace:
           root: /tmp
           paths:
