@@ -11,9 +11,13 @@ commands:
       archive_file:
         type: string
         default: "/tmp/cache/docker.tar.zst"
+      run_name:
+        type: string
+        default: "Load Docker image layer cache"
     steps:
       - run:
-          name: "Loading docker image from <<parameters.archive_file>>"
+          name: "<<parameters.run_name>> from <<parameters.archive_file>>"
+          no_output_timeout: 30m
           command: |
             docker info
             set +o pipefail
@@ -29,8 +33,13 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Remove any config file present in ds-sample/code and create ds-sample/test"
     steps:
       - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 8h
           command: |
             # Get version, update files.
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
@@ -47,11 +56,15 @@ commands:
 
   install-conda-and-cmp3:
     parameters:
+      run_name:
+        type: string
+        default: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
       cmp3_dir:
         type: string
         default: /home/circleci/src/connectomemapper3
     steps:
       - run:
+          name: <<parameters.run_name>>
           command: |
             sudo apt update
             sudo apt install -y wget
@@ -71,6 +84,9 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical pipeline"
       test_name:
         type: string
         default: "test-01"
@@ -85,6 +101,7 @@ commands:
         default: "ref_anatomical_config_1.ini"
     steps:
       - run:
+          name: <<parameters.run_name>>
           command: |
             # Execute BIDS App
             singularity run --containall \
@@ -114,6 +131,9 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical pipeline"
       test_name:
         type: string
         default: "test-09"
@@ -128,6 +148,8 @@ commands:
         default: "ref_anatomical_config_1.ini"
     steps:
       - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
           command: |
             # Activate the conda environment
             source activate connectomemapper3
@@ -155,6 +177,9 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical pipeline"
       test_name:
         type: string
         default: "test-09"
@@ -166,6 +191,8 @@ commands:
         default: "ref_anatomical_config_1.ini"
     steps:
       - run:
+          name: <<parameters.run_name>>
+          no_output_timeout: 5h
           command: |
             # Activate the conda environment
             source activate connectomemapper3
@@ -192,6 +219,9 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical pipeline"
       test_name:
         type: string
         default: "test-01"
@@ -203,6 +233,7 @@ commands:
         default: "ref_anatomical_config_1.ini"
     steps:
       - run:
+          name: <<parameters.run_name>>
           command: |
             # Execute BIDS App
             docker run -it --rm \
@@ -233,6 +264,9 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical and diffusion pipelines"
       test_name:
         type: string
         default: "test-01"
@@ -247,6 +281,7 @@ commands:
         default: "ref_diffusion_config_1.ini"
     steps:
       - run:
+          name: <<parameters.run_name>>
           command: |
             # Execute BIDS App
             docker run -it --rm \
@@ -278,6 +313,9 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
+      run_name:
+        type: string
+        default: "Run anatomical and fMRI pipelines"
       test_name:
         type: string
         default: "test-01"
@@ -292,6 +330,7 @@ commands:
         default: "ref_fMRI_config_1.ini"
     steps:
       - run:
+          name: <<parameters.run_name>>
           command: |
             # Execute BIDS App
             docker run -it --rm \
@@ -468,7 +507,6 @@ jobs:
           name: "Starting local registry"
           command: docker run -d -p 5000:5000 --restart=always --name registry registry:2
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - singularity/install-go:
           go-version: '1.13'
@@ -593,14 +631,12 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
-          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          name: Run anatomical and diffusion pipelines on ds-sample (test 1 - Lausanne2018 + FSL FLIRT + Dipy SHORE + MRtrix SD_STREAM tracking + MRtrix SIFT tractogram filtering)
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 1 - Lausanne2018 + FSL FLIRT + Dipy SHORE + MRtrix SD_STREAM tracking + MRtrix SIFT tractogram filtering)
           test_name: "test-01"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
@@ -640,14 +676,12 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
-          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          name: Run anatomical and diffusion pipelines on ds-sample (test 2 - Lausanne2018 + ANTs SyN + Dipy SHORE + MRtrix ACT iFOV2 tracking)
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 2 - Lausanne2018 + ANTs SyN + Dipy SHORE + MRtrix ACT iFOV2 tracking)
           test_name: "test-02"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
@@ -687,14 +721,12 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
-          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          name: Run anatomical and diffusion pipelines on ds-sample (test 3 - Dipy SHORE + Deterministic tracking)
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 3 - Dipy SHORE + Deterministic tracking)
           test_name: "test-03"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
@@ -734,14 +766,12 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
-          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          name: Run anatomical and diffusion pipelines on ds-sample (test 4 - Dipy SHORE + PFT tracking)
+          run_name: Run anatomical and diffusion pipelines on ds-sample (test 4 - Dipy SHORE + PFT tracking)
           test_name: "test-04"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
@@ -781,17 +811,15 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - install-conda-and-cmp3:
-          name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
-          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
-          name: Run anatomical pipeline on ds-sample (test 5 - NativeFreesurfer - Python wrapper)
+          run_name: Run anatomical pipeline on ds-sample (test 5 - NativeFreesurfer - Python wrapper)
           test_name: "test-05"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_2.ini"
@@ -838,17 +866,15 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - install-conda-and-cmp3:
-          name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
-          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline:
           circleci_job: ${CIRCLE_JOB}
-          name: Run anatomical pipeline on ds-sample (test 6 - Lausanne 2008)
+          run_name: Run anatomical pipeline on ds-sample (test 6 - Lausanne 2008)
           test_name: "test-06"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_3.ini"
@@ -895,14 +921,12 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
-          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          name: Run anatomical and fmri pipelines on ds-sample (test 7 - Lausanne2018 + BBRegister + fmri)
+          run_name: Run anatomical and fmri pipelines on ds-sample (test 7 - Lausanne2018 + BBRegister + fmri)
           test_name: "test-07"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
@@ -942,14 +966,12 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
-          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines:
           circleci_job: ${CIRCLE_JOB}
-          name: Run anatomical and fmri pipelines on ds-sample (test 8 - Lausanne2018 + FSL FLIRT + All nuisance regression + linear detrending + scrubbing)
+          run_name: Run anatomical and fmri pipelines on ds-sample (test 8 - Lausanne2018 + FSL FLIRT + All nuisance regression + linear detrending + scrubbing)
           test_name: "test-08"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_1.ini"
@@ -1048,14 +1070,13 @@ jobs:
       - singularity/debian-install-3:
           singularity-version: 3.8.3
       - install-conda-and-cmp3:
-          name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
-          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-singularity-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
-          name: Run anatomical pipeline on ds-sample (test 5 bis - Native Freesurfer)
+          run_name: Run anatomical pipeline on ds-sample (test 5 bis - Native Freesurfer)
           test_name: "test-05"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           singularity_image: "/tmp/cache/connectomemapper3.simg"
@@ -1107,14 +1128,13 @@ jobs:
       - singularity/debian-install-3:
           singularity-version: 3.8.3
       - install-conda-and-cmp3:
-          name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
+          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
-          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-singularity-anat-pipeline:
           circleci_job: ${CIRCLE_JOB}
-          name: Run anatomical pipeline on ds-sample (test 6 bis - Lausanne 2008)
+          run_name: Run anatomical pipeline on ds-sample (test 6 bis - Lausanne 2008)
           test_name: "test-06"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           singularity_image: "/tmp/cache/connectomemapper3.simg"
@@ -1160,7 +1180,6 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - run:
           name: Build Connectome Mapper 3 documentation
@@ -1188,7 +1207,6 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - run:
           name: Deploy release with version tag to Docker Hub
@@ -1219,7 +1237,6 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
-          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - run:
           name: Deploy latest master to Docker Hub
