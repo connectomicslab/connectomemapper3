@@ -121,12 +121,16 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-## Install conda environment, including ANTs 2.2.0 and MRtrix 3.0.2
+## Create conda environment, including ANTs 2.2.0 and MRtrix 3.0.2
 ENV CONDA_ENV="py37cmp-core"
-# Pull the environment name out of the environment.yml
-COPY docker/environment.yml /app/environment.yml
-RUN /bin/bash -c "conda env create -f /app/environment.yml && . activate $CONDA_ENV &&\
-     conda clean -v --all --yes && rm -rf ~/.conda ~/.cache/pip/*"
+COPY docker/spec-file.txt /app/spec-file.txt
+COPY docker/requirements.txt /app/requirements.txt
+RUN /bin/bash -c "conda config --set default_threads 4 &&\
+    conda create --name ${CONDA_ENV} --file /app/spec-file.txt &&\
+    . activate ${CONDA_ENV} &&\
+    pip install -r /app/requirements.txt &&\
+    conda clean -v --all --yes &&\
+    rm -rf ~/.conda ~/.cache/pip/*"
 
 ##################################################################
 # Install BIDS validator

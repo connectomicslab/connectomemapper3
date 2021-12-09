@@ -1,0 +1,10 @@
+coverage==5.2
+duecredit==0.8.0
+mne==0.20.7
+datalad[full]==0.14.0
+datalad-container==1.1.2
+datalad_neuroimaging==0.3.1
+pybids==0.14.0
+statsmodels==0.11.1
+networkx==2.4
+pydicom==2.0.0

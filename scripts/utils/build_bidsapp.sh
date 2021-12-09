@@ -33,8 +33,8 @@ cd "$BASEDIR"
 
 # Build the final image
 DOCKER_BUILDKIT=1 \
-  docker build --rm \
-      --build-arg BUILD_DATE="$CMP_BUILD_DATE "\
+  docker build --rm --progress=plain \
+      --build-arg BUILD_DATE="$CMP_BUILD_DATE" \
       --build-arg VCS_REF="$VCS_REF" \
       --build-arg VERSION="$VERSION" \
       -t sebastientourbier/connectomemapper-bidsapp:"${VERSION}" .
