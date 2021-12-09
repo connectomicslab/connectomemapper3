@@ -155,7 +155,14 @@ COPY --from=neurobuntu /usr/lib/fsl /usr/lib/fsl
 COPY --from=neurobuntu /etc/fsl /etc/fsl
 COPY --from=neurobuntu /usr/lib/afni /usr/lib/afni
 COPY --from=neurobuntu /usr/bin/afni /usr/bin/afni
-COPY --from=neurobuntu /usr/share/* /usr/share/
+COPY --from=neurobuntu /usr/bin/tclsh /usr/bin/tclsh
+COPY --from=neurobuntu /usr/bin/wish /usr/bin/wish
+
+COPY --from=neurobuntu /usr/share/fsl /usr/share/fsl
+COPY --from=neurobuntu /usr/share/afni /usr/share/afni
+COPY --from=neurobuntu /usr/share/man /usr/share/man
+COPY --from=neurobuntu /usr/share/matlab /usr/share/matlab
+COPY --from=neurobuntu /usr/share/octave /usr/share/octave
 
 # Set the working directory to /app/connectomemapper3
 WORKDIR /app/connectomemapper3
