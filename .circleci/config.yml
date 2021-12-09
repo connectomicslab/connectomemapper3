@@ -11,9 +11,6 @@ commands:
       archive_file:
         type: string
         default: "/tmp/cache/docker.tar.zst"
-      name:
-        type: string
-        default: "Load Docker image layer cache"
     steps:
       - run:
           name: "<<parameters.name>> from <<parameters.archive_file>>"
@@ -33,9 +30,6 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
-      name:
-        type: string
-        default: "Remove any config file present in ds-sample/code and create ds-sample/test"
     steps:
       - run:
           name: <<parameters.name>>
@@ -56,9 +50,6 @@ commands:
 
   install-conda-and-cmp3:
     parameters:
-      name:
-        type: string
-        default: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
       cmp3_dir:
         type: string
         default: /home/circleci/src/connectomemapper3
@@ -84,9 +75,6 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
-      name:
-        type: string
-        default: "Run anatomical pipeline"
       test_name:
         type: string
         default: "test-01"
@@ -131,9 +119,6 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
-      name:
-        type: string
-        default: "Run anatomical pipeline"
       test_name:
         type: string
         default: "test-09"
@@ -177,9 +162,6 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
-      name:
-        type: string
-        default: "Run anatomical pipeline"
       test_name:
         type: string
         default: "test-09"
@@ -219,9 +201,6 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
-      name:
-        type: string
-        default: "Run anatomical pipeline"
       test_name:
         type: string
         default: "test-01"
@@ -264,9 +243,6 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
-      name:
-        type: string
-        default: "Run anatomical and diffusion pipelines"
       test_name:
         type: string
         default: "test-01"
@@ -313,9 +289,6 @@ commands:
       circleci_job:
         type: string
         default: ${CIRCLE_JOB}
-      name:
-        type: string
-        default: "Run anatomical and fMRI pipelines"
       test_name:
         type: string
         default: "test-01"
