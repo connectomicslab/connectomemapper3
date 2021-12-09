@@ -153,6 +153,11 @@ COPY --from=neurobuntu /opt/freesurfer /opt/freesurfer
 COPY --from=neurobuntu /etc /etc
 COPY --from=neurobuntu /usr/lib /usr/lib
 COPY --from=neurobuntu /usr/bin /usr/bin
+COPY --from=neurobuntu /usr/sbin /usr/sbin
+COPY --from=neurobuntu /usr/local/bin /usr/local/bin
+COPY --from=neurobuntu /usr/local/sbin /usr/local/sbin
+COPY --from=neurobuntu /bin /bin
+COPY --from=neurobuntu /sbin /sbin
 
 COPY --from=neurobuntu /usr/share/fsl /usr/share/fsl
 COPY --from=neurobuntu /usr/share/afni /usr/share/afni
