@@ -169,7 +169,7 @@ jobs:
             THISVERSION=$( python /tmp/src/connectomemapper3/get_version.py )
             mkdir -p /tmp/cache
             docker save sebastientourbier/connectomemapper3 \
-            | zstd -15 --threads=0 > /tmp/cache/docker.tar.zst
+            | zstd -10 --threads=4 > /tmp/cache/docker.tar.zst
       - persist_to_workspace:
           root: /tmp
           paths:
