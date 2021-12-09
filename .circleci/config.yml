@@ -4,6 +4,55 @@ orbs:
   singularity: singularity/singularity@1.0.11
   codecov: codecov/codecov@1.1.5
 
+commands:
+
+  load-docker-image-archive:
+    description: "Uncompress with Zstandard and load the docker image archive"
+    parameters:
+      archive_file:
+        type: string
+        default: "/tmp/cache/docker.tar.zst"
+    steps:
+      - run:
+          name: "Load Docker image layer cache"
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f "<<parameters.archive_file>>" ]; then
+              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+              sudo apt-get update && sudo apt-get -y install zstd
+              zstd -d --stdout "<<parameters.archive_file>>" | docker load
+              docker images
+            fi
+
+  clean-configuration-files:
+    description: "Remove any config file present in ds-sample/code and create ds-sample/test"
+    parameters:
+      circleci_job:
+        type: string
+        default: ${CIRCLE_JOB}
+    steps:
+      - run:
+          name: "Remove any config file present in ds-sample/code and create ds-sample/test"
+          no_output_timeout: 8h
+          command: |
+            # Get version, update files.
+            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
+            #echo "THISVERSION : ${THISVERSION}"
+            ls -la  /tmp/data/ds-sample/code
+
+            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
+            rm -f /tmp/data/ds-sample/code/*.ini
+
+            # Create the test folder to store list of test output files
+            mkdir -p /tmp/data/ds-sample/test
+
+            # Create the dataset dedicated to this job and copy data into it
+            echo "Create test-dedicated dataset at: /tmp/data/<<parameters.circleci_job>>/ds-sample"
+            mkdir -p "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+            cp -R /tmp/data/ds-sample/* "/tmp/data/<<parameters.circleci_job>>/ds-sample"
+
 jobs:
 
   test-python-install:
@@ -50,10 +99,10 @@ jobs:
     working_directory: tmp/src/connectomemapper3
     steps:
       - run:
-          name: Install parallel gzip
+          name: Install parallel zstd
           command: |
             sudo apt-get update
-            sudo apt-get install pigz
+            sudo apt-get install zstd
       - run:
           name: Enable "--squash" feature of docker build
           command: |
@@ -76,8 +125,8 @@ jobs:
           command: |
             docker info
             set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+            if [ -f /tmp/cache/docker.tar.zst ]; then
+              zstd -d --stdout /tmp/cache/docker.tar.zst | docker load
               docker images
             fi
       - run:
@@ -120,11 +169,11 @@ jobs:
             THISVERSION=$( python /tmp/src/connectomemapper3/get_version.py )
             mkdir -p /tmp/cache
             docker save sebastientourbier/connectomemapper3 \
-            | pigz -8 -p 3 > /tmp/cache/docker.tar.gz
+            | zstd -15 --threads=0 > /tmp/cache/docker.tar.zst
       - persist_to_workspace:
           root: /tmp
           paths:
-            - cache/docker.tar.gz
+            - cache/docker.tar.zst
             - src/connectomemapper3
       #- save_cache:
       #    key: docker-v1-{{ .Branch }}-{{ .Revision }}
@@ -153,19 +202,8 @@ jobs:
       - run:
           name: "Starting local registry"
           command: docker run -d -p 5000:5000 --restart=always --name registry registry:2
-      - run:
-          name: "Load Docker image layer cache"
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-              sudo rm /tmp/cache/docker.tar.gz
-            fi
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker.tar.zst"
       - singularity/install-go:
           go-version: '1.13'
       - singularity/debian-install-3:
@@ -288,37 +326,10 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
-      - run:
-          name: Remove any config file present in ds-sample/code and create ds-sample/test
-          no_output_timeout: 8h
-          command: |
-            # Get version, update files.
-            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
-
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
-
-            # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
-
-            # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker.tar.zst"
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
       - run:
           name: Run anatomical and diffusion pipelines on ds-sample (test 1 - Lausanne2018 + FSL FLIRT + Dipy SHORE + MRtrix SD_STREAM tracking + MRtrix SIFT tractogram filtering)
           no_output_timeout: 8h
@@ -413,37 +424,10 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
-      - run:
-          name: Remove any config file present in ds-sample/code and create ds-sample/test
-          no_output_timeout: 8h
-          command: |
-            # Get version, update files.
-            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
-
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
-
-            # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
-
-            # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker.tar.zst"
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
       - run:
           name: Run anatomical and diffusion pipelines on ds-sample (test 3 - Dipy SHORE + Deterministic tracking)
           no_output_timeout: 8h
@@ -538,18 +522,8 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker.tar.zst"
       - run:
           name: Setup miniconda environment and install connectomemapper3 with Python wrappers
           command: |
@@ -564,25 +538,8 @@ jobs:
             source activate connectomemapper3
             echo $(which pip)
             pip install .
-      - run:
-          name: Remove any config file present in ds-sample/code and create ds-sample/test
-          no_output_timeout: 1h
-          command: |
-            # Get version, update files.
-            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
-
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
-
-            # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
-
-            # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
       - run:
           name: Run anatomical pipeline on ds-sample (test 5 - NativeFreesurfer - Python wrapper)
           no_output_timeout: 5h
@@ -684,37 +641,10 @@ jobs:
             fi
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
-      - run:
-          name: Remove any config file present in ds-sample/code and create ds-sample/test
-          no_output_timeout: 8h
-          command: |
-            # Get version, update files.
-            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
-
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
-
-            # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
-
-            # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker.tar.zst"
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
       - run:
           name: Run anatomical and fmri pipelines on ds-sample (test 7 - Lausanne2018 + BBRegister + fmri)
           no_output_timeout: 8h
@@ -882,25 +812,8 @@ jobs:
             source activate connectomemapper3
             echo $(which pip)
             pip install .
-      - run:
-          name: Remove any config file present in ds-sample/code and create ds-sample/test
-          no_output_timeout: 1h
-          command: |
-            # Get version, update files.
-            #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
-            #echo "THISVERSION : ${THISVERSION}"
-            ls -la  /tmp/data/ds-sample/code
-
-            # Remove existing config files in ds-sample (Make sure we are using the ones stored in the repo)
-            rm -f /tmp/data/ds-sample/code/*.ini
-
-            # Create the test folder to store list of test output files
-            mkdir -p /tmp/data/ds-sample/test
-
-            # Create the dataset dedicated to this job and copy data into it
-            echo "Create test-dedicated dataset at: /tmp/data/${CIRCLE_JOB}/ds-sample"
-            mkdir -p /tmp/data/${CIRCLE_JOB}/ds-sample
-            cp -R /tmp/data/ds-sample/* /tmp/data/${CIRCLE_JOB}/ds-sample
+      - clean-configuration-files:
+          circleci_job: ${CIRCLE_JOB}
       - run:
           name: Run anatomical pipeline on ds-sample (test 5 bis - NativeFreesurfer - Python wrapper)
           no_output_timeout: 5h
@@ -988,18 +901,8 @@ jobs:
 
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker.tar.zst"
       - run:
           name: Build Connectome Mapper 3 documentation
           no_output_timeout: 2h
@@ -1025,18 +928,8 @@ jobs:
           path: /home/circleci/src/connectomemapper3
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker.tar.zst"
       - run:
           name: Deploy release with version tag to Docker Hub
           no_output_timeout: 40m
@@ -1065,18 +958,8 @@ jobs:
           path: /home/circleci/src/connectomemapper3
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-              sudo apt-get update && sudo apt-get -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
+      - load-docker-image-archive:
+          archive_file: "/tmp/cache/docker.tar.zst"
       - run:
           name: Deploy latest master to Docker Hub
           no_output_timeout: 40m
