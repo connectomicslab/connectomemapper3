@@ -480,6 +480,7 @@ jobs:
           name: "Starting local registry"
           command: docker run -d -p 5000:5000 --restart=always --name registry registry:2
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - singularity/install-go:
           go-version: '1.13'
@@ -604,8 +605,10 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
+          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
@@ -649,8 +652,10 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
+          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
@@ -694,8 +699,10 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
+          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
@@ -739,8 +746,10 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
+          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-dwi-pipelines:
           circleci_job: ${CIRCLE_JOB}
@@ -784,11 +793,13 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - install-conda-and-cmp3:
           name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
+          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -839,11 +850,13 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - install-conda-and-cmp3:
           name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
+          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline:
           circleci_job: ${CIRCLE_JOB}
@@ -894,8 +907,10 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
+          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines:
           circleci_job: ${CIRCLE_JOB}
@@ -939,8 +954,10 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - clean-configuration-files:
+          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-func-pipelines:
           circleci_job: ${CIRCLE_JOB}
@@ -1046,6 +1063,7 @@ jobs:
           name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
+          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-singularity-anat-pipeline-wrapper:
           circleci_job: ${CIRCLE_JOB}
@@ -1104,6 +1122,7 @@ jobs:
           name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
           cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
+          name: "Clean existing configuration files that may exist"
           circleci_job: ${CIRCLE_JOB}
       - test-singularity-anat-pipeline:
           circleci_job: ${CIRCLE_JOB}
@@ -1153,6 +1172,7 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - run:
           name: Build Connectome Mapper 3 documentation
@@ -1180,6 +1200,7 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - run:
           name: Deploy release with version tag to Docker Hub
@@ -1210,6 +1231,7 @@ jobs:
       - attach_workspace:
           at: /tmp
       - load-docker-image-archive:
+          name: "Load docker layers from cache"
           archive_file: "/tmp/cache/docker.tar.zst"
       - run:
           name: Deploy latest master to Docker Hub
