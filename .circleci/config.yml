@@ -13,8 +13,7 @@ commands:
         default: "/tmp/cache/docker.tar.zst"
     steps:
       - run:
-          name: "<<parameters.name>> from <<parameters.archive_file>>"
-          no_output_timeout: 30m
+          name: "Loading docker image from <<parameters.archive_file>>"
           command: |
             docker info
             set +o pipefail
@@ -32,8 +31,6 @@ commands:
         default: ${CIRCLE_JOB}
     steps:
       - run:
-          name: <<parameters.name>>
-          no_output_timeout: 8h
           command: |
             # Get version, update files.
             #THISVERSION=v$( python /home/circleci/src/connectomemapper3/get_version.py )
@@ -55,7 +52,6 @@ commands:
         default: /home/circleci/src/connectomemapper3
     steps:
       - run:
-          name: <<parameters.name>>
           command: |
             sudo apt update
             sudo apt install -y wget
@@ -89,7 +85,6 @@ commands:
         default: "ref_anatomical_config_1.ini"
     steps:
       - run:
-          name: <<parameters.name>>
           command: |
             # Execute BIDS App
             singularity run --containall \
@@ -133,8 +128,6 @@ commands:
         default: "ref_anatomical_config_1.ini"
     steps:
       - run:
-          name: <<parameters.name>>
-          no_output_timeout: 5h
           command: |
             # Activate the conda environment
             source activate connectomemapper3
@@ -173,8 +166,6 @@ commands:
         default: "ref_anatomical_config_1.ini"
     steps:
       - run:
-          name: <<parameters.name>>
-          no_output_timeout: 5h
           command: |
             # Activate the conda environment
             source activate connectomemapper3
@@ -212,7 +203,6 @@ commands:
         default: "ref_anatomical_config_1.ini"
     steps:
       - run:
-          name: <<parameters.name>>
           command: |
             # Execute BIDS App
             docker run -it --rm \
@@ -257,7 +247,6 @@ commands:
         default: "ref_diffusion_config_1.ini"
     steps:
       - run:
-          name: <<parameters.name>>
           command: |
             # Execute BIDS App
             docker run -it --rm \
@@ -303,7 +292,6 @@ commands:
         default: "ref_fMRI_config_1.ini"
     steps:
       - run:
-          name: <<parameters.name>>
           command: |
             # Execute BIDS App
             docker run -it --rm \
