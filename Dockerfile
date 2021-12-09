@@ -150,13 +150,10 @@ ARG VERSION
 
 # Copy content of neurobuntu intermediate stage build
 COPY --from=neurobuntu /opt/freesurfer /opt/freesurfer
-COPY --from=neurobuntu /usr/bin/fsl* /usr/bin/
 COPY --from=neurobuntu /usr/lib/fsl /usr/lib/fsl
 COPY --from=neurobuntu /etc/fsl /etc/fsl
 COPY --from=neurobuntu /usr/lib/afni /usr/lib/afni
-COPY --from=neurobuntu /usr/bin/afni /usr/bin/afni
-COPY --from=neurobuntu /usr/bin/tclsh /usr/bin/tclsh
-COPY --from=neurobuntu /usr/bin/wish /usr/bin/wish
+COPY --from=neurobuntu /usr/bin /usr/bin
 
 COPY --from=neurobuntu /usr/share/fsl /usr/share/fsl
 COPY --from=neurobuntu /usr/share/afni /usr/share/afni
