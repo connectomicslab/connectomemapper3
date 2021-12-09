@@ -1537,6 +1537,7 @@ workflows:
             - test6_docker_parcellation
             - test7_docker_fmri
             - test8_docker_fmri
+            - codacy_coverage_report
           filters:
             branches:
               ignore:
