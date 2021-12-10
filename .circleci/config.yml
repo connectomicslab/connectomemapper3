@@ -1441,7 +1441,6 @@ workflows:
             - get_data
             # - update_cache
             - build_docker
-            - build_singularity  # delay this job as we are limited to 4 concurrent jobs
           filters:
             branches:
               ignore:
@@ -1454,7 +1453,6 @@ workflows:
             - get_data
             # - update_cache
             - build_docker
-            - build_singularity  # delay this job as we are limited to 4 concurrent jobs
           filters:
             branches:
               ignore:
