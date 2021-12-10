@@ -22,8 +22,7 @@ from bids import BIDSLayout
 from pyface.api import FileDialog, OK
 
 # Own imports
-from . import core
-from . import gui
+from cmp.bidsappmanager import gui
 from cmtklib.bids.io import __cmp_directory__, __nipype_directory__, __freesurfer_directory__
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as anatomical_pipeline
 from cmp.bidsappmanager.pipelines.diffusion import diffusion as diffusion_pipeline
@@ -40,8 +39,10 @@ from cmtklib.config import (
     get_fmri_process_detail_json,
     convert_config_ini_2_json,
 )
-from cmtklib.util import print_blue, print_warning, print_error
-
+from cmtklib.util import (
+    print_blue, print_warning, print_error
+)
+from cmtklib.process import run
 
 warnings.filterwarnings(
     "ignore", message="No valid root directory found for domain 'derivatives'."
@@ -2032,7 +2033,7 @@ class CMP_MainWindowHandler(Handler):
                         )
                     try:
                         print_blue("... cmd: {}".format(cmd))
-                        core.run(
+                        run(
                             cmd,
                             env={},
                             cwd=os.path.abspath(loaded_project.base_directory),
@@ -2050,7 +2051,7 @@ class CMP_MainWindowHandler(Handler):
                     )
                     try:
                         print_blue("... cmd: {}".format(cmd))
-                        core.run(
+                        run(
                             cmd,
                             env={},
                             cwd=os.path.abspath(loaded_project.base_directory),

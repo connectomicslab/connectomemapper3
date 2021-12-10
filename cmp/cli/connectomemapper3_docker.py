@@ -8,12 +8,10 @@
 
 # General imports
 import sys
-from pathlib import Path
 
 # Own imports
-from cmp.info import __version__
 from cmp.parser import get_docker_wrapper_parser
-from cmp.bidsappmanager.core import run
+from cmtklib.process import run
 
 
 def create_docker_cmd(args):

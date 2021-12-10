@@ -4,7 +4,7 @@
 #
 #  This software is distributed under the open-source license Modified BSD.
 
-"""Core module providing a `run()` command."""
+"""Module providing a `run()` command using `subprocess`."""
 
 import os
 import subprocess
