@@ -292,9 +292,18 @@ class SegmentationStage(Stage):
                 orig_dir = os.path.join(
                     correct_freesurfer_subjectid_path(self.config.freesurfer_subject_id), "mri", "orig"
                 )
-                if not os.path.exists(orig_dir):
-                    print(f'INFO : Create folder: {orig_dir}')
-                    os.makedirs(orig_dir)
+                if os.path.exists(os.path.join(orig_dir, "001.mgz")):
+                    # Skip Freesurfer recon-all if 001.mgz exists which typically means it has been already run
+                    outputnode.inputs.subjects_dir = correct_freesurfer_subjects_path(self.config.freesurfer_subjects_dir)
+                    outputnode.inputs.subject_id = correct_freesurfer_subjectid_path(self.config.freesurfer_subject_id)
+                    print(f'INFO : Found existing {os.path.join(orig_dir, "001.mgz")} -> Skip Freesurfer recon-all')
+                    print(f'       - outputnode.inputs.subjects_dir: {outputnode.inputs.subjects_dir}')
+                    print(f'       - outputnode.inputs.subject_id: {outputnode.inputs.subject_id}')
+                    return
+                else:
+                    if not os.path.exists(orig_dir):
+                        print(f'INFO : Create folder: {orig_dir}')
+                        os.makedirs(orig_dir)
 
                 rename.inputs.format_string = os.path.join(orig_dir, "001.mgz")
 
