@@ -401,7 +401,7 @@ jobs:
     machine:
       image: ubuntu-1604:201903-01
       docker_layer_caching: true
-    resource_class: large
+    resource_class: ${CIRCLECI_RESOURCE_CLASS}
     working_directory: tmp/src/connectomemapper3
     steps:
       - run:
@@ -490,7 +490,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/src/connectomemapper3
     steps:
       - checkout:
@@ -615,7 +615,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -660,7 +660,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -705,7 +705,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -750,7 +750,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -795,7 +795,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -850,7 +850,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -905,7 +905,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -950,7 +950,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -1050,7 +1050,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -1108,7 +1108,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -1201,7 +1201,7 @@ jobs:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/src/connectomemapper3
     steps:
       - checkout:
@@ -1231,7 +1231,7 @@ jobs:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/src/connectomemapper3
     steps:
       - checkout:
@@ -1259,7 +1259,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/src/connectomemapper3
     steps:
       - checkout:
@@ -1297,7 +1297,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: large
+    resource_class: "${CIRCLECI_RESOURCE_CLASS}"
     working_directory: /tmp/src/connectomemapper3
     steps:
       - checkout:
