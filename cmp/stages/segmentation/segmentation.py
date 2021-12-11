@@ -204,6 +204,13 @@ class SegmentationStage(Stage):
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.config = SegmentationConfig()
+        self.config.freesurfer_subjects_dir = os.path.join('/output_dir', f'{__freesurfer_directory__}')
+        fs_subject_dir = (subject
+                          if session == "" or session is None
+                          else '_'.join(subject, session))
+        self.config.freesurfer_subject_id = os.path.join(
+            self.config.freesurfer_subjects_dir, fs_subject_dir
+        )
         self.config.ants_templatefile = pkg_resources.resource_filename(
             "cmtklib",
             os.path.join(
@@ -274,9 +281,10 @@ class SegmentationStage(Stage):
             orig_dir = os.path.join(
                 correct_freesurfer_subjectid_path(self.config.freesurfer_subject_id), "mri", "orig"
             )
+            print(f'INFO : orig_dir = {orig_dir}')
             # Skip Freesurfer recon-all if 001.mgz exists which typically means it has been already run
-            if os.path.exists(os.path.join(orig_dir, "001.mgz")):
-                self.config.use_existing_freesurfer_data = True
+            self.config.use_existing_freesurfer_data = True if os.path.exists(orig_dir) else False
+            print(f'INFO : orig_dir exists? {self.config.use_existing_freesurfer_data}')
 
             if self.config.use_existing_freesurfer_data is False:
                 # Converting to .mgz format
