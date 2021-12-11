@@ -65,6 +65,7 @@ commands:
     steps:
       - run:
           name: <<parameters.run_name>>
+          no_output_timeout: 5h
           command: |
             wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
             bash miniconda.sh -bfp $HOME/miniconda
@@ -99,6 +100,7 @@ commands:
     steps:
       - run:
           name: <<parameters.run_name>>
+          no_output_timeout: 5h
           command: |
             # Execute BIDS App
             singularity run --containall \
@@ -233,6 +235,7 @@ commands:
     steps:
       - run:
           name: <<parameters.run_name>>
+          no_output_timeout: 5h
           command: |
             # Execute BIDS App
             docker run -it --rm \
@@ -281,6 +284,7 @@ commands:
     steps:
       - run:
           name: <<parameters.run_name>>
+          no_output_timeout: 5h
           command: |
             # Execute BIDS App
             docker run -it --rm \
@@ -330,6 +334,7 @@ commands:
     steps:
       - run:
           name: <<parameters.run_name>>
+          no_output_timeout: 5h
           command: |
             # Execute BIDS App
             docker run -it --rm \
