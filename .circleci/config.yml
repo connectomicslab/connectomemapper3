@@ -148,8 +148,9 @@ commands:
           name: <<parameters.run_name>>
           no_output_timeout: 5h
           command: |
+            export PATH="$HOME/miniconda/bin:$PATH"
             # Activate the conda environment
-            conda activate connectomemapper3
+            source activate connectomemapper3
             # Execute BIDS App via the singularity python wrapper
             bids_dir="/tmp/data/<<parameters.circleci_job>>/ds-sample"
             output_dir="${bids_dir}/derivatives"
@@ -191,8 +192,9 @@ commands:
           name: <<parameters.run_name>>
           no_output_timeout: 5h
           command: |
+            export PATH="$HOME/miniconda/bin:$PATH"
             # Activate the conda environment
-            conda activate connectomemapper3
+            source activate connectomemapper3
             # Execute BIDS App via the singularity python wrapper
             bids_dir="/tmp/data/<<parameters.circleci_job>>/ds-sample"
             output_dir="${bids_dir}/derivatives"
