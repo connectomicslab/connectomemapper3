@@ -207,7 +207,7 @@ class SegmentationStage(Stage):
         self.config.freesurfer_subjects_dir = os.path.join('/output_dir', f'{__freesurfer_directory__}')
         fs_subject_dir = (subject
                           if session == "" or session is None
-                          else '_'.join(subject, session))
+                          else '_'.join([subject, session]))
         self.config.freesurfer_subject_id = os.path.join(
             self.config.freesurfer_subjects_dir, fs_subject_dir
         )
