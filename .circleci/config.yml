@@ -66,12 +66,7 @@ commands:
       - run:
           name: <<parameters.run_name>>
           command: |
-            sudo apt update
-            sudo apt install -y wget
-            bash /tmp/miniconda.sh -bfp /opt/conda && \
-                rm -rf /tmp/miniconda.sh && \
             wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-            echo $(sha256sum miniconda.sh)
             bash miniconda.sh -bfp $HOME/miniconda
             export PATH="$HOME/miniconda/bin:$PATH"
             conda update -y conda
