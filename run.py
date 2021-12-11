@@ -17,7 +17,7 @@ import os
 import warnings
 
 from glob import glob
-
+import numpy
 # import http.client
 # import urllib
 import requests
@@ -25,10 +25,18 @@ from datetime import datetime
 
 # Own imports
 from cmtklib.util import BColors, print_error, print_blue
-from cmtklib.config import create_subject_configuration_from_ref,\
-    check_configuration_format, convert_config_ini_2_json
+from cmtklib.config import (
+    create_subject_configuration_from_ref,
+    check_configuration_format,
+    convert_config_ini_2_json
+)
 from cmp import parser
 from cmp.info import __version__
+from cmtklib.bids.io import (
+    __cmp_directory__,
+    __freesurfer_directory__,
+    __nipype_directory__
+)
 from cmp.project import CMP_Project_Info, run_individual
 
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
@@ -54,11 +62,12 @@ def report_usage(event_category, event_action, event_label, verbose=False):
     """
     tracking_id = 'UA-124877585-4'
     clientid_str = str(datetime.now())
-    tracking_url = 'https://www.google-analytics.com/collect?v=1&t=event&tid={}&cid={}&ec={}&ea={}&el={}&aip=1'.format(tracking_id,
-                                                                                                                       clientid_str,
-                                                                                                                       event_category,
-                                                                                                                       event_action,
-                                                                                                                       event_label)
+    tracking_url = ('https://www.google-analytics.com/collect?v=1&t=event&'
+                    'tid={}&cid={}&ec={}&ea={}&el={}&aip=1'.format(tracking_id,
+                                                                   clientid_str,
+                                                                   event_category,
+                                                                   event_action,
+                                                                   event_label))
     r = requests.post(tracking_url)
 
     if verbose:
@@ -276,7 +285,7 @@ derivatives_dir = os.path.abspath(args.output_dir)
 if not os.path.isdir(derivatives_dir):
     os.makedirs(derivatives_dir)
 
-tools = ['cmp', 'freesurfer', 'nipype']
+tools = [__cmp_directory__, __freesurfer_directory__, __nipype_directory__]
 
 for tool in tools:
     tool_dir = os.path.join(args.output_dir, tool)
@@ -386,7 +395,6 @@ if args.ants_number_of_threads is not None:
 # Numpy needs to be imported after setting the different multi-threading environment variable
 # See https://stackoverflow.com/questions/30791550/limit-number-of-threads-in-numpy for more details
 # noinspection PyPep8
-import numpy
 numpy.random.seed(1234)
 
 # Set random generator seed of MRtrix if specified
@@ -466,7 +474,7 @@ if args.analysis_level == "participant":
 
                 # Derivatives folder creation
                 for tool in tools:
-                    if tool == 'freesurfer':
+                    if tool == __freesurfer_directory__:
                         session_derivatives_dir = os.path.join(args.output_dir, tool,
                                                                '{}_{}'.format(project.subject, project.subject_session))
                     else:
@@ -570,8 +578,8 @@ if args.analysis_level == "participant":
                         print_blue("... cmd : {}".format(cmd))
 
                         proc = run(command=cmd, env={},
-                                   log_filename=os.path.join(project.output_directory, 'cmp', project.subject,
-                                                             project.subject_session,
+                                   log_filename=os.path.join(project.output_directory, __cmp_directory__,
+                                                             project.subject, project.subject_session,
                                                              '{}_{}_log.txt'.format(project.subject,
                                                                                     project.subject_session)))
                         processes.append(proc)
@@ -691,7 +699,7 @@ if args.analysis_level == "participant":
 
                     proc = run(command=cmd, env={},
                                log_filename=os.path.join(project.output_directory,
-                                                         'cmp', project.subject,
+                                                         __cmp_directory__, project.subject,
                                                          '{}_log.txt'.format(project.subject))
                                )
                     processes.append(proc)

@@ -20,6 +20,10 @@ from nipype.interfaces.base import (
     OutputMultiPath
 )
 
+from cmtklib.bids.io import (
+    __cmp_directory__, __nipype_directory__, __freesurfer_directory__
+)
+
 
 def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
     """Write a dataset_description.json in each type of CMP derivatives.
@@ -33,7 +37,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
         Output/derivatives directory
 
     pipeline_name : string
-        Type of derivatives (`['cmp', 'freesurfer', 'nipype']`)
+        Type of derivatives (`['cmp-<version>', 'freesurfer-<version>', 'nipype-<version>']`)
     """
     from cmp.info import __version__, __url__, DOCKER_HUB
 
@@ -42,7 +46,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
 
     desc = {}
 
-    if pipeline_name == "cmp":
+    if pipeline_name == __cmp_directory__:
         desc = {
             "Name": "CMP3 Outputs",
             "BIDSVersion": "1.4.0",
@@ -59,7 +63,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
                 }
             ]
         }
-    elif pipeline_name == "freesurfer":
+    elif pipeline_name == __freesurfer_directory__:
         desc = {
             "Name": "Freesurfer Outputs of CMP3 ({})".format(__version__),
             "BIDSVersion": "1.4.0",
@@ -76,7 +80,7 @@ def write_derivative_description(bids_dir, deriv_dir, pipeline_name):
                 }
             ]
         }
-    elif pipeline_name == "nipype":
+    elif pipeline_name == __nipype_directory__:
         from nipype import __version__ as nipype_version
 
         desc = {

@@ -273,7 +273,7 @@ def refresh_folder(
         BIDS subject label (``sub-XX``)
 
     input_folders : List of string
-        List of folder to be created in ``derivatives_directory``/'cmp'/``subject``
+        List of folder to be created in ``derivatives_directory``/'cmp-<version>'/``subject``
 
     session : string
         BIDS session label (``ses-YY``)
@@ -313,9 +313,9 @@ def refresh_folder(
             finally:
                 print("Created directory %s" % full_p)
 
-    write_derivative_description(bids_directory, derivatives_directory, "cmp")
-    write_derivative_description(bids_directory, derivatives_directory, "freesurfer")
-    write_derivative_description(bids_directory, derivatives_directory, "nipype")
+    write_derivative_description(bids_directory, derivatives_directory, __cmp_directory__)
+    write_derivative_description(bids_directory, derivatives_directory, __freesurfer_directory__)
+    write_derivative_description(bids_directory, derivatives_directory, __nipype_directory__)
 
 
 def init_dmri_project(project_info, bids_layout, is_new_project, gui=True, debug=False):
