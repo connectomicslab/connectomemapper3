@@ -20,7 +20,9 @@ from nipype import config, logging
 from traits.api import *
 
 # Own import
-from cmtklib.bids.io import __cmp_directory__, __nipype_directory__
+from cmtklib.bids.io import (
+    __cmp_directory__, __nipype_directory__, __freesurfer_directory__
+)
 import cmp.pipelines.common as cmp_common
 from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
@@ -137,10 +139,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.subject = project_info.subject
 
         self.stages["Segmentation"].config.freesurfer_subjects_dir = os.path.join(
-            self.output_directory, "freesurfer"
+            self.output_directory, __freesurfer_directory__
         )
         self.stages["Segmentation"].config.freesurfer_subject_id = os.path.join(
-            self.output_directory, "freesurfer", subject_id
+            self.output_directory, __freesurfer_directory__, subject_id
         )
 
     def _update_parcellation_scheme(self):
@@ -955,12 +957,12 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.stages[
                 "Segmentation"
             ].config.freesurfer_subjects_dir = os.path.join(
-                self.output_directory, "freesurfer"
+                self.output_directory, __freesurfer_directory__
             )
             self.stages[
                 "Segmentation"
             ].config.freesurfer_subject_id = os.path.join(
-                self.output_directory, "freesurfer", self.subject
+                self.output_directory, __freesurfer_directory__, self.subject
             )
 
             # fmt: off
