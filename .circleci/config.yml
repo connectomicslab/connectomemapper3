@@ -149,7 +149,7 @@ commands:
           no_output_timeout: 5h
           command: |
             # Activate the conda environment
-            source activate connectomemapper3
+            conda activate connectomemapper3
             # Execute BIDS App via the singularity python wrapper
             bids_dir="/tmp/data/<<parameters.circleci_job>>/ds-sample"
             output_dir="${bids_dir}/derivatives"
@@ -192,7 +192,7 @@ commands:
           no_output_timeout: 5h
           command: |
             # Activate the conda environment
-            source activate connectomemapper3
+            conda activate connectomemapper3
             # Execute BIDS App via the singularity python wrapper
             bids_dir="/tmp/data/<<parameters.circleci_job>>/ds-sample"
             output_dir="${bids_dir}/derivatives"
