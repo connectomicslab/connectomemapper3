@@ -206,7 +206,7 @@ commands:
             output_dir="${bids_dir}/derivatives"
             connectomemapper3_docker \
             "${bids_dir}" "${output_dir}" participant --participant_label 01 --session_label 01 \
-            --docker_image "sebastientourbier/connectomemapper-bidsapp:latest" \
+            --docker_image "sebastientourbier/connectomemapper3" \
             --config_dir <<parameters.config_dir>> \
             --anat_pipeline_config <<parameters.anat_pipeline_config>> \
             --fs_license "${bids_dir}/code/license.txt" \
