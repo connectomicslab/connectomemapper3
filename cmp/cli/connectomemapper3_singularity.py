@@ -71,11 +71,11 @@ def create_singularity_cmd(args):
         for label in args.session_label:
             cmd += f'{label} '
     if args.anat_pipeline_config:
-        cmd += f'/config/{args.anat_pipeline_config} '
+        cmd += f'--anat_pipeline_config /config/{args.anat_pipeline_config} '
     if args.dwi_pipeline_config:
-        cmd += f'/config/{args.dwi_pipeline_config} '
+        cmd += f'--dwi_pipeline_config /config/{args.dwi_pipeline_config} '
     if args.func_pipeline_config:
-        cmd += f'/config/{args.func_pipeline_config} '
+        cmd += f'--func_pipeline_config /config/{args.func_pipeline_config} '
     cmd += f'--fs_license /bids_dir/code/license.txt '
     optional_single_args = (
         "number_of_threads", "number_of_participants_processed_in_parallel",
