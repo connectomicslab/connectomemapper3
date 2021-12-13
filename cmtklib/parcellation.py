@@ -3752,6 +3752,8 @@ def create_wm_mask_v2(subject_id, subjects_dir, v=True):
     else:
         status = subprocess.call(
             ' '.join(mri_cmd), shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+    iflogger.info(status)
+
     mri_cmd = ['fslmaths', op.join(fs_dir, 'mri', 'brainmask.nii.gz'), '-bin',
                op.join(fs_dir, 'mri', 'brainmask.nii.gz')]
     if v == 2:
@@ -3759,6 +3761,7 @@ def create_wm_mask_v2(subject_id, subjects_dir, v=True):
     else:
         status = subprocess.call(
             ' '.join(mri_cmd), shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+    iflogger.info(status)
 
 
 def crop_and_move_datasets(parcellation_scheme, subject_id, subjects_dir):
@@ -3814,7 +3817,7 @@ def crop_and_move_datasets(parcellation_scheme, subject_id, subjects_dir):
     #            os.makedirs(op.join('.', p))
     #        except:
     #            pass
-    orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
+    orig = op.join(fs_dir, 'mri', 'rawavg.mgz')
 
     for d in ds:
         print("Processing %s:" % d[0])
@@ -4060,7 +4063,7 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
         ds.append((op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' %
                            p), 'ROIv_HR_th_%s.nii.gz' % p))
 
-    orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
+    orig = op.join(fs_dir, 'mri', 'rawavg.mgz')
 
     for d in ds:
         print("Processing %s:" % d[0])
