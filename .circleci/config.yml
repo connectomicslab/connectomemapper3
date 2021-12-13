@@ -1532,9 +1532,6 @@ workflows:
 
       - test4_docker_dsi_mrtrix:
           requires:
-            - get_data
-            # - update_cache
-            - build_docker
             - test1_docker_parcellation
           filters:
             branches:
@@ -1545,9 +1542,6 @@ workflows:
 
       - test5_docker_dsi_mrtrix:
           requires:
-            - get_data
-            # - update_cache
-            - build_docker
             - test1_docker_parcellation
           filters:
             branches:
@@ -1558,9 +1552,6 @@ workflows:
 
       - test6_docker_dsi_dipy:
           requires:
-            - get_data
-            # - update_cache
-            - build_docker
             - test1_docker_parcellation
           filters:
             branches:
@@ -1571,9 +1562,6 @@ workflows:
 
       - test7_docker_dsi_dipy:
           requires:
-            - get_data
-            # - update_cache
-            - build_docker
             - test1_docker_parcellation
           filters:
             branches:
@@ -1584,9 +1572,7 @@ workflows:
 
       - test8_docker_fmri:
           requires:
-            - get_data
-            # - update_cache
-            - build_docker
+            - test1_docker_parcellation
           filters:
             branches:
               ignore:
@@ -1596,9 +1582,7 @@ workflows:
 
       - test9_docker_fmri:
           requires:
-            - get_data
-            # - update_cache
-            - build_docker
+            - test1_docker_parcellation
           filters:
             branches:
               ignore:
