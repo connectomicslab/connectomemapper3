@@ -111,6 +111,7 @@ commands:
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
                 --anat_pipeline_config /config/<<parameters.anat_pipeline_config>> \
                 --fs_license /bids_dir/code/license.txt \
+                --ants_number_of_threads 4 \
                 --coverage
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
@@ -162,6 +163,7 @@ commands:
             --config_dir <<parameters.config_dir>> \
             --anat_pipeline_config <<parameters.anat_pipeline_config>> \
             --fs_license "${bids_dir}/code/license.txt" \
+            --ants_number_of_threads 4 \
             --coverage
       - run:
           name: Checking outputs of Connectome Mapper run (<<parameters.test_name>>)
@@ -210,6 +212,7 @@ commands:
             --config_dir <<parameters.config_dir>> \
             --anat_pipeline_config <<parameters.anat_pipeline_config>> \
             --fs_license "${bids_dir}/code/license.txt" \
+            --ants_number_of_threads 4 \
             --coverage
       - when:
           condition:
@@ -256,6 +259,7 @@ commands:
                 /bids_dir /output_dir participant --participant_label 01 --session_label 01 \
                 --anat_pipeline_config /config/<<parameters.anat_pipeline_config>> \
                 --fs_license /bids_dir/code/license.txt \
+                --ants_number_of_threads 4 \
                 --coverage
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
@@ -306,6 +310,7 @@ commands:
                 --anat_pipeline_config /config/<<parameters.anat_pipeline_config>> \
                 --dwi_pipeline_config /config/<<parameters.dwi_pipeline_config>> \
                 --fs_license /bids_dir/code/license.txt \
+                --ants_number_of_threads 4 \
                 --coverage
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
@@ -356,6 +361,7 @@ commands:
                 --anat_pipeline_config /config/<<parameters.anat_pipeline_config>> \
                 --func_pipeline_config /config/<<parameters.func_pipeline_config>> \
                 --fs_license /bids_dir/code/license.txt \
+                --ants_number_of_threads 4 \
                 --coverage
             # Rename partial coverage
             mv /tmp/data/<<parameters.circleci_job>>/ds-sample/code/coverage.xml /tmp/data/ds-sample/test/<<parameters.test_name>>_coverage.xml
@@ -626,7 +632,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: medium
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -702,14 +708,11 @@ jobs:
           at: /tmp
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker.tar.zst"
-      - install-conda-and-cmp3:
-          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
-          cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
-      - test-docker-anat-pipeline-wrapper:
+      - test-docker-anat-pipeline:
           circleci_job: ${CIRCLE_JOB}
-          run_name: Run anatomical pipeline on ds-sample (test 2 - NativeFreesurfer - Python wrapper)
+          run_name: Run anatomical pipeline on ds-sample (test 2 - NativeFreesurfer)
           test_name: "test-02"
           config_dir: /home/circleci/src/connectomemapper3/.circleci/tests/configuration_files
           anat_pipeline_config: "ref_anatomical_config_2.ini"
@@ -757,9 +760,6 @@ jobs:
           at: /tmp
       - load-docker-image-archive:
           archive_file: "/tmp/cache/docker.tar.zst"
-      - install-conda-and-cmp3:
-          run_name: "Setup miniconda environment and install connectomemapper3 with Python wrappers"
-          cmp3_dir: /home/circleci/src/connectomemapper3
       - clean-configuration-files:
           circleci_job: ${CIRCLE_JOB}
       - test-docker-anat-pipeline:
@@ -793,7 +793,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: medium
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -844,7 +844,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: medium
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -895,7 +895,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: medium
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -946,7 +946,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: medium
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -997,7 +997,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: medium
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -1048,7 +1048,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: medium
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -1099,7 +1099,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: medium
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
@@ -1157,7 +1157,7 @@ jobs:
     machine:
       # Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       image: ubuntu-1604:201903-01
-    resource_class: medium
+    resource_class: large
     working_directory: /tmp/data
     environment:
       - FS_LICENSE: /tmp/data/${CIRCLE_JOB}/ds-sample/code/license.txt
