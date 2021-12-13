@@ -102,6 +102,18 @@ class PreprocessingConfig(HasTraits):
         'interpolate', 'weighted', 'nearest', 'sinc', or 'cubic'
         (Default: 'interpolate')
 
+    tracking_tool : Enum(['Dipy', 'MRtrix'])
+        Tool used for tractography
+
+    act_tracking : Bool
+        True if Anatomically-Constrained or Particle Filtering
+        Tractography is enabled
+        (Default: False)
+
+    gmwmi_seeding : Bool
+        True if tractography seeding is performed from the
+        gray-matter / white-matter interface(Default: False)
+
     See Also
     --------
     cmp.stages.preprocessing.preprocessing.PreprocessingStage
@@ -127,6 +139,10 @@ class PreprocessingConfig(HasTraits):
     # DWI resampling selection
     resampling = Tuple(1, 1, 1)
     interpolation = Enum(["interpolate", "weighted", "nearest", "sinc", "cubic"])
+
+    tracking_tool = Enum(['Dipy', 'MRtrix'])
+    act_tracking = Bool(False)
+    gmwmi_seeding = Bool(False)
 
 
 class PreprocessingStage(Stage):
@@ -902,68 +918,12 @@ class PreprocessingStage(Stage):
                     ]
                 )
 
-                flow.connect(
-                    [(eddy_correct, outputnode, [("bvecs_rotated", "bvecs_rot")])]
-                )
-
-                # # DTK needs fixed number of directions (512)
-                # if self.config.start_vol > 0 and self.config.end_vol == self.config.max_vol:
-                #     merge_filenames = pe.Node(interface=util.Merge(2),name='merge_files')
-                #     flow.connect([
-                #                 (split_vol,merge_filenames,[("padding1","in1")]),
-                #                 (eddy_correct,merge_filenames,[("eddy_corrected","in1")])
-                #                 ])
-                #     merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
-                #     flow.connect([
-                #                 (merge_filenames,merge,[("out","in_files")]),
-                #                 ])
-                #     # resampling diffusion image and setting output type to short
-                #     flow.connect([
-                #                 (merge,fs_mriconvert,[('merged_file','in_file')]),
-                #                 (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                #                 ])
-                #
-                # elif self.config.start_vol > 0 and self.config.end_vol < self.config.max_vol:
-                #     merge_filenames = pe.Node(interface=util.Merge(3),name='merge_files')
-                #     flow.connect([
-                #                 (split_vol,merge_filenames,[("padding1","in1")]),
-                #                 (eddy_correct,merge_filenames,[("eddy_corrected","in1")]),
-                #                 (split_vol,merge_filenames,[("padding2","in3")])
-                #                 ])
-                #     merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
-                #     flow.connect([
-                #                 (merge_filenames,merge,[("out","in_files")]),
-                #                 ])
-                #     # resampling diffusion image and setting output type to short
-                #     flow.connect([
-                #                 (merge,fs_mriconvert,[('merged_file','in_file')]),
-                #                 (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                #                 ])
-                # elif self.config.start_vol == 0 and self.config.end_vol < self.config.max_vol:
-                #     merge_filenames = pe.Node(interface=util.Merge(2),name='merge_files')
-                #     flow.connect([
-                #                 (eddy_correct,merge_filenames,[("eddy_corrected","in1")]),
-                #                 (split_vol,merge_filenames,[("padding2","in2")])
-                #                 ])
-                #     merge = pe.Node(interface=fsl.Merge(dimension='t'),name="merge")
-                #     flow.connect([
-                #                 (merge_filenames,merge,[("out","in_files")]),
-                #                 ])
-                #     # resampling diffusion image and setting output type to short
-                #     flow.connect([
-                #                 (merge,fs_mriconvert,[('merged_file','in_file')]),
-                #                 (fs_mriconvert,outputnode,[("out_file","diffusion_preproc")])
-                #                 ])
-                # else:
                 # resampling diffusion image and setting output type to short
                 flow.connect(
                     [
+                        (eddy_correct, outputnode, [("bvecs_rotated", "bvecs_rot")]),
                         (eddy_correct, fs_mriconvert, [("eddy_corrected", "in_file")]),
-                        (
-                            fs_mriconvert,
-                            outputnode,
-                            [("out_file", "diffusion_preproc")],
-                        ),
+                        (fs_mriconvert,outputnode, [("out_file", "diffusion_preproc")])
                     ]
                 )
         else:
@@ -1021,95 +981,99 @@ class PreprocessingStage(Stage):
         #                     (mc_flirt,outputnode,[("out_file","diffusion_preproc")])
         #                     ])
 
-        fs_mriconvert_5tt = pe.Node(
-            interface=fs.MRIConvert(
-                out_type="niigz", out_file="act_5tt_resampled.nii.gz"
-            ),
-            name="5tt_resample",
-        )
-        fs_mriconvert_5tt.inputs.vox_size = self.config.resampling
-        fs_mriconvert_5tt.inputs.resample_type = self.config.interpolation
-
-        mrtrix_5tt = pe.Node(
-            interface=Generate5tt(out_file="mrtrix_5tt.nii.gz"), name="mrtrix_5tt"
-        )
-        mrtrix_5tt.inputs.algorithm = "freesurfer"
-        # mrtrix_5tt.inputs.algorithm = 'hsvs'
-
-        flow.connect(
-            [
-                (processing_input, mrtrix_5tt, [("aparc_aseg", "in_file")]),
-                (mrtrix_5tt, fs_mriconvert_5tt, [("out_file", "in_file")]),
-                (fs_mriconvert_5tt, outputnode, [("out_file", "act_5TT")]),
-            ]
-        )
-
-        # if self.config.partial_volume_estimation:
-        pve_extractor_from_5tt = pe.Node(
-            interface=ExtractPVEsFrom5TT(), name="pve_extractor_from_5tt"
-        )
-        pve_extractor_from_5tt.inputs.pve_csf_file = "pve_0.nii.gz"
-        pve_extractor_from_5tt.inputs.pve_gm_file = "pve_1.nii.gz"
-        pve_extractor_from_5tt.inputs.pve_wm_file = "pve_2.nii.gz"
-
-        flow.connect(
-            [
-                (mrtrix_5tt, pve_extractor_from_5tt, [("out_file", "in_5tt")]),
-                (processing_input, pve_extractor_from_5tt, [("T1", "ref_image")]),
-            ]
-        )
-
-        fs_mriconvert_PVEs = pe.MapNode(
-            interface=fs.MRIConvert(out_type="niigz"),
-            iterfield=["in_file"],
-            name="PVEs_resample",
-        )
-        fs_mriconvert_PVEs.inputs.vox_size = self.config.resampling
-        fs_mriconvert_PVEs.inputs.resample_type = self.config.interpolation
-        flow.connect(
-            [
-                (
-                    pve_extractor_from_5tt,
-                    fs_mriconvert_PVEs,
-                    [("partial_volume_files", "in_file")],
+        if self.config.act_tracking:
+            fs_mriconvert_5tt = pe.Node(
+                interface=fs.MRIConvert(
+                    out_type="niigz", out_file="act_5tt_resampled.nii.gz"
                 ),
-                # (mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
-                (
-                    fs_mriconvert_PVEs,
-                    outputnode,
-                    [("out_file", "partial_volume_files")],
+                name="5tt_resample",
+            )
+            fs_mriconvert_5tt.inputs.vox_size = self.config.resampling
+            fs_mriconvert_5tt.inputs.resample_type = self.config.interpolation
+
+            mrtrix_5tt = pe.Node(
+                interface=Generate5tt(out_file="mrtrix_5tt.nii.gz"), name="mrtrix_5tt"
+            )
+            mrtrix_5tt.inputs.algorithm = "freesurfer"
+            # mrtrix_5tt.inputs.algorithm = 'hsvs'
+
+            # fmt: off
+            flow.connect(
+                [
+                    (processing_input, mrtrix_5tt, [("aparc_aseg", "in_file")]),
+                    (mrtrix_5tt, fs_mriconvert_5tt, [("out_file", "in_file")]),
+                    (fs_mriconvert_5tt, outputnode, [("out_file", "act_5TT")]),
+                ]
+            )
+            # fmt: on
+
+            if self.config.tracking_tool == 'Dipy':
+                pve_extractor_from_5tt = pe.Node(
+                    interface=ExtractPVEsFrom5TT(), name="pve_extractor_from_5tt"
+                )
+                pve_extractor_from_5tt.inputs.pve_csf_file = "pve_0.nii.gz"
+                pve_extractor_from_5tt.inputs.pve_gm_file = "pve_1.nii.gz"
+                pve_extractor_from_5tt.inputs.pve_wm_file = "pve_2.nii.gz"
+
+                flow.connect(
+                    [
+                        (mrtrix_5tt, pve_extractor_from_5tt, [("out_file", "in_5tt")]),
+                        (processing_input, pve_extractor_from_5tt, [("T1", "ref_image")]),
+                    ]
+                )
+
+                fs_mriconvert_PVEs = pe.MapNode(
+                    interface=fs.MRIConvert(out_type="niigz"),
+                    iterfield=["in_file"],
+                    name="PVEs_resample",
+                )
+                fs_mriconvert_PVEs.inputs.vox_size = self.config.resampling
+                fs_mriconvert_PVEs.inputs.resample_type = self.config.interpolation
+                flow.connect(
+                    [
+                        (
+                            pve_extractor_from_5tt,
+                            fs_mriconvert_PVEs,
+                            [("partial_volume_files", "in_file")],
+                        ),
+                        # (mr_convert_b0_resample,fs_mriconvert_ROIs,[('converted','reslice_like')]),
+                        (
+                            fs_mriconvert_PVEs,
+                            outputnode,
+                            [("out_file", "partial_volume_files")],
+                        ),
+                    ]
+                )
+
+        if self.config.gmwmi_seeding:
+            fs_mriconvert_gmwmi = pe.Node(
+                interface=fs.MRIConvert(
+                    out_type="niigz", out_file="gmwmi_resampled.nii.gz"
                 ),
-            ]
-        )
+                name="gmwmi_resample",
+            )
+            fs_mriconvert_gmwmi.inputs.vox_size = self.config.resampling
+            fs_mriconvert_gmwmi.inputs.resample_type = self.config.interpolation
 
-        fs_mriconvert_gmwmi = pe.Node(
-            interface=fs.MRIConvert(
-                out_type="niigz", out_file="gmwmi_resampled.nii.gz"
-            ),
-            name="gmwmi_resample",
-        )
-        fs_mriconvert_gmwmi.inputs.vox_size = self.config.resampling
-        fs_mriconvert_gmwmi.inputs.resample_type = self.config.interpolation
+            mrtrix_gmwmi = pe.Node(
+                interface=GenerateGMWMInterface(out_file="gmwmi.nii.gz"),
+                name="mrtrix_gmwmi",
+            )
 
-        mrtrix_gmwmi = pe.Node(
-            interface=GenerateGMWMInterface(out_file="gmwmi.nii.gz"),
-            name="mrtrix_gmwmi",
-        )
+            update_gmwmi = pe.Node(
+                interface=UpdateGMWMInterfaceSeeding(), name="update_gmwmi"
+            )
+            update_gmwmi.inputs.out_gmwmi_file = "gmwmi_proc.nii.gz"
 
-        update_gmwmi = pe.Node(
-            interface=UpdateGMWMInterfaceSeeding(), name="update_gmwmi"
-        )
-        update_gmwmi.inputs.out_gmwmi_file = "gmwmi_proc.nii.gz"
-
-        flow.connect(
-            [
-                (mrtrix_5tt, mrtrix_gmwmi, [("out_file", "in_file")]),
-                (mrtrix_gmwmi, update_gmwmi, [("out_file", "in_gmwmi_file")]),
-                (processing_input, update_gmwmi, [("roi_volumes", "in_roi_volumes")]),
-                (update_gmwmi, fs_mriconvert_gmwmi, [("out_gmwmi_file", "in_file")]),
-                (fs_mriconvert_gmwmi, outputnode, [("out_file", "gmwmi")]),
-            ]
-        )
+            flow.connect(
+                [
+                    (mrtrix_5tt, mrtrix_gmwmi, [("out_file", "in_file")]),
+                    (mrtrix_gmwmi, update_gmwmi, [("out_file", "in_gmwmi_file")]),
+                    (processing_input, update_gmwmi, [("roi_volumes", "in_roi_volumes")]),
+                    (update_gmwmi, fs_mriconvert_gmwmi, [("out_gmwmi_file", "in_file")]),
+                    (fs_mriconvert_gmwmi, outputnode, [("out_file", "gmwmi")]),
+                ]
+            )
 
     def define_inspect_outputs(self):
         """Update the `inspect_outputs` class attribute.
