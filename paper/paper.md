@@ -53,7 +53,7 @@ bibliography: paper.bib
 # Statement of Need
 
 The field of Magnetic Resonance (MR) Connectomics has rapidly expanded since its advent 
-  in the 2000s[@SpornsTheBrain:2005,@HagmannFromConnectomics:2005,@SpornsEditorialConnectomics:2018].
+  in the 2000s [@SpornsTheBrain:2005], [@HagmannFromConnectomics:2005], [@SpornsEditorialConnectomics:2018].
 It has revolutionized the way to investigate ``in-vivo``, ``non-invasively`` and 
   ``safely`` at different macroscopic scales the structural and functional systems of the 
   brain by modeling connections between brain areas as a graph or network, the so-called
@@ -78,26 +78,26 @@ While reliability in human brain connectomics concerns the consistency and accur
 The last ten years have witnessed a trend towards the adoption by the community of open research
   practices, which promotes ``open data`` and ``open method``, to address these challenges.
 This has led to the elaboration of the principles of open and reproducible research for
-  neuroimaging using Magnetic Resonance Imaging (MRI)[@Nichols:2017] and to recommendation of
-  standard practices for sharing code and programs[@EglenTowardNeuroscience:2017]. 
+  neuroimaging using Magnetic Resonance Imaging (MRI) [@Nichols:2017] and to recommendation of
+  standard practices for sharing code and programs [@EglenTowardNeuroscience:2017]. 
 To ease and automate
   the practice of sharing raw and processed neuroimaging data and code with appropriate metadata
   and provenance records, multiple initiatives have developed new standards, tools, and educational
   resources.
 Among others, this has contributed to the emergence of
-  Nipype[@GorgolewskiNipype:2011], a dataflow library that facilitates workflow
+  Nipype [@GorgolewskiNipype:2011], a dataflow library that facilitates workflow
   execution/re-execution, provenance tracking and provides a uniform interface to existing
   neuroimaging softwares; the Brain Imaging Data Structure (BIDS)
-  standard[@GorgolewskiTheExperiments:2016], to standardize the organization and description
+  standard [@GorgolewskiTheExperiments:2016], to standardize the organization and description
   of neuroimaging data; Datalad a data portal, versioning, and provenance tracking system
-  supporting BIDS; and more recently, the BIDS-Apps framework[@GorgolewskiBIDSMethods:2017],
+  supporting BIDS; and more recently, the BIDS-Apps framework [@GorgolewskiBIDSMethods:2017],
   which employs modern software practices and encapsulates into a software container a processing
   pipeline that takes a BIDS dataset as input in order to improve the ease of use, accessibility,
   deliverability, portability, scalability and reproducibility of processing pipelines. 
 
-Following these advances, a number of processing pipelines such as C-PAC~[@cpac:2013],
-  NIAK[@BellecNeuroimagingNIAK:2016], fMRIPrep[@Ghosh:2018],
-  dMRIPrep[@dmriprep:2019], QSIPREP[@CieslakQSIPrep:2020], NDMG[@KiarAVariability:2018] and PyNets[@PisnerPyNets:2020] have been
+Following these advances, a number of processing pipelines such as C-PAC [@cpac:2013],
+  NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018],
+  dMRIPrep [@dmriprep:2019], QSIPREP [@CieslakQSIPrep:2020], NDMG [@KiarAVariability:2018] and PyNets [@PisnerPyNets:2020] have been
   developed to support the mapping of connectomes derived from MRI data organized following the BIDS standard.
 They have demonstrated their capability in addressing all the challenges of data sharing,
   portability, computing scalability, reliability, reproducibility and transparency.
