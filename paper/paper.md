@@ -112,7 +112,7 @@ While CMP3 derives from the now deprecated CMP1 and CMP2 packages[@Daducci:2012]
   evolved massively over the years in terms of the underlying codebase, the tools used, and the
   scope of the functionality provided.
 Design considerations with the implementation of modular, configurable, and containerized
-  processing pipelines (\autoref{fig:cmp3.diagram}) handling datasets organized following the BIDS standard, distributed
+  processing pipelines (\autoref{fig:cmp3-diagram}) handling datasets organized following the BIDS standard, distributed
   as a BIDS App, embedding most popular neuroimaging tools (such as including FSL,
   FreeSurfer, ANTs, MRtrix3, Dipy and AFNI) used in combination with the Nipype dataflow library
   makes it not only efficient in managing and scaling the pipeline execution while recording provenance,
