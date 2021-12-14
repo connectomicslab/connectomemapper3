@@ -118,7 +118,7 @@ Design considerations with the implementation of modular, configurable, and cont
   makes it not only efficient in managing and scaling the pipeline execution while recording provenance,
   but also easy to customize it for specific needs.
 
-!["\textbf{Participant-level analysis workflow of the Connectome Mapper 3.}
+![\textbf{Participant-level analysis workflow of the Connectome Mapper 3.}
 It has a modular architecture composed of three different pipelines (anatomical, diffusion and
   fMRI) dedicated to each modality (sMRI, dMRI and rfMRI).
 Each pipeline handles datasets organized following the Brain Imaging Data Structure standard and
@@ -126,7 +126,7 @@ Each pipeline handles datasets organized following the Brain Imaging Data Struct
   workflow, where each task interfaces with a specific tool, empowered by the Nipype dataflow
   library, to computes, from raw MRI data, brain parcellation and corresponding structural and/or
   functional connectivity maps at 5 different scales using the Lausanne2018 hierarchical scheme.
-\label{fig:cmp3-diagram}"](cmp3-diagram.png)
+\label{fig:cmp3-diagram}](cmp3-diagram.png)
 
 Each pipeline can be individually executed with the aid of the user-friendly GUI and the
   output of each stage can be visually reviewed, enabling the user to keep an eye on the
