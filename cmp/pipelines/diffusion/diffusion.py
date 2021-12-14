@@ -148,6 +148,13 @@ class DiffusionPipeline(Pipeline):
         self.subject = project_info.subject
         self.diffusion_imaging_model = project_info.diffusion_imaging_model
 
+        if self.stages["Diffusion"].config.tracking_processing_tool == "Dipy":
+            self.stages["Preprocessing"].config.act_tracking = self.stages["Diffusion"].config.dipy_tracking_config.use_act
+            self.stages["Preprocessing"].config.gmwmi_seeding = False
+        elif self.stages["Diffusion"].config.tracking_processing_tool == "MRtrix":
+            self.stages["Preprocessing"].config.act_tracking = self.stages["Diffusion"].config.mrtrix_tracking_config.use_act
+            self.stages["Preprocessing"].config.gmwmi_seeding = self.stages["Diffusion"].config.mrtrix_tracking_config.seed_from_gmwmi
+
         self.stages["Connectome"].config.on_trait_change(
             self.update_vizualization_layout, "circular_layout"
         )
@@ -158,7 +165,19 @@ class DiffusionPipeline(Pipeline):
             self.update_outputs_recon, "recon_processing_tool"
         )
         self.stages["Diffusion"].config.on_trait_change(
-            self.update_outputs_tracking, "tracking_processing_tool"
+            self.update_tracking_tool, "tracking_processing_tool"
+        )
+        self.stages["Diffusion"].config.mrtrix_tracking_config.on_trait_change(
+            self.update_preprocessing_act, "use_act"
+        )
+        self.stages["Diffusion"].config.mrtrix_tracking_config.on_trait_change(
+            self.update_preprocessing_gmwmi, "seed_from_gmwmi"
+        )
+        self.stages["Diffusion"].config.dipy_tracking_config.on_trait_change(
+            self.update_preprocessing_act, "use_act"
+        )
+        self.stages["Diffusion"].config.on_trait_change(
+            self.update_outputs_recon, "recon_processing_tool"
         )
         # self.anat_flow = anat_flow
 
@@ -203,6 +222,41 @@ class DiffusionPipeline(Pipeline):
         """
         self.stages["Connectome"].define_inspect_outputs()
         self.stages["Connectome"].config.subject = self.subject
+
+    def update_tracking_tool(self, new):
+        """Update ``self.stages["Preprocessing"].config.tracking_tool`` when ``tracking_processing_tool`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value.
+        """
+        self.stages["Preprocessing"].config.tracking_tool = new
+        if self.stages["Preprocessing"].config.tracking_tool == 'Dipy':
+            self.stages["Preprocessing"].config.gmwmi_seeding = False
+
+    def update_preprocessing_act(self, new):
+        """Update ``self.stages["Preprocessing"].config.act_tracking`` when ``use_act`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value.
+        """
+        self.stages["Preprocessing"].config.act_tracking = new
+        if (not self.stages["Preprocessing"].config.act_tracking or
+                self.stages["Preprocessing"].config.tracking_tool == 'Dipy'):
+            self.stages["Preprocessing"].config.gmwmi_seeding = False
+
+    def update_preprocessing_gmwmi(self, new):
+        """Update ``self.stages["Preprocessing"].config.gmwmi_seeding`` when ``seed_from_gmwmi`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value.
+        """
+        self.stages["Preprocessing"].config.gmwmi_seeding = new
 
     def _subject_changed(self, new):
         """Update subject in the connectome stage configuration when ``subject`` is updated.
