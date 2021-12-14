@@ -50,11 +50,6 @@ bibliography: paper.bib
 # aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
-# Summary
-
-The source code for ``Connectome Mapper 3`` has been
-archived to Zenodo with the linked DOI: [@ZenodoCMP:2021]
-
 # Statement of Need
 
 The field of Magnetic Resonance (MR) Connectomics has rapidly expanded since its advent 
@@ -113,6 +108,8 @@ However, none of the existing solutions are designed (1) to generate  precise br
   (except NDMG), (4) to enable the end users to tune pipeline hyper-parameters to their dataset and
   (5) to provide a user-friendly graphical interface that enhances its accessibility.
 
+# Summary
+
 In this article we present the third release of the Connectome Mapper (CMP3), whose original main
   goal was to simplify the organisation and the analysis of sMRI and dMRI from raw data to
   multi-scale structural weighted connectomes.
@@ -136,6 +133,8 @@ CMP3 is open-source, developed in Python, and the processing pipelines and all d
 It is worth noting the software is ready to accommodate other imaging modalities
   such as the current integration of a source EEG imaging pipeline, which makes it an ideal to be further developed into
   the next generation brain connectivity mapping tools.
+The source code for ``Connectome Mapper 3`` has been
+  archived to Zenodo with the linked DOI: [@ZenodoCMP:2021]
 
 # Mention
 
