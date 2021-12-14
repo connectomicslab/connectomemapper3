@@ -54,10 +54,10 @@ bibliography: paper.bib
 
 The field of Magnetic Resonance (MR) Connectomics has rapidly expanded since its advent 
   in the 2000s [@SpornsTheBrain:2005], [@HagmannFromConnectomics:2005], [@SpornsEditorialConnectomics:2018].
-It has revolutionized the way to investigate ``in-vivo``, ``non-invasively`` and 
-  ``safely`` at different macroscopic scales the structural and functional systems of the 
+It has revolutionized the way to investigate `in-vivo`, `non-invasively` and 
+  `safely` at different macroscopic scales the structural and functional systems of the 
   brain by modeling connections between brain areas as a graph or network, the so-called
-  ``connectome``.
+  `connectome`.
 
 While brain areas are usually derived from high resolution T1 weighted  MR imaging, so called
   structural MRI (sMRI), structural brain connectomes are mapped from diffusion MR imaging (dMRI)
@@ -68,15 +68,10 @@ As MRI is being increasingly more accessible and used in both clinical and resea
   such multi-modal MR datasets are being gathered at an unprecedented rate.
 The size and organization of these datasets as well as the increasing complexity of the processing
   pipelines to analyze them present important challenges for scalable computing, data sharing,
-  reliability, reproducibility and transparency of the analysis. 
-While reliability in human brain connectomics concerns the consistency and accuracy of connectome
-  estimation for the discrimination of individuals, reproducibility concerns steps towards 1) increasing the
-  transparency of data analysis, by sharing data, code, computing environment, pipeline configuration files,
-  and recording data and workflow provenance, and 2) minimizing numerical variability when the
-  pipeline is executed on different operating systems. 
+  reliability, reproducibility and transparency of the analysis.
 
-The last ten years have witnessed a trend towards the adoption by the community of open research
-  practices, which promotes ``open data`` and ``open method``, to address these challenges.
+The last ten years have indeed witnessed a trend towards the adoption by the community of open research
+  practices, which promotes `open data` and `open method`, to address these challenges.
 This has led to the elaboration of the principles of open and reproducible research for
   neuroimaging using Magnetic Resonance Imaging (MRI) [@Nichols:2017] and to recommendation of
   standard practices for sharing code and programs [@EglenTowardNeuroscience:2017]. 
@@ -101,47 +96,38 @@ Following these advances, a number of processing pipelines such as C-PAC [@cpac:
   developed to support the mapping of connectomes derived from MRI data organized following the BIDS standard.
 They have demonstrated their capability in addressing all the challenges of data sharing,
   portability, computing scalability, reliability, reproducibility and transparency.
-However, none of the existing solutions are designed (1) to work across both fMRI and dMRI
-  (except NDMG), (2) to map the structural and / or functional connectomes
-  of brain parcellations at five macroscopic scales with hierarchical region grouping,
-  (3) to enable the end users to tune pipeline hyper-parameters to their dataset and
-  (4) to provide a user-friendly graphical interface that enhances its accessibility.
+However, none of the existing solutions are designed to map the structural and / or functional
+  connectomes for five macroscopic brain parcellation scales with hierarchical region grouping,
+  and to provide a user-friendly graphical interface that enhances its accessibility.
 
 # Summary
-
-In this article we present the third release of the Connectome Mapper (CMP3).
-While CMP3 derives from the now deprecated CMP1 and CMP2 packages[@Daducci:2012], whose original main
-  goals were to simplify the organisation and the analysis of sMRI and dMRI from raw data to
-  multi-scale structural weighted connectomes, it has
-  evolved massively over the years in terms of the underlying codebase, the tools used, and the
-  scope of the functionality provided.
-Designed following the specification established by the BIDS-Apps standard, CMP3 is a scalable,
-  portable and a reproducible pipeline software with optionally a graphical user interface that
-  guides and helps researchers through all the steps needed to compute in a common framework both
-  structural and functional connectomes from raw sMRI, dMRI, and resting-state fMRI (rfMRI) data at
-  five different macroscopic scales.
-It handles datasets organized according to the BIDS standard and works transparently with the most
-  used and promising diffusion acquisition schemes.
-Its modular architecture, embedding most popular neuroimaging tools (such as including FSL,
-  FreeSurfer, ANTs, MRtrix3, Dipy and AFNI) used in combination with the Nipype dataflow library
-  makes it not only efficient in managing and scaling the pipeline execution while recording provenance,
-  but also easy to customize it for specific needs.
-CMP3 is open-source, developed in Python, and the processing pipelines and all dependencies
-  are encapsulated in a software container to facilitate installation, enhance execution
-  reproducibility, and to be fully portable, being compatible with all types of operating systems.  
-It is worth noting the software is ready to accommodate other imaging modalities
-  such as the current integration of a source EEG imaging pipeline, which makes it an ideal to be further developed into
-  the next generation brain connectivity mapping tools.
 
 Connectome Mapper 3 provides a unique software pipeline solution for researchers to easily,
   reliably and transparently create a hierarchical multi-scale connectome representation of
   the structural and functional brain systems, on any dataset structured according to the
   BIDS standard.
+While CMP3 derives from the now deprecated CMP1 and CMP2 packages[@Daducci:2012], whose original main
+  goals were to simplify the organisation and the analysis of sMRI and dMRI from raw data to
+  multi-scale structural weighted connectomes, it has
+  evolved massively over the years in terms of the underlying codebase, the tools used, and the
+  scope of the functionality provided.
 Design considerations with the implementation of modular, configurable, and containerized
-  processing pipelines handling datasets organized following the BIDS standard, distributed
-  as a BIDS App, and supported by a Graphical User Interface (GUI), make CMP3 accessible to
-  a broad range of users from computational neuro-researchers to clinicians without
-  extensive computer engineering experience.
+  processing pipelines (\autoref{fig:cmp3.diagram}) handling datasets organized following the BIDS standard, distributed
+  as a BIDS App, embedding most popular neuroimaging tools (such as including FSL,
+  FreeSurfer, ANTs, MRtrix3, Dipy and AFNI) used in combination with the Nipype dataflow library
+  makes it not only efficient in managing and scaling the pipeline execution while recording provenance,
+  but also easy to customize it for specific needs.
+
+!["\textbf{Participant-level analysis workflow of the Connectome Mapper 3.}
+It has a modular architecture composed of three different pipelines (anatomical, diffusion and
+  fMRI) dedicated to each modality (sMRI, dMRI and rfMRI).
+Each pipeline handles datasets organized following the Brain Imaging Data Structure standard and
+  consists of a number of processing stages implementing one or multiple specific tasks of the
+  workflow, where each task interfaces with a specific tool, empowered by the Nipype dataflow
+  library, to computes, from raw MRI data, brain parcellation and corresponding structural and/or
+  functional connectivity maps at 5 different scales using the Lausanne2018 hierarchical scheme.
+\label{fig:cmp3-diagram}"](cmp3-diagram.png)
+
 Each pipeline can be individually executed with the aid of the user-friendly GUI and the
   output of each stage can be visually reviewed, enabling the user to keep an eye on the
   data being processed and easily understand the cause of the problems, change the
@@ -149,12 +135,12 @@ Each pipeline can be individually executed with the aid of the user-friendly GUI
 The adoption of pipeline containerization not only eases the installation process as all
   dependencies are already installed, but it also provides the user with a computing
   environment in which the pipelines are guarantee to run.
-It however also presents some limitations.
-For instance, MP2RAGE needs to be masked ``a-priori`` to make FreeSurfer recon-all
-  succeeding.
-Moreover, CMP does not work with brains displaying abnormal anatomy (e.g., brain lesions)
-  because FreeSurfer may not run successfully and/or tractography potentially will fail in
-  lesion areas with excessively low Fractional Anisotropy (FA).
+# It however also presents some limitations.
+# For instance, MP2RAGE needs to be masked ``a-priori`` to make FreeSurfer recon-all
+#   succeeding.
+# Moreover, CMP does not work with brains displaying abnormal anatomy (e.g., brain lesions)
+#   because FreeSurfer may not run successfully and/or tractography potentially will fail in
+#   lesion areas with excessively low Fractional Anisotropy (FA).
 
 While CMP3 simplifies the creation of connectomes and makes it a straightforward process
   even for users not familiar with dataflow languages, it fulfils at the same time the
@@ -180,10 +166,10 @@ At the time of writing, some new modules such as the SIFT2
   algorithm [@SmithSIFT2:2015] to guarantee more biologically accurate
   measures of fibre connectivity, or surface-based co-registration of the mean BOLD image
   with the anatomical MRI using FreeSurfer BBRegister are under development.
-A new pipeline dedicated to the processing of EEG data, initiated at OHBM BrainHack 2020
+It is worth noting the software is ready to accommodate other imaging modalities
+  such as the current integration of an EEG source imaging pipeline initiated at OHBM BrainHack 2020
   ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
-  is also being implemented for extension of CMP3 to multi-modal MRI/EEG brain connectivity
-  analyses. 
+  which makes it an ideal to be further developed into the next generation brain connectivity mapping tools.
 
 CMP3 is developed with openness and transparency in mind.
 The source code for ``Connectome Mapper 3`` is hosted at
