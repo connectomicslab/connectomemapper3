@@ -26,6 +26,9 @@ except ImportError:
     raise Exception(
         'Need scipy for binary erosion of white matter and CSF masks')
 
+import skimage.morphology as skmorphology
+import skimage.filters as skfilters
+
 # Nipype imports
 from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, BaseInterface, Directory, File, \
     InputMultiPath, OutputMultiPath
@@ -258,6 +261,7 @@ def erode_mask(fsdir, mask_file):
                              '{}_eroded.nii.gz'.format(os.path.splitext(op.splitext(op.basename(mask_file))[0])[0]))
     print('    > Save eroded mask to: {}'.format(out_fname))
     ni.save(img, out_fname)
+    del img
 
 
 class Erode_inputspec(BaseInterfaceInputSpec):
@@ -725,27 +729,33 @@ class CombineParcellations(BaseInterface):
         ind_v = np.where(img_data == ventricle3)
         tmp[ind_v] = 1
 
-        third_vent_fn = op.abspath('{}.nii.gz'.format("ventricle3"))
+        third_vent_fn = op.abspath('ventricle3.nii.gz')
         hdr = img_v.get_header()
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.int16)
         iflogger.info("    ... Image saved to {}".format(third_vent_fn))
         img = ni.Nifti1Image(tmp, img_v.get_affine(), hdr2)
         ni.save(img, third_vent_fn)
+        del img
 
-        iflogger.info("  > Dilate the ventricule image")
-        third_vent_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
-        fslmaths_cmd = 'fslmaths -dt char {} -mas {} -kernel sphere 5 -dilD {}'.format(
-            third_vent_fn, third_vent_fn, third_vent_dil)
-        iflogger.info("    ... Command: {}".format(fslmaths_cmd))
-        process = subprocess.Popen(
-            fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        proc_stdout = process.communicate()[0].strip()
+        iflogger.info("  > Dilate (modal) the ventricule image")
+        third_vent_dil = op.abspath('ventricle3_dil.nii.gz')
 
-        if self.inputs.verbose_level == 2:
-            print(proc_stdout)
+        # radius = 5 [mm] => n x voxelsize max [mm]
+        zooms = hdr2.get_zooms()
+        radius = 5.0 / max(zooms)
+        third_vent_data = (tmp > 0).as_type(np.int16)
 
-        tmp = ni.load(third_vent_dil).get_data()
+        iflogger.info(f'    ... Sphere radius: {radius} voxels')
+        sphere_sel = skmorphology.ball(radius=radius)
+        third_vent_dil_data = skfilters.rank(third_vent_data, footprint=sphere_sel)
+
+        iflogger.info(f'    ... Save image to {third_vent_dil}...')
+        img = ni.Nifti1Image(third_vent_dil_data, img_v.get_affine(), hdr2)
+        ni.save(img, third_vent_dil)
+        del img
+
+        tmp = third_vent_dil_data
         indrhypothal = np.where((tmp == 1) & (img_data == right_ventral))
         indlhypothal = np.where((tmp == 1) & (img_data == left_ventral))
         del tmp
@@ -1515,6 +1525,7 @@ class CombineParcellations(BaseInterface):
             iflogger.info("  > Save output image to {}".format(output_roi))
             img = ni.Nifti1Image(img_data_out, img_v.get_affine(), hdr2)
             ni.save(img, output_roi)
+            del img
 
             if self.inputs.create_colorLUT:
                 f_color_lut.close()
@@ -1626,6 +1637,7 @@ class CombineParcellations(BaseInterface):
             img = ni.Nifti1Image(
                 img_data_aparcaseg_new, img_aparcaseg.get_affine(), img_aparcaseg.get_header())
             ni.save(img, new_aparcaseg_native)
+            del img
 
         else:
             iflogger.info(
@@ -1638,6 +1650,7 @@ class CombineParcellations(BaseInterface):
             img = ni.Nifti1Image(
                 img_data_aparcaseg, img_aparcaseg.get_affine(), img_aparcaseg.get_header())
             ni.save(img, aparcaseg_native)
+            del img
 
         return runtime
 
@@ -1844,6 +1857,7 @@ class ParcellateThalamus(BaseInterface):
         print("Save output image to %s" % debug_file)
         img = ni.Nifti1Image(max_prob, img_atlas.get_affine(), hdr2)
         ni.save(img, debug_file)
+        del img
 
         # Take into account jacobian to correct the probability maps after interpolation
         img_data_spams = np.zeros(img_data_vspams.shape)
@@ -1864,6 +1878,7 @@ class ParcellateThalamus(BaseInterface):
         print("Save output image to %s" % debug_file)
         img = ni.Nifti1Image(max_prob, img_atlas.get_affine(), hdr2)
         ni.save(img, debug_file)
+        del img
 
         iflogger.info('Creating Thalamus mask from FreeSurfer aparc+aseg ')
 
@@ -2749,6 +2764,7 @@ def create_roi(subject_id, subjects_dir):
         print("Save output image to %s" % out_roi)
         img = ni.Nifti1Image(newrois, aseg.get_affine(), hdr2)
         ni.save(img, out_roi)
+        del img
 
         # dilate cortical regions
         print("Dilating cortical regions...")
@@ -2780,12 +2796,14 @@ def create_roi(subject_id, subjects_dir):
             print("Save gray matter mask to %s" % out_mask)
             img = ni.Nifti1Image(gmMask, aseg.get_affine(), hdr2)
             ni.save(img, out_mask)
+            del img
 
         # store volume eg in ROIv_scale33.nii.gz
         out_roi = op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % parkey)
         print("Save output image to %s" % out_roi)
         img = ni.Nifti1Image(newrois, aseg.get_affine(), hdr2)
         ni.save(img, out_roi)
+        del img
 
     print("[ DONE ]")
 
@@ -3023,6 +3041,8 @@ def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id):
     this_out = os.path.join(subject_dir, 'mri', aseg_output[i])
     img = ni.Nifti1Image(vol, this_nifti.affine, hdr2)
     ni.save(img, this_out)
+    del img
+
     mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
         this_out,
         os.path.join(subject_dir, 'mri', aseg_output[i][0:-4] + '.mgz'))
@@ -3238,6 +3258,7 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
         this_out = os.path.join(subject_dir, 'mri', rois_output[i])
         img = ni.Nifti1Image(newrois, this_nifti.affine, hdr2)
         ni.save(img, this_out)
+        del img
 
         # 4. Dilate cortical regions
         if v:
@@ -3265,6 +3286,7 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
         this_out = os.path.join(subject_dir, 'mri', roivs_output[i])
         img = ni.Nifti1Image(newrois, this_nifti.affine, hdr2)
         ni.save(img, this_out)
+        del img
 
         mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
             this_out,
@@ -3286,6 +3308,7 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
             print("         Save gray matter mask to %s" % out_mask)
             img = ni.Nifti1Image(gmMask, this_nifti.affine, hdr2)
             ni.save(img, out_mask)
+            del img
 
     mri_cmd = ['mri_convert', '-i', op.join(subject_dir, 'mri', 'ribbon.mgz'), '-o',
                op.join(subject_dir, 'mri', 'ribbon.nii.gz')]
@@ -3373,6 +3396,8 @@ def create_wm_mask(subject_id, subjects_dir):
     csfA[idx] = 1
     img = ni.Nifti1Image(csfA, aseg.get_affine(), aseg.get_header())
     ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
+    del img
+
     csfA = imerode(imerode(csfA, se1), se)
 
     # thalmus proper and cuadate are put back because they are not lateral ventricles
@@ -3495,12 +3520,14 @@ def create_wm_mask(subject_id, subjects_dir):
     img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header())
     print("Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
+    del img
 
     # output white matter mask. crop and move it afterwards
     gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
     img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header())
     print("Save gray matter mask: %s" % gm_out)
     ni.save(img, gm_out)
+    del img
 
     # Convert whole brain mask
     mri_cmd = ['mri_convert', '-i', op.join(fs_dir, 'mri', 'brainmask.mgz'), '-o',
@@ -3607,6 +3634,8 @@ def create_wm_mask_v2(subject_id, subjects_dir, v=True):
         iflogger.info("    > Save CSF mask")
     img = ni.Nifti1Image(csfA, aseg.get_affine(), aseg.get_header())
     ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
+    del img
+
     csfA = imerode(imerode(csfA, se1), se)
 
     # thalmus proper and cuadate are put back because they are not lateral ventricles
@@ -3734,12 +3763,14 @@ def create_wm_mask_v2(subject_id, subjects_dir, v=True):
     if v:
         iflogger.info("    > Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
+    del img
 
     gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
     img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header())
     if v:
         iflogger.info("    > Save gray matter mask: %s" % gm_out)
     ni.save(img, gm_out)
+    del img
 
     # Redirect ouput if low verbose
     FNULL = open(os.devnull, 'w')
@@ -3951,6 +3982,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
                          nii_apar_cimg.get_header())
     print("Save to: " + wm_out)
     ni.save(img, wm_out)
+    del img
 
     print("GM mask....")
     # %% create GM parcellation (CORTICAL+SUBCORTICAL)
@@ -3981,6 +4013,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
         img = ni.Nifti1Image(nii_gm, nii_apar_cimg.get_affine(),
                              nii_apar_cimg.get_header())
         ni.save(img, gm_out)
+        del img
 
         # Create GM mask
         gm_maskout = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
@@ -3993,6 +4026,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
         img = ni.Nifti1Image(
             nii_gm_mask, nii_apar_cimg.get_affine(), nii_apar_cimg.get_header())
         ni.save(img, gm_maskout)
+        del img
 
     # Create CSF mask
     mri_cmd = ['mri_convert', '-i',
@@ -4014,6 +4048,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     img = ni.Nifti1Image(er_mask, ni.load(
         asegfile).get_affine(), ni.load(asegfile).get_header())
     ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
+    del img
 
     # Convert whole brain mask
     mri_cmd = ['mri_convert', '-i', op.join(fs_dir, 'mri', 'brainmask.mgz'), '-o',
