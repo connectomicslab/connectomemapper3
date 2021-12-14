@@ -1,4 +1,3 @@
-
 ---
 title: 'Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping'
 tags:
@@ -14,7 +13,7 @@ authors:
   - name: Sebastien Tourbier
     orcid: 0000-0002-4441-899X
     affiliation: 1
-  - name: Joan Rue Queralt
+  - name: Joan Rue-Queralt
     orcid: 0000-0001-5680-4540
     affiliation: 1
   - name: Katharina Glomb
@@ -38,23 +37,28 @@ authors:
 affiliations:
  - name: Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland
    index: 1
- - name: Medical Image Processing Lab (MIP:Lab), Ecole Polytechnique Fédérale de Lausanne (EPFL), Switzerland
+ - name: Medical Image Processing Lab (MIP:Lab), Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
    index: 2
-- name: Département des Neurosciences Cliniques, University of Geneva, Switzerland
+ - name: Departement des Neurosciences Cliniques, University of Geneva, Switzerland
    index: 3
 date: 14 December 2021
-bibliography: ./paper.bib
+bibliography: paper.bib
+
+# Optional fields if submitting to a AAS journal too, see this blog post:
+# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
+# aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
+# aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 # Summary
 
 The source code for ``Connectome Mapper 3`` has been
-archived to Zenodo with the linked DOI: [@zenodo]
+archived to Zenodo with the linked DOI: [@ZenodoCMP:2021]
 
 # Statement of Need
 
 The field of Magnetic Resonance (MR) Connectomics has rapidly expanded since its advent 
-  in the 2000s[@Sporns2005TheBrain,@Hagmann2005FromConnectomics,@Sporns2018Editorial:Connectomics].
+  in the 2000s[@SpornsTheBrain:2005,@HagmannFromConnectomics:2005,@SpornsEditorialConnectomics:2018].
 It has revolutionized the way to investigate ``in-vivo``, ``non-invasively`` and 
   ``safely`` at different macroscopic scales the structural and functional systems of the 
   brain by modeling connections between brain areas as a graph or network, the so-called
@@ -79,26 +83,26 @@ While reliability in human brain connectomics concerns the consistency and accur
 The last ten years have witnessed a trend towards the adoption by the community of open research
   practices, which promotes ``open data`` and ``open method``, to address these challenges.
 This has led to the elaboration of the principles of open and reproducible research for
-  neuroimaging using Magnetic Resonance Imaging (MRI)[@Nichols2017] and to recommendation of
-  standard practices for sharing code and programs[@Eglen2017TowardNeuroscience]. 
+  neuroimaging using Magnetic Resonance Imaging (MRI)[@Nichols:2017] and to recommendation of
+  standard practices for sharing code and programs[@EglenTowardNeuroscience:2017]. 
 To ease and automate
   the practice of sharing raw and processed neuroimaging data and code with appropriate metadata
   and provenance records, multiple initiatives have developed new standards, tools, and educational
   resources.
 Among others, this has contributed to the emergence of
-  Nipype[@Gorgolewski2011Nipype:Python], a dataflow library that facilitates workflow
+  Nipype[@GorgolewskiNipype:2011], a dataflow library that facilitates workflow
   execution/re-execution, provenance tracking and provides a uniform interface to existing
   neuroimaging softwares; the Brain Imaging Data Structure (BIDS)
-  standard[@Gorgolewski2016TheExperiments], to standardize the organization and description
+  standard[@GorgolewskiTheExperiments:2016], to standardize the organization and description
   of neuroimaging data; Datalad a data portal, versioning, and provenance tracking system
-  supporting BIDS; and more recently, the BIDS-Apps framework[@Gorgolewski2017BIDSMethods],
+  supporting BIDS; and more recently, the BIDS-Apps framework[@GorgolewskiBIDSMethods:2017],
   which employs modern software practices and encapsulates into a software container a processing
   pipeline that takes a BIDS dataset as input in order to improve the ease of use, accessibility,
   deliverability, portability, scalability and reproducibility of processing pipelines. 
 
-Following these advances, a number of processing pipelines such as C-PAC~[@cpac2013],
-  NIAK[@Bellec2016NeuroimagingNIAK], fMRIPrep[@Ghosh2018],
-  dMRIPrep[@dmriprep2019], QSIPREP[@Cieslak2020QSIPrep:MRI], NDMG[@Kiar2018AVariability] and PyNets[@Pisner2020PyNets:Learning] have been
+Following these advances, a number of processing pipelines such as C-PAC~[@cpac:2013],
+  NIAK[@BellecNeuroimagingNIAK:2016], fMRIPrep[@Ghosh:2018],
+  dMRIPrep[@dmriprep:2019], QSIPREP[@CieslakQSIPrep:2020], NDMG[@KiarAVariability:2018] and PyNets[@PisnerPyNets:2020] have been
   developed to support the mapping of connectomes derived from MRI data organized following the BIDS standard.
 They have demonstrated their capability in addressing all the challenges of data sharing,
   portability, computing scalability, reliability, reproducibility and transparency.
@@ -112,7 +116,7 @@ However, none of the existing solutions are designed (1) to generate  precise br
 In this article we present the third release of the Connectome Mapper (CMP3), whose original main
   goal was to simplify the organisation and the analysis of sMRI and dMRI from raw data to
   multi-scale structural weighted connectomes.
-While CMP3 derives from the now deprecated CMP1 and CMP2 packages[@Daducci2012], it has
+While CMP3 derives from the now deprecated CMP1 and CMP2 packages[@Daducci:2012], it has
   evolved massively over the years in terms of the underlying codebase, the tools used and the
   scope of the functionality provided.
 Designed following the specification established by the BIDS-Apps standard, CMP3 is a scalable,
