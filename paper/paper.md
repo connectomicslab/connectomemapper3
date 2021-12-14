@@ -1,5 +1,5 @@
 ---
-title: 'Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping'
+title: "Connectome Mapper 3: A Flexible and Open-Source Pipeline Software for Multiscale Multimodal Human Connectome Mapping"
 tags:
   - Python
   - connectome
@@ -42,7 +42,7 @@ affiliations:
 - name: Département des Neurosciences Cliniques, University of Geneva, Switzerland
    index: 3
 date: 14 December 2021
-bibliography: paper.bib
+bibliography: ./paper.bib
 ---
 
 # Summary
