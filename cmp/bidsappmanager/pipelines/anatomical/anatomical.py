@@ -177,9 +177,7 @@ class AnatomicalPipelineUI(AnatomicalPipeline):
             self.stages["Parcellation"].config.on_trait_change(
                 self._update_segmentation, "parcellation_scheme"
             )
-            self.stages["Parcellation"].config.on_trait_change(
-                self._update_parcellation_scheme, "parcellation_scheme"
-            )
+
 
     def _update_parcellation(self):
         """Update self.stages['Parcellation'].config.parcellation_scheme when ``seg_tool`` is updated."""

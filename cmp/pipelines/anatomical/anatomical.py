@@ -145,6 +145,10 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.output_directory, __freesurfer_directory__, subject_id
         )
 
+        self.stages["Parcellation"].config.on_trait_change(
+             self._update_parcellation_scheme, "parcellation_scheme"
+        )
+
     def _update_parcellation_scheme(self):
         """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
         self.parcellation_scheme = self.stages["Parcellation"].config.parcellation_scheme
