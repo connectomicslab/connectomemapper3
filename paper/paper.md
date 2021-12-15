@@ -172,8 +172,10 @@ It is worth noting the software is ready to accommodate other imaging modalities
   ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
   which makes it an ideal to be further developed into the next generation brain connectivity mapping tools.
 
-# Design 
+# Overview
 
+CMP 3 adopts an object-oriented programming style for the sake of modularity, extensibility,
+  and re-usability.
 CMP3 is written in Python and uses Miniconda (\href{https://docs.conda.io}{https://docs.conda.io}),
   a package and environment manager, to facilitate the installation of the Python environment with
   all package dependencies installed inside.
@@ -192,12 +194,11 @@ To be robust to adverse code changes, versions are released through continuous i
   and testing using the sample multi-modal MRI dataset [@Tourbier2020SampleDataset] previously
   presented.
 
-CMP 3 adopts an object-oriented programming style for the sake of modularity, extensibility,
-  and re-usability.
 The implemented participant-level analysis workflow is represented in
   Nipype [@GorgolewskiNipype:2011] with a modular structure, composed of three different
   `pipeline classes` (anatomical, diffusion, and fMRI) dedicated to the processing of each
-  modality (sMRI, dMRI, rfMRI).
+  modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset
+  to be processed, and a pipeline configuration file.
 Each pipeline class provides methods to create and execute a Nipype workflow that runs a number of
   Nipype sub-workflows, described by `stage classes` and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
@@ -206,18 +207,13 @@ Each pipeline class provides methods to create and execute a Nipype workflow tha
   MRtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
   (see Figure \autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
   can be set from configuration files.
-
-The implemented workflow takes as principal inputs the path of the dataset to be processed, and a
-  pipeline configuration file (Figure \autoref{fig:bundle}).
-The input dataset is required to be in valid BIDS format, and it must include at least one
-  high-resolution T1w sMRI.
 BIDS allows CMP3 to automatically identify the structure of the input data, to check the
   availability of sMRI, dMRI, rfMRI, and derived data, and to collect all the available acquisition
   metadata.
 The processing pipelines and stages are dynamically built and configured depending on the input
   data (sMRI, dMRI, rfMRI) and parameters set in the configuration files.
 This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI, multi-shell) and
-  to appropriately setup the best available pipeline configuration for its processing. 
+  to appropriately set up the set of available pipeline configuration parameters for its processing. 
 
 ![\textbf{Participant-level analysis workflow of the Connectome Mapper 3.}
 It has a modular architecture composed of three different pipelines (anatomical, diffusion and
