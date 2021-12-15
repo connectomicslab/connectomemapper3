@@ -204,27 +204,27 @@ Furthermore, bugs as well as both internal and external developer contributions 
 
 CMP3 is written in Python and uses Miniconda (\href{https://docs.conda.io}{https://docs.conda.io}),
   a package and environment manager, to facilitate the installation of the Python environment with
-  all package dependencies installed inside (see Table~\ref{tab:dep} in annex).
+  all package dependencies installed inside.
 The use of Miniconda environment is particularly powerful at two levels.
 It provides a way to ease the installation of python package dependencies at a fixed version for
   both the processing core inside the BIDS App and the GUI on the host system.
 It also provides a way to isolate the installation of CMP3 with other python dependencies.
 This prevents conflicts with other package versions that might exist already on the host system.
-To ensure software accessibility, inter-operability, portability and reproducibility, the pipelines
+To ensure software accessibility, interoperability, portability and reproducibility, the pipelines
   handles datasets organized following the Brain Imaging Data Structure (BIDS)
-  standard~\citep{Gorgolewski2016TheExperiments} are encapsulated in a Docker container as a BIDS
-  App~\citep{Gorgolewski2017BIDSMethods} that can be run on Linux, MacOSX, and Windows computers.
+  standard [@Gorgolewski2016TheExperiments] are encapsulated in a Docker container as a BIDS
+  App [@Gorgolewski2017BIDSMethods] that can be run on Linux, MacOSX, and Windows computers.
 Since administrative privileges are required to run the Docker container, the Docker image can be
-  easily converted into a Singularity image~\citep{Kurtzer2017Singularity:Compute} to deploy the
+  easily converted into a Singularity image [@Kurtzer2017Singularity:Compute] to deploy the
   tool on high performance computing systems (clusters) for large dataset processing.
 To be robust to adverse code changes, versions are released through continuous integration building
-  and testing using the sample multi-modal MRI dataset~\citep{Tourbier2020SampleDataset} previously
+  and testing using the sample multi-modal MRI dataset [@Tourbier2020SampleDataset] previously
   presented.
 
 CMP 3 adopts an object-oriented programming style for the sake of modularity, extensibility,
   and re-usability.
 The implemented participant-level analysis workflow is represented in
-  Nipype [@GorgolewskiNipype:2011} with a modular structure, composed of three different
+  Nipype [@GorgolewskiNipype:2011] with a modular structure, composed of three different
   `pipeline classes` (anatomical, diffusion, and fMRI) dedicated to the processing of each
   modality (sMRI, dMRI, rfMRI).
 Each pipeline class provides methods to create and execute a Nipype workflow that runs a number of
@@ -237,7 +237,7 @@ Each pipeline class provides methods to create and execute a Nipype workflow tha
   can be set from configuration files.
 
 The implemented workflow takes as principal inputs the path of the dataset to be processed, and a
-  pipeline configuration file (Figure~\ref{fig:bundle}).
+  pipeline configuration file (Figure \autoref{fig:bundle}).
 The input dataset is required to be in valid BIDS format, and it must include at least one
   high-resolution T1w sMRI.
 BIDS allows CMP3 to automatically identify the structure of the input data, to check the
