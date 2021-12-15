@@ -28,6 +28,8 @@ authors:
   - name: Alessandra Griffa
     orcid: 0000-0003-1923-1653
     affiliation: 2
+  - name: Mikkel Schöttner
+    affiliation: 1
   - name: Jonathan Wirsich
     orcid: 0000-0003-0588-9710
     affiliation: 3
