@@ -104,11 +104,13 @@ However, none of the existing solutions provides a user-friendly graphical inter
 
 # Summary
 
-Connectome Mapper 3 provides a unique software pipeline solution with a Graphical User Interface
+Connectome Mapper 3 provides a unique open-source software pipeline solution with a Graphical User Interface
   (GUI) for researchers to easily, reliably and transparently create a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, on any sMRI / dMRI /
   rfMRI dataset structured according to the BIDS standard, by interfacing with a number of popular
-  neuroimaging tools (such as FSL, FreeSurfer, ANTs, MRtrix3, Dipy and AFNI).
+  neuroimaging tools (inclusing FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
+  ANTs [@AVANTS2008SymmetricBrain], Dipy [@Garyfallidis2014DipyData],
+  MRtrix3 [@Tournier2019MRtrix3:Visualisation], and AFNI [@Cox2012]).
 While CMP3 derives from the now deprecated CMP1 and CMP2 packages[@Daducci:2012], whose original main
   goals were to simplify the organisation and the analysis of sMRI and dMRI from raw data to
   multi-scale structural weighted connectomes, it has evolved massively over the years in terms
@@ -129,29 +131,9 @@ Outputs are organized following a BIDS derivatives-like structure where connecto
   analyzes, but also to facilitate the sharing of the derivatives in the BIDS App
   ecosystem.
 
-CMP3 is developed with openness and transparency in mind.
-The software is published under the terms of the open source 3-Clause Berkeley Software
-  Distribution (3-Clause BSD) license, which allows unlimited modification, redistribution
-  and commercial use in source and binary forms as long as its copyright notices, and the
-  license's disclaimers of warranty are maintained.
-The source code for ``Connectome Mapper 3`` is hosted at
-  [https://github.com/sebastientourbier/connectomemapper3](https://github.com/sebastientourbier/connectomemapper3),
-  and archived to Zenodo [@ZenodoCMP:2021].
-A detailed documentation is available
-  at [connectome-mapper-3.readthedocs.io](connectome-mapper-3.readthedocs.io) that is
-  kept up to date with the current release and can be retrieved for older versions.
-It includes in particular step-by-step guides for installation and usage together with the
-  description of all generated outputs and each processing step.
-In case of problems, the Connectome Mapper has a dedicated forum at
-  [groups.google.com/group/cmtk-users](groups.google.com/group/cmtk-users) where a
-  community of users is active to support and have scientific discussions.
-Furthermore, bugs as well as both internal and external developer contributions are
-  discussed and managed through issues directly on GitHub for transparent software
-  development.
-
 While CMP3 simplifies the creation of connectomes and makes it a straightforward process
-  even for users not familiar with nipype workflows, it fulfils at the same time the
-  needs of advanced users in charge of analyzing huge amount of data, offering them the
+  even for users not familiar with Nipype and Software container technology, it fulfils
+  at the same time the needs of advanced users in charge of analyzing huge amount of data, offering them the
   possibility to tune and save all the parameters in configuration files and create a batch
   job to automatically process all data with the BIDS App.
 CMP3 can be highly versatile as it offers a number of options at each processing steps to
@@ -162,14 +144,10 @@ At the same time, it provides the user with a very efficient framework to comput
 In addition, the very flexible framework of CMP3 enables the addition of new steps, stages
   or pipelines with relatively little effort to account for additional imaging modalities
   and algorithms.
-At the time of writing, some new modules such as the SIFT2
-  algorithm [@SmithSIFT2:2015] to guarantee more biologically accurate
-  measures of fibre connectivity, or surface-based co-registration of the mean BOLD image
-  with the anatomical MRI using FreeSurfer BBRegister are under development.
 It is worth noting the software is ready to accommodate other imaging modalities
   such as the current integration of an EEG source imaging pipeline initiated at OHBM BrainHack 2020
   ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
-  which makes it an ideal to be further developed into the next generation brain connectivity mapping tools.
+  which makes CMP3 an ideal to be further developed into the next generation brain connectivity mapping tools.
 
 # Overview
 
@@ -190,22 +168,23 @@ To ensure software accessibility, interoperability, portability and reproducibil
   App [@GorgolewskiBIDSMethods:2017] that can be run on Linux, MacOSX, Windows computers, and
   on high performance computing systems (clusters) for large dataset processing.
 To be robust to adverse code changes, versions are released through continuous integration building
-  and testing using the sample multi-modal MRI dataset [@Tourbier2020SampleDataset] previously
-  presented.
+  and testing using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset] that we created
+  for this purpose.
 
 The implemented participant-level analysis workflow is represented in
   Nipype [@GorgolewskiNipype:2011] with a modular structure, composed of three different
-  `pipeline classes` (anatomical, diffusion, and fMRI) dedicated to the processing of each
+  pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of each
   modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset
   to be processed, and a pipeline configuration file.
 Each pipeline class provides methods to create and execute a Nipype workflow that runs a number of
-  Nipype sub-workflows, described by `stage classes` and implementing one or multiple tasks,
+  Nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
   FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
   ANTs [@AVANTS2008SymmetricBrain], Dipy [@Garyfallidis2014DipyData],
   MRtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
   (see Figure \autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
-  can be set from configuration files.
+  can be set from configuration files. Empowered by the Nipype workflow engine, the re-execution of the workflow will resume the
+  processing at any stages a change of parameter occurred. 
 
 ![\textbf{Participant-level analysis workflow of the Connectome Mapper 3.}
 It has a modular architecture composed of three different pipelines (anatomical, diffusion and
@@ -235,8 +214,7 @@ CMP3 takes advantage of Traits/TraitsUI framework
 If the outputs at a given stage are found not to be satisfactory, the GUI offers the possibility to
   easily tune any parameter specific to this stage, regenerate the configuration file and repeat
   the BIDS App execution.
-Empowered by the Nipype workflow engine, the re-execution of the workflow will resume the
-  processing at any stages a change of parameter occurred. Typically, the outputs are inspected
+Typically, the outputs are inspected
   using native visualization tool bundled with each software package involved in the processing
   stage as the end user might be already very familiar with these tools (Figure \autoref{fig:gui} d).
 In particular, all sMRI are inspected with the fslview viewer shipped with FSL, brain tissue
@@ -255,7 +233,8 @@ A typical procedure would consists of
   depending on the software involved in the stage.
 Connectivity matrices are visualized using the matplotlib library. \label{fig:gui}](cmp3-gui-paper.png)
 
-Outputs follow as close as possible the BIDS Derivatives specifications.
+Outputs follow as close as possible the BIDS Derivatives specifications, which allows the user
+to easily retrieve them with the pybids.
 The data derived from the processing of one subject are placed in a \texttt{sub-<participant\_id>/}
   folder.
 Derivatives are also kept in separate folders to distinguish main CMP3 outputs (`cmp-<version>/`) from outputs
@@ -287,7 +266,30 @@ Finally, connectome data can be saved in generic file formats such as GraphML, G
 The full documentation of the outputs can be found on the
   \href{https://connectome-mapper-3.readthedocs.io/en/latest/outputs.html}{documentation website}.
 
+CMP3 is developed with openness and transparency in mind.
+The software is published under the terms of the open source 3-Clause Berkeley Software
+  Distribution (3-Clause BSD) license, which allows unlimited modification, redistribution
+  and commercial use in source and binary forms as long as its copyright notices, and the
+  license's disclaimers of warranty are maintained.
+The source code for ``Connectome Mapper 3`` is hosted at
+  [https://github.com/sebastientourbier/connectomemapper3](https://github.com/sebastientourbier/connectomemapper3),
+  and archived to Zenodo [@ZenodoCMP:2021].
+A detailed documentation is available
+  at [connectome-mapper-3.readthedocs.io](connectome-mapper-3.readthedocs.io) that is
+  kept up to date with the current release and can be retrieved for older versions.
+It includes in particular step-by-step guides for installation and usage together with the
+  description of all processing steps and
+  \href{https://connectome-mapper-3.readthedocs.io/en/latest/outputs.html}{generated outputs}.
+In case of problems, CMP3 has a dedicated forum at
+  [groups.google.com/group/cmtk-users](groups.google.com/group/cmtk-users) where a
+  community of users is active to support and have scientific discussions.
+Furthermore, bugs as well as both internal and external developer contributions are
+  discussed and managed through issues directly on GitHub for transparent software
+  development.
+
 # Mention
+
+Connectome Mapper 3 was successfully employed in
 
 *   2021 - VEPCON: Source imaging of high-density visual evoked potentials with multi-scale brain parcellations and connectomes
     In press, Scientific Data Nature
