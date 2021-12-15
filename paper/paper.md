@@ -114,15 +114,13 @@ While CMP3 derives from the now deprecated CMP1 and CMP2 packages[@Daducci:2012]
   multi-scale structural weighted connectomes, it has evolved massively over the years in terms
   of the underlying codebase, the tools used, and the scope of the functionality provided.
 Design considerations with the implementation of modular, configurable, and containerized
-  processing pipelines handling datasets organized following the BIDS standard, distributed
-  as a BIDS App, used in combination with the Nipype dataflow library, 
-  makes it not only efficient in managing and scaling the pipeline execution while recording provenance,
-  but also easy to customize it for specific needs.
-Furthermore, the adoption of pipeline containerization gives two main advantages: it eases
-  the installation process as all dependencies are already installed, and it provides the user with a computing
-  environment in which the pipelines are guarantee to run.
-Each pipeline can be individually executed with the aid of the user-friendly GUI and the
-  output of each stage can be visually reviewed, enabling the user to keep
+  processing pipelines, empowered by Nipype, handling datasets concordant to the BIDS standard,
+  distributed as a BIDS App, makes it not only easy to install and use (as it provides the user with a computing
+  environment in which the pipelines are guarantee to run with all dependencies
+  are already installed), but also efficient in managing and scaling the pipeline execution
+  while recording provenance, and easy to customize it for specific needs.
+Each pipeline can be individually configured and executed with the aid of the user-friendly
+  GUI and the output of each stage can be visually reviewed, enabling the user to keep
   an eye on the data being processed and easily understand the cause of the problems, change the
   parameters and re-execute when results are unsatisfactory.
 Outputs are organized following a BIDS derivatives-like structure where connectome files
