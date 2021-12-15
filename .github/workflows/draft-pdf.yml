@@ -1,6 +1,7 @@
-on: [push]
-branches:
-  - add-joss-paper
+on: 
+  push:
+    branches:
+      - add-joss-paper
 
 jobs:
   paper:
