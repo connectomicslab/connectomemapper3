@@ -744,7 +744,7 @@ class CombineParcellations(BaseInterface):
         # radius = 5 [mm] => n x voxelsize max [mm]
         zooms = hdr2.get_zooms()
         radius = 5.0 / max(zooms)
-        third_vent_data = (tmp > 0).as_type(np.int16)
+        third_vent_data = (tmp > 0).astype(np.int16)
 
         iflogger.info(f'    ... Sphere radius: {radius} voxels')
         sphere_sel = skmorphology.ball(radius=radius)
