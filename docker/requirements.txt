@@ -8,3 +8,4 @@ pybids==0.14.0
 statsmodels==0.11.1
 networkx==2.4
 pydicom==2.0.0
+scikit-image==0.16.2
