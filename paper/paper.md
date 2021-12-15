@@ -59,7 +59,7 @@ It has revolutionized the way to investigate `in-vivo`, `non-invasively` and
   brain by modeling connections between brain areas as a graph or network, the so-called
   `connectome`.
 
-While brain areas are usually derived from high resolution T1 weighted  MR imaging, so called
+While brain areas are usually derived from high resolution T1 weighted  MR imaging, so-called
   structural MRI (sMRI), structural brain connectomes are mapped from diffusion MR imaging (dMRI)
   tractography, which exploits the diffusion of water molecules in biological tissues, and
   functional brain connectomes are mapped usually from functional MRI (fMRI), which exploits
@@ -92,8 +92,9 @@ Among others, this has contributed to the emergence of
 
 Following these advances, a number of processing pipelines such as C-PAC [@cpac:2013],
   NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018],
-  dMRIPrep [@dmriprep:2019], QSIPREP [@CieslakQSIPrep:2020], NDMG [@KiarAVariability:2018] and PyNets [@PisnerPyNets:2020] have been
-  developed to support the mapping of connectomes derived from MRI data organized following the BIDS standard.
+  dMRIPrep [@dmriprep:2019], QSIPREP [@CieslakQSIPrep:2020], NDMG [@KiarAVariability:2018] and PyNets
+  [@PisnerPyNets:2020] have been developed to support the mapping of connectomes derived from
+  MRI data organized following the BIDS standard.
 They have demonstrated their capability in addressing all the challenges of data sharing,
   portability, computing scalability, reliability, reproducibility and transparency.
 However, none of the existing solutions are designed to map the structural and / or functional
@@ -108,9 +109,8 @@ Connectome Mapper 3 provides a unique software pipeline solution for researchers
   BIDS standard.
 While CMP3 derives from the now deprecated CMP1 and CMP2 packages[@Daducci:2012], whose original main
   goals were to simplify the organisation and the analysis of sMRI and dMRI from raw data to
-  multi-scale structural weighted connectomes, it has
-  evolved massively over the years in terms of the underlying codebase, the tools used, and the
-  scope of the functionality provided.
+  multi-scale structural weighted connectomes, it has evolved massively over the years in terms
+  of the underlying codebase, the tools used, and the scope of the functionality provided.
 Design considerations with the implementation of modular, configurable, and containerized
   processing pipelines (\autoref{fig:cmp3-diagram}) handling datasets organized following the BIDS standard, distributed
   as a BIDS App, embedding most popular neuroimaging tools (such as including FSL,
@@ -129,9 +129,21 @@ Each pipeline handles datasets organized following the Brain Imaging Data Struct
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
 
 Each pipeline can be individually executed with the aid of the user-friendly GUI and the
-  output of each stage can be visually reviewed, enabling the user to keep an eye on the
-  data being processed and easily understand the cause of the problems, change the
+  output of each stage can be visually reviewed (\autoref{fig:gui}), enabling the user to keep
+  an eye on the data being processed and easily understand the cause of the problems, change the
   parameters and re-execute when results are unsatisfactory.
+
+![\textbf{Graphical User Interface of the Connectome Mapper 3.}
+It is designed to bring the best experience to the final user by facilitating all the steps
+ required to perform an analysis.
+A typical procedure would consists of
+  (a) the selection of the root directory of the BIDS dataset to be analyzed,
+  (b) the creation/edition of the different pipeline configuration files,
+  (c) the configuration of the BIDS App run and its execution, and
+  (d) the inspection of stage outputs using either fslview or freeview or mrview or trackvis
+  depending on the software involved in the stage.
+Connectivity matrices are visualized using the matplotlib library. \label{fig:gui}](cmp3-gui-paper.png)
+
 The adoption of pipeline containerization not only eases the installation process as all
   dependencies are already installed, but it also provides the user with a computing
   environment in which the pipelines are guarantee to run.
@@ -150,7 +162,7 @@ While CMP3 simplifies the creation of connectomes and makes it a straightforward
 Outputs are organized following a BIDS derivatives-like structure where connectome files
   can be exported to a number of formats, such that not only connectomes can be opened by
   the most popular software packages used in this field to perform complex network
-  analyses, but also to facilitate the sharing of the derivatives in the BIDS App
+  analyzes, but also to facilitate the sharing of the derivatives in the BIDS App
   ecosystem.
 To this end, we are actively participating in the development of BIDS-Derivatives for connectivity data.
 
@@ -158,7 +170,7 @@ CMP3 can be highly versatile as it offers a number of options at each processing
   be completely data agnostic.
 At the same time, it provides the user with a very efficient framework to compute
   connectomes in the way it guides them through all the steps and options involved in their
-  creation and it guarantees seamless processing, irrespective of the choices made.
+  creation, and it guarantees seamless processing, irrespective of the choices made.
 In addition, the very flexible framework of CMP3 enables the addition of new steps, stages
   or pipelines with relatively little effort to account for additional imaging modalities
   and algorithms.
@@ -172,6 +184,7 @@ It is worth noting the software is ready to accommodate other imaging modalities
   which makes it an ideal to be further developed into the next generation brain connectivity mapping tools.
 
 CMP3 is developed with openness and transparency in mind.
+``Connectome Mapper 3`` is released under the 3-clause BSD license.
 The source code for ``Connectome Mapper 3`` is hosted at
   [https://github.com/sebastientourbier/connectomemapper3](https://github.com/sebastientourbier/connectomemapper3),
   and archived to Zenodo [@ZenodoCMP:2021].
@@ -186,6 +199,107 @@ In case of problems, the Connectome Mapper has a dedicated forum at
 Furthermore, bugs as well as both internal and external developer contributions are
   discussed and managed through issues directly on GitHub for transparent software
   development.
+
+# Design 
+
+CMP3 is written in Python and uses Miniconda (\href{https://docs.conda.io}{https://docs.conda.io}),
+  a package and environment manager, to facilitate the installation of the Python environment with
+  all package dependencies installed inside (see Table~\ref{tab:dep} in annex).
+The use of Miniconda environment is particularly powerful at two levels.
+It provides a way to ease the installation of python package dependencies at a fixed version for
+  both the processing core inside the BIDS App and the GUI on the host system.
+It also provides a way to isolate the installation of CMP3 with other python dependencies.
+This prevents conflicts with other package versions that might exist already on the host system.
+To ensure software accessibility, inter-operability, portability and reproducibility, the pipelines
+  handles datasets organized following the Brain Imaging Data Structure (BIDS)
+  standard~\citep{Gorgolewski2016TheExperiments} are encapsulated in a Docker container as a BIDS
+  App~\citep{Gorgolewski2017BIDSMethods} that can be run on Linux, MacOSX, and Windows computers.
+Since administrative privileges are required to run the Docker container, the Docker image can be
+  easily converted into a Singularity image~\citep{Kurtzer2017Singularity:Compute} to deploy the
+  tool on high performance computing systems (clusters) for large dataset processing.
+To be robust to adverse code changes, versions are released through continuous integration building
+  and testing using the sample multi-modal MRI dataset~\citep{Tourbier2020SampleDataset} previously
+  presented.
+
+CMP 3 adopts an object-oriented programming style for the sake of modularity, extensibility,
+  and re-usability.
+The implemented participant-level analysis workflow is represented in
+  Nipype [@GorgolewskiNipype:2011} with a modular structure, composed of three different
+  `pipeline classes` (anatomical, diffusion, and fMRI) dedicated to the processing of each
+  modality (sMRI, dMRI, rfMRI).
+Each pipeline class provides methods to create and execute a Nipype workflow that runs a number of
+  Nipype sub-workflows, described by `stage classes` and implementing one or multiple tasks,
+  where each task can interface with either a specific tool including in
+  FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
+  ANTs [@AVANTS2008SymmetricBrain], Dipy [@Garyfallidis2014DipyData],
+  MRtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
+  (see Figure \autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
+  can be set from configuration files.
+
+The implemented workflow takes as principal inputs the path of the dataset to be processed, and a
+  pipeline configuration file (Figure~\ref{fig:bundle}).
+The input dataset is required to be in valid BIDS format, and it must include at least one
+  high-resolution T1w sMRI.
+BIDS allows CMP3 to automatically identify the structure of the input data, to check the
+  availability of sMRI, dMRI, rfMRI, and derived data, and to collect all the available acquisition
+  metadata.
+The processing pipelines and stages are dynamically built and configured depending on the input
+  data (sMRI, dMRI, rfMRI) and parameters set in the configuration files.
+This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI, multi-shell) and
+  to appropriately setup the best available pipeline configuration for its processing. 
+
+Outputs follow as close as possible the BIDS Derivatives specifications.
+The data derived from the processing of one subject are placed in a \texttt{sub-<participant\_id>/}
+  folder.
+Derivatives are also kept in separate folders to distinguish main CMP3 outputs (`cmp-<version>/`) from outputs
+  produced by FreeSurfer (`freesurfer-<version>/`) and from all intermediate workflow outputs
+  (`nipype-<version>/`), where `<version>` indicates the version of each tool as specified by the
+  BIDS Derivatives specifications.
+Main sMRI-, dMRI-, and rfMRI-derived data, which includes preprocessed data, brain parcellations,
+  tractograms and connectivity matrices, are saved into their respective anat/, dwi/, and func/
+  folder, and which contains sub-\textless subject\_label\textgreater\_log.txt. a log file that
+  summarizes output execution.
+All intermediate outputs generated by Nipype interfaces can be found in their respective {\textless
+  pipeline\_name\textgreater/ \textless stage\_name\textgreater/ \textless
+  interface\_name\textgreater} folders, which contains among others execution report in the
+  {\textless interface\_name\textgreater} folder and the pipeline execution graph in the {\textless
+  pipeline\_name\textgreater/} folder.
+The full documentation of the outputs can be found on the
+  \href{https://connectome-mapper-3.readthedocs.io/en/latest/outputs.html}{documentation website}.
+
+While the BIDS-Derivatives extension to organize network data is being developed, both structural
+  and functional connectomes generated with CMP3 are saved by default as graph objects in Python
+  pickle format that can be directly analysed using the
+  \href{https://networkx.org/documentation/stable/tutorial.html}{NetworkX} Python library, which
+  offers many general purpose algorithms to explore graphs as well as tools to compute local and
+  global network properties.
+Connectivity matrices can also be exported to Matlab as MAT-files and fed to the
+  \href{www.brain-connectivity-toolbox.net}{Brain Connectivity Toolbox}, which is a powerful
+  toolbox containing a large selection of network measures for the characterization of brain
+  connectivity datasets.
+Finally, connectome data can be saved in generic file formats such as GraphML, GML and DOT to
+  interface with a lot of general purpose software packages for graph analysis such as
+  \href{www.cytoscape.org}{Cytoscape} or \href{www.gephi.org}{Gephi}.
+
+CMP3 takes advantage of Traits/TraitsUI framework
+  (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
+  interactive Graphical User Interface (GUI), where pipeline and stage class attributes
+  (parameters) are represented as Traits objects with TraitsUI graphical representations, which
+  makes it easier to understand and extend. This has enabled the design of a GUI that reflects the
+  structure of the processing workflow and that facilitates the configuration of all pipeline
+  stages, supports their execution within the BIDS App and the inspection of stage outputs with
+  appropriate viewers (Figure \autoref{fig:gui}).
+If the outputs at a given stage are found not to be satisfactory, the GUI offers the possibility to
+  easily tune any parameter specific to this stage, regenerate the configuration file and repeat
+  the BIDS App execution.
+Empowered by the Nipype workflow engine, the re-execution of the workflow will resume the
+  processing at any stages a change of parameter occurred. Typically, the outputs are inspected
+  using native visualization tool bundled with each software package involved in the processing
+  stage as the end user might be already very familiar with these tools (Figure \autoref{fig:gui} d).
+In particular, all sMRI are inspected with the fslview viewer shipped with FSL, brain tissue
+  segmentation and parcellation are inspected with freeview, mrview is used to visualize the fiber
+  orientation distribution functions estimated by the diffusion signal model, and TrackVis is used
+  to visualize the fiber bundles estimated with tractography.
 
 # Mention
 
@@ -219,6 +333,7 @@ Furthermore, bugs as well as both internal and external developer contributions 
     
 # Acknowledgements
 
-This work was supported by Swiss National Science Foundation Sinergia grant no. 170873.
+This work was supported by Swiss National Science Foundation Sinergia
+  [grant no. 170873](https://p3.snf.ch/project-170873).
 
 # References
