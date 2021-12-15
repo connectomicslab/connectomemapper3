@@ -82,7 +82,7 @@ To ease and automate
   and provenance records, multiple initiatives have developed new standards, tools, and educational
   resources.
 Among others, this has contributed to the emergence of
-  Nipype [@GorgolewskiNipype:2011], a dataflow library that facilitates workflow
+  nipype [@GorgolewskiNipype:2011], a dataflow library that facilitates workflow
   execution/re-execution, provenance tracking and provides a uniform interface to existing
   neuroimaging softwares; the Brain Imaging Data Structure (BIDS)
   standard [@GorgolewskiTheExperiments:2016], to standardize the organization and description
@@ -110,15 +110,15 @@ Connectome Mapper 3 provides a unique open-source software pipeline solution wit
   (GUI) for researchers to easily, reliably and transparently create a hierarchical multi-scale
   connectome representation of the structural and functional brain systems, on any sMRI / dMRI /
   rfMRI dataset structured according to the BIDS standard, by interfacing with a number of popular
-  neuroimaging tools (inclusing FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
-  ANTs [@AVANTS2008SymmetricBrain], Dipy [@Garyfallidis2014DipyData],
-  MRtrix3 [@Tournier2019MRtrix3:Visualisation], and AFNI [@Cox2012]).
+  neuroimaging tools (inclusing fsl [@Jenkinson2012FSL], freesurfer [@Fischl2012FreeSurfer],
+  ants [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
+  mrtrix3 [@Tournier2019MRtrix3:Visualisation], and afni [@Cox2012]).
 While CMP3 derives from the now deprecated CMP1 and CMP2 packages[@Daducci:2012], whose original main
   goals were to simplify the organisation and the analysis of sMRI and dMRI from raw data to
   multi-scale structural weighted connectomes, it has evolved massively over the years in terms
   of the underlying codebase, the tools used, and the scope of the functionality provided.
 Design considerations with the implementation of modular, configurable, and containerized
-  processing pipelines, empowered by Nipype, handling datasets concordant to the BIDS standard,
+  processing pipelines, empowered by nipype, handling datasets concordant to the BIDS standard,
   distributed as a BIDS App, makes it not only easy to install and use (as it provides the user with a computing
   environment in which the pipelines are guarantee to run with all dependencies
   are already installed), but also efficient in managing and scaling the pipeline execution
@@ -134,7 +134,7 @@ Outputs are organized following a BIDS derivatives-like structure where connecto
   ecosystem.
 
 While CMP3 simplifies the creation of connectomes and makes it a straightforward process
-  even for users not familiar with Nipype and Software container technology, it fulfils
+  even for users not familiar with nipype and software container technology, it fulfils
   at the same time the needs of advanced users in charge of analyzing huge amount of data, offering them the
   possibility to tune and save all the parameters in configuration files and create a batch
   job to automatically process all data with the BIDS App.
@@ -174,18 +174,18 @@ To be robust to adverse code changes, versions are released through continuous i
   for this purpose.
 
 The implemented participant-level analysis workflow is represented in
-  Nipype [@GorgolewskiNipype:2011] with a modular structure, composed of three different
+  nipype [@GorgolewskiNipype:2011] with a modular structure, composed of three different
   pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of each
   modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset
   to be processed, and a pipeline configuration file.
-Each pipeline class provides methods to create and execute a Nipype workflow that runs a number of
-  Nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
+Each pipeline class provides methods to create and execute a nipype workflow that runs a number of
+  nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
-  FSL [@Jenkinson2012FSL], FreeSurfer [@Fischl2012FreeSurfer],
-  ANTs [@AVANTS2008SymmetricBrain], Dipy [@Garyfallidis2014DipyData],
-  MRtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
+  fsl [@Jenkinson2012FSL], freeSurfer [@Fischl2012FreeSurfer],
+  ants [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
+  mrtrix3 [@Tournier2019MRtrix3:Visualisation], afni [@Cox2012], or with an in-house tool
   (see Figure \autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
-  can be set from configuration files. Empowered by the Nipype workflow engine, the re-execution of the workflow will resume the
+  can be set from configuration files. Empowered by the nipype workflow engine, the re-execution of the workflow will resume the
   processing at any stages a change of parameter occurred. 
 
 ![\textbf{Participant-level analysis workflow of the Connectome Mapper 3.}
@@ -193,7 +193,7 @@ It has a modular architecture composed of three different pipelines (anatomical,
   fMRI) dedicated to each modality (sMRI, dMRI and rfMRI).
 Each pipeline handles datasets organized following the Brain Imaging Data Structure standard and
   consists of a number of processing stages implementing one or multiple specific tasks of the
-  workflow, where each task interfaces with a specific tool, empowered by the Nipype dataflow
+  workflow, where each task interfaces with a specific tool, empowered by the nipype dataflow
   library, to computes, from raw MRI data, brain parcellation and corresponding structural and/or
   functional connectivity maps at 5 different scales using the Lausanne2018 hierarchical scheme.
 BIDS allows CMP3 to automatically identify the structure of the input data, to check the
@@ -219,7 +219,7 @@ If the outputs at a given stage are found not to be satisfactory, the GUI offers
 Typically, the outputs are inspected
   using native visualization tool bundled with each software package involved in the processing
   stage as the end user might be already very familiar with these tools (Figure \autoref{fig:gui} d).
-In particular, all sMRI are inspected with the fslview viewer shipped with FSL, brain tissue
+In particular, all sMRI are inspected with the fsleyes viewer shipped with fsl, brain tissue
   segmentation and parcellation are inspected with freeview, mrview is used to visualize the fiber
   orientation distribution functions estimated by the diffusion signal model, and TrackVis is used
   to visualize the fiber bundles estimated with tractography.
@@ -247,7 +247,7 @@ Main sMRI-, dMRI-, and rfMRI-derived data, which includes preprocessed data, bra
   tractograms and connectivity matrices, are saved into their respective anat/, dwi/, and func/
   folder, and which contains sub-\textless subject\_label\textgreater\_log.txt. a log file that
   summarizes output execution.
-All intermediate outputs generated by Nipype interfaces can be found in their respective {\textless
+All intermediate outputs generated by nipype interfaces can be found in their respective {\textless
   pipeline\_name\textgreater/ \textless stage\_name\textgreater/ \textless
   interface\_name\textgreater} folders, which contains among others execution report in the
   {\textless interface\_name\textgreater} folder and the pipeline execution graph in the {\textless
