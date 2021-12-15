@@ -97,9 +97,10 @@ Following these advances, a number of processing pipelines such as C-PAC [@cpac:
   MRI data organized following the BIDS standard.
 They have demonstrated their capability in addressing all the challenges of data sharing,
   portability, computing scalability, reliability, reproducibility and transparency.
-However, none of the existing solutions are designed to map from sMRI / dMRI / fMRI
-  the structural and / or functional connectomes, for five macroscopic brain parcellation scales with hierarchical region grouping,
-  and to provide a user-friendly graphical interface that enhances its accessibility.
+However, none of the existing solutions provides a user-friendly graphical interface
+  that would enhance their accessibility and are designed to map from sMRI / dMRI / fMRI
+  the structural and / or functional connectomes, for five macroscopic brain parcellation
+  scales with hierarchical region grouping.
 
 # Summary
 
@@ -207,13 +208,6 @@ Each pipeline class provides methods to create and execute a Nipype workflow tha
   MRtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
   (see Figure \autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
   can be set from configuration files.
-BIDS allows CMP3 to automatically identify the structure of the input data, to check the
-  availability of sMRI, dMRI, rfMRI, and derived data, and to collect all the available acquisition
-  metadata.
-The processing pipelines and stages are dynamically built and configured depending on the input
-  data (sMRI, dMRI, rfMRI) and parameters set in the configuration files.
-This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI, multi-shell) and
-  to appropriately set up the set of available pipeline configuration parameters for its processing. 
 
 ![\textbf{Participant-level analysis workflow of the Connectome Mapper 3.}
 It has a modular architecture composed of three different pipelines (anatomical, diffusion and
@@ -223,6 +217,13 @@ Each pipeline handles datasets organized following the Brain Imaging Data Struct
   workflow, where each task interfaces with a specific tool, empowered by the Nipype dataflow
   library, to computes, from raw MRI data, brain parcellation and corresponding structural and/or
   functional connectivity maps at 5 different scales using the Lausanne2018 hierarchical scheme.
+BIDS allows CMP3 to automatically identify the structure of the input data, to check the
+  availability of sMRI, dMRI, rfMRI, and derived data, and to collect all the available acquisition
+  metadata.
+The processing pipelines and stages are dynamically built and configured depending on the input
+  data (sMRI, dMRI, rfMRI) and parameters set in the configuration files.
+This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI, multi-shell) and
+  to appropriately set up the set of available pipeline configuration parameters for its processing.
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
 
 CMP3 takes advantage of Traits/TraitsUI framework
