@@ -152,25 +152,26 @@ At the time of writing, an EEG source imaging pipeline is being integrated, init
   ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
   which would make CMP3...
 
-# Design considerations
+# Highlights
 
-\textbf{Designed with a focus on reproducibility and portability} CMP3 is written in Python 3
-  and adopts an object-oriented programming style for the sake of modularity, extensibility,
-  and re-usability.
+\textbf{A focus on reproducibility, portability, and accessibility} CMP3 implements pipelines that maps
+  from sMRI / dMRI / fMRI the structural and / or functional connectomes, for five macroscopic brain
+  parcellation scales with hierarchical region grouping.
+It is written in Python 3 and adopts an object-oriented programming style for the sake of modularity,
+  extensibility, and re-usability.
 It uses Miniconda (\href{https://docs.conda.io}{https://docs.conda.io}),
   a package and environment manager, to facilitate the installation of the Python environment with
   all package dependencies installed inside, that is particularly powerful at two levels.
-It provides a way to ease the installation of python package dependencies at a fixed version for
+It eases the installation of python package dependencies at a fixed version for
   both the processing core inside the BIDS App and the GUI on the host system.
 It also provides a way to isolate the installation of CMP3 with other python dependencies.
 This prevents conflicts with other package versions that might exist already on the host system.
 To maximize software accessibility, interoperability, portability and reproducibility, the
   implemented pipelines are encapsulated in a Docker [@merkeldocker:2014]
-  and a Singularity [@Kurtzer2017Singularity:Compute] software image containers in concordance to the BIDS
-  App standard [@GorgolewskiBIDSMethods:2017]. 
+  and a Singularity [@Kurtzer2017Singularity:Compute] software image containers.
 
 \textbf{A flexible workflow for multi-modal connectome mapping in the BIDS ecosystem} The implemented participant-level analysis
-  workflow is represented in nipype [@GorgolewskiNipype:2011] with a modular structure, composed of
+  workflow is represented with nipype [@GorgolewskiNipype:2011] adopting a modular architecture, composed of
   three different pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of each
   modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset
   to be processed, and a pipeline configuration file.
@@ -184,12 +185,10 @@ Each pipeline class provides methods to create and execute a nipype workflow tha
   can be set from configuration files in `.json` format.
 Empowered by the nipype workflow engine, the re-execution of the workflow will resume the
   processing at any stages a change of parameter occurred.
-To maximize software accessibility, interoperability, portability and reproducibility, the
-  implemented pipelines are encapsulated in a Docker [@merkeldocker:2014]
-  and a Singularity [@Kurtzer2017Singularity:Compute] software image containers in concordance to the BIDS
-  App standard [@GorgolewskiBIDSMethods:2017]. This means that the BIDS App of CMP3 can be run on diversity
-  of datasets Linux, MacOSX, Windows computers, and on high performance computing systems (clusters)
-  for large-scale analysis.
+To maximize accessibility and re-usability of the tool, the implemented pipelines are encapsulated in
+  software image containers in concordance to the BIDS App standard [@GorgolewskiBIDSMethods:2017]. This means that the BIDS App
+  of CMP3 can be run on diversity of datasets Linux, MacOSX, Windows computers, and on high performance
+  computing systems (clusters) for large-scale analysis.
 
 ![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
 It has a modular architecture composed of three different pipelines (anatomical, diffusion and
