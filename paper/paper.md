@@ -174,7 +174,7 @@ To maximize software accessibility, interoperability, portability and reproducib
   workflow is represented with nipype [@GorgolewskiNipype:2011] adopting a modular architecture, composed of
   three different pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of each
   modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset
-  to be processed, and a pipeline configuration file.
+  to be processed, and a set of pipeline configuration file.
 Each pipeline class provides methods to create and execute a nipype workflow that runs a number of
   nipype sub-workflows, described by stage classes and implementing one or multiple tasks,
   where each task can interface with either a specific tool including in
@@ -282,10 +282,12 @@ The source code for `Connectome Mapper 3` is hosted at
   [https://github.com/sebastientourbier/connectomemapper3](https://github.com/sebastientourbier/connectomemapper3),
   and archived to Zenodo [@ZenodoCMP:2021].
 To be robust to adverse code changes, versions are released through continuous integration building
-  and testing using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset] that we created
-  for this purpose. Specifically, this involves testing the installation of the python package, the build of
-  the Docker and Singularity container images, and the execution of the BIDS App via the container
-  images with multiple configurations, to guarantee the full functionality of each new version release.
+  and testing.
+Specifically, this involves testing the installation of the python package, the build of
+  the Docker and Singularity container images, and the execution of the BIDS App via the different container
+  images adopting multiple pipeline configurations, using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset] that we created
+  for this purpose.
+Doing so, we can guarantee the full functionality of each new released version of CMP3.
 A detailed documentation is available
   at [connectome-mapper-3.readthedocs.io](connectome-mapper-3.readthedocs.io) that is
   kept up to date with the current release and can be retrieved for older versions.
