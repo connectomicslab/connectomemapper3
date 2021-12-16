@@ -16,9 +16,9 @@ class VerifyVersionCommand(install):
     description = "verify that the git tag matches our version"
 
     def run(self):
-        tag = os.getenv("CIRCLE_TAG")
-        version = f"{__version__}"
-
+        """Verify that the git tag (`CIRCLE_TAG`) matches our version."""
+        tag = os.getenv('CIRCLE_TAG')
+        version = f'{__version__}'
         if tag != version:
             info = f"Git tag: {tag} does not match the version of this app: {version}"
             sys.exit(info)
@@ -98,7 +98,7 @@ include_conda_pip_dependencies = False
 install_requires = []
 dependency_links = []
 if include_conda_pip_dependencies:
-    path = os.path.join(directory, "ubuntu16.04", "environment.yml")
+    path = os.path.join(directory, "docker", "environment.yml")
     with open(path) as read_file:
         state = "PREAMBLE"
         for line in read_file:
@@ -144,9 +144,11 @@ def main():
         url="https://github.com/connectomicslab/connectomemapper3",
         entry_points={
             "console_scripts": [
-                "connectomemapper3 = cmp.cli.connectomemapper3:main",
-                "cmpbidsappmanager = cmp.cli.cmpbidsappmanager:main",
-                "showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main",
+                'connectomemapper3 = cmp.cli.connectomemapper3:main',
+                'cmpbidsappmanager = cmp.cli.cmpbidsappmanager:main',
+                'showmatrix_gpickle = cmp.cli.showmatrix_gpickle:main',
+                'connectomemapper3_docker = cmp.cli.connectomemapper3_docker:main',
+                'connectomemapper3_singularity = cmp.cli.connectomemapper3_singularity:main'
             ]
         },
         license="BSD-3-Clause",

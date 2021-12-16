@@ -22,8 +22,8 @@ from bids import BIDSLayout
 from pyface.api import FileDialog, OK
 
 # Own imports
-from . import core
-from . import gui
+from cmp.bidsappmanager import gui
+from cmtklib.bids.io import __cmp_directory__, __nipype_directory__, __freesurfer_directory__
 from cmp.bidsappmanager.pipelines.anatomical import anatomical as anatomical_pipeline
 from cmp.bidsappmanager.pipelines.diffusion import diffusion as diffusion_pipeline
 from cmp.bidsappmanager.pipelines.functional import fMRI as fMRI_pipeline
@@ -39,8 +39,10 @@ from cmtklib.config import (
     get_fmri_process_detail_json,
     convert_config_ini_2_json,
 )
-from cmtklib.util import print_blue, print_warning, print_error
-
+from cmtklib.util import (
+    print_blue, print_warning, print_error
+)
+from cmtklib.process import run
 
 warnings.filterwarnings(
     "ignore", message="No valid root directory found for domain 'derivatives'."
@@ -125,24 +127,24 @@ def refresh_folder(derivatives_directory, subject, input_folders, session=None):
     paths = []
 
     if session is None or session == "":
-        paths.append(os.path.join(derivatives_directory, "freesurfer", subject))
-        paths.append(os.path.join(derivatives_directory, "cmp", subject))
-        paths.append(os.path.join(derivatives_directory, "nipype", subject))
+        paths.append(os.path.join(derivatives_directory, __freesurfer_directory__, subject))
+        paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject))
+        paths.append(os.path.join(derivatives_directory, __nipype_directory__, subject))
 
         for in_f in input_folders:
-            paths.append(os.path.join(derivatives_directory, "cmp", subject, in_f))
+            paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject, in_f))
     else:
         paths.append(
             os.path.join(
-                derivatives_directory, "freesurfer", "%s_%s" % (subject, session)
+                derivatives_directory, __freesurfer_directory__, "%s_%s" % (subject, session)
             )
         )
-        paths.append(os.path.join(derivatives_directory, "cmp", subject, session))
-        paths.append(os.path.join(derivatives_directory, "nipype", subject, session))
+        paths.append(os.path.join(derivatives_directory, __cmp_directory__, subject, session))
+        paths.append(os.path.join(derivatives_directory, __nipype_directory__, subject, session))
 
         for in_f in input_folders:
             paths.append(
-                os.path.join(derivatives_directory, "cmp", subject, session, in_f)
+                os.path.join(derivatives_directory, __cmp_directory__, subject, session, in_f)
             )
 
     for full_p in paths:
@@ -432,7 +434,7 @@ def update_anat_last_processed(project_info, pipeline):
     # last date
     if os.path.exists(
         os.path.join(
-            project_info.base_directory, "derivatives", "cmp", project_info.subject
+            project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
         )
     ):
         # out_dirs = os.listdir(os.path.join(
@@ -455,7 +457,7 @@ def update_anat_last_processed(project_info, pipeline):
         os.path.join(
             project_info.base_directory,
             "derivatives",
-            "cmp",
+            __cmp_directory__,
             project_info.subject,
             "tmp",
             "anatomical_pipeline",
@@ -466,7 +468,7 @@ def update_anat_last_processed(project_info, pipeline):
             os.path.join(
                 project_info.base_directory,
                 "derivatives",
-                "cmp",
+                __cmp_directory__,
                 project_info.subject,
                 "tmp",
                 "anatomical_pipeline",
@@ -498,7 +500,7 @@ def update_dmri_last_processed(project_info, pipeline):
     # last date
     if os.path.exists(
         os.path.join(
-            project_info.base_directory, "derivatives", "cmp", project_info.subject
+            project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
         )
     ):
         # out_dirs = os.listdir(os.path.join(
@@ -521,7 +523,7 @@ def update_dmri_last_processed(project_info, pipeline):
         os.path.join(
             project_info.base_directory,
             "derivatives",
-            "cmp",
+            __cmp_directory__,
             project_info.subject,
             "tmp",
             "diffusion_pipeline",
@@ -532,7 +534,7 @@ def update_dmri_last_processed(project_info, pipeline):
             os.path.join(
                 project_info.base_directory,
                 "derivatives",
-                "cmp",
+                __cmp_directory__,
                 project_info.subject,
                 "tmp",
                 "diffusion_pipeline",
@@ -560,7 +562,7 @@ def update_fmri_last_processed(project_info, pipeline):
     # last date
     if os.path.exists(
         os.path.join(
-            project_info.base_directory, "derivatives", "cmp", project_info.subject
+            project_info.base_directory, "derivatives", __cmp_directory__, project_info.subject
         )
     ):
         # out_dirs = os.listdir(os.path.join(
@@ -583,7 +585,7 @@ def update_fmri_last_processed(project_info, pipeline):
         os.path.join(
             project_info.base_directory,
             "derivatives",
-            "cmp",
+            __cmp_directory__,
             project_info.subject,
             "tmp",
             "fMRI_pipeline",
@@ -594,7 +596,7 @@ def update_fmri_last_processed(project_info, pipeline):
             os.path.join(
                 project_info.base_directory,
                 "derivatives",
-                "cmp",
+                __cmp_directory__,
                 project_info.subject,
                 "tmp",
                 "fMRI_pipeline",
@@ -890,6 +892,10 @@ class CMP_ConfigQualityWindowHandler(Handler):
             print(loaded_project.subjects)
             loaded_project.number_of_subjects = len(loaded_project.subjects)
 
+        except ValueError as e:
+            msg = str(e)
+            error(message=msg, title="BIDS error")
+            return
         except Exception:
             error(
                 message="Invalid BIDS dataset. Please see documentation for more details.",
@@ -2027,7 +2033,7 @@ class CMP_MainWindowHandler(Handler):
                         )
                     try:
                         print_blue("... cmd: {}".format(cmd))
-                        core.run(
+                        run(
                             cmd,
                             env={},
                             cwd=os.path.abspath(loaded_project.base_directory),
@@ -2045,7 +2051,7 @@ class CMP_MainWindowHandler(Handler):
                     )
                     try:
                         print_blue("... cmd: {}".format(cmd))
-                        core.run(
+                        run(
                             cmd,
                             env={},
                             cwd=os.path.abspath(loaded_project.base_directory),
@@ -2207,11 +2213,12 @@ class CMP_MainWindowHandler(Handler):
                     if len(query_files) > 0:
                         print("        * Available BOLD(s): {}".format(query_files))
                         fmri_available = True
-
-            except Exception:
-                msg = "Invalid BIDS dataset. Please see documentation for more details."
-                print_error(msg)
+            except ValueError as e:
+                msg = str(e)
                 error(message=msg, title="BIDS error")
+            except Exception:
+                error(message="Invalid BIDS dataset. Please see documentation for more details.",
+                  title="BIDS error")
                 return
 
             ui_info.ui.context["object"].project_info = loaded_project

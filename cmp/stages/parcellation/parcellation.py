@@ -14,8 +14,10 @@ import pkg_resources
 # Nipype imports
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
+from nipype.interfaces.io import BIDSDataGrabber
 
 # Own imports
+from cmtklib.bids.io import __cmp_directory__
 from cmp.stages.common import Stage
 from cmtklib.parcellation import (
     Parcellate,
@@ -26,7 +28,15 @@ from cmtklib.parcellation import (
     ComputeParcellationRoiVolumes,
 )
 from cmtklib.util import get_pipeline_dictionary_outputs, get_basename
-from cmtklib.bids.utils import CreateBIDSStandardParcellationLabelIndexMappingFile
+from cmtklib.bids.utils import (
+    CreateBIDSStandardParcellationLabelIndexMappingFile,
+    CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile,
+    get_native_space_tsv_sidecar_files,
+    get_native_space_files
+)
+from cmtklib.bids.io import (
+    CustomParcellationBIDSFile
+)
 
 
 class ParcellationConfig(HasTraits):
@@ -68,18 +78,16 @@ class ParcellationConfig(HasTraits):
 
     atlas_info : traits.Dict
         Dictionary storing information of atlases in the form
-        >>> atlas_info = {atlas_name: {'number_of_regions': number_of_regions,
-        >>>               'node_information_graphml': graphml_file}} # doctest: +SKIP
+        >>> atlas_info = {
+        >>>     "atlas_name": {
+        >>>         'number_of_regions': 83,
+        >>>         'node_information_graphml': "/path/to/file.graphml"
+        >>>     }
+        >>> } # doctest: +SKIP
 
-    custom_bids_derivatives_dir : traits.Directory
-        Specify a custom BIDS derivatives directory
-        where parcellation and csf segmentation files
-        can be found
-
-    custom_bids_derivatives_json : traits.File
-        Path to a JSON file specifying the BIDS format of
-        parcellation atlas nifti and graphml files, and
-        csf file to query
+    custom_parcellation : traits.Instance(CustomParcellationBIDSFile)
+        Instance of :obj:`~cmtklib.bids.io.CustomParcellationBIDSFile`
+        that describes the custom BIDS-formatted brain parcellation file
 
     See Also
     --------
@@ -89,72 +97,21 @@ class ParcellationConfig(HasTraits):
     pipeline_mode = Enum(["Diffusion", "fMRI"])
     parcellation_scheme = Str("Lausanne2008")
     parcellation_scheme_editor = List(
-        ["NativeFreesurfer", "Lausanne2008", "Lausanne2018"]
+        ["NativeFreesurfer", "Lausanne2008", "Lausanne2018", "Custom"]
     )
     include_thalamic_nuclei_parcellation = Bool(True)
     ants_precision_type = Enum(["double", "float"])
     segment_hippocampal_subfields = Bool(True)
     segment_brainstem = Bool(True)
-    pre_custom = Str("Lausanne2008")
-    custom_bids_derivatives_dir = Directory(
-        desc="Specify a custom BIDS derivatives directory "
-        + "where parcellation and csf segmentation files "
-        + "can be found"
-    )
-    custom_bids_derivatives_json = File(
-        desc="Path to a JSON file specifying the BIDS format of "
-        + "parcellation atlas nifti and graphml files, and "
-        + "csf file to query"
-    )
-    number_of_regions = Int()
-    atlas_nifti_file = File(exists=True)
-    csf_file = File(exists=True)
-    brain_file = File(exists=True)
+    # csf_file = File(exists=True)
+    # brain_file = File(exists=True)
     graphml_file = File(exists=True)
     atlas_info = Dict()
-
-    def update_atlas_info(self):
-        """Update `atlas_info` class attribute."""
-        atlas_name = os.path.basename(self.atlas_nifti_file)
-        atlas_name = os.path.splitext(os.path.splitext(atlas_name)[0])[0].encode(
-            "ascii"
-        )
-        self.atlas_info = {
-            atlas_name: {
-                "number_of_regions": self.number_of_regions,
-                "node_information_graphml": self.graphml_file,
-            }
-        }
-
-    def _atlas_nifti_file_changed(self, new):
-        """Calls `update_atlas_info()` when ``atlas_nifti_file`` is changed.
-
-        Parameters
-        ----------
-        new : string
-            New value of ``atlas_nifti_file``
-        """
-        self.update_atlas_info()
-
-    def _number_of_regions_changed(self, new):
-        """Calls `update_atlas_info()` when ``number_of_regions`` is changed.
-
-        Parameters
-        ----------
-        new : string
-            New value of ``number_of_regions``
-        """
-        self.update_atlas_info()
-
-    def _graphml_file_changed(self, new):
-        """Calls `update_atlas_info()` when ``graphml_file`` is changed.
-
-        Parameters
-        ----------
-        new : string
-            New value of ``graphml_file``
-        """
-        self.update_atlas_info()
+    custom_parcellation = Instance(
+        CustomParcellationBIDSFile, (),
+        desc="Instance of :obj:`~cmtklib.bids.io.CustomParcellationBIDSFile`"
+             "that describes the custom BIDS-formatted brain parcellation file"
+    )
 
 
 class ParcellationStage(Stage):
@@ -211,10 +168,10 @@ class ParcellationStage(Stage):
             The nipype.pipeline.engine.Workflow instance of the anatomical pipeline
 
         inputnode : nipype.interfaces.utility.IdentityInterface
-            Identity interface describing the inputs of the stage
+            Identity interface describing the inputs of the parcellation stage
 
         outputnode : nipype.interfaces.utility.IdentityInterface
-            Identity interface describing the outputs of the stage
+            Identity interface describing the outputs of the parcellation stage
         """
         outputnode.inputs.parcellation_scheme = self.config.parcellation_scheme
 
@@ -283,7 +240,6 @@ class ParcellationStage(Stage):
                                                     (("subject_id", get_basename), "subject_id")]),
                             (parcHippo, parcCombiner, [("lh_hipposubfields", "lh_hippocampal_subfields"),
                                                        ("rh_hipposubfields", "rh_hippocampal_subfields")]),
-
                         ]
                     )
                     # fmt: on
@@ -340,19 +296,19 @@ class ParcellationStage(Stage):
                     ]
                 )
                 # fmt: on
-                computeROIVolumetry = pe.Node(
+                compute_roi_volumetry = pe.Node(
                     interface=ComputeParcellationRoiVolumes(),
-                    name="computeROIVolumetry",
+                    name="compute_roi_volumetry",
                 )
-                computeROIVolumetry.inputs.parcellation_scheme = (
+                compute_roi_volumetry.inputs.parcellation_scheme = (
                     self.config.parcellation_scheme
                 )
                 # fmt: off
                 flow.connect(
                     [
-                        (parcCombiner, computeROIVolumetry, [("output_rois", "roi_volumes"),
+                        (parcCombiner, compute_roi_volumetry, [("output_rois", "roi_volumes"),
                                                              ("graphML_files", "roi_graphMLs")]),
-                        (computeROIVolumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
+                        (compute_roi_volumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
                     ]
                 )
                 # fmt: on
@@ -467,45 +423,130 @@ class ParcellationStage(Stage):
                     ]
                 )
                 # fmt: on
-                computeROIVolumetry = pe.Node(
-                    interface=ComputeParcellationRoiVolumes(),
-                    name="computeROIVolumetry",
-                )
-                computeROIVolumetry.inputs.parcellation_scheme = (
-                    self.config.parcellation_scheme
+                compute_roi_volumetry = pe.Node(
+                    interface=ComputeParcellationRoiVolumes(
+                        parcellation_scheme=self.config.parcellation_scheme
+                    ),
+                    name="compute_roi_volumetry",
                 )
                 # fmt: off
                 flow.connect(
                     [
-                        (parc_node, computeROIVolumetry, [("roi_files_in_structural_space", "roi_volumes")]),
-                        (parc_files, computeROIVolumetry, [("roi_graphMLs", "roi_graphMLs")]),
-                        (computeROIVolumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
+                        (parc_node, compute_roi_volumetry, [("roi_files_in_structural_space", "roi_volumes")]),
+                        (parc_files, compute_roi_volumetry, [("roi_graphMLs", "roi_graphMLs")]),
+                        (compute_roi_volumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
                     ]
                 )
                 # fmt: on
+        else:
+            self.create_workflow_custom(flow, outputnode)
 
-            # TODO
-            # if self.config.pipeline_mode == "fMRI":
-            #     erode_wm = pe.Node(interface=cmtk.Erode(),name="erode_wm")
-            #     flow.connect([
-            #                 (inputnode,erode_wm,[("custom_wm_mask","in_file")]),
-            #                 (erode_wm,outputnode,[("out_file","wm_eroded")]),
-            #                 ])
-            #     if os.path.exists(self.config.csf_file):
-            #         erode_csf = pe.Node(interface=cmtk.Erode(in_file = self.config.csf_file),name="erode_csf")
-            #         flow.connect([
-            #                     (erode_csf,outputnode,[("out_file","csf_eroded")])
-            #                     ])
-            #     if os.path.exists(self.config.brain_file):
-            #         erode_brain = pe.Node(interface=cmtk.Erode(in_file = self.config.brain_file),name="erode_brain")
-            #         flow.connect([
-            #                     (erode_brain,outputnode,[("out_file","brain_eroded")])
-            #                     ])
+        # TODO
+        # if self.config.pipeline_mode == "fMRI":
+        #     erode_wm = pe.Node(interface=cmtk.Erode(),name="erode_wm")
+        #     flow.connect([
+        #                 (inputnode,erode_wm,[("custom_wm_mask","in_file")]),
+        #                 (erode_wm,outputnode,[("out_file","wm_eroded")]),
+        #                 ])
+        #     if os.path.exists(self.config.csf_file):
+        #         erode_csf = pe.Node(interface=cmtk.Erode(in_file = self.config.csf_file),name="erode_csf")
+        #         flow.connect([
+        #                     (erode_csf,outputnode,[("out_file","csf_eroded")])
+        #                     ])
+        #     if os.path.exists(self.config.brain_file):
+        #         erode_brain = pe.Node(interface=cmtk.Erode(in_file = self.config.brain_file),name="erode_brain")
+        #         flow.connect([
+        #                     (erode_brain,outputnode,[("out_file","brain_eroded")])
+        #                     ])
+
+    def create_workflow_custom(self, flow, outputnode):
+        """Create the stage workflow when custom inputs are specified.
+
+        Parameters
+        ----------
+        flow : nipype.pipeline.engine.Workflow
+            The nipype.pipeline.engine.Workflow instance of the anatomical pipeline
+
+        outputnode : nipype.interfaces.utility.IdentityInterface
+            Identity interface describing the outputs of the parcellation stage
+        """
+        # Create the dictionary of to be passed as output_query to BIDSDataGrabber
+        output_query_dict = {
+            "custom_roi_volumes": self.config.custom_parcellation.get_query_dict(),
+        }
+
+        # Make a list of toolbox directories where custom BIDS derivatives can be found
+        toolbox_derivatives_dirs = [self.config.custom_parcellation.get_toolbox_derivatives_dir()]
+        toolbox_derivatives_paths = [
+            os.path.join(self.bids_dir, "derivatives", toolbox_dir) for toolbox_dir in toolbox_derivatives_dirs
+        ]
+
+        print(f"Get input brain parcellation file from {toolbox_derivatives_paths}...")
+        custom_parc_grabber = pe.Node(
+            interface=BIDSDataGrabber(
+                base_dir=self.bids_dir,
+                subject=self.bids_subject_label.split("-")[1],
+                session=(self.bids_session_label.split("-")[1]
+                         if self.bids_session_label is not None and self.bids_session_label != ""
+                         else None),
+                datatype="anat",
+                extra_derivatives=toolbox_derivatives_paths,
+                output_query=output_query_dict,
+            ),
+            name="custom_parc_grabber",
+        )
+        # fmt: off
+        flow.connect(
+            [
+                (custom_parc_grabber, outputnode, [(("custom_roi_volumes", get_native_space_files), "roi_volumes")]),
+            ]
+        )
+        # fmt: on
+
+        create_cmp_parc_desc_files = pe.Node(
+            interface=CreateMultipleCMPParcellationNodeDescriptionFilesFromBIDSFile(),
+            name="create_cmp_parc_desc_files_from_custom"
+        )
+        # fmt: off
+        flow.connect(
+            [
+                (custom_parc_grabber, create_cmp_parc_desc_files, [
+                        (("custom_roi_volumes", get_native_space_tsv_sidecar_files), "roi_bids_tsvs")
+                    ]
+                 ),
+                (custom_parc_grabber, outputnode, [
+                        (("custom_roi_volumes", get_native_space_tsv_sidecar_files), "roi_TSVs")
+                    ]
+                 ),
+                (create_cmp_parc_desc_files, outputnode, [("roi_graphmls", "roi_graphMLs")]),
+                (create_cmp_parc_desc_files, outputnode, [("roi_colorluts", "roi_colorLUTs")]),
+            ]
+        )
+        # fmt: on
+
+        compute_roi_volumetry = pe.Node(
+            interface=ComputeParcellationRoiVolumes(
+                parcellation_scheme=self.config.parcellation_scheme
+            ),
+            name="custom_compute_roi_volumetry"
+        )
+        # fmt: off
+        flow.connect(
+            [
+                (custom_parc_grabber, compute_roi_volumetry, [
+                    (("custom_roi_volumes", get_native_space_files), "roi_volumes")
+                ]),
+                (create_cmp_parc_desc_files, compute_roi_volumetry, [("roi_graphmls", "roi_graphMLs")]),
+                (compute_roi_volumetry, outputnode, [("roi_volumes_stats", "roi_volumes_stats")]),
+            ]
+        )
+        # fmt: on
 
     def define_inspect_outputs(self):
         """Update the `inspect_outputs` class attribute.
 
         It contains a dictionary of stage outputs with corresponding commands for visual inspection.
+
         """
         anat_sinker_dir = os.path.join(
             os.path.dirname(self.stage_dir), "anatomical_sinker"
@@ -588,11 +629,21 @@ class ParcellationStage(Stage):
                                     roi_v + ":colormap=lut:lut=" + lut_file,
                                 ]
         else:
-            self.inspect_outputs_dict["Custom atlas"] = [
-                'fsleyes',
-                self.config.atlas_nifti_file,
-                "-cm",
-                "random"
+            roi_v = self.config.custom_parcellation.get_filename_path(
+                base_dir=os.path.join(self.output_dir, __cmp_directory__),
+                subject=self.bids_subject_label,
+                session=self.bids_session_label if self.bids_session_label != "" else None
+            ) + ".nii.gz"
+            lut_file = self.config.custom_parcellation.get_filename_path(
+                base_dir=os.path.join(self.output_dir, __cmp_directory__),
+                subject=self.bids_subject_label,
+                session=self.bids_session_label if self.bids_session_label != "" else None
+            ).split("_dseg")[0] + "_FreeSurferColorLUT.txt"
+
+            self.inspect_outputs_dict[f'Custom atlas ({self.config.custom_parcellation.atlas})'] = [
+                "freeview",
+                "-v",
+                f"{roi_v}:colormap=lut:lut={lut_file}" + lut_file,
             ]
 
         self.inspect_outputs = sorted(
@@ -608,8 +659,13 @@ class ParcellationStage(Stage):
         `True` if the stage has been run successfully
         """
         if self.config.parcellation_scheme == "Custom":
-            # TODO
-            return True
+            return os.path.exists(
+                os.path.join(
+                    self.stage_dir,
+                    "custom_compute_roi_volumetry",
+                    "result_custom_compute_roi_volumetry.pklz"
+                )
+            )
         elif self.config.parcellation_scheme == "Lausanne2018":
             return os.path.exists(
                 os.path.join(

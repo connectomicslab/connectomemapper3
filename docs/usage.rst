@@ -26,24 +26,85 @@ The command to run ``CMP3`` follows the `BIDS-Apps <https://github.com/BIDS-Apps
 
 Participant Level Analysis
 ===========================
-To run the docker image in participant level mode (for one participant):
+
+You can run `CMP3`` using the lightweight Docker or Singularity wrappers we created for convenience or you can interact directly with the Docker / Singularity Engine via the docker or singularity run command.
+
+With the wrappers
+-------------------
+
+When you run ``connectomemapper3_docker``, it will generate a Docker command line for you, print it out for reporting purposes, and then execute it without further action needed, e.g.:
+
+    .. code-block:: console
+
+       $ connectomemapper_docker \
+            "/home/user/data/ds001" "/home/user/data/ds001/derivatives" \
+            participant --participant_label 01 --session_label 01 \
+            --fs_license "/usr/local/freesurfer/license.txt" \
+            --config_dir "/home/user/data/ds001/code" \
+            --anat_pipeline_config "ref_anatomical_config.json" \
+            (--dwi_pipeline_config "ref_diffusion_config.json" \)
+            (--func_pipeline_config "ref_fMRI_config.json" \)
+            (--number_of_participants_processed_in_parallel 1)
+            
+When you run ``connectomemapper3_singularity``, it will generate a Singularity command line for you, print it out for reporting purposes, and then execute it without further action needed, e.g.:
+
+    .. code-block:: console
+
+       $ connectomemapper3_singularity \
+            "/home/user/data/ds001" "/home/user/data/ds001/derivatives" \
+            participant --participant_label 01 --session_label 01 \
+            --fs_license "/usr/local/freesurfer/license.txt" \
+            --config_dir "/home/user/data/ds001/code" \
+            --anat_pipeline_config "ref_anatomical_config.json" \
+            (--dwi_pipeline_config "ref_diffusion_config.json" \)
+            (--func_pipeline_config "ref_fMRI_config.json" \)
+            (--number_of_participants_processed_in_parallel 1)
+            
+
+With the Docker / Singularity Engine
+--------------------------------------
+
+If you need a finer control over the container execution, or you feel comfortable with the Docker or Singularity Engine, avoiding the extra software layer of the wrapper might be a good decision.
+
+Docker 
+------
+
+For instance, the previous call to the ``connectomemapper3_docker`` wrapper corresponds to:
 
   .. parsed-literal::
 
     $ docker run -t --rm -u $(id -u):$(id -g) \\
-            -v /home/localadmin/data/ds001:/bids_dir \\
-            -v /media/localadmin/data/ds001/derivatives:/output_dir \\
-            (-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \\)
-            sebastientourbier/connectomemapper-bidsapp:|release| \\
-            /bids_dir /output_dir participant --participant_label 01 \\(--session_label 01 \\)
-            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \\)
-            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \\)
-            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \\)
+            -v /home/user/data/ds001:/bids_dir \
+            -v /home/user/data/ds001/derivatives:/output_dir \
+            (-v /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \)
+            sebastientourbier/connectomemapper-bidsapp:|release| \
+            /bids_dir /output_dir participant --participant_label 01 \(--session_label 01 \)
+            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \)
+            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \)
+            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \)
+            (--number_of_participants_processed_in_parallel 1)
+            
+Singularity
+-----------
+
+For instance, the previous call to the ``connectomemapper3_singularity`` wrapper corresponds to:
+
+  .. parsed-literal::
+
+    $ singularity run  --containall \
+            --bind /home/user/data/ds001:/bids_dir \
+            --bind /home/user/data/ds001/derivatives:/output_dir \
+            --bind /usr/local/freesurfer/license.txt:/bids_dir/code/license.txt \
+            library://connectomicslab/default/connectomemapper-bidsapp:|release| \
+            /bids_dir /output_dir participant --participant_label 01 \(--session_label 01 \)
+            --anat_pipeline_config /bids_dir/code/ref_anatomical_config.json \)
+            (--dwi_pipeline_config /bids_dir/code/ref_diffusion_config.json \)
+            (--func_pipeline_config /bids_dir/code/ref_fMRI_config.json \)
             (--number_of_participants_processed_in_parallel 1)
 
-.. note:: The local directory of the input BIDS dataset (here: ``/home/localadmin/data/ds001``) and the output directory (here: ``/media/localadmin/data/ds001/derivatives``) used to process have to be mapped to the folders ``/bids_dir`` and ``/output_dir`` respectively using the ``-v`` docker run option.
+.. note:: The local directory of the input BIDS dataset (here: ``/home/user/data/ds001``) and the output directory (here: ``/home/user/data/ds001/derivatives``) used to process have to be mapped to the folders ``/bids_dir`` and ``/output_dir`` respectively using the docker ``-v`` / singularity ``--bind`` run option.
 
-.. important:: The user is requested to use its own Freesurfer license (`available here <https://surfer.nmr.mgh.harvard.edu/registration.html>`_). CMP expects by default to find a copy of the FreeSurfer ``license.txt`` in the ``code/`` folder of the BIDS directory. However, one can also mount with the ``-v`` docker run option a freesurfer ``license.txt``, which can be located anywhere on its computer (as in the example above, i.e. ``/usr/local/freesurfer/license.txt``) to the ``code/`` folder of the BIDS directory inside the docker container (i.e. ``/bids_dir/code/license.txt``).
+.. important:: The user is requested to use its own Freesurfer license (`available here <https://surfer.nmr.mgh.harvard.edu/registration.html>`_). CMP expects by default to find a copy of the FreeSurfer ``license.txt`` in the ``code/`` folder of the BIDS directory. However, one can also mount a freesurfer ``license.txt``  with the docker ``-v`` / singularity ``--bind`` run option. This file can be located anywhere on the computer (as in the example above, i.e. ``/usr/local/freesurfer/license.txt``) to the ``code/`` folder of the BIDS directory inside the docker container (i.e. ``/bids_dir/code/license.txt``).
 
 .. note:: At least a configuration file describing the processing stages of the anatomical pipeline should be provided. Diffusion and/or Functional MRI pipeline are performed only if a configuration file is set. The generation of such configuration files, the execution of the BIDS App docker image and output inpection are facilitated through the use of the Connectome Mapper GUI, i.e. cmpbidsappmanager (see `dedicated documentation page <bidsappmanager.html>`_)
 

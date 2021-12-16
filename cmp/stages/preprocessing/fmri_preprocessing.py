@@ -119,16 +119,20 @@ class PreprocessingStage(Stage):
                 interface=Discard_tp(n_discard=self.config.discard_n_volumes),
                 name="discard_volumes",
             )
+            # fmt:off
             flow.connect(
                 [
                     (inputnode, discard, [("functional", "in_file")]),
                     (discard, discard_output, [("out_file", "discard_output")]),
                 ]
             )
+            # fmt:on
         else:
+            # fmt:off
             flow.connect(
                 [(inputnode, discard_output, [("functional", "discard_output")])]
             )
+            # fmt:on
 
         despiking_output = pe.Node(
             interface=util.IdentityInterface(fields=["despiking_output"]),
@@ -140,6 +144,7 @@ class PreprocessingStage(Stage):
                 interface=afni.AFNItoNIFTI(out_file="fMRI_despike.nii.gz"),
                 name="converter",
             )
+            # fmt:off
             flow.connect(
                 [
                     (discard_output, despike, [("discard_output", "in_file")]),
@@ -147,16 +152,15 @@ class PreprocessingStage(Stage):
                     (converter, despiking_output, [("out_file", "despiking_output")]),
                 ]
             )
+            # fmt:on
         else:
+            # fmt:off
             flow.connect(
                 [
-                    (
-                        discard_output,
-                        despiking_output,
-                        [("discard_output", "despiking_output")],
-                    )
+                    (discard_output, despiking_output, [("discard_output", "despiking_output")],)
                 ]
             )
+            # fmt:on
 
         if self.config.slice_timing != "none":
             slc_timing = pe.Node(interface=fsl.SliceTimer(), name="slice_timing")
@@ -187,58 +191,56 @@ class PreprocessingStage(Stage):
             )
 
         if self.config.slice_timing != "none":
+            # fmt:off
             flow.connect(
                 [(despiking_output, slc_timing, [("despiking_output", "in_file")])]
             )
+            # fmt:on
             if self.config.motion_correction:
+                # fmt:off
                 flow.connect(
                     [
-                        (
-                            slc_timing,
-                            mo_corr,
-                            [("slice_time_corrected_file", "in_file")],
-                        ),
+                        (slc_timing, mo_corr, [("slice_time_corrected_file", "in_file")],),
                         (mo_corr, outputnode, [("out_file", "functional_preproc")]),
                         (mo_corr, outputnode, [("par_file", "par_file")]),
                         (mo_corr, outputnode, [("mean_img", "mean_vol")]),
                     ]
                 )
+                # fmt:on
             else:
                 mean = pe.Node(interface=fsl.MeanImage(), name="mean")
+                # fmt:off
                 flow.connect(
                     [
-                        (
-                            slc_timing,
-                            outputnode,
-                            [("slice_time_corrected_file", "functional_preproc")],
-                        ),
+                        (slc_timing, outputnode, [("slice_time_corrected_file", "functional_preproc")],),
                         (slc_timing, mean, [("slice_time_corrected_file", "in_file")]),
                         (mean, outputnode, [("out_file", "mean_vol")]),
                     ]
                 )
+                # fmt:on
         else:
             if self.config.motion_correction:
+                # fmt:off
                 flow.connect(
                     [
                         (despiking_output, mo_corr, [("despiking_output", "in_file")]),
-                        (mo_corr, outputnode, [("out_file", "functional_preproc")]),
-                        (mo_corr, outputnode, [("par_file", "par_file")]),
-                        (mo_corr, outputnode, [("mean_img", "mean_vol")]),
+                        (mo_corr, outputnode, [("out_file", "functional_preproc"),
+                                               ("par_file", "par_file"),
+                                               ("mean_img", "mean_vol")]),
                     ]
                 )
+                # fmt:on
             else:
                 mean = pe.Node(interface=fsl.MeanImage(), name="mean")
+                # fmt:off
                 flow.connect(
                     [
-                        (
-                            despiking_output,
-                            outputnode,
-                            [("despiking_output", "functional_preproc")],
-                        ),
-                        (inputnode, mean, [("functional", "in_file")]),
+                        (despiking_output, outputnode, [("despiking_output", "functional_preproc")]),
+                        (despiking_output, mean, [("despiking_output", "in_file")]),
                         (mean, outputnode, [("out_file", "mean_vol")]),
                     ]
                 )
+                # fmt:on
 
     def define_inspect_outputs(self):
         """Update the `inspect_outputs` class attribute.

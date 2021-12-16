@@ -20,7 +20,6 @@ import glob
 
 from pyface.api import ImageResource
 from traitsui.qt4.extra.qt_view import QtView
-from traitsui.tabular_adapter import TabularAdapter
 from traitsui.api import *
 from traits.api import *
 
@@ -30,9 +29,8 @@ import warnings
 
 # Own imports
 import cmp.bidsappmanager.project as project
-from cmp.project import CMP_Project_Info
+from cmp.project import CMP_Project_Info, __cmp_directory__, __freesurfer_directory__
 from cmp.info import __version__
-
 from cmtklib.util import (
     return_button_style_sheet,
     BColors,
@@ -1182,13 +1180,17 @@ class CMP_BIDSAppWindow(HasTraits):
         self.dmri_config = dmri_config
         self.fmri_config = fmri_config
 
-        if "FREESURFER_HOME" in os.environ:
-            self.fs_license = os.path.join(os.environ["FREESURFER_HOME"], "license.txt")
+        if 'FREESURFER_HOME' in os.environ:
+            self.fs_license = os.path.join(
+                os.environ['FREESURFER_HOME'], 'license.txt')
+        elif os.path.isfile(os.path.join(bids_root, 'code', 'license.txt')):
+            self.fs_license = os.path.join(bids_root, 'code', 'license.txt')
         else:
-            print_error("  .. ERROR: Environment variable $FREESURFER_HOME not found")
-            self.fs_license = ""
-            print_warning("Freesurfer license unset ({})".format(self.fs_license))
-
+            print_error('.. ERROR: Environment variable $FREESURFER_HOME not found and no Freesurfer license file '
+                        'found in local code-folder ')
+            self.fs_license = ''
+            print_warning('Freesurfer license unset ({})'.format(self.fs_license))
+            
         self.datalad_is_available = project.is_tool("datalad")
 
         self.on_trait_change(self.update_run_dmri_pipeline, "run_dmri_pipeline")
@@ -1275,10 +1277,10 @@ class CMP_BIDSAppWindow(HasTraits):
             print_error("Error: BIDS root invalid!")
             self.settings_checked = False
 
-        if os.path.exists(os.path.join(self.output_dir, "cmp")):
+        if os.path.exists(os.path.join(self.output_dir, __cmp_directory__)):
             print(f"* Output directory (existing) : {self.output_dir}")
         else:
-            os.makedirs(os.path.join(self.output_dir, "cmp"))
+            os.makedirs(os.path.join(self.output_dir, __cmp_directory__))
             print_warning(f"Output directory (created) : {self.output_dir}")
 
         if len(self.list_of_subjects_to_be_processed) > 0:
@@ -1791,7 +1793,7 @@ class CMP_BIDSAppWindow(HasTraits):
                         "sub-{}/ses-*/anat/sub-{}*_T1w.*".format(label, label)
                     )
                     datalad_get_list.append(
-                        "derivatives/freesurfer/sub-{}*/*".format(label)
+                        "derivatives/{}/sub-{}*/*".format(__freesurfer_directory__, label)
                     )
                     if self.run_dmri_pipeline:
                         datalad_get_list.append(
@@ -1807,7 +1809,7 @@ class CMP_BIDSAppWindow(HasTraits):
                         "sub-{}/anat/sub-{}*_T1w.*".format(label, label)
                     )
                     datalad_get_list.append(
-                        "derivatives/freesurfer/sub-{}/*".format(label)
+                        "derivatives/{}/sub-{}/*".format(__freesurfer_directory__, label)
                     )
                     if self.run_dmri_pipeline:
                         datalad_get_list.append(
@@ -2365,7 +2367,7 @@ class CMP_InspectorWindow(HasTraits):
                 self.project_info.anat_config_file = os.path.join(
                     self.project_info.base_directory,
                     "derivatives",
-                    "cmp",
+                    __cmp_directory__,
                     "{}".format(self.project_info.subject),
                     "{}".format(self.project_info.subject_session),
                     "{}_{}_anatomical_config.json".format(
@@ -2384,7 +2386,7 @@ class CMP_InspectorWindow(HasTraits):
                     self.project_info.dmri_config_file = os.path.join(
                         self.project_info.base_directory,
                         "derivatives",
-                        "cmp",
+                        __cmp_directory__,
                         "{}".format(self.project_info.subject),
                         "{}".format(self.project_info.subject_session),
                         "{}_{}_diffusion_config.json".format(
@@ -2409,7 +2411,7 @@ class CMP_InspectorWindow(HasTraits):
                     self.project_info.fmri_config_file = os.path.join(
                         self.project_info.base_directory,
                         "derivatives",
-                        "cmp",
+                        __cmp_directory__,
                         "{}".format(self.project_info.subject),
                         "{}".format(self.project_info.subject_session),
                         "{}_{}_fMRI_config.json".format(
@@ -2447,7 +2449,7 @@ class CMP_InspectorWindow(HasTraits):
                     ].config.freesurfer_subject_id = os.path.join(
                         self.project_info.base_directory,
                         "derivatives",
-                        "freesurfer",
+                        __freesurfer_directory__,
                         "{}_{}".format(
                             self.project_info.subject, self.project_info.subject_session
                         ),
@@ -2457,7 +2459,7 @@ class CMP_InspectorWindow(HasTraits):
                 self.project_info.anat_config_file = os.path.join(
                     self.project_info.base_directory,
                     "derivatives",
-                    "cmp",
+                    __cmp_directory__,
                     "{}".format(self.project_info.subject),
                     "{}_anatomical_config.json".format(self.project_info.subject),
                 )
@@ -2472,7 +2474,7 @@ class CMP_InspectorWindow(HasTraits):
                     self.project_info.dmri_config_file = os.path.join(
                         self.project_info.base_directory,
                         "derivatives",
-                        "cmp",
+                        __cmp_directory__,
                         "{}".format(self.project_info.subject),
                         "{}_diffusion_config.json".format(self.project_info.subject),
                     )
@@ -2493,7 +2495,7 @@ class CMP_InspectorWindow(HasTraits):
                     self.project_info.fmri_config_file = os.path.join(
                         self.project_info.base_directory,
                         "derivatives",
-                        "cmp",
+                        __cmp_directory__,
                         "{}".format(self.project_info.subject),
                         "{}_fMRI_config.json".format(self.project_info.subject),
                     )
@@ -2517,7 +2519,7 @@ class CMP_InspectorWindow(HasTraits):
                     ].config.freesurfer_subjects_dir = os.path.join(
                         self.project_info.base_directory,
                         "derivatives",
-                        "freesurfer",
+                        __freesurfer_directory__,
                         "{}".format(self.project_info.subject),
                     )
 

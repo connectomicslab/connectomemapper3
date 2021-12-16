@@ -16,6 +16,7 @@ from nipype import config, logging
 from nipype.interfaces.utility import Merge
 
 # Own imports
+from cmtklib.bids.io import __cmp_directory__, __nipype_directory__
 from cmp.pipelines.common import *
 from cmp.stages.connectome.connectome import ConnectomeStage
 from cmp.stages.diffusion.diffusion import DiffusionStage
@@ -86,6 +87,8 @@ class DiffusionPipeline(Pipeline):
     derivatives_directory = Directory
     ordered_stage_list = ["Preprocessing", "Registration", "Diffusion", "Connectome"]
     parcellation_scheme = Str
+    custom_atlas_name = Str
+    custom_atlas_res = Str
     atlas_info = Dict()
     global_conf = Global_Configuration()
     config_file = Str
@@ -145,6 +148,13 @@ class DiffusionPipeline(Pipeline):
         self.subject = project_info.subject
         self.diffusion_imaging_model = project_info.diffusion_imaging_model
 
+        if self.stages["Diffusion"].config.tracking_processing_tool == "Dipy":
+            self.stages["Preprocessing"].config.act_tracking = self.stages["Diffusion"].config.dipy_tracking_config.use_act
+            self.stages["Preprocessing"].config.gmwmi_seeding = False
+        elif self.stages["Diffusion"].config.tracking_processing_tool == "MRtrix":
+            self.stages["Preprocessing"].config.act_tracking = self.stages["Diffusion"].config.mrtrix_tracking_config.use_act
+            self.stages["Preprocessing"].config.gmwmi_seeding = self.stages["Diffusion"].config.mrtrix_tracking_config.seed_from_gmwmi
+
         self.stages["Connectome"].config.on_trait_change(
             self.update_vizualization_layout, "circular_layout"
         )
@@ -155,7 +165,19 @@ class DiffusionPipeline(Pipeline):
             self.update_outputs_recon, "recon_processing_tool"
         )
         self.stages["Diffusion"].config.on_trait_change(
-            self.update_outputs_tracking, "tracking_processing_tool"
+            self.update_tracking_tool, "tracking_processing_tool"
+        )
+        self.stages["Diffusion"].config.mrtrix_tracking_config.on_trait_change(
+            self.update_preprocessing_act, "use_act"
+        )
+        self.stages["Diffusion"].config.mrtrix_tracking_config.on_trait_change(
+            self.update_preprocessing_gmwmi, "seed_from_gmwmi"
+        )
+        self.stages["Diffusion"].config.dipy_tracking_config.on_trait_change(
+            self.update_preprocessing_act, "use_act"
+        )
+        self.stages["Diffusion"].config.on_trait_change(
+            self.update_outputs_recon, "recon_processing_tool"
         )
         # self.anat_flow = anat_flow
 
@@ -200,6 +222,41 @@ class DiffusionPipeline(Pipeline):
         """
         self.stages["Connectome"].define_inspect_outputs()
         self.stages["Connectome"].config.subject = self.subject
+
+    def update_tracking_tool(self, new):
+        """Update ``self.stages["Preprocessing"].config.tracking_tool`` when ``tracking_processing_tool`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value.
+        """
+        self.stages["Preprocessing"].config.tracking_tool = new
+        if self.stages["Preprocessing"].config.tracking_tool == 'Dipy':
+            self.stages["Preprocessing"].config.gmwmi_seeding = False
+
+    def update_preprocessing_act(self, new):
+        """Update ``self.stages["Preprocessing"].config.act_tracking`` when ``use_act`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value.
+        """
+        self.stages["Preprocessing"].config.act_tracking = new
+        if (not self.stages["Preprocessing"].config.act_tracking or
+                self.stages["Preprocessing"].config.tracking_tool == 'Dipy'):
+            self.stages["Preprocessing"].config.gmwmi_seeding = False
+
+    def update_preprocessing_gmwmi(self, new):
+        """Update ``self.stages["Preprocessing"].config.gmwmi_seeding`` when ``seed_from_gmwmi`` is updated.
+
+        Parameters
+        ----------
+        new : string
+            New value.
+        """
+        self.stages["Preprocessing"].config.gmwmi_seeding = new
 
     def _subject_changed(self, new):
         """Update subject in the connectome stage configuration when ``subject`` is updated.
@@ -288,9 +345,9 @@ class DiffusionPipeline(Pipeline):
             The output filepath or None if no file was found
         """
         if session is None:
-            files = layout.get(subject=subject, suffix=suffix, extensions=extensions)
+            files = layout.get(subject=subject, suffix=suffix, extension=extensions)
         else:
-            files = layout.get(subject=subject, suffix=suffix, extensions=extensions, session=session)
+            files = layout.get(subject=subject, suffix=suffix, extension=extensions, session=session)
 
         if len(files) > 0:
             out_file = os.path.join(files[0].dirname, files[0].filename)
@@ -425,8 +482,8 @@ class DiffusionPipeline(Pipeline):
             if os.path.isfile(dwi_file):
                 diffusion_available = True
 
-        except Exception:
-            print("Invalid BIDS dataset. Please see documentation for more details.")
+        except Exception as e:
+            print(f"Invalid BIDS dataset.\n\n\t{e}\n\nPlease see documentation for more details.")
             return
 
         if os.path.isfile(json_file):
@@ -446,21 +503,21 @@ class DiffusionPipeline(Pipeline):
                 if self.global_conf.subject_session == "":
                     out_dwi_file = os.path.join(
                         self.output_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         "dwi",
                         subject + "_desc-cmp_dwi.nii.gz",
                     )
                     out_bval_file = os.path.join(
                         self.output_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         "dwi",
                         subject + "_desc-cmp_dwi.bval",
                     )
                     out_bvec_file = os.path.join(
                         self.output_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         "dwi",
                         subject + "_desc-cmp_dwi.bvec",
@@ -468,7 +525,7 @@ class DiffusionPipeline(Pipeline):
                 else:
                     out_dwi_file = os.path.join(
                         self.output_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",
@@ -476,7 +533,7 @@ class DiffusionPipeline(Pipeline):
                     )
                     out_bval_file = os.path.join(
                         self.output_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",
@@ -484,7 +541,7 @@ class DiffusionPipeline(Pipeline):
                     )
                     out_bvec_file = os.path.join(
                         self.output_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",
@@ -506,7 +563,7 @@ class DiffusionPipeline(Pipeline):
                     if self.global_conf.subject_session == "":
                         out_json_file = os.path.join(
                             self.output_directory,
-                            "cmp",
+                            __cmp_directory__,
                             self.subject,
                             "dwi",
                             self.subject + "_desc-cmp_dwi.json",
@@ -514,7 +571,7 @@ class DiffusionPipeline(Pipeline):
                     else:
                         out_json_file = os.path.join(
                             self.output_directory,
-                            "cmp",
+                            __cmp_directory__,
                             self.subject,
                             self.global_conf.subject_session,
                             "dwi",
@@ -576,7 +633,7 @@ class DiffusionPipeline(Pipeline):
             )
 
         return valid_inputs
-    
+
     def create_field_template_dict(self, bids_atlas_label):
         """Create the dictionary of input field template given to Nipype DataGrabber`
 
@@ -591,6 +648,33 @@ class DiffusionPipeline(Pipeline):
             Output dictionary of template input formats given to Nipype DataGrabber
         """
         if self.parcellation_scheme == "NativeFreesurfer":
+            # fmt:off
+            field_template = dict(
+                diffusion="dwi/" + self.subject + "_desc-cmp_dwi.nii.gz",
+                bvecs="dwi/" + self.subject + "_desc-cmp_dwi.bvec",
+                bvals="dwi/" + self.subject + "_desc-cmp_dwi.bval",
+                T1="anat/" + self.subject + "_desc-head_T1w.nii.gz",
+                aseg="anat/" + self.subject + "_desc-aseg_dseg.nii.gz",
+                aparc_aseg="anat/" + self.subject + "_desc-aparcaseg_dseg.nii.gz",
+                brain="anat/" + self.subject + "_desc-brain_T1w.nii.gz",
+                brain_mask="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                wm_mask_file="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                wm_eroded="anat/" + self.subject + "_label-WM_dseg.nii.gz",
+                brain_eroded="anat/" + self.subject + "_desc-brain_mask.nii.gz",
+                csf_eroded="anat/" + self.subject + "_label-CSF_dseg.nii.gz",
+                roi_volume_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_dseg.nii.gz",
+                roi_graphml_s1="anat/" + self.subject + "_atlas-" + bids_atlas_label + "_dseg.graphml",
+                roi_volume_s2="anat/irrelevant.nii.gz",
+                roi_graphml_s2="anat/irrelevant.graphml",
+                roi_volume_s3="anat/irrelevant.nii.gz",
+                roi_graphml_s3="anat/irrelevant.graphml",
+                roi_volume_s4="anat/irrelevant.nii.gz",
+                roi_graphml_s4="anat/irrelevant.graphml",
+                roi_volume_s5="anat/irrelevant.nii.gz",
+                roi_graphml_s5="anat/irrelevant.graphml",
+            )
+            # fmt:on
+        elif self.parcellation_scheme == "Custom":
             # fmt:off
             field_template = dict(
                 diffusion="dwi/" + self.subject + "_desc-cmp_dwi.nii.gz",
@@ -785,24 +869,42 @@ class DiffusionPipeline(Pipeline):
         ]
         # fmt:on
 
-        for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+        if self.parcellation_scheme != "Custom":
+            for scale in ['scale1', 'scale2', 'scale3', 'scale4', 'scale5']:
+                # fmt:off
+                sinker.inputs.substitutions += [
+                    (
+                        f'ROIv_HR_th_{scale}_out_warped.nii.gz',
+                        f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    ),
+                    (
+                        f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_out_warped.nii.gz',
+                        f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    ),
+                    (
+                        f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_out_flirt.nii.gz',
+                        f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    ),
+                    (
+                        f'connectome_{scale}',
+                        f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_conndata-network_connectivity'),
+                ]
+                # fmt:on
+        else:
             # fmt:off
+            bids_atlas_name = bids_atlas_label if "res" not in bids_atlas_label else bids_atlas_label.split('_')[0]
             sinker.inputs.substitutions += [
                 (
-                    f'ROIv_HR_th_{scale}_out_warped.nii.gz',
-                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    f'{self.subject}_atlas-{bids_atlas_label}_dseg_out_warped.nii.gz',
+                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_dseg.nii.gz'
                 ),
                 (
-                    f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_out_warped.nii.gz',
-                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
+                    f'{self.subject}_atlas-{bids_atlas_label}_dseg_out_flirt.nii.gz',
+                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_dseg.nii.gz'
                 ),
                 (
-                    f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_dseg_out_flirt.nii.gz',
-                    f'{self.subject}_space-DWI_atlas-{bids_atlas_label}_res-{scale}_dseg.nii.gz'
-                ),
-                (
-                    f'connectome_{scale}',
-                    f'{self.subject}_atlas-{bids_atlas_label}_res-{scale}_conndata-network_connectivity'),
+                    f'connectome_{bids_atlas_name}',
+                    f'{self.subject}_atlas-{bids_atlas_label}_conndata-network_connectivity'),
             ]
             # fmt:on
 
@@ -854,6 +956,10 @@ class DiffusionPipeline(Pipeline):
             bids_atlas_label = "L2018"
         elif self.parcellation_scheme == "NativeFreesurfer":
             bids_atlas_label = "Desikan"
+        elif self.parcellation_scheme == "Custom":
+            bids_atlas_label = self.custom_atlas_name
+            if self.custom_atlas_res is not None and self.custom_atlas_res != "":
+                bids_atlas_label += f'_res-{self.custom_atlas_res}'
 
         # Clear previous outputs
         self.clear_stages_outputs()
@@ -1105,21 +1211,21 @@ class DiffusionPipeline(Pipeline):
 
         if self.global_conf.subject_session == "":
             cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, "cmp", self.subject
+                self.output_directory, __cmp_directory__, self.subject
             )
             nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, "nipype", self.subject
+                self.output_directory, __nipype_directory__, self.subject
             )
         else:
             cmp_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                "cmp",
+                __cmp_directory__,
                 self.subject,
                 self.global_conf.subject_session,
             )
             nipype_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                "nipype",
+                __nipype_directory__,
                 self.subject,
                 self.global_conf.subject_session,
             )
@@ -1144,7 +1250,7 @@ class DiffusionPipeline(Pipeline):
 
         if os.path.isfile(log_file):
             os.unlink(log_file)
-    
+
         config.update_config(
             {
                 "logging": {

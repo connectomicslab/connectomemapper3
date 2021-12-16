@@ -20,6 +20,9 @@ from nipype import config, logging
 from traits.api import *
 
 # Own import
+from cmtklib.bids.io import (
+    __cmp_directory__, __nipype_directory__, __freesurfer_directory__
+)
 import cmp.pipelines.common as cmp_common
 from cmp.stages.segmentation.segmentation import SegmentationStage
 from cmp.stages.parcellation.parcellation import ParcellationStage
@@ -75,7 +78,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
     input_folders = ["anat"]
     process_type = Str
     diffusion_imaging_model = Str
-    parcellation_scheme = Str("Lausanne2008")
+    parcellation_scheme = Str("Lausanne2018")
     atlas_info = Dict()
     subject_directory = Directory
     derivatives_directory = Directory
@@ -98,7 +101,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         cmp.project.CMP_Project_Info
         """
         self.global_conf.subjects = project_info.subjects
-        self.global_conf.subject = self.subject
+        self.global_conf.subject = project_info.subject
 
         if len(project_info.subject_sessions) > 0:
             self.global_conf.subject_session = project_info.subject_session
@@ -107,13 +110,11 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 project_info.subject,
                 project_info.subject_session,
             )
-            subject_id = "_".join((self.subject, self.global_conf.subject_session))
+            subject_id = "_".join(( self.global_conf.subject, self.global_conf.subject_session))
         else:
             self.global_conf.subject_session = ""
-            self.subject_directory = os.path.join(
-                project_info.base_directory, project_info.subject
-            )
-            subject_id = self.subject
+            self.subject_directory = os.path.join( project_info.base_directory, self.global_conf.subject)
+            subject_id =  self.global_conf.subject
 
         self.derivatives_directory = os.path.abspath(project_info.output_directory)
         self.output_directory = os.path.abspath(project_info.output_directory)
@@ -138,20 +139,41 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         self.subject = project_info.subject
 
         self.stages["Segmentation"].config.freesurfer_subjects_dir = os.path.join(
-            self.output_directory, "freesurfer"
+            self.output_directory, __freesurfer_directory__
         )
         self.stages["Segmentation"].config.freesurfer_subject_id = os.path.join(
-            self.output_directory, "freesurfer", subject_id
+            self.output_directory, __freesurfer_directory__, subject_id
         )
-        self.stages["Segmentation"].config.on_trait_change(
-            self.update_parcellation, "seg_tool"
-        )
+
         self.stages["Parcellation"].config.on_trait_change(
-            self.update_segmentation, "parcellation_scheme"
+             self._update_parcellation_scheme, "parcellation_scheme"
         )
-        self.stages["Parcellation"].config.on_trait_change(
-            self.update_parcellation_scheme, "parcellation_scheme"
-        )
+
+    def _update_parcellation_scheme(self):
+        """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
+        self.parcellation_scheme = self.stages["Parcellation"].config.parcellation_scheme
+        if self.parcellation_scheme != "Custom":
+            self.atlas_info = self.stages["Parcellation"].config.atlas_info
+        else:
+            self.atlas_info = {
+                f'{self.stages["Parcellation"].config.custom_parcellation.atlas}': {
+                    "number_of_regions": self.stages["Parcellation"].config.custom_parcellation.get_nb_of_regions(
+                        bids_dir=self.base_directory,
+                        subject=self.stages["Parcellation"].bids_subject_label,
+                        session=(self.stages["Parcellation"].bids_session_label
+                                 if self.stages["Parcellation"].bids_session_label is not None and self.stages["Parcellation"].bids_session_label != ""
+                                 else None)
+                    ),
+                    "node_information_graphml": self.stages["Parcellation"].config.custom_parcellation.get_filename_path(
+                        base_dir=os.path.join(self.output_directory, __cmp_directory__),
+                        subject=self.stages["Parcellation"].bids_subject_label,
+                        session=(self.stages["Parcellation"].bids_session_label
+                                 if self.stages["Parcellation"].bids_session_label is not None and self.stages["Parcellation"].bids_session_label != ""
+                                 else None)
+                    ) + '.graphml'
+                }
+            }
+            print(f' .. DEBUG : Updated custom parcellation atlas_info = {self.atlas_info}')
 
     def check_config(self):
         """Check if custom white matter mask and custom atlas files specified in the configuration exist.
@@ -183,29 +205,6 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 )
         return message
 
-    def update_parcellation_scheme(self):
-        """Updates ``parcellation_scheme`` and ``atlas_info`` when ``parcellation_scheme`` is updated."""
-        self.parcellation_scheme = self.stages[
-            "Parcellation"
-        ].config.parcellation_scheme
-        self.atlas_info = self.stages["Parcellation"].config.atlas_info
-
-    def update_parcellation(self):
-        """Update self.stages['Parcellation'].config.parcellation_scheme when ``seg_tool`` is updated."""
-        if self.stages["Segmentation"].config.seg_tool == "Custom segmentation":
-            self.stages["Parcellation"].config.parcellation_scheme = "Custom"
-        else:
-            self.stages["Parcellation"].config.parcellation_scheme = self.stages[
-                "Parcellation"
-            ].config.pre_custom
-
-    def update_segmentation(self):
-        """Update self.stages['Segmentation'].config.seg_tool when ``parcellation_scheme`` is updated."""
-        if self.stages["Parcellation"].config.parcellation_scheme == "Custom":
-            self.stages["Segmentation"].config.seg_tool = "Custom segmentation"
-        else:
-            self.stages["Segmentation"].config.seg_tool = "Freesurfer"
-
     def define_custom_mapping(self, custom_last_stage):
         """Define the pipeline to be executed until a specific stages.
 
@@ -228,7 +227,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 break
 
     def check_input(self, layout, gui=True):
-        """Check if input of the anatomical pipeline are available.
+        """Check if inputs of the anatomical pipeline are available.
 
         Parameters
         ----------
@@ -256,33 +255,27 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         subjid = self.subject.split("-")[1]
 
         if self.global_conf.subject_session == "":
-            T1_file = os.path.join(
-                self.subject_directory, "anat", self.subject + "_T1w.nii.gz"
-            )
-            files = layout.get(subject=subjid, suffix="T1w", extensions=".nii.gz")
+            files = layout.get(subject=subjid, suffix="T1w", extension=".nii.gz")
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_file)
             else:
-                return
+                return False
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(
-                subject=subjid, suffix="T1w", extensions=".nii.gz", session=sessid
+                subject=subjid, suffix="T1w", extension=".nii.gz", session=sessid
             )
             if len(files) > 0:
                 T1_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_file)
             else:
-                return
+                return False
 
         print("... t1_file : %s" % T1_file)
 
         if self.global_conf.subject_session == "":
-            T1_json_file = os.path.join(
-                self.subject_directory, "anat", self.subject + "_T1w.json"
-            )
-            files = layout.get(subject=subjid, suffix="T1w", extensions=".json")
+            files = layout.get(subject=subjid, suffix="T1w", extension=".json")
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)
                 print(T1_json_file)
@@ -291,7 +284,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         else:
             sessid = self.global_conf.subject_session.split("-")[1]
             files = layout.get(
-                subject=subjid, suffix="T1w", extensions=".json", session=sessid
+                subject=subjid, suffix="T1w", extension=".json", session=sessid
             )
             if len(files) > 0:
                 T1_json_file = os.path.join(files[0].dirname, files[0].filename)
@@ -312,7 +305,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             if self.global_conf.subject_session == "":
                 out_T1_file = os.path.join(
                     self.output_directory,
-                    "cmp",
+                    __cmp_directory__,
                     self.subject,
                     "anat",
                     self.subject + "_desc-cmp_T1w.nii.gz",
@@ -320,7 +313,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             else:
                 out_T1_file = os.path.join(
                     self.output_directory,
-                    "cmp",
+                    __cmp_directory__,
                     self.subject,
                     self.global_conf.subject_session,
                     "anat",
@@ -340,7 +333,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 if self.global_conf.subject_session == "":
                     out_T1_json_file = os.path.join(
                         self.output_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         "anat",
                         self.subject + "_desc-cmp_T1w.json",
@@ -348,7 +341,7 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 else:
                     out_T1_json_file = os.path.join(
                         self.output_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "anat",
@@ -395,6 +388,166 @@ class AnatomicalPipeline(cmp_common.Pipeline):
                 "Please see documentation for more details."
             )
 
+        if self.stages["Parcellation"].config.parcellation_scheme == "Custom":
+
+            custom_parc_nii_available = True
+            custom_parc_tsv_available = True
+            custom_brainmask_available = True
+            custom_gm_mask_available = True
+            custom_wm_mask_available = True
+            custom_csf_mask_available = True
+            custom_aparcaseg_available = True
+
+            # Add custom BIDS derivatives directories to the BIDSLayout
+            custom_derivatives_dirnames = [
+                self.stages["Parcellation"].config.custom_parcellation.get_toolbox_derivatives_dir(),
+                self.stages["Segmentation"].config.custom_brainmask.get_toolbox_derivatives_dir(),
+                self.stages["Segmentation"].config.custom_gm_mask.get_toolbox_derivatives_dir(),
+                self.stages["Segmentation"].config.custom_wm_mask.get_toolbox_derivatives_dir(),
+                self.stages["Segmentation"].config.custom_csf_mask.get_toolbox_derivatives_dir(),
+                self.stages["Segmentation"].config.custom_aparcaseg.get_toolbox_derivatives_dir()
+            ]
+            # Keep only unique custom derivatives to make the BIDSLayout happy
+            custom_derivatives_dirnames = list(set(custom_derivatives_dirnames))
+            print(f"DEBUG: custom_derivatives_dirnames: {custom_derivatives_dirnames}")
+            print(f"DEBUG: layout.derivatives: {layout.derivatives}")
+            for custom_derivatives_dirname in  custom_derivatives_dirnames:
+                if custom_derivatives_dirname not in layout.derivatives:
+                    print(f"    * Add custom_derivatives_dirname: {custom_derivatives_dirname}")
+                    layout.add_derivatives(os.path.join(self.base_directory, 'derivatives', custom_derivatives_dirname))
+
+            files = layout.get(
+                subject=subjid,
+                session=(self.global_conf.subject_session.split("-")[1]
+                         if self.global_conf.subject_session != ""
+                         else None),
+                suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
+                extension=".nii.gz",
+                atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
+                res=self.stages["Parcellation"].config.custom_parcellation.res,
+            )
+            if len(files) > 0:
+                custom_parc_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_parc_file = "NotFound"
+                custom_parc_nii_available = False
+            print("... custom_parc_file : %s" % custom_parc_file)
+
+            files = layout.get(
+                subject=subjid,
+                session=(self.global_conf.subject_session.split("-")[1]
+                         if self.global_conf.subject_session != ""
+                         else None),
+                suffix=self.stages["Parcellation"].config.custom_parcellation.suffix,
+                extension=".tsv",
+                atlas=self.stages["Parcellation"].config.custom_parcellation.atlas,
+                res=self.stages["Parcellation"].config.custom_parcellation.res,
+            )
+            if len(files) > 0:
+                custom_parc_tsv_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_parc_tsv_file = "NotFound"
+                custom_parc_tsv_available = False
+            print("... custom_parc_tsv_file : %s" % custom_parc_tsv_file)
+
+            if not custom_parc_nii_available and not custom_parc_tsv_available:
+                valid_inputs = False
+
+            files = layout.get(
+                    subject=subjid,
+                    session=(self.global_conf.subject_session.split("-")[1]
+                             if self.global_conf.subject_session != ""
+                             else None),
+                    suffix=self.stages["Segmentation"].config.custom_brainmask.suffix,
+                    extension=".nii.gz",
+                    desc=self.stages["Segmentation"].config.custom_brainmask.desc,
+            )
+            if len(files) > 0:
+                custom_brainmask_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_brainmask_file = "NotFound"
+                custom_brainmask_available = False
+            print("... custom_brainmask_file : %s" % custom_brainmask_file)
+
+            if not custom_brainmask_available:
+                valid_inputs = False
+
+            files = layout.get(
+                subject=subjid,
+                session=(self.global_conf.subject_session.split("-")[1]
+                         if self.global_conf.subject_session != ""
+                         else None),
+                suffix=self.stages["Segmentation"].config.custom_gm_mask.suffix,
+                extension=".nii.gz",
+                label=self.stages["Segmentation"].config.custom_gm_mask.label,
+            )
+            if len(files) > 0:
+                custom_gm_mask_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_gm_mask_file = "NotFound"
+                custom_gm_mask_available = False
+            print("... custom_gm_mask_file : %s" % custom_gm_mask_file)
+
+            if not custom_gm_mask_available:
+                valid_inputs = False
+
+            files = layout.get(
+                subject=subjid,
+                session=(self.global_conf.subject_session.split("-")[1]
+                         if self.global_conf.subject_session != ""
+                         else None),
+                suffix=self.stages["Segmentation"].config.custom_wm_mask.suffix,
+                extension=".nii.gz",
+                label=self.stages["Segmentation"].config.custom_wm_mask.label,
+            )
+            if len(files) > 0:
+                custom_wm_mask_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_wm_mask_file = "NotFound"
+                custom_wm_mask_available = False
+            print("... custom_wm_mask_file : %s" % custom_wm_mask_file)
+
+            if not custom_wm_mask_available:
+                valid_inputs = False
+
+            files = layout.get(
+                subject=subjid,
+                session=(self.global_conf.subject_session.split("-")[1]
+                         if self.global_conf.subject_session != ""
+                         else None),
+                suffix=self.stages["Segmentation"].config.custom_csf_mask.suffix,
+                extension=".nii.gz",
+                label=self.stages["Segmentation"].config.custom_csf_mask.label,
+            )
+            if len(files) > 0:
+                custom_csf_mask_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_csf_mask_file = "NotFound"
+                custom_csf_mask_available = False
+            print("... custom_csf_mask_file : %s" % custom_csf_mask_file)
+
+            if not custom_csf_mask_available:
+                valid_inputs = False
+
+            files = layout.get(
+                subject=subjid,
+                session=(self.global_conf.subject_session.split("-")[1]
+                         if self.global_conf.subject_session != ""
+                         else None),
+                suffix=self.stages["Segmentation"].config.custom_aparcaseg.suffix,
+                extension=".nii.gz",
+                desc=self.stages["Segmentation"].config.custom_aparcaseg.desc,
+            )
+            if len(files) > 0:
+                custom_aparcaseg_file = os.path.join(files[0].dirname, files[0].filename)
+            else:
+                custom_aparcaseg_file = "NotFound"
+                custom_aparcaseg_available = False
+            print("... custom_aparcaseg_file : %s" % custom_aparcaseg_file)
+
+            if not custom_aparcaseg_available:
+                valid_inputs = False
+
         return valid_inputs
 
     def check_output(self):
@@ -421,24 +574,20 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         if self.global_conf.subject_session == "":
             anat_deriv_subject_directory = os.path.join(
-                self.output_directory, "cmp", self.subject, "anat"
+                self.output_directory, __cmp_directory__, self.subject, "anat"
             )
         else:
             if self.global_conf.subject_session not in subject:
                 anat_deriv_subject_directory = os.path.join(
-                    self.output_directory,
-                    "cmp",
-                    subject,
-                    self.global_conf.subject_session,
+                    self.output_directory, __cmp_directory__,
+                    subject, self.global_conf.subject_session,
                     "anat",
                 )
                 subject = "_".join((subject, self.global_conf.subject_session))
             else:
                 anat_deriv_subject_directory = os.path.join(
-                    self.output_directory,
-                    "cmp",
-                    subject.split("_")[0],
-                    self.global_conf.subject_session,
+                    self.output_directory, __cmp_directory__,
+                    subject.split("_")[0], self.global_conf.subject_session,
                     "anat",
                 )
 
@@ -461,19 +610,33 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             bids_atlas_label = "L2018"
         elif self.parcellation_scheme == "NativeFreesurfer":
             bids_atlas_label = "Desikan"
+        elif self.parcellation_scheme == "Custom":
+            bids_atlas_label = self.stages["Parcellation"].config.custom_parcellation.atlas
 
-        if bids_atlas_label == "Desikan":
-            roiv_files = glob.glob(
-                os.path.join(
-                    anat_deriv_subject_directory,
-                    subject + "_atlas-" + bids_atlas_label + "_dseg.nii.gz",
+        if self.parcellation_scheme != "Custom":
+            if bids_atlas_label == "Desikan":
+                roiv_files = glob.glob(
+                    os.path.join(
+                        anat_deriv_subject_directory,
+                        subject + "_atlas-" + bids_atlas_label + "_dseg.nii.gz",
+                    )
                 )
-            )
+            else:
+                roiv_files = glob.glob(
+                    os.path.join(
+                        anat_deriv_subject_directory,
+                        subject + "_atlas-" + bids_atlas_label + "_res-scale*_dseg.nii.gz",
+                    )
+                )
         else:
+            roiv_filename = subject + "_atlas-" + bids_atlas_label
+            if self.stages["Parcellation"].config.custom_parcellation.res:
+                roiv_filename += f'_res-{self.stages["Parcellation"].config.custom_parcellation.res}'
+            roiv_filename += "_dseg.nii.gz"
             roiv_files = glob.glob(
                 os.path.join(
                     anat_deriv_subject_directory,
-                    subject + "_atlas-" + bids_atlas_label + "_res-scale*_dseg.nii.gz",
+                    roiv_filename
                 )
             )
 
@@ -582,116 +745,126 @@ class AnatomicalPipeline(cmp_common.Pipeline):
         sinker.inputs.base_directory = os.path.abspath(base_directory)
         # sinker.inputs.parametrization = True  # Store output in parametrized structure (for MapNode)
 
-        sinker.inputs.substitutions = [
-            ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
-            ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
-            ("brain_mask.nii.gz", self.subject + "_desc-brain_mask.nii.gz"),
-            ("aseg.nii.gz", self.subject + "_desc-aseg_dseg.nii.gz"),
-            ("csf_mask.nii.gz", self.subject + "_label-CSF_dseg.nii.gz"),
-            ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
-            ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-            ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
-            ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
-            ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
-            ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
-            ("_createBIDSLabelIndexMappingFile0/", ""),
-            ("_createBIDSLabelIndexMappingFile1/", ""),
-            ("_createBIDSLabelIndexMappingFile2/", ""),
-            ("_createBIDSLabelIndexMappingFile3/", ""),
-            ("_createBIDSLabelIndexMappingFile4/", ""),
-        ]
-        # Dataname substitutions in order to comply with BIDS derivatives specifications
-        if self.parcellation_scheme == "Lausanne2008":
+        if self.stages["Parcellation"].config.parcellation_scheme == "Custom":
+            custom_atlas = self.stages["Parcellation"].config.custom_parcellation.atlas
+            custom_atlas_res = self.stages["Parcellation"].config.custom_parcellation.res
+            if custom_atlas_res is not None and custom_atlas_res != "":
+                sinker.inputs.substitutions = [
+                    ("roi_stats_custom.tsv", f'{self.subject}_atlas-{custom_atlas}_res-{custom_atlas_res}_stats.tsv')
+                ]
+            else:
+                sinker.inputs.substitutions = [
+                    ("roi_stats_custom.tsv", f'{self.subject}_atlas-{custom_atlas}_stats.tsv')
+                ]
+            sinker.inputs.substitutions.append(
+                (f'{self.subject}_desc-cmp_T1w.nii.gz', f'{self.subject}_desc-head_T1w.nii.gz')
+            )
+        else:
             # fmt: off
-            scale_mapping = {
-                "scale1": "83",
-                "scale2": "150",
-                "scale3": "258",
-                "scale4": "500",
-                "scale5": "1015",
-            }
-            for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
+            sinker.inputs.substitutions = [
+                ("T1.nii.gz", self.subject + "_desc-head_T1w.nii.gz"),
+                ("brain.nii.gz", self.subject + "_desc-brain_T1w.nii.gz"),
+                ("brain_mask.nii.gz", self.subject + "_desc-brain_mask.nii.gz"),
+                ("aseg.nii.gz", self.subject + "_desc-aseg_dseg.nii.gz"),
+                ("csf_mask.nii.gz", self.subject + "_label-CSF_dseg.nii.gz"),
+                ("fsmask_1mm.nii.gz", self.subject + "_label-WM_dseg.nii.gz"),
+                ("gmmask.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
+                ("T1w_class-GM.nii.gz", self.subject + "_label-GM_dseg.nii.gz"),
+                ("wm_eroded.nii.gz", self.subject + "_label-WM_desc-eroded_dseg.nii.gz"),
+                ("csf_eroded.nii.gz", self.subject + "_label-CSF_desc-eroded_dseg.nii.gz"),
+                ("brain_eroded.nii.gz", self.subject + "_label-brain_desc-eroded_dseg.nii.gz"),
+                ("_createBIDSLabelIndexMappingFile0/", ""),
+                ("_createBIDSLabelIndexMappingFile1/", ""),
+                ("_createBIDSLabelIndexMappingFile2/", ""),
+                ("_createBIDSLabelIndexMappingFile3/", ""),
+                ("_createBIDSLabelIndexMappingFile4/", ""),
+            ]
+            # fmt: on
+            # Dataname substitutions in order to comply with BIDS derivatives specifications
+            if self.parcellation_scheme == "Lausanne2008":
+                # fmt: off
+                scale_mapping = {
+                    "scale1": "83",
+                    "scale2": "150",
+                    "scale3": "258",
+                    "scale4": "500",
+                    "scale5": "1015",
+                }
+                for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
+                    sinker.inputs.substitutions.append(
+                        ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2008_{scale}.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2008_{scale}_final.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'resolution{scale_mapping[scale]}.graphml', self.subject + f'_atlas-L2008_res-{scale}_dseg.graphml')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'resolution{scale_mapping[scale]}_LUT.txt', self.subject + f'_atlas-L2008_res-{scale}_FreeSurferColorLUT.txt')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'_createBIDSLabelIndexMappingFile{i}/', '')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'resolution{scale_mapping[scale]}.tsv', self.subject + f'_atlas-L2008_res-{scale}_dseg.tsv')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
+                    )
+                # fmt: on
+            elif self.parcellation_scheme == "Lausanne2018":
+                # fmt: off
+                for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
+                    sinker.inputs.substitutions.append(
+                        ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2018_{scale}.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2018_{scale}_final.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2018_{scale}.graphml', self.subject + f'_atlas-L2018_res-{scale}_dseg.graphml')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2018_{scale}_FreeSurferColorLUT.txt', self.subject + f'_atlas-L2018_res-{scale}_FreeSurferColorLUT.txt')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'_createBIDSLabelIndexMappingFile{i}/', '')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'ROIv_Lausanne2018_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_dseg.tsv')
+                    )
+                    sinker.inputs.substitutions.append(
+                        (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_stats.tsv')
+                    )
+                # fmt: on
+            elif self.parcellation_scheme == "NativeFreesurfer":
+                # fmt: off
                 sinker.inputs.substitutions.append(
                     ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
                 )
                 sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2008_{scale}.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                    ("ROIv_HR_th_freesurferaparc.nii.gz", self.subject + "_atlas-Desikan_dseg.nii.gz")
                 )
                 sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2008_{scale}_final.nii.gz', self.subject + f'_atlas-L2008_res-{scale}_dseg.nii.gz')
+                    ("freesurferaparc.graphml", self.subject + "_atlas-Desikan_dseg.graphml")
                 )
                 sinker.inputs.substitutions.append(
-                    (f'resolution{scale_mapping[scale]}.graphml', self.subject + f'_atlas-L2008_res-{scale}_dseg.graphml')
+                    ("FreeSurferColorLUT_adapted.txt", self.subject + "_atlas-Desikan_FreeSurferColorLUT.txt")
                 )
                 sinker.inputs.substitutions.append(
-                    (f'resolution{scale_mapping[scale]}_LUT.txt', self.subject + f'_atlas-L2008_res-{scale}_FreeSurferColorLUT.txt')
+                    ("freesurferaparc.tsv", self.subject + "_atlas-Desikan_dseg.tsv")
                 )
                 sinker.inputs.substitutions.append(
-                    (f'_createBIDSLabelIndexMappingFile{i}/', '')
+                    ("roi_stats_freesurferaparc.tsv", self.subject + "_atlas-Desikan_stats.tsv")
                 )
-                sinker.inputs.substitutions.append(
-                    (f'resolution{scale_mapping[scale]}.tsv', self.subject + f'_atlas-L2008_res-{scale}_dseg.tsv')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2008_res-{scale}_stats.tsv')
-                )
-            # fmt: on
-        elif self.parcellation_scheme == "Lausanne2018":
-            # fmt: off
-            for i, scale in enumerate(['scale1', 'scale2', 'scale3', 'scale4', 'scale5']):
-                sinker.inputs.substitutions.append(
-                    ("aparc+aseg.Lausanne2018.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}_final.nii.gz', self.subject + f'_atlas-L2018_res-{scale}_dseg.nii.gz')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}.graphml', self.subject + f'_atlas-L2018_res-{scale}_dseg.graphml')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}_FreeSurferColorLUT.txt', self.subject + f'_atlas-L2018_res-{scale}_FreeSurferColorLUT.txt')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'_createBIDSLabelIndexMappingFile{i}/', '')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'ROIv_Lausanne2018_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_dseg.tsv')
-                )
-                sinker.inputs.substitutions.append(
-                    (f'roi_stats_{scale}.tsv', self.subject + f'_atlas-L2018_res-{scale}_stats.tsv')
-                )
-            # fmt: on
-        elif self.parcellation_scheme == "NativeFreesurfer":
-            # fmt: off
-            sinker.inputs.substitutions.append(
-                ("aparc+aseg.native.nii.gz", self.subject + "_desc-aparcaseg_dseg.nii.gz")
-            )
-            sinker.inputs.substitutions.append(
-                ("ROIv_HR_th_freesurferaparc.nii.gz", self.subject + "_atlas-Desikan_dseg.nii.gz")
-            )
-            sinker.inputs.substitutions.append(
-                ("freesurferaparc.graphml", self.subject + "_atlas-Desikan_dseg.graphml")
-            )
-            sinker.inputs.substitutions.append(
-                ("FreeSurferColorLUT_adapted.txt", self.subject + "_atlas-Desikan_FreeSurferColorLUT.txt")
-            )
-            sinker.inputs.substitutions.append(
-                ("freesurferaparc.tsv", self.subject + "_atlas-Desikan_dseg.tsv")
-            )
-            sinker.inputs.substitutions.append(
-                ("roi_stats_freesurferaparc.tsv", self.subject + "_atlas-Desikan_stats.tsv")
-            )
-            # fmt: on
-        elif self.parcellation_scheme == "Custom":
-            # TODO
-            # fmt: off
-            sinker.inputs.substitutions = [
-
-            ]
-            # fmt: on
+                # fmt: on
 
         return sinker
 
@@ -788,12 +961,12 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             self.stages[
                 "Segmentation"
             ].config.freesurfer_subjects_dir = os.path.join(
-                self.output_directory, "freesurfer"
+                self.output_directory, __freesurfer_directory__
             )
             self.stages[
                 "Segmentation"
             ].config.freesurfer_subject_id = os.path.join(
-                self.output_directory, "freesurfer", self.subject
+                self.output_directory, __freesurfer_directory__, self.subject
             )
 
             # fmt: off
@@ -829,15 +1002,21 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             anat_flow.connect(
                 [
                     (seg_flow, parc_flow, [("outputnode.custom_wm_mask", "inputnode.custom_wm_mask")]),
-                    (seg_flow, anat_outputnode, [("outputnode.brain_mask", "brain_mask"),
-                                                 ("outputnode.brain", "brain")]),
+                    (seg_flow, anat_outputnode, [("outputnode.brain", "brain"),
+                                                 ("outputnode.custom_brain_mask", "brain_mask"),
+                                                 ("outputnode.custom_gm_mask", "gm_mask_file"),
+                                                 ("outputnode.custom_wm_mask", "wm_mask_file"),
+                                                 ("outputnode.custom_csf_mask", "csf_mask_file"),
+                                                 ("outputnode.custom_aparcaseg", "aparc_aseg")]),
                     (anat_inputnode, anat_outputnode, [("T1", "T1")]),
-                    (parc_flow, anat_outputnode, [("outputnode.wm_mask_file", "wm_mask_file"),
-                                                  ("outputnode.parcellation_scheme", "parcellation_scheme"),
+                    (parc_flow, anat_outputnode, [("outputnode.parcellation_scheme", "parcellation_scheme"),
                                                   ("outputnode.atlas_info", "atlas_info"),
                                                   ("outputnode.roi_volumes", "roi_volumes"),
+                                                  ("outputnode.roi_colorLUTs", "roi_colorLUTs"),
+                                                  ("outputnode.roi_graphMLs", "roi_graphMLs"),
+                                                  ("outputnode.roi_TSVs", "roi_TSVs"),
+                                                  ("outputnode.roi_volumes_stats", "roi_volumes_stats"),
                                                   ("outputnode.wm_eroded", "wm_eroded"),
-                                                  ("outputnode.gm_mask_file", "gm_mask_file"),
                                                   ("outputnode.csf_eroded", "csf_eroded"),
                                                   ("outputnode.brain_eroded", "brain_eroded")])
                 ]
@@ -883,55 +1062,38 @@ class AnatomicalPipeline(cmp_common.Pipeline):
 
         if self.global_conf.subject_session == "":
             cmp_deriv_subject_directory = os.path.join(
-                self.output_directory, "cmp", self.subject
+                self.output_directory, __cmp_directory__, self.subject
             )
             nipype_deriv_subject_directory = os.path.join(
-                self.output_directory, "nipype", self.subject
+                self.output_directory, __nipype_directory__, self.subject
             )
         else:
             cmp_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                "cmp",
+                __cmp_directory__,
                 self.subject,
                 self.global_conf.subject_session,
             )
             nipype_deriv_subject_directory = os.path.join(
                 self.output_directory,
-                "nipype",
+                __nipype_directory__,
                 self.subject,
                 self.global_conf.subject_session,
             )
 
             self.subject = "_".join((self.subject, self.global_conf.subject_session))
 
-        if not os.path.exists(
-            os.path.join(nipype_deriv_subject_directory, "anatomical_pipeline")
-        ):
+        nipype_anatomical_pipeline_subject_dir = os.path.join(nipype_deriv_subject_directory, "anatomical_pipeline")
+        if not os.path.exists(nipype_anatomical_pipeline_subject_dir):
             try:
-                os.makedirs(
-                    os.path.join(nipype_deriv_subject_directory, "anatomical_pipeline")
-                )
+                os.makedirs(nipype_anatomical_pipeline_subject_dir)
             except os.error:
-                print(
-                    "%s was already existing"
-                    % os.path.join(
-                        nipype_deriv_subject_directory, "anatomical_pipeline"
-                    )
-                )
+                print("%s was already existing" % nipype_anatomical_pipeline_subject_dir)
 
         # Initialization
-        if os.path.isfile(
-            os.path.join(
-                nipype_deriv_subject_directory, "anatomical_pipeline", "pypeline.log"
-            )
-        ):
-            os.unlink(
-                os.path.join(
-                    nipype_deriv_subject_directory,
-                    "anatomical_pipeline",
-                    "pypeline.log",
-                )
-            )
+        if os.path.isfile(os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log")):
+            os.unlink(os.path.join(nipype_anatomical_pipeline_subject_dir, "pypeline.log"))
+
         config.update_config(
             {
                 "logging": {
@@ -969,6 +1131,8 @@ class AnatomicalPipeline(cmp_common.Pipeline):
             )
         else:
             anat_flow.run()
+
+        self._update_parcellation_scheme()
 
         iflogger.info("**** Processing finished ****")
 

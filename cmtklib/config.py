@@ -6,9 +6,11 @@
 
 """ Module that defines methods for handling CMP3 configuration files."""
 import os
+from pathlib import Path
 import configparser
 import json
 from collections.abc import Iterable
+from ast import literal_eval
 
 from cmp.info import __version__
 from cmtklib.util import BColors, print_warning, print_error, print_blue
@@ -89,6 +91,12 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
     """
     config_json = {}
 
+    # In the case of anatomical pipeline
+    if "segmentation_stage" in config.sections():
+        segmentation_tool = config["segmentation_stage"].get("seg_tool")
+    if "parcellation_stage" in config.sections():
+        parcellation_scheme = config["parcellation_stage"].get("parcellation_scheme")
+
     # In the case of diffusion pipeline
     if "diffusion_stage" in config.sections():
         recon_processing_tool = config["diffusion_stage"].get("recon_processing_tool")
@@ -117,6 +125,29 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
                 elif tracking_processing_tool == "MRtrix":
                     if "dipy_tracking_config" in name:
                         continue
+            if "segmentation_stage" in section:
+                if segmentation_tool == "Custom segmentation":
+                    if "custom" not in name and "seg_tool" not in name:
+                        if debug:
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
+                else:
+                    if "custom" in name:
+                        if debug:
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
+
+            if "parcellation_stage" in section:
+                if parcellation_scheme == "Custom":
+                    if "custom" not in name and "parcellation_scheme" not in name:
+                        if debug:
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
+                else:
+                    if "custom" in name:
+                        if debug:
+                            print_warning(f"  .. DEBUG: Skip parameter {section} / {name}")
+                        continue
 
             if "_editor" in name:
                 if debug:
@@ -137,11 +168,8 @@ def save_configparser_as_json(config, config_json_path, ini_mode=False, debug=Fa
 
             if ini_mode:
                 try:
-                    if not (
-                        section == "parcellation_stage"
-                        and name == "ants_precision_type"
-                    ):
-                        value = eval(value)
+                    if not(section == 'parcellation_stage' and name == 'ants_precision_type'):
+                        value = literal_eval(value)
                         if debug:
                             print_warning(f"  .. DEBUG: String {value} evaluated")
                     else:
@@ -290,7 +318,7 @@ def create_subject_configuration_from_ref(
         # print('With session : {}'.format(project.subject_session))
         subject_conf_file = os.path.join(
             subject_derivatives_dir,
-            "cmp",
+            f"cmp-{__version__}",
             project.subject,
             project.subject_session,
             "{}_{}_{}_config.json".format(
@@ -301,7 +329,7 @@ def create_subject_configuration_from_ref(
         # print('With NO session ')
         subject_conf_file = os.path.join(
             subject_derivatives_dir,
-            "cmp",
+            f"cmp-{__version__}",
             project.subject,
             "{}_{}_config.json".format(project.subject, pipeline_type),
         )
@@ -330,6 +358,9 @@ def create_subject_configuration_from_ref(
 
     config["Multi-processing"]["number_of_cores"] = multiproc_number_of_cores
 
+    subject_conf_file_dir = Path(subject_conf_file).parent
+    if not os.path.isdir(str(subject_conf_file_dir)):
+        os.makedirs(str(subject_conf_file_dir), exist_ok=True)
     with open(subject_conf_file, "w") as outfile:
         json.dump(config, outfile, indent=4)
 
@@ -381,7 +412,7 @@ def get_anat_process_detail_json(project_info, section, detail):
         config = json.load(f)
     res = None
     if detail == "atlas_info":
-        res = eval(config[section][detail])
+        res = literal_eval(config[section][detail])
     else:
         res = config[section][detail]
     return res
@@ -469,7 +500,12 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
             prop for prop in list(stage.config.traits().keys()) if "trait" not in prop
         ]  # possibly dangerous..?
         for key in stage_keys:
-            if "config" in key:  # subconfig
+            if "config" in key or key in ['custom_brainmask',
+                                          'custom_wm_mask',
+                                          'custom_gm_mask',
+                                          'custom_csf_mask',
+                                          'custom_aparcaseg',
+                                          'custom_parcellation']:  # subconfig or custom inputs
                 sub_config = getattr(stage.config, key)
                 stage_sub_keys = [
                     prop
@@ -507,7 +543,7 @@ def set_pipeline_attributes_from_config(pipeline, config, debug=False):
                                         + f"{sub_config}.{sub_key} to {conf_value}"
                                     )
                                     print_error(f"    {e}")
-                            pass
+                                pass
             else:
                 if stage.name in config.keys():
                     if key in config[stage.name].keys():
@@ -583,7 +619,12 @@ def create_configparser_from_pipeline(pipeline, debug=False):
         ]  # possibly dangerous..?
         for key in stage_keys:
             keyval = getattr(stage.config, key)
-            if "config" in key:  # subconfig
+            if "config" in key or key in ['custom_brainmask',
+                                          'custom_wm_mask',
+                                          'custom_gm_mask',
+                                          'custom_csf_mask',
+                                          'custom_aparcaseg',
+                                          'custom_parcellation']:  # subconfig or custom inputs
                 stage_sub_keys = [
                     prop for prop in list(keyval.traits().keys()) if "trait" not in prop
                 ]

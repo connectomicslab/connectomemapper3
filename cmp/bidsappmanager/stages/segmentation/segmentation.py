@@ -20,6 +20,26 @@ class SegmentationConfigUI(SegmentationConfig):
 
     Attributes
     ----------
+    custom_brainmask_group : traits.ui.VGroup
+        VGroup that displays the different parts of
+        a custom BIDS brain mask file
+
+    custom_gm_mask_group : traits.ui.VGroup
+        VGroup that displays the different parts of a
+        custom BIDS gray matter mask file
+
+    custom_wm_mask_group : traits.ui.VGroup
+        VGroup that displays the different parts of a
+        custom BIDS white matter mask file
+
+    custom_csf_mask_group : traits.ui.VGroup
+        VGroup that displays the different parts of a
+        custom BIDS CSF mask file
+
+    custom_aparcaseg_group : traits.ui.VGroup
+        VGroup that displays the different parts of a
+        custom BIDS-formatted Freesurfer's aparc+aseg file
+
     traits_view : traits.ui.View
         TraitsUI view that displays the attributes of this class, e.g.
         the parameters for the stage
@@ -28,6 +48,49 @@ class SegmentationConfigUI(SegmentationConfig):
     ---------
     cmp.stages.segmentation.segmentation.SegmentationConfig
     """
+
+    custom_brainmask_group = VGroup(
+        Item('object.custom_brainmask.toolbox_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_brainmask.desc', style='readonly', label="desc"),
+        Item('object.custom_brainmask.suffix', style='readonly', label="suffix"),
+        label="Custom brain mask",
+        show_border=True
+    )
+
+    custom_gm_mask_group = VGroup(
+        Item('object.custom_gm_mask.toolbox_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_gm_mask.desc', label="desc"),
+        Item('object.custom_gm_mask.label', label="label", style='readonly'),
+        Item('object.custom_gm_mask.suffix', label="suffix", style='readonly'),
+        label="Custom gray matter mask",
+        show_border=True
+    )
+
+    custom_wm_mask_group = VGroup(
+        Item('object.custom_wm_mask.toolbox_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_wm_mask.desc', label="desc"),
+        Item('object.custom_wm_mask.label', label="label", style='readonly'),
+        Item('object.custom_wm_mask.suffix', label="suffix", style='readonly'),
+        label="Custom white matter mask",
+        show_border=True
+    )
+
+    custom_csf_mask_group = VGroup(
+        Item('object.custom_csf_mask.toolbox_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_csf_mask.desc', label="desc"),
+        Item('object.custom_csf_mask.label', label="label", style='readonly'),
+        Item('object.custom_csf_mask.suffix', label="suffix", style='readonly'),
+        label="Custom CSF mask",
+        show_border=True
+    )
+
+    custom_aparcaseg_group = VGroup(
+        Item('object.custom_aparcaseg.toolbox_derivatives_dir', label='Derivatives directory'),
+        Item('object.custom_aparcaseg.desc', label="desc", style='readonly'),
+        Item('object.custom_aparcaseg.suffix', label="suffix", style='readonly'),
+        label="Custom Freesurfer aparc+aseg (used by MRtrix3 to build the 5TT image)",
+        show_border=True
+    )
 
     traits_view = View(
         Item("seg_tool", label="Segmentation tool"),
@@ -47,7 +110,8 @@ class SegmentationConfigUI(SegmentationConfig):
             ),
             Item(
                 "number_of_threads",
-                label="Number of threads used for multithreading in Freesurfer and ANTs",
+                label="Number of parallel threads used by Freesurfer and ANTs",
+                resizable=True
             ),
             "brain_mask_extraction_tool",
             Item(
@@ -69,13 +133,11 @@ class SegmentationConfigUI(SegmentationConfig):
             visible_when="seg_tool=='Freesurfer'",
         ),
         Group(
-            Item(
-                "custom_bids_derivatives_dir", label="Custom BIDS derivatives directory"
-            ),
-            Item(
-                "custom_bids_derivatives_json",
-                label="JSON describing custom segmentation in BIDS format",
-            ),
+            Include('custom_brainmask_group'),
+            Include('custom_gm_mask_group'),
+            Include('custom_wm_mask_group'),
+            Include('custom_csf_mask_group'),
+            Include('custom_aparcaseg_group'),
             visible_when="seg_tool=='Custom segmentation'",
         ),
     )
@@ -135,8 +197,8 @@ class SegmentationStageUI(SegmentationStage):
         ),
         scrollable=True,
         resizable=True,
-        height=400,
-        width=450,
+        height=800,
+        width=600,
         kind="livemodal",
         title="Edit stage configuration",
         buttons=["OK", "Cancel"],

@@ -43,6 +43,7 @@ cmp-v3.0.0/sub-01/ses-01/anat/sub-01_ses-01_label-GM_dseg.nii.gz
 cmp-v3.0.0/sub-01/ses-01/anat/sub-01_ses-01_label-WM_desc-eroded_dseg.nii.gz
 cmp-v3.0.0/sub-01/ses-01/anat/sub-01_ses-01_label-WM_dseg.nii.gz
 cmp-v3.0.0/sub-01/ses-01/sub-01_ses-01_anatomical_config.json
+cmp-v3.0.0/sub-01/ses-01/sub-01_ses-01_log.txt
 freesurfer-6.0.1/dataset_description.json
 freesurfer-6.0.1/sub-01_ses-01/label/aparc.annot.a2009s.ctab
 freesurfer-6.0.1/sub-01_ses-01/label/aparc.annot.ctab

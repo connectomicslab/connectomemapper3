@@ -161,12 +161,12 @@ def save_fibers(oldhdr, oldfib, fname, indices):
 
 def cmat(
     intrk,
-    roi_volumes,
-    roi_graphmls,
-    parcellation_scheme,
+    roi_volumes=None,
+    roi_graphmls=None,
+    parcellation_scheme=None,
     compute_curvature=True,
     additional_maps=None,
-    output_types=["gPickle"],
+    output_types=None,
     atlas_info=None,
 ):
     """Create the connection matrix for each resolution using fibers and ROIs.
@@ -200,6 +200,8 @@ def cmat(
         additional_maps = {}
     if atlas_info is None:
         atlas_info = {}
+    if output_types is None:
+        output_types = ["gPickle"]
 
     print("================================================")
     print(" > Creation of connectome maps")
@@ -226,7 +228,7 @@ def cmat(
                         roi_fname = vol
                     if parkey in graphml:
                         roi_graphml_fname = graphml
-                    
+
                 roi = nib.load(roi_fname)
                 roiData = roi.get_data()
                 resolutions[parkey]["number_of_regions"] = roiData.max()
@@ -306,7 +308,7 @@ def cmat(
                 G.nodes[int(u)][key] = d[key]
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
-            if parcellation_scheme != "Lausanne2018":
+            if parcellation_scheme not in ["Custom", "Lausanne2018"]:
                 G.nodes[int(u)]["dn_position"] = tuple(
                     np.mean(np.where(roiData == int(d["dn_correspondence_id"])), axis=1)
                 )
@@ -631,7 +633,7 @@ def cmat(
                     g2[u_gml][v_gml][key] = d_gml[key]
             for u_gml, d_gml in G_out.nodes(data=True):
                 g2.add_node(u_gml)
-                if parcellation_scheme != "Lausanne2018":
+                if parcellation_scheme not in ["Custom", "Lausanne2018"]:
                     g2.nodes[u_gml]["dn_correspondence_id"] = d_gml[
                         "dn_correspondence_id"
                     ]
@@ -929,7 +931,7 @@ class CMTK_rsfmri_cmat(BaseInterface):
             # loop throughout all the ROIs (current resolution)
             for i in range(1, nROIs + 1):
                 ts[i - 1, :] = fdata[mask == i].mean(axis=0)
-            
+
             # Save average roi time-series
             np.save(os.path.abspath("averageTimeseries_%s.npy" % parkey), ts)
             sio.savemat(os.path.abspath("averageTimeseries_%s.mat" % parkey), {"ts": ts})
@@ -946,7 +948,7 @@ class CMTK_rsfmri_cmat(BaseInterface):
                     G.nodes[int(u)][key] = d[key]
                 # Compute a position for the node based on the mean position of the
                 # ROI in voxel coordinates (segmentation volume )
-                if self.inputs.parcellation_scheme != "Lausanne2018":
+                if self.inputs.parcellation_scheme not in ["Custom", "Lausanne2018"]:
                     G.nodes[int(u)]["dn_position"] = tuple(
                         np.mean(
                             np.where(mask == int(d["dn_correspondence_id"])), axis=1
@@ -1078,7 +1080,7 @@ class CMTK_rsfmri_cmat(BaseInterface):
                 # Create graph nodes
                 for u_gml, d_gml in G.nodes(data=True):
                     g2.add_node(u_gml)
-                    if self.inputs.parcellation_scheme != "Lausanne2018":
+                    if self.inputs.parcellation_scheme not in ["Custom", "Lausanne2018"]:
                         g2.nodes[u_gml]["dn_correspondence_id"] = d_gml["dn_correspondence_id"]
                     else:
                         g2.nodes[u_gml]["dn_multiscaleID"] = d_gml["dn_multiscaleID"]

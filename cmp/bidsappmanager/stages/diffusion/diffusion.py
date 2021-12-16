@@ -99,7 +99,7 @@ class DiffusionConfigUI(DiffusionConfig):
 
         See also
         ---------
-        cmp.stages.diffusion.diffusion.DiffusionConfig.__init_
+        cmp.stages.diffusion.diffusion.DiffusionConfig.__init__
         cmp.cmpbidsappmanager.stages.diffusion.reconstruction.Dipy_recon_configUI
         cmp.cmpbidsappmanager.stages.diffusion.reconstruction.MRtrix_recon_configUI
         cmp.cmpbidsappmanager.stages.diffusion.tracking.Dipy_tracking_configUI

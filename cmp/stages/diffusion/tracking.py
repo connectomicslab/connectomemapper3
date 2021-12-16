@@ -12,7 +12,6 @@ from nipype.interfaces.base import traits
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 from nipype import logging
-
 # import matplotlib.pyplot as plt
 
 from cmtklib.interfaces.mrtrix3 import Erode, StreamlineTrack, FilterTractogram
@@ -21,9 +20,9 @@ from cmtklib.interfaces.dipy import (
     TensorInformedEudXTractography,
 )
 from cmtklib.interfaces.misc import ExtractHeaderVoxel2WorldMatrix
-from cmtklib.diffusion import Tck2Trk, Make_Mrtrix_Seeds
-
+from cmtklib.diffusion import Tck2Trk
 # from cmtklib.diffusion import filter_fibers
+
 
 iflogger = logging.getLogger("nipype.interface")
 
@@ -534,7 +533,6 @@ def create_mrtrix_tracking_flow(config):
             [(inputnode, mrtrix_tracking, [("grad", "gradient_encoding_file")])]
         )
         # fmt:on
-        
 
         voxel2WorldMatrixExtracter = pe.Node(
             interface=ExtractHeaderVoxel2WorldMatrix(),

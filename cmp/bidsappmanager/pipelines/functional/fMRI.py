@@ -12,13 +12,10 @@ import shutil
 from traits.api import *
 from traitsui.api import *
 from traitsui.qt4.extra.qt_view import QtView
-
-# from pyface.ui.qt4.image_resource import ImageResource
-from pyface.qt.QtCore import *
-from pyface.qt.QtGui import *
 from pyface.api import ImageResource
 
 # Own imports
+from cmtklib.bids.io import __cmp_directory__, __nipype_directory__
 from cmp.bidsappmanager.stages.preprocessing.fmri_preprocessing import (
     PreprocessingStageUI,
 )
@@ -186,7 +183,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    "nipype",
+                    __nipype_directory__,
                     self.subject,
                     project_info.subject_session,
                     self.pipeline_name,
@@ -196,7 +193,7 @@ class fMRIPipelineUI(fMRIPipeline):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    "nipype",
+                    __nipype_directory__,
                     self.subject,
                     self.pipeline_name,
                     self.stages[stage].name,
@@ -435,11 +432,11 @@ class fMRIPipelineUI(fMRIPipeline):
 
         if fMRI_available:
             if self.global_conf.subject_session == "":
-                out_dir = os.path.join(self.output_directory, "cmp", self.subject)
+                out_dir = os.path.join(self.output_directory, __cmp_directory__, self.subject)
             else:
                 out_dir = os.path.join(
                     self.output_directory,
-                    "cmp",
+                    __cmp_directory__,
                     self.subject,
                     self.global_conf.subject_session,
                 )

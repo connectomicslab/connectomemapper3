@@ -26,6 +26,9 @@ except ImportError:
     raise Exception(
         'Need scipy for binary erosion of white matter and CSF masks')
 
+import skimage.morphology as skmorphology
+import skimage.filters as skfilters
+
 # Nipype imports
 from nipype.interfaces.base import traits, BaseInterfaceInputSpec, TraitedSpec, BaseInterface, Directory, File, \
     InputMultiPath, OutputMultiPath
@@ -53,7 +56,7 @@ class ComputeParcellationRoiVolumesInputSpec(BaseInterfaceInputSpec):
 
     parcellation_scheme = traits.Enum(
             'Lausanne2018',
-            ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018'],
+            ['NativeFreesurfer', 'Lausanne2008', 'Lausanne2018', 'Custom'],
             usedefault=True, mandatory=True,
             desc="Parcellation scheme")
 
@@ -99,113 +102,126 @@ class ComputeParcellationRoiVolumes(BaseInterface):
 
     def _run_interface(self, runtime):
 
-        resolutions = get_parcellation(self.inputs.parcellation_scheme)
+        if "Custom" in self.inputs.parcellation_scheme:
+            self._compute_and_save_volumetry(
+                self.inputs.roi_volumes[0],
+                self.inputs.roi_graphMLs[0],
+                "custom"
+            )
+        else:
+            resolutions = get_parcellation(self.inputs.parcellation_scheme)
 
-        for parkey, parval in list(resolutions.items()):
+            for parkey, parval in list(resolutions.items()):
 
-            for roi in self.inputs.roi_volumes:
-                if parkey in roi:
-                    roi_fname = roi
-                    break
-
-            if self.inputs.parcellation_scheme != 'Lausanne2008':
-                for graphml in self.inputs.roi_graphMLs:
-                    if parkey in graphml:
-                        roi_info_graphml = graphml
+                for roi in self.inputs.roi_volumes:
+                    if parkey in roi:
+                        roi_fname = roi
                         break
-            else:
-                roi_info_graphml = parval['node_information_graphml']
 
-            iflogger.info(
-                "-------------------------------------------------------")
-            iflogger.info(
-                "Processing {} parcellation - {}".format(self.inputs.parcellation_scheme, parkey))
-            iflogger.info(
-                "-------------------------------------------------------")
-
-            iflogger.info("  > Load {}...".format(roi_fname))
-            roiImg = ni.load(roi_fname)
-            roiData = roiImg.get_data()
-
-            # Compute the volume of the voxel
-            voxel_dimX, voxel_dimY, voxel_dimZ = roiImg.header.get_zooms()
-            voxel_volume = voxel_dimX * voxel_dimY * voxel_dimZ
-            iflogger.info("    ... Voxel volume = {} mm3".format(roi_fname))
-
-            # Initialize the TSV file used to store the parcellation volumetry resulty
-            volumetry_file = op.abspath('roi_stats_{}.tsv'.format(parkey))
-            f_volumetry = open(volumetry_file, 'w+')
-            iflogger.info(
-                "  > Create Volumetry TSV file as {}".format(volumetry_file))
-
-            # Format the TSV file according to BIDS Extension Proposal 11 (BEP011): The structural preprocessing derivatives.
-            time_now = strftime("%a %d %b %Y %H:%M:%S", localtime())
-            hdr_lines = ['{:<4}, {:<55}, {:<10}, {:>10} \n'.format(
-                "index", "name", "type", "volume-mm3")]
-
-            f_volumetry.writelines(hdr_lines)
-            del hdr_lines
-
-            # add node information from parcellation
-            iflogger.info("  > Load {}...".format(roi_info_graphml))
-            gp = nx.read_graphml(roi_info_graphml)
-            n_nodes = len(gp)
-
-            # variables used by the percent counter
-            pc = -1
-            cnt = -1
-
-            iflogger.info("  > Processing parcels...")
-
-            # Loop over each parcel/ROI
-            for u, d in gp.nodes(data=True):
-                # Percent counter
-                cnt += 1
-                pcN = int(round(float(100 * cnt) / n_nodes))
-                if pcN > pc and pcN % 10 == 0:
-                    pc = pcN
-                    iflogger.info('%4.0f%%' % pc)
-
-                # Get the label number
-                if self.inputs.parcellation_scheme == 'Lausanne2018':
-                    parcel_label = d["dn_multiscaleID"]
+                if self.inputs.parcellation_scheme != 'Lausanne2008':
+                    for graphml in self.inputs.roi_graphMLs:
+                        if parkey in graphml:
+                            roi_info_graphml = graphml
+                            break
                 else:
-                    parcel_label = d["dn_correspondence_id"]
+                    roi_info_graphml = parval['node_information_graphml']
 
-                # Get each the parcel is cortical or subcortical
-                parcel_type = d["dn_region"]
-
-                # Get the name of the parcel
-                parcel_name = d["dn_name"]
-
-                # Compute the parcel/ROI volume
-                parcel_volumetry = np.sum(roiData == int(
-                    parcel_label)) * voxel_volume
-
-                f_volumetry.write(
-                    '{:<4}, {:<55}, {:<10}, {:>10} \n'.format(parcel_label, parcel_name, parcel_type, parcel_volumetry))
-
-            f_volumetry.close()
+                iflogger.info(
+                    "-------------------------------------------------------")
+                iflogger.info(
+                    "Processing {} parcellation - {}".format(self.inputs.parcellation_scheme, parkey))
+                iflogger.info(
+                    "-------------------------------------------------------")
+                self._compute_and_save_volumetry(roi_fname, roi_info_graphml, parkey)
 
         iflogger.info('  [Done]')
 
         return runtime
 
+    def _compute_and_save_volumetry(self, roi_fname, roi_info_graphml, parkey):
+        iflogger.info("  > Load {}...".format(roi_fname))
+        roiImg = ni.load(roi_fname)
+        roiData = roiImg.get_data()
+
+        # Compute the volume of the voxel
+        voxel_dimX, voxel_dimY, voxel_dimZ = roiImg.header.get_zooms()
+        voxel_volume = voxel_dimX * voxel_dimY * voxel_dimZ
+        iflogger.info("    ... Voxel volume = {} mm3".format(roi_fname))
+
+        # Initialize the TSV file used to store the parcellation volumetry resulty
+        volumetry_file = op.abspath('roi_stats_{}.tsv'.format(parkey))
+        f_volumetry = open(volumetry_file, 'w+')
+        iflogger.info(
+            "  > Create Volumetry TSV file as {}".format(volumetry_file)
+        )
+
+        # Format the TSV file according to BIDS Extension Proposal 11 (BEP011):
+        # The structural preprocessing derivatives.
+        hdr_lines = [
+            '{:<4}, {:<55}, {:<10}, {:>10} \n'.format("index", "name", "type", "volume-mm3")
+        ]
+
+        f_volumetry.writelines(hdr_lines)
+        del hdr_lines
+
+        # add node information from parcellation
+        iflogger.info("  > Load {}...".format(roi_info_graphml))
+        gp = nx.read_graphml(roi_info_graphml)
+        n_nodes = len(gp)
+
+        # variables used by the percent counter
+        pc = -1
+        cnt = -1
+
+        iflogger.info("  > Processing parcels...")
+
+        # Loop over each parcel/ROI
+        for u, d in gp.nodes(data=True):
+            # Percent counter
+            cnt += 1
+            pcN = int(round(float(100 * cnt) / n_nodes))
+            if pcN > pc and pcN % 10 == 0:
+                pc = pcN
+                iflogger.info('%4.0f%%' % pc)
+
+            # Get the label number
+            if self.inputs.parcellation_scheme in ["Custom", "Lausanne2018"]:
+                parcel_label = d["dn_multiscaleID"]
+            else:
+                parcel_label = d["dn_correspondence_id"]
+
+            # Get if the parcel is cortical or subcortical
+            parcel_type = d["dn_region"]
+
+            # Get the name of the parcel
+            parcel_name = d["dn_name"]
+
+            # Compute the parcel/ROI volume
+            parcel_volumetry = np.sum(roiData == int(
+                    parcel_label)) * voxel_volume
+
+            f_volumetry.write(
+                    '{:<4}, {:<55}, {:<10}, {:>10} \n'.format(parcel_label, parcel_name, parcel_type, parcel_volumetry))
+
+        f_volumetry.close()
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['roi_volumes_stats'] = self._gen_outfilenames(
-            'roi_stats', '.tsv', self.inputs.parcellation_scheme)
+        if self.inputs.parcellation_scheme == "Custom":
+            outputs['roi_volumes_stats'] = 'roi_stats_custom.tsv'
+        else:
+            outputs['roi_volumes_stats'] = self._gen_outfilenames('roi_stats', '.tsv')
 
         return outputs
 
-    def _gen_outfilenames(self, basename, posfix, parcellation_scheme):
+    def _gen_outfilenames(self, basename, posfix):
         filepaths = []
-        for scale in list(get_parcellation(parcellation_scheme).keys()):
+        for scale in list(get_parcellation(self.inputs.parcellation_scheme).keys()):
             filepaths.append(op.abspath(basename + '_' + scale + posfix))
         return filepaths
 
 
-def erode_mask(fsdir, maskFile):
+def erode_mask(fsdir, mask_file):
     """Erodes the mask and saves it the Freesurfer subject directory.
 
     Parameters
@@ -213,7 +229,7 @@ def erode_mask(fsdir, maskFile):
     fsdir : string
         Freesurfer subject directory
 
-    maskFile : string
+    mask_file : string
         Path to mask file
     """
     # Define erosion mask
@@ -224,8 +240,8 @@ def erode_mask(fsdir, maskFile):
     se[1, 1, :] = 1
 
     # Erode mask
-    print('    > Load mask {}'.format(maskFile))
-    img = ni.load(maskFile)
+    print('    > Load mask {}'.format(mask_file))
+    img = ni.load(mask_file)
     mask = img.get_data()
 
     # Circumvent a casting issue for csf_mask which did not have element exactly equal to 1 (instead 0.999998....)
@@ -242,9 +258,10 @@ def erode_mask(fsdir, maskFile):
     print(er_mask.sum())
     img = ni.Nifti1Image(er_mask, img.get_affine(), img.get_header())
     out_fname = os.path.join(fsdir, 'mri',
-                             '{}_eroded.nii.gz'.format(os.path.splitext(op.splitext(op.basename(maskFile))[0])[0]))
+                             '{}_eroded.nii.gz'.format(os.path.splitext(op.splitext(op.basename(mask_file))[0])[0]))
     print('    > Save eroded mask to: {}'.format(out_fname))
     ni.save(img, out_fname)
+    del img
 
 
 class Erode_inputspec(BaseInterfaceInputSpec):
@@ -712,27 +729,32 @@ class CombineParcellations(BaseInterface):
         ind_v = np.where(img_data == ventricle3)
         tmp[ind_v] = 1
 
-        third_vent_fn = op.abspath('{}.nii.gz'.format("ventricle3"))
+        third_vent_fn = op.abspath('ventricle3.nii.gz')
         hdr = img_v.get_header()
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.int16)
         iflogger.info("    ... Image saved to {}".format(third_vent_fn))
         img = ni.Nifti1Image(tmp, img_v.get_affine(), hdr2)
         ni.save(img, third_vent_fn)
+        del img
 
-        iflogger.info("  > Dilate the ventricule image")
-        third_vent_dil = op.abspath('{}_dil.nii.gz'.format("ventricle3"))
-        fslmaths_cmd = 'fslmaths -dt char {} -mas {} -kernel sphere 5 -dilD {}'.format(
-            third_vent_fn, third_vent_fn, third_vent_dil)
-        iflogger.info("    ... Command: {}".format(fslmaths_cmd))
-        process = subprocess.Popen(
-            fslmaths_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        proc_stdout = process.communicate()[0].strip()
+        iflogger.info("  > Dilate (modal) the ventricule image")
+        third_vent_dil = op.abspath('ventricle3_dil.nii.gz')
 
-        if self.inputs.verbose_level == 2:
-            print(proc_stdout)
+        # radius = 5 [mm] => n x voxelsize max [mm]
+        zooms = hdr2.get_zooms()
+        radius = 5.0 / max(zooms)
+        third_vent_data = (tmp > 0).astype(np.int16)
 
-        tmp = ni.load(third_vent_dil).get_data()
+        iflogger.info(f'    ... Sphere radius: {radius} voxels')
+        sphere_sel = skmorphology.ball(radius=radius)
+        third_vent_dil_data = skfilters.rank.modal(third_vent_data, sphere_sel)
+        iflogger.info(f'    ... Save image to {third_vent_dil}...')
+        img = ni.Nifti1Image(third_vent_dil_data, img_v.get_affine(), hdr2)
+        ni.save(img, third_vent_dil)
+        del img
+
+        tmp = third_vent_dil_data
         indrhypothal = np.where((tmp == 1) & (img_data == right_ventral))
         indlhypothal = np.where((tmp == 1) & (img_data == left_ventral))
         del tmp
@@ -742,7 +764,7 @@ class CombineParcellations(BaseInterface):
 
         print("create color look up table : ", self.inputs.create_colorLUT)
 
-        for roi_index, roi in enumerate(self.inputs.input_rois):
+        for _, roi in enumerate(self.inputs.input_rois):
             # colorLUT creation if enabled
             if self.inputs.create_colorLUT:
                 outprefix_name = roi.split(".")[0]
@@ -1502,6 +1524,7 @@ class CombineParcellations(BaseInterface):
             iflogger.info("  > Save output image to {}".format(output_roi))
             img = ni.Nifti1Image(img_data_out, img_v.get_affine(), hdr2)
             ni.save(img, output_roi)
+            del img
 
             if self.inputs.create_colorLUT:
                 f_color_lut.close()
@@ -1613,6 +1636,7 @@ class CombineParcellations(BaseInterface):
             img = ni.Nifti1Image(
                 img_data_aparcaseg_new, img_aparcaseg.get_affine(), img_aparcaseg.get_header())
             ni.save(img, new_aparcaseg_native)
+            del img
 
         else:
             iflogger.info(
@@ -1625,6 +1649,7 @@ class CombineParcellations(BaseInterface):
             img = ni.Nifti1Image(
                 img_data_aparcaseg, img_aparcaseg.get_affine(), img_aparcaseg.get_header())
             ni.save(img, aparcaseg_native)
+            del img
 
         return runtime
 
@@ -1831,6 +1856,7 @@ class ParcellateThalamus(BaseInterface):
         print("Save output image to %s" % debug_file)
         img = ni.Nifti1Image(max_prob, img_atlas.get_affine(), hdr2)
         ni.save(img, debug_file)
+        del img
 
         # Take into account jacobian to correct the probability maps after interpolation
         img_data_spams = np.zeros(img_data_vspams.shape)
@@ -1851,6 +1877,7 @@ class ParcellateThalamus(BaseInterface):
         print("Save output image to %s" % debug_file)
         img = ni.Nifti1Image(max_prob, img_atlas.get_affine(), hdr2)
         ni.save(img, debug_file)
+        del img
 
         iflogger.info('Creating Thalamus mask from FreeSurfer aparc+aseg ')
 
@@ -2736,6 +2763,7 @@ def create_roi(subject_id, subjects_dir):
         print("Save output image to %s" % out_roi)
         img = ni.Nifti1Image(newrois, aseg.get_affine(), hdr2)
         ni.save(img, out_roi)
+        del img
 
         # dilate cortical regions
         print("Dilating cortical regions...")
@@ -2767,12 +2795,14 @@ def create_roi(subject_id, subjects_dir):
             print("Save gray matter mask to %s" % out_mask)
             img = ni.Nifti1Image(gmMask, aseg.get_affine(), hdr2)
             ni.save(img, out_mask)
+            del img
 
         # store volume eg in ROIv_scale33.nii.gz
         out_roi = op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % parkey)
         print("Save output image to %s" % out_roi)
         img = ni.Nifti1Image(newrois, aseg.get_affine(), hdr2)
         ni.save(img, out_roi)
+        del img
 
     print("[ DONE ]")
 
@@ -3010,6 +3040,8 @@ def generate_single_parcellation(v, i, fs_string, subject_dir, subject_id):
     this_out = os.path.join(subject_dir, 'mri', aseg_output[i])
     img = ni.Nifti1Image(vol, this_nifti.affine, hdr2)
     ni.save(img, this_out)
+    del img
+
     mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
         this_out,
         os.path.join(subject_dir, 'mri', aseg_output[i][0:-4] + '.mgz'))
@@ -3225,6 +3257,7 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
         this_out = os.path.join(subject_dir, 'mri', rois_output[i])
         img = ni.Nifti1Image(newrois, this_nifti.affine, hdr2)
         ni.save(img, this_out)
+        del img
 
         # 4. Dilate cortical regions
         if v:
@@ -3252,6 +3285,7 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
         this_out = os.path.join(subject_dir, 'mri', roivs_output[i])
         img = ni.Nifti1Image(newrois, this_nifti.affine, hdr2)
         ni.save(img, this_out)
+        del img
 
         mri_cmd = fs_string + '; mri_convert -i %s -o %s' % (
             this_out,
@@ -3273,6 +3307,7 @@ def create_roi_v2(subject_id, subjects_dir, v=True):
             print("         Save gray matter mask to %s" % out_mask)
             img = ni.Nifti1Image(gmMask, this_nifti.affine, hdr2)
             ni.save(img, out_mask)
+            del img
 
     mri_cmd = ['mri_convert', '-i', op.join(subject_dir, 'mri', 'ribbon.mgz'), '-o',
                op.join(subject_dir, 'mri', 'ribbon.nii.gz')]
@@ -3360,6 +3395,8 @@ def create_wm_mask(subject_id, subjects_dir):
     csfA[idx] = 1
     img = ni.Nifti1Image(csfA, aseg.get_affine(), aseg.get_header())
     ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
+    del img
+
     csfA = imerode(imerode(csfA, se1), se)
 
     # thalmus proper and cuadate are put back because they are not lateral ventricles
@@ -3482,12 +3519,14 @@ def create_wm_mask(subject_id, subjects_dir):
     img = ni.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header())
     print("Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
+    del img
 
     # output white matter mask. crop and move it afterwards
     gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
     img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header())
     print("Save gray matter mask: %s" % gm_out)
     ni.save(img, gm_out)
+    del img
 
     # Convert whole brain mask
     mri_cmd = ['mri_convert', '-i', op.join(fs_dir, 'mri', 'brainmask.mgz'), '-o',
@@ -3594,6 +3633,8 @@ def create_wm_mask_v2(subject_id, subjects_dir, v=True):
         iflogger.info("    > Save CSF mask")
     img = ni.Nifti1Image(csfA, aseg.get_affine(), aseg.get_header())
     ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
+    del img
+
     csfA = imerode(imerode(csfA, se1), se)
 
     # thalmus proper and cuadate are put back because they are not lateral ventricles
@@ -3721,12 +3762,14 @@ def create_wm_mask_v2(subject_id, subjects_dir, v=True):
     if v:
         iflogger.info("    > Save white matter mask: %s" % wm_out)
     ni.save(img, wm_out)
+    del img
 
     gm_out = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
     img = ni.Nifti1Image(gmmask, fsmask.get_affine(), fsmask.get_header())
     if v:
         iflogger.info("    > Save gray matter mask: %s" % gm_out)
     ni.save(img, gm_out)
+    del img
 
     # Redirect ouput if low verbose
     FNULL = open(os.devnull, 'w')
@@ -3739,6 +3782,8 @@ def create_wm_mask_v2(subject_id, subjects_dir, v=True):
     else:
         status = subprocess.call(
             ' '.join(mri_cmd), shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+    iflogger.info(status)
+
     mri_cmd = ['fslmaths', op.join(fs_dir, 'mri', 'brainmask.nii.gz'), '-bin',
                op.join(fs_dir, 'mri', 'brainmask.nii.gz')]
     if v == 2:
@@ -3746,6 +3791,7 @@ def create_wm_mask_v2(subject_id, subjects_dir, v=True):
     else:
         status = subprocess.call(
             ' '.join(mri_cmd), shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+    iflogger.info(status)
 
 
 def crop_and_move_datasets(parcellation_scheme, subject_id, subjects_dir):
@@ -3801,7 +3847,7 @@ def crop_and_move_datasets(parcellation_scheme, subject_id, subjects_dir):
     #            os.makedirs(op.join('.', p))
     #        except:
     #            pass
-    orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
+    orig = op.join(fs_dir, 'mri', 'rawavg.mgz')
 
     for d in ds:
         print("Processing %s:" % d[0])
@@ -3935,6 +3981,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
                          nii_apar_cimg.get_header())
     print("Save to: " + wm_out)
     ni.save(img, wm_out)
+    del img
 
     print("GM mask....")
     # %% create GM parcellation (CORTICAL+SUBCORTICAL)
@@ -3965,6 +4012,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
         img = ni.Nifti1Image(nii_gm, nii_apar_cimg.get_affine(),
                              nii_apar_cimg.get_header())
         ni.save(img, gm_out)
+        del img
 
         # Create GM mask
         gm_maskout = op.join(fs_dir, 'mri', 'gmmask.nii.gz')
@@ -3977,6 +4025,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
         img = ni.Nifti1Image(
             nii_gm_mask, nii_apar_cimg.get_affine(), nii_apar_cimg.get_header())
         ni.save(img, gm_maskout)
+        del img
 
     # Create CSF mask
     mri_cmd = ['mri_convert', '-i',
@@ -3998,6 +4047,7 @@ def generate_WM_and_GM_mask(subject_id, subjects_dir):
     img = ni.Nifti1Image(er_mask, ni.load(
         asegfile).get_affine(), ni.load(asegfile).get_header())
     ni.save(img, op.join(fs_dir, 'mri', 'csf_mask.nii.gz'))
+    del img
 
     # Convert whole brain mask
     mri_cmd = ['mri_convert', '-i', op.join(fs_dir, 'mri', 'brainmask.mgz'), '-o',
@@ -4047,7 +4097,7 @@ def crop_and_move_WM_and_GM(subject_id, subjects_dir):
         ds.append((op.join(fs_dir, 'mri', 'ROIv_%s.nii.gz' %
                            p), 'ROIv_HR_th_%s.nii.gz' % p))
 
-    orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
+    orig = op.join(fs_dir, 'mri', 'rawavg.mgz')
 
     for d in ds:
         print("Processing %s:" % d[0])

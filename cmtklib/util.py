@@ -7,17 +7,14 @@
 """Module that defines CMTK Utility functions."""
 
 import os
-from os import path as op
-
 import warnings
 from glob import glob
 
-# import pickle
-import gzip
 import json
-
 import networkx as nx
 import numpy as np
+
+from cmtklib.bids.io import __cmp_directory__
 
 warnings.simplefilter("ignore")
 
@@ -70,9 +67,8 @@ def get_basename(path):
     path : os.path
         Path to the containing directory
     """
-    import os  # Important to be used as Nipype connect function
-
-    return os.path.basename(path)
+    from os import path as op  # Important to be used as Nipype connect function
+    return op.basename(path)
 
 
 class BColors:
@@ -222,7 +218,7 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
     if parcellation_scheme == "NativeFreesurfer":
         for subj in subjects:
             subj_dir = os.path.join(output_dir, subj)
-            subj_session_dirs = glob(op.join(subj_dir, "ses-*"))
+            subj_session_dirs = glob(os.path.join(subj_dir, "ses-*"))
             subj_sessions = [
                 "ses-{}".format(subj_session_dir.split("-")[-1])
                 for subj_session_dir in subj_session_dirs
@@ -230,13 +226,13 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
 
             if len(subj_sessions) > 0:  # Session structure
                 for subj_session in subj_sessions:
-                    conn_derivatives_dir = op.join(
-                        output_dir, "cmp", subj, subj_session, "connectivity"
+                    conn_derivatives_dir = os.path.join(
+                        output_dir, __cmp_directory__, subj, subj_session, "connectivity"
                     )
 
                     # Extract the connectivity matrix
                     # self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'
-                    connmat_fname = op.join(
+                    connmat_fname = os.path.join(
                         conn_derivatives_dir,
                         "{}_{}_label-{}_conndata-snetwork_connectivity.gpickle".format(
                             subj, subj_session, bids_atlas_label
@@ -251,7 +247,7 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
         for scale in np.arange(1, 6):
             for subj in subjects:
                 subj_dir = os.path.join(output_dir, subj)
-                subj_session_dirs = glob(op.join(subj_dir, "ses-*"))
+                subj_session_dirs = glob(os.path.join(subj_dir, "ses-*"))
                 subj_sessions = [
                     "ses-{}".format(subj_session_dir.split("-")[-1])
                     for subj_session_dir in subj_session_dirs
@@ -259,13 +255,13 @@ def load_graphs(output_dir, subjects, parcellation_scheme, weight):
 
                 if len(subj_sessions) > 0:  # Session structure
                     for subj_session in subj_sessions:
-                        conn_derivatives_dir = op.join(
-                            output_dir, "cmp", subj, subj_session, "connectivity"
+                        conn_derivatives_dir = os.path.join(
+                            output_dir, __cmp_directory__, subj, subj_session, "connectivity"
                         )
 
                         # Extract the connectivity matrix
                         # self.subject+'_label-'+bids_atlas_label+'_desc-scale5_conndata-snetwork_connectivity'
-                        connmat_fname = op.join(
+                        connmat_fname = os.path.join(
                             conn_derivatives_dir,
                             "{}_{}_label-{}_desc-scale{}_conndata-snetwork_connectivity.gpickle".format(
                                 subj, subj_session, bids_atlas_label, scale

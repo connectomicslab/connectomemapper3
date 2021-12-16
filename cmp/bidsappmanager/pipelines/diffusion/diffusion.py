@@ -7,33 +7,22 @@
 """Diffusion pipeline UI Class definition."""
 
 import os
-import datetime
-
-from pyface.qt.QtCore import *
-from pyface.qt.QtGui import *
+import shutil
 
 from traitsui.api import *
 from traits.api import *
 from traitsui.qt4.extra.qt_view import QtView
-from traitsui.qt4.button_editor import ToolkitEditorFactory, CustomEditor
-
 from pyface.api import ImageResource
-import shutil
-
-import nibabel as nib
 
 from bids import BIDSLayout
 
 # Own imports
-from cmp.bidsappmanager.pipelines.anatomical.anatomical import AnatomicalPipelineUI
-
+from cmtklib.bids.io import __cmp_directory__, __nipype_directory__
 from cmtklib.util import return_button_style_sheet
 from cmp.bidsappmanager.stages.preprocessing.preprocessing import PreprocessingStageUI
 from cmp.bidsappmanager.stages.diffusion.diffusion import DiffusionStageUI
 from cmp.bidsappmanager.stages.registration.registration import RegistrationStageUI
 from cmp.bidsappmanager.stages.connectome.connectome import ConnectomeStageUI
-
-from cmp.pipelines.common import Pipeline
 from cmp.pipelines.diffusion.diffusion import DiffusionPipeline
 
 
@@ -207,7 +196,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    "nipype",
+                    __nipype_directory__,
                     self.subject,
                     project_info.subject_session,
                     self.pipeline_name,
@@ -217,7 +206,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 self.stages[stage].stage_dir = os.path.join(
                     self.base_directory,
                     "derivatives",
-                    "nipype",
+                    __nipype_directory__,
                     self.subject,
                     self.pipeline_name,
                     self.stages[stage].name,
@@ -449,21 +438,21 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 if self.global_conf.subject_session == "":
                     out_dwi_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         "dwi",
                         subject + "_dwi.nii.gz",
                     )
                     out_bval_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         "dwi",
                         subject + "_dwi.bval",
                     )
                     out_bvec_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         "dwi",
                         subject + "_dwi.bvec",
@@ -471,7 +460,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                 else:
                     out_dwi_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",
@@ -479,7 +468,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     )
                     out_bval_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",
@@ -487,7 +476,7 @@ class DiffusionPipelineUI(DiffusionPipeline):
                     )
                     out_bvec_file = os.path.join(
                         self.derivatives_directory,
-                        "cmp",
+                        __cmp_directory__,
                         self.subject,
                         self.global_conf.subject_session,
                         "dwi",

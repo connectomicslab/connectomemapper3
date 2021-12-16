@@ -219,9 +219,7 @@ def main():
                 print(
                     f"  .. INFO: Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP"
                 )
-                anat_pipeline.stages[
-                    "Segmentation"
-                ].config.number_of_threads = args.number_of_threads
+                anat_pipeline.stages["Segmentation"].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
                 anat_pipeline.process()
@@ -244,9 +242,7 @@ def main():
                 print(
                     f"  .. INFO: Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP"
                 )
-                anat_pipeline.stages[
-                    "Segmentation"
-                ].config.number_of_threads = args.number_of_threads
+                anat_pipeline.stages["Segmentation"].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -257,12 +253,8 @@ def main():
                 return exit_code
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
-        project.freesurfer_subjects_dir = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
 
         if anat_valid_outputs:
             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(
@@ -271,6 +263,9 @@ def main():
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    dmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
+                    dmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
 
                 if dmri_valid_inputs:
                     dmri_pipeline.process()
@@ -299,9 +294,7 @@ def main():
                 print(
                     f"  .. INFO: Set Freesurfer and ANTs to use {args.number_of_threads} threads by the means of OpenMP"
                 )
-                anat_pipeline.stages[
-                    "Segmentation"
-                ].config.number_of_threads = args.number_of_threads
+                anat_pipeline.stages["Segmentation"].config.number_of_threads = args.number_of_threads
 
             if anat_valid_inputs:
                 print(">> Process anatomical pipeline")
@@ -312,12 +305,8 @@ def main():
                 return exit_code
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
-        project.freesurfer_subjects_dir = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
 
         if anat_valid_outputs:
             fmri_valid_inputs, fmri_pipeline = cmp.project.init_fmri_project(
@@ -326,6 +315,9 @@ def main():
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    fmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
+                    fmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
 
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
@@ -367,12 +359,8 @@ def main():
                 return exit_code
 
         anat_valid_outputs, msg = anat_pipeline.check_output()
-        project.freesurfer_subjects_dir = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subjects_dir
-        project.freesurfer_subject_id = anat_pipeline.stages[
-            "Segmentation"
-        ].config.freesurfer_subject_id
+        project.freesurfer_subjects_dir = anat_pipeline.stages["Segmentation"].config.freesurfer_subjects_dir
+        project.freesurfer_subject_id = anat_pipeline.stages["Segmentation"].config.freesurfer_subject_id
 
         if anat_valid_outputs:
             dmri_valid_inputs, dmri_pipeline = cmp.project.init_dmri_project(
@@ -381,6 +369,9 @@ def main():
             if dmri_pipeline is not None:
                 dmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 dmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    dmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
+                    dmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
 
                 if dmri_valid_inputs:
                     print(">> Process diffusion pipeline")
@@ -396,6 +387,9 @@ def main():
             if fmri_pipeline is not None:
                 fmri_pipeline.parcellation_scheme = anat_pipeline.parcellation_scheme
                 fmri_pipeline.atlas_info = anat_pipeline.atlas_info
+                if anat_pipeline.parcellation_scheme == "Custom":
+                    fmri_pipeline.custom_atlas_name = anat_pipeline.stages["Parcellation"].config.custom_parcellation.atlas
+                    fmri_pipeline.custom_atlas_res = anat_pipeline.stages["Parcellation"].config.custom_parcellation.res
 
                 if fmri_valid_inputs:
                     print(">> Process fmri pipeline")
