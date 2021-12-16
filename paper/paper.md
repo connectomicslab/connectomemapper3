@@ -164,20 +164,7 @@ It provides a way to ease the installation of python package dependencies at a f
 It also provides a way to isolate the installation of CMP3 with other python dependencies.
 This prevents conflicts with other package versions that might exist already on the host system.
 
-To ensure software accessibility, interoperability, portability and reproducibility, the
-  implemented pipelines handles datasets organized following the Brain Imaging Data Structure (BIDS)
-  standard [@GorgolewskiTheExperiments:2016], and are encapsulated in a Docker [@merkeldocker:2014]
-  and a Singularity [@Kurtzer2017Singularity:Compute] software image containers in concordance to the BIDS
-  App standard [@GorgolewskiBIDSMethods:2017]. This means that the BIDS App of CMP3 can be run on diversity
-  of datasets Linux, MacOSX, Windows computers, and
-  on high performance computing systems (clusters) for large dataset processing.
-To be robust to adverse code changes, versions are released through continuous integration building
-  and testing using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset] that we created
-  for this purpose. Specifically, this involves testing the installation of the python package, the build of
-  the Docker and Singularity container images, and the execution of the BIDS App via the container
-  images with multiple configurations, to guarantee the full functionality of each new version release.
-
-\textbf{Modular workflow} The implemented participant-level analysis workflow is represented in
+\textbf{A modular and flexible workflow in the BIDS ecosystem} The implemented participant-level analysis workflow is represented in
   nipype [@GorgolewskiNipype:2011] with a modular structure, composed of three different
   pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of each
   modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset
@@ -189,10 +176,18 @@ Each pipeline class provides methods to create and execute a nipype workflow tha
   ANTs [@AVANTS2008SymmetricBrain], dipy [@Garyfallidis2014DipyData],
   mrtrix3 [@Tournier2019MRtrix3:Visualisation], AFNI [@Cox2012], or with an in-house tool
   (see Figure \autoref{fig:cmp3-diagram}); Pipeline and stage object attributes (parameters)
-  can be set from configuration files. Empowered by the nipype workflow engine, the re-execution of the workflow will resume the
-  processing at any stages a change of parameter occurred. 
+  can be set from configuration files in `.json` format.
+Empowered by the nipype workflow engine, the re-execution of the workflow will resume the
+  processing at any stages a change of parameter occurred.
+To maximize software accessibility, interoperability, portability and reproducibility, the
+  implemented pipelines are encapsulated in a Docker [@merkeldocker:2014]
+  and a Singularity [@Kurtzer2017Singularity:Compute] software image containers in concordance to the BIDS
+  App standard [@GorgolewskiBIDSMethods:2017]. This means that the BIDS App of CMP3 can be run on diversity
+  of datasets Linux, MacOSX, Windows computers, and on high performance computing systems (clusters)
+  for large-scale analysis.
 
-![\textbf{Participant-level analysis workflow of the Connectome Mapper 3.}
+
+![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
 It has a modular architecture composed of three different pipelines (anatomical, diffusion and
   fMRI) dedicated to each modality (sMRI, dMRI and rfMRI).
 Each pipeline handles datasets organized following the Brain Imaging Data Structure standard and
@@ -209,24 +204,25 @@ This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI
   to appropriately set up the set of available pipeline configuration parameters for its processing.
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
 
-\textbf{Accessible} CMP3 takes advantage of Traits/TraitsUI framework
+\textbf{Integrated Graphical User Interface} CMP3 takes advantage of Traits/TraitsUI framework
   (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
-  interactive Graphical User Interface (GUI), where pipeline and stage class attributes
-  (parameters) are represented as Traits objects with TraitsUI graphical representations, which
-  makes it easier to understand and extend. This has enabled the design of a GUI that reflects the
-  structure of the processing workflow and that facilitates the configuration of all pipeline
-  stages, supports their execution within the BIDS App and the inspection of stage outputs with
-  appropriate viewers (Figure \autoref{fig:gui}).
-If the outputs at a given stage are found not to be satisfactory, the GUI offers the possibility to
-  easily tune any parameter specific to this stage, regenerate the configuration file and repeat
-  the BIDS App execution.
-Typically, the outputs are inspected
-  using native visualization tool bundled with each software package involved in the processing
-  stage as the end user might be already very familiar with these tools (Figure \autoref{fig:gui} d).
+  interactive Graphical User Interface (GUI), where pipeline and stage
+  class attributes (parameters) are represented as Traits objects with TraitsUI graphical
+  representations, which makes it easier to understand and extend.
+This has enabled the design of a GUI aka `cmpbidsappmanager` (Figure \autoref{fig:gui}) that reflects
+  the structure of the processing workflow and that facilitates the configuration of all pipeline stages
+  and guarantees the formatting of the `.json` pipeline configuration files (Figure \autoref{fig:gui} b),
+  supports their execution within the BIDS App (Figure \autoref{fig:gui} c), and the inspection of stage
+  outputs with native visualization tools bundled with each software package
+  involved in the processing stage as the end user might be already very familiar with these tools
+  (Figure \autoref{fig:gui} d).
 In particular, all sMRI are inspected with the fsleyes viewer shipped with fsl, brain tissue
   segmentation and parcellation are inspected with freeview, mrview is used to visualize the fiber
   orientation distribution functions estimated by the diffusion signal model, and TrackVis is used
   to visualize the fiber bundles estimated with tractography.
+If the outputs at a given stage are found not to be satisfactory, the GUI offers the possibility to
+  easily tune any parameter specific to this stage, regenerate the configuration file and repeat
+  the BIDS App execution.
 
 ![\textbf{Graphical User Interface of the Connectome Mapper 3.}
 It is designed to bring the best experience to the final user by facilitating all the steps
@@ -239,8 +235,9 @@ A typical procedure would consists of
   depending on the software involved in the stage.
 Connectivity matrices are visualized using the matplotlib library. \label{fig:gui}](cmp3-gui-paper.png)
 
-\textbf{Reusable} Outputs follow as close as possible the BIDS Derivatives specifications,
-  which allows the user to easily retrieve them with the pybids.
+\textbf{Highly reusable connectome mapping outputs} CMP3 outputs follow as close as possible the BIDS Derivatives specifications,
+  which allows the user to easily retrieve any of the files generated by CMP3
+  with tools of the BIDS ecosystem such as pybids [@Yarkoni:2019].
 The data derived from the processing of one subject are placed in a \texttt{sub-<participant\_id>/}
   folder.
 Derivatives are also kept in separate folders to distinguish main CMP3 outputs (`cmp-<version>/`) from outputs
@@ -273,14 +270,19 @@ The full documentation of the outputs can be found on the
   \href{https://connectome-mapper-3.readthedocs.io/en/latest/outputs.html}{documentation website}.
 }
 
-\textbf{Open science} CMP3 is developed with openness and transparency in mind.
+\textbf{Open-source software development practices} CMP3 is developed with openness and transparency in mind.
 The software is published under the terms of the open source 3-Clause Berkeley Software
   Distribution (3-Clause BSD) license, which allows unlimited modification, redistribution
   and commercial use in source and binary forms as long as its copyright notices, and the
   license's disclaimers of warranty are maintained.
-The source code for ``Connectome Mapper 3`` is hosted at
+The source code for `Connectome Mapper 3` is hosted at
   [https://github.com/sebastientourbier/connectomemapper3](https://github.com/sebastientourbier/connectomemapper3),
   and archived to Zenodo [@ZenodoCMP:2021].
+To be robust to adverse code changes, versions are released through continuous integration building
+  and testing using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset] that we created
+  for this purpose. Specifically, this involves testing the installation of the python package, the build of
+  the Docker and Singularity container images, and the execution of the BIDS App via the container
+  images with multiple configurations, to guarantee the full functionality of each new version release.
 A detailed documentation is available
   at [connectome-mapper-3.readthedocs.io](connectome-mapper-3.readthedocs.io) that is
   kept up to date with the current release and can be retrieved for older versions.
