@@ -147,10 +147,10 @@ At the same time, it provides the user with a very efficient framework to comput
 In addition, the very flexible framework of CMP3 enables the addition of new steps, stages
   or pipelines with relatively little effort to account for additional imaging modalities
   and algorithms.
-It is worth noting the software is ready to accommodate other imaging modalities
-  such as the current integration of an EEG source imaging pipeline initiated at OHBM BrainHack 2020
+It is worth noting the software is ready to accommodate other imaging modalities.
+At the time of writing, an EEG source imaging pipeline is being integrated, initiated during OHBM BrainHack 2020
   ([https://github.com/ohbm/hackathon2020/issues/214](https://github.com/ohbm/hackathon2020/issues/214)),
-  which makes CMP3 an ideal to be further developed into the next generation brain connectivity mapping tools.
+  which would make CMP3...
 
 # Design considerations
 
@@ -185,7 +185,6 @@ To maximize software accessibility, interoperability, portability and reproducib
   App standard [@GorgolewskiBIDSMethods:2017]. This means that the BIDS App of CMP3 can be run on diversity
   of datasets Linux, MacOSX, Windows computers, and on high performance computing systems (clusters)
   for large-scale analysis.
-
 
 ![\textbf{Overview of participant-level analysis workflow of the Connectome Mapper 3 BIDS App.}
 It has a modular architecture composed of three different pipelines (anatomical, diffusion and
