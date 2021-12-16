@@ -154,7 +154,7 @@ It is worth noting the software is ready to accommodate other imaging modalities
 
 # Design considerations
 
-CMP 3  is written in Python and adopts an object-oriented programming style for the sake of modularity, extensibility,
+CMP3 is written in Python and adopts an object-oriented programming style for the sake of modularity, extensibility,
   and re-usability.
 It uses Miniconda (\href{https://docs.conda.io}{https://docs.conda.io}),
   a package and environment manager, to facilitate the installation of the Python environment with
@@ -204,7 +204,7 @@ This enables CMP3 to self-adapt to the type of dMRI acquisition scheme (DTI, DSI
   to appropriately set up the set of available pipeline configuration parameters for its processing.
 \label{fig:cmp3-diagram}](cmp3-diagram.png)
 
-\textbf{Integrated Graphical User Interface} CMP3 takes advantage of Traits/TraitsUI framework
+\textbf{A Graphical User Interface that reflects the worklow structure} CMP3 takes advantage of Traits/TraitsUI framework
   (\href{http://docs.enthought.com/traits/}{http://docs.enthought.com/traits/}) for building an
   interactive Graphical User Interface (GUI), where pipeline and stage
   class attributes (parameters) are represented as Traits objects with TraitsUI graphical
