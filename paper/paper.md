@@ -169,7 +169,7 @@ To maximize software accessibility, interoperability, portability and reproducib
   and a Singularity [@Kurtzer2017Singularity:Compute] software image containers in concordance to the BIDS
   App standard [@GorgolewskiBIDSMethods:2017]. 
 
-\textbf{A modular and flexible workflow in the BIDS ecosystem} The implemented participant-level analysis
+\textbf{A flexible workflow for multi-modal connectome mapping in the BIDS ecosystem} The implemented participant-level analysis
   workflow is represented in nipype [@GorgolewskiNipype:2011] with a modular structure, composed of
   three different pipeline classes (anatomical, diffusion, and fMRI) dedicated to the processing of each
   modality (sMRI, dMRI, rfMRI), which takes as principal inputs the path of the BIDS dataset
