@@ -23,6 +23,13 @@ which includes the following changes.
     BIDS-formatted files.
     (`PR #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_)
 
+*   CMP3 provide python wrappers to the Docker and Singularity container images
+    (`connectomemapper3_docker` and `connectomemapper3_singularity`)
+    that will generate and execute the appropriate command to run the BIDS App.
+    (`PR #109 <https://github.com/connectomicslab/connectomemapper3/pull/109>`_,
+      `PR #115 <https://github.com/connectomicslab/connectomemapper3/pull/115>`_,
+      `PR #130 <https://github.com/connectomicslab/connectomemapper3/pull/130>`_)
+
 *Updates*
 
 *   Directories for the derivatives produced by cmp (`cmp`, `freesurfer`, `nipype`)
@@ -30,7 +37,16 @@ which includes the following changes.
     `nipype-<nipype_version>` to comply with BIDS 1.4.0+.
     (`PR #3 (fork) <https://github.com/sebastientourbier/connectomemapper3/pull/3>`_)
 
-*Improvements*
+*Pipeline Improvements*
+
+*   Better handle of existing Freesurfer outputs. In this case, CMP3 does not
+    re-create the `mri/orig/001.mgz` and connect the reconall interface anymore.
+
+*   Creation of 5TT, gray-matter / white-matter interface, and partial volume maps images
+    are performed in the preprocessing stage of the diffusion pipeline only if
+    necessary
+
+*Code Improvements*
 
 *   Creation in `AnatomicalPipeline`, `DiffusionPipeline`, `fMRIPipeline` of
     `create_datagrabber_node()` and `create_datasinker_node()` methods to
@@ -48,10 +64,37 @@ which includes the following changes.
 *   Add description in contributing page of format for code related to
     the connection of the nodes in a Nipype `Workflow`.
 
+*   Add instructions to use the python wrappers for running the BIDS App.
+    (`PR #115 <https://github.com/connectomicslab/connectomemapper3/pull/115>`_)
+
+*Software container*
+
+*   Define multiple build stages in Dockerfile, which can be run in parallel at build
+    with BUILDKIT.
+    (`PR #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_)
+
 *Software development life cycle*
 
 *   Update the list of outputs of circleci tests with the new names of
     directories produced by cmp in `output_dir/`.
+
+*   Following major changes in the pricing plans of CircleCI but also to improve its readability,
+    `.circleci/config.yml` has been dramatically refactored, including:
+    *   Reordering and modularization of the tests:
+        *   tests 01-03 (Docker): anatomical pipeline for each parcellation scheme
+        *   tests 04-07 (Docker): diffusion pipeline for dipy/mrtrix deterministic/probabilistic tractography
+        *   tests 08-09 (Docker): fMRI pipeline for FLIRT and BBRegistration registrations
+        *   tests 10-11 (Singularity): anatomical pipeline for NativeFreesurfer and Lausanne2008 schemes
+    *   Creation of commands for steps that are shared between jobs to reduce code duplication
+    *   Use BUILDKIT in docker build to take advantage of the multi-stage build
+    (`PR #88 <https://github.com/connectomicslab/connectomemapper3/pull/88>`_)
+
+*Contributors*
+
+*   [Sebastien Tourbier](https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Asebastientourbier)
+*   [Anil Tuncel](https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Aanilbey)
+*   [Jakub Jancovic] (https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Akuba-fidel)
+*   [Jonathan Wirsich] (https://github.com/connectomicslab/connectomemapper3/issues?q=is%3Apr+author%3Ajwirsich)
 
 Please check the `main pull request 88 page <https://github.com/connectomicslab/connectomemapper3/pull/88>`_ for more details.
 
