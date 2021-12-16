@@ -740,21 +740,15 @@ class CombineParcellations(BaseInterface):
 
         iflogger.info("  > Dilate (modal) the ventricule image")
         third_vent_dil = op.abspath('ventricle3_dil.nii.gz')
+        cmd = f'fslmaths -dt char {third_vent_fn} -mas {third_vent_fn} -kernel sphere 5 -dilD {third_vent_dil}'
+        iflogger.info("    ... Command: {}".format(cmd))
+        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        proc_stdout = process.communicate()[0].strip()
 
-        # radius = 5 [mm] => n x voxelsize max [mm]
-        zooms = hdr2.get_zooms()
-        radius = 5.0 / max(zooms)
-        third_vent_data = (tmp > 0).astype(np.int16)
+        if self.inputs.verbose_level == 2:
+            print(proc_stdout)
 
-        iflogger.info(f'    ... Sphere radius: {radius} voxels')
-        sphere_sel = skmorphology.ball(radius=radius)
-        third_vent_dil_data = skfilters.rank.modal(third_vent_data, sphere_sel)
-        iflogger.info(f'    ... Save image to {third_vent_dil}...')
-        img = ni.Nifti1Image(third_vent_dil_data, img_v.get_affine(), hdr2)
-        ni.save(img, third_vent_dil)
-        del img
-
-        tmp = third_vent_dil_data
+        tmp = ni.load(third_vent_dil)
         indrhypothal = np.where((tmp == 1) & (img_data == right_ventral))
         indlhypothal = np.where((tmp == 1) & (img_data == left_ventral))
         del tmp
