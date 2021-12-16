@@ -88,9 +88,10 @@ Among others, this has contributed to the emergence of
   standard [@GorgolewskiTheExperiments:2016], to standardize the organization and description
   of neuroimaging data; Datalad a data portal, versioning, and provenance tracking system
   supporting BIDS; and more recently, the BIDS-Apps framework [@GorgolewskiBIDSMethods:2017],
-  which employs modern software practices and encapsulates into a software container a processing
-  pipeline that takes a BIDS dataset as input in order to improve the ease of use, accessibility,
-  deliverability, portability, scalability and reproducibility of processing pipelines. 
+  which employs modern software practices and encapsulates a processing
+  pipeline that takes a BIDS dataset as input into a software container in order to improve
+  the ease of use, accessibility, deliverability, portability, scalability and reproducibility
+  of processing pipelines. 
 
 Following these advances, a number of processing pipelines such as C-PAC [@cpac:2013],
   NIAK [@BellecNeuroimagingNIAK:2016], fMRIPrep [@Ghosh:2018],
@@ -153,21 +154,22 @@ It is worth noting the software is ready to accommodate other imaging modalities
 
 # Design considerations
 
-CMP 3 adopts an object-oriented programming style for the sake of modularity, extensibility,
+CMP 3  is written in Python and adopts an object-oriented programming style for the sake of modularity, extensibility,
   and re-usability.
-CMP3 is written in Python and uses Miniconda (\href{https://docs.conda.io}{https://docs.conda.io}),
+It uses Miniconda (\href{https://docs.conda.io}{https://docs.conda.io}),
   a package and environment manager, to facilitate the installation of the Python environment with
-  all package dependencies installed inside.
-The use of Miniconda environment is particularly powerful at two levels.
+  all package dependencies installed inside, that is particularly powerful at two levels.
 It provides a way to ease the installation of python package dependencies at a fixed version for
   both the processing core inside the BIDS App and the GUI on the host system.
 It also provides a way to isolate the installation of CMP3 with other python dependencies.
 This prevents conflicts with other package versions that might exist already on the host system.
+
 To ensure software accessibility, interoperability, portability and reproducibility, the
   implemented pipelines handles datasets organized following the Brain Imaging Data Structure (BIDS)
-  standard [@GorgolewskiTheExperiments:2016] are encapsulated in a Docker [@merkeldocker:2014]
-  and a Singularity [@Kurtzer2017Singularity:Compute] containers as a BIDS
-  App [@GorgolewskiBIDSMethods:2017] that can be run on Linux, MacOSX, Windows computers, and
+  standard [@GorgolewskiTheExperiments:2016], and are encapsulated in a Docker [@merkeldocker:2014]
+  and a Singularity [@Kurtzer2017Singularity:Compute] software image containers in concordance to the BIDS
+  App standard [@GorgolewskiBIDSMethods:2017]. This means that the BIDS App of CMP3 can be run on diversity
+  of datasets Linux, MacOSX, Windows computers, and
   on high performance computing systems (clusters) for large dataset processing.
 To be robust to adverse code changes, versions are released through continuous integration building
   and testing using a sample multi-modal MRI dataset [@Tourbier2020SampleDataset] that we created
