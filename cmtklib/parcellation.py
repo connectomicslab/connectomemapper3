@@ -748,10 +748,7 @@ class CombineParcellations(BaseInterface):
 
         iflogger.info(f'    ... Sphere radius: {radius} voxels')
         sphere_sel = skmorphology.ball(radius=radius)
-        third_vent_dil_data = skfilters.rank.modal(
-            image=third_vent_data,
-            footprint=sphere_sel
-        )
+        third_vent_dil_data = skfilters.rank.modal(third_vent_data, sphere_sel)
         iflogger.info(f'    ... Save image to {third_vent_dil}...')
         img = ni.Nifti1Image(third_vent_dil_data, img_v.get_affine(), hdr2)
         ni.save(img, third_vent_dil)
