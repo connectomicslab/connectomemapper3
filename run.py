@@ -424,8 +424,6 @@ if args.analysis_level == "participant":
     # find all T1s and skullstrip them
     for subject_label in subjects_to_analyze:
 
-        print('> Process subject {}'.format(project.subject))
-
         project = CMP_Project_Info()
         project.base_directory = args.bids_dir
         project.output_directory = args.output_dir
@@ -433,6 +431,7 @@ if args.analysis_level == "participant":
         project.subjects = ['sub-{}'.format(label)
                             for label in subjects_to_analyze]
         project.subject = 'sub-{}'.format(subject_label)
+        print('> Process subject {}'.format(project.subject))
 
         if args.session_label is not None:
             print("> Sessions specified by input args : {}".format(
