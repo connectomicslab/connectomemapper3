@@ -32,12 +32,14 @@ def run(command, env=None, cwd=None):
     >>> run(cmd) # doctest: +SKIP
 
     """
+    merged_env = os.environ
+
     if (cwd is None) or (cwd == {}):
         cwd = os.getcwd()
 
-    merged_env = os.environ
     if env is not None:
         merged_env.update(env)
+
     process = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
@@ -46,11 +48,13 @@ def run(command, env=None, cwd=None):
         env=merged_env,
         cwd=cwd,
     )
+
     while True:
         line = process.stdout.readline()
         line = str(line)[:-1]
         print(line)
         if line == "" and process.poll() is not None:
             break
+
     if process.returncode != 0:
         raise Exception("Non zero return code: %d" % process.returncode)
